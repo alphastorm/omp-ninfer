@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `draft` → installable `candidate` → externally accepted `ready` transition.
 - OMP NInfer brand system with source SVG/HTML, rendered README and architecture artwork, social
   preview, lockups, and icon/favicon variants.
+- Deterministic local RTX 5090 binary package, OCI archive, and SPDX SBOM identities, plus a
+  state-faithful remote lifecycle rehearsal; publication remains a separate gate.
+- Fresh RTX 4090 package/install/restart evidence with an explicit Golden typed-tool-call blocker;
+  no RTX 4090 support claim was added.
 
 ### Security
 

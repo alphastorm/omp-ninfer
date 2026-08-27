@@ -319,6 +319,23 @@ def validate(
             "qualification and manifest NInfer source commits must match", errors)
     require(ninfer.get("server_binary_sha256") == qualification.get("runtime_identity", {}).get("release_server_binary_sha256"),
             "qualification and manifest NInfer binary hashes must match", errors)
+    local_packaging = qualification.get("composition", {}).get("local_release_packaging", {})
+    require(local_packaging.get("status") == "passed",
+            "qualification must record passing local release packaging", errors)
+    require(local_packaging.get("published") is False,
+            "checked-in local release packaging must remain unpublished", errors)
+    require(local_packaging.get("release_source_commit") == ninfer.get("source_commit"),
+            "local packaging and manifest NInfer source commits must match", errors)
+    require(local_packaging.get("release_server_binary_sha256") == ninfer.get("server_binary_sha256"),
+            "local packaging and manifest NInfer binary hashes must match", errors)
+    require(ninfer.get("oci_manifest_digest") == local_packaging.get("oci_manifest_digest"),
+            "local packaging and manifest OCI digests must match", errors)
+    require(ninfer.get("sbom_sha256") == local_packaging.get("sbom_sha256"),
+            "local packaging and manifest SBOM hashes must match", errors)
+    require(isinstance(ninfer.get("oci_manifest_digest"), str)
+            and OCI_DIGEST_RE.fullmatch(ninfer.get("oci_manifest_digest", "")) is not None,
+            "NInfer OCI manifest digest must be sha256:<64 hex>", errors)
+    require_sha(ninfer.get("sbom_sha256"), "components.ninfer.sbom_sha256", errors)
     require(runtime.get("configuration_sha256") == qualification.get("runtime_identity", {}).get("configuration_sha256"),
             "qualification and manifest configuration hashes must match", errors)
     require(qualification.get("release") == release, "qualification release must match manifest", errors)
@@ -381,14 +398,10 @@ def validate(
         require(isinstance(ninfer.get("oci_reference"), str)
                 and "@sha256:" in ninfer.get("oci_reference", ""),
                 "ready NInfer OCI reference must be digest-pinned", errors)
-        require(isinstance(ninfer.get("oci_manifest_digest"), str)
-                and OCI_DIGEST_RE.fullmatch(ninfer.get("oci_manifest_digest", "")) is not None,
-                "installable NInfer OCI manifest digest must be sha256:<64 hex>", errors)
         require(ninfer.get("oci_reference")
                 == f"ghcr.io/alphastorm/ninfer@{ninfer.get('oci_manifest_digest')}",
                 "NInfer OCI reference must exactly bind its manifest digest", errors)
         require_https(ninfer.get("sbom_url"), "components.ninfer.sbom_url", errors, nullable=True)
-        require_sha(ninfer.get("sbom_sha256"), "components.ninfer.sbom_sha256", errors, nullable=True)
 
     if status == "candidate":
         require(any(isinstance(item, str) and "external-install" in item.lower()

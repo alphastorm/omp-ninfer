@@ -20,7 +20,9 @@ without access to a developer workstation:
 The beta ships only the manual-tunnel profile. Its release manifest must bind the OMP artifact,
 NInfer image digest and SBOM, NInfer/model/config hashes, Homebrew beta cask, qualification summary,
 and exact setup smoke. The 5090 runtime is already release-eligible; publication and a clean
-external-install smoke remain separate gates.
+external-install smoke remain separate gates. The exact release-source image, deterministic OCI
+archive, binary package, and SPDX SBOM now exist locally and passed a state-faithful remote
+doctor/install/status/quick-benchmark/rollback/support-bundle rehearsal; none is published.
 
 ### Explicit non-claims
 
@@ -51,6 +53,13 @@ command family after the remote execution boundary is implemented and qualified.
   passes on the fixed external-model installer; and
 - one manifest authority mechanically checked against OMP's compiled profile registry and the
   Homebrew cask.
+
+The RTX 5090 remote-side transitions above are proven inputs, not a shipping managed CLI claim: the
+Mac-to-remote transport and product-side command ownership remain unimplemented. The first fresh
+RTX 4090 package, fixed external-model install, and packaged restart passed on `sm_89`, but its exact
+Golden-equivalent failed by emitting textual tool markup instead of a typed tool call. Protocol,
+100K+ restart-persistence, and performance gates therefore remain blocked, and RTX 4090 support is
+still a non-claim.
 
 Fleet routing already exists in source, but a two-machine performance claim is deferred until both
 hardware profiles are release-qualified and the fixed foreground/background workload shows a real

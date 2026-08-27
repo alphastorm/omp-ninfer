@@ -80,12 +80,13 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                     "homebrew_cask_revision": "c" * 40,
                 }
             )
+            oci_manifest_digest = manifest["components"]["ninfer"][
+                "oci_manifest_digest"
+            ]
             manifest["components"]["ninfer"].update(
                 {
-                    "oci_reference": f"ghcr.io/alphastorm/ninfer@sha256:{'d' * 64}",
-                    "oci_manifest_digest": f"sha256:{'d' * 64}",
+                    "oci_reference": f"ghcr.io/alphastorm/ninfer@{oci_manifest_digest}",
                     "sbom_url": "https://example.test/ninfer.spdx.json",
-                    "sbom_sha256": "e" * 64,
                 }
             )
             manifest_path.write_text(

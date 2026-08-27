@@ -37,9 +37,9 @@
       "source_archive_sha256": "31eda87bf64caf7152b71d8cfe976b30661c02347decef9935437cc76af464bd",
       "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
       "oci_reference": null,
-      "oci_manifest_digest": null,
+      "oci_manifest_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
       "sbom_url": null,
-      "sbom_sha256": null
+      "sbom_sha256": "5e6ce7b222591e85a75ea698532ce18016f4e5c4fa4e5cb341b87560bf5241ac"
     },
     "model": {
       "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
@@ -94,7 +94,7 @@
     ],
     "blockers": [
       "Publish the verified draft OMP archive asset when the product manifest reaches candidate.",
-      "Publish the immutable NInfer OCI image and SBOM, then record their digests.",
+      "Publish local OCI manifest sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712 and SPDX 5e6ce7b222591e85a75ea698532ce18016f4e5c4fa4e5cb341b87560bf5241ac, then record their immutable reference and URL.",
       "Push Homebrew revision da24c3ac9d46e5419e5ba3e69565da48e224b5ef and publish the draft asset when the product reaches candidate.",
       "Publish this qualification summary and record its SHA-256 and URL.",
       "Run the clean external-install acceptance path using only published URLs.",
