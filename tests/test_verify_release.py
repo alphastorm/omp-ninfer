@@ -119,6 +119,7 @@ class ReleaseContractTest(unittest.TestCase):
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["status"] = "ready"
+        manifest["components"]["omp"]["artifact_url"] = None
         manifest["publication"]["blockers"] = []
         self.save(manifest_path, manifest)
 

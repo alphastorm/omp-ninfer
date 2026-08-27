@@ -19,12 +19,12 @@
       "distribution_version": "18.0.5-09615b86",
       "source_commit": "390cdc21c0e3e0a7578686c54c67f56f2959916b",
       "artifact_name": "omp-18.0.5-09615b86-darwin-arm64.tar.gz",
-      "artifact_url": null,
+      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/531802612#omp-18.0.5-09615b86-darwin-arm64.tar.gz",
       "artifact_bytes": 121104321,
       "artifact_sha256": "01750320e6300a692eb7a462ee597316a34f141c940da3426d4c55578665bfb4",
       "homebrew_repository": "https://github.com/alphastorm/homebrew-omp",
       "homebrew_cask": "omp-beta",
-      "homebrew_cask_revision": null
+      "homebrew_cask_revision": "0f4110c28b4aef418eaed37aaaed59e51c841497"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -90,9 +90,9 @@
       "Homebrew cask omp-beta"
     ],
     "blockers": [
-      "Publish omp-18.0.5-09615b86-darwin-arm64.tar.gz and record its immutable HTTPS asset URL.",
+      "Publish the verified draft OMP archive asset when the product manifest reaches candidate.",
       "Publish the immutable NInfer OCI image and SBOM, then record their digests.",
-      "Publish and pin the omp-beta Homebrew cask revision.",
+      "Push Homebrew revision 0f4110c28b4aef418eaed37aaaed59e51c841497 and publish the draft asset when the product reaches candidate.",
       "Publish this qualification summary and record its SHA-256 and URL.",
       "Run the clean external-install acceptance path using only published URLs.",
       "Obtain bounded authority for repository, tag, release, registry, and Homebrew publication effects."
