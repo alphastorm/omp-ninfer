@@ -13,21 +13,21 @@
   "components": {
     "omp": {
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
-      "upstream_tag": "v18.0.5",
-      "upstream_commit": "eab72e88e447a4be45bea2bc302995844c0c51a2",
-      "release_id": "18.0.5-09615b86684075d50f7d59e16390344fe45199b0d9f1b4863c6ae84153e37d40",
-      "distribution_version": "18.0.5-09615b86",
-      "source_commit": "390cdc21c0e3e0a7578686c54c67f56f2959916b",
-      "artifact_name": "omp-18.0.5-09615b86-darwin-arm64.tar.gz",
-      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/531802612#omp-18.0.5-09615b86-darwin-arm64.tar.gz",
-      "artifact_release_id": 377585663,
-      "artifact_asset_id": 531802612,
+      "upstream_tag": "v18.0.7",
+      "upstream_commit": "6be4a1bec9c53ed9eef33e65a70a060970f30cce",
+      "release_id": "18.0.7-c5ee093270ca54d9bfbfc42177395cbb37892b97279f001d5214b94348864f52",
+      "distribution_version": "18.0.7-c5ee0932",
+      "source_commit": "18649c918205f61466fbe1f229151e024302d432",
+      "artifact_name": "omp-18.0.7-c5ee0932-darwin-arm64.tar.gz",
+      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/532706226#omp-18.0.7-c5ee0932-darwin-arm64.tar.gz",
+      "artifact_release_id": 378036980,
+      "artifact_asset_id": 532706226,
       "artifact_published": true,
-      "artifact_bytes": 121104321,
-      "artifact_sha256": "01750320e6300a692eb7a462ee597316a34f141c940da3426d4c55578665bfb4",
+      "artifact_bytes": 121325051,
+      "artifact_sha256": "e51a61e59c64fa7dda573a28ad4823aa92cb45c8e65d13d409c89c38e2e4b6b1",
       "homebrew_repository": "https://github.com/alphastorm/homebrew-omp",
       "homebrew_cask": "omp-beta",
-      "homebrew_cask_revision": "da24c3ac9d46e5419e5ba3e69565da48e224b5ef"
+      "homebrew_cask_revision": "852bcd9e2c8a088659a8de01c1d8fa62e7e0ffc2"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
