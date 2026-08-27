@@ -14,6 +14,14 @@ EXAMPLES = ROOT / "examples" / "manual-tunnel"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
+    @staticmethod
+    def copy_contract_tree(root: Path) -> None:
+        for directory in ("examples", "profiles", "releases", "scripts"):
+            shutil.copytree(ROOT / directory, root / directory)
+        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        (root / "docs").mkdir()
+        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+
     def run_script(
         self,
         name: str,
@@ -38,8 +46,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
     def test_start_refuses_draft_before_runtime_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            for directory in ("examples", "profiles", "releases", "scripts"):
-                shutil.copytree(ROOT / directory, root / directory)
+            self.copy_contract_tree(root)
             manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
@@ -74,8 +81,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
     def test_start_passes_host_network_to_docker(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            for directory in ("examples", "profiles", "releases", "scripts"):
-                shutil.copytree(ROOT / directory, root / directory)
+            self.copy_contract_tree(root)
 
             manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

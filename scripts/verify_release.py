@@ -12,6 +12,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from render_compatibility import load_authority, render as render_compatibility_matrix
+
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 OCI_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -232,6 +235,47 @@ def validate(
     model = components.get("model", {})
     runtime = manifest.get("runtime_identity", {})
     manifest_qualification = manifest.get("qualification", {})
+
+    compatibility_path = root / "compatibility.json"
+    compatibility_matrix_path = root / "docs" / "COMPATIBILITY.md"
+    compatibility: dict[str, Any] = {}
+    try:
+        compatibility = load_authority(compatibility_path)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        errors.append(f"compatibility.json: {error}")
+    if compatibility:
+        require(compatibility.get("product_release") == release,
+                "compatibility product_release must match the manifest", errors)
+        try:
+            require(compatibility_matrix_path.read_text(encoding="utf-8")
+                    == render_compatibility_matrix(compatibility),
+                    "generated compatibility matrix is stale", errors)
+        except OSError as error:
+            errors.append(f"docs/COMPATIBILITY.md: {error}")
+        composition = compatibility.get("composition", {})
+        require_git_sha(composition.get("lifecycle_source_commit"),
+                        "compatibility composition.lifecycle_source_commit", errors)
+        require_git_sha(composition.get("request_compatibility_source_commit"),
+                        "compatibility composition.request_compatibility_source_commit", errors)
+        for profile_item in compatibility.get("profiles", []):
+            profile_id = profile_item.get("id", "<unknown>")
+            profile_runtime = profile_item.get("runtime", {})
+            require(profile_item.get("product_release") == release,
+                    f"compatibility {profile_id} product release must match", errors)
+            require(profile_runtime.get("image_reference") == ninfer.get("oci_reference"),
+                    f"compatibility {profile_id} image must match the manifest", errors)
+            require(profile_runtime.get("model_sha256") == model.get("artifact_sha256"),
+                    f"compatibility {profile_id} model must match the manifest", errors)
+            require(profile_runtime.get("configuration_sha256") == runtime.get("configuration_sha256"),
+                    f"compatibility {profile_id} configuration must match the manifest", errors)
+            require(profile_runtime.get("server_binary_sha256") == ninfer.get("server_binary_sha256"),
+                    f"compatibility {profile_id} server must match the manifest", errors)
+            client = profile_item.get("client_distribution", {})
+            require_git_sha(client.get("source_commit"),
+                            f"compatibility {profile_id} client source", errors)
+            if client.get("archive_sha256") is not None:
+                require_sha(client.get("archive_sha256"),
+                            f"compatibility {profile_id} client archive", errors)
 
     for key in ("upstream_commit", "source_commit"):
         require_git_sha(ninfer.get(key), f"components.ninfer.{key}", errors)

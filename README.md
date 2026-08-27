@@ -29,17 +29,10 @@ implementation.
 ## First release
 
 `v0.1.0-beta.1` is intentionally narrow so a handful of invited testers can provide useful feedback
-without turning an early package into a broad support claim.
-
-| Boundary | `v0.1.0-beta.1` |
-| --- | --- |
-| OMP client | Apple-silicon macOS, installed from the `omp-beta` Homebrew cask |
-| Inference host | One user-controlled Linux or WSL2 host with one NVIDIA GeForce RTX 5090 |
-| Model | Exact Qwen3.8 27B NInfer artifact pinned in the release manifest |
-| Runtime | NInfer, BF16 KV, MTP3, Vision enabled, one active request, 131,072-token ceiling |
-| Connection | Authenticated NInfer on remote loopback through a local SSH port forward |
-| OMP integration | Custom `openai-responses` provider with NInfer stateful continuation enabled |
-| Audience | Invited early-access testers; no general-availability promise |
+without turning an early package into a broad support claim. The versioned
+[`compatibility.json`](compatibility.json) is the platform/profile authority; the public
+[`compatibility matrix`](docs/COMPATIBILITY.md) is generated from it. `preview` and `blocked` rows
+are not support claims, even when they reference the shared qualified RTX 5090 runtime.
 
 The runtime qualification recorded an exact 130,048-token retrieval, OpenAI/Anthropic/Responses
 protocol behavior, image input, stateful continuation and forks, cache reuse, an exact Golden task,

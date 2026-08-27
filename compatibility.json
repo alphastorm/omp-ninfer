@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-1",
+  "product_release": "v0.1.0-beta.1",
+  "composition": {
+    "status": "blocked",
+    "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
+    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/13",
+    "lifecycle_source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
+    "lifecycle_semantic_tree": "d881f5aca972a8e1ab5313a2330fa86b96e4f411",
+    "lifecycle_generated_lock_tree": "6059e9bf5bf253ed577a80d59d247747fdc0834b",
+    "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
+    "hosted_ci": "https://github.com/alphastorm/omp-monorepo/actions/runs/33105621756",
+    "blockers": [
+      "Compose the reasoning-safe NInfer request patch into the cross-platform lifecycle source.",
+      "Record clean native Windows, native Linux, and managed macOS client acceptance receipts.",
+      "Publish client distributions only after their exact acceptance receipts pass."
+    ]
+  },
+  "profiles": [
+    {
+      "id": "darwin-remote-ssh",
+      "adapter": "darwin-remote-ssh",
+      "status": "preview",
+      "transport": "ssh-loopback",
+      "commands": [
+        "doctor",
+        "status"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": false,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "macos-arm64-remote-ssh"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Managed remote install, benchmark, rollback, and support-bundle are not implemented; the existing manual SSH topology remains separate.",
+        "Preview pending a clean managed macOS client acceptance receipt."
+      ],
+      "blockers": [
+        "No managed macOS acceptance receipt.",
+        "Cross-platform lifecycle PR 13 is draft and unmerged.",
+        "Reasoning-safe request compatibility is not composed into PR 13."
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "os": "macOS",
+        "architecture": "arm64",
+        "source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
+        "published": false,
+        "archive_sha256": null
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 32,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "windows-docker-local",
+      "adapter": "windows-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": true,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "windows-11-x64-docker-desktop"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported.",
+        "Preview pending a clean native Windows acceptance receipt."
+      ],
+      "blockers": [
+        "No clean native Windows acceptance receipt.",
+        "The Windows client archive is unpublished.",
+        "Reasoning-safe request compatibility is not composed into PR 13."
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "os": "Windows 11",
+        "architecture": "x64",
+        "source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
+        "published": false,
+        "archive_sha256": "aeef7296a6510e9b3f2b0a6507ab3410883154c43d39ef8858dc1e70971555a1",
+        "binary_sha256": "6171c94e5f88cd7988d6e601a65e38f2e9645924184767be9bf1f0db57b24fb4"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 32,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "linux-docker-local",
+      "adapter": "linux-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": true,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "linux-x64-docker"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Native Linux OMP requires a local Docker Linux engine and NVIDIA Container Toolkit.",
+        "Preview pending a clean native Linux acceptance receipt."
+      ],
+      "blockers": [
+        "No clean native Linux acceptance receipt.",
+        "The Linux client archive is unpublished.",
+        "Reasoning-safe request compatibility is not composed into PR 13."
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "os": "Linux",
+        "architecture": "x64",
+        "source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
+        "published": false,
+        "archive_sha256": "717b79170994a6574c336b75f56567668f830e5016ea53d9d6bfec38b962e4d0",
+        "binary_sha256": "33ecd740bd55031a4a6d7387e8398f064aeed8cf294b3e083c7d31fea1d3d408"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 32,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    }
+  ]
+}

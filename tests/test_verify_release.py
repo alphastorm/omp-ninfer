@@ -23,6 +23,9 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
+        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        (root / "docs").mkdir()
+        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
         return temporary, root
 
     @staticmethod
