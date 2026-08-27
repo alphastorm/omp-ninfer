@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="OMP NInfer">
+  <rect x="12" y="12" width="10" height="72" rx="2" fill="#E8ECEF"></rect>
+  <rect x="22" y="43" width="26" height="10" rx="2" fill="#E8ECEF"></rect>
+  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#E8ECEF" stroke-width="10"></rect>
+  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle>
+</svg>

@@ -1,0 +1,16 @@
+# Local Python state
+__pycache__/
+*.py[cod]
+
+# Workstation files
+.DS_Store
+
+# Never commit local secrets or runtime data
+.env
+*.key
+*.log
+*.jsonl
+
+# Local downloads and generated acceptance output
+downloads/
+acceptance-output/

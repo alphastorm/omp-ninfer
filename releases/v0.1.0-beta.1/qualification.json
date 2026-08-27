@@ -1,0 +1,119 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 1,
+  "release": "v0.1.0-beta.1",
+  "as_of": "2026-08-26",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "One measured NVIDIA GeForce RTX 5090, the exact Qwen3.8 27B NInfer model artifact, the recorded BF16-KV MTP3 profile, and a later clean-source candidate identity proof. This does not qualify the unpublished OMP/Homebrew installation path or another machine.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+    "behavioral_source_commit": "70868c658f5bd412ead5b105ec76939997bd6ca9",
+    "release_source_commit": "da2b6b6c8e129d182370feee657b7d8b9b9bbbf5",
+    "release_source_archive_sha256": "31eda87bf64caf7152b71d8cfe976b30661c02347decef9935437cc76af464bd",
+    "release_server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.1.0"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "docs/qualification/rtx5090-qwen38-v0.1.0.json",
+      "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a",
+      "status": "passed",
+      "source_commit": "70868c658f5bd412ead5b105ec76939997bd6ca9"
+    },
+    "provenance_remediation": {
+      "status": "passed",
+      "release_source_commit": "da2b6b6c8e129d182370feee657b7d8b9b9bbbf5",
+      "closed_class": "configure-time Git identity surviving an incremental compile from changed source"
+    },
+    "fresh_candidate_identity_proof": {
+      "status": "passed",
+      "duration_seconds": 122.54,
+      "candidate_restart_policy": "no",
+      "authenticated_health": "ok",
+      "source_clean": true,
+      "exact_runtime_identity_verified": true,
+      "benchmark_repeated": false,
+      "candidate_removed_after_proof": true,
+      "incumbent_exact_identity_restored": true,
+      "private_receipt_sha256": "456b596f99d7d5e12cd64df0626ac3f5f9899f040df394ddc8cb4f53b386c5ac"
+    },
+    "independent_shipping_disposition": {
+      "status": "passed",
+      "release_eligible": true,
+      "publication_authorized": false,
+      "private_disposition_sha256": "fa299095dd98cb81fcf1891c3a1e128af4098b3168d7df2d4d2923531731b2ef"
+    }
+  },
+  "observed_gates": {
+    "long_context": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output_match": true,
+      "elapsed_seconds": 58.546667
+    },
+    "golden_t01": {
+      "status": "passed",
+      "exact_match": true,
+      "elapsed_seconds": 100.227,
+      "maximum_elapsed_seconds": 120.9117,
+      "runner": "OMP 18.0.5"
+    },
+    "decode_throughput": {
+      "status": "passed",
+      "completion_tokens": 1143,
+      "decode_seconds": 5.467908612000004,
+      "tokens_per_second": 209.03787555840722,
+      "minimum_tokens_per_second": 200.58921
+    },
+    "mtp_acceptance": {
+      "status": "passed",
+      "drafted_tokens": 1038,
+      "accepted_tokens": 799,
+      "rate": 0.7697495183044316
+    },
+    "serving_contract": {
+      "status": "passed",
+      "openai": true,
+      "anthropic": true,
+      "responses": true,
+      "vision": true,
+      "authenticated_status": true
+    },
+    "stateful_responses": {
+      "status": "passed",
+      "continuation": true,
+      "forks": 2,
+      "delete_and_descendant_survival": true,
+      "cache_reuse_observed": true,
+      "maximum_prefix_cache_hit_tokens": 37591
+    },
+    "runtime_lifecycle": {
+      "status": "passed",
+      "automatic_restart_observed": false,
+      "explicit_repromotion_healthy": true,
+      "candidate_removed": true,
+      "incumbent_exact_identity_verified": true
+    }
+  },
+  "interpretation": [
+    "Behavioral measurements were not rebound by assumption: the later release-source proof verified exact source, binary, model, and configuration identity but did not repeat performance gates.",
+    "209.04 decode tokens/second is one measured server result, not a universal RTX 5090 or end-to-end OMP claim.",
+    "The runtime lifecycle proved explicit re-promotion and exact incumbent restoration; it did not prove automatic restart or OMP appliance-level rollback.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": [
+    "Bind the exact OMP macOS beta artifact and Homebrew cask.",
+    "Publish an immutable NInfer OCI image and SBOM for the release-source binary.",
+    "Run a clean external installation using only public release URLs and the manual-tunnel quickstart.",
+    "Obtain explicit authority for all publication effects."
+  ]
+}

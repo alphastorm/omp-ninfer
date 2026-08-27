@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "release": "v0.1.0-beta.1",
+  "status": "draft",
+  "channel": "early-access",
+  "audience": "invited-testers",
+  "product": {
+    "name": "OMP NInfer",
+    "tagline": "Private Qwen coding appliance for RTX 5090",
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "profile": "../../profiles/qwen38-rtx5090-manual-tunnel.json"
+  },
+  "components": {
+    "omp": {
+      "upstream_repository": "https://github.com/can1357/oh-my-pi",
+      "upstream_tag": "v18.0.5",
+      "upstream_commit": "eab72e88e447a4be45bea2bc302995844c0c51a2",
+      "release_id": "18.0.5-09615b86684075d50f7d59e16390344fe45199b0d9f1b4863c6ae84153e37d40",
+      "distribution_version": "18.0.5-09615b86",
+      "source_commit": "390cdc21c0e3e0a7578686c54c67f56f2959916b",
+      "artifact_name": "omp-18.0.5-09615b86-darwin-arm64.tar.gz",
+      "artifact_url": null,
+      "artifact_bytes": 121104321,
+      "artifact_sha256": "01750320e6300a692eb7a462ee597316a34f141c940da3426d4c55578665bfb4",
+      "homebrew_repository": "https://github.com/alphastorm/homebrew-omp",
+      "homebrew_cask": "omp-beta",
+      "homebrew_cask_revision": null
+    },
+    "ninfer": {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "release_tag": "v0.1.0-qwen38-5090",
+      "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+      "source_commit": "da2b6b6c8e129d182370feee657b7d8b9b9bbbf5",
+      "source_archive_sha256": "31eda87bf64caf7152b71d8cfe976b30661c02347decef9935437cc76af464bd",
+      "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+      "oci_reference": null,
+      "oci_manifest_digest": null,
+      "sbom_url": null,
+      "sbom_sha256": null
+    },
+    "model": {
+      "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
+      "revision": "18dfc887423fa5aabf3cb56fac41490e462b3fab",
+      "artifact_name": "qwen3_8_27b.ninfer",
+      "artifact_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+      "artifact_bytes": 18210531328,
+      "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    }
+  },
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.1.0",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 1,
+    "speculative_backend": "mtp",
+    "draft_tokens": 3,
+    "vision": true,
+    "preserve_thinking": true
+  },
+  "qualification": {
+    "summary": "qualification.json",
+    "summary_sha256": null,
+    "public_url": null,
+    "runtime_release_eligible": true,
+    "external_installation_passed": false
+  },
+  "installation": {
+    "mode": "manual-ssh-tunnel",
+    "quickstart": "../../docs/QUICKSTART.md",
+    "managed_appliance_install": false,
+    "silent_cloud_fallback": false
+  },
+  "limitations": [
+    "Invited early access only; this is not a general-availability support claim.",
+    "Only the exact RTX 5090 Linux/WSL2 manual-tunnel profile is included.",
+    "The first beta does not use omp appliance install, managed upgrade, or appliance rollback.",
+    "The NInfer container uses restart policy no; automatic restart and process-restart continuation are not claimed.",
+    "RTX 4090 support and multi-machine fleet claims are deferred.",
+    "Measured throughput and latency apply only to the recorded qualification machine and profile."
+  ],
+  "publication": {
+    "authorized": false,
+    "targets": [
+      "GitHub repository alphastorm/omp-ninfer",
+      "GitHub prerelease v0.1.0-beta.1",
+      "GitHub runtime tag alphastorm/ninfer@v0.1.0-qwen38-5090",
+      "GHCR immutable NInfer image",
+      "Homebrew cask omp-beta"
+    ],
+    "blockers": [
+      "Publish omp-18.0.5-09615b86-darwin-arm64.tar.gz and record its immutable HTTPS asset URL.",
+      "Publish the immutable NInfer OCI image and SBOM, then record their digests.",
+      "Publish and pin the omp-beta Homebrew cask revision.",
+      "Publish this qualification summary and record its SHA-256 and URL.",
+      "Run the clean external-install acceptance path using only published URLs.",
+      "Obtain bounded authority for repository, tag, release, registry, and Homebrew publication effects."
+    ]
+  }
+}

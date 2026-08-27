@@ -1,0 +1,97 @@
+name: Hardware report
+description: Report an early-access success or compatibility observation
+title: "[hardware]: "
+labels:
+  - early-access
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report only content-safe system facts. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, or Docker inspection dumps.
+  - type: input
+    id: release
+    attributes:
+      label: OMP NInfer release
+      description: Exact product tag, for example v0.1.0-beta.1.
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile ID
+      description: Exact profile from the manifest.
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: Mac OS and architecture
+      placeholder: macOS 26.x, arm64
+    validations:
+      required: true
+  - type: input
+    id: runtime_os
+    attributes:
+      label: Inference-host OS
+      placeholder: Ubuntu 24.04 under WSL2
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU and reported VRAM
+      placeholder: NVIDIA GeForce RTX 5090, 32607 MiB
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: NVIDIA driver and CUDA reported by nvidia-smi
+    validations:
+      required: true
+  - type: input
+    id: docker
+    attributes:
+      label: Docker and NVIDIA Container Toolkit versions
+    validations:
+      required: true
+  - type: input
+    id: omp
+    attributes:
+      label: OMP version
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Acceptance result
+      options:
+        - All documented checks passed
+        - Text and tools passed; another check failed
+        - Installation did not complete
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Observed checks
+      options:
+        - label: Text and file-tool turn passed
+        - label: Image input passed
+        - label: Stateful same-session follow-up passed
+        - label: OMP exit/resume passed while NInfer stayed alive
+        - label: Disconnected tunnel failed closed without a cloud answer
+  - type: textarea
+    id: notes
+    attributes:
+      label: Content-safe observations
+      description: Include the step and behavior, not prompt/output content or private identifiers.
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction confirmation
+      options:
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, and session data.
+          required: true

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>OMP NInfer — lockups</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .grid { position: absolute; inset: 0; opacity: 0.5;
+    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
+    background-size: 40px 40px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+</style>
+<style>
+  body { background: #48505A; display: flex; flex-direction: column; gap: 24px; padding: 24px; }
+  .lk { width: 860px; height: 180px; display: flex; align-items: center; justify-content: center; gap: 24px; background: transparent; }
+  .lk .name { font-size: 58px; font-weight: 600; letter-spacing: -0.015em; }
+  .x { color: #8E7BE8; font-weight: 500; margin: 0 6px; }
+</style>
+</head>
+<body>
+<div class="lk" id="lk-dark"><svg width="72" height="72" viewBox="0 0 96 96">  <rect x="12" y="12" width="10" height="72" rx="2" fill="#E8ECEF"></rect>
+  <rect x="22" y="43" width="26" height="10" rx="2" fill="#E8ECEF"></rect>
+  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#E8ECEF" stroke-width="10"></rect>
+  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle></svg><div class="name" style="color:#E8ECEF;">OMP NInfer</div></div>
+<div class="lk" id="lk-light"><svg width="72" height="72" viewBox="0 0 96 96">  <rect x="12" y="12" width="10" height="72" rx="2" fill="#0B0E11"></rect>
+  <rect x="22" y="43" width="26" height="10" rx="2" fill="#0B0E11"></rect>
+  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#0B0E11" stroke-width="10"></rect>
+  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle></svg><div class="name" style="color:#0B0E11;">OMP NInfer</div></div>
+<div class="lk" id="lkx-dark"><svg width="72" height="72" viewBox="0 0 96 96">  <rect x="12" y="12" width="10" height="72" rx="2" fill="#E8ECEF"></rect>
+  <rect x="22" y="43" width="26" height="10" rx="2" fill="#E8ECEF"></rect>
+  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#E8ECEF" stroke-width="10"></rect>
+  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle></svg><div class="name" style="color:#E8ECEF;">OMP <span class="x">&#215;</span> NInfer</div></div>
+<div class="lk" id="lkx-light"><svg width="72" height="72" viewBox="0 0 96 96">  <rect x="12" y="12" width="10" height="72" rx="2" fill="#0B0E11"></rect>
+  <rect x="22" y="43" width="26" height="10" rx="2" fill="#0B0E11"></rect>
+  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#0B0E11" stroke-width="10"></rect>
+  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle></svg><div class="name" style="color:#0B0E11;">OMP <span class="x">&#215;</span> NInfer</div></div>
+</body>
+</html>

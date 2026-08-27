@@ -1,0 +1,262 @@
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import shutil
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "verify_release", ROOT / "scripts" / "verify_release.py"
+)
+assert SPEC is not None and SPEC.loader is not None
+VERIFY_RELEASE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(VERIFY_RELEASE)
+
+
+class ReleaseContractTest(unittest.TestCase):
+    def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+        temporary = tempfile.TemporaryDirectory()
+        root = Path(temporary.name)
+        shutil.copytree(ROOT / "releases", root / "releases")
+        shutil.copytree(ROOT / "profiles", root / "profiles")
+        return temporary, root
+
+    @staticmethod
+    def load(path: Path) -> dict:
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    @staticmethod
+    def save(path: Path, value: dict) -> None:
+        path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+    @staticmethod
+    def bind_installable_components(manifest: dict) -> None:
+        omp = manifest["components"]["omp"]
+        artifact_name = omp["artifact_name"]
+        manifest["components"]["omp"].update(
+            {
+                "artifact_url": (
+                    "https://api.github.com/repos/alphastorm/homebrew-omp/"
+                    f"releases/assets/123456789#{artifact_name}"
+                ),
+                "homebrew_cask_revision": "c" * 40,
+            }
+        )
+        manifest["components"]["ninfer"].update(
+            {
+                "oci_reference": f"ghcr.io/alphastorm/ninfer@sha256:{'d' * 64}",
+                "oci_manifest_digest": f"sha256:{'d' * 64}",
+                "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.1.0-qwen38-5090/ninfer.spdx.json",
+                "sbom_sha256": "e" * 64,
+            }
+        )
+
+    def test_checked_in_draft_is_valid_but_not_release_ready(self) -> None:
+        manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
+        self.assertEqual(manifest["status"], "draft")
+        self.assertEqual(errors, [])
+
+        _, ready_errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
+        self.assertIn("release manifest is not ready", ready_errors)
+
+        _, installable_errors = VERIFY_RELEASE.validate(
+            ROOT,
+            require_ready=False,
+            require_installable=True,
+        )
+        self.assertIn("release manifest is not installable", installable_errors)
+
+    def test_candidate_accepts_exact_installable_components_before_external_smoke(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "candidate"
+        self.bind_installable_components(manifest)
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(
+            root,
+            require_ready=False,
+            require_installable=True,
+        )
+        self.assertEqual(errors, [])
+
+    def test_ready_contract_accepts_complete_immutable_identities(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        manifest = self.load(manifest_path)
+        qualification = self.load(qualification_path)
+
+        qualification["external_installation_qualified"] = True
+        self.save(qualification_path, qualification)
+        qualification_sha = hashlib.sha256(qualification_path.read_bytes()).hexdigest()
+
+        manifest["status"] = "ready"
+        self.bind_installable_components(manifest)
+        manifest["qualification"].update(
+            {
+                "summary_sha256": qualification_sha,
+                "public_url": "https://github.com/alphastorm/omp-ninfer/releases/download/v0.1.0-beta.1/qualification.json",
+                "external_installation_passed": True,
+            }
+        )
+        manifest["publication"]["blockers"] = []
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [])
+
+    def test_ready_contract_rejects_incomplete_publication(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "ready"
+        manifest["publication"]["blockers"] = []
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn("installable release requires components.omp.artifact_url", errors)
+        self.assertIn("installable release requires components.ninfer.oci_reference", errors)
+        self.assertIn("ready release requires qualification.summary_sha256", errors)
+        self.assertIn("ready release requires a passing external installation", errors)
+
+    def test_cross_component_model_hash_drift_is_rejected(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(profile_path)
+        profile["model"]["artifact_sha256"] = "0" * 64
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("profile and manifest model hashes must match", errors)
+
+    def test_profile_rejects_container_private_loopback_networking(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(profile_path)
+        profile["server"]["container_network_mode"] = "bridge"
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("profile container network mode must be host", errors)
+
+    def test_model_url_must_bind_its_recorded_revision(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["components"]["model"]["artifact_url"] = (
+            "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/main/qwen3_8_27b.ninfer"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("model artifact URL must bind repository, revision, and name", errors)
+
+    def test_omp_distribution_version_must_derive_from_release_id(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["components"]["omp"]["distribution_version"] = "18.0.5-deadbeef"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("OMP distribution version must derive from release_id", errors)
+
+    def test_omp_artifact_name_must_bind_distribution_version(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["components"]["omp"]["artifact_name"] = "omp-macos-arm64.tar.gz"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "OMP artifact name must bind distribution_version and darwin-arm64",
+            errors,
+        )
+
+    def test_candidate_omp_asset_url_must_bind_private_asset_name(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "candidate"
+        self.bind_installable_components(manifest)
+        manifest["components"]["omp"]["artifact_url"] = (
+            "https://api.github.com/repos/alphastorm/homebrew-omp/"
+            "releases/assets/123456789#wrong.tar.gz"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "OMP artifact URL must bind the private Homebrew release asset and artifact name",
+            errors,
+        )
+
+    def test_candidate_oci_reference_must_match_manifest_digest(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "candidate"
+        self.bind_installable_components(manifest)
+        manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("NInfer OCI reference must exactly bind its manifest digest", errors)
+
+    def test_private_paths_are_rejected_from_public_receipts(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["debug_path"] = "/Users/private/operator-receipt.json"
+        self.save(qualification_path, qualification)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(any("private marker" in error for error in errors), errors)
+
+    def test_private_paths_are_rejected_from_public_brand_sources(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "BRAND.md").write_text(
+            "Regenerate from /Users/private/Desktop/brand.\n", encoding="utf-8"
+        )
+        assets = root / "assets"
+        assets.mkdir()
+        (assets / "banner.html").write_text(
+            "<p>source: C:\\Users\\private\\banner</p>\n", encoding="utf-8"
+        )
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("BRAND.md contains private marker '/Users/'", errors)
+        self.assertIn(
+            "assets/banner.html contains private marker 'C:\\\\Users\\\\'", errors
+        )
+
+    def test_missing_local_documentation_link_is_rejected(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "README.md").write_text("[missing](docs/not-there.md)\n", encoding="utf-8")
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("README.md has missing local link: docs/not-there.md", errors)
+
+
+if __name__ == "__main__":
+    unittest.main()

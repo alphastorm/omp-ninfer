@@ -1,0 +1,5 @@
+# Use with: omp --config /absolute/path/to/fail-closed.yml --model ninfer-beta/local-max
+retry:
+  enabled: false
+  modelFallback: false
+  fallbackRevertPolicy: never

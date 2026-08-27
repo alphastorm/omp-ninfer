@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private vulnerability report
+    url: https://github.com/alphastorm/omp-ninfer/security/advisories/new
+    about: Report security issues privately; never include a secret in a public issue.

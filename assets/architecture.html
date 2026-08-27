@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>OMP NInfer — architecture</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .grid { position: absolute; inset: 0; opacity: 0.5;
+    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
+    background-size: 40px 40px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+</style>
+<style>
+  .arch { position: relative; width: 1240px; height: 380px; background: #060809; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; gap: 0; }
+  .node { position: relative; background: #0E1319; border: 1px solid #1C232B; border-radius: 8px; padding: 26px 30px;
+    display: flex; flex-direction: column; gap: 8px; }
+  .node h3 { color: #E8ECEF; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .node .sub { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A939D; letter-spacing: 0.06em; line-height: 1.7; }
+  .link { position: relative; width: 250px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .wire { position: relative; width: 100%; height: 2px; background: linear-gradient(90deg, #1C232B, rgba(142,123,232,0.7), #1C232B); }
+  .wire .pk { position: absolute; top: -4px; left: 50%; width: 10px; height: 10px; border-radius: 50%; background: #8E7BE8; transform: translateX(-50%); }
+  .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939D; }
+  .lbl2 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #5F6870; }
+  .boundary { position: relative; border: 1px dashed rgba(142,123,232,0.45); border-radius: 12px; padding: 26px; }
+  .btag { position: absolute; top: -9px; left: 20px; background: #060809; padding: 0 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8E7BE8; }
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .chip { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B6BEC7; }
+  .chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #3A434D; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #5F6870; }
+</style>
+</head>
+<body>
+<div class="arch">
+  <div class="grid"></div>
+  <div class="node">
+    <h3>OMP</h3>
+    <div class="sub">apple silicon &middot; macos<br>command stays <span style="color:#B6BEC7;">omp</span></div>
+  </div>
+  <div class="link">
+    <div class="lbl">authenticated ssh loopback</div>
+    <div class="wire"><div class="pk"></div></div>
+    <div class="lbl2">manual tunnel in v0.1 &middot; fail-closed</div>
+  </div>
+  <div class="boundary">
+    <div class="btag">your hardware</div>
+    <div class="node" style="border:none; background:transparent; padding:0;">
+      <h3>NInfer</h3>
+      <div class="rows" style="margin-top:6px;">
+        <div class="chip">qwen3.8</div>
+        <div class="chip">one rtx 5090 &middot; linux/wsl2</div>
+        <div class="chip">stateful sessions &middot; openai responses</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">omp-ninfer owns setup, release manifests, hardware profiles, qualification, and the security boundary &mdash; not the runtimes.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+name: Installation failure
+description: Report a reproducible failure in the supported early-access path
+title: "[install]: "
+labels:
+  - early-access
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Stop at the first failed step. Do not retry unchanged input. Never include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, or Docker inspection dumps. Security issues belong in private vulnerability reporting.
+  - type: input
+    id: release
+    attributes:
+      label: OMP NInfer release
+      description: Exact product tag.
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile ID
+    validations:
+      required: true
+  - type: dropdown
+    id: step
+    attributes:
+      label: First failing step
+      options:
+        - Release manifest verification
+        - Homebrew beta installation
+        - Model download or checksum
+        - Docker or NVIDIA prerequisite
+        - NInfer image or binary verification
+        - NInfer startup or authenticated identity
+        - SSH tunnel
+        - OMP provider configuration
+        - Text or tool turn
+        - Image input
+        - Stateful follow-up or OMP resume
+        - Fail-closed tunnel check
+        - Owned-container stop
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: Mac OS, architecture, and OMP version
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Inference-host OS, GPU, VRAM, driver, Docker, and NVIDIA toolkit
+    validations:
+      required: true
+  - type: dropdown
+    id: predecessor
+    attributes:
+      label: Starting state
+      options:
+        - Fresh install; no beta container or provider
+        - Existing stopped beta container
+        - Existing running beta container
+        - Existing OMP provider configuration
+        - Resumed interrupted model download
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Content-safe command or action
+      description: Replace user, host, IP, and private paths with neutral labels. Never include a key.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Content-safe error
+      description: Include expected and actual public hashes when relevant; omit raw logs and private data.
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: Nearest-cause correction already attempted
+      description: State what changed before a retry. Write “none” if you stopped at the first failure.
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction confirmation
+      options:
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, and session data.
+          required: true
+        - label: This is not a vulnerability report.
+          required: true
