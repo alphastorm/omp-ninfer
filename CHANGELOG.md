@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   state-faithful remote lifecycle rehearsal; publication remains a separate gate.
 - Fresh RTX 4090 package/install/restart evidence with an explicit Golden typed-tool-call blocker;
   no RTX 4090 support claim was added.
+- Reviewed draft OMP transport for read-only remote `doctor`/`status`, with mutating operations and
+  later lifecycle ownership still fail-closed.
 
 ### Security
 

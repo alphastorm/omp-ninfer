@@ -54,12 +54,17 @@ command family after the remote execution boundary is implemented and qualified.
 - one manifest authority mechanically checked against OMP's compiled profile registry and the
   Homebrew cask.
 
-The RTX 5090 remote-side transitions above are proven inputs, not a shipping managed CLI claim: the
-Mac-to-remote transport and product-side command ownership remain unimplemented. The first fresh
-RTX 4090 package, fixed external-model install, and packaged restart passed on `sm_89`, but its exact
-Golden-equivalent failed by emitting textual tool markup instead of a typed tool call. Protocol,
-100K+ restart-persistence, and performance gates therefore remain blocked, and RTX 4090 support is
-still a non-claim.
+The RTX 5090 remote-side transitions above are proven inputs, not a shipping managed CLI claim. A
+reviewed draft now owns bounded read-only Mac-to-SSH/WSL `doctor` and `status`; it rejects blank
+destinations and every mutating remote action before SSH. Bootstrap/version attestation,
+authenticated loopback forwarding, artifact transfer, install, rollback, and recovery remain
+unowned, and the draft must be reconciled with the current OMP release series before merge.
+
+The first fresh RTX 4090 package, fixed external-model install, and packaged restart passed on
+`sm_89`, but its exact Golden-equivalent exhausted its output bound with two unclosed tool/function
+regions. The safe parser correctly returned text rather than fabricating missing arguments.
+Protocol, 100K+ restart-persistence, and performance gates therefore remain blocked, and RTX 4090
+support is still a non-claim.
 
 Fleet routing already exists in source, but a two-machine performance claim is deferred until both
 hardware profiles are release-qualified and the fixed foreground/background workload shows a real
