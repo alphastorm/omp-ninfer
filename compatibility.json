@@ -1,21 +1,22 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-1",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-2",
   "product_release": "v0.1.0-beta.1",
   "composition": {
     "status": "blocked",
     "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
-    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/13",
-    "lifecycle_source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
-    "lifecycle_semantic_tree": "d881f5aca972a8e1ab5313a2330fa86b96e4f411",
-    "lifecycle_generated_lock_tree": "6059e9bf5bf253ed577a80d59d247747fdc0834b",
+    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
+    "lifecycle_source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
+    "lifecycle_semantic_tree": "d0fc0f7107050e1d0ad6a78bc0c413c08c2ec21b",
+    "lifecycle_generated_lock_tree": "a5bc31d0f33fbce3ebc0d9373efb0abc2459c01a",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
-    "hosted_ci": "https://github.com/alphastorm/omp-monorepo/actions/runs/33105621756",
+    "hosted_ci": "pending for composed source",
     "blockers": [
-      "Compose the reasoning-safe NInfer request patch into the cross-platform lifecycle source.",
+      "Rebuild native Windows and Linux client archives from the composed lifecycle source.",
       "Record clean native Windows, native Linux, and managed macOS client acceptance receipts.",
       "Publish client distributions only after their exact acceptance receipts pass."
-    ]
+    ],
+    "composed_source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013"
   },
   "profiles": [
     {
@@ -42,14 +43,13 @@
       ],
       "blockers": [
         "No managed macOS acceptance receipt.",
-        "Cross-platform lifecycle PR 13 is draft and unmerged.",
-        "Reasoning-safe request compatibility is not composed into PR 13."
+        "The composed cross-platform lifecycle source remains draft and unmerged."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
         "os": "macOS",
         "architecture": "arm64",
-        "source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
+        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
         "published": false,
         "archive_sha256": null
       },
@@ -123,17 +123,16 @@
       ],
       "blockers": [
         "No clean native Windows acceptance receipt.",
-        "The Windows client archive is unpublished.",
-        "Reasoning-safe request compatibility is not composed into PR 13."
+        "The composed Windows client archive has not been rebuilt or published."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
         "os": "Windows 11",
         "architecture": "x64",
-        "source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
+        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
         "published": false,
-        "archive_sha256": "aeef7296a6510e9b3f2b0a6507ab3410883154c43d39ef8858dc1e70971555a1",
-        "binary_sha256": "6171c94e5f88cd7988d6e601a65e38f2e9645924184767be9bf1f0db57b24fb4"
+        "archive_sha256": null,
+        "binary_sha256": null
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -205,17 +204,16 @@
       ],
       "blockers": [
         "No clean native Linux acceptance receipt.",
-        "The Linux client archive is unpublished.",
-        "Reasoning-safe request compatibility is not composed into PR 13."
+        "The composed Linux client archive has not been rebuilt or published."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
         "os": "Linux",
         "architecture": "x64",
-        "source_commit": "19d5bcdbbbdc23bf294c199b058f14d9ad977759",
+        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
         "published": false,
-        "archive_sha256": "717b79170994a6574c336b75f56567668f830e5016ea53d9d6bfec38b962e4d0",
-        "binary_sha256": "33ecd740bd55031a4a6d7387e8398f064aeed8cf294b3e083c7d31fea1d3d408"
+        "archive_sha256": null,
+        "binary_sha256": null
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
