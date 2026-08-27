@@ -51,6 +51,9 @@ command family after the remote execution boundary is implemented and qualified.
   representative predecessor state;
 - RTX 4090 beta support only after a fresh package, restart, protocol, long-context, and Golden lane
   passes on the fixed external-model installer; and
+- RTX 3090 beta support only after a reviewed current-architecture port from
+  [`Don-Chad/ninfer-3090`](https://github.com/Don-Chad/ninfer-3090) and the same fresh package,
+  restart, protocol, long-context, and Golden qualification on a representative RTX 3090 host; and
 - one manifest authority mechanically checked against OMP's compiled profile registry and the
   Homebrew cask.
 
