@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-5",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-6",
   "product_release": "v0.1.0-beta.1",
   "composition": {
     "status": "blocked",
@@ -10,9 +10,9 @@
     "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
     "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
-    "hosted_ci": "pending for final port-safe source",
+    "hosted_ci": "https://github.com/alphastorm/omp-monorepo/actions/runs/33119378113",
     "blockers": [
-      "Record clean native Windows, native Linux, and managed macOS client acceptance receipts.",
+      "Record clean native Linux hosted-client and Docker/NVIDIA lifecycle acceptance receipts.",
       "Publish client distributions only after their exact acceptance receipts pass."
     ],
     "composed_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608"
@@ -38,19 +38,23 @@
       "container_port": 8080,
       "limitations": [
         "Managed remote install, benchmark, rollback, and support-bundle are not implemented; the existing manual SSH topology remains separate.",
-        "Preview pending a clean managed macOS client acceptance receipt."
+        "Clean managed macOS doctor/status, authenticated requests, Vision, stateful resume, and fail-closed behavior passed on the exact composed client."
       ],
       "blockers": [
-        "No managed macOS acceptance receipt.",
+        "The composed macOS client archive is unpublished.",
         "The composed cross-platform lifecycle source remains draft and unmerged."
       ],
-      "acceptance_receipt": null,
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ef269fd0ae4d64abbd215ddb371c992d8f47ef52/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+        "sha256": "6ec506f3b5bffcdd5a07e7b43004db1a20106fb19ca4a83b817f17b4a1eb0d80"
+      },
       "client_distribution": {
         "os": "macOS",
         "architecture": "arm64",
         "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": null
+        "archive_sha256": null,
+        "binary_sha256": "b5166af33eb27f1d3377f878de402066ba70ffadc4a77b8b997712c8700760d8"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -118,13 +122,15 @@
       "container_port": 8080,
       "limitations": [
         "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported.",
-        "Preview pending a clean native Windows acceptance receipt."
+        "Clean native Windows install, Docker/GPU detection, authenticated requests, Vision, stateful resume, and fail-closed behavior passed."
       ],
       "blockers": [
-        "No clean native Windows acceptance receipt.",
         "The composed Windows client archive is unpublished."
       ],
-      "acceptance_receipt": null,
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ef269fd0ae4d64abbd215ddb371c992d8f47ef52/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+        "sha256": "0978417007ef53fd5c57aec4c9e3130010318369a2bb82d99874b23cc576004d"
+      },
       "client_distribution": {
         "os": "Windows 11",
         "architecture": "x64",

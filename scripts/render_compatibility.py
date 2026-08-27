@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +51,7 @@ def load_authority(path: Path) -> dict[str, Any]:
         require(profile.get("silent_cloud_fallback") is False,
                 f"{profile_id} must disable silent cloud fallback")
         commands = profile.get("commands")
-        require(isinstance(commands, list) and commands and len(commands) == len(set(commands)),
+        require(isinstance(commands, list) and len(commands) > 0 and len(commands) == len(set(commands)),
                 f"{profile_id} commands are absent or duplicated")
         require(set(commands) <= COMMANDS, f"{profile_id} contains an unknown command")
         require(isinstance(profile.get("client_distribution"), dict),
@@ -58,6 +59,23 @@ def load_authority(path: Path) -> dict[str, Any]:
         require(isinstance(profile.get("runtime"), dict), f"{profile_id} runtime is absent")
         require(isinstance(profile.get("gpu_qualification"), dict),
                 f"{profile_id} GPU qualification is absent")
+        acceptance = profile.get("acceptance_receipt")
+        if acceptance is not None:
+            require(isinstance(acceptance, dict), f"{profile_id} acceptance receipt is invalid")
+            require(
+                isinstance(acceptance.get("url"), str)
+                and re.fullmatch(
+                    r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/[0-9a-f]{40}/releases/v0\.1\.0-beta\.1/acceptance/[a-z0-9-]+\.json",
+                    acceptance["url"],
+                )
+                is not None,
+                f"{profile_id} acceptance receipt URL is not immutable",
+            )
+            require(
+                isinstance(acceptance.get("sha256"), str)
+                and re.fullmatch(r"[0-9a-f]{64}", acceptance["sha256"]) is not None,
+                f"{profile_id} acceptance receipt SHA-256 is invalid",
+            )
         if profile["status"] == "qualified":
             require(profile.get("acceptance_receipt") is not None,
                     f"{profile_id} qualified without acceptance")
