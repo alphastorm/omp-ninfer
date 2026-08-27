@@ -75,6 +75,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                         "https://api.github.com/repos/alphastorm/homebrew-omp/"
                         f"releases/assets/123456789#{omp_artifact_name}"
                     ),
+                    "artifact_asset_id": 123456789,
+                    "artifact_published": True,
                     "homebrew_cask_revision": "c" * 40,
                 }
             )

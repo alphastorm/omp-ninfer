@@ -19,7 +19,7 @@ OMP_RELEASE_ID_RE = re.compile(
     r"^(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-(?P<identity>[0-9a-f]{64})$"
 )
 OMP_ASSET_PATH_RE = re.compile(
-    r"^/repos/alphastorm/homebrew-omp/releases/assets/[1-9][0-9]*$"
+    r"^/repos/alphastorm/homebrew-omp/releases/assets/(?P<asset_id>[1-9][0-9]*)$"
 )
 PRIVATE_MARKERS = (
     "/Users/",
@@ -261,6 +261,14 @@ def validate(
     )
     require(omp.get("artifact_name") == expected_omp_artifact_name,
             "OMP artifact name must bind distribution_version and darwin-arm64", errors)
+    require(isinstance(omp.get("artifact_release_id"), int)
+            and omp.get("artifact_release_id", 0) > 0,
+            "OMP artifact_release_id must be positive", errors)
+    require(isinstance(omp.get("artifact_asset_id"), int)
+            and omp.get("artifact_asset_id", 0) > 0,
+            "OMP artifact_asset_id must be positive", errors)
+    require(isinstance(omp.get("artifact_published"), bool),
+            "OMP artifact_published must be boolean", errors)
     require_sha(omp.get("artifact_sha256"), "components.omp.artifact_sha256", errors)
     require(isinstance(omp.get("artifact_bytes"), int) and omp.get("artifact_bytes", 0) > 0,
             "OMP artifact_bytes must be positive", errors)
@@ -272,10 +280,13 @@ def validate(
     require_https(omp_artifact_url, "components.omp.artifact_url", errors, nullable=True)
     if isinstance(omp_artifact_url, str):
         parsed_omp_url = urlparse(omp_artifact_url)
+        omp_asset_path_match = OMP_ASSET_PATH_RE.fullmatch(parsed_omp_url.path)
         require(
             parsed_omp_url.scheme == "https"
             and parsed_omp_url.netloc == "api.github.com"
-            and OMP_ASSET_PATH_RE.fullmatch(parsed_omp_url.path) is not None
+            and omp_asset_path_match is not None
+            and int(omp_asset_path_match.group("asset_id"))
+            == omp.get("artifact_asset_id")
             and parsed_omp_url.params == ""
             and parsed_omp_url.query == ""
             and parsed_omp_url.fragment == omp.get("artifact_name"),
@@ -350,6 +361,9 @@ def validate(
             "components.omp.source_commit": omp.get("source_commit"),
             "components.omp.artifact_name": omp.get("artifact_name"),
             "components.omp.artifact_url": omp.get("artifact_url"),
+            "components.omp.artifact_release_id": omp.get("artifact_release_id"),
+            "components.omp.artifact_asset_id": omp.get("artifact_asset_id"),
+            "components.omp.artifact_published": omp.get("artifact_published"),
             "components.omp.artifact_bytes": omp.get("artifact_bytes"),
             "components.omp.artifact_sha256": omp.get("artifact_sha256"),
             "components.omp.homebrew_cask_revision": omp.get("homebrew_cask_revision"),
@@ -360,6 +374,8 @@ def validate(
         }
         for label, value in installable_values.items():
             require(value is not None, f"installable release requires {label}", errors)
+        require(omp.get("artifact_published") is True,
+                "installable release requires a published OMP artifact", errors)
         require_git_sha(omp.get("homebrew_cask_revision"),
                         "components.omp.homebrew_cask_revision", errors, nullable=True)
         require(isinstance(ninfer.get("oci_reference"), str)

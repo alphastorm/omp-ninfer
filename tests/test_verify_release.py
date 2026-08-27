@@ -43,6 +43,8 @@ class ReleaseContractTest(unittest.TestCase):
                     "https://api.github.com/repos/alphastorm/homebrew-omp/"
                     f"releases/assets/123456789#{artifact_name}"
                 ),
+                "artifact_asset_id": 123456789,
+                "artifact_published": True,
                 "homebrew_cask_revision": "c" * 40,
             }
         )
@@ -205,6 +207,24 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn(
             "OMP artifact URL must bind the private Homebrew release asset and artifact name",
+            errors,
+        )
+
+    def test_candidate_rejects_a_draft_omp_asset(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "candidate"
+        self.bind_installable_components(manifest)
+        manifest["components"]["omp"]["artifact_published"] = False
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(
+            root, require_ready=False, require_installable=True
+        )
+        self.assertIn(
+            "installable release requires a published OMP artifact",
             errors,
         )
 

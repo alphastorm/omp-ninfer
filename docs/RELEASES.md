@@ -39,6 +39,8 @@ manifest and qualification summary.
 
 - every OMP, Homebrew, NInfer OCI/SBOM, model, binary, source, and configuration identity required
   for installation is immutable and published;
+- `components.omp.artifact_published` is true only after the cask verifier passes without
+  `--allow-draft` against the exact release asset;
 - `publication.blockers` remains non-empty and the qualification still records that external
   installation has not passed;
 - `python3 scripts/verify_release.py --require-installable` passes; and

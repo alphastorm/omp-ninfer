@@ -3,10 +3,12 @@
 Fix the first concrete mismatch. Do not rerun an unchanged install or replace an immutable identity
 with a convenient local image.
 
-## `release manifest is still draft`
+## `release manifest is not installable`
 
 No installable release exists yet. Wait for the `v0.1.0-beta.1` prerelease and use a clean clone of
-that tag. The draft intentionally has null OMP/image/SBOM/Homebrew fields and explicit blockers.
+that tag. The draft may bind the staged OMP asset and Homebrew revision while marking the asset
+unpublished; NInfer OCI/SBOM and qualification publication fields remain null, and explicit
+blockers enumerate every incomplete transition.
 
 ## Model byte count or SHA-256 mismatch
 
