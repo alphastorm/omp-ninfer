@@ -1,22 +1,21 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-2",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-5",
   "product_release": "v0.1.0-beta.1",
   "composition": {
     "status": "blocked",
     "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
     "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
-    "lifecycle_source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
-    "lifecycle_semantic_tree": "d0fc0f7107050e1d0ad6a78bc0c413c08c2ec21b",
-    "lifecycle_generated_lock_tree": "a5bc31d0f33fbce3ebc0d9373efb0abc2459c01a",
+    "lifecycle_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
-    "hosted_ci": "pending for composed source",
+    "hosted_ci": "pending for final port-safe source",
     "blockers": [
-      "Rebuild native Windows and Linux client archives from the composed lifecycle source.",
       "Record clean native Windows, native Linux, and managed macOS client acceptance receipts.",
       "Publish client distributions only after their exact acceptance receipts pass."
     ],
-    "composed_source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013"
+    "composed_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608"
   },
   "profiles": [
     {
@@ -49,7 +48,7 @@
       "client_distribution": {
         "os": "macOS",
         "architecture": "arm64",
-        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
         "archive_sha256": null
       },
@@ -69,7 +68,7 @@
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
         "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
         "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
-        "minimum_vram_gib": 32,
+        "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
@@ -123,16 +122,16 @@
       ],
       "blockers": [
         "No clean native Windows acceptance receipt.",
-        "The composed Windows client archive has not been rebuilt or published."
+        "The composed Windows client archive is unpublished."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
         "os": "Windows 11",
         "architecture": "x64",
-        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": null,
-        "binary_sha256": null
+        "archive_sha256": "647f732dfc1a292b64e6045d6b8deed6bd946eedd7bce093c81c1ad2c64873af",
+        "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -150,7 +149,7 @@
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
         "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
         "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
-        "minimum_vram_gib": 32,
+        "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
@@ -204,16 +203,16 @@
       ],
       "blockers": [
         "No clean native Linux acceptance receipt.",
-        "The composed Linux client archive has not been rebuilt or published."
+        "The composed Linux client archive is unpublished."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
         "os": "Linux",
         "architecture": "x64",
-        "source_commit": "5576c8d8a92c2991b242371d8043d3235bb77013",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": null,
-        "binary_sha256": null
+        "archive_sha256": "e928a924a13cdde2f8af18afb51a1a523d4ec563b8eef2acb8ad0321f0163a7e",
+        "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -231,7 +230,7 @@
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
         "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
         "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
-        "minimum_vram_gib": 32,
+        "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
