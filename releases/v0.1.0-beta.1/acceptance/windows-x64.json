@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-x64-842366735b-647f732dfc",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e"
+  },
+  "client": {
+    "release_id": "18.0.7-cross-platform-preview-5",
+    "version": "18.0.7",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "archive_sha256": "647f732dfc1a292b64e6045d6b8deed6bd946eedd7bce093c81c1ad2c64873af",
+    "archive_bytes": 78452185,
+    "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+    "clean_install": true,
+    "previous_retained": false
+  },
+  "host": {
+    "runtime": "Docker Desktop Linux containers",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "observed_vram_gib": 31.8,
+    "docker_available": true,
+    "nvidia_container_runtime_available": true,
+    "secure_auth_available": true,
+    "minimum_observed_free_disk_gib": 880.3
+  },
+  "runtime": {
+    "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
+  },
+  "checks": {
+    "archive_checksum": "passed",
+    "clean_install": "passed",
+    "version": "passed",
+    "docker_and_gpu_detection": "passed",
+    "authenticated_text_and_file_tool": "passed",
+    "vision": "passed",
+    "stateful_exit_and_resume": "passed",
+    "tunnel_outage_fail_closed": "passed",
+    "runtime_rollback_and_incumbent_restore": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "The client archive was locally composed and is not yet published.",
+    "The lifecycle source remains on a draft pull request.",
+    "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported."
+  ]
+}

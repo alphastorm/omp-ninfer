@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-x64-wsl-client-842366735b-e928a924a1",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "linux-docker-local",
+  "status": "partial",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e"
+  },
+  "client": {
+    "release_id": "18.0.7-cross-platform-preview-5",
+    "version": "18.0.7",
+    "os": "Ubuntu 24.04 under WSL2",
+    "architecture": "x64",
+    "archive_sha256": "e928a924a13cdde2f8af18afb51a1a523d4ec563b8eef2acb8ad0321f0163a7e",
+    "archive_bytes": 112329968,
+    "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6",
+    "clean_install": true
+  },
+  "checks": {
+    "archive_checksum": "passed",
+    "clean_install": "passed",
+    "version": "passed",
+    "authenticated_text_and_file_tool": "passed",
+    "vision": "passed",
+    "stateful_exit_and_resume": "passed",
+    "tunnel_outage_fail_closed": "passed",
+    "runtime_rollback_and_incumbent_restore": "passed",
+    "native_linux_docker_nvidia_lifecycle": "not_run"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "This receipt proves the Linux x64 client and inference route under WSL2, not a native Linux Docker/NVIDIA lifecycle.",
+    "The native Linux acceptance gate remains open until an ubuntu-24.04 hosted client receipt and a GPU lifecycle receipt are recorded.",
+    "The client archive is not yet published."
+  ]
+}

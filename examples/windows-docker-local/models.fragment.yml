@@ -1,0 +1,27 @@
+providers:
+  ninfer-beta:
+    baseUrl: http://127.0.0.1:18089/v1
+    api: openai-responses
+    apiKey: NINFER_BETA_API_KEY
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-max
+        requestModelId: q38-ninfer
+        name: Qwen3.8 27B NInfer RTX 5090 beta
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+          - image
+        supportsTools: true
+        cost:
+          input: 0
+          output: 0
+          cacheRead: 0
+          cacheWrite: 0
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          ninferStatefulResponses: true

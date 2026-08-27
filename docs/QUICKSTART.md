@@ -189,6 +189,21 @@ providers or model definitions. The key remains an executable secret reference:
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
+### Native Windows OMP
+
+The POSIX `!cat` secret reference is not supported by native Windows OMP. Copy
+[`examples/windows-docker-local/models.fragment.yml`](../examples/windows-docker-local/models.fragment.yml)
+to `$HOME\.omp\agent\models.yml`, or merge only its `providers.ninfer-beta` mapping.
+Load the key into the process environment without printing it before every OMP launch:
+
+```powershell
+$env:NINFER_BETA_API_KEY = (Get-Content -Raw "$HOME\.omp\agent\ninfer-beta.key").Trim()
+omp --model ninfer-beta/local-max
+```
+
+The environment-backed value exists only in that PowerShell process and its children. Do not put
+the key itself in YAML, command arguments, shell history, or support bundles.
+
 Install the supplied fail-closed settings into the launcher-owned default config whenever exercising
 the beta. If the file already exists, merge only the `retry` mapping instead of overwriting unrelated
 settings:
