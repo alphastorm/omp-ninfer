@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no RTX 4090 support claim was added.
 - Reviewed draft OMP transport for read-only remote `doctor`/`status`, with mutating operations and
   later lifecycle ownership still fail-closed.
+- Published and bound the exact OMP, Homebrew, NInfer OCI, binary-package, SPDX, and checksum
+  identities; advanced the product manifest to an installable candidate while external acceptance
+  and ready publication remain open.
 
 ### Security
 

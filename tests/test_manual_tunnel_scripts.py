@@ -29,7 +29,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             check=False,
         )
 
-    def test_start_contract_accepts_checked_in_draft(self) -> None:
+    def test_start_contract_accepts_checked_in_candidate(self) -> None:
         result = self.run_script("start-ninfer.sh", "--check-contract")
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -38,18 +38,34 @@ class ManualTunnelScriptsTest(unittest.TestCase):
     def test_start_refuses_draft_before_runtime_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
+            for directory in ("examples", "profiles", "releases", "scripts"):
+                shutil.copytree(ROOT / directory, root / directory)
+            manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["status"] = "draft"
+            manifest["components"]["omp"]["artifact_published"] = False
+            manifest_path.write_text(
+                json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+            )
             model = root / "model.ninfer"
             key = root / "api-key"
             model.write_bytes(b"not-used")
             key.write_text("not-used\n", encoding="utf-8")
-            result = self.run_script(
-                "start-ninfer.sh",
-                "--model",
-                str(model),
-                "--api-key-file",
-                str(key),
-                "--log-dir",
-                str(root / "logs"),
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(root / "examples" / "manual-tunnel" / "start-ninfer.sh"),
+                    "--model",
+                    str(model),
+                    "--api-key-file",
+                    str(key),
+                    "--log-dir",
+                    str(root / "logs"),
+                ],
+                cwd=root,
+                text=True,
+                capture_output=True,
+                check=False,
             )
 
         self.assertEqual(result.returncode, 1)

@@ -322,8 +322,8 @@ def validate(
     local_packaging = qualification.get("composition", {}).get("local_release_packaging", {})
     require(local_packaging.get("status") == "passed",
             "qualification must record passing local release packaging", errors)
-    require(local_packaging.get("published") is False,
-            "checked-in local release packaging must remain unpublished", errors)
+    require(isinstance(local_packaging.get("published"), bool),
+            "qualification local release packaging must record publication state", errors)
     require(local_packaging.get("release_source_commit") == ninfer.get("source_commit"),
             "local packaging and manifest NInfer source commits must match", errors)
     require(local_packaging.get("release_server_binary_sha256") == ninfer.get("server_binary_sha256"),
@@ -393,6 +393,8 @@ def validate(
             require(value is not None, f"installable release requires {label}", errors)
         require(omp.get("artifact_published") is True,
                 "installable release requires a published OMP artifact", errors)
+        require(local_packaging.get("published") is True,
+                "installable release requires published NInfer packaging", errors)
         require_git_sha(omp.get("homebrew_cask_revision"),
                         "components.omp.homebrew_cask_revision", errors, nullable=True)
         require(isinstance(ninfer.get("oci_reference"), str)

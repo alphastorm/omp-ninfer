@@ -6,7 +6,7 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "One measured NVIDIA GeForce RTX 5090, the exact Qwen3.8 27B NInfer model artifact, the recorded BF16-KV MTP3 profile, and a later clean-source candidate identity proof. This does not qualify the unpublished OMP/Homebrew installation path or another machine.",
+  "scope": "One measured NVIDIA GeForce RTX 5090, the exact Qwen3.8 27B NInfer model artifact, the recorded BF16-KV MTP3 profile, and a later clean-source candidate identity proof. Component artifacts are published, but the external OMP/Homebrew installation path and another machine remain unqualified.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
@@ -46,15 +46,21 @@
     },
     "local_release_packaging": {
       "status": "passed",
-      "published": false,
+      "published": true,
       "release_source_commit": "da2b6b6c8e129d182370feee657b7d8b9b9bbbf5",
       "release_server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
       "image_id": "sha256:93ab5bc7bda16d0ed401d049ce264a90ff2a7bba3222fd77173a932590865c82",
+      "registry_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+      "registry_tag_index_digest": "sha256:93ab5bc7bda16d0ed401d049ce264a90ff2a7bba3222fd77173a932590865c82",
       "oci_archive_sha256": "a3819f9030e4228bf79e9a3bbac7c10dd2e6aaeec29ce9941598c1d1341aa250",
       "oci_index_digest": "sha256:abce5ffd1ea34d169cbe7ca89200b9910c785b7fca790cdd908aaf05d4050553",
       "oci_manifest_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
       "binary_package_sha256": "89db6e521bd76f301bac14b881d69f9a09f8375e109b2175fa6387e7878bcfbd",
-      "sbom_sha256": "5e6ce7b222591e85a75ea698532ce18016f4e5c4fa4e5cb341b87560bf5241ac",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.1.0-qwen38-5090/ninfer-qwen38-rtx5090-v0.1.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "bb7bcf71019b4033fcc5f26c66c8e69f19272acf8d0986d4822f26605ced7682",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.1.0-qwen38-5090",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
       "deterministic_rebuild": true,
       "checksums_verified": true
     },
@@ -122,13 +128,12 @@
     "Behavioral measurements were not rebound by assumption: the later release-source proof verified exact source, binary, model, and configuration identity but did not repeat performance gates.",
     "209.04 decode tokens/second is one measured server result, not a universal RTX 5090 or end-to-end OMP claim.",
     "The runtime lifecycle proved explicit re-promotion and exact incumbent restoration; it did not prove automatic restart or OMP appliance-level rollback.",
-    "The local release package, deterministic OCI archive, SPDX SBOM, and remote lifecycle rehearsal are exact unpublished staging evidence; they do not authorize registry or product publication.",
+    "The exact NInfer image, binary package, SPDX SBOM, and checksums are publicly available and anonymously verified; this component publication does not authorize product readiness.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
   "remaining_release_gates": [
-    "Publish the verified draft OMP macOS artifact and exact Homebrew revision.",
-    "Publish the exact local NInfer OCI manifest and SPDX SBOM, then bind their registry reference and URL.",
     "Run a clean external installation using only public release URLs and the manual-tunnel quickstart.",
-    "Obtain explicit authority for all publication effects."
+    "Publish this qualification summary with its exact SHA-256 and URL.",
+    "Obtain explicit authority for the product tag, release, and final readiness effects."
   ]
 }

@@ -4,8 +4,9 @@ This is the supported `v0.1.0-beta.1` path: OMP on Apple-silicon macOS, NInfer o
 user-controlled Linux or WSL2 RTX 5090 host, and an authenticated SSH local forward between them.
 It is deliberately manual. Do not use `omp appliance install` for this beta.
 
-The checked-in manifest is currently `draft`. Invited testers must stop unless the release tag
-exists and this succeeds from a clean clone of that tag:
+The checked-in manifest is currently an installable `candidate`. Invited testers must still stop
+unless the product release tag exists and the ready contract succeeds from a clean clone of that
+tag. Maintainers may use the exact candidate commit for the bounded external-install acceptance:
 
 ```sh
 python3 scripts/verify_release.py --require-ready
@@ -48,7 +49,8 @@ cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
-Do not continue from `main`, an untagged archive, or a manifest whose status is `draft`.
+Do not invite testers from moving `main`, an untagged archive, or a manifest whose status is
+`draft` or `candidate`.
 The bounded pre-tag acceptance instead checks out its recorded candidate commit in detached mode;
 it must never use moving `main` as the tested identity.
 
