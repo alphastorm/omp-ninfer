@@ -104,10 +104,12 @@ Validate that `~/.omp/agent/models.yml` remains valid YAML and contains exactly 
 than nesting a second `providers:` key or overwriting other providers. Keep both provider- and
 model-level `ninferStatefulResponses: true` fields.
 
-Run with the exact route and fail-closed overlay:
+Install or merge the fail-closed `retry` mapping into the launcher-owned default config, then run
+the exact route:
 
 ```sh
-omp --config /absolute/path/to/fail-closed.yml --model ninfer-beta/local-max
+install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
+omp --model ninfer-beta/local-max
 ```
 
 ## Text works but image input fails

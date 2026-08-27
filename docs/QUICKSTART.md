@@ -189,15 +189,19 @@ providers or model definitions. The key remains an executable secret reference:
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
-Use the supplied fail-closed overlay whenever exercising the beta:
+Install the supplied fail-closed settings into the launcher-owned default config whenever exercising
+the beta. If the file already exists, merge only the `retry` mapping instead of overwriting unrelated
+settings:
 
 ```sh
-OVERLAY=$(cd examples/manual-tunnel && pwd)/fail-closed.yml
-omp --config "$OVERLAY" --model ninfer-beta/local-max
+install -m 600 examples/manual-tunnel/fail-closed.yml \
+  "$HOME/.omp/agent/config.yml"
+omp --model ninfer-beta/local-max
 ```
 
-The explicit provider/model and overlay disable model fallback. A tunnel or runtime failure must be
-an error, not a switch to a cloud model.
+The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
+the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
+switch to a cloud model.
 
 ## 8. Early-access acceptance
 
@@ -210,7 +214,7 @@ launcher.
 SMOKE=$(mktemp -d)
 printf 'OMP_NINFER_TOOL_OK\n' > "$SMOKE/marker.txt"
 cd "$SMOKE"
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   "Use a file-reading tool to read marker.txt, then report its exact single line."
 ```
 
@@ -222,7 +226,7 @@ not a numerical oracle; the observed tool result is the contract.
 From a directory containing a non-sensitive PNG or JPEG:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   @sample.png "Describe the visible image in one sentence."
 ```
 
@@ -234,14 +238,14 @@ in an issue.
 Start an interactive session:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   "Remember the nonce COBALT-493817 for my next turn."
 ```
 
 In the same session, ask for the nonce. Exit OMP normally, then resume that session:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max --continue \
+omp --model ninfer-beta/local-max --continue \
   "Return the nonce from the prior turn."
 ```
 
@@ -255,7 +259,7 @@ Stop the tunnel with `Ctrl-C`, then run:
 
 ```sh
 omp --no-session --max-time 20s \
-  --config "$OVERLAY" --model ninfer-beta/local-max \
+  --model ninfer-beta/local-max \
   "Return LOCAL_ONLY."
 ```
 
