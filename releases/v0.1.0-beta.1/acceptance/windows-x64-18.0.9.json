@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-docker-local-32c6f614d4-6e00573933",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+    "semantic_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "generated_lock_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "main_commit": "6223369c62f3c35b6a2b8edfcad07a0d9fcf0b03",
+    "main_tree": "f5bf2d5e5695ce2c7a650ddc6f58550ba45c81f0",
+    "request_compatibility_commit": "6223369c62f3c35b6a2b8edfcad07a0d9fcf0b03"
+  },
+  "client": {
+    "release_id": "18.0.9-cross-platform-beta-1",
+    "version": "18.0.9",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "archive_sha256": "6e00573933b209eac48a65ee3c185132bc816955f40f473490f6819b512cfb23",
+    "archive_bytes": 82880170,
+    "binary_sha256": "787687e3fc27d3b9d53d7daa07a03c76f279f6c75835c42959522be11192a571",
+    "binary_bytes": 157776384,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-1",
+    "component_release_id": 378414741,
+    "asset_id": 533642334,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/omp-18.0.9-windows-x64.tar.gz"
+  },
+  "host": {
+    "runtime": "Docker Desktop Linux containers",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "observed_vram_gib": 31.8,
+    "docker_available": true,
+    "nvidia_container_runtime_available": true,
+    "secure_auth_available": true,
+    "minimum_observed_free_disk_gib": 880.3
+  },
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33160519305",
+    "qualification_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+    "source_commit": "4f6d5475180a9a350a48fc7c7920622406aeff67",
+    "source_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "archive_sha256": "6e00573933b209eac48a65ee3c185132bc816955f40f473490f6819b512cfb23",
+    "binary_sha256": "787687e3fc27d3b9d53d7daa07a03c76f279f6c75835c42959522be11192a571",
+    "binary_bytes": 157776384,
+    "clean_install": true,
+    "version": "omp/18.0.9",
+    "doctor": "blocked-as-expected",
+    "status": "ok-not-installed",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "secret_free": true,
+    "prior_sha": "9f6d05b544404bf48e4730acacfe3ec8acdaea2c"
+  },
+  "runtime": {
+    "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version_and_diagnostics": "passed",
+    "live_authenticated_text_tool_vision_resume_and_fail_closed": "reused-from-immutable-prior-acceptance",
+    "runtime_rollback_and_incumbent_restore": "reused-from-immutable-prior-acceptance"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "This receipt composes new-client hosted qualification with immutable prior live-runtime acceptance only because the lifecycle adapter patch is byte-identical.",
+    "No new production route or OMP activation was performed."
+  ],
+  "evidence_mode": "composed-reuse",
+  "evidence_reuse": {
+    "prior_acceptance_path": "releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+    "prior_acceptance_sha256": "9f6d05b544404bf48e4730ac5b77247e23d494ea681f56d5d8368b70b72a477a",
+    "lifecycle_patch_sha256": "2c7f65c330df6f60f8b5630f36f00b95e9593b3f44ee1221de3eaf6510cb88d3",
+    "lifecycle_patch_preserved_byte_for_byte": true,
+    "rationale": "The live appliance behavior boundary is unchanged; OMP 18.0.9 separately passed clean provider-free native build, install, diagnostics, and cleanup on this platform."
+  }
+}
