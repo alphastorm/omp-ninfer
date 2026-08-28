@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Integrated the scripted SM120/MTP3 profiler and its retained experiment packets into NInfer
+  mainline together with the latest direct upstream runtime changes.
 - Rewrote the README around the product value proposition: stateful GPU-resident sessions,
   fail-closed privacy, verifiable release identity, a runtime comparison table, and the NInfer
   family lineage.
