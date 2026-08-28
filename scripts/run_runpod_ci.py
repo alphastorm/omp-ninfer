@@ -79,6 +79,24 @@ def require_success(result: CommandResult, step: str) -> CommandResult:
     raise CiError(f"{step} failed ({result.returncode}): {detail}")
 
 
+def run_with_retries(
+    command: Sequence[str],
+    step: str,
+    *,
+    runner: Runner = run_command,
+    sleep: Callable[[float], None] = time.sleep,
+) -> CommandResult:
+    last: CommandResult | None = None
+    for delay in (0.0, 2.0, 5.0):
+        if delay:
+            sleep(delay)
+        last = runner(command)
+        if last.returncode == 0:
+            return last
+    assert last is not None
+    return require_success(last, step)
+
+
 def parse_json_output(text: str) -> Any:
     """Parse JSON even when a CLI emitted bounded progress text first."""
     stripped = text.strip()
@@ -421,21 +439,19 @@ def main() -> int:
                 "-o",
                 "ConnectTimeout=20",
             ]
-            require_success(
-                run_command(
-                    [
-                        "scp",
-                        "-q",
-                        "-i",
-                        key,
-                        "-P",
-                        port,
-                        "-o",
-                        "StrictHostKeyChecking=accept-new",
-                        str(bundle),
-                        f"root@{host}:/workspace/omp-ninfer-ci.bundle",
-                    ]
-                ),
+            run_with_retries(
+                [
+                    "scp",
+                    "-q",
+                    "-i",
+                    key,
+                    "-P",
+                    port,
+                    "-o",
+                    "StrictHostKeyChecking=accept-new",
+                    str(bundle),
+                    f"root@{host}:/workspace/omp-ninfer-ci.bundle",
+                ],
                 "bundle transfer",
             )
             remote = remote_script(
