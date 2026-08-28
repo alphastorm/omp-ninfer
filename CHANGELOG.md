@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark-report issue form feeding the community results table.
 - Qualified-results stat strip asset for the README and benchmarks page.
 - Continuous-integration badge row and measured-value badges bound to the qualified numbers.
+- Release-verifier validation of every checked-in hardware profile against the manifest identity,
+  transport, server, and provider contract, with a drift test.
+- Published RTX 4090 lane qualification receipt (content-safe, prior evidence) linked from the
+  performance program and roadmap.
 
 ### Changed
 

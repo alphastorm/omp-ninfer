@@ -69,8 +69,10 @@ Status notes, kept honest:
   Golden-equivalent exhausted its output bound with two unclosed tool regions; the safe parser
   correctly returned text rather than fabricating arguments. Protocol, 100K+ restart-persistence,
   and performance gates remain blocked, so RTX 4090 support is still a non-claim. That lane has
-  also measured disk-checkpoint session restores (a 105K-token session prepared in well under a
-  second instead of a cold re-prefill); the receipt publishes with the lane.
+  also measured disk-checkpoint session restores — a 105K-token session prepared in well under a
+  second instead of a cold re-prefill
+  ([receipt](https://raw.githubusercontent.com/alphastorm/ninfer-4090/1b3a2562f213fa4a234fbe2794955f3d6d6d548e/docs/qualification/receipts/ninfer-4090-qwen38-v0.1.0-win-x64-qualification.json),
+  recorded as prior evidence inside an overall-failed package qualification).
 - Fleet routing across two GPUs exists in source, but a two-machine performance claim is deferred
   until both hardware profiles are release-qualified and a fixed workload shows a real
   completed-work benefit without weakening sticky warm-session ownership or fail-closed routing.
