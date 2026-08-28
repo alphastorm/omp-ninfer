@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import subprocess
 import sys
@@ -163,6 +164,46 @@ class RunpodCiTest(unittest.TestCase):
             "--target ninfer-serve ninfer_session_checkpoint_store_test", script
         )
         self.assertNotIn("ninfer_checkpoint_io_contract_test", script)
+
+    def test_remote_script_packages_exact_release_identity(self) -> None:
+        script = MODULE.remote_script(
+            source_commit="1" * 40,
+            upstream_base="2" * 40,
+            cuda_arch="120a",
+            cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
+            build_targets=MODULE.DEFAULT_BUILD_TARGETS,
+            ctest_regex=MODULE.DEFAULT_CTEST_REGEX,
+            build_profile="omp-v0.2.0-rtx5090",
+            release_version="v0.2.0",
+        )
+        self.assertIn("-DNINFER_BUILD_PROFILE=omp-v0.2.0-rtx5090", script)
+        self.assertIn("tools/release/package.py", script)
+        self.assertIn("--release-version v0.2.0", script)
+        self.assertIn("--release-head-sha " + "1" * 40, script)
+        self.assertNotIn("NINFER_SOURCE_CLEAN_VERIFIED", script)
+
+    def test_release_artifact_verifier_binds_complete_payload(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            payloads = {
+                "ninfer.tar.gz": b"binary",
+                "ninfer-source.tar.gz": b"source",
+                "ninfer.spdx.json": b"{}",
+            }
+            for name, content in payloads.items():
+                (root / name).write_bytes(content)
+            (root / "ninfer.SHA256SUMS").write_text(
+                "".join(
+                    f"{hashlib.sha256(content).hexdigest()}  {name}\n"
+                    for name, content in payloads.items()
+                ),
+                encoding="ascii",
+            )
+            artifacts = MODULE.verify_release_artifacts(root)
+            self.assertEqual({item["name"] for item in artifacts}, {p.name for p in root.iterdir()})
+            (root / "ninfer.tar.gz").write_bytes(b"tampered")
+            with self.assertRaisesRegex(MODULE.CiError, "digest mismatch"):
+                MODULE.verify_release_artifacts(root)
 
     def test_receipt_is_atomic_and_contains_no_connection_details(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
