@@ -113,11 +113,12 @@ class RunpodCiTest(unittest.TestCase):
             source_commit=source,
             upstream_base=upstream,
             cuda_arch="120a",
-            cuda_toolkit_package="cuda-toolkit-13-1",
+            cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
             ctest_regex=MODULE.DEFAULT_CTEST_REGEX,
         )
         self.assertIn("set -euo pipefail", script)
-        self.assertIn("cuda-toolkit-13-1", script)
+        self.assertIn("cuda-compiler-13-1", script)
+        self.assertIn("cuda-libraries-dev-13-1", script)
         self.assertIn("libssl-dev", script)
         self.assertIn("-DCMAKE_CUDA_ARCHITECTURES=120a", script)
         self.assertIn(f"-DNINFER_PATCH_STACK_SHA={source}", script)

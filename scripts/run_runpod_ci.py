@@ -19,6 +19,7 @@ from typing import Any, Callable, Sequence
 
 DEFAULT_GPU_ID = "NVIDIA GeForce RTX 5090"
 DEFAULT_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
+DEFAULT_CUDA_PACKAGES = ("cuda-compiler-13-1", "cuda-libraries-dev-13-1")
 DEFAULT_CTEST_REGEX = (
     "ninfer_(resource_manager|openai_schema|responses_schema|response_store|"
     "tool_call_parser|serve_options|request_log)_test"
@@ -192,13 +193,13 @@ def remote_script(
     source_commit: str,
     upstream_base: str,
     cuda_arch: str,
-    cuda_toolkit_package: str,
+    cuda_packages: Sequence[str],
     ctest_regex: str,
 ) -> str:
     packages = (
         "cmake git ninja-build pkg-config libavcodec-dev libavformat-dev "
         "libavutil-dev libcurl4-openssl-dev libssl-dev libswscale-dev "
-        + shlex.quote(cuda_toolkit_package)
+        + " ".join(shlex.quote(package) for package in cuda_packages)
     )
     targets = (
         "ninfer ninfer-serve ninfer_resource_manager_test ninfer_openai_schema_test "
@@ -259,7 +260,12 @@ def main() -> int:
     parser.add_argument("--cloud-type", choices=("COMMUNITY", "SECURE"), default="COMMUNITY")
     parser.add_argument("--image", default=DEFAULT_IMAGE)
     parser.add_argument("--cuda-arch", default="120a")
-    parser.add_argument("--cuda-toolkit-package", default="cuda-toolkit-13-1")
+    parser.add_argument(
+        "--cuda-package",
+        action="append",
+        dest="cuda_packages",
+        help="CUDA apt package; repeat as needed",
+    )
     parser.add_argument("--container-disk-gb", type=int, default=40)
     parser.add_argument("--max-hourly-price", type=float, default=0.70)
     parser.add_argument("--cleanup-deadline-minutes", type=int, default=55)
@@ -272,6 +278,9 @@ def main() -> int:
         parser.error("--container-disk-gb must be at least 20")
     if not 10 <= args.cleanup_deadline_minutes <= 180:
         parser.error("--cleanup-deadline-minutes must be between 10 and 180")
+    cuda_packages = tuple(args.cuda_packages or DEFAULT_CUDA_PACKAGES)
+    if not cuda_packages or any(not package for package in cuda_packages):
+        parser.error("at least one non-empty --cuda-package is required")
 
     install_signal_handlers()
     source = args.source.resolve()
@@ -287,6 +296,7 @@ def main() -> int:
         "cloud_type": args.cloud_type,
         "image": args.image,
         "cuda_arch": args.cuda_arch,
+        "cuda_packages": list(cuda_packages),
         "hourly_price_usd": None,
         "pod_id": None,
         "pod_deleted": False,
@@ -405,7 +415,7 @@ def main() -> int:
                 source_commit=source_commit,
                 upstream_base=upstream_base,
                 cuda_arch=args.cuda_arch,
-                cuda_toolkit_package=args.cuda_toolkit_package,
+                cuda_packages=cuda_packages,
                 ctest_regex=args.ctest_regex,
             )
             remote_result = run_command(["ssh", *ssh_options, f"root@{host}", remote])
