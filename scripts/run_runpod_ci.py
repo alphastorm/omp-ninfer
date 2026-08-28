@@ -270,6 +270,7 @@ def main() -> int:
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--upstream-base-sha")
     parser.add_argument("--gpu-id", default=DEFAULT_GPU_ID)
+    parser.add_argument("--data-center-ids")
     parser.add_argument("--cloud-type", choices=("COMMUNITY", "SECURE"), default="COMMUNITY")
     parser.add_argument("--image", default=DEFAULT_IMAGE)
     parser.add_argument("--cuda-arch", default="120a")
@@ -321,6 +322,7 @@ def main() -> int:
         "cuda_packages": list(cuda_packages),
         "build_targets": list(build_targets),
         "hourly_price_usd": None,
+        "data_center_ids": args.data_center_ids,
         "pod_id": None,
         "pod_deleted": False,
         "failed_step": None,
@@ -373,6 +375,8 @@ def main() -> int:
             ]
             if args.cloud_type == "COMMUNITY":
                 create_command.append("--public-ip")
+            if args.data_center_ids:
+                create_command.extend(["--data-center-ids", args.data_center_ids])
             created = run_command(create_command)
             pod_id = extract_pod_id(created)
             if pod_id is None:
