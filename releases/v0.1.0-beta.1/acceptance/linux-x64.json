@@ -20,7 +20,11 @@
     "archive_sha256": "712bb293de3a86e9b72512b0d75d36a450691f6ced9ad8f3b617171af4d2e555",
     "archive_bytes": 112329967,
     "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6",
-    "clean_install": true
+    "clean_install": true,
+    "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "component_release_id": 378212363,
+    "asset_id": 533095341,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-linux-x64.tar.gz"
   },
   "checks": {
     "native_ubuntu_archive_build": "passed",
@@ -44,7 +48,7 @@
   "limitations": [
     "Native hosted CI proves the Linux client build/install/diagnostic route without GPU hardware.",
     "Live RTX 5090 inference was exercised under WSL2; a bare-metal native Linux RTX 5090 lifecycle was not available.",
-    "The client archive is not yet published."
+    "The accepted Linux archive is published as a component prerelease; the OMP NInfer product release remains held."
   ],
   "hosted_ci": {
     "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33129814272",

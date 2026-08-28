@@ -20,7 +20,11 @@
     "archive_bytes": 78452185,
     "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
     "clean_install": true,
-    "previous_retained": false
+    "previous_retained": false,
+    "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "component_release_id": 378212363,
+    "asset_id": 533095343,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz"
   },
   "host": {
     "runtime": "Docker Desktop Linux containers",
@@ -73,7 +77,7 @@
     "runtime_incumbent_restored": true
   },
   "limitations": [
-    "The client archive was locally composed and is not yet published.",
+    "The accepted Windows archive is published as a component prerelease; the OMP NInfer product release remains held.",
     "The lifecycle source remains on a draft pull request.",
     "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported."
   ]

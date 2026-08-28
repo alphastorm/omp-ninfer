@@ -22,7 +22,11 @@
     "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10",
     "binary_bytes": 121899792,
     "clean_install": true,
-    "clean_home": true
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "component_release_id": 378212363,
+    "asset_id": 533095340,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-macos-arm64.tar.gz"
   },
   "managed_remote": {
     "transport": "SSH to WSL2 Linux",
@@ -78,7 +82,7 @@
   },
   "limitations": [
     "Managed remote install, benchmark, rollback, and support-bundle are not implemented.",
-    "The macOS distribution archive is not yet published.",
+    "The accepted macOS archive is published as a component prerelease; the OMP NInfer product release remains held.",
     "The lifecycle source remains on a draft pull request."
   ]
 }
