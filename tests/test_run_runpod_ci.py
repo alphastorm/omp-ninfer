@@ -124,6 +124,7 @@ class RunpodCiTest(unittest.TestCase):
         self.assertIn(f"-DNINFER_PATCH_STACK_SHA={source}", script)
         self.assertIn(f"-DNINFER_UPSTREAM_BASE_SHA={upstream}", script)
         self.assertIn("ninfer_tool_call_parser_test", script)
+        self.assertIn("ninfer_checkpoint_io_contract_test", script)
         self.assertIn("ninfer_resource_manager_test", script)
         self.assertIn("build/runpod/apps/ninfer-serve --version", script)
 

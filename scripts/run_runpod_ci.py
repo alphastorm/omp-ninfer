@@ -21,7 +21,7 @@ DEFAULT_GPU_ID = "NVIDIA GeForce RTX 5090"
 DEFAULT_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
 DEFAULT_CUDA_PACKAGES = ("cuda-compiler-13-1", "cuda-libraries-dev-13-1")
 DEFAULT_CTEST_REGEX = (
-    "ninfer_(resource_manager|openai_schema|responses_schema|response_store|"
+    "ninfer_(checkpoint_io_contract|resource_manager|openai_schema|responses_schema|response_store|"
     "tool_call_parser|serve_options|request_log)_test"
 )
 GIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -202,7 +202,8 @@ def remote_script(
         + " ".join(shlex.quote(package) for package in cuda_packages)
     )
     targets = (
-        "ninfer ninfer-serve ninfer_resource_manager_test ninfer_openai_schema_test "
+        "ninfer ninfer-serve ninfer_checkpoint_io_contract_test "
+        "ninfer_resource_manager_test ninfer_openai_schema_test "
         "ninfer_responses_schema_test ninfer_response_store_test "
         "ninfer_tool_call_parser_test ninfer_serve_options_test ninfer_request_log_test"
     )
