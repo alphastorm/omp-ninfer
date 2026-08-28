@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-6",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-7",
   "product_release": "v0.1.0-beta.1",
   "composition": {
-    "status": "blocked",
+    "status": "ready-for-component-cut",
     "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
     "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
     "lifecycle_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "qualification_source_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
     "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
     "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
-    "hosted_ci": "https://github.com/alphastorm/omp-monorepo/actions/runs/33119378113",
+    "hosted_ci": "windows 33129814227; linux 33129814272; macos 33129814279",
     "blockers": [
-      "Record clean native Linux hosted-client and Docker/NVIDIA lifecycle acceptance receipts.",
       "Publish client distributions only after their exact acceptance receipts pass."
     ],
     "composed_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608"
@@ -45,16 +45,17 @@
         "The composed cross-platform lifecycle source remains draft and unmerged."
       ],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ef269fd0ae4d64abbd215ddb371c992d8f47ef52/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
-        "sha256": "6ec506f3b5bffcdd5a07e7b43004db1a20106fb19ca4a83b817f17b4a1eb0d80"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9b7e8768df873737821345f155029131221875d9/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+        "sha256": "45ac988b1ce62f952ee3bbf651abac3c202ba0e70b95a633959d1a7ee4afa3bc"
       },
       "client_distribution": {
         "os": "macOS",
         "architecture": "arm64",
         "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": null,
-        "binary_sha256": "b5166af33eb27f1d3377f878de402066ba70ffadc4a77b8b997712c8700760d8"
+        "archive_sha256": "f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9",
+        "archive_bytes": 59799181,
+        "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -128,15 +129,16 @@
         "The composed Windows client archive is unpublished."
       ],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ef269fd0ae4d64abbd215ddb371c992d8f47ef52/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
-        "sha256": "0978417007ef53fd5c57aec4c9e3130010318369a2bb82d99874b23cc576004d"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9b7e8768df873737821345f155029131221875d9/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+        "sha256": "a3bd2934bf9d194f7f6eb9b54b469b20367d7f75143ba845329f1ff69c6ede2d"
       },
       "client_distribution": {
         "os": "Windows 11",
         "architecture": "x64",
         "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": "647f732dfc1a292b64e6045d6b8deed6bd946eedd7bce093c81c1ad2c64873af",
+        "archive_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+        "archive_bytes": 78452185,
         "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892"
       },
       "gpu_qualification": {
@@ -205,19 +207,22 @@
       "container_port": 8080,
       "limitations": [
         "Native Linux OMP requires a local Docker Linux engine and NVIDIA Container Toolkit.",
-        "Preview pending a clean native Linux acceptance receipt."
+        "Native Ubuntu 24.04 build/install/diagnostics passed in hosted CI; live RTX 5090 inference passed under WSL2. Bare-metal native Linux GPU lifecycle remains unqualified."
       ],
       "blockers": [
-        "No clean native Linux acceptance receipt.",
         "The composed Linux client archive is unpublished."
       ],
-      "acceptance_receipt": null,
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9b7e8768df873737821345f155029131221875d9/releases/v0.1.0-beta.1/acceptance/linux-x64.json",
+        "sha256": "1d125ba815a3d06c61e948da72576d95b3fa9620f1aa20400d6d5b491c9ced77"
+      },
       "client_distribution": {
         "os": "Linux",
         "architecture": "x64",
         "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": false,
-        "archive_sha256": "e928a924a13cdde2f8af18afb51a1a523d4ec563b8eef2acb8ad0321f0163a7e",
+        "archive_sha256": "712bb293de3a86e9b72512b0d75d36a450691f6ced9ad8f3b617171af4d2e555",
+        "archive_bytes": 112329967,
         "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6"
       },
       "gpu_qualification": {
