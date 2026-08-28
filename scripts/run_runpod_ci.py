@@ -197,7 +197,7 @@ def remote_script(
 ) -> str:
     packages = (
         "cmake git ninja-build pkg-config libavcodec-dev libavformat-dev "
-        "libavutil-dev libcurl4-openssl-dev libswscale-dev "
+        "libavutil-dev libcurl4-openssl-dev libssl-dev libswscale-dev "
         + shlex.quote(cuda_toolkit_package)
     )
     targets = (
