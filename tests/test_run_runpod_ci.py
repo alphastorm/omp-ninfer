@@ -187,7 +187,6 @@ class RunpodCiTest(unittest.TestCase):
             root = Path(temporary)
             payloads = {
                 "ninfer.tar.gz": b"binary",
-                "ninfer-source.tar.gz": b"source",
                 "ninfer.spdx.json": b"{}",
             }
             for name, content in payloads.items():

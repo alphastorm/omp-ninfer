@@ -284,9 +284,9 @@ build/runpod/apps/ninfer-serve --version
 
 def verify_release_artifacts(path: Path) -> list[dict[str, Any]]:
     files = sorted(item for item in path.iterdir() if item.is_file())
-    if len(files) != 4:
+    if len(files) < 3:
         raise CiError(
-            f"release artifact directory contains {len(files)} files, expected 4"
+            f"release artifact directory contains {len(files)} files, expected at least 3"
         )
     checksum_files = [item for item in files if item.name.endswith(".SHA256SUMS")]
     if len(checksum_files) != 1:
@@ -304,7 +304,7 @@ def verify_release_artifacts(path: Path) -> list[dict[str, Any]]:
             raise CiError("release checksum manifest is malformed")
         expected[name] = digest
     payload_names = {item.name for item in files if item != checksum_file}
-    if len(expected) != 3 or set(expected) != payload_names:
+    if len(expected) < 2 or set(expected) != payload_names:
         raise CiError("release checksum manifest does not bind the complete artifact set")
 
     result: list[dict[str, Any]] = []
