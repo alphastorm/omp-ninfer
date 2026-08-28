@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "darwin-remote-ssh-32c6f614d4-973ec3a03b",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "darwin-remote-ssh",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+    "semantic_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "generated_lock_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "main_commit": "6223369c62f3c35b6a2b8edfcad07a0d9fcf0b03",
+    "main_tree": "f5bf2d5e5695ce2c7a650ddc6f58550ba45c81f0",
+    "request_compatibility_commit": "6223369c62f3c35b6a2b8edfcad07a0d9fcf0b03"
+  },
+  "client": {
+    "release_id": "18.0.9-cross-platform-beta-1",
+    "version": "18.0.9",
+    "os": "macOS",
+    "architecture": "arm64",
+    "archive_sha256": "973ec3a03bd03ba3af662336345d6e2bede841adb664ce7fed54ed12dc2595cf",
+    "archive_bytes": 66797403,
+    "binary_sha256": "af9318f913d701edb0f06274fdde07a65d454139c18a2b958d911b5851d3bd32",
+    "binary_bytes": 130764192,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-1",
+    "component_release_id": 378414741,
+    "asset_id": 533642339,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/omp-18.0.9-macos-arm64.tar.gz"
+  },
+  "managed_remote": {
+    "transport": "SSH to WSL2 Linux",
+    "remote_os": "Linux",
+    "remote_architecture": "x64",
+    "remote_gpu": "NVIDIA GeForce RTX 5090",
+    "docker_available": true,
+    "nvidia_container_runtime_available": true,
+    "doctor_receipt_id": "8f1c1801-0967-4ff3-bbff-f4fb38fa477d",
+    "doctor_result": "completed_with_expected_preview_blockers",
+    "status_receipt_id": "36f39a05-1497-4054-8b97-c11c79377fe9",
+    "status_result": "ok",
+    "compatibility_authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-6",
+    "compatibility_sha256": "3b91e35d9ee1c75a7ec8d557acd02832723e5d84796068ae87d02c36c29f147e"
+  },
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33160519326",
+    "qualification_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+    "source_commit": "4f6d5475180a9a350a48fc7c7920622406aeff67",
+    "source_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "archive_sha256": "973ec3a03bd03ba3af662336345d6e2bede841adb664ce7fed54ed12dc2595cf",
+    "binary_sha256": "af9318f913d701edb0f06274fdde07a65d454139c18a2b958d911b5851d3bd32",
+    "binary_bytes": 130764192,
+    "clean_install": true,
+    "version": "omp/18.0.9",
+    "doctor": "blocked-as-expected",
+    "status": "ok-uninstalled",
+    "managed_remote_without_target": "failed-closed",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "secret_free": true,
+    "prior_sha": "5ab80fa460e072b3e73e420b574c53ede8f86aa737f22bac742749a792dda590"
+  },
+  "runtime": {
+    "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version_and_diagnostics": "passed",
+    "live_authenticated_text_tool_vision_resume_and_fail_closed": "reused-from-immutable-prior-acceptance",
+    "runtime_rollback_and_incumbent_restore": "reused-from-immutable-prior-acceptance"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "This receipt composes new-client hosted qualification with immutable prior live-runtime acceptance only because the lifecycle adapter patch is byte-identical.",
+    "No new production route or OMP activation was performed."
+  ],
+  "evidence_mode": "composed-reuse",
+  "evidence_reuse": {
+    "prior_acceptance_path": "releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+    "prior_acceptance_sha256": "5ab80fa460e072b3e73e420b574c53ede8f86aa737f22bac742749a792dda590",
+    "lifecycle_patch_sha256": "2c7f65c330df6f60f8b5630f36f00b95e9593b3f44ee1221de3eaf6510cb88d3",
+    "lifecycle_patch_preserved_byte_for_byte": true,
+    "rationale": "The live appliance behavior boundary is unchanged; OMP 18.0.9 separately passed clean provider-free native build, install, diagnostics, and cleanup on this platform."
+  }
+}

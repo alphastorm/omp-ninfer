@@ -1,29 +1,29 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-qualified-10",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
   "product_release": "v0.1.0-beta.1",
   "composition": {
-    "status": "clients-qualified-runtime-refresh-pending",
+    "status": "component-published-source-merged",
     "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
-    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/16",
-    "lifecycle_source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
-    "qualification_source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
-    "lifecycle_main_commit": "6223369c62f3c35b6a2b8edfcad07a0d9fcf0b03",
-    "lifecycle_main_tree": "f5bf2d5e5695ce2c7a650ddc6f58550ba45c81f0",
-    "lifecycle_semantic_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
-    "lifecycle_generated_lock_tree": "1feeb3c17fc8cfd3d67829f66e8db38f9ebfd162",
+    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
+    "lifecycle_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "qualification_source_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "lifecycle_main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "lifecycle_main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048",
+    "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
-    "hosted_ci": "windows 33160519305; linux 33160519296; macos 33160519326",
+    "hosted_ci": "windows 33129814227; linux 33129814272; macos 33129814279",
     "blockers": [
-      "Publish and externally qualify the refreshed NInfer runtime before the v0.2 product release becomes ready."
+      "Run a clean invited-tester installation from the published component assets."
     ],
-    "composed_source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1"
+    "composed_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608"
   },
   "profiles": [
     {
       "id": "darwin-remote-ssh",
       "adapter": "darwin-remote-ssh",
-      "status": "qualified",
+      "status": "preview",
       "transport": "ssh-loopback",
       "commands": [
         "doctor",
@@ -39,28 +39,26 @@
       "local_port": 18089,
       "container_port": 8080,
       "limitations": [
-        "The supported managed surface is read-only doctor/status over explicit SSH; install, benchmark, rollback, and support-bundle remain outside this profile.",
-        "The OMP 18.0.9 macOS arm64 archive passed clean hosted install, architecture, ad-hoc signature, remote-boundary, doctor, and status checks."
+        "Managed remote install, benchmark, rollback, and support-bundle are not implemented; the existing manual SSH topology remains separate.",
+        "Clean managed macOS doctor/status, authenticated requests, Vision, stateful resume, and fail-closed behavior passed on the exact composed client."
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/02be02196f2d7e64828af7ab061e920231d95af3/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh-18.0.9.json",
-        "sha256": "0d187db99c646c6e23827cf55efdf5cf07dfd7e0f27f4f366c334c6d91cdf03c"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+        "sha256": "5ab80fa460e072b3e73e420b574c53ede8f86aa737f22bac742749a792dda590"
       },
       "client_distribution": {
         "os": "macOS",
         "architecture": "arm64",
-        "source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": true,
-        "archive_sha256": "973ec3a03bd03ba3af662336345d6e2bede841adb664ce7fed54ed12dc2595cf",
-        "archive_bytes": 66797403,
-        "binary_sha256": "af9318f913d701edb0f06274fdde07a65d454139c18a2b958d911b5851d3bd32",
-        "release_tag": "omp-18.0.9-cross-platform-beta-1",
-        "release_id": 378414741,
-        "asset_id": 533642339,
-        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/omp-18.0.9-macos-arm64.tar.gz",
-        "qualification_receipt_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/receipt.json",
-        "qualification_receipt_sha256": "ccb0a7ca56e1284d6e78139b30dbcdb8653975d8d14d0add5cc541a8c11fb89c"
+        "archive_sha256": "f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9",
+        "archive_bytes": 59799181,
+        "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095340,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-macos-arm64.tar.gz"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -106,7 +104,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -127,28 +125,26 @@
       "local_port": 18089,
       "container_port": 8080,
       "limitations": [
-        "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer remains a separate hardware-specific qualification.",
-        "The OMP 18.0.9 Windows x64 archive passed clean hosted extraction, installation, launcher, version, doctor, status, and cleanup checks."
+        "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported.",
+        "Clean native Windows install, Docker/GPU detection, authenticated requests, Vision, stateful resume, and fail-closed behavior passed."
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/02be02196f2d7e64828af7ab061e920231d95af3/releases/v0.1.0-beta.1/acceptance/windows-x64-18.0.9.json",
-        "sha256": "d0da5133ce2c3101fcd7c847b67038026ec4fbade1e199a1aaee5c1f4812fd04"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+        "sha256": "9f6d05b544404bf48e4730ac5b77247e23d494ea681f56d5d8368b70b72a477a"
       },
       "client_distribution": {
         "os": "Windows 11",
         "architecture": "x64",
-        "source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": true,
-        "archive_sha256": "6e00573933b209eac48a65ee3c185132bc816955f40f473490f6819b512cfb23",
-        "archive_bytes": 82880170,
-        "binary_sha256": "787687e3fc27d3b9d53d7daa07a03c76f279f6c75835c42959522be11192a571",
-        "release_tag": "omp-18.0.9-cross-platform-beta-1",
-        "release_id": 378414741,
-        "asset_id": 533642334,
-        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/omp-18.0.9-windows-x64.tar.gz",
-        "qualification_receipt_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/windows-x64-qualification.json",
-        "qualification_receipt_sha256": "0baf09bc6ce4491fb01cc823da51105e1594aa02cb8c9bfc7f6bbc9df4c86fb5"
+        "archive_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+        "archive_bytes": 78452185,
+        "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095343,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
@@ -194,7 +190,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -215,28 +211,28 @@
       "local_port": 18089,
       "container_port": 8080,
       "limitations": [
-        "The qualified Linux client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
-        "Bare-metal Linux GPU lifecycle is not claimed by this client qualification."
+        "Native Linux OMP requires a local Docker Linux engine and NVIDIA Container Toolkit.",
+        "Native Ubuntu 24.04 build/install/diagnostics passed in hosted CI; live RTX 5090 inference passed under WSL2. Bare-metal native Linux GPU lifecycle remains unqualified."
       ],
-      "blockers": [],
+      "blockers": [
+        "Bare-metal native Linux RTX 5090 lifecycle remains unqualified; the profile stays preview."
+      ],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/02be02196f2d7e64828af7ab061e920231d95af3/releases/v0.1.0-beta.1/acceptance/linux-x64-18.0.9.json",
-        "sha256": "bca9b460ea70be16ad14a451524ac878d9ca33b16c57c81643635c7255daf416"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/linux-x64.json",
+        "sha256": "5f36fb8d508bc4e024228f6d563781b6a85552a0e442036ec8aa85330ca49a62"
       },
       "client_distribution": {
         "os": "Linux",
         "architecture": "x64",
-        "source_commit": "32c6f614d4f0d38896d631b134e1435f16222fe1",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
         "published": true,
-        "archive_sha256": "cd9756c309955df0c244347b13544d5a6d0a9a102823ff486a957406266d3c6e",
-        "archive_bytes": 86483803,
-        "binary_sha256": "1893d07fada1a11980501173a62925ba57a88a0bef6f8132298581611f665673",
-        "release_tag": "omp-18.0.9-cross-platform-beta-1",
-        "release_id": 378414741,
-        "asset_id": 533642333,
-        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/omp-18.0.9-linux-x64.tar.gz",
-        "qualification_receipt_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-1/qualification.json",
-        "qualification_receipt_sha256": "0e55dd6c9c5a193ebe02aa1ab5f18b8cd090ebbd4e19400dae597a5313069918"
+        "archive_sha256": "712bb293de3a86e9b72512b0d75d36a450691f6ced9ad8f3b617171af4d2e555",
+        "archive_bytes": 112329967,
+        "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095341,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-linux-x64.tar.gz"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.1.0",
