@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "kind": "omp-ninfer-platform-acceptance-receipt",
-  "receipt_id": "macos-arm64-842366735b-b5166af33e",
+  "receipt_id": "macos-arm64-842366735b-f619ce2266",
   "product_release": "v0.1.0-beta.1",
   "profile": "darwin-remote-ssh",
   "status": "passed",
@@ -17,8 +17,11 @@
     "version": "18.0.7",
     "os": "macOS 26",
     "architecture": "arm64",
-    "binary_sha256": "b5166af33eb27f1d3377f878de402066ba70ffadc4a77b8b997712c8700760d8",
-    "binary_bytes": 129894368,
+    "archive_sha256": "f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9",
+    "archive_bytes": 59799181,
+    "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10",
+    "binary_bytes": 121899792,
+    "clean_install": true,
     "clean_home": true
   },
   "managed_remote": {
@@ -28,12 +31,28 @@
     "remote_gpu": "NVIDIA GeForce RTX 5090",
     "docker_available": true,
     "nvidia_container_runtime_available": true,
-    "doctor_receipt_id": "828f3a1e-0ab8-4646-8dcb-0f53ed83a10e",
+    "doctor_receipt_id": "8f1c1801-0967-4ff3-bbff-f4fb38fa477d",
     "doctor_result": "completed_with_expected_preview_blockers",
-    "status_receipt_id": "79055433-fafd-4312-a228-0f5507abd320",
+    "status_receipt_id": "36f39a05-1497-4054-8b97-c11c79377fe9",
     "status_result": "ok",
-    "compatibility_authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-5",
-    "compatibility_sha256": "925197b5a0bf4439e4afb547f1c8e6abfe757ea4b19088d78b16bb9a599642b9"
+    "compatibility_authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-6",
+    "compatibility_sha256": "3b91e35d9ee1c75a7ec8d557acd02832723e5d84796068ae87d02c36c29f147e"
+  },
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33129814279",
+    "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "source_commit": "0650dd128c6e08dbde0e1f0ce1c29f2bfccb6f8a",
+    "source_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "archive_sha256": "652af61ed907a8d5b0c42d26c1226891d88ba63e93d6a4b56bcd91679f9b4c2e",
+    "binary_sha256": "b289b038d764363f5f6ff8a4b05a08e3ebeb47e840fd2b636c8dceeafb2bba48",
+    "clean_install": true,
+    "version": "omp/18.0.7",
+    "doctor": "blocked-as-expected",
+    "status": "ok-uninstalled",
+    "managed_remote_without_target": "failed-closed",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "secret_free": true
   },
   "runtime": {
     "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
@@ -42,7 +61,7 @@
     "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
   },
   "checks": {
-    "exact_composed_binary": "passed",
+    "exact_composed_archive_clean_install": "passed",
     "managed_remote_doctor_transport": "passed",
     "managed_remote_status": "passed",
     "authenticated_text_and_file_tool": "passed",

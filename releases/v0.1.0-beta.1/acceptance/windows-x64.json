@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "kind": "omp-ninfer-platform-acceptance-receipt",
-  "receipt_id": "windows-x64-842366735b-647f732dfc",
+  "receipt_id": "windows-x64-842366735b-4d94ffd776",
   "product_release": "v0.1.0-beta.1",
   "profile": "windows-docker-local",
   "status": "passed",
@@ -16,7 +16,7 @@
     "version": "18.0.7",
     "os": "Windows 11",
     "architecture": "x64",
-    "archive_sha256": "647f732dfc1a292b64e6045d6b8deed6bd946eedd7bce093c81c1ad2c64873af",
+    "archive_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
     "archive_bytes": 78452185,
     "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
     "clean_install": true,
@@ -31,6 +31,23 @@
     "secure_auth_available": true,
     "minimum_observed_free_disk_gib": 880.3
   },
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33129814227",
+    "qualification_receipt_sha256": "3eee67b64aa48f2b58a7669f4499fbb16f643e2a215349ec3e3a381d69763aeb",
+    "workflow_receipt_sha256": "0bf8df0b81be92103b593396f71f49e823a2642a11ebeee5c82cfdc3f7b4a137",
+    "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "source_commit": "0650dd128c6e08dbde0e1f0ce1c29f2bfccb6f8a",
+    "source_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "archive_sha256": "f02c9c4418d4327885316795849638948c510130a81efc59ac3736a913a0bc83",
+    "binary_sha256": "5772e975209bb20ac98a6358f6edb8648a6b943b41d9dc5bf64ff0d2989e1882",
+    "clean_install": true,
+    "version": "omp/18.0.7",
+    "doctor": "blocked-as-expected",
+    "status": "ok-uninstalled",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "published": false
+  },
   "runtime": {
     "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
     "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
@@ -39,6 +56,7 @@
   },
   "checks": {
     "archive_checksum": "passed",
+    "final_tree_metadata_repack": "passed; client-release.json only; accepted binary and installer unchanged",
     "clean_install": "passed",
     "version": "passed",
     "docker_and_gpu_detection": "passed",
