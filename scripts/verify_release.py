@@ -22,7 +22,8 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 OCI_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 OMP_RELEASE_ID_RE = re.compile(
-    r"^(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-cross-platform-preview-(?P<preview>[1-9][0-9]*)$"
+    r"^(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-cross-platform-"
+    r"(?P<channel>preview|beta)-(?P<sequence>[1-9][0-9]*)$"
 )
 PRODUCT_RELEASE_RE = re.compile(r"^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$")
 OMP_ASSET_DOWNLOAD_RE = re.compile(
@@ -405,7 +406,8 @@ def validate(
         else None
     )
     require(omp_release_match is not None,
-            "components.omp.release_id must be a cross-platform preview identity", errors)
+            "components.omp.release_id must be a cross-platform preview or beta identity",
+            errors)
     if omp_release_match is not None:
         omp_version = omp_release_match.group("version")
         require(omp.get("upstream_tag") == f"v{omp_version}",
