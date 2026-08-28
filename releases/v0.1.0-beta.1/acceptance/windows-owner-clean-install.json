@@ -1,0 +1,71 @@
+{
+  "artifact_type": "omp_ninfer_external_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.1.0-beta.1",
+  "status": "passed",
+  "observed_at": "2026-08-28",
+  "operator_class": "owner-operated tester-equivalent",
+  "topology": "native Windows OMP with Docker Desktop WSL2 RTX 5090 NInfer",
+  "public_inputs_only": true,
+  "product_source": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "candidate_main_commit": "b9e9d7675ae320a81922bf88143541dac3f42eca",
+    "compatibility_authority": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
+    "compatibility_sha256": "225619d324c9e722002a4b7b48f3059f444460c5d981b16525e859414a8ea7bc"
+  },
+  "omp_client": {
+    "release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "release_id": 378212363,
+    "asset_id": 533095343,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz",
+    "asset_bytes": 78452185,
+    "asset_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+    "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+    "version_output": "omp/18.0.7",
+    "clean_install": true,
+    "previous_retained": false
+  },
+  "runtime": {
+    "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
+  },
+  "checks": {
+    "public_archive_download": "passed",
+    "archive_checksum": "passed",
+    "clean_native_install": "passed",
+    "installed_binary_checksum": "passed",
+    "version": "passed",
+    "compatibility_authority_checksum": "passed",
+    "windows_docker_gpu_doctor": "passed-with-preview-blockers",
+    "appliance_status": "passed",
+    "authenticated_text_and_file_tool": "passed",
+    "vision": "passed",
+    "stateful_exit_and_resume": "passed",
+    "runtime_outage_fail_closed": "passed",
+    "cloud_fallback_absent": "passed",
+    "runtime_incumbent_restore": "passed"
+  },
+  "doctor": {
+    "receipt_id": "a2639218-2f89-4283-a230-7f7da0ab54cc",
+    "status": "blocked",
+    "support_status": "preview"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_tag_created": false,
+    "runtime_incumbent_restored": true
+  },
+  "disposition": {
+    "external_installation_qualified": true,
+    "product_ready_gate_satisfied": true,
+    "future_tester_defects": "Fix in the next release unless a release-integrity or safety issue requires withdrawal."
+  },
+  "limitations": [
+    "This acceptance was owner-operated on a clean isolated Windows client root rather than performed by the invited third party.",
+    "The invited tester remains useful post-release validation but is no longer a publication gate.",
+    "Bare-metal native Linux RTX 5090 lifecycle remains preview-only."
+  ]
+}
