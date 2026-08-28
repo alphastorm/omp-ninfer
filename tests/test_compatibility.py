@@ -64,6 +64,14 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
+            distribution = profile["client_distribution"]
+            self.assertTrue(distribution["published"])
+            self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])
+            self.assertEqual(subject["client"]["binary_sha256"], distribution["binary_sha256"])
+            self.assertEqual(subject["client"]["component_release_tag"], distribution["release_tag"])
+            self.assertEqual(subject["client"]["component_release_id"], distribution["release_id"])
+            self.assertEqual(subject["client"]["asset_id"], distribution["asset_id"])
+            self.assertEqual(subject["client"]["asset_url"], distribution["asset_url"])
             self.assertTrue(receipt["url"].endswith(f"/releases/v0.1.0-beta.1/acceptance/{filename}"))
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), receipt["sha256"])
 
