@@ -143,6 +143,25 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile container network mode must be host", errors)
 
+    def test_additional_profiles_share_the_release_contract(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(profile_path)
+        profile["transport"]["runtime_bind_host"] = "0.0.0.0"
+        profile["model"]["artifact_sha256"] = "0" * 64
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "profiles/qwen38-rtx5090-manual-tunnel.json: runtime endpoint must bind loopback",
+            errors,
+        )
+        self.assertIn(
+            "profiles/qwen38-rtx5090-manual-tunnel.json: model hash must match the manifest",
+            errors,
+        )
+
     def test_model_url_must_bind_its_recorded_revision(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)

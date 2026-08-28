@@ -107,6 +107,76 @@ def argument_value(arguments: list[Any], flag: str) -> Any:
     return arguments[index + 1] if index + 1 < len(arguments) else None
 
 
+REQUIRED_SERVER_VALUES = {
+    "--host": "127.0.0.1",
+    "--port": "18089",
+    "--model-id": "q38-ninfer",
+    "--deployment-profile": "qwen38-5090-v0.1.0",
+    "--max-context": "131072",
+    "--kv-capacity": "auto",
+    "--prefill-chunk": "1024",
+    "--kv-dtype": "bf16",
+    "--max-concurrency": "1",
+    "--spec": "mtp",
+    "--draft-tokens": "3",
+}
+REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
+
+
+def validate_profile_contract(
+    profile: dict[str, Any],
+    label: str,
+    release: Any,
+    model: dict[str, Any],
+    public_model_id: Any,
+    errors: list[str],
+) -> None:
+    require(profile.get("schema_version") == 1, f"{label}: schema_version must be 1", errors)
+    require(profile.get("release") == release, f"{label}: release must match the manifest", errors)
+
+    transport = profile.get("transport", {})
+    require(transport.get("client_bind_host") == "127.0.0.1",
+            f"{label}: client endpoint must bind loopback", errors)
+    require(transport.get("runtime_bind_host") == "127.0.0.1",
+            f"{label}: runtime endpoint must bind loopback", errors)
+    require(transport.get("client_port") == transport.get("runtime_port") == 18089,
+            f"{label}: loopback ports must both be 18089", errors)
+    require(transport.get("silent_cloud_fallback") is False,
+            f"{label}: silent cloud fallback must be disabled", errors)
+
+    server = profile.get("server", {})
+    arguments = server.get("arguments", [])
+    require(isinstance(arguments, list) and all(isinstance(item, str) for item in arguments),
+            f"{label}: server.arguments must be a string array", errors)
+    require(server.get("restart_policy") == "no", f"{label}: restart_policy must be no", errors)
+    require(server.get("container_network_mode") == "host",
+            f"{label}: container network mode must be host", errors)
+    for flag, expected in REQUIRED_SERVER_VALUES.items():
+        require(argument_value(arguments, flag) == expected,
+                f"{label}: {flag} must equal {expected}", errors)
+    for flag in REQUIRED_SERVER_FLAGS:
+        require(flag in arguments, f"{label}: must include {flag}", errors)
+    require("--api-key" not in arguments, f"{label}: must not embed an API key", errors)
+
+    omp_provider = profile.get("omp_provider", {})
+    require(omp_provider.get("api") == "openai-responses",
+            f"{label}: OMP provider API must be openai-responses", errors)
+    require(omp_provider.get("base_url") == "http://127.0.0.1:18089/v1",
+            f"{label}: OMP provider must use the local loopback endpoint", errors)
+    require(omp_provider.get("request_model_id") == public_model_id,
+            f"{label}: OMP provider request model must match the manifest", errors)
+    require(omp_provider.get("ninfer_stateful_responses") is True,
+            f"{label}: OMP provider must enable NInfer stateful Responses", errors)
+
+    profile_model = profile.get("model", {})
+    require(profile_model.get("public_id") == public_model_id,
+            f"{label}: model public_id must match the manifest", errors)
+    require(profile_model.get("artifact_sha256") == model.get("artifact_sha256"),
+            f"{label}: model hash must match the manifest", errors)
+    require(profile_model.get("artifact_bytes") == model.get("artifact_bytes"),
+            f"{label}: model bytes must match the manifest", errors)
+
+
 def validate_markdown_links(root: Path, errors: list[str]) -> None:
     resolved_root = root.resolve()
     for document in sorted(root.rglob("*.md")):
@@ -205,23 +275,10 @@ def validate(
     require(server.get("restart_policy") == "no", "profile restart_policy must be no", errors)
     require(server.get("container_network_mode") == "host",
             "profile container network mode must be host", errors)
-    required_values = {
-        "--host": "127.0.0.1",
-        "--port": "18089",
-        "--model-id": "q38-ninfer",
-        "--deployment-profile": "qwen38-5090-v0.1.0",
-        "--max-context": "131072",
-        "--kv-capacity": "auto",
-        "--prefill-chunk": "1024",
-        "--kv-dtype": "bf16",
-        "--max-concurrency": "1",
-        "--spec": "mtp",
-        "--draft-tokens": "3",
-    }
-    for flag, expected in required_values.items():
+    for flag, expected in REQUIRED_SERVER_VALUES.items():
         require(argument_value(arguments, flag) == expected,
                 f"profile {flag} must equal {expected}", errors)
-    for flag in ("--lm-head-draft", "--vision", "--preserve-thinking"):
+    for flag in REQUIRED_SERVER_FLAGS:
         require(flag in arguments, f"profile must include {flag}", errors)
     require("--api-key" not in arguments, "profile must not embed an API key", errors)
 
@@ -241,6 +298,19 @@ def validate(
     model = components.get("model", {})
     runtime = manifest.get("runtime_identity", {})
     manifest_qualification = manifest.get("qualification", {})
+
+    profiles_dir = root / "profiles"
+    if profiles_dir.is_dir():
+        for extra_path in sorted(profiles_dir.glob("*.json")):
+            if extra_path.resolve() == profile_path:
+                continue
+            try:
+                extra_profile = load_json(extra_path)
+            except ContractError as error:
+                errors.append(str(error))
+                continue
+            validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
+                                      model, runtime.get("public_model_id"), errors)
 
     compatibility_path = root / "compatibility.json"
     compatibility_matrix_path = root / "docs" / "COMPATIBILITY.md"
