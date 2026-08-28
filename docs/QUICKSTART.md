@@ -1,23 +1,57 @@
 # Early-access quickstart
 
-This is the supported `v0.1.0-beta.1` path: OMP on Apple-silicon macOS, NInfer on one
-user-controlled Linux or WSL2 RTX 5090 host, and an authenticated SSH local forward between them.
-It is deliberately manual. Do not use `omp appliance install` for this beta.
+The ready `v0.1.0-beta.1` route is native Windows OMP connected over authenticated local loopback
+to the exact NInfer container in Docker Desktop WSL2 on one user-controlled RTX 5090. Managed
+macOS SSH and native Linux clients are published preview profiles, not additional ready claims.
 
-The checked-in manifest is currently an installable `candidate`. Invited testers must still stop
-unless the product release tag exists and the ready contract succeeds from a clean clone of that
-tag. Maintainers may use the exact candidate commit for the bounded external-install acceptance:
+Start only from the product tag and require its ready contract:
 
 ```sh
 python3 scripts/verify_release.py --require-ready
 ```
 
-That gate prevents these instructions from resolving an unpinned image or unfinished OMP package.
-The only pre-tag exception is the bounded maintainer acceptance gate: it uses an exact public
-`candidate` commit after every installable artifact is pinned, and must first pass
-`python3 scripts/verify_release.py --require-installable`. A candidate is not an invited-tester
-release and cannot be tagged until this quickstart succeeds and the observed result is bound into a
-`ready` manifest.
+That gate binds the Windows client archive and binary, compatibility authority, NInfer image/SBOM,
+model, configuration, qualification summary, and clean-install acceptance receipt.
+
+## Ready route: native Windows and Docker Desktop WSL2
+
+### Prerequisites
+
+- Windows 11 x64 and a single NVIDIA GeForce RTX 5090;
+- Docker Desktop using Linux containers, WSL2 Ubuntu 24.04, and the NVIDIA container runtime;
+- Git, PowerShell, and at least 40 GiB free for the model, image, client, and logs; and
+- one trusted owner for Windows and the WSL2 runtime.
+
+### Clone and verify the exact product release
+
+Clone the tag in Windows and in the WSL2 namespace that owns Docker:
+
+```powershell
+git clone --branch v0.1.0-beta.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+Set-Location omp-ninfer
+python3 scripts/verify_release.py --require-ready
+```
+
+### Install the exact native Windows client
+
+```powershell
+$Url = 'https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz'
+$Expected = '4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7'
+Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-18.0.7-windows-x64.tar.gz
+if ((Get-FileHash omp-18.0.7-windows-x64.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP archive checksum mismatch' }
+tar -xzf omp-18.0.7-windows-x64.tar.gz
+& .\omp-18.0.7-windows-x64\install.ps1
+& "$env:LOCALAPPDATA\OMP\omp.cmd" --version
+```
+
+The version must be `omp/18.0.7`. The installer retains the previous client pointer when one exists.
+
+Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
+the macOS tunnel/key-copy sections: Docker Desktop exposes the WSL2 loopback service to native
+Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
+section 7 and run every acceptance check in section 8.
+
+## Managed macOS SSH preview route
 
 ## Prerequisites
 
@@ -51,37 +85,24 @@ python3 scripts/verify_release.py --require-ready
 
 Do not invite testers from moving `main`, an untagged archive, or a manifest whose status is
 `draft` or `candidate`.
-The bounded pre-tag acceptance instead checks out its recorded candidate commit in detached mode;
-it must never use moving `main` as the tested identity.
 
 ## 2. Install the OMP beta on the Mac
 
 ```sh
 (
 set -euo pipefail
-brew tap alphastorm/omp
-brew update
-CASK_REVISION=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.1.0-beta.1/manifest.json"))["components"]["omp"]["homebrew_cask_revision"])')
-TAP_ROOT=$(brew --repository alphastorm/omp)
-git -C "$TAP_ROOT" fetch --quiet origin "$CASK_REVISION"
-PINNED_CASK_SHA=$(git -C "$TAP_ROOT" show "$CASK_REVISION:Casks/omp-beta.rb" | shasum -a 256 | cut -d ' ' -f 1)
-CURRENT_CASK_SHA=$(shasum -a 256 "$TAP_ROOT/Casks/omp-beta.rb" | cut -d ' ' -f 1)
-test "$CURRENT_CASK_SHA" = "$PINNED_CASK_SHA"
-
-if brew list --cask omp >/dev/null 2>&1; then
-  brew uninstall --cask omp
-fi
-HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask omp-beta
-omp --version
+URL='https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-macos-arm64.tar.gz'
+EXPECTED='f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9'
+curl --fail --location --output omp-18.0.7-macos-arm64.tar.gz "$URL"
+test "$(shasum -a 256 omp-18.0.7-macos-arm64.tar.gz | cut -d ' ' -f 1)" = "$EXPECTED"
+tar -xzf omp-18.0.7-macos-arm64.tar.gz
+./omp-18.0.7-macos-arm64/install.sh
+"${XDG_BIN_HOME:-$HOME/.local/bin}/omp" --version
 )
 ```
 
-The stable and beta casks deliberately conflict because both own the same immutable release root and
-`~/.local/bin/omp` launcher. The content comparison prevents a moving tap from substituting a
-different beta cask after the manifest was cut; `HOMEBREW_NO_AUTO_UPDATE` keeps it fixed through
-installation. Do not manually overwrite the stable binary. To return to stable, uninstall
-`omp-beta` and reinstall `omp`.
+The version must be `omp/18.0.7`. This native preview package uses the same current/previous client
+pointer contract as Windows and Linux; it does not change the stable Homebrew cask.
 
 ## 3. Prepare the model and key on the inference host
 

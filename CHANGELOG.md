@@ -7,13 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0-beta.1] - 2026-08-28
+
 ### Added
 
 - Canonical OMP NInfer product repository and naming.
-- Draft `v0.1.0-beta.1` manifest binding OMP, NInfer, Qwen3.8, the RTX 5090 profile,
-  qualification evidence, Homebrew, and publication blockers.
-- Invited-tester quickstart for OMP on Apple-silicon macOS connected through an authenticated SSH
-  local forward to NInfer on a Linux or WSL2 RTX 5090 host.
+- Ready `v0.1.0-beta.1` manifest binding the native Windows OMP component, NInfer, Qwen3.8,
+  the RTX 5090 profile, qualification summary, compatibility authority, and acceptance receipt.
+- Ready native Windows quickstart plus managed macOS SSH and native Linux preview routes.
 - Digest- and hash-verifying NInfer launcher, owned-container stop path, OMP provider fragment, and
   fail-closed OMP overlay.
 - Runtime qualification summary covering exact long context, serving protocols, Vision, stateful
@@ -33,16 +34,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reviewed draft OMP transport for read-only remote `doctor`/`status`, with mutating operations and
   later lifecycle ownership still fail-closed.
 - Published and bound the exact OMP, Homebrew, NInfer OCI, binary-package, SPDX, and checksum
-  identities; advanced the product manifest to an installable candidate while external acceptance
-  and ready publication remain open.
+  identities; advanced the product manifest through installable candidate to externally accepted
+  ready release.
+- Owner-operated tester-equivalent Windows clean install from public URLs, including tools, Vision,
+  stateful exit/resume, fail-closed outage behavior, and exact runtime restoration.
 
 ### Security
 
 - Restricted both NInfer and tunnel listeners to loopback in the supported profile.
 - Required a user-only NInfer bearer-key file and disabled OMP model fallback for beta acceptance.
-- Required immutable model, binary, image, SBOM, OMP artifact, qualification-summary, and Homebrew
+- Required immutable model, binary, image, SBOM, OMP artifact, qualification-summary, and component
   identities before a release can move from `draft` to `ready`.
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/commits/main
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.1.0-beta.1...HEAD
+[0.1.0-beta.1]: https://github.com/alphastorm/omp-ninfer/releases/tag/v0.1.0-beta.1

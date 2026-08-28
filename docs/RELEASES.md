@@ -7,7 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Early access | Invited testers, narrow exact profile, known manual steps and non-claims | `v0.1.0-beta.1` draft |
+| Early access | Invited testers, narrow exact profile, known manual steps and non-claims | `v0.1.0-beta.1` ready prerelease |
 | Stable | Broadly advertised supported release | none |
 | Development | Branch content with no install/support claim | `main` after publication |
 
@@ -18,7 +18,7 @@ unchanged; early access uses `omp-beta`.
 
 - Product prerelease: `alphastorm/omp-ninfer@v0.1.0-beta.1`
 - RTX 5090 runtime component: `alphastorm/ninfer@v0.1.0-qwen38-5090`
-- macOS package channel: `alphastorm/omp/omp-beta`
+- native client component: `alphastorm/homebrew-omp@omp-18.0.7-cross-platform-preview-5`
 - RTX 4090 runtime: no v0.1 product binding
 
 A component tag does not make the product release ready. The product tag must carry the exact ready
@@ -65,7 +65,7 @@ Authorization for those external effects remains separate and bounded.
 
 Before the final external-install smoke, freeze these bytes together:
 
-1. OMP macOS archive;
+1. OMP Windows x64 archive and binary;
 2. NInfer OCI manifest and every referenced platform blob;
 3. NInfer SBOM;
 4. Qwen artifact revision;
@@ -80,15 +80,15 @@ mutable tag or rebinding an old qualification to new bytes is prohibited.
 
 ## External-install acceptance
 
-The final gate starts from a tester-equivalent Mac and RTX 5090 host with no developer-local paths or
-unpublished assets. It follows [`QUICKSTART.md`](QUICKSTART.md) from the exact `candidate` commit
-whose installable contract passes; the final product tag is created only after the observed result
-is bound into the `ready` manifest and qualification summary. The gate proves:
+The final gate used a clean isolated native Windows client root and the exact Docker Desktop WSL2
+RTX 5090 runtime identity. It downloaded the public client and compatibility authority, then bound
+the result into the `ready` manifest and qualification summary before the product tag. The gate
+proved:
 
-- Homebrew beta installation and exact OMP version;
-- model download byte count and hash;
-- digest-pinned NInfer pull, binary hash, and authenticated identity;
-- remote-loopback SSH tunnel;
+- published Windows archive and installed binary checksums plus exact OMP version;
+- exact served model artifact hash;
+- digest-pinned NInfer image, binary hash, and authenticated identity;
+- Windows local-loopback connectivity to Docker Desktop WSL2;
 - explicit fail-closed OMP provider resolution;
 - text/tool, image, stateful follow-up, and OMP exit/resume;
 - disconnected-tunnel failure with no cloud answer; and

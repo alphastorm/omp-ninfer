@@ -36,36 +36,25 @@ class ReleaseContractTest(unittest.TestCase):
     def save(path: Path, value: dict) -> None:
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
-    @staticmethod
-    def bind_installable_components(manifest: dict) -> None:
-        omp = manifest["components"]["omp"]
-        artifact_name = omp["artifact_name"]
-        manifest["components"]["omp"].update(
-            {
-                "artifact_url": (
-                    "https://api.github.com/repos/alphastorm/homebrew-omp/"
-                    f"releases/assets/123456789#{artifact_name}"
-                ),
-                "artifact_asset_id": 123456789,
-                "artifact_published": True,
-                "homebrew_cask_revision": "c" * 40,
-            }
-        )
-        oci_manifest_digest = manifest["components"]["ninfer"]["oci_manifest_digest"]
-        manifest["components"]["ninfer"].update(
-            {
-                "oci_reference": f"ghcr.io/alphastorm/ninfer@{oci_manifest_digest}",
-                "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.1.0-qwen38-5090/ninfer.spdx.json",
-            }
-        )
+    def make_candidate(self, root: Path, manifest: dict) -> None:
+        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["external_installation_qualified"] = False
+        self.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        manifest["status"] = "candidate"
+        manifest["qualification"]["external_installation_passed"] = False
+        manifest["publication"]["blockers"] = ["Run the external-install acceptance path."]
 
-    def test_checked_in_candidate_is_installable_but_not_ready(self) -> None:
+    def test_checked_in_ready_release_is_installable(self) -> None:
         manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
-        self.assertEqual(manifest["status"], "candidate")
+        self.assertEqual(manifest["status"], "ready")
         self.assertEqual(errors, [])
 
         _, ready_errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
-        self.assertIn("release manifest is not ready", ready_errors)
+        self.assertEqual(ready_errors, [])
 
         _, installable_errors = VERIFY_RELEASE.validate(
             ROOT,
@@ -81,6 +70,7 @@ class ReleaseContractTest(unittest.TestCase):
         manifest = self.load(manifest_path)
         manifest["status"] = "draft"
         manifest["components"]["omp"]["artifact_published"] = False
+        manifest["publication"]["blockers"] = ["Draft release is not installable."]
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
@@ -95,8 +85,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
-        manifest["status"] = "candidate"
-        self.bind_installable_components(manifest)
+        self.make_candidate(root, manifest)
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(
@@ -107,40 +96,24 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_ready_contract_accepts_complete_immutable_identities(self) -> None:
-        temporary, root = self.candidate_copy()
-        self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
-        manifest = self.load(manifest_path)
-        qualification = self.load(qualification_path)
-
-        qualification["external_installation_qualified"] = True
-        self.save(qualification_path, qualification)
-        qualification_sha = hashlib.sha256(qualification_path.read_bytes()).hexdigest()
-
-        manifest["status"] = "ready"
-        self.bind_installable_components(manifest)
-        manifest["qualification"].update(
-            {
-                "summary_sha256": qualification_sha,
-                "public_url": "https://github.com/alphastorm/omp-ninfer/releases/download/v0.1.0-beta.1/qualification.json",
-                "external_installation_passed": True,
-            }
-        )
-        manifest["publication"]["blockers"] = []
-        self.save(manifest_path, manifest)
-
-        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
         self.assertEqual(errors, [])
 
     def test_ready_contract_rejects_incomplete_publication(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
         manifest = self.load(manifest_path)
+        qualification = self.load(qualification_path)
         manifest["status"] = "ready"
         manifest["components"]["omp"]["artifact_url"] = None
+        manifest["qualification"]["summary_sha256"] = None
+        manifest["qualification"]["public_url"] = None
+        manifest["qualification"]["external_installation_passed"] = False
         manifest["publication"]["blockers"] = []
+        qualification["external_installation_qualified"] = False
+        self.save(qualification_path, qualification)
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
@@ -151,7 +124,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_cross_component_model_hash_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(profile_path)
         profile["model"]["artifact_sha256"] = "0" * 64
         self.save(profile_path, profile)
@@ -162,7 +135,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_profile_rejects_container_private_loopback_networking(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(profile_path)
         profile["server"]["container_network_mode"] = "bridge"
         self.save(profile_path, profile)
@@ -183,7 +156,7 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("model artifact URL must bind repository, revision, and name", errors)
 
-    def test_omp_distribution_version_must_derive_from_release_id(self) -> None:
+    def test_omp_distribution_version_must_equal_release_id(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
@@ -192,9 +165,9 @@ class ReleaseContractTest(unittest.TestCase):
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
-        self.assertIn("OMP distribution version must derive from release_id", errors)
+        self.assertIn("OMP distribution version must equal release_id", errors)
 
-    def test_omp_artifact_name_must_bind_distribution_version(self) -> None:
+    def test_omp_artifact_name_must_bind_version_and_platform(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
@@ -204,26 +177,25 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn(
-            "OMP artifact name must bind distribution_version and darwin-arm64",
+            "OMP artifact name must bind release version and primary platform",
             errors,
         )
 
-    def test_candidate_omp_asset_url_must_bind_private_asset_name(self) -> None:
+    def test_candidate_omp_asset_url_must_bind_public_component(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
-        manifest["status"] = "candidate"
-        self.bind_installable_components(manifest)
+        self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_url"] = (
-            "https://api.github.com/repos/alphastorm/homebrew-omp/"
-            "releases/assets/123456789#wrong.tar.gz"
+            "https://github.com/alphastorm/homebrew-omp/releases/download/"
+            "omp-18.0.7-cross-platform-preview-5/wrong.tar.gz"
         )
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn(
-            "OMP artifact URL must bind the private Homebrew release asset and artifact name",
+            "OMP artifact URL must bind the public component tag and artifact name",
             errors,
         )
 
@@ -232,8 +204,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
-        manifest["status"] = "candidate"
-        self.bind_installable_components(manifest)
+        self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_published"] = False
         self.save(manifest_path, manifest)
 
@@ -250,8 +221,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
-        manifest["status"] = "candidate"
-        self.bind_installable_components(manifest)
+        self.make_candidate(root, manifest)
         manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
         self.save(manifest_path, manifest)
 

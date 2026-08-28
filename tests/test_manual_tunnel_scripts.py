@@ -89,31 +89,6 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             model = root / "model.ninfer"
             with model.open("wb") as model_file:
                 model_file.truncate(manifest["components"]["model"]["artifact_bytes"])
-            manifest["status"] = "candidate"
-            omp_artifact_name = manifest["components"]["omp"]["artifact_name"]
-            manifest["components"]["omp"].update(
-                {
-                    "artifact_url": (
-                        "https://api.github.com/repos/alphastorm/homebrew-omp/"
-                        f"releases/assets/123456789#{omp_artifact_name}"
-                    ),
-                    "artifact_asset_id": 123456789,
-                    "artifact_published": True,
-                    "homebrew_cask_revision": "c" * 40,
-                }
-            )
-            oci_manifest_digest = manifest["components"]["ninfer"][
-                "oci_manifest_digest"
-            ]
-            manifest["components"]["ninfer"].update(
-                {
-                    "oci_reference": f"ghcr.io/alphastorm/ninfer@{oci_manifest_digest}",
-                    "sbom_url": "https://example.test/ninfer.spdx.json",
-                }
-            )
-            manifest_path.write_text(
-                json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
-            )
 
             key = root / "api-key"
             key.write_text("test-key\n", encoding="utf-8")
