@@ -114,18 +114,35 @@ class RunpodCiTest(unittest.TestCase):
             upstream_base=upstream,
             cuda_arch="120a",
             cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
+            build_targets=MODULE.DEFAULT_BUILD_TARGETS,
             ctest_regex=MODULE.DEFAULT_CTEST_REGEX,
         )
         self.assertIn("set -euo pipefail", script)
         self.assertIn("cuda-compiler-13-1", script)
         self.assertIn("cuda-libraries-dev-13-1", script)
+        self.assertIn("cuda-nvtx-13-1", script)
         self.assertIn("libssl-dev", script)
         self.assertIn("-DCMAKE_CUDA_ARCHITECTURES=120a", script)
         self.assertIn(f"-DNINFER_PATCH_STACK_SHA={source}", script)
         self.assertIn(f"-DNINFER_UPSTREAM_BASE_SHA={upstream}", script)
         self.assertIn("ninfer_tool_call_parser_test", script)
+        self.assertIn("ninfer_checkpoint_io_contract_test", script)
         self.assertIn("ninfer_resource_manager_test", script)
         self.assertIn("build/runpod/apps/ninfer-serve --version", script)
+
+    def test_remote_script_uses_the_requested_build_targets(self) -> None:
+        script = MODULE.remote_script(
+            source_commit="1" * 40,
+            upstream_base="2" * 40,
+            cuda_arch="86",
+            cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
+            build_targets=("ninfer-serve", "ninfer_session_checkpoint_store_test"),
+            ctest_regex="ninfer_session_checkpoint_store_test",
+        )
+        self.assertIn(
+            "--target ninfer-serve ninfer_session_checkpoint_store_test", script
+        )
+        self.assertNotIn("ninfer_checkpoint_io_contract_test", script)
 
     def test_receipt_is_atomic_and_contains_no_connection_details(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

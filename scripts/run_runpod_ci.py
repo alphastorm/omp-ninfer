@@ -19,10 +19,26 @@ from typing import Any, Callable, Sequence
 
 DEFAULT_GPU_ID = "NVIDIA GeForce RTX 5090"
 DEFAULT_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
-DEFAULT_CUDA_PACKAGES = ("cuda-compiler-13-1", "cuda-libraries-dev-13-1")
+DEFAULT_CUDA_PACKAGES = (
+    "cuda-compiler-13-1",
+    "cuda-libraries-dev-13-1",
+    "cuda-nvtx-13-1",
+)
 DEFAULT_CTEST_REGEX = (
-    "ninfer_(resource_manager|openai_schema|responses_schema|response_store|"
+    "ninfer_(checkpoint_io_contract|resource_manager|openai_schema|responses_schema|response_store|"
     "tool_call_parser|serve_options|request_log)_test"
+)
+DEFAULT_BUILD_TARGETS = (
+    "ninfer",
+    "ninfer-serve",
+    "ninfer_checkpoint_io_contract_test",
+    "ninfer_resource_manager_test",
+    "ninfer_openai_schema_test",
+    "ninfer_responses_schema_test",
+    "ninfer_response_store_test",
+    "ninfer_tool_call_parser_test",
+    "ninfer_serve_options_test",
+    "ninfer_request_log_test",
 )
 GIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 TRANSIENT_RUNPOD_ERRORS = {"network_error", "rate_limited", "server_error"}
@@ -194,6 +210,7 @@ def remote_script(
     upstream_base: str,
     cuda_arch: str,
     cuda_packages: Sequence[str],
+    build_targets: Sequence[str],
     ctest_regex: str,
 ) -> str:
     packages = (
@@ -201,11 +218,7 @@ def remote_script(
         "libavutil-dev libcurl4-openssl-dev libssl-dev libswscale-dev "
         + " ".join(shlex.quote(package) for package in cuda_packages)
     )
-    targets = (
-        "ninfer ninfer-serve ninfer_resource_manager_test ninfer_openai_schema_test "
-        "ninfer_responses_schema_test ninfer_response_store_test "
-        "ninfer_tool_call_parser_test ninfer_serve_options_test ninfer_request_log_test"
-    )
+    targets = " ".join(shlex.quote(target) for target in build_targets)
     return f"""set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -257,6 +270,7 @@ def main() -> int:
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--upstream-base-sha")
     parser.add_argument("--gpu-id", default=DEFAULT_GPU_ID)
+    parser.add_argument("--data-center-ids")
     parser.add_argument("--cloud-type", choices=("COMMUNITY", "SECURE"), default="COMMUNITY")
     parser.add_argument("--image", default=DEFAULT_IMAGE)
     parser.add_argument("--cuda-arch", default="120a")
@@ -265,6 +279,12 @@ def main() -> int:
         action="append",
         dest="cuda_packages",
         help="CUDA apt package; repeat as needed",
+    )
+    parser.add_argument(
+        "--build-target",
+        action="append",
+        dest="build_targets",
+        help="CMake target; repeat to replace the default target set",
     )
     parser.add_argument("--container-disk-gb", type=int, default=40)
     parser.add_argument("--max-hourly-price", type=float, default=0.70)
@@ -281,6 +301,9 @@ def main() -> int:
     cuda_packages = tuple(args.cuda_packages or DEFAULT_CUDA_PACKAGES)
     if not cuda_packages or any(not package for package in cuda_packages):
         parser.error("at least one non-empty --cuda-package is required")
+    build_targets = tuple(args.build_targets or DEFAULT_BUILD_TARGETS)
+    if not build_targets or any(not target for target in build_targets):
+        parser.error("at least one non-empty --build-target is required")
 
     install_signal_handlers()
     source = args.source.resolve()
@@ -297,7 +320,9 @@ def main() -> int:
         "image": args.image,
         "cuda_arch": args.cuda_arch,
         "cuda_packages": list(cuda_packages),
+        "build_targets": list(build_targets),
         "hourly_price_usd": None,
+        "data_center_ids": args.data_center_ids,
         "pod_id": None,
         "pod_deleted": False,
         "failed_step": None,
@@ -350,6 +375,8 @@ def main() -> int:
             ]
             if args.cloud_type == "COMMUNITY":
                 create_command.append("--public-ip")
+            if args.data_center_ids:
+                create_command.extend(["--data-center-ids", args.data_center_ids])
             created = run_command(create_command)
             pod_id = extract_pod_id(created)
             if pod_id is None:
@@ -416,6 +443,7 @@ def main() -> int:
                 upstream_base=upstream_base,
                 cuda_arch=args.cuda_arch,
                 cuda_packages=cuda_packages,
+                build_targets=build_targets,
                 ctest_regex=args.ctest_regex,
             )
             remote_result = run_command(["ssh", *ssh_options, f"root@{host}", remote])
