@@ -14,6 +14,32 @@ EXAMPLES = ROOT / "examples" / "manual-tunnel"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
+    def test_windows_ready_path_materializes_key_and_refuses_overwrite(self) -> None:
+        quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+        provider = quickstart.split("### Native Windows OMP", 1)[1].split(
+            "The sealed launcher owns config selection", 1
+        )[0]
+        self.assertIn("wsl.exe -d Ubuntu-24.04", provider)
+        self.assertIn("$HOME/.config/omp-ninfer/api-key", provider)
+        self.assertIn("[IO.File]::WriteAllText($KeyPath", provider)
+        self.assertIn("icacls.exe $KeyPath /inheritance:r", provider)
+        self.assertIn("Existing OMP models/config found", provider)
+        self.assertIn("Copy-Item .\\examples\\manual-tunnel\\fail-closed.yml", provider)
+        self.assertIn("$env:NINFER_BETA_API_KEY", provider)
+        self.assertNotIn("install -m", provider)
+        self.assertLess(
+            provider.index("Existing OMP models/config found"),
+            provider.index("Copy-Item .\\examples\\windows-docker-local"),
+        )
+
+        acceptance = quickstart.split("### Native Windows command forms", 1)[1].split(
+            "### macOS/Linux command forms", 1
+        )[0]
+        self.assertIn("$env:LOCALAPPDATA\\OMP\\omp.cmd", acceptance)
+        self.assertIn("stop-ninfer.sh", acceptance)
+        self.assertIn("if ($LASTEXITCODE -eq 0)", acceptance)
+        self.assertNotIn("Stop the tunnel", acceptance)
+
     @staticmethod
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):
