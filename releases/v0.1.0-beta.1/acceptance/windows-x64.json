@@ -9,7 +9,9 @@
     "repository": "https://github.com/alphastorm/omp-monorepo",
     "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
     "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
-    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e"
+    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048"
   },
   "client": {
     "release_id": "18.0.7-cross-platform-preview-5",
@@ -78,7 +80,7 @@
   },
   "limitations": [
     "The accepted Windows archive is published as a component prerelease; the OMP NInfer product release remains held.",
-    "The lifecycle source remains on a draft pull request.",
+    "The lifecycle source is merged to omp-monorepo main at ea28601524239eeff1a6a19b9a827c24fed756b3.",
     "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported."
   ]
 }

@@ -10,6 +10,8 @@
     "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
     "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
     "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048",
     "request_compatibility_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3"
   },
   "client": {
@@ -83,6 +85,6 @@
   "limitations": [
     "Managed remote install, benchmark, rollback, and support-bundle are not implemented.",
     "The accepted macOS archive is published as a component prerelease; the OMP NInfer product release remains held.",
-    "The lifecycle source remains on a draft pull request."
+    "The lifecycle source is merged to omp-monorepo main at ea28601524239eeff1a6a19b9a827c24fed756b3."
   ]
 }
