@@ -24,6 +24,7 @@ OCI_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 OMP_RELEASE_ID_RE = re.compile(
     r"^(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-cross-platform-preview-(?P<preview>[1-9][0-9]*)$"
 )
+PRODUCT_RELEASE_RE = re.compile(r"^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$")
 OMP_ASSET_DOWNLOAD_RE = re.compile(
     r"^/alphastorm/homebrew-omp/releases/download/(?P<tag>[^/]+)/(?P<name>[^/]+)$"
 )
@@ -53,6 +54,15 @@ def load_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ContractError(f"{path}: root must be an object")
     return value
+
+
+def resolve_product_release(root: Path, requested: str | None) -> str:
+    release = requested
+    if release is None:
+        release = load_json(root / "compatibility.json").get("product_release")
+    if not isinstance(release, str) or PRODUCT_RELEASE_RE.fullmatch(release) is None:
+        raise ContractError("product release must be a versioned release directory name")
+    return release
 
 
 def sha256_file(path: Path) -> str:
@@ -107,20 +117,48 @@ def argument_value(arguments: list[Any], flag: str) -> Any:
     return arguments[index + 1] if index + 1 < len(arguments) else None
 
 
-REQUIRED_SERVER_VALUES = {
-    "--host": "127.0.0.1",
-    "--port": "18089",
-    "--model-id": "q38-ninfer",
-    "--deployment-profile": "qwen38-5090-v0.1.0",
-    "--max-context": "131072",
-    "--kv-capacity": "auto",
-    "--prefill-chunk": "1024",
-    "--kv-dtype": "bf16",
-    "--max-concurrency": "1",
-    "--spec": "mtp",
-    "--draft-tokens": "3",
-}
+REQUIRED_TUNING_VALUES = (
+    "--kv-capacity",
+    "--prefill-chunk",
+    "--kv-dtype",
+    "--max-concurrency",
+    "--spec",
+    "--draft-tokens",
+)
 REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
+
+
+def validate_server_arguments(
+    profile: dict[str, Any], label: str, errors: list[str]
+) -> None:
+    transport = profile.get("transport", {})
+    model = profile.get("model", {})
+    server = profile.get("server", {})
+    provider = profile.get("omp_provider", {})
+    arguments = server.get("arguments", [])
+    if not isinstance(arguments, list) or not all(isinstance(item, str) for item in arguments):
+        require(False, f"{label}: server.arguments must be a string array", errors)
+        return
+
+    expected_values = {
+        "--host": transport.get("runtime_bind_host"),
+        "--port": str(transport.get("runtime_port")),
+        "--model-id": model.get("public_id"),
+        "--deployment-profile": server.get("deployment_profile"),
+        "--max-context": str(provider.get("context_window")),
+    }
+    for flag, expected in expected_values.items():
+        require(isinstance(expected, str) and expected not in {"", "None"},
+                f"{label}: cannot derive {flag} from structured profile fields", errors)
+        require(arguments.count(flag) == 1 and argument_value(arguments, flag) == expected,
+                f"{label}: {flag} must occur once and equal {expected}", errors)
+    for flag in REQUIRED_TUNING_VALUES:
+        value = argument_value(arguments, flag)
+        require(arguments.count(flag) == 1 and isinstance(value, str) and bool(value),
+                f"{label}: {flag} must occur once with a non-empty value", errors)
+    for flag in REQUIRED_SERVER_FLAGS:
+        require(arguments.count(flag) == 1, f"{label}: must include {flag} exactly once", errors)
+    require("--api-key" not in arguments, f"{label}: must not embed an API key", errors)
 
 
 def validate_profile_contract(
@@ -145,18 +183,10 @@ def validate_profile_contract(
             f"{label}: silent cloud fallback must be disabled", errors)
 
     server = profile.get("server", {})
-    arguments = server.get("arguments", [])
-    require(isinstance(arguments, list) and all(isinstance(item, str) for item in arguments),
-            f"{label}: server.arguments must be a string array", errors)
     require(server.get("restart_policy") == "no", f"{label}: restart_policy must be no", errors)
     require(server.get("container_network_mode") == "host",
             f"{label}: container network mode must be host", errors)
-    for flag, expected in REQUIRED_SERVER_VALUES.items():
-        require(argument_value(arguments, flag) == expected,
-                f"{label}: {flag} must equal {expected}", errors)
-    for flag in REQUIRED_SERVER_FLAGS:
-        require(flag in arguments, f"{label}: must include {flag}", errors)
-    require("--api-key" not in arguments, f"{label}: must not embed an API key", errors)
+    validate_server_arguments(profile, label, errors)
 
     omp_provider = profile.get("omp_provider", {})
     require(omp_provider.get("api") == "openai-responses",
@@ -214,14 +244,17 @@ def validate(
     root: Path,
     require_ready: bool,
     require_installable: bool = False,
+    product_release: str | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
-    manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+    selected_release = resolve_product_release(root, product_release)
+    manifest_path = root / "releases" / selected_release / "manifest.json"
     manifest = load_json(manifest_path)
     errors: list[str] = []
 
     require(manifest.get("schema_version") == 1, "manifest schema_version must be 1", errors)
     release = manifest.get("release")
-    require(release == "v0.1.0-beta.1", "manifest release must be v0.1.0-beta.1", errors)
+    require(release == selected_release,
+            f"manifest release must match selected release {selected_release}", errors)
     status = manifest.get("status")
     require(status in {"draft", "candidate", "ready"},
             "manifest status must be draft, candidate, or ready", errors)
@@ -247,9 +280,13 @@ def validate(
 
     profile = load_json(profile_path) if profile_path.is_file() else {}
     qualification = load_json(qualification_path) if qualification_path.is_file() else {}
+    components = manifest.get("components", {})
+    omp = components.get("omp", {})
+    ninfer = components.get("ninfer", {})
+    model = components.get("model", {})
+    runtime = manifest.get("runtime_identity", {})
+    manifest_qualification = manifest.get("qualification", {})
 
-    require(profile.get("schema_version") == 1, "profile schema_version must be 1", errors)
-    require(profile.get("release") == release, "profile release must match manifest release", errors)
     expected_profile_id = product.get("primary_profile_id") if isinstance(product, dict) else None
     installation_mode = manifest.get("installation", {}).get("mode")
     require(isinstance(expected_profile_id, str) and profile.get("profile_id") == expected_profile_id,
@@ -257,47 +294,8 @@ def validate(
     require(isinstance(installation_mode, str)
             and profile.get("installation_mode") == installation_mode,
             "profile installation_mode must match manifest installation.mode", errors)
-
-    transport = profile.get("transport", {})
-    require(transport.get("client_bind_host") == "127.0.0.1",
-            "client endpoint must bind loopback", errors)
-    require(transport.get("runtime_bind_host") == "127.0.0.1",
-            "runtime endpoint must bind loopback", errors)
-    require(transport.get("client_port") == transport.get("runtime_port") == 18089,
-            "profile loopback ports must both be 18089", errors)
-    require(transport.get("silent_cloud_fallback") is False,
-            "profile must disable silent cloud fallback", errors)
-
-    server = profile.get("server", {})
-    arguments = server.get("arguments", [])
-    require(isinstance(arguments, list) and all(isinstance(item, str) for item in arguments),
-            "profile server.arguments must be a string array", errors)
-    require(server.get("restart_policy") == "no", "profile restart_policy must be no", errors)
-    require(server.get("container_network_mode") == "host",
-            "profile container network mode must be host", errors)
-    for flag, expected in REQUIRED_SERVER_VALUES.items():
-        require(argument_value(arguments, flag) == expected,
-                f"profile {flag} must equal {expected}", errors)
-    for flag in REQUIRED_SERVER_FLAGS:
-        require(flag in arguments, f"profile must include {flag}", errors)
-    require("--api-key" not in arguments, "profile must not embed an API key", errors)
-
-    omp_provider = profile.get("omp_provider", {})
-    require(omp_provider.get("api") == "openai-responses",
-            "OMP provider API must be openai-responses", errors)
-    require(omp_provider.get("base_url") == "http://127.0.0.1:18089/v1",
-            "OMP provider must use the local loopback endpoint", errors)
-    require(omp_provider.get("request_model_id") == "q38-ninfer",
-            "OMP provider request model must be q38-ninfer", errors)
-    require(omp_provider.get("ninfer_stateful_responses") is True,
-            "OMP provider must enable NInfer stateful Responses", errors)
-
-    components = manifest.get("components", {})
-    omp = components.get("omp", {})
-    ninfer = components.get("ninfer", {})
-    model = components.get("model", {})
-    runtime = manifest.get("runtime_identity", {})
-    manifest_qualification = manifest.get("qualification", {})
+    validate_profile_contract(profile, "profile", release, model,
+                              runtime.get("public_model_id"), errors)
 
     profiles_dir = root / "profiles"
     if profiles_dir.is_dir():
@@ -635,6 +633,7 @@ def validate(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--release", help="product release directory; defaults to compatibility.json")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--require-installable", action="store_true")
     mode.add_argument("--require-ready", action="store_true")
@@ -646,6 +645,7 @@ def main() -> int:
             args.root.resolve(),
             args.require_ready,
             args.require_installable,
+            args.release,
         )
     except ContractError as error:
         errors = [str(error)]
