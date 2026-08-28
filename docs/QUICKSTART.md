@@ -53,7 +53,7 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Managed macOS SSH preview route
 
-## Prerequisites
+### Prerequisites
 
 **Mac**
 
