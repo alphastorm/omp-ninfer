@@ -18,6 +18,21 @@ SPEC.loader.exec_module(VERIFY_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_omp_component_identity_accepts_preview_and_beta_only(self) -> None:
+        self.assertIsNotNone(
+            VERIFY_RELEASE.OMP_RELEASE_ID_RE.fullmatch(
+                "18.0.9-cross-platform-beta-1"
+            )
+        )
+        self.assertIsNotNone(
+            VERIFY_RELEASE.OMP_RELEASE_ID_RE.fullmatch(
+                "18.0.9-cross-platform-preview-5"
+            )
+        )
+        self.assertIsNone(
+            VERIFY_RELEASE.OMP_RELEASE_ID_RE.fullmatch("18.0.9-cross-platform-stable-1")
+        )
+
     def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
