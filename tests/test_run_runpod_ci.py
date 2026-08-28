@@ -76,6 +76,26 @@ class RunpodCiTest(unittest.TestCase):
             )
         self.assertEqual(len(calls), 1)
 
+    def test_command_retry_recovers_a_transient_scp_close(self) -> None:
+        results = iter(
+            [
+                MODULE.CommandResult(255, "", "scp: Connection closed"),
+                MODULE.CommandResult(255, "", "scp: Connection closed"),
+                MODULE.CommandResult(0, "", ""),
+            ]
+        )
+        calls: list[list[str]] = []
+        sleeps: list[float] = []
+        result = MODULE.run_with_retries(
+            ["scp", "bundle", "host:/workspace/bundle"],
+            "bundle transfer",
+            runner=lambda command: calls.append(list(command)) or next(results),
+            sleep=sleeps.append,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(sleeps, [2.0, 5.0])
+
     def test_source_must_be_clean_and_committed(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary)
