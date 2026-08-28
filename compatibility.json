@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
+  "product_release": "v0.1.0-beta.1",
+  "composition": {
+    "status": "component-published-source-merged",
+    "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
+    "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
+    "lifecycle_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "qualification_source_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "lifecycle_main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "lifecycle_main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048",
+    "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
+    "hosted_ci": "windows 33129814227; linux 33129814272; macos 33129814279",
+    "blockers": [
+      "Run a clean invited-tester installation from the published component assets."
+    ],
+    "composed_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608"
+  },
+  "profiles": [
+    {
+      "id": "darwin-remote-ssh",
+      "adapter": "darwin-remote-ssh",
+      "status": "preview",
+      "transport": "ssh-loopback",
+      "commands": [
+        "doctor",
+        "status"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": false,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "macos-arm64-remote-ssh"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Managed remote install, benchmark, rollback, and support-bundle are not implemented; the existing manual SSH topology remains separate.",
+        "Clean managed macOS doctor/status, authenticated requests, Vision, stateful resume, and fail-closed behavior passed on the exact composed client."
+      ],
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+        "sha256": "5ab80fa460e072b3e73e420b574c53ede8f86aa737f22bac742749a792dda590"
+      },
+      "client_distribution": {
+        "os": "macOS",
+        "architecture": "arm64",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+        "published": true,
+        "archive_sha256": "f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9",
+        "archive_bytes": 59799181,
+        "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095340,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-macos-arm64.tar.gz"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "windows-docker-local",
+      "adapter": "windows-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": true,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "windows-11-x64-docker-desktop"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported.",
+        "Clean native Windows install, Docker/GPU detection, authenticated requests, Vision, stateful resume, and fail-closed behavior passed."
+      ],
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+        "sha256": "9f6d05b544404bf48e4730ac5b77247e23d494ea681f56d5d8368b70b72a477a"
+      },
+      "client_distribution": {
+        "os": "Windows 11",
+        "architecture": "x64",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+        "published": true,
+        "archive_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+        "archive_bytes": 78452185,
+        "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095343,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "linux-docker-local",
+      "adapter": "linux-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": true,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.1.0-beta.1",
+      "aliases": [
+        "linux-x64-docker"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "Native Linux OMP requires a local Docker Linux engine and NVIDIA Container Toolkit.",
+        "Native Ubuntu 24.04 build/install/diagnostics passed in hosted CI; live RTX 5090 inference passed under WSL2. Bare-metal native Linux GPU lifecycle remains unqualified."
+      ],
+      "blockers": [
+        "Bare-metal native Linux RTX 5090 lifecycle remains unqualified; the profile stays preview."
+      ],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/linux-x64.json",
+        "sha256": "5f36fb8d508bc4e024228f6d563781b6a85552a0e442036ec8aa85330ca49a62"
+      },
+      "client_distribution": {
+        "os": "Linux",
+        "architecture": "x64",
+        "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+        "published": true,
+        "archive_sha256": "712bb293de3a86e9b72512b0d75d36a450691f6ced9ad8f3b617171af4d2e555",
+        "archive_bytes": 112329967,
+        "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6",
+        "release_tag": "omp-18.0.7-cross-platform-preview-5",
+        "release_id": 378212363,
+        "asset_id": 533095341,
+        "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-linux-x64.tar.gz"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.1.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/docs/qualification/rtx5090-qwen38-v0.1.0.json",
+          "sha256": "de4043ae19b201fe5df7c632ac437f2b7579ca3ef7b4ee695c8775ed86130b3a"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+        "model_bytes": 18210531328,
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+        "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 1,
+        "kv_dtype": "bf16",
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision"
+        ]
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/da2b6b6c8e129d182370feee657b7d8b9b9bbbf5/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "014a293c1af1b9454c823780bbc051b49513d3a1ff7c1fb6ba2816f9d73e295c",
+        "arguments": []
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.1.0-beta.1",
-  "status": "draft",
+  "status": "candidate",
   "channel": "early-access",
   "audience": "invited-testers",
   "product": {
@@ -13,21 +13,21 @@
   "components": {
     "omp": {
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
-      "upstream_tag": "v18.0.5",
-      "upstream_commit": "eab72e88e447a4be45bea2bc302995844c0c51a2",
-      "release_id": "18.0.5-09615b86684075d50f7d59e16390344fe45199b0d9f1b4863c6ae84153e37d40",
-      "distribution_version": "18.0.5-09615b86",
-      "source_commit": "390cdc21c0e3e0a7578686c54c67f56f2959916b",
-      "artifact_name": "omp-18.0.5-09615b86-darwin-arm64.tar.gz",
-      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/531802612#omp-18.0.5-09615b86-darwin-arm64.tar.gz",
-      "artifact_release_id": 377585663,
-      "artifact_asset_id": 531802612,
-      "artifact_published": false,
-      "artifact_bytes": 121104321,
-      "artifact_sha256": "01750320e6300a692eb7a462ee597316a34f141c940da3426d4c55578665bfb4",
+      "upstream_tag": "v18.0.7",
+      "upstream_commit": "6be4a1bec9c53ed9eef33e65a70a060970f30cce",
+      "release_id": "18.0.7-7b1dcc68daf9d8a4f901be7e2110ea86db37f719c6ecd20ed95a309d6fd347d8",
+      "distribution_version": "18.0.7-7b1dcc68",
+      "source_commit": "6d6ee173d86d8c537b019019ce9dbd149970f22f",
+      "artifact_name": "omp-18.0.7-7b1dcc68-darwin-arm64.tar.gz",
+      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/532746724#omp-18.0.7-7b1dcc68-darwin-arm64.tar.gz",
+      "artifact_release_id": 378058103,
+      "artifact_asset_id": 532746724,
+      "artifact_published": true,
+      "artifact_bytes": 121326128,
+      "artifact_sha256": "718934e50688983056fee023e0e5b9008453cdd9ce080c120470d7393ab3975a",
       "homebrew_repository": "https://github.com/alphastorm/homebrew-omp",
       "homebrew_cask": "omp-beta",
-      "homebrew_cask_revision": "da24c3ac9d46e5419e5ba3e69565da48e224b5ef"
+      "homebrew_cask_revision": "88589a511b2a8a36439904b621d15ac2ac0f153c"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -36,10 +36,10 @@
       "source_commit": "da2b6b6c8e129d182370feee657b7d8b9b9bbbf5",
       "source_archive_sha256": "31eda87bf64caf7152b71d8cfe976b30661c02347decef9935437cc76af464bd",
       "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
-      "oci_reference": null,
-      "oci_manifest_digest": null,
-      "sbom_url": null,
-      "sbom_sha256": null
+      "oci_reference": "ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+      "oci_manifest_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.1.0-qwen38-5090/ninfer-qwen38-rtx5090-v0.1.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "bb7bcf71019b4033fcc5f26c66c8e69f19272acf8d0986d4822f26605ced7682"
     },
     "model": {
       "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
@@ -93,12 +93,9 @@
       "Homebrew cask omp-beta"
     ],
     "blockers": [
-      "Publish the verified draft OMP archive asset when the product manifest reaches candidate.",
-      "Publish the immutable NInfer OCI image and SBOM, then record their digests.",
-      "Push Homebrew revision da24c3ac9d46e5419e5ba3e69565da48e224b5ef and publish the draft asset when the product reaches candidate.",
       "Publish this qualification summary and record its SHA-256 and URL.",
       "Run the clean external-install acceptance path using only published URLs.",
-      "Obtain bounded authority for repository, tag, release, registry, and Homebrew publication effects."
+      "Obtain bounded authority for the product tag, release, and final readiness effects."
     ]
   }
 }

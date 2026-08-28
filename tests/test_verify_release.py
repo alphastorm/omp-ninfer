@@ -23,6 +23,9 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
+        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        (root / "docs").mkdir()
+        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
         return temporary, root
 
     @staticmethod
@@ -48,18 +51,17 @@ class ReleaseContractTest(unittest.TestCase):
                 "homebrew_cask_revision": "c" * 40,
             }
         )
+        oci_manifest_digest = manifest["components"]["ninfer"]["oci_manifest_digest"]
         manifest["components"]["ninfer"].update(
             {
-                "oci_reference": f"ghcr.io/alphastorm/ninfer@sha256:{'d' * 64}",
-                "oci_manifest_digest": f"sha256:{'d' * 64}",
+                "oci_reference": f"ghcr.io/alphastorm/ninfer@{oci_manifest_digest}",
                 "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.1.0-qwen38-5090/ninfer.spdx.json",
-                "sbom_sha256": "e" * 64,
             }
         )
 
-    def test_checked_in_draft_is_valid_but_not_release_ready(self) -> None:
+    def test_checked_in_candidate_is_installable_but_not_ready(self) -> None:
         manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
-        self.assertEqual(manifest["status"], "draft")
+        self.assertEqual(manifest["status"], "candidate")
         self.assertEqual(errors, [])
 
         _, ready_errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
@@ -69,6 +71,22 @@ class ReleaseContractTest(unittest.TestCase):
             ROOT,
             require_ready=False,
             require_installable=True,
+        )
+        self.assertEqual(installable_errors, [])
+
+    def test_draft_contract_remains_noninstallable(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "draft"
+        manifest["components"]["omp"]["artifact_published"] = False
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertEqual(errors, [])
+        _, installable_errors = VERIFY_RELEASE.validate(
+            root, require_ready=False, require_installable=True
         )
         self.assertIn("release manifest is not installable", installable_errors)
 
@@ -127,7 +145,6 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertIn("installable release requires components.omp.artifact_url", errors)
-        self.assertIn("installable release requires components.ninfer.oci_reference", errors)
         self.assertIn("ready release requires qualification.summary_sha256", errors)
         self.assertIn("ready release requires a passing external installation", errors)
 
@@ -240,6 +257,17 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("NInfer OCI reference must exactly bind its manifest digest", errors)
+
+    def test_local_packaging_oci_digest_drift_is_rejected(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("local packaging and manifest OCI digests must match", errors)
 
     def test_private_paths_are_rejected_from_public_receipts(self) -> None:
         temporary, root = self.candidate_copy()

@@ -4,8 +4,9 @@ This is the supported `v0.1.0-beta.1` path: OMP on Apple-silicon macOS, NInfer o
 user-controlled Linux or WSL2 RTX 5090 host, and an authenticated SSH local forward between them.
 It is deliberately manual. Do not use `omp appliance install` for this beta.
 
-The checked-in manifest is currently `draft`. Invited testers must stop unless the release tag
-exists and this succeeds from a clean clone of that tag:
+The checked-in manifest is currently an installable `candidate`. Invited testers must still stop
+unless the product release tag exists and the ready contract succeeds from a clean clone of that
+tag. Maintainers may use the exact candidate commit for the bounded external-install acceptance:
 
 ```sh
 python3 scripts/verify_release.py --require-ready
@@ -48,7 +49,8 @@ cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
-Do not continue from `main`, an untagged archive, or a manifest whose status is `draft`.
+Do not invite testers from moving `main`, an untagged archive, or a manifest whose status is
+`draft` or `candidate`.
 The bounded pre-tag acceptance instead checks out its recorded candidate commit in detached mode;
 it must never use moving `main` as the tested identity.
 
@@ -187,15 +189,34 @@ providers or model definitions. The key remains an executable secret reference:
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
-Use the supplied fail-closed overlay whenever exercising the beta:
+### Native Windows OMP
 
-```sh
-OVERLAY=$(cd examples/manual-tunnel && pwd)/fail-closed.yml
-omp --config "$OVERLAY" --model ninfer-beta/local-max
+The POSIX `!cat` secret reference is not supported by native Windows OMP. Copy
+[`examples/windows-docker-local/models.fragment.yml`](../examples/windows-docker-local/models.fragment.yml)
+to `$HOME\.omp\agent\models.yml`, or merge only its `providers.ninfer-beta` mapping.
+Load the key into the process environment without printing it before every OMP launch:
+
+```powershell
+$env:NINFER_BETA_API_KEY = (Get-Content -Raw "$HOME\.omp\agent\ninfer-beta.key").Trim()
+omp --model ninfer-beta/local-max
 ```
 
-The explicit provider/model and overlay disable model fallback. A tunnel or runtime failure must be
-an error, not a switch to a cloud model.
+The environment-backed value exists only in that PowerShell process and its children. Do not put
+the key itself in YAML, command arguments, shell history, or support bundles.
+
+Install the supplied fail-closed settings into the launcher-owned default config whenever exercising
+the beta. If the file already exists, merge only the `retry` mapping instead of overwriting unrelated
+settings:
+
+```sh
+install -m 600 examples/manual-tunnel/fail-closed.yml \
+  "$HOME/.omp/agent/config.yml"
+omp --model ninfer-beta/local-max
+```
+
+The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
+the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
+switch to a cloud model.
 
 ## 8. Early-access acceptance
 
@@ -208,7 +229,7 @@ launcher.
 SMOKE=$(mktemp -d)
 printf 'OMP_NINFER_TOOL_OK\n' > "$SMOKE/marker.txt"
 cd "$SMOKE"
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   "Use a file-reading tool to read marker.txt, then report its exact single line."
 ```
 
@@ -220,7 +241,7 @@ not a numerical oracle; the observed tool result is the contract.
 From a directory containing a non-sensitive PNG or JPEG:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   @sample.png "Describe the visible image in one sentence."
 ```
 
@@ -232,14 +253,14 @@ in an issue.
 Start an interactive session:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max \
+omp --model ninfer-beta/local-max \
   "Remember the nonce COBALT-493817 for my next turn."
 ```
 
 In the same session, ask for the nonce. Exit OMP normally, then resume that session:
 
 ```sh
-omp --config "$OVERLAY" --model ninfer-beta/local-max --continue \
+omp --model ninfer-beta/local-max --continue \
   "Return the nonce from the prior turn."
 ```
 
@@ -253,7 +274,7 @@ Stop the tunnel with `Ctrl-C`, then run:
 
 ```sh
 omp --no-session --max-time 20s \
-  --config "$OVERLAY" --model ninfer-beta/local-max \
+  --model ninfer-beta/local-max \
   "Return LOCAL_ONLY."
 ```
 

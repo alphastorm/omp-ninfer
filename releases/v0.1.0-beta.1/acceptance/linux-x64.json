@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-x64-842366735b-712bb293de",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048"
+  },
+  "client": {
+    "release_id": "18.0.7-cross-platform-preview-5",
+    "version": "18.0.7",
+    "os": "Linux x64",
+    "architecture": "x64",
+    "archive_sha256": "712bb293de3a86e9b72512b0d75d36a450691f6ced9ad8f3b617171af4d2e555",
+    "archive_bytes": 112329967,
+    "binary_sha256": "0ac75fdf311eadfa285266485a00d958e8865762847b0849c774d8b6f1074ca6",
+    "clean_install": true,
+    "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "component_release_id": 378212363,
+    "asset_id": 533095341,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-linux-x64.tar.gz"
+  },
+  "checks": {
+    "native_ubuntu_archive_build": "passed",
+    "native_ubuntu_clean_install": "passed",
+    "native_ubuntu_version": "passed",
+    "native_ubuntu_provider_free_doctor": "passed",
+    "native_ubuntu_provider_free_status": "passed",
+    "wsl_authenticated_text_and_file_tool": "passed",
+    "wsl_vision": "passed",
+    "wsl_stateful_exit_and_resume": "passed",
+    "wsl_tunnel_outage_fail_closed": "passed",
+    "runtime_rollback_and_incumbent_restore": "passed",
+    "final_tree_metadata_repack": "passed; client-release.json only; accepted binary and installer unchanged"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "Native hosted CI proves the Linux client build/install/diagnostic route without GPU hardware.",
+    "Live RTX 5090 inference was exercised under WSL2; a bare-metal native Linux RTX 5090 lifecycle was not available.",
+    "The accepted Linux archive is published as a component prerelease; the OMP NInfer product release remains held."
+  ],
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33129814272",
+    "qualification_receipt_sha256": "e362de788b7a45e127b201716243557bc91bd6b92d8ac1f8be75465bc697c446",
+    "workflow_receipt_sha256": "b5ddd3c66d24911dbd8fe524f16b99ba62fed9ea5979909f849267100d5484d1",
+    "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "source_commit": "0650dd128c6e08dbde0e1f0ce1c29f2bfccb6f8a",
+    "source_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "release_id": "18.0.7-linux-x64-aa0dee6db6cf",
+    "archive_sha256": "ff8223d14f5210b3b85267631aaf9cec31557dfcab1821c42b74a3bf38235c92",
+    "binary_sha256": "fef0471e12a3753d34f3fed1b8054156df23f6fe715fc38a3caf6497b6205820",
+    "clean_install": true,
+    "version": "omp/18.0.7",
+    "doctor": "blocked",
+    "status": "ok:not-installed",
+    "appliance_state": "read-only",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "published": false
+  }
+}

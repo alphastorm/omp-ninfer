@@ -1,4 +1,4 @@
-# Use with: omp --config /absolute/path/to/fail-closed.yml --model ninfer-beta/local-max
+# Install or merge into ~/.omp/agent/config.yml, then use: omp --model ninfer-beta/local-max
 retry:
   enabled: false
   modelFallback: false

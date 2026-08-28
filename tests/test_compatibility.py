@@ -1,0 +1,136 @@
+from __future__ import annotations
+
+import importlib.util
+import hashlib
+import json
+import unittest
+from copy import deepcopy
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "render_compatibility", ROOT / "scripts" / "render_compatibility.py"
+)
+assert SPEC and SPEC.loader
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+class CompatibilityAuthorityTests(unittest.TestCase):
+    def test_authority_renders_the_checked_in_public_matrix(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        rendered = MODULE.render(authority)
+        self.assertEqual(
+            rendered,
+            (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8"),
+        )
+        self.assertEqual(
+            [profile["id"] for profile in authority["profiles"]],
+            [
+                "darwin-remote-ssh",
+                "windows-docker-local",
+                "linux-docker-local",
+            ],
+        )
+        self.assertTrue(all(profile["status"] == "preview" for profile in authority["profiles"]))
+        receipts = {profile["id"]: profile["acceptance_receipt"] for profile in authority["profiles"]}
+        self.assertIsNotNone(receipts["darwin-remote-ssh"])
+        self.assertIsNotNone(receipts["windows-docker-local"])
+        self.assertIsNotNone(receipts["linux-docker-local"])
+
+    def test_bound_acceptance_receipts_match_immutable_public_files(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        expected_files = {
+            "darwin-remote-ssh": "macos-arm64-managed-ssh.json",
+            "windows-docker-local": "windows-x64.json",
+            "linux-docker-local": "linux-x64.json",
+        }
+        for profile in authority["profiles"]:
+            filename = expected_files.get(profile["id"])
+            if filename is None:
+                self.assertIsNone(profile["acceptance_receipt"])
+                continue
+            receipt = profile["acceptance_receipt"]
+            self.assertIsNotNone(receipt)
+            path = ROOT / "releases" / "v0.1.0-beta.1" / "acceptance" / filename
+            subject = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(subject["kind"], "omp-ninfer-platform-acceptance-receipt")
+            self.assertEqual(subject["product_release"], authority["product_release"])
+            self.assertEqual(subject["profile"], profile["id"])
+            self.assertEqual(subject["status"], "passed")
+            self.assertEqual(
+                subject["source"]["commit"], authority["composition"]["composed_source_commit"]
+            )
+            self.assertEqual(
+                subject["source"]["main_commit"], authority["composition"]["lifecycle_main_commit"]
+            )
+            self.assertEqual(
+                subject["source"]["main_tree"], authority["composition"]["lifecycle_main_tree"]
+            )
+            self.assertFalse(subject["safety"]["cloud_fallback_observed"])
+            self.assertFalse(subject["safety"]["production_omp_activation_performed"])
+            self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
+            distribution = profile["client_distribution"]
+            self.assertTrue(distribution["published"])
+            self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])
+            self.assertEqual(subject["client"]["binary_sha256"], distribution["binary_sha256"])
+            self.assertEqual(subject["client"]["component_release_tag"], distribution["release_tag"])
+            self.assertEqual(subject["client"]["component_release_id"], distribution["release_id"])
+            self.assertEqual(subject["client"]["asset_id"], distribution["asset_id"])
+            self.assertEqual(subject["client"]["asset_url"], distribution["asset_url"])
+            self.assertTrue(receipt["url"].endswith(f"/releases/v0.1.0-beta.1/acceptance/{filename}"))
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), receipt["sha256"])
+
+    def test_runtime_identity_matches_the_release_manifest(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        manifest = json.loads(
+            (ROOT / "releases" / "v0.1.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
+        )
+        expected = {
+            "image_reference": manifest["components"]["ninfer"]["oci_reference"],
+            "model_sha256": manifest["components"]["model"]["artifact_sha256"],
+            "configuration_sha256": manifest["runtime_identity"]["configuration_sha256"],
+            "server_binary_sha256": manifest["components"]["ninfer"]["server_binary_sha256"],
+        }
+        for profile in authority["profiles"]:
+            for key, value in expected.items():
+                self.assertEqual(profile["runtime"][key], value)
+
+    def test_unknown_or_incomplete_profiles_fail_closed(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        invalid = deepcopy(authority)
+        invalid["profiles"][0]["status"] = "experimental"
+        with self.assertRaisesRegex(ValueError, "status"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
+        invalid["profiles"][1]["commands"].append("repair")
+        with self.assertRaisesRegex(ValueError, "unknown command"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
+        invalid["profiles"][2]["silent_cloud_fallback"] = True
+        with self.assertRaisesRegex(ValueError, "silent cloud fallback"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
+        invalid["profiles"][0]["acceptance_receipt"]["url"] = (
+            "https://raw.githubusercontent.com/alphastorm/omp-ninfer/main/receipt.json"
+        )
+        with self.assertRaisesRegex(ValueError, "not immutable"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
+        invalid["profiles"][1]["acceptance_receipt"]["sha256"] = "not-a-sha"
+        with self.assertRaisesRegex(ValueError, "SHA-256"):
+            MODULE.load_authority(self._write(invalid))
+
+    def _write(self, value: object) -> Path:
+        path = Path(self._testMethodName + ".compatibility.tmp.json")
+        self.addCleanup(path.unlink, missing_ok=True)
+        path.write_text(json.dumps(value), encoding="utf-8")
+        return path
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "macos-arm64-842366735b-f619ce2266",
+  "product_release": "v0.1.0-beta.1",
+  "profile": "darwin-remote-ssh",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/omp-monorepo",
+    "commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+    "semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
+    "generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048",
+    "request_compatibility_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3"
+  },
+  "client": {
+    "release_id": "18.0.7-cross-platform-preview-5",
+    "version": "18.0.7",
+    "os": "macOS 26",
+    "architecture": "arm64",
+    "archive_sha256": "f619ce2266f07ebe5c16a75dfe9d84381562c13c2c6bee0a1d1e56f040222ec9",
+    "archive_bytes": 59799181,
+    "binary_sha256": "1d56719ab26ae9980f8f781c95dddb7ce9660e8ad92159849886de5e72935a10",
+    "binary_bytes": 121899792,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+    "component_release_id": 378212363,
+    "asset_id": 533095340,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-macos-arm64.tar.gz"
+  },
+  "managed_remote": {
+    "transport": "SSH to WSL2 Linux",
+    "remote_os": "Linux",
+    "remote_architecture": "x64",
+    "remote_gpu": "NVIDIA GeForce RTX 5090",
+    "docker_available": true,
+    "nvidia_container_runtime_available": true,
+    "doctor_receipt_id": "8f1c1801-0967-4ff3-bbff-f4fb38fa477d",
+    "doctor_result": "completed_with_expected_preview_blockers",
+    "status_receipt_id": "36f39a05-1497-4054-8b97-c11c79377fe9",
+    "status_result": "ok",
+    "compatibility_authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-6",
+    "compatibility_sha256": "3b91e35d9ee1c75a7ec8d557acd02832723e5d84796068ae87d02c36c29f147e"
+  },
+  "hosted_ci": {
+    "run_url": "https://github.com/alphastorm/omp-monorepo/actions/runs/33129814279",
+    "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "source_commit": "0650dd128c6e08dbde0e1f0ce1c29f2bfccb6f8a",
+    "source_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+    "archive_sha256": "652af61ed907a8d5b0c42d26c1226891d88ba63e93d6a4b56bcd91679f9b4c2e",
+    "binary_sha256": "b289b038d764363f5f6ff8a4b05a08e3ebeb47e840fd2b636c8dceeafb2bba48",
+    "clean_install": true,
+    "version": "omp/18.0.7",
+    "doctor": "blocked-as-expected",
+    "status": "ok-uninstalled",
+    "managed_remote_without_target": "failed-closed",
+    "provider_free": true,
+    "hardware_accepted": false,
+    "secret_free": true
+  },
+  "runtime": {
+    "image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "server_binary_sha256": "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6"
+  },
+  "checks": {
+    "exact_composed_archive_clean_install": "passed",
+    "managed_remote_doctor_transport": "passed",
+    "managed_remote_status": "passed",
+    "authenticated_text_and_file_tool": "passed",
+    "vision": "passed",
+    "stateful_exit_and_resume": "passed",
+    "tunnel_outage_fail_closed": "passed",
+    "runtime_rollback_and_incumbent_restore": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "product_release_published": false,
+    "runtime_incumbent_restored": true
+  },
+  "limitations": [
+    "Managed remote install, benchmark, rollback, and support-bundle are not implemented.",
+    "The accepted macOS archive is published as a component prerelease; the OMP NInfer product release remains held.",
+    "The lifecycle source is merged to omp-monorepo main at ea28601524239eeff1a6a19b9a827c24fed756b3."
+  ]
+}
