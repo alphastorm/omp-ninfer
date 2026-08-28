@@ -14,6 +14,32 @@ EXAMPLES = ROOT / "examples" / "manual-tunnel"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
+    def test_windows_ready_path_materializes_key_and_refuses_overwrite(self) -> None:
+        quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+        provider = quickstart.split("### Native Windows OMP", 1)[1].split(
+            "The sealed launcher owns config selection", 1
+        )[0]
+        self.assertIn("wsl.exe -d Ubuntu-24.04", provider)
+        self.assertIn("$HOME/.config/omp-ninfer/api-key", provider)
+        self.assertIn("[IO.File]::WriteAllText($KeyPath", provider)
+        self.assertIn("icacls.exe $KeyPath /inheritance:r", provider)
+        self.assertIn("Existing OMP models/config found", provider)
+        self.assertIn("Copy-Item .\\examples\\manual-tunnel\\fail-closed.yml", provider)
+        self.assertIn("$env:NINFER_BETA_API_KEY", provider)
+        self.assertNotIn("install -m", provider)
+        self.assertLess(
+            provider.index("Existing OMP models/config found"),
+            provider.index("Copy-Item .\\examples\\windows-docker-local"),
+        )
+
+        acceptance = quickstart.split("### Native Windows command forms", 1)[1].split(
+            "### macOS/Linux command forms", 1
+        )[0]
+        self.assertIn("$env:LOCALAPPDATA\\OMP\\omp.cmd", acceptance)
+        self.assertIn("stop-ninfer.sh", acceptance)
+        self.assertIn("if ($LASTEXITCODE -eq 0)", acceptance)
+        self.assertNotIn("Stop the tunnel", acceptance)
+
     @staticmethod
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):
@@ -89,31 +115,6 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             model = root / "model.ninfer"
             with model.open("wb") as model_file:
                 model_file.truncate(manifest["components"]["model"]["artifact_bytes"])
-            manifest["status"] = "candidate"
-            omp_artifact_name = manifest["components"]["omp"]["artifact_name"]
-            manifest["components"]["omp"].update(
-                {
-                    "artifact_url": (
-                        "https://api.github.com/repos/alphastorm/homebrew-omp/"
-                        f"releases/assets/123456789#{omp_artifact_name}"
-                    ),
-                    "artifact_asset_id": 123456789,
-                    "artifact_published": True,
-                    "homebrew_cask_revision": "c" * 40,
-                }
-            )
-            oci_manifest_digest = manifest["components"]["ninfer"][
-                "oci_manifest_digest"
-            ]
-            manifest["components"]["ninfer"].update(
-                {
-                    "oci_reference": f"ghcr.io/alphastorm/ninfer@{oci_manifest_digest}",
-                    "sbom_url": "https://example.test/ninfer.spdx.json",
-                }
-            )
-            manifest_path.write_text(
-                json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
-            )
 
             key = root / "api-key"
             key.write_text("test-key\n", encoding="utf-8")

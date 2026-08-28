@@ -2,11 +2,11 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 1,
   "release": "v0.1.0-beta.1",
-  "as_of": "2026-08-27",
+  "as_of": "2026-08-28",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "One measured NVIDIA GeForce RTX 5090, the exact Qwen3.8 27B NInfer model artifact, the recorded BF16-KV MTP3 profile, and a later clean-source candidate identity proof. Component artifacts are published, but the external OMP/Homebrew installation path and another machine remain unqualified.",
+  "external_installation_qualified": true,
+  "scope": "One measured NVIDIA GeForce RTX 5090, the exact Qwen3.8 27B NInfer model artifact, the recorded BF16-KV MTP3 profile, clean-source candidate identity proof, and an owner-operated tester-equivalent clean native Windows installation using only public component URLs.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
@@ -69,6 +69,23 @@
       "release_eligible": true,
       "publication_authorized": false,
       "private_disposition_sha256": "fa299095dd98cb81fcf1891c3a1e128af4098b3168d7df2d4d2923531731b2ef"
+    },
+    "external_installation_acceptance": {
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.1.0-beta.1/acceptance/windows-owner-clean-install.json",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c08a2a98ddd2d1a369ffdfea4b7a0e552ba3e0c2/releases/v0.1.0-beta.1/acceptance/windows-owner-clean-install.json",
+      "sha256": "a8adb6bae314a05ec33d4549c50636762e0037a074199bdfda48816c0a8a6527",
+      "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+      "windows_asset_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+      "windows_binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+      "compatibility_authority": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
+      "compatibility_sha256": "225619d324c9e722002a4b7b48f3059f444460c5d981b16525e859414a8ea7bc",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true
     }
   },
   "observed_gates": {
@@ -129,11 +146,11 @@
     "209.04 decode tokens/second is one measured server result, not a universal RTX 5090 or end-to-end OMP claim.",
     "The runtime lifecycle proved explicit re-promotion and exact incumbent restoration; it did not prove automatic restart or OMP appliance-level rollback.",
     "The exact NInfer image, binary package, SPDX SBOM, and checksums are publicly available and anonymously verified; this component publication does not authorize product readiness.",
+    "The owner-operated tester-equivalent native Windows clean install used only public client and compatibility URLs and passed tools, Vision, stateful resume, fail-closed behavior, and exact runtime restoration.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
   "remaining_release_gates": [
-    "Run a clean external installation using only public release URLs and the manual-tunnel quickstart.",
     "Publish this qualification summary with its exact SHA-256 and URL.",
-    "Obtain explicit authority for the product tag, release, and final readiness effects."
+    "Create the explicitly authorized product tag and prerelease from the ready manifest."
   ]
 }

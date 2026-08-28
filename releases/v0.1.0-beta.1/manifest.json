@@ -1,33 +1,43 @@
 {
   "schema_version": 1,
   "release": "v0.1.0-beta.1",
-  "status": "candidate",
+  "status": "ready",
   "channel": "early-access",
   "audience": "invited-testers",
   "product": {
     "name": "OMP NInfer",
     "tagline": "Private Qwen coding appliance for RTX 5090",
     "repository": "https://github.com/alphastorm/omp-ninfer",
-    "profile": "../../profiles/qwen38-rtx5090-manual-tunnel.json"
+    "profile": "../../profiles/qwen38-rtx5090-windows-docker-local.json",
+    "primary_profile_id": "qwen38-rtx5090-windows-docker-local"
   },
   "components": {
     "omp": {
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.0.7",
       "upstream_commit": "6be4a1bec9c53ed9eef33e65a70a060970f30cce",
-      "release_id": "18.0.7-7b1dcc68daf9d8a4f901be7e2110ea86db37f719c6ecd20ed95a309d6fd347d8",
-      "distribution_version": "18.0.7-7b1dcc68",
-      "source_commit": "6d6ee173d86d8c537b019019ce9dbd149970f22f",
-      "artifact_name": "omp-18.0.7-7b1dcc68-darwin-arm64.tar.gz",
-      "artifact_url": "https://api.github.com/repos/alphastorm/homebrew-omp/releases/assets/532746724#omp-18.0.7-7b1dcc68-darwin-arm64.tar.gz",
-      "artifact_release_id": 378058103,
-      "artifact_asset_id": 532746724,
+      "component_repository": "https://github.com/alphastorm/homebrew-omp",
+      "component_release_tag": "omp-18.0.7-cross-platform-preview-5",
+      "component_release_id": 378212363,
+      "release_id": "18.0.7-cross-platform-preview-5",
+      "distribution_version": "18.0.7-cross-platform-preview-5",
+      "platform": "windows-x64",
+      "source_repository": "https://github.com/alphastorm/omp-monorepo",
+      "source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
+      "qualification_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+      "main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+      "source_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
+      "artifact_name": "omp-18.0.7-windows-x64.tar.gz",
+      "artifact_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.7-cross-platform-preview-5/omp-18.0.7-windows-x64.tar.gz",
+      "artifact_release_id": 378212363,
+      "artifact_asset_id": 533095343,
       "artifact_published": true,
-      "artifact_bytes": 121326128,
-      "artifact_sha256": "718934e50688983056fee023e0e5b9008453cdd9ce080c120470d7393ab3975a",
-      "homebrew_repository": "https://github.com/alphastorm/homebrew-omp",
-      "homebrew_cask": "omp-beta",
-      "homebrew_cask_revision": "88589a511b2a8a36439904b621d15ac2ac0f153c"
+      "artifact_bytes": 78452185,
+      "artifact_sha256": "4d94ffd7761558691cc5381d56069ea9d3bd2b081d37ce5afbaf2c05ef9af5a7",
+      "binary_sha256": "0b59681010427a77aa39f7929576e270e91f8e8cc563a9f32f865090fc9ec892",
+      "compatibility_authority": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
+      "compatibility_url": "https://github.com/alphastorm/omp-ninfer/blob/main/compatibility.json",
+      "compatibility_sha256": "225619d324c9e722002a4b7b48f3059f444460c5d981b16525e859414a8ea7bc"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -64,23 +74,23 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": null,
-    "public_url": null,
+    "summary_sha256": "b03806c042d0ac766c13a0f38b86614352759fc65142e58c9862430f449fe5f8",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f5ad3f2762889deca69daf2c7b35afa5e20f57f6/releases/v0.1.0-beta.1/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
-    "mode": "manual-ssh-tunnel",
+    "mode": "native-windows-docker-local",
     "quickstart": "../../docs/QUICKSTART.md",
     "managed_appliance_install": false,
     "silent_cloud_fallback": false
   },
   "limitations": [
     "Invited early access only; this is not a general-availability support claim.",
-    "Only the exact RTX 5090 Linux/WSL2 manual-tunnel profile is included.",
-    "The first beta does not use omp appliance install, managed upgrade, or appliance rollback.",
+    "The ready acceptance route is native Windows OMP with Docker Desktop WSL2 on an RTX 5090.",
+    "macOS managed SSH and native Linux clients remain preview profiles under compatibility.json.",
     "The NInfer container uses restart policy no; automatic restart and process-restart continuation are not claimed.",
-    "RTX 4090 support and multi-machine fleet claims are deferred.",
+    "RTX 4090 support, multi-GPU, and multi-tenant claims are deferred.",
     "Measured throughput and latency apply only to the recorded qualification machine and profile."
   ],
   "publication": {
@@ -88,14 +98,10 @@
     "targets": [
       "GitHub repository alphastorm/omp-ninfer",
       "GitHub prerelease v0.1.0-beta.1",
+      "Published OMP component omp-18.0.7-cross-platform-preview-5",
       "GitHub runtime tag alphastorm/ninfer@v0.1.0-qwen38-5090",
-      "GHCR immutable NInfer image",
-      "Homebrew cask omp-beta"
+      "GHCR immutable NInfer image"
     ],
-    "blockers": [
-      "Publish this qualification summary and record its SHA-256 and URL.",
-      "Run the clean external-install acceptance path using only published URLs.",
-      "Obtain bounded authority for the product tag, release, and final readiness effects."
-    ]
+    "blockers": []
   }
 }
