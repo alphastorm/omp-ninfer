@@ -19,7 +19,11 @@ from typing import Any, Callable, Sequence
 
 DEFAULT_GPU_ID = "NVIDIA GeForce RTX 5090"
 DEFAULT_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
-DEFAULT_CUDA_PACKAGES = ("cuda-compiler-13-1", "cuda-libraries-dev-13-1")
+DEFAULT_CUDA_PACKAGES = (
+    "cuda-compiler-13-1",
+    "cuda-libraries-dev-13-1",
+    "cuda-nvtx-13-1",
+)
 DEFAULT_CTEST_REGEX = (
     "ninfer_(checkpoint_io_contract|resource_manager|openai_schema|responses_schema|response_store|"
     "tool_call_parser|serve_options|request_log)_test"

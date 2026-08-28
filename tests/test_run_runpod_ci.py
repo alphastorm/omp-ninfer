@@ -120,6 +120,7 @@ class RunpodCiTest(unittest.TestCase):
         self.assertIn("set -euo pipefail", script)
         self.assertIn("cuda-compiler-13-1", script)
         self.assertIn("cuda-libraries-dev-13-1", script)
+        self.assertIn("cuda-nvtx-13-1", script)
         self.assertIn("libssl-dev", script)
         self.assertIn("-DCMAKE_CUDA_ARCHITECTURES=120a", script)
         self.assertIn(f"-DNINFER_PATCH_STACK_SHA={source}", script)
