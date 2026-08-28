@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import re
 import shlex
@@ -230,6 +231,8 @@ def remote_script(
     cuda_packages: Sequence[str],
     build_targets: Sequence[str],
     ctest_regex: str,
+    build_profile: str = "runpod-ci",
+    release_version: str | None = None,
 ) -> str:
     packages = (
         "cmake git ninja-build pkg-config libavcodec-dev libavformat-dev "
@@ -237,6 +240,21 @@ def remote_script(
         + " ".join(shlex.quote(package) for package in cuda_packages)
     )
     targets = " ".join(shlex.quote(target) for target in build_targets)
+    package = ""
+    if release_version is not None:
+        package = f"""
+rm -rf /workspace/ninfer-release
+python3 tools/release/package.py \
+  --source . \
+  --ninfer build/runpod/apps/ninfer \
+  --ninfer-serve build/runpod/apps/ninfer-serve \
+  --output-dir /workspace/ninfer-release \
+  --release-version {shlex.quote(release_version)} \
+  --platform linux-x86_64-cuda13.1 \
+  --upstream-base-sha {shlex.quote(upstream_base)} \
+  --release-head-sha {shlex.quote(source_commit)} \
+  --build-profile {shlex.quote(build_profile)}
+"""
     return f"""set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -254,14 +272,50 @@ cmake -S . -B build/runpod -G Ninja \\
   -DNINFER_BUILD_APPS=ON \\
   -DBUILD_TESTING=ON \\
   -DNINFER_BUILD_BENCHMARKS=OFF \\
-  -DNINFER_BUILD_PROFILE=runpod-ci \\
+  -DNINFER_BUILD_PROFILE={shlex.quote(build_profile)} \\
   -DNINFER_UPSTREAM_BASE_SHA={shlex.quote(upstream_base)} \\
-  -DNINFER_PATCH_STACK_SHA={shlex.quote(source_commit)} \\
-  -DNINFER_SOURCE_CLEAN_VERIFIED=ON
+  -DNINFER_PATCH_STACK_SHA={shlex.quote(source_commit)}
 cmake --build build/runpod --parallel --target {targets}
 ctest --test-dir build/runpod --output-on-failure -R {shlex.quote(ctest_regex)}
 build/runpod/apps/ninfer-serve --version
+{package}
 """
+
+
+def verify_release_artifacts(path: Path) -> list[dict[str, Any]]:
+    files = sorted(item for item in path.iterdir() if item.is_file())
+    if len(files) != 4:
+        raise CiError(
+            f"release artifact directory contains {len(files)} files, expected 4"
+        )
+    checksum_files = [item for item in files if item.name.endswith(".SHA256SUMS")]
+    if len(checksum_files) != 1:
+        raise CiError("release artifact directory has no unique checksum manifest")
+    checksum_file = checksum_files[0]
+    expected: dict[str, str] = {}
+    for line in checksum_file.read_text(encoding="ascii").splitlines():
+        digest, separator, name = line.partition("  ")
+        if (
+            not separator
+            or not re.fullmatch(r"[0-9a-f]{64}", digest)
+            or Path(name).name != name
+            or name in expected
+        ):
+            raise CiError("release checksum manifest is malformed")
+        expected[name] = digest
+    payload_names = {item.name for item in files if item != checksum_file}
+    if len(expected) != 3 or set(expected) != payload_names:
+        raise CiError("release checksum manifest does not bind the complete artifact set")
+
+    result: list[dict[str, Any]] = []
+    for item in files:
+        digest = hashlib.sha256(item.read_bytes()).hexdigest()
+        if item != checksum_file and expected[item.name] != digest:
+            raise CiError(f"release artifact digest mismatch: {item.name}")
+        result.append(
+            {"name": item.name, "bytes": item.stat().st_size, "sha256": digest}
+        )
+    return result
 
 
 def write_receipt(path: Path | None, receipt: dict[str, Any]) -> None:
@@ -309,6 +363,9 @@ def main() -> int:
     parser.add_argument("--cleanup-deadline-minutes", type=int, default=55)
     parser.add_argument("--wait-timeout", default="15m")
     parser.add_argument("--ctest-regex", default=DEFAULT_CTEST_REGEX)
+    parser.add_argument("--build-profile", default="runpod-ci")
+    parser.add_argument("--release-version")
+    parser.add_argument("--artifact-dir", type=Path)
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
 
@@ -322,6 +379,10 @@ def main() -> int:
     build_targets = tuple(args.build_targets or DEFAULT_BUILD_TARGETS)
     if not build_targets or any(not target for target in build_targets):
         parser.error("at least one non-empty --build-target is required")
+    if bool(args.release_version) != bool(args.artifact_dir):
+        parser.error("--release-version and --artifact-dir must be supplied together")
+    if args.artifact_dir is not None and args.artifact_dir.exists():
+        parser.error("--artifact-dir must not already exist")
 
     install_signal_handlers()
     source = args.source.resolve()
@@ -339,6 +400,9 @@ def main() -> int:
         "cuda_arch": args.cuda_arch,
         "cuda_packages": list(cuda_packages),
         "build_targets": list(build_targets),
+        "build_profile": args.build_profile,
+        "release_version": args.release_version,
+        "release_artifacts": [],
         "hourly_price_usd": None,
         "data_center_ids": args.data_center_ids,
         "pod_id": None,
@@ -461,11 +525,37 @@ def main() -> int:
                 cuda_packages=cuda_packages,
                 build_targets=build_targets,
                 ctest_regex=args.ctest_regex,
+                build_profile=args.build_profile,
+                release_version=args.release_version,
             )
             remote_result = run_command(["ssh", *ssh_options, f"root@{host}", remote])
             if remote_result.stdout:
                 print(remote_result.stdout, end="")
             require_success(remote_result, "remote build and tests")
+            if args.artifact_dir is not None:
+                artifact_dir = args.artifact_dir.resolve()
+                artifact_dir.parent.mkdir(parents=True, exist_ok=True)
+                artifact_staging = Path(temporary) / "downloaded-release"
+                run_with_retries(
+                    [
+                        "scp",
+                        "-q",
+                        "-r",
+                        "-i",
+                        key,
+                        "-P",
+                        port,
+                        "-o",
+                        "StrictHostKeyChecking=accept-new",
+                        f"root@{host}:/workspace/ninfer-release",
+                        str(artifact_staging),
+                    ],
+                    "release artifact transfer",
+                )
+                receipt["release_artifacts"] = verify_release_artifacts(artifact_staging)
+                if artifact_dir.exists():
+                    raise CiError("release artifact destination appeared during transfer")
+                artifact_staging.replace(artifact_dir)
             receipt["status"] = "passed"
     except BaseException as error:  # cleanup must also run for SIGTERM/KeyboardInterrupt
         failure = error
