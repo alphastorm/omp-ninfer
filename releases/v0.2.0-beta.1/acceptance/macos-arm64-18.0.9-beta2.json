@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "darwin-remote-ssh-60d4134b-ba85e7aba6",
+  "product_release": "v0.2.0-beta.1",
+  "profile": "darwin-remote-ssh",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
+    "qualification_commit": "c12b02b4e0563c78fcf8f38843ab02392558d6f4",
+    "semantic_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "generated_lock_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "main_commit": "ff70194c3a799eaf36afbad355c44a178585d316",
+    "main_tree": "553aece2b7a8c3b3f46caa266851462e2069c1a3"
+  },
+  "client": {
+    "release_id": "18.0.9-cross-platform-beta-2",
+    "version": "18.0.9",
+    "os": "macOS 26",
+    "architecture": "arm64",
+    "archive_sha256": "ba85e7aba6a6dba7d734e58d741c09798e8b3323f8abda0485bedafebc6c00c7",
+    "archive_bytes": 66805394,
+    "binary_sha256": "ff5cc0524a8831e7e1b9463721405be08475132482c8f58ea94b12a0f51da7d4",
+    "binary_bytes": 130797024,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "component_release_id": 378771357,
+    "asset_id": 534356913,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-macos-arm64.tar.gz",
+    "homebrew_cask_revision": "5b7996fd30e04186701bda6aad78315521a82343"
+  },
+  "hosted_ci": {
+    "run_id": 33208643243,
+    "qualification_receipt_asset_id": 534356914,
+    "qualification_receipt_sha256": "aae9fb4d7532d10e727b235a8acb10ddade3eeff436d34ae17643fb1390f610f",
+    "provider_free": true,
+    "hardware_accepted": false
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.0.9",
+    "events": 55,
+    "assistant_messages": 2,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "isolated_install_and_bounded_uninstall": true,
+    "raw_transcript_included": false
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version_and_diagnostics": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the native client and authenticated protocol path; GPU runtime identities are bound separately by the product qualification.",
+    "No stable channel or production inference route was activated."
+  ]
+}

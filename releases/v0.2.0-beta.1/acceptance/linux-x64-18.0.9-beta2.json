@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-60d4134b-8dc77c5ff3",
+  "product_release": "v0.2.0-beta.1",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
+    "qualification_commit": "c12b02b4e0563c78fcf8f38843ab02392558d6f4",
+    "semantic_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "generated_lock_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "main_commit": "ff70194c3a799eaf36afbad355c44a178585d316",
+    "main_tree": "553aece2b7a8c3b3f46caa266851462e2069c1a3"
+  },
+  "client": {
+    "release_id": "18.0.9-cross-platform-beta-2",
+    "version": "18.0.9",
+    "os": "Ubuntu 24.04",
+    "architecture": "x64",
+    "archive_sha256": "8dc77c5ff314152c7f87a14d5e9c34cc0a9afd30a342c1162e9ff1c9d6c11d37",
+    "archive_bytes": 86492729,
+    "binary_sha256": "cf5c22f4f2d8fab1d853a74e83b07f283c45fda9eff3d2c934aa5e430c70671c",
+    "binary_bytes": 158504136,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "component_release_id": 378771357,
+    "asset_id": 534356917,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-linux-x64.tar.gz"
+  },
+  "hosted_ci": {
+    "run_id": 33208643176,
+    "qualification_receipt_asset_id": 534356918,
+    "qualification_receipt_sha256": "429fa638e7fb711e3bd1efb8f0e2175f760a893d7d3bb05b6219ac9a208df315",
+    "provider_free": true,
+    "hardware_accepted": false
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.0.9",
+    "events": 68,
+    "assistant_messages": 2,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "protocol_compatible_qualified_runtime": true,
+    "raw_transcript_included": false
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version_and_diagnostics": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the native client and authenticated protocol path; the exact v0.2 RTX 5090 runtime identity is bound separately by the product qualification.",
+    "No stable channel or production inference route was activated."
+  ]
+}

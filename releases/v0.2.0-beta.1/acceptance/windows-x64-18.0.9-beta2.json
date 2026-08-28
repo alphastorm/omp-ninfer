@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-docker-local-60d4134b-0256dc2517",
+  "product_release": "v0.2.0-beta.1",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
+    "qualification_commit": "c12b02b4e0563c78fcf8f38843ab02392558d6f4",
+    "semantic_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "generated_lock_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "main_commit": "ff70194c3a799eaf36afbad355c44a178585d316",
+    "main_tree": "553aece2b7a8c3b3f46caa266851462e2069c1a3"
+  },
+  "client": {
+    "release_id": "18.0.9-cross-platform-beta-2",
+    "version": "18.0.9",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "archive_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+    "archive_bytes": 82889525,
+    "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+    "binary_bytes": 157808128,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "component_release_id": 378771357,
+    "asset_id": 534356916,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-windows-x64.tar.gz"
+  },
+  "hosted_ci": {
+    "run_id": 33208643234,
+    "qualification_receipt_asset_id": 534356931,
+    "qualification_receipt_sha256": "d08814c7d015d3828aacfb0618c8b19b679dae93d6852df1daf8ea9fdc54435b",
+    "provider_free": true,
+    "hardware_accepted": false
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.0.9",
+    "events": 52,
+    "assistant_messages": 2,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "runtime_variant": "rtx3090-windows-native",
+    "raw_transcript_included": false
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version_and_diagnostics": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the native client and authenticated protocol path; GPU runtime identities are bound separately by the product qualification.",
+    "No stable channel or production inference route was activated."
+  ]
+}
