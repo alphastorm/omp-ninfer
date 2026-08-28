@@ -3,11 +3,37 @@
 Stateful model APIs, prefix/KV reuse, local model servers, and distributed inference all have strong
 prior art. OMP NInfer's contribution is the exact product integration: OMP transcript and tool
 semantics, transactional provider continuation, a target-specific NInfer/Qwen runtime, a private
-Mac-to-GPU topology, and one release/qualification authority. It does not claim invention of
+client-to-GPU topology, and one release/qualification authority. It does not claim invention of
 stateful Responses or persistent KV caching.
 
-Sources below were reviewed on 2026-08-26. These projects move quickly; consult their current
-documentation before making a deployment decision.
+Sources below were reviewed on 2026-08-26, and the NInfer family section on 2026-08-28. These
+projects move quickly; consult their current documentation before making a deployment decision.
+
+## The NInfer family
+
+The runtime is not ours alone; it is one lane of a small ecosystem of single-GPU NInfer ports, and
+the credit ordering matters:
+
+- [Neroued/ninfer](https://github.com/Neroued/ninfer) is the original from-scratch C++20/CUDA
+  engine for registered Qwen checkpoints on one RTX 5090 (`sm_120a`): the `.ninfer` artifact
+  format, MTP speculative decoding, hybrid Gated DeltaNet execution, Vision, and the published
+  performance and evaluation campaigns. Apache-2.0.
+- [alphastorm/ninfer](https://github.com/alphastorm/ninfer) is this product's runtime fork of
+  Neroued/ninfer. It adds the OMP-oriented pieces: stateful OpenAI Responses
+  continuation/fork/delete semantics, authenticated status identity, the container/OCI/SBOM
+  release packaging, and the qualification evidence bound into the product manifest.
+- [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) ports the engine
+  to RTX 4090 (`sm_89`) with E8-lattice KV quantization, DirectStorage weight DMA, and D3D12
+  residency management. Our deferred
+  [alphastorm/ninfer-4090](https://github.com/alphastorm/ninfer-4090) lane forks it.
+- [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) ports the engine to RTX 3090
+  (`sm_86`) with ReplaySSM and RotorQuant KV compression; the roadmap plans a reviewed
+  current-architecture 3090 lane from it.
+
+Each repository publishes its own measurements on its own profiles and quantization schemes; the
+README family table quotes their headlines with attribution, and only the RTX 5090 numbers in
+[`BENCHMARKS.md`](BENCHMARKS.md) are qualified product claims.
+
 
 ## Closest semantic prior art
 

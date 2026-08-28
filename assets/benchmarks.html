@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>OMP NInfer — qualified results</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
+  .grid { position: absolute; inset: 0; opacity: 0.5;
+    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
+    background-size: 40px 40px; }
+</style>
+<style>
+  .stats { position: relative; width: 1240px; height: 300px; background: #060809; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; }
+  .eyebrow { display: flex; align-items: center; gap: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #8A939D; }
+  .eyebrow::before, .eyebrow::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #8E7BE8; }
+  .row { display: flex; align-items: stretch; }
+  .cell { width: 290px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; }
+  .cell + .cell { border-left: 1px solid #1C232B; }
+  .num { color: #E8ECEF; font-size: 44px; font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
+  .what { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.09em;
+    text-transform: uppercase; color: #B6BEC7; white-space: nowrap; }
+  .how { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: #5F6870; white-space: nowrap; }
+  .foot { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #5F6870; }
+  .foot span { color: #8E7BE8; }
+</style>
+</head>
+<body>
+<div class="stats">
+  <div class="grid"></div>
+  <div class="eyebrow">qualified &middot; v0.1.0-beta.1 &middot; one measured rtx 5090</div>
+  <div class="row">
+    <div class="cell">
+      <div class="num">209.04</div>
+      <div class="what">decode tok/s</div>
+      <div class="how">mtp3 &middot; 77.0% acceptance</div>
+    </div>
+    <div class="cell">
+      <div class="num">130,048</div>
+      <div class="what">token prompt &middot; exact recall</div>
+      <div class="how">full round trip in 58.5 s</div>
+    </div>
+    <div class="cell">
+      <div class="num">37,591</div>
+      <div class="what">token prefix reused warm</div>
+      <div class="how">zero recompute on resume</div>
+    </div>
+    <div class="cell">
+      <div class="num">131,072</div>
+      <div class="what">context ceiling</div>
+      <div class="how">tools &middot; vision &middot; thinking</div>
+    </div>
+  </div>
+  <div class="foot">openai &middot; anthropic &middot; responses &middot; authenticated identity &mdash; receipts: <span>releases/v0.1.0-beta.1/qualification.json</span></div>
+</div>
+</body>
+</html>

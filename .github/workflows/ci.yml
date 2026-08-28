@@ -1,11 +1,17 @@
-name: verify
+name: CI
 
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
   pull_request:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
   release-contract:
@@ -19,6 +25,9 @@ jobs:
           python-version: "3.11"
       - name: Validate manifest and bound contracts
         run: python3 scripts/verify_release.py
+      - name: Require the ready contract on release tags
+        if: github.ref_type == 'tag'
+        run: python3 scripts/verify_release.py --require-ready
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -v
       - name: Parse shell launchers
