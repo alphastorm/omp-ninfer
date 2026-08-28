@@ -1,13 +1,15 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-8",
+  "authority_id": "omp-ninfer-v0.1.0-beta.1-cross-platform-preview-9",
   "product_release": "v0.1.0-beta.1",
   "composition": {
-    "status": "component-published",
+    "status": "component-published-source-merged",
     "lifecycle_repository": "https://github.com/alphastorm/omp-monorepo",
     "lifecycle_pull_request": "https://github.com/alphastorm/omp-monorepo/pull/14",
     "lifecycle_source_commit": "842366735b701bf0b15e26e31c5ca44928a0c608",
     "qualification_source_commit": "aa0dee6db6cf5e61674577acacfe3ec8acdaea2c",
+    "lifecycle_main_commit": "ea28601524239eeff1a6a19b9a827c24fed756b3",
+    "lifecycle_main_tree": "6bb21e1aa0ba31ab7957d0368415fbe0138a9048",
     "lifecycle_semantic_tree": "754e8517ca6a6dcb874fba1716711f1cbfadd7d1",
     "lifecycle_generated_lock_tree": "fa6ed6a4e6ae3ebcba8f75781fa0b86ae2b9325e",
     "request_compatibility_source_commit": "868f665a033fa97e59e272aa3dcde58aa70d56c3",
@@ -40,12 +42,10 @@
         "Managed remote install, benchmark, rollback, and support-bundle are not implemented; the existing manual SSH topology remains separate.",
         "Clean managed macOS doctor/status, authenticated requests, Vision, stateful resume, and fail-closed behavior passed on the exact composed client."
       ],
-      "blockers": [
-        "The composed cross-platform lifecycle source remains draft and unmerged."
-      ],
+      "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/8b629f6f157f6032515fdc89263b26ab2e6d0cd4/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
-        "sha256": "46216e68e53441b230d8a0bd26bb572c14f6d51cfae6909df632ee2e5de49ae0"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/macos-arm64-managed-ssh.json",
+        "sha256": "5ab80fa460e072b3e73e420b574c53ede8f86aa737f22bac742749a792dda590"
       },
       "client_distribution": {
         "os": "macOS",
@@ -128,12 +128,10 @@
         "Native Windows OMP controls a Docker Desktop Linux container; native Windows NInfer and native Windows CUDA are unsupported.",
         "Clean native Windows install, Docker/GPU detection, authenticated requests, Vision, stateful resume, and fail-closed behavior passed."
       ],
-      "blockers": [
-        "The composed cross-platform lifecycle source remains draft and unmerged."
-      ],
+      "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/8b629f6f157f6032515fdc89263b26ab2e6d0cd4/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
-        "sha256": "f22fe74f8811c6abee46e898f24e030c46784cdf179124c70887c42ef0e48902"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/windows-x64.json",
+        "sha256": "9f6d05b544404bf48e4730ac5b77247e23d494ea681f56d5d8368b70b72a477a"
       },
       "client_distribution": {
         "os": "Windows 11",
@@ -220,8 +218,8 @@
         "Bare-metal native Linux RTX 5090 lifecycle remains unqualified; the profile stays preview."
       ],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/8b629f6f157f6032515fdc89263b26ab2e6d0cd4/releases/v0.1.0-beta.1/acceptance/linux-x64.json",
-        "sha256": "918bff8eb4816fb32291adf2244d9b2ebb2cec27e034b2a257a6957aa86e81e4"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a5614f9404477aec6769a903c231cebc16503c75/releases/v0.1.0-beta.1/acceptance/linux-x64.json",
+        "sha256": "5f36fb8d508bc4e024228f6d563781b6a85552a0e442036ec8aa85330ca49a62"
       },
       "client_distribution": {
         "os": "Linux",

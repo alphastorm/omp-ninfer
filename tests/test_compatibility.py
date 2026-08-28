@@ -61,6 +61,12 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertEqual(
                 subject["source"]["commit"], authority["composition"]["composed_source_commit"]
             )
+            self.assertEqual(
+                subject["source"]["main_commit"], authority["composition"]["lifecycle_main_commit"]
+            )
+            self.assertEqual(
+                subject["source"]["main_tree"], authority["composition"]["lifecycle_main_tree"]
+            )
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
