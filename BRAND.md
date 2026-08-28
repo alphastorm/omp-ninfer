@@ -1,10 +1,11 @@
 # OMP NInfer — brand spec
 
 Identity for `alphastorm/omp-ninfer`: the integration and release layer
-connecting OMP on Apple-silicon macOS, an authenticated SSH loopback tunnel,
-and NInfer running Qwen3.8 on a user-owned NVIDIA GPU. It owns setup, release
-manifests, hardware profiles, qualification, security boundaries, and support
-— not duplicated OMP or NInfer implementations.
+connecting OMP clients on native Windows, macOS, or Linux over an
+authenticated loopback route to NInfer running Qwen3.8 on a user-owned
+NVIDIA GPU. It owns setup, release manifests, hardware profiles,
+qualification, security boundaries, and support — not duplicated OMP or
+NInfer implementations.
 
 **Brand sibling of `omp-session-gateway`.** OMP NInfer shares that family's ground, neutrals,
 type, kinship rule, and voice register; this file is the complete authority for the OMP NInfer
@@ -99,17 +100,20 @@ imply official partnership.
 | `assets/og.png` | GitHub social preview (1280×640) |
 | `assets/architecture.html` | architecture illustration source (1240×380) |
 | `assets/architecture.png` | rendered architecture @2x — for the README |
+| `assets/benchmarks.html` | qualified-results stat strip source (1240×300) |
+| `assets/benchmarks.png` | rendered stat strip @2x — for the README and benchmarks page |
 | `assets/favicon.svg` | favicon (96, rx22 tile) |
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
 | `assets/favicon-32.png` / `favicon-16.png` | PNG favicon fallbacks |
 
 Regeneration: screenshot `.banner` at 2× for `banner.png`, `.arch` at 2×
-for `architecture.png`, `#lk-dark`/`#lk-light`/`#lkx-dark`/`#lkx-light`
+for `architecture.png`, `.stats` at 2× for `benchmarks.png`,
+`#lk-dark`/`#lk-light`/`#lkx-dark`/`#lkx-light`
 at 2× for the lockup PNGs (transparent); render `icon.svg` at 512 and
 `favicon.svg` at 32/16; screenshot `.og` at 1× for `og.png`. Expected raster dimensions are
-2560×640 for the banner, 2480×760 for architecture, 1720×360 for each lockup, and 1280×640 for
-the social preview.
+2560×640 for the banner, 2480×760 for architecture, 2480×600 for the stat strip, 1720×360 for
+each lockup, and 1280×640 for the social preview.
 
 ## README header (drop-in)
 
@@ -123,17 +127,22 @@ the social preview.
 **Private Qwen coding appliance for RTX 5090**
 
 Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
-[Oh My Pi](https://github.com/can1357/oh-my-pi) on a Mac.
+[Oh My Pi](https://github.com/can1357/oh-my-pi) on native Windows, Linux, or a Mac.
 
-**[Early-access setup](docs/QUICKSTART.md)** · **[Release status](docs/RELEASES.md)** ·
-**[Architecture](docs/ARCHITECTURE.md)** · **[Security](docs/SECURITY.md)** ·
-**[Troubleshooting](docs/TROUBLESHOOTING.md)** · **[Changelog](CHANGELOG.md)**
-
-</div>
+**[Quickstart](docs/QUICKSTART.md)** · **[Benchmarks](docs/BENCHMARKS.md)** ·
+**[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
+**[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
 ```
 
-Place `![OMP NInfer architecture](assets/architecture.png)` under `## Repository ownership`; it is
-not part of the header.
+followed by the badge row and the private-by-design subline as currently set in `README.md`.
 
-Then upload `assets/og.png` at GitHub → Settings → Social preview. No badge
-rows — surfaces stay quiet, like the gateway's.
+Badges are shields.io flat style only, `labelColor 0B0E11`, values in Local violet `#8E7BE8` or
+surface `#1C232B` — never green/red status colors, never more than one row. Sanctioned badges:
+CI, release, measured decode, measured context, license. A measured-value badge must match the
+qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualification receipt.
+
+Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and
+`![Qualified v0.1.0-beta.1 results](assets/benchmarks.png)` under `## Measured, not estimated`;
+neither is part of the header.
+
+Then upload `assets/og.png` at GitHub → Settings → Social preview.

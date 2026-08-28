@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Benchmarks page with qualified results, upstream campaign attribution, model-quality table,
+  community results leaderboard, and a planned-measurements list.
+- Public performance program page: measured baseline, scripted profiling lane, auditable
+  experiment ledger including rejected attempts, and an open ideas backlog.
+- Benchmark-report issue form feeding the community results table.
+- Qualified-results stat strip asset for the README and benchmarks page.
+- Continuous-integration badge row and measured-value badges bound to the qualified numbers.
+
+### Changed
+
+- Rewrote the README around the product value proposition: stateful GPU-resident sessions,
+  fail-closed privacy, verifiable release identity, a runtime comparison table, and the NInfer
+  family lineage.
+- Credited upstream projects explicitly and in order: Oh My Pi (can1357), NInfer (Neroued), the
+  Qwen team, UDPSendToFailed/ninfer-4090, and Don-Chad/ninfer-3090.
+- Documented the OMP client as a pinned fork build of Oh My Pi with upstreaming intent and the
+  source-publication broad-release gate.
+- Reframed the roadmap around shipped v0.1, the managed v0.2 lifecycle, the continuous performance
+  program, and concrete ways to help.
+- Extended contributing and related-work documentation with benchmark, performance, and NInfer
+  family lanes; refreshed the architecture illustration for the Windows-primary topology.
+
 ## [0.1.0-beta.1] - 2026-08-28
 
 ### Added

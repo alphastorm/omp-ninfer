@@ -1,0 +1,96 @@
+name: Benchmark report
+description: Submit a content-safe performance measurement for the community results table
+title: "[benchmark]: "
+labels:
+  - early-access
+  - benchmark
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Community results are collected in [docs/BENCHMARKS.md](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md).
+        Report only content-safe system facts and measurements. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, or Docker inspection dumps.
+  - type: input
+    id: release
+    attributes:
+      label: OMP NInfer release
+      description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass on your clone.
+      placeholder: v0.1.0-beta.1
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile ID
+      description: Exact profile from the manifest.
+      placeholder: qwen38-rtx5090-windows-docker-local
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU and reported VRAM
+      placeholder: NVIDIA GeForce RTX 5090, 32607 MiB
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: NVIDIA driver and CUDA reported by nvidia-smi
+    validations:
+      required: true
+  - type: input
+    id: topology
+    attributes:
+      label: Client OS and topology
+      placeholder: Windows 11 x64 + Docker Desktop WSL2 local loopback
+    validations:
+      required: true
+  - type: input
+    id: decode
+    attributes:
+      label: Decode tokens per second
+      description: Committed decode throughput for one request, with decode seconds and completion tokens if available.
+      placeholder: "209.04 (1,143 tokens / 5.47 s)"
+    validations:
+      required: true
+  - type: input
+    id: acceptance
+    attributes:
+      label: MTP acceptance rate
+      description: Accepted / drafted tokens if available.
+      placeholder: "77.0% (799/1,038)"
+  - type: input
+    id: longcontext
+    attributes:
+      label: Longest exact-retrieval context you verified
+      placeholder: "130,048-token prompt, exact match, 58.5 s"
+  - type: textarea
+    id: method
+    attributes:
+      label: Measurement method
+      description: Exactly how each number was produced (harness, command shape, warm-up, repetitions). Server-side harnesses live in the runtime repositories; v0.1 ships no one-command product benchmark.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Acceptance checks passing on this environment
+      options:
+        - label: Text and file-tool turn passed
+        - label: Image input passed
+        - label: Stateful same-session follow-up passed
+        - label: OMP exit/resume passed while NInfer stayed alive
+        - label: Disconnected route failed closed without a cloud answer
+  - type: textarea
+    id: notes
+    attributes:
+      label: Content-safe notes
+      description: Anything that affects interpretation - thermals, power limit, shared workloads, clocks.
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction confirmation
+      options:
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, and session data.
+          required: true

@@ -1,0 +1,119 @@
+# Benchmarks
+
+Every number on this page is a recorded measurement with a receipt, or it is explicitly labelled as
+someone else's published result. Measurements belong to the exact candidate, profile, and machine
+that produced them; none is a universal GPU, model, or end-to-end latency claim.
+
+- **Qualified product results** come from the release qualification bound into
+  [`qualification.json`](../releases/v0.1.0-beta.1/qualification.json).
+- **Engine campaign results** are published upstream by
+  [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
+- **Community results** are early-access tester submissions collected below.
+
+## Qualified `v0.1.0-beta.1` results
+
+Measured on one NVIDIA GeForce RTX 5090 (`sm_120a`) with the exact shipped profile:
+`qwen3_8_27b.ninfer` (Qwen3.8 27B, groupwise-int Q4/Q5 group-64), BF16 KV cache, 131,072-token
+context ceiling, MTP speculative decoding with 3 draft tokens, 1,024-token prefill chunks, one
+active request. Receipts: [`qualification.json`](../releases/v0.1.0-beta.1/qualification.json) ·
+[profile](../profiles/qwen38-rtx5090-windows-docker-local.json).
+
+| Gate | Result | Detail |
+| --- | --- | --- |
+| Decode throughput | **209.04 tok/s** | 1,143 completion tokens in 5.47 s decode; release gate ≥ 200.6 |
+| MTP3 acceptance | **77.0%** | 799 of 1,038 drafted tokens accepted |
+| Long context | **130,048-token prompt, exact retrieval** | full round trip in 58.5 s, 17 completion tokens |
+| Stateful reuse | **37,591-token prefix-cache hit** | zero recomputation on the largest observed warm request |
+| Session semantics | continuation, 2 forks, delete survival | cache reuse observed across the stateful Responses lifecycle |
+| Golden t01 | **exact match in 100.2 s** | fixed end-to-end OMP agent task (runner OMP 18.0.5), bound 120.9 s |
+| Serving contract | OpenAI, Anthropic, Responses, Vision | plus authenticated status identity |
+
+During the stateful-responses qualification, 18 of 31 telemetry requests were served from retained
+state rather than recomputed prefill.
+
+### What those numbers mean in a coding session
+
+- **209 tok/s decode with thinking preserved.** Agent turns are decode-heavy; drafted-and-verified
+  MTP3 commits multiple tokens per backbone pass instead of one.
+- **130K context is real, not nominal.** The gate is an exact-output retrieval across a
+  130,048-token prompt, not a perplexity curve.
+- **Warm turns skip the re-read.** OMP appends to retained GPU state through stateful OpenAI
+  Responses (`previous_response_id`). The 37,591-token prefix hit is a whole session prefix the GPU
+  did not re-prefill. A stateless provider route would recompute that prefix on every turn.
+- **Correctness does not depend on the cache.** OMP commits its transcript before advancing
+  provider state; retained GPU state is an acceleration that can be discarded and replayed.
+
+## Model quality at this quantization
+
+Published by [Neroued/ninfer](https://github.com/Neroued/ninfer#evaluation) for the registered
+artifacts (EvalScope 1.9.0, 0-shot, one sample per problem, thinking enabled, MTP3). The shipped
+product artifact is the `groupwise-int` row:
+
+| Artifact profile | AIME 2025 | AIME 2026 | GPQA-Diamond | ERQA | RealWorldQA |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.8-27B `groupwise-int` (shipped) | 96.67% | 96.67% | 87.37% | 66.25% | 82.22% |
+| Qwen3.8-27B `nvfp4` | 96.67% | 96.67% | 90.40% | 66.25% | 83.53% |
+
+These are single-sample runs on small question sets (30 and 198 items) under one evaluation
+profile: a strong sanity signal that the quantization preserves capability, not a leaderboard
+claim.
+
+## Engine campaign highlights
+
+The NInfer engine's published performance campaign — measured and documented upstream by
+[Neroued/ninfer](https://github.com/Neroued/ninfer#performance) on one RTX 5090 with INT8 KV and
+different artifacts/settings than the shipped product profile:
+
+| Published upstream measurement | Result |
+| --- | --- |
+| Qwen3.6-35B-A3B prefill at a 7,680-token prompt | 15,544 tok/s |
+| Qwen3.6-27B `nvfp4` prefill at a 7,680-token prompt | 11,191 tok/s (3.48× groupwise-int) |
+| Qwen3.6-35B-A3B saturated decode at concurrency 8 | 1,313.8 aggregate tok/s |
+| Qwen3.6-27B `nvfp4` saturated decode at concurrency 8 | 1,146.9 aggregate tok/s (5.67× C=1) |
+| Qwen3.8-27B `nvfp4` MTP3 structured output | 219.8 tok/s at 90.8% acceptance |
+
+Those results are not product claims: the shipped v0.1 profile is Qwen3.8-27B `groupwise-int` with
+BF16 KV and one active request, and its qualified numbers are the table at the top. They show the
+headroom of the engine family this product rides on. Full methodology:
+[upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md).
+
+## Community results
+
+Early-access leaderboard. One row per verified environment; newest first. Submit yours with the
+[benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+after the documented acceptance checks pass.
+
+| Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
+| --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.1.0-beta.1 | 209.04 | 77.0% | 130,048 tokens, exact | [qualification](../releases/v0.1.0-beta.1/qualification.json) (maintainer) |
+
+Submission rules:
+
+1. Run the exact ready release (`python3 scripts/verify_release.py --require-ready` passes) on the
+   documented topology.
+2. Report only content-safe values: hardware, driver, versions, throughput, acceptance, and check
+   results. No prompts, outputs, hostnames, or raw logs.
+3. State the measurement method. v0.1 has no one-command product benchmark; server-side
+   measurements come from the runtime harness in the component repositories, and a managed
+   `benchmark --quick` product command is planned for v0.2 (see [`ROADMAP.md`](../ROADMAP.md)).
+4. Rows are added after a maintainer matches the report against the release identities.
+
+## Benchmarks we still want
+
+Planned measurements that would sharpen the picture; contributions welcome
+(see [`PERFORMANCE.md`](PERFORMANCE.md)):
+
+- **Warm vs cold turn latency sweep** on the product profile: time-to-first-token for a follow-up
+  turn at 10K/37K/100K-token sessions, stateful route vs forced replay.
+- **MTP0 vs MTP3 ablation** on the shipped `groupwise-int` artifact (the upstream campaign covers
+  other artifacts).
+- **Prefill throughput curve** for the shipped artifact from 7,680 to 130,048 tokens.
+- **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
+- **Process-restart continuation timing** once durable session checkpoints ship (in development in
+  the runtime repositories).
+- **RTX 4090 and RTX 3090 lanes** re-running the full gate set on their fixed profiles before any
+  support claim.
+
+Publishing rule: a new number enters this page only with its receipt, exact profile, and machine
+identity, and product claims change only through a new qualification binding
+(see [`RELEASES.md`](RELEASES.md)).

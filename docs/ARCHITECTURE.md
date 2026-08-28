@@ -9,14 +9,14 @@ and qualification summary.
 ```mermaid
 sequenceDiagram
     participant User
-    participant OMP as OMP on macOS
-    participant SSH as SSH local forward
+    participant OMP as OMP client (Windows/macOS/Linux)
+    participant Route as loopback route
     participant NInfer as NInfer on RTX 5090
     participant GPU as Qwen3.8 artifact
 
     User->>OMP: new coding turn
-    OMP->>SSH: OpenAI Responses request<br/>Bearer auth, local port 18089
-    SSH->>NInfer: remote loopback port 18089
+    OMP->>Route: OpenAI Responses request<br/>Bearer auth, local port 18089
+    Route->>NInfer: loopback port 18089
     NInfer->>GPU: prefill/decode or retained continuation
     GPU-->>NInfer: tokens and state transition
     NInfer-->>OMP: Responses stream + response ID
@@ -24,11 +24,14 @@ sequenceDiagram
     OMP->>OMP: commit provider snapshot only after transcript publication
 ```
 
-Both listener endpoints are loopback. The NInfer container uses Docker host networking on the
-Linux/WSL2 inference host, so its qualified `--host 127.0.0.1` bind is host loopback rather than
-container-private loopback behind an unreachable bridge mapping. SSH authenticates the machine
-path; a separate NInfer bearer token authenticates the HTTP endpoint. The NInfer process uses one
-resident model and one active request in the first profile.
+Both listener endpoints are loopback. In the ready Windows route, Docker Desktop exposes the WSL2
+loopback service to native Windows at `127.0.0.1:18089`; in the managed macOS preview route, an
+authenticated SSH local forward carries Mac loopback to remote loopback. The NInfer container uses
+Docker host networking on the Linux/WSL2 inference host, so its qualified `--host 127.0.0.1` bind
+is host loopback rather than container-private loopback behind an unreachable bridge mapping. SSH
+(where used) authenticates the machine path; a separate NInfer bearer token always authenticates
+the HTTP endpoint. The NInfer process uses one resident model and one active request in the first
+profile.
 
 ## State ownership
 
@@ -77,19 +80,23 @@ OMP session semantics, or another request proxy.
 ### OMP
 
 Owns the coding-agent UX, transcript, tools, model configuration, stateful Responses transaction,
-and eventual `omp appliance ...` lifecycle. In v0.1, the custom provider route is configured
-manually; source-integrated managed appliance installation remains non-installable.
+and eventual `omp appliance ...` lifecycle. The beta client is a pinned fork build of
+[Oh My Pi](https://github.com/can1357/oh-my-pi) carrying the NInfer provider integration, with
+upstreaming intended (see [`ROADMAP.md`](../ROADMAP.md)). In v0.1, the custom provider route is
+configured manually; source-integrated managed appliance installation remains non-installable.
 
 ### NInfer
 
 Owns the `.ninfer` engine/server, CUDA execution, Qwen3.8 runtime, Responses state/cache, authenticated
-status, numerical behavior, container, and runtime qualification. The 5090 and 4090 forks remain
-separate runtime repositories until their target contracts converge by evidence rather than naming.
+status, numerical behavior, container, and runtime qualification. The runtime is a downstream fork
+of [Neroued/ninfer](https://github.com/Neroued/ninfer); the 5090 and 4090 lanes remain separate
+runtime repositories until their target contracts converge by evidence rather than naming.
 
 ### Homebrew tap
 
-Owns installation of the exact macOS OMP bundle. Stable `omp` and prerelease `omp-beta` are separate
-casks so early access does not silently replace the stable channel.
+Owns distribution of the exact native client archives (Windows, macOS, Linux) plus the stable
+`omp` and prerelease `omp-beta` casks, kept separate so early access does not silently replace the
+stable channel.
 
 ## v0.2 cutover
 
