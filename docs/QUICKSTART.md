@@ -49,7 +49,7 @@ The version must be `omp/18.0.7`. The installer retains the previous client poin
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
 the macOS tunnel/key-copy sections: Docker Desktop exposes the WSL2 loopback service to native
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
-section 7 and run every acceptance check in section 8.
+section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Managed macOS SSH preview route
 
@@ -210,30 +210,31 @@ providers or model definitions. The key remains an executable secret reference:
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
+For the macOS/Linux shell route, install the fail-closed default config:
+
+```sh
+install -m 600 examples/manual-tunnel/fail-closed.yml \
+  "$HOME/.omp/agent/config.yml"
+```
+
 ### Native Windows OMP
 
 The POSIX `!cat` secret reference is not supported by native Windows OMP. Copy
 [`examples/windows-docker-local/models.fragment.yml`](../examples/windows-docker-local/models.fragment.yml)
 to `$HOME\.omp\agent\models.yml`, or merge only its `providers.ninfer-beta` mapping.
-Load the key into the process environment without printing it before every OMP launch:
+Install the fail-closed default config and load the key without printing it before every OMP launch:
 
 ```powershell
+$Agent = Join-Path $HOME '.omp\agent'
+New-Item -ItemType Directory -Force -Path $Agent | Out-Null
+Copy-Item .\examples\windows-docker-local\models.fragment.yml (Join-Path $Agent 'models.yml')
+Copy-Item .\examples\manual-tunnel\fail-closed.yml (Join-Path $Agent 'config.yml')
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw "$HOME\.omp\agent\ninfer-beta.key").Trim()
-omp --model ninfer-beta/local-max
+& "$env:LOCALAPPDATA\OMP\omp.cmd" --model ninfer-beta/local-max
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
 the key itself in YAML, command arguments, shell history, or support bundles.
-
-Install the supplied fail-closed settings into the launcher-owned default config whenever exercising
-the beta. If the file already exists, merge only the `retry` mapping instead of overwriting unrelated
-settings:
-
-```sh
-install -m 600 examples/manual-tunnel/fail-closed.yml \
-  "$HOME/.omp/agent/config.yml"
-omp --model ninfer-beta/local-max
-```
 
 The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
 the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
@@ -243,6 +244,52 @@ switch to a cloud model.
 
 Run these checks in order and record only pass/fail plus the content-safe identities from the NInfer
 launcher.
+
+### Native Windows command forms
+
+Run from the tagged product clone in the same PowerShell process that loaded
+`NINFER_BETA_API_KEY`:
+
+```powershell
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.cmd"
+$Smoke = Join-Path $env:TEMP ("omp-ninfer-acceptance-" + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
+Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
+Push-Location $Smoke
+try {
+  & $Launcher -p --no-session --auto-approve --model ninfer-beta/local-max `
+    'Use a file-reading tool to read marker.txt, then report its exact single line.'
+  if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
+} finally { Pop-Location }
+
+$Image = (Resolve-Path .\assets\icon-512.png).Path
+& $Launcher -p --no-session --auto-approve --model ninfer-beta/local-max `
+  ("@" + $Image) 'Describe the visible image in one sentence.'
+if ($LASTEXITCODE -ne 0) { throw 'Vision acceptance failed' }
+
+$Session = Join-Path $Smoke 'sessions'
+& $Launcher -p --auto-approve --session-dir $Session --model ninfer-beta/local-max `
+  'Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly.'
+if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
+& $Launcher -p --auto-approve --session-dir $Session --continue `
+  'Return only the nonce from the prior turn.'
+if ($LASTEXITCODE -ne 0) { throw 'stateful resume failed' }
+```
+
+For the fail-closed check, stop the owned runtime from the tagged WSL2 clone, then issue one
+native Windows request:
+
+```powershell
+wsl.exe -d Ubuntu-24.04 -- bash -lc 'cd ~/omp-ninfer && ./examples/manual-tunnel/stop-ninfer.sh'
+& $Launcher -p --no-session --auto-approve --max-time 20s `
+  --model ninfer-beta/local-max 'Return LOCAL_ONLY.'
+if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+```
+
+Expected result: a connection/authentication failure and no model response. Any cloud-provider
+request is a release failure. Restart NInfer with section 4 only after observing the failure.
+
+### macOS/Linux command forms
 
 ### Text and tool turn
 
@@ -291,7 +338,7 @@ continuation.
 
 ### Fail closed
 
-Stop the tunnel with `Ctrl-C`, then run:
+For the managed macOS route, stop the tunnel with `Ctrl-C`, then run:
 
 ```sh
 omp --no-session --max-time 20s \
