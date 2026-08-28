@@ -47,7 +47,7 @@ tar -xzf omp-18.0.7-windows-x64.tar.gz
 The version must be `omp/18.0.7`. The installer retains the previous client pointer when one exists.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
-the macOS tunnel/key-copy sections: Docker Desktop exposes the WSL2 loopback service to native
+the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to native
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
 section 7 and the **Native Windows command forms** at the start of section 8.
 
@@ -227,14 +227,29 @@ Install the fail-closed default config and load the key without printing it befo
 ```powershell
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
-Copy-Item .\examples\windows-docker-local\models.fragment.yml (Join-Path $Agent 'models.yml')
-Copy-Item .\examples\manual-tunnel\fail-closed.yml (Join-Path $Agent 'config.yml')
-$env:NINFER_BETA_API_KEY = (Get-Content -Raw "$HOME\.omp\agent\ninfer-beta.key").Trim()
+$KeyPath = Join-Path $Agent 'ninfer-beta.key'
+$KeyText = (& wsl.exe -d Ubuntu-24.04 -- bash -lc 'cat "$HOME/.config/omp-ninfer/api-key"' | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($KeyText)) { throw 'NInfer key copy from WSL2 failed' }
+[IO.File]::WriteAllText($KeyPath, $KeyText, [Text.UTF8Encoding]::new($false))
+$Identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+& icacls.exe $KeyPath /inheritance:r /grant:r "${Identity}:(R,W)" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'NInfer key ACL restriction failed' }
+
+$ModelsPath = Join-Path $Agent 'models.yml'
+$ConfigPath = Join-Path $Agent 'config.yml'
+if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
+  throw 'Existing OMP models/config found; merge providers.ninfer-beta and retry mappings instead of overwriting them.'
+}
+Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
+Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+$env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
 & "$env:LOCALAPPDATA\OMP\omp.cmd" --model ninfer-beta/local-max
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
-the key itself in YAML, command arguments, shell history, or support bundles.
+the key itself in YAML, command arguments, shell history, or support bundles. The block refuses to
+overwrite an existing OMP configuration; merge only `providers.ninfer-beta` and the `retry` mapping
+when those files already exist.
 
 The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
 the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
