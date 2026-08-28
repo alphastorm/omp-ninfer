@@ -141,7 +141,29 @@ class ReleaseContractTest(unittest.TestCase):
         self.save(profile_path, profile)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
-        self.assertIn("profile container network mode must be host", errors)
+        self.assertIn("profile: container network mode must be host", errors)
+
+    def test_release_defaults_to_compatibility_authority(self) -> None:
+        self.assertEqual(
+            VERIFY_RELEASE.resolve_product_release(ROOT, None),
+            "v0.1.0-beta.1",
+        )
+        with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
+            VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
+
+    def test_server_arguments_derive_hardware_specific_values(self) -> None:
+        profile = self.load(ROOT / "profiles" / "qwen38-rtx5090-windows-docker-local.json")
+        profile["omp_provider"]["context_window"] = 65536
+        arguments = profile["server"]["arguments"]
+        arguments[arguments.index("--max-context") + 1] = "65536"
+        arguments[arguments.index("--kv-dtype") + 1] = "int8"
+        errors: list[str] = []
+        VERIFY_RELEASE.validate_server_arguments(profile, "profile", errors)
+        self.assertEqual(errors, [])
+
+        arguments[arguments.index("--max-context") + 1] = "131072"
+        VERIFY_RELEASE.validate_server_arguments(profile, "profile", errors)
+        self.assertTrue(any("--max-context" in error for error in errors))
 
     def test_additional_profiles_share_the_release_contract(self) -> None:
         temporary, root = self.candidate_copy()

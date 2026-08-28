@@ -39,9 +39,9 @@ number kernel work is judged against.
 
 ## The profiling lane
 
-Branch
-[`perf/scripted-sm120-mtp3-profiling`](https://github.com/alphastorm/ninfer/tree/perf/scripted-sm120-mtp3-profiling)
-in the runtime repo turns one-off profiling into reproducible packets:
+Runtime mainline commit
+[`7c1c1936`](https://github.com/alphastorm/ninfer/tree/7c1c1936d1fd8b645bc7a30cdcbe35cc6b12c206/tools/bench)
+turns one-off profiling into reproducible packets without a long-lived controller branch:
 
 - `tools/bench/run_sm120_mtp3_profile.sh` — orchestrates Nsight Compute, Nsight Systems, and
   timing captures for the MTP3 decode loop with container isolation and performance-counter
@@ -80,7 +80,8 @@ Entry detail:
   pair kernels show decode (`M=1`) already at 75.2% of the measured read peak, and the 4-token
   verification batch moving the same bytes. Conclusion: speculative verification is
   bandwidth-amortized; acceptance rate, not verify cost, is the lever. Packets:
-  `profiles/` on the profiling branch.
+  [`profiles/`](https://github.com/alphastorm/ninfer/tree/7c1c1936d1fd8b645bc7a30cdcbe35cc6b12c206/profiles)
+  at the integrated mainline commit.
 - **EXP-002 — negative result, kept on the record.** The MMA candidate for the Q5 post-mixer was
   triaged `more-than-50-percent-slower` and rejected; SIMT split-2 remains production. Negative
   results are part of the ledger so the next contributor does not re-run the same dead end.

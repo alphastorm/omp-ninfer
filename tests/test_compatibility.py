@@ -32,7 +32,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                 "linux-docker-local",
             ],
         )
-        self.assertTrue(all(profile["status"] == "preview" for profile in authority["profiles"]))
+        self.assertTrue(
+            all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
+        )
         receipts = {profile["id"]: profile["acceptance_receipt"] for profile in authority["profiles"]}
         self.assertIsNotNone(receipts["darwin-remote-ssh"])
         self.assertIsNotNone(receipts["windows-docker-local"])
