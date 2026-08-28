@@ -310,8 +310,17 @@ def validate(
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
                                       model, runtime.get("public_model_id"), errors)
 
-    compatibility_path = root / "compatibility.json"
-    compatibility_matrix_path = root / "docs" / "COMPATIBILITY.md"
+    release_compatibility_path = manifest_path.parent / "compatibility.json"
+    compatibility_path = (
+        release_compatibility_path
+        if release_compatibility_path.is_file()
+        else root / "compatibility.json"
+    )
+    compatibility_matrix_path = (
+        manifest_path.parent / "COMPATIBILITY.md"
+        if release_compatibility_path.is_file()
+        else root / "docs" / "COMPATIBILITY.md"
+    )
     compatibility: dict[str, Any] = {}
     try:
         compatibility = load_authority(compatibility_path)

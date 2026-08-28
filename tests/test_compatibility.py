@@ -43,9 +43,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_bound_acceptance_receipts_match_immutable_public_files(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         expected_files = {
-            "darwin-remote-ssh": "macos-arm64-managed-ssh.json",
-            "windows-docker-local": "windows-x64.json",
-            "linux-docker-local": "linux-x64.json",
+            "darwin-remote-ssh": "macos-arm64-managed-ssh-18.0.9.json",
+            "windows-docker-local": "windows-x64-18.0.9.json",
+            "linux-docker-local": "linux-x64-18.0.9.json",
         }
         for profile in authority["profiles"]:
             filename = expected_files.get(profile["id"])
