@@ -223,6 +223,16 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("OMP distribution version must equal release_id", errors)
 
+    def test_v02_requires_the_public_auditable_omp_source_repository(self) -> None:
+        self.assertEqual(
+            VERIFY_RELEASE.expected_omp_source_repository("v0.2.0-beta.1"),
+            "https://github.com/alphastorm/oh-my-pi",
+        )
+        self.assertEqual(
+            VERIFY_RELEASE.expected_omp_source_repository("v0.1.0-beta.1"),
+            "https://github.com/alphastorm/omp-monorepo",
+        )
+
     def test_omp_artifact_name_must_bind_version_and_platform(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
@@ -283,6 +293,150 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("NInfer OCI reference must exactly bind its manifest digest", errors)
+
+    def test_candidate_accepts_the_public_runtime_repository(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        self.make_candidate(root, manifest)
+        ninfer = manifest["components"]["ninfer"]
+        ninfer["oci_repository"] = "ghcr.io/alphastorm/ninfer-runtime"
+        ninfer["oci_reference"] = (
+            f"{ninfer['oci_repository']}@{ninfer['oci_manifest_digest']}"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertNotIn(
+            "NInfer OCI reference must exactly bind its manifest digest", errors
+        )
+        self.assertNotIn(
+            "NInfer OCI repository is not an approved public runtime repository", errors
+        )
+
+    def test_native_runtime_variant_binds_its_qualification_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release = "v0.2.0-beta.1"
+            qualification_dir = root / "releases" / release / "qualification"
+            qualification_dir.mkdir(parents=True)
+            receipt_path = qualification_dir / "rtx3090.json"
+            receipt = {
+                "status": "passed",
+                "beta_qualified": True,
+                "identity": {
+                    "source_commit": "a" * 40,
+                    "server_binary_sha256": "b" * 64,
+                    "configuration_sha256": "c" * 64,
+                },
+                "package": {
+                    "sha256": "d" * 64,
+                    "sbom_sha256": "f" * 64,
+                    "installer_sha256": "4" * 64,
+                    "controller_sha256": "5" * 64,
+                    "gpu_owner_controller_sha256": "6" * 64,
+                    "state_protection_sha256": "7" * 64,
+                },
+            }
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            variant = {
+                "id": "rtx3090-windows-native",
+                "status": "qualified",
+                "installable": True,
+                "repository": "https://github.com/alphastorm/ninfer",
+                "release_tag": "v0.2.0-qwen38-3090-beta.1",
+                "source_commit": "a" * 40,
+                "source_archive_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/source.tar.gz"
+                ),
+                "source_archive_sha256": "e" * 64,
+                "package_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/package.tar.gz"
+                ),
+                "package_sha256": "d" * 64,
+                "package_bytes": 1,
+                "sbom_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/package.spdx.json"
+                ),
+                "sbom_sha256": "f" * 64,
+                "installer_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Install-Release.ps1"
+                ),
+                "installer_sha256": "4" * 64,
+                "controller_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Control-Release.ps1"
+                ),
+                "controller_sha256": "5" * 64,
+                "gpu_owner_controller_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Control-GpuOwner.ps1"
+                ),
+                "gpu_owner_controller_sha256": "6" * 64,
+                "state_protection_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Protect-StateRoot.ps1"
+                ),
+                "state_protection_sha256": "7" * 64,
+                "server_binary_sha256": "b" * 64,
+                "configuration_sha256": "c" * 64,
+                "model_artifact_sha256": "1" * 64,
+                "maximum_context_tokens": 65536,
+                "qualification": {
+                    "summary": "qualification/rtx3090.json",
+                    "sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
+                    "public_url": (
+                        "https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
+                        + "2" * 40
+                        + "/releases/v0.2.0-beta.1/qualification/rtx3090.json"
+                    ),
+                },
+            }
+            compatibility = {
+                "runtime_variants": [{
+                    "id": variant["id"],
+                    "status": "qualified",
+                    "installable": True,
+                }]
+            }
+            errors: list[str] = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertEqual(errors, [])
+
+            receipt["status"] = "incomplete"
+            receipt["beta_qualified"] = False
+            receipt["installable"] = False
+            receipt["deferred_gates"] = ["fresh Windows hardware gate"]
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            variant["status"] = "preview"
+            variant["installable"] = False
+            variant["qualification"]["sha256"] = hashlib.sha256(
+                receipt_path.read_bytes()
+            ).hexdigest()
+            compatibility["runtime_variants"][0]["status"] = "preview"
+            compatibility["runtime_variants"][0]["installable"] = False
+            errors = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertEqual(errors, [])
+
+            variant["package_sha256"] = "3" * 64
+            errors = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertIn(
+                "components.ninfer_variants.rtx3090-windows-native qualification package must match",
+                errors,
+            )
 
     def test_local_packaging_oci_digest_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()

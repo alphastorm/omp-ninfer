@@ -86,8 +86,9 @@ The user-facing claim is therefore “stop re-prefilling the same long coding se
 - [llm-d](https://github.com/llm-d/llm-d) targets Kubernetes-native distributed inference.
 
 They address materially broader multi-node/multi-tenant scheduling and serving problems. The current
-OMP NInfer v0.1 contract is one GPU, one resident model, one trusted owner, and one active request; a
-distributed control plane would add cost without satisfying the early-access outcome.
+OMP NInfer v0.2 contract is one GPU per qualified profile, one resident model, one trusted owner,
+and one active request; a distributed control plane would add cost without satisfying the
+early-access outcome.
 
 ## Why direct OMP to NInfer
 
@@ -95,7 +96,8 @@ The direct route is intentional:
 
 - OMP already owns coding sessions, tools, branches, replay, and durable transcript publication;
 - NInfer already owns Qwen execution, authenticated status, Responses state, and GPU cache lifetime;
-- SSH already supplies the narrow private machine transport for v0.1; and
+- the managed adapters and SSH/local-loopback transports already supply the narrow private machine
+  boundary for v0.2; and
 - the product manifest binds exact bytes and support claims across both.
 
 A new gateway or generic model framework should be introduced only if a named requirement cannot be

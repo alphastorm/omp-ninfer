@@ -1,0 +1,61 @@
+{
+  "artifact_type": "omp_ninfer_external_installation_acceptance",
+  "schema_version": 2,
+  "status": "passed",
+  "product_release": "v0.2.0-beta.1",
+  "completed_utc": "2026-08-29T10:45:00Z",
+  "compatibility": {
+    "authority_id": "omp-ninfer-v0.2.0-beta.1-qualified-1",
+    "sha256": "cd92f66ef78da29f911a1057f40c4198853c03a853141f4e648a46d9d6a72f57",
+    "native_variants": {
+      "rtx4090-windows-native": "qualified",
+      "rtx3090-windows-native": "preview-not-installable"
+    }
+  },
+  "omp_component": {
+    "release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "windows_archive_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+    "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+    "public_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3"
+  },
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "1653e0f5bca2ce08e01ade5c141d72331bed8275aaa782fdf0be1690f2269b"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "runtime_evidence": {
+    "primary_rtx5090": "qualified",
+    "rtx4090_windows_native": "qualified",
+    "rtx3090_windows_native": "preview; fresh current-package live/Windows gates not_run"
+  },
+  "checks": {
+    "tools": true,
+    "vision": true,
+    "stateful_resume": true,
+    "fail_closed": true,
+    "runtime_incumbent_restored": true,
+    "all_three_client_archives_and_binaries_bound": true,
+    "preview_variant_refused_by_installable_path": true
+  },
+  "safety": {
+    "raw_transcripts_included": false,
+    "private_fleet_projection_included": false,
+    "cloud_fallback_observed": false,
+    "production_route_activation_performed": false,
+    "stable_promotion_performed": false
+  },
+  "limitations": [
+    "External installation acceptance covers the qualified primary RTX 5090 composition and all three OMP 18.0.9 clients.",
+    "RTX 4090 native Windows support is separately beta-qualified by its exact component receipt.",
+    "RTX 3090 is a public non-installable preview; its current live model and fresh Windows package lifecycle gates are not_run."
+  ]
+}

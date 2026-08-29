@@ -4,14 +4,14 @@ OMP NInfer is an integration and release product, not a third inference runtime.
 version to an exact OMP client, NInfer runtime, Qwen artifact, hardware profile, connection topology,
 and qualification summary.
 
-## v0.1 topology
+## v0.2 topology
 
 ```mermaid
 sequenceDiagram
     participant User
     participant OMP as OMP client (Windows/macOS/Linux)
     participant Route as loopback route
-    participant NInfer as NInfer on RTX 5090
+    participant NInfer as NInfer on a qualified GPU profile
     participant GPU as Qwen3.8 artifact
 
     User->>OMP: new coding turn
@@ -24,14 +24,15 @@ sequenceDiagram
     OMP->>OMP: commit provider snapshot only after transcript publication
 ```
 
-Both listener endpoints are loopback. In the ready Windows route, Docker Desktop exposes the WSL2
-loopback service to native Windows at `127.0.0.1:18089`; in the managed macOS preview route, an
+Both listener endpoints are loopback. In the primary Windows route, Docker Desktop exposes the WSL2
+loopback service to native Windows at `127.0.0.1:18089`; in the managed macOS route, an
 authenticated SSH local forward carries Mac loopback to remote loopback. The NInfer container uses
 Docker host networking on the Linux/WSL2 inference host, so its qualified `--host 127.0.0.1` bind
 is host loopback rather than container-private loopback behind an unreachable bridge mapping. SSH
 (where used) authenticates the machine path; a separate NInfer bearer token always authenticates
 the HTTP endpoint. The NInfer process uses one resident model and one active request in the first
-profile.
+profile. Native Windows 3090/4090 variants retain their own ports, packages, and receipts rather
+than inheriting the primary container identity.
 
 ## State ownership
 
@@ -52,11 +53,12 @@ owner for continuation, persistence, and failure recovery without solving a firs
 
 ## Identity chain
 
-[`manifest.json`](../releases/v0.1.0-beta.1/manifest.json) binds:
+[`manifest.json`](../releases/v0.2.0-beta.1/manifest.json) binds:
 
 1. product release and support channel;
-2. OMP upstream/source revision, macOS artifact, Homebrew beta cask, size, and hash;
-3. NInfer upstream/source revision, server binary hash, OCI digest, and SBOM;
+2. OMP public source revision, all three native client artifacts, Homebrew beta cask, sizes, and hashes;
+3. primary NInfer source/server/OCI/SBOM plus each native variant package, source archive,
+   SBOM/file inventory, configuration, and qualification receipt;
 4. Qwen artifact revision, byte count, and hash;
 5. canonical runtime configuration hash and hardware profile; and
 6. the public product qualification summary and external-install result.
@@ -80,17 +82,18 @@ OMP session semantics, or another request proxy.
 ### OMP
 
 Owns the coding-agent UX, transcript, tools, model configuration, stateful Responses transaction,
-and eventual `omp appliance ...` lifecycle. The beta client is a pinned fork build of
-[Oh My Pi](https://github.com/can1357/oh-my-pi) carrying the NInfer provider integration, with
-upstreaming intended (see [`ROADMAP.md`](../ROADMAP.md)). In v0.1, the custom provider route is
-configured manually; source-integrated managed appliance installation remains non-installable.
+and `omp appliance ...` lifecycle. The beta client's exact accepted source is public at
+[alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi), carrying the NInfer provider
+integration with upstreaming still intended (see [`ROADMAP.md`](../ROADMAP.md)). v0.2 ships both
+fail-closed manual configuration and the closed managed appliance adapters.
 
 ### NInfer
 
 Owns the `.ninfer` engine/server, CUDA execution, Qwen3.8 runtime, Responses state/cache, authenticated
-status, numerical behavior, container, and runtime qualification. The runtime is a downstream fork
-of [Neroued/ninfer](https://github.com/Neroued/ninfer); the 5090 and 4090 lanes remain separate
-runtime repositories until their target contracts converge by evidence rather than naming.
+status, numerical behavior, container/native packages, and runtime qualification. The primary
+runtime and reviewed 3090/4090 branches are public under
+[alphastorm/ninfer](https://github.com/alphastorm/ninfer), retaining their upstream lineage and
+separate hardware contracts.
 
 ### Homebrew tap
 
@@ -100,7 +103,7 @@ stable channel.
 
 ## v0.2 cutover
 
-The long-term UX stays under `omp appliance ...`. V0.2 should replace the manually operated SSH
-forward and container commands with a remote appliance platform that consumes the same manifest,
-performs state-faithful install/upgrade/rollback, and emits content-safe receipts. It must not add a
-second product name or duplicate the runtime.
+The long-term UX stays under `omp appliance ...`. V0.2 adds a remote appliance platform that
+consumes the same manifest, performs state-faithful install/upgrade/rollback, and emits content-safe
+receipts while retaining the manual route as a bounded fallback. It does not add a second product
+name or another continuation owner.

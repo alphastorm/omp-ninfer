@@ -73,13 +73,12 @@ emoji, no exclamation marks. Claims stated as invariants:
 
 Hard constraints — never write:
 
-- anything implying general availability (v0.1.0-beta.1 is invited)
-- RTX 4090 as supported in v0.1; the dual-GPU tagline remains reserved until an RTX 4090 release is
-  qualified and shipped
-- cloud hosting, automatic appliance installation, or universal RTX support
+- anything implying general availability (`v0.2.0-beta.1` remains invited)
+- support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the v0.2 manifest
+- cloud hosting, unattended production activation, or universal RTX support
 - "first stateful Responses", automatic restart, or universal performance
-- `omp appliance ...` as available now (managed lifecycle comes later;
-  v0.1 tunnel is manual)
+- `omp appliance ...` outside the exact v0.2 compatibility authority or as an implicit production
+  activation path
 
 Standing disclaimer: "Community project; not affiliated with or endorsed by
 Oh My Pi, Qwen, or NVIDIA." Never set NVIDIA, Qwen, or OMP marks in ways that
@@ -142,7 +141,7 @@ CI, release, measured decode, measured context, license. A measured-value badge 
 qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualification receipt.
 
 Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and
-`![Qualified v0.1.0-beta.1 results](assets/benchmarks.png)` under `## Measured, not estimated`;
+`![Qualified v0.2.0-beta.1 results](assets/benchmarks.png)` under `## Measured, not estimated`;
 neither is part of the header.
 
 Then upload `assets/og.png` at GitHub → Settings → Social preview.
