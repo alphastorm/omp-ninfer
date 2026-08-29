@@ -46,7 +46,9 @@
     "tool_result_marker": true,
     "exact_visible_final_answer": true,
     "agent_end": true,
-    "runtime_variant": "rtx3090-windows-native",
+    "runtime_variant": "historical-rtx3090-protocol-endpoint",
+    "runtime_identity_bound": false,
+    "profile_runtime_qualified_by_this_receipt": false,
     "raw_transcript_included": false
   },
   "checks": {
@@ -63,7 +65,8 @@
     "private_fleet_projection_included": false
   },
   "limitations": [
-    "This receipt qualifies the native client and authenticated protocol path; GPU runtime identities are bound separately by the product qualification.",
+    "This receipt qualifies the native client and authenticated protocol shape only; the observed endpoint was a historical RTX 3090 candidate, not the current preview or the primary RTX 5090 profile.",
+    "GPU runtime and profile identities are bound separately by product qualification; this receipt does not qualify either endpoint.",
     "No stable channel or production inference route was activated."
   ]
 }

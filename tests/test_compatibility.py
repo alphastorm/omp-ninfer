@@ -73,6 +73,15 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
+            if profile["id"] == "windows-docker-local":
+                self.assertEqual(
+                    subject["live_acceptance"]["runtime_variant"],
+                    "historical-rtx3090-protocol-endpoint",
+                )
+                self.assertFalse(subject["live_acceptance"]["runtime_identity_bound"])
+                self.assertFalse(
+                    subject["live_acceptance"]["profile_runtime_qualified_by_this_receipt"]
+                )
             distribution = profile["client_distribution"]
             self.assertTrue(distribution["published"])
             self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])

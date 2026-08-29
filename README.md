@@ -51,12 +51,13 @@ re-prefills the whole transcript, and reuse of prior computation is a best-effor
 
 OMP NInfer ships the third option as a small set of qualified combinations — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
-RTX 5090, RTX 4090, or RTX 3090 — with three properties the alternatives do not give you together:
+RTX 5090 or RTX 4090, plus a public RTX 3090 preview — with three properties the qualified lanes do
+not give you together elsewhere:
 
 1. **Session state lives on your GPU.** OMP drives NInfer through stateful OpenAI Responses
    (`previous_response_id`). A follow-up turn continues from retained GPU state instead of
-   re-prefilling the session — the qualification observed a 37,591-token prefix served with zero
-   recomputation, and 18 of 31 requests reusing retained state. OMP commits its transcript before
+   re-prefilling the session. The predecessor v0.1 campaign observed a 37,591-token prefix hit, but
+   v0.2 does not rebind that numeric result. OMP commits its transcript before
    advancing provider state, so losing the cache degrades to a replay, never a broken session.
 2. **Private and fail-closed.** Both endpoints bind loopback only; the route is
    bearer-authenticated; the shipped OMP configuration disables model fallback. When your GPU is
@@ -81,7 +82,7 @@ Exact shipped profiles and receipts in
 | RTX 4090 native beta | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-Process-restart Responses continuation is a native RTX 3090/4090 variant claim. The primary RTX
+Process-restart Responses continuation is qualified only for the native RTX 4090 variant. The primary RTX
 5090 image keeps restart policy `no`; OMP transcript replay remains its recovery path.
 
 The shipped artifact holds its capability through quantization — 96.67% AIME 2025/2026 and 87.37%
@@ -143,11 +144,11 @@ second gateway sits between OMP and NInfer: [Related work](docs/RELATED_WORK.md)
 | --- | --- | --- | --- | --- |
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
-| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090/3090, MTP0 on the qualified 4090 package | Model/config dependent | Optional draft/ngram setups | Optional |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on qualified 4090; the 3090 preview has no current performance claim | Model/config dependent | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | One pinned artifact and three explicitly qualified GPU lanes | Thousands of models, broad hardware | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| Breadth | One pinned artifact, two qualified GPU lanes, and one public preview | Thousands of models, broad hardware | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
 Where each shines: **Ollama** is the easiest way to run many models locally. **llama.cpp** has the
 broadest hardware and quant ecosystem. **vLLM** is the throughput and multi-tenant serving

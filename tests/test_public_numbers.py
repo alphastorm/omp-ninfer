@@ -11,7 +11,14 @@ README = ROOT / "README.md"
 BENCHMARKS = ROOT / "docs" / "BENCHMARKS.md"
 
 
-class PublicNumbersTest(unittest.TestCase):
+class PublicNumbersTests(unittest.TestCase):
+    def test_predecessor_prefix_hit_is_not_rebound_to_v02(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        performance = (ROOT / "docs" / "PERFORMANCE.md").read_text(encoding="utf-8")
+        self.assertIn("predecessor v0.1 campaign", readme)
+        self.assertIn("not rebind that numeric result", readme)
+        self.assertIn("not rebound as a v0.2 numeric claim", performance)
+
     @classmethod
     def setUpClass(cls) -> None:
         authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
