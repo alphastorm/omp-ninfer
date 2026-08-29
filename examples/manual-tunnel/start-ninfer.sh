@@ -206,6 +206,55 @@ CONTAINER_ID=$(
 )
 printf 'started %s (%s)\n' "$CONTAINER" "$CONTAINER_ID"
 
+# Fail fast on the WSL mirrored-loopback drift signature: the server logs that it is
+# listening on host loopback, but the port is unreachable from this namespace
+# (docs/TROUBLESHOOTING.md, "The server listens but loopback is unreachable").
+probe_loopback() {
+  python3 - <<'PY'
+import socket
+import sys
+
+probe = socket.socket()
+probe.settimeout(3)
+try:
+    probe.connect(("127.0.0.1", 18089))
+except OSError:
+    sys.exit(1)
+finally:
+    probe.close()
+PY
+}
+
+LISTENING_PATTERN='listening on http://127.0.0.1:18089'
+LISTENING_GRACE=${NINFER_LOOPBACK_GRACE:-15}
+PREFLIGHT_DEADLINE=$((SECONDS + 900))
+LISTENING_SINCE=
+LOOPBACK_REACHABLE=false
+while ((SECONDS < PREFLIGHT_DEADLINE)); do
+  if probe_loopback; then
+    LOOPBACK_REACHABLE=true
+    break
+  fi
+  if [[ -z "$LISTENING_SINCE" ]]; then
+    if docker logs "$CONTAINER" 2>&1 | grep -qF "$LISTENING_PATTERN"; then
+      LISTENING_SINCE=$SECONDS
+    fi
+  elif ((SECONDS - LISTENING_SINCE >= LISTENING_GRACE)); then
+    printf 'error: wsl-mirrored-loopback-unavailable\n' >&2
+    printf 'NInfer logs "%s", but host loopback cannot reach the port.\n' "$LISTENING_PATTERN" >&2
+    printf 'The WSL/Docker Desktop loopback path has drifted on this host.\n' >&2
+    printf 'Recovery: from Windows run `wsl --shutdown`, start Docker Desktop, then rerun this launcher.\n' >&2
+    printf 'See docs/TROUBLESHOOTING.md; the container stays up for `docker logs %s`.\n' "$CONTAINER" >&2
+    exit 1
+  fi
+  sleep 5
+done
+if [[ "$LOOPBACK_REACHABLE" != true ]]; then
+  printf 'error: NInfer did not become ready within 900 seconds: loopback connection never succeeded\n' >&2
+  printf 'Inspect `docker logs %s`; the container is left in place for diagnosis.\n' "$CONTAINER" >&2
+  exit 1
+fi
+
 python3 - \
   "$API_KEY_FILE" \
   "$EXPECTED_UPSTREAM_COMMIT" \

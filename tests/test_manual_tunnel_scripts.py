@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import socket
 import stat
 import subprocess
 import tempfile
@@ -206,6 +207,109 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             network_index = arguments.index("--network")
             self.assertEqual(arguments[network_index + 1], "host")
             self.assertNotIn("--publish", arguments)
+
+    @staticmethod
+    def write_common_fakes(fake_bin: Path) -> None:
+        (fake_bin / "nvidia-smi").write_text(
+            "#!/bin/sh\nprintf 'NVIDIA GeForce RTX 5090, 32607 MiB, 12.0\\n'\n",
+            encoding="utf-8",
+        )
+        (fake_bin / "chmod").write_text(
+            "#!/bin/sh\n"
+            "if [ \"$2\" = -- ]; then exec /bin/chmod \"$1\" \"$3\"; fi\n"
+            "exec /bin/chmod \"$@\"\n",
+            encoding="utf-8",
+        )
+        (fake_bin / "sha256sum").write_text(
+            "#!/bin/sh\n[ \"$1\" = -- ] && shift\n"
+            "printf '%s  %s\\n' \"$EXPECTED_MODEL_SHA256\" \"$1\"\n",
+            encoding="utf-8",
+        )
+        for name in ("chmod", "docker", "nvidia-smi", "sha256sum"):
+            path = fake_bin / name
+            path.chmod(path.stat().st_mode | stat.S_IXUSR)
+
+    def test_start_names_loopback_drift_when_listening_is_unreachable(self) -> None:
+        probe = socket.socket()
+        probe.settimeout(0.5)
+        try:
+            probe.connect(("127.0.0.1", 18089))
+        except OSError:
+            pass
+        else:
+            self.skipTest("local port 18089 is in use; drift preflight cannot be exercised")
+        finally:
+            probe.close()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.copy_contract_tree(root)
+
+            manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+            model = root / "model.ninfer"
+            with model.open("wb") as model_file:
+                model_file.truncate(manifest["components"]["model"]["artifact_bytes"])
+
+            key = root / "api-key"
+            key.write_text("test-key\n", encoding="utf-8")
+            key.chmod(0o600)
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            (fake_bin / "docker").write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1:$2\" = \"container:inspect\" ]; then exit 1; fi\n"
+                "if [ \"$1\" = pull ]; then exit 0; fi\n"
+                "if [ \"$1\" = logs ]; then\n"
+                "  printf 'listening on http://127.0.0.1:18089\\n'\n"
+                "  exit 0\n"
+                "fi\n"
+                "if [ \"$1\" = run ]; then\n"
+                "  for argument in \"$@\"; do\n"
+                "    if [ \"$argument\" = --entrypoint ]; then\n"
+                "      printf '%s  /usr/local/bin/ninfer-serve\\n' "
+                "\"$EXPECTED_BINARY_SHA256\"\n"
+                "      exit 0\n"
+                "    fi\n"
+                "  done\n"
+                "  printf 'fake-container-id\\n'\n"
+                "  exit 0\n"
+                "fi\n"
+                "exit 2\n",
+                encoding="utf-8",
+            )
+            self.write_common_fakes(fake_bin)
+
+            environment = os.environ.copy()
+            environment["PATH"] = f"{fake_bin}:{environment['PATH']}"
+            environment["EXPECTED_BINARY_SHA256"] = manifest["components"]["ninfer"][
+                "server_binary_sha256"
+            ]
+            environment["EXPECTED_MODEL_SHA256"] = manifest["components"]["model"][
+                "artifact_sha256"
+            ]
+            environment["NINFER_LOOPBACK_GRACE"] = "1"
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(root / "examples" / "manual-tunnel" / "start-ninfer.sh"),
+                    "--model",
+                    str(model),
+                    "--api-key-file",
+                    str(key),
+                    "--log-dir",
+                    str(root / "logs"),
+                ],
+                cwd=root,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=60,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("wsl-mirrored-loopback-unavailable", result.stderr)
 
     def test_tunnel_executes_exact_fail_closed_ssh_arguments(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
