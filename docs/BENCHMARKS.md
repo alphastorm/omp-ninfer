@@ -57,8 +57,8 @@ active request. Receipts: [`qualification.json`](../releases/v0.1.0-beta.1/quali
 | Golden t01 | **exact match in 100.2 s** | fixed end-to-end OMP agent task (runner OMP 18.0.5), bound 120.9 s |
 | Serving contract | OpenAI, Anthropic, Responses, Vision | plus authenticated status identity |
 
-During the stateful-responses qualification, 18 of 31 telemetry requests were served from retained
-state rather than recomputed prefill.
+During the v0.1.0-beta.1 stateful-responses qualification, 18 of 31 telemetry requests were served
+from retained state rather than recomputed prefill.
 
 ### What those numbers mean in a coding session
 
@@ -67,8 +67,9 @@ state rather than recomputed prefill.
 - **130K context is real, not nominal.** The gate is an exact-output retrieval across a
   130,048-token prompt, not a perplexity curve.
 - **Warm turns skip the re-read.** OMP appends to retained GPU state through stateful OpenAI
-  Responses (`previous_response_id`). The 37,591-token prefix hit is a whole session prefix the GPU
-  did not re-prefill. A stateless provider route would recompute that prefix on every turn.
+  Responses (`previous_response_id`). In that v0.1 campaign, the 37,591-token prefix hit is a whole
+  session prefix the GPU did not re-prefill. A stateless provider route would recompute that prefix
+  on every turn.
 - **Correctness does not depend on the cache.** OMP commits its transcript before advancing
   provider state; retained GPU state is an acceleration that can be discarded and replayed.
 
