@@ -58,5 +58,4 @@ agg --font-family "JetBrains Mono" --font-size 16 --idle-time-limit 1.75 \
 The numbers this demo illustrates are bound by receipts elsewhere: qualified results in
 [`../BENCHMARKS.md`](../BENCHMARKS.md) and the warm-vs-cold follow-up measurement in
 [`../measurements/2026-08-29-warm-vs-cold-ttft.json`](../measurements/2026-08-29-warm-vs-cold-ttft.json).
-Launch copy drafts live in [`LAUNCH_COPY.md`](LAUNCH_COPY.md). Community project; not affiliated
-with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
