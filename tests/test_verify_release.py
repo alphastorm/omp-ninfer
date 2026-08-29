@@ -114,6 +114,33 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
         self.assertEqual(errors, [])
 
+    def test_external_acceptance_rejects_short_or_stale_platform_hashes(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        release = "v0.2.0-beta.1"
+        manifest_path = root / "releases" / release / "manifest.json"
+        qualification_path = root / "releases" / release / "qualification.json"
+        acceptance_path = root / "releases" / release / "acceptance" / "composed-external-installation.json"
+        manifest = self.load(manifest_path)
+        qualification = self.load(qualification_path)
+        acceptance = self.load(acceptance_path)
+        acceptance["platform_receipts"][1]["sha256"] = "a" * 62
+        self.save(acceptance_path, acceptance)
+        qualification["composition"]["external_installation_acceptance"]["sha256"] = hashlib.sha256(
+            acceptance_path.read_bytes()
+        ).hexdigest()
+        self.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "external acceptance platform receipt hashes must match compatibility",
+            errors,
+        )
+
     def test_ready_contract_rejects_incomplete_publication(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)

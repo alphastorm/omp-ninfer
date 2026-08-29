@@ -6,7 +6,7 @@
   "completed_utc": "2026-08-29T10:45:00Z",
   "compatibility": {
     "authority_id": "omp-ninfer-v0.2.0-beta.1-qualified-1",
-    "sha256": "cd92f66ef78da29f911a1057f40c4198853c03a853141f4e648a46d9d6a72f57",
+    "sha256": "4ef0e5a0f5a7d7ab9f7772e33d0c09c79619e57cddee79c410da4bd87e22daeb",
     "native_variants": {
       "rtx4090-windows-native": "qualified",
       "rtx3090-windows-native": "preview-not-installable"
@@ -25,7 +25,7 @@
     },
     {
       "profile": "windows-docker-local",
-      "sha256": "1653e0f5bca2ce08e01ade5c141d72331bed8275aaa782fdf0be1690f2269b"
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
     },
     {
       "profile": "linux-docker-local",

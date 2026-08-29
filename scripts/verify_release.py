@@ -685,6 +685,26 @@ def validate(
         if acceptance_path.is_file() and isinstance(external_acceptance.get("sha256"), str):
             require(sha256_file(acceptance_path) == external_acceptance.get("sha256"),
                     "external acceptance SHA-256 must match receipt bytes", errors)
+        acceptance_subject = load_json(acceptance_path) if acceptance_path.is_file() else {}
+        platform_rows = acceptance_subject.get("platform_receipts", [])
+        require(isinstance(platform_rows, list),
+                "external acceptance platform_receipts must be an array", errors)
+        platform_hashes = {
+            row.get("profile"): row.get("sha256")
+            for row in platform_rows
+            if isinstance(row, dict)
+        } if isinstance(platform_rows, list) else {}
+        expected_platform_hashes = {
+            profile_item.get("id"): profile_item.get("acceptance_receipt", {}).get("sha256")
+            for profile_item in compatibility.get("profiles", [])
+            if isinstance(profile_item, dict)
+        }
+        require(len(platform_hashes) == len(platform_rows),
+                "external acceptance platform receipts are duplicated or malformed", errors)
+        require(platform_hashes == expected_platform_hashes,
+                "external acceptance platform receipt hashes must match compatibility", errors)
+        for profile_id, digest in platform_hashes.items():
+            require_sha(digest, f"external acceptance {profile_id} SHA-256", errors)
         require_https(external_acceptance.get("public_url"),
                       "external acceptance public_url", errors)
         require(external_acceptance.get("component_release_tag") == omp.get("component_release_tag"),
