@@ -4,12 +4,16 @@
 
 # OMP NInfer
 
-**Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
+**Stateful local Qwen for long OMP coding sessions.**
 
-Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
-[Oh My Pi](https://github.com/can1357/oh-my-pi) on native Windows, Linux, or a Mac.
+**RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
 
-**[Quickstart](docs/QUICKSTART.md)** · **[Benchmarks](docs/BENCHMARKS.md)** ·
+If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
+OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
+retained state instead of re-prefilling the full transcript.
+
+**[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
+**[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
 **[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
 
@@ -32,12 +36,32 @@ Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
 <sub><strong>Private by design:</strong> loopback-only endpoints · bearer-authenticated ·
 fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
-<img src="docs/media/omp-ninfer-demo.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green at production decode speed, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript." width="900">
+<img src="docs/media/omp-ninfer-demo-social-discord.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript. This public derivative begins after the pinned-client update banner has left the frame." width="900">
+
+<sub><a href="docs/media/omp-ninfer-demo-social.mp4">MP4</a> · <a href="docs/media/omp-ninfer-demo-social-poster.png">poster</a> · <a href="docs/media/README.md#public-launch-derivatives">provenance and checksums</a></sub>
 
 </div>
 
+| What changes for you | Released evidence |
+| --- | --- |
+| Long-session follow-ups can start without a full re-prefill | One maintainer-measured 89,216-token follow-up: **0.375 s warm vs 36.697 s cold** |
+| Interactive output is fast | **235.02 tok/s** decode on the qualified RTX 5090 profile |
+| Long coding sessions fit | Exact retrieval at a **130,048-token** prompt; 131,072-token ceiling |
+| The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
+
+The warm/cold row is one server-side maintainer sample on the released RTX 5090 runtime, not a
+universal latency or inference-speed claim. [Method, receipt, and caveats](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29).
+
+**Use OMP NInfer when:** you use OMP, own a qualified card, want Qwen3.8, and care about private,
+long-lived coding sessions.
+
+**Use something else when:** you want a broad model catalog, an unsupported GPU, multi-user
+serving, or generic OpenAI-compatible inference.
+
 > [!IMPORTANT]
-> `v0.2.0-beta.1` is a **ready invited-tester release**, not general availability. Native macOS
+> **RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+>
+> `v0.2.0-beta.1` is ready for invited testers, not general availability. Native macOS
 > arm64, Windows x64, and Linux x64 OMP clients are qualified. RTX 5090 is the primary container
 > profile and native Windows RTX 4090 is separately beta-qualified. The RTX 3090 lane is built and
 > reviewed but not yet installable: its remaining gates await validation hardware, and
@@ -72,7 +96,7 @@ not give you together elsewhere:
 
 ## Measured, not estimated
 
-![Qualified v0.2.0-beta.1 results](assets/benchmarks.png)
+![Released v0.2.0-beta.1 evidence: one 89,216-token warm/cold follow-up sample, qualified RTX 5090 decode and long-context results, and distinct qualified/preview lane status](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
 [`qualification.json`](releases/v0.2.0-beta.1/qualification.json):
@@ -81,7 +105,7 @@ Exact shipped profiles and receipts in
 | --- | --- |
 | RTX 5090 decode | **235.02 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
 | RTX 5090 prefill | **2,180.87 tok/s** at 130,048 tokens, exact retrieval |
-| Warm vs cold follow-up | **0.375 s** vs 36.70 s to first token at an 89,216-token session — [labeled maintainer measurement](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29), not a qualification-bound claim |
+| Warm vs cold follow-up | **0.375 s** vs 36.697 s to first token at an 89,216-token session — one [labeled maintainer measurement](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29), not a qualification-bound claim |
 | RTX 3090 native preview | Current sm_86 contract tests **3/3**; live-model and fresh Windows package gates `not_run` |
 | RTX 4090 native beta | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
@@ -169,7 +193,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens | The original engine; everything below forks it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090 / 4090 / 3090 | 235.02 tok/s on the primary 5090 profile; qualified 4090 beta and public 3090 preview packages | This product's public runtime source and component releases |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090; qualified RTX 4090; preview RTX 3090 | 235.02 tok/s on the primary 5090 profile; qualified 4090 beta and public 3090 preview packages | This product's public runtime source and component releases |
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the reviewed native 3090 preview branch |
 
@@ -183,21 +207,25 @@ are what close them. See [`ROADMAP.md`](ROADMAP.md).
 [Benchmarks](docs/BENCHMARKS.md) holds the qualified results, the upstream campaign highlights,
 the model-quality table, and a community results table seeded with the maintainer entry. If you are
 an invited tester, submit your environment's numbers with the
-[benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
 after the documented acceptance checks pass. Planned measurements we want next — warm-vs-cold turn
 latency, MTP0-vs-MTP3 on the shipped artifact, prefill curves — are listed there too.
 
-## Contributing
+## Help close a real gate
 
-Three lanes, in rising order of ambition:
+- **Own an RTX 3090?** Run the published preview boundary and attach a redacted
+  [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml).
+- **Own a qualified RTX 5090 or 4090?** Run a clean install and report
+  [time-to-first-turn and every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+- **Work on CUDA kernels?** Pick a measured bottleneck from the
+  [performance program](docs/PERFORMANCE.md) and submit before/after receipts with the
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
+- **Need a different model or profile?** File a
+  [model/profile request](https://github.com/alphastorm/omp-ninfer/issues/new?template=model-profile-request.yml)
+  so artifact identity and qualification scope stay explicit.
 
-1. **Run it and report.** Hardware reports and installation failures from real machines move the
-   compatibility matrix more than anything else right now. Use the issue forms.
-2. **Make it faster.** The kernel and scheduling work is public: measured baseline, scripted
-   Nsight profiling lane, an auditable experiment ledger (including rejected attempts), and an
-   open ideas backlog. Start at [Performance program](docs/PERFORMANCE.md).
-3. **Improve the product.** Docs, release tooling, and profile contracts in this repository;
-   engine work in the runtime repositories. Routing map: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Docs, release tooling, and profile contracts belong here; engine work belongs in the runtime
+repositories. The complete routing and evidence rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 The beta OMP client carries the NInfer stateful-Responses provider integration. Its exact accepted
 source is public at [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi); the standing

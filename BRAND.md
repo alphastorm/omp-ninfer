@@ -17,8 +17,9 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
-- v0.2 tagline: **Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
-- Status grammar: when lane status is stated, write "5090 + 4090 qualified · 3090 preview";
+- v0.2 tagline: **Stateful local Qwen for long OMP coding sessions.**
+- Status grammar: when lane status is stated, write
+  **"RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta"**;
   never present the three GPUs as an undifferentiated support claim in status copy
 - The user-facing command remains `omp`; "appliance" describes the operating
   concept, never the repository name.
@@ -100,16 +101,20 @@ imply official partnership.
 | `assets/og.png` | GitHub social preview (1280×640) |
 | `assets/architecture.html` | architecture illustration source (1240×380) |
 | `assets/architecture.png` | rendered architecture @2x — for the README |
-| `assets/benchmarks.html` | qualified-results stat strip source (1240×300) |
-| `assets/benchmarks.png` | rendered stat strip @2x — for the README and benchmarks page |
+| `assets/benchmarks.html` | released-evidence stat strip source (1240×300) |
+| `assets/benchmarks.png` | rendered released-evidence strip @2x — for the README and benchmarks page |
 | `assets/favicon.svg` | favicon (96, rx22 tile) |
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
 | `assets/favicon-32.png` / `favicon-16.png` | PNG favicon fallbacks |
-| `docs/media/omp-ninfer-demo.gif` | real-session README demo (GIF) |
+| `docs/media/omp-ninfer-demo.gif` | canonical full-session GIF render; retained for provenance |
 | `docs/media/omp-ninfer-demo.mp4` | real-session demo master (MP4) |
 | `docs/media/omp-ninfer-demo-poster.png` | demo poster frame for posts and video embeds |
 | `docs/media/omp-ninfer-demo.cast` | raw asciinema capture behind the demo (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-social.mp4` | updater-free social derivative of the canonical demo |
+| `docs/media/omp-ninfer-demo-social-discord.gif` | update-banner-free README/Discord fallback |
+| `docs/media/omp-ninfer-demo-social-poster.png` | poster from the clean social interval |
+| `docs/media/omp-ninfer-launch-card.png` | scoped launch evidence card; provenance in `docs/media/README.md` |
 
 Regeneration: screenshot `.banner` at 2× for `banner.png`, `.arch` at 2×
 for `architecture.png`, `.stats` at 2× for `benchmarks.png`,
@@ -135,12 +140,16 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 # OMP NInfer
 
-**Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
+**Stateful local Qwen for long OMP coding sessions.**
 
-Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
-[Oh My Pi](https://github.com/can1357/oh-my-pi) on native Windows, Linux, or a Mac.
+**RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
 
-**[Quickstart](docs/QUICKSTART.md)** · **[Benchmarks](docs/BENCHMARKS.md)** ·
+If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
+OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
+retained state instead of re-prefilling the full transcript.
+
+**[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
+**[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
 **[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
 ```
@@ -152,11 +161,11 @@ surface `#1C232B` — never green/red status colors, never more than one row. Sa
 CI, release, measured decode, measured context, license. A measured-value badge must match the
 qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualification receipt.
 
-Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and
-`![Qualified v0.2.0-beta.1 results](assets/benchmarks.png)` under `## Measured, not estimated`;
+Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and the scoped
+released-evidence strip at `assets/benchmarks.png` under `## Measured, not estimated`;
 neither is part of the header.
 
-The real-session demo GIF sits inside the header block directly under the private-by-design
-subline, at width 900 with a full alt description; link the MP4 master and provenance beside it.
+The update-banner-free social GIF sits inside the header block directly under the private-by-design
+subline, at width 900 with a full alt description; link the social MP4 and provenance beside it.
 
 Then upload `assets/og.png` at GitHub → Settings → Social preview.

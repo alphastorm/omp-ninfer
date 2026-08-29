@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Launch-safe social MP4, animated GIF fallback, poster, and scoped evidence card with public
+  checksums/provenance, plus clean-install and model/profile report forms.
 - Launcher fail-fast diagnosis `wsl-mirrored-loopback-unavailable` when the runtime logs a
   loopback listener that the invoking namespace cannot reach, with troubleshooting entries for
   the WSL loopback-drift signature and the non-interactive-SSH Docker credential-helper failure
@@ -23,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Led the README and rendered social/benchmark surfaces with the long-session outcome, added a
+  pre-command GPU lane chooser, and standardized qualified/preview/invited-beta status grammar.
 - Sharpened the README hero around the measured value proposition and explicit lane status, and
   added LM Studio to the runtime comparison and related-work review.
 - Reframed RTX 3090 preview messaging around its actual blocker — validation-hardware

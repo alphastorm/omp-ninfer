@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Stop at the first failed step. Do not retry unchanged input. Never include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, or Docker inspection dumps. Security issues belong in private vulnerability reporting.
+        Stop at the first failed step. Do not retry unchanged input. Never include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction. Security issues belong in private vulnerability reporting.
   - type: input
     id: release
     attributes:
@@ -91,7 +91,7 @@ body:
     attributes:
       label: Redaction confirmation
       options:
-        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, and session data.
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, session data, and any source code I did not deliberately choose to publish.
           required: true
         - label: This is not a vulnerability report.
           required: true

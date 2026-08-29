@@ -1,5 +1,5 @@
-name: Hardware report
-description: Report an early-access success or compatibility observation
+name: Hardware qualification report
+description: Report acceptance evidence or a compatibility observation from an exact GPU lane
 title: "[hardware]: "
 labels:
   - early-access
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Report only content-safe system facts. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, or Docker inspection dumps.
+        Report only content-safe system facts. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
   - type: input
     id: release
     attributes:
@@ -23,10 +23,10 @@ body:
     validations:
       required: true
   - type: input
-    id: macos
+    id: client_os
     attributes:
-      label: Mac OS and architecture
-      placeholder: macOS 26.x, arm64
+      label: Client OS and architecture
+      placeholder: Windows 11 x64, macOS 26 arm64, or Ubuntu 24.04 x64
     validations:
       required: true
   - type: input
@@ -52,7 +52,8 @@ body:
   - type: input
     id: docker
     attributes:
-      label: Docker and NVIDIA Container Toolkit versions
+      label: Runtime stack versions
+      description: Docker and NVIDIA Container Toolkit versions, or the exact native package ID.
     validations:
       required: true
   - type: input
@@ -81,6 +82,7 @@ body:
         - label: Stateful same-session follow-up passed
         - label: OMP exit/resume passed while NInfer stayed alive
         - label: Disconnected tunnel failed closed without a cloud answer
+        - label: NInfer process-restart continuation passed (qualified native lane only)
   - type: textarea
     id: notes
     attributes:
@@ -93,5 +95,5 @@ body:
     attributes:
       label: Redaction confirmation
       options:
-        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, and session data.
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, session data, and any source code I did not deliberately choose to publish.
           required: true

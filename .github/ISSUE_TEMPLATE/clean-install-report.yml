@@ -1,0 +1,97 @@
+name: Clean-install report
+description: Report time-to-first-turn and setup friction on an exact qualified lane
+title: "[clean install]: "
+labels:
+  - early-access
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form only for a fresh RTX 5090 or qualified RTX 4090 install from the tagged quickstart. Report content-safe facts, elapsed time, and manual steps—not a raw support bundle. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
+  - type: input
+    id: release
+    attributes:
+      label: OMP NInfer release
+      description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass first.
+      placeholder: v0.2.0-beta.1
+    validations:
+      required: true
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Qualified lane
+      options:
+        - RTX 5090 + Windows 11 / Docker Desktop WSL2
+        - RTX 4090 + native Windows
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile or runtime variant ID
+      description: Copy the exact public ID from the release manifest; never infer it from the GPU name.
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Client OS, architecture, and OMP version
+      placeholder: Windows 11 x64, omp/18.0.9
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime OS and stack
+      description: Content-safe OS, Docker/NVIDIA toolkit versions, or exact native package ID.
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU, reported VRAM, driver, and CUDA version
+      placeholder: NVIDIA GeForce RTX 5090, 32607 MiB, driver ..., CUDA ...
+    validations:
+      required: true
+  - type: input
+    id: elapsed
+    attributes:
+      label: Clone-to-first-successful-turn elapsed time
+      description: Wall-clock duration; state whether downloads were already cached.
+      placeholder: 42 minutes, no cached model or image
+    validations:
+      required: true
+  - type: textarea
+    id: manual_steps
+    attributes:
+      label: Manual steps not explicit in the quickstart
+      description: List every intervention or write “none.” Use neutral placeholders for private identifiers and paths.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Acceptance checks observed
+      options:
+        - label: Tagged release verification passed before setup
+        - label: Text and file-tool turn passed
+        - label: Image input passed
+        - label: Stateful same-session follow-up passed
+        - label: OMP exit/resume passed while NInfer stayed alive
+        - label: Disconnected route failed closed without a cloud answer
+  - type: textarea
+    id: friction
+    attributes:
+      label: Content-safe setup friction
+      description: Describe unclear or slow steps and expected versus observed behavior. Write “none” if the path was exact.
+    validations:
+      required: true
+  - type: checkboxes
+    id: redaction
+    attributes:
+      label: Redaction confirmation
+      options:
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, session data, and any source code I did not deliberately choose to publish.
+          required: true
+        - label: This report covers a qualified lane and is not an RTX 3090 support claim.
+          required: true

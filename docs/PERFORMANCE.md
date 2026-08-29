@@ -126,5 +126,5 @@ hypothesis and method before writing code.
    distributed group avoids repeating dead ends.
 
 Product-level throughput submissions (whole-appliance numbers rather than kernel work) go through
-the [benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+the [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
 and the [community results table](BENCHMARKS.md#community-results).

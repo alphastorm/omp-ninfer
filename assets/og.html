@@ -24,6 +24,10 @@
   .title { color: #E8ECEF; font-size: 58px; font-weight: 600; letter-spacing: -0.015em; }
   .subtitle { width: 900px; color: #B6BEC7; font-size: 22px; font-weight: 500;
     line-height: 1.55; text-align: center; }
+  .metric { color: #E8ECEF; font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .metric span { color: #8A939D; font-size: 20px; font-weight: 500; }
+  .scope { color: #8A939D; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.06em; }
   .footer { position: absolute; left: 40px; right: 40px; bottom: 28px; display: flex;
     justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace;
     color: #5F6870; font-size: 12px; letter-spacing: 0.06em; }
@@ -47,11 +51,13 @@
       </svg>
       <div class="title">OMP NInfer</div>
     </div>
-    <div class="subtitle">OMP on macOS, Windows, or Linux. Qwen3.8 on your own qualified RTX GPU — private, stateful, authenticated, fail-closed.</div>
+    <div class="subtitle">Stateful local Qwen for long OMP coding sessions. Warm follow-ups continue from retained GPU state.</div>
+    <div class="metric">0.375 s warm <span>vs</span> 36.697 s cold</div>
+    <div class="scope">one maintainer-measured 89,216-token follow-up · released RTX 5090 profile</div>
   </div>
   <div class="footer">
     <div class="footer-group"><span class="local-dot"></span><span>github.com/alphastorm/omp-ninfer</span></div>
-    <div class="footer-group"><span>v0.2.0-beta.1 · invited</span><span class="kin-dot"></span><span>community project</span></div>
+    <div class="footer-group"><span>RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta</span></div>
   </div>
   <div class="edge bottom"></div>
 </div>

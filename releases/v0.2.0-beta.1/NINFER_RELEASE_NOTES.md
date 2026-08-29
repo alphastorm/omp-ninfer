@@ -1,6 +1,8 @@
 # OMP NInfer v0.2.0-beta.1
 
-Invited-tester prerelease. Not stable or GA. No production route is activated.
+**RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+
+Not stable or GA. No production route is activated.
 
 ## What is qualified
 

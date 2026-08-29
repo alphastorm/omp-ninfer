@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>OMP NInfer — qualified results</title>
+<title>OMP NInfer — released evidence</title>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -23,6 +23,8 @@
   .cell { width: 290px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; }
   .cell + .cell { border-left: 1px solid #1C232B; }
   .num { color: #E8ECEF; font-size: 44px; font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
+  .num.compact { font-size: 31px; line-height: 1.05; }
+  .num.status-copy { font-size: 23px; line-height: 1.15; }
   .what { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.09em;
     text-transform: uppercase; color: #B6BEC7; white-space: nowrap; }
   .how { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: #5F6870; white-space: nowrap; }
@@ -33,30 +35,30 @@
 <body>
 <div class="stats">
   <div class="grid"></div>
-  <div class="eyebrow">v0.2.0-beta.1 &middot; rtx 5090 + native 4090 beta + 3090 preview</div>
+  <div class="eyebrow">released evidence · one maintainer sample where labeled</div>
   <div class="row">
+    <div class="cell">
+      <div class="num compact">0.375 s warm</div>
+      <div class="what">89,216-token follow-up</div>
+      <div class="how">36.697 s cold · one sample</div>
+    </div>
     <div class="cell">
       <div class="num">235.02</div>
       <div class="what">decode tok/s</div>
-      <div class="how">5090 mtp3 &middot; 99.87% acceptance</div>
+      <div class="how">qualified 5090 · mtp3</div>
     </div>
     <div class="cell">
       <div class="num">130,048</div>
-      <div class="what">token prompt &middot; exact recall</div>
-      <div class="how">2,180.87 tok/s &middot; exact</div>
+      <div class="what">token prompt · exact recall</div>
+      <div class="how">qualified 5090 · 131,072 ceiling</div>
     </div>
     <div class="cell">
-      <div class="num">2 + 1</div>
-      <div class="what">qualified + preview lanes</div>
-      <div class="how">5090 &middot; 4090 + 3090 preview</div>
-    </div>
-    <div class="cell">
-      <div class="num">131,072</div>
-      <div class="what">context ceiling</div>
-      <div class="how">tools &middot; state &middot; native restart</div>
+      <div class="num status-copy">5090 + 4090<br>qualified</div>
+      <div class="what">RTX 3090 preview</div>
+      <div class="how">invited-tester beta</div>
     </div>
   </div>
-  <div class="foot">openai &middot; anthropic &middot; responses &middot; authenticated identity &mdash; receipts: <span>releases/v0.2.0-beta.1/qualification.json</span></div>
+  <div class="foot"><span>RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta</span> — scope + receipts: docs/BENCHMARKS.md</div>
 </div>
 </body>
 </html>

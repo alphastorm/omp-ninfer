@@ -133,7 +133,7 @@ headroom of the engine family this product rides on. Full methodology:
 ## Community results
 
 Early-access leaderboard. One row per verified environment; newest first. Submit yours with the
-[benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
 after the documented acceptance checks pass.
 
 | Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |

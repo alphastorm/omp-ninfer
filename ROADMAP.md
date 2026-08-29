@@ -129,7 +129,7 @@ Before marketing beyond invited testers:
   [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new/choose) — pass or fail,
   both move the matrix.
 - **Measured something?** Submit the
-  [benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
   for the [community results table](docs/BENCHMARKS.md#community-results).
 - **CUDA/kernel work?** Claim an idea from the
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog).

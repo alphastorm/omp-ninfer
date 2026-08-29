@@ -1,8 +1,28 @@
 # Early-access quickstart
 
+> **RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+
+## Choose your lane
+
+Choose by GPU and runtime before downloading anything. Client-platform qualification is separate
+from GPU-runtime qualification.
+
+| I have | Status | Start here | What success produces |
+| --- | --- | --- | --- |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **qualified** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **qualified** | [RTX 4090 native lane](#native-windows-rtx-4090-qualified-and-rtx-3090-preview-lanes) | The documented acceptance checks on the exact qualified package |
+| RTX 3090 + native Windows | **preview; not installable** | [RTX 3090 validation lane](#native-windows-rtx-4090-qualified-and-rtx-3090-preview-lanes) | A redacted hardware report that can close deferred gates; no support claim |
+| Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
+
+The RTX 3090 row is a validation invitation, not an install instruction. Do not substitute GPU
+family names, package URLs, or variant IDs between lanes.
+
+## Verify the release before setup
+
 The ready `v0.2.0-beta.1` route is native Windows OMP connected over authenticated local loopback
 to the exact NInfer container in Docker Desktop WSL2 on one user-controlled RTX 5090. Managed
-macOS SSH and native Linux clients are qualified profiles under the same compatibility authority.
+macOS SSH and native Linux clients are qualified client profiles under the same compatibility
+authority; the qualified native RTX 4090 runtime is a separate Windows package.
 
 Start only from the product tag and require its ready contract:
 
@@ -12,6 +32,12 @@ python3 scripts/verify_release.py --require-ready
 
 That gate binds the Windows client archive and binary, compatibility authority, NInfer image/SBOM,
 model, configuration, qualification summary, and clean-install acceptance receipt.
+
+> [!WARNING]
+> Stay on the exact OMP 18.0.9 beta archive pinned by this release. Until
+> [issue #18](https://github.com/alphastorm/omp-ninfer/issues/18) is resolved, a generic
+> `omp update` banner is not an instruction for this qualified channel: updating can move the
+> client away from the checksummed release bytes.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
@@ -51,7 +77,7 @@ the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to n
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
 section 7 and the **Native Windows command forms** at the start of section 8.
 
-## Native Windows RTX 4090 beta and RTX 3090 preview
+## Native Windows RTX 4090 qualified and RTX 3090 preview lanes
 
 These are separate native NInfer packages, not substitutions for the primary RTX 5090 image. The
 installable path accepts only `rtx4090-windows-native`. The RTX 3090 package is built and reviewed,
@@ -418,10 +444,18 @@ failure. Restart the tunnel only after observing the failure.
 
 ## 9. Send feedback
 
-Use the repository issue forms. Include:
+Choose the structured form that matches the result:
+
+- a successful qualified-lane setup: [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml);
+- RTX 3090 validation or another hardware observation: [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml);
+- a first failed setup step: [installation failure](https://github.com/alphastorm/omp-ninfer/issues/new?template=installation-failure.yml); or
+- reproducible throughput/latency work: [performance result](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
+
+Include:
 
 - release and profile IDs;
 - OS, GPU name, VRAM, driver, Docker, and OMP versions;
+- install-to-first-turn time and every manual step for a clean-install report;
 - the failing step and content-safe error; and
 - whether the route was fresh, resumed, or tunnel-disconnected.
 

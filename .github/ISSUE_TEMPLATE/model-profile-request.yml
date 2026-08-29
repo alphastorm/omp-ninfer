@@ -1,0 +1,68 @@
+name: Model or profile request
+description: Propose a distinct registered model profile without inheriting qualified claims
+title: "[profile request]: "
+labels:
+  - early-access
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A requested derivative must keep a distinct artifact identity, source revision, conversion recipe, capability set, and qualification class. A request is not a support or roadmap commitment. Do not include API keys, usernames, hostnames, IP addresses, private paths, private prompts, model output, raw logs, session files, proprietary weights, or source code unless you deliberately choose to publish content you own after redaction.
+  - type: textarea
+    id: use_case
+    attributes:
+      label: User outcome
+      description: Describe the concrete OMP workflow the current qualified profile cannot serve.
+    validations:
+      required: true
+  - type: input
+    id: source_model
+    attributes:
+      label: Public source model and immutable revision
+      description: Public repository plus commit/revision when one exists; do not upload weights here.
+      placeholder: publisher/model@revision
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Target GPU and runtime lane
+      placeholder: RTX 4090 native Windows
+    validations:
+      required: true
+  - type: checkboxes
+    id: capabilities
+    attributes:
+      label: Capabilities requested
+      options:
+        - label: Text
+        - label: Vision
+        - label: Tools
+        - label: Stateful Responses
+        - label: Long context
+        - label: MTP speculative decoding
+  - type: textarea
+    id: identity
+    attributes:
+      label: Proposed identity and provenance
+      description: If known, provide a distinct profile ID, license, source weight hashes, and conversion recipe. Never reuse the official qualified artifact identity for modified weights.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation evidence you can contribute
+      description: Hardware access and content-safe checks you can run, such as conversion inventory, tools, exact retrieval, performance, Vision, or safety evaluation.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Qualification boundaries
+      options:
+        - label: I understand this request is not a support claim or roadmap commitment.
+          required: true
+        - label: I understand a community profile must not inherit official model identity, capabilities, or qualification.
+          required: true
+        - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, session data, proprietary weights, and any source code I did not deliberately choose to publish.
+          required: true

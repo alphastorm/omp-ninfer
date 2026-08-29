@@ -5,6 +5,24 @@ integration defects, documentation corrections, benchmark submissions, performan
 [performance program](docs/PERFORMANCE.md), and release-contract fixes are useful. Generic
 model/runtime expansion and speculative abstractions are not current goals.
 
+## Help close a real gate
+
+- **Own an RTX 3090?** Run the preview boundary and submit a redacted
+  [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml).
+- **Own a qualified RTX 5090 or 4090?** Run a clean install and report
+  [time-to-first-turn plus every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+- **Work on CUDA kernels?** Pick a measured bottleneck from the
+  [performance program](docs/PERFORMANCE.md), then submit before/after receipts for the affected
+  end-to-end workload with the
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
+- **Need a different model/profile?** Use the
+  [model/profile request](https://github.com/alphastorm/omp-ninfer/issues/new?template=model-profile-request.yml)
+  so a derivative cannot silently inherit the official artifact identity or qualification.
+
+Every public form forbids keys, private identifiers and paths, prompts, source code, model output,
+raw logs, and session data unless a reporter deliberately publishes content they own after
+redaction. Security reports always stay private.
+
 ## Route the change to its owner
 
 - Product manifest, profile, setup, qualification composition, benchmarks/leaderboard, and support
@@ -22,10 +40,10 @@ model/runtime expansion and speculative abstractions are not current goals.
 
 Do not duplicate implementation across repositories to make a local patch easier.
 
-## Benchmark submissions
+## Performance submissions
 
 Use the
-[benchmark report form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
+[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
 Entries land in the [community results table](docs/BENCHMARKS.md#community-results) after the
 release identities check out. Content-safe values only; the measurement method is part of the
 submission.
