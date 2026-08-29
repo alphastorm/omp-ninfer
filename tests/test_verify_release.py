@@ -174,6 +174,49 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile and manifest model hashes must match", errors)
 
+    def test_primary_gpu_receipt_bytes_must_match_compatibility(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        receipt_path = root / "releases" / "v0.2.0-beta.1" / "qualification" / "rtx5090.json"
+        receipt = self.load(receipt_path)
+        receipt["debug_drift"] = True
+        self.save(receipt_path, receipt)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "primary RTX 5090 qualification SHA-256 must match checked-in bytes",
+            errors,
+        )
+
+    def test_root_and_release_compatibility_copies_must_match(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        root_compatibility = self.load(root / "compatibility.json")
+        root_compatibility["authority_id"] += "-drift"
+        self.save(root / "compatibility.json", root_compatibility)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "root and release compatibility authorities must be byte-identical",
+            errors,
+        )
+
+    def test_product_public_urls_must_bind_immutable_raw_paths(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["qualification"]["public_url"] = (
+            "https://github.com/alphastorm/omp-ninfer/releases/latest"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "qualification.public_url must bind an immutable product commit and path",
+            errors,
+        )
+
     def test_profile_rejects_container_private_loopback_networking(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
@@ -184,6 +227,19 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile: container network mode must be host", errors)
+
+    def test_profile_deployment_identity_must_match_manifest(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
+        profile = self.load(profile_path)
+        profile["server"]["deployment_profile"] = "qwen38-5090-v0.1.0"
+        arguments = profile["server"]["arguments"]
+        arguments[arguments.index("--deployment-profile") + 1] = "qwen38-5090-v0.1.0"
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("profile: deployment_profile must match the manifest", errors)
 
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(

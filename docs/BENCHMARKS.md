@@ -45,7 +45,7 @@ Measured on one NVIDIA GeForce RTX 5090 (`sm_120a`) with the exact shipped profi
 `qwen3_8_27b.ninfer` (Qwen3.8 27B, groupwise-int Q4/Q5 group-64), BF16 KV cache, 131,072-token
 context ceiling, MTP speculative decoding with 3 draft tokens, 1,024-token prefill chunks, one
 active request. Receipts: [`qualification.json`](../releases/v0.1.0-beta.1/qualification.json) ·
-[profile](../profiles/qwen38-rtx5090-windows-docker-local.json).
+[v0.1 manifest](../releases/v0.1.0-beta.1/manifest.json).
 
 | Gate | Result | Detail |
 | --- | --- | --- |

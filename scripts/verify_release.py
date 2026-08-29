@@ -108,6 +108,21 @@ def require_https(value: Any, label: str, errors: list[str], *, nullable: bool =
             f"{label} must be an HTTPS URL", errors)
 
 
+def require_product_raw_url(value: Any, label: str, path: str, errors: list[str]) -> None:
+    require_https(value, label, errors)
+    require(
+        isinstance(value, str)
+        and re.fullmatch(
+            r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
+            r"[0-9a-f]{40}/" + re.escape(path),
+            value,
+        )
+        is not None,
+        f"{label} must bind an immutable product commit and path",
+        errors,
+    )
+
+
 def walk_strings(value: Any) -> list[str]:
     if isinstance(value, str):
         return [value]
@@ -241,7 +256,12 @@ def validate_ninfer_variants(
         if summary_path.is_file() and isinstance(qualification.get("sha256"), str):
             require(sha256_file(summary_path) == qualification.get("sha256"),
                     f"{prefix}.qualification SHA-256 must match receipt bytes", errors)
-        require_https(qualification.get("public_url"), f"{prefix}.qualification.public_url", errors)
+        require_product_raw_url(
+            qualification.get("public_url"),
+            f"{prefix}.qualification.public_url",
+            f"releases/{release}/{summary}",
+            errors,
+        )
         receipt = load_json(summary_path) if summary_path.is_file() else {}
         if status == "qualified":
             require(receipt.get("status") == "passed" and receipt.get("beta_qualified") is True,
@@ -314,6 +334,7 @@ def validate_profile_contract(
     release: Any,
     model: dict[str, Any],
     public_model_id: Any,
+    deployment_profile: Any,
     errors: list[str],
 ) -> None:
     require(profile.get("schema_version") == 1, f"{label}: schema_version must be 1", errors)
@@ -330,6 +351,8 @@ def validate_profile_contract(
             f"{label}: silent cloud fallback must be disabled", errors)
 
     server = profile.get("server", {})
+    require(server.get("deployment_profile") == deployment_profile,
+            f"{label}: deployment_profile must match the manifest", errors)
     require(server.get("restart_policy") == "no", f"{label}: restart_policy must be no", errors)
     require(server.get("container_network_mode") == "host",
             f"{label}: container network mode must be host", errors)
@@ -442,7 +465,8 @@ def validate(
             and profile.get("installation_mode") == installation_mode,
             "profile installation_mode must match manifest installation.mode", errors)
     validate_profile_contract(profile, "profile", release, model,
-                              runtime.get("public_model_id"), errors)
+                              runtime.get("public_model_id"),
+                              runtime.get("deployment_profile"), errors)
 
     profiles_dir = root / "profiles"
     if profiles_dir.is_dir():
@@ -455,7 +479,8 @@ def validate(
                 errors.append(str(error))
                 continue
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
-                                      model, runtime.get("public_model_id"), errors)
+                                      model, runtime.get("public_model_id"),
+                                      runtime.get("deployment_profile"), errors)
 
     release_compatibility_path = manifest_path.parent / "compatibility.json"
     compatibility_path = (
@@ -474,6 +499,14 @@ def validate(
     except (OSError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"compatibility.json: {error}")
     if compatibility:
+        root_compatibility_path = root / "compatibility.json"
+        if release_compatibility_path.is_file() and root_compatibility_path.is_file():
+            require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
+                    "root and release compatibility authorities must be byte-identical", errors)
+            root_matrix_path = root / "docs" / "COMPATIBILITY.md"
+            require(root_matrix_path.is_file()
+                    and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
+                    "root and release compatibility matrices must be byte-identical", errors)
         require(compatibility.get("product_release") == release,
                 "compatibility product_release must match the manifest", errors)
         try:
@@ -499,6 +532,12 @@ def validate(
                     "components.omp.compatibility_sha256", errors)
         require(omp.get("compatibility_sha256") == sha256_file(compatibility_path),
                 "OMP compatibility SHA-256 must match compatibility.json", errors)
+        require_product_raw_url(
+            omp.get("compatibility_url"),
+            "components.omp.compatibility_url",
+            "compatibility.json",
+            errors,
+        )
         require(composition.get("lifecycle_source_commit") == omp.get("source_commit"),
                 "OMP source commit must match compatibility composition", errors)
         require(composition.get("qualification_source_commit") == omp.get("qualification_commit"),
@@ -537,6 +576,30 @@ def validate(
             if client.get("archive_sha256") is not None:
                 require_sha(client.get("archive_sha256"),
                             f"compatibility {profile_id} client archive", errors)
+
+        primary_receipt_path = manifest_path.parent / "qualification" / "rtx5090.json"
+        require(primary_receipt_path.is_file(), "primary RTX 5090 qualification receipt must exist", errors)
+        primary_receipt_hashes = {
+            item.get("gpu_qualification", {}).get("receipt", {}).get("sha256")
+            for item in compatibility.get("profiles", [])
+            if isinstance(item, dict)
+        }
+        require(len(primary_receipt_hashes) == 1,
+                "compatibility profiles must share one RTX 5090 receipt hash", errors)
+        if primary_receipt_path.is_file() and len(primary_receipt_hashes) == 1:
+            require(sha256_file(primary_receipt_path) == next(iter(primary_receipt_hashes)),
+                    "primary RTX 5090 qualification SHA-256 must match checked-in bytes", errors)
+
+        behavioral = qualification.get("composition", {}).get("behavioral_qualification", {})
+        behavioral_ref = behavioral.get("repository_path")
+        behavioral_path = (root / behavioral_ref).resolve() if isinstance(behavioral_ref, str) else root
+        require(isinstance(behavioral_ref, str) and behavioral_path.is_relative_to(root.resolve())
+                and behavioral_path.is_file(),
+                "behavioral qualification receipt path must resolve inside the repository", errors)
+        require_sha(behavioral.get("sha256"), "behavioral qualification SHA-256", errors)
+        if behavioral_path.is_file() and isinstance(behavioral.get("sha256"), str):
+            require(sha256_file(behavioral_path) == behavioral.get("sha256"),
+                    "behavioral qualification SHA-256 must match checked-in bytes", errors)
 
     validate_ninfer_variants(
         root,
@@ -705,8 +768,12 @@ def validate(
                 "external acceptance platform receipt hashes must match compatibility", errors)
         for profile_id, digest in platform_hashes.items():
             require_sha(digest, f"external acceptance {profile_id} SHA-256", errors)
-        require_https(external_acceptance.get("public_url"),
-                      "external acceptance public_url", errors)
+        require_product_raw_url(
+            external_acceptance.get("public_url"),
+            "external acceptance public_url",
+            str(external_acceptance.get("repository_path")),
+            errors,
+        )
         require(external_acceptance.get("component_release_tag") == omp.get("component_release_tag"),
                 "external acceptance component tag must match manifest", errors)
         require(external_acceptance.get("windows_asset_sha256") == omp.get("artifact_sha256"),
@@ -808,8 +875,12 @@ def validate(
                 "ready release requires qualification.summary_sha256", errors)
         require(manifest_qualification.get("public_url") is not None,
                 "ready release requires qualification.public_url", errors)
-        require_https(manifest_qualification.get("public_url"),
-                      "qualification.public_url", errors, nullable=True)
+        require_product_raw_url(
+            manifest_qualification.get("public_url"),
+            "qualification.public_url",
+            f"releases/{release}/{manifest_qualification.get('summary')}",
+            errors,
+        )
         require(manifest_qualification.get("external_installation_passed") is True,
                 "ready release requires a passing external installation", errors)
         require(qualification.get("external_installation_qualified") is True,

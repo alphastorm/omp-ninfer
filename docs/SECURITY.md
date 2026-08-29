@@ -53,6 +53,12 @@ request JSONL files live under protected managed state; the primary container pr
 owner-controlled host state/log directories. Treat both as sensitive even though public qualification
 and issue forms use content-safe aggregates only.
 
+The primary RTX 5090 server binary accepts the bearer through `--api-key`, not a file option. The
+launcher reads the read-only Docker secret only inside the container entry command, but the resulting
+server argument vector contains the bearer and is inspectable by the trusted host owner or root. This
+release therefore requires the documented single-trusted-owner boundary; it does not claim protection
+from another privileged local administrator.
+
 Stopping the container does not delete the model, key, OMP transcript, or request-log files. Delete
 those explicitly when removing the beta. Removing NInfer response state does not remove the OMP
 transcript.

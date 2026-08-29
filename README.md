@@ -245,10 +245,10 @@ Ordered by how much this product owes them:
    conversion published at
    [neroued/Qwen3.8-27B-NInfer](https://huggingface.co/neroued/Qwen3.8-27B-NInfer). Apache-2.0.
 4. **[UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090)** — the RTX
-   4090 port (E8-lattice KV quantization, DirectStorage weight DMA) our deferred 4090 lane builds
+   4090 port (E8-lattice KV quantization, DirectStorage weight DMA) the qualified 4090 lane builds
    on. Apache-2.0.
 5. **[Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)** — the RTX 3090 port
-   (ReplaySSM, RotorQuant) planned as the base of a future 3090 lane. Apache-2.0.
+   (ReplaySSM, RotorQuant) underlying the public non-installable 3090 preview. Apache-2.0.
 6. Algorithm and library lineage — Gated DeltaNet
    ([arXiv:2412.06464](https://arxiv.org/abs/2412.06464)), Tri Dao's ReplaySSM note, Z-Lab's
    DFlash, Unsloth's NVFP4 weights, and vendored `utf8proc`, `nlohmann/json`, and `cpp-httplib` —
@@ -262,12 +262,11 @@ NVIDIA.
 | Repository | Owns |
 | --- | --- |
 | [`alphastorm/omp-ninfer`](https://github.com/alphastorm/omp-ninfer) | Product front door: release manifests, profiles, quickstart, qualification composition, support boundary |
-| [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) | RTX 5090 runtime fork of Neroued/ninfer: stateful Responses for OMP, authenticated identity, container, release evidence |
-| [`alphastorm/ninfer-4090`](https://github.com/alphastorm/ninfer-4090) | RTX 4090 runtime lane, fork of UDPSendToFailed/ninfer-4090 — deferred from the first beta |
+| [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) | Public tagged RTX 5090, qualified RTX 4090, and preview RTX 3090 component source |
 | [`alphastorm/homebrew-omp`](https://github.com/alphastorm/homebrew-omp) | Client distribution: release archives plus stable `omp` and prerelease `omp-beta` casks |
 
-The OMP client source is a fork of `can1357/oh-my-pi`; it is private during early access, and its
-publication plus upstreaming are tracked roadmap gates. The user-facing command remains `omp`;
+The OMP client source is a public fork of `can1357/oh-my-pi` at
+[`alphastorm/oh-my-pi`](https://github.com/alphastorm/oh-my-pi); upstreaming remains a roadmap goal. The user-facing command remains `omp`;
 "appliance" names the operating concept, and **OMP NInfer** names this integration and repository.
 
 ## License
