@@ -109,6 +109,7 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo.gif` | real-session README demo (GIF) |
 | `docs/media/omp-ninfer-demo.mp4` | real-session demo master (MP4) |
 | `docs/media/omp-ninfer-demo-poster.png` | demo poster frame for posts and video embeds |
+| `docs/media/omp-ninfer-demo.cast` | raw asciinema capture behind the demo (provenance: `docs/media/README.md`) |
 
 Regeneration: screenshot `.banner` at 2× for `banner.png`, `.arch` at 2×
 for `architecture.png`, `.stats` at 2× for `benchmarks.png`,
