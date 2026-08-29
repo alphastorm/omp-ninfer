@@ -87,7 +87,9 @@ The next expensive-to-add-later items are now explicit rather than hidden releas
 - JSON-schema constrained decoding only if the runtime can enforce rather than ignore the contract;
 - concurrency-qualified 3090/4090 profiles after memory and latency gates exist for those exact
   packages;
-- a dependency-level SBOM for the 4090 package beyond its complete file inventory; and
+- a dependency-level SBOM for the 4090 package beyond its complete file inventory;
+- a doctor-level WSL networking-mode and loopback-reachability preflight for the Windows Docker
+  profiles ([#15](https://github.com/alphastorm/omp-ninfer/issues/15)); and
 - a fixed two-machine workload before any fleet completed-work or throughput claim.
 
 ## Upstreaming to Oh My Pi

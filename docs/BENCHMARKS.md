@@ -139,6 +139,7 @@ after the documented acceptance checks pass.
 | Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
 | 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
+| 2026-08 | RTX 4090 | 24 GiB | Native Windows 11 x64 | v0.2.0-beta.1 | 52.330 | — (MTP0 profile) | 102,075-token restored continuation after process restart | [qualification](../releases/v0.2.0-beta.1/qualification/rtx4090.json) (maintainer) |
 | 2026-08 | RTX 3090 | 24 GiB | Preview candidate | v0.2.0-beta.1 | not run | not run | current live-model gates deferred | [incomplete receipt](../releases/v0.2.0-beta.1/qualification/rtx3090.json) (maintainer) |
 
 Submission rules:
