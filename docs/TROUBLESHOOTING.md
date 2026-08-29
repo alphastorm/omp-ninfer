@@ -75,6 +75,37 @@ Common first failures are insufficient GPU memory, the NVIDIA runtime not being 
 mount/permission errors, or an identity mismatch. Do not restart unchanged input. Correct the named
 cause, stop the owned container, then start once.
 
+## The server listens but loopback is unreachable
+
+The launcher exits with `error: wsl-mirrored-loopback-unavailable` when the container logs
+`listening on http://127.0.0.1:18089` while the port stays unreachable from the invoking
+namespace. On Windows 11 + Docker Desktop WSL2 hosts this is WSL networking drift (for example
+after a WSL or Docker Desktop update): `.wslconfig` may still declare `networkingMode=mirrored`
+while the live VM no longer shares loopback, so a host-network container bind never surfaces on
+Windows or Ubuntu loopback.
+
+1. From Windows run `wsl --shutdown`, start Docker Desktop, and wait for the engine.
+2. Rerun the launcher once. Do not change ports or bind addresses as a workaround; that would
+   diverge from the qualified profile identity.
+
+First observed post-release on the maintainer qualification host
+([#15](https://github.com/alphastorm/omp-ninfer/issues/15)).
+
+## Docker credential helper fails over non-interactive SSH
+
+`docker pull` can fail with `error getting credentials … A specified logon session does not
+exist` when Docker Desktop's Windows credential helper runs inside a non-interactive SSH
+session — even for anonymous public pulls. Point `DOCKER_CONFIG` at an empty configuration for
+the launcher invocation:
+
+```sh
+DOCKER_CONFIG=$(mktemp -d)
+printf '{}\n' > "$DOCKER_CONFIG/config.json"
+export DOCKER_CONFIG
+```
+
+This bypasses only credential lookup; digest pinning and hash verification are unchanged.
+
 ## Authenticated status returns `401`
 
 The Mac and inference host must contain the same single-line key. Check file existence and mode
