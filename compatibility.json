@@ -72,7 +72,7 @@
         "profile": "qwen38-5090-v0.2.0-beta.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://github.com/alphastorm/omp-ninfer/releases/download/v0.2.0-beta.1/ninfer-rtx5090-v0.2.0-beta.2-qualification.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx5090.json",
           "sha256": "4de677beedd042678257dafce97228ebae46fe41151ed5b355c99bee36e53fdc"
         }
       },
@@ -140,8 +140,8 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/windows-x64-18.0.9-beta2.json",
-        "sha256": "1653e0f5bca2ce08e01ade5c141d72331bedbd8275aaa782fdf0be1690f2269b"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/51876533a4d41ef1b87e88b81cee954df5bcba1a/releases/v0.2.0-beta.1/acceptance/windows-x64-18.0.9-beta2.json",
+        "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
       },
       "client_distribution": {
         "os": "Windows 11",
@@ -162,7 +162,7 @@
         "profile": "qwen38-5090-v0.2.0-beta.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://github.com/alphastorm/omp-ninfer/releases/download/v0.2.0-beta.1/ninfer-rtx5090-v0.2.0-beta.2-qualification.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx5090.json",
           "sha256": "4de677beedd042678257dafce97228ebae46fe41151ed5b355c99bee36e53fdc"
         }
       },
@@ -252,7 +252,7 @@
         "profile": "qwen38-5090-v0.2.0-beta.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://github.com/alphastorm/omp-ninfer/releases/download/v0.2.0-beta.1/ninfer-rtx5090-v0.2.0-beta.2-qualification.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx5090.json",
           "sha256": "4de677beedd042678257dafce97228ebae46fe41151ed5b355c99bee36e53fdc"
         }
       },

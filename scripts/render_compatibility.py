@@ -85,6 +85,24 @@ def load_authority(path: Path) -> dict[str, Any]:
                 f"{profile_id} lifecycle script SHA-256 is invalid")
         require(isinstance(profile.get("gpu_qualification"), dict),
                 f"{profile_id} GPU qualification is absent")
+        gpu_receipt = profile["gpu_qualification"].get("receipt")
+        require(isinstance(gpu_receipt, dict),
+                f"{profile_id} GPU qualification receipt is absent")
+        require(
+            isinstance(gpu_receipt.get("url"), str)
+            and re.fullmatch(
+                r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
+                r"[0-9a-f]{40}/releases/"
+                + re.escape(product_release)
+                + r"/qualification/rtx5090\.json",
+                gpu_receipt["url"],
+            )
+            is not None,
+            f"{profile_id} GPU qualification receipt URL is not immutable",
+        )
+        require(isinstance(gpu_receipt.get("sha256"), str)
+                and re.fullmatch(r"[0-9a-f]{64}", gpu_receipt["sha256"]) is not None,
+                f"{profile_id} GPU qualification receipt SHA-256 is invalid")
         acceptance = profile.get("acceptance_receipt")
         if acceptance is not None:
             require(isinstance(acceptance, dict), f"{profile_id} acceptance receipt is invalid")

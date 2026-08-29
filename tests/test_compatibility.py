@@ -155,6 +155,14 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             MODULE.load_authority(self._write(invalid))
 
         invalid = deepcopy(authority)
+        invalid["profiles"][0]["gpu_qualification"]["receipt"]["url"] = (
+            "https://github.com/alphastorm/omp-ninfer/releases/download/"
+            "v0.2.0-beta.1/future-receipt.json"
+        )
+        with self.assertRaisesRegex(ValueError, "GPU qualification receipt URL"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
         invalid["profiles"][0]["acceptance_receipt"]["url"] = (
             "https://raw.githubusercontent.com/alphastorm/omp-ninfer/main/receipt.json"
         )

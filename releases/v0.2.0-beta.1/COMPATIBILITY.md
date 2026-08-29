@@ -10,7 +10,7 @@ Client status is independent from each GPU runtime qualification. `preview` is n
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `darwin-remote-ssh` | macOS 26 arm64 | `qwen38-5090-v0.2.0-beta.2` | `ssh-loopback` | `darwin-remote-ssh` | **qualified** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/macos-arm64-18.0.9-beta2.json) |
-| `windows-docker-local` | Windows 11 x64 | `qwen38-5090-v0.2.0-beta.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/windows-x64-18.0.9-beta2.json) |
+| `windows-docker-local` | Windows 11 x64 | `qwen38-5090-v0.2.0-beta.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/51876533a4d41ef1b87e88b81cee954df5bcba1a/releases/v0.2.0-beta.1/acceptance/windows-x64-18.0.9-beta2.json) |
 | `linux-docker-local` | Ubuntu 24.04 x64 | `qwen38-5090-v0.2.0-beta.2` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/linux-x64-18.0.9-beta2.json) |
 
 ## Native runtime variants
