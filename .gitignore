@@ -14,3 +14,7 @@ __pycache__/
 # Local downloads and generated acceptance output
 downloads/
 acceptance-output/
+
+# Local agent tooling output
+prompt-exports/
+.ruby-lsp/
