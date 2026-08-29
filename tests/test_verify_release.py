@@ -52,7 +52,7 @@ class ReleaseContractTest(unittest.TestCase):
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
     def make_candidate(self, root: Path, manifest: dict) -> None:
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         qualification = self.load(qualification_path)
         qualification["external_installation_qualified"] = False
         self.save(qualification_path, qualification)
@@ -81,7 +81,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_draft_contract_remains_noninstallable(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["status"] = "draft"
         manifest["components"]["omp"]["artifact_published"] = False
@@ -98,7 +98,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_accepts_exact_installable_components_before_external_smoke(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         self.save(manifest_path, manifest)
@@ -117,8 +117,8 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ready_contract_rejects_incomplete_publication(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         manifest = self.load(manifest_path)
         qualification = self.load(qualification_path)
         manifest["status"] = "ready"
@@ -161,7 +161,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.1.0-beta.1",
+            "v0.2.0-beta.1",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -202,7 +202,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_model_url_must_bind_its_recorded_revision(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["model"]["artifact_url"] = (
             "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/main/qwen3_8_27b.ninfer"
@@ -215,7 +215,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_omp_distribution_version_must_equal_release_id(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["omp"]["distribution_version"] = "18.0.5-deadbeef"
         self.save(manifest_path, manifest)
@@ -236,7 +236,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_omp_artifact_name_must_bind_version_and_platform(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["omp"]["artifact_name"] = "omp-macos-arm64.tar.gz"
         self.save(manifest_path, manifest)
@@ -250,7 +250,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_omp_asset_url_must_bind_public_component(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_url"] = (
@@ -268,7 +268,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_rejects_a_draft_omp_asset(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_published"] = False
@@ -285,7 +285,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_oci_reference_must_match_manifest_digest(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
@@ -297,7 +297,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_accepts_the_public_runtime_repository(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         ninfer = manifest["components"]["ninfer"]
@@ -441,7 +441,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_local_packaging_oci_digest_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
         self.save(manifest_path, manifest)
@@ -452,7 +452,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_private_paths_are_rejected_from_public_receipts(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         qualification = self.load(qualification_path)
         qualification["debug_path"] = "/Users/private/operator-receipt.json"
         self.save(qualification_path, qualification)

@@ -91,7 +91,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_runtime_identity_matches_the_release_manifest(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         manifest = json.loads(
-            (ROOT / "releases" / "v0.1.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
+            (ROOT / "releases" / "v0.2.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
         )
         expected = {
             "image_reference": manifest["components"]["ninfer"]["oci_reference"],
