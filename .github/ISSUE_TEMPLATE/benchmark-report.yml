@@ -51,7 +51,7 @@ body:
     attributes:
       label: Decode tokens per second
       description: Committed decode throughput for one request, with decode seconds and completion tokens if available.
-      placeholder: "209.04 (1,143 tokens / 5.47 s)"
+      placeholder: "235.02 (2,048 tokens / 8.71 s)"
     validations:
       required: true
   - type: input
@@ -59,17 +59,17 @@ body:
     attributes:
       label: MTP acceptance rate
       description: Accepted / drafted tokens if available.
-      placeholder: "77.0% (799/1,038)"
+      placeholder: "99.87% (1,534/1,536)"
   - type: input
     id: longcontext
     attributes:
       label: Longest exact-retrieval context you verified
-      placeholder: "130,048-token prompt, exact match, 58.5 s"
+      placeholder: "130,048-token prompt, exact match, 59.8 s"
   - type: textarea
     id: method
     attributes:
       label: Measurement method
-      description: Exactly how each number was produced (harness, command shape, warm-up, repetitions). Server-side harnesses live in the runtime repositories; v0.1 ships no one-command product benchmark.
+      description: Exactly how each number was produced (harness, command shape, warm-up, repetitions). Server-side harnesses live in the runtime repositories; the managed appliance profile also exposes `benchmark --quick` for its exact published runtime.
     validations:
       required: true
   - type: checkboxes

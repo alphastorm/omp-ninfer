@@ -6,7 +6,8 @@ semantics, transactional provider continuation, a target-specific NInfer/Qwen ru
 client-to-GPU topology, and one release/qualification authority. It does not claim invention of
 stateful Responses or persistent KV caching.
 
-Sources below were reviewed on 2026-08-26, and the NInfer family section on 2026-08-28. These
+Sources below were reviewed on 2026-08-26, the NInfer family section on 2026-08-28, and the
+local-server section on 2026-08-29. These
 projects move quickly; consult their current documentation before making a deployment decision.
 
 ## The NInfer family
@@ -21,14 +22,14 @@ the credit ordering matters:
 - [alphastorm/ninfer](https://github.com/alphastorm/ninfer) is this product's runtime fork of
   Neroued/ninfer. It adds the OMP-oriented pieces: stateful OpenAI Responses
   continuation/fork/delete semantics, authenticated status identity, the container/OCI/SBOM
-  release packaging, and the qualification evidence bound into the product manifest.
+  release packaging, and the qualification evidence bound into the product manifest — plus the
+  qualified native RTX 4090 beta branch and the reviewed RTX 3090 preview branch shipped by v0.2.
 - [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) ports the engine
   to RTX 4090 (`sm_89`) with E8-lattice KV quantization, DirectStorage weight DMA, and D3D12
-  residency management. Our deferred
-  [alphastorm/ninfer-4090](https://github.com/alphastorm/ninfer-4090) lane forks it.
+  residency management. The qualified native RTX 4090 beta branch in `alphastorm/ninfer` forks it.
 - [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) ports the engine to RTX 3090
-  (`sm_86`) with ReplaySSM and RotorQuant KV compression; the roadmap plans a reviewed
-  current-architecture 3090 lane from it.
+  (`sm_86`) with ReplaySSM and RotorQuant KV compression; the reviewed, non-installable RTX 3090
+  preview branch in `alphastorm/ninfer` forks it.
 
 Each repository publishes its own measurements on its own profiles and quantization schemes; the
 README family table quotes their headlines with attribution, and only the RTX 5090 numbers in
@@ -42,6 +43,8 @@ README family table quotes their headlines with attribution, and only the RTX 50
 A stateful gateway in front of stateless vLLM core. Its public design includes OpenAI-compatible
 Responses, `previous_response_id`, tool-oriented request state, SSE/WebSocket transport, and
 SQLite/Postgres persistence. It is the closest public prior art for stateful Responses semantics.
+As of 2026-08 its [roadmap](https://github.com/vllm-project/agentic-api/blob/main/ROADMAP.md)
+still lists reliable `previous_response_id` state hydration as active work.
 
 OMP NInfer does not insert Agentic API because OMP already owns the authoritative transcript and
 transactional provider snapshot while NInfer owns process-local response/cache state. Adding another
@@ -55,6 +58,19 @@ A widely used local model runtime with OpenAI-compatible endpoints and an access
 Its documented Responses compatibility is not the same OMP-owned `previous_response_id` transaction
 used here. Ollama is a better fit when broad model/hardware convenience matters more than the exact
 qualified NInfer/Qwen/RTX route.
+
+### [LM Studio](https://lmstudio.ai/docs)
+
+The most polished desktop path to discovering and running local models, with a headless daemon,
+OpenAI- and Anthropic-compatible local endpoints, tool calling, and structured output. Its
+documented endpoints are stateless chat-style requests: cross-turn state lives in the client, and
+no `previous_response_id` continuation contract is documented. A better fit when desktop model
+management and catalog breadth matter more than one qualified stateful OMP route.
+
+Adjacent single-machine servers with strong NVIDIA followings —
+[TabbyAPI](https://github.com/theroyallab/tabbyAPI) (ExLlama-based) and
+[mistral.rs](https://github.com/EricLBuehler/mistral.rs) — offer quant-focused OpenAI-compatible
+serving under the same stateless per-request contract.
 
 ### [LocalAI](https://github.com/mudler/LocalAI)
 

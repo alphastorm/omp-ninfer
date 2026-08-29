@@ -17,8 +17,9 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
-- v0.1 tagline: **Private Qwen coding appliance for RTX 5090**
-- Reserved post-qualification tagline: **Private Qwen coding appliance for RTX 4090/5090**
+- v0.2 tagline: **Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
+- Status grammar: when lane status is stated, write "5090 + 4090 qualified · 3090 preview";
+  never present the three GPUs as an undifferentiated support claim in status copy
 - The user-facing command remains `omp`; "appliance" describes the operating
   concept, never the repository name.
 
@@ -67,7 +68,7 @@ Voice: the gateway's sober register, operator-flavored. Sentence case, no
 emoji, no exclamation marks. Claims stated as invariants:
 
 - "Your model prompt stays on hardware you own."
-- "One supported target, qualified: an RTX 5090 on Linux/WSL2."
+- "Two qualified GPU lanes and one preview, each bound to an exact receipt."
 - "The tunnel is authenticated and fail-closed; identity is visible."
 - "Stateful local coding through OpenAI Responses."
 
@@ -105,6 +106,9 @@ imply official partnership.
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
 | `assets/favicon-32.png` / `favicon-16.png` | PNG favicon fallbacks |
+| `docs/media/omp-ninfer-demo.gif` | real-session README demo (GIF) |
+| `docs/media/omp-ninfer-demo.mp4` | real-session demo master (MP4) |
+| `docs/media/omp-ninfer-demo-poster.png` | demo poster frame for posts and video embeds |
 
 Regeneration: screenshot `.banner` at 2× for `banner.png`, `.arch` at 2×
 for `architecture.png`, `.stats` at 2× for `benchmarks.png`,
@@ -113,6 +117,13 @@ at 2× for the lockup PNGs (transparent); render `icon.svg` at 512 and
 `favicon.svg` at 32/16; screenshot `.og` at 1× for `og.png`. Expected raster dimensions are
 2560×640 for the banner, 2480×760 for architecture, 2480×600 for the stat strip, 1720×360 for
 each lockup, and 1280×640 for the social preview.
+
+Demo captures are real sessions, never mockups presented as recordings: record against a real
+qualified-profile runtime, use synthetic task content only, and verify no hostname, username,
+private path, key, or personal data appears in any frame. Any number shown must match a published
+receipt or be visibly produced by the recorded session itself. Composites and illustrations must
+be labelled as such in the media provenance file; provenance for every demo lives in
+`docs/media/README.md`.
 
 ## README header (drop-in)
 
@@ -123,7 +134,7 @@ each lockup, and 1280×640 for the social preview.
 
 # OMP NInfer
 
-**Private Qwen coding appliance for RTX 5090**
+**Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
 
 Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
 [Oh My Pi](https://github.com/can1357/oh-my-pi) on native Windows, Linux, or a Mac.
@@ -143,5 +154,8 @@ qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualificat
 Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and
 `![Qualified v0.2.0-beta.1 results](assets/benchmarks.png)` under `## Measured, not estimated`;
 neither is part of the header.
+
+The real-session demo GIF sits inside the header block directly under the private-by-design
+subline, at width 900 with a full alt description; link the MP4 master and provenance beside it.
 
 Then upload `assets/og.png` at GitHub → Settings → Social preview.

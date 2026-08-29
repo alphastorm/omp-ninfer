@@ -1,8 +1,9 @@
 # Roadmap
 
 This roadmap is a scope boundary, not a promise of dates. The current product wedge is OMP plus
-NInfer plus Qwen3.8 on user-controlled RTX 5090 machines. Work outside that wedge needs a new
-product decision rather than placeholder abstractions.
+NInfer plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 lanes and a
+preview RTX 3090 lane, each bound to an exact package and receipt. Work outside that wedge needs
+a new product decision rather than placeholder abstractions.
 
 Want to move something here? The fastest ways to help are listed at the end of this page and in
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
@@ -53,7 +54,8 @@ The second invited-tester release closes the v0.2 roadmap:
 - the refreshed RTX 5090 BF16-KV/MTP3 runtime plus documentation-strengthening prefill and decode
   measurements;
 - a beta-qualified native Windows RTX 4090 runtime plus a review-closed, non-installable RTX 3090
-  preview whose current live-model and fresh Windows package lifecycle gates remain `not_run`; and
+  preview whose current live-model and fresh Windows package lifecycle gates remain `not_run`
+  while the maintainer's 3090 validation rig is offline for service; and
 - one product compatibility authority binding the three OMP clients, Homebrew cask, primary RTX
   5090 image, qualified RTX 4090 variant, and RTX 3090 preview.
 
@@ -129,4 +131,7 @@ Before marketing beyond invited testers:
   for the [community results table](docs/BENCHMARKS.md#community-results).
 - **CUDA/kernel work?** Claim an idea from the
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog).
-- **RTX 3090 or RTX 4090 owner?** Run the matching tagged acceptance boundary and file a content-safe hardware report; RTX 3090 reports close the preview's deferred gates, while pass and fail reports both improve the observed matrix.
+- **RTX 3090 or RTX 4090 owner?** Run the matching tagged acceptance boundary and file a
+  content-safe hardware report. The 3090 preview's remaining gates are blocked on validation
+  hardware, not design — 3090 reports are exactly the evidence that closes them, and pass and
+  fail reports both improve the observed matrix.

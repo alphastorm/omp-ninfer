@@ -8,7 +8,7 @@ branches are unsupported deployments.
 
 | Version | Supported |
 | --- | --- |
-| latest published `0.1.0-beta.x` | yes, during invited early access |
+| latest published `0.2.0-beta.x` | yes, during invited early access |
 | older prereleases | no |
 | `main` / draft manifests | no deployment support |
 

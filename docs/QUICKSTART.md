@@ -54,9 +54,11 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 ## Native Windows RTX 4090 beta and RTX 3090 preview
 
 These are separate native NInfer packages, not substitutions for the primary RTX 5090 image. The
-installable path accepts only `rtx4090-windows-native`. RTX 3090 is published for inspection and
-hardware reports, but its manifest status is `preview` and this script must refuse it. Start from an
-elevated PowerShell in the tagged product clone and let the manifest supply every URL and hash:
+installable path accepts only `rtx4090-windows-native`. The RTX 3090 package is built and reviewed,
+but its live-model and fresh-package gates still await validation hardware, so its manifest status
+is `preview` and this script must refuse it; it stays published for inspection and hardware
+reports. Start from an elevated PowerShell in the tagged product clone and let the manifest supply
+every URL and hash:
 
 ```powershell
 $VariantId = 'rtx4090-windows-native'
@@ -94,9 +96,12 @@ if (-not (Test-Path $Key)) {
 
 The package controller binds loopback/Tailscale-only listening, mandatory bearer authentication,
 the external model hash, process-restart checkpoints, and active/previous rollback. Do not mix
-assets across variants or infer support from GPU-family names. RTX 3090 remains non-installable until
-a later passing receipt closes its deferred live-model and fresh Windows package gates. RTX 4090 uses its exact MTP0 profile. Run the ordinary acceptance in section
-8 after installation. Structured JSON-schema output remains unsupported and fails closed.
+assets across variants or infer support from GPU-family names. RTX 3090 remains non-installable
+until a later passing receipt closes its deferred live-model and fresh Windows package gates —
+if you own a 3090, running the published acceptance boundary and filing a
+[hardware report](https://github.com/alphastorm/omp-ninfer/issues/new/choose) is exactly the
+evidence that closes them. RTX 4090 uses its exact MTP0 profile. Run the ordinary acceptance in
+section 8 after installation. Structured JSON-schema output remains unsupported and fails closed.
 
 ## Managed macOS SSH qualified route
 

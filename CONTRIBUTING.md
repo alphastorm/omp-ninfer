@@ -15,7 +15,9 @@ model/runtime expansion and speculative abstractions are not current goals.
 - OMP session/tool/provider semantics: upstream
   [Oh My Pi](https://github.com/can1357/oh-my-pi) where the change is general; the beta client
   fork only carries the NInfer integration until those parts are upstreamed.
-- RTX 4090 runtime: `alphastorm/ninfer-4090`; it is not part of the first product release.
+- Native RTX 4090 and RTX 3090 runtime variants: their reviewed branches in `alphastorm/ninfer`
+  (upstream ports: [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090),
+  [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)).
 - Homebrew cask behavior: `alphastorm/homebrew-omp`.
 
 Do not duplicate implementation across repositories to make a local patch easier.
