@@ -1,0 +1,49 @@
+{
+  "artifact_type": "maintainer_measurement",
+  "schema_version": 1,
+  "id": "warm-vs-cold-followup-ttft-2026-08-29",
+  "date": "2026-08-29",
+  "claim_scope": "labeled maintainer measurement on the released runtime; not a qualification-bound product claim",
+  "runtime_identity": {
+    "product_release": "v0.2.0-beta.1",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+    "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "gpu": "NVIDIA GeForce RTX 5090, 32607 MiB",
+    "host": "Windows 11 x64 + Docker Desktop WSL2",
+    "capture_adaptation": "container relaunched from the identical image/model/arguments with bridge networking and a published host port because the capture host's WSL mirrored-loopback path was unavailable; serve arguments otherwise identical to the shipped profile"
+  },
+  "method": {
+    "vantage": "server-side loopback on the runtime host (WSL2), Python urllib streaming client",
+    "definition": "TTFT = time from request start to the first streamed generated token event (reasoning or output text delta) over SSE",
+    "warm": "one stored seed turn establishes the session; the measured follow-up sends a short input with previous_response_id",
+    "cold": "a fresh prompt of equivalent length built from a different random seed (no possible prefix reuse), store=false",
+    "corpus": "synthetic random words from a fixed 20-word vocabulary; content-safe by construction",
+    "requests_per_point": 1,
+    "concurrency": 1,
+    "script": "committed inline in this file's provenance section of docs/BENCHMARKS.md history; single-sample, no warm-up discarded"
+  },
+  "results": [
+    {
+      "session_input_tokens": 28558,
+      "warm_ttft_s": 0.208,
+      "warm_cached_tokens": 28553,
+      "cold_equivalent_input_tokens": 28500,
+      "cold_ttft_s": 9.407
+    },
+    {
+      "session_input_tokens": 89216,
+      "warm_ttft_s": 0.375,
+      "warm_cached_tokens": 89211,
+      "cold_equivalent_input_tokens": 89286,
+      "cold_ttft_s": 36.697
+    }
+  ],
+  "caveats": [
+    "single sample per point",
+    "synthetic corpus, not an agent transcript",
+    "cold time-to-first-token approximates full prefill of an equivalent-length fresh session and is consistent with the qualified prefill curve",
+    "numbers belong to this exact machine, image, and profile; they are not universal GPU claims"
+  ]
+}

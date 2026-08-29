@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Real-session README demo (GIF, MP4, poster) recorded against the exact released v0.2.0-beta.1
+  RTX 5090 runtime, with provenance notes and a launch-copy kit under `docs/media/`.
+- Labeled maintainer warm-vs-cold follow-up-turn latency measurement on the released runtime.
+
+### Changed
+
+- Sharpened the README hero around the measured value proposition and explicit lane status, and
+  added LM Studio to the runtime comparison and related-work review.
+- Reframed RTX 3090 preview messaging around its actual blocker — validation-hardware
+  availability — with a direct hardware-report call to action across README, roadmap, quickstart,
+  and benchmarks.
+- Refreshed stale v0.1-era statements in the contributing router, related-work family section,
+  roadmap wedge, security policy support table, brand canon, and benchmark issue form.
+
 ## [0.2.0-beta.1] - 2026-08-29
 
 ### Added

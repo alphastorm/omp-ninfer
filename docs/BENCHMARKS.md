@@ -37,7 +37,30 @@ not an architecture-normalized benchmark.
 
 The RTX 4090 Golden replacement is synthetic and committed. The unavailable historical private
 corpus was not reused. The RTX 3090 automatic-use role corpus is a separate, stricter gate that did
-not pass; no unattended role is authorized by these interactive product measurements.
+not pass; no unattended role is authorized by these interactive product measurements. The remaining
+RTX 3090 package gates are blocked on validation hardware — the maintainer's 3090 rig is offline
+for service — not on a design decision; a content-safe
+[hardware report](https://github.com/alphastorm/omp-ninfer/issues/new/choose) from any 3090 owner
+running the published acceptance boundary is the evidence that closes them.
+
+## Maintainer measurement — warm vs cold follow-up turn (2026-08-29)
+
+The first entry from the [planned-measurements list](#benchmarks-we-still-want), measured
+post-release on the released RTX 5090 runtime bytes (the image digest, server binary, and model of
+`qwen38-5090-v0.2.0-beta.2`). This is a labeled maintainer measurement with a committed receipt
+([`measurements/2026-08-29-warm-vs-cold-ttft.json`](measurements/2026-08-29-warm-vs-cold-ttft.json)),
+not a qualification-bound product claim.
+
+| Session (input tokens) | Warm follow-up TTFT (`previous_response_id`) | Cold equivalent TTFT (forced full prefill) | Ratio |
+| ---: | ---: | ---: | ---: |
+| 28,558 | **0.208 s** (28,553 tokens served from retained state) | 9.407 s | ~45× |
+| 89,216 | **0.375 s** (89,211 tokens served from retained state) | 36.697 s | ~98× |
+
+Method: server-side loopback vantage on the runtime host; TTFT is the time to the first streamed
+generated token; the cold pair sends a fresh equivalent-length synthetic prompt that cannot reuse
+any prefix; one sample per point. The server's own `usage.input_tokens_details.cached_tokens`
+attests the retained-state reuse, and the cold time-to-first-token is consistent with the
+qualified prefill curve above.
 
 ## Qualified `v0.1.0-beta.1` results
 
@@ -133,8 +156,9 @@ Submission rules:
 Planned measurements that would sharpen the picture; contributions welcome
 (see [`PERFORMANCE.md`](PERFORMANCE.md)):
 
-- **Warm vs cold turn latency sweep** on the product profile: time-to-first-token for a follow-up
-  turn at 10K/37K/100K-token sessions, stateful route vs forced replay.
+- **Warm vs cold turn latency sweep** on the product profile: the first 28K/89K pair is measured
+  above; the fuller sweep — 10K/37K/100K-token sessions with repetitions and client-side vantage —
+  remains open.
 - **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
 - **Matched MTP0/MTP3 ablation** on one unchanged artifact and context profile.
 - **Concurrency curves** for future 3090/4090 profiles only after exact memory-admission gates are

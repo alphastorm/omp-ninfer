@@ -32,15 +32,18 @@ Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
 <sub><strong>Private by design:</strong> loopback-only endpoints · bearer-authenticated ·
 fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
+<img src="docs/media/omp-ninfer-demo.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green at production decode speed, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript." width="900">
+
 </div>
 
 > [!IMPORTANT]
-> `v0.2.0-beta.1` is a **ready invited-tester release**. Native macOS arm64, Windows x64, and Linux
-> x64 OMP clients are qualified. RTX 5090 is the primary container profile; native Windows RTX 4090
-> is separately beta-qualified, while RTX 3090 is a non-installable public preview. Install only from the tagged quickstart and
-> checksums; this is not
-> a general-availability support claim. Details: [release status](docs/RELEASES.md) ·
-> [compatibility matrix](docs/COMPATIBILITY.md).
+> `v0.2.0-beta.1` is a **ready invited-tester release**, not general availability. Native macOS
+> arm64, Windows x64, and Linux x64 OMP clients are qualified. RTX 5090 is the primary container
+> profile and native Windows RTX 4090 is separately beta-qualified. The RTX 3090 lane is built and
+> reviewed but not yet installable: its remaining gates await validation hardware, and
+> [3090 hardware reports](https://github.com/alphastorm/omp-ninfer/issues/new/choose) are the
+> evidence that closes them. Install only from the tagged quickstart and checksums.
+> Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
 
 ## Why this exists
 
@@ -78,6 +81,7 @@ Exact shipped profiles and receipts in
 | --- | --- |
 | RTX 5090 decode | **235.02 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
 | RTX 5090 prefill | **2,180.87 tok/s** at 130,048 tokens, exact retrieval |
+| Warm vs cold follow-up | **0.375 s** vs 36.70 s to first token at an 89,216-token session — [labeled maintainer measurement](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29), not a qualification-bound claim |
 | RTX 3090 native preview | Current sm_86 contract tests **3/3**; live-model and fresh Windows package gates `not_run` |
 | RTX 4090 native beta | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
@@ -137,23 +141,24 @@ Deep dive: [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURIT
 ## How it compares
 
 Source-verified against public documentation, 2026-08. These projects move quickly; check their
-current docs. Fuller analysis including vLLM's Agentic API, LMCache, SGLang HiCache, and why no
-second gateway sits between OMP and NInfer: [Related work](docs/RELATED_WORK.md).
+current docs. Fuller analysis including LM Studio, vLLM's Agentic API, LMCache, SGLang HiCache, and
+why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_WORK.md).
 
-| | OMP NInfer | [Ollama](https://ollama.com) | [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) | [vLLM](https://github.com/vllm-project/vllm) |
-| --- | --- | --- | --- | --- |
-| What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
-| Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
-| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on qualified 4090; the 3090 preview has no current performance claim | Model/config dependent | Optional draft/ngram setups | Optional |
-| Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model and build | Varies by model |
-| Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling builds | Rolling releases |
-| Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | One pinned artifact, two qualified GPU lanes, and one public preview | Thousands of models, broad hardware | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| | OMP NInfer | [Ollama](https://ollama.com) | [LM Studio](https://lmstudio.ai) | [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) | [vLLM](https://github.com/vllm-project/vllm) |
+| --- | --- | --- | --- | --- | --- |
+| What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
+| Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on qualified 4090; the 3090 preview has no current performance claim | Model/config dependent | Optional draft-model setups, backend-dependent | Optional draft/ngram setups | Optional |
+| Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
+| Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
+| Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config | Depends on your client config |
+| Breadth | One pinned artifact, two qualified GPU lanes, and one public preview | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
-Where each shines: **Ollama** is the easiest way to run many models locally. **llama.cpp** has the
-broadest hardware and quant ecosystem. **vLLM** is the throughput and multi-tenant serving
-reference. **OMP NInfer** is for one specific job — OMP plus Qwen on your own RTX card, long
-stateful coding sessions, privacy as a tested invariant rather than a configuration hope.
+Where each shines: **Ollama** is the easiest way to run many models locally. **LM Studio** is the
+most polished desktop experience for browsing and running them. **llama.cpp** has the broadest
+hardware and quant ecosystem. **vLLM** is the throughput and multi-tenant serving reference.
+**OMP NInfer** is for one specific job — OMP plus Qwen on your own RTX card, long stateful coding
+sessions, privacy as a tested invariant rather than a configuration hope.
 
 ## The NInfer family
 
@@ -169,7 +174,9 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the reviewed native 3090 preview branch |
 
 RTX 4090 support is beta-only. RTX 3090 is preview-only and non-installable until a later passing
-receipt supersedes its incomplete authority. See [`ROADMAP.md`](ROADMAP.md).
+receipt supersedes its incomplete authority — its remaining gates are blocked on validation
+hardware, and [3090 hardware reports](https://github.com/alphastorm/omp-ninfer/issues/new/choose)
+are what close them. See [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
 
