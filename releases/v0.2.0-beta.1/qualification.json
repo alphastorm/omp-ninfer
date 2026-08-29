@@ -1,0 +1,127 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.2.0-beta.1",
+  "as_of": "2026-08-29",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": true,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; one digest-pinned RTX 5090 primary runtime; one exact beta-qualified native Windows RTX 4090 runtime; and one public non-installable RTX 3090 preview whose current live-model and fresh Windows package gates remain not_run.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+    "behavioral_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "release_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "release_source_archive_sha256": "1ef072dbda64875341db27f9dc7e54aa7e97b4546d1f55ee671667d6c703b859",
+    "release_server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.2.0-beta.1/qualification/rtx5090.json",
+      "sha256": "4de677beedd042678257dafce97228ebae46fe41151ed5b355c99bee36e53fdc",
+      "status": "passed",
+      "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2"
+    },
+    "provenance_remediation": {
+      "status": "passed",
+      "release_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+      "source_identity_authority": "packaged build-identity.json; malformed historical benchmark source field is not credited"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+      "release_server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+      "oci_manifest_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+      "binary_package_sha256": "2592d8c7e198dcaff81ef0f3969f975ca1eefd209903f4339eb6f6a0a3f3cec6",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.2.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "08350bcb60ed76819eb4ec7ae3f60d4f9e2d82d59279f8155e4fc770e1718d44",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.2.0-qwen38-5090-beta.2",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "repository_path": "releases/v0.2.0-beta.1/qualification/rtx4090.json",
+        "sha256": "575c9373921c5f8d1651b01d28e2f180cfd41348bdb307f30c2e1886a6f0fdfe",
+        "release_tag": "v0.2.0-qwen38-4090-beta.1",
+        "package_sha256": "1cced9e1f16ad0d1b4a5f9c5a28d00cb2b4449137f1652696799be70a74baf7d"
+      },
+      "rtx3090-windows-native": {
+        "status": "incomplete",
+        "beta_qualified": false,
+        "installable": false,
+        "repository_path": "releases/v0.2.0-beta.1/qualification/rtx3090.json",
+        "sha256": "f9801c113088a18a5e57bb63ae389636d29400eebc5bbd353685dafc714932a5",
+        "release_tag": "v0.2.0-qwen38-3090-beta.1",
+        "package_sha256": "b313904eb22a271d99d21d589075cc0102ab081e6835e9600f3c74c8d0cc48cc",
+        "deferred_gates": [
+          "authenticated live model protocol",
+          "64,512-token retrieval",
+          "process-restart continuation",
+          "bounded C1 performance",
+          "fresh exact Windows RTX 3090 install/security/bidirectional rollback",
+          "exact OMP 18.0.9 acceptance"
+        ]
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.2.0-beta.1/acceptance/composed-external-installation.json",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c4fca931c2faad3c4743b3cc23bef5e2700fee63/releases/v0.2.0-beta.1/acceptance/composed-external-installation.json",
+      "sha256": "5262e90455f76d3a15ae7d106a2e083b0816ad3eee599d048af76ce8b9477744",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.2.0-beta.1-qualified-1",
+      "compatibility_sha256": "4ef0e5a0f5a7d7ab9f7772e33d0c09c79619e57cddee79c410da4bd87e22daeb",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "maximum_prompt_tokens": 130048,
+      "decode_tokens_per_second": 235.02,
+      "mtp_acceptance_rate": 0.9986979
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "checkpoint_seed_tokens": 102060,
+      "checkpoint_restored_tokens": 102075,
+      "prefill_tokens_per_second": 1410.6911829944888,
+      "decode_tokens_per_second": 52.3296743137719,
+      "golden_equivalent": "passed"
+    },
+    "rtx3090_windows_native": {
+      "status": "incomplete",
+      "remote_linux_sm86_native_tests": "3/3 passed",
+      "live_model_gates": "not_run",
+      "fresh_windows_package_gates": "not_run"
+    }
+  },
+  "interpretation": [
+    "The three OMP 18.0.9 clients and primary RTX 5090 composition are qualified and published.",
+    "RTX 4090 beta support binds one exact Windows package, source, SBOM, scripts, protocol, 102K restart, performance, Golden-equivalent, and restoration chain.",
+    "RTX 3090 is intentionally preview-only. Its current package is public and review-closed, but live-model and fresh Windows package lifecycle/security/OMP gates are not_run; historical package measurements are not rebound.",
+    "The historical private Golden corpus was unavailable and was not reused.",
+    "The primary RTX 5090 image does not claim process-restart Responses continuation; OMP transcript replay remains its recovery path.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": []
+}

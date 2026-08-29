@@ -14,6 +14,14 @@ EXAMPLES = ROOT / "examples" / "manual-tunnel"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
+    def test_start_identity_uses_profile_deployment_identity(self) -> None:
+        source = (ROOT / "examples" / "manual-tunnel" / "start-ninfer.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('EXPECTED_DEPLOYMENT_PROFILE=${PROFILE_VALUES[2]}', source)
+        self.assertIn('"deployment_profile": (identity.get("deployment_profile"), deployment_profile)', source)
+        self.assertNotIn('"qwen38-5090-v0.1.0"', source)
+
     def test_windows_ready_path_materializes_key_and_refuses_overwrite(self) -> None:
         quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
         provider = quickstart.split("### Native Windows OMP", 1)[1].split(
@@ -73,7 +81,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.copy_contract_tree(root)
-            manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+            manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
             manifest["components"]["omp"]["artifact_published"] = False
@@ -109,7 +117,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             root = Path(temporary)
             self.copy_contract_tree(root)
 
-            manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+            manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
             model = root / "model.ninfer"

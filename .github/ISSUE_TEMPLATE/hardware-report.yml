@@ -12,7 +12,7 @@ body:
     id: release
     attributes:
       label: OMP NInfer release
-      description: Exact product tag, for example v0.1.0-beta.1.
+      description: Exact product tag, for example v0.2.0-beta.1.
     validations:
       required: true
   - type: input

@@ -37,55 +37,64 @@ can:
 - no silent cloud fallback; and
 - no general-availability support commitment.
 
-## v0.2 — managed appliance lifecycle
+## v0.2.0-beta.1 — managed lifecycle and three GPU release lanes
 
-The next product release is expected to replace manual setup with the existing `omp appliance ...`
-command family after the remote execution boundary is implemented and qualified. Target outcomes:
+The second invited-tester release closes the v0.2 roadmap:
 
-- transport owned by the appliance platform instead of a manually maintained tunnel;
-- manifest-driven `doctor`, `plan`, `install`, `status`, `benchmark --quick`, `rollback`, and
-  `support-bundle` against immutable published artifacts;
-- exact candidate/incumbent identity and rollback receipts on the remote host;
-- OMP exit/resume and, if separately qualified, NInfer process-restart continuation on top of the
-  durable-session-checkpoint work in the runtime repositories;
-- clean install, already-installed, upgrade, interrupted-install, and rollback acceptance from
-  representative predecessor state;
-- RTX 4090 beta support only after a fresh package, restart, protocol, long-context, and Golden
-  lane passes on the fixed external-model installer;
-- RTX 3090 beta support only after a reviewed current-architecture port from
-  [`Don-Chad/ninfer-3090`](https://github.com/Don-Chad/ninfer-3090) and the same qualification on
-  a representative RTX 3090 host; and
-- one manifest authority mechanically checked against OMP's compiled profile registry and the
-  Homebrew cask.
+- native OMP 18.0.9 clients for macOS arm64, Windows x64, and Linux x64, with the exact accepted
+  source published at [`alphastorm/oh-my-pi`](https://github.com/alphastorm/oh-my-pi);
+- manifest-driven `doctor`, `plan`, `install`, `status`, `benchmark --quick`, checkpoint,
+  `rollback`, and `support-bundle` through the closed cross-platform appliance adapters;
+- durable NInfer process-restart continuation on the native RTX 4090 variant, with authenticated
+  session ownership and bounded checkpoint stores; RTX 3090 transaction tests pass but its current
+  live restart gate remains `not_run`;
+- state-faithful clean install, already-installed, interrupted-install repair, upgrade, and
+  rollback coverage from representative predecessor state;
+- the refreshed RTX 5090 BF16-KV/MTP3 runtime plus documentation-strengthening prefill and decode
+  measurements;
+- a beta-qualified native Windows RTX 4090 runtime plus a review-closed, non-installable RTX 3090
+  preview whose current live-model and fresh Windows package lifecycle gates remain `not_run`; and
+- one product compatibility authority binding the three OMP clients, Homebrew cask, primary RTX
+  5090 image, qualified RTX 4090 variant, and RTX 3090 preview.
 
-Status notes, kept honest:
+The RTX 4090 gate uses a committed synthetic OMP Golden-equivalent because the historical private
+corpus is unavailable. It was not reused, read, copied, hashed, or transmitted. The replacement
+requires one typed tool call with exact primitive arguments, linked tool-result continuation, and an
+exact visible final answer.
 
-- The RTX 5090 remote-side install/upgrade/rollback transitions are proven inputs from a
-  state-faithful rehearsal, not a shipping managed CLI claim. A reviewed draft owns bounded
-  read-only `doctor`/`status`; every mutating remote action stays fail-closed and unowned.
-- The first fresh RTX 4090 package, fixed external-model install, and packaged restart passed on
-  `sm_89` ([lane](https://github.com/alphastorm/ninfer-4090), upstream
-  [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090)), but its exact
-  Golden-equivalent exhausted its output bound with two unclosed tool regions; the safe parser
-  correctly returned text rather than fabricating arguments. Protocol, 100K+ restart-persistence,
-  and performance gates remain blocked, so RTX 4090 support is still a non-claim. That lane has
-  also measured disk-checkpoint session restores — a 105K-token session prepared in well under a
-  second instead of a cold re-prefill
-  ([receipt](https://raw.githubusercontent.com/alphastorm/ninfer-4090/1b3a2562f213fa4a234fbe2794955f3d6d6d548e/docs/qualification/receipts/ninfer-4090-qwen38-v0.1.0-win-x64-qualification.json),
-  recorded as prior evidence inside an overall-failed package qualification).
-- Fleet routing across two GPUs exists in source, but a two-machine performance claim is deferred
-  until both hardware profiles are release-qualified and a fixed workload shows a real
-  completed-work benefit without weakening sticky warm-session ownership or fail-closed routing.
+### v0.2 support boundaries
+
+- prerelease/invited-tester support only; no stable or GA promotion;
+- one active request per qualified product profile;
+- JSON-schema structured output is unsupported and rejected;
+- the RTX 3090 unattended evidence-role corpus did not pass, so that automatic route stays disabled;
+- the RTX 3090 thermal claim is GPU-only at 300 W; CPU-heavy, mixed-load, and overnight behavior is
+  outside the gate;
+- no multi-GPU, multi-tenant, priority, or preemptive scheduling claim;
+- no two-machine throughput claim from fleet routing; and
+- no silent cloud fallback or production-route activation.
+
+## v0.3 candidates
+
+The next expensive-to-add-later items are now explicit rather than hidden release debt:
+
+- adopt the shared native-Windows source-first qualification sequence in
+  [the release process](docs/RELEASES.md#next-native-release-sequencing);
+- notarized macOS distribution and a first-party Windows signing path;
+- a public, hardware-independent acceptance runner shared by all client releases;
+- JSON-schema constrained decoding only if the runtime can enforce rather than ignore the contract;
+- concurrency-qualified 3090/4090 profiles after memory and latency gates exist for those exact
+  packages;
+- a dependency-level SBOM for the 4090 package beyond its complete file inventory; and
+- a fixed two-machine workload before any fleet completed-work or throughput claim.
 
 ## Upstreaming to Oh My Pi
 
-The beta OMP client is a pinned fork build carrying the NInfer stateful-Responses provider
-integration; running a fork was the fastest way to ship one exact qualified combination. The
-standing intent is to upstream the reusable parts — provider semantics, stateful Responses
-transaction, appliance profile plumbing — to
-[can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) so the integration stops requiring a fork
-at all. Until then, publishing the exact integration source corresponding to the distributed binary
-remains a broad-release gate below.
+The beta OMP client carries the NInfer stateful-Responses provider integration; running a fork was
+the fastest way to ship one exact qualified combination. The exact accepted source is now public at
+[alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi). The standing intent remains to
+upstream the reusable provider semantics, stateful transaction, and appliance plumbing to
+[can1357/oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ## Continuous — performance program
 
@@ -99,14 +108,14 @@ binary and profile are rebound through a new qualification receipt.
 
 Before marketing beyond invited testers:
 
-- publish or otherwise make inspectable the exact OMP integration source corresponding to the
-  distributed binary (or land the upstreaming above);
-- finish managed remote install/upgrade/rollback or explicitly retain the manual topology as the
-  supported product;
+- gather clean-install and rollback evidence from multiple independent owners for each claimed GPU
+  profile;
+- sign the Windows packages and notarize the macOS client, or retain the explicit unsigned beta
+  boundary;
 - close the highest-signal early-access installation and compatibility failures;
-- define a support/compatibility matrix from observed machines rather than GPU-family inference;
-- re-run external installation from public URLs and immutable digests;
-- publish a concise security model and vulnerability-reporting route; and
+- define response times, supported upgrade windows, and rollback ownership for a broad support
+  commitment;
+- run a fixed two-machine workload before making any fleet completed-work claim; and
 - cut a new release candidate if any executable component, model, configuration, or support
   boundary changes.
 
@@ -120,7 +129,4 @@ Before marketing beyond invited testers:
   for the [community results table](docs/BENCHMARKS.md#community-results).
 - **CUDA/kernel work?** Claim an idea from the
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog).
-- **4090 owner?** The Golden typed-tool-call blocker is the single gate holding that lane; watch
-  [alphastorm/ninfer-4090](https://github.com/alphastorm/ninfer-4090).
-- **3090 owner?** The reviewed port from Don-Chad/ninfer-3090 has not started; interest expressed
-  on an issue helps prioritize it.
+- **RTX 3090 or RTX 4090 owner?** Run the matching tagged acceptance boundary and file a content-safe hardware report; RTX 3090 reports close the preview's deferred gates, while pass and fail reports both improve the observed matrix.

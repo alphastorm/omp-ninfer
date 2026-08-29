@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
-MANIFEST="$ROOT/releases/v0.1.0-beta.1/manifest.json"
+MANIFEST="$ROOT/releases/v0.2.0-beta.1/manifest.json"
 PROFILE="$ROOT/profiles/qwen38-rtx5090-manual-tunnel.json"
 CONTAINER=omp-ninfer-beta
 MODEL_PATH=
@@ -15,7 +15,7 @@ usage() {
 usage: start-ninfer.sh --model PATH --api-key-file PATH --log-dir PATH
        start-ninfer.sh --check-contract
 
-Starts the exact digest-pinned v0.1.0-beta.1 NInfer image on remote loopback.
+Starts the exact digest-pinned v0.2.0-beta.1 NInfer image on remote loopback.
 The release manifest must be installable (`candidate` or `ready`); a draft is rejected before
 Docker runs.
 EOF
@@ -146,13 +146,15 @@ profile = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 print(profile["profile_id"], end="\0")
 server = profile["server"]
 print(server["container_network_mode"], end="\0")
+print(server["deployment_profile"], end="\0")
 for argument in server["arguments"]:
     print(argument, end="\0")
 PY
 )
 PROFILE_ID=${PROFILE_VALUES[0]}
 CONTAINER_NETWORK_MODE=${PROFILE_VALUES[1]}
-PROFILE_ARGS=("${PROFILE_VALUES[@]:2}")
+EXPECTED_DEPLOYMENT_PROFILE=${PROFILE_VALUES[2]}
+PROFILE_ARGS=("${PROFILE_VALUES[@]:3}")
 
 if [[ ! -f "$MODEL_PATH" ]]; then
   printf 'error: model is not a regular file: %s\n' "$MODEL_PATH" >&2
@@ -210,7 +212,8 @@ python3 - \
   "$EXPECTED_SOURCE_COMMIT" \
   "$EXPECTED_BINARY_SHA256" \
   "$EXPECTED_MODEL_SHA256" \
-  "$EXPECTED_CONFIG_SHA256" <<'PY'
+  "$EXPECTED_CONFIG_SHA256" \
+  "$EXPECTED_DEPLOYMENT_PROFILE" <<'PY'
 import json
 import sys
 import time
@@ -218,7 +221,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-key_path, upstream, source, binary_sha, model_sha, config_sha = sys.argv[1:]
+key_path, upstream, source, binary_sha, model_sha, config_sha, deployment_profile = sys.argv[1:]
 api_key = Path(key_path).read_text(encoding="utf-8").strip()
 request = urllib.request.Request(
     "http://127.0.0.1:18089/v1/ninfer/status",
@@ -247,7 +250,7 @@ expected = {
     "upstream_base_sha": (identity.get("upstream_base_sha"), upstream),
     "patch_stack_sha": (identity.get("patch_stack_sha"), source),
     "source_dirty": (identity.get("source_dirty"), False),
-    "deployment_profile": (identity.get("deployment_profile"), "qwen38-5090-v0.1.0"),
+    "deployment_profile": (identity.get("deployment_profile"), deployment_profile),
     "binary_sha256": (identity.get("binary_sha256"), binary_sha),
     "model_artifact_sha256": (identity.get("model_artifact_sha256"), model_sha),
     "config_sha256": (identity.get("config_sha256"), config_sha),

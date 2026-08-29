@@ -2,8 +2,8 @@
 
 ## Supported trust boundary
 
-`v0.1.0-beta.1` supports one trusted owner controlling both the Mac and the RTX 5090 Linux/WSL2
-host. Local administrators and root can inspect processes, files, container state, GPU memory, and
+`v0.2.0-beta.1` supports one trusted owner controlling each OMP client and qualified RTX runtime
+host. Local administrators and root can inspect processes, files, container/native runtime state, GPU memory, and
 traffic endpoints. Shared shell hosts, hostile local users, untrusted containers, public HTTP
 service, and tenant isolation are outside the release claim.
 
@@ -37,18 +37,27 @@ OMP remains responsible for tool approval and workspace boundaries.
 9. The beta container uses restart policy `no`; a process exit is observable rather than silently
    presented as proven recovery.
 
-The in-container server process necessarily receives `--api-key` because NInfer v0.1 exposes that
-server option. The launcher avoids placing the expanded key in Docker configuration or host shell
+The primary in-container server process receives `--api-key` because that launcher expands a
+read-only secret mount for the server option. Native 3090/4090 packages instead use ACL-restricted
+release-scoped key files. The container launcher avoids placing the expanded key in Docker
+configuration or host shell
 history, but root inside the trusted host/container boundary can inspect the process argument. Do
 not use this topology where local administrators are outside the trust boundary.
 
 ## Data flow and retention
 
-OMP stores its normal session transcript and a provider acceleration snapshot on the Mac. NInfer
-retains bounded Responses/cache state in the live process; v0.1 does not claim durable NInfer
-process-restart continuity. The optional request JSONL is written to the user-owned log directory on
-the inference host. Treat it as sensitive even though the supported release path and issue forms use
-content-safe aggregates only.
+OMP stores its normal session transcript and a provider acceleration snapshot on the client. NInfer
+retains bounded Responses/cache state and, on the qualified native Windows RTX 4090 v0.2 variant,
+authenticated durable checkpoints for process-restart continuation. Native checkpoints and optional
+request JSONL files live under protected managed state; the primary container profile uses its
+owner-controlled host state/log directories. Treat both as sensitive even though public qualification
+and issue forms use content-safe aggregates only.
+
+The primary RTX 5090 server binary accepts the bearer through `--api-key`, not a file option. The
+launcher reads the read-only Docker secret only inside the container entry command, but the resulting
+server argument vector contains the bearer and is inspectable by the trusted host owner or root. This
+release therefore requires the documented single-trusted-owner boundary; it does not claim protection
+from another privileged local administrator.
 
 Stopping the container does not delete the model, key, OMP transcript, or request-log files. Delete
 those explicitly when removing the beta. Removing NInfer response state does not remove the OMP

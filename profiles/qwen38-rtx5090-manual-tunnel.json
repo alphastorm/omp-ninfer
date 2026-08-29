@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.1.0-beta.1",
+  "release": "v0.2.0-beta.1",
   "status": "early-access",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
@@ -36,7 +36,7 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.1.0",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
     "container_network_mode": "host",
     "restart_policy": "no",
     "arguments": [
@@ -47,13 +47,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "af557e9b146c68b051bd29e9e7a7d172e908f4b12df4e6d3bd83c54ce58b2399",
+      "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
-      "c6b635ccab19fd712ba503cd051b5359bb9c355068706b17372860baa0de49b6",
+      "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
       "--deployment-profile",
-      "qwen38-5090-v0.1.0",
+      "qwen38-5090-v0.2.0-beta.2",
       "--max-context",
       "131072",
       "--kv-capacity",
@@ -104,13 +104,13 @@
     "prefix-reuse"
   ],
   "unsupported": [
+    "process-restart-continuation",
     "managed-remote-install",
     "managed-upgrade",
     "appliance-rollback",
     "automatic-container-restart",
-    "process-restart-continuation",
-    "rtx4090",
     "multi-gpu",
-    "multi-tenant"
+    "multi-tenant",
+    "structured-json-schema-output"
   ]
 }

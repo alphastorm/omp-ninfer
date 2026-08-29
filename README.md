@@ -4,7 +4,7 @@
 
 # OMP NInfer
 
-**Private Qwen coding appliance for RTX 5090**
+**Private Qwen coding appliance for RTX 5090, RTX 4090, and RTX 3090**
 
 Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
 [Oh My Pi](https://github.com/can1357/oh-my-pi) on native Windows, Linux, or a Mac.
@@ -24,7 +24,7 @@ Run a stateful Qwen3.8 coding model on your own NVIDIA GPU and use it from
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?include_prereleases&filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-209%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-235%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -35,9 +35,10 @@ fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 </div>
 
 > [!IMPORTANT]
-> `v0.1.0-beta.1` is a **ready invited-tester release**, deliberately narrow. The accepted route is
-> native Windows OMP with Docker Desktop WSL2 on one RTX 5090; the published macOS and Linux
-> clients are preview profiles. Install only from the tagged quickstart and checksums; this is not
+> `v0.2.0-beta.1` is a **ready invited-tester release**. Native macOS arm64, Windows x64, and Linux
+> x64 OMP clients are qualified. RTX 5090 is the primary container profile; native Windows RTX 4090
+> is separately beta-qualified, while RTX 3090 is a non-installable public preview. Install only from the tagged quickstart and
+> checksums; this is not
 > a general-availability support claim. Details: [release status](docs/RELEASES.md) ·
 > [compatibility matrix](docs/COMPATIBILITY.md).
 
@@ -48,14 +49,15 @@ to a cloud provider, every one of those tokens is metered and every file leaves 
 Routed to a typical local OpenAI-compatible server, the API is stateless — each turn re-sends and
 re-prefills the whole transcript, and reuse of prior computation is a best-effort cache guess.
 
-OMP NInfer ships the third option as one qualified combination — OMP, the
+OMP NInfer ships the third option as a small set of qualified combinations — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
-RTX 5090 — with three properties the alternatives do not give you together:
+RTX 5090 or RTX 4090, plus a public RTX 3090 preview — with three properties the qualified lanes do
+not give you together elsewhere:
 
 1. **Session state lives on your GPU.** OMP drives NInfer through stateful OpenAI Responses
    (`previous_response_id`). A follow-up turn continues from retained GPU state instead of
-   re-prefilling the session — the qualification observed a 37,591-token prefix served with zero
-   recomputation, and 18 of 31 requests reusing retained state. OMP commits its transcript before
+   re-prefilling the session. The predecessor v0.1 campaign observed a 37,591-token prefix hit, but
+   v0.2 does not rebind that numeric result. OMP commits its transcript before
    advancing provider state, so losing the cache degrades to a replay, never a broken session.
 2. **Private and fail-closed.** Both endpoints bind loopback only; the route is
    bearer-authenticated; the shipped OMP configuration disables model fallback. When your GPU is
@@ -67,18 +69,21 @@ RTX 5090 — with three properties the alternatives do not give you together:
 
 ## Measured, not estimated
 
-![Qualified v0.1.0-beta.1 results](assets/benchmarks.png)
+![Qualified v0.2.0-beta.1 results](assets/benchmarks.png)
 
-One measured RTX 5090, exact shipped profile, receipts in
-[`qualification.json`](releases/v0.1.0-beta.1/qualification.json):
+Exact shipped profiles and receipts in
+[`qualification.json`](releases/v0.2.0-beta.1/qualification.json):
 
 | Gate | Result |
 | --- | --- |
-| Decode throughput | **209.04 tok/s** (MTP3 speculative decoding, 77.0% acceptance) |
-| Long context | **130,048-token prompt with exact retrieval** in 58.5 s |
-| Stateful reuse | **37,591-token prefix-cache hit**, zero recompute |
-| End-to-end agent task | Golden t01 exact match through OMP in 100.2 s |
-| Serving contract | OpenAI, Anthropic, and Responses protocols; Vision; authenticated identity |
+| RTX 5090 decode | **235.02 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
+| RTX 5090 prefill | **2,180.87 tok/s** at 130,048 tokens, exact retrieval |
+| RTX 3090 native preview | Current sm_86 contract tests **3/3**; live-model and fresh Windows package gates `not_run` |
+| RTX 4090 native beta | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
+| Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
+
+Process-restart Responses continuation is qualified only for the native RTX 4090 variant. The primary RTX
+5090 image keeps restart policy `no`; OMP transcript replay remains its recovery path.
 
 The shipped artifact holds its capability through quantization — 96.67% AIME 2025/2026 and 87.37%
 GPQA-Diamond in the upstream single-sample evaluation campaign. Numbers, methodology, caveats, and
@@ -92,8 +97,8 @@ machine and profile, not universal GPU claims.
   context ceiling.
 - **The full OMP agent surface.** Tools, Vision, stateful follow-ups, session forks, and preserved
   thinking, qualified together in one profile rather than advertised separately.
-- **Speculative decoding that pays for itself.** MTP with three draft tokens, qualified at 77.0%
-  acceptance on the shipped artifact; the verification batch costs 1.227× a single-token pass.
+- **Speculative decoding that pays for itself.** The primary MTP3 profile measured 235.02 tok/s;
+  each native GPU variant retains its own profile and receipt rather than inheriting that number.
 - **An operable runtime.** Digest-pinned container, authenticated status identity, observable
   restart policy, owned stop path, and a launcher that refuses identity mismatches.
 - **A support boundary you can read.** One [compatibility authority](compatibility.json), explicit
@@ -101,19 +106,19 @@ machine and profile, not universal GPU claims.
 
 ## Get started
 
-Ready route requirements: Windows 11 x64, one NVIDIA GeForce RTX 5090, Docker Desktop with WSL2
-Ubuntu 24.04 and the NVIDIA container runtime, 40 GiB free disk.
+Primary route requirements: one published OMP client, an RTX 5090 host with Docker/NVIDIA runtime,
+and 40 GiB free disk. Native Windows RTX 3090/4090 variants use their separately pinned packages.
 
 ```powershell
-git clone --branch v0.1.0-beta.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.2.0-beta.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
 Then follow the [quickstart](docs/QUICKSTART.md): install the checksummed OMP client, fetch the
 hash-pinned model, start the digest-pinned NInfer container, add the provider fragment, and run the
-documented acceptance checks. The managed macOS SSH and native Linux routes are published as
-preview profiles in the same document.
+documented acceptance checks. The same document contains managed macOS SSH, native Linux, and
+native Windows 3090/4090 paths.
 
 ## How it works
 
@@ -137,13 +142,13 @@ second gateway sits between OMP and NInfer: [Related work](docs/RELATED_WORK.md)
 
 | | OMP NInfer | [Ollama](https://ollama.com) | [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) | [vLLM](https://github.com/vllm-project/vllm) |
 | --- | --- | --- | --- | --- |
-| What it is | One qualified OMP + runtime + model + GPU combination with receipts | General local runtime with a large model library | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
+| What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
-| Speculative decoding on the shipped model | MTP3 qualified at 77.0% acceptance | Model/config dependent | Optional draft/ngram setups | Optional |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on qualified 4090; the 3090 preview has no current performance claim | Model/config dependent | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | One pinned artifact, one GPU family lane at a time — by design | Thousands of models, broad hardware | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| Breadth | One pinned artifact, two qualified GPU lanes, and one public preview | Thousands of models, broad hardware | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
 Where each shines: **Ollama** is the easiest way to run many models locally. **llama.cpp** has the
 broadest hardware and quant ecosystem. **vLLM** is the throughput and multi-tenant serving
@@ -159,12 +164,12 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens | The original engine; everything below forks it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090 (`sm_120a`) | 209.04 tok/s decode, 130,048-token exact retrieval (qualified here) | This product's runtime: adds OMP-oriented stateful Responses, authenticated identity, release packaging |
-| [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of our deferred 4090 lane ([alphastorm/ninfer-4090](https://github.com/alphastorm/ninfer-4090)) |
-| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Planned base of a reviewed 3090 lane (roadmap) |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090 / 4090 / 3090 | 235.02 tok/s on the primary 5090 profile; qualified 4090 beta and public 3090 preview packages | This product's public runtime source and component releases |
+| [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
+| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the reviewed native 3090 preview branch |
 
-RTX 4090 and RTX 3090 are explicitly **not supported** by `v0.1.0-beta.1`; their lanes ship only
-after passing the same gate set on their own fixed profiles. See [`ROADMAP.md`](ROADMAP.md).
+RTX 4090 support is beta-only. RTX 3090 is preview-only and non-installable until a later passing
+receipt supersedes its incomplete authority. See [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
 
@@ -187,22 +192,17 @@ Three lanes, in rising order of ambition:
 3. **Improve the product.** Docs, release tooling, and profile contracts in this repository;
    engine work in the runtime repositories. Routing map: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The beta OMP client is a pinned fork build of Oh My Pi carrying the NInfer stateful-Responses
-provider integration — running a fork was the fastest honest way to ship one exact qualified
-combination. The intent is to upstream the reusable parts to
-[can1357/oh-my-pi](https://github.com/can1357/oh-my-pi); until then, publishing the exact
-integration source is a tracked broad-release gate on the [roadmap](ROADMAP.md).
+The beta OMP client carries the NInfer stateful-Responses provider integration. Its exact accepted
+source is public at [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi); the standing
+intent remains to upstream reusable provider and lifecycle pieces to
+[can1357/oh-my-pi](https://github.com/can1357/oh-my-pi).
 
 ## Roadmap
 
-`v0.1` is manual and narrow on purpose. In flight for `v0.2` and beyond:
-
-- managed lifecycle — manifest-driven `doctor`, `plan`, `install`, `status`, `benchmark --quick`,
-  `rollback`, and `support-bundle` replacing the manual tunnel and container commands;
-- RTX 4090 beta after its blocked Golden gate closes, then an RTX 3090 lane from a reviewed port;
-- durable session checkpoints toward process-restart continuation;
-- upstreaming the OMP provider integration to Oh My Pi; and
-- publication gates for anything currently private.
+`v0.2` closes the managed lifecycle, cross-platform client, public OMP source, and native RTX 4090
+beta work while publishing the review-closed RTX 3090 preview. The next candidates are signing/notarization, a shared public
+client acceptance runner, dependency-level 4090 SBOM expansion, and concurrency-qualified native
+profiles. No item becomes a support claim before an exact package and receipt bind it.
 
 Scope boundaries and explicit non-claims: [`ROADMAP.md`](ROADMAP.md).
 
@@ -245,10 +245,10 @@ Ordered by how much this product owes them:
    conversion published at
    [neroued/Qwen3.8-27B-NInfer](https://huggingface.co/neroued/Qwen3.8-27B-NInfer). Apache-2.0.
 4. **[UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090)** — the RTX
-   4090 port (E8-lattice KV quantization, DirectStorage weight DMA) our deferred 4090 lane builds
+   4090 port (E8-lattice KV quantization, DirectStorage weight DMA) the qualified 4090 lane builds
    on. Apache-2.0.
 5. **[Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)** — the RTX 3090 port
-   (ReplaySSM, RotorQuant) planned as the base of a future 3090 lane. Apache-2.0.
+   (ReplaySSM, RotorQuant) underlying the public non-installable 3090 preview. Apache-2.0.
 6. Algorithm and library lineage — Gated DeltaNet
    ([arXiv:2412.06464](https://arxiv.org/abs/2412.06464)), Tri Dao's ReplaySSM note, Z-Lab's
    DFlash, Unsloth's NVFP4 weights, and vendored `utf8proc`, `nlohmann/json`, and `cpp-httplib` —
@@ -262,12 +262,11 @@ NVIDIA.
 | Repository | Owns |
 | --- | --- |
 | [`alphastorm/omp-ninfer`](https://github.com/alphastorm/omp-ninfer) | Product front door: release manifests, profiles, quickstart, qualification composition, support boundary |
-| [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) | RTX 5090 runtime fork of Neroued/ninfer: stateful Responses for OMP, authenticated identity, container, release evidence |
-| [`alphastorm/ninfer-4090`](https://github.com/alphastorm/ninfer-4090) | RTX 4090 runtime lane, fork of UDPSendToFailed/ninfer-4090 — deferred from the first beta |
+| [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) | Public tagged RTX 5090, qualified RTX 4090, and preview RTX 3090 component source |
 | [`alphastorm/homebrew-omp`](https://github.com/alphastorm/homebrew-omp) | Client distribution: release archives plus stable `omp` and prerelease `omp-beta` casks |
 
-The OMP client source is a fork of `can1357/oh-my-pi`; it is private during early access, and its
-publication plus upstreaming are tracked roadmap gates. The user-facing command remains `omp`;
+The OMP client source is a public fork of `can1357/oh-my-pi` at
+[`alphastorm/oh-my-pi`](https://github.com/alphastorm/oh-my-pi); upstreaming remains a roadmap goal. The user-facing command remains `omp`;
 "appliance" names the operating concept, and **OMP NInfer** names this integration and repository.
 
 ## License

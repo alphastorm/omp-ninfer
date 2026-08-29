@@ -21,16 +21,16 @@ program so contributors can see the state of play in one place.
 
 ## Measured baseline
 
-One RTX 5090 (`sm_120a`), shipped v0.1 profile — Qwen3.8-27B `groupwise-int`, BF16 KV, MTP3,
+One RTX 5090 (`sm_120a`), shipped v0.2 profile — Qwen3.8-27B `groupwise-int`, BF16 KV, MTP3,
 1,024-token prefill chunks, one active request
-([receipts](../releases/v0.1.0-beta.1/qualification.json)):
+([receipts](../releases/v0.2.0-beta.1/qualification.json)):
 
 | Metric | Value |
 | --- | --- |
-| Decode throughput | 209.04 tok/s |
-| MTP3 acceptance | 77.0% (799/1,038) |
-| 130,048-token prompt round trip | 58.5 s |
-| Largest observed warm-request prefix hit | 37,591 tokens, zero recompute |
+| Decode throughput | 235.02 tok/s over 2,048 completion tokens |
+| MTP3 acceptance | 99.87% (1,534/1,536) on the fixed decode workload |
+| 130,048-token exact prefill | 2,180.87 tok/s; 59.80 s server round trip |
+| Stateful Responses | passed; the predecessor v0.1 37,591-token prefix hit is not rebound as a v0.2 numeric claim |
 
 Hardware envelope, measured with the runtime repo's `hbm_bandwidth_probe`: **1,674.5 GB/s**
 sustained pure-read HBM bandwidth on this RTX 5090 — 93.4% of the 1,792 GB/s theoretical peak.
@@ -104,10 +104,10 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
-| DirectStorage-style weight paging on the 5090 lane | The [ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) port measured 10.1 GB/s cold weight DMA, cutting cold TTFT from 52.6 s to 1.86 s on its profile; a Linux/WSL2 analogue exists as branch `port/nyc-5090-directstorage` | in flight |
+| DirectStorage-style weight paging on the 5090 lane | Windows DirectStorage and the Linux/WSL2 async backend are independently qualified in v0.2; future work is a fixed end-to-end cold-start product comparison | qualified foundation |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
-| Durable session checkpoints → process-restart continuation | The 4090 lane measured a disk-checkpoint restore of a 105K-token session with 97.8 ms prepare time versus an 88 s cold prefill ([receipt](https://raw.githubusercontent.com/alphastorm/ninfer-4090/1b3a2562f213fa4a234fbe2794955f3d6d6d548e/docs/qualification/receipts/ninfer-4090-qwen38-v0.1.0-win-x64-qualification.json), recorded as prior evidence inside an overall-failed package qualification); branch `feat/durable-session-checkpoints` tracks the 5090 runtime | in flight |
-| MTP acceptance modelling for Qwen3.8 | Upstream measured 48.9% acceptance on `nvfp4` vs 77.0% qualified here on `groupwise-int`; understanding the quant/acceptance interaction could recover decode throughput on faster-prefill artifacts | open |
+| Durable session checkpoints → process-restart continuation | The qualified RTX 4090 profile restored a 102K-token session. RTX 3090 native transaction tests pass, but its current live restart gate remains `not_run`. | qualified on 4090; 3090 preview |
+| MTP acceptance modelling for Qwen3.8 | Recorded acceptance ranges from 48.9% on an upstream `nvfp4` workload through 77.0% in v0.1 to 99.87% on the fixed v0.2 decode workload; a matched corpus is needed before attributing the delta to quantization | open |
 | DFlash-style deeper drafting (k=7) on 27B | Upstream measured 764–786 tok/s at 65–66% acceptance on 35B-A3B with DFlash; unknown economics on dense 27B | open |
 
 ## Contributing a result

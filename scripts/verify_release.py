@@ -66,6 +66,14 @@ def resolve_product_release(root: Path, requested: str | None) -> str:
     return release
 
 
+def expected_omp_source_repository(release: str) -> str:
+    return (
+        "https://github.com/alphastorm/omp-monorepo"
+        if release == "v0.1.0-beta.1"
+        else "https://github.com/alphastorm/oh-my-pi"
+    )
+
+
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -100,6 +108,21 @@ def require_https(value: Any, label: str, errors: list[str], *, nullable: bool =
             f"{label} must be an HTTPS URL", errors)
 
 
+def require_product_raw_url(value: Any, label: str, path: str, errors: list[str]) -> None:
+    require_https(value, label, errors)
+    require(
+        isinstance(value, str)
+        and re.fullmatch(
+            r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
+            r"[0-9a-f]{40}/" + re.escape(path),
+            value,
+        )
+        is not None,
+        f"{label} must bind an immutable product commit and path",
+        errors,
+    )
+
+
 def walk_strings(value: Any) -> list[str]:
     if isinstance(value, str):
         return [value]
@@ -127,6 +150,149 @@ REQUIRED_TUNING_VALUES = (
     "--draft-tokens",
 )
 REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
+NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
+
+
+def validate_ninfer_variants(
+    root: Path,
+    release: str,
+    variants: Any,
+    compatibility: dict[str, Any],
+    model_sha256: Any,
+    errors: list[str],
+) -> None:
+    require(isinstance(variants, list), "components.ninfer_variants must be an array", errors)
+    if not isinstance(variants, list):
+        return
+    ids = [item.get("id") for item in variants if isinstance(item, dict)]
+    require(len(ids) == len(variants), "NInfer runtime variant must be an object", errors)
+    require(ids == [item for item in NINFER_VARIANT_IDS if item in ids],
+            "NInfer runtime variants must use the closed set in canonical order", errors)
+    require(len(ids) == len(set(ids)), "NInfer runtime variants are duplicated", errors)
+    compatibility_ids = [
+        item.get("id")
+        for item in compatibility.get("runtime_variants", [])
+        if isinstance(item, dict)
+    ]
+    require(ids == compatibility_ids,
+            "manifest and compatibility runtime variant sets must match", errors)
+    for item in variants:
+        if not isinstance(item, dict):
+            continue
+        variant_id = item.get("id", "<unknown>")
+        prefix = f"components.ninfer_variants.{variant_id}"
+        status = item.get("status")
+        require(status in {"qualified", "preview"},
+                f"{prefix}.status must be qualified or preview", errors)
+        require(item.get("installable") is (status == "qualified"),
+                f"{prefix}.installable must match status", errors)
+        compatibility_item = next(
+            (candidate for candidate in compatibility.get("runtime_variants", [])
+             if isinstance(candidate, dict) and candidate.get("id") == variant_id),
+            {},
+        )
+        require(compatibility_item.get("status") == status,
+                f"{prefix}.status must match compatibility", errors)
+        require(compatibility_item.get("installable") is item.get("installable"),
+                f"{prefix}.installable must match compatibility", errors)
+        require(item.get("repository") == "https://github.com/alphastorm/ninfer",
+                f"{prefix}.repository must be the public NInfer repository", errors)
+        require_git_sha(item.get("source_commit"), f"{prefix}.source_commit", errors)
+        for field in (
+            "source_archive_sha256",
+            "package_sha256",
+            "sbom_sha256",
+            "installer_sha256",
+            "controller_sha256",
+            "gpu_owner_controller_sha256",
+            "state_protection_sha256",
+            "server_binary_sha256",
+            "configuration_sha256",
+            "model_artifact_sha256",
+        ):
+            require_sha(item.get(field), f"{prefix}.{field}", errors)
+        require(item.get("model_artifact_sha256") == model_sha256,
+                f"{prefix}.model_artifact_sha256 must match the product model", errors)
+        require(isinstance(item.get("package_bytes"), int) and item["package_bytes"] > 0,
+                f"{prefix}.package_bytes must be positive", errors)
+        require(isinstance(item.get("maximum_context_tokens"), int)
+                and item["maximum_context_tokens"] > 0,
+                f"{prefix}.maximum_context_tokens must be positive", errors)
+        release_tag = item.get("release_tag")
+        expected_gpu = "3090" if variant_id == "rtx3090-windows-native" else "4090"
+        require(isinstance(release_tag, str)
+                and re.fullmatch(rf"v0\.2\.0-qwen38-{expected_gpu}-beta\.[1-9][0-9]*", release_tag) is not None,
+                f"{prefix}.release_tag is invalid", errors)
+        asset_prefix = (
+            "https://github.com/alphastorm/ninfer/releases/download/"
+            + str(release_tag)
+            + "/"
+        )
+        for field in (
+            "source_archive_url",
+            "package_url",
+            "sbom_url",
+            "installer_url",
+            "controller_url",
+            "gpu_owner_controller_url",
+            "state_protection_url",
+        ):
+            require_https(item.get(field), f"{prefix}.{field}", errors)
+            require(isinstance(item.get(field), str) and item[field].startswith(asset_prefix),
+                    f"{prefix}.{field} must bind its component release", errors)
+
+        qualification = item.get("qualification", {})
+        require(isinstance(qualification, dict), f"{prefix}.qualification must be an object", errors)
+        summary = qualification.get("summary") if isinstance(qualification, dict) else None
+        require(isinstance(summary, str), f"{prefix}.qualification.summary must be a path", errors)
+        summary_path = (
+            root / "releases" / release / summary
+        ).resolve() if isinstance(summary, str) else root
+        release_root = (root / "releases" / release).resolve()
+        require(summary_path.is_relative_to(release_root),
+                f"{prefix}.qualification summary must stay inside the release", errors)
+        require(summary_path.is_file(), f"{prefix}.qualification summary must exist", errors)
+        require_sha(qualification.get("sha256"), f"{prefix}.qualification.sha256", errors)
+        if summary_path.is_file() and isinstance(qualification.get("sha256"), str):
+            require(sha256_file(summary_path) == qualification.get("sha256"),
+                    f"{prefix}.qualification SHA-256 must match receipt bytes", errors)
+        require_product_raw_url(
+            qualification.get("public_url"),
+            f"{prefix}.qualification.public_url",
+            f"releases/{release}/{summary}",
+            errors,
+        )
+        receipt = load_json(summary_path) if summary_path.is_file() else {}
+        if status == "qualified":
+            require(receipt.get("status") == "passed" and receipt.get("beta_qualified") is True,
+                    f"{prefix} qualification must pass beta support", errors)
+        else:
+            require(receipt.get("status") == "incomplete"
+                    and receipt.get("beta_qualified") is False
+                    and receipt.get("installable") is False,
+                    f"{prefix} preview qualification must remain incomplete", errors)
+            require(isinstance(receipt.get("deferred_gates"), list)
+                    and len(receipt["deferred_gates"]) > 0,
+                    f"{prefix} preview qualification must enumerate deferred gates", errors)
+        identity = receipt.get("identity", {})
+        package = receipt.get("package", {})
+        require(identity.get("source_commit") == item.get("source_commit"),
+                f"{prefix} qualification source must match", errors)
+        require(identity.get("server_binary_sha256") == item.get("server_binary_sha256"),
+                f"{prefix} qualification server must match", errors)
+        require(identity.get("configuration_sha256") == item.get("configuration_sha256"),
+                f"{prefix} qualification configuration must match", errors)
+        require(package.get("sha256") == item.get("package_sha256"),
+                f"{prefix} qualification package must match", errors)
+        for field in (
+            "sbom_sha256",
+            "installer_sha256",
+            "controller_sha256",
+            "gpu_owner_controller_sha256",
+            "state_protection_sha256",
+        ):
+            require(package.get(field) == item.get(field),
+                    f"{prefix} qualification {field} must match", errors)
 
 
 def validate_server_arguments(
@@ -168,6 +334,7 @@ def validate_profile_contract(
     release: Any,
     model: dict[str, Any],
     public_model_id: Any,
+    deployment_profile: Any,
     errors: list[str],
 ) -> None:
     require(profile.get("schema_version") == 1, f"{label}: schema_version must be 1", errors)
@@ -184,6 +351,8 @@ def validate_profile_contract(
             f"{label}: silent cloud fallback must be disabled", errors)
 
     server = profile.get("server", {})
+    require(server.get("deployment_profile") == deployment_profile,
+            f"{label}: deployment_profile must match the manifest", errors)
     require(server.get("restart_policy") == "no", f"{label}: restart_policy must be no", errors)
     require(server.get("container_network_mode") == "host",
             f"{label}: container network mode must be host", errors)
@@ -296,7 +465,8 @@ def validate(
             and profile.get("installation_mode") == installation_mode,
             "profile installation_mode must match manifest installation.mode", errors)
     validate_profile_contract(profile, "profile", release, model,
-                              runtime.get("public_model_id"), errors)
+                              runtime.get("public_model_id"),
+                              runtime.get("deployment_profile"), errors)
 
     profiles_dir = root / "profiles"
     if profiles_dir.is_dir():
@@ -309,7 +479,8 @@ def validate(
                 errors.append(str(error))
                 continue
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
-                                      model, runtime.get("public_model_id"), errors)
+                                      model, runtime.get("public_model_id"),
+                                      runtime.get("deployment_profile"), errors)
 
     release_compatibility_path = manifest_path.parent / "compatibility.json"
     compatibility_path = (
@@ -328,6 +499,14 @@ def validate(
     except (OSError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"compatibility.json: {error}")
     if compatibility:
+        root_compatibility_path = root / "compatibility.json"
+        if release_compatibility_path.is_file() and root_compatibility_path.is_file():
+            require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
+                    "root and release compatibility authorities must be byte-identical", errors)
+            root_matrix_path = root / "docs" / "COMPATIBILITY.md"
+            require(root_matrix_path.is_file()
+                    and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
+                    "root and release compatibility matrices must be byte-identical", errors)
         require(compatibility.get("product_release") == release,
                 "compatibility product_release must match the manifest", errors)
         try:
@@ -353,6 +532,12 @@ def validate(
                     "components.omp.compatibility_sha256", errors)
         require(omp.get("compatibility_sha256") == sha256_file(compatibility_path),
                 "OMP compatibility SHA-256 must match compatibility.json", errors)
+        require_product_raw_url(
+            omp.get("compatibility_url"),
+            "components.omp.compatibility_url",
+            "compatibility.json",
+            errors,
+        )
         require(composition.get("lifecycle_source_commit") == omp.get("source_commit"),
                 "OMP source commit must match compatibility composition", errors)
         require(composition.get("qualification_source_commit") == omp.get("qualification_commit"),
@@ -392,6 +577,39 @@ def validate(
                 require_sha(client.get("archive_sha256"),
                             f"compatibility {profile_id} client archive", errors)
 
+        primary_receipt_path = manifest_path.parent / "qualification" / "rtx5090.json"
+        require(primary_receipt_path.is_file(), "primary RTX 5090 qualification receipt must exist", errors)
+        primary_receipt_hashes = {
+            item.get("gpu_qualification", {}).get("receipt", {}).get("sha256")
+            for item in compatibility.get("profiles", [])
+            if isinstance(item, dict)
+        }
+        require(len(primary_receipt_hashes) == 1,
+                "compatibility profiles must share one RTX 5090 receipt hash", errors)
+        if primary_receipt_path.is_file() and len(primary_receipt_hashes) == 1:
+            require(sha256_file(primary_receipt_path) == next(iter(primary_receipt_hashes)),
+                    "primary RTX 5090 qualification SHA-256 must match checked-in bytes", errors)
+
+        behavioral = qualification.get("composition", {}).get("behavioral_qualification", {})
+        behavioral_ref = behavioral.get("repository_path")
+        behavioral_path = (root / behavioral_ref).resolve() if isinstance(behavioral_ref, str) else root
+        require(isinstance(behavioral_ref, str) and behavioral_path.is_relative_to(root.resolve())
+                and behavioral_path.is_file(),
+                "behavioral qualification receipt path must resolve inside the repository", errors)
+        require_sha(behavioral.get("sha256"), "behavioral qualification SHA-256", errors)
+        if behavioral_path.is_file() and isinstance(behavioral.get("sha256"), str):
+            require(sha256_file(behavioral_path) == behavioral.get("sha256"),
+                    "behavioral qualification SHA-256 must match checked-in bytes", errors)
+
+    validate_ninfer_variants(
+        root,
+        release,
+        components.get("ninfer_variants", []),
+        compatibility,
+        model.get("artifact_sha256"),
+        errors,
+    )
+
     for key in ("upstream_commit", "source_commit"):
         require_git_sha(ninfer.get(key), f"components.ninfer.{key}", errors)
     require_git_sha(omp.get("upstream_commit"), "components.omp.upstream_commit", errors)
@@ -428,8 +646,8 @@ def validate(
             "OMP artifact name must bind release version and primary platform", errors)
     require(omp.get("component_repository") == "https://github.com/alphastorm/homebrew-omp",
             "OMP component repository must be alphastorm/homebrew-omp", errors)
-    require(omp.get("source_repository") == "https://github.com/alphastorm/omp-monorepo",
-            "OMP source repository must be alphastorm/omp-monorepo", errors)
+    require(omp.get("source_repository") == expected_omp_source_repository(release),
+            "OMP source repository must match the release's public-source policy", errors)
     require(isinstance(omp.get("component_release_id"), int)
             and omp.get("component_release_id", 0) > 0,
             "OMP component_release_id must be positive", errors)
@@ -530,8 +748,32 @@ def validate(
         if acceptance_path.is_file() and isinstance(external_acceptance.get("sha256"), str):
             require(sha256_file(acceptance_path) == external_acceptance.get("sha256"),
                     "external acceptance SHA-256 must match receipt bytes", errors)
-        require_https(external_acceptance.get("public_url"),
-                      "external acceptance public_url", errors)
+        acceptance_subject = load_json(acceptance_path) if acceptance_path.is_file() else {}
+        platform_rows = acceptance_subject.get("platform_receipts", [])
+        require(isinstance(platform_rows, list),
+                "external acceptance platform_receipts must be an array", errors)
+        platform_hashes = {
+            row.get("profile"): row.get("sha256")
+            for row in platform_rows
+            if isinstance(row, dict)
+        } if isinstance(platform_rows, list) else {}
+        expected_platform_hashes = {
+            profile_item.get("id"): profile_item.get("acceptance_receipt", {}).get("sha256")
+            for profile_item in compatibility.get("profiles", [])
+            if isinstance(profile_item, dict)
+        }
+        require(len(platform_hashes) == len(platform_rows),
+                "external acceptance platform receipts are duplicated or malformed", errors)
+        require(platform_hashes == expected_platform_hashes,
+                "external acceptance platform receipt hashes must match compatibility", errors)
+        for profile_id, digest in platform_hashes.items():
+            require_sha(digest, f"external acceptance {profile_id} SHA-256", errors)
+        require_product_raw_url(
+            external_acceptance.get("public_url"),
+            "external acceptance public_url",
+            str(external_acceptance.get("repository_path")),
+            errors,
+        )
         require(external_acceptance.get("component_release_tag") == omp.get("component_release_tag"),
                 "external acceptance component tag must match manifest", errors)
         require(external_acceptance.get("windows_asset_sha256") == omp.get("artifact_sha256"),
@@ -607,8 +849,14 @@ def validate(
         require(isinstance(ninfer.get("oci_reference"), str)
                 and "@sha256:" in ninfer.get("oci_reference", ""),
                 "ready NInfer OCI reference must be digest-pinned", errors)
+        oci_repository = ninfer.get("oci_repository", "ghcr.io/alphastorm/ninfer")
+        require(oci_repository in {
+                    "ghcr.io/alphastorm/ninfer",
+                    "ghcr.io/alphastorm/ninfer-runtime",
+                },
+                "NInfer OCI repository is not an approved public runtime repository", errors)
         require(ninfer.get("oci_reference")
-                == f"ghcr.io/alphastorm/ninfer@{ninfer.get('oci_manifest_digest')}",
+                == f"{oci_repository}@{ninfer.get('oci_manifest_digest')}",
                 "NInfer OCI reference must exactly bind its manifest digest", errors)
         require_https(ninfer.get("sbom_url"), "components.ninfer.sbom_url", errors, nullable=True)
 
@@ -627,8 +875,12 @@ def validate(
                 "ready release requires qualification.summary_sha256", errors)
         require(manifest_qualification.get("public_url") is not None,
                 "ready release requires qualification.public_url", errors)
-        require_https(manifest_qualification.get("public_url"),
-                      "qualification.public_url", errors, nullable=True)
+        require_product_raw_url(
+            manifest_qualification.get("public_url"),
+            "qualification.public_url",
+            f"releases/{release}/{manifest_qualification.get('summary')}",
+            errors,
+        )
         require(manifest_qualification.get("external_installation_passed") is True,
                 "ready release requires a passing external installation", errors)
         require(qualification.get("external_installation_qualified") is True,

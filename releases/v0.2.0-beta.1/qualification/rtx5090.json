@@ -1,0 +1,102 @@
+{
+  "artifact_type": "ninfer_rtx5090_beta_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "beta_qualified": true,
+  "release_tag": "v0.2.0-qwen38-5090-beta.2",
+  "identity": {
+    "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "source_dirty": false,
+    "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "cuda_architecture": "sm_120a"
+  },
+  "runtime_image": {
+    "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+    "manifest_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+    "anonymous_pull": true
+  },
+  "package": {
+    "filename": "ninfer-qwen38-rtx5090-v0.2.0-linux-x86_64-cuda13.1.tar.gz",
+    "sha256": "2592d8c7e198dcaff81ef0f3969f975ca1eefd209903f4339eb6f6a0a3f3cec6",
+    "bytes": 319023636,
+    "sbom_filename": "ninfer-qwen38-rtx5090-v0.2.0-linux-x86_64-cuda13.1.spdx.json",
+    "sbom_sha256": "08350bcb60ed76819eb4ec7ae3f60d4f9e2d82d59279f8155e4fc770e1718d44",
+    "checksums_sha256": "d2636ac199cf346497cd2ee0d220ffc625cadf8726660a77676f02a6cd23a3d8"
+  },
+  "gates": {
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "surviving_descendant_continued": true
+    },
+    "prefill_curve": {
+      "status": "passed",
+      "exact_retrieval_at_every_point": true,
+      "points": [
+        {
+          "prompt_tokens": 7680,
+          "tokens_per_second": 3268.5687043361486
+        },
+        {
+          "prompt_tokens": 32256,
+          "tokens_per_second": 3055.4928590058485
+        },
+        {
+          "prompt_tokens": 64512,
+          "tokens_per_second": 2687.1721422764754
+        },
+        {
+          "prompt_tokens": 98304,
+          "tokens_per_second": 2394.4368417878477
+        },
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2180.865892242192
+        }
+      ]
+    },
+    "decode": {
+      "status": "passed",
+      "completion_tokens": 2048,
+      "decode_tokens_per_second": 235.02288226295994,
+      "drafted_tokens": 1536,
+      "accepted_tokens": 1534,
+      "mtp_acceptance_rate": 0.9986979166666666
+    },
+    "lifecycle": {
+      "status": "passed",
+      "restart_policy": "no",
+      "incumbent_restored": true
+    }
+  },
+  "omp_component": {
+    "public_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
+    "accepted_source_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "client_platforms": [
+      "macos-arm64",
+      "windows-x64",
+      "linux-x64"
+    ],
+    "live_authenticated_client_acceptance": "passed"
+  },
+  "limitations": [
+    "One active request and the exact BF16-KV MTP3 profile are qualified.",
+    "JSON-schema structured output is unsupported and rejected.",
+    "No stable promotion or production-route activation was performed."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false,
+  "private_fleet_projection_included": false,
+  "evidence_interpretation": {
+    "packaged_build_identity_authoritative": true,
+    "packaged_build_identity_sha256": "cbc2683bda64c6edb955f89a953aabfe5f719e4042bbe132f88d31ed5187a193",
+    "documentation_benchmark_source_field_credited": false,
+    "reason": "The documentation benchmark receipt contains an unresolvable source-commit value. Its binary, model, and configuration hashes exactly match the packaged runtime, so only those measured fields are composed; the package build identity supplies source provenance."
+  }
+}

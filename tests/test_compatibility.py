@@ -6,6 +6,7 @@ import json
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -42,19 +43,19 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_bound_acceptance_receipts_match_immutable_public_files(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
-        expected_files = {
-            "darwin-remote-ssh": "macos-arm64-managed-ssh-18.0.9.json",
-            "windows-docker-local": "windows-x64-18.0.9.json",
-            "linux-docker-local": "linux-x64-18.0.9.json",
-        }
         for profile in authority["profiles"]:
-            filename = expected_files.get(profile["id"])
-            if filename is None:
+            receipt = profile["acceptance_receipt"]
+            if receipt is None:
                 self.assertIsNone(profile["acceptance_receipt"])
                 continue
-            receipt = profile["acceptance_receipt"]
-            self.assertIsNotNone(receipt)
-            path = ROOT / "releases" / "v0.1.0-beta.1" / "acceptance" / filename
+            filename = Path(urlparse(receipt["url"]).path).name
+            path = (
+                ROOT
+                / "releases"
+                / authority["product_release"]
+                / "acceptance"
+                / filename
+            )
             subject = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(subject["kind"], "omp-ninfer-platform-acceptance-receipt")
             self.assertEqual(subject["product_release"], authority["product_release"])
@@ -72,6 +73,15 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
+            if profile["id"] == "windows-docker-local":
+                self.assertEqual(
+                    subject["live_acceptance"]["runtime_variant"],
+                    "historical-rtx3090-protocol-endpoint",
+                )
+                self.assertFalse(subject["live_acceptance"]["runtime_identity_bound"])
+                self.assertFalse(
+                    subject["live_acceptance"]["profile_runtime_qualified_by_this_receipt"]
+                )
             distribution = profile["client_distribution"]
             self.assertTrue(distribution["published"])
             self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])
@@ -80,13 +90,17 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertEqual(subject["client"]["component_release_id"], distribution["release_id"])
             self.assertEqual(subject["client"]["asset_id"], distribution["asset_id"])
             self.assertEqual(subject["client"]["asset_url"], distribution["asset_url"])
-            self.assertTrue(receipt["url"].endswith(f"/releases/v0.1.0-beta.1/acceptance/{filename}"))
+            self.assertTrue(
+                receipt["url"].endswith(
+                    f"/releases/{authority['product_release']}/acceptance/{filename}"
+                )
+            )
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), receipt["sha256"])
 
     def test_runtime_identity_matches_the_release_manifest(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         manifest = json.loads(
-            (ROOT / "releases" / "v0.1.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
+            (ROOT / "releases" / "v0.2.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
         )
         expected = {
             "image_reference": manifest["components"]["ninfer"]["oci_reference"],
@@ -97,6 +111,22 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         for profile in authority["profiles"]:
             for key, value in expected.items():
                 self.assertEqual(profile["runtime"][key], value)
+
+    def test_primary_rtx5090_profiles_do_not_claim_process_restart(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        for profile in authority["profiles"]:
+            self.assertNotIn(
+                "process-restart-continuation",
+                profile["runtime"]["capabilities"],
+            )
+
+        for filename in (
+            "qwen38-rtx5090-manual-tunnel.json",
+            "qwen38-rtx5090-windows-docker-local.json",
+        ):
+            profile = json.loads((ROOT / "profiles" / filename).read_text(encoding="utf-8"))
+            self.assertNotIn("process-restart-continuation", profile["capabilities"])
+            self.assertIn("process-restart-continuation", profile["unsupported"])
 
     def test_unknown_or_incomplete_profiles_fail_closed(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
@@ -116,6 +146,23 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             MODULE.load_authority(self._write(invalid))
 
         invalid = deepcopy(authority)
+        invalid["profiles"][0]["lifecycle"]["script_url"] = invalid["profiles"][0][
+            "lifecycle"
+        ]["script_url"].replace(
+            invalid["composition"]["ninfer_lifecycle_source_commit"], "f" * 40
+        )
+        with self.assertRaisesRegex(ValueError, "lifecycle script"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
+        invalid["profiles"][0]["gpu_qualification"]["receipt"]["url"] = (
+            "https://github.com/alphastorm/omp-ninfer/releases/download/"
+            "v0.2.0-beta.1/future-receipt.json"
+        )
+        with self.assertRaisesRegex(ValueError, "GPU qualification receipt URL"):
+            MODULE.load_authority(self._write(invalid))
+
+        invalid = deepcopy(authority)
         invalid["profiles"][0]["acceptance_receipt"]["url"] = (
             "https://raw.githubusercontent.com/alphastorm/omp-ninfer/main/receipt.json"
         )
@@ -125,6 +172,36 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         invalid = deepcopy(authority)
         invalid["profiles"][1]["acceptance_receipt"]["sha256"] = "not-a-sha"
         with self.assertRaisesRegex(ValueError, "SHA-256"):
+            MODULE.load_authority(self._write(invalid))
+
+    def test_native_runtime_variants_render_and_fail_closed(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        variant = {
+            "id": "rtx3090-windows-native",
+            "status": "qualified",
+            "platform": "Windows 11 x64",
+            "gpu": "NVIDIA GeForce RTX 3090",
+            "cuda_architecture": "sm_86",
+            "maximum_context_tokens": 65536,
+            "installation_mode": "native-windows-package",
+            "installable": True,
+            "silent_cloud_fallback": False,
+            "qualification_receipt": {
+                "url": (
+                    "https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
+                    + "a" * 40
+                    + f"/releases/{authority['product_release']}/qualification/rtx3090.json"
+                ),
+                "sha256": "b" * 64,
+            },
+        }
+        authority["runtime_variants"] = [variant]
+        loaded = MODULE.load_authority(self._write(authority))
+        self.assertIn("rtx3090-windows-native", MODULE.render(loaded))
+
+        invalid = deepcopy(authority)
+        invalid["runtime_variants"][0]["silent_cloud_fallback"] = True
+        with self.assertRaisesRegex(ValueError, "silent cloud fallback"):
             MODULE.load_authority(self._write(invalid))
 
     def _write(self, value: object) -> Path:

@@ -5,10 +5,10 @@ with a convenient local image.
 
 ## `release manifest is not installable`
 
-No installable release exists yet. Wait for the `v0.1.0-beta.1` prerelease and use a clean clone of
-that tag. The draft may bind the staged OMP asset and Homebrew revision while marking the asset
-unpublished; NInfer OCI/SBOM and qualification publication fields remain null, and explicit
-blockers enumerate every incomplete transition.
+Use a clean clone of `v0.2.0-beta.1` and run
+`python3 scripts/verify_release.py --require-ready`. Moving `main`, an older tag, or a partially
+published candidate is not installable. A draft/candidate intentionally retains explicit blockers;
+do not fill missing component identities from a local cache.
 
 ## Model byte count or SHA-256 mismatch
 
@@ -57,8 +57,9 @@ boundary before starting the 18.2 GB model. Do not infer RTX 5090 support from a
 ## Port `18089` is occupied
 
 On the inference host, identify the loopback listener before stopping anything. On the Mac,
-`open-tunnel.sh` exits because `ExitOnForwardFailure=yes`. V0.1 fixes port `18089`; do not silently
-change one side because the profile/configuration identity and OMP provider would diverge.
+`open-tunnel.sh` exits because `ExitOnForwardFailure=yes`. The primary profile fixes port `18089`;
+do not silently change one side because the profile/configuration identity and OMP provider would
+diverge.
 
 ## NInfer never becomes ready
 
@@ -126,8 +127,9 @@ Separate correctness from acceleration:
 - If the OMP transcript is present and a full replay succeeds, transcript correctness is intact but
   provider state was not reused.
 - If the transcript itself is missing, inspect OMP session selection/storage rather than NInfer.
-- If the NInfer process restarted, v0.1 does not claim retained process state; OMP must remain able to
-  replay its transcript.
+- If the qualified native Windows RTX 4090 v0.2 process restarted, inspect the checkpoint status/receipt
+  first. OMP must still remain able to replay its transcript when acceleration state is unavailable or
+  invalid.
 - Endpoint, model, request-shape, branch, or committed-turn identity changes intentionally invalidate
   a provider snapshot.
 

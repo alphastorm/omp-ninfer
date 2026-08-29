@@ -5,10 +5,39 @@ someone else's published result. Measurements belong to the exact candidate, pro
 that produced them; none is a universal GPU, model, or end-to-end latency claim.
 
 - **Qualified product results** come from the release qualification bound into
-  [`qualification.json`](../releases/v0.1.0-beta.1/qualification.json).
+  [`qualification.json`](../releases/v0.2.0-beta.1/qualification.json).
 - **Engine campaign results** are published upstream by
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are early-access tester submissions collected below.
+
+## Qualified `v0.2.0-beta.1` results
+
+Every row below belongs to one exact package and profile; comparisons across GPUs are descriptive,
+not an architecture-normalized benchmark.
+
+### RTX 5090 — BF16 KV, MTP3, C1, 131,072-token context ceiling
+
+| Gate | Result | Detail |
+| --- | --- | --- |
+| Decode throughput | **235.02 tok/s** | 2,048 completion tokens; 8.71 s decode |
+| MTP3 acceptance | **99.87%** | 1,534 of 1,536 drafted tokens accepted on this fixed output workload |
+| 7,680-token prefill | **3,268.57 tok/s** | exact retrieval |
+| 32,256-token prefill | **3,055.49 tok/s** | exact retrieval |
+| 64,512-token prefill | **2,687.17 tok/s** | exact retrieval |
+| 98,304-token prefill | **2,394.44 tok/s** | exact retrieval |
+| 130,048-token prefill | **2,180.87 tok/s** | exact retrieval; 59.80 s server round trip |
+| Agent protocol | **passed** | authenticated OpenAI, Anthropic, Responses, tools, continuation, forks, delete survival |
+
+### Native Windows runtime variants
+
+| GPU/profile | Context gate | Process restart | Decode | Prefill | Peak VRAM | OMP gate |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| RTX 3090 current preview | current live gate `not_run` | current restart gate `not_run` | no current package claim | no current package claim | no current package claim | sm_86 response/session/HTTP contract tests passed 3/3; historical values do not qualify this package |
+| RTX 4090, `qwen38-4090-v0.1`, MTP0, C1 | 102,060-token checkpoint seed and 102,075-token restored continuation | process replacement and disk restore passed | **52.330 tok/s** over 1,168 tokens | **1,410.691 tok/s** | profile-bound | source-controlled typed-tool Golden-equivalent passed |
+
+The RTX 4090 Golden replacement is synthetic and committed. The unavailable historical private
+corpus was not reused. The RTX 3090 automatic-use role corpus is a separate, stricter gate that did
+not pass; no unattended role is authorized by these interactive product measurements.
 
 ## Qualified `v0.1.0-beta.1` results
 
@@ -16,7 +45,7 @@ Measured on one NVIDIA GeForce RTX 5090 (`sm_120a`) with the exact shipped profi
 `qwen3_8_27b.ninfer` (Qwen3.8 27B, groupwise-int Q4/Q5 group-64), BF16 KV cache, 131,072-token
 context ceiling, MTP speculative decoding with 3 draft tokens, 1,024-token prefill chunks, one
 active request. Receipts: [`qualification.json`](../releases/v0.1.0-beta.1/qualification.json) ·
-[profile](../profiles/qwen38-rtx5090-windows-docker-local.json).
+[v0.1 manifest](../releases/v0.1.0-beta.1/manifest.json).
 
 | Gate | Result | Detail |
 | --- | --- | --- |
@@ -28,8 +57,8 @@ active request. Receipts: [`qualification.json`](../releases/v0.1.0-beta.1/quali
 | Golden t01 | **exact match in 100.2 s** | fixed end-to-end OMP agent task (runner OMP 18.0.5), bound 120.9 s |
 | Serving contract | OpenAI, Anthropic, Responses, Vision | plus authenticated status identity |
 
-During the stateful-responses qualification, 18 of 31 telemetry requests were served from retained
-state rather than recomputed prefill.
+During the v0.1.0-beta.1 stateful-responses qualification, 18 of 31 telemetry requests were served
+from retained state rather than recomputed prefill.
 
 ### What those numbers mean in a coding session
 
@@ -38,8 +67,9 @@ state rather than recomputed prefill.
 - **130K context is real, not nominal.** The gate is an exact-output retrieval across a
   130,048-token prompt, not a perplexity curve.
 - **Warm turns skip the re-read.** OMP appends to retained GPU state through stateful OpenAI
-  Responses (`previous_response_id`). The 37,591-token prefix hit is a whole session prefix the GPU
-  did not re-prefill. A stateless provider route would recompute that prefix on every turn.
+  Responses (`previous_response_id`). In that v0.1 campaign, the 37,591-token prefix hit is a whole
+  session prefix the GPU did not re-prefill. A stateless provider route would recompute that prefix
+  on every turn.
 - **Correctness does not depend on the cache.** OMP commits its transcript before advancing
   provider state; retained GPU state is an acceleration that can be discarded and replayed.
 
@@ -85,7 +115,8 @@ after the documented acceptance checks pass.
 
 | Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
-| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.1.0-beta.1 | 209.04 | 77.0% | 130,048 tokens, exact | [qualification](../releases/v0.1.0-beta.1/qualification.json) (maintainer) |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
+| 2026-08 | RTX 3090 | 24 GiB | Preview candidate | v0.2.0-beta.1 | not run | not run | current live-model gates deferred | [incomplete receipt](../releases/v0.2.0-beta.1/qualification/rtx3090.json) (maintainer) |
 
 Submission rules:
 
@@ -93,9 +124,8 @@ Submission rules:
    documented topology.
 2. Report only content-safe values: hardware, driver, versions, throughput, acceptance, and check
    results. No prompts, outputs, hostnames, or raw logs.
-3. State the measurement method. v0.1 has no one-command product benchmark; server-side
-   measurements come from the runtime harness in the component repositories, and a managed
-   `benchmark --quick` product command is planned for v0.2 (see [`ROADMAP.md`](../ROADMAP.md)).
+3. State the measurement method. Server-side measurements come from the component harnesses; the
+   managed appliance profile also exposes `benchmark --quick` for its exact published runtime.
 4. Rows are added after a maintainer matches the report against the release identities.
 
 ## Benchmarks we still want
@@ -105,14 +135,10 @@ Planned measurements that would sharpen the picture; contributions welcome
 
 - **Warm vs cold turn latency sweep** on the product profile: time-to-first-token for a follow-up
   turn at 10K/37K/100K-token sessions, stateful route vs forced replay.
-- **MTP0 vs MTP3 ablation** on the shipped `groupwise-int` artifact (the upstream campaign covers
-  other artifacts).
-- **Prefill throughput curve** for the shipped artifact from 7,680 to 130,048 tokens.
 - **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
-- **Process-restart continuation timing** once durable session checkpoints ship (in development in
-  the runtime repositories).
-- **RTX 4090 and RTX 3090 lanes** re-running the full gate set on their fixed profiles before any
-  support claim.
+- **Matched MTP0/MTP3 ablation** on one unchanged artifact and context profile.
+- **Concurrency curves** for future 3090/4090 profiles only after exact memory-admission gates are
+  defined.
 
 Publishing rule: a new number enters this page only with its receipt, exact profile, and machine
 identity, and product claims change only through a new qualification binding

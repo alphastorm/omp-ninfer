@@ -52,7 +52,7 @@ class ReleaseContractTest(unittest.TestCase):
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
     def make_candidate(self, root: Path, manifest: dict) -> None:
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         qualification = self.load(qualification_path)
         qualification["external_installation_qualified"] = False
         self.save(qualification_path, qualification)
@@ -81,7 +81,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_draft_contract_remains_noninstallable(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["status"] = "draft"
         manifest["components"]["omp"]["artifact_published"] = False
@@ -98,7 +98,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_accepts_exact_installable_components_before_external_smoke(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         self.save(manifest_path, manifest)
@@ -114,11 +114,38 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
         self.assertEqual(errors, [])
 
+    def test_external_acceptance_rejects_short_or_stale_platform_hashes(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        release = "v0.2.0-beta.1"
+        manifest_path = root / "releases" / release / "manifest.json"
+        qualification_path = root / "releases" / release / "qualification.json"
+        acceptance_path = root / "releases" / release / "acceptance" / "composed-external-installation.json"
+        manifest = self.load(manifest_path)
+        qualification = self.load(qualification_path)
+        acceptance = self.load(acceptance_path)
+        acceptance["platform_receipts"][1]["sha256"] = "a" * 62
+        self.save(acceptance_path, acceptance)
+        qualification["composition"]["external_installation_acceptance"]["sha256"] = hashlib.sha256(
+            acceptance_path.read_bytes()
+        ).hexdigest()
+        self.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "external acceptance platform receipt hashes must match compatibility",
+            errors,
+        )
+
     def test_ready_contract_rejects_incomplete_publication(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         manifest = self.load(manifest_path)
         qualification = self.load(qualification_path)
         manifest["status"] = "ready"
@@ -147,6 +174,49 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile and manifest model hashes must match", errors)
 
+    def test_primary_gpu_receipt_bytes_must_match_compatibility(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        receipt_path = root / "releases" / "v0.2.0-beta.1" / "qualification" / "rtx5090.json"
+        receipt = self.load(receipt_path)
+        receipt["debug_drift"] = True
+        self.save(receipt_path, receipt)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "primary RTX 5090 qualification SHA-256 must match checked-in bytes",
+            errors,
+        )
+
+    def test_root_and_release_compatibility_copies_must_match(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        root_compatibility = self.load(root / "compatibility.json")
+        root_compatibility["authority_id"] += "-drift"
+        self.save(root / "compatibility.json", root_compatibility)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "root and release compatibility authorities must be byte-identical",
+            errors,
+        )
+
+    def test_product_public_urls_must_bind_immutable_raw_paths(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["qualification"]["public_url"] = (
+            "https://github.com/alphastorm/omp-ninfer/releases/latest"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "qualification.public_url must bind an immutable product commit and path",
+            errors,
+        )
+
     def test_profile_rejects_container_private_loopback_networking(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
@@ -158,10 +228,23 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile: container network mode must be host", errors)
 
+    def test_profile_deployment_identity_must_match_manifest(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
+        profile = self.load(profile_path)
+        profile["server"]["deployment_profile"] = "qwen38-5090-v0.1.0"
+        arguments = profile["server"]["arguments"]
+        arguments[arguments.index("--deployment-profile") + 1] = "qwen38-5090-v0.1.0"
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("profile: deployment_profile must match the manifest", errors)
+
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.1.0-beta.1",
+            "v0.2.0-beta.1",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -202,7 +285,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_model_url_must_bind_its_recorded_revision(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["model"]["artifact_url"] = (
             "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/main/qwen3_8_27b.ninfer"
@@ -215,7 +298,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_omp_distribution_version_must_equal_release_id(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["omp"]["distribution_version"] = "18.0.5-deadbeef"
         self.save(manifest_path, manifest)
@@ -223,10 +306,20 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("OMP distribution version must equal release_id", errors)
 
+    def test_v02_requires_the_public_auditable_omp_source_repository(self) -> None:
+        self.assertEqual(
+            VERIFY_RELEASE.expected_omp_source_repository("v0.2.0-beta.1"),
+            "https://github.com/alphastorm/oh-my-pi",
+        )
+        self.assertEqual(
+            VERIFY_RELEASE.expected_omp_source_repository("v0.1.0-beta.1"),
+            "https://github.com/alphastorm/omp-monorepo",
+        )
+
     def test_omp_artifact_name_must_bind_version_and_platform(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["omp"]["artifact_name"] = "omp-macos-arm64.tar.gz"
         self.save(manifest_path, manifest)
@@ -240,7 +333,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_omp_asset_url_must_bind_public_component(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_url"] = (
@@ -258,7 +351,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_rejects_a_draft_omp_asset(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["omp"]["artifact_published"] = False
@@ -275,7 +368,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_candidate_oci_reference_must_match_manifest_digest(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         self.make_candidate(root, manifest)
         manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
@@ -284,10 +377,154 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("NInfer OCI reference must exactly bind its manifest digest", errors)
 
+    def test_candidate_accepts_the_public_runtime_repository(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        self.make_candidate(root, manifest)
+        ninfer = manifest["components"]["ninfer"]
+        ninfer["oci_repository"] = "ghcr.io/alphastorm/ninfer-runtime"
+        ninfer["oci_reference"] = (
+            f"{ninfer['oci_repository']}@{ninfer['oci_manifest_digest']}"
+        )
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertNotIn(
+            "NInfer OCI reference must exactly bind its manifest digest", errors
+        )
+        self.assertNotIn(
+            "NInfer OCI repository is not an approved public runtime repository", errors
+        )
+
+    def test_native_runtime_variant_binds_its_qualification_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release = "v0.2.0-beta.1"
+            qualification_dir = root / "releases" / release / "qualification"
+            qualification_dir.mkdir(parents=True)
+            receipt_path = qualification_dir / "rtx3090.json"
+            receipt = {
+                "status": "passed",
+                "beta_qualified": True,
+                "identity": {
+                    "source_commit": "a" * 40,
+                    "server_binary_sha256": "b" * 64,
+                    "configuration_sha256": "c" * 64,
+                },
+                "package": {
+                    "sha256": "d" * 64,
+                    "sbom_sha256": "f" * 64,
+                    "installer_sha256": "4" * 64,
+                    "controller_sha256": "5" * 64,
+                    "gpu_owner_controller_sha256": "6" * 64,
+                    "state_protection_sha256": "7" * 64,
+                },
+            }
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            variant = {
+                "id": "rtx3090-windows-native",
+                "status": "qualified",
+                "installable": True,
+                "repository": "https://github.com/alphastorm/ninfer",
+                "release_tag": "v0.2.0-qwen38-3090-beta.1",
+                "source_commit": "a" * 40,
+                "source_archive_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/source.tar.gz"
+                ),
+                "source_archive_sha256": "e" * 64,
+                "package_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/package.tar.gz"
+                ),
+                "package_sha256": "d" * 64,
+                "package_bytes": 1,
+                "sbom_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/package.spdx.json"
+                ),
+                "sbom_sha256": "f" * 64,
+                "installer_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Install-Release.ps1"
+                ),
+                "installer_sha256": "4" * 64,
+                "controller_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Control-Release.ps1"
+                ),
+                "controller_sha256": "5" * 64,
+                "gpu_owner_controller_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Control-GpuOwner.ps1"
+                ),
+                "gpu_owner_controller_sha256": "6" * 64,
+                "state_protection_url": (
+                    "https://github.com/alphastorm/ninfer/releases/download/"
+                    "v0.2.0-qwen38-3090-beta.1/Protect-StateRoot.ps1"
+                ),
+                "state_protection_sha256": "7" * 64,
+                "server_binary_sha256": "b" * 64,
+                "configuration_sha256": "c" * 64,
+                "model_artifact_sha256": "1" * 64,
+                "maximum_context_tokens": 65536,
+                "qualification": {
+                    "summary": "qualification/rtx3090.json",
+                    "sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest(),
+                    "public_url": (
+                        "https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
+                        + "2" * 40
+                        + "/releases/v0.2.0-beta.1/qualification/rtx3090.json"
+                    ),
+                },
+            }
+            compatibility = {
+                "runtime_variants": [{
+                    "id": variant["id"],
+                    "status": "qualified",
+                    "installable": True,
+                }]
+            }
+            errors: list[str] = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertEqual(errors, [])
+
+            receipt["status"] = "incomplete"
+            receipt["beta_qualified"] = False
+            receipt["installable"] = False
+            receipt["deferred_gates"] = ["fresh Windows hardware gate"]
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            variant["status"] = "preview"
+            variant["installable"] = False
+            variant["qualification"]["sha256"] = hashlib.sha256(
+                receipt_path.read_bytes()
+            ).hexdigest()
+            compatibility["runtime_variants"][0]["status"] = "preview"
+            compatibility["runtime_variants"][0]["installable"] = False
+            errors = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertEqual(errors, [])
+
+            variant["package_sha256"] = "3" * 64
+            errors = []
+            VERIFY_RELEASE.validate_ninfer_variants(
+                root, release, [variant], compatibility, "1" * 64, errors
+            )
+            self.assertIn(
+                "components.ninfer_variants.rtx3090-windows-native qualification package must match",
+                errors,
+            )
+
     def test_local_packaging_oci_digest_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.1.0-beta.1" / "manifest.json"
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
         self.save(manifest_path, manifest)
@@ -298,7 +535,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_private_paths_are_rejected_from_public_receipts(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
-        qualification_path = root / "releases" / "v0.1.0-beta.1" / "qualification.json"
+        qualification_path = root / "releases" / "v0.2.0-beta.1" / "qualification.json"
         qualification = self.load(qualification_path)
         qualification["debug_path"] = "/Users/private/operator-receipt.json"
         self.save(qualification_path, qualification)
