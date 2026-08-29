@@ -1,0 +1,68 @@
+{
+  "artifact_type": "omp_ninfer_native_runtime_qualification",
+  "schema_version": 2,
+  "release": "v0.2.0-beta.1",
+  "variant_id": "rtx3090-windows-native",
+  "status": "incomplete",
+  "beta_qualified": false,
+  "installable": false,
+  "release_tag": "v0.2.0-qwen38-3090-beta.1",
+  "identity": {
+    "source_commit": "96b0101fde0483271ef002d8e6dfe3e431f8286f",
+    "runtime_source_commit": "c5db3495ce08a6756ffb8962a3ca5142343239ef",
+    "qualification_commit": "9cd084411fa7e791b3df62be287284caf148f01f",
+    "server_binary_sha256": "f5d5970da3ef38c2e59e1d1bd1f8f92d78af7f26975ac491ab5cec9b68c46884",
+    "configuration_sha256": "9a6ddc78992d6342913d991d26dfae26fc1a58f228746aa6d3b914067f4a1479",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "cuda_architecture": "sm_86",
+    "maximum_context_tokens": 65536
+  },
+  "package": {
+    "filename": "ninfer-rtx3090-omp-v0.2.0-windows-x86_64-cuda12.8-rtx3090.tar.gz",
+    "sha256": "b313904eb22a271d99d21d589075cc0102ab081e6835e9600f3c74c8d0cc48cc",
+    "bytes": 813776286,
+    "source_archive_filename": "ninfer-rtx3090-omp-v0.2.0-source.tar.gz",
+    "source_archive_sha256": "4a2e0159825b818a60bf5267f62ac28400cf702561f9ad238a906de943d48898",
+    "sbom_filename": "ninfer-rtx3090-omp-v0.2.0-windows-x86_64-cuda12.8-rtx3090.spdx.json",
+    "sbom_sha256": "44c31a64c9e7e24a2692b020759cf3b76272383e98893027668ed65f101da7af",
+    "checksums_sha256": "132cd03491e6b263e33590aee7d23e88326ab5a0ce5df47ac5c5e4b3d57bf961",
+    "inner_checksums_sha256": "206dd1d335a874b3887de3d23337bc617a35c92a831835b3e568ccda744941e3",
+    "package_build_receipt_sha256": "a90842779b26244fb906a0921eb6ca9b41a2afce5494035c72a80c1d615cfa02",
+    "installer_sha256": "72d9510933f0823e0d57aeb55fa1848c7efb381e18b4caef0c242f0353c30676",
+    "controller_sha256": "2980fcb733b0d20a19b5260a03d0c8a226e36a3e6ebcfbc51873c8fed2840119",
+    "gpu_owner_controller_sha256": "e2b80702366fdf951910911f2619c110f601ef16f5c2672d4bac62fd13c81c04",
+    "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b"
+  },
+  "component_evidence": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "qualification_commit": "9cd084411fa7e791b3df62be287284caf148f01f",
+    "qualification_path": "docs/qualification/receipts/qwen3.8-27b-rtx-3090-v0.2.0.json",
+    "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.2.0-qwen38-3090-beta.1",
+    "remote_linux_sm86_native_tests": "3/3 passed",
+    "remote_linux_pods_deleted": true,
+    "estimated_cloud_spend_upper_bound_usd": 0.35,
+    "fresh_live_model_gates": "not_run",
+    "fresh_windows_package_lifecycle": "not_run",
+    "historical_evidence_applies_to_current_package": false,
+    "private_identifier_scan_findings": 0
+  },
+  "deferred_gates": [
+    "authenticated live model protocol",
+    "64,512-token retrieval",
+    "process-restart continuation",
+    "bounded C1 performance",
+    "fresh exact Windows RTX 3090 install/security/bidirectional rollback",
+    "exact OMP 18.0.9 acceptance"
+  ],
+  "limitations": [
+    "Preview candidate only; it is not an installable qualified runtime variant.",
+    "Remote Linux sm_86 native contract tests passed, but live-model evidence was unusable because the Community provider CUDA runtime returned cudaErrorUnknown.",
+    "Fresh exact-package Windows RTX 3090 lifecycle, state-security, and OMP acceptance were not run after the user reclaimed the local host.",
+    "Historical package evidence is isolated and does not qualify this package.",
+    "CPU, mixed CPU/GPU, overnight thermal, 128K, higher-concurrency, stable, and route-activation claims are excluded."
+  ],
+  "automatic_route_activation_allowed": false,
+  "stable_promotion_performed": false,
+  "production_route_activation_performed": false,
+  "private_fleet_projection_included": false
+}
