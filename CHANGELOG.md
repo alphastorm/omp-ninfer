@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#15](https://github.com/alphastorm/omp-ninfer/issues/15)).
 - Test guards binding the published warm-vs-cold follow-up numbers to their committed receipt and
   covering the launcher's drift preflight.
+- Community results row for the qualified native RTX 4090 variant, sourced from its committed
+  qualification receipt, and GitHub Discussions linked from the issue chooser.
 - Real-session README demo (GIF, MP4, poster) recorded against the exact released v0.2.0-beta.1
   RTX 5090 runtime, with provenance notes and a launch-copy kit under `docs/media/`.
 - Labeled maintainer warm-vs-cold follow-up-turn latency measurement on the released runtime.
