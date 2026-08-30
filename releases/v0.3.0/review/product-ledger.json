@@ -1,0 +1,21 @@
+{
+  "review_sequence_id": "CRS-20260830-ompninfer-v030",
+  "review_id": "CR-1",
+  "review_class": "focused",
+  "reviewer": "review-daybreak-blue",
+  "subject_commit": "d5efecd8481a0b7a2cfa3c0a16ee9b112f89b38e",
+  "dispositions": [
+    {"id": "R1", "severity": "P1", "disposition": "mitigate", "action": "Composed acceptance rebound to the current compatibility authority and SHA-256 (the campaign itself verified component-release bytes, not the compatibility file; the composition-layer binding now names the authority it composes into), plus a verifier invariant comparing the composed subject's release/status/authority/compatibility hash to the manifest."},
+    {"id": "R2", "severity": "P1", "disposition": "mitigate", "action": "Every all-lane restart claim replaced with per-lane semantics on README, benchmarks, performance program, and changelog: durable checkpoints on the native Windows lanes; the RTX 5090 container is live-process warm continuation with transcript-replay recovery."},
+    {"id": "R3", "severity": "P1", "disposition": "mitigate", "action": "Composed record now states the clean-install basis exactly: the from-absent-state transition for these exact bytes is receipted in the parity campaign (one clean install, one upgrade, ACLs, rollback), and the public acceptance adds byte-identity from public URLs plus authenticated smoke. No fresh public-URL first-install claim is made; independent clean-install evidence remains a path-to-v1.0 item."},
+    {"id": "R4", "severity": "P1", "disposition": "mitigate", "action": "Quickstart staging moved from user TEMP to a freshly created administrators-only ACL directory under ProgramData, closing the same-account medium-integrity swap window between hash verification and elevated execution."},
+    {"id": "R5", "severity": "P1", "disposition": "mitigate", "action": "All residual draft/pending machine-readable state cleared (compatibility composition status and blockers, manifest publication targets), plus a ready-mode verifier sweep requiring empty blockers and non-draft statuses across manifest, compatibility, and qualification."},
+    {"id": "R6", "severity": "P1", "disposition": "mitigate", "action": "The component release's closed outer SHA256SUMS committed as releases/v0.3.0/qualification/rtx3090-windows-native.SHA256SUMS, bound by checksums_sha256 on the variant, plus a verifier invariant requiring every ancillary asset hash to match that closed set."},
+    {"id": "R7", "severity": "P2", "disposition": "mitigate", "action": "Ready-mode verifier invariant: the runtime-variant id set must be non-empty and equal the qualification composition's native lane set."},
+    {"id": "R8", "severity": "P2", "disposition": "mitigate", "action": "README current-results receipt link now targets the v0.3.0 qualification; the remaining 'this beta' phrase replaced. Historical sections retain their immutable v0.2 links by design."},
+    {"id": "R9", "severity": "P2", "disposition": "mitigate", "action": "Restoration claims narrowed to appliance state (lease, task, endpoint, power) with the console sign-out and closed applications disclosed as interventions, in both the composed record and the changelog."},
+    {"id": "U1", "severity": "P2", "disposition": "accept", "rationale": "The frozen diff exposed the runtime source review ledger (a different subject's verdict, archived in-repo). Cross-subject exposure is disclosed; future product review subjects exclude releases/*/review/. No same-subject prior-round exposure occurred."},
+    {"id": "U2", "severity": "P1", "disposition": "reject", "rationale": "Lead-verified: the rebound v0.2 platform acceptance receipts (releases/v0.2.0-beta.1/acceptance/*.json) each record the tools, vision, stateful-resume, and fail-closed observations the composed wrapper asserts."}
+  ],
+  "closure": "All in-scope P0/P1 findings mitigated with executable invariants where the class was mechanical; remediation verified by a focused re-review of the remediation delta before publication."
+}

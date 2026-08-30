@@ -48,10 +48,7 @@
         "OMP installation on the remote account is outside this adapter; no secret, raw log, prompt, or model output crosses the receipt boundary.",
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
-      "blockers": [
-        "RTX 5090 v0.3 qualification receipts pending",
-        "external clean-install acceptance from public URLs pending"
-      ],
+      "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/macos-arm64-18.0.9-beta2.json",
         "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
@@ -141,10 +138,7 @@
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
-      "blockers": [
-        "RTX 5090 v0.3 qualification receipts pending",
-        "external clean-install acceptance from public URLs pending"
-      ],
+      "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/51876533a4d41ef1b87e88b81cee954df5bcba1a/releases/v0.2.0-beta.1/acceptance/windows-x64-18.0.9-beta2.json",
         "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
@@ -234,10 +228,7 @@
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
-      "blockers": [
-        "RTX 5090 v0.3 qualification receipts pending",
-        "external clean-install acceptance from public URLs pending"
-      ],
+      "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2228136b00d7111ead18d1bb91c6778679d8ce9b/releases/v0.2.0-beta.1/acceptance/linux-x64-18.0.9-beta2.json",
         "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"

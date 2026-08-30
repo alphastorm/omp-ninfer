@@ -39,8 +39,6 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 qualification receipts pending
-- external clean-install acceptance from public URLs pending
 
 ### `windows-docker-local`
 
@@ -52,8 +50,6 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 qualification receipts pending
-- external clean-install acceptance from public URLs pending
 
 ### `linux-docker-local`
 
@@ -65,8 +61,6 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 qualification receipts pending
-- external clean-install acceptance from public URLs pending
 
 ## Composition blockers
 
