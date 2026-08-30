@@ -77,12 +77,13 @@ This lane's recovery path after a process restart is OMP transcript replay: the 
 process-local by design on the container lane, and no restart-continuation claim is made for it.
 Durable process-restart continuation is a native Windows lane property (tables above).
 
-### Durable checkpoints on every lane
+### Durable checkpoints on the native Windows lanes
 
-v0.3.0 ships checkpoint-backed session durability on all three lanes — DirectStorage on native
-Windows, io_uring in the Linux container. A follow-up continues from restored state after a
-process restart instead of re-prefilling the transcript, and each lane's restart gate binds the
-exact observed restoration above. Upstream,
+v0.3.0 ships checkpoint-backed session durability on the RTX 4090 and RTX 3090 native Windows
+lanes (DirectStorage): a follow-up continues from restored state after a process restart instead
+of re-prefilling the transcript, and each lane's restart gate binds the exact observed
+restoration above. The RTX 5090 container makes no restart-continuation claim — its response
+store is process-local by design and its recovery path is OMP transcript replay. Upstream,
 [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its
 DirectStorage cold restore at 10.1 GB/s (1.51 GiB in 150 ms) on its own artifacts — an
 engine-family capability reference, not a product claim.

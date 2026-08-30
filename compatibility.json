@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.3.0-qualified-1",
   "product_release": "v0.3.0",
   "composition": {
-    "status": "v0.3 public release draft",
+    "status": "v0.3.0 public release",
     "lifecycle_repository": "https://github.com/alphastorm/oh-my-pi",
     "lifecycle_source_release": "https://github.com/alphastorm/oh-my-pi/releases/tag/omp-v18.0.9-ninfer-beta.2",
     "lifecycle_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
@@ -15,10 +15,7 @@
     "lifecycle_generated_lock_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
     "request_compatibility_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
     "hosted_ci": "windows 33208643234; linux 33208643176; macos 33208643243",
-    "blockers": [
-      "RTX 5090 v0.3 qualification receipts pending",
-      "external clean-install acceptance from public URLs pending"
-    ],
+    "blockers": [],
     "composed_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3"
   },
   "profiles": [

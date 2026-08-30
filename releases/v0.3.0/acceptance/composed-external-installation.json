@@ -24,7 +24,9 @@
     "id": "rtx3090-windows-native-public-install",
     "repository_path": "releases/v0.3.0/acceptance/rtx3090-public-install.json",
     "sha256": "b63d9e308c678b437727c1bcbbe4ef81ecf04878ddd051b0c7cf4af652d1867b",
-    "highlights": "public-URL download with exact SHA-256 set verification; downloaded installer accepted the exact qualified bytes (already_installed); controller start ready in 17.756 s; authenticated loopback status HTTP 200; synthetic completion HTTP 200; stop restored task Ready, lease clear, 370 W"
+    "highlights": "public-URL download with exact SHA-256 set verification; downloaded installer accepted the exact qualified bytes (already_installed); controller start ready in 17.756 s; authenticated loopback status HTTP 200; synthetic completion HTTP 200; stop restored task Ready, lease clear, 370 W",
+    "clean_install_basis": "The from-absent-state install transition for these exact bytes is receipted in the parity campaign (transfer_install: one clean install and one upgrade, protected-state ACLs, rollback both directions); this public acceptance adds byte-identity from public URLs (already_installed against the identical active release) plus authenticated start/stop smoke. No claim of a fresh public-URL first-install run is made.",
+    "restoration_scope": "Appliance state: GPU-owner lease cleared, scheduled task Ready, endpoint unavailable, 370 W power limit. Console session was signed out and closed desktop applications were not relaunched; both disclosed as interventions."
   },
   "requalified_primary": {
     "id": "rtx5090-container-v03-requalification",
@@ -36,6 +38,6 @@
   "raw_prompts_outputs_or_secrets_included": false,
   "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
   "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
-  "compatibility_authority": "omp-ninfer-v0.3.0-public-draft-1",
-  "compatibility_sha256": "42d3edf67bbd4c1ac15e731a569ad3764351bb5404d5a380cdd57ad45e31113d"
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "d94dac0d2f71066e13c1d138c67096529fd3179b112f80cd8bb5713543164e2e"
 }

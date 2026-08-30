@@ -3,7 +3,7 @@
 
 Authority: `omp-ninfer-v0.3.0-qualified-1`
 Product release: `v0.3.0`
-Composition: **v0.3 public release draft**
+Composition: **v0.3.0 public release**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
@@ -70,5 +70,3 @@ Blockers:
 
 ## Composition blockers
 
-- RTX 5090 v0.3 qualification receipts pending
-- external clean-install acceptance from public URLs pending

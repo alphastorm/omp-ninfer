@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   130,048 tokens, a qualification-bound warm/cold pair (0.191 s vs 36.651 s at an 89,022-token
   session), and an in-process deletion/no-resurrection probe.
 - Public-URL external installation acceptance for the RTX 3090 lane: verified download set,
-  exact-bytes installer acceptance, authenticated smoke, and full machine restoration.
+  exact-bytes installer acceptance, authenticated smoke, and appliance-state restoration
+  (GPU lease, scheduled task, endpoint, and power limit; console sign-out disclosed).
 - Ready `v0.3.0` manifest binding three qualified GPU lanes, the composed external acceptance,
   and every per-lane receipt; `verify_release.py --require-ready` passes on the tree.
 

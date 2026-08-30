@@ -99,7 +99,7 @@ give you together elsewhere:
 ![Measured evidence: 0.191-second warm continuation versus 36.651-second cold prefill at 89,022 tokens, 240.30-token-per-second RTX 5090 decode, exact 130,048-token recall, and three qualified GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.2.0-beta.1/qualification.json):
+[`qualification.json`](releases/v0.3.0/qualification.json):
 
 | Gate | Result |
 | --- | --- |
@@ -110,9 +110,10 @@ Exact shipped profiles and receipts in
 | RTX 4090 native | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-Durable session checkpoints ship on all three lanes in v0.3.0 — DirectStorage-backed on native
-Windows, io_uring-backed in the Linux container — so a follow-up can continue from restored state
-even across a process restart. Every lane's restart gate is bound by its own receipt.
+Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on
+the RTX 4090 and RTX 3090 a follow-up continues from restored state even across a process
+restart, each bound by its own receipt. The RTX 5090 container keeps live-process warm
+continuation; its recovery path after a process restart is OMP transcript replay, by design.
 
 The shipped artifact holds its capability through quantization — 96.67% AIME 2025/2026 and 87.37%
 GPQA-Diamond in the upstream single-sample evaluation campaign. Numbers, methodology, caveats, and
@@ -235,7 +236,7 @@ intent remains to upstream reusable provider and lifecycle pieces to
 ## Roadmap
 
 `v0.3` made the appliance public: three qualified GPU lanes in one ready manifest, durable
-checkpoint restart on every lane, and public install authority with no access gate. Next:
+checkpoint restart on both native Windows lanes, and public install authority with no access gate. Next:
 signing/notarization, a shared public client acceptance runner, concurrency-qualified native
 profiles, and multi-owner clean-install evidence on the path to v1.0. No item becomes a support
 claim before an exact package, receipt, and product manifest bind it.
@@ -261,7 +262,7 @@ release notes must use those exact bytes. Lifecycle details: [Releases](docs/REL
 Use the [hardware report, installation failure, or benchmark forms](https://github.com/alphastorm/omp-ninfer/issues/new/choose).
 Remove API keys, hostnames, usernames, private prompts, model outputs, and raw request logs before
 attaching anything; the forms only ask for content-safe facts. The support boundary assumes a
-single trusted owner on both machines; this beta is not a multi-tenant service. Security reports go
+single trusted owner on both machines; this release is not a multi-tenant service. Security reports go
 through [private vulnerability reporting](SECURITY.md), never a public issue.
 
 ## Credits

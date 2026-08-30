@@ -36,8 +36,8 @@
       "artifact_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7111c7b1bab1625ce8e2a8a8cf0f30a2217897a8/compatibility.json",
-      "compatibility_sha256": "6e74e06f2484158e055cdcb0c636b0eff4d81643255f4299f7beb4fb8f43a2bf"
+      "compatibility_url": null,
+      "compatibility_sha256": "d94dac0d2f71066e13c1d138c67096529fd3179b112f80cd8bb5713543164e2e"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -93,7 +93,8 @@
           "summary": "releases/v0.3.0/qualification/rtx3090.json",
           "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
           "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification/rtx3090.json"
-        }
+        },
+        "checksums_sha256": "1c8cdbf211e3cb9222c3de805c80ccc386b3425db8b74b9eff63a6c2eee4007b"
       },
       {
         "id": "rtx4090-windows-native",
@@ -144,8 +145,8 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "385e4962b8cc506dfbea55626dec47b6bbaf9808bf89197620f7cc9d9de49a5c",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7111c7b1bab1625ce8e2a8a8cf0f30a2217897a8/releases/v0.3.0/qualification.json",
+    "summary_sha256": "6d03433af6fddad10cb1d6a55ca40c1ad117350f227411e89635437de905fa2c",
+    "public_url": null,
     "runtime_release_eligible": true,
     "external_installation_passed": true
   },
@@ -167,10 +168,10 @@
     "authorized": false,
     "targets": [
       "GitHub public release v0.3.0",
-      "OMP component omp-18.0.9-cross-platform-beta-2",
-      "NInfer RTX 5090 v0.3 beta.1 runtime component",
-      "NInfer RTX 4090 v0.2.0 beta.1 component",
-      "NInfer RTX 3090 v0.3.0 parity component"
+      "OMP component omp-18.0.9-cross-platform-beta-2 (rebound)",
+      "NInfer RTX 5090 runtime component v0.2.0-qwen38-5090-beta.2 (rebound, requalified)",
+      "NInfer RTX 4090 component v0.2.0-qwen38-4090-beta.1 (rebound)",
+      "NInfer RTX 3090 component v0.3.0-qwen38-3090.1"
     ],
     "blockers": []
   }

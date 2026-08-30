@@ -119,8 +119,21 @@ $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $V
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
 }
-$Stage = Join-Path $env:TEMP ("omp-ninfer-" + $VariantId)
-New-Item -ItemType Directory -Force -Path $Stage | Out-Null
+# Stage under ProgramData with an administrators-only ACL so no medium-integrity process
+# under the same account can swap bytes between verification and elevated execution.
+$Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
+if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
+New-Item -ItemType Directory -Path $Stage | Out-Null
+$Acl = Get-Acl $Stage
+$Acl.SetAccessRuleProtection($true, $false)
+foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
+  $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    (New-Object System.Security.Principal.SecurityIdentifier($Sid)),
+    'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
+  $Acl.AddAccessRule($Rule)
+}
+Set-Acl $Stage $Acl
+(Get-Item $Stage).Attributes = 'Directory'
 foreach ($Asset in @(
   @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
   @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
