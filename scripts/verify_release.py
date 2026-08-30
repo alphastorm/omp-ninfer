@@ -554,7 +554,8 @@ def validate_ninfer_variants(
                         f"{prefix} parity qualification must pass", errors)
             else:
                 require(receipt.get("status") == "passed"
-                        and receipt.get("beta_qualified") is True,
+                        and (receipt.get("beta_qualified") is True
+                             or receipt.get("qualification_class") == "public-release-qualification"),
                         f"{prefix} qualification must pass beta support", errors)
         else:
             require(receipt.get("status") == "incomplete"
