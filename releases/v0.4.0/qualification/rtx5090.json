@@ -1,0 +1,86 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "durable_qualification": {
+    "headline": "Durable session checkpoints qualified: automatic 7.95 GB checkpoint at 109,725-token frontier; docker-restart continuation restored 109,589 tokens hot on a rotated server instance (serve ttft 0.778 s); exact retrieval at 130,448 tokens; decode 143.0-144.8 tok/s; pinned 18.0.9 client accepted status and checkpoint documents verbatim",
+    "sha256": "8df38c3c2a106dd819364d377c6837ef049ffeb167b79f37ff33de9cbe968b53",
+    "summary": "releases/v0.4.0/qualification/rtx5090-durable.json"
+  },
+  "evidence_interpretation": "The v0.4.0 container lane runs new engine+serve bytes (source 1ceaeebd) with durable session checkpoints; every number above is bound in the durable qualification summary and the serve request logs retained on the appliance. The v0.2/v0.3 container receipts remain bound to their own releases.",
+  "gates": {
+    "agent_protocol": {
+      "authenticated_session_identity": true,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "deleted_continuation_status": 404,
+      "forks": 2,
+      "no_resurrection": true,
+      "parent_delete_status": 200,
+      "post_lru_pressure_continuation_status": 404,
+      "post_lru_pressure_error_code": "previous_response_not_found",
+      "stateful_continuation": true,
+      "status": "passed",
+      "surviving_descendant_continued": true
+    },
+    "decode": {
+      "accepted_tokens": 1534,
+      "completion_tokens": 2048,
+      "decode_tokens_per_second": 240.30294601486273,
+      "drafted_tokens": 1536,
+      "mtp_acceptance_rate": 0.9986979166666666,
+      "status": "passed"
+    },
+    "lifecycle": {
+      "incumbent_configuration_preserved": true,
+      "incumbent_restored": true,
+      "qualification_containers_running": 0,
+      "restart_policy": "no",
+      "status": "passed",
+      "temporary_api_key_removed": true
+    },
+    "prefill_curve": {
+      "exact_retrieval_at_every_point": true,
+      "points": [
+        {
+          "prompt_tokens": 7680,
+          "tokens_per_second": 3193.769854592199
+        },
+        {
+          "prompt_tokens": 32256,
+          "tokens_per_second": 2956.731228476698
+        },
+        {
+          "prompt_tokens": 64512,
+          "tokens_per_second": 2664.2214294374985
+        },
+        {
+          "prompt_tokens": 98304,
+          "tokens_per_second": 2402.5866676846235
+        },
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2199.4120619105965
+        }
+      ],
+      "status": "passed"
+    }
+  },
+  "identity": {
+    "configuration_sha256": "a65e9cc84c7c83e8e40a3aee5e41a2d8a1619ac71570ce26ff9023b16ee90b33",
+    "cuda_architecture": "sm_120a",
+    "deployment_profile": "qwen38-5090-v0.4.0",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "server_binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
+    "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "source_dirty": false
+  },
+  "private_fleet_projection_included": false,
+  "private_paths_included": false,
+  "qualified": true,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "release_tag": "v0.4.0",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
+  "schema_version": 1,
+  "scope_exclusions": [
+    "process-restart continuation is not claimed or qualified for this runtime identity"
+  ],
+  "status": "passed"
+}

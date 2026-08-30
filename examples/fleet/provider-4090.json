@@ -1,0 +1,8 @@
+{
+  "provider": "ninfer/local-max",
+  "protocol": "openai-responses",
+  "base_url": "http://127.0.0.1:<local-forward-port-4090>",
+  "api_key_file": "<path-to-this-lane's-api-key-file>",
+  "stateful_continuation": true,
+  "note": "RTX 4090 native Windows lane; MTP3 (v0.3.1); DirectStorage checkpoints"
+}

@@ -62,7 +62,7 @@ The prior MTP0 receipt (52.330 tok/s over 1,168 tokens, 1,410.691 tok/s prefill,
 102,075-token restored continuation) remains bound to `v0.2.0-qwen38-4090-beta.1` and is the
 baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
-[qualification summary](../releases/v0.3.2/qualification/rtx4090.json).
+[qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
 ### RTX 5090 — container, MTP3, C1
 
@@ -87,8 +87,9 @@ Warm/cold method: server-side vantage, one sample per point, synthetic content-s
 cold pair sends a fresh equivalent-length prompt that cannot reuse any prefix. Full measurement
 detail: [`2026-08-30-warm-vs-cold-ttft-v03.json`](measurements/2026-08-30-warm-vs-cold-ttft-v03.json).
 
-This lane's recovery path after a process restart is OMP transcript replay: the response store is
-process-local by design on the container lane, and no restart-continuation claim is made for it.
+As of v0.4.0 this lane restores sessions from durable checkpoints across process restarts
+([qualification](measurements/2026-08-30-rtx5090-durable-qualification.json)); OMP transcript
+replay remains the fallback when no checkpoint exists.
 Durable process-restart continuation is a native Windows lane property (tables above).
 
 ### Durable checkpoints on the native Windows lanes
@@ -97,8 +98,9 @@ v0.3.0 ships checkpoint-backed session durability on the RTX 4090 and RTX 3090 n
 lanes (DirectStorage): a follow-up continues from restored state after a process restart instead
 of rebuilding the session cold — exactly the delta the warm/cold row measures — and each lane's
 restart gate binds the exact observed
-restoration above. The RTX 5090 container makes no restart-continuation claim — its response
-store is process-local by design and its recovery path is OMP transcript replay. Upstream,
+restoration above. The RTX 5090 container joins them in v0.4.0: an automatic 7.95 GB checkpoint
+at a 109,725-token frontier restored 109,589 tokens hot across a docker restart on a rotated
+server instance (0.778 s serve-side first token). Upstream,
 [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its
 DirectStorage cold restore at 10.1 GB/s (1.51 GiB in 150 ms) on its own artifacts — an
 engine-family capability reference, not a product claim.

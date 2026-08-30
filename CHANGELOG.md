@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-30
+
+### Added
+
+- Durable session checkpoints on the RTX 5090 container lane: transactional generational store
+  (fsync-disciplined, corruption-quarantining, quota-evicting), automatic checkpoint queue, native
+  io_uring O_DIRECT restore backend under a sha-pinned seccomp profile, and authenticated
+  `/v1/ninfer/checkpoints` endpoints speaking the released 18.0.9 client's path addressing.
+  Qualified live: automatic 7.95 GB checkpoint at a 109,725-token frontier; docker-restart
+  continuation restored **109,589 tokens hot** on a rotated server instance (0.778 s serve-side
+  first token); exact retrieval at 130,448 tokens; decode 143.0-144.8 tok/s.
+- Durability now ships on **all three GPU lanes** - the RTX 5090 container joins the native
+  Windows 4090/3090 DirectStorage lanes.
+- Serve startup re-hashes the model artifact against its declared identity and refuses mismatch;
+  lifecycle tooling is loopback-only; cross-family review CR-20260830 dispositions land with the
+  candidate (9 mitigations, receipts in the component release).
+- `examples/fleet/`: one provider fragment per qualified lane plus a role mapping for running
+  three model-bound agents against the fleet.
+
+### Changed
+
+- The RTX 5090 container image moves to
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:8de5efdf...` (source `1ceaeebd`, binary `7eb66643`);
+  the previous digest remains published as the rollback target.
+
 ## [0.3.2] - 2026-08-30
 
 ### Fixed
@@ -202,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...v0.3.0

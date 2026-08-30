@@ -7,13 +7,21 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.3.2`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.3.2` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.0`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.0` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.0 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.0`, GitHub `Latest`.
+- The RTX 5090 container lane moves to a new durable runtime image
+  ([`ninfer@v0.4.0-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.0-qwen38-5090-beta.1),
+  image digest `8de5efdf...`): transactional session checkpoints restored across docker restarts.
+  Durability now ships on all three lanes. 4090/3090 components unchanged.
 
 ### v0.3.2 public release
 

@@ -1,0 +1,89 @@
+{
+  "artifact_type": "ninfer_rtx5090_durable_qualification_summary",
+  "schema_version": 1,
+  "release": "v0.4.0",
+  "status": "passed",
+  "qualified_utc": "2026-08-30T20:41:30Z",
+  "qualification_class": "public-release-qualification",
+  "identity": {
+    "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
+    "image_digest": "sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
+    "server_binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "a65e9cc84c7c83e8e40a3aee5e41a2d8a1619ac71570ce26ff9023b16ee90b33",
+    "deployment_profile": "qwen38-5090-v0.4.0",
+    "source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34",
+    "source_dirty": false,
+    "binary_release_tag": "v0.4.0-qwen38-5090-beta.1",
+    "runtime_receipt_release_tag": "v0.4.0-qwen38-5090-runtime-beta.1",
+    "kv_dtype": "bf16",
+    "speculative": "mtp/3 (+lm-head-draft)",
+    "max_context": 131072
+  },
+  "review": {
+    "sequence_id": "CRS-durable-5090-v040",
+    "initial_epoch": "CR-20260830-durable5090",
+    "remediation_epoch": "CR-20260830-durable5090-rem1 (lead-close, triage exit 0)",
+    "findings": "18 rows: 9 mitigated with red-to-green evidence, 4 falsified with counter-evidence, 5 deferred with residual rationales; no residual P0/P1"
+  },
+  "gates": {
+    "pinned_client_status_conformance": {
+      "status": "passed",
+      "detail": "live /v1/ninfer/status accepted verbatim by the validator extracted from oh-my-pi@60d4134b (released 18.0.9)"
+    },
+    "checkpoint_endpoints_contract": {
+      "status": "passed",
+      "detail": "POST save -> available; GET /v1/ninfer/checkpoints/<sha>/status (client path addressing) accepted by the extracted checkpoint validator; DELETE path form exercised (deleted/404 paths)"
+    },
+    "automatic_checkpoint": {
+      "status": "passed",
+      "detail": "saved automatically after the qualifying turn: generation 1788122071764-0, 7,954,261,219 bytes, frontier 109,725 tokens, read_backend io_uring-odirect; the requeue-before-save fix observed firing on a racing turn"
+    },
+    "docker_restart_continuation": {
+      "status": "passed",
+      "restored_hot_tokens": 109589,
+      "threshold": 100000,
+      "detail": "docker restart -> fresh process (model reloaded 56.6 s, server_instance serve-1-1788122237763234) -> previous_response_id continuation served with 109,589 tokens hot, serve-side ttft 778 ms, request wall 1.49 s; 24.8 s end-to-end including first-touch restore of the 7.95 GB checkpoint"
+    },
+    "long_context_exact_retrieval": {
+      "status": "passed",
+      "prompt_tokens": 130448,
+      "detail": "planted ORCHID=811427; COLOR=VERMILION recovered verbatim; prefill 2,186.3 tok/s; 60.59 s wall"
+    },
+    "decode": {
+      "status": "passed",
+      "tokens_per_second": [
+        144.8,
+        143.0
+      ],
+      "detail": "two 2,048-token generations, serve-side decode; MTP3 acceptance 2.32 tok/round (44%) on the writing workload"
+    },
+    "warm_vs_cold": {
+      "status": "passed",
+      "detail": "cold 47.92 s wall at 109,594 input tokens (ttft 47.21 s) vs warm follow-up 1.79 s and post-restore ttft 0.778 s on the same session"
+    },
+    "mtp_acceptance_spread": {
+      "status": "measured",
+      "detail": "83.3% (ledger retrieval), 62.7% (continuation), 44.1% (technical writing) - agent-shaped variance recorded for the depth ablation"
+    },
+    "fail_closed_confinement": {
+      "status": "passed",
+      "detail": "serve boots only under the sha-pinned custom seccomp granting io_uring syscalls; artifact digest re-hashed and matched at startup (18.2 GB)"
+    },
+    "incumbent_restoration": {
+      "status": "passed",
+      "detail": "canary stopped for the window and restarted; listening again with model resident"
+    }
+  },
+  "public_install_basis": {
+    "image_pull": "anonymous pull by digest from public ghcr.io/alphastorm/ninfer-runtime succeeded on the appliance (empty DOCKER_CONFIG)",
+    "binary_release": "public prerelease v0.4.0-qwen38-5090-beta.1 with SHA256SUMS-verified archive"
+  },
+  "limitations": [
+    "One machine, one profile; numbers are receipts, not universal claims.",
+    "The checkpoint frontier lags to the last catalogued complete endpoint; a turn completing between capture and save replays its tail from the OMP transcript on restore (observed: 109,589 hot of 109,743 total).",
+    "Post-restart first-touch restore of a multi-GiB checkpoint adds one-time I/O latency (24.8 s end-to-end for 7.95 GB) before the sub-second warm path resumes.",
+    "MTP3 acceptance varies 44-83% with workload shape; decode throughput varies accordingly.",
+    "Vision inputs and multi-concurrency remain per-profile non-claims."
+  ]
+}

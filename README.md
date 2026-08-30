@@ -11,11 +11,11 @@
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own an RTX 5090, 4090, or 3090,
 OMP NInfer keeps Qwen3.8 27B and your session's continuation state on your GPU — as an explicit,
 durable primitive, not a lucky prefix-cache hit. Follow-ups continue from state addressed by
-lineage, and on the native Windows lanes that state survives process restarts.
+lineage, and that state survives process restarts on every qualified lane.
 
 **[Get started](docs/QUICKSTART.md)**
 
-**[Download v0.3.2](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
+**[Download v0.4.0](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
 **[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
@@ -79,11 +79,12 @@ is all you need, that works today without OMP NInfer.
 
 What this project adds is continuation as an **explicit, transactional, durable** primitive
 rather than an implicit longest-prefix match. OMP tracks the Responses lineage end to end —
-`previous_response_id`, forks, rollback — and on the RTX 4090 and 3090 native Windows lanes the
-continuation (session state plus its required KV) is checkpointed to disk and restored after
-process death: [102,075 tokens restored on the
-4090](releases/v0.2.0-beta.1/qualification/rtx4090.json), [310 MB checkpoint restore on the
-3090](docs/measurements/2026-08-30-rtx3090-parity.json). A prefix cache cannot outlive its
+`previous_response_id`, forks, rollback — and as of v0.4.0 the continuation (session state plus
+its required KV) is checkpointed to disk and restored after process death on **all three lanes**:
+[109,589 tokens restored across a docker restart on the
+5090](docs/measurements/2026-08-30-rtx5090-durable-qualification.json), [102,075 tokens restored
+on the 4090](releases/v0.2.0-beta.1/qualification/rtx4090.json), [310 MB checkpoint restore on
+the 3090](docs/measurements/2026-08-30-rtx3090-parity.json). A prefix cache cannot outlive its
 process; a checkpoint can.
 
 Next on the [roadmap](ROADMAP.md): portable checkpoints — store them on shared storage, restore
@@ -121,7 +122,7 @@ give you together elsewhere:
 ![Measured evidence: 0.191-second warm continuation versus 36.651-second cold prefill at 89,022 tokens, 240.30-token-per-second RTX 5090 decode, exact 130,048-token recall, and three qualified GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.3.2/qualification.json):
+[`qualification.json`](releases/v0.4.0/qualification.json):
 
 | Gate | Result |
 | --- | --- |
@@ -135,7 +136,9 @@ Exact shipped profiles and receipts in
 Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on
 the RTX 4090 and RTX 3090 a follow-up continues from restored state even across a process
 restart, each bound by its own receipt. The RTX 5090 container keeps live-process warm
-continuation; its recovery path after a process restart is OMP transcript replay, by design.
+continuation; as of v0.4.0 a process restart restores the session from its durable checkpoint
+(109,589 tokens hot in the qualification), with OMP transcript replay as the fallback when no
+checkpoint exists.
 
 The shipped artifact holds its capability through quantization — 96.67% AIME 2025/2026 and 87.37%
 GPQA-Diamond in the upstream single-sample evaluation campaign. Numbers, methodology, caveats, and
@@ -163,7 +166,7 @@ WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned
 route needs one published OMP client and about 40 GiB free disk.
 
 ```powershell
-git clone --branch v0.3.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.4.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -222,7 +225,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.3.2 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.4.0 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard

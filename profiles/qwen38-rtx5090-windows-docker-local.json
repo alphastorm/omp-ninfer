@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.3.2",
+  "release": "v0.4.0",
   "status": "public",
   "installation_mode": "native-windows-docker-local",
   "client": {
@@ -39,7 +39,7 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "deployment_profile": "qwen38-5090-v0.4.0",
     "container_network_mode": "host",
     "restart_policy": "no",
     "arguments": [
@@ -50,13 +50,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+      "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
-      "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+      "a65e9cc84c7c83e8e40a3aee5e41a2d8a1619ac71570ce26ff9023b16ee90b33",
       "--deployment-profile",
-      "qwen38-5090-v0.2.0-beta.2",
+      "qwen38-5090-v0.4.0",
       "--max-context",
       "131072",
       "--kv-capacity",
