@@ -117,6 +117,9 @@ imply official partnership.
 | `assets/architecture.png` | rendered architecture @2x (2480×840) — for the README |
 | `assets/benchmarks.html` | released-evidence continuation story source (1240×360) |
 | `assets/benchmarks.png` | rendered released-evidence strip @2x — for the README and benchmarks page |
+| `assets/chart-warm-cold.html` / `chart-warm-cold.png` | warm vs cold TTFT chart source (1240×420) and @2x render — benchmarks page |
+| `assets/chart-prefill.html` / `chart-prefill.png` | 5090 prefill-curve chart source (1240×420) and @2x render — benchmarks page |
+| `assets/chart-decode.html` / `chart-decode.png` | per-lane decode chart source (1240×420) and @2x render — benchmarks page |
 | `assets/favicon.svg` | favicon (96, rx22 tile) |
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
@@ -129,6 +132,9 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo-social-discord.gif` | update-banner-free README/Discord fallback |
 | `docs/media/omp-ninfer-demo-social-poster.png` | poster from the clean social interval |
 | `docs/media/omp-ninfer-launch-card.png` | scoped launch evidence card; provenance in `docs/media/README.md` |
+| `docs/media/omp-ninfer-demo-2x.gif` | crisp 1224×868 20 fps README embed rendered straight from the cast |
+| `docs/media/omp-ninfer-demo-2x.mp4` | H.264 transcode of the 2x render; preferred social attachment |
+| `docs/media/omp-ninfer-demo-2x-poster.png` | poster frame from the 2x render |
 
 Regeneration: run `python3 scripts/render_assets.py`. It renders the banner, architecture,
 benchmark, and social-preview HTML sources with headless Chrome and verifies every PNG dimension;
