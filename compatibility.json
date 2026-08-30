@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "authority_id": "omp-ninfer-v0.3.0-public-draft-1",
+  "authority_id": "omp-ninfer-v0.3.0-qualified-1",
   "product_release": "v0.3.0",
   "composition": {
     "status": "v0.3 public release draft",
