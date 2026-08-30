@@ -160,7 +160,7 @@ native Windows 3090/4090 paths.
 - **NInfer owns the speed.** Process-local Responses state and GPU cache scoped by authenticated
   client and session identity. Retained state is an acceleration, never the source of truth.
 - **The manifest owns identity.** Exact client, image, model, configuration, and qualification
-  bytes; `ready` status requires an external clean install from public URLs.
+  bytes; `ready` status requires the composed external acceptance from public URLs.
 
 Deep dive: [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) ·
 [Release lifecycle](docs/RELEASES.md).
