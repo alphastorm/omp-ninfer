@@ -36,7 +36,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_release_predicate_exempts_prerelease_contracts(self) -> None:
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.2.0-beta.1"))
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.3.0-rc.1"))
-        self.assertTrue(VERIFY_RELEASE.ga_release("v0.3.0"))
+        self.assertTrue(VERIFY_RELEASE.ga_release("v0.3.1"))
 
     def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary = tempfile.TemporaryDirectory()
@@ -115,14 +115,14 @@ class ReleaseContractTest(unittest.TestCase):
             "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
         )
         summary_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.3.0" / "qualification.json").read_bytes()
+            (ROOT / "releases" / "v0.3.1" / "qualification.json").read_bytes()
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        planted = root / "releases" / "v0.3.0" / "review" / "planted.json"
+        planted = root / "releases" / "v0.3.1" / "review" / "planted.json"
         planted.write_text('{"path": "/Users/someone/secret"}', encoding="utf-8")
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(
@@ -133,7 +133,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
+        manifest_path = root / "releases" / "v0.3.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["limitations"] = list(manifest.get("limitations", [])) + [
             "The RTX 5090 identities remain pending."
@@ -152,7 +152,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
+        manifest_path = root / "releases" / "v0.3.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["channel"] = "general-availability"
         self.save(manifest_path, manifest)
@@ -268,7 +268,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(field=field):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release = "v0.3.0"
+                    release = "v0.3.1"
                     release_root = root / "releases" / release
                     acceptance_path = (
                         release_root
@@ -346,7 +346,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.3.0"
+                    release_root = root / "releases" / "v0.3.1"
                     manifest_path = release_root / "manifest.json"
                     qualification_path = release_root / "qualification.json"
                     compatibility_path = release_root / "compatibility.json"
@@ -387,7 +387,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_ready_lane_set_must_match_qualification_composition(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        release_root = root / "releases" / "v0.3.0"
+        release_root = root / "releases" / "v0.3.1"
         qualification_path = release_root / "qualification.json"
         manifest_path = release_root / "manifest.json"
         qualification = self.load(qualification_path)
@@ -501,7 +501,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.3.0",
+            "v0.3.1",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -796,7 +796,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.3.0"
+                    release_root = root / "releases" / "v0.3.1"
                     manifest_path = release_root / "manifest.json"
                     manifest = self.load(manifest_path)
                     variant = next(
@@ -858,7 +858,7 @@ class ReleaseContractTest(unittest.TestCase):
 
         temporary, root = self.public_draft_copy()
         try:
-            release_root = root / "releases" / "v0.3.0"
+            release_root = root / "releases" / "v0.3.1"
             manifest_path = release_root / "manifest.json"
             manifest = self.load(manifest_path)
             variant = next(

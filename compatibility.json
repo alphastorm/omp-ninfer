@@ -308,7 +308,7 @@
       "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
       "package_bytes": 573355399,
       "qualification_receipt": {
-        "path": "releases/v0.3.0/qualification/rtx3090.json",
+        "path": "releases/v0.3.1/qualification/rtx3090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/550943ba5c1c9b38c95b608ab94b87c0567d92f6/releases/v0.3.1/qualification/rtx3090.json",
         "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392"
       }

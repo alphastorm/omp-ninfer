@@ -66,7 +66,7 @@
       "operator_class": "owner-operated tester-equivalent",
       "repository_path": "releases/v0.3.1/acceptance/composed-external-installation.json",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7d497e2c8bf9a5bac46ca4af6c156c2c6a5c6387/releases/v0.3.1/acceptance/composed-external-installation.json",
-      "sha256": "31514f578b58f21f010fd1cebcb391aa5130cb32628b12268877e08644c4c1c5",
+      "sha256": "d50de68d54aa98604dd980fd9ca91462a8d61edd25a82f5be182acbb10441786",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
       "vision": true,
@@ -76,7 +76,7 @@
       "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_sha256": "df506611a02266f9ac2ed63ac418eb618754ebdcd9625ee46473d063e171d35d"
+      "compatibility_sha256": "23cee3fcb1f3064115bf0bca4ba22746394ef08070fadeac02b70a08049a9c19"
     }
   },
   "observed_gates": {
