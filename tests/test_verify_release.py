@@ -33,6 +33,11 @@ class ReleaseContractTest(unittest.TestCase):
             VERIFY_RELEASE.OMP_RELEASE_ID_RE.fullmatch("18.0.9-cross-platform-stable-1")
         )
 
+    def test_ga_release_predicate_exempts_prerelease_contracts(self) -> None:
+        self.assertFalse(VERIFY_RELEASE.ga_release("v0.2.0-beta.1"))
+        self.assertFalse(VERIFY_RELEASE.ga_release("v0.3.0-rc.1"))
+        self.assertTrue(VERIFY_RELEASE.ga_release("v0.3.0"))
+
     def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
@@ -210,6 +215,66 @@ class ReleaseContractTest(unittest.TestCase):
             errors,
         )
 
+    def test_composed_acceptance_subject_identity_fields_must_match(self) -> None:
+        cases = (
+            (
+                "release",
+                "v9.9.9",
+                "external acceptance receipt release must match manifest release",
+            ),
+            (
+                "status",
+                "failed",
+                "external acceptance receipt status must be passed",
+            ),
+            (
+                "compatibility_authority",
+                "stale-authority",
+                "external acceptance receipt compatibility_authority must match manifest",
+            ),
+            (
+                "compatibility_sha256",
+                "0" * 64,
+                "external acceptance receipt compatibility_sha256 must match manifest",
+            ),
+        )
+        for field, stale_value, expected_error in cases:
+            with self.subTest(field=field):
+                temporary, root = self.public_draft_copy()
+                try:
+                    release = "v0.3.0"
+                    release_root = root / "releases" / release
+                    acceptance_path = (
+                        release_root
+                        / "acceptance"
+                        / "composed-external-installation.json"
+                    )
+                    qualification_path = release_root / "qualification.json"
+                    manifest_path = release_root / "manifest.json"
+
+                    acceptance = self.load(acceptance_path)
+                    acceptance[field] = stale_value
+                    self.save(acceptance_path, acceptance)
+
+                    qualification = self.load(qualification_path)
+                    qualification["composition"][
+                        "external_installation_acceptance"
+                    ]["sha256"] = hashlib.sha256(
+                        acceptance_path.read_bytes()
+                    ).hexdigest()
+                    self.save(qualification_path, qualification)
+
+                    manifest = self.load(manifest_path)
+                    manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+                        qualification_path.read_bytes()
+                    ).hexdigest()
+                    self.save(manifest_path, manifest)
+
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertIn(expected_error, errors)
+                finally:
+                    temporary.cleanup()
+
     def test_ready_contract_rejects_incomplete_publication(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
@@ -231,6 +296,101 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertIn("installable release requires components.omp.artifact_url", errors)
         self.assertIn("ready release requires qualification.summary_sha256", errors)
         self.assertIn("ready release requires a passing external installation", errors)
+
+    def test_ga_ready_state_sweep_rejects_stale_machine_state(self) -> None:
+        cases = (
+            (
+                "manifest_blockers",
+                "manifest.consistency_probe.blockers must be an empty array in ready mode",
+            ),
+            (
+                "compatibility_blockers",
+                "compatibility.composition.blockers must be an empty array in ready mode",
+            ),
+            (
+                "qualification_status",
+                "qualification.consistency_probe.status must not be draft or pending in ready mode",
+            ),
+            (
+                "authority_id",
+                "compatibility.authority_id must not contain draft or pending in ready mode",
+            ),
+        )
+        for case, expected_error in cases:
+            with self.subTest(case=case):
+                temporary, root = self.public_draft_copy()
+                try:
+                    release_root = root / "releases" / "v0.3.0"
+                    manifest_path = release_root / "manifest.json"
+                    qualification_path = release_root / "qualification.json"
+                    compatibility_path = release_root / "compatibility.json"
+
+                    if case == "manifest_blockers":
+                        manifest = self.load(manifest_path)
+                        manifest["consistency_probe"] = {
+                            "blockers": ["unresolved release gate"]
+                        }
+                        self.save(manifest_path, manifest)
+                    elif case == "qualification_status":
+                        qualification = self.load(qualification_path)
+                        qualification["consistency_probe"] = {"status": "pending"}
+                        self.save(qualification_path, qualification)
+                        manifest = self.load(manifest_path)
+                        manifest["qualification"]["summary_sha256"] = (
+                            hashlib.sha256(qualification_path.read_bytes()).hexdigest()
+                        )
+                        self.save(manifest_path, manifest)
+                    else:
+                        compatibility = self.load(compatibility_path)
+                        if case == "compatibility_blockers":
+                            compatibility["composition"]["blockers"] = [
+                                "unresolved composition gate"
+                            ]
+                        else:
+                            compatibility["authority_id"] += "-draft"
+                        self.save(compatibility_path, compatibility)
+                        self.save(root / "compatibility.json", compatibility)
+
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertIn(expected_error, errors)
+                finally:
+                    temporary.cleanup()
+
+    def test_ga_ready_lane_set_must_match_qualification_composition(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release_root = root / "releases" / "v0.3.0"
+        qualification_path = release_root / "qualification.json"
+        manifest_path = release_root / "manifest.json"
+        qualification = self.load(qualification_path)
+        native_variants = qualification["composition"]["native_runtime_variants"]
+        native_variants["unexpected-windows-native"] = dict(
+            native_variants["rtx4090-windows-native"]
+        )
+        self.save(qualification_path, qualification)
+        manifest = self.load(manifest_path)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "ready components.ninfer_variants ids must exactly match qualification.composition.native_runtime_variants keys",
+            errors,
+        )
+
+        empty_errors: list[str] = []
+        VERIFY_RELEASE.validate_exact_lane_set(
+            {"components": {"ninfer_variants": []}},
+            {"runtime_variants": []},
+            {"composition": {"native_runtime_variants": {}}},
+            empty_errors,
+        )
+        self.assertIn(
+            "ready release requires a non-empty components.ninfer_variants id set",
+            empty_errors,
+        )
 
     def test_cross_component_model_hash_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()
@@ -594,6 +754,118 @@ class ReleaseContractTest(unittest.TestCase):
                 "components.ninfer_variants.rtx3090-windows-native qualification package must match",
                 errors,
             )
+
+    def test_ga_native_variant_checksum_closure_is_complete(self) -> None:
+        prefix = "components.ninfer_variants.rtx4090-windows-native"
+        cases = (
+            "missing_digest",
+            "missing_file",
+            "outer_digest_drift",
+            "installer_entry_drift",
+            "package_entry_drift",
+        )
+        for case in cases:
+            with self.subTest(case=case):
+                temporary, root = self.public_draft_copy()
+                try:
+                    release_root = root / "releases" / "v0.3.0"
+                    manifest_path = release_root / "manifest.json"
+                    manifest = self.load(manifest_path)
+                    variant = next(
+                        item
+                        for item in manifest["components"]["ninfer_variants"]
+                        if item["id"] == "rtx4090-windows-native"
+                    )
+                    checksums_path = (
+                        release_root
+                        / "qualification"
+                        / "rtx4090-windows-native.SHA256SUMS"
+                    )
+                    checksums_text = checksums_path.read_text(encoding="utf-8")
+                    self.assertNotIn("runtime-source-e4654b5a.tar.gz", checksums_text)
+
+                    if case == "missing_digest":
+                        variant.pop("checksums_sha256")
+                        expected_error = (
+                            f"{prefix}.checksums_sha256 must be a lower-case SHA-256"
+                        )
+                    elif case == "missing_file":
+                        checksums_path.unlink()
+                        expected_error = f"{prefix} checksums file must exist"
+                    elif case == "outer_digest_drift":
+                        variant["checksums_sha256"] = "0" * 64
+                        expected_error = (
+                            f"{prefix}.checksums_sha256 must match the checksums file"
+                        )
+                    else:
+                        if case == "installer_entry_drift":
+                            digest_field = "installer_sha256"
+                            filename = "Install-Release.ps1"
+                        else:
+                            digest_field = "package_sha256"
+                            filename = variant["package_name"]
+                        original_entry = f"{variant[digest_field]}  {filename}"
+                        stale_entry = f"{'0' * 64}  {filename}"
+                        mutated_text = checksums_text.replace(
+                            original_entry, stale_entry
+                        )
+                        self.assertNotEqual(mutated_text, checksums_text)
+                        checksums_path.write_text(mutated_text, encoding="utf-8")
+                        variant["checksums_sha256"] = hashlib.sha256(
+                            checksums_path.read_bytes()
+                        ).hexdigest()
+                        expected_error = (
+                            f"{prefix} checksums entry {filename} must match {digest_field}"
+                        )
+
+                    self.save(manifest_path, manifest)
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertIn(expected_error, errors)
+                    self.assertFalse(
+                        any("runtime-source-e4654b5a.tar.gz" in error for error in errors),
+                        errors,
+                    )
+                finally:
+                    temporary.cleanup()
+
+        temporary, root = self.public_draft_copy()
+        try:
+            release_root = root / "releases" / "v0.3.0"
+            manifest_path = release_root / "manifest.json"
+            manifest = self.load(manifest_path)
+            variant = next(
+                item
+                for item in manifest["components"]["ninfer_variants"]
+                if item["id"] == "rtx3090-windows-native"
+            )
+            checksums_path = (
+                release_root
+                / "qualification"
+                / "rtx3090-windows-native.SHA256SUMS"
+            )
+            source_filename = variant["source_archive_url"].rsplit("/", 1)[-1]
+            checksums_text = checksums_path.read_text(encoding="utf-8")
+            original_entry = (
+                f"{variant['source_archive_sha256']}  {source_filename}"
+            )
+            mutated_text = checksums_text.replace(
+                original_entry, f"{'0' * 64}  {source_filename}"
+            )
+            self.assertNotEqual(mutated_text, checksums_text)
+            checksums_path.write_text(mutated_text, encoding="utf-8")
+            variant["checksums_sha256"] = hashlib.sha256(
+                checksums_path.read_bytes()
+            ).hexdigest()
+            self.save(manifest_path, manifest)
+
+            _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+            self.assertIn(
+                "components.ninfer_variants.rtx3090-windows-native checksums entry "
+                f"{source_filename} must match source_archive_sha256",
+                errors,
+            )
+        finally:
+            temporary.cleanup()
 
     def test_local_packaging_oci_digest_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()

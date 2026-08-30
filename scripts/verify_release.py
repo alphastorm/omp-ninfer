@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -26,6 +27,7 @@ OMP_RELEASE_ID_RE = re.compile(
     r"(?P<channel>preview|beta)-(?P<sequence>[1-9][0-9]*)$"
 )
 PRODUCT_RELEASE_RE = re.compile(r"^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$")
+GA_PRODUCT_RELEASE_RE = re.compile(r"^v[0-9]+\.[0-9]+\.[0-9]+$")
 OMP_ASSET_DOWNLOAD_RE = re.compile(
     r"^/alphastorm/homebrew-omp/releases/download/(?P<tag>[^/]+)/(?P<name>[^/]+)$"
 )
@@ -64,6 +66,13 @@ def resolve_product_release(root: Path, requested: str | None) -> str:
     if not isinstance(release, str) or PRODUCT_RELEASE_RE.fullmatch(release) is None:
         raise ContractError("product release must be a versioned release directory name")
     return release
+
+
+def ga_release(release: Any) -> bool:
+    return (
+        isinstance(release, str)
+        and GA_PRODUCT_RELEASE_RE.fullmatch(release) is not None
+    )
 
 
 def expected_omp_source_repository(release: str) -> str:
@@ -133,6 +142,104 @@ def walk_strings(value: Any) -> list[str]:
     return []
 
 
+def walk_object_fields(
+    value: Any, path: str
+) -> Iterator[tuple[str, str, Any]]:
+    if isinstance(value, dict):
+        for field, child in value.items():
+            child_path = f"{path}.{field}"
+            yield child_path, field, child
+            yield from walk_object_fields(child, child_path)
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            yield from walk_object_fields(child, f"{path}[{index}]")
+
+
+def validate_ready_state_consistency(
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    forbidden_statuses = {"draft", "pending"}
+    forbidden_authority_markers = ("draft", "pending")
+    for label, document in (
+        ("manifest", manifest),
+        ("compatibility", compatibility),
+        ("qualification", qualification),
+    ):
+        for path, field, value in walk_object_fields(document, label):
+            if field == "status" and isinstance(value, str):
+                require(
+                    value.strip().casefold() not in forbidden_statuses,
+                    f"{path} must not be draft or pending in ready mode",
+                    errors,
+                )
+            if field == "authority_id" and isinstance(value, str):
+                normalized = value.casefold()
+                require(
+                    not any(
+                        marker in normalized
+                        for marker in forbidden_authority_markers
+                    ),
+                    f"{path} must not contain draft or pending in ready mode",
+                    errors,
+                )
+            if label in {"manifest", "compatibility"} and field == "blockers":
+                require(
+                    isinstance(value, list) and value == [],
+                    f"{path} must be an empty array in ready mode",
+                    errors,
+                )
+
+
+
+def validate_exact_lane_set(
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    manifest_variant_ids = {
+        item.get("id")
+        for item in manifest.get("components", {}).get("ninfer_variants", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    compatibility_variant_ids = {
+        item.get("id")
+        for item in compatibility.get("runtime_variants", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    qualification_variants = qualification.get("composition", {}).get(
+        "native_runtime_variants"
+    )
+    qualification_variant_ids = (
+        set(qualification_variants)
+        if isinstance(qualification_variants, dict)
+        else set()
+    )
+    require(
+        bool(manifest_variant_ids),
+        "ready release requires a non-empty components.ninfer_variants id set",
+        errors,
+    )
+    require(
+        manifest_variant_ids == compatibility_variant_ids,
+        "ready components.ninfer_variants ids must exactly match compatibility.runtime_variants ids",
+        errors,
+    )
+    require(
+        isinstance(qualification_variants, dict),
+        "qualification.composition.native_runtime_variants must be an object in ready mode",
+        errors,
+    )
+    require(
+        manifest_variant_ids == qualification_variant_ids,
+        "ready components.ninfer_variants ids must exactly match qualification.composition.native_runtime_variants keys",
+        errors,
+    )
+
+
 def argument_value(arguments: list[Any], flag: str) -> Any:
     try:
         index = arguments.index(flag)
@@ -171,6 +278,110 @@ NINFER_VARIANT_PACKAGE_NAME_RES = {
         r"^ninfer-4090-qwen38-v0\.1\.0-win-x64\.zip$"
     ),
 }
+CHECKSUM_REQUIRED_ASSET_FIELDS = (
+    "package",
+    "sbom",
+    "installer",
+    "controller",
+    "gpu_owner_controller",
+    "state_protection",
+)
+CHECKSUM_TRIGGER_ASSET_FIELDS = CHECKSUM_REQUIRED_ASSET_FIELDS[1:] + (
+    "source_archive",
+)
+SHA256SUMS_ENTRY_RE = re.compile(r"^([0-9a-f]{64}) [ *](.+)$")
+
+
+def validate_variant_checksums(
+    root: Path,
+    release: str,
+    item: dict[str, Any],
+    prefix: str,
+    errors: list[str],
+) -> None:
+    has_component_assets = any(
+        item.get(f"{field}_url") is not None
+        or item.get(f"{field}_sha256") is not None
+        for field in CHECKSUM_TRIGGER_ASSET_FIELDS
+    )
+    if not has_component_assets:
+        return
+
+    required_assets: list[tuple[str, str, str]] = []
+    for field in CHECKSUM_REQUIRED_ASSET_FIELDS:
+        url = item.get(f"{field}_url")
+        digest = item.get(f"{field}_sha256")
+        if (
+            isinstance(url, str)
+            and isinstance(digest, str)
+            and SHA256_RE.fullmatch(digest) is not None
+        ):
+            filename = Path(unquote(urlparse(url).path)).name
+            if filename:
+                required_assets.append((field, filename, digest))
+
+    source_asset: tuple[str, str, str] | None = None
+    source_url = item.get("source_archive_url")
+    source_digest = item.get("source_archive_sha256")
+    if (
+        isinstance(source_url, str)
+        and isinstance(source_digest, str)
+        and SHA256_RE.fullmatch(source_digest) is not None
+    ):
+        source_filename = Path(unquote(urlparse(source_url).path)).name
+        if source_filename:
+            source_asset = ("source_archive", source_filename, source_digest)
+
+    checksums_digest = item.get("checksums_sha256")
+    require_sha(checksums_digest, f"{prefix}.checksums_sha256", errors)
+    checksums_path = (
+        root
+        / "releases"
+        / release
+        / "qualification"
+        / f"{item.get('id')}.SHA256SUMS"
+    )
+    require(checksums_path.is_file(), f"{prefix} checksums file must exist", errors)
+    if not checksums_path.is_file():
+        return
+
+    if isinstance(checksums_digest, str):
+        require(
+            sha256_file(checksums_path) == checksums_digest,
+            f"{prefix}.checksums_sha256 must match the checksums file",
+            errors,
+        )
+
+    entries: dict[str, list[str]] = {}
+    try:
+        lines = checksums_path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        errors.append(f"{prefix} checksums file: {error}")
+        return
+    for line_number, line in enumerate(lines, 1):
+        if not line:
+            continue
+        match = SHA256SUMS_ENTRY_RE.fullmatch(line)
+        if match is None:
+            errors.append(
+                f"{prefix} checksums file line {line_number} is not a SHA256SUMS entry"
+            )
+            continue
+        entries.setdefault(match.group(2), []).append(match.group(1))
+
+    for field, filename, expected_digest in required_assets:
+        require(
+            entries.get(filename) == [expected_digest],
+            f"{prefix} checksums entry {filename} must match {field}_sha256",
+            errors,
+        )
+    if source_asset is not None and source_asset[1] in entries:
+        field, filename, expected_digest = source_asset
+        require(
+            entries[filename] == [expected_digest],
+            f"{prefix} checksums entry {filename} must match {field}_sha256",
+            errors,
+        )
 
 
 def validate_ninfer_variants(
@@ -275,6 +486,9 @@ def validate_ninfer_variants(
         if isinstance(package_url, str) and isinstance(package_name, str):
             require(package_url == asset_prefix + package_name,
                     f"{prefix}.package_url must bind the exact package name", errors)
+
+        if ga_release(release):
+            validate_variant_checksums(root, release, item, prefix, errors)
 
         qualification = item.get("qualification", {})
         require(isinstance(qualification, dict), f"{prefix}.qualification must be an object", errors)
@@ -831,22 +1045,64 @@ def validate(
     require(qualification_pending or qualification.get("publication_authorized") is False,
             "checked-in qualification must not grant publication authority", errors)
     external_acceptance = qualification.get("composition", {}).get("external_installation_acceptance", {})
+    acceptance_ref = external_acceptance.get("repository_path")
+    acceptance_path = (
+        (root / acceptance_ref).resolve()
+        if isinstance(acceptance_ref, str)
+        else root
+    )
+    acceptance_inside_repository = (
+        isinstance(acceptance_ref, str)
+        and acceptance_path.is_relative_to(root.resolve())
+    )
+    acceptance_subject: dict[str, Any] = {}
+    if isinstance(acceptance_ref, str) and (
+        qualification.get("external_installation_qualified") is True
+        or ga_release(release)
+    ):
+        require(acceptance_inside_repository,
+                "external acceptance path must stay inside the repository", errors)
+        require(acceptance_path.is_file(), "external acceptance receipt must exist", errors)
+        if acceptance_inside_repository and acceptance_path.is_file():
+            acceptance_subject = load_json(acceptance_path)
+            if ga_release(release):
+                require(
+                    acceptance_subject.get("release") == release,
+                    "external acceptance receipt release must match manifest release",
+                    errors,
+                )
+                require(
+                    acceptance_subject.get("status") == "passed",
+                    "external acceptance receipt status must be passed",
+                    errors,
+                )
+                require(
+                    acceptance_subject.get("compatibility_authority")
+                    == omp.get("compatibility_authority"),
+                    "external acceptance receipt compatibility_authority must match manifest",
+                    errors,
+                )
+                require(
+                    acceptance_subject.get("compatibility_sha256")
+                    == omp.get("compatibility_sha256"),
+                    "external acceptance receipt compatibility_sha256 must match manifest",
+                    errors,
+                )
+
     if qualification.get("external_installation_qualified") is True:
         require(external_acceptance.get("status") == "passed",
                 "external installation acceptance must pass", errors)
-        acceptance_ref = external_acceptance.get("repository_path")
         require(isinstance(acceptance_ref, str),
                 "external acceptance repository_path must be present", errors)
-        acceptance_path = (root / acceptance_ref).resolve() if isinstance(acceptance_ref, str) else root
-        require(acceptance_path.is_relative_to(root.resolve()),
-                "external acceptance path must stay inside the repository", errors)
-        require(acceptance_path.is_file(), "external acceptance receipt must exist", errors)
         require_sha(external_acceptance.get("sha256"),
                     "external acceptance SHA-256", errors)
-        if acceptance_path.is_file() and isinstance(external_acceptance.get("sha256"), str):
+        if (
+            acceptance_inside_repository
+            and acceptance_path.is_file()
+            and isinstance(external_acceptance.get("sha256"), str)
+        ):
             require(sha256_file(acceptance_path) == external_acceptance.get("sha256"),
                     "external acceptance SHA-256 must match receipt bytes", errors)
-        acceptance_subject = load_json(acceptance_path) if acceptance_path.is_file() else {}
         platform_rows = acceptance_subject.get("platform_receipts", [])
         require(isinstance(platform_rows, list),
                 "external acceptance platform_receipts must be an array", errors)
@@ -984,6 +1240,12 @@ def validate(
         require(qualification.get("external_installation_qualified") is True,
                 "ready qualification must record the passing external installation", errors)
         require(blocker_items == [], "ready release must have no publication blockers", errors)
+
+        if ga_release(release):
+            validate_exact_lane_set(manifest, compatibility, qualification, errors)
+            validate_ready_state_consistency(
+                manifest, compatibility, qualification, errors
+            )
 
     validate_markdown_links(root, errors)
     validate_public_text(root, errors)
