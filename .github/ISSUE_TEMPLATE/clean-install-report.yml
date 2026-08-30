@@ -13,7 +13,7 @@ body:
     attributes:
       label: OMP NInfer release
       description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass first.
-      placeholder: v0.3.0
+      placeholder: v0.3.1
     validations:
       required: true
   - type: dropdown
