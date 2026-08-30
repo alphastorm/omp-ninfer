@@ -61,8 +61,8 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.3.0 is the first public release.** Anyone with a qualified card can install it today from
-> the tagged release — no invitation. Native macOS arm64, Windows x64, and Linux x64 OMP clients
+> **v0.3.0 is the first public release.** If you own a qualified card, the
+> [quickstart](docs/QUICKSTART.md) is the whole onboarding. Native macOS arm64, Windows x64, and Linux x64 OMP clients
 > are qualified, and all three GPU lanes ship with public install authority: the RTX 5090
 > container profile, native Windows RTX 4090, and native Windows RTX 3090, each bound to exact
 > bytes and a qualification receipt. The 0.x series carries an explicit support boundary: the

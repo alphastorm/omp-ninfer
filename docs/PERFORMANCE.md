@@ -124,6 +124,7 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
+| Qualify a speculative (MTP) profile on the RTX 4090 lane | The qualified lane runs MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with MTP7; a qualified MTP3 profile should close most of that gap | open |
 | DirectStorage-style weight paging on the 5090 lane | The io_uring checkpoint backend ships in the v0.3.0 container lane and Windows DirectStorage in both native lanes; the remaining work is a fixed end-to-end cold-start product comparison | shipped foundation; comparison open |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | Both native Windows lanes bind passing restart gates: 102K restored continuation on RTX 4090 and 310 MB checkpoint restoration on RTX 3090; the RTX 5090 container keeps transcript-replay recovery, and its durable candidate branch is the next step | released on both native lanes; container lane open |
