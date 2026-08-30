@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_composed_external_installation",
   "schema_version": 2,
-  "release": "v0.3.0",
+  "release": "v0.3.1",
   "as_of": "2026-08-30",
   "status": "passed",
   "operator_class": "owner-operated tester-equivalent",
@@ -21,13 +21,13 @@
     }
   ],
   "new_lane_acceptance": {
-    "id": "rtx3090-windows-native-public-install",
-    "repository_path": "releases/v0.3.0/acceptance/rtx3090-public-install.json",
-    "sha256": "b63d9e308c678b437727c1bcbbe4ef81ecf04878ddd051b0c7cf4af652d1867b",
-    "highlights": "public-URL download with exact SHA-256 set verification; downloaded installer accepted the exact qualified bytes (already_installed); controller start ready in 17.756 s; authenticated loopback status HTTP 200; synthetic completion HTTP 200; stop restored task Ready, lease clear, 370 W",
-    "clean_install_basis": "The from-absent-state install transition for these exact bytes is receipted in the parity campaign (transfer_install: one clean install and one upgrade, protected-state ACLs, rollback both directions); this public acceptance adds byte-identity from public URLs (already_installed against the identical active release) plus authenticated start/stop smoke. No claim of a fresh public-URL first-install run is made.",
-    "restoration_scope": "Appliance state: GPU-owner lease cleared, scheduled task Ready, endpoint unavailable, 370 W power limit. Console session was signed out and closed desktop applications were not relaunched; both disclosed as interventions.",
-    "identity_continuity": "The parity campaign's clean install and the public acceptance used the same package sha256 e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97 and the same installer sha256 b5d4bcee014a3628482e80650f68a7f974ff2ac542d70dcbcb621a5ac1212150 (bound in the closed checksum set); the public run additionally verified those bytes from the published URLs."
+    "id": "rtx4090-mtp3-public-install",
+    "repository_path": "releases/v0.3.1/acceptance/rtx4090-mtp3-public-install.json",
+    "sha256": "71edfd7ba38b14ddc34bd1de558f70ce9b523db174ab930be1934b0b383f80e4",
+    "highlights": "public-URL download of the immutable MTP3 component release with exact SHA256SUMS verification; the downloaded installer accepted the exact qualified package from an absent state on a fresh protected root; authenticated status bound the exact MTP3 configuration identity before smoke",
+    "clean_install_basis": "The from-absent-state install transition for these exact bytes is receipted in this acceptance itself; the qualification campaign additionally receipted install, restart, and restoration for the same package sha256 8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef.",
+    "restoration_scope": "Qualification serve stopped, managed scheduled task removed, operator development serve relaunched from its recorded command line and verified listening.",
+    "identity_continuity": "The qualification campaign and the public acceptance used the same package sha256, server binary 41fcc1803e4a\u2026, model artifact eec39564993d\u2026, and MTP3 configuration 5a565eafb038\u2026; only the download origin differs (public release URLs)."
   },
   "requalified_primary": {
     "id": "rtx5090-container-v03-requalification",
@@ -40,5 +40,5 @@
   "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
   "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
   "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-  "compatibility_sha256": "e1c28d9dbe5125e376ff58f4609520aafc9900cb7952bfb857ba9cc029b35379"
+  "compatibility_sha256": "7b238aee948619216c67a2554d5138decbe86b3da0181e5ff84cc1a04be07033"
 }
