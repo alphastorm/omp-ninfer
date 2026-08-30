@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OMP NInfer — decode throughput per qualified lane</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  .chart { width: 1240px; height: 420px; padding: 34px 42px 30px; display: grid; grid-template-rows: 34px auto 1fr 30px; }
+  .head, .foot { display: flex; align-items: center; justify-content: space-between; }
+  .head .brand img { width: 22px; height: 22px; }
+  .head .brand-name { font-size: 15px; }
+  .title { font-size: 21px; font-weight: 500; letter-spacing: -.025em; color: var(--warm); margin: 14px 0 10px; }
+  .title span { color: var(--muted); font-size: 12px; margin-left: 12px; font-weight: 400; }
+  .lanes { display: grid; gap: 22px; align-content: center; }
+  .lane { display: grid; grid-template-columns: 96px 1fr; gap: 20px; align-items: center; }
+  .gpu { font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
+  .track { display: grid; gap: 7px; }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .bar { height: 22px; border-radius: 2px; background: linear-gradient(90deg, rgba(240,242,243,0.17), rgba(240,242,243,0.07)); border: 1px solid var(--line-strong); }
+  .lane.primary .bar { background: linear-gradient(90deg, rgba(152,136,239,.34), rgba(152,136,239,.14)); border-color: rgba(152,136,239,.5); box-shadow: 0 0 22px var(--local-glow); }
+  .num { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--ink); white-space: nowrap; }
+  .num small { color: var(--muted); font-size: 9px; margin-left: 4px; text-transform: uppercase; letter-spacing: .08em; }
+  .meta { display: flex; gap: 7px; }
+  .meta .pill { min-height: 22px; padding: 0 8px; font-size: 8px; }
+  .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .foot strong { color: var(--local); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="canvas chart">
+  <div class="head">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Benchmarks · decode throughput</span></div>
+    <div class="eyebrow">One active request · per-lane profile</div>
+  </div>
+  <div class="title">Every qualified lane, measured on its own shipped profile.<span>Profiles differ by design — no cross-GPU normalization.</span></div>
+  <div class="lanes">
+    <div class="lane primary">
+      <div class="gpu">RTX 5090</div>
+      <div class="track">
+        <div class="row"><div class="bar" style="width: 88%;"></div><div class="num">235.02<small>tok/s</small></div></div>
+        <div class="meta"><span class="pill"><span class="dot"></span>MTP3</span><span class="pill">99.87% acceptance</span><span class="pill">container · BF16 KV</span></div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="gpu">RTX 3090</div>
+      <div class="track">
+        <div class="row"><div class="bar" style="width: 33.8%;"></div><div class="num">90.17<small>tok/s</small></div></div>
+        <div class="meta"><span class="pill"><span class="dot"></span>MTP3</span><span class="pill">93.43% acceptance</span><span class="pill">native Windows · 300 W cap</span></div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="gpu">RTX 4090</div>
+      <div class="track">
+        <div class="row"><div class="bar" style="width: 19.6%;"></div><div class="num">52.33<small>tok/s</small></div></div>
+        <div class="meta"><span class="pill"><span class="dot"></span>MTP0</span><span class="pill">102K restored continuation</span><span class="pill">native Windows</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Qwen3.8 27B · exact profiles and receipts per lane</span><strong>docs/BENCHMARKS.md →</strong></div>
+</div>
+</body>
+</html>
