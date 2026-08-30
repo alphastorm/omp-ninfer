@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-08-30
+
+### Added
+
+- Qualified MTP3 speculative profile on the RTX 4090 native Windows lane: identical released
+  binary and model bytes with only the speculative configuration changed, promoted by the
+  recorded two-arm MTP0-versus-MTP3 decision (+17.04% complete Golden-equivalent wall time;
+  decode 93.2–97.7 tok/s vs the 52.330 tok/s MTP0 baseline; 107,851-token restored continuation
+  with server-instance rotation).
+- Exploratory draft-depth sweep (4 and 5 measured slower than 3 on the fixed decode workload),
+  recorded as the first datapoint for the MTP depth-and-corpus ablation.
+- Deterministic MTP3 arm package (+4 bytes over the baseline zip) with finalized qualification
+  sidecar, SBOM, and SHA256SUMS published as a component release.
+
+### Fixed
+
+- Disclosed and patched two latent defects in the published qualification tooling (PowerShell 5.1
+  serializer incompatibility; post-restart restore gate expecting a lazy restore label while the
+  released engine restores checkpoints eagerly); the patched gate is strictly stronger, proving
+  server-instance rotation plus at-least-100,000-token restoration.
+
 ## [0.3.0] - 2026-08-30
 
 ### Added
@@ -172,7 +193,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...v0.3.0
 [0.2.0-beta.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.1.0-beta.1...v0.2.0-beta.1
 [0.1.0-beta.1]: https://github.com/alphastorm/omp-ninfer/releases/tag/v0.1.0-beta.1

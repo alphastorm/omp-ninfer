@@ -20,7 +20,7 @@ every chart is a rendering of the same receipts as the tables, never a separate 
 
 ![RTX 5090 prefill throughput holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
 
-![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 52.33 tok/s with MTP0](../assets/chart-decode.png)
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 97.69 tok/s peak with MTP0](../assets/chart-decode.png)
 
 ### RTX 3090 — native Windows, MTP3, C1, 300 W cap
 
@@ -39,21 +39,30 @@ Promoted from the post-release parity campaign: the v0.3.0 manifest binds the ex
 | Peak envelope | **21,159 MiB · 299.8 W · 47 °C** | GPU-only qualification at the 300 W cap |
 | Lifecycle / OMP | **passed** | clean install, upgrade, two rollback directions, protected ACLs, exact read-tool answer |
 
-### RTX 4090 — native Windows, MTP0, C1
+### RTX 4090 — native Windows, MTP3, C1 (v0.3.1)
 
-Rebound from its qualified component release (`v0.2.0-qwen38-4090-beta.1`); identities unchanged.
-The 52.330 tok/s figure is an **MTP0 profile** — one token per backbone pass, no speculative
-decoding — because that is the profile the 4090 campaign qualified; it is not a silicon ceiling.
-The 5090 and 3090 lanes run MTP3 (draft-and-verify commits several tokens per pass at ~93–99%
-acceptance), and the upstream 4090 port has measured 229.9 tok/s with MTP7 on its own artifacts.
-Qualifying a speculative profile on this lane is an open performance-program item.
+Promoted by the 2026-08-30 two-arm MTP requalification: the same released engine binary, model
+artifact, and nonspeculative configuration were qualified as an MTP0 baseline arm and an MTP3
+speculative arm on the owner 4090 host, and the recorded comparison decision promotes MTP3 —
+complete Golden-equivalent wall time improved **17.04%** (5.663 s → 4.698 s), over the 10%
+promotion threshold, with every deterministic, persistence, and protocol gate green on both arms.
+The v0.3.1 manifest binds the exact MTP3 package
+`8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef` (227,438,719 bytes) — the
+identical binary bytes with only the speculative configuration block changed.
 
-| Gate | Result |
-| --- | --- |
-| Decode | **52.330 tok/s** over 1,168 tokens |
-| Prefill | **1,410.691 tok/s** |
-| Durable restart | 102,060-token checkpoint seed; 102,075-token restored continuation after process replacement |
-| OMP | source-controlled typed-tool Golden-equivalent passed |
+| Gate | Result | Detail |
+| --- | ---: | --- |
+| Decode | **93.2–97.7 tok/s** | two logged server-side 2,048-token generations (21.97 s, 20.96 s decode) |
+| Golden equivalent | **4.698 s** complete wall | vs 5.663 s on the same-epoch MTP0 arm |
+| Durable restart | **107,851 tokens restored** | server instance rotated; 0.133 s post-restart prepare |
+| Protocol | **15/15 passed** | OpenAI, Anthropic, Responses, tools, isolation, continuation |
+| Depth sweep | **3 > 4 > 5** | exploratory: draft-4 ≈26.5 s, draft-5 ≈29.2 s per 2,048 tokens — deeper drafts lose |
+
+The prior MTP0 receipt (52.330 tok/s over 1,168 tokens, 1,410.691 tok/s prefill,
+102,075-token restored continuation) remains bound to `v0.2.0-qwen38-4090-beta.1` and is the
+baseline this campaign was compared against. Receipts:
+[decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
+[qualification summary](../releases/v0.3.1/qualification/rtx4090.json).
 
 ### RTX 5090 — container, MTP3, C1
 
