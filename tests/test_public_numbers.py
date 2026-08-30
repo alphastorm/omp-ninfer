@@ -82,16 +82,23 @@ class PublicNumbersTests(unittest.TestCase):
         self.assert_in_both(f"{ceiling:,}")
 
     def test_warm_cold_measurement_matches_receipt(self) -> None:
-        receipt = json.loads(
-            (ROOT / "docs" / "measurements" / "2026-08-29-warm-vs-cold-ttft.json").read_text(
+        for name in (
+            "2026-08-29-warm-vs-cold-ttft.json",
+            "2026-08-30-warm-vs-cold-ttft-v03.json",
+        ):
+            receipt = json.loads(
+                (ROOT / "docs" / "measurements" / name).read_text(encoding="utf-8")
+            )
+            for row in receipt["results"]:
+                self.assertIn(f"{row['session_input_tokens']:,}", self.benchmarks)
+                self.assertIn(f"{row['warm_ttft_s']:.3f} s", self.benchmarks)
+                self.assertIn(f"{row['cold_ttft_s']:.3f} s", self.benchmarks)
+        current = json.loads(
+            (ROOT / "docs" / "measurements" / "2026-08-30-warm-vs-cold-ttft-v03.json").read_text(
                 encoding="utf-8"
             )
         )
-        for row in receipt["results"]:
-            self.assertIn(f"{row['session_input_tokens']:,}", self.benchmarks)
-            self.assertIn(f"{row['warm_ttft_s']:.3f} s", self.benchmarks)
-            self.assertIn(f"{row['cold_ttft_s']:.3f} s", self.benchmarks)
-        largest = max(receipt["results"], key=lambda row: row["session_input_tokens"])
+        largest = max(current["results"], key=lambda row: row["session_input_tokens"])
         self.assertIn(f"{largest['warm_ttft_s']:.3f} s", self.readme)
 
     def test_packaged_source_identity_is_authoritative(self) -> None:

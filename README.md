@@ -30,7 +30,7 @@ retained state instead of re-prefilling the full transcript.
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-235%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-240%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -46,13 +46,13 @@ fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
 | What changes for you | Released evidence |
 | --- | --- |
-| Long-session follow-ups can start without a full re-prefill | One maintainer-measured 89,216-token follow-up: **0.375 s warm vs 36.697 s cold** |
-| Interactive output is fast | **235.02 tok/s** decode on the qualified RTX 5090 profile |
+| Long-session follow-ups can start without a full re-prefill | Qualification-bound 89,022-token follow-up: **0.191 s warm vs 36.651 s cold** |
+| Interactive output is fast | **240.30 tok/s** decode on the qualified RTX 5090 profile |
 | Long coding sessions fit | Exact retrieval at a **130,048-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
 
-The warm/cold row is one server-side maintainer sample on the released RTX 5090 runtime, not a
-universal latency or inference-speed claim. [Method, receipt, and caveats](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29).
+The warm/cold pair is server-side, one sample per point, bound into the v0.3.0 qualification on
+the exact released bytes — not a universal latency claim. [Method and receipts](docs/BENCHMARKS.md).
 
 **Use OMP NInfer when:** you use OMP, own a qualified card, want Qwen3.8, and care about private,
 long-lived coding sessions.
@@ -96,16 +96,16 @@ give you together elsewhere:
 
 ## Measured, not estimated
 
-![Measured evidence: 0.375-second warm continuation versus 36.697-second cold prefill at 89,216 tokens, 235.02-token-per-second RTX 5090 decode, exact 130,048-token recall, and the fresh RTX 3090 candidate](assets/benchmarks.png)
+![Measured evidence: 0.191-second warm continuation versus 36.651-second cold prefill at 89,022 tokens, 240.30-token-per-second RTX 5090 decode, exact 130,048-token recall, and three qualified GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
 [`qualification.json`](releases/v0.2.0-beta.1/qualification.json):
 
 | Gate | Result |
 | --- | --- |
-| RTX 5090 decode | **235.02 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
-| RTX 5090 prefill | **2,180.87 tok/s** at 130,048 tokens, exact retrieval |
-| Warm vs cold follow-up | **0.375 s** vs 36.697 s to first token at an 89,216-token session — one [labeled maintainer measurement](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29), not a qualification-bound claim |
+| RTX 5090 decode | **240.30 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
+| RTX 5090 prefill | **2,199.41 tok/s** at 130,048 tokens, exact retrieval |
+| Warm vs cold follow-up | **0.191 s** vs 36.651 s to first token at an 89,022-token session — qualification-bound, server-side, one sample per point |
 | RTX 3090 native | **90.17 tok/s** decode, 93.43% MTP3 acceptance, exact 64,512-token retrieval, durable restart, 299.8 W observed peak |
 | RTX 4090 native | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
@@ -126,7 +126,7 @@ machine and profile, not universal GPU claims.
   context ceiling.
 - **The full OMP agent surface.** Tools, Vision, stateful follow-ups, session forks, and preserved
   thinking, qualified together in one profile rather than advertised separately.
-- **Speculative decoding that pays for itself.** The primary MTP3 profile measured 235.02 tok/s;
+- **Speculative decoding that pays for itself.** The primary MTP3 profile measured 240.30 tok/s;
   each native GPU variant retains its own profile and receipt rather than inheriting that number.
 - **An operable runtime.** Digest-pinned container, authenticated status identity, observable
   restart policy, owned stop path, and a launcher that refuses identity mismatches.
@@ -195,7 +195,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens | The original engine; everything below forks it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | 235.02 tok/s on the primary 5090 profile; 90.17 C1 decode tok/s on the qualified native 3090 lane | This product's public runtime source and component releases |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | 240.30 tok/s on the primary 5090 profile; 90.17 C1 decode tok/s on the qualified native 3090 lane | This product's public runtime source and component releases |
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 

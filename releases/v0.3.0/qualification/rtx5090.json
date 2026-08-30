@@ -1,5 +1,9 @@
 {
   "artifact_type": "ninfer_rtx5090_qualification",
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true
+  },
   "gates": {
     "agent_protocol": {
       "authenticated_session_identity": true,

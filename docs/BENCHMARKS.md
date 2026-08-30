@@ -16,11 +16,11 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
 The first public release binds three qualified GPU lanes into one manifest. The shape first —
 every chart is a rendering of the same receipts as the tables, never a separate measurement:
 
-![Warm vs cold time to first token: 0.375 s warm versus 36.697 s cold at an 89,216-token session, and 0.208 s versus 9.407 s at 28,558 tokens; roughly 98x and 45x faster first tokens](../assets/chart-warm-cold.png)
+![Warm vs cold time to first token: 0.191 s warm versus 36.651 s cold at an 89,022-token session, and 0.126 s versus 9.719 s at 28,535 tokens; roughly 192x and 77x faster first tokens](../assets/chart-warm-cold.png)
 
-![RTX 5090 prefill throughput holding above 2,100 tokens per second from 3,268.57 tok/s at 7,680 prompt tokens to 2,180.87 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
+![RTX 5090 prefill throughput holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
 
-![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 235.02 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 52.33 tok/s with MTP0](../assets/chart-decode.png)
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 52.33 tok/s with MTP0](../assets/chart-decode.png)
 
 ### RTX 3090 — native Windows, MTP3, C1, 300 W cap
 
@@ -52,9 +52,30 @@ Rebound from its qualified component release (`v0.2.0-qwen38-4090-beta.1`); iden
 
 ### RTX 5090 — container, MTP3, C1
 
-The v0.3.0 lane ships new runtime bytes carrying the io_uring durable-checkpoint backend; its
-decode, prefill, exact-context, restart, and protocol gates are bound by the fresh qualification
-receipt in [`releases/v0.3.0/qualification.json`](../releases/v0.3.0/qualification.json).
+Freshly requalified for v0.3.0 on the identical published image digest and server binary —
+no re-pull for existing installs. Receipt:
+[`qualification/rtx5090.json`](../releases/v0.3.0/qualification/rtx5090.json).
+
+| Gate | Result | Detail |
+| --- | ---: | --- |
+| Decode throughput | **240.30 tok/s** | 2,048 completion tokens; MTP3, 1,534 of 1,536 drafted tokens accepted (99.87%) |
+| 7,680-token prefill | **3,193.77 tok/s** | exact retrieval |
+| 32,256-token prefill | **2,956.73 tok/s** | exact retrieval |
+| 64,512-token prefill | **2,664.22 tok/s** | exact retrieval |
+| 98,304-token prefill | **2,402.59 tok/s** | exact retrieval |
+| 130,048-token prefill | **2,199.41 tok/s** | exact retrieval; 131,072-token ceiling |
+| Warm follow-up, 89,022-token session | **0.191 s** to first token | vs **36.651 s** cold equivalent (~192×); 89,003 cached input tokens attested |
+| Warm follow-up, 28,535-token session | **0.126 s** to first token | vs **9.719 s** cold equivalent (~77×); 28,515 cached input tokens attested |
+| Deletion, no resurrection | **passed** | deleted continuation refused immediately and after 1,030-record LRU pressure |
+| Agent protocol | **passed** | authenticated identity, stateful continuation, 2 forks, parent delete with surviving descendant |
+
+Warm/cold method: server-side vantage, one sample per point, synthetic content-safe fixtures; the
+cold pair sends a fresh equivalent-length prompt that cannot reuse any prefix. Full measurement
+detail: [`2026-08-30-warm-vs-cold-ttft-v03.json`](measurements/2026-08-30-warm-vs-cold-ttft-v03.json).
+
+This lane's recovery path after a process restart is OMP transcript replay: the response store is
+process-local by design on the container lane, and no restart-continuation claim is made for it.
+Durable process-restart continuation is a native Windows lane property (tables above).
 
 ### Durable checkpoints on every lane
 
@@ -195,9 +216,10 @@ after the documented acceptance checks pass.
 
 | Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.3.0 | 240.30 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx5090.json) (maintainer) |
 | 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
 | 2026-08 | RTX 4090 | 24 GiB | Native Windows 11 x64 | v0.2.0-beta.1 | 52.330 | — (MTP0 profile) | 102,075-token restored continuation after process restart | [qualification](../releases/v0.2.0-beta.1/qualification/rtx4090.json) (maintainer) |
-| 2026-08 | RTX 3090 | 24 GiB | Native Windows 11 x64 | v0.3.0 | 90.17 | 93.43% | 64,512 tokens, exact | [qualification](../releases/v0.3.0/qualification.json) (maintainer) |
+| 2026-08 | RTX 3090 | 24 GiB | Native Windows 11 x64 | v0.3.0 | 90.17 | 93.43% | 64,512 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx3090.json) (maintainer) |
 
 Submission rules:
 

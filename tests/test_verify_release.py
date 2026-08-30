@@ -105,15 +105,20 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(manifest["status"], "draft")
         self.assertEqual((manifest["channel"], manifest["audience"]), ("public", "public"))
         self.assertTrue(manifest["publication"]["blockers"])
-        self.assertIsNone(manifest["components"]["ninfer"]["oci_reference"])
-        self.assertIsNone(manifest["components"]["ninfer"]["oci_manifest_digest"])
-        self.assertIsNone(manifest["components"]["ninfer"]["sbom_sha256"])
+        self.assertEqual(
+            manifest["components"]["ninfer"]["oci_manifest_digest"],
+            "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+        )
+        summary_sha = hashlib.sha256(
+            (ROOT / "releases" / "v0.3.0" / "qualification.json").read_bytes()
+        ).hexdigest()
+        self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
     def test_public_draft_fails_ready_validation(self) -> None:
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
         self.assertIn("release manifest is not ready", errors)
-        self.assertIn("installable release requires components.ninfer.oci_reference", errors)
-        self.assertIn("ready release requires qualification.summary_sha256", errors)
+        self.assertIn("ready release requires a passing external installation", errors)
+        self.assertIn("ready release must have no publication blockers", errors)
 
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()

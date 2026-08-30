@@ -37,12 +37,22 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
         self.assertEqual(authority["product_release"], "v0.3.0")
+        receipt_sha = hashlib.sha256(
+            (ROOT / "releases" / "v0.3.0" / "qualification" / "rtx5090.json").read_bytes()
+        ).hexdigest()
         self.assertTrue(
             all(
-                profile["gpu_qualification"]["status"] == "in qualification"
-                and profile["gpu_qualification"]["receipt"] is None
-                and profile["runtime"]["image_reference"] is None
-                and profile["runtime"]["image_digest"] is None
+                profile["gpu_qualification"]["status"] == "qualified"
+                and profile["gpu_qualification"]["receipt"]["sha256"] == receipt_sha
+                for profile in authority["profiles"]
+            )
+        )
+        self.assertTrue(
+            all(
+                profile["runtime"]["image_reference"]
+                == "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d"
+                and profile["runtime"]["image_digest"]
+                == "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d"
                 for profile in authority["profiles"]
             )
         )
@@ -214,9 +224,13 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertEqual(rtx3090["package_bytes"], 573355399)
         self.assertEqual(
             rtx3090["qualification_receipt"]["path"],
-            "docs/measurements/2026-08-30-rtx3090-parity.json",
+            "releases/v0.3.0/qualification/rtx3090.json",
         )
-        self.assertIsNone(rtx3090["package_url"])
+        self.assertEqual(
+            rtx3090["package_url"],
+            "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/"
+            "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+        )
         self.assertEqual(
             variants["rtx4090-windows-native"]["release_tag"],
             "v0.2.0-qwen38-4090-beta.1",
