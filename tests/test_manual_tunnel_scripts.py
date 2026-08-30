@@ -63,6 +63,22 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         (root / "docs").mkdir()
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
 
+    @staticmethod
+    def materialize_synthetic_runtime(
+        root: Path, manifest_path: Path, manifest: dict
+    ) -> None:
+        manifest["components"]["ninfer"]["oci_reference"] = (
+            "ghcr.io/alphastorm/ninfer-runtime@sha256:" + "a" * 64
+        )
+        manifest["components"]["ninfer"]["server_binary_sha256"] = "b" * 64
+        manifest["runtime_identity"]["configuration_sha256"] = "c" * 64
+        manifest_path.write_text(
+            json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+        )
+        (root / "scripts" / "verify_release.py").write_text(
+            "raise SystemExit(0)\n", encoding="utf-8"
+        )
+
     def run_script(
         self,
         name: str,
@@ -126,6 +142,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
 
             manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.materialize_synthetic_runtime(root, manifest_path, manifest)
 
             model = root / "model.ninfer"
             with model.open("wb") as model_file:
@@ -252,6 +269,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
 
             manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.materialize_synthetic_runtime(root, manifest_path, manifest)
 
             model = root / "model.ninfer"
             with model.open("wb") as model_file:
