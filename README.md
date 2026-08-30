@@ -38,9 +38,9 @@ retained state instead of re-prefilling the full transcript.
 <sub><strong>Private by design:</strong> loopback-only endpoints · bearer-authenticated ·
 fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
-<img src="docs/media/omp-ninfer-demo-social-discord.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript. This public derivative begins after the pinned-client update banner has left the frame." width="900">
+<img src="docs/media/omp-ninfer-demo-2x.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript. This 2x derivative begins after the pinned-client update banner has left the frame." width="900">
 
-<sub><a href="docs/media/omp-ninfer-demo-social.mp4">MP4</a> · <a href="docs/media/omp-ninfer-demo-social-poster.png">poster</a> · <a href="docs/media/README.md#public-launch-derivatives">provenance and checksums</a></sub>
+<sub><a href="docs/media/omp-ninfer-demo-2x.mp4">MP4</a> · <a href="docs/media/omp-ninfer-demo-2x-poster.png">poster</a> · <a href="docs/media/README.md#public-launch-derivatives">provenance and checksums</a></sub>
 
 </div>
 

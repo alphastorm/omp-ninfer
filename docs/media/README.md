@@ -51,11 +51,29 @@ qualification recording.
 | `omp-ninfer-demo-social-discord.gif` | `c5423f9e9289cecb68c42edb9631da0833c05b3ab0e61981465fa61f87ac7763` | Real animated GIF89a, 720×511, 10 fps; fallback where MP4 embedding is unavailable. |
 | `omp-ninfer-demo-social-poster.png` | `80b8ce9069b201802dcaecd9a7b5da080ea4aca0a1e7a4eeadaeef7538788373` | 978×694 frame from the clean social interval; static demo fallback. |
 | `omp-ninfer-launch-card.png` | `91c7b8be815e0a21ca6bfc753b21e3036f4c8a71ab8390b54bc1e3ea40e0b093` | 1600×900 launch evidence card; warm/cold is explicitly one measured 89,216-token follow-up. |
+| `omp-ninfer-demo-2x.gif` | `c806e5d585ca9ff4042951be0d1e80efb08667a00742d49197fb8bef8f1d45a5` | 1224×868, 20 fps GIF89a rendered at font-size 20 directly from the canonical cast; the v0.3 README embed. |
+| `omp-ninfer-demo-2x.mp4` | `99cb0dbfff8ae01a979ff8f89bf46916c55a84503b5a2e38febdac2d59c3109e` | H.264 `yuv420p` faststart transcode of the 2x GIF; preferred social attachment. |
+| `omp-ninfer-demo-2x-poster.png` | `a30db22bcdbb4455f80d042af6091438f41ae9508166150dafcc9b8e84b5213c` | Single 1224×868 frame: passing tests, the one-line fix summary, and the stateful follow-up question. |
 
 The social recording begins 8.5 seconds into the full MP4, after the generic updater banner has
 left the frame. It is a temporal trim/re-encode only: no task content or output was altered. The GIF
 and social poster show that same clean interval. All three inherit the source recording's disclosed
 idle-gap compression and the exact released client/runtime/model identity above.
+
+The `-2x` derivatives are rendered directly from `omp-ninfer-demo.cast` rather than from the MP4:
+the cast's leading events are re-timed to zero until 8.5 seconds of idle-compressed playback have
+elapsed (the same updater-banner boundary as the social cut, verified frame-exact against it), so
+terminal state is preserved while the banner interval contributes no frames. Render:
+
+```sh
+agg --font-family "JetBrains Mono" --font-size 20 --fps-cap 20 --idle-time-limit 1.75 \
+  --theme "060809,E8ECEF,0B0E11,C85045,85C29A,D8B575,87A5C4,8E7BE8,8FB8B2,B6BEC7,3A434D,E0685C,9FD3AE,E7C98A,9FBBD8,AB9DF0,A8CFC9,E8ECEF" \
+  demo-trim.cast omp-ninfer-demo-2x.gif   # then gifsicle -O3
+```
+
+The theme keeps the brand ground/ink and Local violet slots exactly and re-tunes the green,
+yellow, blue, and cyan slots to the same restrained saturation family; content is unchanged from
+the canonical recording and inherits its disclosed idle-gap compression and runtime identity.
 
 ```sh
 ffmpeg -ss 8.5 -i omp-ninfer-demo.mp4 \
