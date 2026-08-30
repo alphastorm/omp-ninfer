@@ -47,9 +47,10 @@ not use this topology where local administrators are outside the trust boundary.
 ## Data flow and retention
 
 OMP stores its normal session transcript and a provider acceleration snapshot on the client. NInfer
-retains bounded Responses/cache state and, on the qualified native Windows RTX 4090 v0.2 variant,
-authenticated durable checkpoints for process-restart continuation. Native checkpoints and optional
-request JSONL files live under protected managed state; the primary container profile uses its
+retains bounded Responses/cache state. The published v0.2 restart claim applies to native RTX 4090;
+fresh RTX 5090, RTX 4090, and RTX 3090 candidates also pass authenticated durable process-restart
+continuation. Candidate evidence does not expand the published manifest. Native checkpoints and
+optional request JSONL files live under protected managed state; the primary container profile uses its
 owner-controlled host state/log directories. Treat both as sensitive even though public qualification
 and issue forms use content-safe aggregates only.
 

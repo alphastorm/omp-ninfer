@@ -29,7 +29,9 @@ the credit ordering matters:
   residency management. The qualified native RTX 4090 beta branch in `alphastorm/ninfer` forks it.
 - [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) ports the engine to RTX 3090
   (`sm_86`) with ReplaySSM and RotorQuant KV compression; the reviewed, non-installable RTX 3090
-  preview branch in `alphastorm/ninfer` forks it.
+  preview branch in `alphastorm/ninfer` forks it. A fresh downstream candidate now adds exact
+  native-Windows package, durable restart, OMP, and bounded C1 evidence without changing that
+  upstream lineage or the published v0.2 manifest.
 
 Each repository publishes its own measurements on its own profiles and quantization schemes; the
 README family table quotes their headlines with attribution, and only the RTX 5090 numbers in

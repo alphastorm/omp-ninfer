@@ -7,10 +7,13 @@ model/runtime expansion and speculative abstractions are not current goals.
 
 ## Help close a real gate
 
-- **Own an RTX 3090?** Run the preview boundary and submit a redacted
-  [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml).
-- **Own a qualified RTX 5090 or 4090?** Run a clean install and report
+- **Want to test an RTX 5090, 4090, or 3090 lane?**
+  [Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
+  with your exact card and long-session workflow.
+- **Own a qualified card and a published package?** Run a clean install and report
   [time-to-first-turn plus every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+- **Own an RTX 3090?** The fresh candidate gates passed; independent content-safe hardware reports
+  now test transferability rather than closing a missing maintainer-hardware gate.
 - **Work on CUDA kernels?** Pick a measured bottleneck from the
   [performance program](docs/PERFORMANCE.md), then submit before/after receipts for the affected
   end-to-end workload with the

@@ -1,64 +1,63 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>OMP NInfer — released evidence</title>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>OMP NInfer — measured evidence</title>
+<link rel="stylesheet" href="brand.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .grid { position: absolute; inset: 0; opacity: 0.5;
-    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
-    background-size: 40px 40px; }
-</style>
-<style>
-  .stats { position: relative; width: 1240px; height: 300px; background: #060809; overflow: hidden;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; }
-  .eyebrow { display: flex; align-items: center; gap: 12px;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: #8A939D; }
-  .eyebrow::before, .eyebrow::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #8E7BE8; }
-  .row { display: flex; align-items: stretch; }
-  .cell { width: 290px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; }
-  .cell + .cell { border-left: 1px solid #1C232B; }
-  .num { color: #E8ECEF; font-size: 44px; font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
-  .num.compact { font-size: 31px; line-height: 1.05; }
-  .num.status-copy { font-size: 23px; line-height: 1.15; }
-  .what { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.09em;
-    text-transform: uppercase; color: #B6BEC7; white-space: nowrap; }
-  .how { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; color: #5F6870; white-space: nowrap; }
-  .foot { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #5F6870; }
-  .foot span { color: #8E7BE8; }
+  .evidence { width: 1240px; height: 360px; padding: 34px 42px 30px; display: grid; grid-template-rows: 34px 1fr 30px; }
+  .head, .foot { display: flex; align-items: center; justify-content: space-between; }
+  .head .brand img { width: 22px; height: 22px; }
+  .head .brand-name { font-size: 15px; }
+  .main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr); gap: 42px; align-items: center; }
+  .comparison { margin-top: 14px; display: grid; grid-template-columns: auto 72px auto; align-items: end; width: max-content; }
+  .metric strong { display: block; font-size: 54px; line-height: .9; letter-spacing: -.055em; font-weight: 600; }
+  .metric.warm strong { color: var(--ink); }
+  .metric.cold strong { color: var(--muted); font-size: 37px; letter-spacing: -.04em; }
+  .metric span { display: block; margin-top: 10px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+  .versus { align-self: center; display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 10px; text-transform: uppercase; }
+  .versus::before, .versus::after { content: ""; width: 18px; height: 1px; background: var(--line-strong); }
+  .descriptor { margin-top: 17px; display: flex; align-items: baseline; gap: 12px; }
+  .descriptor b { font-size: 18px; letter-spacing: -.025em; font-weight: 500; color: var(--warm); }
+  .descriptor span { color: var(--muted); font-size: 11px; }
+  .secondary { border-left: 1px solid var(--line-strong); padding-left: 34px; display: grid; gap: 18px; }
+  .stat { display: grid; grid-template-columns: 118px 1fr; align-items: baseline; gap: 16px; }
+  .stat strong { font-size: 25px; line-height: 1; letter-spacing: -.035em; font-weight: 600; }
+  .stat div { color: var(--body); font-size: 12px; line-height: 1.25; }
+  .stat small { display: block; margin-top: 4px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .lanes { display: flex; gap: 7px; padding-top: 3px; }
+  .lanes .pill { min-height: 25px; padding: 0 9px; font-size: 8px; }
+  .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .foot strong { color: var(--local); font-weight: 500; }
 </style>
 </head>
 <body>
-<div class="stats">
-  <div class="grid"></div>
-  <div class="eyebrow">released evidence · one maintainer sample where labeled</div>
-  <div class="row">
-    <div class="cell">
-      <div class="num compact">0.375 s warm</div>
-      <div class="what">89,216-token follow-up</div>
-      <div class="how">36.697 s cold · one sample</div>
-    </div>
-    <div class="cell">
-      <div class="num">235.02</div>
-      <div class="what">decode tok/s</div>
-      <div class="how">qualified 5090 · mtp3</div>
-    </div>
-    <div class="cell">
-      <div class="num">130,048</div>
-      <div class="what">token prompt · exact recall</div>
-      <div class="how">qualified 5090 · 131,072 ceiling</div>
-    </div>
-    <div class="cell">
-      <div class="num status-copy">5090 + 4090<br>qualified</div>
-      <div class="what">RTX 3090 preview</div>
-      <div class="how">invited-tester beta</div>
-    </div>
+<div class="canvas evidence">
+  <div class="head">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Released evidence · v0.2</span></div>
+    <div class="eyebrow">Measured, not estimated</div>
   </div>
-  <div class="foot"><span>RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta</span> — scope + receipts: docs/BENCHMARKS.md</div>
+  <div class="main">
+    <section>
+      <div class="eyebrow">Same session · 89,216-token follow-up</div>
+      <div class="comparison">
+        <div class="metric warm"><strong>0.375 s</strong><span>Warm time to first token</span></div>
+        <div class="versus">vs</div>
+        <div class="metric cold"><strong>36.697 s</strong><span>Cold equivalent</span></div>
+      </div>
+      <div class="descriptor"><b>Continue from retained state.</b><span>One maintainer sample · receipt linked below.</span></div>
+    </section>
+    <aside class="secondary">
+      <div class="stat"><strong>235.02</strong><div>decode tokens / second<small>Qualified RTX 5090 · MTP3</small></div></div>
+      <div class="stat"><strong>130,048</strong><div>token exact-recall prompt<small>131,072-token ceiling</small></div></div>
+      <div class="lanes">
+        <span class="pill"><span class="dot"></span>5090 qualified</span>
+        <span class="pill"><span class="dot"></span>4090 qualified</span>
+        <span class="pill"><span class="dot"></span>3090 candidate</span>
+      </div>
+    </aside>
+  </div>
+  <div class="foot"><span>Scope, method, and immutable receipts</span><strong>docs/BENCHMARKS.md →</strong></div>
 </div>
 </body>
 </html>

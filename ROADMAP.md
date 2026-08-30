@@ -2,7 +2,8 @@
 
 This roadmap is a scope boundary, not a promise of dates. The current product wedge is OMP plus
 NInfer plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 lanes and a
-preview RTX 3090 lane, each bound to an exact package and receipt. Work outside that wedge needs
+qualified RTX 3090 candidate, each bound to exact bytes and a receipt. The published v0.2 manifest
+still exposes the 3090 as a non-installable preview. Work outside that wedge needs
 a new product decision rather than placeholder abstractions.
 
 Want to move something here? The fastest ways to help are listed at the end of this page and in
@@ -54,8 +55,8 @@ The second invited-tester release closes the v0.2 roadmap:
 - the refreshed RTX 5090 BF16-KV/MTP3 runtime plus documentation-strengthening prefill and decode
   measurements;
 - a beta-qualified native Windows RTX 4090 runtime plus a review-closed, non-installable RTX 3090
-  preview whose current live-model and fresh Windows package lifecycle gates remain `not_run`
-  while the maintainer's 3090 validation rig is offline for service; and
+  preview whose live-model and fresh Windows package lifecycle gates were `not_run` at the
+  v0.2 release cut while the validation rig was offline; and
 - one product compatibility authority binding the three OMP clients, Homebrew cask, primary RTX
   5090 image, qualified RTX 4090 variant, and RTX 3090 preview.
 
@@ -75,6 +76,24 @@ exact visible final answer.
 - no multi-GPU, multi-tenant, priority, or preemptive scheduling claim;
 - no two-machine throughput claim from fleet routing; and
 - no silent cloud fallback or production-route activation.
+
+## v0.2.1-beta.1 candidate — RTX 3090 parity
+
+The validation rig returned and the native RTX 3090 candidate now matches the expensive gates used
+for the other qualified lanes:
+
+- path-neutral `sm_86` Windows binaries and a deterministic, private-path-clean package;
+- 15/15 authenticated protocol checks and exact 64,512-token retrieval;
+- durable process replacement with disk-backed continuation and checkpoint deletion regressions;
+- clean install, managed upgrade, bidirectional rollback, protected-state ACLs, and exact OMP
+  read-tool acceptance; and
+- managed C1 measurement at 90.17 decode tok/s, 893.41 prefill tok/s, 93.43% MTP3 acceptance,
+  21,159 MiB peak VRAM, and 299.8 W peak power.
+
+The [candidate receipt](docs/measurements/2026-08-30-rtx3090-parity.json) binds package
+`e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`. It does not
+change the immutable `v0.2.0-beta.1` manifest, activate an unattended route, or perform a stable
+promotion. The next product release must publish that exact package or requalify changed bytes.
 
 ## v0.3 candidates
 
@@ -133,7 +152,7 @@ Before marketing beyond invited testers:
   for the [community results table](docs/BENCHMARKS.md#community-results).
 - **CUDA/kernel work?** Claim an idea from the
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog).
-- **RTX 3090 or RTX 4090 owner?** Run the matching tagged acceptance boundary and file a
-  content-safe hardware report. The 3090 preview's remaining gates are blocked on validation
-  hardware, not design — 3090 reports are exactly the evidence that closes them, and pass and
-  fail reports both improve the observed matrix.
+- **RTX 3090, 4090, or 5090 owner?**
+  [Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml),
+  run the matching published boundary, and file a content-safe report. Pass and fail reports both
+  improve the observed matrix; candidate qualification never authorizes package substitution.

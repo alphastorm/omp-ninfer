@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Hash-bound RTX 3090 `v0.2.1-beta.1` parity candidate: deterministic path-neutral package,
+  15/15 protocol checks, exact 64K retrieval, durable restart, bidirectional rollback, protected
+  state, exact OMP acceptance, and managed 300 W performance evidence.
+- One idempotent, checkpointed RTX 3090 qualification command covering preflight, neutral build,
+  disclosure scan, package, install, acceptance, benchmark, receipt, and guaranteed GPU/task restore.
+- Public early-access request form and one primary conversion action across first-screen surfaces.
 - Launch-safe social MP4, animated GIF fallback, poster, and scoped evidence card with public
   checksums/provenance, plus clean-install and model/profile report forms.
 - Launcher fail-fast diagnosis `wsl-mirrored-loopback-unavailable` when the runtime logs a
@@ -25,13 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Rebuilt the campaign banner, architecture graphic, social preview, and benchmark story around one
+  editorial hierarchy; the benchmark asset now leads with the measured warm-continuation outcome.
+- Advanced public status copy from two qualified lanes plus a preview to three qualified candidates,
+  while keeping the published v0.2 install authority explicit and immutable.
 - Led the README and rendered social/benchmark surfaces with the long-session outcome, added a
   pre-command GPU lane chooser, and standardized qualified/preview/invited-beta status grammar.
 - Sharpened the README hero around the measured value proposition and explicit lane status, and
   added LM Studio to the runtime comparison and related-work review.
-- Reframed RTX 3090 preview messaging around its actual blocker — validation-hardware
-  availability — with a direct hardware-report call to action across README, roadmap, quickstart,
-  and benchmarks.
+- Replaced the former validation-hardware blocker copy after the returned RTX 3090 rig completed
+  the full candidate gate; access copy now distinguishes qualified bytes from published authority.
 - Refreshed stale v0.1-era statements in the contributing router, related-work family section,
   roadmap wedge, security policy support table, brand canon, and benchmark issue form.
 
@@ -46,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Beta-qualified native Windows RTX 4090 support plus a public non-installable RTX 3090 preview;
   each binds exact source, package, SBOM, checksums, scripts, and qualification status.
 - Durable process-restart continuation and checkpoint-aware response deletion on the qualified RTX
-  4090 runtime; current RTX 3090 live-model and Windows-package gates remain explicitly `not_run`.
+  4090 runtime; RTX 3090 live-model and Windows-package gates were `not_run` at the release cut.
 - RTX 5090 documentation-strengthening prefill curve from 7,680 through 130,048 tokens and a new
   2,048-token decode measurement.
 

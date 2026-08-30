@@ -1,0 +1,105 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap");
+
+:root {
+  --ground: #060809;
+  --surface: #0b0e11;
+  --surface-raised: #101419;
+  --ink: #f0f2f3;
+  --body: #bcc3ca;
+  --muted: #7c858e;
+  --quiet: #4d5660;
+  --line: rgba(232, 236, 239, 0.12);
+  --line-strong: rgba(232, 236, 239, 0.22);
+  --local: #9888ef;
+  --local-soft: rgba(152, 136, 239, 0.16);
+  --local-glow: rgba(142, 123, 232, 0.2);
+  --warm: #d7d1c4;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.canvas {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(900px 440px at 10% -20%, var(--local-glow), transparent 58%),
+    linear-gradient(135deg, #080a0c 0%, var(--ground) 58%, #080a0c 100%);
+}
+.canvas::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border: 1px solid var(--line);
+  pointer-events: none;
+  z-index: -1;
+}
+.canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(90deg, transparent 0, transparent calc(25% - 1px), rgba(232,236,239,.045) 25%, transparent calc(25% + 1px)),
+    linear-gradient(180deg, transparent 0, transparent calc(50% - 1px), rgba(232,236,239,.035) 50%, transparent calc(50% + 1px));
+  pointer-events: none;
+  z-index: -2;
+}
+
+.mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace; }
+.eyebrow {
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand img { width: 28px; height: 28px; }
+.brand-name { font-size: 19px; font-weight: 600; letter-spacing: -.02em; }
+.brand-rule { width: 1px; height: 20px; background: var(--line-strong); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(14, 19, 25, .66);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--body);
+}
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--local); box-shadow: 0 0 14px var(--local); }
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(152, 136, 239, .55);
+  background: var(--local-soft);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #dcd6ff;
+}
+.cta b { color: var(--local); font-size: 15px; font-weight: 400; }
+.hairline { height: 1px; background: var(--line); }

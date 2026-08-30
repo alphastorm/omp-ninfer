@@ -6,11 +6,13 @@
 
 **Stateful local Qwen for long OMP coding sessions.**
 
-**RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+**RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
 
-If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
+If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own an RTX 5090, 4090, or 3090,
 OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
 retained state instead of re-prefilling the full transcript.
+
+**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
 
 **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·
@@ -59,14 +61,14 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+> **RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
 >
 > `v0.2.0-beta.1` is ready for invited testers, not general availability. Native macOS
 > arm64, Windows x64, and Linux x64 OMP clients are qualified. RTX 5090 is the primary container
-> profile and native Windows RTX 4090 is separately beta-qualified. The RTX 3090 lane is built and
-> reviewed but not yet installable: its remaining gates await validation hardware, and
-> [3090 hardware reports](https://github.com/alphastorm/omp-ninfer/issues/new/choose) are the
-> evidence that closes them. Install only from the tagged quickstart and checksums.
+> profile and native Windows RTX 4090 is separately beta-qualified. A fresh native RTX 3090
+> candidate now passes package, protocol, 64K retrieval, restart, rollback, security, OMP, and
+> 300 W performance gates. It is **not** part of the published v0.2 manifest yet; request access
+> rather than substituting its candidate package into the tagged quickstart.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
 
 ## Why this exists
@@ -78,7 +80,7 @@ re-prefills the whole transcript, and reuse of prior computation is a best-effor
 
 OMP NInfer ships the third option as a small set of qualified combinations — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
-RTX 5090 or RTX 4090, plus a public RTX 3090 preview — with three properties the qualified lanes do
+RTX 5090, RTX 4090, or RTX 3090 — with three properties the exact qualified candidates do
 not give you together elsewhere:
 
 1. **Session state lives on your GPU.** OMP drives NInfer through stateful OpenAI Responses
@@ -96,7 +98,7 @@ not give you together elsewhere:
 
 ## Measured, not estimated
 
-![Released v0.2.0-beta.1 evidence: one 89,216-token warm/cold follow-up sample, qualified RTX 5090 decode and long-context results, and distinct qualified/preview lane status](assets/benchmarks.png)
+![Measured evidence: 0.375-second warm continuation versus 36.697-second cold prefill at 89,216 tokens, 235.02-token-per-second RTX 5090 decode, exact 130,048-token recall, and the fresh RTX 3090 candidate](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
 [`qualification.json`](releases/v0.2.0-beta.1/qualification.json):
@@ -106,12 +108,20 @@ Exact shipped profiles and receipts in
 | RTX 5090 decode | **235.02 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
 | RTX 5090 prefill | **2,180.87 tok/s** at 130,048 tokens, exact retrieval |
 | Warm vs cold follow-up | **0.375 s** vs 36.697 s to first token at an 89,216-token session — one [labeled maintainer measurement](docs/BENCHMARKS.md#maintainer-measurement--warm-vs-cold-follow-up-turn-2026-08-29), not a qualification-bound claim |
-| RTX 3090 native preview | Current sm_86 contract tests **3/3**; live-model and fresh Windows package gates `not_run` |
+| RTX 3090 released preview | Shipped v0.2 authority remains non-installable; its historical live gates stay `not_run` |
 | RTX 4090 native beta | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-Process-restart Responses continuation is qualified only for the native RTX 4090 variant. The primary RTX
-5090 image keeps restart policy `no`; OMP transcript replay remains its recovery path.
+Fresh parity candidate: RTX 3090 package
+`e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97` passed
+15/15 authenticated protocol checks, exact 64,512-token retrieval, process replacement with 45
+cached input tokens restored from disk, bidirectional rollback, protected-state security, exact OMP
+read-tool acceptance, and a managed C1 run at **90.17 decode tok/s**, **893.41 prefill tok/s**, and
+**299.8 W** maximum observed power. [Candidate receipt](docs/measurements/2026-08-30-rtx3090-parity.json).
+
+The published v0.2.0-beta.1 restart claim remains limited to native RTX 4090; the primary RTX 5090
+image still uses transcript replay for process recovery. Candidate qualification does not rewrite
+that immutable release history.
 
 The shipped artifact holds its capability through quantization — 96.67% AIME 2025/2026 and 87.37%
 GPQA-Diamond in the upstream single-sample evaluation campaign. Numbers, methodology, caveats, and
@@ -172,11 +182,11 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | --- | --- | --- | --- | --- | --- |
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
-| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on qualified 4090; the 3090 preview has no current performance claim | Model/config dependent | Optional draft-model setups, backend-dependent | Optional draft/ngram setups | Optional |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on 5090, MTP0 on released 4090; the fresh 3090 candidate uses MTP3 | Model/config dependent | Optional draft-model setups, backend-dependent | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | One pinned artifact, two qualified GPU lanes, and one public preview | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| Breadth | One pinned artifact and three qualified GPU candidates; two runtime lanes are in the published v0.2 manifest | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
 Where each shines: **Ollama** is the easiest way to run many models locally. **LM Studio** is the
 most polished desktop experience for browsing and running them. **llama.cpp** has the broadest
@@ -193,14 +203,13 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens | The original engine; everything below forks it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090; qualified RTX 4090; preview RTX 3090 | 235.02 tok/s on the primary 5090 profile; qualified 4090 beta and public 3090 preview packages | This product's public runtime source and component releases |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090; qualified RTX 4090; RTX 3090 parity candidate | 235.02 tok/s on the primary 5090 profile; released 4090 beta; fresh 3090 candidate at 90.17 C1 decode tok/s | This product's public runtime source and component releases |
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
-| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the reviewed native 3090 preview branch |
+| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-RTX 4090 support is beta-only. RTX 3090 is preview-only and non-installable until a later passing
-receipt supersedes its incomplete authority — its remaining gates are blocked on validation
-hardware, and [3090 hardware reports](https://github.com/alphastorm/omp-ninfer/issues/new/choose)
-are what close them. See [`ROADMAP.md`](ROADMAP.md).
+RTX 4090 support is beta-only. The published RTX 3090 lane remains preview-only and non-installable;
+the fresh parity candidate has a passing receipt but no product manifest yet. Request access rather
+than substituting candidate bytes. See [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
 
@@ -234,10 +243,11 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
-`v0.2` closes the managed lifecycle, cross-platform client, public OMP source, and native RTX 4090
-beta work while publishing the review-closed RTX 3090 preview. The next candidates are signing/notarization, a shared public
-client acceptance runner, dependency-level 4090 SBOM expansion, and concurrency-qualified native
-profiles. No item becomes a support claim before an exact package and receipt bind it.
+`v0.2` closed the managed lifecycle, cross-platform client, public OMP source, and native RTX
+4090 work while publishing the review-closed RTX 3090 preview. The post-release RTX 3090 parity
+candidate is now qualification-complete. Signing/notarization, a shared public client acceptance
+runner, dependency-level 4090 SBOM expansion, and concurrency-qualified native profiles remain.
+No item becomes a support claim before an exact package, receipt, and product manifest bind it.
 
 Scope boundaries and explicit non-claims: [`ROADMAP.md`](ROADMAP.md).
 
@@ -283,7 +293,7 @@ Ordered by how much this product owes them:
    4090 port (E8-lattice KV quantization, DirectStorage weight DMA) the qualified 4090 lane builds
    on. Apache-2.0.
 5. **[Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)** — the RTX 3090 port
-   (ReplaySSM, RotorQuant) underlying the public non-installable 3090 preview. Apache-2.0.
+   (ReplaySSM, RotorQuant) underlying both the released preview and fresh parity candidate. Apache-2.0.
 6. Algorithm and library lineage — Gated DeltaNet
    ([arXiv:2412.06464](https://arxiv.org/abs/2412.06464)), Tri Dao's ReplaySSM note, Z-Lab's
    DFlash, Unsloth's NVFP4 weights, and vendored `utf8proc`, `nlohmann/json`, and `cpp-httplib` —

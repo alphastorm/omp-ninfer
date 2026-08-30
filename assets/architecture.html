@@ -1,64 +1,53 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>OMP NInfer — architecture</title>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>OMP NInfer — architecture</title>
+<link rel="stylesheet" href="brand.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .grid { position: absolute; inset: 0; opacity: 0.5;
-    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
-    background-size: 40px 40px; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-</style>
-<style>
-  .arch { position: relative; width: 1240px; height: 380px; background: #060809; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; gap: 0; }
-  .node { position: relative; background: #0E1319; border: 1px solid #1C232B; border-radius: 8px; padding: 26px 30px;
-    display: flex; flex-direction: column; gap: 8px; }
-  .node h3 { color: #E8ECEF; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
-  .node .sub { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A939D; letter-spacing: 0.06em; line-height: 1.7; }
-  .link { position: relative; width: 250px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .wire { position: relative; width: 100%; height: 2px; background: linear-gradient(90deg, #1C232B, rgba(142,123,232,0.7), #1C232B); }
-  .wire .pk { position: absolute; top: -4px; left: 50%; width: 10px; height: 10px; border-radius: 50%; background: #8E7BE8; transform: translateX(-50%); }
-  .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939D; }
-  .lbl2 { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: #5F6870; }
-  .boundary { position: relative; border: 1px dashed rgba(142,123,232,0.45); border-radius: 12px; padding: 26px; }
-  .btag { position: absolute; top: -9px; left: 20px; background: #060809; padding: 0 8px;
-    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: #8E7BE8; }
-  .rows { display: flex; flex-direction: column; gap: 10px; }
-  .chip { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #B6BEC7; }
-  .chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #3A434D; }
-  .foot { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: #5F6870; }
+  .arch { width: 1240px; height: 420px; padding: 34px 42px 30px; display: grid; grid-template-rows: 40px 1fr 54px; }
+  .head, .rail { display: flex; align-items: center; justify-content: space-between; }
+  .head .brand img { width: 22px; height: 22px; }
+  .head .brand-name { font-size: 15px; }
+  .flow { display: grid; grid-template-columns: 1fr 190px 1fr; align-items: center; gap: 24px; }
+  .node { min-height: 204px; border: 1px solid var(--line); background: rgba(11,14,17,.7); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+  .node .index { color: var(--local); }
+  .node h2 { margin: 14px 0 8px; font-size: 29px; line-height: 1; letter-spacing: -.035em; font-weight: 600; }
+  .node p { margin: 0; max-width: 350px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .tags { display: flex; gap: 7px; margin-top: 18px; }
+  .tags span { padding: 6px 8px; border: 1px solid var(--line); color: var(--body); font: 8px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .link { position: relative; text-align: center; }
+  .link::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: linear-gradient(90deg, var(--line), var(--local), var(--line)); }
+  .link .socket { position: relative; margin: 0 auto; width: 58px; height: 58px; border: 1px solid rgba(152,136,239,.58); background: var(--ground); border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 30px rgba(142,123,232,.12); }
+  .link .socket::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--local); box-shadow: 0 0 16px var(--local); }
+  .link .copy { position: relative; display: inline-block; margin-top: 14px; padding: 4px 7px; background: var(--ground); color: var(--muted); font: 8px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .rail { border-top: 1px solid var(--line); padding-top: 15px; }
+  .invariant { display: flex; align-items: center; gap: 10px; color: var(--body); font-size: 11px; }
+  .invariant b { color: var(--warm); font-weight: 500; }
+  .backend { color: var(--muted); font: 8px "JetBrains Mono", monospace; letter-spacing: .07em; text-transform: uppercase; }
 </style>
 </head>
 <body>
-<div class="arch">
-  <div class="grid"></div>
-  <div class="node">
-    <h3>OMP</h3>
-    <div class="sub">native windows &middot; macos &middot; linux<br>command stays <span style="color:#B6BEC7;">omp</span></div>
+<div class="canvas arch">
+  <div class="head">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">System boundary</span></div>
+    <div class="eyebrow">One truth · one accelerator · no hidden gateway</div>
   </div>
-  <div class="link">
-    <div class="lbl">authenticated loopback</div>
-    <div class="wire"><div class="pk"></div></div>
-    <div class="lbl2" style="text-align:center;">wsl2 local &middot; ssh remote<br>fail-closed</div>
+  <div class="flow">
+    <section class="node">
+      <div><div class="eyebrow"><span class="index">[01]</span> Authoritative client</div><h2>OMP keeps the truth.</h2><p>Transcript, tools, branches, and replay commit locally before provider state advances.</p></div>
+      <div class="tags"><span>durable transcript</span><span>tools</span><span>forks</span></div>
+    </section>
+    <div class="link"><div class="socket"></div><div class="copy">authenticated loopback</div></div>
+    <section class="node">
+      <div><div class="eyebrow"><span class="index">[02]</span> Qualified runtime</div><h2>NInfer keeps it warm.</h2><p>Qwen3.8 and scoped Responses state stay on the selected GPU. Invalid state falls back to transcript replay.</p></div>
+      <div class="tags"><span>resident model</span><span>state cache</span><span>receipts</span></div>
+    </section>
   </div>
-  <div class="boundary">
-    <div class="btag">your hardware</div>
-    <div class="node" style="border:none; background:transparent; padding:0;">
-      <h3>NInfer</h3>
-      <div class="rows" style="margin-top:6px;">
-        <div class="chip">qwen3.8</div>
-        <div class="chip">qualified rtx 5090 &middot; 4090 + 3090 preview</div>
-        <div class="chip">stateful sessions &middot; openai responses</div>
-      </div>
-    </div>
+  <div class="rail">
+    <div class="invariant"><span class="dot"></span><b>Commit boundary:</b><span>complete stream → durable transcript → provider state</span></div>
+    <div class="backend">5090 WSL2 · 4090 native · 3090 native · qualification-current</div>
   </div>
-  <div class="foot">omp-ninfer owns setup, release manifests, hardware profiles, qualification, and the security boundary &mdash; not the runtimes.</div>
 </div>
 </body>
 </html>

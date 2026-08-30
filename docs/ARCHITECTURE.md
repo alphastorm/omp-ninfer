@@ -34,6 +34,11 @@ the HTTP endpoint. The NInfer process uses one resident model and one active req
 profile. Native Windows 3090/4090 variants retain their own ports, packages, and receipts rather
 than inheriting the primary container identity.
 
+The fresh parity candidate keeps that separation while converging restart semantics: the RTX 3090
+native package writes authenticated, session-scoped checkpoints under its protected release state,
+then restores the prior Responses chain after a managed process replacement. OMP's transcript
+remains authoritative if any retained state is absent or invalid.
+
 ## State ownership
 
 - **OMP transcript:** authoritative messages, tool calls/results, branches, and session history.

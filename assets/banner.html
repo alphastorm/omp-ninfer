@@ -1,63 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>OMP NInfer — banner</title>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>OMP NInfer — banner</title>
+<link rel="stylesheet" href="brand.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #060809; font-family: 'Space Grotesk', system-ui, sans-serif; }
-  .grid { position: absolute; inset: 0; opacity: 0.5;
-    background-image: linear-gradient(rgba(232,236,239,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,236,239,0.025) 1px, transparent 1px);
-    background-size: 40px 40px; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-</style>
-<style>
-  .banner { position: relative; width: 1280px; height: 320px; overflow: hidden; background: #060809;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
-  .glow { position: absolute; left: 50%; top: 50%; width: 560px; height: 280px; transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse, rgba(142,123,232,0.10) 0%, transparent 65%); }
-  .lockup { position: relative; display: flex; align-items: center; gap: 26px; }
-  .title { color: #E8ECEF; font-size: 46px; font-weight: 600; letter-spacing: -0.015em; }
-  .tagline { position: relative; display: flex; align-items: center; gap: 12px;
-    font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: #8A939D; }
-  .tagline .bracket { color: #3A434D; }
-  .status { position: relative; display: flex; align-items: center; gap: 10px;
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em; color: #5F6870; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: #8E7BE8; }
-  .kin { width: 5px; height: 5px; border-radius: 50%; background: #F97316; }
-  .edge { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(142,123,232,0.35), transparent); }
-  .edge.top { top: 0; } .edge.bottom { bottom: 0; }
+  .banner { width: 1280px; height: 320px; padding: 42px 54px 38px; display: grid; grid-template-rows: 42px 1fr 42px; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .release { display: flex; align-items: center; gap: 12px; }
+  .release .index { color: var(--local); }
+  .hero { display: grid; grid-template-columns: 1fr 430px; align-items: center; gap: 70px; }
+  h1 { margin: 0; max-width: 660px; font-size: 48px; line-height: .98; letter-spacing: -.045em; font-weight: 600; }
+  h1 span { color: var(--local); }
+  .promise { margin-top: 15px; max-width: 650px; color: var(--body); font-size: 17px; line-height: 1.35; }
+  .proof { align-self: center; padding: 22px 0 22px 26px; border-left: 1px solid var(--line-strong); }
+  .proof strong { display: block; margin-top: 7px; color: var(--warm); font-size: 24px; line-height: 1.1; letter-spacing: -.025em; font-weight: 500; }
+  .proof p { margin: 9px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+  .bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 14px; }
+  .lane { display: flex; align-items: center; gap: 9px; color: var(--body); font-size: 11px; letter-spacing: .03em; }
+  .lane i { width: 6px; height: 6px; border-radius: 50%; background: var(--local); box-shadow: 0 0 12px var(--local); }
 </style>
 </head>
 <body>
-<div class="banner">
-  <div class="grid"></div>
-  <div class="glow"></div>
-  <div class="edge top"></div>
-  <div class="lockup">
-    <svg width="76" height="76" viewBox="0 0 96 96">
-  <rect x="12" y="12" width="10" height="72" rx="2" fill="#E8ECEF"></rect>
-  <rect x="22" y="43" width="26" height="10" rx="2" fill="#E8ECEF"></rect>
-  <rect x="51" y="31" width="28" height="34" rx="2" fill="none" stroke="#E8ECEF" stroke-width="10"></rect>
-  <circle cx="65" cy="48" r="8" fill="#8E7BE8"></circle>
-    </svg>
-    <div class="title">OMP NInfer</div>
+<div class="canvas banner">
+  <div class="top">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Invited beta · v0.2</span></div>
+    <div class="release eyebrow"><span class="index">[01]</span><span>Stateful local Qwen</span></div>
   </div>
-  <div class="tagline">
-    <span class="bracket">[</span>
-    <span>stateful local qwen for long omp coding sessions</span>
-    <span class="bracket">]</span>
+  <div class="hero">
+    <div>
+      <h1>Your coding session,<br><span>still on your GPU.</span></h1>
+      <div class="promise">Qwen3.8 27B for long Oh My Pi sessions. Transcript truth stays in OMP; retained model state makes the next turn warm.</div>
+    </div>
+    <div class="proof">
+      <div class="eyebrow">Measured follow-up · 89,216 tokens</div>
+      <strong>0.375 s warm  /  36.697 s cold</strong>
+      <p>One maintainer sample. Exact method and receipt in <span class="mono">docs/BENCHMARKS.md</span>.</p>
+    </div>
   </div>
-  <div class="status">
-    <span class="dot"></span>
-    <span>RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta</span>
-    <span style="color:#3A434D;">&middot;</span>
-    <span class="kin"></span>
-    <span>companion to oh-my-pi</span>
+  <div class="bottom">
+    <div class="lane mono"><i></i><span>RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta</span></div>
+    <div class="cta"><span>Request early access</span><b>↗</b></div>
   </div>
-  <div class="edge bottom"></div>
 </div>
 </body>
 </html>

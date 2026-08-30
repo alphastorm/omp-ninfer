@@ -32,16 +32,34 @@ not an architecture-normalized benchmark.
 
 | GPU/profile | Context gate | Process restart | Decode | Prefill | Peak VRAM | OMP gate |
 | --- | --- | --- | ---: | ---: | ---: | --- |
-| RTX 3090 current preview | current live gate `not_run` | current restart gate `not_run` | no current package claim | no current package claim | no current package claim | sm_86 response/session/HTTP contract tests passed 3/3; historical values do not qualify this package |
+| RTX 3090 released v0.2 preview | released live gate `not_run` | released restart gate `not_run` | no released-package claim | no released-package claim | no released-package claim | historical preview remains non-installable |
 | RTX 4090, `qwen38-4090-v0.1`, MTP0, C1 | 102,060-token checkpoint seed and 102,075-token restored continuation | process replacement and disk restore passed | **52.330 tok/s** over 1,168 tokens | **1,410.691 tok/s** | profile-bound | source-controlled typed-tool Golden-equivalent passed |
+
+### RTX 3090 — fresh `v0.2.1-beta.1` parity candidate, MTP3, C1
+
+Candidate package `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`
+at source `872ee508c1f9c46fa38f4170c7e21f254a79e21f`. This is post-release candidate
+evidence, not a rewrite of the published `v0.2.0-beta.1` authority.
+
+| Gate | Result | Detail |
+| --- | ---: | --- |
+| Authenticated protocol | **15/15 passed** | OpenAI, Anthropic, Responses, tools, isolation, continuation, delete survival |
+| Long context | **64,512 prompt tokens** | exact `ORCHID=493817; COLOR=COBALT` retrieval in 88.89 s |
+| Process restart | **passed** | PID replaced; 45 cached input tokens restored; 310,216,517 checkpoint bytes |
+| Managed C1 decode | **90.17 tok/s** | exact 1,024-token completion; 16.48 s end-to-end wall time |
+| Managed C1 prefill | **893.41 tok/s** | 4,541 computed prompt tokens; no prefix hit |
+| MTP3 acceptance | **93.43%** | exact managed C1 workload |
+| Peak envelope | **21,159 MiB · 299.8 W · 47 °C** | GPU-only qualification at the 300 W cap |
+| Lifecycle / OMP | **passed** | clean install, upgrade, two rollback directions, protected ACLs, exact read-tool answer |
+
+[Hash-bound candidate receipt](measurements/2026-08-30-rtx3090-parity.json).
 
 The RTX 4090 Golden replacement is synthetic and committed. The unavailable historical private
 corpus was not reused. The RTX 3090 automatic-use role corpus is a separate, stricter gate that did
-not pass; no unattended role is authorized by these interactive product measurements. The remaining
-RTX 3090 package gates are blocked on validation hardware — the maintainer's 3090 rig is offline
-for service — not on a design decision; a content-safe
-[hardware report](https://github.com/alphastorm/omp-ninfer/issues/new/choose) from any 3090 owner
-running the published acceptance boundary is the evidence that closes them.
+not pass; no unattended role is authorized by these interactive product measurements. The returned
+validation rig closed the interactive package gates above. Public install authority still requires
+a new product manifest; [request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
+instead of treating candidate evidence as a released asset.
 
 ## Maintainer measurement — warm vs cold follow-up turn (2026-08-29)
 

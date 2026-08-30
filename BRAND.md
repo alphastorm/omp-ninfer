@@ -19,8 +19,11 @@ stay retired. Do not reuse them.
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
 - v0.2 tagline: **Stateful local Qwen for long OMP coding sessions.**
 - Status grammar: when lane status is stated, write
-  **"RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta"**;
-  never present the three GPUs as an undifferentiated support claim in status copy
+  **"RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta"**;
+  immediately distinguish the published v0.2 install authority from post-release candidates
+- Primary conversion action: **Request early access**, linked directly to
+  `.github/ISSUE_TEMPLATE/early-access.yml`. Put it before documentation links whenever the
+  surface has room for only one action.
 - The user-facing command remains `omp`; "appliance" describes the operating
   concept, never the repository name.
 
@@ -65,11 +68,17 @@ Space Grotesk 500/600 (headings, wordmark, −0.015em) + JetBrains Mono 400/500
 (eyebrows, stats, paths; labels 10–12px uppercase, letter-spacing 0.1–0.2em).
 Webfonts on marketing surfaces only.
 
+Composition is editorial, not dashboard-like: one message wins the first read, one proof wins the
+second, and metadata recedes. Use open ground, large type, thin rules, and asymmetry before adding
+containers. Violet is an action or retained-state accent, not decoration. Avoid equal-weight card
+grids, glowing tiles, ornamental gradients, and more than one primary call to action. At thumbnail
+size, the headline and one proof must remain legible without reading labels.
+
 Voice: the gateway's sober register, operator-flavored. Sentence case, no
 emoji, no exclamation marks. Claims stated as invariants:
 
 - "Your model prompt stays on hardware you own."
-- "Two qualified GPU lanes and one preview, each bound to an exact receipt."
+- "Three qualified GPU candidates, each bound to exact bytes and a receipt."
 - "The tunnel is authenticated and fail-closed; identity is visible."
 - "Stateful local coding through OpenAI Responses."
 
@@ -77,6 +86,7 @@ Hard constraints — never write:
 
 - anything implying general availability (`v0.2.0-beta.1` remains invited)
 - support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the v0.2 manifest
+- wording that makes a qualified candidate sound publicly installable before its manifest ships
 - cloud hosting, unattended production activation, or universal RTX support
 - "first stateful Responses", automatic restart, or universal performance
 - `omp appliance ...` outside the exact v0.2 compatibility authority or as an implicit production
@@ -95,13 +105,14 @@ imply official partnership.
 | `assets/lockup.png` / `lockup-light.png` | horizontal lockup, transparent @2x |
 | `assets/lockup-x.png` / `lockup-x-light.png` | OMP × NInfer alternate, transparent @2x |
 | `assets/lockups.html` | lockup source |
+| `assets/brand.css` | shared color, type, spacing, and guide tokens for campaign assets |
 | `assets/banner.html` | README banner source (1280×320) |
 | `assets/banner.png` | rendered banner @2x (2560×640) |
 | `assets/og.html` | GitHub social preview source (1280×640) |
 | `assets/og.png` | GitHub social preview (1280×640) |
-| `assets/architecture.html` | architecture illustration source (1240×380) |
-| `assets/architecture.png` | rendered architecture @2x — for the README |
-| `assets/benchmarks.html` | released-evidence stat strip source (1240×300) |
+| `assets/architecture.html` | architecture illustration source (1240×420) |
+| `assets/architecture.png` | rendered architecture @2x (2480×840) — for the README |
+| `assets/benchmarks.html` | released-evidence continuation story source (1240×360) |
 | `assets/benchmarks.png` | rendered released-evidence strip @2x — for the README and benchmarks page |
 | `assets/favicon.svg` | favicon (96, rx22 tile) |
 | `assets/icon.svg` | icon source (512, rx116 tile) |
@@ -116,13 +127,13 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo-social-poster.png` | poster from the clean social interval |
 | `docs/media/omp-ninfer-launch-card.png` | scoped launch evidence card; provenance in `docs/media/README.md` |
 
-Regeneration: screenshot `.banner` at 2× for `banner.png`, `.arch` at 2×
-for `architecture.png`, `.stats` at 2× for `benchmarks.png`,
-`#lk-dark`/`#lk-light`/`#lkx-dark`/`#lkx-light`
-at 2× for the lockup PNGs (transparent); render `icon.svg` at 512 and
-`favicon.svg` at 32/16; screenshot `.og` at 1× for `og.png`. Expected raster dimensions are
-2560×640 for the banner, 2480×760 for architecture, 2480×600 for the stat strip, 1720×360 for
-each lockup, and 1280×640 for the social preview.
+Regeneration: run `python3 scripts/render_assets.py`. It renders the banner, architecture,
+benchmark, and social-preview HTML sources with headless Chrome and verifies every PNG dimension;
+`python3 scripts/render_assets.py --check` fails when a committed raster is stale. Render
+`#lk-dark`/`#lk-light`/`#lkx-dark`/`#lkx-light` from `assets/lockups.html` at
+2× for transparent lockups, `icon.svg` at 512, and `favicon.svg` at 32/16. Expected raster
+dimensions are 2560×640 for the banner, 2480×840 for architecture, 2480×720 for the benchmark
+story, 1720×360 for each lockup, and 1280×640 for the social preview.
 
 Demo captures are real sessions, never mockups presented as recordings: record against a real
 qualified-profile runtime, use synthetic task content only, and verify no hostname, username,
@@ -142,11 +153,13 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 **Stateful local Qwen for long OMP coding sessions.**
 
-**RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+**RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
 
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
 OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
 retained state instead of re-prefilling the full transcript.
+
+**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
 
 **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·

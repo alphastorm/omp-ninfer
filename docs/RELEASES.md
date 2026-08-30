@@ -9,7 +9,7 @@ the product manifest binds the exact combination.
 | --- | --- | --- |
 | Early access | Invited testers, closed exact profiles, known limitations and non-claims | `v0.2.0-beta.1` ready prerelease |
 | Stable | Broadly advertised supported release | none |
-| Development | Branch content with no install/support claim | `main` after publication |
+| Development | Qualified candidates with no published install/support claim | RTX 3090 `v0.2.1-beta.1` parity candidate |
 
 GitHub `Latest` must not point to an early-access prerelease. The stable `omp` Homebrew cask remains
 unchanged; early access uses `omp-beta`.
@@ -22,9 +22,16 @@ unchanged; early access uses `omp-beta`.
 - public OMP source/client mirror: `alphastorm/oh-my-pi@omp-v18.0.9-ninfer-beta.2`
 - native runtime components: RTX 3090 preview at `alphastorm/ninfer@v0.2.0-qwen38-3090-beta.1`
   and qualified RTX 4090 beta at `v0.2.0-qwen38-4090-beta.1`
+- post-release RTX 3090 parity candidate: source
+  `872ee508c1f9c46fa38f4170c7e21f254a79e21f`, package
+  `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`, and
+  [qualification summary](measurements/2026-08-30-rtx3090-parity.json)
 
 A component tag does not make the product release ready. The product tag must carry the exact ready
 manifest and qualification summary.
+
+The RTX 3090 candidate is qualification-complete but unpublished. It must enter a new product
+manifest as those exact bytes—or be requalified—before any install documentation can select it.
 
 ## Release state transition
 
@@ -102,9 +109,11 @@ builds or GPU leases:
    and security verification, GPU protocol/restart/performance/OMP gates, then receipt-only closure
    review.
 
-This sequencing does not change the v0.2 candidate in flight. It prevents the next release from
-discovering shared correctness classes after variant binaries and hardware evidence are already
-frozen.
+The RTX 3090 parity candidate exercised this sequence end to end with one checkpointed command:
+preflight, neutral build, private-path scan, deterministic package, managed install, protocol,
+64K, restart, rollback, security, OMP, C1, receipt, and 370 W restoration. The sequence prevents
+shared correctness classes from being discovered after variant binaries and hardware evidence are
+already frozen.
 
 ## External-install acceptance
 

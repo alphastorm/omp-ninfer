@@ -1,6 +1,8 @@
 # Early-access quickstart
 
-> **RTX 5090 + 4090 qualified · RTX 3090 preview · invited-tester beta**
+> **RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
+
+**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
 
 ## Choose your lane
 
@@ -10,12 +12,12 @@ from GPU-runtime qualification.
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
 | RTX 5090 + Windows 11 / Docker Desktop WSL2 | **qualified** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **qualified** | [RTX 4090 native lane](#native-windows-rtx-4090-qualified-and-rtx-3090-preview-lanes) | The documented acceptance checks on the exact qualified package |
-| RTX 3090 + native Windows | **preview; not installable** | [RTX 3090 validation lane](#native-windows-rtx-4090-qualified-and-rtx-3090-preview-lanes) | A redacted hardware report that can close deferred gates; no support claim |
+| RTX 4090 + native Windows | **qualified release** | [RTX 4090 native lane](#native-windows-rtx-4090-release-and-rtx-3090-qualified-candidate) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **qualified candidate; request access** | [RTX 3090 candidate boundary](#native-windows-rtx-4090-release-and-rtx-3090-qualified-candidate) | A hash-bound candidate receipt; no public install claim until its manifest ships |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
-The RTX 3090 row is a validation invitation, not an install instruction. Do not substitute GPU
-family names, package URLs, or variant IDs between lanes.
+The RTX 3090 row is an access invitation, not a published install instruction. Do not substitute
+candidate URLs, GPU family names, package URLs, or variant IDs between lanes.
 
 ## Verify the release before setup
 
@@ -77,14 +79,14 @@ the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to n
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
 section 7 and the **Native Windows command forms** at the start of section 8.
 
-## Native Windows RTX 4090 qualified and RTX 3090 preview lanes
+## Native Windows RTX 4090 release and RTX 3090 qualified candidate
 
 These are separate native NInfer packages, not substitutions for the primary RTX 5090 image. The
-installable path accepts only `rtx4090-windows-native`. The RTX 3090 package is built and reviewed,
-but its live-model and fresh-package gates still await validation hardware, so its manifest status
-is `preview` and this script must refuse it; it stays published for inspection and hardware
-reports. Start from an elevated PowerShell in the tagged product clone and let the manifest supply
-every URL and hash:
+published install path still accepts only `rtx4090-windows-native`. The fresh RTX 3090 candidate
+passed clean install, protocol, 64K retrieval, process restart, bidirectional rollback, protected
+state, exact OMP, and managed 300 W performance gates. Its package is not in the v0.2 manifest, so
+this tagged script must still refuse it. Start from an elevated PowerShell in the tagged product
+clone and let the manifest supply every URL and hash:
 
 ```powershell
 $VariantId = 'rtx4090-windows-native'
@@ -122,12 +124,11 @@ if (-not (Test-Path $Key)) {
 
 The package controller binds loopback/Tailscale-only listening, mandatory bearer authentication,
 the external model hash, process-restart checkpoints, and active/previous rollback. Do not mix
-assets across variants or infer support from GPU-family names. RTX 3090 remains non-installable
-until a later passing receipt closes its deferred live-model and fresh Windows package gates —
-if you own a 3090, running the published acceptance boundary and filing a
-[hardware report](https://github.com/alphastorm/omp-ninfer/issues/new/choose) is exactly the
-evidence that closes them. RTX 4090 uses its exact MTP0 profile. Run the ordinary acceptance in
-section 8 after installation. Structured JSON-schema output remains unsupported and fails closed.
+assets across variants or infer install authority from GPU-family names. The RTX 3090 candidate is
+qualified but unpublished; [request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
+instead of modifying `manifest.json`. RTX 4090 uses its exact MTP0 profile; the fresh RTX 3090
+candidate uses its exact MTP3 profile. Run the ordinary acceptance in section 8 after installation.
+Structured JSON-schema output remains unsupported and fails closed.
 
 ## Managed macOS SSH qualified route
 
