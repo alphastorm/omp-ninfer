@@ -37,20 +37,20 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-public-draft-1",
       "compatibility_url": null,
-      "compatibility_sha256": "159298f129854a36860c4ea21b82ba8698f98c69afc1c51c58757083de6a2cb0"
+      "compatibility_sha256": "efd31232557d0fa2fd1784a279f7f317d515b199395cb5b52a7bb8b325890677"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
-      "release_tag": "v0.3.0-qwen38-5090-beta.1",
+      "release_tag": "v0.2.0-qwen38-5090-beta.2",
       "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
       "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
-      "source_archive_sha256": null,
-      "server_binary_sha256": null,
+      "source_archive_sha256": "1ef072dbda64875341db27f9dc7e54aa7e97b4546d1f55ee671667d6c703b859",
+      "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
       "oci_repository": "ghcr.io/alphastorm/ninfer-runtime",
-      "oci_reference": null,
-      "oci_manifest_digest": null,
-      "sbom_url": null,
-      "sbom_sha256": null
+      "oci_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+      "oci_manifest_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.2.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "08350bcb60ed76819eb4ec7ae3f60d4f9e2d82d59279f8155e4fc770e1718d44"
     },
     "model": {
       "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
@@ -68,31 +68,32 @@
         "repository": "https://github.com/alphastorm/ninfer",
         "release_tag": "v0.3.0-qwen38-3090.1",
         "source_commit": "872ee508c1f9c46fa38f4170c7e21f254a79e21f",
-        "source_archive_url": null,
-        "source_archive_sha256": null,
+        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-source.tar.gz",
+        "source_archive_sha256": "c509b6d07de15ce5b4df7b90e54379f79794b67b2c549cfa22a657313426567d",
         "package_name": "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-        "package_url": null,
+        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
         "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
         "package_bytes": 573355399,
-        "sbom_url": null,
-        "sbom_sha256": null,
-        "installer_url": null,
-        "installer_sha256": null,
-        "controller_url": null,
-        "controller_sha256": null,
-        "gpu_owner_controller_url": null,
-        "gpu_owner_controller_sha256": null,
-        "state_protection_url": null,
-        "state_protection_sha256": null,
-        "server_binary_sha256": null,
-        "configuration_sha256": null,
+        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.spdx.json",
+        "sbom_sha256": "4fea7c7d4832b0152b3316a808f6ea8fdb018c6c56e276b54126111cbb83f7b0",
+        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Install-Release.ps1",
+        "installer_sha256": "b5d4bcee014a3628482e80650f68a7f974ff2ac542d70dcbcb621a5ac1212150",
+        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Control-Release.ps1",
+        "controller_sha256": "26f2c9d59bd8ea6f517403b0df02b079008730f6f24326126469259139d9f577",
+        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Control-GpuOwner.ps1",
+        "gpu_owner_controller_sha256": "e2b80702366fdf951910911f2619c110f601ef16f5c2672d4bac62fd13c81c04",
+        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Protect-StateRoot.ps1",
+        "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b",
+        "server_binary_sha256": "4e68fd351f7311abced5da1a0020a16763666a79e1b535745e6bf31269340ab7",
+        "configuration_sha256": "ae519b6e41c33d8b7b1d397352df63cba6b928dec8fc9afa968a0c02fe1d3fd6",
         "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
         "maximum_context_tokens": 65536,
         "deferred_gates": [],
         "qualification": {
           "summary": "docs/measurements/2026-08-30-rtx3090-parity.json",
           "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
-          "public_url": null
+          "public_url": null,
+          "repository_path": "releases/v0.3.0/qualification/rtx3090.json"
         }
       },
       {
@@ -124,7 +125,8 @@
         "qualification": {
           "summary": "../v0.2.0-beta.1/qualification/rtx4090.json",
           "sha256": "575c9373921c5f8d1651b01d28e2f180cfd41348bdb307f30c2e1886a6f0fdfe",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx4090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx4090.json",
+          "repository_path": "releases/v0.3.0/qualification/rtx4090.json"
         },
         "package_name": "ninfer-4090-qwen38-v0.1.0-win-x64.zip"
       }
@@ -133,7 +135,7 @@
   "runtime_identity": {
     "public_model_id": "q38-ninfer",
     "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
-    "configuration_sha256": null,
+    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
     "maximum_context_tokens": 131072,
     "kv_dtype": "bf16",
     "maximum_concurrency": 1,
@@ -144,9 +146,9 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": null,
+    "summary_sha256": "118e88709ef199594db9e689caef4dada23e72ccd8000bd83fff7046317f0c51",
     "public_url": null,
-    "runtime_release_eligible": false,
+    "runtime_release_eligible": true,
     "external_installation_passed": false
   },
   "installation": {
@@ -173,9 +175,6 @@
       "NInfer RTX 3090 v0.3.0 parity component"
     ],
     "blockers": [
-      "RTX 5090 v0.3 runtime component unpublished",
-      "RTX 5090 v0.3 qualification receipts pending",
-      "RTX 3090 package public URL pending",
       "external clean-install acceptance from public URLs pending"
     ]
   }

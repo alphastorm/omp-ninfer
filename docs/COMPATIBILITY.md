@@ -24,7 +24,7 @@ These variants use the same OMP clients but own separate native runtime packages
 
 Package bindings:
 
-- `rtx3090-windows-native`: component `v0.3.0-qwen38-3090.1`; package `ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz` (public URL pending); SHA-256 `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`; 573,355,399 bytes.
+- `rtx3090-windows-native`: component `v0.3.0-qwen38-3090.1`; package [`ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`; 573,355,399 bytes.
 - `rtx4090-windows-native`: component `v0.2.0-qwen38-4090-beta.1`; package [`ninfer-4090-qwen38-v0.1.0-win-x64.zip`](https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/ninfer-4090-qwen38-v0.1.0-win-x64.zip); SHA-256 `1cced9e1f16ad0d1b4a5f9c5a28d00cb2b4449137f1652696799be70a74baf7d`; 227,438,715 bytes.
 
 ## Profile boundaries
@@ -39,7 +39,6 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 runtime component unpublished
 - RTX 5090 v0.3 qualification receipts pending
 - external clean-install acceptance from public URLs pending
 
@@ -53,7 +52,6 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 runtime component unpublished
 - RTX 5090 v0.3 qualification receipts pending
 - external clean-install acceptance from public URLs pending
 
@@ -67,13 +65,10 @@ Limitations:
 - The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported.
 
 Blockers:
-- RTX 5090 v0.3 runtime component unpublished
 - RTX 5090 v0.3 qualification receipts pending
 - external clean-install acceptance from public URLs pending
 
 ## Composition blockers
 
-- RTX 5090 v0.3 runtime component unpublished
 - RTX 5090 v0.3 qualification receipts pending
-- RTX 3090 package public URL pending
 - external clean-install acceptance from public URLs pending

@@ -16,9 +16,7 @@
     "request_compatibility_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
     "hosted_ci": "windows 33208643234; linux 33208643176; macos 33208643243",
     "blockers": [
-      "RTX 5090 v0.3 runtime component unpublished",
       "RTX 5090 v0.3 qualification receipts pending",
-      "RTX 3090 package public URL pending",
       "external clean-install acceptance from public URLs pending"
     ],
     "composed_source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3"
@@ -54,7 +52,6 @@
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
       "blockers": [
-        "RTX 5090 v0.3 runtime component unpublished",
         "RTX 5090 v0.3 qualification receipts pending",
         "external clean-install acceptance from public URLs pending"
       ],
@@ -78,18 +75,21 @@
         "qualification_receipt_sha256": "aae9fb4d7532d10e727b235a8acb10ddade3eeff436d34ae17643fb1390f610f"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.3.0",
-        "status": "in qualification",
-        "receipt": null
+        "profile": "qwen38-5090-v0.2.0-beta.2",
+        "status": "qualified",
+        "receipt": {
+          "url": null,
+          "sha256": "d088f8830faf4ce03b01a8a42dc978f8ba9de189e2da7ace095f35e624edc449"
+        }
       },
       "runtime": {
-        "image_reference": null,
-        "image_digest": null,
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+        "image_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": null,
-        "server_binary_sha256": null,
+        "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+        "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -145,7 +145,6 @@
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
       "blockers": [
-        "RTX 5090 v0.3 runtime component unpublished",
         "RTX 5090 v0.3 qualification receipts pending",
         "external clean-install acceptance from public URLs pending"
       ],
@@ -169,18 +168,21 @@
         "qualification_receipt_sha256": "d08814c7d015d3828aacfb0618c8b19b679dae93d6852df1daf8ea9fdc54435b"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.3.0",
-        "status": "in qualification",
-        "receipt": null
+        "profile": "qwen38-5090-v0.2.0-beta.2",
+        "status": "qualified",
+        "receipt": {
+          "url": null,
+          "sha256": "d088f8830faf4ce03b01a8a42dc978f8ba9de189e2da7ace095f35e624edc449"
+        }
       },
       "runtime": {
-        "image_reference": null,
-        "image_digest": null,
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+        "image_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": null,
-        "server_binary_sha256": null,
+        "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+        "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -236,7 +238,6 @@
         "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
       ],
       "blockers": [
-        "RTX 5090 v0.3 runtime component unpublished",
         "RTX 5090 v0.3 qualification receipts pending",
         "external clean-install acceptance from public URLs pending"
       ],
@@ -260,18 +261,21 @@
         "qualification_receipt_sha256": "429fa638e7fb711e3bd1efb8f0e2175f760a893d7d3bb05b6219ac9a208df315"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.3.0",
-        "status": "in qualification",
-        "receipt": null
+        "profile": "qwen38-5090-v0.2.0-beta.2",
+        "status": "qualified",
+        "receipt": {
+          "url": null,
+          "sha256": "d088f8830faf4ce03b01a8a42dc978f8ba9de189e2da7ace095f35e624edc449"
+        }
       },
       "runtime": {
-        "image_reference": null,
-        "image_digest": null,
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+        "image_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": null,
-        "server_binary_sha256": null,
+        "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+        "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -312,11 +316,11 @@
       "release_tag": "v0.3.0-qwen38-3090.1",
       "source_commit": "872ee508c1f9c46fa38f4170c7e21f254a79e21f",
       "package_name": "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_url": null,
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
       "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
       "package_bytes": 573355399,
       "qualification_receipt": {
-        "path": "docs/measurements/2026-08-30-rtx3090-parity.json",
+        "path": "releases/v0.3.0/qualification/rtx3090.json",
         "url": null,
         "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392"
       }
