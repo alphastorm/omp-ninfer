@@ -115,6 +115,14 @@ Entry detail:
   product lane would need its own qualification pass (quality table in
   [`BENCHMARKS.md`](BENCHMARKS.md)).
 
+## Current order
+
+The backlog below is a pool; the program's order is fixed and lives in
+[`ROADMAP.md`](../ROADMAP.md#after-v030): the RTX 4090 MTP3 qualification campaign first, then
+the MTP depth-and-corpus ablation that decides draft depth for every lane, then the durable RTX
+5090 container promotion, with the `nvfp4` artifact swap as a v0.4-class requalification decision
+gated on the ablation data.
+
 ## Ideas backlog
 
 Open, unclaimed, or in-flight. Claim one by opening an issue in
@@ -124,11 +132,11 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
-| Qualify a speculative (MTP) profile on the RTX 4090 lane | The qualified lane runs MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with MTP7; a qualified MTP3 profile should close most of that gap | open |
-| DirectStorage-style weight paging on the 5090 lane | The io_uring checkpoint backend ships in the v0.3.0 container lane and Windows DirectStorage in both native lanes; the remaining work is a fixed end-to-end cold-start product comparison | shipped foundation; comparison open |
+| Qualify a speculative (MTP) profile on the RTX 4090 lane | The qualified lane runs MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with MTP7; a qualified MTP3 profile should close most of that gap | ordered first |
+| Durable RTX 5090 container (serve-layer session persistence) | The engine backends shipped in v0.3.0; promoting the durable-serve candidate branch gives the container lane restart continuation and requires full requalification | ordered third |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | Both native Windows lanes bind passing restart gates: 102K restored continuation on RTX 4090 and 310 MB checkpoint restoration on RTX 3090; the RTX 5090 container keeps transcript-replay recovery, and its durable candidate branch is the next step | released on both native lanes; container lane open |
-| MTP acceptance modelling for Qwen3.8 | Recorded acceptance ranges from 48.9% on an upstream `nvfp4` workload through 77.0% in v0.1 to 99.87% on the fixed v0.2 decode workload; a matched corpus is needed before attributing the delta to quantization | open |
+| MTP depth-and-corpus ablation for Qwen3.8 | Recorded acceptance ranges from 48.9% on an upstream `nvfp4` workload through 99.87% on the fixed v0.3 decode workload — a fixed-workload artifact; sweep MTP0/3/5/7 on one unchanged artifact against an agent-shaped corpus (tool calls, thinking, long turns) before attributing deltas or picking shipped draft depth | ordered second |
 | DFlash-style deeper drafting (k=7) on 27B | Upstream measured 764–786 tok/s at 65–66% acceptance on 35B-A3B with DFlash; unknown economics on dense 27B | open |
 
 ## Contributing a result
