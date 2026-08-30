@@ -5,10 +5,10 @@ ba6f49d5d5ef0db8f84f0361df3b65998c7277cbaabdf2ffb3c0f84294d49e3c  Compare-MtpQua
 698db0aa389412cf35fb34ce2f2e59ce531b1316da2b1dd60b6ef33e9260a997  Invoke-Qualification.ps1
 529a249e0a594e33a2683ba5a6bfe633fb7d85bbae4ff9cb745e062d0bf95b48  New-Package.ps1
 c0d7d640190dca4f5fe3d055a564fb0c3a0d4fbdfd0aa461faa763cf96c699a5  New-QualificationReceipt.ps1
-474f0c0e83903bec64744d9cd12b71a6b46b25647d218726d2ab7f61c9873e9a  ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json
-1cced9e1f16ad0d1b4a5f9c5a28d00cb2b4449137f1652696799be70a74baf7d  ninfer-4090-qwen38-v0.1.0-win-x64.zip
-543e7ff9d174b6a7896acb1ccbd8332a3af3a9dc4c248794d3f073678c7a4497  ninfer-4090-qwen38-v0.1.0-win-x64-qualification.json
-b5ee9e0bffe97b4defcba02911a11f44dd3f8176efdbcf81116afe87db9df4ce  ninfer-4090-qwen38-v0.1.0-win-x64-release-manifest.json
+a2b801254ce50058e7420e5624d4d159a9253f21defc871f157840158a68f308  ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json
+8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef  ninfer-4090-qwen38-v0.1.0-win-x64.zip
+44a0013ad1bca20fcc98e23c6ffd2dd2b017daf963e4c82a1630dbffec52d74f  ninfer-4090-qwen38-v0.1.0-win-x64-qualification.json
+abc56cc79d4e31003293f385965fc3a3207d0450c727aa05a909ffb67c6b1cfd  ninfer-4090-qwen38-v0.1.0-win-x64-release-manifest.json
 c0d9c294f986834ea177842bf336e9c38d28200fcfeb325c9b218df70ddae39c  ninfer-4090-qwen38-v0.1.0-win-x64-source.tar.gz
-9b3e9dfe8659cdca128884eaf14be54c5658100909ba2ed3a20870934a56e653  package-build-receipt.json
+32878f90bd25bfb654938788f6c6794e822289659895bdeb19eabf89a72485c0  package-build-receipt.json
 c431cdd55a764526d6d9b720909b2a706e0df2b8f75d871900e4d74616af8463  Protect-StateRoot.ps1

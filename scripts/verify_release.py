@@ -289,7 +289,7 @@ NINFER_VARIANT_RELEASE_TAG_RES = {
         r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1)$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^v0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*$"
+        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*)$"
     ),
 }
 NINFER_VARIANT_PACKAGE_NAME_RES = {

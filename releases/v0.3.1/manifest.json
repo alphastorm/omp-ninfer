@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c4fcc6f5db7610febd0982c0af85b9586d130061/compatibility.json",
-      "compatibility_sha256": "246e7f432a1caf1b6eeabeafab0501550d7322b6becace87036f9925145a4d2e"
+      "compatibility_sha256": "df506611a02266f9ac2ed63ac418eb618754ebdcd9625ee46473d063e171d35d"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -90,7 +90,7 @@
         "maximum_context_tokens": 65536,
         "deferred_gates": [],
         "qualification": {
-          "summary": "releases/v0.3.0/qualification/rtx3090.json",
+          "summary": "releases/v0.3.1/qualification/rtx3090.json",
           "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
           "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification/rtx3090.json"
         },
@@ -101,22 +101,22 @@
         "status": "qualified",
         "installable": true,
         "repository": "https://github.com/alphastorm/ninfer",
-        "release_tag": "v0.3.1-qwen38-4090-mtp3.1",
+        "release_tag": "v0.3.1-qwen38-4090-mtp3.2",
         "source_commit": "e4654b5aed87e7385bdf33f8b4365a7a550d4ad9",
-        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/runtime-source-e4654b5a.tar.gz",
+        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/runtime-source-e4654b5a.tar.gz",
         "source_archive_sha256": "0c8b7afd73ae1354d82f7f01b84e7b42b7fab203df5484fe4d954c6eaaf20d6d",
-        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/ninfer-4090-qwen38-v0.1.0-win-x64.zip",
+        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/ninfer-4090-qwen38-v0.1.0-win-x64.zip",
         "package_sha256": "8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef",
         "package_bytes": 227438719,
-        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json",
+        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json",
         "sbom_sha256": "a2b801254ce50058e7420e5624d4d159a9253f21defc871f157840158a68f308",
-        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/Install-Release.ps1",
+        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/Install-Release.ps1",
         "installer_sha256": "767642c0a16d6dc3decb5543692fa50c1b0ccfaca2cf239a64c3a28b9a729fd2",
-        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/Control-Release.ps1",
+        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/Control-Release.ps1",
         "controller_sha256": "0d7d32dfeda190802433d8b92545bef66bee5dd617a18fd3e9d4c324bbb551d5",
-        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/Control-GpuOwner.ps1",
+        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/Control-GpuOwner.ps1",
         "gpu_owner_controller_sha256": "3e3ae54c71c7534064ceff1dae59acfd2ea546a8c920fcc6c9fb1d46296ba5e0",
-        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1/Protect-StateRoot.ps1",
+        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.2/Protect-StateRoot.ps1",
         "state_protection_sha256": "c431cdd55a764526d6d9b720909b2a706e0df2b8f75d871900e4d74616af8463",
         "server_binary_sha256": "41fcc1803e4a057de24a485776e71737a31cb39fdd9358350b975f6b11b9c869",
         "configuration_sha256": "5a565eafb038c19d699f5a118624ff7a77c245a532c1036aeb2a9b9c136f6175",
@@ -148,7 +148,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "382902b9754b6059654dc469158cd4b0494d2e668fcdb318b70ba5b362ee0934",
+    "summary_sha256": "d328a2f12c6b08eb3f2b047af13a8aee5e37497a11412db3b3159e50d884cdaa",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c4fcc6f5db7610febd0982c0af85b9586d130061/releases/v0.3.1/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true

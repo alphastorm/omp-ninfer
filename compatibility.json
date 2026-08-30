@@ -37,7 +37,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.3.0",
+      "product_release": "v0.3.1",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -127,7 +127,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.3.0",
+      "product_release": "v0.3.1",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -217,7 +217,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.3.0",
+      "product_release": "v0.3.1",
       "aliases": [
         "linux-x64-docker"
       ],
