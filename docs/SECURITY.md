@@ -2,7 +2,7 @@
 
 ## Supported trust boundary
 
-`v0.2.0-beta.1` supports one trusted owner controlling each OMP client and qualified RTX runtime
+`v0.3.0` supports one trusted owner controlling each OMP client and qualified RTX runtime
 host. Local administrators and root can inspect processes, files, container/native runtime state, GPU memory, and
 traffic endpoints. Shared shell hosts, hostile local users, untrusted containers, public HTTP
 service, and tenant isolation are outside the release claim.
@@ -34,7 +34,7 @@ OMP remains responsible for tool approval and workspace boundaries.
 7. The NInfer image is pulled by OCI manifest digest, never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
    IP addresses, and Docker inspection dumps.
-9. The beta container uses restart policy `no`; a process exit is observable rather than silently
+9. The RTX 5090 container uses restart policy `no`; a process exit is observable rather than silently
    presented as proven recovery.
 
 The primary in-container server process receives `--api-key` because that launcher expands a
@@ -47,12 +47,13 @@ not use this topology where local administrators are outside the trust boundary.
 ## Data flow and retention
 
 OMP stores its normal session transcript and a provider acceleration snapshot on the client. NInfer
-retains bounded Responses/cache state. The published v0.2 restart claim applies to native RTX 4090;
-fresh RTX 5090, RTX 4090, and RTX 3090 candidates also pass authenticated durable process-restart
-continuation. Candidate evidence does not expand the published manifest. Native checkpoints and
-optional request JSONL files live under protected managed state; the primary container profile uses its
-owner-controlled host state/log directories. Treat both as sensitive even though public qualification
-and issue forms use content-safe aggregates only.
+retains bounded Responses/cache state. The `v0.3.0` release publishes authenticated durable
+process-restart continuation for the exact native RTX 4090 and RTX 3090 packages. The RTX 5090
+DirectStorage/io_uring durable-checkpoint backend remains in qualification for the v0.3 campaign; it
+does not inherit a native lane's restart semantics. Native checkpoints and optional request JSONL
+files live under protected managed state; the primary container profile uses its owner-controlled host
+state/log directories. Treat both as sensitive even though public qualification and issue forms use
+content-safe aggregates only.
 
 The primary RTX 5090 server binary accepts the bearer through `--api-key`, not a file option. The
 launcher reads the read-only Docker secret only inside the container entry command, but the resulting
@@ -61,7 +62,7 @@ release therefore requires the documented single-trusted-owner boundary; it does
 from another privileged local administrator.
 
 Stopping the container does not delete the model, key, OMP transcript, or request-log files. Delete
-those explicitly when removing the beta. Removing NInfer response state does not remove the OMP
+those explicitly when removing the runtime. Removing NInfer response state does not remove the OMP
 transcript.
 
 ## Network exposure

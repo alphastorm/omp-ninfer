@@ -1,8 +1,8 @@
-# Early-access quickstart
+# Quickstart
 
-> **RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
+> **Qualified on RTX 5090 · 4090 · 3090**
 
-**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
+**Get started with the exact lane for your GPU and runtime.**
 
 ## Choose your lane
 
@@ -11,20 +11,21 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **qualified** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **qualified release** | [RTX 4090 native lane](#native-windows-rtx-4090-release-and-rtx-3090-qualified-candidate) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **qualified candidate; request access** | [RTX 3090 candidate boundary](#native-windows-rtx-4090-release-and-rtx-3090-qualified-candidate) | A hash-bound candidate receipt; no public install claim until its manifest ships |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **qualified release** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **qualified release** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **qualified release** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
-The RTX 3090 row is an access invitation, not a published install instruction. Do not substitute
-candidate URLs, GPU family names, package URLs, or variant IDs between lanes.
+Each native lane is installable only through its exact manifest variant. Do not substitute GPU
+family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The ready `v0.2.0-beta.1` route is native Windows OMP connected over authenticated local loopback
-to the exact NInfer container in Docker Desktop WSL2 on one user-controlled RTX 5090. Managed
-macOS SSH and native Linux clients are qualified client profiles under the same compatibility
-authority; the qualified native RTX 4090 runtime is a separate Windows package.
+The ready `v0.3.0` public release connects native Windows OMP over authenticated local loopback
+to the exact runtime for the selected qualified lane. RTX 5090 uses
+the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
+native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
+and RTX 3090 use separate native Windows packages.
 
 Start only from the product tag and require its ready contract:
 
@@ -55,7 +56,7 @@ model, configuration, qualification summary, and clean-install acceptance receip
 Clone the tag in Windows and in the WSL2 namespace that owns Docker:
 
 ```powershell
-git clone --branch v0.2.0-beta.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.3.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -79,18 +80,41 @@ the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to n
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
 section 7 and the **Native Windows command forms** at the start of section 8.
 
-## Native Windows RTX 4090 release and RTX 3090 qualified candidate
+## Native Windows RTX 4090 and RTX 3090 release lanes
 
-These are separate native NInfer packages, not substitutions for the primary RTX 5090 image. The
-published install path still accepts only `rtx4090-windows-native`. The fresh RTX 3090 candidate
-passed clean install, protocol, 64K retrieval, process restart, bidirectional rollback, protected
-state, exact OMP, and managed 300 W performance gates. Its package is not in the v0.2 manifest, so
-this tagged script must still refuse it. Start from an elevated PowerShell in the tagged product
-clone and let the manifest supply every URL and hash:
+These are separate native NInfer packages, not substitutions for the RTX 5090 image. The ready
+manifest publishes exactly `rtx4090-windows-native` and `rtx3090-windows-native` as
+qualified native lanes.
+
+The RTX 3090 package identity is:
+
+- filename: `ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`;
+- SHA-256: `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`;
+- byte count: `573,355,399`; and
+- source commit: `872ee508c1f9c46fa38f4170c7e21f254a79e21f`.
+
+Its component-release slot is
+[`alphastorm/ninfer@v0.3.0-qwen38-3090.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.3.0-qwen38-3090.1).
+That URL must resolve at release cut; the ready product manifest remains authoritative for every
+download URL and hash.
+
+Start from an elevated PowerShell in the tagged product clone. Set `$VariantId` once for the
+matching GPU:
 
 ```powershell
 $VariantId = 'rtx4090-windows-native'
-$Manifest = Get-Content .\releases\v0.2.0-beta.1\manifest.json -Raw | ConvertFrom-Json
+```
+
+or:
+
+```powershell
+$VariantId = 'rtx3090-windows-native'
+```
+
+Then let the manifest supply every URL and hash:
+
+```powershell
+$Manifest = Get-Content .\releases\v0.3.0\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -111,6 +135,9 @@ foreach ($Asset in @(
   }
 }
 $Package = Join-Path $Stage ([IO.Path]::GetFileName(([Uri]$Variant[0].package_url).AbsolutePath))
+if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
+  throw 'native runtime package byte count mismatch'
+}
 $Installer = Join-Path $Stage 'Install-Release.ps1'
 $Model = Resolve-Path .\models\qwen3_8_27b.ninfer
 $Key = Join-Path $Stage 'api-key.txt'
@@ -124,11 +151,9 @@ if (-not (Test-Path $Key)) {
 
 The package controller binds loopback/Tailscale-only listening, mandatory bearer authentication,
 the external model hash, process-restart checkpoints, and active/previous rollback. Do not mix
-assets across variants or infer install authority from GPU-family names. The RTX 3090 candidate is
-qualified but unpublished; [request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
-instead of modifying `manifest.json`. RTX 4090 uses its exact MTP0 profile; the fresh RTX 3090
-candidate uses its exact MTP3 profile. Run the ordinary acceptance in section 8 after installation.
-Structured JSON-schema output remains unsupported and fails closed.
+assets across variants or infer install authority from GPU-family names. RTX 4090 uses its exact
+MTP0 profile; RTX 3090 uses its exact MTP3 profile. Run the ordinary acceptance in section 8 after
+installation. Structured JSON-schema output remains unsupported and fails closed.
 
 ## Managed macOS SSH qualified route
 
@@ -148,21 +173,21 @@ Structured JSON-schema output remains unsupported and fails closed.
 - at least 40 GiB free for the 18,210,531,328-byte model, image, and logs.
 
 The NInfer endpoint binds only to remote loopback. Never publish port `18089` on a LAN or public
-interface. The first beta assumes both machines and local accounts are controlled by one trusted
+interface. This release assumes both machines and local accounts are controlled by one trusted
 owner.
 
 ## 1. Clone the exact release on both machines
 
-After the prerelease is published, run this on the Mac and inference host:
+From the public release tag, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.2.0-beta.1 --depth 1 \
+git clone --branch v0.3.0 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
-Do not invite testers from moving `main`, an untagged archive, or a manifest whose status is
+Do not install from moving `main`, an untagged archive, or a manifest whose status is
 `draft` or `candidate`.
 
 ## 2. Install the OMP beta on the Mac
@@ -194,11 +219,11 @@ LOGS="$HOME/.local/state/omp-ninfer"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.2.0-beta.1/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.3.0/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.2.0-beta.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.3.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.2.0-beta.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.3.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 curl --fail --location --continue-at - --output "$MODEL" "$MODEL_URL"
@@ -334,7 +359,7 @@ The sealed launcher owns config selection and deliberately rejects `--config`; t
 the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
 switch to a cloud model.
 
-## 8. Early-access acceptance
+## 8. Acceptance
 
 Run these checks in order and record only pass/fail plus the content-safe identities from the NInfer
 launcher.

@@ -5,7 +5,7 @@ with a convenient local image.
 
 ## `release manifest is not installable`
 
-Use a clean clone of `v0.2.0-beta.1` and run
+Use a clean clone of `v0.3.0` and run
 `python3 scripts/verify_release.py --require-ready`. Moving `main`, an older tag, or a partially
 published candidate is not installable. A draft/candidate intentionally retains explicit blockers;
 do not fill missing component identities from a local cache.
@@ -38,7 +38,7 @@ docker logs --tail 100 omp-ninfer-beta
 ```
 
 If it was created by this release, use `examples/manual-tunnel/stop-ninfer.sh`; that script refuses
-unexpected ownership labels. If labels do not match, do not stop or remove it through the beta
+unexpected ownership labels. If labels do not match, do not stop or remove it through the release
 script.
 
 ## GPU is unavailable inside Docker
@@ -132,7 +132,7 @@ Do not point OMP at a remote LAN address as a workaround.
 ## OMP cannot resolve `ninfer-beta/local-max`
 
 Validate that `~/.omp/agent/models.yml` remains valid YAML and contains exactly one
-`providers.ninfer-beta` mapping. If the file existed before beta setup, merge the fragment rather
+`providers.ninfer-beta` mapping. If the file existed before setup, merge the fragment rather
 than nesting a second `providers:` key or overwriting other providers. Keep both provider- and
 model-level `ninferStatefulResponses: true` fields.
 
@@ -158,9 +158,9 @@ Separate correctness from acceleration:
 - If the OMP transcript is present and a full replay succeeds, transcript correctness is intact but
   provider state was not reused.
 - If the transcript itself is missing, inspect OMP session selection/storage rather than NInfer.
-- If the qualified native Windows RTX 4090 v0.2 process restarted, inspect the checkpoint status/receipt
-  first. OMP must still remain able to replay its transcript when acceleration state is unavailable or
-  invalid.
+- If a qualified native Windows RTX 3090 or RTX 4090 `v0.3.0` process restarted, inspect the
+  checkpoint status/receipt first. OMP must still remain able to replay its transcript when
+  acceleration state is unavailable or invalid.
 - Endpoint, model, request-shape, branch, or committed-turn identity changes intentionally invalidate
   a provider snapshot.
 
@@ -170,7 +170,7 @@ conversation content.
 ## Fail-closed check returns a cloud answer
 
 Stop testing. Preserve the command, explicit model ID, overlay identity, and provider/model name from
-content-safe output. Do not repeat the request. This violates the beta route contract and blocks the
+content-safe output. Do not repeat the request. This violates the qualified route contract and blocks the
 release until locally reproduced and fixed.
 
 ## Safe issue material

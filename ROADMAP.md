@@ -1,23 +1,23 @@
 # Roadmap
 
 This roadmap is a scope boundary, not a promise of dates. The current product wedge is OMP plus
-NInfer plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 lanes and a
-qualified RTX 3090 candidate, each bound to exact bytes and a receipt. The published v0.2 manifest
-still exposes the 3090 as a non-installable preview. Work outside that wedge needs
-a new product decision rather than placeholder abstractions.
+NInfer plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090
+release lanes, each bound to exact bytes and a receipt. The `v0.3.0` public release exposes only
+those exact installable profiles. Work outside that wedge needs a new product decision rather than
+placeholder abstractions.
 
 Want to move something here? The fastest ways to help are listed at the end of this page and in
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## v0.1.0-beta.1 — invited RTX 5090 early access (shipped)
+## v0.1.0-beta.1 — restricted RTX 5090 beta (shipped)
 
 The first release is out. Its ready manifest binds the native Windows OMP client, the digest-pinned
 NInfer image and SBOM, the hash-pinned Qwen3.8 artifact, the RTX 5090 profile, the qualification
-summary, and an owner-operated tester-equivalent clean install from public URLs
+summary, and an owner-operated external clean install from public URLs
 ([receipts](releases/v0.1.0-beta.1/qualification.json)).
 
-An invited tester starting from the published artifacts, without access to a developer workstation,
+An external owner starting from the published artifacts, without access to a developer workstation,
 can:
 
 1. verify the exact release contract (`python3 scripts/verify_release.py --require-ready`);
@@ -37,11 +37,11 @@ can:
 - no multi-GPU, multi-tenant, priority, or preemptive scheduling;
 - no universal throughput, latency, or hardware claim;
 - no silent cloud fallback; and
-- no general-availability support commitment.
+- no support response-time or SLA commitment.
 
 ## v0.2.0-beta.1 — managed lifecycle and three GPU release lanes
 
-The second invited-tester release closes the v0.2 roadmap:
+The second beta release closes the v0.2 roadmap:
 
 - native OMP 18.0.9 clients for macOS arm64, Windows x64, and Linux x64, with the exact accepted
   source published at [`alphastorm/oh-my-pi`](https://github.com/alphastorm/oh-my-pi);
@@ -67,7 +67,7 @@ exact visible final answer.
 
 ### v0.2 support boundaries
 
-- prerelease/invited-tester support only; no stable or GA promotion;
+- prerelease support only; no support response-time or SLA commitment;
 - one active request per qualified product profile;
 - JSON-schema structured output is unsupported and rejected;
 - the RTX 3090 unattended evidence-role corpus did not pass, so that automatic route stays disabled;
@@ -92,10 +92,32 @@ for the other qualified lanes:
 
 The [candidate receipt](docs/measurements/2026-08-30-rtx3090-parity.json) binds package
 `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`. It does not
-change the immutable `v0.2.0-beta.1` manifest, activate an unattended route, or perform a stable
-promotion. The next product release must publish that exact package or requalify changed bytes.
+change the immutable `v0.2.0-beta.1` manifest, activate an unattended route, or publish it as a
+product release. The next product release must publish that exact package or requalify changed bytes.
 
-## v0.3 candidates
+## v0.3.0 — public release and three qualified GPU lanes (shipped)
+
+The first public release publishes one exact install lane for each qualified GPU profile:
+
+- qualified RTX 5090 container, RTX 4090 native-Windows, and RTX 3090 native-Windows lanes;
+- durable authenticated process-restart checkpoints on all three GPU lanes; the RTX 5090
+  DirectStorage/io_uring backend must be qualified in the v0.3 campaign before this release claim
+  is final;
+- the exact RTX 3090 parity package, the published RTX 4090 component rebind, and the new RTX 5090
+  runtime through one ready product manifest; and
+- public artifacts and install instructions, with `v0.3.0` as GitHub `Latest` and
+  [`Get started`](docs/QUICKSTART.md) as the primary route.
+
+### v0.3 support boundaries
+
+- one active request per exact profile unless its qualification receipt says otherwise;
+- structured JSON-schema output remains unsupported and is rejected;
+- the unattended RTX 3090 evidence role remains disabled;
+- no multi-GPU, multi-tenant, priority, or preemptive scheduling claim;
+- no universal throughput, latency, or hardware claim; and
+- no silent cloud fallback.
+
+## After v0.3.0
 
 The next expensive-to-add-later items are now explicit rather than hidden release debt:
 
@@ -113,7 +135,7 @@ The next expensive-to-add-later items are now explicit rather than hidden releas
 
 ## Upstreaming to Oh My Pi
 
-The beta OMP client carries the NInfer stateful-Responses provider integration; running a fork was
+The pinned OMP client carries the NInfer stateful-Responses provider integration; running a fork was
 the fastest way to ship one exact qualified combination. The exact accepted source is now public at
 [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi). The standing intent remains to
 upstream the reusable provider semantics, stateful transaction, and appliance plumbing to
@@ -127,17 +149,17 @@ include prefill, decode, MTP acceptance and verification cost, Vision, KV storag
 and long-session continuation. No optimization result becomes part of a release until its exact
 binary and profile are rebound through a new qualification receipt.
 
-## Broad public release gate
+## Path to v1.0
 
-Before marketing beyond invited testers:
+A public release does not imply a v1.0 or SLA commitment. Before a v1.0 decision:
 
 - gather clean-install and rollback evidence from multiple independent owners for each claimed GPU
   profile;
-- sign the Windows packages and notarize the macOS client, or retain the explicit unsigned beta
+- sign the Windows packages and notarize the macOS client, or retain the explicit unsigned
   boundary;
-- close the highest-signal early-access installation and compatibility failures;
-- define response times, supported upgrade windows, and rollback ownership for a broad support
-  commitment;
+- close the highest-signal public-release installation and compatibility failures;
+- publish supported upgrade and security-fix windows, rollback ownership, and response-time
+  expectations without implying an SLA;
 - run a fixed two-machine workload before making any fleet completed-work claim; and
 - cut a new release candidate if any executable component, model, configuration, or support
   boundary changes.
@@ -153,6 +175,8 @@ Before marketing beyond invited testers:
 - **CUDA/kernel work?** Claim an idea from the
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog).
 - **RTX 3090, 4090, or 5090 owner?**
-  [Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml),
-  run the matching published boundary, and file a content-safe report. Pass and fail reports both
-  improve the observed matrix; candidate qualification never authorizes package substitution.
+  [`Get started`](docs/QUICKSTART.md) with the matching published lane, then file a content-safe
+  [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
+  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+  Pass and fail reports both improve the observed matrix; one lane never authorizes package
+  substitution in another.

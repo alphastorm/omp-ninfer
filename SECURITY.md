@@ -2,15 +2,15 @@
 
 ## Supported versions
 
-No stable version exists yet. During invited early access, only the latest published OMP NInfer
-prerelease and its exact manifest/profile receive security fixes. Draft manifests and development
-branches are unsupported deployments.
+For the 0.x series, only the latest published OMP NInfer release and its exact manifest/profile
+receive security fixes. Older releases, draft manifests, and development branches are unsupported
+deployments.
 
 | Version | Supported |
 | --- | --- |
-| latest published `0.2.0-beta.x` | yes, during invited early access |
-| older prereleases | no |
-| `main` / draft manifests | no deployment support |
+| latest published `0.3.x` release | yes |
+| older releases | no |
+| `main` / draft manifests | no |
 
 ## Report privately
 
@@ -25,8 +25,8 @@ or have explicit permission to assess.
 
 A report is in scope when it can violate an advertised boundary such as loopback-only exposure,
 release artifact integrity, bearer-key handling, fail-closed local routing, transcript/provider-state
-publication ordering, or support-data redaction. The beta does not claim protection from root or
-local administrators on either user-controlled machine, multi-tenant isolation, or public-Internet
+publication ordering, or support-data redaction. The public release does not claim protection from
+root or local administrators on either user-controlled machine, multi-tenant isolation, or public-Internet
 service.
 
 We will acknowledge and disposition reports through the private advisory. Public disclosure and any

@@ -106,7 +106,7 @@ The user-facing claim is therefore “stop re-prefilling the same long coding se
 They address materially broader multi-node/multi-tenant scheduling and serving problems. The current
 OMP NInfer v0.2 contract is one GPU per qualified profile, one resident model, one trusted owner,
 and one active request; a distributed control plane would add cost without satisfying the
-early-access outcome.
+public-release outcome.
 
 ## Why direct OMP to NInfer
 
