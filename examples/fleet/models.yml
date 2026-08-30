@@ -1,0 +1,12 @@
+# Role -> lane mapping for a three-agent fleet. Static pinning; one lane per agent.
+roles:
+  main:
+    provider: ninfer/local-max
+    fragment: provider-5090.json
+  heavy:
+    provider: ninfer/local-max
+    fragment: provider-4090.json
+  scout:
+    provider: ninfer/local-max
+    fragment: provider-3090.json
+    context_note: keep working sets in the 64K class on this lane

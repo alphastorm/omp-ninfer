@@ -34,22 +34,22 @@
 <body>
 <div class="canvas evidence">
   <div class="head">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Released evidence · v0.3</span></div>
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Released evidence · v0.4</span></div>
     <div class="eyebrow">Measured, not estimated</div>
   </div>
   <div class="main">
     <section>
-      <div class="eyebrow">Same session · 89,022-token follow-up</div>
+      <div class="eyebrow">Same session · docker restart between turns</div>
       <div class="comparison">
-        <div class="metric warm"><strong>0.191 s</strong><span>Warm time to first token</span></div>
+        <div class="metric warm"><strong>0.778 s</strong><span>First token after restart, from the durable checkpoint</span></div>
         <div class="versus">vs</div>
-        <div class="metric cold"><strong>36.651 s</strong><span>Cold equivalent</span></div>
+        <div class="metric cold"><strong>47.92 s</strong><span>Cold rebuild of the same 109,594-token session</span></div>
       </div>
       <div class="descriptor"><b>Continue from retained state.</b><span>Qualification-bound · receipt linked below.</span></div>
     </section>
     <aside class="secondary">
-      <div class="stat"><strong>240.30</strong><div>decode tokens / second<small>Qualified RTX 5090 · MTP3</small></div></div>
-      <div class="stat"><strong>130,048</strong><div>token exact-recall prompt<small>131,072-token ceiling</small></div></div>
+      <div class="stat"><strong>144.8</strong><div>decode tokens / second<small>RTX 5090 v0.4.0 · agent-shaped MTP3</small></div></div>
+      <div class="stat"><strong>130,448</strong><div>token exact-recall prompt<small>131,072-token ceiling</small></div></div>
       <div class="lanes">
         <span class="pill"><span class="dot"></span>5090 qualified</span>
         <span class="pill"><span class="dot"></span>4090 qualified</span>

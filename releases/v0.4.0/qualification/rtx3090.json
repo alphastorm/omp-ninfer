@@ -1,0 +1,71 @@
+{
+  "artifact_type": "ninfer_rtx3090_qualification_summary",
+  "automatic_route_activation_allowed": false,
+  "evidence": {
+    "benchmark_c1": {
+      "receipt_sha256": "bb7ef8a4cd7cc58425ca69618f426a29f1c683c04f4a379fd8238cf644b61a28",
+      "status": "passed"
+    },
+    "context_64k": {
+      "receipt_sha256": "8aeccc0cf37970d8009f02ebafc59c3132420019d4ca02b6400d5d61b6bc2f1b",
+      "status": "passed"
+    },
+    "neutral_build": {
+      "receipt_sha256": "5623202a115f8c6c8ede99238052e1c2f2bea3887e910854bd70f829c2585448",
+      "status": "passed"
+    },
+    "omp": {
+      "receipt_sha256": "7e0e0536654d01aed069fd3c05ef55f2ca37963b53d5ccef99121f02d2453a6d",
+      "status": "passed"
+    },
+    "package": {
+      "receipt_sha256": "86a6d9793b43e8ecf6d7d4497f7e2302e7d1bf5afeba74016edc9b64ae3fa88b",
+      "status": "passed"
+    },
+    "private_path_scan": {
+      "receipt_sha256": "e5cb9e3b1d9a68a2d80d18eb016b4c3b91fd18783f5dc37c55ea525127ee05f1",
+      "status": "passed"
+    },
+    "protocol": {
+      "receipt_sha256": "7c977428431b89370e73e0a37b8f45f9e709db4d7d17931ed2391e78fed319ad",
+      "status": "passed"
+    },
+    "restart": {
+      "receipt_sha256": "5cd52bef47df2d24024afacab188c1b45fc2cb28ed1a1ba226cf09b1f3b066cc",
+      "status": "passed"
+    },
+    "rollback": {
+      "receipt_sha256": "d52fd485e47b4f881002031923f8ae3054bc4d6577dda0f6cde1eea4e7e23bf3",
+      "status": "passed"
+    },
+    "security": {
+      "receipt_sha256": "97716f0624c6265f325bd87ddea69a5e221d1ead0231d7fe53d327c01933934a",
+      "status": "passed"
+    },
+    "transfer_install": {
+      "receipt_sha256": "fa7784fb32806d8a91de8f098c0948159b4c9d03425681c4f1db25bfd943b7f5",
+      "status": "passed"
+    }
+  },
+  "observed": {
+    "c1_decode_tokens_per_second": 90.17303192140295,
+    "c1_max_power_w": 299.8,
+    "c1_prefill_tokens_per_second": 893.411379306566,
+    "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+    "context_prompt_tokens": 64512,
+    "restart_cached_input_tokens": 45,
+    "restart_process_replaced": true
+  },
+  "package": {
+    "bytes": 573355399,
+    "filename": "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97"
+  },
+  "production_route_activation_performed": false,
+  "qualification_tool_commit": "30dea6302cd0978e4a7fb70952860d9d2691d69f",
+  "qualified_utc": "2026-08-30T04:54:26Z",
+  "schema_version": 1,
+  "source_commit": "872ee508c1f9c46fa38f4170c7e21f254a79e21f",
+  "stable_promotion_performed": false,
+  "status": "passed"
+}

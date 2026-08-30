@@ -1,0 +1,8 @@
+{
+  "provider": "ninfer/local-max",
+  "protocol": "openai-responses",
+  "base_url": "http://127.0.0.1:<local-forward-port-5090>",
+  "api_key_file": "<path-to-this-lane's-api-key-file>",
+  "stateful_continuation": true,
+  "note": "RTX 5090 container lane; durable session checkpoints (v0.4.0)"
+}

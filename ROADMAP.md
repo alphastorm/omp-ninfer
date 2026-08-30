@@ -102,7 +102,8 @@ The first public release publishes one exact install lane for each qualified GPU
 - qualified RTX 5090 container, RTX 4090 native-Windows, and RTX 3090 native-Windows lanes;
 - durable authenticated process-restart checkpoints on both native Windows lanes
   (DirectStorage-backed, each bound by its restart receipt); the RTX 5090 container keeps
-  live-process warm continuation with OMP transcript replay as its recovery path;
+  live-process warm continuation with OMP transcript replay as its recovery path (superseded:
+  v0.4.0 ships durable container checkpoints);
 - the exact RTX 3090 parity package, the published RTX 4090 component rebind, and the new RTX 5090
   runtime through one ready product manifest; and
 - public artifacts and install instructions, with `v0.3.0` as GitHub `Latest` and
@@ -131,14 +132,30 @@ promise:
    measured on an agent-shaped corpus (tool calls, thinking, long turns) rather than a fixed
    decode fixture — the 99.87% v0.3 acceptance is a fixed-workload artifact, and this ablation
    decides the draft depth every lane ships next.
-3. **v0.4-class — durable RTX 5090 container.** Promote the existing durable-serve candidate
-   branch into a new runtime image so the container lane gains the process-restart continuation
-   the native lanes already claim; new bytes mean a full 5090 requalification and its own
-   freeze review.
+3. **v0.4.0 — durable RTX 5090 container. Shipped.** New runtime image (source `1ceaeebd`)
+   with transactional durable session checkpoints, qualified end to end: 109,589 tokens restored
+   hot across a docker restart, exact retrieval at 130,448 tokens, cross-family review
+   dispositions landed with the candidate.
 4. **v0.4-class decision — `nvfp4` artifact evaluation.** The upstream campaign shows 3.48×
    groupwise-int prefill and a higher GPQA row for `nvfp4`; adopting it swaps the pinned model
    artifact and therefore forces requalification of all three lanes. Decide with the ablation
    data in hand; until then the groupwise-int artifact stays pinned.
+
+Unblocked by v0.4.0 dogfooding: the MTP depth-and-corpus ablation's **agent-shaped corpus**
+now accumulates for free from real per-lane session request logs.
+
+New checkpoint-track items, in order after the ablation:
+
+- **Checkpoint replication (sync, don't serve).** The native IO paths are O_DIRECT/DirectStorage
+  and require local filesystems, so network shares are never a checkpoint root. Generations are
+  immutable, SHA-manifested, and atomically published, so replication is a crash-consistent copy
+  of `sessions/` to shared storage and a copy-back to local NVMe before restore. Portability is
+  same-profile-pair only: the runtime fingerprint binds binary and profile, so identical-lane
+  machine pairs can resume and cross-lane resume (5090↔4090) structurally cannot.
+- **Template-fork warm starts.** Checkpoint a session immediately after the system prompt and
+  repository context are prefilled, then fork every subagent from that generation: each one
+  starts hot instead of paying a 30–90 s prefill. Fork lineage is already a qualified contract;
+  this is an operational pattern to receipt, not new engine work.
 
 Parked until >131,072-token contexts matter: paged host-to-device KV prefetch and the
 E8-lattice/RotorQuant ceiling work the family ports carry upstream.

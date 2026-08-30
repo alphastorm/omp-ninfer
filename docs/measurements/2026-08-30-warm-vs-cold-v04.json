@@ -1,0 +1,17 @@
+{
+  "artifact_type": "rtx5090_warm_vs_cold_ttft",
+  "schema_version": 1,
+  "measured_utc": "2026-08-30T20:41:00Z",
+  "release": "v0.4.0",
+  "vantage": "client wall over authenticated SSH loopback forward; serve-side confirmations in the request log",
+  "results": [
+    {
+      "session_input_tokens": 109594,
+      "warm_ttft_s": 1.79,
+      "cold_ttft_s": 47.92,
+      "post_restart_first_token_s": 0.778,
+      "restored_hot_tokens": 109589
+    }
+  ],
+  "notes": "One sample per point; the post-restart figure is serve-side ttft after first-touch restore of the 7.95 GB durable checkpoint (24.8 s end-to-end including the restore read)."
+}

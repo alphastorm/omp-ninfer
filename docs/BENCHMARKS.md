@@ -16,11 +16,11 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
 The first public release binds three qualified GPU lanes into one manifest. The shape first —
 every chart is a rendering of the same receipts as the tables, never a separate measurement:
 
-![Warm vs cold time to first token: 0.191 s warm versus 36.651 s cold at an 89,022-token session, and 0.126 s versus 9.719 s at 28,535 tokens; roughly 192x and 77x faster first tokens](../assets/chart-warm-cold.png)
+![Warm vs cold time to first token (v0.3.0 runtime, historical): 0.191 s warm versus 36.651 s cold at an 89,022-token session, and 0.126 s versus 9.719 s at 28,535 tokens; roughly 192x and 77x faster first tokens](../assets/chart-warm-cold.png)
 
-![RTX 5090 prefill throughput holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
+![RTX 5090 prefill throughput (v0.3.0 runtime, historical) holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
 
-![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 97.69 tok/s peak with MTP0](../assets/chart-decode.png)
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3 on the v0.3.0 fixed fixture (143-152 tok/s agent-shaped on v0.4.0), RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 97.69 tok/s peak with MTP0](../assets/chart-decode.png)
 
 ### RTX 3090 — native Windows, MTP3, C1, 300 W cap
 
@@ -62,17 +62,29 @@ The prior MTP0 receipt (52.330 tok/s over 1,168 tokens, 1,410.691 tok/s prefill,
 102,075-token restored continuation) remains bound to `v0.2.0-qwen38-4090-beta.1` and is the
 baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
-[qualification summary](../releases/v0.3.2/qualification/rtx4090.json).
+[qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
-### RTX 5090 — container, MTP3, C1
+### RTX 5090 — container, MTP3, durable checkpoints (v0.4.0)
 
-Freshly requalified for v0.3.0 on the identical published image digest and server binary —
-no re-pull for existing installs. Receipt:
-[`qualification/rtx5090.json`](../releases/v0.3.0/qualification/rtx5090.json).
+New runtime bytes (source `1ceaeebd`, image digest `8de5efdf…`) qualified live on the owner
+appliance. Receipt:
+[`2026-08-30-rtx5090-durable-qualification.json`](measurements/2026-08-30-rtx5090-durable-qualification.json).
 
 | Gate | Result | Detail |
 | --- | ---: | --- |
-| Decode throughput | **240.30 tok/s** | 2,048 completion tokens; MTP3, 1,534 of 1,536 drafted tokens accepted (99.87%) |
+| Docker-restart continuation | **109,589 tokens restored hot** | rotated server instance; 0.778 s serve-side first token; 7.95 GB automatic checkpoint (io_uring O_DIRECT) at a 109,725-token frontier |
+| Decode throughput | **144.80 tok/s** | 2,048 completion tokens, 44.10% MTP3 acceptance on the technical-writing gate; ledger retrieval measured 152.2 tok/s at 83.3% — agent-shaped spread |
+| 130,448-token prefill | **2,186.30 tok/s** | exact planted-needle retrieval; 131,072-token ceiling |
+| Warm follow-up, 109,594-token session | **1.790 s** wall | vs **47.920 s** cold build of the same session ([receipt](measurements/2026-08-30-warm-vs-cold-v04.json)) |
+| Pinned-client conformance | **passed** | live status and checkpoint documents accepted verbatim by the validator extracted from the released 18.0.9 client |
+| Fail-closed confinement | **passed** | serve boots only under the sha-pinned io_uring seccomp profile; 18.2 GB artifact re-hashed against declared identity at startup |
+
+The v0.3.0 receipts below remain bound to the previous runtime bytes (image `63c794e2…`) and are
+the rollback lane's numbers, not this release's:
+
+| v0.3.0 gate (historical) | Result | Detail |
+| --- | ---: | --- |
+| Decode throughput | **240.30 tok/s** | 2,048 completion tokens; MTP3, 1,534 of 1,536 drafted tokens accepted (99.87% on the fixed decode fixture) |
 | 7,680-token prefill | **3,193.77 tok/s** | exact retrieval |
 | 32,256-token prefill | **2,956.73 tok/s** | exact retrieval |
 | 64,512-token prefill | **2,664.22 tok/s** | exact retrieval |
@@ -87,18 +99,20 @@ Warm/cold method: server-side vantage, one sample per point, synthetic content-s
 cold pair sends a fresh equivalent-length prompt that cannot reuse any prefix. Full measurement
 detail: [`2026-08-30-warm-vs-cold-ttft-v03.json`](measurements/2026-08-30-warm-vs-cold-ttft-v03.json).
 
-This lane's recovery path after a process restart is OMP transcript replay: the response store is
-process-local by design on the container lane, and no restart-continuation claim is made for it.
-Durable process-restart continuation is a native Windows lane property (tables above).
+As of v0.4.0 this lane restores sessions from durable checkpoints across process restarts
+([qualification](measurements/2026-08-30-rtx5090-durable-qualification.json)); OMP transcript
+replay remains the fallback when no checkpoint exists.
 
 ### Durable checkpoints on the native Windows lanes
 
-v0.3.0 ships checkpoint-backed session durability on the RTX 4090 and RTX 3090 native Windows
-lanes (DirectStorage): a follow-up continues from restored state after a process restart instead
+Checkpoint-backed session durability ships on the RTX 4090 and RTX 3090 native Windows lanes
+(DirectStorage, since v0.3.0) and on the RTX 5090 container (io_uring, since v0.4.0): a
+follow-up continues from restored state after a process restart instead
 of rebuilding the session cold — exactly the delta the warm/cold row measures — and each lane's
 restart gate binds the exact observed
-restoration above. The RTX 5090 container makes no restart-continuation claim — its response
-store is process-local by design and its recovery path is OMP transcript replay. Upstream,
+restoration above. The RTX 5090 container joins them in v0.4.0: an automatic 7.95 GB checkpoint
+at a 109,725-token frontier restored 109,589 tokens hot across a docker restart on a rotated
+server instance (0.778 s serve-side first token). Upstream,
 [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its
 DirectStorage cold restore at 10.1 GB/s (1.51 GiB in 150 ms) on its own artifacts — an
 engine-family capability reference, not a product claim.
