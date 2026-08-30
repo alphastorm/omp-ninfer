@@ -4,13 +4,14 @@
 
 # OMP NInfer
 
-**Stateful local Qwen for long OMP coding sessions.**
+**Durable session state on your GPU.**
 
 **Qualified on RTX 5090 · 4090 · 3090**
 
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own an RTX 5090, 4090, or 3090,
-OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
-retained state instead of re-prefilling the full transcript.
+OMP NInfer keeps Qwen3.8 27B and your session's continuation state on your GPU — as an explicit,
+durable primitive, not a lucky prefix-cache hit. Follow-ups continue from state addressed by
+lineage, and on the native Windows lanes that state survives process restarts.
 
 **[Get started](docs/QUICKSTART.md)**
 
@@ -46,7 +47,7 @@ fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
 | What changes for you | Released evidence |
 | --- | --- |
-| Long-session follow-ups can start without a full re-prefill | Qualification-bound 89,022-token follow-up: **0.191 s warm vs 36.651 s cold** |
+| Retained state outlives the turn — the cold start is what you skip | Qualification-bound 89,022-token follow-up: **0.191 s warm (retained state) vs 36.651 s cold (fresh process, no cache)** |
 | Interactive output is fast | **240.30 tok/s** decode on the qualified RTX 5090 profile |
 | Long coding sessions fit | Exact retrieval at a **130,048-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
@@ -69,23 +70,44 @@ serving, or generic OpenAI-compatible inference.
 > latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
 
+## What this is — and isn't
+
+A live [ninfer](https://github.com/Neroued/ninfer) or llama.cpp process with prefix caching
+already avoids recomputing an append-only prefix — the engine this project ships does it too
+(`prefix_reuse` is enabled in every shipped profile). If a warm in-process cache on a live server
+is all you need, that works today without OMP NInfer.
+
+What this project adds is continuation as an **explicit, transactional, durable** primitive
+rather than an implicit longest-prefix match. OMP tracks the Responses lineage end to end —
+`previous_response_id`, forks, rollback — and on the RTX 4090 and 3090 native Windows lanes the
+continuation (session state plus its required KV) is checkpointed to disk and restored after
+process death: [102,075 tokens restored on the
+4090](releases/v0.2.0-beta.1/qualification/rtx4090.json), [310 MB checkpoint restore on the
+3090](docs/measurements/2026-08-30-rtx3090-parity.json). A prefix cache cannot outlive its
+process; a checkpoint can.
+
+Next on the [roadmap](ROADMAP.md): portable checkpoints — store them on shared storage, restore
+the session on another compatible machine — which in-process caches structurally cannot do.
+
 ## Why this exists
 
 Serious OMP coding sessions run long: 100K-token transcripts, thinking, tool calls, images. Routed
 to a cloud provider, every one of those tokens is metered and every file leaves your machine.
-Routed to a typical local OpenAI-compatible server, the API is stateless — each turn re-sends and
-re-prefills the whole transcript, and reuse of prior computation is a best-effort cache guess.
+Routed to a typical local OpenAI-compatible server, the API is stateless — each turn re-sends the
+whole transcript, and while a live server's prefix cache usually avoids recomputing an append-only
+prefix, that reuse is an implicit longest-prefix guess that dies with the process.
 
 OMP NInfer ships the third option as a small set of qualified lanes — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
 RTX 5090, RTX 4090, or RTX 3090 — with three properties the exact qualified releases do not
 give you together elsewhere:
 
-1. **Session state lives on your GPU.** OMP drives NInfer through stateful OpenAI Responses
-   (`previous_response_id`). A follow-up turn continues from retained GPU state instead of
-   re-prefilling the session. The predecessor v0.1 campaign observed a 37,591-token prefix hit, but
-   v0.2 does not rebind that numeric result. OMP commits its transcript before
-   advancing provider state, so losing the cache degrades to a replay, never a broken session.
+1. **Continuation is explicit and durable, not guessed.** OMP drives NInfer through stateful
+   OpenAI Responses (`previous_response_id`): continuation is addressed by transactional lineage —
+   forks and rollback qualified — instead of inferred by longest-prefix matching, and on the
+   native Windows lanes the continuation is checkpointed and survives process restarts. OMP
+   commits its transcript before advancing provider state, so losing retained state degrades to a
+   replay, never a broken session.
 2. **Private and fail-closed.** Both endpoints bind loopback only; the route is
    bearer-authenticated; the shipped OMP configuration disables model fallback. When your GPU is
    unreachable, the turn fails with an error — it is never silently answered by a cloud model.
@@ -174,7 +196,7 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | | OMP NInfer | [Ollama](https://ollama.com) | [LM Studio](https://lmstudio.ai) | [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) | [vLLM](https://github.com/vllm-project/vllm) |
 | --- | --- | --- | --- | --- | --- |
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
-| Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; internal caching best-effort | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
+| Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; in-process prefix reuse avoids recomputing matching prefixes | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
 | Speculative decoding on the shipped model | Profile-specific: MTP3 on the 5090 and 3090 lanes, MTP0 on the 4090 lane | Model/config dependent | Optional draft-model setups, backend-dependent | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
