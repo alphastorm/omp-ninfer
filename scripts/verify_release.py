@@ -703,6 +703,11 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(root.rglob("*.md"))
     documents.update(assets.glob("*.html"))
     documents.update(assets.glob("*.svg"))
+    releases_root = root / "releases"
+    if releases_root.is_dir():
+        documents.update(releases_root.rglob("*.json"))
+        documents.update(releases_root.rglob("*.SHA256SUMS"))
+        documents.update(releases_root.rglob("*.jsonl"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
         for marker in PRIVATE_MARKERS:

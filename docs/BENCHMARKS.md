@@ -42,6 +42,11 @@ Promoted from the post-release parity campaign: the v0.3.0 manifest binds the ex
 ### RTX 4090 — native Windows, MTP0, C1
 
 Rebound from its qualified component release (`v0.2.0-qwen38-4090-beta.1`); identities unchanged.
+The 52.330 tok/s figure is an **MTP0 profile** — one token per backbone pass, no speculative
+decoding — because that is the profile the 4090 campaign qualified; it is not a silicon ceiling.
+The 5090 and 3090 lanes run MTP3 (draft-and-verify commits several tokens per pass at ~93–99%
+acceptance), and the upstream 4090 port has measured 229.9 tok/s with MTP7 on its own artifacts.
+Qualifying a speculative profile on this lane is an open performance-program item.
 
 | Gate | Result |
 | --- | --- |

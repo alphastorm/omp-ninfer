@@ -119,6 +119,17 @@ class ReleaseContractTest(unittest.TestCase):
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
+    def test_release_tree_text_rejects_private_markers(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        planted = root / "releases" / "v0.3.0" / "review" / "planted.json"
+        planted.write_text('{"path": "/Users/someone/secret"}', encoding="utf-8")
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(
+            any("private marker" in error and "planted.json" in error for error in errors),
+            errors,
+        )
+
     def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
