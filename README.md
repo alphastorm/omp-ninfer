@@ -254,7 +254,9 @@ python3 -m unittest discover -s tests -v
 
 Both pass on the tagged release. The ready manifest binds the accepted Windows client archive,
 compatibility authority, NInfer image and SBOM, model artifact, qualification summary, and an
-owner-operated tester-equivalent clean-install acceptance from public URLs. Published tags and
+owner-operated tester-equivalent external acceptance composed from the immutable client
+platform receipts, the public-URL byte-identity and smoke acceptance of the new RTX 3090 lane,
+and the fresh RTX 5090 requalification. Published tags and
 release notes must use those exact bytes. Lifecycle details: [Releases](docs/RELEASES.md).
 
 ## Feedback and support boundary

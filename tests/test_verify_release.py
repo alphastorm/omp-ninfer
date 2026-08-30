@@ -119,6 +119,21 @@ class ReleaseContractTest(unittest.TestCase):
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
+    def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["limitations"] = list(manifest.get("limitations", [])) + [
+            "The RTX 5090 identities remain pending."
+        ]
+        self.save(manifest_path, manifest)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertTrue(
+            any("stale release-state phrase" in error for error in errors),
+            errors,
+        )
+
     def test_public_release_passes_ready_validation(self) -> None:
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
         self.assertEqual(errors, [])

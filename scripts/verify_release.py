@@ -162,6 +162,15 @@ def validate_ready_state_consistency(
     errors: list[str],
 ) -> None:
     forbidden_markers = ("draft", "pending")
+    stale_phrases = (
+        "release draft",
+        "remains pending",
+        "remain pending",
+        "remains blocked",
+        "remain blocked",
+        "publication remains blocked",
+        "in qualification",
+    )
     for label, document in (
         ("manifest", manifest),
         ("compatibility", compatibility),
@@ -185,10 +194,24 @@ def validate_ready_state_consistency(
                     f"{path} must not contain draft or pending in ready mode",
                     errors,
                 )
+            if field in {"remaining_release_gates"}:
+                require(
+                    isinstance(value, list) and value == [],
+                    f"{path} must be an empty array in ready mode",
+                    errors,
+                )
             if label in {"manifest", "compatibility"} and field == "blockers":
                 require(
                     isinstance(value, list) and value == [],
                     f"{path} must be an empty array in ready mode",
+                    errors,
+                )
+        for text in walk_strings(document):
+            normalized = text.casefold()
+            for phrase in stale_phrases:
+                require(
+                    phrase not in normalized,
+                    f"{label} contains stale release-state phrase {phrase!r} in ready mode",
                     errors,
                 )
 

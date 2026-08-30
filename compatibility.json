@@ -46,7 +46,7 @@
       "limitations": [
         "Managed actions delegate over explicit non-interactive SSH to an exact remote OMP 18.0.9 client and the matching local-loopback profile.",
         "OMP installation on the remote account is outside this adapter; no secret, raw log, prompt, or model output crosses the receipt boundary.",
-        "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
+        "The RTX 5090 container lane does not support process-restart Responses continuation; recovery is OMP transcript replay."
       ],
       "blockers": [],
       "acceptance_receipt": {
@@ -136,7 +136,7 @@
       "limitations": [
         "The primary profile controls one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.",
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
-        "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
+        "The RTX 5090 container lane does not support process-restart Responses continuation; recovery is OMP transcript replay."
       ],
       "blockers": [],
       "acceptance_receipt": {
@@ -226,7 +226,7 @@
       "limitations": [
         "The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
-        "The RTX 5090 v0.3 runtime is in qualification; process-restart Responses continuation remains unsupported."
+        "The RTX 5090 container lane does not support process-restart Responses continuation; recovery is OMP transcript replay."
       ],
       "blockers": [],
       "acceptance_receipt": {

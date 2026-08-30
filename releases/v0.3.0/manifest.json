@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3eedc0ab136ee9b0ad0e0619dfc708fceaca858e/compatibility.json",
-      "compatibility_sha256": "afb67ac5feb9171cc2617a8d4e8126df562392270960133157d60fb30820f4ba"
+      "compatibility_sha256": "e1c28d9dbe5125e376ff58f4609520aafc9900cb7952bfb857ba9cc029b35379"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -146,7 +146,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "5909d61e4c3062178093cf235bc4266f93873a3eede89faeb510db3305899603",
+    "summary_sha256": "52075818e31cfb2928f0ef94c7991cf1b6719707910794169d4af33f5da2d60c",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ad407b5e8fb6e94022a655a573184d3a9aa790c3/releases/v0.3.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
@@ -158,10 +158,9 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "Public release draft; publication remains blocked until the exact external identities and acceptance receipts are complete.",
-    "The RTX 5090 v0.3 runtime is in qualification; its image digest, server binary, configuration identity, SBOM, and receipts remain pending.",
+    "The RTX 5090 container lane does not support process-restart Responses continuation; its recovery path is OMP transcript replay, and its fresh v0.3.0 receipts were measured on the identical published v0.2 runtime bytes.",
     "Native Windows RTX 4090 support binds only alphastorm/ninfer@v0.2.0-qwen38-4090-beta.1 and its exact MTP0 package.",
-    "Native Windows RTX 3090 support binds only the qualified parity package; its public component URL remains pending and unattended activation remains disabled.",
+    "Native Windows RTX 3090 support binds only the exact parity package published at alphastorm/ninfer@v0.3.0-qwen38-3090.1; unattended evidence-role activation stays disabled.",
     "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
     "Measured throughput and latency apply only to the recorded package, machine, and profile."
   ],

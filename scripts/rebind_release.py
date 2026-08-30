@@ -39,6 +39,11 @@ def main() -> int:
     parser.add_argument("--release", required=True, help="release directory name, e.g. v0.3.0")
     parser.add_argument("--pin", metavar="COMMIT",
                         help="pin evidence URLs to this 40-hex commit instead of rebinding hashes")
+    parser.add_argument("--stage", choices=("acceptance", "manifest"), default="acceptance",
+                        help="pin stage: 'acceptance' rewrites the qualification's acceptance URL "
+                             "(commit must contain the final acceptance bytes); 'manifest' rewrites "
+                             "only the manifest's qualification/compatibility URLs (commit must "
+                             "contain the final qualification and compatibility bytes)")
     args = parser.parse_args()
 
     release_root = ROOT / "releases" / args.release
@@ -50,19 +55,24 @@ def main() -> int:
         if len(args.pin) != 40:
             raise SystemExit("--pin requires a full 40-hex commit")
         raw = f"{RAW}/{args.pin}"
-        if acceptance_path.is_file():
-            qualification = load(qualification_path)
-            acceptance = qualification["composition"]["external_installation_acceptance"]
-            acceptance["public_url"] = f"{raw}/releases/{args.release}/acceptance/composed-external-installation.json"
-            save(qualification_path, qualification)
+        if args.stage == "acceptance":
+            if acceptance_path.is_file():
+                qualification = load(qualification_path)
+                acceptance = qualification["composition"]["external_installation_acceptance"]
+                acceptance["public_url"] = f"{raw}/releases/{args.release}/acceptance/composed-external-installation.json"
+                save(qualification_path, qualification)
+            manifest = load(manifest_path)
+            manifest["qualification"]["summary_sha256"] = sha256(qualification_path)
+            save(manifest_path, manifest)
+            print(f"pinned acceptance URL to {args.pin}; commit, then run --stage manifest "
+                  "with the NEW commit that contains these final qualification bytes")
+            return 0
         manifest = load(manifest_path)
         manifest["qualification"]["summary_sha256"] = sha256(qualification_path)
         manifest["qualification"]["public_url"] = f"{raw}/releases/{args.release}/qualification.json"
         manifest["components"]["omp"]["compatibility_url"] = f"{raw}/compatibility.json"
         save(manifest_path, manifest)
-        print(f"pinned evidence URLs to {args.pin}")
-        print("note: qualification.json changed if an acceptance URL was pinned; commit, then rerun "
-              "--pin with the new commit ONLY for the manifest stage if bytes drifted")
+        print(f"pinned manifest evidence URLs to {args.pin}")
         return 0
 
     subprocess.run([sys.executable, str(ROOT / "scripts" / "render_compatibility.py")], check=True)

@@ -120,12 +120,16 @@ if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
 }
 # Stage under ProgramData with an administrators-only ACL so no medium-integrity process
-# under the same account can swap bytes between verification and elevated execution.
+# under the same account can swap bytes between verification and elevated execution. Every
+# step below is fail-closed: an ACL error stops the session before anything is downloaded.
+$ErrorActionPreference = 'Stop'
 $Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
 if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
 New-Item -ItemType Directory -Path $Stage | Out-Null
+$Admins = New-Object System.Security.Principal.SecurityIdentifier('S-1-5-32-544')
 $Acl = Get-Acl $Stage
 $Acl.SetAccessRuleProtection($true, $false)
+$Acl.SetOwner($Admins)
 foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
   $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
     (New-Object System.Security.Principal.SecurityIdentifier($Sid)),
@@ -133,12 +137,26 @@ foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
   $Acl.AddAccessRule($Rule)
 }
 Set-Acl $Stage $Acl
-(Get-Item $Stage).Attributes = 'Directory'
+$Applied = Get-Acl $Stage
+if (-not $Applied.AreAccessRulesProtected) { throw 'staging ACL protection did not apply' }
+if (@($Applied.Access | Where-Object {
+      $_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin
+      @('S-1-5-32-544', 'S-1-5-18') }).Count -ne 0) {
+  throw 'staging ACL retains a non-administrator principal'
+}
+# The API key lives OUTSIDE the staging directory so reruns of this snippet never delete it.
+$KeyDir = Join-Path $env:ProgramData 'omp-ninfer-keys'
+if (-not (Test-Path $KeyDir)) {
+  New-Item -ItemType Directory -Path $KeyDir | Out-Null
+  Set-Acl $KeyDir $Acl
+}
+$ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
 foreach ($Asset in @(
   @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
   @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
   @{ Url = $Variant[0].controller_url; Sha = $Variant[0].controller_sha256 },
-  @{ Url = $Variant[0].gpu_owner_controller_url; Sha = $Variant[0].gpu_owner_controller_sha256 }
+  @{ Url = $Variant[0].gpu_owner_controller_url; Sha = $Variant[0].gpu_owner_controller_sha256 },
+  @{ Url = $Variant[0].state_protection_url; Sha = $Variant[0].state_protection_sha256 }
 )) {
   $Name = [IO.Path]::GetFileName(([Uri]$Asset.Url).AbsolutePath)
   $Path = Join-Path $Stage $Name
@@ -153,12 +171,11 @@ if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
 }
 $Installer = Join-Path $Stage 'Install-Release.ps1'
 $Model = Resolve-Path .\models\qwen3_8_27b.ninfer
-$Key = Join-Path $Stage 'api-key.txt'
-if (-not (Test-Path $Key)) {
-  throw "create one random non-empty line at $Key, then rerun; never paste it into an issue"
+if (-not (Test-Path $ApiKeyFile)) {
+  throw "create one random non-empty line at $ApiKeyFile, then rerun; never paste it into an issue"
 }
 & $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
-  -ModelArtifactPath $Model -ApiKeyFile $Key `
+  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile `
   -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
 ```
 
