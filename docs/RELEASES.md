@@ -7,13 +7,19 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.3.1`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.3.1` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.3.2`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.3.2` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.3.2 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.3.2`, GitHub `Latest`.
+- Corrective release: fixes the v0.3.1 RTX 4090 qualification summary whose limitations block
+  contradicted its own MTP3 receipts (template residue). Component bytes and receipts unchanged.
 
 ### v0.3.1 public release
 

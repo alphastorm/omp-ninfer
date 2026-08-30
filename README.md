@@ -15,7 +15,7 @@ lineage, and on the native Windows lanes that state survives process restarts.
 
 **[Get started](docs/QUICKSTART.md)**
 
-**[Download v0.3.1](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
+**[Download v0.3.2](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
 **[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
@@ -121,7 +121,7 @@ give you together elsewhere:
 ![Measured evidence: 0.191-second warm continuation versus 36.651-second cold prefill at 89,022 tokens, 240.30-token-per-second RTX 5090 decode, exact 130,048-token recall, and three qualified GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.3.1/qualification.json):
+[`qualification.json`](releases/v0.3.2/qualification.json):
 
 | Gate | Result |
 | --- | --- |
@@ -163,7 +163,7 @@ WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned
 route needs one published OMP client and about 40 GiB free disk.
 
 ```powershell
-git clone --branch v0.3.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.3.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -222,7 +222,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.3.1 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.3.2 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
