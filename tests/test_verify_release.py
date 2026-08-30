@@ -38,9 +38,28 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
-        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         (root / "docs").mkdir()
+        historical = root / "releases" / "v0.2.0-beta.1"
+        shutil.copy2(historical / "compatibility.json", root / "compatibility.json")
+        shutil.copy2(historical / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        for profile_path in (root / "profiles").glob("*.json"):
+            profile = self.load(profile_path)
+            profile["release"] = "v0.2.0-beta.1"
+            self.save(profile_path, profile)
+        return temporary, root
+
+    def public_draft_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+        temporary = tempfile.TemporaryDirectory()
+        root = Path(temporary.name)
+        shutil.copytree(ROOT / "releases", root / "releases")
+        shutil.copytree(ROOT / "profiles", root / "profiles")
+        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        (root / "docs" / "measurements").mkdir(parents=True)
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        shutil.copy2(
+            ROOT / "docs" / "measurements" / "2026-08-30-rtx3090-parity.json",
+            root / "docs" / "measurements" / "2026-08-30-rtx3090-parity.json",
+        )
         return temporary, root
 
     @staticmethod
@@ -64,19 +83,51 @@ class ReleaseContractTest(unittest.TestCase):
         manifest["publication"]["blockers"] = ["Run the external-install acceptance path."]
 
     def test_checked_in_ready_release_is_installable(self) -> None:
-        manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertEqual(manifest["status"], "ready")
         self.assertEqual(errors, [])
 
-        _, ready_errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
+        _, ready_errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertEqual(ready_errors, [])
 
         _, installable_errors = VERIFY_RELEASE.validate(
-            ROOT,
+            root,
             require_ready=False,
             require_installable=True,
         )
         self.assertEqual(installable_errors, [])
+
+    def test_checked_in_public_draft_accepts_pending_external_identities(self) -> None:
+        manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
+        self.assertEqual(errors, [])
+        self.assertEqual(manifest["status"], "draft")
+        self.assertEqual((manifest["channel"], manifest["audience"]), ("public", "public"))
+        self.assertTrue(manifest["publication"]["blockers"])
+        self.assertIsNone(manifest["components"]["ninfer"]["oci_reference"])
+        self.assertIsNone(manifest["components"]["ninfer"]["oci_manifest_digest"])
+        self.assertIsNone(manifest["components"]["ninfer"]["sbom_sha256"])
+
+    def test_public_draft_fails_ready_validation(self) -> None:
+        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
+        self.assertIn("release manifest is not ready", errors)
+        self.assertIn("installable release requires components.ninfer.oci_reference", errors)
+        self.assertIn("ready release requires qualification.summary_sha256", errors)
+
+    def test_unknown_release_channel_fails_closed(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.3.0" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["channel"] = "general-availability"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "manifest channel and audience must form a recognized release posture",
+            errors,
+        )
 
     def test_draft_contract_remains_noninstallable(self) -> None:
         temporary, root = self.candidate_copy()
@@ -95,6 +146,19 @@ class ReleaseContractTest(unittest.TestCase):
         )
         self.assertIn("release manifest is not installable", installable_errors)
 
+    def test_draft_still_validates_present_external_identities(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "draft"
+        manifest["publication"]["blockers"] = ["Draft release is not installable."]
+        manifest["components"]["ninfer"]["oci_manifest_digest"] = f"sha256:{'f' * 64}"
+        self.save(manifest_path, manifest)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("local packaging and manifest OCI digests must match", errors)
+
     def test_candidate_accepts_exact_installable_components_before_external_smoke(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
@@ -111,7 +175,9 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_ready_contract_accepts_complete_immutable_identities(self) -> None:
-        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertEqual(errors, [])
 
     def test_external_acceptance_rejects_short_or_stale_platform_hashes(self) -> None:
@@ -244,7 +310,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.2.0-beta.1",
+            "v0.3.0",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -437,7 +503,12 @@ class ReleaseContractTest(unittest.TestCase):
                 "source_archive_sha256": "e" * 64,
                 "package_url": (
                     "https://github.com/alphastorm/ninfer/releases/download/"
-                    "v0.2.0-qwen38-3090-beta.1/package.tar.gz"
+                    "v0.2.0-qwen38-3090-beta.1/"
+                    "ninfer-rtx3090-omp-v0.2.0-windows-x86_64-cuda12.8-rtx3090.tar.gz"
+                ),
+                "package_name": (
+                    "ninfer-rtx3090-omp-v0.2.0-windows-x86_64-"
+                    "cuda12.8-rtx3090.tar.gz"
                 ),
                 "package_sha256": "d" * 64,
                 "package_bytes": 1,

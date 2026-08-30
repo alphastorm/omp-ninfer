@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "release": "v0.3.0",
+  "status": "draft",
+  "channel": "public",
+  "audience": "public",
+  "product": {
+    "name": "OMP NInfer",
+    "tagline": "Stateful local Qwen for long OMP coding sessions.",
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "profile": "../../profiles/qwen38-rtx5090-windows-docker-local.json",
+    "primary_profile_id": "qwen38-rtx5090-windows-docker-local"
+  },
+  "components": {
+    "omp": {
+      "upstream_repository": "https://github.com/can1357/oh-my-pi",
+      "upstream_tag": "v18.0.9",
+      "upstream_commit": "cc14e04f075de82c5c0c0ccd2f9dfbce6f03fe9e",
+      "component_repository": "https://github.com/alphastorm/homebrew-omp",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "component_release_id": 378771357,
+      "release_id": "18.0.9-cross-platform-beta-2",
+      "distribution_version": "18.0.9-cross-platform-beta-2",
+      "platform": "windows-x64",
+      "source_repository": "https://github.com/alphastorm/oh-my-pi",
+      "source_commit": "60d4134b2ea153f984bf5a3ac6f7a220821de4e3",
+      "qualification_commit": "c12b02b4e0563c78fcf8f38843ab02392558d6f4",
+      "main_commit": "ff70194c3a799eaf36afbad355c44a178585d316",
+      "source_tree": "f4dcba581e4a0e03de94affc21b84679a93752c8",
+      "artifact_name": "omp-18.0.9-windows-x64.tar.gz",
+      "artifact_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-windows-x64.tar.gz",
+      "artifact_release_id": 378771357,
+      "artifact_asset_id": 534356916,
+      "artifact_published": true,
+      "artifact_bytes": 82889525,
+      "artifact_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-public-draft-1",
+      "compatibility_url": null,
+      "compatibility_sha256": "159298f129854a36860c4ea21b82ba8698f98c69afc1c51c58757083de6a2cb0"
+    },
+    "ninfer": {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "release_tag": "v0.3.0-qwen38-5090-beta.1",
+      "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+      "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+      "source_archive_sha256": null,
+      "server_binary_sha256": null,
+      "oci_repository": "ghcr.io/alphastorm/ninfer-runtime",
+      "oci_reference": null,
+      "oci_manifest_digest": null,
+      "sbom_url": null,
+      "sbom_sha256": null
+    },
+    "model": {
+      "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
+      "revision": "18dfc887423fa5aabf3cb56fac41490e462b3fab",
+      "artifact_name": "qwen3_8_27b.ninfer",
+      "artifact_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+      "artifact_bytes": 18210531328,
+      "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    "ninfer_variants": [
+      {
+        "id": "rtx3090-windows-native",
+        "status": "qualified",
+        "installable": true,
+        "repository": "https://github.com/alphastorm/ninfer",
+        "release_tag": "v0.3.0-qwen38-3090.1",
+        "source_commit": "872ee508c1f9c46fa38f4170c7e21f254a79e21f",
+        "source_archive_url": null,
+        "source_archive_sha256": null,
+        "package_name": "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+        "package_url": null,
+        "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
+        "package_bytes": 573355399,
+        "sbom_url": null,
+        "sbom_sha256": null,
+        "installer_url": null,
+        "installer_sha256": null,
+        "controller_url": null,
+        "controller_sha256": null,
+        "gpu_owner_controller_url": null,
+        "gpu_owner_controller_sha256": null,
+        "state_protection_url": null,
+        "state_protection_sha256": null,
+        "server_binary_sha256": null,
+        "configuration_sha256": null,
+        "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "maximum_context_tokens": 65536,
+        "deferred_gates": [],
+        "qualification": {
+          "summary": "docs/measurements/2026-08-30-rtx3090-parity.json",
+          "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
+          "public_url": null
+        }
+      },
+      {
+        "id": "rtx4090-windows-native",
+        "status": "qualified",
+        "installable": true,
+        "repository": "https://github.com/alphastorm/ninfer",
+        "release_tag": "v0.2.0-qwen38-4090-beta.1",
+        "source_commit": "e4654b5aed87e7385bdf33f8b4365a7a550d4ad9",
+        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/runtime-source-e4654b5a.tar.gz",
+        "source_archive_sha256": "0c8b7afd73ae1354d82f7f01b84e7b42b7fab203df5484fe4d954c6eaaf20d6d",
+        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/ninfer-4090-qwen38-v0.1.0-win-x64.zip",
+        "package_sha256": "1cced9e1f16ad0d1b4a5f9c5a28d00cb2b4449137f1652696799be70a74baf7d",
+        "package_bytes": 227438715,
+        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json",
+        "sbom_sha256": "474f0c0e83903bec64744d9cd12b71a6b46b25647d218726d2ab7f61c9873e9a",
+        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/Install-Release.ps1",
+        "installer_sha256": "767642c0a16d6dc3decb5543692fa50c1b0ccfaca2cf239a64c3a28b9a729fd2",
+        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/Control-Release.ps1",
+        "controller_sha256": "0d7d32dfeda190802433d8b92545bef66bee5dd617a18fd3e9d4c324bbb551d5",
+        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/Control-GpuOwner.ps1",
+        "gpu_owner_controller_sha256": "3e3ae54c71c7534064ceff1dae59acfd2ea546a8c920fcc6c9fb1d46296ba5e0",
+        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-4090-beta.1/Protect-StateRoot.ps1",
+        "state_protection_sha256": "c431cdd55a764526d6d9b720909b2a706e0df2b8f75d871900e4d74616af8463",
+        "server_binary_sha256": "41fcc1803e4a057de24a485776e71737a31cb39fdd9358350b975f6b11b9c869",
+        "configuration_sha256": "ec5e4cdb167ac26fc7cc762f9e3d188b965c4e2a20ecfe3cbb1968f084e872db",
+        "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "maximum_context_tokens": 131072,
+        "qualification": {
+          "summary": "../v0.2.0-beta.1/qualification/rtx4090.json",
+          "sha256": "575c9373921c5f8d1651b01d28e2f180cfd41348bdb307f30c2e1886a6f0fdfe",
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5a4308791f7c9851f1a53100844a013058822645/releases/v0.2.0-beta.1/qualification/rtx4090.json"
+        },
+        "package_name": "ninfer-4090-qwen38-v0.1.0-win-x64.zip"
+      }
+    ]
+  },
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "configuration_sha256": null,
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 1,
+    "speculative_backend": "mtp",
+    "draft_tokens": 3,
+    "vision": true,
+    "preserve_thinking": true
+  },
+  "qualification": {
+    "summary": "qualification.json",
+    "summary_sha256": null,
+    "public_url": null,
+    "runtime_release_eligible": false,
+    "external_installation_passed": false
+  },
+  "installation": {
+    "mode": "native-windows-docker-local",
+    "quickstart": "../../docs/QUICKSTART.md",
+    "managed_appliance_install": true,
+    "silent_cloud_fallback": false
+  },
+  "limitations": [
+    "Public release draft; publication remains blocked until the exact external identities and acceptance receipts are complete.",
+    "The RTX 5090 v0.3 runtime is in qualification; its image digest, server binary, configuration identity, SBOM, and receipts remain pending.",
+    "Native Windows RTX 4090 support binds only alphastorm/ninfer@v0.2.0-qwen38-4090-beta.1 and its exact MTP0 package.",
+    "Native Windows RTX 3090 support binds only the qualified parity package; its public component URL remains pending and unattended activation remains disabled.",
+    "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
+    "Measured throughput and latency apply only to the recorded package, machine, and profile."
+  ],
+  "publication": {
+    "authorized": false,
+    "targets": [
+      "GitHub public release v0.3.0",
+      "OMP component omp-18.0.9-cross-platform-beta-2",
+      "NInfer RTX 5090 v0.3 beta.1 runtime component",
+      "NInfer RTX 4090 v0.2.0 beta.1 component",
+      "NInfer RTX 3090 v0.3.0 parity component"
+    ],
+    "blockers": [
+      "RTX 5090 v0.3 runtime component unpublished",
+      "RTX 5090 v0.3 qualification receipts pending",
+      "RTX 3090 package public URL pending",
+      "external clean-install acceptance from public URLs pending"
+    ]
+  }
+}

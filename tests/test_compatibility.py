@@ -36,6 +36,16 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
+        self.assertEqual(authority["product_release"], "v0.3.0")
+        self.assertTrue(
+            all(
+                profile["gpu_qualification"]["status"] == "in qualification"
+                and profile["gpu_qualification"]["receipt"] is None
+                and profile["runtime"]["image_reference"] is None
+                and profile["runtime"]["image_digest"] is None
+                for profile in authority["profiles"]
+            )
+        )
         receipts = {profile["id"]: profile["acceptance_receipt"] for profile in authority["profiles"]}
         self.assertIsNotNone(receipts["darwin-remote-ssh"])
         self.assertIsNotNone(receipts["windows-docker-local"])
@@ -49,16 +59,18 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                 self.assertIsNone(profile["acceptance_receipt"])
                 continue
             filename = Path(urlparse(receipt["url"]).path).name
+            url_parts = Path(urlparse(receipt["url"]).path).parts
+            receipt_release = url_parts[url_parts.index("releases") + 1]
             path = (
                 ROOT
                 / "releases"
-                / authority["product_release"]
+                / receipt_release
                 / "acceptance"
                 / filename
             )
             subject = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(subject["kind"], "omp-ninfer-platform-acceptance-receipt")
-            self.assertEqual(subject["product_release"], authority["product_release"])
+            self.assertEqual(subject["product_release"], receipt_release)
             self.assertEqual(subject["profile"], profile["id"])
             self.assertEqual(subject["status"], "passed")
             self.assertEqual(
@@ -92,7 +104,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertEqual(subject["client"]["asset_url"], distribution["asset_url"])
             self.assertTrue(
                 receipt["url"].endswith(
-                    f"/releases/{authority['product_release']}/acceptance/{filename}"
+                    f"/releases/{receipt_release}/acceptance/{filename}"
                 )
             )
             self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), receipt["sha256"])
@@ -100,7 +112,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_runtime_identity_matches_the_release_manifest(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         manifest = json.loads(
-            (ROOT / "releases" / "v0.2.0-beta.1" / "manifest.json").read_text(encoding="utf-8")
+            (
+                ROOT / "releases" / authority["product_release"] / "manifest.json"
+            ).read_text(encoding="utf-8")
         )
         expected = {
             "image_reference": manifest["components"]["ninfer"]["oci_reference"],
@@ -155,10 +169,17 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             MODULE.load_authority(self._write(invalid))
 
         invalid = deepcopy(authority)
-        invalid["profiles"][0]["gpu_qualification"]["receipt"]["url"] = (
-            "https://github.com/alphastorm/omp-ninfer/releases/download/"
-            "v0.2.0-beta.1/future-receipt.json"
-        )
+        invalid["profiles"][0]["gpu_qualification"] = {
+            "profile": "qwen38-5090-v0.3.0",
+            "status": "qualified",
+            "receipt": {
+                "url": (
+                    "https://github.com/alphastorm/omp-ninfer/releases/download/"
+                    "v0.3.0/future-receipt.json"
+                ),
+                "sha256": "a" * 64,
+            },
+        }
         with self.assertRaisesRegex(ValueError, "GPU qualification receipt URL"):
             MODULE.load_authority(self._write(invalid))
 
@@ -176,6 +197,30 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_native_runtime_variants_render_and_fail_closed(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
+        variants = {item["id"]: item for item in authority["runtime_variants"]}
+        rtx3090 = variants["rtx3090-windows-native"]
+        self.assertEqual(rtx3090["status"], "qualified")
+        self.assertTrue(rtx3090["installable"])
+        self.assertEqual(rtx3090["release_tag"], "v0.3.0-qwen38-3090.1")
+        self.assertEqual(
+            rtx3090["package_name"],
+            "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-"
+            "cuda13.3-rtx3090.tar.gz",
+        )
+        self.assertEqual(
+            rtx3090["package_sha256"],
+            "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
+        )
+        self.assertEqual(rtx3090["package_bytes"], 573355399)
+        self.assertEqual(
+            rtx3090["qualification_receipt"]["path"],
+            "docs/measurements/2026-08-30-rtx3090-parity.json",
+        )
+        self.assertIsNone(rtx3090["package_url"])
+        self.assertEqual(
+            variants["rtx4090-windows-native"]["release_tag"],
+            "v0.2.0-qwen38-4090-beta.1",
+        )
         variant = {
             "id": "rtx3090-windows-native",
             "status": "qualified",
@@ -203,6 +248,18 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         invalid["runtime_variants"][0]["silent_cloud_fallback"] = True
         with self.assertRaisesRegex(ValueError, "silent cloud fallback"):
             MODULE.load_authority(self._write(invalid))
+
+    def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
+        current = MODULE.load_authority(ROOT / "compatibility.json")
+        self.assertEqual(current["product_release"], "v0.3.0")
+
+        historical_path = ROOT / "releases" / "v0.2.0-beta.1"
+        historical = MODULE.load_authority(historical_path / "compatibility.json")
+        self.assertEqual(historical["product_release"], "v0.2.0-beta.1")
+        self.assertEqual(
+            MODULE.render(historical),
+            (historical_path / "COMPATIBILITY.md").read_text(encoding="utf-8"),
+        )
 
     def _write(self, value: object) -> Path:
         path = Path(self._testMethodName + ".compatibility.tmp.json")
