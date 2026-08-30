@@ -100,9 +100,9 @@ product release. The next product release must publish that exact package or req
 The first public release publishes one exact install lane for each qualified GPU profile:
 
 - qualified RTX 5090 container, RTX 4090 native-Windows, and RTX 3090 native-Windows lanes;
-- durable authenticated process-restart checkpoints on all three GPU lanes; the RTX 5090
-  DirectStorage/io_uring backend must be qualified in the v0.3 campaign before this release claim
-  is final;
+- durable authenticated process-restart checkpoints on both native Windows lanes
+  (DirectStorage-backed, each bound by its restart receipt); the RTX 5090 container keeps
+  live-process warm continuation with OMP transcript replay as its recovery path;
 - the exact RTX 3090 parity package, the published RTX 4090 component rebind, and the new RTX 5090
   runtime through one ready product manifest; and
 - public artifacts and install instructions, with `v0.3.0` as GitHub `Latest` and
@@ -119,7 +119,29 @@ The first public release publishes one exact install lane for each qualified GPU
 
 ## After v0.3.0
 
-The next expensive-to-add-later items are now explicit rather than hidden release debt:
+The performance program has an explicit order; each step is a receipt-gated campaign, not a
+promise:
+
+1. **v0.3.1 — qualify a speculative (MTP3) profile on the RTX 4090 lane.** The cheapest large
+   win: the lane ships MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with
+   MTP7 on its own artifacts. Proven silicon, known campaign shape, no new bytes elsewhere.
+2. **MTP depth-and-corpus ablation.** One unchanged artifact, one context profile, MTP0/3/5/7,
+   measured on an agent-shaped corpus (tool calls, thinking, long turns) rather than a fixed
+   decode fixture — the 99.87% v0.3 acceptance is a fixed-workload artifact, and this ablation
+   decides the draft depth every lane ships next.
+3. **v0.4-class — durable RTX 5090 container.** Promote the existing durable-serve candidate
+   branch into a new runtime image so the container lane gains the process-restart continuation
+   the native lanes already claim; new bytes mean a full 5090 requalification and its own
+   freeze review.
+4. **v0.4-class decision — `nvfp4` artifact evaluation.** The upstream campaign shows 3.48×
+   groupwise-int prefill and a higher GPQA row for `nvfp4`; adopting it swaps the pinned model
+   artifact and therefore forces requalification of all three lanes. Decide with the ablation
+   data in hand; until then the groupwise-int artifact stays pinned.
+
+Parked until >131,072-token contexts matter: paged host-to-device KV prefetch and the
+E8-lattice/RotorQuant ceiling work the family ports carry upstream.
+
+The remaining expensive-to-add-later items stay explicit rather than hidden release debt:
 
 - adopt the shared native-Windows source-first qualification sequence in
   [the release process](docs/RELEASES.md#next-native-release-sequencing);

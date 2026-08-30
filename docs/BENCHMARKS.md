@@ -246,7 +246,8 @@ Planned measurements that would sharpen the picture; contributions welcome
   above; the fuller sweep — 10K/37K/100K-token sessions with repetitions and client-side vantage —
   remains open.
 - **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
-- **Matched MTP0/MTP3 ablation** on one unchanged artifact and context profile.
+- **Matched MTP depth sweep (MTP0/3/5/7)** on one unchanged artifact and context profile,
+  measured on an agent-shaped corpus rather than a fixed decode fixture.
 - **Concurrency curves** for future 3090/4090 profiles only after exact memory-admission gates are
   defined.
 
