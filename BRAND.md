@@ -17,13 +17,13 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
-- v0.2 tagline: **Stateful local Qwen for long OMP coding sessions.**
-- Status grammar: when lane status is stated, write
-  **"RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta"**;
-  immediately distinguish the published v0.2 install authority from post-release candidates
-- Primary conversion action: **Request early access**, linked directly to
-  `.github/ISSUE_TEMPLATE/early-access.yml`. Put it before documentation links whenever the
-  surface has room for only one action.
+- Tagline: **Stateful local Qwen for long OMP coding sessions.**
+- Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
+  When install authority matters, bind it to the current ready release (`v0.3.0`) instead of
+  restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
+- Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
+  documentation links whenever the surface has room for only one action. The GitHub `Latest`
+  release card is the secondary conversion surface; never add a third competing action.
 - The user-facing command remains `omp`; "appliance" describes the operating
   concept, never the repository name.
 
@@ -84,12 +84,15 @@ emoji, no exclamation marks. Claims stated as invariants:
 
 Hard constraints — never write:
 
-- anything implying general availability (`v0.2.0-beta.1` remains invited)
-- support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the v0.2 manifest
-- wording that makes a qualified candidate sound publicly installable before its manifest ships
-- cloud hosting, unattended production activation, or universal RTX support
+- stable/v1.0 support, SLAs, or upgrade commitments — the 0.x series carries an explicit
+  support boundary: the latest published release and its exact manifest/profile only
+- support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the current
+  ready manifest
+- wording that transfers one lane's measured numbers, restart semantics, or capabilities to
+  another lane
+- cloud hosting, multi-tenant serving, unattended production activation, or universal RTX support
 - "first stateful Responses", automatic restart, or universal performance
-- `omp appliance ...` outside the exact v0.2 compatibility authority or as an implicit production
+- `omp appliance ...` outside the exact compatibility authority or as an implicit production
   activation path
 
 Standing disclaimer: "Community project; not affiliated with or endorsed by
@@ -114,6 +117,9 @@ imply official partnership.
 | `assets/architecture.png` | rendered architecture @2x (2480×840) — for the README |
 | `assets/benchmarks.html` | released-evidence continuation story source (1240×360) |
 | `assets/benchmarks.png` | rendered released-evidence strip @2x — for the README and benchmarks page |
+| `assets/chart-warm-cold.html` / `chart-warm-cold.png` | warm vs cold TTFT chart source (1240×420) and @2x render — benchmarks page |
+| `assets/chart-prefill.html` / `chart-prefill.png` | 5090 prefill-curve chart source (1240×420) and @2x render — benchmarks page |
+| `assets/chart-decode.html` / `chart-decode.png` | per-lane decode chart source (1240×420) and @2x render — benchmarks page |
 | `assets/favicon.svg` | favicon (96, rx22 tile) |
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
@@ -126,6 +132,9 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo-social-discord.gif` | update-banner-free README/Discord fallback |
 | `docs/media/omp-ninfer-demo-social-poster.png` | poster from the clean social interval |
 | `docs/media/omp-ninfer-launch-card.png` | scoped launch evidence card; provenance in `docs/media/README.md` |
+| `docs/media/omp-ninfer-demo-2x.gif` | crisp 1224×868 20 fps README embed rendered straight from the cast |
+| `docs/media/omp-ninfer-demo-2x.mp4` | H.264 transcode of the 2x render; preferred social attachment |
+| `docs/media/omp-ninfer-demo-2x-poster.png` | poster frame from the 2x render |
 
 Regeneration: run `python3 scripts/render_assets.py`. It renders the banner, architecture,
 benchmark, and social-preview HTML sources with headless Chrome and verifies every PNG dimension;
@@ -153,18 +162,18 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 **Stateful local Qwen for long OMP coding sessions.**
 
-**RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
+**Qualified on RTX 5090 · 4090 · 3090**
 
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
 OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
 retained state instead of re-prefilling the full transcript.
 
-**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
+**[Get started](docs/QUICKSTART.md)**
 
-**[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
-**[Benchmarks](docs/BENCHMARKS.md)** ·
-**[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
-**[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
+**[Download v0.3.0](https://github.com/alphastorm/omp-ninfer/releases/latest)** ·
+**[Benchmarks](docs/BENCHMARKS.md)** · **[Architecture](docs/ARCHITECTURE.md)** ·
+**[Performance program](docs/PERFORMANCE.md)** · **[Security](docs/SECURITY.md)** ·
+**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
 ```
 
 followed by the badge row and the private-by-design subline as currently set in `README.md`.

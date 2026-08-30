@@ -2,7 +2,7 @@ name: Performance result
 description: Submit a reproducible content-safe performance result or before/after comparison
 title: "[performance]: "
 labels:
-  - early-access
+  - community
   - benchmark
 body:
   - type: markdown
@@ -15,7 +15,7 @@ body:
     attributes:
       label: OMP NInfer release
       description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass on your clone.
-      placeholder: v0.2.0-beta.1
+      placeholder: v0.3.0
     validations:
       required: true
   - type: input

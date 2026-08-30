@@ -4,11 +4,89 @@ Every number on this page is a recorded measurement with a receipt, or it is exp
 someone else's published result. Measurements belong to the exact candidate, profile, and machine
 that produced them; none is a universal GPU, model, or end-to-end latency claim.
 
-- **Qualified product results** come from the release qualification bound into
-  [`qualification.json`](../releases/v0.2.0-beta.1/qualification.json).
+- **Qualified product results** come from the release qualifications bound into
+  [`releases/v0.3.0/qualification.json`](../releases/v0.3.0/qualification.json) and the immutable
+  prior-release authorities.
 - **Engine campaign results** are published upstream by
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
-- **Community results** are early-access tester submissions collected below.
+- **Community results** are tester submissions collected below.
+
+## Qualified `v0.3.0` results
+
+The first public release binds three qualified GPU lanes into one manifest. The shape first —
+every chart is a rendering of the same receipts as the tables, never a separate measurement:
+
+![Warm vs cold time to first token: 0.191 s warm versus 36.651 s cold at an 89,022-token session, and 0.126 s versus 9.719 s at 28,535 tokens; roughly 192x and 77x faster first tokens](../assets/chart-warm-cold.png)
+
+![RTX 5090 prefill throughput holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
+
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3, RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 52.33 tok/s with MTP0](../assets/chart-decode.png)
+
+### RTX 3090 — native Windows, MTP3, C1, 300 W cap
+
+Promoted from the post-release parity campaign: the v0.3.0 manifest binds the exact package
+`e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97` (573,355,399 bytes) at source
+`872ee508c1f9c46fa38f4170c7e21f254a79e21f`.
+
+| Gate | Result | Detail |
+| --- | ---: | --- |
+| Authenticated protocol | **15/15 passed** | OpenAI, Anthropic, Responses, tools, isolation, continuation, delete survival |
+| Long context | **64,512 prompt tokens** | exact `ORCHID=493817; COLOR=COBALT` retrieval in 88.89 s |
+| Durable restart | **passed** | PID replaced; 45 cached input tokens and 310,216,517 checkpoint bytes restored from disk |
+| Managed C1 decode | **90.17 tok/s** | exact 1,024-token completion; 16.48 s end-to-end wall time |
+| Managed C1 prefill | **893.41 tok/s** | 4,541 computed prompt tokens; no prefix hit |
+| MTP3 acceptance | **93.43%** | exact managed C1 workload |
+| Peak envelope | **21,159 MiB · 299.8 W · 47 °C** | GPU-only qualification at the 300 W cap |
+| Lifecycle / OMP | **passed** | clean install, upgrade, two rollback directions, protected ACLs, exact read-tool answer |
+
+### RTX 4090 — native Windows, MTP0, C1
+
+Rebound from its qualified component release (`v0.2.0-qwen38-4090-beta.1`); identities unchanged.
+
+| Gate | Result |
+| --- | --- |
+| Decode | **52.330 tok/s** over 1,168 tokens |
+| Prefill | **1,410.691 tok/s** |
+| Durable restart | 102,060-token checkpoint seed; 102,075-token restored continuation after process replacement |
+| OMP | source-controlled typed-tool Golden-equivalent passed |
+
+### RTX 5090 — container, MTP3, C1
+
+Freshly requalified for v0.3.0 on the identical published image digest and server binary —
+no re-pull for existing installs. Receipt:
+[`qualification/rtx5090.json`](../releases/v0.3.0/qualification/rtx5090.json).
+
+| Gate | Result | Detail |
+| --- | ---: | --- |
+| Decode throughput | **240.30 tok/s** | 2,048 completion tokens; MTP3, 1,534 of 1,536 drafted tokens accepted (99.87%) |
+| 7,680-token prefill | **3,193.77 tok/s** | exact retrieval |
+| 32,256-token prefill | **2,956.73 tok/s** | exact retrieval |
+| 64,512-token prefill | **2,664.22 tok/s** | exact retrieval |
+| 98,304-token prefill | **2,402.59 tok/s** | exact retrieval |
+| 130,048-token prefill | **2,199.41 tok/s** | exact retrieval; 131,072-token ceiling |
+| Warm follow-up, 89,022-token session | **0.191 s** to first token | vs **36.651 s** cold equivalent (~192×); 89,003 cached input tokens attested |
+| Warm follow-up, 28,535-token session | **0.126 s** to first token | vs **9.719 s** cold equivalent (~77×); 28,515 cached input tokens attested |
+| Deletion, no resurrection | **passed** | deleted continuation refused immediately and after 1,030-record LRU pressure |
+| Agent protocol | **passed** | authenticated identity, stateful continuation, 2 forks, parent delete with surviving descendant |
+
+Warm/cold method: server-side vantage, one sample per point, synthetic content-safe fixtures; the
+cold pair sends a fresh equivalent-length prompt that cannot reuse any prefix. Full measurement
+detail: [`2026-08-30-warm-vs-cold-ttft-v03.json`](measurements/2026-08-30-warm-vs-cold-ttft-v03.json).
+
+This lane's recovery path after a process restart is OMP transcript replay: the response store is
+process-local by design on the container lane, and no restart-continuation claim is made for it.
+Durable process-restart continuation is a native Windows lane property (tables above).
+
+### Durable checkpoints on the native Windows lanes
+
+v0.3.0 ships checkpoint-backed session durability on the RTX 4090 and RTX 3090 native Windows
+lanes (DirectStorage): a follow-up continues from restored state after a process restart instead
+of re-prefilling the transcript, and each lane's restart gate binds the exact observed
+restoration above. The RTX 5090 container makes no restart-continuation claim — its response
+store is process-local by design and its recovery path is OMP transcript replay. Upstream,
+[UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its
+DirectStorage cold restore at 10.1 GB/s (1.51 GiB in 150 ms) on its own artifacts — an
+engine-family capability reference, not a product claim.
 
 ## Qualified `v0.2.0-beta.1` results
 
@@ -35,31 +113,14 @@ not an architecture-normalized benchmark.
 | RTX 3090 released v0.2 preview | released live gate `not_run` | released restart gate `not_run` | no released-package claim | no released-package claim | no released-package claim | historical preview remains non-installable |
 | RTX 4090, `qwen38-4090-v0.1`, MTP0, C1 | 102,060-token checkpoint seed and 102,075-token restored continuation | process replacement and disk restore passed | **52.330 tok/s** over 1,168 tokens | **1,410.691 tok/s** | profile-bound | source-controlled typed-tool Golden-equivalent passed |
 
-### RTX 3090 — fresh `v0.2.1-beta.1` parity candidate, MTP3, C1
+### RTX 3090 parity campaign (2026-08-30)
 
-Candidate package `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`
-at source `872ee508c1f9c46fa38f4170c7e21f254a79e21f`. This is post-release candidate
-evidence, not a rewrite of the published `v0.2.0-beta.1` authority.
-
-| Gate | Result | Detail |
-| --- | ---: | --- |
-| Authenticated protocol | **15/15 passed** | OpenAI, Anthropic, Responses, tools, isolation, continuation, delete survival |
-| Long context | **64,512 prompt tokens** | exact `ORCHID=493817; COLOR=COBALT` retrieval in 88.89 s |
-| Process restart | **passed** | PID replaced; 45 cached input tokens restored; 310,216,517 checkpoint bytes |
-| Managed C1 decode | **90.17 tok/s** | exact 1,024-token completion; 16.48 s end-to-end wall time |
-| Managed C1 prefill | **893.41 tok/s** | 4,541 computed prompt tokens; no prefix hit |
-| MTP3 acceptance | **93.43%** | exact managed C1 workload |
-| Peak envelope | **21,159 MiB · 299.8 W · 47 °C** | GPU-only qualification at the 300 W cap |
-| Lifecycle / OMP | **passed** | clean install, upgrade, two rollback directions, protected ACLs, exact read-tool answer |
-
-[Hash-bound candidate receipt](measurements/2026-08-30-rtx3090-parity.json).
-
-The RTX 4090 Golden replacement is synthetic and committed. The unavailable historical private
-corpus was not reused. The RTX 3090 automatic-use role corpus is a separate, stricter gate that did
-not pass; no unattended role is authorized by these interactive product measurements. The returned
-validation rig closed the interactive package gates above. Public install authority still requires
-a new product manifest; [request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
-instead of treating candidate evidence as a released asset.
+The RTX 3090 lane was qualified after the v0.2 cut as candidate package
+`e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97` at source
+`872ee508c1f9c46fa38f4170c7e21f254a79e21f`; `v0.3.0` binds those exact bytes, and the full gate
+table above is this campaign's receipt promoted into the release. Hash-bound candidate receipt:
+[2026-08-30-rtx3090-parity.json](measurements/2026-08-30-rtx3090-parity.json). The separate,
+stricter unattended evidence-role corpus did not pass, so that automatic route stays disabled.
 
 ## Maintainer measurement — warm vs cold follow-up turn (2026-08-29)
 
@@ -150,15 +211,16 @@ headroom of the engine family this product rides on. Full methodology:
 
 ## Community results
 
-Early-access leaderboard. One row per verified environment; newest first. Submit yours with the
+Community leaderboard. One row per verified environment; newest first. Submit yours with the
 [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
 after the documented acceptance checks pass.
 
 | Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.3.0 | 240.30 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx5090.json) (maintainer) |
 | 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
 | 2026-08 | RTX 4090 | 24 GiB | Native Windows 11 x64 | v0.2.0-beta.1 | 52.330 | — (MTP0 profile) | 102,075-token restored continuation after process restart | [qualification](../releases/v0.2.0-beta.1/qualification/rtx4090.json) (maintainer) |
-| 2026-08 | RTX 3090 | 24 GiB | Preview candidate | v0.2.0-beta.1 | not run | not run | current live-model gates deferred | [incomplete receipt](../releases/v0.2.0-beta.1/qualification/rtx3090.json) (maintainer) |
+| 2026-08 | RTX 3090 | 24 GiB | Native Windows 11 x64 | v0.3.0 | 90.17 | 93.43% | 64,512 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx3090.json) (maintainer) |
 
 Submission rules:
 

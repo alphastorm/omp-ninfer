@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OMP NInfer — warm vs cold time to first token</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  .chart { width: 1240px; height: 420px; padding: 34px 42px 30px; display: grid; grid-template-rows: 34px 1fr 30px; }
+  .head, .foot { display: flex; align-items: center; justify-content: space-between; }
+  .head .brand img { width: 22px; height: 22px; }
+  .head .brand-name { font-size: 15px; }
+  .main { display: grid; grid-template-rows: auto auto auto; gap: 26px; align-content: center; }
+  .title { font-size: 21px; font-weight: 500; letter-spacing: -.025em; color: var(--warm); margin-bottom: 10px; }
+  .title span { color: var(--muted); font-size: 12px; margin-left: 12px; font-weight: 400; letter-spacing: 0; }
+  .session { display: grid; grid-template-columns: 1fr 150px; gap: 28px; align-items: center; }
+  .bars { display: grid; gap: 9px; }
+  .label { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 2px; }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .bar { height: 16px; border-radius: 2px; }
+  .bar.warm { background: var(--local); box-shadow: 0 0 16px var(--local-glow); }
+  .bar.cold { background: linear-gradient(90deg, rgba(240,242,243,0.17), rgba(240,242,243,0.07)); border: 1px solid var(--line-strong); }
+  .value { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--ink); white-space: nowrap; }
+  .row.hot .value { color: #ab9df0; }
+  .value small { color: var(--muted); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-left: 6px; }
+  .ratio { text-align: right; }
+  .ratio strong { display: block; font-size: 46px; line-height: .9; letter-spacing: -.05em; font-weight: 600; color: var(--ink); }
+  .ratio span { display: block; margin-top: 8px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+  .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .foot strong { color: var(--local); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="canvas chart">
+  <div class="head">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Benchmarks · time to first token</span></div>
+    <div class="eyebrow">Lower is better</div>
+  </div>
+  <div class="main">
+    <div class="title">Warm follow-ups continue from retained GPU state.<span>Cold equivalents re-prefill the full session.</span></div>
+    <div class="session">
+      <div class="bars">
+        <div class="label">89,022-token session</div>
+        <div class="row hot"><div class="bar warm" style="width: 6px;"></div><div class="value">0.191 s<small>warm · previous_response_id</small></div></div>
+        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">36.651 s<small>cold · full re-prefill</small></div></div>
+      </div>
+      <div class="ratio"><strong>~192×</strong><span>faster first token</span></div>
+    </div>
+    <div class="session">
+      <div class="bars">
+        <div class="label">28,535-token session</div>
+        <div class="row hot"><div class="bar warm" style="width: 4px;"></div><div class="value">0.126 s<small>warm · previous_response_id</small></div></div>
+        <div class="row"><div class="bar cold" style="width: 22.8%;"></div><div class="value">9.719 s<small>cold · full re-prefill</small></div></div>
+      </div>
+      <div class="ratio"><strong>~77×</strong><span>faster first token</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Qualification-bound · one sample per point · server-side vantage · RTX 5090</span><strong>docs/BENCHMARKS.md →</strong></div>
+</div>
+</body>
+</html>

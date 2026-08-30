@@ -2,7 +2,7 @@ name: Model or profile request
 description: Propose a distinct registered model profile without inheriting qualified claims
 title: "[profile request]: "
 labels:
-  - early-access
+  - community
 body:
   - type: markdown
     attributes:

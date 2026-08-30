@@ -1,19 +1,23 @@
 # Contributing
 
-OMP NInfer is in narrow invited early access. High-signal installation reports, reproducible
-integration defects, documentation corrections, benchmark submissions, performance work through the
+OMP NInfer has a public release for three exact qualified GPU lanes. High-signal installation
+reports, reproducible integration defects, documentation corrections, benchmark submissions,
+performance work through the
 [performance program](docs/PERFORMANCE.md), and release-contract fixes are useful. Generic
 model/runtime expansion and speculative abstractions are not current goals.
 
 ## Help close a real gate
 
-- **Want to test an RTX 5090, 4090, or 3090 lane?**
-  [Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)
-  with your exact card and long-session workflow.
+- **Want to run an RTX 5090, 4090, or 3090 lane?**
+  [`Get started`](docs/QUICKSTART.md) with the exact published lane, then use the
+  [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml),
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml),
+  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml)
+  that matches the observation.
 - **Own a qualified card and a published package?** Run a clean install and report
   [time-to-first-turn plus every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
-- **Own an RTX 3090?** The fresh candidate gates passed; independent content-safe hardware reports
-  now test transferability rather than closing a missing maintainer-hardware gate.
+- **Own an RTX 3090?** The qualified release package is public; independent content-safe hardware
+  reports now test transferability rather than closing a missing maintainer-hardware gate.
 - **Work on CUDA kernels?** Pick a measured bottleneck from the
   [performance program](docs/PERFORMANCE.md), then submit before/after receipts for the affected
   end-to-end workload with the
@@ -34,7 +38,7 @@ redaction. Security reports always stay private.
   (downstream of [Neroued/ninfer](https://github.com/Neroued/ninfer); kernel/perf work starts at
   [docs/PERFORMANCE.md](docs/PERFORMANCE.md)).
 - OMP session/tool/provider semantics: upstream
-  [Oh My Pi](https://github.com/can1357/oh-my-pi) where the change is general; the beta client
+  [Oh My Pi](https://github.com/can1357/oh-my-pi) where the change is general; the pinned client
   fork only carries the NInfer integration until those parts are upstreamed.
 - Native RTX 4090 and RTX 3090 runtime variants: their reviewed branches in `alphastorm/ninfer`
   (upstream ports: [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090),

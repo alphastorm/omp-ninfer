@@ -45,7 +45,7 @@ def load_authority(path: Path) -> dict[str, Any]:
             "compatibility authority_id is absent")
     product_release = value.get("product_release")
     require(isinstance(product_release, str)
-            and re.fullmatch(r"v\d+\.\d+\.\d+-beta\.\d+", product_release) is not None,
+            and re.fullmatch(r"v\d+\.\d+\.\d+(?:-beta\.\d+)?", product_release) is not None,
             "compatibility product_release is invalid")
     require(isinstance(value.get("composition"), dict), "composition is absent")
     composition = value["composition"]
@@ -85,24 +85,31 @@ def load_authority(path: Path) -> dict[str, Any]:
                 f"{profile_id} lifecycle script SHA-256 is invalid")
         require(isinstance(profile.get("gpu_qualification"), dict),
                 f"{profile_id} GPU qualification is absent")
+        gpu_status = profile["gpu_qualification"].get("status")
+        require(gpu_status in {"qualified", "in qualification"},
+                f"{profile_id} GPU qualification status is invalid")
         gpu_receipt = profile["gpu_qualification"].get("receipt")
-        require(isinstance(gpu_receipt, dict),
-                f"{profile_id} GPU qualification receipt is absent")
-        require(
-            isinstance(gpu_receipt.get("url"), str)
-            and re.fullmatch(
-                r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
-                r"[0-9a-f]{40}/releases/"
-                + re.escape(product_release)
-                + r"/qualification/rtx5090\.json",
-                gpu_receipt["url"],
+        if gpu_status == "in qualification":
+            require(gpu_receipt is None,
+                    f"{profile_id} in-qualification GPU receipt must be pending")
+        else:
+            require(isinstance(gpu_receipt, dict),
+                    f"{profile_id} GPU qualification receipt is absent")
+            require(
+                isinstance(gpu_receipt.get("url"), str)
+                and re.fullmatch(
+                    r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
+                    r"[0-9a-f]{40}/releases/"
+                    + re.escape(product_release)
+                    + r"/qualification/rtx5090\.json",
+                    gpu_receipt["url"],
+                )
+                is not None,
+                f"{profile_id} GPU qualification receipt URL is not immutable",
             )
-            is not None,
-            f"{profile_id} GPU qualification receipt URL is not immutable",
-        )
-        require(isinstance(gpu_receipt.get("sha256"), str)
-                and re.fullmatch(r"[0-9a-f]{64}", gpu_receipt["sha256"]) is not None,
-                f"{profile_id} GPU qualification receipt SHA-256 is invalid")
+            require(isinstance(gpu_receipt.get("sha256"), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", gpu_receipt["sha256"]) is not None,
+                    f"{profile_id} GPU qualification receipt SHA-256 is invalid")
         acceptance = profile.get("acceptance_receipt")
         if acceptance is not None:
             require(isinstance(acceptance, dict), f"{profile_id} acceptance receipt is invalid")
@@ -110,9 +117,8 @@ def load_authority(path: Path) -> dict[str, Any]:
                 isinstance(acceptance.get("url"), str)
                 and re.fullmatch(
                     r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
-                    r"[0-9a-f]{40}/releases/"
-                    + re.escape(product_release)
-                    + r"/acceptance/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
+                    r"[0-9a-f]{40}/releases/v\d+\.\d+\.\d+(?:-beta\.\d+)?/"
+                    r"acceptance/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
                     acceptance["url"],
                 )
                 is not None,
@@ -153,20 +159,61 @@ def load_authority(path: Path) -> dict[str, Any]:
                 f"{variant_id} installation mode is absent")
         receipt = variant.get("qualification_receipt")
         require(isinstance(receipt, dict), f"{variant_id} qualification receipt is absent")
-        require(
-            isinstance(receipt.get("url"), str)
+        receipt_url = receipt.get("url")
+        receipt_path = receipt.get("path")
+        immutable_receipt_url = (
+            isinstance(receipt_url, str)
             and re.fullmatch(
                 r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
-                r"[0-9a-f]{40}/releases/"
-                + re.escape(product_release)
-                + r"/qualification/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
-                receipt["url"],
-            ) is not None,
-            f"{variant_id} qualification receipt URL is not immutable",
+                r"[0-9a-f]{40}/releases/v\d+\.\d+\.\d+(?:-beta\.\d+)?/"
+                r"qualification/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
+                receipt_url,
+            ) is not None
         )
+        local_measurement = (
+            receipt_url is None
+            and isinstance(receipt_path, str)
+            and re.fullmatch(r"docs/measurements/[a-z0-9-]+\.json", receipt_path) is not None
+        )
+        require(immutable_receipt_url or local_measurement,
+                f"{variant_id} qualification receipt binding is invalid")
         require(isinstance(receipt.get("sha256"), str)
                 and re.fullmatch(r"[0-9a-f]{64}", receipt["sha256"]) is not None,
                 f"{variant_id} qualification receipt SHA-256 is invalid")
+        if "release_tag" in variant:
+            expected_release_tags = {
+                "rtx3090-windows-native": "v0.3.0-qwen38-3090.1",
+                "rtx4090-windows-native": "v0.2.0-qwen38-4090-beta.1",
+            }
+            expected_package_names = {
+                "rtx3090-windows-native": (
+                    "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-"
+                    "cuda13.3-rtx3090.tar.gz"
+                ),
+                "rtx4090-windows-native": "ninfer-4090-qwen38-v0.1.0-win-x64.zip",
+            }
+            require(variant.get("release_tag") == expected_release_tags[variant_id],
+                    f"{variant_id} component release tag is invalid")
+            require(variant.get("package_name") == expected_package_names[variant_id],
+                    f"{variant_id} package name is invalid")
+            require(isinstance(variant.get("source_commit"), str)
+                    and re.fullmatch(r"[0-9a-f]{40}", variant["source_commit"]) is not None,
+                    f"{variant_id} source commit is invalid")
+            require(isinstance(variant.get("package_sha256"), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", variant["package_sha256"]) is not None,
+                    f"{variant_id} package SHA-256 is invalid")
+            require(isinstance(variant.get("package_bytes"), int)
+                    and variant["package_bytes"] > 0,
+                    f"{variant_id} package size is invalid")
+            package_url = variant.get("package_url")
+            if package_url is not None:
+                require(
+                    package_url == (
+                        "https://github.com/alphastorm/ninfer/releases/download/"
+                        f"{variant['release_tag']}/{variant['package_name']}"
+                    ),
+                    f"{variant_id} package URL does not bind its component release",
+                )
         if variant["status"] == "qualified":
             require(variant.get("installable") is True,
                     f"{variant_id} qualified without an installable artifact")
@@ -192,17 +239,20 @@ def render(authority: dict[str, Any]) -> str:
     for profile in authority["profiles"]:
         client = profile["client_distribution"]
         gpu = profile["gpu_qualification"]
+        runtime_text = f"`{gpu['profile']}`"
+        if gpu.get("status") != "qualified":
+            runtime_text += f" ({gpu['status']})"
         acceptance = profile.get("acceptance_receipt")
         acceptance_text = (
             f"[receipt]({acceptance['url']})" if acceptance else "pending"
         )
         lines.append(
-            "| `{id}` | {os} {arch} | `{gpu}` | `{transport}` | `{adapter}` | "
+            "| `{id}` | {os} {arch} | {gpu} | `{transport}` | `{adapter}` | "
             "**{status}** | {installable} | {acceptance} |".format(
                 id=profile["id"],
                 os=client["os"],
                 arch=client["architecture"],
-                gpu=gpu["profile"],
+                gpu=runtime_text,
                 transport=profile["transport"],
                 adapter=profile["adapter"],
                 status=profile["status"],
@@ -223,9 +273,14 @@ def render(authority: dict[str, Any]) -> str:
         ])
         for variant in variants:
             receipt = variant["qualification_receipt"]
+            receipt_text = (
+                f"[receipt]({receipt['url']})"
+                if receipt.get("url")
+                else f"`{receipt['path']}`"
+            )
             lines.append(
                 "| {id} | {platform} | {gpu} | {cuda} | {context:,} | "
-                "**{status}** | {installable} | {installation} | [receipt]({receipt}) |".format(
+                "**{status}** | {installable} | {installation} | {receipt} |".format(
                     id=variant["id"],
                     platform=variant["platform"],
                     gpu=variant["gpu"],
@@ -234,9 +289,22 @@ def render(authority: dict[str, Any]) -> str:
                     status=variant["status"],
                     installable="yes" if variant["installable"] else "no",
                     installation=variant["installation_mode"],
-                    receipt=receipt["url"],
+                    receipt=receipt_text,
                 )
             )
+        if all("package_name" in variant for variant in variants):
+            lines.extend(["", "Package bindings:", ""])
+            for variant in variants:
+                package = (
+                    f"[`{variant['package_name']}`]({variant['package_url']})"
+                    if variant.get("package_url")
+                    else f"`{variant['package_name']}` (public URL pending)"
+                )
+                lines.append(
+                    f"- `{variant['id']}`: component `{variant['release_tag']}`; "
+                    f"package {package}; SHA-256 `{variant['package_sha256']}`; "
+                    f"{variant['package_bytes']:,} bytes."
+                )
     lines.extend(["", "## Profile boundaries", ""])
     for profile in authority["profiles"]:
         lines.extend(

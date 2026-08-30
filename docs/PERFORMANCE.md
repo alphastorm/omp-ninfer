@@ -124,9 +124,9 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
-| DirectStorage-style weight paging on the 5090 lane | Windows DirectStorage and the Linux/WSL2 async backend are independently qualified in v0.2; future work is a fixed end-to-end cold-start product comparison | qualified foundation |
+| DirectStorage-style weight paging on the 5090 lane | The io_uring checkpoint backend ships in the v0.3.0 container lane and Windows DirectStorage in both native lanes; the remaining work is a fixed end-to-end cold-start product comparison | shipped foundation; comparison open |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
-| Durable session checkpoints → process-restart continuation | The released RTX 4090 profile restored a 102K-token session; fresh RTX 5090, 4090, and 3090 candidates now pass their exact restart gates. | released on 4090; candidate-qualified on all three |
+| Durable session checkpoints → process-restart continuation | Both native Windows lanes bind passing restart gates: 102K restored continuation on RTX 4090 and 310 MB checkpoint restoration on RTX 3090; the RTX 5090 container keeps transcript-replay recovery, and its durable candidate branch is the next step | released on both native lanes; container lane open |
 | MTP acceptance modelling for Qwen3.8 | Recorded acceptance ranges from 48.9% on an upstream `nvfp4` workload through 77.0% in v0.1 to 99.87% on the fixed v0.2 decode workload; a matched corpus is needed before attributing the delta to quantization | open |
 | DFlash-style deeper drafting (k=7) on 27B | Upstream measured 764–786 tok/s at 65–66% acceptance on 35B-A3B with DFlash; unknown economics on dense 27B | open |
 

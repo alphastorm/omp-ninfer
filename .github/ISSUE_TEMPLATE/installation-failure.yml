@@ -1,8 +1,8 @@
 name: Installation failure
-description: Report a reproducible failure in the supported early-access path
+description: Report a reproducible failure in a supported public release path
 title: "[install]: "
 labels:
-  - early-access
+  - community
 body:
   - type: markdown
     attributes:
@@ -27,7 +27,7 @@ body:
       label: First failing step
       options:
         - Release manifest verification
-        - Homebrew beta installation
+        - OMP client installation
         - Model download or checksum
         - Docker or NVIDIA prerequisite
         - NInfer image or binary verification
@@ -58,9 +58,9 @@ body:
     attributes:
       label: Starting state
       options:
-        - Fresh install; no beta container or provider
-        - Existing stopped beta container
-        - Existing running beta container
+        - Fresh install; no NInfer container or provider
+        - Existing stopped NInfer container
+        - Existing running NInfer container
         - Existing OMP provider configuration
         - Resumed interrupted model download
     validations:

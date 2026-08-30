@@ -24,9 +24,22 @@ class PublicNumbersTests(unittest.TestCase):
         authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
         cls.release = authority["product_release"]
         release_root = ROOT / "releases" / cls.release
-        cls.qualification = json.loads(
-            (release_root / "qualification" / "rtx5090.json").read_text(encoding="utf-8")
-        )
+        receipt = release_root / "qualification" / "rtx5090.json"
+        if not receipt.is_file():
+            manifest = json.loads((release_root / "manifest.json").read_text(encoding="utf-8"))
+            if manifest.get("status") != "draft":
+                raise AssertionError(
+                    f"{cls.release} is {manifest.get('status')!r} but carries no rtx5090 receipt"
+                )
+            qualified = sorted(
+                path
+                for path in (ROOT / "releases").iterdir()
+                if (path / "qualification" / "rtx5090.json").is_file()
+            )
+            if not qualified:
+                raise AssertionError("no release carries an rtx5090 qualification receipt")
+            receipt = qualified[-1] / "qualification" / "rtx5090.json"
+        cls.qualification = json.loads(receipt.read_text(encoding="utf-8"))
         cls.profile = json.loads(
             (ROOT / "profiles" / "qwen38-rtx5090-windows-docker-local.json").read_text(
                 encoding="utf-8"
@@ -69,16 +82,23 @@ class PublicNumbersTests(unittest.TestCase):
         self.assert_in_both(f"{ceiling:,}")
 
     def test_warm_cold_measurement_matches_receipt(self) -> None:
-        receipt = json.loads(
-            (ROOT / "docs" / "measurements" / "2026-08-29-warm-vs-cold-ttft.json").read_text(
+        for name in (
+            "2026-08-29-warm-vs-cold-ttft.json",
+            "2026-08-30-warm-vs-cold-ttft-v03.json",
+        ):
+            receipt = json.loads(
+                (ROOT / "docs" / "measurements" / name).read_text(encoding="utf-8")
+            )
+            for row in receipt["results"]:
+                self.assertIn(f"{row['session_input_tokens']:,}", self.benchmarks)
+                self.assertIn(f"{row['warm_ttft_s']:.3f} s", self.benchmarks)
+                self.assertIn(f"{row['cold_ttft_s']:.3f} s", self.benchmarks)
+        current = json.loads(
+            (ROOT / "docs" / "measurements" / "2026-08-30-warm-vs-cold-ttft-v03.json").read_text(
                 encoding="utf-8"
             )
         )
-        for row in receipt["results"]:
-            self.assertIn(f"{row['session_input_tokens']:,}", self.benchmarks)
-            self.assertIn(f"{row['warm_ttft_s']:.3f} s", self.benchmarks)
-            self.assertIn(f"{row['cold_ttft_s']:.3f} s", self.benchmarks)
-        largest = max(receipt["results"], key=lambda row: row["session_input_tokens"])
+        largest = max(current["results"], key=lambda row: row["session_input_tokens"])
         self.assertIn(f"{largest['warm_ttft_s']:.3f} s", self.readme)
 
     def test_packaged_source_identity_is_authoritative(self) -> None:

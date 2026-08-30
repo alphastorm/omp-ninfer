@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OMP NInfer — prefill throughput across the context window</title>
+<link rel="stylesheet" href="brand.css">
+<style>
+  .chart { width: 1240px; height: 420px; padding: 34px 42px 30px; display: grid; grid-template-rows: 34px auto 1fr 30px; }
+  .head, .foot { display: flex; align-items: center; justify-content: space-between; }
+  .head .brand img { width: 22px; height: 22px; }
+  .head .brand-name { font-size: 15px; }
+  .title { font-size: 21px; font-weight: 500; letter-spacing: -.025em; color: var(--warm); margin: 14px 0 6px; }
+  .title span { color: var(--muted); font-size: 12px; margin-left: 12px; font-weight: 400; }
+  .plot { position: relative; }
+  .plot svg { display: block; width: 100%; height: 100%; }
+  .gridlabel, .xlabel { fill: #7c858e; font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .1em; }
+  .pt { fill: #f0f2f3; }
+  .pt.hot { fill: #9888ef; }
+  .callout { fill: #f0f2f3; font-family: "JetBrains Mono", monospace; font-size: 11px; }
+  .callout tspan { fill: #7c858e; font-size: 9px; }
+  .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .foot strong { color: var(--local); font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="canvas chart">
+  <div class="head">
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Benchmarks · prefill throughput</span></div>
+    <div class="eyebrow">Qualified RTX 5090 profile</div>
+  </div>
+  <div class="title">Above 2,100 tokens/s of prefill all the way to 130K.<span>Exact retrieval verified at every point.</span></div>
+  <div class="plot">
+    <svg viewBox="0 0 1156 236" preserveAspectRatio="none">
+      <!-- gridlines: 1000 / 2000 / 3000 tok/s ; y(v) = 210 - v/3500*200 -->
+      <line x1="70" y1="152.9" x2="1156" y2="152.9" stroke="rgba(232,236,239,0.10)" stroke-width="1"/>
+      <line x1="70" y1="95.7"  x2="1156" y2="95.7"  stroke="rgba(232,236,239,0.10)" stroke-width="1"/>
+      <line x1="70" y1="38.6"  x2="1156" y2="38.6"  stroke="rgba(232,236,239,0.10)" stroke-width="1"/>
+      <line x1="70" y1="210"   x2="1156" y2="210"   stroke="rgba(232,236,239,0.22)" stroke-width="1"/>
+      <text class="gridlabel" x="0" y="213">0</text>
+      <text class="gridlabel" x="0" y="155.9">1,000</text>
+      <text class="gridlabel" x="0" y="98.7">2,000</text>
+      <text class="gridlabel" x="0" y="41.6">3,000</text>
+      <!-- x(t) = 70 + t/131072*1066 ; points 7,680 / 32,256 / 64,512 / 98,304 / 130,048 -->
+      <defs>
+        <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="rgba(152,136,239,0.22)"/>
+          <stop offset="1" stop-color="rgba(152,136,239,0.02)"/>
+        </linearGradient>
+      </defs>
+      <path d="M 132.5 27.5 L 332.3 41.0 L 594.7 57.8 L 869.4 72.7 L 1127.6 84.3 L 1127.6 210 L 132.5 210 Z" fill="url(#area)"/>
+      <path d="M 132.5 27.5 L 332.3 41.0 L 594.7 57.8 L 869.4 72.7 L 1127.6 84.3" fill="none" stroke="#f0f2f3" stroke-width="2"/>
+      <circle class="pt" cx="132.5" cy="27.5" r="3.5"/>
+      <circle class="pt" cx="332.3" cy="41.0" r="3.5"/>
+      <circle class="pt" cx="594.7" cy="57.8" r="3.5"/>
+      <circle class="pt" cx="869.4" cy="72.7" r="3.5"/>
+      <circle class="pt hot" cx="1127.6" cy="84.3" r="5"/>
+      <text class="callout" x="150" y="20">3,193.77 tok/s</text>
+      <text class="xlabel" x="132.5" y="230" text-anchor="middle">7,680</text>
+      <text class="xlabel" x="332.3" y="230" text-anchor="middle">32,256</text>
+      <text class="xlabel" x="594.7" y="230" text-anchor="middle">64,512</text>
+      <text class="xlabel" x="869.4" y="230" text-anchor="middle">98,304</text>
+      <text class="xlabel" x="1127.6" y="230" text-anchor="end">130,048 prompt tokens</text>
+      <text class="callout" x="1127.6" y="60" text-anchor="end">2,199.41 tok/s <tspan>@ 130,048 tokens</tspan></text>
+      <line x1="1127.6" y1="66" x2="1127.6" y2="76" stroke="rgba(152,136,239,0.6)" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="foot"><span>Exact-retrieval prefill gates · one active request · 131,072-token ceiling</span><strong>docs/BENCHMARKS.md →</strong></div>
+</div>
+</body>
+</html>

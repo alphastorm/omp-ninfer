@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.2.0-beta.1",
-  "status": "early-access",
+  "release": "v0.3.0",
+  "status": "public",
   "installation_mode": "native-windows-docker-local",
   "client": {
     "os": "Windows 11",

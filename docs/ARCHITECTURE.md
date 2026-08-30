@@ -4,7 +4,7 @@ OMP NInfer is an integration and release product, not a third inference runtime.
 version to an exact OMP client, NInfer runtime, Qwen artifact, hardware profile, connection topology,
 and qualification summary.
 
-## v0.2 topology
+## v0.3 topology
 
 ```mermaid
 sequenceDiagram
@@ -34,8 +34,8 @@ the HTTP endpoint. The NInfer process uses one resident model and one active req
 profile. Native Windows 3090/4090 variants retain their own ports, packages, and receipts rather
 than inheriting the primary container identity.
 
-The fresh parity candidate keeps that separation while converging restart semantics: the RTX 3090
-native package writes authenticated, session-scoped checkpoints under its protected release state,
+The RTX 3090 release lane keeps that separation while converging restart semantics: its native
+package writes authenticated, session-scoped checkpoints under protected release state,
 then restores the prior Responses chain after a managed process replacement. OMP's transcript
 remains authoritative if any retained state is absent or invalid.
 
@@ -58,7 +58,7 @@ owner for continuation, persistence, and failure recovery without solving a firs
 
 ## Identity chain
 
-[`manifest.json`](../releases/v0.2.0-beta.1/manifest.json) binds:
+[`manifest.json`](../releases/v0.3.0/manifest.json) binds:
 
 1. product release and support channel;
 2. OMP public source revision, all three native client artifacts, Homebrew beta cask, sizes, and hashes;
@@ -87,9 +87,9 @@ OMP session semantics, or another request proxy.
 ### OMP
 
 Owns the coding-agent UX, transcript, tools, model configuration, stateful Responses transaction,
-and `omp appliance ...` lifecycle. The beta client's exact accepted source is public at
+and `omp appliance ...` lifecycle. The pinned client's exact accepted source is public at
 [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi), carrying the NInfer provider
-integration with upstreaming still intended (see [`ROADMAP.md`](../ROADMAP.md)). v0.2 ships both
+integration with upstreaming still intended (see [`ROADMAP.md`](../ROADMAP.md)). v0.3 ships both
 fail-closed manual configuration and the closed managed appliance adapters.
 
 ### NInfer
@@ -102,9 +102,9 @@ separate hardware contracts.
 
 ### Homebrew tap
 
-Owns distribution of the exact native client archives (Windows, macOS, Linux) plus the stable
-`omp` and prerelease `omp-beta` casks, kept separate so early access does not silently replace the
-stable channel.
+Owns distribution of the exact native client archives (Windows, macOS, Linux). The prerelease
+`omp-beta` cask stays separate from the stable `omp` cask so this product never replaces a user's
+stable OMP.
 
 ## v0.2 cutover
 

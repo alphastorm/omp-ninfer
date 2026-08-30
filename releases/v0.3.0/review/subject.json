@@ -1,0 +1,17 @@
+{
+  "files": [
+    "src/runtime/engine/resource_manager.h",
+    "src/serve/client_identity.cpp",
+    "tests/test_resource_manager.cpp",
+    "tools/smoke/agent_protocol.py"
+  ],
+  "kind": "repository",
+  "packetPath": "/Users/srs/Development/omp-ninfer-v03-staging/review-5090-src/packet.json",
+  "packetSha256": "180bbc82db15a18823c20b1fba905a25a579ed371d21c23eb7cd0ce0465947bd",
+  "repositoryPath": "/Users/srs/Development/omp-ninfer-v03-staging/ninfer-5090-src",
+  "schemaVersion": 2,
+  "scopePath": "/Users/srs/Development/omp-ninfer-v03-staging/review-5090-src/scope.json",
+  "scopeSha256": "4002c8e76572e1a5702b3bd3eb9fd751f26e93c887f8ef604d6c2c2d7a9c38e8",
+  "subjectCommit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+  "subjectDigest": "b413f4c21dad22d34d075e2e21de706a5f319350cea3ad9c146b42c0f0e3c7ca"
+}

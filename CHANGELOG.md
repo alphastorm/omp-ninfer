@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-30
+
 ### Added
+- Fresh RTX 5090 qualification on the identical published runtime bytes: 240.30 tok/s decode
+  (MTP3, 99.87% acceptance), a 3,193.77-through-2,199.41 tok/s exact-retrieval prefill curve to
+  130,048 tokens, a qualification-bound warm/cold pair (0.191 s vs 36.651 s at an 89,022-token
+  session), and an in-process deletion/no-resurrection probe.
+- Public-URL external installation acceptance for the RTX 3090 lane: verified download set,
+  exact-bytes installer acceptance, authenticated smoke, and appliance-state restoration
+  (GPU lease, scheduled task, endpoint, and power limit; console sign-out disclosed).
+- Ready `v0.3.0` manifest binding three qualified GPU lanes, the composed external acceptance,
+  and every per-lane receipt; `verify_release.py --require-ready` passes on the tree.
 
 - Hash-bound RTX 3090 `v0.2.1-beta.1` parity candidate: deterministic path-neutral package,
   15/15 protocol checks, exact 64K retrieval, durable restart, bidirectional rollback, protected
@@ -28,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-session README demo (GIF, MP4, poster) recorded against the exact released v0.2.0-beta.1
   RTX 5090 runtime, with provenance notes under `docs/media/`.
 - Labeled maintainer warm-vs-cold follow-up-turn latency measurement on the released runtime.
+- Receipt-bound benchmark charts (warm-vs-cold TTFT, RTX 5090 prefill curve, per-lane decode)
+  rendered through the deterministic asset pipeline and embedded in the benchmarks page.
+- Crisp 2x README demo derivatives (GIF, MP4, poster) rendered directly from the canonical cast
+  with a brand-exact terminal palette, replacing the upscaled social fallback in the README.
+- RTX 3090 qualified component release `v0.3.0-qwen38-3090.1` publishing the exact parity
+  package bytes, source archive, SBOM, lifecycle scripts, and closed checksum set.
+- Cross-session eviction hygiene invariant test pinned in the runtime after the v0.3 source
+  freeze review; the review ledger dispositions are archived with the release evidence.
 
 ### Changed
 
@@ -43,6 +62,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the full candidate gate; access copy now distinguishes qualified bytes from published authority.
 - Refreshed stale v0.1-era statements in the contributing router, related-work family section,
   roadmap wedge, security policy support table, brand canon, and benchmark issue form.
+- Cut every public surface over from invited-tester beta to first-public-release posture:
+  BRAND status grammar and primary action, README front door, quickstart lanes, roadmap,
+  security support table, contributing router, release channels, issue forms, profiles, and
+  launcher pins now describe three qualified GPU lanes with public install authority.
+- Promoted the RTX 3090 lane to qualified/installable in the compatibility authority and
+  scaffolded the `v0.3.0` draft manifest with explicit publication blockers.
 
 ## [0.2.0-beta.1] - 2026-08-29
 
@@ -147,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...v0.3.0
 [0.2.0-beta.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.1.0-beta.1...v0.2.0-beta.1
 [0.1.0-beta.1]: https://github.com/alphastorm/omp-ninfer/releases/tag/v0.1.0-beta.1

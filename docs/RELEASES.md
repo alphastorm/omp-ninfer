@@ -7,31 +7,44 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Early access | Invited testers, closed exact profiles, known limitations and non-claims | `v0.2.0-beta.1` ready prerelease |
-| Stable | Broadly advertised supported release | none |
-| Development | Qualified candidates with no published install/support claim | RTX 3090 `v0.2.1-beta.1` parity candidate |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.3.0`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.3.0` work |
 
-GitHub `Latest` must not point to an early-access prerelease. The stable `omp` Homebrew cask remains
-unchanged; early access uses `omp-beta`.
+Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
+prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
 
-- Product prerelease: `alphastorm/omp-ninfer@v0.2.0-beta.1`
-- RTX 5090 runtime component: `alphastorm/ninfer@v0.2.0-qwen38-5090-beta.2`
-- native client component: `alphastorm/homebrew-omp@omp-18.0.9-cross-platform-beta-2`
-- public OMP source/client mirror: `alphastorm/oh-my-pi@omp-v18.0.9-ninfer-beta.2`
-- native runtime components: RTX 3090 preview at `alphastorm/ninfer@v0.2.0-qwen38-3090-beta.1`
-  and qualified RTX 4090 beta at `v0.2.0-qwen38-4090-beta.1`
-- post-release RTX 3090 parity candidate: source
-  `872ee508c1f9c46fa38f4170c7e21f254a79e21f`, package
-  `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`, and
-  [qualification summary](measurements/2026-08-30-rtx3090-parity.json)
+### v0.3.0 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.3.0`.
+- OMP source/client: `alphastorm/oh-my-pi@omp-v18.0.9-ninfer-beta.2`; the unchanged native archives
+  remain at `alphastorm/homebrew-omp@omp-18.0.9-cross-platform-beta-2`.
+- RTX 3090 runtime component: release-cut slot
+  [`alphastorm/ninfer@v0.3.0-qwen38-3090.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.3.0-qwen38-3090.1),
+  which must resolve before cut; package
+  `ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`, SHA-256
+  `e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97`,
+  `573,355,399` bytes, source commit `872ee508c1f9c46fa38f4170c7e21f254a79e21f`, and
+  [qualification receipt](measurements/2026-08-30-rtx3090-parity.json).
+- RTX 4090 runtime component: rebinds the published
+  `alphastorm/ninfer@v0.2.0-qwen38-4090-beta.1` component without changing its bytes.
+- RTX 5090 runtime component: source `alphastorm/ninfer@6efa06505` from
+  `vendor/neroued-dev`; OCI digest, SBOM identity, and qualification receipt are pending publication
+  and remain release blockers until the product manifest binds them.
+
+### Prior release record: v0.2.0-beta.1
+
+- Product prerelease: `alphastorm/omp-ninfer@v0.2.0-beta.1`.
+- RTX 5090 runtime component: `alphastorm/ninfer@v0.2.0-qwen38-5090-beta.2`.
+- Native client component: `alphastorm/homebrew-omp@omp-18.0.9-cross-platform-beta-2`.
+- Public OMP source/client mirror: `alphastorm/oh-my-pi@omp-v18.0.9-ninfer-beta.2`.
+- Native runtime components: RTX 3090 preview at
+  `alphastorm/ninfer@v0.2.0-qwen38-3090-beta.1` and qualified RTX 4090 beta at
+  `alphastorm/ninfer@v0.2.0-qwen38-4090-beta.1`.
 
 A component tag does not make the product release ready. The product tag must carry the exact ready
 manifest and qualification summary.
-
-The RTX 3090 candidate is qualification-complete but unpublished. It must enter a new product
-manifest as those exact bytes—or be requalified—before any install documentation can select it.
 
 ## Release state transition
 
@@ -53,8 +66,8 @@ Each `releases/<version>/manifest.json` has three valid states:
 - `publication.blockers` remains non-empty and the qualification still records that external
   installation has not passed;
 - `python3 scripts/verify_release.py --require-installable` passes; and
-- maintainers may run the tester-equivalent external-install acceptance from that exact commit, but
-  no product tag or invited-tester readiness claim exists yet.
+- maintainers may run the external-install acceptance from that exact commit, but no product tag
+  or public-release readiness claim exists yet.
 
 ### `ready`
 
@@ -148,7 +161,8 @@ qualification summary, quickstart, security model, and known limitations. Do not
 - “first stateful Responses” or “first persistent KV cache”;
 - automatic container restart, multi-GPU, or multi-tenant support;
 - structured JSON-schema output or unattended RTX 3090 role activation;
-- stable/GA support or universal GPU performance; or
+- support response-time guarantees or other SLAs;
+- universal GPU performance; or
 - benchmark values not present in the public qualification summary.
 
 Use “OMP NInfer” for the product/repository and `omp appliance ...` only for the command concept.

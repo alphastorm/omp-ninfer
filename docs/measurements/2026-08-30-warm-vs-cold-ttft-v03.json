@@ -1,0 +1,67 @@
+{
+  "artifact_type": "ninfer_rtx5090_warm_cold_ttft",
+  "method": {
+    "cold": "fresh equivalent-length synthetic prompt from a different fixed random seed, store=false",
+    "concurrency": 1,
+    "corpus": "synthetic random words from a fixed 20-word vocabulary; content-safe by construction",
+    "definition": "TTFT = request send timestamp to first non-empty generated SSE delta",
+    "requests_per_point": 1,
+    "vantage": "server-host WSL2 loopback, shipped Python streaming HTTP client",
+    "warm": "one stored synthetic seed establishes the session; measured follow-up uses previous_response_id"
+  },
+  "private_paths_included": false,
+  "raw_prompts_or_outputs_included": false,
+  "recorded_at_utc": "2026-08-30T08:01:14.732910Z",
+  "results": [
+    {
+      "cold_cached_tokens": 0,
+      "cold_equivalent_input_tokens": 28535,
+      "cold_fixture_count_tokens": 28535,
+      "cold_fixture_sha256": "85745c292ea3add679426997601fe6c45be3dc6f0420d9ef376d842b86242ec1",
+      "cold_reuse_path": "root",
+      "cold_server_ttft_s": 9.717188383,
+      "cold_ttft_s": 9.719455781,
+      "seed_prompt_tokens": 28500,
+      "session_input_tokens": 28535,
+      "target_session_tokens": 28500,
+      "warm_cached_tokens": 28515,
+      "warm_fixture_count_tokens": 28500,
+      "warm_fixture_sha256": "94a354468545246fee90365686c4a42caea00e84614ad36cc75dbd5bdead42ca",
+      "warm_reuse_path": "private_endpoint",
+      "warm_server_ttft_s": 0.12517711499999998,
+      "warm_to_cold_ttft_ratio": 0.012987332711236704,
+      "warm_ttft_s": 0.126229806
+    },
+    {
+      "cold_cached_tokens": 0,
+      "cold_equivalent_input_tokens": 89022,
+      "cold_fixture_count_tokens": 89022,
+      "cold_fixture_sha256": "abc610ae641e288161cf21be5ae06eeba579a49376b7eaeaf1445c49d2bcd0cd",
+      "cold_reuse_path": "root",
+      "cold_server_ttft_s": 36.647064647,
+      "cold_ttft_s": 36.651112411,
+      "seed_prompt_tokens": 89000,
+      "session_input_tokens": 89022,
+      "target_session_tokens": 89000,
+      "warm_cached_tokens": 89003,
+      "warm_fixture_count_tokens": 89000,
+      "warm_fixture_sha256": "ddeb13d89a21ccff1f09e24fcb241b07f29f28ee2e8db50835e04759c05252b1",
+      "warm_reuse_path": "private_endpoint",
+      "warm_server_ttft_s": 0.189393153,
+      "warm_to_cold_ttft_ratio": 0.005200287616448904,
+      "warm_ttft_s": 0.190596326
+    }
+  ],
+  "runtime_identity": {
+    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "gpu": "NVIDIA GeForce RTX 5090, 32607 MiB",
+    "host_environment": "Windows 11 x64 + Docker Desktop WSL2",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2"
+  },
+  "schema_version": 1,
+  "status": "passed"
+}
