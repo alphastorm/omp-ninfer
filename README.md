@@ -129,7 +129,7 @@ Exact shipped profiles and receipts in
 | RTX 5090 prefill | **2,199.41 tok/s** at 130,048 tokens, exact retrieval |
 | Warm vs cold follow-up | **0.191 s** vs 36.651 s to first token at an 89,022-token session — qualification-bound, server-side, one sample per point |
 | RTX 3090 native | **90.17 tok/s** decode, 93.43% MTP3 acceptance, exact 64,512-token retrieval, durable restart, 299.8 W observed peak |
-| RTX 4090 native | **52.330 tok/s**, 102K checkpoint restart, exact OMP Golden-equivalent |
+| RTX 4090 native | **93–98 tok/s** decode (MTP3, v0.3.1), 107,851-token restored continuation, exact OMP Golden-equivalent |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
 Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on

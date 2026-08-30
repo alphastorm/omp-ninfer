@@ -118,7 +118,7 @@ Entry detail:
 ## Current order
 
 The backlog below is a pool; the program's order is fixed and lives in
-[`ROADMAP.md`](../ROADMAP.md#after-v030): the RTX 4090 MTP3 qualification campaign first, then
+[`ROADMAP.md`](../ROADMAP.md#after-v030): the RTX 4090 MTP3 qualification campaign (shipped in v0.3.1), then
 the MTP depth-and-corpus ablation that decides draft depth for every lane, then the durable RTX
 5090 container promotion, with the `nvfp4` artifact swap as a v0.4-class requalification decision
 gated on the ablation data.
@@ -132,7 +132,7 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
-| Qualify a speculative (MTP) profile on the RTX 4090 lane | The qualified lane runs MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with MTP7; a qualified MTP3 profile should close most of that gap | ordered first |
+| Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | The engine backends shipped in v0.3.0; promoting the durable-serve candidate branch gives the container lane restart continuation and requires full requalification | ordered third |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | Both native Windows lanes bind passing restart gates: 102K restored continuation on RTX 4090 and 310 MB checkpoint restoration on RTX 3090; the RTX 5090 container keeps transcript-replay recovery, and its durable candidate branch is the next step | released on both native lanes; container lane open |

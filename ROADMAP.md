@@ -122,9 +122,11 @@ The first public release publishes one exact install lane for each qualified GPU
 The performance program has an explicit order; each step is a receipt-gated campaign, not a
 promise:
 
-1. **v0.3.1 — qualify a speculative (MTP3) profile on the RTX 4090 lane.** The cheapest large
-   win: the lane ships MTP0 at 52.330 tok/s while the upstream port measured 229.9 tok/s with
-   MTP7 on its own artifacts. Proven silicon, known campaign shape, no new bytes elsewhere.
+1. **v0.3.1 — qualify a speculative (MTP3) profile on the RTX 4090 lane. Shipped.** The
+   two-arm comparison promoted MTP3 (+17.04% complete Golden-equivalent wall time; decode
+   93.2–97.7 tok/s vs the 52.330 tok/s MTP0 baseline), and the exploratory depth sweep measured
+   draft-3 > draft-4 > draft-5 on the fixed decode workload — the first real datapoint for the
+   ablation below.
 2. **MTP depth-and-corpus ablation.** One unchanged artifact, one context profile, MTP0/3/5/7,
    measured on an agent-shaped corpus (tool calls, thinking, long turns) rather than a fixed
    decode fixture — the 99.87% v0.3 acceptance is a fixed-workload artifact, and this ablation

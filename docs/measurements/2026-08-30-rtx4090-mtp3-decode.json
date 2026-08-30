@@ -1,0 +1,72 @@
+{
+  "artifact_type": "rtx4090_mtp3_decode_measurement",
+  "schema_version": 1,
+  "measured_utc": "2026-08-30T17:05:00Z",
+  "status": "passed",
+  "context": "Maintainer measurement on the owner RTX 4090 host during the 2026-08-30 MTP requalification window, immediately after the MTP3 arm passed qualification on the managed release.",
+  "identity": {
+    "server_binary_sha256": "41fcc1803e4a057de24a485776e71737a31cb39fdd9358350b975f6b11b9c869",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "configuration_sha256": "5a565eafb038c19d699f5a118624ff7a77c245a532c1036aeb2a9b9c136f6175",
+    "package_sha256": "8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef",
+    "deployment_profile": "qwen38-4090-v0.1",
+    "speculative_backend": "mtp",
+    "speculative_draft_tokens": 3
+  },
+  "workload": {
+    "kind": "fixed-prompt technical-writing generation",
+    "input_tokens": 95,
+    "max_output_tokens": 2048,
+    "temperature": 0,
+    "rounds_logged_server_side": 2
+  },
+  "results": {
+    "server_side": [
+      {
+        "decode_seconds": 21.968046299999965,
+        "completion_tokens": 2048,
+        "decode_tokens_per_second": 93.23,
+        "prefill_seconds": 0.0257179,
+        "ttft_seconds": 0.0271844
+      },
+      {
+        "decode_seconds": 20.96491460000003,
+        "completion_tokens": 2048,
+        "decode_tokens_per_second": 97.69,
+        "prefill_seconds": 0.024101,
+        "ttft_seconds": 0.0246308
+      }
+    ],
+    "wall_clock_rounds_seconds": [
+      20.183,
+      22.026,
+      21.017
+    ],
+    "golden_equivalent_wall_seconds": {
+      "mtp0": 5.663106,
+      "mtp3": 4.697929,
+      "improvement_percent": 17.043244
+    },
+    "exploratory_nonqualification": {
+      "mtp4_wall_seconds_2048_tokens": [
+        26.213,
+        26.702
+      ],
+      "mtp5_wall_seconds_2048_tokens": [
+        29.213,
+        29.222
+      ],
+      "note": "Foreground serve from the identical binary and model on an unmanaged loopback port; bench-only, no qualification claim."
+    }
+  },
+  "bindings": {
+    "mtp_decision_selected_profile": "MTP3",
+    "qualification_summary": "../../releases/v0.3.1/qualification/rtx4090.json",
+    "component_release": "https://github.com/alphastorm/ninfer/releases/tag/v0.3.1-qwen38-4090-mtp3.1"
+  },
+  "caveats": [
+    "One machine, one fixed workload; not a universal GPU or model claim.",
+    "Decode throughput is server-side decode time over completion tokens; wall rounds include prefill and HTTP.",
+    "MTP acceptance varies with workload; the depth ordering (3 > 4 > 5) is measured on this fixed workload only."
+  ]
+}
