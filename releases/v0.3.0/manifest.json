@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-public-draft-1",
       "compatibility_url": null,
-      "compatibility_sha256": "500de15be2a4a0eccc588e85c19ed14d9c59f7d085c2b9f8344b4635a36b5c43"
+      "compatibility_sha256": "42d3edf67bbd4c1ac15e731a569ad3764351bb5404d5a380cdd57ad45e31113d"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -92,7 +92,7 @@
         "qualification": {
           "summary": "releases/v0.3.0/qualification/rtx3090.json",
           "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d9020bc2c09205f827daab0f2fe78e66f9b52ab2/releases/v0.3.0/qualification/rtx3090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification/rtx3090.json"
         }
       },
       {
@@ -124,7 +124,7 @@
         "qualification": {
           "summary": "releases/v0.3.0/qualification/rtx4090.json",
           "sha256": "575c9373921c5f8d1651b01d28e2f180cfd41348bdb307f30c2e1886a6f0fdfe",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d9020bc2c09205f827daab0f2fe78e66f9b52ab2/releases/v0.3.0/qualification/rtx4090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification/rtx4090.json"
         },
         "package_name": "ninfer-4090-qwen38-v0.1.0-win-x64.zip"
       }
@@ -145,7 +145,7 @@
   "qualification": {
     "summary": "qualification.json",
     "summary_sha256": "68e1f0b3e845d2495e440344ff254912632558f5a785e6013f8888e4cdca94de",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d9020bc2c09205f827daab0f2fe78e66f9b52ab2/releases/v0.3.0/qualification.json",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": false
   },
