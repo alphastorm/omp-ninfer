@@ -2,7 +2,7 @@
 
 ## Supported trust boundary
 
-`v0.3.0` supports one trusted owner controlling each OMP client and qualified RTX runtime
+The current `v0.3.x` release supports one trusted owner controlling each OMP client and qualified RTX runtime
 host. Local administrators and root can inspect processes, files, container/native runtime state, GPU memory, and
 traffic endpoints. Shared shell hosts, hostile local users, untrusted containers, public HTTP
 service, and tenant isolation are outside the release claim.
@@ -47,7 +47,7 @@ not use this topology where local administrators are outside the trust boundary.
 ## Data flow and retention
 
 OMP stores its normal session transcript and a provider acceleration snapshot on the client. NInfer
-retains bounded Responses/cache state. The `v0.3.0` release publishes authenticated durable
+retains bounded Responses/cache state. The current release publishes authenticated durable
 process-restart continuation for the exact native RTX 4090 and RTX 3090 packages. The RTX 5090
 DirectStorage/io_uring durable-checkpoint backend remains in qualification for the v0.3 campaign; it
 does not inherit a native lane's restart semantics. Native checkpoints and optional request JSONL
