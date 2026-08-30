@@ -2,18 +2,18 @@ name: Clean-install report
 description: Report time-to-first-turn and setup friction on an exact qualified lane
 title: "[clean install]: "
 labels:
-  - early-access
+  - community
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form only for a fresh RTX 5090 or qualified RTX 4090 install from the tagged quickstart. Report content-safe facts, elapsed time, and manual steps—not a raw support bundle. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
+        Use this form only for a fresh install of one qualified lane in the public release from the tagged quickstart. Report content-safe facts, elapsed time, and manual steps—not a raw support bundle. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
   - type: input
     id: release
     attributes:
       label: OMP NInfer release
       description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass first.
-      placeholder: v0.2.0-beta.1
+      placeholder: v0.3.0
     validations:
       required: true
   - type: dropdown
@@ -21,8 +21,9 @@ body:
     attributes:
       label: Qualified lane
       options:
-        - RTX 5090 + Windows 11 / Docker Desktop WSL2
-        - RTX 4090 + native Windows
+        - RTX 5090 container
+        - RTX 4090 native Windows
+        - RTX 3090 native Windows
     validations:
       required: true
   - type: input
@@ -93,5 +94,5 @@ body:
       options:
         - label: I removed secrets, private identifiers, paths, prompts, outputs, raw logs, session data, and any source code I did not deliberately choose to publish.
           required: true
-        - label: This report covers a qualified lane and is not an RTX 3090 support claim.
+        - label: This report covers one exact qualified lane and release manifest/profile.
           required: true
