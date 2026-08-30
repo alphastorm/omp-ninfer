@@ -309,7 +309,7 @@ class ReleaseContractTest(unittest.TestCase):
             ),
             (
                 "qualification_status",
-                "qualification.consistency_probe.status must not be draft or pending in ready mode",
+                "qualification.consistency_probe.status must not contain draft or pending in ready mode",
             ),
             (
                 "authority_id",
@@ -333,7 +333,9 @@ class ReleaseContractTest(unittest.TestCase):
                         self.save(manifest_path, manifest)
                     elif case == "qualification_status":
                         qualification = self.load(qualification_path)
-                        qualification["consistency_probe"] = {"status": "pending"}
+                        qualification["consistency_probe"] = {
+                            "status": "release pending publication"
+                        }
                         self.save(qualification_path, qualification)
                         manifest = self.load(manifest_path)
                         manifest["qualification"]["summary_sha256"] = (

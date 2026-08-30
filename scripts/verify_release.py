@@ -161,8 +161,7 @@ def validate_ready_state_consistency(
     qualification: dict[str, Any],
     errors: list[str],
 ) -> None:
-    forbidden_statuses = {"draft", "pending"}
-    forbidden_authority_markers = ("draft", "pending")
+    forbidden_markers = ("draft", "pending")
     for label, document in (
         ("manifest", manifest),
         ("compatibility", compatibility),
@@ -170,9 +169,10 @@ def validate_ready_state_consistency(
     ):
         for path, field, value in walk_object_fields(document, label):
             if field == "status" and isinstance(value, str):
+                normalized = value.casefold()
                 require(
-                    value.strip().casefold() not in forbidden_statuses,
-                    f"{path} must not be draft or pending in ready mode",
+                    not any(marker in normalized for marker in forbidden_markers),
+                    f"{path} must not contain draft or pending in ready mode",
                     errors,
                 )
             if field == "authority_id" and isinstance(value, str):
@@ -180,7 +180,7 @@ def validate_ready_state_consistency(
                 require(
                     not any(
                         marker in normalized
-                        for marker in forbidden_authority_markers
+                        for marker in forbidden_markers
                     ),
                     f"{path} must not contain draft or pending in ready mode",
                     errors,
