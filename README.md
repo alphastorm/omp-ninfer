@@ -319,6 +319,9 @@ Ordered by how much this product owes them:
    DFlash, Unsloth's NVFP4 weights, and vendored `utf8proc`, `nlohmann/json`, and `cpp-httplib` —
    credited in full in the runtime repositories.
 
+How each upstream is tracked, with fork points and the current pull-in position:
+[Upstream watch](docs/UPSTREAM.md).
+
 OMP NInfer is a community project; it is not affiliated with or endorsed by Oh My Pi, Qwen, or
 NVIDIA.
 

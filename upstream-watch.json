@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "description": "Upstream fork-watch manifest. Each entry names one upstream this product tracks, the exact fork point our lineage last incorporated, and the downstream path classes that make an upstream commit conflict-relevant. scripts/upstream_watch.py turns this into a classified delta report.",
+  "upstreams": [
+    {
+      "id": "ninfer-5090",
+      "upstream": "Neroued/ninfer",
+      "upstream_ref": "master",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+      "fork_point_meaning": "vendor/neroued-dev mirror head incorporated into the shipped 5090 container lineage (feat/unified-durable-resume)",
+      "overlap_paths": [
+        "src/serve/",
+        "src/runtime/engine/",
+        "src/runtime/contract/",
+        "src/targets/qwen3_6/impl/runtime/",
+        "tests/"
+      ]
+    },
+    {
+      "id": "ninfer-4090",
+      "upstream": "UDPSendToFailed/ninfer-4090",
+      "upstream_ref": "feat/rtx-4090-sm89-native",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "11aae2d6342d1fbdc7ef2b9ee17096858be44271",
+      "fork_point_meaning": "vendored base of the native Windows 4090 lane (release/qwen38-4090-v0.1 lineage)",
+      "overlap_paths": [
+        "src/",
+        "packaging/windows/"
+      ]
+    },
+    {
+      "id": "ninfer-3090",
+      "upstream": "Don-Chad/ninfer-3090",
+      "upstream_ref": "master",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
+      "fork_point_meaning": "vendored base of the native Windows 3090 lane (port/omp-v0.2 lineage)",
+      "overlap_paths": [
+        "src/",
+        "packaging/windows/"
+      ]
+    },
+    {
+      "id": "oh-my-pi-client",
+      "upstream": "can1357/oh-my-pi",
+      "upstream_ref": "main",
+      "fork_repo": "alphastorm/oh-my-pi",
+      "fork_point": "cc14e04f075de82c5c0c0ccd2f9dfbce6f03fe9e",
+      "fork_point_meaning": "upstream v18.0.9 tag commit; the pinned patched client rebases downstream patches on this",
+      "overlap_paths": [
+        "packages/ai/",
+        "packages/core/"
+      ]
+    }
+  ]
+}
