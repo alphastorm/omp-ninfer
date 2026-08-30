@@ -10,34 +10,34 @@
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
-    "behavioral_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
-    "release_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
-    "release_source_archive_sha256": "1ef072dbda64875341db27f9dc7e54aa7e97b4546d1f55ee671667d6c703b859",
-    "release_server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "behavioral_source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34",
+    "release_source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34",
+    "release_source_archive_sha256": "b6dbd1a73145de2f636c2a30f147a68fc4529ec63d579120d3aab3633d546a71",
+    "release_server_binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
     "model_artifact_bytes": 18210531328,
-    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+    "configuration_sha256": "a65e9cc84c7c83e8e40a3aee5e41a2d8a1619ac71570ce26ff9023b16ee90b33",
     "public_model_id": "q38-ninfer",
-    "deployment_profile": "qwen38-5090-v0.2.0-beta.2"
+    "deployment_profile": "qwen38-5090-v0.4.0"
   },
   "composition": {
     "behavioral_qualification": {
       "repository_path": "releases/v0.4.0/qualification/rtx5090.json",
-      "sha256": "d207faaa6e1a235317dc7218481d09af4adc5f106d541039e66a59ad3bb610bc",
+      "sha256": "add7cba262daf6a8e48e5c1212477b67ddce59b2645d9d46978c7422b8379ad3",
       "status": "passed",
-      "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2"
+      "source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34"
     },
     "local_release_packaging": {
       "status": "passed",
       "published": true,
-      "release_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
-      "release_server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
-      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
-      "oci_manifest_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+      "release_source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34",
+      "release_server_binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
+      "oci_manifest_digest": "sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
       "binary_package_sha256": "2592d8c7e198dcaff81ef0f3969f975ca1eefd209903f4339eb6f6a0a3f3cec6",
-      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.0-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.2.0-linux-x86_64-cuda13.1.spdx.json",
-      "sbom_sha256": "08350bcb60ed76819eb4ec7ae3f60d4f9e2d82d59279f8155e4fc770e1718d44",
-      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.2.0-qwen38-5090-beta.2",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.4.0-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.4.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "6f5e3a60b295279e46711e8d0c3c133458c67b7bf8920583c70017f1f76c9efc",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.4.0-qwen38-5090-beta.1",
       "anonymous_pull_verified": true,
       "anonymous_assets_verified": true,
       "checksums_verified": true
@@ -47,7 +47,7 @@
         "status": "passed",
         "beta_qualified": true,
         "repository_path": "releases/v0.4.0/qualification/rtx4090.json",
-        "sha256": "575c9373921c5f8d1651b01d28e2f180cfd41348bdb307f30c2e1886a6f0fdfe",
+        "sha256": "41bd8f1bc1ae92f3bd93af71890f03a7a82de4ee2ca7caff38ff50725b3aab33",
         "release_tag": "v0.3.1-qwen38-4090-mtp3.2",
         "package_sha256": "8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef"
       },
@@ -66,7 +66,7 @@
       "operator_class": "owner-operated tester-equivalent",
       "repository_path": "releases/v0.4.0/acceptance/composed-external-installation.json",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/8eb693b5186db0ad08381410e069306e6b3ec451/releases/v0.4.0/acceptance/composed-external-installation.json",
-      "sha256": "72ff34e84f774c95f2405d75a0151ca648daab90aef0abfb2b78759159d38435",
+      "sha256": "1debfaa5bea790097fcdec53518c5bbed5e323e1960cadfdcd1ed0ebdb0633ff",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
       "vision": true,
@@ -76,7 +76,7 @@
       "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_sha256": "29c979988f55ff0564fb5032042d648b7ec1e592279e2dd7490201dc864c388f"
+      "compatibility_sha256": "1a35f9eeeeac54cf4a124fcc1f263f97f7e47b7c8e75a07cdd1ed3c8d3b8cefa"
     }
   },
   "observed_gates": {
