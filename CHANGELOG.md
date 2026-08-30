@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-30
+
 ### Added
+- Fresh RTX 5090 qualification on the identical published runtime bytes: 240.30 tok/s decode
+  (MTP3, 99.87% acceptance), a 3,193.77-through-2,199.41 tok/s exact-retrieval prefill curve to
+  130,048 tokens, a qualification-bound warm/cold pair (0.191 s vs 36.651 s at an 89,022-token
+  session), and an in-process deletion/no-resurrection probe.
+- Public-URL external installation acceptance for the RTX 3090 lane: verified download set,
+  exact-bytes installer acceptance, authenticated smoke, and full machine restoration.
+- Ready `v0.3.0` manifest binding three qualified GPU lanes, the composed external acceptance,
+  and every per-lane receipt; `verify_release.py --require-ready` passes on the tree.
 
 - Hash-bound RTX 3090 `v0.2.1-beta.1` parity candidate: deterministic path-neutral package,
   15/15 protocol checks, exact 64K retrieval, durable restart, bidirectional rollback, protected
@@ -161,6 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...v0.3.0
 [0.2.0-beta.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.1.0-beta.1...v0.2.0-beta.1
 [0.1.0-beta.1]: https://github.com/alphastorm/omp-ninfer/releases/tag/v0.1.0-beta.1

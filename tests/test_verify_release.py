@@ -99,12 +99,12 @@ class ReleaseContractTest(unittest.TestCase):
         )
         self.assertEqual(installable_errors, [])
 
-    def test_checked_in_public_draft_accepts_pending_external_identities(self) -> None:
+    def test_checked_in_public_release_is_ready(self) -> None:
         manifest, errors = VERIFY_RELEASE.validate(ROOT, require_ready=False)
         self.assertEqual(errors, [])
-        self.assertEqual(manifest["status"], "draft")
+        self.assertEqual(manifest["status"], "ready")
         self.assertEqual((manifest["channel"], manifest["audience"]), ("public", "public"))
-        self.assertTrue(manifest["publication"]["blockers"])
+        self.assertEqual(manifest["publication"]["blockers"], [])
         self.assertEqual(
             manifest["components"]["ninfer"]["oci_manifest_digest"],
             "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
@@ -114,11 +114,9 @@ class ReleaseContractTest(unittest.TestCase):
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
-    def test_public_draft_fails_ready_validation(self) -> None:
+    def test_public_release_passes_ready_validation(self) -> None:
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
-        self.assertIn("release manifest is not ready", errors)
-        self.assertIn("ready release requires a passing external installation", errors)
-        self.assertIn("ready release must have no publication blockers", errors)
+        self.assertEqual(errors, [])
 
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()
