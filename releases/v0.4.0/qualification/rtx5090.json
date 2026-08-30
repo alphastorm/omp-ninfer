@@ -5,7 +5,11 @@
     "sha256": "8df38c3c2a106dd819364d377c6837ef049ffeb167b79f37ff33de9cbe968b53",
     "summary": "releases/v0.4.0/qualification/rtx5090-durable.json"
   },
-  "evidence_interpretation": "The v0.4.0 container lane runs new engine+serve bytes (source 1ceaeebd) with durable session checkpoints; every number above is bound in the durable qualification summary and the serve request logs retained on the appliance. The v0.2/v0.3 container receipts remain bound to their own releases.",
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "narrative": "The v0.4.0 container lane runs new engine+serve bytes (source 1ceaeebd) with durable session checkpoints; every number is bound in the durable qualification summary and the serve request logs retained on the appliance. The v0.2/v0.3 container receipts remain bound to their own releases.",
+    "packaged_build_identity_authoritative": true
+  },
   "gates": {
     "agent_protocol": {
       "authenticated_session_identity": true,
@@ -69,7 +73,7 @@
     "deployment_profile": "qwen38-5090-v0.4.0",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
     "server_binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
-    "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "source_commit": "1ceaeebd6701cd88a20aecac028313afa9ef2e34",
     "source_dirty": false
   },
   "private_fleet_projection_included": false,
