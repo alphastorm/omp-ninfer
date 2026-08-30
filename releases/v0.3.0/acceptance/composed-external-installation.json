@@ -1,0 +1,41 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 2,
+  "release": "v0.3.0",
+  "as_of": "2026-08-30",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "composition_basis": "The three OMP 18.0.9 client platform acceptances are rebound unchanged from the immutable v0.2.0-beta.1 campaign (identical client archives, checksums, and provider contract). The composition change in v0.3.0 is the RTX 3090 native lane's public install authority and the freshly requalified RTX 5090 runtime on identical published bytes; both carry fresh receipts below.",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "new_lane_acceptance": {
+    "id": "rtx3090-windows-native-public-install",
+    "repository_path": "releases/v0.3.0/acceptance/rtx3090-public-install.json",
+    "sha256": "b63d9e308c678b437727c1bcbbe4ef81ecf04878ddd051b0c7cf4af652d1867b",
+    "highlights": "public-URL download with exact SHA-256 set verification; downloaded installer accepted the exact qualified bytes (already_installed); controller start ready in 17.756 s; authenticated loopback status HTTP 200; synthetic completion HTTP 200; stop restored task Ready, lease clear, 370 W"
+  },
+  "requalified_primary": {
+    "id": "rtx5090-container-v03-requalification",
+    "repository_path": "releases/v0.3.0/qualification/rtx5090.json",
+    "sha256": "d207faaa6e1a235317dc7218481d09af4adc5f106d541039e66a59ad3bb610bc"
+  },
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "compatibility_authority": "omp-ninfer-v0.3.0-public-draft-1",
+  "compatibility_sha256": "42d3edf67bbd4c1ac15e731a569ad3764351bb5404d5a380cdd57ad45e31113d"
+}

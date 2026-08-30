@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.3.0",
-  "status": "draft",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -144,10 +144,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "68e1f0b3e845d2495e440344ff254912632558f5a785e6013f8888e4cdca94de",
+    "summary_sha256": "40b178270db6d6868b06af2b23ab8d8f43a64c52ae3939f0bab40da2accab1ef",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5e8acf458481881be4c0a475e40c07aba227fc32/releases/v0.3.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -172,8 +172,6 @@
       "NInfer RTX 4090 v0.2.0 beta.1 component",
       "NInfer RTX 3090 v0.3.0 parity component"
     ],
-    "blockers": [
-      "external clean-install acceptance from public URLs pending"
-    ]
+    "blockers": []
   }
 }

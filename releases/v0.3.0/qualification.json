@@ -5,7 +5,7 @@
   "as_of": "2026-08-30",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; one digest-pinned RTX 5090 primary runtime freshly requalified on the identical published bytes; one exact qualified native Windows RTX 4090 runtime rebound unchanged; and one exact qualified native Windows RTX 3090 runtime promoted from the hash-bound parity campaign.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -62,11 +62,17 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
+      "status": "passed",
       "operator_class": "owner-operated tester-equivalent",
-      "repository_path": null,
+      "repository_path": "releases/v0.3.0/acceptance/composed-external-installation.json",
       "public_url": null,
-      "sha256": null
+      "sha256": "1ec3fc76ca61867976917fcdb135c64fbb4694cc341c24ec782a45fcf5a02c9e",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true
     }
   },
   "observed_gates": {
@@ -107,7 +113,5 @@
     "The RTX 3090 unattended evidence-role corpus did not pass; that automatic route stays disabled.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
-  "remaining_release_gates": [
-    "external clean-install acceptance from public URLs"
-  ]
+  "remaining_release_gates": []
 }
