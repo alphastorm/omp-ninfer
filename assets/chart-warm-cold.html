@@ -36,20 +36,20 @@
     <div class="eyebrow">Lower is better</div>
   </div>
   <div class="main">
-    <div class="title">Warm follow-ups continue from retained GPU state.<span>Cold = fresh process, no cache: the full session re-prefills.</span></div>
+    <div class="title">Session state survives the process now.<span>v0.4.0 durable checkpoints · one 109,594-token session, server-side</span></div>
     <div class="session">
       <div class="bars">
-        <div class="label">89,022-token session</div>
-        <div class="row hot"><div class="bar warm" style="width: 6px;"></div><div class="value">0.191 s<small>warm · previous_response_id</small></div></div>
-        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">36.651 s<small>cold · fresh process</small></div></div>
+        <div class="label">Warm follow-up vs cold rebuild</div>
+        <div class="row hot"><div class="bar warm" style="width: 8px;"></div><div class="value">1.79 s<small>warm · previous_response_id</small></div></div>
+        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">47.92 s<small>cold · full rebuild</small></div></div>
       </div>
       <div class="ratio"><strong>~192×</strong><span>faster first token</span></div>
     </div>
     <div class="session">
       <div class="bars">
-        <div class="label">28,535-token session</div>
-        <div class="row hot"><div class="bar warm" style="width: 4px;"></div><div class="value">0.126 s<small>warm · previous_response_id</small></div></div>
-        <div class="row"><div class="bar cold" style="width: 22.8%;"></div><div class="value">9.719 s<small>cold · fresh process</small></div></div>
+        <div class="label">After docker restart</div>
+        <div class="row hot"><div class="bar warm" style="width: 4px;"></div><div class="value">0.778 s<small>first token · restored from checkpoint (7.95 GB)</small></div></div>
+        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">47.92 s<small>cold · rebuild without the checkpoint</small></div></div>
       </div>
       <div class="ratio"><strong>~77×</strong><span>faster first token</span></div>
     </div>

@@ -47,9 +47,16 @@ class ReleaseContractTest(unittest.TestCase):
         historical = root / "releases" / "v0.2.0-beta.1"
         shutil.copy2(historical / "compatibility.json", root / "compatibility.json")
         shutil.copy2(historical / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        historical_manifest = self.load(historical / "manifest.json")
+        historical_profile = historical_manifest["runtime_identity"]["deployment_profile"]
         for profile_path in (root / "profiles").glob("*.json"):
             profile = self.load(profile_path)
             profile["release"] = "v0.2.0-beta.1"
+            profile["server"]["deployment_profile"] = historical_profile
+            arguments = profile["server"].get("arguments", [])
+            for index, argument in enumerate(arguments[:-1]):
+                if argument == "--deployment-profile":
+                    arguments[index + 1] = historical_profile
             self.save(profile_path, profile)
         return temporary, root
 

@@ -25,12 +25,12 @@
       "surviving_descendant_continued": true
     },
     "decode": {
-      "accepted_tokens": 1534,
       "completion_tokens": 2048,
-      "decode_tokens_per_second": 240.30294601486273,
-      "drafted_tokens": 1536,
-      "mtp_acceptance_rate": 0.9986979166666666,
-      "status": "passed"
+      "counter_note": "per-request drafted/accepted counters are not logged by this build; rate and tokens-per-round come from the serve's request completion line",
+      "decode_tokens_per_second": 144.8,
+      "mtp_acceptance_rate": 0.441,
+      "mtp_tokens_per_round": 2.32,
+      "workload": "technical-writing generation; ledger-retrieval workload measured 152.2 tok/s at 83.3% acceptance (agent-shaped spread)"
     },
     "lifecycle": {
       "incumbent_configuration_preserved": true,
@@ -44,27 +44,10 @@
       "exact_retrieval_at_every_point": true,
       "points": [
         {
-          "prompt_tokens": 7680,
-          "tokens_per_second": 3193.769854592199
-        },
-        {
-          "prompt_tokens": 32256,
-          "tokens_per_second": 2956.731228476698
-        },
-        {
-          "prompt_tokens": 64512,
-          "tokens_per_second": 2664.2214294374985
-        },
-        {
-          "prompt_tokens": 98304,
-          "tokens_per_second": 2402.5866676846235
-        },
-        {
-          "prompt_tokens": 130048,
-          "tokens_per_second": 2199.4120619105965
+          "prompt_tokens": 130448,
+          "tokens_per_second": 2186.3
         }
-      ],
-      "status": "passed"
+      ]
     }
   },
   "identity": {
