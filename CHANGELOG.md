@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-08-30
+
+### Fixed
+
+- Corrected the RTX 4090 qualification summary: the v0.3.1 copy carried its v0.2 template's
+  limitations ("MTP0 qualified", "MTP3 performance not claimed") in direct contradiction of the
+  MTP3 receipts it fronts, plus a stale beta classification. No component bytes, receipts, or
+  measured numbers changed; v0.3.1 remains immutable with this defect on record.
+
 ## [0.3.1] - 2026-08-30
 
 ### Added
@@ -193,7 +202,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.2.0-beta.1...v0.3.0
 [0.2.0-beta.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.1.0-beta.1...v0.2.0-beta.1

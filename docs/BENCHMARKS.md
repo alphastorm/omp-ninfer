@@ -62,7 +62,7 @@ The prior MTP0 receipt (52.330 tok/s over 1,168 tokens, 1,410.691 tok/s prefill,
 102,075-token restored continuation) remains bound to `v0.2.0-qwen38-4090-beta.1` and is the
 baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
-[qualification summary](../releases/v0.3.1/qualification/rtx4090.json).
+[qualification summary](../releases/v0.3.2/qualification/rtx4090.json).
 
 ### RTX 5090 — container, MTP3, C1
 

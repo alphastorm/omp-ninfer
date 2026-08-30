@@ -1,0 +1,90 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true
+  },
+  "gates": {
+    "agent_protocol": {
+      "authenticated_session_identity": true,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "deleted_continuation_status": 404,
+      "forks": 2,
+      "no_resurrection": true,
+      "parent_delete_status": 200,
+      "post_lru_pressure_continuation_status": 404,
+      "post_lru_pressure_error_code": "previous_response_not_found",
+      "stateful_continuation": true,
+      "status": "passed",
+      "surviving_descendant_continued": true
+    },
+    "decode": {
+      "accepted_tokens": 1534,
+      "completion_tokens": 2048,
+      "decode_tokens_per_second": 240.30294601486273,
+      "drafted_tokens": 1536,
+      "mtp_acceptance_rate": 0.9986979166666666,
+      "status": "passed"
+    },
+    "lifecycle": {
+      "incumbent_configuration_preserved": true,
+      "incumbent_restored": true,
+      "qualification_containers_running": 0,
+      "restart_policy": "no",
+      "status": "passed",
+      "temporary_api_key_removed": true
+    },
+    "prefill_curve": {
+      "exact_retrieval_at_every_point": true,
+      "points": [
+        {
+          "prompt_tokens": 7680,
+          "tokens_per_second": 3193.769854592199
+        },
+        {
+          "prompt_tokens": 32256,
+          "tokens_per_second": 2956.731228476698
+        },
+        {
+          "prompt_tokens": 64512,
+          "tokens_per_second": 2664.2214294374985
+        },
+        {
+          "prompt_tokens": 98304,
+          "tokens_per_second": 2402.5866676846235
+        },
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2199.4120619105965
+        }
+      ],
+      "status": "passed"
+    }
+  },
+  "identity": {
+    "configuration_sha256": "ec38be25bb090532312d2c369e4bda20271890c309cffddbb76c202b1c9ace75",
+    "cuda_architecture": "sm_120a",
+    "deployment_profile": "qwen38-5090-v0.2.0-beta.2",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "server_binary_sha256": "d11dbba7853f45ba51b9b7dbb04eba6c53c6dffc1cbb72a87e73313b711efdfa",
+    "source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+    "source_dirty": false
+  },
+  "private_fleet_projection_included": false,
+  "private_paths_included": false,
+  "qualified": true,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "release_tag": "v0.3.0",
+  "runtime_image": {
+    "anonymous_pull_performed": false,
+    "exact_digest_verified": true,
+    "manifest_digest": "sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d",
+    "pull_skipped_reason": "exact pinned image already present",
+    "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2e366a53a1054074e35337504f89b0f9b74f980e3a72cb2ed49e2f08d"
+  },
+  "schema_version": 1,
+  "scope_exclusions": [
+    "process-restart continuation is not claimed or qualified for this runtime identity"
+  ],
+  "status": "passed"
+}

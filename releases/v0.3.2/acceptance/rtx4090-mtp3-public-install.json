@@ -1,0 +1,42 @@
+{
+  "artifact_type": "ninfer_rtx4090_mtp3_public_install_acceptance",
+  "schema_version": 1,
+  "status": "passed",
+  "completed_utc": "2026-08-30T17:08:44.0174882Z",
+  "release_tag": "v0.3.1-qwen38-4090-mtp3.1",
+  "source": {
+    "base_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.1-qwen38-4090-mtp3.1",
+    "assets_verified_against_sha256sums": [
+      "Control-GpuOwner.ps1",
+      "Control-Release.ps1",
+      "Install-Release.ps1",
+      "ninfer-4090-qwen38-v0.1.0-win-x64.zip",
+      "Protect-StateRoot.ps1"
+    ],
+    "package_sha256": "8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef",
+    "installer_sha256": "767642c0a16d6dc3decb5543692fa50c1b0ccfaca2cf239a64c3a28b9a729fd2",
+    "superseding_release_note": "The acceptance downloaded from the immutable v0.3.1-qwen38-4090-mtp3.1 release. The manifest binds v0.3.1-qwen38-4090-mtp3.2, which republishes the byte-identical asset set (identical SHA256SUMS, package sha256 8f79ebc2\u2026) plus the runtime source archive and campaign receipts that the immutable first tag could not accept post-creation. Asset identity, not URL string, is the acceptance subject."
+  },
+  "install": {
+    "transition": "from-absent-state",
+    "elapsed_seconds": 93.4,
+    "state_root_class": "fresh-protected-root"
+  },
+  "smoke": {
+    "authenticated": true,
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3,
+    "config_sha256": "5a565eafb038c19d699f5a118624ff7a77c245a532c1036aeb2a9b9c136f6175",
+    "binary_sha256": "41fcc1803e4a057de24a485776e71737a31cb39fdd9358350b975f6b11b9c869",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "completion_seconds": 0.213,
+    "exact_output": "The user wants me to reply with exactly \"ACCEPTED\". This is a simple"
+  },
+  "restoration": {
+    "qualification_serve_stopped": true,
+    "managed_task_removed": true,
+    "operator_serve_processes": 1,
+    "operator_port_listening": true
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}
