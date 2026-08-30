@@ -17,13 +17,13 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
-- v0.2 tagline: **Stateful local Qwen for long OMP coding sessions.**
-- Status grammar: when lane status is stated, write
-  **"RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta"**;
-  immediately distinguish the published v0.2 install authority from post-release candidates
-- Primary conversion action: **Request early access**, linked directly to
-  `.github/ISSUE_TEMPLATE/early-access.yml`. Put it before documentation links whenever the
-  surface has room for only one action.
+- Tagline: **Stateful local Qwen for long OMP coding sessions.**
+- Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
+  When install authority matters, bind it to the current ready release (`v0.3.0`) instead of
+  restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
+- Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
+  documentation links whenever the surface has room for only one action. The GitHub `Latest`
+  release card is the secondary conversion surface; never add a third competing action.
 - The user-facing command remains `omp`; "appliance" describes the operating
   concept, never the repository name.
 
@@ -84,12 +84,15 @@ emoji, no exclamation marks. Claims stated as invariants:
 
 Hard constraints — never write:
 
-- anything implying general availability (`v0.2.0-beta.1` remains invited)
-- support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the v0.2 manifest
-- wording that makes a qualified candidate sound publicly installable before its manifest ships
-- cloud hosting, unattended production activation, or universal RTX support
+- stable/v1.0 support, SLAs, or upgrade commitments — the 0.x series carries an explicit
+  support boundary: the latest published release and its exact manifest/profile only
+- support outside the exact RTX 5090, RTX 4090, and RTX 3090 profiles bound by the current
+  ready manifest
+- wording that transfers one lane's measured numbers, restart semantics, or capabilities to
+  another lane
+- cloud hosting, multi-tenant serving, unattended production activation, or universal RTX support
 - "first stateful Responses", automatic restart, or universal performance
-- `omp appliance ...` outside the exact v0.2 compatibility authority or as an implicit production
+- `omp appliance ...` outside the exact compatibility authority or as an implicit production
   activation path
 
 Standing disclaimer: "Community project; not affiliated with or endorsed by
@@ -153,18 +156,18 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 **Stateful local Qwen for long OMP coding sessions.**
 
-**RTX 5090 + 4090 + 3090 qualified candidates · invited-tester beta**
+**Qualified on RTX 5090 · 4090 · 3090**
 
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
 OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
 retained state instead of re-prefilling the full transcript.
 
-**[Request early access](https://github.com/alphastorm/omp-ninfer/issues/new?template=early-access.yml)**
+**[Get started](docs/QUICKSTART.md)**
 
-**[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** · **[Quickstart](docs/QUICKSTART.md)** ·
-**[Benchmarks](docs/BENCHMARKS.md)** ·
-**[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
-**[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
+**[Download v0.3.0](https://github.com/alphastorm/omp-ninfer/releases/latest)** ·
+**[Benchmarks](docs/BENCHMARKS.md)** · **[Architecture](docs/ARCHITECTURE.md)** ·
+**[Performance program](docs/PERFORMANCE.md)** · **[Security](docs/SECURITY.md)** ·
+**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
 ```
 
 followed by the badge row and the private-by-design subline as currently set in `README.md`.
