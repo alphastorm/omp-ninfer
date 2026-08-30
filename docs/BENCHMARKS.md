@@ -86,7 +86,8 @@ Durable process-restart continuation is a native Windows lane property (tables a
 
 v0.3.0 ships checkpoint-backed session durability on the RTX 4090 and RTX 3090 native Windows
 lanes (DirectStorage): a follow-up continues from restored state after a process restart instead
-of re-prefilling the transcript, and each lane's restart gate binds the exact observed
+of rebuilding the session cold — exactly the delta the warm/cold row measures — and each lane's
+restart gate binds the exact observed
 restoration above. The RTX 5090 container makes no restart-continuation claim — its response
 store is process-local by design and its recovery path is OMP transcript replay. Upstream,
 [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its

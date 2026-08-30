@@ -82,6 +82,9 @@ breadth is a feature for a different product boundary, not a deficiency.
 
 ## Prefix and KV reuse
 
+- [Neroued/ninfer](https://github.com/Neroued/ninfer) itself ships in-process prefix reuse
+  (`prefix_reuse`, enabled in every profile this project ships): a live process avoids
+  recomputing an append-only prefix with no OMP NInfer involvement.
 - [vLLM Automatic Prefix Caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/)
   reuses matching prefix blocks inside vLLM.
 - [LMCache](https://github.com/LMCache/LMCache) extends KV reuse and movement across inference
@@ -91,11 +94,14 @@ breadth is a feature for a different product boundary, not a deficiency.
 - [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) exposes slots and
   cache-oriented local serving behavior.
 
-Those systems establish extensive KV/prefix-cache prior art. OMP NInfer's relevant distinction is
-ownership and commit ordering: OMP publishes the transcript before committing a provider baseline;
-NInfer's retained state is an acceleration that may be discarded without losing the conversation.
-The user-facing claim is therefore “stop re-prefilling the same long coding session every turn,” not
-“invent persistent KV” or “make inference 100× faster.”
+Those systems establish extensive KV/prefix-cache prior art, and they fully cover the
+live-process append-only case. OMP NInfer's relevant distinction is that continuation is
+explicit, transactional, and durable rather than an implicit longest-prefix match: OMP publishes
+the transcript before committing a provider baseline, lineage (forks, rollback) is addressable
+through `previous_response_id`, and on the native Windows lanes the continuation is checkpointed
+so it survives process death — which an in-process cache structurally cannot. The user-facing
+claim is therefore “keep a long coding session durable and instantly resumable on a GPU you
+own,” not “no re-prefill,” and not “invent persistent KV” or “make inference 100× faster.”
 
 ## Distributed inference control planes
 

@@ -91,7 +91,7 @@ lane was still preview-only.
 | `omp-ninfer-demo-social.mp4` | `e2e8fbc4cb42c5c30a12ac0299c081728d6f4f6627ae74c260a2abc97fa0bd81` | 978×694, 30 fps, begins 8.5 s in, after the update banner left the frame. |
 | `omp-ninfer-demo-social-discord.gif` | `c5423f9e9289cecb68c42edb9631da0833c05b3ab0e61981465fa61f87ac7763` | 720×511, 10 fps GIF89a fallback. |
 | `omp-ninfer-demo-social-poster.png` | `80b8ce9069b201802dcaecd9a7b5da080ea4aca0a1e7a4eeadaeef7538788373` | 978×694 frame from the clean social interval. |
-| `omp-ninfer-launch-card.png` | `91c7b8be815e0a21ca6bfc753b21e3036f4c8a71ab8390b54bc1e3ea40e0b093` | 1600×900 evidence card; its warm/cold figure is one measured 89,216-token follow-up. |
+| `omp-ninfer-launch-card.png` | `91c7b8be815e0a21ca6bfc753b21e3036f4c8a71ab8390b54bc1e3ea40e0b093` | 1600×900 evidence card; its warm/cold figure is one measured 89,216-token follow-up — retained state versus fresh-process cold start. |
 | `omp-ninfer-demo-2x.gif` | `c806e5d585ca9ff4042951be0d1e80efb08667a00742d49197fb8bef8f1d45a5` | 1224×868, 20 fps; the v0.3.0-launch README embed, superseded by `-v3`. |
 | `omp-ninfer-demo-2x.mp4` | `99cb0dbfff8ae01a979ff8f89bf46916c55a84503b5a2e38febdac2d59c3109e` | H.264 transcode of the 2x render. |
 | `omp-ninfer-demo-2x-poster.png` | `a30db22bcdbb4455f80d042af6091438f41ae9508166150dafcc9b8e84b5213c` | Single 1224×868 frame. |

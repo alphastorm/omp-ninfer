@@ -17,7 +17,13 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
-- Tagline: **Stateful local Qwen for long OMP coding sessions.**
+- Tagline: **Durable session state on your GPU.**
+- Positioning rule: never claim "no re-prefill" as the value. In-process prefix caching
+  (upstream ninfer `prefix_reuse`, llama.cpp prompt cache, vLLM APC) already covers the
+  live-process append-only case and is conceded as prior art. The product claim is explicit,
+  transactional, durable continuation — checkpoints that survive process death, portability as
+  the trajectory. Warm/cold figures are always captioned retained state versus fresh-process
+  cold start, never versus an ordinary follow-up.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
   When install authority matters, bind it to the current ready release (`v0.3.0`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
@@ -160,13 +166,13 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 # OMP NInfer
 
-**Stateful local Qwen for long OMP coding sessions.**
+**Durable session state on your GPU.**
 
 **Qualified on RTX 5090 · 4090 · 3090**
 
 If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
-OMP NInfer keeps Qwen3.8 27B and the live session state on your GPU. Warm follow-ups continue from
-retained state instead of re-prefilling the full transcript.
+OMP NInfer keeps Qwen3.8 27B and your session's continuation state on your GPU — as an explicit,
+durable primitive, not a lucky prefix-cache hit.
 
 **[Get started](docs/QUICKSTART.md)**
 
