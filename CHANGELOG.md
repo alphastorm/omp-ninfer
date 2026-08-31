@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-31
+
+### Added
+
+- Same-lane agent fanout on the RTX 5090 container: sibling branches of one
+  `previous_response_id` reuse the base prefill through private long anchors instead of
+  replaying it from scratch. Measured at a 67.7K-token base: four branches 148.7 s → 47.9 s,
+  and 0.40 s to first token when the anchor is still device-resident
+  ([probe receipt](docs/measurements/2026-08-31-fanout-probe-v043.json), with the
+  [v0.4.1 baseline](docs/measurements/2026-08-31-fanout-probe-v041-baseline.json) and a
+  [device-state-slots null result](docs/measurements/2026-08-31-fanout-probe-v043-slots4.json)
+  pinning the remaining sibling KV-clone ceiling,
+  [ninfer#34](https://github.com/alphastorm/ninfer/issues/34)).
+- Checkpoint refusal diagnostics carry the attempted response id in manual and automatic
+  refusal log lines, populated without allocation on the refusal path.
+
+### Fixed
+
+- Private continuations never cross sessions: the session-isolation set proven on the 4090
+  durable train (preserve private session ownership, isolate private cache sessions, harden
+  session publication invariants) now ships on the 5090 lane, where the agent-protocol smoke
+  exposed the latent cross-session private reuse.
+- Anchored continuations no longer fail their first turn or restart restore: continuation
+  summaries self-reserve anchor backing at the single populate chokepoint.
+- Streaming UTF-8 repair and explicit invalid media-enum rejection (upstream parity picks).
+
+### Security
+
+- Checkpoint imports are bound to their load-time digests end to end: the reader re-hashes
+  every streamed chunk with strict front-to-back single-pass coverage and fails closed, the
+  `responses.cbor` reopen is digest-gated, and a divergence marks the generation corrupt so
+  status stops advertising it and the next load quarantines it (closes
+  [ninfer#21](https://github.com/alphastorm/ninfer/issues/21)).
+- Checkpoint export writes refuse symlinks and reparse points and verify every staging
+  directory component is a real directory, so a checkpoint-root writer cannot redirect
+  server-authority writes (council CR-20260831-fanout43).
+- Bearer, `x-api-key`, and stored-response session-ownership comparisons are constant-time
+  digest-then-compare (closes [ninfer#22](https://github.com/alphastorm/ninfer/issues/22)).
+- Checkpoint export copies are explicitly fenced behind in-flight compute-stream work via a
+  recorded CUDA event (closes [ninfer#24](https://github.com/alphastorm/ninfer/issues/24)).
+
 ## [0.4.2] - 2026-08-31
 
 ### Added
@@ -284,7 +325,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...v0.4.0

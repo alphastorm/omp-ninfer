@@ -1,116 +1,116 @@
 {
-  "schema_version": 1,
-  "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.4.2",
-  "status": "public",
-  "installation_mode": "manual-ssh-tunnel",
-  "client": {
-    "os": "macOS",
-    "architecture": "arm64",
-    "package": "omp-beta"
-  },
-  "runtime_host": {
-    "os": [
-      "Linux",
-      "WSL2"
-    ],
-    "ownership": "single-trusted-user",
-    "gpu": "NVIDIA GeForce RTX 5090",
-    "cuda_architecture": "sm_120a",
-    "minimum_vram_mib": 32607,
-    "container_runtime": "Docker with NVIDIA Container Toolkit"
-  },
-  "transport": {
-    "kind": "ssh-local-forward",
-    "client_bind_host": "127.0.0.1",
-    "client_port": 18089,
-    "runtime_bind_host": "127.0.0.1",
-    "runtime_port": 18089,
-    "authentication": "NInfer bearer token loaded from a user-only file",
-    "silent_cloud_fallback": false
-  },
-  "model": {
-    "public_id": "q38-ninfer",
-    "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-    "artifact_bytes": 18210531328
-  },
-  "server": {
-    "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.4.1",
-    "container_network_mode": "host",
-    "restart_policy": "no",
-    "arguments": [
-      "--host",
-      "127.0.0.1",
-      "--port",
-      "18089",
-      "--model-id",
-      "q38-ninfer",
-      "--binary-sha256",
-      "b85d8b901995d6578a4b2efcb6cd3a2933488f0d58d464523a80888833bfbc4a",
-      "--artifact-sha256",
-      "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-      "--config-sha256",
-      "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
-      "--deployment-profile",
-      "qwen38-5090-v0.4.1",
-      "--max-context",
-      "131072",
-      "--kv-capacity",
-      "auto",
-      "--prefill-chunk",
-      "1024",
-      "--kv-dtype",
-      "bf16",
-      "--max-concurrency",
-      "1",
-      "--spec",
-      "mtp",
-      "--draft-tokens",
-      "3",
-      "--lm-head-draft",
-      "--vision",
-      "--preserve-thinking"
-    ]
-  },
-  "omp_provider": {
-    "id": "ninfer-beta",
-    "model_alias": "local-max",
-    "request_model_id": "q38-ninfer",
-    "base_url": "http://127.0.0.1:18089/v1",
-    "api": "openai-responses",
-    "reasoning": true,
-    "input": [
-      "text",
-      "image"
-    ],
-    "supports_tools": true,
-    "context_window": 131072,
-    "maximum_output_tokens": 32768,
-    "ninfer_stateful_responses": true,
-    "cost": {
-      "input": 0,
-      "output": 0,
-      "cacheRead": 0,
-      "cacheWrite": 0
-    }
-  },
-  "capabilities": [
-    "text",
-    "reasoning",
-    "tools",
-    "vision",
-    "stateful-responses",
-    "prefix-reuse"
+ "schema_version": 1,
+ "profile_id": "qwen38-rtx5090-manual-tunnel",
+ "release": "v0.4.3",
+ "status": "public",
+ "installation_mode": "manual-ssh-tunnel",
+ "client": {
+  "os": "macOS",
+  "architecture": "arm64",
+  "package": "omp-beta"
+ },
+ "runtime_host": {
+  "os": [
+   "Linux",
+   "WSL2"
   ],
-  "unsupported": [
-    "process-restart-continuation",
-    "managed-remote-install",
-    "managed-upgrade",
-    "appliance-rollback",
-    "automatic-container-restart",
-    "multi-gpu",
-    "multi-tenant",
-    "structured-json-schema-output"
+  "ownership": "single-trusted-user",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "cuda_architecture": "sm_120a",
+  "minimum_vram_mib": 32607,
+  "container_runtime": "Docker with NVIDIA Container Toolkit"
+ },
+ "transport": {
+  "kind": "ssh-local-forward",
+  "client_bind_host": "127.0.0.1",
+  "client_port": 18089,
+  "runtime_bind_host": "127.0.0.1",
+  "runtime_port": 18089,
+  "authentication": "NInfer bearer token loaded from a user-only file",
+  "silent_cloud_fallback": false
+ },
+ "model": {
+  "public_id": "q38-ninfer",
+  "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "artifact_bytes": 18210531328
+ },
+ "server": {
+  "executable": "/usr/local/bin/ninfer-serve",
+  "deployment_profile": "qwen38-5090-v0.4.3",
+  "container_network_mode": "host",
+  "restart_policy": "no",
+  "arguments": [
+   "--host",
+   "127.0.0.1",
+   "--port",
+   "18089",
+   "--model-id",
+   "q38-ninfer",
+   "--binary-sha256",
+   "4d11c95500eb7ab2bbf0855794045626780054fb7212235bb4fd94a0cfa51bdf",
+   "--artifact-sha256",
+   "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+   "--config-sha256",
+   "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
+   "--deployment-profile",
+   "qwen38-5090-v0.4.3",
+   "--max-context",
+   "131072",
+   "--kv-capacity",
+   "auto",
+   "--prefill-chunk",
+   "1024",
+   "--kv-dtype",
+   "bf16",
+   "--max-concurrency",
+   "1",
+   "--spec",
+   "mtp",
+   "--draft-tokens",
+   "3",
+   "--lm-head-draft",
+   "--vision",
+   "--preserve-thinking"
   ]
+ },
+ "omp_provider": {
+  "id": "ninfer-beta",
+  "model_alias": "local-max",
+  "request_model_id": "q38-ninfer",
+  "base_url": "http://127.0.0.1:18089/v1",
+  "api": "openai-responses",
+  "reasoning": true,
+  "input": [
+   "text",
+   "image"
+  ],
+  "supports_tools": true,
+  "context_window": 131072,
+  "maximum_output_tokens": 32768,
+  "ninfer_stateful_responses": true,
+  "cost": {
+   "input": 0,
+   "output": 0,
+   "cacheRead": 0,
+   "cacheWrite": 0
+  }
+ },
+ "capabilities": [
+  "text",
+  "reasoning",
+  "tools",
+  "vision",
+  "stateful-responses",
+  "prefix-reuse"
+ ],
+ "unsupported": [
+  "process-restart-continuation",
+  "managed-remote-install",
+  "managed-upgrade",
+  "appliance-rollback",
+  "automatic-container-restart",
+  "multi-gpu",
+  "multi-tenant",
+  "structured-json-schema-output"
+ ]
 }

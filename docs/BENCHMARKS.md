@@ -11,6 +11,32 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## Qualified `v0.4.3` results — agent fanout on the RTX 5090 lane
+
+v0.4.3 changes one thing about the numbers on this page: what happens when several agent branches
+continue from the same base. Before it, every sibling branch of a `previous_response_id` replayed
+the whole base from scratch; now branches reuse it through the session's private long anchors.
+Measured on the owner appliance at a 67,681-token base, four branches, one sample per step
+([v0.4.3 probe receipt](measurements/2026-08-31-fanout-probe-v043.json) ·
+[v0.4.1 baseline receipt](measurements/2026-08-31-fanout-probe-v041-baseline.json)):
+
+| Step | v0.4.1 (baseline) | v0.4.3 | Server-attested reuse (v0.4.3) |
+| --- | ---: | ---: | --- |
+| Branch 1 | 26.45 s | **1.05 s** (0.40 s to first token) | `private_long_anchor`, 67,726 tokens |
+| Branch 2 | 42.70 s | 15.45 s | `private_long_anchor`, 67,726 tokens |
+| Branch 3 | 42.96 s | 15.66 s | `private_long_anchor`, 67,726 tokens |
+| Branch 4 | 42.59 s | 15.48 s | `private_long_anchor`, 67,726 tokens |
+| Four branches total | 148.7 s | **47.9 s** | — |
+| Post-restart resume | — | 27.5 s wall, **0.52 s** to first token | `private_endpoint`, 67,828 tokens |
+
+Branch 1 hits the device-resident anchor; branches 2–4 re-materialize the base from host RAM
+because private forks clone their KV pages — that ~15 s ceiling is the next campaign
+([ninfer#34](https://github.com/alphastorm/ninfer/issues/34); a
+[device-state-slots sweep](measurements/2026-08-31-fanout-probe-v043-slots4.json) pinned the
+ceiling to KV page ownership, not state-image slots). Method: ordinary authenticated client
+session against the published serve through the qualified tunnel profile; wall times include the
+~80-token generation per branch; reuse classes join the server's own request log.
+
 ## Qualified `v0.3.0` results
 
 The first public release binds three qualified GPU lanes into one manifest. The shape first —

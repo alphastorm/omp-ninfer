@@ -282,7 +282,7 @@ REQUIRED_TUNING_VALUES = (
 REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
 NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
 NINFER_RELEASE_TAG_RE = re.compile(
-    r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1)-qwen38-5090-beta\.[1-9][0-9]*$"
+    r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
 NINFER_VARIANT_RELEASE_TAG_RES = {
     "rtx3090-windows-native": re.compile(

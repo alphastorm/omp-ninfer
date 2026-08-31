@@ -7,13 +7,24 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.2`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.2` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.3`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.3` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.3 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.3`, GitHub `Latest`.
+- The RTX 5090 durable container moves to
+  [`ninfer@v0.4.3-qwen38-5090-beta.2`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.3-qwen38-5090-beta.2)
+  (image digest `f66708f5...`): same-lane agent fanout through private long anchors,
+  checkpoint-import integrity (streamed re-hash, fail-closed coverage, corrupt-generation
+  quarantine), symlink-refusing export writes, constant-time credential equality, an explicit
+  compute-to-transfer export fence, and the session-isolation set proven on the 4090 durable
+  train (council CR-20260831-fanout43). 4090/3090 components rebound unchanged.
 
 ### v0.4.2 public release
 
