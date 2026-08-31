@@ -1,0 +1,32 @@
+{
+  "artifact_type": "omp_ninfer_rtx4090_mtp_k_ablation",
+  "schema_version": 1,
+  "generated_utc": "2026-08-31",
+  "release": "qwen38-4090-v0.2 candidate 32aa5899",
+  "conditions": "dev-run from the build tree on sf-pc, NOT the managed lane: no WDDM residency lock, desktop-shared GPU, 8K KV, temperature 0, 768-token technical generation; absolute throughput is contention-degraded and NOT comparable to lane receipts - only the relative K signal is meaningful",
+  "results": [
+    {
+      "k": 3,
+      "acceptance_pct": 44.2,
+      "tokens_per_round": 2.32,
+      "decode_tok_s_contended": 7.0
+    },
+    {
+      "k": 5,
+      "acceptance_pct": 26.1,
+      "tokens_per_round": 2.3,
+      "decode_tok_s_contended": 4.5
+    },
+    {
+      "k": 7,
+      "acceptance_pct": 19.0,
+      "tokens_per_round": 2.32,
+      "decode_tok_s_contended": 3.5
+    },
+    {
+      "k": 15,
+      "status": "serve did not reach ready within 3 minutes under desktop contention; not measured"
+    }
+  ],
+  "conclusion": "Tokens-per-round is flat (~2.3) while acceptance collapses with width: wider drafts waste verify slots on this workload. K=3 remains optimal for the shipped lane, consistent with the v0.3.1 MTP3 promotion decision and council CR-20260831-durable4090 R1 disposition (K>5 additionally breaks v0.3.1 rollback restore)."
+}

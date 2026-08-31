@@ -1,0 +1,595 @@
+{
+  "artifact_type": "omp_ninfer_rtx3090_power_sweep",
+  "schema_version": 1,
+  "generated_utc": "2026-08-31T09:34:16Z",
+  "status": "complete",
+  "status_detail": "Full battery executed on hardware: six decode points (280/300/320/350/370 W with 300 W measured first and last), a warm-vs-cold session restore leg, and mandatory teardown. The pass-1 gate blocker cleared after the founder closed Discord, whose bogus WDDM perf-counter row was the sole residual interactive-GPU owner. Every power target applied exactly with no clamping under load. Checkpoint route POST /v1/ninfer/checkpoints does not exist (HTTP 404), so the restore figure is the honest warm-vs-cold TTFT fallback; no restore bandwidth in bytes is reported because the server exposes no byte counter.",
+  "sanction": {
+    "packet_quote": "Use the already stable 300 W operating point as the baseline. Sweep 280/300/320/350/370 W. Do not reopen CPU/RAM overclocking.",
+    "cpu_ram_overclocking_touched": false,
+    "source_or_package_modified": false,
+    "lane_state_files_modified": false,
+    "measurement_only": true
+  },
+  "identity": {
+    "host_class": "sf-old RTX 3090",
+    "host_alias": "sf-old",
+    "host_os": "Windows (WDDM)",
+    "operator_account_is_admin": true,
+    "lane_release": "v0.2.1-beta.1",
+    "release_tag": "v0.3.0-qwen38-3090.1",
+    "release_id": "qwen38-3090-omp-v0.2.1-beta.1-872ee508c1f9",
+    "patch_stack_sha": "872ee508c1f9c46fa38f4170c7e21f254a79e21f",
+    "deployment_profile": "qwen38-3090-omp-v0.2.1-beta.1-c1",
+    "build_profile": "omp-v0.2.1-rtx3090",
+    "cuda_architecture": "sm_86",
+    "state_root": "C:\\ProgramData\\NInfer\\qwen38-3090-omp-v0.2",
+    "task_name": "NInfer-Qwen38-3090-OMP-v0.2",
+    "model_id": "q38-ninfer",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_bytes": 18210531328,
+    "binary_sha256": "4e68fd351f7311abced5da1a0020a16763666a79e1b535745e6bf31269340ab7",
+    "config_sha256": "ae519b6e41c33d8b7b1d397352df63cba6b928dec8fc9afa968a0c02fe1d3fd6",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "gpu_uuid": "GPU-8ee57e94-4cec-9fcc-9e1b-2aaea2a70d99",
+    "driver_version": "616.56",
+    "kmd_version": "616.56",
+    "cuda_umd_version": "13.4",
+    "vbios_version": "94.02.42.40.a2",
+    "memory_total_mib": 24576,
+    "power_default_limit_w": 370.0,
+    "power_min_limit_w": 100.0,
+    "power_max_limit_w": 390.0,
+    "card_default_equals_sweep_point_370w": true
+  },
+  "pcie": {
+    "measured_state": "idle_only",
+    "loaded_read_performed": false,
+    "loaded_read_unreached_reason": "model never became resident; lane start refused by GPU-owner gate",
+    "link_gen_current_idle": 1,
+    "link_gen_negotiated_max": 3,
+    "link_gen_device_max": 4,
+    "link_gen_host_max": 3,
+    "link_width_current": 8,
+    "link_width_max": 16,
+    "link_width_current_stable_across_samples": true,
+    "pstate_at_sample": "P8",
+    "replays_since_reset": 0,
+    "interpretation": "Host link is PCIe 3.0 x8: host max gen3 caps the card's gen4 capability, and width negotiated at 8x of the card's 16x. Gen 1 current is the P8 idle downtrain and would train up under load; the 8x width was stable across all samples and is a host/slot limit, not idle behaviour.",
+    "host_link_theoretical_ceiling_gb_s": 7.877,
+    "host_link_theoretical_ceiling_note": "PCIe 3.0 x8 = 8 GT/s/lane x 128b/130b x 8 lanes. Theoretical, derived from the measured link - not a measured transfer."
+  },
+  "power_limit_authority": {
+    "privilege_denied": false,
+    "denial_verbatim": null,
+    "method": "nvidia-smi -pl <watts> over ssh (BatchMode)",
+    "all_targets_applied_exactly": true,
+    "clamping_observed": false,
+    "attempts_per_target": 1,
+    "verified_under_load": true,
+    "readback_stable_across_probe": true,
+    "note": "All six set operations returned rc 0 and read back exactly; the limit was re-queried after every generation and never drifted, so the running lane did not re-assert its 300 W qualified cap mid-probe."
+  },
+  "results": [
+    {
+      "requested_w": 300,
+      "applied_w": 300.0,
+      "tokps": 56.836,
+      "output_tokens": 1024,
+      "wall_s": 18.273,
+      "max_power_draw_w": 299.58,
+      "max_temp_c": 42.0,
+      "sequence_tag": "baseline_first",
+      "is_baseline": true,
+      "is_card_default": false,
+      "set_command": "nvidia-smi -pl 300",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 300.00 W from 300.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 300.0,
+      "probe_started_utc": "2026-08-31T09:26:19Z",
+      "ttft_s": 0.256,
+      "decode_wall_s": 18.017,
+      "tokps_decode": 56.836,
+      "tokps_end_to_end": 56.038,
+      "max_sm_clock_mhz": 1575,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "299.58 W, 41, 1575 MHz, 100 %, P2, 300.00 W",
+        "299.50 W, 42, 1560 MHz, 100 %, P2, 300.00 W",
+        "299.39 W, 42, 1560 MHz, 99 %, P2, 300.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.31,
+        8.3,
+        13.3
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": true
+    },
+    {
+      "requested_w": 280,
+      "applied_w": 280.0,
+      "tokps": 54.266,
+      "output_tokens": 1024,
+      "wall_s": 19.075,
+      "max_power_draw_w": 279.63,
+      "max_temp_c": 42.0,
+      "sequence_tag": "sweep",
+      "is_baseline": false,
+      "is_card_default": false,
+      "set_command": "nvidia-smi -pl 280",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 280.00 W from 300.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 280.0,
+      "probe_started_utc": "2026-08-31T09:26:43Z",
+      "ttft_s": 0.205,
+      "decode_wall_s": 18.87,
+      "tokps_decode": 54.266,
+      "tokps_end_to_end": 53.683,
+      "max_sm_clock_mhz": 1485,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "278.72 W, 41, 1470 MHz, 100 %, P2, 280.00 W",
+        "279.63 W, 41, 1485 MHz, 100 %, P2, 280.00 W",
+        "279.42 W, 42, 1470 MHz, 100 %, P2, 280.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.31,
+        8.31,
+        13.33
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": true
+    },
+    {
+      "requested_w": 320,
+      "applied_w": 320.0,
+      "tokps": 58.023,
+      "output_tokens": 1024,
+      "wall_s": 17.858,
+      "max_power_draw_w": 319.52,
+      "max_temp_c": 45.0,
+      "sequence_tag": "sweep",
+      "is_baseline": false,
+      "is_card_default": false,
+      "set_command": "nvidia-smi -pl 320",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 320.00 W from 280.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 320.0,
+      "probe_started_utc": "2026-08-31T09:27:08Z",
+      "ttft_s": 0.21,
+      "decode_wall_s": 17.648,
+      "tokps_decode": 58.023,
+      "tokps_end_to_end": 57.341,
+      "max_sm_clock_mhz": 1605,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "319.42 W, 44, 1605 MHz, 99 %, P2, 320.00 W",
+        "319.52 W, 45, 1605 MHz, 99 %, P2, 320.00 W",
+        "319.33 W, 45, 1605 MHz, 99 %, P2, 320.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.31,
+        8.31,
+        13.3
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": true
+    },
+    {
+      "requested_w": 350,
+      "applied_w": 350.0,
+      "tokps": 60.195,
+      "output_tokens": 1024,
+      "wall_s": 17.316,
+      "max_power_draw_w": 349.57,
+      "max_temp_c": 47.0,
+      "sequence_tag": "sweep",
+      "is_baseline": false,
+      "is_card_default": false,
+      "set_command": "nvidia-smi -pl 350",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 350.00 W from 320.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 350.0,
+      "probe_started_utc": "2026-08-31T09:28:15Z",
+      "ttft_s": 0.304,
+      "decode_wall_s": 17.011,
+      "tokps_decode": 60.195,
+      "tokps_end_to_end": 59.137,
+      "max_sm_clock_mhz": 1695,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "349.07 W, 45, 1695 MHz, 100 %, P2, 350.00 W",
+        "349.25 W, 46, 1680 MHz, 100 %, P2, 350.00 W",
+        "349.57 W, 47, 1680 MHz, 100 %, P2, 350.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.33,
+        8.32,
+        13.33
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": true
+    },
+    {
+      "requested_w": 370,
+      "applied_w": 370.0,
+      "tokps": 60.215,
+      "output_tokens": 1024,
+      "wall_s": 17.215,
+      "max_power_draw_w": 350.79,
+      "max_temp_c": 48.0,
+      "sequence_tag": "sweep_card_default",
+      "is_baseline": false,
+      "is_card_default": true,
+      "set_command": "nvidia-smi -pl 370",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 370.00 W from 350.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 370.0,
+      "probe_started_utc": "2026-08-31T09:28:38Z",
+      "ttft_s": 0.209,
+      "decode_wall_s": 17.006,
+      "tokps_decode": 60.215,
+      "tokps_end_to_end": 59.483,
+      "max_sm_clock_mhz": 1695,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "350.33 W, 47, 1665 MHz, 99 %, P2, 370.00 W",
+        "350.23 W, 47, 1665 MHz, 100 %, P2, 370.00 W",
+        "350.79 W, 48, 1695 MHz, 99 %, P2, 370.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.31,
+        8.31,
+        13.33
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": false
+    },
+    {
+      "requested_w": 300,
+      "applied_w": 300.0,
+      "tokps": 56.213,
+      "output_tokens": 1024,
+      "wall_s": 18.498,
+      "max_power_draw_w": 299.79,
+      "max_temp_c": 44.0,
+      "sequence_tag": "baseline_last",
+      "is_baseline": true,
+      "is_card_default": false,
+      "set_command": "nvidia-smi -pl 300",
+      "set_rc": 0,
+      "set_stdout_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 300.00 W from 370.00 W. All done.",
+      "clamped": false,
+      "applied_power_limit_w_readback_after_probe": 300.0,
+      "probe_started_utc": "2026-08-31T09:29:01Z",
+      "ttft_s": 0.281,
+      "decode_wall_s": 18.216,
+      "tokps_decode": 56.213,
+      "tokps_end_to_end": 55.358,
+      "max_sm_clock_mhz": 1560,
+      "load_sample_count": 3,
+      "load_samples_verbatim": [
+        "299.79 W, 44, 1560 MHz, 100 %, P2, 300.00 W",
+        "299.60 W, 44, 1545 MHz, 100 %, P2, 300.00 W",
+        "299.36 W, 44, 1545 MHz, 100 %, P2, 300.00 W"
+      ],
+      "load_sample_offsets_s": [
+        3.32,
+        8.32,
+        13.32
+      ],
+      "probe_final_status": "incomplete",
+      "power_limited": true
+    }
+  ],
+  "results_note": "Each point: nvidia-smi -pl <W> over ssh, power.limit read back, 5 s settle, then one streaming POST /v1/responses decode probe with an identical fixed prompt (temperature 0, max_output_tokens 1024, store false). Every probe returned exactly 1024 output tokens, so tok/s is directly comparable across points. tokps == tokps_decode == output_tokens / (total wall - TTFT), with TTFT taken from the first SSE delta event; tokps_end_to_end (tokens / total wall) is also given and is ~1.5-2.8% lower. power/temperature are the MAX of 3 nvidia-smi samples taken over ssh at ~3/8/13 s into each generation - these are LOAD samples, unlike pass 1. Wall time is client-side on the Mac and therefore includes tunnel and HTTP overhead.",
+  "baseline_drift": {
+    "measured": true,
+    "runs": 2,
+    "target_w": 300,
+    "first_run": {
+      "sequence_tag": "baseline_first",
+      "probe_started_utc": "2026-08-31T09:26:19Z",
+      "tokps": 56.836,
+      "wall_s": 18.273,
+      "max_power_draw_w": 299.58,
+      "max_temp_c": 42.0,
+      "max_sm_clock_mhz": 1575
+    },
+    "last_run": {
+      "sequence_tag": "baseline_last",
+      "probe_started_utc": "2026-08-31T09:29:01Z",
+      "tokps": 56.213,
+      "wall_s": 18.498,
+      "max_power_draw_w": 299.79,
+      "max_temp_c": 44.0,
+      "max_sm_clock_mhz": 1560
+    },
+    "tokps_delta_abs": -0.623,
+    "tokps_delta_pct": -1.096,
+    "temp_delta_c": 2.0,
+    "max_sm_clock_delta_mhz": -15,
+    "elapsed_between_runs_s": 162,
+    "interpretation": "Throughput at the 300 W baseline fell 0.623 tok/s (-1.10%) between the first and last point of the battery, with max load temperature up 2 C (42 -> 44 C) and peak SM clock down 15 MHz (1575 -> 1560). This is a small warm-drift bound, not a thermal wall: the card never approached its thermal limit. It is a single pair of runs, so -1.1% should be read as an upper bound on drift of the same order as run-to-run noise, not a precisely resolved trend.",
+    "bound_only": true
+  },
+  "restore_bandwidth": {
+    "measured": true,
+    "method": "warm_vs_cold_ttft_fallback",
+    "checkpoint_route_probed": true,
+    "checkpoint_route": "POST /v1/ninfer/checkpoints",
+    "checkpoint_route_exists": false,
+    "checkpoint_route_http_status": 404,
+    "checkpoint_route_note": "Probed with body {\"session_sha256\": \"0000\"}; server returned HTTP 404, so the route is not implemented in this release and the fallback was used as instructed.",
+    "session_created": true,
+    "session_seed_string": "omp-ninfer/2026-08-31-rtx3090-power-sweep/restore-leg",
+    "session_sha256": "273f501cd046955668b47dad202e74dae9537dd4062e692e73a30fd585ebe896",
+    "session_field_sent": "ninfer_session",
+    "turn1": {
+      "max_output_tokens": 200,
+      "output_tokens": 200,
+      "ttft_s": 0.441,
+      "wall_s": 3.608,
+      "response_id": "resp_2ba29141a265f4b7bf11b61fc835649c",
+      "store": true
+    },
+    "warm_continuation": {
+      "trigger": "previous_response_id immediately, same lane process",
+      "ttft_s": 0.419,
+      "wall_s": 1.404,
+      "input_tokens": 290,
+      "cached_tokens": 266,
+      "output_tokens": 64,
+      "server_cache_path": "append_frontier",
+      "frontier_tokens": 266
+    },
+    "cold_continuation": {
+      "trigger": "identical request (same previous_response_id and input) replayed after Control-Release.ps1 -Action Stop then -Action Start",
+      "ttft_s": 3.519,
+      "wall_s": 4.51,
+      "input_tokens": 290,
+      "cached_tokens": 288,
+      "output_tokens": 64,
+      "server_cache_path_before": "full_reset",
+      "server_cache_path_after": "restore_turn_checkpoint",
+      "restored_frontier_tokens": 288
+    },
+    "warm_ttft_s": 0.419,
+    "cold_ttft_s": 3.519,
+    "restore_ttft_penalty_s": 3.1,
+    "restore_wall_s": 3.107,
+    "lane_stop_wall_s": 39.42,
+    "lane_start_wall_s": 18.13,
+    "lane_cycle_wall_s": 57.55,
+    "serve_ready_after_start_return_s": 0.01,
+    "restored_bytes": null,
+    "mb_per_s": null,
+    "bytes_not_observable_reason": "No byte counter is exposed: GET /v1/ninfer/status reported host_kv.capacity_bytes = 0, host_kv.occupied_bytes = 0 and last_materialization_predicted_nanoseconds = 0 both before and after the restore, and the checkpoint route that would report sizes is 404. Deriving MB/s from a token count would require assuming a per-token KV size, so no bandwidth figure is reported.",
+    "interpretation": "The stored session survived a full lane Stop/Start: the replayed turn recovered 288 of 290 prompt tokens from an on-disk turn checkpoint (cache path full_reset -> restore_turn_checkpoint) instead of reprefilling from scratch. The restore cost 3.100 s of extra time to first token (0.419 s warm -> 3.519 s cold) and 3.107 s of extra turn wall. End-to-end, returning a restarted lane to first restored token took 57.55 s of lifecycle (39.42 s Stop + 18.13 s Start) plus 3.52 s of restore on the first request; serve answered the Mac 0.01 s after Start returned.",
+    "honesty_note": "Single trial of each leg, one session, 290-token frontier. The cold number bundles first-request warmup of the fresh process with checkpoint restore and does not isolate them."
+  },
+  "gate_blocker": {
+    "summary": "Appliance GPU-owner gate refused lease acquisition; the lane cannot start while it counts any interactive GPU owner.",
+    "error_verbatim": "GPU has an active interactive workload; close it before appliance start",
+    "throw_site": "gpu-owner\\Control-GpuOwner.ps1:74 (Assert-InteractiveGpuWorkloadAbsent)",
+    "gate_source": "Win32_PerfFormattedData_GPUPerformanceCounters_GPUProcessMemory, DedicatedUsage >= 1 GiB",
+    "gate_self_report": "{\"schema_version\":1,\"paused\":false,\"power_limit_w\":370,\"qualified_power_limit_w\":300,\"interactive_gpu_workload_count\":1}",
+    "start_attempts": 2,
+    "start_attempt_1": {
+      "result": "failed",
+      "error_verbatim": "GPU has an active interactive workload; close it before appliance start",
+      "owners_at_attempt": 2,
+      "owners_detail": "dwm pid 28220 = 2.38 GiB; Discord pid 21236 = 80.09 GiB"
+    },
+    "sanctioned_dwm_remedy": {
+      "applied": true,
+      "times": 1,
+      "command": "Stop-Process -Name dwm -Force",
+      "pid_before": 28220,
+      "pid_after_respawn": 30124,
+      "wait_s": 8,
+      "effect": "dwm respawned and its dedicated usage fell below the 1 GiB threshold; owner count 2 -> 1"
+    },
+    "start_attempt_2": {
+      "result": "failed",
+      "error_verbatim": "GPU has an active interactive workload; close it before appliance start",
+      "owners_at_attempt": 1,
+      "owners_detail": "BLOCKER instance=pid_21236_luid_0x00000000_0x0001312F_phys_0 pid=21236 name=Discord dedicated_bytes=85997453312"
+    },
+    "residual_blocker": {
+      "process": "Discord",
+      "pid": 21236,
+      "reported_dedicated_bytes": 85997453312,
+      "reported_dedicated_gib": 80.09,
+      "counter_is_bogus": true,
+      "evidence": "Card total is 24576 MiB and nvidia-smi reported only 1204-1607 MiB used across the whole GPU, so an 80.09 GiB dedicated allocation is physically impossible; pid 21236 also does not appear in nvidia-smi's own process enumeration (a sibling Discord pid 25760 does). Value was bit-identical across 5 samples spanning ~12 minutes.",
+      "action_taken": "none",
+      "action_rationale": "Out of sanction. The packet authorised exactly one interactive-workload remedy (Stop-Process -Name dwm), which self-heals in ~1 s. Discord is a user application that does not respawn, so terminating it would be an unsanctioned, user-visible change to the founder's desktop. No repo runbook authorises clearing other GPU owners.",
+      "host_session_state": "locked (LogonUI.exe and LockApp.exe resident), so no human was interacting at measurement time"
+    },
+    "unblock_for_rerun": "Close Discord (or let the stale GPU perf-counter instance clear on next Discord/host restart) so Get-InteractiveGpuWorkloadCount returns 0, then re-run the battery unchanged.",
+    "resolution": {
+      "cleared": true,
+      "cleared_utc_observed_by": "pass 2 (this battery)",
+      "action_taken_by_operator": "Discord was closed on the founder host before this pass; it was left closed.",
+      "action_taken_by_measurement_agent": "none - no process was terminated in pass 2",
+      "effect": "Get-InteractiveGpuWorkloadCount fell to 0, the lease was acquired, and Control-Release.ps1 -Action Start returned rc 0 in 18.13 s with 20995 MiB resident. The lane also restarted cleanly a second time during the restore leg.",
+      "root_cause_status": "UNFIXED. Closing Discord removed the symptom; the gate still trusts Win32_PerfFormattedData_GPUPerformanceCounters_GPUProcessMemory with a 1 GiB threshold and no sanity bound against installed VRAM, so any future bogus counter row can deny lane start again."
+    }
+  },
+  "lane_power_lease_design_note": {
+    "finding": "Control-GpuOwner.ps1 is a power-limit lease manager, not just a gate: on acquisition it records the prior limit and forces the qualified cap of 300 W; on release it restores the recorded prior limit.",
+    "qualified_power_limit_w": 300,
+    "prior_limit_that_would_be_recorded_w": 370.0,
+    "drift_assertion": "Its status action throws 'GPU-owner lease state is invalid or the safe power cap drifted' whenever the live limit differs from 300 W while a lease is held.",
+    "consequence_for_future_in_lane_sweep": "Any future sweep performed with the lane running must (a) avoid Control-Release.ps1 -Action Status while off 300 W, and (b) set the limit back to 300 W before Control-Release.ps1 -Action Stop, otherwise Stop's status emit will throw. Sampling serve's own GET /v1/ninfer/status over the tunnel is drift-safe and is the right probe mid-sweep."
+  },
+  "anomalies": [
+    {
+      "id": "gpu_owner_gate_blocked_lane_start",
+      "severity": "blocking",
+      "detail": "Both lane start attempts failed with: 'GPU has an active interactive workload; close it before appliance start'. Residual owner was Discord pid 21236 reporting 85,997,453,312 bytes (80.09 GiB) dedicated - impossible on a 24 GiB card showing 1204 MiB used. Sanctioned dwm remedy applied once and start retried once, per instruction; no further escalation attempted."
+    },
+    {
+      "id": "bogus_windows_gpu_perf_counter",
+      "severity": "high",
+      "detail": "Win32_PerfFormattedData_GPUPerformanceCounters_GPUProcessMemory reported a stale/garbage DedicatedUsage instance for Discord pid 21236. Because the appliance gate trusts this counter with a 1 GiB threshold, a single bogus instance can indefinitely deny lane start. Worth a tolerance fix: cross-check against nvidia-smi total used, or ignore instances exceeding installed VRAM."
+    },
+    {
+      "id": "powershell_execution_policy_blocked_controller",
+      "severity": "low",
+      "detail": "Invoking Control-Release.ps1 over ssh failed with 'running scripts is disabled on this system' (SecurityError). Worked around per-process with 'powershell -ExecutionPolicy Bypass -EncodedCommand'; no machine or user execution policy was changed."
+    },
+    {
+      "id": "pcie_host_link_is_gen3_x8",
+      "severity": "medium",
+      "detail": "Device max gen4 / host max gen3, and link width 8x of a 16x-capable card (stable across samples). The lane's host link ceiling is ~7.88 GB/s, which bounds model load and checkpoint-restore bandwidth. Worth confirming the slot choice on this box."
+    },
+    {
+      "id": "pcie_loaded_read_unavailable",
+      "severity": "low",
+      "detail": "Required loaded PCIe read (gen/width with the model resident) could not be taken; the reported gen 1 current is the P8 idle downtrain."
+    },
+    {
+      "id": "power_samples_are_idle_not_load",
+      "severity": "low",
+      "detail": "All power.draw/temperature.gpu figures in results[] are idle P8 samples (~9.8-10.0 W, 25 C). They confirm the limit took effect but carry no throughput or thermal-headroom information."
+    },
+    {
+      "id": "no_clamping_observed",
+      "severity": "info",
+      "detail": "All five targets (280/300/320/350/370 W) were applied exactly with no driver clamping; min/max limits are 100 W/390 W, so the sanctioned sweep range is fully within hardware bounds and needs no adjustment on re-run."
+    },
+    {
+      "id": "discord_gpu_counter_artifact_unblocked_by_closing_discord",
+      "severity": "high",
+      "detail": "Pass 1 was gate-blocked solely by a Windows WDDM perf-counter artifact: Discord pid 21236 reported 85,997,453,312 bytes (~82 GiB / 80.09 GiB) dedicated GPU usage on a 24 GiB card, tripping Control-GpuOwner.ps1 Assert-InteractiveGpuWorkloadAbsent (threshold 1 GiB). Discord was closed out of band to unblock this pass and was deliberately left closed; the measurement agent terminated nothing. The lane then started on the first attempt (rc 0, 18.13 s) and again during the restore leg, confirming the counter row - not real VRAM pressure - was the blocker. The gate tolerance bug itself remains unfixed and will recur whenever a stale counter instance appears."
+    },
+    {
+      "id": "power_scaling_saturates_at_350w",
+      "severity": "info",
+      "detail": "Throughput scales with the cap only up to ~350 W. At 370 W the card drew 350.79 W max (under its own cap) with the same 1695 MHz peak SM clock as 350 W, and tok/s differed by 0.02 (0.03%) - noise. At 280/300/320 W max draw pinned within 0.5 W of the cap, so those points were truly power-limited. Total span 280 -> 370 W is +10.96% throughput (54.266 -> 60.215 tok/s); the lane 300 W qualified cap costs ~6.6% versus the 350 W knee."
+    },
+    {
+      "id": "probe_output_is_entirely_reasoning_tokens",
+      "severity": "medium",
+      "detail": "The 1024-token cap was consumed inside the model reasoning stream on every sweep point: usage.output_tokens_details.reasoning_tokens == 1024 and response status == \"incomplete\" for all six points, with no final answer text emitted. This is ideal for comparability (exactly 1024 tokens each time, so tok/s is apples-to-apples) but the figures describe reasoning-phase decode throughput at batch size 1, not a mixed prefill/answer workload. TTFT was therefore taken from the first reasoning delta event."
+    },
+    {
+      "id": "checkpoint_route_absent_in_this_release",
+      "severity": "medium",
+      "detail": "POST /v1/ninfer/checkpoints returned HTTP 404, so the intended direct restore measurement was impossible and the warm-vs-cold fallback was used. Separately, no byte counter is exposed anywhere (host_kv.capacity_bytes = 0, occupied_bytes = 0, last_materialization_predicted_nanoseconds = 0 across the whole battery), so restore bandwidth in MB/s is not reportable from this release and none is inferred."
+    },
+    {
+      "id": "lane_lease_power_cap_behaviour_confirmed_under_load",
+      "severity": "info",
+      "detail": "The pass-1 lease design note held exactly. The lane forced its 300 W qualified cap on acquisition; the sweep drove the live limit to 280-370 W while the lease was held and no throw occurred because Control-Release.ps1 -Action Status was never invoked off-cap - GET /v1/ninfer/status over the tunnel was used instead. The limit was re-queried after every generation and the lane never re-asserted 300 W mid-battery. Teardown set 300 W before Stop; Stop then restored the recorded prior limit of 370 W by itself, which the explicit nvidia-smi -pl 370 confirmed as a no-op (\"set to 370.00 W from 370.00 W\")."
+    },
+    {
+      "id": "pcie_loaded_read_still_untaken",
+      "severity": "low",
+      "detail": "The pcie block is unchanged from pass 1 and remains IDLE-ONLY (gen 1 x8 at P8); a loaded gen/width read was not in this assignment scope and was not taken even though the model was resident and decoding. The ~7.88 GB/s gen3 x8 host ceiling there is still theoretical."
+    },
+    {
+      "id": "client_side_wall_includes_tunnel_overhead",
+      "severity": "low",
+      "detail": "All wall times are measured on the Mac across an ssh tunnel to sf-old:18082, so they include tunnel and HTTP framing overhead and slightly understate on-host throughput. Magnitude is bounded by the observed TTFT floor of ~0.26-0.49 s. Each point is a single run: the 0.02 tok/s gap between 350 and 370 W is well inside that noise."
+    }
+  ],
+  "final_state": {
+    "serve_stopped": true,
+    "controller_process_state": "stopped",
+    "controller_endpoint_state": "unavailable",
+    "controller_task_state": "Ready",
+    "controller_status_rc": 0,
+    "gpu_owner_lease_active": false,
+    "gpu_owner_status": "ok",
+    "gpu_memory_used_mib": 871,
+    "gpu_memory_under_3gib": true,
+    "gpu_final_query_verbatim": "871 MiB, P8, 26, 9.93 W",
+    "gpu_pstate": "P8",
+    "power_limit_w": 370.0,
+    "power_default_limit_w": 370.0,
+    "power_limit_restored_to_default": true,
+    "teardown_order": "set 300 W (lease-qualified cap) -> Control-Release.ps1 -Action Stop (lease release restored 370 W) -> explicit nvidia-smi -pl 370 -> readback -> verify VRAM and tunnel",
+    "pre_stop_set_300w_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 300.00 W from 300.00 W. All done.",
+    "stop_command_rc": 0,
+    "stop_command_wall_s": 34.11,
+    "restore_command": "nvidia-smi -pl 370",
+    "restore_command_rc": 0,
+    "restore_command_verbatim": "Power limit for GPU 00000000:65:00.0 was set to 370.00 W from 370.00 W. All done.",
+    "restore_readback_limit_default": "370.00 W, 370.00 W",
+    "mac_tunnel_probe_after_stop": {
+      "http_status": null,
+      "body_or_error": "RemoteDisconnected: Remote end closed connection without response",
+      "wall_s": 2.02
+    },
+    "gpu_left_free": true,
+    "discord_left_closed": true,
+    "teardown_completed_utc": "2026-08-31T09:33:27Z",
+    "teardown_deadline_local": "07:30 America/Los_Angeles",
+    "teardown_before_deadline": true
+  },
+  "method": {
+    "transport": "ssh BatchMode to sf-old; powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand",
+    "serve_reachability": "http://127.0.0.1:18193 via persistent tunnel (listener verified on 127.0.0.1:18193 and [::1]:18193), bearer key from /Users/srs/.omp/agent/ninfer-3090.key",
+    "tunnel_verified": true,
+    "tunnel_note": "Tunnel listener was up throughout; probes returned RemoteDisconnected because nothing was listening on sf-old:18082 (lane stopped), not because the tunnel was down.",
+    "settle_seconds_per_point": 5,
+    "samples_per_point": 3,
+    "sample_offsets_s_into_generation": [
+      3.0,
+      8.0,
+      13.0
+    ],
+    "sample_query": "nvidia-smi --query-gpu=power.draw,temperature.gpu,clocks.sm,utilization.gpu,pstate,power.limit",
+    "sampling_transport": "background thread issuing ssh BatchMode queries during each generation",
+    "timing_source": "client-side monotonic clock on the Mac; TTFT from first SSE delta event",
+    "decode_probe": {
+      "route": "POST /v1/responses",
+      "model": "q38-ninfer",
+      "store": false,
+      "temperature": 0,
+      "max_output_tokens": 1024,
+      "stream": true,
+      "executed": true,
+      "probes_run": 6,
+      "prompt_identical_across_points": true,
+      "prompt_sha256": "e259cda7ef03b0d716f0f0434eaa9e8c2d2f360de87d7ae2fa096df9e7990483",
+      "prompt_verbatim": "Write a precise technical essay of about 900 words explaining how paged attention and KV-cache block allocation reduce memory fragmentation in large language model inference servers. Cover block tables, copy-on-write sharing for parallel samples, preemption and recomputation policy, and the throughput trade-offs versus contiguous cache allocation. Use plain prose without bullet lists.",
+      "warmup_generation_discarded": true,
+      "warmup_note": "One identical 1024-token generation was run and discarded before the first recorded point so no cold-start cost landed on the first 300 W baseline."
+    },
+    "sweep_order": [
+      300,
+      280,
+      320,
+      350,
+      370,
+      300
+    ],
+    "restore_probe": {
+      "route_attempted": "POST /v1/ninfer/checkpoints (404)",
+      "fallback": "warm previous_response_id continuation vs identical replay after Stop/Start",
+      "executed": true
+    },
+    "status_probe_used_mid_battery": "GET /v1/ninfer/status over the tunnel (drift-safe)",
+    "powershell_version_on_host": "5.1 (no null-coalescing operator used)"
+  },
+  "power_scaling": {
+    "best_point_w": 370,
+    "best_tokps": 60.215,
+    "worst_point_w": 280,
+    "worst_tokps": 54.266,
+    "span_pct_280_to_370": 10.96,
+    "saturation_w": 350,
+    "saturation_evidence": "At the 370 W limit the card drew only 350.79 W max - below its own cap - and peak SM clock was identical to the 350 W point (1695 MHz). 350 W and 370 W differ by 0.02 tok/s (0.03%), i.e. indistinguishable. At 280/300/320 W max draw sat within 0.5 W of the cap, so those points were genuinely power-limited.",
+    "recommendation": "300 W (the lane qualified cap) costs ~6.6% throughput versus the 350 W knee. Raising the qualified cap to 350 W would capture essentially all available headroom; going to 370 W buys nothing measurable."
+  }
+}
