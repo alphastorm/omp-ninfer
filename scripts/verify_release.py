@@ -289,7 +289,7 @@ NINFER_VARIANT_RELEASE_TAG_RES = {
         r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1)$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*)$"
+        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.0-qwen38-4090-durable\.[1-9][0-9]*)$"
     ),
 }
 NINFER_VARIANT_PACKAGE_NAME_RES = {
@@ -298,7 +298,7 @@ NINFER_VARIANT_PACKAGE_NAME_RES = {
         r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^ninfer-4090-qwen38-v0\.1\.0-win-x64\.zip$"
+        r"^ninfer-4090-qwen38-v0\.[12]\.0-win-x64\.zip$"
     ),
 }
 CHECKSUM_REQUIRED_ASSET_FIELDS = (

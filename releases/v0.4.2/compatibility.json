@@ -37,7 +37,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.1",
+      "product_release": "v0.4.2",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -127,7 +127,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.1",
+      "product_release": "v0.4.2",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -217,7 +217,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.1",
+      "product_release": "v0.4.2",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -332,7 +332,7 @@
       "qualification_receipt": {
         "path": "releases/v0.4.2/qualification/rtx4090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx4090.json",
-        "sha256": "8f815a37384a085d1475d8c65def9939e9617e33f4b2a0ea903d3e37de7cf24f"
+        "sha256": "9482795175089ec6ed2fc086855377a4a65b6b3cda597af0251fc7424f545537"
       }
     }
   ]
