@@ -1,0 +1,30 @@
+{
+  "artifact_type": "omp_ninfer_profile_arm_comparison",
+  "schema_version": 1,
+  "lane": "main-5090",
+  "generated_utc": "2026-08-31T01:25:00Z",
+  "comparison": "released v0.4.0 container, vision-on production config vs identical side arm omitting --vision",
+  "identity": {
+    "image_digest": "sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61",
+    "binary_sha256": "7eb66643df764c8c4d488f6ff4eff707a997c37d2995b5abdc12baa849d652f0",
+    "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "vision_on": {
+    "runtime_reservation_gib": 9.69,
+    "free_after_startup_gib": 3.63,
+    "planned_slack_gib": 3.56,
+    "kv_pages": "2048/2048",
+    "kv_ceiling_tokens": 131072,
+    "media": {"workers": 16, "cache_gib": 1.0, "live_gib": 2.0}
+  },
+  "text_only": {
+    "runtime_reservation_gib": 9.06,
+    "free_after_startup_gib": 4.55,
+    "planned_slack_gib": 4.47,
+    "kv_pages": "2048/2048",
+    "kv_ceiling_tokens": 131072,
+    "media": null
+  },
+  "finding": "Text-only frees ~0.92 GiB on the 32 GiB card but the KV ceiling was already at the 131,072-token maximum, so the benefit is slack/headroom only. The native Windows 4090 lane already ships vision off. Disposition: no production config churn now; fold the text/vision profile split into the next qualified profile train where it can raise ceilings on VRAM-tight cards.",
+  "restoration": "production container restarted on the unchanged vision-on config after the window"
+}
