@@ -1,0 +1,28 @@
+{
+  "artifact_type": "omp_ninfer_restore_from_copy_drill",
+  "schema_version": 1,
+  "lane": "main-5090",
+  "generated_utc": "2026-08-31T03:33:00Z",
+  "claim": "A pull-based cold copy of a checkpoint session tree is crash-consistent and restores exactly on the same lane: generations are immutable, SHA-manifested, and atomically published.",
+  "fixture": {
+    "session_frontier_tokens": 67935,
+    "generation": "1788139223130-2",
+    "tree_files": 9,
+    "tree_bytes": 5042999375
+  },
+  "steps": [
+    {"step": "replicate_to_nas", "detail": "allowlisted session tree, WSL ext4 -> drvfs staging -> SMB (sync script), byte-verified 9 files / 5,042,999,375 bytes"},
+    {"step": "erase_local", "detail": "DELETE /v1/ninfer/checkpoints/<digest> -> 200 state=deleted; local tree gone"},
+    {"step": "pull_back", "detail": "NAS -> drvfs staging over site-to-site WAN at ~28.3 MB/s (~3 min)"},
+    {"step": "install_local", "detail": "staging -> local ext4 store, root-owned 0700 like container writes"},
+    {"step": "status_reads_copy", "detail": "checkpoint status served from the installed copy: same generation, frontier 67935, read_backend io_uring-odirect"},
+    {"step": "process_restart", "detail": "docker restart of the released production container"},
+    {"step": "continuation", "detail": "previous_response_id from the copied manifest: HTTP 200, reuse=private_endpoint, cache=67935 restored, server ttft 0.58 s, wall 15.8 s (disk restore dominates)"}
+  ],
+  "caveats": [
+    "Restore is runtime-fingerprint-bound: a copied tree resumes only on an identical lane pair (same binary, artifact, config).",
+    "The engine refuses restore while the session is still live in its index (correct: never clobber resident state) - the drill therefore models recovery after process loss; the pre-restart attempt 404s by design when the response store has evicted the record.",
+    "Released v0.4.0 store semantics: quota must hold two generations of a session during a save transition; production runs 24576 MiB. The v0.4.1 tolerance fix (ninfer#27) removes that sizing constraint.",
+    "Replication policy: allowlisted public-safe sessions only; secret-bearing sessions stay local per the fleet security classes."
+  ]
+}
