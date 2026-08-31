@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
-MANIFEST="$ROOT/releases/v0.4.1/manifest.json"
+MANIFEST="$ROOT/releases/v0.4.2/manifest.json"
 PROFILE="$ROOT/profiles/qwen38-rtx5090-manual-tunnel.json"
 CONTAINER=omp-ninfer-beta
 MODEL_PATH=
@@ -15,7 +15,7 @@ usage() {
 usage: start-ninfer.sh --model PATH --api-key-file PATH --log-dir PATH
        start-ninfer.sh --check-contract
 
-Starts the exact digest-pinned v0.4.1 NInfer image on remote loopback.
+Starts the exact digest-pinned v0.4.2 NInfer image on remote loopback.
 The release manifest must be installable (`candidate` or `ready`); a draft is rejected before
 Docker runs.
 EOF

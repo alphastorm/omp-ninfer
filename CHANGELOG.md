@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-08-31
+
+### Added
+
+- The RTX 4090 native Windows lane moves to the durable v0.2 package
+  (`alphastorm/ninfer@v0.2.0-qwen38-4090-durable.1`): v0.4.1 checkpoint-store hardening on the
+  native lineage, chunked KV snapshot restore with a fail-closed cross-layout guard, hardened
+  D3D12 residency verification, WDDM evictable-budget CLI opt-in, streaming UTF-8 repair, and
+  MTP K=15 draft capacity (shipped arm remains MTP3 per the width ablation).
+- 4090 requalification receipts: protocol, 102,060-token seeded session, post-restart
+  persistence restoring 102,075 tokens on a fresh process, OMP golden equivalence.
+- Fleet measurements: RTX 3090 power sweep (350 W knee, +5.9% decode over the 300 W baseline;
+  host PCIe link documented as gen3 x8) and the MTP draft-width ablation.
+
+### Fixed
+
+- The pinned OMP 18.0.9 client now completes cold-start sessions on the RTX 4090 lane: the
+  native serve emits the full concrete status telemetry hierarchy (ninfer#28), with a
+  regression mirroring the client validator field-for-field.
+
+### Security
+
+- Cross-family council review (CR-20260831-durable4090) at source freeze, before the Windows
+  build: the convergent D3D12 probe-teardown P1 and a post-publish reclamation gap were
+  remediated with regressions; upstream's global fast-math device flags were rejected to
+  preserve the lane's numeric contract.
+
 ## [0.4.1] - 2026-08-31
 
 ### Fixed
@@ -257,7 +284,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...v0.3.2

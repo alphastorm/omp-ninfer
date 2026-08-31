@@ -7,13 +7,22 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.1`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.1` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.2`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.2` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.2 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.2`, GitHub `Latest`.
+- The RTX 4090 native Windows lane moves to the durable v0.2 package
+  ([`ninfer@v0.2.0-qwen38-4090-durable.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.0-qwen38-4090-durable.1)):
+  the durable-train rebase (council CR-20260831-durable4090), the ninfer#28 pinned-client
+  status fix, and five upstream ports. Requalified on the owner rig; the pinned client now
+  cold-starts on every lane. 5090/3090 components rebound unchanged.
 
 ### v0.4.1 public release
 

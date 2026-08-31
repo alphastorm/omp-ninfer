@@ -21,7 +21,7 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The ready `v0.4.1` public release connects native Windows OMP over authenticated local loopback
+The ready `v0.4.2` public release connects native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
@@ -56,7 +56,7 @@ model, configuration, qualification summary, and clean-install acceptance receip
 Clone the tag in Windows and in the WSL2 namespace that owns Docker:
 
 ```powershell
-git clone --branch v0.4.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.4.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -211,7 +211,7 @@ owner.
 From the public release tag, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.4.1 --depth 1 \
+git clone --branch v0.4.2 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -249,11 +249,11 @@ LOGS="$HOME/.local/state/omp-ninfer"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.1/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.4.2/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.4.2/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.4.2/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 curl --fail --location --continue-at - --output "$MODEL" "$MODEL_URL"

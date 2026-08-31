@@ -36,9 +36,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
-        self.assertEqual(authority["product_release"], "v0.4.1")
+        self.assertEqual(authority["product_release"], "v0.4.2")
         receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.4.1" / "qualification" / "rtx5090.json").read_bytes()
+            (ROOT / "releases" / "v0.4.2" / "qualification" / "rtx5090.json").read_bytes()
         ).hexdigest()
         self.assertTrue(
             all(
@@ -224,7 +224,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertEqual(rtx3090["package_bytes"], 573355399)
         self.assertEqual(
             rtx3090["qualification_receipt"]["path"],
-            "releases/v0.4.1/qualification/rtx3090.json",
+            "releases/v0.4.2/qualification/rtx3090.json",
         )
         self.assertEqual(
             rtx3090["package_url"],
@@ -265,7 +265,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
         current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.4.1")
+        self.assertEqual(current["product_release"], "v0.4.2")
 
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")
