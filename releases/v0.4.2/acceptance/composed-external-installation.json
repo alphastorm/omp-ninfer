@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_composed_external_installation",
   "schema_version": 1,
-  "release": "v0.4.1",
+  "release": "v0.4.2",
   "as_of": "2026-08-31",
   "status": "passed",
   "operator_class": "owner-operated tester-equivalent",
@@ -43,7 +43,7 @@
     "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
   },
   "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-  "compatibility_sha256": "2e83e8125abd322a5e38d4f3795e4cac89b56abc7cd81c3cf4d7ea629ee78f02",
+  "compatibility_sha256": "5b1782f29867028f0314c92363f7791dcb4d309407685d421c4de49c2b0b274c",
   "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
   "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
   "platform_receipts": [

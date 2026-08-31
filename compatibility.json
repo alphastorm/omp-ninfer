@@ -72,7 +72,7 @@
         "profile": "qwen38-5090-v0.4.1",
         "status": "qualified",
         "receipt": {
-          "url": "PENDING-PIN-5090",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx5090.json",
           "sha256": "1adbe9274c4e56df6f1b2cb85ae07ccaa83d3e8ec2fc26f40d9df6e788340348"
         }
       },
@@ -162,7 +162,7 @@
         "profile": "qwen38-5090-v0.4.1",
         "status": "qualified",
         "receipt": {
-          "url": "PENDING-PIN-5090",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx5090.json",
           "sha256": "1adbe9274c4e56df6f1b2cb85ae07ccaa83d3e8ec2fc26f40d9df6e788340348"
         }
       },
@@ -252,7 +252,7 @@
         "profile": "qwen38-5090-v0.4.1",
         "status": "qualified",
         "receipt": {
-          "url": "PENDING-PIN-5090",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx5090.json",
           "sha256": "1adbe9274c4e56df6f1b2cb85ae07ccaa83d3e8ec2fc26f40d9df6e788340348"
         }
       },
@@ -308,8 +308,8 @@
       "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
       "package_bytes": 573355399,
       "qualification_receipt": {
-        "path": "releases/v0.4.1/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3edc88d02aab4fb8c4a1160f39b9b583bdc5d169/releases/v0.4.1/qualification/rtx3090.json",
+        "path": "releases/v0.4.2/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx3090.json",
         "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392"
       }
     },
@@ -331,7 +331,7 @@
       "package_bytes": 227438715,
       "qualification_receipt": {
         "path": "releases/v0.4.2/qualification/rtx4090.json",
-        "url": "PENDING-PIN",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/dc45feec5d87288d326c36a77023eb2e029df8f3/releases/v0.4.2/qualification/rtx4090.json",
         "sha256": "8f815a37384a085d1475d8c65def9939e9617e33f4b2a0ea903d3e37de7cf24f"
       }
     }
