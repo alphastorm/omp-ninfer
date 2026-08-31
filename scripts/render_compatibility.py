@@ -182,12 +182,12 @@ def load_authority(path: Path) -> dict[str, Any]:
                 f"{variant_id} qualification receipt SHA-256 is invalid")
         if "release_tag" in variant:
             expected_release_tags = {
-                "rtx3090-windows-native": "v0.3.0-qwen38-3090.1",
+                "rtx3090-windows-native": "v0.2.2-qwen38-3090-beta.1",
                 "rtx4090-windows-native": "v0.2.0-qwen38-4090-beta.1",
             }
             expected_package_names = {
                 "rtx3090-windows-native": (
-                    "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-"
+                    "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-"
                     "cuda13.3-rtx3090.tar.gz"
                 ),
                 "rtx4090-windows-native": "ninfer-4090-qwen38-v0.1.0-win-x64.zip",

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-08-31
+
+### Changed
+
+- The RTX 3090 native Windows lane joins the durable train
+  ([`ninfer@v0.2.2-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.2-qwen38-3090-beta.1)):
+  buffered checkpoint export off the engine execution lock (fail-before-publication preserved),
+  every-turn automatic saves with sustained-idle debounce and redundant-frontier skip, explicit
+  `POST /v1/ninfer/checkpoints` as the synchronous durability boundary, lineage-aware
+  lazy-restore freshness guard, idempotent exact-endpoint restore, and constant-time
+  session-ownership comparisons. Qualified 14/14 on the owner rig: **90.0 tok/s** decode at
+  93.4% MTP acceptance under the 300 W managed envelope, exact 64K retrieval, **310 MB durable
+  restart** with exact recall, bidirectional rollback, and real OMP client acceptance
+  (council CRS-durable-3090, all 15 findings resolved).
+- RTX 5090 and 4090 components rebound unchanged from v0.4.4.
+
 ## [0.4.4] - 2026-08-31
 
 ### Changed
@@ -349,7 +365,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.4...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.5...HEAD
+[0.4.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...v0.4.2

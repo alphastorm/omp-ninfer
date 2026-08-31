@@ -36,9 +36,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
-        self.assertEqual(authority["product_release"], "v0.4.4")
+        self.assertEqual(authority["product_release"], "v0.4.5")
         receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.4.4" / "qualification" / "rtx5090.json").read_bytes()
+            (ROOT / "releases" / "v0.4.5" / "qualification" / "rtx5090.json").read_bytes()
         ).hexdigest()
         self.assertTrue(
             all(
@@ -211,25 +211,25 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         rtx3090 = variants["rtx3090-windows-native"]
         self.assertEqual(rtx3090["status"], "qualified")
         self.assertTrue(rtx3090["installable"])
-        self.assertEqual(rtx3090["release_tag"], "v0.3.0-qwen38-3090.1")
+        self.assertEqual(rtx3090["release_tag"], "v0.2.2-qwen38-3090-beta.1")
         self.assertEqual(
             rtx3090["package_name"],
-            "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-"
+            "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-"
             "cuda13.3-rtx3090.tar.gz",
         )
         self.assertEqual(
             rtx3090["package_sha256"],
-            "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
+            "57652260531a391f1a443437c200657ef90e85e322e078f6c7cb6e47682f5aa1",
         )
-        self.assertEqual(rtx3090["package_bytes"], 573355399)
+        self.assertEqual(rtx3090["package_bytes"], 573249238)
         self.assertEqual(
             rtx3090["qualification_receipt"]["path"],
-            "releases/v0.4.4/qualification/rtx3090.json",
+            "releases/v0.4.5/qualification/rtx3090.json",
         )
         self.assertEqual(
             rtx3090["package_url"],
-            "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/"
-            "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+            "https://github.com/alphastorm/ninfer/releases/download/v0.2.2-qwen38-3090-beta.1/"
+            "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
         )
         self.assertEqual(
             variants["rtx4090-windows-native"]["release_tag"],
@@ -265,7 +265,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
         current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.4.4")
+        self.assertEqual(current["product_release"], "v0.4.5")
 
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")

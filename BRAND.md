@@ -39,7 +39,7 @@ stay retired. Do not reuse them.
   the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
   is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
-  When install authority matters, bind it to the current ready release (`v0.4.4`) instead of
+  When install authority matters, bind it to the current ready release (`v0.4.5`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
 - Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
   documentation links whenever the surface has room for only one action. The GitHub `Latest`
@@ -190,7 +190,7 @@ durable primitive, not a lucky prefix-cache hit.
 
 **[Get started](docs/QUICKSTART.md)**
 
-**[Download v0.4.4](https://github.com/alphastorm/omp-ninfer/releases/latest)** ·
+**[Download v0.4.5](https://github.com/alphastorm/omp-ninfer/releases/latest)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** · **[Architecture](docs/ARCHITECTURE.md)** ·
 **[Performance program](docs/PERFORMANCE.md)** · **[Security](docs/SECURITY.md)** ·
 **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**

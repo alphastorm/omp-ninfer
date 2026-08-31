@@ -7,13 +7,25 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.4`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.4` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.5`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.5` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.5 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.5`, GitHub `Latest`.
+- The RTX 3090 native Windows lane joins the durable train at
+  [`ninfer@v0.2.2-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.2-qwen38-3090-beta.1):
+  buffered checkpoint export off the engine lock, every-turn automatic saves with sustained-idle
+  debounce and redundant-frontier skip, explicit `POST /v1/ninfer/checkpoints`, lineage-aware
+  lazy-restore freshness guard, idempotent exact-endpoint restore, and constant-time
+  session-ownership comparisons (council CRS-durable-3090, 14/14 rig qualification: 90.0 tok/s
+  at 93.4% MTP under 300 W, 310 MB durable restart with exact recall). 5090/4090 components
+  rebound unchanged.
 
 ### v0.4.4 public release
 

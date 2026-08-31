@@ -91,6 +91,9 @@ def main() -> int:
                         help="companion runtime-image receipt release tag")
     parser.add_argument("--archive-name", default=None,
                         help="binary archive asset name; default derives from the release")
+    parser.add_argument("--keep-deployment-profile", action="store_true",
+                        help="variant-only rebind: keep the prior 5090 deployment profile "
+                             "(v0.4.2 precedent - the container identity does not advance)")
     args = parser.parse_args()
 
     if not args.image_digest.startswith("sha256:"):
@@ -112,7 +115,9 @@ def main() -> int:
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     profile_from = f"qwen38-5090-{args.source}"
-    profile_to = f"qwen38-5090-{args.release}"
+    profile_to = (
+        profile_from if args.keep_deployment_profile else f"qwen38-5090-{args.release}"
+    )
 
     # 1. Copy the tree.
     shutil.copytree(src_dir, dst_dir)
