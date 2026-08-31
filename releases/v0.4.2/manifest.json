@@ -36,7 +36,7 @@
       "artifact_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cb35adae37a534edabaf61a87f457073d8c6fd10/compatibility.json",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d9cf10bbee4f802a44158ce114dc33f38782658a/compatibility.json",
       "compatibility_sha256": "cacd96eec8737aad8561e76f860d0f9b47f7502baf1848764da21a8f4bb0fb59"
     },
     "ninfer": {
@@ -153,8 +153,8 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "567605873a24ad6e641097a6805f36d2d107ab1a7444b453935b4dbb1d5e618e",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cb35adae37a534edabaf61a87f457073d8c6fd10/releases/v0.4.2/qualification.json",
+    "summary_sha256": "ae44d6da2c7340f2327a2ea8b63add2921dbe2c890386a00d431e341ba0da47e",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d9cf10bbee4f802a44158ce114dc33f38782658a/releases/v0.4.2/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
   },
