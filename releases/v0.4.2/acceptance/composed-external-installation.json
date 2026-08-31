@@ -1,0 +1,63 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.4.1",
+  "as_of": "2026-08-31",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "docker-local (pull by digest, launch from the published manifest identities)",
+  "steps": {
+    "anonymous_image_pull": {
+      "status": "passed",
+      "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:ce3cd21591d9a5a424a56c78652e0e8e70a7e0c85983df96fd55727058c04937",
+      "note": "pulled with an empty scratch DOCKER_CONFIG (no credentials)"
+    },
+    "anonymous_release_assets": {
+      "status": "passed",
+      "binary_http": 200,
+      "source_http": 200
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "SHA256SUMS verified for the binary archive and SBOM on an independent host"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "identity_line": "upstream=6e8b2e2a patch=f4fb315a dirty=false build=appliance-local deployment=qwen38-5090-v0.4.1"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "anonymous_status_request": 401
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "save -> docker restart -> warm continuation (reuse=private_endpoint, codeword recalled)"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "deleted continuation refuses 404 before and after restart; unhealthy reclamation withdraws the save tolerance (release CI regression)"
+    }
+  },
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "2e83e8125abd322a5e38d4f3795e4cac89b56abc7cd81c3cf4d7ea629ee78f02",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ]
+}
