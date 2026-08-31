@@ -1,0 +1,115 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 1,
+  "lane": "main-5090",
+  "generated_utc": "2026-08-31T17:06:22Z",
+  "base_tokens_requested": 56000,
+  "branches": 4,
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 25.875,
+      "input_tokens": 67681,
+      "id": "resp_5bfae21134d05503f9b067ec66ceead1"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 16.178,
+      "id": "resp_d3b30bedeca055d8676274587a9c719e"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 31.647,
+      "generation": "1788195770974-2",
+      "bytes": 5188026234,
+      "frontier": 67825
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 1.049,
+      "id": "resp_c890fe8639d5ced64586efa183173348"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 15.454,
+      "id": "resp_d622b81f2a9861ef159d7483bea6784f"
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 16.059,
+      "id": "resp_7c9b5b645fc2ee07bcc54830e143d3ee"
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 16.212,
+      "id": "resp_de452084dc95b11f917fef0a7f2629ea"
+    },
+    {
+      "step": "restart",
+      "wall_s": 90.622,
+      "ready_after_s": 57.33
+    },
+    {
+      "step": "post_restart_resume",
+      "wall_s": 27.381,
+      "id": "resp_9b8c1ac85cb671811bc44926a9a8494b"
+    },
+    {
+      "step": "post_restart_save",
+      "wall_s": 27.918,
+      "generation": "1788195967697-1",
+      "frontier": 67935
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67681,
+      "completion_tokens": 40,
+      "ttft_s": 25.428765408
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 67720,
+      "prompt_tokens": 67746,
+      "completion_tokens": 80,
+      "ttft_s": 15.47028336
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.401227918
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 14.755842899
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 15.305169022
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 15.434125869
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 67828,
+      "prompt_tokens": 67856,
+      "completion_tokens": 80,
+      "ttft_s": 0.524005178
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 1,
+  "lane": "main-5090-slots4",
+  "generated_utc": "2026-08-31T17:11:13Z",
+  "base_tokens_requested": 56000,
+  "branches": 4,
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 25.908,
+      "input_tokens": 67681,
+      "id": "resp_808161137fa5e31acfa253eb2f2e7dd6"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 15.631,
+      "id": "resp_431cf81f79e94ad1c28fbe86b9748c85"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 31.46,
+      "generation": "1788196208091-2",
+      "bytes": 5188026234,
+      "frontier": 67825
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 1.026,
+      "id": "resp_54e2678c0b0454a795aa2aae6cf36a8f"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 15.849,
+      "id": "resp_2dd57760e6cc374680c0c509cae89b21"
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 15.663,
+      "id": "resp_543e1a23a6f243c390594c8e8d1aca41"
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 15.399,
+      "id": "resp_14bdee3746077e346623d03e3baf089b"
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67681,
+      "completion_tokens": 40,
+      "ttft_s": 25.458210011000002
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 67720,
+      "prompt_tokens": 67746,
+      "completion_tokens": 80,
+      "ttft_s": 14.886485309
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.365953548
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 15.148074524
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 14.887887772000001
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 14.619914545
+    }
+  ]
+}

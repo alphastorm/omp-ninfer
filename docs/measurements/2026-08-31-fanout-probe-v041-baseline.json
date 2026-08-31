@@ -1,0 +1,92 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 1,
+  "lane": "main-5090-v041-baseline",
+  "generated_utc": "2026-08-31T16:32:33Z",
+  "base_tokens_requested": 56000,
+  "branches": 4,
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 25.819,
+      "input_tokens": 67681,
+      "id": "resp_c0bb3da781bf705a376def37f24f5a02"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 16.993,
+      "id": "resp_b00a8bd1fccc91a85e8c8f90128b0492"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 32.902,
+      "generation": "1788193781242-2",
+      "bytes": 5034071578,
+      "frontier": 67825
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 26.453,
+      "id": "resp_b6945b47c1701710993cd95950ac0dcc"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 42.696,
+      "id": "resp_91c5a8be663dc11b0a4116a1172e604b"
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 42.965,
+      "id": "resp_9913c97d904cd66c4a9a55d970f1469d"
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 42.589,
+      "id": "resp_82babf39529878b6650db9c951ce14cb"
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67681,
+      "completion_tokens": 40,
+      "ttft_s": 25.371681887999998
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 67720,
+      "prompt_tokens": 67746,
+      "completion_tokens": 80,
+      "ttft_s": 16.286730905000002
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 25.779997881000003
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 41.945802203999996
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 42.133277491
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 41.797632723
+    }
+  ]
+}
