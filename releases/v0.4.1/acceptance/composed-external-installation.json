@@ -1,0 +1,45 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.4.1",
+  "as_of": "2026-08-31",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "docker-local (pull by digest, launch from the published manifest identities)",
+  "steps": {
+    "anonymous_image_pull": {
+      "status": "passed",
+      "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:ce3cd21591d9a5a424a56c78652e0e8e70a7e0c85983df96fd55727058c04937",
+      "note": "pulled with an empty scratch DOCKER_CONFIG (no credentials)"
+    },
+    "anonymous_release_assets": {
+      "status": "passed",
+      "binary_http": 200,
+      "source_http": 200
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "SHA256SUMS verified for the binary archive and SBOM on an independent host"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "identity_line": "upstream=6e8b2e2a patch=f4fb315a dirty=false build=appliance-local deployment=qwen38-5090-v0.4.1"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "anonymous_status_request": 401
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "save -> docker restart -> warm continuation (reuse=private_endpoint, codeword recalled)"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "deleted continuation refuses 404 before and after restart; unhealthy reclamation withdraws the save tolerance (release CI regression)"
+    }
+  },
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  }
+}

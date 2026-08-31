@@ -1,0 +1,94 @@
+{
+  "artifact_type": "ninfer_rtx4090_mtp3_qualification_summary",
+  "schema_version": 2,
+  "release": "v0.3.2",
+  "variant_id": "rtx4090-windows-native",
+  "status": "passed",
+  "release_tag": "v0.3.2",
+  "identity": {
+    "source_commit": "e4654b5aed87e7385bdf33f8b4365a7a550d4ad9",
+    "package_source_commit": "19ebcc09ebbcc79061badf78068e1ad70062485f",
+    "qualification_commit": "32e551a949c81507b18c40b178e20b6641df5b23",
+    "server_binary_sha256": "41fcc1803e4a057de24a485776e71737a31cb39fdd9358350b975f6b11b9c869",
+    "configuration_sha256": "5a565eafb038c19d699f5a118624ff7a77c245a532c1036aeb2a9b9c136f6175",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "cuda_architecture": "sm_89",
+    "maximum_context_tokens": 131072
+  },
+  "package": {
+    "filename": "ninfer-4090-qwen38-v0.1.0-win-x64.zip",
+    "sha256": "8f79ebc2efea4fe1359e123a54b3c9fd45f253539ca1a609ffe22b31812f96ef",
+    "bytes": 227438719,
+    "source_archive_filename": "runtime-source-e4654b5a.tar.gz",
+    "source_archive_sha256": "0c8b7afd73ae1354d82f7f01b84e7b42b7fab203df5484fe4d954c6eaaf20d6d",
+    "package_source_archive_filename": "ninfer-4090-qwen38-v0.1.0-win-x64-source.tar.gz",
+    "package_source_archive_sha256": "c0d9c294f986834ea177842bf336e9c38d28200fcfeb325c9b218df70ddae39c",
+    "sbom_filename": "ninfer-4090-qwen38-v0.1.0-win-x64.spdx.json",
+    "sbom_sha256": "a2b801254ce50058e7420e5624d4d159a9253f21defc871f157840158a68f308",
+    "checksums_sha256": "2c21d5d3f74501ef57ba18a2eb99d9bba600c3301a6dcfceabbd2633216d3889",
+    "package_build_receipt_sha256": "9b3e9dfe8659cdca128884eaf14be54c5658100909ba2ed3a20870934a56e653",
+    "release_manifest_sha256": "b5ee9e0bffe97b4defcba02911a11f44dd3f8176efdbcf81116afe87db9df4ce",
+    "installer_sha256": "767642c0a16d6dc3decb5543692fa50c1b0ccfaca2cf239a64c3a28b9a729fd2",
+    "controller_sha256": "0d7d32dfeda190802433d8b92545bef66bee5dd617a18fd3e9d4c324bbb551d5",
+    "gpu_owner_controller_sha256": "3e3ae54c71c7534064ceff1dae59acfd2ea546a8c920fcc6c9fb1d46296ba5e0",
+    "state_protection_sha256": "c431cdd55a764526d6d9b720909b2a706e0df2b8f75d871900e4d74616af8463"
+  },
+  "component_evidence": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "qualification_commit": null,
+    "qualification_path": null,
+    "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.3.1-qwen38-4090-mtp3.1",
+    "golden_equivalent": "passed",
+    "historical_private_corpus_reused": false,
+    "protocol_checks": "15/15",
+    "checkpoint_restart_tokens": 107836,
+    "checkpoint_restored_tokens": 107851,
+    "prefill_tokens_per_second": null,
+    "decode_tokens_per_second": 97.69,
+    "populated_status_seconds": 3.8825062,
+    "private_identifier_scan_findings": 0,
+    "release_lifecycle": "passed",
+    "incumbent_restoration": "passed",
+    "post_restart_prepare_seconds": 0.1334949,
+    "server_instance_replaced": true,
+    "decode_tokens_per_second_rounds": [
+      93.23,
+      97.69
+    ],
+    "decode_workload": "2048-token generation, temperature 0, maintainer measurement",
+    "golden_equivalent_wall_seconds": {
+      "mtp0": 5.663106,
+      "mtp3": 4.697929
+    },
+    "mtp_decision": {
+      "artifact": "ninfer_mtp_requalification_decision",
+      "selected_profile": "MTP3",
+      "improvement_percent": 17.043244,
+      "threshold_percent": 10.0
+    },
+    "exploratory_depths_nonqualification": {
+      "mtp4_wall_seconds": [
+        26.213,
+        26.702
+      ],
+      "mtp5_wall_seconds": [
+        29.213,
+        29.222
+      ]
+    },
+    "tooling_disclosure": "Published qualification driver and comparator carried two latent defects (PowerShell 5.1 serializer incompatibility; post-restart gate expecting a lazy restore label while the engine restores eagerly at startup). Minimal disclosed patches were applied at the installed copies; the patched restore gate is strictly stronger, proving server-instance rotation plus >=100,000-token restoration. An operator-specific GPU-owner controller managed the host's predecessor serve. Full disclosure is embedded in the component release qualification sidecar."
+  },
+  "limitations": [
+    "Windows 11 x64, one active request, MTP3 (speculative backend mtp, draft_tokens 3), and the exact qwen38-4090-v0.1 profile with configuration 5a565eafb038c19d699f5a118624ff7a77c245a532c1036aeb2a9b9c136f6175 are qualified.",
+    "Vision is not claimed for this package.",
+    "Draft depths 4 and 5 were measured exploratory-only on a fixed decode workload; no qualification claim attaches to them.",
+    "The decode range 93.2-97.7 tok/s is two logged server-side 2,048-token generations on one machine, not a universal throughput claim.",
+    "The SPDX is a complete 27-file package inventory; dependency-level package enumeration is not claimed.",
+    "Response DELETE is logical object deletion, not secure erasure of context retained for surviving descendant continuation; DELETE-specific stale generations are retired eagerly.",
+    "The populated-root Status measurement covers a 2,048-file/2 GiB sparse fixture, not the worst-case quota-full file count."
+  ],
+  "stable_promotion_performed": false,
+  "production_route_activation_performed": false,
+  "private_fleet_projection_included": false,
+  "qualification_class": "public-release-qualification"
+}
