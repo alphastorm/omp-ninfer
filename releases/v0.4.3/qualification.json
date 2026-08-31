@@ -1,126 +1,126 @@
 {
- "artifact_type": "omp_ninfer_product_qualification",
- "schema_version": 2,
- "release": "v0.4.3",
- "as_of": "2026-08-31",
- "status": "runtime-release-eligible",
- "publication_authorized": false,
- "external_installation_qualified": true,
- "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 durable container advanced to v0.4.3 (fanout anchors, checkpoint-import integrity, session isolation; fanout-probe + restart-resume + protocol smokes qualified on the owner appliance); the RTX 4090 durable v0.2 package and the exact qualified RTX 3090 runtime rebound unchanged.",
- "runtime_identity": {
-  "repository": "https://github.com/alphastorm/ninfer",
-  "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
-  "behavioral_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
-  "release_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
-  "release_source_archive_sha256": "b40a2ba9970812926bc885052ea2a723c4cc08c4ae42b476211b26cc94eabd11",
-  "release_server_binary_sha256": "4d11c95500eb7ab2bbf0855794045626780054fb7212235bb4fd94a0cfa51bdf",
-  "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-  "model_artifact_bytes": 18210531328,
-  "configuration_sha256": "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
-  "public_model_id": "q38-ninfer",
-  "deployment_profile": "qwen38-5090-v0.4.3"
- },
- "composition": {
-  "behavioral_qualification": {
-   "repository_path": "releases/v0.4.3/qualification/rtx5090.json",
-   "sha256": "6db7b8659ad9ab0d7d99e3a8c6807804be21458b292ab59270459dfc95f73650",
-   "status": "passed",
-   "source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b"
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.4.3",
+  "as_of": "2026-08-31",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": true,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 durable container advanced to v0.4.3 (fanout anchors, checkpoint-import integrity, session isolation; fanout-probe + restart-resume + protocol smokes qualified on the owner appliance); the RTX 4090 durable v0.2 package and the exact qualified RTX 3090 runtime rebound unchanged.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
+    "behavioral_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
+    "release_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
+    "release_source_archive_sha256": "b40a2ba9970812926bc885052ea2a723c4cc08c4ae42b476211b26cc94eabd11",
+    "release_server_binary_sha256": "4d11c95500eb7ab2bbf0855794045626780054fb7212235bb4fd94a0cfa51bdf",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.4.3"
   },
-  "local_release_packaging": {
-   "status": "passed",
-   "published": true,
-   "release_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
-   "release_server_binary_sha256": "4d11c95500eb7ab2bbf0855794045626780054fb7212235bb4fd94a0cfa51bdf",
-   "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:f66708f585ca1e379e578412b807dcc4608e6726139487a52fcb0ae1ae3495b6",
-   "oci_manifest_digest": "sha256:f66708f585ca1e379e578412b807dcc4608e6726139487a52fcb0ae1ae3495b6",
-   "binary_package_sha256": "04d501a2760b6846fb52f039721c77fb7a175620aee7fc4208ee04a57a383e0c",
-   "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.4.3-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.4.3-linux-x86_64-cuda13.1.spdx.json",
-   "sbom_sha256": "88a731d2bee5cbdb1c0f2ea6948b2f48e66c2cbe227a9269bf276b567e3e61e8",
-   "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.4.3-qwen38-5090-beta.2",
-   "anonymous_pull_verified": true,
-   "anonymous_assets_verified": true,
-   "checksums_verified": true,
-   "build_route_note": "built in the pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 container on the owner appliance (route proven for v0.4.1); 9/9 suites + receipt attached to the component release"
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.4.3/qualification/rtx5090.json",
+      "sha256": "6db7b8659ad9ab0d7d99e3a8c6807804be21458b292ab59270459dfc95f73650",
+      "status": "passed",
+      "source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
+      "release_server_binary_sha256": "4d11c95500eb7ab2bbf0855794045626780054fb7212235bb4fd94a0cfa51bdf",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:f66708f585ca1e379e578412b807dcc4608e6726139487a52fcb0ae1ae3495b6",
+      "oci_manifest_digest": "sha256:f66708f585ca1e379e578412b807dcc4608e6726139487a52fcb0ae1ae3495b6",
+      "binary_package_sha256": "04d501a2760b6846fb52f039721c77fb7a175620aee7fc4208ee04a57a383e0c",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.4.3-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.4.3-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "88a731d2bee5cbdb1c0f2ea6948b2f48e66c2cbe227a9269bf276b567e3e61e8",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.4.3-qwen38-5090-beta.2",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "built in the pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 container on the owner appliance (route proven for v0.4.1); 9/9 suites + receipt attached to the component release"
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.4.3/qualification/rtx4090.json",
+        "sha256": "8f815a37384a085d1475d8c65def9939e9617e33f4b2a0ea903d3e37de7cf24f",
+        "release_tag": "v0.2.0-qwen38-4090-durable.1",
+        "package_sha256": "5ce8b7a9e8982d4c58cdb1798d2fdee7f3a3514db59f1feefeb14293d08418fa"
+      },
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.4.3/qualification/rtx3090.json",
+        "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
+        "release_tag": "v0.3.0-qwen38-3090.1",
+        "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.4.3/acceptance/composed-external-installation.json",
+      "sha256": "55cc03b204f8644962af91e9be75eb96db7d0097561b96fbe9794905b55b8b47",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "1e627be235652074f10e13999ed329fc9a34343c2ce449e800fdca44824daa30",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/28eb8fdc309e5f5cc6f81057179380ef44c781c0/releases/v0.4.3/acceptance/composed-external-installation.json"
+    }
   },
-  "native_runtime_variants": {
-   "rtx4090-windows-native": {
-    "status": "passed",
-    "beta_qualified": true,
-    "installable": true,
-    "repository_path": "releases/v0.4.3/qualification/rtx4090.json",
-    "sha256": "8f815a37384a085d1475d8c65def9939e9617e33f4b2a0ea903d3e37de7cf24f",
-    "release_tag": "v0.2.0-qwen38-4090-durable.1",
-    "package_sha256": "5ce8b7a9e8982d4c58cdb1798d2fdee7f3a3514db59f1feefeb14293d08418fa"
-   },
-   "rtx3090-windows-native": {
-    "status": "passed",
-    "beta_qualified": true,
-    "installable": true,
-    "repository_path": "releases/v0.4.3/qualification/rtx3090.json",
-    "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
-    "release_tag": "v0.3.0-qwen38-3090.1",
-    "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97"
-   }
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "fanout_branch_reuse": "private_long_anchor (4/4 branches, 67,726 tokens reused)",
+      "fanout_device_resident_branch_ttft_s": 0.401,
+      "fanout_four_branch_wall_s": 47.9,
+      "fanout_baseline_wall_s": 148.7,
+      "checkpoint_save_bytes": 5188026234,
+      "restart_continuation_reuse": "private_endpoint",
+      "restart_continuation_ttft_s": 0.524,
+      "cross_session_isolation": "root (agent-protocol smoke rc=0)",
+      "decode_inheritance": "decode/prefill curves inherited from the v0.4.1 receipt (serve-layer delta plus session-scoped cache fixes; kernels identical)"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "checkpoint_seed_tokens": 102060,
+      "post_restart_restored_tokens": 102075,
+      "post_restart_prepare_seconds": 0.171,
+      "golden_equivalent": "passed",
+      "pinned_client_cold_start": "passed (ninfer#28 closed: FLEET-HEAVY-OK from a clean HOME)",
+      "mtp_arm": "MTP3 (K ablation: acceptance 44.2/26.1/19.0 pct at K=3/5/7; K>5 breaks v0.3.1 rollback restores)"
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "protocol_checks": "15/15",
+      "exact_retrieval_prompt_tokens": 64512,
+      "restart_cached_input_tokens_restored": 45,
+      "decode_tokens_per_second": 90.17303192140295,
+      "prefill_tokens_per_second": 893.411379306566,
+      "mtp_acceptance_rate": 0.9343,
+      "max_power_w": 299.8
+    }
   },
-  "external_installation_acceptance": {
-   "status": "passed",
-   "operator_class": "owner-operated tester-equivalent",
-   "repository_path": "releases/v0.4.3/acceptance/composed-external-installation.json",
-   "sha256": "55cc03b204f8644962af91e9be75eb96db7d0097561b96fbe9794905b55b8b47",
-   "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
-   "tools": true,
-   "vision": true,
-   "stateful_resume": true,
-   "fail_closed": true,
-   "runtime_incumbent_restored": true,
-   "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
-   "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
-   "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-   "compatibility_sha256": "1e627be235652074f10e13999ed329fc9a34343c2ce449e800fdca44824daa30",
-   "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.3/acceptance/composed-external-installation.json"
-  }
- },
- "observed_gates": {
-  "rtx5090": {
-   "status": "passed",
-   "maximum_context_tokens": 131072,
-   "fanout_branch_reuse": "private_long_anchor (4/4 branches, 67,726 tokens reused)",
-   "fanout_device_resident_branch_ttft_s": 0.401,
-   "fanout_four_branch_wall_s": 47.9,
-   "fanout_baseline_wall_s": 148.7,
-   "checkpoint_save_bytes": 5188026234,
-   "restart_continuation_reuse": "private_endpoint",
-   "restart_continuation_ttft_s": 0.524,
-   "cross_session_isolation": "root (agent-protocol smoke rc=0)",
-   "decode_inheritance": "decode/prefill curves inherited from the v0.4.1 receipt (serve-layer delta plus session-scoped cache fixes; kernels identical)"
-  },
-  "rtx4090_windows_native": {
-   "status": "passed",
-   "checkpoint_seed_tokens": 102060,
-   "post_restart_restored_tokens": 102075,
-   "post_restart_prepare_seconds": 0.171,
-   "golden_equivalent": "passed",
-   "pinned_client_cold_start": "passed (ninfer#28 closed: FLEET-HEAVY-OK from a clean HOME)",
-   "mtp_arm": "MTP3 (K ablation: acceptance 44.2/26.1/19.0 pct at K=3/5/7; K>5 breaks v0.3.1 rollback restores)"
-  },
-  "rtx3090_windows_native": {
-   "status": "passed",
-   "protocol_checks": "15/15",
-   "exact_retrieval_prompt_tokens": 64512,
-   "restart_cached_input_tokens_restored": 45,
-   "decode_tokens_per_second": 90.17303192140295,
-   "prefill_tokens_per_second": 893.411379306566,
-   "mtp_acceptance_rate": 0.9343,
-   "max_power_w": 299.8
-  }
- },
- "interpretation": [
-  "All three GPU lanes are qualified in one public release; every claim binds an exact package, profile, and receipt.",
-  "The RTX 4090 lane now runs the durable train: v0.4.1 store hardening ported to the native Windows lineage, five upstream ports folded, cross-family council review remediated before the build (CR-20260831-durable4090).",
-  "The pinned OMP 18.0.9 client completes cold-start sessions on every lane; the 4090 status-contract defect (ninfer#28) is closed at source with a validator-mirroring regression.",
-  "Post-restart persistence on the 4090 restores 102,075 tokens on a fresh process via the authenticated session checkpoint store.",
-  "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
- ],
- "remaining_release_gates": []
+  "interpretation": [
+    "All three GPU lanes are qualified in one public release; every claim binds an exact package, profile, and receipt.",
+    "The RTX 4090 lane now runs the durable train: v0.4.1 store hardening ported to the native Windows lineage, five upstream ports folded, cross-family council review remediated before the build (CR-20260831-durable4090).",
+    "The pinned OMP 18.0.9 client completes cold-start sessions on every lane; the 4090 status-contract defect (ninfer#28) is closed at source with a validator-mirroring regression.",
+    "Post-restart persistence on the 4090 restores 102,075 tokens on a fresh process via the authenticated session checkpoint store.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": []
 }
