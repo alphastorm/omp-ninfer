@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison</title>
+<meta name="description" content="A dated, honest decision guide for local inference backends for coding-agent sessions.">
+<link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/compare/">
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison">
+<meta property="og:description" content="A dated, honest decision guide for local inference backends for coding-agent sessions.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/compare/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication",
+ "name": "OMP NInfer",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Windows, Linux",
+ "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "url": "https://alphastorm.github.io/omp-ninfer/",
+ "codeRepository": "https://github.com/alphastorm/omp-ninfer",
+ "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
+</script>
+</head>
+<body>
+<header class="site">
+  <img src="../logo.svg" alt="" aria-hidden="true">
+  <a class="brand" href="../">OMP NInfer</a>
+  <nav>
+      <a href="../">Overview</a>
+      <a href="../compare/" aria-current="page">Compare</a>
+      <a href="../status/">Status</a>
+      <a href="../benchmarks/">Benchmarks</a>
+      <a href="../security/">Security</a>
+  </nav>
+</header>
+<main>
+<p class="eyebrow">Decision guide</p>
+<h1>Choosing a local backend for coding sessions</h1>
+<p class="lede">Every project below is excellent at a different job. Most operators should use one
+of them; this page exists to make that call fast and honest.</p>
+<table>
+<tr><th>Dimension</th><th>OMP NInfer</th><th>Ollama</th><th>LM Studio</th><th>llama.cpp</th><th>vLLM</th></tr>
+<tr><td>Primary job</td><td>Durable OMP appliance</td><td>Easy model runner</td><td>GUI model runner</td><td>Portable engine</td><td>General serving</td></tr>
+<tr><td>Model breadth</td><td>One model, hash-pinned</td><td>Broad</td><td>Broad</td><td>Broad</td><td>Broad</td></tr>
+<tr><td>Explicit Responses continuation</td><td>Core product</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td></tr>
+<tr><td>Process-restart recovery</td><td>Transactional checkpoints, verified restore</td><td>Different contract</td><td>Different contract</td><td>Different contract</td><td>Different architecture</td></tr>
+<tr><td>GUI</td><td>No</td><td>Limited</td><td>Strong</td><td>No</td><td>No</td></tr>
+<tr><td>Multi-user throughput</td><td>Not the target</td><td>Limited</td><td>Not the target</td><td>Limited</td><td>Strong</td></tr>
+<tr><td>Best fit</td><td>One private, long-lived OMP session</td><td>Easy breadth</td><td>Desktop convenience</td><td>Portability</td><td>Serving scale</td></tr>
+</table>
+<p class="verified">Last verified 2026-08-31 against each project's public documentation.
+Capabilities change quickly — reverify before deciding.</p>
+<h2>The one-sentence answer</h2>
+<p>For an Oh My Pi operator running Qwen3.8 27B on a qualified RTX 5090, 4090, or 3090 who values
+private, restart-resumable long sessions, OMP NInfer is the strongest fit. Choose Ollama or
+LM&nbsp;Studio for breadth and convenience, llama.cpp for portability, or vLLM for serving scale.</p>
+<p>Full criteria: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md">decision guide</a> ·
+prior art: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELATED_WORK.md">related work</a></p>
+</main>
+<footer>
+  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
+  every number on this site is bound to a versioned release receipt.
+</footer>
+</body>
+</html>

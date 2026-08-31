@@ -17,13 +17,27 @@ stay retired. Do not reuse them.
 - Repository: `alphastorm/omp-ninfer`
 - Display name: **OMP NInfer** (capital N, capital I)
 - Alternate lockup: **OMP × NInfer** — the × is Local violet, weight 500
+- Category (the market we claim): **durable local inference for coding agents**
+- Product descriptor: **the qualified local inference appliance for Oh My Pi**
+- Headline: **Your coding session should survive the process.**
 - Tagline: **Durable session state on your GPU.**
+- Messaging stack — every first screen answers, in order: category, headline, entity
+  (what it is, for whom), proof (one receipt line from the current release), one action.
+  The enemy is the cold context rebuild and implicit-cache roulette; the promise is one
+  private, long-lived coding session that is explicitly resumable across process restarts.
+- Entity grammar: state the four-part relationship in nearly identical words on every
+  surface — *Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release
+  layer) → NInfer (inference engine) → Qwen3.8 27B (served model).* Spell out "Oh My Pi"
+  before using "OMP" on any page that can be read standalone.
 - Positioning rule: never claim "no re-prefill" as the value. In-process prefix caching
   (upstream ninfer `prefix_reuse`, llama.cpp prompt cache, vLLM APC) already covers the
   live-process append-only case and is conceded as prior art. The product claim is explicit,
   transactional, durable continuation — checkpoints that survive process death, portability as
   the trajectory. Warm/cold figures are always captioned retained state versus fresh-process
   cold start, never versus an ordinary follow-up.
+- Non-fit is part of the brand: say plainly when Ollama, LM Studio, llama.cpp, or vLLM is
+  the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
+  is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
   When install authority matters, bind it to the current ready release (`v0.4.0`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.

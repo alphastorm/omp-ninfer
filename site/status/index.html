@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP NInfer status — current qualified release and lanes</title>
+<meta name="description" content="Current stable release v0.4.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and known caveats.">
+<link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/status/">
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="OMP NInfer status — current qualified release and lanes">
+<meta property="og:description" content="Current stable release v0.4.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and known caveats.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/status/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication",
+ "name": "OMP NInfer",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Windows, Linux",
+ "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "url": "https://alphastorm.github.io/omp-ninfer/",
+ "codeRepository": "https://github.com/alphastorm/omp-ninfer",
+ "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
+</script>
+</head>
+<body>
+<header class="site">
+  <img src="../logo.svg" alt="" aria-hidden="true">
+  <a class="brand" href="../">OMP NInfer</a>
+  <nav>
+      <a href="../">Overview</a>
+      <a href="../compare/">Compare</a>
+      <a href="../status/" aria-current="page">Status</a>
+      <a href="../benchmarks/">Benchmarks</a>
+      <a href="../security/">Security</a>
+  </nav>
+</header>
+<main>
+<p class="eyebrow">Status</p>
+<h1>Current qualified release</h1>
+<p class="lede"><strong>v0.4.0</strong> — durable session state on every lane. Published, hash-pinned,
+and acceptance-tested from public URLs.</p>
+<table>
+<tr><th>Lane</th><th>Form</th><th>Context ceiling</th><th>Notes</th></tr>
+<tr><td>RTX 5090</td><td>Linux container (Docker/WSL2)</td><td>131,072</td><td>Durable container; vision available</td></tr>
+<tr><td>RTX 4090</td><td>Native Windows service</td><td>131,072</td><td>MTP3 profile; DirectStorage checkpoints; text-only</td></tr>
+<tr><td>RTX 3090</td><td>Native Windows service</td><td>65,536</td><td>64K working class; text-only</td></tr>
+</table>
+<h2>Known caveats</h2>
+<ul>
+<li>One active request per lane (max concurrency 1); not a serving farm.</li>
+<li>Checkpoints restore only on an identical lane (same binary, artifact, profile).</li>
+<li>The pinned Oh My Pi client build is <code>18.0.9</code>; do not run <code>omp update</code> over a lane install.</li>
+</ul>
+<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/releases/v0.4.0/manifest.json">release manifest</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md">release lifecycle</a></p>
+<p class="verified">Last verified 2026-08-31.</p>
+</main>
+<footer>
+  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
+  every number on this site is bound to a versioned release receipt.
+</footer>
+</body>
+</html>

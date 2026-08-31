@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP NInfer — durable local inference for coding agents</title>
+<meta name="description" content="The qualified local inference appliance for Oh My Pi: Qwen3.8 27B on one RTX 5090, 4090, or 3090 with restart-resumable OpenAI Responses state.">
+<link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/">
+<link rel="stylesheet" href="site.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="OMP NInfer — durable local inference for coding agents">
+<meta property="og:description" content="The qualified local inference appliance for Oh My Pi: Qwen3.8 27B on one RTX 5090, 4090, or 3090 with restart-resumable OpenAI Responses state.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication",
+ "name": "OMP NInfer",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Windows, Linux",
+ "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "url": "https://alphastorm.github.io/omp-ninfer/",
+ "codeRepository": "https://github.com/alphastorm/omp-ninfer",
+ "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
+</script>
+</head>
+<body>
+<header class="site">
+  <img src="logo.svg" alt="" aria-hidden="true">
+  <a class="brand" href="">OMP NInfer</a>
+  <nav>
+      <a href="" aria-current="page">Overview</a>
+      <a href="compare/">Compare</a>
+      <a href="status/">Status</a>
+      <a href="benchmarks/">Benchmarks</a>
+      <a href="security/">Security</a>
+  </nav>
+</header>
+<main>
+<p class="eyebrow">Durable local inference for coding agents</p>
+<h1>Your coding session should survive the&nbsp;process.</h1>
+<p class="lede"><strong>OMP NInfer</strong> is the qualified local inference appliance for
+<a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> (a coding-agent client). It runs
+Qwen3.8&nbsp;27B through the <a href="https://github.com/alphastorm/ninfer">NInfer engine</a> on one
+NVIDIA RTX&nbsp;5090, 4090, or 3090 and preserves explicit OpenAI Responses continuation state
+across process restarts — a durable primitive, not a lucky prefix-cache hit.</p>
+
+<div class="receipt">
+<strong>RTX 5090 · v0.4.0 qualification:</strong><br>
+<span class="n">109,589</span> tokens restored after a docker restart ·
+<span class="n">0.778&nbsp;s</span> to first token vs <span class="n">47.920&nbsp;s</span> cold ·
+<span class="n">144.80&nbsp;tok/s</span> on the agent-shaped gate.
+<div class="verified">Retained state vs fresh-process cold start · last verified 2026-08-31 ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">method and receipts</a></div>
+</div>
+
+<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md">Get started</a>
+<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/latest">Download v0.4.0</a>
+
+<h2>Use it when</h2>
+<ul>
+<li>You use Oh My Pi and own a qualified RTX 5090, 4090, or 3090.</li>
+<li>Qwen3.8 27B is the model you want, private and on your own hardware.</li>
+<li>Sessions are long-lived, and restart recovery matters more than model breadth.</li>
+</ul>
+
+<h2>Use something else when</h2>
+<p>You want a broad model catalog (Ollama), a desktop GUI (LM&nbsp;Studio), maximum portability
+(llama.cpp), or multi-user serving (vLLM). The <a href="compare/">comparison</a> is candid about
+this — the narrow target is what makes the recommendation credible.</p>
+
+<h2>How it fits together</h2>
+<p><code>Oh My Pi</code> (client) → <code>OMP NInfer</code> (qualified appliance + releases) →
+<code>NInfer</code> (engine) → <code>Qwen3.8 27B</code> (model). Loopback-only, bearer-authenticated,
+fail-closed instead of cloud fallback, every byte hash-pinned.
+Full detail: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">canonical facts</a>.</p>
+</main>
+<footer>
+  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
+  every number on this site is bound to a versioned release receipt.
+</footer>
+</body>
+</html>

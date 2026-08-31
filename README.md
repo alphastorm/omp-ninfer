@@ -4,18 +4,22 @@
 
 # OMP NInfer
 
-**Durable session state on your GPU.**
+## Your coding session should survive the process.
+
+**Durable local inference for coding agents** — the qualified appliance for
+[Oh My Pi](https://github.com/can1357/oh-my-pi). It runs Qwen3.8 27B through the NInfer engine
+on one NVIDIA RTX 5090, 4090, or 3090 and preserves explicit OpenAI Responses continuation
+state across process restarts — a durable primitive, not a lucky prefix-cache hit.
 
 **Qualified on RTX 5090 · 4090 · 3090**
 
-If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own an RTX 5090, 4090, or 3090,
-OMP NInfer keeps Qwen3.8 27B and your session's continuation state on your GPU — as an explicit,
-durable primitive, not a lucky prefix-cache hit. Follow-ups continue from state addressed by
-lineage, and that state survives process restarts on every qualified lane.
+**RTX 5090 · v0.4.0:** 109,589 tokens restored after a docker restart · **0.778 s** to first
+token vs **47.920 s** cold · **144.80 tok/s** on the agent-shaped qualification gate.
 
 **[Get started](docs/QUICKSTART.md)**
 
 **[Download v0.4.0](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
+**[Facts](docs/FACTS.md)** · **[Which backend?](docs/DECISION_GUIDE.md)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
 **[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**

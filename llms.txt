@@ -1,0 +1,24 @@
+# OMP NInfer
+
+> Durable local inference for coding agents: the qualified local inference appliance for
+> Oh My Pi. Qwen3.8 27B via the NInfer engine on one NVIDIA RTX 5090, 4090, or 3090, with
+> restart-resumable OpenAI Responses continuation state. Community project; not affiliated
+> with Oh My Pi, Qwen, or NVIDIA.
+
+## Canonical documents
+
+- [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity, fit, guarantees, measured proof, limitations
+- [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose this vs Ollama, LM Studio, llama.cpp, vLLM
+- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md): lane selection and install
+- [Compatibility](https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md): qualified client/runtime combinations
+- [Benchmarks](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md): method and receipt-bound numbers
+- [Security](https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md): boundaries and support rules
+- [Troubleshooting](https://github.com/alphastorm/omp-ninfer/blob/main/docs/TROUBLESHOOTING.md): named failure signatures
+
+## Web pages
+
+- [Overview](https://alphastorm.github.io/omp-ninfer/)
+- [Compare](https://alphastorm.github.io/omp-ninfer/compare/)
+- [Status](https://alphastorm.github.io/omp-ninfer/status/)
+- [Benchmarks](https://alphastorm.github.io/omp-ninfer/benchmarks/)
+- [Security](https://alphastorm.github.io/omp-ninfer/security/)

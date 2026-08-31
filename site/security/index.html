@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP NInfer security — loopback-only, fail-closed, hash-pinned</title>
+<meta name="description" content="The security boundary: loopback-only listeners, bearer auth, fail-closed routing, hash-pinned bytes, local-only checkpoints.">
+<link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/security/">
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="OMP NInfer security — loopback-only, fail-closed, hash-pinned">
+<meta property="og:description" content="The security boundary: loopback-only listeners, bearer auth, fail-closed routing, hash-pinned bytes, local-only checkpoints.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/security/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication",
+ "name": "OMP NInfer",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Windows, Linux",
+ "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "url": "https://alphastorm.github.io/omp-ninfer/",
+ "codeRepository": "https://github.com/alphastorm/omp-ninfer",
+ "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
+</script>
+</head>
+<body>
+<header class="site">
+  <img src="../logo.svg" alt="" aria-hidden="true">
+  <a class="brand" href="../">OMP NInfer</a>
+  <nav>
+      <a href="../">Overview</a>
+      <a href="../compare/">Compare</a>
+      <a href="../status/">Status</a>
+      <a href="../benchmarks/">Benchmarks</a>
+      <a href="../security/" aria-current="page">Security</a>
+  </nav>
+</header>
+<main>
+<p class="eyebrow">Security</p>
+<h1>Private by design, fail-closed by default</h1>
+<ul>
+<li><strong>Loopback-only listeners</strong> — the serve never binds a public interface in the supported profiles; remote lanes are reached through authenticated SSH local forwards.</li>
+<li><strong>Bearer authentication</strong> with a user-only key file; no anonymous access.</li>
+<li><strong>Fail closed, never cloud fallback</strong> — if the lane is unavailable, the session stops rather than silently escaping to a hosted model.</li>
+<li><strong>Everything hash-pinned</strong> — model artifact, server binary, container image, and launch config are bound by the release manifest and verified at boot.</li>
+<li><strong>Checkpoints stay local</strong> — durable state lives on local NVMe with owner-only permissions; wrong-profile checkpoints are rejected, not partially loaded.</li>
+</ul>
+<p>The full model, boundaries, and support rules:
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md">docs/SECURITY.md</a></p>
+<p class="verified">Last verified 2026-08-31.</p>
+</main>
+<footer>
+  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
+  every number on this site is bound to a versioned release receipt.
+</footer>
+</body>
+</html>

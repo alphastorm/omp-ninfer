@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMP NInfer benchmarks — measured, receipted restart recovery</title>
+<meta name="description" content="109,589 tokens restored after a docker restart, 0.778 s to first token vs 47.920 s cold; every number receipt-bound.">
+<link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/benchmarks/">
+<link rel="stylesheet" href="../site.css">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="OMP NInfer benchmarks — measured, receipted restart recovery">
+<meta property="og:description" content="109,589 tokens restored after a docker restart, 0.778 s to first token vs 47.920 s cold; every number receipt-bound.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/benchmarks/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "SoftwareApplication",
+ "name": "OMP NInfer",
+ "applicationCategory": "DeveloperApplication",
+ "operatingSystem": "Windows, Linux",
+ "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "url": "https://alphastorm.github.io/omp-ninfer/",
+ "codeRepository": "https://github.com/alphastorm/omp-ninfer",
+ "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
+</script>
+</head>
+<body>
+<header class="site">
+  <img src="../logo.svg" alt="" aria-hidden="true">
+  <a class="brand" href="../">OMP NInfer</a>
+  <nav>
+      <a href="../">Overview</a>
+      <a href="../compare/">Compare</a>
+      <a href="../status/">Status</a>
+      <a href="../benchmarks/" aria-current="page">Benchmarks</a>
+      <a href="../security/">Security</a>
+  </nav>
+</header>
+<main>
+<p class="eyebrow">Benchmarks</p>
+<h1>Measured, receipted, reproducible</h1>
+<p class="lede">Every number is bound to a versioned qualification receipt on exact released
+bytes. Warm/cold figures are retained state versus fresh-process cold start — never versus an
+ordinary in-process follow-up.</p>
+<table>
+<tr><th>Claim</th><th>Measurement (RTX 5090 · v0.4.0)</th></tr>
+<tr><td>Restart recovery</td><td>109,589 tokens restored; 0.778&nbsp;s to first token vs 47.920&nbsp;s cold</td></tr>
+<tr><td>Warm follow-up</td><td>1.790&nbsp;s at a 109,594-token session</td></tr>
+<tr><td>Decode</td><td>144.80&nbsp;tok/s agent-shaped gate (44.10% MTP acceptance); 152.2&nbsp;tok/s at 83.3% on retrieval</td></tr>
+<tr><td>Long context</td><td>Exact needle retrieval at a 130,448-token prompt; 131,072 ceiling</td></tr>
+</table>
+<p>Method, per-lane numbers, and historical sections:
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
+raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
+<p class="verified">Last verified 2026-08-31.</p>
+</main>
+<footer>
+  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
+  every number on this site is bound to a versioned release receipt.
+</footer>
+</body>
+</html>
