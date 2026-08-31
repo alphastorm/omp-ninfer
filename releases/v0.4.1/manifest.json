@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b62d780c73921e739627e04bde0b452757a960a7/compatibility.json",
-      "compatibility_sha256": "c87348ab838e6fc316548f43e39474c0c92d480a71274c6419f2482a6d2e4772"
+      "compatibility_sha256": "2e83e8125abd322a5e38d4f3795e4cac89b56abc7cd81c3cf4d7ea629ee78f02"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -152,7 +152,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "8b5357bc608a7b35bd7ad18ced3acedab12a61708d6b3c7aff63ba41b43d6564",
+    "summary_sha256": "eff25f431f43d67ae2133d8b5af9d537cc683988b584f63e7bad6ccfd9e0dc04",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b62d780c73921e739627e04bde0b452757a960a7/releases/v0.4.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
@@ -171,7 +171,7 @@
     "Measured throughput and latency apply only to the recorded package, machine, and profile."
   ],
   "publication": {
-    "authorized": true,
+    "authorized": false,
     "targets": [
       "GitHub public release v0.4.1",
       "OMP component omp-18.0.9-cross-platform-beta-2 (rebound)",
