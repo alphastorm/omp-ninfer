@@ -66,7 +66,7 @@
       "status": "passed",
       "operator_class": "owner-operated tester-equivalent",
       "repository_path": "releases/v0.4.1/acceptance/composed-external-installation.json",
-      "sha256": "6b13facf9c40235da339c2d10865466e324fedacfc9b67b5deec149ed49bba0c",
+      "sha256": "5d7d9f3b2cb5e8523e9d04dd1c0d55937bb4f045e462c3a917e2476ea2b317a9",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
       "vision": true,
