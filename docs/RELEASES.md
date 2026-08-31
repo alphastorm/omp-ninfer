@@ -7,13 +7,25 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.3`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.3` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.4`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.4` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.4 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.4`, GitHub `Latest`.
+- The RTX 5090 durable container moves to
+  [`ninfer@v0.4.4-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.4-qwen38-5090-beta.1)
+  (image digest `546bb6a8...`): checkpoint export decoupled from the engine through a bounded
+  buffered writer (fail-before-publication preserved), automatic saves debounced to
+  sustained-idle with a redundant-frontier skip, and lazy restore repairing partially resident
+  sessions (council CR-20260831-ckptdecouple). Warm follow-up during checkpoint traffic
+  15.26 s → 0.91 s; explicit save 31.6 s → 13.8 s; four fanout branches 0.90-1.01 s with
+  automatic saves at defaults. 4090/3090 components rebound unchanged.
 
 ### v0.4.3 public release
 

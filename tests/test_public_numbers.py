@@ -109,7 +109,7 @@ class PublicNumbersTests(unittest.TestCase):
         self.assertFalse(interpretation["documentation_benchmark_source_field_credited"])
         self.assertEqual(
             self.qualification["identity"]["source_commit"],
-            "82a1a22725009f6cefb78e946f9e2994c1ebd41b",
+            "51fd30e5427bd8115ca71c5b20c86fdfbfdf988e",
         )
 
 

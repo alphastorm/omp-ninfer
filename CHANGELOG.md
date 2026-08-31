@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-08-31
+
+### Changed
+
+- Checkpoint export no longer blocks the engine: exporter writes flow through a bounded
+  in-memory queue (`--session-checkpoint-write-buffer-mib`, default 6144) drained to disk off
+  the engine execution lock, with a deferred write failure still failing the save before
+  anything publishes. Warm follow-up during checkpoint traffic 15.26 s → **0.91 s**, explicit
+  save 31.6 s → **13.8 s**, and all four sibling fanout branches at **0.90-1.01 s** with
+  automatic saves enabled at defaults
+  ([acceptance receipt](docs/measurements/2026-08-31-fanout-probe-v044c.json),
+  [ninfer#34](https://github.com/alphastorm/ninfer/issues/34)).
+- Automatic checkpoint saves yield to live traffic: they start only after the engine stays
+  quiet for consecutive samples (bounded at 60 s) and skip entirely when the catalogued
+  checkpoint already covers the session's newest stored response. Explicit `POST` saves keep
+  their synchronous crash-test contract.
+
+### Fixed
+
+- Lazy restore repairs partially resident sessions: restoring a checkpoint replaces the
+  target session's complete stored lineage (partial overlap repaired, stale records removed)
+  while any cross-session ID collision still fails closed, and restoring onto an exact live
+  endpoint is an idempotent no-op instead of a refusal.
+
 ## [0.4.3] - 2026-08-31
 
 ### Added
@@ -325,7 +349,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.4...HEAD
+[0.4.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...v0.4.1

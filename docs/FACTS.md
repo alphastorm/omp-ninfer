@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-08-31 · Current stable release: **v0.4.3**
+Last verified: 2026-08-31 · Current stable release: **v0.4.4**
 
-Everything on this page is bound to the [v0.4.3 release manifest](../releases/v0.4.3/manifest.json)
+Everything on this page is bound to the [v0.4.4 release manifest](../releases/v0.4.4/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -42,9 +42,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.3 durable container with agent fanout |
-| RTX 4090 | native Windows service | 131,072 | durable v0.2 lane (native Windows, MTP3, bound by v0.4.3) |
-| RTX 3090 | native Windows service | 65,536 | v0.3.0 lane (bound by v0.4.3) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.4 durable container with fanout + decoupled export |
+| RTX 4090 | native Windows service | 131,072 | durable v0.2 lane (native Windows, MTP3, bound by v0.4.4) |
+| RTX 3090 | native Windows service | 65,536 | v0.3.0 lane (bound by v0.4.4) |
 
 ## Current model and artifact
 
@@ -65,9 +65,11 @@ checkpointed to local NVMe (SHA-manifested, atomically published generations) an
 exactly — the restored frontier is verified, and a wrong-profile checkpoint is rejected rather
 than partially loaded. This is a stronger, explicit contract than in-process prefix caching.
 
-As of v0.4.3 on the RTX 5090 lane, sibling agent branches of one `previous_response_id` also
-reuse the base prefill through the session's private long anchors (four branches: 148.7 s →
-47.9 s at a 67.7K-token base; 0.40 s to first token when the anchor is device-resident).
+As of v0.4.4 on the RTX 5090 lane, sibling agent branches of one `previous_response_id` reuse
+the base prefill through the session's private long anchors, and checkpoint exports run off the
+engine execution lock (four branches: 148.7 s → 3.84 s at a 67.7K-token base; warm follow-up
+during checkpoint traffic 0.91 s; automatic saves debounce to sustained-idle and skip
+already-catalogued frontiers).
 
 Operators may describe this problem as persistent KV cache, restartable context, session
 checkpointing, stateful local inference, or avoiding cold re-prefill. The actual guarantee is
@@ -108,7 +110,7 @@ ordinary in-process follow-up.
 
 ## Primary evidence
 
-[Release manifest](../releases/v0.4.3/manifest.json) ·
+[Release manifest](../releases/v0.4.4/manifest.json) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
 [Security model](SECURITY.md) · [Quickstart](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

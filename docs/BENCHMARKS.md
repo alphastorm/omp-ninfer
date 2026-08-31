@@ -11,6 +11,35 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## Qualified `v0.4.4` results — checkpoint export off the engine (RTX 5090 lane)
+
+v0.4.3's remaining fanout ceiling was not KV cloning: request-log decomposition showed sibling
+branches spending ~14 s in `queue_wait` behind the automatic checkpoint export, which held the
+engine during ~5 GB of disk I/O. v0.4.4 moves those writes into a bounded in-memory queue
+drained off the engine execution lock (a deferred failure still fails the save before anything
+publishes), debounces automatic saves to sustained-idle, and skips saves whose frontier is
+already catalogued. Measured on the owner appliance at the same 67,681-token base, four
+branches, automatic saves enabled at defaults
+([v0.4.4 acceptance receipt](measurements/2026-08-31-fanout-probe-v044c.json) ·
+[red receipts](measurements/2026-08-31-fanout-probe-v044.json) from the two intermediate
+candidates):
+
+| Step | v0.4.3 | v0.4.4 | Server-attested reuse (v0.4.4) |
+| --- | ---: | ---: | --- |
+| Warm follow-up during checkpoint traffic | 15.26 s | **0.91 s** | `private_long_anchor` |
+| Explicit checkpoint save (5.19 GB) | 31.6 s | **13.8 s** | synchronous contract unchanged |
+| Branch 1 | 1.05 s | **1.01 s** | `private_long_anchor`, 67,726 tokens |
+| Branch 2 | 15.45 s | **0.90 s** | `private_long_anchor`, 67,726 tokens |
+| Branch 3 | 15.66 s | **0.96 s** | `private_long_anchor`, 67,726 tokens |
+| Branch 4 | 15.48 s | **0.97 s** | `private_long_anchor`, 67,726 tokens |
+| Four branches total | 47.9 s | **3.84 s** | — |
+| Post-restart resume | 27.5 s | 27.6 s | `private_endpoint` |
+
+Method identical to the v0.4.3 probe below: ordinary authenticated client session against the
+published serve through the qualified tunnel profile; wall times include the ~80-token
+generation per branch; reuse classes join the server's own request log. The engine kernels are
+identical to v0.4.1 — every gain here is export scheduling.
+
 ## Qualified `v0.4.3` results — agent fanout on the RTX 5090 lane
 
 v0.4.3 changes one thing about the numbers on this page: what happens when several agent branches
@@ -29,11 +58,12 @@ Measured on the owner appliance at a 67,681-token base, four branches, one sampl
 | Four branches total | 148.7 s | **47.9 s** | — |
 | Post-restart resume | — | 27.5 s wall, **0.52 s** to first token | `private_endpoint`, 67,828 tokens |
 
-Branch 1 hits the device-resident anchor; branches 2–4 re-materialize the base from host RAM
-because private forks clone their KV pages — that ~15 s ceiling is the next campaign
+Branch 1 hits the device-resident anchor; branches 2–4 appeared to re-materialize the base —
+at the time attributed to KV page cloning
 ([ninfer#34](https://github.com/alphastorm/ninfer/issues/34); a
-[device-state-slots sweep](measurements/2026-08-31-fanout-probe-v043-slots4.json) pinned the
-ceiling to KV page ownership, not state-image slots). Method: ordinary authenticated client
+[device-state-slots sweep](measurements/2026-08-31-fanout-probe-v043-slots4.json) ruled out
+state-image slots). v0.4.4's request-log decomposition corrected the attribution: the ~15 s was
+`queue_wait` behind the engine-held checkpoint export, closed above. Method: ordinary authenticated client
 session against the published serve through the qualified tunnel profile; wall times include the
 ~80-token generation per branch; reuse classes join the server's own request log.
 
