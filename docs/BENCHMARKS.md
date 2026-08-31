@@ -73,7 +73,7 @@ appliance. Receipt:
 | Gate | Result | Detail |
 | --- | ---: | --- |
 | Docker-restart continuation | **109,589 tokens restored hot** | rotated server instance; 0.778 s serve-side first token; 7.95 GB automatic checkpoint (io_uring O_DIRECT) at a 109,725-token frontier |
-| Decode throughput | **144.80 tok/s** | 2,048 completion tokens, 44.10% MTP3 acceptance on the technical-writing gate; ledger retrieval measured 152.2 tok/s at 83.3% — agent-shaped spread |
+| Decode throughput | **134.80 tok/s** | 2,048 completion tokens, 38.80% MTP3 acceptance on the technical-writing gate at temperature 0, v0.4.1 receipt; the v0.4.0 receipt measured 144.80 tok/s at 44.10% on the same gate and 152.2 tok/s at 83.3% on ledger retrieval |
 | 130,448-token prefill | **2,186.30 tok/s** | exact planted-needle retrieval; 131,072-token ceiling |
 | Warm follow-up, 109,594-token session | **1.790 s** wall | vs **47.920 s** cold build of the same session ([receipt](measurements/2026-08-30-warm-vs-cold-v04.json)) |
 | Pinned-client conformance | **passed** | live status and checkpoint documents accepted verbatim by the validator extracted from the released 18.0.9 client |

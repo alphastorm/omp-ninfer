@@ -36,9 +36,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
-        self.assertEqual(authority["product_release"], "v0.4.0")
+        self.assertEqual(authority["product_release"], "v0.4.1")
         receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.4.0" / "qualification" / "rtx5090.json").read_bytes()
+            (ROOT / "releases" / "v0.4.1" / "qualification" / "rtx5090.json").read_bytes()
         ).hexdigest()
         self.assertTrue(
             all(
@@ -50,9 +50,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(
                 profile["runtime"]["image_reference"]
-                == "ghcr.io/alphastorm/ninfer-runtime@sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61"
+                == "ghcr.io/alphastorm/ninfer-runtime@sha256:ce3cd21591d9a5a424a56c78652e0e8e70a7e0c85983df96fd55727058c04937"
                 and profile["runtime"]["image_digest"]
-                == "sha256:8de5efdfb06eafbd112f6c8b3175149bf24f3390d39b9274b0e9bdf720a74a61"
+                == "sha256:ce3cd21591d9a5a424a56c78652e0e8e70a7e0c85983df96fd55727058c04937"
                 for profile in authority["profiles"]
             )
         )
@@ -224,7 +224,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertEqual(rtx3090["package_bytes"], 573355399)
         self.assertEqual(
             rtx3090["qualification_receipt"]["path"],
-            "releases/v0.4.0/qualification/rtx3090.json",
+            "releases/v0.4.1/qualification/rtx3090.json",
         )
         self.assertEqual(
             rtx3090["package_url"],
@@ -265,7 +265,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
         current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.4.0")
+        self.assertEqual(current["product_release"], "v0.4.1")
 
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")

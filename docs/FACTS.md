@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-08-31 · Current stable release: **v0.4.0**
+Last verified: 2026-08-31 · Current stable release: **v0.4.1**
 
-Everything on this page is bound to the [v0.4.0 release manifest](../releases/v0.4.0/manifest.json)
+Everything on this page is bound to the [v0.4.1 release manifest](../releases/v0.4.1/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -42,9 +42,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.0 durable container |
-| RTX 4090 | native Windows service | 131,072 | v0.3.1 MTP3 lane (bound by v0.4.0) |
-| RTX 3090 | native Windows service | 65,536 | v0.3.0 lane (bound by v0.4.0) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.1 durable container |
+| RTX 4090 | native Windows service | 131,072 | v0.3.1 MTP3 lane (bound by v0.4.1) |
+| RTX 3090 | native Windows service | 65,536 | v0.3.0 lane (bound by v0.4.1) |
 
 ## Current model and artifact
 
@@ -104,7 +104,7 @@ ordinary in-process follow-up.
 
 ## Primary evidence
 
-[Release manifest](../releases/v0.4.0/manifest.json) ·
+[Release manifest](../releases/v0.4.1/manifest.json) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
 [Security model](SECURITY.md) · [Quickstart](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

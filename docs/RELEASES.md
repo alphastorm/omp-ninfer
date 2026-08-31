@@ -7,13 +7,24 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.0`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.0` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.1`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.1` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.1 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.1`, GitHub `Latest`.
+- The RTX 5090 durable container moves to
+  [`ninfer@v0.4.1-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.1-qwen38-5090-beta.1)
+  (image digest `ce3cd215...`): health-gated checkpoint quota transition, post-publish
+  reclamation that never fails an acknowledged save, and named skip reasons in server logs
+  (council CR-20260831-v041delta). 4090/3090 components rebound unchanged.
+- Release bytes were built in the pinned CI container on the owner appliance after a RunPod
+  SECURE allocation outage; the route is documented in the component-release receipt.
 
 ### v0.4.0 public release
 

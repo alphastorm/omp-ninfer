@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-31
+
+### Fixed
+
+- Post-publish checkpoint reclamation can no longer fail an acknowledged save: once the
+  current pointer durably swaps, cleanup trouble is absorbed, the pass is marked unhealthy,
+  and the next save refuses fail-closed until reclamation recovers (council
+  CR-20260831-v041delta, convergent P1, remediated in alphastorm/ninfer#30 with a
+  regression covering outage -> acknowledged save -> refusal -> recovery).
+- A throwing tombstone-cleanup hook now degrades to an unhealthy reclamation pass instead of
+  propagating; refusing an invalid engine stats export names `ProgramRejected` instead of
+  leaving the skip reason empty.
+
+### Added
+
+- Health-gated publish transient tolerance (alphastorm/ninfer#27): a session whose checkpoint
+  exceeds half the disk quota can still save its successor; the superseded generation is
+  reclaimed under quota pressure only while every attempted reclamation succeeds.
+- Named checkpoint skip reasons with response-id-correlated server logs
+  (alphastorm/ninfer#26); HTTP refusal bodies keep the released closed vocabulary.
+- v0.4.1 requalification on the owner appliance: explicit 316.8 MB checkpoint restored warm
+  after `docker restart` (`reuse=private_endpoint`, 1.52 s), fork/delete arc with no
+  resurrection through the reworked reclamation layer, decode 134.8 tok/s at temperature 0.
+
+### Changed
+
+- Release bytes were built in the pinned CI container on the owner appliance after three
+  RunPod SECURE ssh-allocation failures; the route is documented in the component-release
+  receipt and the build profile is stamped `appliance-local`.
+
 ## [0.4.0] - 2026-08-30
 
 ### Added
@@ -227,7 +257,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.3.0...v0.3.1

@@ -14,11 +14,11 @@ state across process restarts — a durable primitive, not a lucky prefix-cache 
 **Qualified on RTX 5090 · 4090 · 3090**
 
 **RTX 5090 · v0.4.0:** 109,589 tokens restored after a docker restart · **0.778 s** to first
-token vs **47.920 s** cold · **144.80 tok/s** on the agent-shaped qualification gate.
+token vs **47.920 s** cold · **134.80 tok/s** on the qualification decode gate.
 
 **[Get started](docs/QUICKSTART.md)**
 
-**[Download v0.4.0](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
+**[Download v0.4.1](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
 **[Facts](docs/FACTS.md)** · **[Which backend?](docs/DECISION_GUIDE.md)** ·
 **[Benchmarks](docs/BENCHMARKS.md)** ·
 **[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
@@ -35,7 +35,7 @@ token vs **47.920 s** cold · **144.80 tok/s** on the agent-shaped qualification
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-145%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-135%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -52,7 +52,7 @@ fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 | What changes for you | Released evidence |
 | --- | --- |
 | Retained state outlives the turn — and the process | v0.4.0 qualification: warm follow-up **1.790 s vs 47.920 s cold** at 109,594 tokens, and **0.778 s first token after a docker restart** from the durable checkpoint |
-| Interactive output is fast | **144.80 tok/s** decode on the qualified RTX 5090 v0.4.0 profile (44.10% MTP acceptance on the agent-shaped gate; 152.2 tok/s at 83.3% on retrieval) |
+| Interactive output is fast | **134.80 tok/s** decode on the qualified RTX 5090 v0.4.1 profile (38.80% MTP acceptance at temperature 0 on the technical-writing gate) |
 | Long coding sessions fit | Exact retrieval at a **130,448-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
 
@@ -126,7 +126,7 @@ give you together elsewhere:
 ![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.4.0/qualification.json):
+[`qualification.json`](releases/v0.4.1/qualification.json):
 
 | Gate | Result |
 | --- | --- |
@@ -170,7 +170,7 @@ WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned
 route needs one published OMP client and about 40 GiB free disk.
 
 ```powershell
-git clone --branch v0.4.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.4.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -229,7 +229,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.4.0 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.4.1 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
