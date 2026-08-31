@@ -1,28 +1,19 @@
 ![OMP NInfer](assets/banner.png)
 
-<div align="center">
-
-# OMP NInfer
-
-## Your coding session should survive the process.
-
 **Durable local inference for coding agents** — the qualified appliance for
 [Oh My Pi](https://github.com/can1357/oh-my-pi). It runs Qwen3.8 27B through the NInfer engine
 on one NVIDIA RTX 5090, 4090, or 3090 and preserves explicit OpenAI Responses continuation
-state across process restarts — a durable primitive, not a lucky prefix-cache hit.
+state across process restarts — a durable primitive, not a lucky prefix-cache hit. Qualified
+on all three lanes: measured, hash-pinned, fail-closed.
 
-**Qualified on RTX 5090 · 4090 · 3090**
+<div align="center">
 
-**RTX 5090 · v0.4.0:** 109,589 tokens restored after a docker restart · **0.778 s** to first
-token vs **47.920 s** cold · **134.80 tok/s** on the qualification decode gate.
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.4.2](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
-**[Get started](docs/QUICKSTART.md)**
-
-**[Download v0.4.2](https://github.com/alphastorm/omp-ninfer/releases/latest)** · **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** ·
-**[Facts](docs/FACTS.md)** · **[Which backend?](docs/DECISION_GUIDE.md)** ·
-**[Benchmarks](docs/BENCHMARKS.md)** ·
-**[Architecture](docs/ARCHITECTURE.md)** · **[Performance program](docs/PERFORMANCE.md)** ·
-**[Security](docs/SECURITY.md)** · **[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
+[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
+[Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
+[Architecture](docs/ARCHITECTURE.md) · [Performance](docs/PERFORMANCE.md) ·
+[Security](docs/SECURITY.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 [![CI][ci-badge]][ci]
 [![Release][release-badge]][releases]
@@ -43,6 +34,10 @@ token vs **47.920 s** cold · **134.80 tok/s** on the qualification decode gate.
 <sub><strong>Private by design:</strong> loopback-only endpoints · bearer-authenticated ·
 fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
+<sub>A real recorded session on the released RTX 5090 runtime — bug found and fixed, tests
+rerun to green, then a follow-up turn continues from retained GPU state instead of
+re-sending the transcript.</sub>
+
 <img src="docs/media/omp-ninfer-demo-v3.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript." width="900">
 
 <sub><a href="docs/media/omp-ninfer-demo-v3.mp4">MP4</a> · <a href="docs/media/omp-ninfer-demo-v3-poster.png">poster</a> · <a href="docs/media/README.md#canonical-files">provenance and checksums</a></sub>
@@ -51,13 +46,14 @@ fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
 | What changes for you | Released evidence |
 | --- | --- |
-| Retained state outlives the turn — and the process | v0.4.0 qualification: warm follow-up **1.790 s vs 47.920 s cold** at 109,594 tokens, and **0.778 s first token after a docker restart** from the durable checkpoint |
-| Interactive output is fast | **134.80 tok/s** decode on the qualified RTX 5090 v0.4.1 profile (38.80% MTP acceptance at temperature 0 on the technical-writing gate) |
+| Retained state outlives the turn — and the process | Warm follow-up **1.790 s vs 47.920 s cold** at a 109,594-token session, and **0.778 s first token after a docker restart** from the durable checkpoint — the current measurement receipts |
+| Interactive output is fast | **134.80 tok/s** decode on the qualified RTX 5090 profile (38.80% MTP acceptance at temperature 0 on the technical-writing gate) |
 | Long coding sessions fit | Exact retrieval at a **130,448-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
 
-The warm/cold pair is server-side, one sample per point, bound into the v0.3.x qualification chain on
-the exact released bytes — not a universal latency claim. [Method and receipts](docs/BENCHMARKS.md).
+The warm/cold pair is server-side, one sample per point, bound into the released qualification
+chain on the exact published bytes — not a universal latency claim.
+[Method and receipts](docs/BENCHMARKS.md).
 
 **Use OMP NInfer when:** you use OMP, own a qualified card, want Qwen3.8, and care about private,
 long-lived coding sessions.
@@ -66,12 +62,11 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.3.0 is the first public release.** If you own a qualified card, the
-> [quickstart](docs/QUICKSTART.md) is the whole onboarding. Native macOS arm64, Windows x64, and Linux x64 OMP clients
-> are qualified, and all three GPU lanes ship with public install authority: the RTX 5090
-> container profile, native Windows RTX 4090, and native Windows RTX 3090, each bound to exact
-> bytes and a qualification receipt. The 0.x series carries an explicit support boundary: the
-> latest published release and its exact manifest/profile.
+> **v0.4.2 is the current public release.** If you own a qualified card, the
+> [quickstart](docs/QUICKSTART.md) is the whole onboarding: three GPU lanes with public
+> install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
+> RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
+> explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
 
 ## What this is — and isn't
