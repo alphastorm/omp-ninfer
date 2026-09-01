@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-08-31
+
+### Security
+
+- Checkpoint manifests are now ORIGIN-authenticated on the RTX 5090 lane
+  ([`ninfer@v0.4.5-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.5-qwen38-5090-beta.1),
+  closes [ninfer#32](https://github.com/alphastorm/ninfer/issues/32)): every save publishes
+  `manifest.mac` - an HMAC-SHA256 over the exact manifest bytes, keyed by material derived from
+  the bearer key and held outside the checkpoint root - and loads verify origin before trusting
+  manifest content. Transient tag faults preserve `current` for retry; the compatibility window
+  keeps locally-produced legacy generations loading; `--session-checkpoint-require-origin-auth`
+  is the strict, reversible posture required before checkpoints are ever imported from remote
+  storage (NAS/S3). Rollback-safe additive design - prior binaries read the same store, proven
+  live during qualification. Independent council CRS-origin-auth closed with all 7 findings
+  resolved. 4090/3090 components rebound unchanged.
+
 ## [0.4.5] - 2026-08-31
 
 ### Changed
@@ -365,7 +381,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.5...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.6...HEAD
+[0.4.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.3...v0.4.4
 [0.4.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.2...v0.4.3

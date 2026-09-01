@@ -7,13 +7,25 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.5`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.5` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.6`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.6` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
+
+### v0.4.6 public release
+
+- Product release: `alphastorm/omp-ninfer@v0.4.6`, GitHub `Latest`.
+- The RTX 5090 durable container moves to
+  [`ninfer@v0.4.5-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.4.5-qwen38-5090-beta.1)
+  (image digest `876c7809...`): checkpoint manifest ORIGIN authentication (closes
+  [ninfer#32](https://github.com/alphastorm/ninfer/issues/32)) - every save publishes an HMAC
+  tag keyed outside the checkpoint root, loads verify before trusting manifest content, and
+  `--session-checkpoint-require-origin-auth` is the strict posture for future NAS/S3 import
+  (council CRS-origin-auth). Rollback-safe additive design: prior binaries read the same store.
+  4090/3090 components rebound unchanged.
 
 ### v0.4.5 public release
 

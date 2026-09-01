@@ -94,6 +94,9 @@ def main() -> int:
     parser.add_argument("--keep-deployment-profile", action="store_true",
                         help="variant-only rebind: keep the prior 5090 deployment profile "
                              "(v0.4.2 precedent - the container identity does not advance)")
+    parser.add_argument("--profile-from", default=None, metavar="vX.Y.Z",
+                        help="release whose 5090 deployment profile is currently live, when a "
+                             "variant-only rebind left it behind the source release")
     args = parser.parse_args()
 
     if not args.image_digest.startswith("sha256:"):
@@ -114,7 +117,10 @@ def main() -> int:
         f"ninfer-qwen38-rtx5090-{args.release}-linux-x86_64-cuda13.1.tar.gz"
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
-    profile_from = f"qwen38-5090-{args.source}"
+    profile_from = (
+        f"qwen38-5090-{args.profile_from}" if args.profile_from
+        else f"qwen38-5090-{args.source}"
+    )
     profile_to = (
         profile_from if args.keep_deployment_profile else f"qwen38-5090-{args.release}"
     )
