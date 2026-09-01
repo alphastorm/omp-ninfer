@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 1,
+  "lane": "main-5090-origin",
+  "generated_utc": "2026-09-01T00:14:54Z",
+  "base_tokens_requested": 24000,
+  "branches": 2,
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 9.813,
+      "input_tokens": 28405,
+      "id": "resp_605df1ff7efbf0653d24af45db29e23a"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 0.784,
+      "id": "resp_b1e00cec6dffcc8294d72d422f176544"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 7.028,
+      "generation": "1788221587027-0",
+      "bytes": 2454883778,
+      "frontier": 28549
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 0.818,
+      "id": "resp_60b0874ef2cb47a1ab09309ec37f59b4"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 10.089,
+      "id": "resp_27eda6736b8fbfa72b1da89ffe204fe5"
+    },
+    {
+      "step": "restart",
+      "wall_s": 67.56,
+      "ready_after_s": 56.52
+    },
+    {
+      "step": "post_restart_resume",
+      "wall_s": 13.916,
+      "id": "resp_660a5a8c3944e19815c338e7677acdd7"
+    },
+    {
+      "step": "post_restart_save",
+      "wall_s": 7.032,
+      "generation": "1788221686437-0",
+      "frontier": 28659
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 28405,
+      "completion_tokens": 40,
+      "ttft_s": 9.428297614
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 28444,
+      "prompt_tokens": 28470,
+      "completion_tokens": 80,
+      "ttft_s": 0.142209509
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 28450,
+      "prompt_tokens": 28473,
+      "completion_tokens": 80,
+      "ttft_s": 0.14122933399999998
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 28473,
+      "completion_tokens": 80,
+      "ttft_s": 9.445150788
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 28552,
+      "prompt_tokens": 28580,
+      "completion_tokens": 80,
+      "ttft_s": 0.337507594
+    }
+  ]
+}
