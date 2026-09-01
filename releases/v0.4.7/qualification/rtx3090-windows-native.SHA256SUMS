@@ -1,0 +1,9 @@
+e2b80702366fdf951910911f2619c110f601ef16f5c2672d4bac62fd13c81c04  Control-GpuOwner.ps1
+8f2975594dcad17641724d7a11258501f27e8d0c13dd9dda29fc838b13957170  Control-Release.ps1
+1235abf4bde57256d57ad4b133cb212f807424ac0b9a1047ec5f1bc4bab59114  Install-Release.ps1
+e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b  Protect-StateRoot.ps1
+61c85e8ae4dbcc240e7b1c5c6a69f2a7d4e946ee627af5b4aadc84fe776c36b7  ninfer-rtx3090-omp-v0.2.2-beta.1-source.tar.gz
+019b660ec3c5ed7c8c57a4a7714f06dc292edefe167ea795a2a51be070c13efc  ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS
+c5980d62a769728f032932e3248f6e097e6bcab311028662a7a359bdfde56524  ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-cuda13.3-rtx3090.spdx.json
+57652260531a391f1a443437c200657ef90e85e322e078f6c7cb6e47682f5aa1  ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz
+f07d936a3f332e8678e2e1d9de4bb8771a8b5a20dc1d80fb9087a1828282eba7  package-build-receipt.json

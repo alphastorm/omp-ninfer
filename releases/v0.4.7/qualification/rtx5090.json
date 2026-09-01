@@ -1,0 +1,108 @@
+{
+ "artifact_type": "ninfer_rtx5090_qualification",
+ "durable_qualification": {
+  "summary": "releases/v0.4.1/qualification/rtx5090-durable.json",
+  "sha256": "74a24eeb2681660e18bb0bca9137f5b272a0743e83207190f31920bbb77394e7",
+  "headline": "Durable checkpoints requalified on v0.4.1: explicit 316.8 MB checkpoint saved, docker-restart continuation restored warm (reuse=private_endpoint, 1.52 s); fork/delete arc proves no resurrection through the reworked quota/reclamation layer; decode 134.8 tok/s at temperature 0",
+  "note": "v0.4.1 durable summary remains the store-format authority; v0.4.4 changes export scheduling only (buffered writer, fail-before-publication preserved)"
+ },
+ "evidence_interpretation": {
+  "documentation_benchmark_source_field_credited": false,
+  "narrative": "The v0.4.0 container lane runs new engine+serve bytes (source 1ceaeebd) with durable session checkpoints; every number is bound in the durable qualification summary and the serve request logs retained on the appliance. The v0.2/v0.3 container receipts remain bound to their own releases.",
+  "packaged_build_identity_authoritative": true
+ },
+ "gates": {
+  "agent_protocol": {
+   "status": "passed",
+   "authenticated_session_identity": true,
+   "stateful_continuation": true,
+   "forks": 2,
+   "parent_delete_status": 200,
+   "deleted_continuation_status": 404,
+   "deleted_continuation_error_code": "previous_response_not_found",
+   "post_restart_deleted_continuation_status": 404,
+   "no_resurrection": true,
+   "surviving_descendant_continued": true
+  },
+  "decode": {
+   "completion_tokens": 2048,
+   "decode_tokens_per_second": 134.8,
+   "mtp_acceptance_rate": 0.388,
+   "mtp_tokens_per_round": 2.16,
+   "workload": "technical-writing generation at temperature 0 on the live promoted container (2026-08-31)",
+   "counter_note": "rate and tokens-per-round from the serve's request completion line"
+  },
+  "lifecycle": {
+   "status": "passed",
+   "incumbent_restored": true,
+   "incumbent_configuration_preserved": true,
+   "qualification_containers_running": 0,
+   "restart_policy": "unless-stopped",
+   "temporary_api_key_removed": true
+  },
+  "prefill_curve": {
+   "exact_retrieval_at_every_point": true,
+   "points": [
+    {
+     "prompt_tokens": 130448,
+     "tokens_per_second": 2186.3
+    }
+   ],
+   "inherited_from": "releases/v0.4.0/qualification/rtx5090.json (source 1ceaeebd)",
+   "inheritance_basis": "v0.4.1 delta is store/manager-layer only; no kernel, scheduler, or prefill-path change (diff 1ceaeebd..f4fb315a)"
+  },
+  "inheritance_note": "decode/prefill gates inherited from the v0.4.1 receipt: serve-layer fanout anchors plus session-scoped cache fixes; kernels identical (v0.4.3)"
+ },
+ "identity": {
+  "source_commit": "dde8d07026e79f32afcf1fb367a80c6bc741e855",
+  "server_binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
+  "configuration_sha256": "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
+  "deployment_profile": "qwen38-5090-v0.4.6",
+  "oci_manifest_digest": "sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4"
+ },
+ "private_fleet_projection_included": false,
+ "private_paths_included": false,
+ "qualified": true,
+ "raw_prompts_outputs_or_secrets_included": false,
+ "release_tag": "v0.4.5-qwen38-5090-beta.1",
+ "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
+ "schema_version": 1,
+ "scope_exclusions": [
+  "process-restart continuation is not claimed or qualified for this runtime identity"
+ ],
+ "status": "passed",
+ "release": "v0.4.7",
+ "as_of": "2026-08-31",
+ "build": {
+  "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "ctest": "9/9 passed",
+  "receipt_release": "v0.4.5-qwen38-5090-beta.1",
+  "package_identity_note": "v0.4.5 tarball packaged from the exact qualified build tree; bin/ninfer-serve byte-identical to the acceptance candidate (afb691db)"
+ },
+ "arcs": {
+  "origin_authentication": {
+   "status": "passed",
+   "probe_receipt": "docs/measurements/2026-08-31-origin-auth-probe.json",
+   "summary": "every save publishes manifest.mac (HMAC-SHA256, key held outside the checkpoint root); restart-resume verified through MAC-authenticated manifests; production v0.4.4 binary read the MAC-tagged store unchanged (rollback-safe additive design)",
+   "council": "CRS-origin-auth (initial + remediation epochs, closed; 7/7 findings resolved)"
+  },
+  "save_restart_restore": {
+   "status": "passed",
+   "checkpoint_generation": "1788221587027-0",
+   "explicit_checkpoint_bytes": 2454883778,
+   "explicit_save_wall_s": 7.03,
+   "process_restart": "docker restart",
+   "post_restart_resume_reuse": "private_endpoint",
+   "post_restart_save_frontier": 28659
+  },
+  "checkpoint_scheduling_inheritance": {
+   "status": "inherited",
+   "note": "warm-edit/fanout scheduling numbers inherited from the v0.4.4 acceptance (docs/measurements/2026-08-31-fanout-probe-v044c.json); this delta changes manifest publication only"
+  }
+ },
+ "review": {
+  "council": "CR-20260831-originauth (+ -r2 remediation, gate rc 0)",
+  "dispositions": "closed; finding ledger + verdicts in the campaign directory",
+  "deferred": []
+ }
+}

@@ -7,15 +7,21 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.6`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.6` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.7`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.7` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
 ## Version identities
 
-### v0.4.6 public release
+### v0.4.7 public release (corrects v0.4.6 asset URLs)
+
+- Product release: `alphastorm/omp-ninfer@v0.4.7`, GitHub `Latest`. Identical components to
+  v0.4.6; the v0.4.6 manifest bound product-versioned runtime asset names that 404 (tags are
+  immutable, so the correction ships as a new release).
+
+### v0.4.6 public release (superseded)
 
 - Product release: `alphastorm/omp-ninfer@v0.4.6`, GitHub `Latest`.
 - The RTX 5090 durable container moves to
