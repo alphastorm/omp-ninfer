@@ -113,8 +113,11 @@ def main() -> int:
     if dst_dir.exists():
         parser.error(f"refusing to overwrite existing tree: {dst_dir}")
 
+    # The archive is named by the RUNTIME version embedded in the release tag, which can
+    # trail the product release (e.g. product v0.4.6 shipping runtime v0.4.5).
+    runtime_version = args.release_tag.split("-", 1)[0]
     archive = args.archive_name or (
-        f"ninfer-qwen38-rtx5090-{args.release}-linux-x86_64-cuda13.1.tar.gz"
+        f"ninfer-qwen38-rtx5090-{runtime_version}-linux-x86_64-cuda13.1.tar.gz"
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     profile_from = (
