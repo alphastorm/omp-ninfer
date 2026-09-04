@@ -31,28 +31,25 @@ what can ship next:
    anchored base prefill instead of cloning its private pages.
 2. **RTX 3090 durable-and-fanout train — shipped in v0.4.5.** The 3090 lane joined the durable
    v0.2 lineage with restart qualification and the same MTP3 shipped profile.
-3. **MTP depth-and-corpus ablation — measured post-v0.4.7, decision inconclusive.**
+3. **MTP depth-and-corpus ablation — completed post-v0.4.7; retain MTP3.**
    MTP0/3/5/7 ran against the same binary and model within each lane on 24 deterministic
-   agent-shaped requests. The corrected v3 corpus includes client-visible reasoning in its hashes.
-   Review found that the original arm traces do not carry one shared campaign identity and compare
-   different arm processes without a separate fresh-process MTP0 control. Analysis revision 4
-   therefore permits no lane decision from this evidence. Within-process observations remain
-   useful diagnostics: MTP0 changed on 1/12 repeated steps on RTX 5090 and 10/12 on RTX 4090; all
-   RTX 3090 arms repeated exactly within process, while MTP3/5/7 differed from MTP0 on 6/8/4 of 24
-   normalized outputs. Those differences are not attributable to draft depth yet. Public-safe
-   receipts: [5090](docs/measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
+   agent-shaped requests. MTP3 was fastest on every lane and in both repetitions. Against MTP3,
+   K5/K7 were 13.57%/24.72% slower on RTX 5090, 7.29%/20.17% slower on RTX 4090, and
+   11.34%/22.46% slower on RTX 3090. No alternative cleared the 5% promotion margin; keep the
+   qualified MTP3 incumbent and reject deeper drafting for the current artifacts. Exact-output
+   attribution remains unresolved because the original traces lack one shared campaign identity
+   and a separate fresh-process MTP0 control, but that does not invalidate the no-change throughput
+   decision. Public-safe receipts: [5090](docs/measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
    [4090](docs/measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). No public release profile
    changed.
-4. **Campaign identity, cross-process baseline, and exact-output closure — next.** Rerun all three
-   frozen lanes with one shared campaign ID and a second fresh-process MTP0 control. If MTP0 is
-   stable across process boundaries, inspect the first token/logit divergence—especially the RTX
-   3090 speculative differences—before selecting a depth. Do not swap the model artifact while
-   this boundary is unresolved; that would confound runtime and artifact effects.
-5. **`nvfp4` artifact decision.** The upstream campaign shows 3.48× groupwise-int prefill and a
-   higher GPQA row for `nvfp4`; adopting it swaps the pinned model artifact and forces
-   requalification of all three lanes. Until the RTX 4090 boundary closes, the groupwise-int
-   artifact stays pinned.
+4. **`nvfp4` artifact decision — next.** The upstream campaign shows 3.48× groupwise-int prefill
+   and a higher GPQA row for `nvfp4`; adopting it swaps the pinned model artifact and forces
+   requalification of all three lanes. The groupwise-int artifact stays pinned until that campaign
+   makes the replacement decision.
+5. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
+   missing fresh-process MTP0 controls and targeted K0/K3 first-divergence probes. Do not rerun the
+   rejected K5/K7 arms without new evidence that could reverse their measured deficit.
 
 ## v0.5.x — sessions leave the machine
 

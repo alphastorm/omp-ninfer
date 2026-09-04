@@ -93,9 +93,9 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-002 | Q5 linear+add post-mixer | A CTA-collective `mma-r64-c16` kernel beats SIMT split-2 | Candidate 190.46 µs vs production 51.20 µs — 3.72× slower | rejected |
 | EXP-003 | GDN state under speculation | Caching gate activations (ReplaySSM) removes recurrent-state drift on MTP rollback | Bit-identical recurrent fold at 167.82 µs/layer; no drift across long contexts | kept |
 | EXP-004 | Tensor-core prefill | W4A4 MMA prefill (NVFP4 artifacts) multiplies prefill throughput | 11,191 vs 3,218 tok/s at a 7,680-token prompt — 3.48× (upstream campaign, NVFP4 profile) | kept upstream |
-| EXP-005 | RTX 5090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | Raw K0/3/5/7 rates were 81.57/172.94/149.47/130.19 decode tok/s; MTP0 changed on 1/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
-| EXP-006 | RTX 4090 agent-shaped MTP depth | A speculative arm beats output-identical MTP0 | Raw K0/3/5/7 rates were 51.46/110.95/102.87/88.57 decode tok/s; MTP0 changed on 10/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
-| EXP-007 | RTX 3090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | Raw K0/3/5/7 rates were 36.18/65.36/57.95/50.68 decode tok/s; all arms repeated within process, but campaign/cross-process controls are absent | inconclusive |
+| EXP-005 | RTX 5090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 81.57/172.94/149.47/130.19 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
+| EXP-006 | RTX 4090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 51.46/110.95/102.87/88.57 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
+| EXP-007 | RTX 3090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 36.18/65.36/57.95/50.68 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
 
 Entry detail:
 
@@ -118,14 +118,15 @@ Entry detail:
   product lane would need its own qualification pass (quality table in
   [`BENCHMARKS.md`](BENCHMARKS.md)).
 - **EXP-005–007 — frozen agent-shaped MTP depth campaign.** Each lane ran MTP0/3/5/7 with one
-  unchanged binary, model, corpus, seed, and greedy request configuration. The v3 output projection
-  hashes client-visible answer, reasoning, reasoning-summary, and tool-call content. Analysis
-  revision 4 requires exact within-arm repetition, one shared non-null campaign identity, and a
-  separate fresh-process MTP0 control before cross-arm attribution. The original traces predate the
-  latter two controls, so all three lane decisions are inconclusive. Within-process observations
-  remain: MTP0 changed on 1/12 repeated steps on RTX 5090 and 10/12 on RTX 4090; RTX 3090 arms
-  repeated exactly, while MTP3/5/7 differed from MTP0 on 6/8/4 outputs. These observations do not
-  establish a draft-depth effect. No public profile changed. Receipts:
+  unchanged binary, model, corpus, seed, and greedy request configuration. MTP3 was fastest on all
+  three lanes and in both repetitions. K5/K7 trailed it by 13.57%/24.72% on RTX 5090,
+  7.29%/20.17% on RTX 4090, and 11.34%/22.46% on RTX 3090, so analysis revision 5 retains the
+  qualified MTP3 incumbent and rejects deeper drafting for these artifacts. The v3 output
+  projection also exposed baseline nondeterminism: MTP0 changed on 1/12 repeated steps on RTX 5090
+  and 10/12 on RTX 4090, while RTX 3090 repeated exactly and its MTP3/5/7 outputs differed from
+  MTP0 on 6/8/4 requests. Missing campaign and fresh-process controls leave that exact-output
+  attribution unresolved; they do not erase the no-change throughput decision. No public profile
+  changed. Receipts:
   [5090](measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
   [4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
   [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). The generated public corpus and
@@ -135,10 +136,9 @@ Entry detail:
 ## Current order
 
 The backlog below is a pool; the program's order is fixed in [`ROADMAP.md`](../ROADMAP.md). The
-MTP campaign is measured, but no lane can support a depth decision until a campaign-bound rerun
-includes a separate fresh-process MTP0 control. Stable lanes then need first-divergence inspection,
-especially RTX 3090. Only after that exact-output boundary closes does the `nvfp4` artifact swap
-become the next v0.4-class requalification decision.
+MTP campaign retains MTP3 and rejects K5/K7 for the current artifacts. The `nvfp4` artifact swap is
+the next v0.4-class requalification decision. Exact-output attribution is a separate targeted
+diagnostic, not a reason to rerun the slower arms or block the artifact decision.
 
 ## Ideas backlog
 
@@ -155,8 +155,8 @@ hypothesis and method before writing code.
 | Template-fork warm starts | Checkpoint immediately after system-prompt+context prefill and fork subagents from that generation for hot starts; operational pattern over the qualified fork contract | open |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
-| MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus. All decisions are inconclusive until a shared campaign ID and fresh-process MTP0 control bind every lane | measured; controlled rerun next |
-| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes, but absent campaign/cross-process controls its per-arm raw rates remain diagnostic and do not establish a depth effect | inconclusive |
+| MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
+| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
 
 ## Contributing a result
 

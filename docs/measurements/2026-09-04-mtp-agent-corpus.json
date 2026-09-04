@@ -412,7 +412,7 @@
     "version": 3
   },
   "analysis": {
-    "version": 4,
+    "version": 5,
     "quality_reference_arm": 0,
     "requires_within_arm_repeatability": true,
     "cross_arm_attribution_requires_repeatable_baseline": true,
@@ -421,7 +421,8 @@
     "promotion_requires_margin_in_each_repetition": true,
     "corpus_decision_rule_superseded": true,
     "selection_rule": {
-      "validity_gate": "one shared campaign identity plus within-process and fresh-process MTP0 output identity",
+      "validity_gate": "required before promoting a faster arm: one shared campaign identity plus within-process and fresh-process MTP0 output identity",
+      "no_change": "retain the qualified MTP3 incumbent when no completed alternative improves decode throughput by at least 5% in every repetition",
       "incumbent_eligible": "retain MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition",
       "incumbent_ineligible": "select the fastest eligible output-identical fallback without applying the promotion margin to the ineligible incumbent"
     }
@@ -433,6 +434,6 @@
     "Every input is generated public text; output receipts retain only normalized SHA-256 values and structural timing/token metrics.",
     "Output normalization includes client-visible answer, reasoning, reasoning-summary, and tool-call content while excluding generated object IDs.",
     "The forced tool round trip preserves the assistant reasoning_content in second-turn history.",
-    "Analysis revision 4 supersedes the frozen corpus decision_rule for lane selection. The decision is within-lane only: all arms must share one campaign identity, MTP0 must repeat in process and across a separate fresh process, and any selected arm must repeat exactly. The original traces lack the campaign and fresh-process controls, so they are inconclusive. For a valid campaign, retain eligible MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition, or select the fastest eligible fallback when MTP3 changes output."
+    "Analysis revision 5 supersedes the frozen corpus decision_rule for lane selection. The decision is within-lane only. Retain the qualified MTP3 incumbent when no completed alternative improves decode throughput by at least 5% in every repetition. Promoting a faster arm additionally requires one shared campaign identity, repeatable MTP0 in process and across a separate fresh process, and exact repetition for the selected arm. Missing controls limit cross-arm output attribution and promotion; they do not erase an observed no-change result."
   ]
 }

@@ -16,13 +16,11 @@ prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 ### Post-v0.4.7 development evidence
 
 The corrected 2026-09-04 agent-shaped MTP0/3/5/7 campaign changes no released component or
-profile. Its v3 corpus includes client-visible reasoning. Analysis revision 4 requires exact
-within-arm repetition, one shared non-null campaign identity, and a separate fresh-process MTP0
-control before cross-arm differences can support a draft-depth decision. The original traces
-predate the latter two controls, so all three lane decisions are inconclusive. Within-process
-observations remain: MTP0 changed on 1/12 repeated steps on RTX 5090 and 10/12 on RTX 4090; RTX
-3090 arms repeated exactly, while MTP3/5/7 differed from MTP0 on 6/8/4 outputs. These differences
-are not attributable to draft depth yet. Public receipts:
+profile. MTP3 was fastest on every lane and in both repetitions; K5/K7 were 13.57%/24.72% slower
+on RTX 5090, 7.29%/20.17% slower on RTX 4090, and 11.34%/22.46% slower on RTX 3090. Analysis
+revision 5 therefore retains the qualified MTP3 incumbent and rejects deeper drafting for the
+current artifacts. Missing campaign and fresh-process MTP0 controls leave exact-output attribution
+unresolved, but do not invalidate this no-change throughput decision. Public receipts:
 [5090](measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
 [4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
 [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).

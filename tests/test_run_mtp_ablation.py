@@ -690,7 +690,7 @@ class ReceiptTests(unittest.TestCase):
         receipts = [arm_receipt(arm, seconds) for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.8, 8.0))]
         combined = combine_with_control(receipts)
         self.assertEqual(combined["decision"]["selected_arm"], 7)
-        self.assertEqual(combined["analysis"]["version"], 4)
+        self.assertEqual(combined["analysis"]["version"], 5)
         self.assertTrue(combined["analysis"]["corpus_decision_rule_superseded"])
         self.assertIn(
             "fastest eligible output-identical fallback",
@@ -799,7 +799,8 @@ class ReceiptTests(unittest.TestCase):
         ]
         without_control = MODULE.combine_receipts(receipts)
         self.assertIsNone(without_control["decision"]["selected_arm"])
-        self.assertIsNone(without_control["decision"]["fastest_observed_arm"])
+        self.assertEqual(without_control["decision"]["fastest_observed_arm"], 7)
+        self.assertLess(without_control["arms"]["0"]["decode_change_vs_mtp3_pct"], 0)
         self.assertIn(
             "a fresh-process MTP0 control receipt is missing",
             without_control["quality"]["validity_failures"],
@@ -833,6 +834,21 @@ class ReceiptTests(unittest.TestCase):
             "arm receipts lack one shared non-null campaign identity",
             unbound_result["quality"]["validity_failures"],
         )
+
+    def test_combine_retains_incumbent_without_quality_control_when_no_candidate_wins(self) -> None:
+        receipts = [
+            arm_receipt(arm, seconds)
+            for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 12.0, 14.0))
+        ]
+
+        combined = MODULE.combine_receipts(receipts)
+
+        self.assertFalse(combined["quality"]["baseline_repeatable"])
+        self.assertEqual(combined["quality"]["eligible_arms"], [])
+        self.assertEqual(combined["decision"]["status"], "decided")
+        self.assertEqual(combined["decision"]["selected_arm"], 3)
+        self.assertEqual(combined["decision"]["fastest_observed_arm"], 3)
+        self.assertEqual(combined["decision"]["action"], "retain MTP3")
 
     def test_promotion_margin_must_hold_in_each_repetition(self) -> None:
         receipts = [

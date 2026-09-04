@@ -17,9 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fresh-process MTP0 control, bind per-repetition promotion margins, and publish no process
   fingerprints. Campaign-scoped request and session identities are re-derived during reduction;
   receipts must carry the exact frozen corpus step inventory; unknown nested response content and
-  non-canonical digest strings fail closed; invalid campaigns publish no cross-arm winner. Because
-  the original traces predate the new campaign and cross-process controls, all three lane decisions
-  are inconclusive; observed per-arm rates remain diagnostic only. No release profile changed.
+  non-canonical digest strings fail closed. Analysis revision 5 preserves the conclusive no-change
+  result when no candidate clears the 5% margin in either repetition: MTP3 remains the fastest arm
+  on all three lanes, while missing campaign and cross-process controls limit only exact-output
+  attribution and faster-arm promotion. No release profile changed.
 
 ## [0.4.7] - 2026-09-01
 

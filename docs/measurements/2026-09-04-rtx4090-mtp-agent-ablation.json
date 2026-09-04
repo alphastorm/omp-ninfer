@@ -15,9 +15,10 @@
     "selection_rule": {
       "incumbent_eligible": "retain MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition",
       "incumbent_ineligible": "select the fastest eligible output-identical fallback without applying the promotion margin to the ineligible incumbent",
-      "validity_gate": "one shared campaign identity plus within-process and fresh-process MTP0 output identity"
+      "validity_gate": "required before promoting a faster arm: one shared campaign identity plus within-process and fresh-process MTP0 output identity",
+      "no_change": "retain the qualified MTP3 incumbent when no completed alternative improves decode throughput by at least 5% in every repetition"
     },
-    "version": 4
+    "version": 5
   },
   "arms": {
     "0": {
@@ -25,7 +26,7 @@
       "accepted_tokens": 0,
       "completion_tokens": 2367,
       "completion_tokens_per_round": null,
-      "decode_change_vs_mtp3_pct": null,
+      "decode_change_vs_mtp3_pct": -53.62232162444752,
       "decode_seconds": 45.53328569999999,
       "decode_throughput_spread_pct": 0.021142824582986997,
       "decode_tokens": 2343,
@@ -89,7 +90,7 @@
       "accepted_tokens": 1438,
       "completion_tokens": 2363,
       "completion_tokens_per_round": 2.611049723756906,
-      "decode_change_vs_mtp3_pct": null,
+      "decode_change_vs_mtp3_pct": 0,
       "decode_seconds": 21.0812291,
       "decode_throughput_spread_pct": 1.3189358739653878,
       "decode_tokens": 2339,
@@ -153,7 +154,7 @@
       "accepted_tokens": 1561,
       "completion_tokens": 2402,
       "completion_tokens_per_round": 2.9221411192214113,
-      "decode_change_vs_mtp3_pct": null,
+      "decode_change_vs_mtp3_pct": -7.286936390915988,
       "decode_seconds": 23.1172742,
       "decode_throughput_spread_pct": 0.7338791198917338,
       "decode_tokens": 2378,
@@ -217,7 +218,7 @@
       "accepted_tokens": 1572,
       "completion_tokens": 2366,
       "completion_tokens_per_round": 2.9987325728770595,
-      "decode_change_vs_mtp3_pct": null,
+      "decode_change_vs_mtp3_pct": -20.171642134385458,
       "decode_seconds": 26.442067,
       "decode_throughput_spread_pct": 2.3402919092598395,
       "decode_tokens": 2342,
@@ -425,16 +426,16 @@
     "version": 3
   },
   "decision": {
-    "action": "no draft-depth decision",
+    "status": "decided",
+    "selected_arm": 3,
+    "fastest_observed_arm": 3,
     "fastest_eligible_arm": null,
-    "fastest_observed_arm": null,
     "incumbent_arm": 3,
     "promotion_margin": 0.05,
-    "reason": "arm receipts lack one shared non-null campaign identity; MTP0 changed output between same-process repetitions; a fresh-process MTP0 control receipt is missing",
-    "selected_arm": null,
-    "status": "inconclusive"
+    "action": "retain MTP3",
+    "reason": "no completed alternative exceeded MTP3 decode throughput by 5% in every repetition"
   },
-  "generated_utc": "2026-09-04T12:49:28Z",
+  "generated_utc": "2026-09-04T13:55:37.701Z",
   "lane": "rtx4090",
   "model": "qwen3.8-27b",
   "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",

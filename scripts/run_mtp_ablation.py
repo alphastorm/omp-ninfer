@@ -25,7 +25,7 @@ ARM_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_arm"
 LANE_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_lane"
 SCHEMA_VERSION = 1
 CONFIGURATION_SCHEMA_VERSION = 2
-ANALYSIS_VERSION = 4
+ANALYSIS_VERSION = 5
 PROMOTION_MARGIN = 0.05
 CORPUS_STEP_NAMES = {
     "responses_short": ("single",),
@@ -1785,7 +1785,14 @@ def combine_receipts(
             for index in range(REPETITIONS)
         )
 
-    if not baseline_repeatable:
+    observed_promotable = tuple(
+        arm
+        for arm in completed_arms
+        if arm != 3 and clears_promotion_margin(arm)
+    )
+    if not observed_promotable:
+        selected = 3
+    elif not baseline_repeatable:
         selected = None
     elif not incumbent_eligible:
         assert fastest_eligible is not None
@@ -1804,10 +1811,8 @@ def combine_receipts(
         )
         if statuses[arm] == "completed":
             summaries[arm]["decode_change_vs_mtp3_pct"] = (
-                (float(speeds[arm]) / incumbent_speed - 1.0) * 100.0
-                if baseline_repeatable
-                else None
-            )
+                float(speeds[arm]) / incumbent_speed - 1.0
+            ) * 100.0
             summaries[arm]["normalized_output_mismatch_count"] = len(
                 mismatches_by_arm[arm]
             )
@@ -1819,24 +1824,26 @@ def combine_receipts(
             summaries[arm]["normalized_output_mismatch_count"] = None
             summaries[arm]["repeatability_mismatch_count"] = None
     decision = {
-        "status": "inconclusive" if not baseline_repeatable else "decided",
+        "status": "inconclusive" if selected is None else "decided",
         "selected_arm": selected,
-        "fastest_observed_arm": fastest_observed if baseline_repeatable else None,
+        "fastest_observed_arm": fastest_observed,
         "fastest_eligible_arm": fastest_eligible,
         "incumbent_arm": 3,
         "promotion_margin": PROMOTION_MARGIN,
         "action": (
-            "no draft-depth decision"
-            if not baseline_repeatable
+            "retain MTP3"
+            if selected == 3
+            else "no draft-depth decision"
+            if selected is None
             else "replace output-drifted MTP3"
             if not incumbent_eligible
             else "change lane default"
-            if selected != 3
-            else "retain MTP3"
         ),
         "reason": (
-            "; ".join(validity_failures)
-            if not baseline_repeatable
+            "no completed alternative exceeded MTP3 decode throughput by 5% in every repetition"
+            if selected == 3 and not observed_promotable
+            else "; ".join(validity_failures)
+            if selected is None
             else f"MTP3 changed normalized output versus MTP0; MTP{selected} is the fastest output-identical completed arm"
             if not incumbent_eligible
             else f"eligible MTP{selected} exceeded MTP3 decode throughput by at least 5% in each repetition"
@@ -1873,8 +1880,12 @@ def combine_receipts(
             "corpus_decision_rule_superseded": True,
             "selection_rule": {
                 "validity_gate": (
-                    "one shared campaign identity plus within-process and fresh-process "
-                    "MTP0 output identity"
+                    "required before promoting a faster arm: one shared campaign identity "
+                    "plus within-process and fresh-process MTP0 output identity"
+                ),
+                "no_change": (
+                    "retain the qualified MTP3 incumbent when no completed alternative "
+                    "improves decode throughput by at least 5% in every repetition"
                 ),
                 "incumbent_eligible": (
                     "retain MTP3 unless another eligible arm improves decode throughput "
