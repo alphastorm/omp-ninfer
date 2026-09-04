@@ -201,7 +201,7 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | --- | --- | --- | --- | --- | --- |
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; in-process prefix reuse avoids recomputing matching prefixes | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
-| Speculative decoding on the shipped model | Profile-specific: MTP3 on the 5090 and 3090 lanes, MTP0 on the 4090 lane | Model/config dependent | Optional draft-model setups, backend-dependent | Optional draft/ngram setups | Optional |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on all three shipped lanes | Model/config dependent | Desktop app plus headless daemon with a large model catalog | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config | Depends on your client config |
@@ -262,9 +262,10 @@ intent remains to upstream reusable provider and lifecycle pieces to
 ## Roadmap
 
 `v0.4.7` exposes three qualified GPU lanes with durable restart and same-lane agent fanout.
-Next, in order: close MTP0 repeatability on RTX 5090 and RTX 4090 and rerun the frozen agent-shaped
-MTP corpus; decide whether a separately qualified `nvfp4` artifact is worth replacing the pinned
-model; then begin the v0.5 checkpoint-replication work. Signing/notarization, a shared public client
+Next, in order: rerun the frozen agent-shaped MTP corpus on all three lanes with one campaign
+identity and a separate fresh-process MTP0 control, then inspect any stable token/logit divergence;
+decide whether a separately qualified `nvfp4` artifact is worth replacing the pinned model; then
+begin the v0.5 checkpoint-replication work. Signing/notarization, a shared public client
 acceptance runner, and multi-owner clean-install evidence remain on the path to v1.0. No item becomes
 a support claim before an exact package, receipt, and product manifest bind it.
 

@@ -1,9 +1,17 @@
 {
   "analysis": {
     "cross_arm_attribution_requires_repeatable_baseline": true,
+    "fresh_process_baseline_control": {
+      "available": false,
+      "evidence": null,
+      "normalized_output_sha256": null
+    },
+    "promotion_requires_margin_in_each_repetition": true,
     "quality_reference_arm": 0,
+    "requires_fresh_process_baseline_control": true,
+    "requires_shared_campaign_identity": true,
     "requires_within_arm_repeatability": true,
-    "version": 2
+    "version": 3
   },
   "arms": {
     "0": {
@@ -11,16 +19,19 @@
       "accepted_tokens": 0,
       "completion_tokens": 2402,
       "completion_tokens_per_round": null,
-      "decode_change_vs_mtp3_pct": -44.64713381592029,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 65.72682520000001,
+      "decode_throughput_spread_pct": 0.039423030802465675,
       "decode_tokens": 2378,
       "decode_tokens_per_second": 36.180052707003405,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 36.187184343664924,
+        "r1": 36.172923880741266
+      },
       "drafted_tokens": 0,
       "evidence": {
-        "arm_receipt_content_sha256": "4a4d3f54981df317dd281ad7929c641ac343e4fb7247b3d03c50d426f68a30af",
-        "server_instance_sha256s": [
-          "fcc7422d31aec76dd7e9ea9fd95c9448efde317a3946eff0e22c472470f2a089"
-        ],
+        "arm_receipt_content_sha256": "9790b4edfc7ea3f5ee4eb6e04922232aaf71aa1a75bcbd0a6616d8d11c82f33e",
+        "server_instance_count": 1,
         "server_log_sha256": "68f764f7f0689a97a238b0dc7bd85333b27083279cb819448534758a0d4af880",
         "trace_sha256": "9a16960fbfd7988ec3045b27e3fb0cfeca6b15296c453928480abdd428425573"
       },
@@ -60,7 +71,7 @@
         "restore_turn_checkpoint": 2
       },
       "prompt_tokens": 246584,
-      "quality_eligible": true,
+      "quality_eligible": false,
       "repeatability_mismatch_count": 0,
       "request_count": 24,
       "speculative_rounds": 0,
@@ -72,16 +83,19 @@
       "accepted_tokens": 1530,
       "completion_tokens": 2402,
       "completion_tokens_per_round": 2.80607476635514,
-      "decode_change_vs_mtp3_pct": 0.0,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 36.381681599999986,
+      "decode_throughput_spread_pct": 0.33049259139890097,
       "decode_tokens": 2378,
       "decode_tokens_per_second": 65.36256421968139,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 65.2549107901432,
+        "r1": 65.47057343582858
+      },
       "drafted_tokens": 2534,
       "evidence": {
-        "arm_receipt_content_sha256": "cde3b4ddb9ef6e3dcfd5707fe5254df66270e275f4a6b42ae421d5b3a53e0134",
-        "server_instance_sha256s": [
-          "9bc2675a93b2ba2394ca4d8d93b3baa38f2b7e5f994314347a17f645bfb77075"
-        ],
+        "arm_receipt_content_sha256": "d4dab85caf22eb8b22f0294203427c7579e4e982954abe659f1a947e9725376e",
+        "server_instance_count": 1,
         "server_log_sha256": "be70583c7e9545508875cdc5cfe08c73bff9b99015158fabc20d30389709652e",
         "trace_sha256": "10c3f7d673d49cf5102091ea16d8c3646125e2b0844a29b7aa7ce82bdd4b4b00"
       },
@@ -133,16 +147,19 @@
       "accepted_tokens": 1666,
       "completion_tokens": 2446,
       "completion_tokens_per_round": 3.201570680628272,
-      "decode_change_vs_mtp3_pct": -11.342904824803423,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 41.79569579999998,
+      "decode_throughput_spread_pct": 0.32276471123457995,
       "decode_tokens": 2422,
       "decode_tokens_per_second": 57.94855076919191,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 57.855332907277315,
+        "r1": 58.0420695054693
+      },
       "drafted_tokens": 3742,
       "evidence": {
-        "arm_receipt_content_sha256": "3b68206093cfa0922c9845656bb0edf15f13657536e2c3b2bd2149dd92ce4354",
-        "server_instance_sha256s": [
-          "80c15913a3d78feea01e47f084beee8584971c05408c130e1be87607c1ede892"
-        ],
+        "arm_receipt_content_sha256": "f03a1088bd34fd5a44586e29f2c34d27bf4aa1fb93e2ea8887f98b4a455581ea",
+        "server_instance_count": 1,
         "server_log_sha256": "17b4c84adae7f696864272a0b3bdead4d512e3ce0cb3c9ec80d76417b3134c9f",
         "trace_sha256": "5e24ecc95c321b7374c31897d6be1ba138efd27ee4a7c0997040b248fdffd910"
       },
@@ -194,16 +211,19 @@
       "accepted_tokens": 1708,
       "completion_tokens": 2402,
       "completion_tokens_per_round": 3.491279069767442,
-      "decode_change_vs_mtp3_pct": -22.460274870650288,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 46.92005490000001,
+      "decode_throughput_spread_pct": 0.07770485316902498,
       "decode_tokens": 2378,
       "decode_tokens_per_second": 50.681952633435635,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 50.70164380187414,
+        "r1": 50.66227675411027
+      },
       "drafted_tokens": 4712,
       "evidence": {
-        "arm_receipt_content_sha256": "328a7db03522436eb30daab9e82a9212f3d47dcd78250b00cd892e0de18b45c8",
-        "server_instance_sha256s": [
-          "ba6239c0b84b9f97ffa4b595e4bda77ddb62de48ecf79cce8d5e2256dcf2966a"
-        ],
+        "arm_receipt_content_sha256": "7283318df7b7de32264e521d0c198fd3cbf6dd73d671f809bf87b241894039bb",
+        "server_instance_count": 1,
         "server_log_sha256": "edc89cca60b5c88571634cef9e79a06a5ba18fe52cd284ab6ad4ef33efe5bf5b",
         "trace_sha256": "9a52cc3b8c8a9876346d7ae002468f06d4d28805141438e35437784210e0f03c"
       },
@@ -253,7 +273,9 @@
   },
   "artifact_type": "omp_ninfer_mtp_ablation_lane",
   "binary_sha256": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
-  "configuration_sha256": "04d8d7831b34d57d681265d9d553e278707c958f986e9e8ba9458bc081059ef6",
+  "campaign_id": null,
+  "configuration_schema_version": 2,
+  "configuration_sha256": "e40da8b636b57c2e477dbff7d7b952766fdbfefe7e1518b6dd8ec0fcf7fd00b9",
   "corpus": {
     "decision_rule": {
       "incumbent": 3,
@@ -397,25 +419,27 @@
     "version": 3
   },
   "decision": {
-    "action": "replace output-drifted MTP3",
-    "fastest_eligible_arm": 0,
+    "action": "no draft-depth decision",
+    "fastest_eligible_arm": null,
     "fastest_observed_arm": 3,
     "incumbent_arm": 3,
     "promotion_margin": 0.05,
-    "reason": "MTP3 changed normalized output versus MTP0; MTP0 is the fastest output-identical completed arm",
-    "selected_arm": 0,
-    "status": "decided"
+    "reason": "arm receipts lack one shared non-null campaign identity; a fresh-process MTP0 control receipt is missing",
+    "selected_arm": null,
+    "status": "inconclusive"
   },
-  "generated_utc": "2026-09-04T11:35:00Z",
+  "generated_utc": "2026-09-04T12:20:54Z",
   "lane": "rtx3090",
   "model": "q38-ninfer",
   "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
   "quality": {
-    "baseline_repeatable": true,
+    "baseline_control_mismatches": null,
+    "baseline_control_repeatability_mismatches": null,
+    "baseline_cross_instance_repeatable": null,
+    "baseline_repeatable": false,
+    "baseline_within_instance_repeatable": true,
     "compared_steps": 24,
-    "eligible_arms": [
-      0
-    ],
+    "eligible_arms": [],
     "failed_arms": [],
     "mismatches_by_arm": {
       "0": {
@@ -476,9 +500,14 @@
         "count": 0,
         "step_ids": []
       }
-    }
+    },
+    "validity_failures": [
+      "arm receipts lack one shared non-null campaign identity",
+      "a fresh-process MTP0 control receipt is missing"
+    ]
   },
   "schema_version": 1,
   "scope": "within-lane experiment; not release qualification and not cross-lane comparable",
-  "source_commit": "3e37b03eac5633fe434afd84c45c54c2078f1556"
+  "source_commit": "3e37b03eac5633fe434afd84c45c54c2078f1556",
+  "trust_boundary": "owner measurement host and local arm receipts are trusted; hashes are provenance identifiers, not remote attestation"
 }

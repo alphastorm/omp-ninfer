@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+from typing import Any
 import unittest
 from unittest import mock
 
@@ -25,7 +26,13 @@ SHA_C = "c" * 64
 COMMIT = "d" * 40
 
 
-def arm_receipt(arm: int, decode_seconds: float) -> dict[str, object]:
+def arm_receipt(
+    arm: int,
+    decode_seconds: float,
+    *,
+    campaign_id: str | None = SHA_A,
+    instance_sha256: str = SHA_C,
+) -> dict[str, object]:
     expected_requests = MODULE.corpus_manifest()["request_count"]
     configuration = {"fixture": "frozen"}
     return {
@@ -35,15 +42,17 @@ def arm_receipt(arm: int, decode_seconds: float) -> dict[str, object]:
         "lane": "rtx-test",
         "arm": arm,
         "model": "qwen3.8-27b",
+        "campaign_id": campaign_id,
         "corpus_sha256": MODULE.corpus_manifest()["sha256"],
         "source_commit": COMMIT,
         "binary_sha256": SHA_B,
         "model_artifact_sha256": SHA_C,
         "configuration": configuration,
+        "configuration_schema_version": MODULE.CONFIGURATION_SCHEMA_VERSION,
         "configuration_sha256": MODULE.sha256_json(configuration),
         "trace_sha256": SHA_A,
         "server_log_sha256": SHA_B,
-        "server_instance_sha256s": [SHA_C],
+        "server_instance_sha256s": [instance_sha256],
         "completed_requests": expected_requests,
         "expected_requests": expected_requests,
         "requests": [
@@ -78,6 +87,94 @@ def arm_receipt(arm: int, decode_seconds: float) -> dict[str, object]:
     }
 
 
+def combine_with_control(
+    receipts: list[dict[str, object]],
+    control: dict[str, object] | None = None,
+) -> dict[str, Any]:
+    return MODULE.combine_receipts(
+        receipts,
+        control
+        if control is not None
+        else arm_receipt(0, 20.0, instance_sha256="9" * 64),
+    )
+
+
+def server_start_fixture(instance: str, arm: int = 3) -> dict[str, object]:
+    return {
+        "event": "server_start",
+        "server_instance_id": instance,
+        "server": {
+            "api_key_configured": True,
+            "cors_enabled": False,
+            "default_output_tokens": 32768,
+            "default_preserve_thinking": True,
+            "default_thinking": True,
+            "default_thinking_budget": None,
+            "host": "127.0.0.1",
+            "max_request_bytes": 1048576,
+            "port": 18082,
+            "public_model_id": "qwen3.8-27b",
+            "request_log_jsonl": "C:/private/requests.jsonl",
+        },
+        "identity": {
+            "upstream_base_sha": COMMIT,
+            "patch_stack_sha": COMMIT,
+            "source_dirty": False,
+            "build_profile": "mtp-depth-ablation-test",
+            "build_type": "Release",
+            "config_sha256": SHA_A,
+            "cxx_compiler": "test",
+            "cuda_compiler": "test",
+            "cuda_toolkit": "13.1",
+            "deployment_profile": "mtp-depth-ablation-test",
+            "binary_sha256": SHA_B,
+            "model_artifact_sha256": SHA_C,
+            "target": "qwen3_8_27b",
+            "model_id": "artifact-default-model-id",
+            "weights_id": "weights-test",
+        },
+        "artifact": {
+            "bytes_read": 1,
+            "host_to_device_bytes": 1,
+            "load_seconds": 1.0,
+            "peak_staging_bytes": 1,
+            "resource_count": 1,
+            "size_bytes": 1,
+            "target": "qwen3_8_27b",
+            "tensor_count": 1,
+            "upload_seconds": 1.0,
+            "weights_id": "weights-test",
+        },
+        "engine": {
+            "cuda_graph": True,
+            "device": 0,
+            "kv_cache": "int8",
+            "kv_capacity": 65536,
+            "kv_capacity_max_page_groups": 64,
+            "kv_capacity_mode": "automatic",
+            "kv_capacity_page_groups": 32,
+            "log_stats_interval_ms": 0,
+            "max_concurrency": 1,
+            "max_context": 65536,
+            "max_pending_requests": 1,
+            "pending_timeout_ms": 0,
+            "prefill_chunk": 1024,
+            "prefix_reuse": True,
+            "proposal_head": "full" if arm == 0 else "optimized",
+            "speculative_backend": "none" if arm == 0 else "mtp",
+            "speculative_draft_window": arm,
+            "vision": False,
+        },
+        "sampling_defaults": {
+            "greedy": True,
+            "non_thinking": {},
+            "omitted_seed": "random",
+            "server_overrides": {},
+            "thinking": {},
+        },
+    }
+
+
 class CorpusContractTests(unittest.TestCase):
     def test_corpus_is_deterministic_content_safe_and_agent_shaped(self) -> None:
         first = MODULE.corpus_manifest()
@@ -103,7 +200,7 @@ class CorpusContractTests(unittest.TestCase):
             output = root / "state.json"
             key = root / "api-key"
             key.write_text("not-a-real-secret\n", encoding="utf-8")
-            state = MODULE.initial_run_state("rtx-test", 3, "qwen3.8-27b")
+            state = MODULE.initial_run_state("rtx-test", 3, "qwen3.8-27b", SHA_A)
             manifest = MODULE.corpus_manifest()
             for repetition in range(MODULE.REPETITIONS):
                 for definition in manifest["scenarios"]:
@@ -127,6 +224,7 @@ class CorpusContractTests(unittest.TestCase):
                 model="qwen3.8-27b",
                 lane="rtx-test",
                 arm=3,
+                campaign_id=SHA_A,
                 output=str(output),
                 timeout=1.0,
                 resume=True,
@@ -237,6 +335,16 @@ class CorpusContractTests(unittest.TestCase):
             MODULE.sha256_json(MODULE.response_projection("openai_responses", changed)),
         )
 
+    def test_output_projection_rejects_unknown_responses_items(self) -> None:
+        with self.assertRaisesRegex(MODULE.AblationError, "unsupported item type"):
+            MODULE.response_projection(
+                "openai_responses",
+                {
+                    "status": "completed",
+                    "output": [{"type": "future_visible_item", "text": "payload"}],
+                },
+            )
+
     def test_tool_roundtrip_preserves_assistant_reasoning(self) -> None:
         message = MODULE.chat_tool_message(
             {
@@ -266,24 +374,27 @@ class CorpusContractTests(unittest.TestCase):
 
 class ReceiptTests(unittest.TestCase):
     def test_safe_configuration_excludes_arm_specific_runtime_state(self) -> None:
-        baseline = {
-            "server": {},
-            "identity": {},
-            "artifact": {"tensor_count": 1104},
-            "engine": {"proposal_head": "full"},
-            "sampling_defaults": {},
-        }
-        speculative = {
-            "server": {},
-            "identity": {},
-            "artifact": {"tensor_count": 1118},
-            "engine": {"proposal_head": "optimized"},
-            "sampling_defaults": {},
-        }
+        baseline = server_start_fixture("baseline", arm=0)
+        speculative = server_start_fixture("speculative", arm=3)
+        speculative_artifact = speculative["artifact"]
+        assert isinstance(speculative_artifact, dict)
+        speculative_artifact["tensor_count"] = 15
 
         self.assertEqual(
             MODULE.safe_configuration(baseline), MODULE.safe_configuration(speculative)
         )
+        self.assertNotIn(
+            "api_key_configured", MODULE.safe_configuration(baseline)["server"]
+        )
+        engine = speculative["engine"]
+        assert isinstance(engine, dict)
+        engine["max_context"] = 32768
+        self.assertNotEqual(
+            MODULE.safe_configuration(baseline), MODULE.safe_configuration(speculative)
+        )
+        engine["unclassified_setting"] = True
+        with self.assertRaisesRegex(MODULE.AblationError, "unclassified fields"):
+            MODULE.safe_configuration(speculative)
 
     def test_summarize_binds_trace_to_clean_server_identity(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -335,12 +446,17 @@ class ReceiptTests(unittest.TestCase):
                 "event": "server_start",
                 "server_instance_id": instance,
                 "server": {
+                    "api_key_configured": True,
+                    "cors_enabled": False,
                     "public_model_id": "qwen3.8-27b",
                     "request_log_jsonl": "C:/private/requests.jsonl",
                     "default_output_tokens": 32768,
                     "default_thinking": True,
                     "default_thinking_budget": None,
                     "default_preserve_thinking": True,
+                    "host": "127.0.0.1",
+                    "max_request_bytes": 1048576,
+                    "port": 18082,
                 },
                 "identity": {
                     "upstream_base_sha": COMMIT,
@@ -348,6 +464,7 @@ class ReceiptTests(unittest.TestCase):
                     "source_dirty": False,
                     "build_profile": "mtp-depth-ablation-test",
                     "build_type": "Release",
+                    "config_sha256": SHA_A,
                     "cxx_compiler": "test",
                     "cuda_compiler": "test",
                     "cuda_toolkit": "13.1",
@@ -359,17 +476,25 @@ class ReceiptTests(unittest.TestCase):
                     "weights_id": "weights-test",
                 },
                 "artifact": {
+                    "bytes_read": 1,
+                    "host_to_device_bytes": 1,
+                    "load_seconds": 1.0,
+                    "peak_staging_bytes": 1,
                     "size_bytes": 1,
                     "target": "qwen3_8_27b",
                     "weights_id": "weights-test",
                     "tensor_count": 1,
                     "resource_count": 1,
+                    "upload_seconds": 1.0,
                 },
                 "engine": {
                     "device": 0,
                     "max_context": 65536,
                     "kv_capacity_mode": "automatic",
                     "kv_capacity": 65536,
+                    "kv_capacity_max_page_groups": 64,
+                    "kv_capacity_page_groups": 32,
+                    "log_stats_interval_ms": 0,
                     "max_concurrency": 1,
                     "max_pending_requests": 1,
                     "pending_timeout_ms": 0,
@@ -382,7 +507,13 @@ class ReceiptTests(unittest.TestCase):
                     "speculative_draft_window": 3,
                     "proposal_head": "optimized",
                 },
-                "sampling_defaults": {"greedy": True},
+                "sampling_defaults": {
+                    "greedy": True,
+                    "non_thinking": {},
+                    "omitted_seed": "random",
+                    "server_overrides": {},
+                    "thinking": {},
+                },
             }
             done = {
                 "event": "request_done",
@@ -467,9 +598,9 @@ class ReceiptTests(unittest.TestCase):
 
     def test_combine_enforces_frozen_binary_and_exact_outputs(self) -> None:
         receipts = [arm_receipt(arm, seconds) for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.8, 8.0))]
-        combined = MODULE.combine_receipts(receipts)
+        combined = combine_with_control(receipts)
         self.assertEqual(combined["decision"]["selected_arm"], 7)
-        self.assertEqual(combined["analysis"]["version"], 2)
+        self.assertEqual(combined["analysis"]["version"], 3)
         self.assertTrue(
             combined["analysis"]["cross_arm_attribution_requires_repeatable_baseline"]
         )
@@ -484,6 +615,8 @@ class ReceiptTests(unittest.TestCase):
             combined["arms"]["0"]["evidence"]["arm_receipt_content_sha256"],
             MODULE.sha256_json(receipts[0]),
         )
+        self.assertEqual(combined["arms"]["0"]["evidence"]["server_instance_count"], 1)
+        self.assertNotIn("server_instance_sha256s", json.dumps(combined))
 
         receipts[2]["binary_sha256"] = "0" * 64
         with self.assertRaisesRegex(MODULE.AblationError, "binary_sha256"):
@@ -517,13 +650,13 @@ class ReceiptTests(unittest.TestCase):
 
     def test_combine_disqualifies_output_drift_and_retains_inside_margin(self) -> None:
         receipts = [arm_receipt(arm, seconds) for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.7, 8.0))]
-        combined = MODULE.combine_receipts(receipts)
+        combined = combine_with_control(receipts)
         self.assertEqual(combined["decision"]["selected_arm"], 7)
 
         requests = receipts[3]["requests"]
         assert isinstance(requests, list) and isinstance(requests[0], dict)
         requests[0]["projection_sha256"] = "0" * 64
-        drifted = MODULE.combine_receipts(receipts)
+        drifted = combine_with_control(receipts)
         self.assertEqual(drifted["decision"]["selected_arm"], 3)
         self.assertEqual(drifted["decision"]["fastest_observed_arm"], 7)
         self.assertNotIn(7, drifted["quality"]["eligible_arms"])
@@ -540,7 +673,7 @@ class ReceiptTests(unittest.TestCase):
             assert isinstance(requests, list) and isinstance(requests[0], dict)
             requests[0]["projection_sha256"] = SHA_A
 
-        combined = MODULE.combine_receipts(receipts)
+        combined = combine_with_control(receipts)
 
         self.assertFalse(combined["quality"]["baseline_repeatable"])
         self.assertFalse(combined["quality"]["normalized_outputs_identical"])
@@ -548,6 +681,66 @@ class ReceiptTests(unittest.TestCase):
         self.assertIsNone(combined["decision"]["selected_arm"])
         self.assertEqual(combined["decision"]["status"], "inconclusive")
         self.assertEqual(combined["decision"]["action"], "no draft-depth decision")
+
+    def test_combine_requires_campaign_bound_fresh_process_baseline(self) -> None:
+        receipts = [
+            arm_receipt(arm, seconds)
+            for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.7, 8.0))
+        ]
+        without_control = MODULE.combine_receipts(receipts)
+        self.assertIsNone(without_control["decision"]["selected_arm"])
+        self.assertIn(
+            "a fresh-process MTP0 control receipt is missing",
+            without_control["quality"]["validity_failures"],
+        )
+
+        same_instance = arm_receipt(0, 20.0)
+        with self.assertRaisesRegex(MODULE.AblationError, "reused a baseline server instance"):
+            MODULE.combine_receipts(receipts, same_instance)
+
+        cross_instance_drift = arm_receipt(
+            0, 20.0, instance_sha256="9" * 64
+        )
+        control_requests = cross_instance_drift["requests"]
+        assert isinstance(control_requests, list)
+        for index in (0, len(control_requests) // 2):
+            assert isinstance(control_requests[index], dict)
+            control_requests[index]["projection_sha256"] = SHA_B
+        drifted = MODULE.combine_receipts(receipts, cross_instance_drift)
+        self.assertIsNone(drifted["decision"]["selected_arm"])
+        self.assertIs(drifted["quality"]["baseline_cross_instance_repeatable"], False)
+
+        unbound = [
+            arm_receipt(arm, seconds, campaign_id=None)
+            for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.7, 8.0))
+        ]
+        unbound_control = arm_receipt(
+            0, 20.0, campaign_id=None, instance_sha256="9" * 64
+        )
+        unbound_result = MODULE.combine_receipts(unbound, unbound_control)
+        self.assertIn(
+            "arm receipts lack one shared non-null campaign identity",
+            unbound_result["quality"]["validity_failures"],
+        )
+
+    def test_promotion_margin_must_hold_in_each_repetition(self) -> None:
+        receipts = [
+            arm_receipt(arm, seconds)
+            for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 12.0, 8.0))
+        ]
+        candidate_requests = receipts[3]["requests"]
+        assert isinstance(candidate_requests, list)
+        for row in candidate_requests:
+            assert isinstance(row, dict)
+            timings = row["timings_seconds"]
+            assert isinstance(timings, dict)
+            if "/r1/" in str(row["step_id"]):
+                timings["decode"] = 11.0
+
+        combined = combine_with_control(receipts)
+
+        self.assertEqual(combined["decision"]["fastest_observed_arm"], 7)
+        self.assertEqual(combined["decision"]["selected_arm"], 3)
 
     def test_combine_disqualifies_failed_arm(self) -> None:
         receipts = [
@@ -568,7 +761,7 @@ class ReceiptTests(unittest.TestCase):
         assert isinstance(requests, list)
         failed["requests"] = requests[:23]
 
-        combined = MODULE.combine_receipts(receipts)
+        combined = combine_with_control(receipts)
 
         self.assertEqual(combined["decision"]["selected_arm"], 3)
         self.assertEqual(combined["quality"]["failed_arms"], [7])
@@ -585,7 +778,7 @@ class ReceiptTests(unittest.TestCase):
             assert isinstance(requests, list) and isinstance(requests[0], dict)
             requests[0]["projection_sha256"] = output_sha
 
-        combined = MODULE.combine_receipts(receipts)
+        combined = combine_with_control(receipts)
 
         self.assertEqual(combined["quality"]["reference_arm"], 0)
         self.assertEqual(combined["quality"]["eligible_arms"], [0])

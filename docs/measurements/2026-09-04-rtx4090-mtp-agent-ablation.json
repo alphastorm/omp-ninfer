@@ -1,9 +1,17 @@
 {
   "analysis": {
     "cross_arm_attribution_requires_repeatable_baseline": true,
+    "fresh_process_baseline_control": {
+      "available": false,
+      "evidence": null,
+      "normalized_output_sha256": null
+    },
+    "promotion_requires_margin_in_each_repetition": true,
     "quality_reference_arm": 0,
+    "requires_fresh_process_baseline_control": true,
+    "requires_shared_campaign_identity": true,
     "requires_within_arm_repeatability": true,
-    "version": 2
+    "version": 3
   },
   "arms": {
     "0": {
@@ -11,16 +19,19 @@
       "accepted_tokens": 0,
       "completion_tokens": 2367,
       "completion_tokens_per_round": null,
-      "decode_change_vs_mtp3_pct": -53.62232162444752,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 45.53328569999999,
+      "decode_throughput_spread_pct": 0.021142824582986997,
       "decode_tokens": 2343,
       "decode_tokens_per_second": 51.45686202917705,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 51.451481491959136,
+        "r1": 51.46235978843632
+      },
       "drafted_tokens": 0,
       "evidence": {
-        "arm_receipt_content_sha256": "c7301e2fac6b48bd7677eb923cbd90999ef2b2dd01e520fec1d8958732d07428",
-        "server_instance_sha256s": [
-          "f6c5438ac7ec5739fde4e73685db5f3c486734fc79d1767734bcec5640ed0422"
-        ],
+        "arm_receipt_content_sha256": "64ce4ac3f0103cbcfd0288e02ff7f9cc0959651c23df5b1b8b092989deedb86e",
+        "server_instance_count": 1,
         "server_log_sha256": "031523bfd2e09fab826db8662d7fef2a9e8172d7b9c209227bf2497abe0e48ed",
         "trace_sha256": "40743a3f4890915b760015535010c2c9ec798b6560bb74587f2297e95724e692"
       },
@@ -72,16 +83,19 @@
       "accepted_tokens": 1438,
       "completion_tokens": 2363,
       "completion_tokens_per_round": 2.611049723756906,
-      "decode_change_vs_mtp3_pct": 0.0,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 21.0812291,
+      "decode_throughput_spread_pct": 1.3189358739653878,
       "decode_tokens": 2339,
       "decode_tokens_per_second": 110.95178506456247,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 110.21819477554456,
+        "r1": 111.67190208607626
+      },
       "drafted_tokens": 2693,
       "evidence": {
-        "arm_receipt_content_sha256": "97e1427e72fe535ad42ef56e24f7113b71236ecd2b1a33cdb945296236d199e1",
-        "server_instance_sha256s": [
-          "f5eed091ac1b709a72a2545f5a832b9c2dd225436f8925bd3562b7c7536029f6"
-        ],
+        "arm_receipt_content_sha256": "979823e80536a774b3ed19970af0a4b14f7f9c28973154c582ab714e08de2db3",
+        "server_instance_count": 1,
         "server_log_sha256": "760c91591ea05fd9bd5708b64ddb2cc3377ce170a01cb1d627e0e0dad87fe2e3",
         "trace_sha256": "7b5c5015514bdef9314fb378ae26a9f298316c4fe0d8ba3bc6ccf52298b7a616"
       },
@@ -133,16 +147,19 @@
       "accepted_tokens": 1561,
       "completion_tokens": 2402,
       "completion_tokens_per_round": 2.9221411192214113,
-      "decode_change_vs_mtp3_pct": -7.286936390915988,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 23.1172742,
+      "decode_throughput_spread_pct": 0.7338791198917338,
       "decode_tokens": 2378,
       "decode_tokens_per_second": 102.86679906232197,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 103.24457550132406,
+        "r1": 102.49240514052292
+      },
       "drafted_tokens": 4034,
       "evidence": {
-        "arm_receipt_content_sha256": "ffbe9b5ce2ffdfca1138168fee8e85d390c69d7036a331cc04a87069346ab0ce",
-        "server_instance_sha256s": [
-          "db0af848aae9e5db2fde1d78cc87407adc62edde12fa9dcb7c5cbddd87d49eac"
-        ],
+        "arm_receipt_content_sha256": "fc6bc49d03b24f83e106e07648c1bce314c405f4f4f1fd41fe3add523f830fe4",
+        "server_instance_count": 1,
         "server_log_sha256": "7e5528c8df1f406ef3f89d81b0a9dba70c67f468d5d6b93fcf91f71a18792c86",
         "trace_sha256": "cc324353a5bba251e18ea31e87b0c30c4a4dbec7e787e4fb98538de3585f8d7e"
       },
@@ -194,16 +211,19 @@
       "accepted_tokens": 1572,
       "completion_tokens": 2366,
       "completion_tokens_per_round": 2.9987325728770595,
-      "decode_change_vs_mtp3_pct": -20.171642134385458,
+      "decode_change_vs_mtp3_pct": null,
       "decode_seconds": 26.442067,
+      "decode_throughput_spread_pct": 2.3402919092598395,
       "decode_tokens": 2342,
       "decode_tokens_per_second": 88.5709880396264,
+      "decode_tokens_per_second_by_repetition": {
+        "r0": 89.59943229799693,
+        "r1": 87.55049514363354
+      },
       "drafted_tokens": 5387,
       "evidence": {
-        "arm_receipt_content_sha256": "825ee4992d7a136ba5886786a5060e83199b6f6e83516120ab70ed68fc83a3c9",
-        "server_instance_sha256s": [
-          "0134dbc133b22a57135a544a774d47b6827a83ee3f98a53e028a333810d9f09a"
-        ],
+        "arm_receipt_content_sha256": "084e99563a325e610bfb58050f041c1e314cd0cd51d6a8e8a8006a90e4958dea",
+        "server_instance_count": 1,
         "server_log_sha256": "48e2de0b68b56d7c962b29139e244d92405be789adf0e441a4a9c212c63b8836",
         "trace_sha256": "cd6a04548c56970bfb5dda943b348e47b2a8f351a9e2c393d135011275d18591"
       },
@@ -253,7 +273,9 @@
   },
   "artifact_type": "omp_ninfer_mtp_ablation_lane",
   "binary_sha256": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
-  "configuration_sha256": "3dac28fbec5ba66ecd307253c96cd8b0c7f8ac6fa5c2b707cdad3703c3233cf5",
+  "campaign_id": null,
+  "configuration_schema_version": 2,
+  "configuration_sha256": "6e2c8f334138260ac452dffbc2ab7cc7800ec06044b1cfe792b900507ca28dd8",
   "corpus": {
     "decision_rule": {
       "incumbent": 3,
@@ -402,16 +424,20 @@
     "fastest_observed_arm": 3,
     "incumbent_arm": 3,
     "promotion_margin": 0.05,
-    "reason": "MTP0 changed normalized output between identical repetitions; cross-arm output differences are not attributable to draft depth",
+    "reason": "arm receipts lack one shared non-null campaign identity; MTP0 changed output between same-process repetitions; a fresh-process MTP0 control receipt is missing",
     "selected_arm": null,
     "status": "inconclusive"
   },
-  "generated_utc": "2026-09-04T11:35:00Z",
+  "generated_utc": "2026-09-04T12:20:54Z",
   "lane": "rtx4090",
   "model": "qwen3.8-27b",
   "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
   "quality": {
+    "baseline_control_mismatches": null,
+    "baseline_control_repeatability_mismatches": null,
+    "baseline_cross_instance_repeatable": null,
     "baseline_repeatable": false,
+    "baseline_within_instance_repeatable": false,
     "compared_steps": 24,
     "eligible_arms": [],
     "failed_arms": [],
@@ -559,9 +585,15 @@
           "responses_medium_branch/continuation"
         ]
       }
-    }
+    },
+    "validity_failures": [
+      "arm receipts lack one shared non-null campaign identity",
+      "MTP0 changed output between same-process repetitions",
+      "a fresh-process MTP0 control receipt is missing"
+    ]
   },
   "schema_version": 1,
   "scope": "within-lane experiment; not release qualification and not cross-lane comparable",
-  "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7"
+  "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7",
+  "trust_boundary": "owner measurement host and local arm receipts are trusted; hashes are provenance identifiers, not remote attestation"
 }

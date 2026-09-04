@@ -24,7 +24,8 @@ RUN_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_run"
 ARM_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_arm"
 LANE_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_lane"
 SCHEMA_VERSION = 1
-ANALYSIS_VERSION = 2
+CONFIGURATION_SCHEMA_VERSION = 2
+ANALYSIS_VERSION = 3
 PROMOTION_MARGIN = 0.05
 
 SHORT_PROMPT = (
@@ -391,7 +392,7 @@ def response_projection(protocol: str, response: Mapping[str, Any]) -> dict[str,
                 }
             )
         else:
-            projected.append({"type": kind})
+            raise AblationError(f"Responses output contains unsupported item type {kind!r}")
     return {"protocol": protocol, "status": response.get("status"), "output": projected}
 
 
@@ -509,17 +510,22 @@ def execute_scenario(
     model: str,
     lane: str,
     arm: int,
+    campaign_id: str,
     corpus_sha256: str,
     name: str,
     repetition: int,
 ) -> list[dict[str, Any]]:
     scenario_key = f"{name}/r{repetition}"
-    session = identity_digest(f"session/{corpus_sha256}/{lane}/{arm}/{scenario_key}")
+    session = identity_digest(
+        f"session/{campaign_id}/{corpus_sha256}/{lane}/{arm}/{scenario_key}"
+    )
     results: list[dict[str, Any]] = []
 
     def send(protocol: str, step: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         step_id = f"{scenario_key}/{step}"
-        request_id = identity_digest(f"request/{corpus_sha256}/{lane}/{arm}/{step_id}")
+        request_id = identity_digest(
+            f"request/{campaign_id}/{corpus_sha256}/{lane}/{arm}/{step_id}"
+        )
         result, response = request_step(
             client,
             model=model,
@@ -653,7 +659,7 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def initial_run_state(lane: str, arm: int, model: str) -> dict[str, Any]:
+def initial_run_state(lane: str, arm: int, model: str, campaign_id: str) -> dict[str, Any]:
     manifest = corpus_manifest()
     return {
         "artifact_type": RUN_ARTIFACT_TYPE,
@@ -662,6 +668,7 @@ def initial_run_state(lane: str, arm: int, model: str) -> dict[str, Any]:
         "lane": lane,
         "arm": arm,
         "model": model,
+        "campaign_id": require_sha256(campaign_id, "campaign_id"),
         "corpus_sha256": manifest["sha256"],
         "expected_scenarios": len(manifest["scenarios"]) * REPETITIONS,
         "expected_requests": manifest["request_count"],
@@ -669,8 +676,10 @@ def initial_run_state(lane: str, arm: int, model: str) -> dict[str, Any]:
     }
 
 
-def load_run_state(path: Path, lane: str, arm: int, model: str, resume: bool) -> dict[str, Any]:
-    expected = initial_run_state(lane, arm, model)
+def load_run_state(
+    path: Path, lane: str, arm: int, model: str, campaign_id: str, resume: bool
+) -> dict[str, Any]:
+    expected = initial_run_state(lane, arm, model, campaign_id)
     if not path.exists():
         return expected
     if not resume:
@@ -679,7 +688,15 @@ def load_run_state(path: Path, lane: str, arm: int, model: str, resume: bool) ->
         state = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise AblationError(f"cannot read run state {path}: {exc}") from exc
-    for key in ("artifact_type", "schema_version", "lane", "arm", "model", "corpus_sha256"):
+    for key in (
+        "artifact_type",
+        "schema_version",
+        "lane",
+        "arm",
+        "model",
+        "campaign_id",
+        "corpus_sha256",
+    ):
         if state.get(key) != expected[key]:
             raise AblationError(f"run state {key} does not match this campaign")
     if not isinstance(state.get("scenarios"), dict):
@@ -691,7 +708,10 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
     if args.arm not in ARMS:
         raise AblationError(f"arm must be one of {ARMS}")
     output = Path(args.output)
-    state = load_run_state(output, args.lane, args.arm, args.model, args.resume)
+    campaign_id = require_sha256(args.campaign_id, "campaign_id")
+    state = load_run_state(
+        output, args.lane, args.arm, args.model, campaign_id, args.resume
+    )
     api_key = Path(args.api_key_file).read_text(encoding="utf-8").strip()
     if not api_key:
         raise AblationError("API key file is empty")
@@ -711,6 +731,7 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
                 model=args.model,
                 lane=args.lane,
                 arm=args.arm,
+                campaign_id=campaign_id,
                 corpus_sha256=manifest["sha256"],
                 name=name,
                 repetition=repetition,
@@ -759,68 +780,193 @@ def request_identity(record: Mapping[str, Any]) -> str | None:
     return value if isinstance(value, str) else None
 
 
-def object_field(parent: Mapping[str, Any], key: str) -> dict[str, Any]:
-    value = parent.get(key)
-    return value if isinstance(value, dict) else {}
+SAFE_CONFIGURATION_INCLUDED = {
+    "server": frozenset(
+        {
+            "cors_enabled",
+            "default_output_tokens",
+            "default_preserve_thinking",
+            "default_reasoning_effort",
+            "default_thinking",
+            "default_thinking_budget",
+            "host",
+            "max_request_bytes",
+            "media_cache_bytes",
+            "media_live_bytes",
+            "media_preprocess_threads",
+            "port",
+            "public_model_id",
+        }
+    ),
+    "identity": frozenset(
+        {
+            "binary_sha256",
+            "build_profile",
+            "build_type",
+            "cuda_architecture",
+            "cuda_compiler",
+            "cuda_toolkit",
+            "cxx_compiler",
+            "deployment_profile",
+            "model_artifact_sha256",
+            "model_id",
+            "patch_stack_sha",
+            "source_dirty",
+            "target",
+            "upstream_base_sha",
+            "weights_id",
+        }
+    ),
+    "artifact": frozenset(
+        {"resource_count", "size_bytes", "target", "weights_id"}
+    ),
+    "engine": frozenset(
+        {
+            "context_cache",
+            "context_cost",
+            "cuda_graph",
+            "device",
+            "kv_cache",
+            "kv_capacity",
+            "kv_capacity_max_page_groups",
+            "kv_capacity_mode",
+            "kv_capacity_page_groups",
+            "log_stats_interval_ms",
+            "max_concurrency",
+            "max_context",
+            "max_pending_requests",
+            "pending_timeout_ms",
+            "prefill_chunk",
+            "prefix_reuse",
+            "vision",
+        }
+    ),
+    "sampling_defaults": frozenset(
+        {"greedy", "non_thinking", "omitted_seed", "server_overrides", "thinking"}
+    ),
+}
+SAFE_CONFIGURATION_EXCLUDED = {
+    "server": frozenset({"api_key_configured", "request_log_jsonl"}),
+    "identity": frozenset({"config_sha256"}),
+    "artifact": frozenset(
+        {
+            "bytes_read",
+            "host_to_device_bytes",
+            "load_seconds",
+            "path",
+            "peak_staging_bytes",
+            "tensor_count",
+            "upload_seconds",
+        }
+    ),
+    "engine": frozenset(
+        {"proposal_head", "speculative_backend", "speculative_draft_window"}
+    ),
+    "sampling_defaults": frozenset(),
+}
+SAFE_CONFIGURATION_REQUIRED = {
+    "server": frozenset(
+        {
+            "api_key_configured",
+            "cors_enabled",
+            "default_output_tokens",
+            "default_preserve_thinking",
+            "default_thinking",
+            "host",
+            "max_request_bytes",
+            "port",
+            "public_model_id",
+            "request_log_jsonl",
+        }
+    ),
+    "identity": frozenset(
+        {
+            "binary_sha256",
+            "build_profile",
+            "build_type",
+            "config_sha256",
+            "cuda_compiler",
+            "cuda_toolkit",
+            "cxx_compiler",
+            "deployment_profile",
+            "model_artifact_sha256",
+            "model_id",
+            "patch_stack_sha",
+            "source_dirty",
+            "target",
+            "upstream_base_sha",
+            "weights_id",
+        }
+    ),
+    "artifact": frozenset(
+        {
+            "bytes_read",
+            "host_to_device_bytes",
+            "load_seconds",
+            "peak_staging_bytes",
+            "resource_count",
+            "size_bytes",
+            "target",
+            "tensor_count",
+            "upload_seconds",
+            "weights_id",
+        }
+    ),
+    "engine": frozenset(
+        {
+            "cuda_graph",
+            "device",
+            "kv_cache",
+            "kv_capacity",
+            "kv_capacity_max_page_groups",
+            "kv_capacity_mode",
+            "kv_capacity_page_groups",
+            "log_stats_interval_ms",
+            "max_concurrency",
+            "max_context",
+            "max_pending_requests",
+            "pending_timeout_ms",
+            "prefill_chunk",
+            "prefix_reuse",
+            "proposal_head",
+            "speculative_backend",
+            "speculative_draft_window",
+            "vision",
+        }
+    ),
+    "sampling_defaults": SAFE_CONFIGURATION_INCLUDED["sampling_defaults"],
+}
+SAFE_CONFIGURATION_NULLABLE = frozenset({("server", "default_thinking_budget")})
+
+
+def safe_configuration_section(start: Mapping[str, Any], section: str) -> dict[str, Any]:
+    raw = start.get(section)
+    if not isinstance(raw, dict):
+        raise AblationError(f"server_start omitted {section}")
+    known = SAFE_CONFIGURATION_INCLUDED[section] | SAFE_CONFIGURATION_EXCLUDED[section]
+    unknown = sorted(set(raw) - known)
+    if unknown:
+        raise AblationError(f"server_start {section} has unclassified fields: {unknown}")
+    missing = sorted(SAFE_CONFIGURATION_REQUIRED[section] - set(raw))
+    if missing:
+        raise AblationError(f"server_start {section} omitted required fields: {missing}")
+    result = {
+        key: raw[key] for key in sorted(SAFE_CONFIGURATION_INCLUDED[section]) if key in raw
+    }
+    nulls = sorted(
+        key
+        for key, value in result.items()
+        if value is None and (section, key) not in SAFE_CONFIGURATION_NULLABLE
+    )
+    if nulls:
+        raise AblationError(f"server_start {section} has null configuration fields: {nulls}")
+    return result
 
 
 def safe_configuration(start: Mapping[str, Any]) -> dict[str, Any]:
-    server = object_field(start, "server")
-    engine = object_field(start, "engine")
-    identity = object_field(start, "identity")
-    artifact = object_field(start, "artifact")
     return {
-        "server": {
-            key: server.get(key)
-            for key in (
-                "public_model_id",
-                "default_output_tokens",
-                "default_thinking",
-                "default_thinking_budget",
-                "default_preserve_thinking",
-            )
-        },
-        "identity": {
-            key: identity.get(key)
-            for key in (
-                "upstream_base_sha",
-                "patch_stack_sha",
-                "source_dirty",
-                "build_profile",
-                "build_type",
-                "cxx_compiler",
-                "cuda_compiler",
-                "cuda_toolkit",
-                "deployment_profile",
-                "binary_sha256",
-                "model_artifact_sha256",
-                "target",
-                "model_id",
-                "weights_id",
-            )
-        },
-        "artifact": {
-            key: artifact.get(key)
-            for key in ("size_bytes", "target", "weights_id", "resource_count")
-        },
-        "engine": {
-            key: engine.get(key)
-            for key in (
-                "device",
-                "max_context",
-                "kv_capacity_mode",
-                "kv_capacity",
-                "max_concurrency",
-                "max_pending_requests",
-                "pending_timeout_ms",
-                "prefill_chunk",
-                "kv_cache",
-                "vision",
-                "cuda_graph",
-                "prefix_reuse",
-            )
-        },
-        "sampling_defaults": start.get("sampling_defaults"),
+        section: safe_configuration_section(start, section)
+        for section in ("server", "identity", "artifact", "engine", "sampling_defaults")
     }
 
 
@@ -896,7 +1042,14 @@ def summarize_arm(
     binary_sha = require_sha256(expected_binary_sha256, "expected binary SHA-256")
     model_sha = require_sha256(expected_model_sha256, "expected model SHA-256")
     source_commit = require_commit(expected_source_commit, "expected source commit")
+    campaign_value = state.get("campaign_id")
+    campaign_id = (
+        None
+        if campaign_value is None
+        else require_sha256(campaign_value, "campaign_id")
+    )
     configuration: dict[str, Any] | None = None
+    expected_backend = "none" if arm == 0 else "mtp"
     for instance in instance_ids:
         start = starts[instance]
         server = start.get("server")
@@ -925,7 +1078,6 @@ def summarize_arm(
                 )
         if identity.get("source_dirty") is not False:
             raise AblationError("experiment binary reports a dirty source tree")
-        expected_backend = "none" if arm == 0 else "mtp"
         if engine.get("speculative_backend") != expected_backend:
             raise AblationError("server speculative backend does not match the arm")
         if arm != 0 and engine.get("speculative_draft_window") != arm:
@@ -996,6 +1148,27 @@ def summarize_arm(
             raise AblationError(f"completion usage mismatch for {trace['step_id']}")
         if request.get("enable_thinking") is not True:
             raise AblationError(f"thinking was not enabled for {trace['step_id']}")
+        if speculative.get("backend") != expected_backend:
+            raise AblationError(f"speculative backend mismatch for {trace['step_id']}")
+        if speculative.get("draft_window") != arm:
+            raise AblationError(f"speculative draft window mismatch for {trace['step_id']}")
+        drafted = speculative.get("drafted_tokens")
+        accepted = speculative.get("accepted_tokens")
+        if (
+            not isinstance(drafted, int)
+            or isinstance(drafted, bool)
+            or drafted < 0
+            or not isinstance(accepted, int)
+            or isinstance(accepted, bool)
+            or accepted < 0
+            or accepted > drafted
+        ):
+            raise AblationError(f"invalid speculative token counts for {trace['step_id']}")
+        if arm == 0 and any(
+            speculative.get(field) != 0
+            for field in ("rounds", "drafted_tokens", "accepted_tokens", "fallback_steps")
+        ):
+            raise AblationError(f"MTP0 reported speculative work for {trace['step_id']}")
         rows.append(
             {
                 "step_id": trace["step_id"],
@@ -1038,6 +1211,7 @@ def summarize_arm(
         "lane": state.get("lane"),
         "arm": arm,
         "model": state.get("model"),
+        "campaign_id": campaign_id,
         "corpus_sha256": require_sha256(state.get("corpus_sha256"), "corpus_sha256"),
         "source_commit": source_commit,
         "binary_sha256": binary_sha,
@@ -1047,6 +1221,7 @@ def summarize_arm(
         ],
         "trace_sha256": sha256_file(trace_path),
         "server_log_sha256": sha256_file(log_path),
+        "configuration_schema_version": CONFIGURATION_SCHEMA_VERSION,
         "configuration": configuration,
         "configuration_sha256": sha256_json(configuration),
         "completed_requests": len(rows),
@@ -1078,6 +1253,8 @@ def aggregate_arm(receipt: Mapping[str, Any]) -> dict[str, Any]:
     accepted = 0
     fallback = 0
     reuse: dict[str, int] = {}
+    repetition_decode_tokens = {f"r{index}": 0 for index in range(REPETITIONS)}
+    repetition_decode_seconds = {f"r{index}": 0.0 for index in range(REPETITIONS)}
     for row in requests:
         if not isinstance(row, dict):
             raise AblationError("arm receipt contains a malformed request")
@@ -1085,17 +1262,38 @@ def aggregate_arm(receipt: Mapping[str, Any]) -> dict[str, Any]:
         completion = row.get("completion_tokens")
         timings = row.get("timings_seconds")
         speculative = row.get("speculative")
-        if not isinstance(prompt, int) or not isinstance(completion, int):
+        if (
+            not isinstance(prompt, int)
+            or isinstance(prompt, bool)
+            or prompt <= 0
+            or not isinstance(completion, int)
+            or isinstance(completion, bool)
+            or completion < 0
+        ):
             raise AblationError("arm receipt contains invalid token counts")
         if not isinstance(timings, dict) or not isinstance(speculative, dict):
             raise AblationError("arm receipt omitted timing or speculative metrics")
+        step_id = row.get("step_id")
+        parts = step_id.split("/") if isinstance(step_id, str) else []
+        if len(parts) != 3 or parts[1] not in repetition_decode_tokens:
+            raise AblationError("arm receipt contains an invalid repetition step id")
+        repetition = parts[1]
+        row_decode_tokens = max(0, completion - 1)
+        row_decode_seconds = finite_number(timings.get("decode"), "decode seconds")
+        row_total_seconds = finite_number(timings.get("total"), "total seconds")
+        row_ttft = finite_number(timings.get("ttft"), "TTFT seconds")
+        row_wall = finite_number(row.get("client_wall_seconds"), "client wall seconds")
+        if min(row_decode_seconds, row_total_seconds, row_ttft, row_wall) < 0:
+            raise AblationError("arm receipt contains a negative duration")
         prompt_tokens += prompt
         completion_tokens += completion
-        decode_tokens += max(0, completion - 1)
-        decode_seconds += finite_number(timings.get("decode"), "decode seconds")
-        total_seconds += finite_number(timings.get("total"), "total seconds")
-        ttft_values.append(finite_number(timings.get("ttft"), "TTFT seconds"))
-        wall_values.append(finite_number(row.get("client_wall_seconds"), "client wall seconds"))
+        decode_tokens += row_decode_tokens
+        decode_seconds += row_decode_seconds
+        total_seconds += row_total_seconds
+        ttft_values.append(row_ttft)
+        wall_values.append(row_wall)
+        repetition_decode_tokens[repetition] += row_decode_tokens
+        repetition_decode_seconds[repetition] += row_decode_seconds
         for label, target in (
             ("rounds", "rounds"),
             ("drafted_tokens", "drafted"),
@@ -1115,6 +1313,17 @@ def aggregate_arm(receipt: Mapping[str, Any]) -> dict[str, Any]:
                 fallback += value
         path = row.get("prefix_reuse_path")
         reuse[str(path)] = reuse.get(str(path), 0) + 1
+    by_repetition = {
+        repetition: repetition_decode_tokens[repetition] / seconds
+        if seconds > 0
+        else None
+        for repetition, seconds in repetition_decode_seconds.items()
+    }
+    finite_repetition_speeds = [
+        speed for speed in by_repetition.values() if isinstance(speed, float) and speed > 0
+    ]
+    if len(finite_repetition_speeds) != REPETITIONS:
+        raise AblationError("arm receipt has no decode throughput for a repetition")
     return {
         "request_count": len(requests),
         "prompt_tokens": prompt_tokens,
@@ -1122,6 +1331,11 @@ def aggregate_arm(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "decode_tokens": decode_tokens,
         "decode_seconds": decode_seconds,
         "decode_tokens_per_second": decode_tokens / decode_seconds if decode_seconds > 0 else None,
+        "decode_tokens_per_second_by_repetition": by_repetition,
+        "decode_throughput_spread_pct": (
+            max(finite_repetition_speeds) / min(finite_repetition_speeds) - 1.0
+        )
+        * 100.0,
         "total_seconds": total_seconds,
         "median_ttft_seconds": statistics.median(ttft_values),
         "median_client_wall_seconds": statistics.median(wall_values),
@@ -1175,7 +1389,75 @@ def repeatability_mismatches(requests: Sequence[Any], label: str) -> list[str]:
     )
 
 
-def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def validate_arm_receipt_content(
+    receipt: Mapping[str, Any],
+    *,
+    label: str,
+    current_corpus: Mapping[str, Any],
+) -> tuple[str, list[Any], dict[str, str], dict[str, Any], list[str]]:
+    if receipt.get("artifact_type") != ARM_ARTIFACT_TYPE:
+        raise AblationError(f"{label} has the wrong artifact_type")
+    if receipt.get("schema_version") != SCHEMA_VERSION:
+        raise AblationError(f"{label} has an unsupported schema_version")
+    if receipt.get("configuration_schema_version") != CONFIGURATION_SCHEMA_VERSION:
+        raise AblationError(f"{label} has an unsupported configuration schema")
+    if receipt.get("corpus_sha256") != current_corpus["sha256"]:
+        raise AblationError(f"{label} corpus_sha256 is not the current corpus")
+    campaign_id = receipt.get("campaign_id")
+    if campaign_id is not None:
+        require_sha256(campaign_id, f"{label} campaign_id")
+    status = receipt.get("status")
+    if status not in {"completed", "failed"}:
+        raise AblationError(f"{label} has an invalid status")
+    requests = receipt.get("requests")
+    completed_requests = receipt.get("completed_requests")
+    expected_requests = current_corpus["request_count"]
+    if not isinstance(requests, list):
+        raise AblationError(f"{label} omitted requests")
+    if (
+        not isinstance(completed_requests, int)
+        or isinstance(completed_requests, bool)
+        or completed_requests < 0
+        or completed_requests != len(requests)
+        or receipt.get("expected_requests") != expected_requests
+    ):
+        raise AblationError(f"{label} has inconsistent request counts")
+    if status == "completed" and completed_requests != expected_requests:
+        raise AblationError(f"completed {label} omitted corpus requests")
+    if status == "failed" and completed_requests >= expected_requests:
+        raise AblationError(f"failed {label} did not stop before corpus completion")
+    outputs = projection_map(requests, label)
+    configuration = receipt.get("configuration")
+    if not isinstance(configuration, dict):
+        raise AblationError(f"{label} omitted its safe configuration")
+    configuration_sha256 = require_sha256(
+        receipt.get("configuration_sha256"), "configuration_sha256"
+    )
+    if sha256_json(configuration) != configuration_sha256:
+        raise AblationError(f"{label} configuration_sha256 does not match its content")
+    instances = receipt.get("server_instance_sha256s")
+    if not isinstance(instances, list) or not instances:
+        raise AblationError(f"{label} omitted server instance evidence")
+    instance_sha256s = [
+        require_sha256(value, "server instance SHA-256") for value in instances
+    ]
+    if len(set(instance_sha256s)) != len(instance_sha256s):
+        raise AblationError(f"{label} repeated a server instance identity")
+    evidence = {
+        "arm_receipt_content_sha256": sha256_json(receipt),
+        "trace_sha256": require_sha256(receipt.get("trace_sha256"), "trace SHA-256"),
+        "server_log_sha256": require_sha256(
+            receipt.get("server_log_sha256"), "server log SHA-256"
+        ),
+        "server_instance_count": len(instance_sha256s),
+    }
+    return str(status), requests, outputs, evidence, instance_sha256s
+
+
+def combine_receipts(
+    receipts: Sequence[Mapping[str, Any]],
+    baseline_control: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
     if len(receipts) != len(ARMS):
         raise AblationError(f"combine requires exactly {len(ARMS)} arm receipts")
     by_arm: dict[int, Mapping[str, Any]] = {}
@@ -1190,59 +1472,18 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         raise AblationError(f"combine inputs must contain arms {ARMS}")
 
     current_corpus = corpus_manifest()
-    expected_requests = current_corpus["request_count"]
     normalized_outputs_by_arm: dict[int, dict[str, str]] = {}
     evidence_by_arm: dict[int, dict[str, Any]] = {}
+    instances_by_arm: dict[int, list[str]] = {}
+    statuses: dict[int, str] = {}
     for arm, receipt in by_arm.items():
-        if receipt.get("schema_version") != SCHEMA_VERSION:
-            raise AblationError(f"arm {arm} has an unsupported schema_version")
-        if receipt.get("corpus_sha256") != current_corpus["sha256"]:
-            raise AblationError(f"arm {arm} corpus_sha256 is not the current corpus")
-        status = receipt.get("status")
-        if status not in {"completed", "failed"}:
-            raise AblationError(f"arm {arm} has an invalid status")
-        requests = receipt.get("requests")
-        completed_requests = receipt.get("completed_requests")
-        receipt_expected = receipt.get("expected_requests")
-        if not isinstance(requests, list):
-            raise AblationError(f"arm {arm} omitted requests")
-        if (
-            not isinstance(completed_requests, int)
-            or isinstance(completed_requests, bool)
-            or completed_requests < 0
-            or completed_requests != len(requests)
-            or receipt_expected != expected_requests
-        ):
-            raise AblationError(f"arm {arm} has inconsistent request counts")
-        if status == "completed" and completed_requests != expected_requests:
-            raise AblationError(f"completed arm {arm} omitted corpus requests")
-        if status == "failed" and completed_requests >= expected_requests:
-            raise AblationError(f"failed arm {arm} did not stop before corpus completion")
-        normalized_outputs_by_arm[arm] = projection_map(requests, f"arm {arm}")
-        configuration = receipt.get("configuration")
-        if not isinstance(configuration, dict):
-            raise AblationError(f"arm {arm} omitted its safe configuration")
-        configuration_sha256 = require_sha256(
-            receipt.get("configuration_sha256"), "configuration_sha256"
+        status, _, outputs, evidence, instances = validate_arm_receipt_content(
+            receipt, label=f"arm {arm}", current_corpus=current_corpus
         )
-        if sha256_json(configuration) != configuration_sha256:
-            raise AblationError(f"arm {arm} configuration_sha256 does not match its content")
-        instances = receipt.get("server_instance_sha256s")
-        if not isinstance(instances, list) or not instances:
-            raise AblationError(f"arm {arm} omitted server instance evidence")
-        instance_sha256s = [
-            require_sha256(value, "server instance SHA-256") for value in instances
-        ]
-        if len(set(instance_sha256s)) != len(instance_sha256s):
-            raise AblationError(f"arm {arm} repeated a server instance identity")
-        evidence_by_arm[arm] = {
-            "arm_receipt_content_sha256": sha256_json(receipt),
-            "trace_sha256": require_sha256(receipt.get("trace_sha256"), "trace SHA-256"),
-            "server_log_sha256": require_sha256(
-                receipt.get("server_log_sha256"), "server log SHA-256"
-            ),
-            "server_instance_sha256s": instance_sha256s,
-        }
+        statuses[arm] = status
+        normalized_outputs_by_arm[arm] = outputs
+        evidence_by_arm[arm] = evidence
+        instances_by_arm[arm] = instances
 
     baseline = by_arm[0]
     invariant_fields = (
@@ -1252,6 +1493,8 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "source_commit",
         "binary_sha256",
         "model_artifact_sha256",
+        "campaign_id",
+        "configuration_schema_version",
         "configuration_sha256",
     )
     for arm, receipt in by_arm.items():
@@ -1259,7 +1502,43 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             if receipt.get(field) != baseline.get(field):
                 raise AblationError(f"arm {arm} changed invariant field {field}")
 
-    statuses = {arm: str(receipt["status"]) for arm, receipt in by_arm.items()}
+    campaign_bound = isinstance(baseline.get("campaign_id"), str)
+    baseline_control_outputs: dict[str, str] | None = None
+    baseline_control_evidence: dict[str, Any] | None = None
+    baseline_control_repeat_mismatches: list[str] | None = None
+    baseline_control_mismatches: list[str] | None = None
+    if baseline_control is not None:
+        if baseline_control.get("arm") != 0:
+            raise AblationError("fresh-process baseline control must be an MTP0 receipt")
+        (
+            control_status,
+            control_requests,
+            baseline_control_outputs,
+            baseline_control_evidence,
+            control_instances,
+        ) = validate_arm_receipt_content(
+            baseline_control, label="fresh-process MTP0 control", current_corpus=current_corpus
+        )
+        if control_status != "completed":
+            raise AblationError("fresh-process MTP0 control must complete")
+        for field in invariant_fields:
+            if baseline_control.get(field) != baseline.get(field):
+                raise AblationError(
+                    f"fresh-process MTP0 control changed invariant field {field}"
+                )
+        if set(control_instances) & set(instances_by_arm[0]):
+            raise AblationError(
+                "fresh-process MTP0 control reused a baseline server instance"
+            )
+        baseline_control_repeat_mismatches = repeatability_mismatches(
+            control_requests, "fresh-process MTP0 control"
+        )
+        baseline_control_mismatches = sorted(
+            key
+            for key in set(normalized_outputs_by_arm[0]) | set(baseline_control_outputs)
+            if normalized_outputs_by_arm[0].get(key) != baseline_control_outputs.get(key)
+        )
+
     if statuses[0] != "completed":
         raise AblationError("the non-speculative MTP0 baseline must complete")
     if statuses[3] != "completed":
@@ -1324,7 +1603,23 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     incumbent_speed = float(speeds[3])
     completed_arms = tuple(arm for arm in ARMS if statuses[arm] == "completed")
     fastest_observed = max(completed_arms, key=lambda arm: float(speeds[arm]))
-    baseline_repeatable = not repeat_mismatches_by_arm[0]
+    baseline_within_instance_repeatable = not repeat_mismatches_by_arm[0]
+    baseline_control_available = baseline_control is not None
+    baseline_cross_instance_repeatable = (
+        None
+        if not baseline_control_available
+        else not baseline_control_repeat_mismatches and not baseline_control_mismatches
+    )
+    validity_failures: list[str] = []
+    if not campaign_bound:
+        validity_failures.append("arm receipts lack one shared non-null campaign identity")
+    if not baseline_within_instance_repeatable:
+        validity_failures.append("MTP0 changed output between same-process repetitions")
+    if not baseline_control_available:
+        validity_failures.append("a fresh-process MTP0 control receipt is missing")
+    elif not baseline_cross_instance_repeatable:
+        validity_failures.append("MTP0 changed output across fresh server instances")
+    baseline_repeatable = not validity_failures
     eligible = tuple(
         arm
         for arm in completed_arms
@@ -1334,6 +1629,18 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     )
     fastest_eligible = max(eligible, key=lambda arm: float(speeds[arm])) if eligible else None
     incumbent_eligible = 3 in eligible
+
+    def clears_promotion_margin(arm: int) -> bool:
+        candidate = summaries[arm]["decode_tokens_per_second_by_repetition"]
+        incumbent = summaries[3]["decode_tokens_per_second_by_repetition"]
+        if not isinstance(candidate, dict) or not isinstance(incumbent, dict):
+            raise AblationError("arm receipt omitted per-repetition decode throughput")
+        return all(
+            float(candidate[f"r{index}"])
+            >= float(incumbent[f"r{index}"]) * (1.0 + PROMOTION_MARGIN)
+            for index in range(REPETITIONS)
+        )
+
     if not baseline_repeatable:
         selected = None
     elif not incumbent_eligible:
@@ -1341,10 +1648,11 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         selected = fastest_eligible
     else:
         assert fastest_eligible is not None
+        promotable = tuple(
+            arm for arm in eligible if arm != 3 and clears_promotion_margin(arm)
+        )
         selected = (
-            fastest_eligible
-            if float(speeds[fastest_eligible]) >= incumbent_speed * (1.0 + PROMOTION_MARGIN)
-            else 3
+            max(promotable, key=lambda arm: float(speeds[arm])) if promotable else 3
         )
     for arm in ARMS:
         summaries[arm]["quality_eligible"] = (
@@ -1352,8 +1660,10 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         )
         if statuses[arm] == "completed":
             summaries[arm]["decode_change_vs_mtp3_pct"] = (
-                float(speeds[arm]) / incumbent_speed - 1.0
-            ) * 100.0
+                (float(speeds[arm]) / incumbent_speed - 1.0) * 100.0
+                if baseline_repeatable
+                else None
+            )
             summaries[arm]["normalized_output_mismatch_count"] = len(
                 mismatches_by_arm[arm]
             )
@@ -1381,13 +1691,13 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             else "retain MTP3"
         ),
         "reason": (
-            "MTP0 changed normalized output between identical repetitions; cross-arm output differences are not attributable to draft depth"
+            "; ".join(validity_failures)
             if not baseline_repeatable
             else f"MTP3 changed normalized output versus MTP0; MTP{selected} is the fastest output-identical completed arm"
             if not incumbent_eligible
-            else f"eligible MTP{fastest_eligible} exceeded MTP3 aggregate decode throughput by at least 5%"
+            else f"eligible MTP{selected} exceeded MTP3 decode throughput by at least 5% in each repetition"
             if selected != 3
-            else "no output-identical alternative exceeded MTP3 aggregate decode throughput by 5%"
+            else "no output-identical alternative exceeded MTP3 decode throughput by 5% in every repetition"
         ),
     }
     return {
@@ -1397,16 +1707,30 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "scope": "within-lane experiment; not release qualification and not cross-lane comparable",
         "lane": baseline.get("lane"),
         "model": baseline.get("model"),
+        "campaign_id": baseline.get("campaign_id"),
         "model_artifact_sha256": baseline.get("model_artifact_sha256"),
         "source_commit": baseline.get("source_commit"),
         "binary_sha256": baseline.get("binary_sha256"),
+        "configuration_schema_version": baseline.get("configuration_schema_version"),
         "configuration_sha256": baseline.get("configuration_sha256"),
         "corpus": current_corpus,
+        "trust_boundary": (
+            "owner measurement host and local arm receipts are trusted; hashes are "
+            "provenance identifiers, not remote attestation"
+        ),
         "analysis": {
             "version": ANALYSIS_VERSION,
             "quality_reference_arm": 0,
             "requires_within_arm_repeatability": True,
             "cross_arm_attribution_requires_repeatable_baseline": True,
+            "requires_shared_campaign_identity": True,
+            "requires_fresh_process_baseline_control": True,
+            "promotion_requires_margin_in_each_repetition": True,
+            "fresh_process_baseline_control": {
+                "available": baseline_control_available,
+                "evidence": baseline_control_evidence,
+                "normalized_output_sha256": baseline_control_outputs,
+            },
         },
         "quality": {
             "normalized_outputs_identical": baseline_repeatable
@@ -1419,6 +1743,13 @@ def combine_receipts(receipts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             "reference_arm": 0,
             "compared_steps": len(baseline_outputs),
             "baseline_repeatable": baseline_repeatable,
+            "baseline_within_instance_repeatable": baseline_within_instance_repeatable,
+            "baseline_cross_instance_repeatable": baseline_cross_instance_repeatable,
+            "baseline_control_repeatability_mismatches": (
+                baseline_control_repeat_mismatches
+            ),
+            "baseline_control_mismatches": baseline_control_mismatches,
+            "validity_failures": validity_failures,
             "repeatability_compared_steps": len(baseline_outputs) // REPETITIONS,
             "repeatability_mismatches_by_arm": {
                 str(arm): {
@@ -1464,6 +1795,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--model", required=True)
     run.add_argument("--lane", required=True)
     run.add_argument("--arm", required=True, type=int, choices=ARMS)
+    run.add_argument("--campaign-id", required=True)
     run.add_argument("--output", required=True)
     run.add_argument("--timeout", type=float, default=900.0)
     run.add_argument("--resume", action="store_true")
@@ -1481,6 +1813,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     combine = subparsers.add_parser("combine", help="validate and decide one four-arm lane")
     combine.add_argument("--arm-receipt", type=Path, action="append", required=True)
+    combine.add_argument("--baseline-control-receipt", type=Path)
     combine.add_argument("--output", required=True)
     return parser
 
@@ -1498,6 +1831,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "status": "complete",
                         "lane": state["lane"],
                         "arm": state["arm"],
+                        "campaign_id": state["campaign_id"],
                         "requests": len(flatten_steps(state)),
                         "corpus_sha256": state["corpus_sha256"],
                     }
@@ -1517,7 +1851,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             write_or_print(receipt, args.output)
         elif args.command == "combine":
             receipts = [read_json_object(path) for path in args.arm_receipt]
-            write_or_print(combine_receipts(receipts), args.output)
+            baseline_control = (
+                read_json_object(args.baseline_control_receipt)
+                if args.baseline_control_receipt is not None
+                else None
+            )
+            write_or_print(combine_receipts(receipts, baseline_control), args.output)
         else:
             raise AssertionError(args.command)
     except (AblationError, OSError) as exc:
