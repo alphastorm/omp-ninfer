@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A deterministic, public-text agent corpus and stdlib-only MTP ablation runner now measure
+  MTP0/3/5/7 against one frozen binary and model per RTX 5090, RTX 4090, and RTX 3090 lane.
+  Public receipts retain only structural metrics and normalized hashes of client-visible answer,
+  reasoning, reasoning-summary, and tool-call content. The runner requires exact within-arm
+  repetition before cross-arm attribution: RTX 5090 and RTX 4090 are inconclusive because MTP0
+  changed on 1/12 and 10/12 repeated steps; repeatable RTX 3090 leaves MTP0 as its only eligible
+  arm because MTP3/5/7 differ on 6/8/4 of 24 outputs. No release profile changed.
+
 ## [0.4.7] - 2026-09-01
 
 ### Fixed

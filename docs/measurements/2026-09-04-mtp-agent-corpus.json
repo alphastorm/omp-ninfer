@@ -1,0 +1,429 @@
+{
+  "artifact_type": "omp_ninfer_mtp_agent_corpus",
+  "schema_version": 1,
+  "generated_utc": "2026-09-04",
+  "scope": "Content-free structural aggregation of available request_done records from the three standing Qwen3.8 release lanes; no prompt, response, tool argument, session identifier, host path, or secret was read into this artifact.",
+  "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "source_shapes": {
+    "rtx5090": {
+      "request_done": 291,
+      "source_schema_versions": {
+        "16": 57,
+        "17": 234
+      },
+      "integer_quantiles": {
+        "completion_tokens": {
+          "max": 16384,
+          "min": 2,
+          "p50": 80,
+          "p90": 863
+        },
+        "draft_window": {
+          "max": 3,
+          "min": 3,
+          "p50": 3,
+          "p90": 3
+        },
+        "message_count": {
+          "max": 61,
+          "min": 1,
+          "p50": 3,
+          "p90": 27
+        },
+        "model_thinking_tokens": {
+          "max": 0,
+          "min": 0,
+          "p50": 0,
+          "p90": 0
+        },
+        "prefix_cache_hit_tokens": {
+          "max": 97461,
+          "min": 0,
+          "p50": 54,
+          "p90": 67726
+        },
+        "prompt_tokens": {
+          "max": 98076,
+          "min": 55,
+          "p50": 24764,
+          "p90": 69509
+        },
+        "requested_output_tokens": {
+          "max": 32768,
+          "min": 2,
+          "p50": 80,
+          "p90": 32768
+        },
+        "tool_call_count": {
+          "max": 6,
+          "min": 0,
+          "p50": 0,
+          "p90": 1
+        },
+        "tool_count": {
+          "max": 32,
+          "min": 0,
+          "p50": 0,
+          "p90": 14
+        }
+      },
+      "categories": {
+        "enable_thinking": {
+          "true": 291
+        },
+        "finish_reason": {
+          "\"output_limit\"": 166,
+          "\"stop_token\"": 125
+        },
+        "has_tool_history": {
+          "false": 213,
+          "true": 78
+        },
+        "prefix_reuse_path": {
+          "\"private_endpoint\"": 35,
+          "\"private_long_anchor\"": 38,
+          "\"private_response_replay\"": 75,
+          "\"root\"": 132,
+          "\"shared_stable_prefix\"": 11
+        },
+        "preserve_thinking": {
+          "true": 291
+        },
+        "protocol": {
+          "\"anthropic_messages\"": 8,
+          "\"openai_chat_completions\"": 90,
+          "\"openai_responses\"": 193
+        },
+        "speculative_backend": {
+          "\"mtp\"": 291
+        }
+      }
+    },
+    "rtx4090": {
+      "request_done": 32,
+      "source_schema_versions": {
+        "9": 32
+      },
+      "integer_quantiles": {
+        "completion_tokens": {
+          "max": 102,
+          "min": 16,
+          "p50": 16,
+          "p90": 89
+        },
+        "draft_window": {
+          "max": 3,
+          "min": 3,
+          "p50": 3,
+          "p90": 3
+        },
+        "message_count": {
+          "max": 5,
+          "min": 1,
+          "p50": 2,
+          "p90": 5
+        },
+        "prefix_cache_hit_tokens": {
+          "max": 102075,
+          "min": 0,
+          "p50": 0,
+          "p90": 868
+        },
+        "prompt_tokens": {
+          "max": 102097,
+          "min": 58,
+          "p50": 163,
+          "p90": 102060
+        },
+        "requested_output_tokens": {
+          "max": 32768,
+          "min": 16,
+          "p50": 16,
+          "p90": 512
+        },
+        "tool_call_count": {
+          "max": 1,
+          "min": 0,
+          "p50": 0,
+          "p90": 1
+        },
+        "tool_count": {
+          "max": 12,
+          "min": 0,
+          "p50": 0,
+          "p90": 1
+        }
+      },
+      "categories": {
+        "enable_thinking": {
+          "true": 32
+        },
+        "finish_reason": {
+          "\"output_limit\"": 22,
+          "\"stop_token\"": 10
+        },
+        "has_tool_history": {
+          "false": 27,
+          "true": 5
+        },
+        "prefix_reuse_path": {
+          "\"append_frontier\"": 7,
+          "\"full_reset\"": 23,
+          "\"restore_turn_checkpoint\"": 2
+        },
+        "preserve_thinking": {
+          "true": 32
+        },
+        "protocol": {
+          "\"openai_chat_completions\"": 16,
+          "\"openai_responses\"": 16
+        },
+        "speculative_backend": {
+          "\"mtp\"": 32
+        }
+      }
+    },
+    "rtx3090": {
+      "request_done": 157,
+      "source_schema_versions": {
+        "8": 157
+      },
+      "integer_quantiles": {
+        "completion_tokens": {
+          "max": 1024,
+          "min": 2,
+          "p50": 16,
+          "p90": 74
+        },
+        "draft_window": {
+          "max": 3,
+          "min": 3,
+          "p50": 3,
+          "p90": 3
+        },
+        "message_count": {
+          "max": 5,
+          "min": 1,
+          "p50": 2,
+          "p90": 5
+        },
+        "prefix_cache_hit_tokens": {
+          "max": 1490,
+          "min": 0,
+          "p50": 0,
+          "p90": 73
+        },
+        "prompt_tokens": {
+          "max": 64512,
+          "min": 19,
+          "p50": 96,
+          "p90": 4541
+        },
+        "requested_output_tokens": {
+          "max": 16384,
+          "min": 4,
+          "p50": 32,
+          "p90": 512
+        },
+        "tool_call_count": {
+          "max": 1,
+          "min": 0,
+          "p50": 0,
+          "p90": 0
+        },
+        "tool_count": {
+          "max": 14,
+          "min": 0,
+          "p50": 0,
+          "p90": 1
+        }
+      },
+      "categories": {
+        "enable_thinking": {
+          "false": 38,
+          "true": 119
+        },
+        "finish_reason": {
+          "\"output_limit\"": 93,
+          "\"stop_token\"": 64
+        },
+        "has_tool_history": {
+          "false": 142,
+          "true": 15
+        },
+        "prefix_reuse_path": {
+          "\"append_frontier\"": 23,
+          "\"full_reset\"": 116,
+          "\"restore_turn_checkpoint\"": 18
+        },
+        "preserve_thinking": {
+          "true": 157
+        },
+        "protocol": {
+          "\"openai_chat_completions\"": 77,
+          "\"openai_responses\"": 80
+        },
+        "speculative_backend": {
+          "\"mtp\"": 157
+        }
+      }
+    }
+  },
+  "corpus": {
+    "decision_rule": {
+      "incumbent": 3,
+      "primary_metric": "aggregate server-reported decode tokens per second",
+      "promotion_margin": 0.05,
+      "quality": "all normalized user-visible outputs must be byte-identical across arms",
+      "rule": "retain MTP3 unless another arm is at least 5% faster; an ineligible arm cannot win"
+    },
+    "generator": "omp-ninfer/scripts/run_mtp_ablation.py",
+    "input_sha256": {
+      "history_p50": "a72b344243dfa6d8a003729ebb9f2da92fdfd408a2220bf23c0fab2f7b32c772",
+      "history_p90": "ab5c8a1df23e3f51d2451a976513cacc4aa8e938ffa4c48ed4288ed69580f29b",
+      "long_decode_prompt": "8000c0b0ea598dfb4ef61ab3603e9ef4dc7350083d5b99821e67b78edad480a9",
+      "long_prefix": "96419e8b8d7563cd1b7aac2d261ebc16920178e958b3a2667953965eb105b443",
+      "medium_prefix": "d4fa63799e9e375925babce6135a69c2c420c276971d3bf5f50ec028b1d991e7",
+      "short_prompt": "b9783c3f5c0cf93148c8a647b85b3abac99fdf8ddc7ee43b5f0c2a98983c1703",
+      "tool_prompt": "2309a7f28ea304d08c9cf73a8a78d8d86077eb6322fc4faa741d1bd008dcd71d",
+      "tool_result": "b6cc62016e4c0ec545067bbd034405f2a517009dbf160777252d1787f8b499b2"
+    },
+    "output_projection": {
+      "excluded": [
+        "generated_object_ids"
+      ],
+      "included": [
+        "answer_text",
+        "reasoning_text",
+        "reasoning_summary",
+        "tool_name",
+        "parsed_tool_arguments",
+        "finish_status"
+      ],
+      "version": 2
+    },
+    "privacy": "fully synthetic public inputs; receipts retain hashes and structural metrics only",
+    "repetitions": 2,
+    "request_count": 24,
+    "sampling": {
+      "greedy": true,
+      "temperature": 0
+    },
+    "scenarios": [
+      {
+        "max_output_tokens": [
+          32
+        ],
+        "name": "responses_short",
+        "protocols": [
+          "openai_responses"
+        ],
+        "steps": 1,
+        "stratum": "short single turn"
+      },
+      {
+        "max_output_tokens": [
+          512
+        ],
+        "name": "responses_long_decode",
+        "protocols": [
+          "openai_responses"
+        ],
+        "steps": 1,
+        "stratum": "long decode"
+      },
+      {
+        "max_output_tokens": [
+          80
+        ],
+        "message_count": 4,
+        "name": "chat_history_p50",
+        "protocols": [
+          "openai_chat_completions"
+        ],
+        "steps": 1,
+        "stratum": "median message history"
+      },
+      {
+        "max_output_tokens": [
+          80
+        ],
+        "message_count": 24,
+        "name": "chat_history_p90",
+        "protocols": [
+          "openai_chat_completions"
+        ],
+        "steps": 1,
+        "stratum": "deep message history"
+      },
+      {
+        "max_output_tokens": [
+          96,
+          80
+        ],
+        "name": "chat_tool_roundtrip",
+        "preserve_assistant_reasoning": true,
+        "protocols": [
+          "openai_chat_completions",
+          "openai_chat_completions"
+        ],
+        "steps": 2,
+        "stratum": "forced tool call and tool history",
+        "tool_count": 1
+      },
+      {
+        "max_output_tokens": [
+          16,
+          80,
+          80
+        ],
+        "name": "responses_medium_branch",
+        "prefix_chars": 16384,
+        "protocols": [
+          "openai_responses",
+          "openai_responses",
+          "openai_responses"
+        ],
+        "steps": 3,
+        "stratum": "medium stored response continuation and sibling branch"
+      },
+      {
+        "max_output_tokens": [
+          16,
+          80,
+          80
+        ],
+        "name": "responses_long_replay",
+        "prefix_chars": 98304,
+        "protocols": [
+          "openai_responses",
+          "openai_responses",
+          "openai_responses"
+        ],
+        "steps": 3,
+        "stratum": "long stored response replay and sibling branch"
+      }
+    ],
+    "sha256": "9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623",
+    "thinking": {
+      "enable_thinking": true,
+      "preserve_thinking_server_default": true
+    },
+    "version": 3
+  },
+  "analysis": {
+    "version": 2,
+    "quality_reference_arm": 0,
+    "requires_within_arm_repeatability": true,
+    "cross_arm_attribution_requires_repeatable_baseline": true
+  },
+  "rationale": [
+    "OpenAI Responses and Chat Completions are both represented because every standing lane logged both protocols.",
+    "The corpus spans 4- and 24-message histories, one forced tool round trip, 16,384- and 98,304-character stable prefixes, and 32/80/512-token output budgets.",
+    "Stored-response continuations and sibling branches exercise the reuse paths targeted by OMP turns and sub-agents.",
+    "Every input is generated public text; output receipts retain only normalized SHA-256 values and structural timing/token metrics.",
+    "Output normalization includes client-visible answer, reasoning, reasoning-summary, and tool-call content while excluding generated object IDs.",
+    "The forced tool round trip preserves the assistant reasoning_content in second-turn history.",
+    "The decision is within-lane only: MTP0 and any selected arm must repeat exactly; an unstable MTP0 makes the lane inconclusive. Otherwise retain eligible MTP3 unless another eligible arm improves aggregate decode throughput by at least 5%, or select the fastest eligible fallback when MTP3 changes output."
+  ]
+}

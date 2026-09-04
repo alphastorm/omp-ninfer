@@ -261,12 +261,12 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
-`v0.3` made the appliance public: three qualified GPU lanes in one ready manifest, durable
-checkpoint restart on both native Windows lanes, and public install authority with no access gate.
-Next, in order: an MTP3 qualification campaign for the RTX 4090 lane, the MTP depth-and-corpus
-ablation, and the durable RTX 5090 container — then signing/notarization, a shared public client
-acceptance runner, and multi-owner clean-install evidence on the path to v1.0. No item becomes a support
-claim before an exact package, receipt, and product manifest bind it.
+`v0.4.7` exposes three qualified GPU lanes with durable restart and same-lane agent fanout.
+Next, in order: close MTP0 repeatability on RTX 5090 and RTX 4090 and rerun the frozen agent-shaped
+MTP corpus; decide whether a separately qualified `nvfp4` artifact is worth replacing the pinned
+model; then begin the v0.5 checkpoint-replication work. Signing/notarization, a shared public client
+acceptance runner, and multi-owner clean-install evidence remain on the path to v1.0. No item becomes
+a support claim before an exact package, receipt, and product manifest bind it.
 
 Scope boundaries and explicit non-claims: [`ROADMAP.md`](ROADMAP.md).
 

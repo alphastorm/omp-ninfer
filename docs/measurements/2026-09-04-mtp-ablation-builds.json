@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_mtp_ablation_builds",
+  "schema_version": 1,
+  "generated_utc": "2026-09-04",
+  "scope": "Experiment build freeze only; not release qualification.",
+  "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "corpus_sha256": "9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623",
+  "invariant": "Within each lane, MTP0/3/5/7 use one byte-identical clean-source server binary; only speculative backend/window arguments change.",
+  "arms": {
+    "0": {
+      "speculative_backend": "none",
+      "draft_tokens": 0
+    },
+    "3": {
+      "speculative_backend": "mtp",
+      "draft_tokens": 3,
+      "proposal_head": "optimized"
+    },
+    "5": {
+      "speculative_backend": "mtp",
+      "draft_tokens": 5,
+      "proposal_head": "optimized"
+    },
+    "7": {
+      "speculative_backend": "mtp",
+      "draft_tokens": 7,
+      "proposal_head": "optimized"
+    }
+  },
+  "lanes": {
+    "rtx5090": {
+      "source_commit": "ce51ccb689521cadcff541f4bd4cdea9998b7cd5",
+      "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "source_bundle_sha256": "4e49f957546ce4bc574a16d84eeb27007c4972bcc21afc21e5fad807c2d2007e",
+      "binary_sha256": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea",
+      "build_profile": "mtp-depth-ablation-5090",
+      "cuda_architecture": "120a",
+      "source_dirty": false,
+      "offline_checks": [
+        "K15 parser contract passed",
+        "MTP-round GPU test binary compiled",
+        "causal-cache attention GPU test binary compiled"
+      ],
+      "arm_binary_sha256": {
+        "0": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea",
+        "3": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea",
+        "5": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea",
+        "7": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea"
+      }
+    },
+    "rtx4090": {
+      "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7",
+      "upstream_base_sha": "9ec1b82c7afa021314682d7a95390f8935ead7c2",
+      "binary_sha256": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+      "build_profile": "qwen38-4090-v0.2",
+      "cuda_architecture": "89",
+      "source_dirty": false,
+      "offline_checks": [
+        "shipped binary help exposes K1..15",
+        "standing binary identity is clean"
+      ],
+      "arm_binary_sha256": {
+        "0": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+        "3": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+        "5": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+        "7": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2"
+      }
+    },
+    "rtx3090": {
+      "source_commit": "3e37b03eac5633fe434afd84c45c54c2078f1556",
+      "upstream_base_sha": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
+      "source_bundle_sha256": "1a21033fe846c14a1b2bb14b5f12e859092689518187f6bbd51323975d8ed812",
+      "binary_sha256": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
+      "build_profile": "mtp-depth-ablation-3090",
+      "cuda_architecture": "86",
+      "source_dirty": false,
+      "offline_checks": [
+        "K15 parser contract passed",
+        "MTP-round GPU test binary compiled",
+        "GQA attention GPU test binary compiled",
+        "staged binary re-hashed byte-identically on the RTX3090 host"
+      ],
+      "arm_binary_sha256": {
+        "0": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
+        "3": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
+        "5": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
+        "7": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53"
+      }
+    }
+  }
+}

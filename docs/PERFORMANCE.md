@@ -1,7 +1,7 @@
 # Performance program
 
 The shipped profile is the floor, not the ceiling. This page is the public working surface for
-kernel and schedule optimization on the qualified RTX 5090 runtime: the measured baseline, the
+kernel and schedule optimization on the three qualified RTX runtime lanes: measured baselines, the
 profiling lane, an auditable ledger of what has been tried, and the open ideas backlog.
 
 Ground rules:
@@ -85,7 +85,7 @@ branch. Current findings from the scripted captures:
 
 The auditable history: what was tried, the exact method, the measured result, and the verdict.
 Entries are append-only; verdicts are `kept`, `rejected`, `inconclusive`, or `open`. Evidence paths
-refer to the runtime repositories. As of 2026-08.
+refer to the runtime repositories. As of 2026-09.
 
 | ID | Area | Hypothesis | Result | Verdict |
 | --- | --- | --- | --- | --- |
@@ -93,6 +93,9 @@ refer to the runtime repositories. As of 2026-08.
 | EXP-002 | Q5 linear+add post-mixer | A CTA-collective `mma-r64-c16` kernel beats SIMT split-2 | Candidate 190.46 µs vs production 51.20 µs — 3.72× slower | rejected |
 | EXP-003 | GDN state under speculation | Caching gate activations (ReplaySSM) removes recurrent-state drift on MTP rollback | Bit-identical recurrent fold at 167.82 µs/layer; no drift across long contexts | kept |
 | EXP-004 | Tensor-core prefill | W4A4 MMA prefill (NVFP4 artifacts) multiplies prefill throughput | 11,191 vs 3,218 tok/s at a 7,680-token prompt — 3.48× (upstream campaign, NVFP4 profile) | kept upstream |
+| EXP-005 | RTX 5090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | MTP3 fastest observed at 172.94 decode tok/s; MTP0 changed on 1/12 repeated steps, so no draft-depth decision | inconclusive |
+| EXP-006 | RTX 4090 agent-shaped MTP depth | A speculative arm beats output-identical MTP0 | MTP3 fastest observed at 110.95 tok/s; all arms completed, but MTP0 changed on 10/12 repeated steps | inconclusive |
+| EXP-007 | RTX 3090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | All arms repeated exactly; MTP3/5/7 differed from MTP0 on 6/8/4 of 24 outputs, leaving only MTP0 eligible | rejected |
 
 Entry detail:
 
@@ -114,14 +117,27 @@ Entry detail:
   ~3.5× with tensor-core-native weights. The shipped artifact is `groupwise-int`; an NVFP4-profile
   product lane would need its own qualification pass (quality table in
   [`BENCHMARKS.md`](BENCHMARKS.md)).
+- **EXP-005–007 — frozen agent-shaped MTP depth campaign.** Each lane ran MTP0/3/5/7 with one
+  unchanged binary, model, corpus, seed, and greedy request configuration. The v3 output projection
+  hashes client-visible answer, reasoning, reasoning-summary, and tool-call content; analysis
+  revision 2 also requires exact repetition within each arm before comparison with non-speculative
+  MTP0.
+  RTX 5090 and RTX 4090 are inconclusive because MTP0 itself changed on 1/12 and 10/12 repeated
+  steps respectively, so their cross-arm differences cannot be attributed to draft depth. RTX 3090
+  is repeatable, but MTP3/5/7 changed 6/8/4 of 24 outputs versus MTP0; MTP0 is its only eligible arm.
+  No public profile changed. Receipts: [5090](measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
+  [4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
+  [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). The generated public corpus and
+  frozen build identities are [recorded separately](measurements/2026-09-04-mtp-agent-corpus.json)
+  ([builds](measurements/2026-09-04-mtp-ablation-builds.json)).
 
 ## Current order
 
-The backlog below is a pool; the program's order is fixed and lives in
-[`ROADMAP.md`](../ROADMAP.md#after-v030): the RTX 4090 MTP3 qualification campaign (shipped in v0.3.1), then
-the MTP depth-and-corpus ablation that decides draft depth for every lane, then the durable RTX
-5090 container promotion, with the `nvfp4` artifact swap as a v0.4-class requalification decision
-gated on the ablation data.
+The backlog below is a pool; the program's order is fixed in [`ROADMAP.md`](../ROADMAP.md). The
+MTP campaign is measured, but RTX 5090 and RTX 4090 cannot support a depth decision until their
+MTP0 repetition drift is fixed and the same frozen v3 corpus is rerun. RTX 3090's current candidate
+recommendation is MTP0. Only after that exact-output boundary closes does the `nvfp4` artifact
+swap become the next v0.4-class requalification decision.
 
 ## Ideas backlog
 
@@ -137,9 +153,9 @@ hypothesis and method before writing code.
 | Checkpoint replication to shared storage | Native IO paths require local filesystems; replicate immutable SHA-manifested generations (copy out, copy back before restore); same-profile-pair portability only | open |
 | Template-fork warm starts | Checkpoint immediately after system-prompt+context prefill and fork subagents from that generation for hot starts; operational pattern over the qualified fork contract | open |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
-| Durable session checkpoints → process-restart continuation | Both native Windows lanes bind passing restart gates: 102K restored continuation on RTX 4090 and 310 MB checkpoint restoration on RTX 3090; the RTX 5090 container keeps transcript-replay recovery, and its durable candidate branch is the next step | released on both native lanes; container lane open |
-| MTP depth-and-corpus ablation for Qwen3.8 (corpus now accumulating from v0.4.0 dogfood session logs; container-lane acceptance spread observed 44–83% by workload) | Recorded acceptance ranges from 48.9% on an upstream `nvfp4` workload through 99.87% on the fixed v0.3 decode workload — a fixed-workload artifact; sweep MTP0/3/5/7 on one unchanged artifact against an agent-shaped corpus (tool calls, thinking, long turns) before attributing deltas or picking shipped draft depth | ordered second |
-| DFlash-style deeper drafting (k=7) on 27B | Upstream measured 764–786 tok/s at 65–66% acceptance on 35B-A3B with DFlash; unknown economics on dense 27B | open |
+| Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
+| MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus. RTX 5090/4090 need baseline-repeatability closure; RTX 3090 selects MTP0 under the exact-output gate | measured; repeatability closure next |
+| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes and was 24.72%/20.17%/22.46% slower than MTP3 on RTX 5090/4090/3090 respectively; no quality decision is possible on the two baseline-unstable lanes | rejected for current artifacts |
 
 ## Contributing a result
 

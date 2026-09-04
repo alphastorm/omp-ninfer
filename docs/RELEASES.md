@@ -13,6 +13,18 @@ the product manifest binds the exact combination.
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
+### Post-v0.4.7 development evidence
+
+The corrected 2026-09-04 agent-shaped MTP0/3/5/7 campaign changes no released component or
+profile. Its v3 corpus includes client-visible reasoning, and analysis revision 2 requires MTP0 to
+repeat exactly before cross-arm differences can support a draft-depth decision. RTX 5090 and RTX 4090 are
+inconclusive because their MTP0 outputs changed on 1/12 and 10/12 repeated steps respectively.
+RTX 3090 was repeatable, but MTP3/5/7 differed from MTP0 on 6/8/4 of 24 outputs, leaving MTP0 as
+its only eligible arm for a future candidate. Public receipts:
+[5090](measurements/2026-09-04-rtx5090-mtp-agent-ablation.json) ·
+[4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
+[3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).
+
 ## Version identities
 
 ### v0.4.7 public release (corrects v0.4.6 asset URLs)

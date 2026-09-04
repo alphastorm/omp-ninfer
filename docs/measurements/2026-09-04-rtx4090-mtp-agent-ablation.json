@@ -1,0 +1,567 @@
+{
+  "analysis": {
+    "cross_arm_attribution_requires_repeatable_baseline": true,
+    "quality_reference_arm": 0,
+    "requires_within_arm_repeatability": true,
+    "version": 2
+  },
+  "arms": {
+    "0": {
+      "acceptance_rate": null,
+      "accepted_tokens": 0,
+      "completion_tokens": 2367,
+      "completion_tokens_per_round": null,
+      "decode_change_vs_mtp3_pct": -53.62232162444752,
+      "decode_seconds": 45.53328569999999,
+      "decode_tokens": 2343,
+      "decode_tokens_per_second": 51.45686202917705,
+      "drafted_tokens": 0,
+      "evidence": {
+        "arm_receipt_content_sha256": "c7301e2fac6b48bd7677eb923cbd90999ef2b2dd01e520fec1d8958732d07428",
+        "server_instance_sha256s": [
+          "f6c5438ac7ec5739fde4e73685db5f3c486734fc79d1767734bcec5640ed0422"
+        ],
+        "server_log_sha256": "031523bfd2e09fab826db8662d7fef2a9e8172d7b9c209227bf2497abe0e48ed",
+        "trace_sha256": "40743a3f4890915b760015535010c2c9ec798b6560bb74587f2297e95724e692"
+      },
+      "fallback_steps": 0,
+      "median_client_wall_seconds": 1.833022900042124,
+      "median_ttft_seconds": 0.17540419999999998,
+      "normalized_output_mismatch_count": 0,
+      "normalized_output_sha256": {
+        "chat_history_p50/r0/single": "ca4eabb31ec4bd36ac83f0d0057b7e21f88aaa26f528bf8e446d290ebac7f88a",
+        "chat_history_p50/r1/single": "84b80ff19449a95af85faebda4dc4497c8893d506e19ebf98ce60bbca6e1c6b5",
+        "chat_history_p90/r0/single": "8790427eda64d00266c5d9e773a365548e4cd45707ea22791aafbc82f32ece0d",
+        "chat_history_p90/r1/single": "59ef49b940b63cf85295ca42073cfdc62ce575aa628a173479e41419c2f238b0",
+        "chat_tool_roundtrip/r0/tool_call": "dd6fdb05a1ee16170b5c183775818fa56dc484b5eb6acf76e7f87ed62b216f04",
+        "chat_tool_roundtrip/r0/tool_result": "741d5bad91c06df535d8fec27324f6b7bff4d8244e13d4349858aedd9ac7d82f",
+        "chat_tool_roundtrip/r1/tool_call": "2a3a5939b72fa36ae70f084e6c9c248b6df756d1969ad78b43db5fa1aca5e364",
+        "chat_tool_roundtrip/r1/tool_result": "79259b331942c3680cac351402c4eefb6be7ac6d84492d22f0cdc14fb5d7837b",
+        "responses_long_decode/r0/single": "254d7b32e779a0b9ed8d85391cd06b19f8a977a1a2415d1a470dffecc5a8b936",
+        "responses_long_decode/r1/single": "f7c517d0826eb0edb507c58f671cd085e36960605a6649c621189d2a6f109c14",
+        "responses_long_replay/r0/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r0/branch": "c283b6cc3c569f46feccd90c62c54ed3fed55096aee24185a4fb0356d820baed",
+        "responses_long_replay/r0/continuation": "13a5f4d741c6264436f5378e100101c8577efedde9cc5550665a25334677fd73",
+        "responses_long_replay/r1/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r1/branch": "616654c9f0a95dd10c7b025bc4108c05c47174e12c8d1d8731c193e6611c7c5a",
+        "responses_long_replay/r1/continuation": "955c416c4827f10ea44fe3dbd0d1f77ecc47efef7e5f724894125a9dd79b38fe",
+        "responses_medium_branch/r0/base": "8150edb0de5b0e0b44c23c72bfd32f2ed4eadb57505faa38cf67830bed8699ac",
+        "responses_medium_branch/r0/branch": "9bdbf5cbe8220dd4889b89e0f01b09c252246172a1f90d27962328e839f1d57f",
+        "responses_medium_branch/r0/continuation": "fecf3f5ceb8d8d30765a3d5eeb8db96c63c7b4563fd88e92525f65d773227be0",
+        "responses_medium_branch/r1/base": "8150edb0de5b0e0b44c23c72bfd32f2ed4eadb57505faa38cf67830bed8699ac",
+        "responses_medium_branch/r1/branch": "8290ff8d3993e7c820329e2d64b06d9826467e9bf0f39faf3a96ec51cec5db30",
+        "responses_medium_branch/r1/continuation": "af1211061371550b836fc5ad95484da4b69d71114cf5b4957d255a5dbd0b6d9e",
+        "responses_short/r0/single": "724ce65a693da856fdac9b02609241f91d1aa38b28d877e4ea4eeaff84c09d80",
+        "responses_short/r1/single": "1ada738c51017a28a6fe988b8e842ed0cd8a395d434cb902b982db701f6a4b0d"
+      },
+      "prefix_reuse_paths": {
+        "append_frontier": 4,
+        "full_reset": 18,
+        "restore_turn_checkpoint": 2
+      },
+      "prompt_tokens": 246585,
+      "quality_eligible": false,
+      "repeatability_mismatch_count": 10,
+      "request_count": 24,
+      "speculative_rounds": 0,
+      "status": "completed",
+      "total_seconds": 148.44258390000002
+    },
+    "3": {
+      "acceptance_rate": 0.5339769773486818,
+      "accepted_tokens": 1438,
+      "completion_tokens": 2363,
+      "completion_tokens_per_round": 2.611049723756906,
+      "decode_change_vs_mtp3_pct": 0.0,
+      "decode_seconds": 21.0812291,
+      "decode_tokens": 2339,
+      "decode_tokens_per_second": 110.95178506456247,
+      "drafted_tokens": 2693,
+      "evidence": {
+        "arm_receipt_content_sha256": "97e1427e72fe535ad42ef56e24f7113b71236ecd2b1a33cdb945296236d199e1",
+        "server_instance_sha256s": [
+          "f5eed091ac1b709a72a2545f5a832b9c2dd225436f8925bd3562b7c7536029f6"
+        ],
+        "server_log_sha256": "760c91591ea05fd9bd5708b64ddb2cc3377ce170a01cb1d627e0e0dad87fe2e3",
+        "trace_sha256": "7b5c5015514bdef9314fb378ae26a9f298316c4fe0d8ba3bc6ccf52298b7a616"
+      },
+      "fallback_steps": 9,
+      "median_client_wall_seconds": 0.9743285499280319,
+      "median_ttft_seconds": 0.177591,
+      "normalized_output_mismatch_count": 20,
+      "normalized_output_sha256": {
+        "chat_history_p50/r0/single": "f174bfaaa0da758de51839b36dbb75839ca8253797423353e0f71ca097bdc98a",
+        "chat_history_p50/r1/single": "cf025c7b89bbb5fd97b79b90917ad6be7b0aec233dc4e02782d10def6817e2a4",
+        "chat_history_p90/r0/single": "97c20c6c853f60055a80c17ebf79b415affdd6ead4ee54763037eee5b2ea5ac9",
+        "chat_history_p90/r1/single": "532bdbd6b98f794bc98bb1b6a83d749d8a2c828c5c3c6b43e192549c06aec9c3",
+        "chat_tool_roundtrip/r0/tool_call": "70c8b530768771079a189e8ee5a428a798400c35ae302ccf4fda39a32a706551",
+        "chat_tool_roundtrip/r0/tool_result": "adf1bdc472569ab4978cd8828e04d4ce3791234f5976d8705dc4055e7fd09251",
+        "chat_tool_roundtrip/r1/tool_call": "b90fcfc424e98d8e5ada234ddc76ab694971432c4f283145ac040c0fa81681e6",
+        "chat_tool_roundtrip/r1/tool_result": "63dc1fbbbf6c85f25eaf8109e4bedc4cca53ee8ba8d9161ae51b2b090ed41792",
+        "responses_long_decode/r0/single": "0f3ccc435aaf754e6b4b1cc3c4c18e7257fbc702b4099cfc96775db953c4678d",
+        "responses_long_decode/r1/single": "bf6791052e146bec5b587fafb9584229b4d169651d1d6ae97ff37c3c8798d3e0",
+        "responses_long_replay/r0/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r0/branch": "859b704ebece6e195abe2bdd03de849194aa5e7cbc39d72aa94b0c6f1b46a7d9",
+        "responses_long_replay/r0/continuation": "dac992bf0d44916cd9643a9906422c7e0848863d18ea4d124eea86a29ce81865",
+        "responses_long_replay/r1/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r1/branch": "859b704ebece6e195abe2bdd03de849194aa5e7cbc39d72aa94b0c6f1b46a7d9",
+        "responses_long_replay/r1/continuation": "919992142033d25a2b7e8c9c26c8fd4abcfccdf7699ee0fc8f9ea27bb45d0625",
+        "responses_medium_branch/r0/base": "8150edb0de5b0e0b44c23c72bfd32f2ed4eadb57505faa38cf67830bed8699ac",
+        "responses_medium_branch/r0/branch": "3a5553bf985109c03926fa2c80da277bc110b0cdf00be3f6f98dce349712363d",
+        "responses_medium_branch/r0/continuation": "9376dd259e01dc7764f517dff5a20bc4294daa7ab26c2c0dd8c92d0beb7cf2ea",
+        "responses_medium_branch/r1/base": "0a3781b0de8e5d1174f3f48476a8052453ab518b6ea8712a6d76f21eb818873c",
+        "responses_medium_branch/r1/branch": "8700ab4ace5ce7cd5cf96d0c40e9f9b0b76e164f55d458e7e603892732d785cc",
+        "responses_medium_branch/r1/continuation": "11790b461fa159daa3d1b7f1f1f913b9cf3ee135fff31ff85ef8292948ad1473",
+        "responses_short/r0/single": "724ce65a693da856fdac9b02609241f91d1aa38b28d877e4ea4eeaff84c09d80",
+        "responses_short/r1/single": "724ce65a693da856fdac9b02609241f91d1aa38b28d877e4ea4eeaff84c09d80"
+      },
+      "prefix_reuse_paths": {
+        "append_frontier": 4,
+        "full_reset": 18,
+        "restore_turn_checkpoint": 2
+      },
+      "prompt_tokens": 246571,
+      "quality_eligible": false,
+      "repeatability_mismatch_count": 9,
+      "request_count": 24,
+      "speculative_rounds": 905,
+      "status": "completed",
+      "total_seconds": 124.20701000000001
+    },
+    "5": {
+      "acceptance_rate": 0.38696083292017847,
+      "accepted_tokens": 1561,
+      "completion_tokens": 2402,
+      "completion_tokens_per_round": 2.9221411192214113,
+      "decode_change_vs_mtp3_pct": -7.286936390915988,
+      "decode_seconds": 23.1172742,
+      "decode_tokens": 2378,
+      "decode_tokens_per_second": 102.86679906232197,
+      "drafted_tokens": 4034,
+      "evidence": {
+        "arm_receipt_content_sha256": "ffbe9b5ce2ffdfca1138168fee8e85d390c69d7036a331cc04a87069346ab0ce",
+        "server_instance_sha256s": [
+          "db0af848aae9e5db2fde1d78cc87407adc62edde12fa9dcb7c5cbddd87d49eac"
+        ],
+        "server_log_sha256": "7e5528c8df1f406ef3f89d81b0a9dba70c67f468d5d6b93fcf91f71a18792c86",
+        "trace_sha256": "cc324353a5bba251e18ea31e87b0c30c4a4dbec7e787e4fb98538de3585f8d7e"
+      },
+      "fallback_steps": 8,
+      "median_client_wall_seconds": 1.167147450032644,
+      "median_ttft_seconds": 0.17999825,
+      "normalized_output_mismatch_count": 20,
+      "normalized_output_sha256": {
+        "chat_history_p50/r0/single": "5e6fbf9473c8bc49337d8262cac4485b44e0bfe6fe5306c7ae6e342ff7489da3",
+        "chat_history_p50/r1/single": "cf025c7b89bbb5fd97b79b90917ad6be7b0aec233dc4e02782d10def6817e2a4",
+        "chat_history_p90/r0/single": "1d43ae2d236a9a4fa59a945576090cf2e3299278f709dba246d9baf05781b193",
+        "chat_history_p90/r1/single": "c861138c894332df07e5d4728bf2c92b30eb16e4131fc3ba34e8eb0ce45867b9",
+        "chat_tool_roundtrip/r0/tool_call": "2a3a5939b72fa36ae70f084e6c9c248b6df756d1969ad78b43db5fa1aca5e364",
+        "chat_tool_roundtrip/r0/tool_result": "79259b331942c3680cac351402c4eefb6be7ac6d84492d22f0cdc14fb5d7837b",
+        "chat_tool_roundtrip/r1/tool_call": "2a3a5939b72fa36ae70f084e6c9c248b6df756d1969ad78b43db5fa1aca5e364",
+        "chat_tool_roundtrip/r1/tool_result": "9696504f3672e587ca53440699ef348fba9ae89c34b083922654d26edf3f53be",
+        "responses_long_decode/r0/single": "83fc370ac1c0a0453ef0243e23c40edb2459b76c2a320954e492bc42bcd56423",
+        "responses_long_decode/r1/single": "792763675248157acf4ed157d17cb20e1c4976296b71a5ae67be707f570113ae",
+        "responses_long_replay/r0/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r0/branch": "a3e385135bee19d9eb2e739e65b35b754c4b34c39a235f2fdfdc70ead165173e",
+        "responses_long_replay/r0/continuation": "de74f121f57bb75a92b98b7d5e4afd710bad3075ab61586215c0e5ee45924313",
+        "responses_long_replay/r1/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r1/branch": "776976c576ac17a2be94069a9a0f44c0787b98a5783c9841956c37326912f574",
+        "responses_long_replay/r1/continuation": "2658daa60aaa34df1b5e4278865323c623b08095817763b642cc31b60018316e",
+        "responses_medium_branch/r0/base": "0a3781b0de8e5d1174f3f48476a8052453ab518b6ea8712a6d76f21eb818873c",
+        "responses_medium_branch/r0/branch": "96abddba7a87cd415c4893da20a3fa0777fe428fc3c2c5cb5d359b52dc989196",
+        "responses_medium_branch/r0/continuation": "5b0d2c99f61af196bc0910de0c497c7e00d655a05912c0aef8a1ac997e140245",
+        "responses_medium_branch/r1/base": "459ed02786ac40102d3311ecf822eab679aa58a62254dbc8964e1da8aba9ca45",
+        "responses_medium_branch/r1/branch": "2d7c3e5c1eb35f85615759325ffcd1f317302dc8351814b604347ed8bfd27aa8",
+        "responses_medium_branch/r1/continuation": "8e349981fb403d46ee0ace957af126f1cb42cd9865eb4fd6e9f3ca441f73e41d",
+        "responses_short/r0/single": "724ce65a693da856fdac9b02609241f91d1aa38b28d877e4ea4eeaff84c09d80",
+        "responses_short/r1/single": "3869ac4689852bdc957ab838e621cf20c5adcf2aa4594d20cc1354d02bc59b03"
+      },
+      "prefix_reuse_paths": {
+        "append_frontier": 4,
+        "full_reset": 18,
+        "restore_turn_checkpoint": 2
+      },
+      "prompt_tokens": 246586,
+      "quality_eligible": false,
+      "repeatability_mismatch_count": 10,
+      "request_count": 24,
+      "speculative_rounds": 822,
+      "status": "completed",
+      "total_seconds": 126.328899
+    },
+    "7": {
+      "acceptance_rate": 0.29181362539446815,
+      "accepted_tokens": 1572,
+      "completion_tokens": 2366,
+      "completion_tokens_per_round": 2.9987325728770595,
+      "decode_change_vs_mtp3_pct": -20.171642134385458,
+      "decode_seconds": 26.442067,
+      "decode_tokens": 2342,
+      "decode_tokens_per_second": 88.5709880396264,
+      "drafted_tokens": 5387,
+      "evidence": {
+        "arm_receipt_content_sha256": "825ee4992d7a136ba5886786a5060e83199b6f6e83516120ab70ed68fc83a3c9",
+        "server_instance_sha256s": [
+          "0134dbc133b22a57135a544a774d47b6827a83ee3f98a53e028a333810d9f09a"
+        ],
+        "server_log_sha256": "48e2de0b68b56d7c962b29139e244d92405be789adf0e441a4a9c212c63b8836",
+        "trace_sha256": "cd6a04548c56970bfb5dda943b348e47b2a8f351a9e2c393d135011275d18591"
+      },
+      "fallback_steps": 3,
+      "median_client_wall_seconds": 1.1234687499236315,
+      "median_ttft_seconds": 0.1818361,
+      "normalized_output_mismatch_count": 21,
+      "normalized_output_sha256": {
+        "chat_history_p50/r0/single": "32bdd5e2051f53986bff1f433b17613c588a95eb43c3f7757acc0c4679b936f2",
+        "chat_history_p50/r1/single": "32bdd5e2051f53986bff1f433b17613c588a95eb43c3f7757acc0c4679b936f2",
+        "chat_history_p90/r0/single": "5a4eaa830008671d63ecda9ab705c2556af6a3d6ba36c602b258dde34a97f9b9",
+        "chat_history_p90/r1/single": "5aa3f91a74ef656cd2e00e6068c26976ec8bb98ef20ea49a2cdb94902d592e39",
+        "chat_tool_roundtrip/r0/tool_call": "afab93d0e8f220af3807b11951478c5715317b92e98e98a1935117f588f2e834",
+        "chat_tool_roundtrip/r0/tool_result": "098d720028e32de84c792a14cb8a198794fc72c83d3ac9607d47635771728b51",
+        "chat_tool_roundtrip/r1/tool_call": "2a3a5939b72fa36ae70f084e6c9c248b6df756d1969ad78b43db5fa1aca5e364",
+        "chat_tool_roundtrip/r1/tool_result": "9696504f3672e587ca53440699ef348fba9ae89c34b083922654d26edf3f53be",
+        "responses_long_decode/r0/single": "adea8af545e11bdd14ffde921c23469f45278bf9ea3fb01b9dbd6be3a1a2aa8e",
+        "responses_long_decode/r1/single": "f93c66aea7b18a8f56f0d211fec43d3d356bcef6e5d81a52edd7d1cf4572936f",
+        "responses_long_replay/r0/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r0/branch": "1bcf5e55ea63efc6b560dcb728d07c5ceb6b820feaf4a4ba7a738ea2fd067fbe",
+        "responses_long_replay/r0/continuation": "f8eaaf15685e7d294dc84dcb878cb89e19dbe18bfa725589f2ee2763f59fd3cb",
+        "responses_long_replay/r1/base": "89d7d114dc2381e7a605266aac337b48a1c3e44e4072846380530ddd4f795377",
+        "responses_long_replay/r1/branch": "73dce5dac399682bd3aef943fecf4605a4da635f6bab22f671af1fcf1b86be7b",
+        "responses_long_replay/r1/continuation": "f1f41136835fbaf4ee3b252efb0133ea9daffb48cf3333a4bc57060ddee99e31",
+        "responses_medium_branch/r0/base": "68dd043c5c59caf4f6c8d1acce8f2f2d88a2a1f96255d2d4ec718943ed8cf552",
+        "responses_medium_branch/r0/branch": "2d4c8c78b4fb037a28148cec5f8a065991f0d9b7ab95fdb4af7d0b781804fbf2",
+        "responses_medium_branch/r0/continuation": "2f965c300aaf20459971ad2391a44699de6669ef3660e75bb45eaeda0921ce15",
+        "responses_medium_branch/r1/base": "ef345e88c56cb29efea889efd51546d93553346512f6ce7e013e1d4035d268e9",
+        "responses_medium_branch/r1/branch": "c0c4d6c70671865b108bd81dafef3b663c8c7e3716f9954ef5118ba54c0a60aa",
+        "responses_medium_branch/r1/continuation": "7a16591634687eb31bb31bc0aa2718fda56b38fef3f545955d03765329a93662",
+        "responses_short/r0/single": "2770eb514dc938cd4ed025251b8bd73f7e4ca388998b71bc9b1c073107a10aef",
+        "responses_short/r1/single": "2770eb514dc938cd4ed025251b8bd73f7e4ca388998b71bc9b1c073107a10aef"
+      },
+      "prefix_reuse_paths": {
+        "append_frontier": 4,
+        "full_reset": 18,
+        "restore_turn_checkpoint": 2
+      },
+      "prompt_tokens": 246586,
+      "quality_eligible": false,
+      "repeatability_mismatch_count": 9,
+      "request_count": 24,
+      "speculative_rounds": 789,
+      "status": "completed",
+      "total_seconds": 129.69447970000002
+    }
+  },
+  "artifact_type": "omp_ninfer_mtp_ablation_lane",
+  "binary_sha256": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+  "configuration_sha256": "3dac28fbec5ba66ecd307253c96cd8b0c7f8ac6fa5c2b707cdad3703c3233cf5",
+  "corpus": {
+    "decision_rule": {
+      "incumbent": 3,
+      "primary_metric": "aggregate server-reported decode tokens per second",
+      "promotion_margin": 0.05,
+      "quality": "all normalized user-visible outputs must be byte-identical across arms",
+      "rule": "retain MTP3 unless another arm is at least 5% faster; an ineligible arm cannot win"
+    },
+    "generator": "omp-ninfer/scripts/run_mtp_ablation.py",
+    "input_sha256": {
+      "history_p50": "a72b344243dfa6d8a003729ebb9f2da92fdfd408a2220bf23c0fab2f7b32c772",
+      "history_p90": "ab5c8a1df23e3f51d2451a976513cacc4aa8e938ffa4c48ed4288ed69580f29b",
+      "long_decode_prompt": "8000c0b0ea598dfb4ef61ab3603e9ef4dc7350083d5b99821e67b78edad480a9",
+      "long_prefix": "96419e8b8d7563cd1b7aac2d261ebc16920178e958b3a2667953965eb105b443",
+      "medium_prefix": "d4fa63799e9e375925babce6135a69c2c420c276971d3bf5f50ec028b1d991e7",
+      "short_prompt": "b9783c3f5c0cf93148c8a647b85b3abac99fdf8ddc7ee43b5f0c2a98983c1703",
+      "tool_prompt": "2309a7f28ea304d08c9cf73a8a78d8d86077eb6322fc4faa741d1bd008dcd71d",
+      "tool_result": "b6cc62016e4c0ec545067bbd034405f2a517009dbf160777252d1787f8b499b2"
+    },
+    "output_projection": {
+      "excluded": [
+        "generated_object_ids"
+      ],
+      "included": [
+        "answer_text",
+        "reasoning_text",
+        "reasoning_summary",
+        "tool_name",
+        "parsed_tool_arguments",
+        "finish_status"
+      ],
+      "version": 2
+    },
+    "privacy": "fully synthetic public inputs; receipts retain hashes and structural metrics only",
+    "repetitions": 2,
+    "request_count": 24,
+    "sampling": {
+      "greedy": true,
+      "temperature": 0
+    },
+    "scenarios": [
+      {
+        "max_output_tokens": [
+          32
+        ],
+        "name": "responses_short",
+        "protocols": [
+          "openai_responses"
+        ],
+        "steps": 1,
+        "stratum": "short single turn"
+      },
+      {
+        "max_output_tokens": [
+          512
+        ],
+        "name": "responses_long_decode",
+        "protocols": [
+          "openai_responses"
+        ],
+        "steps": 1,
+        "stratum": "long decode"
+      },
+      {
+        "max_output_tokens": [
+          80
+        ],
+        "message_count": 4,
+        "name": "chat_history_p50",
+        "protocols": [
+          "openai_chat_completions"
+        ],
+        "steps": 1,
+        "stratum": "median message history"
+      },
+      {
+        "max_output_tokens": [
+          80
+        ],
+        "message_count": 24,
+        "name": "chat_history_p90",
+        "protocols": [
+          "openai_chat_completions"
+        ],
+        "steps": 1,
+        "stratum": "deep message history"
+      },
+      {
+        "max_output_tokens": [
+          96,
+          80
+        ],
+        "name": "chat_tool_roundtrip",
+        "preserve_assistant_reasoning": true,
+        "protocols": [
+          "openai_chat_completions",
+          "openai_chat_completions"
+        ],
+        "steps": 2,
+        "stratum": "forced tool call and tool history",
+        "tool_count": 1
+      },
+      {
+        "max_output_tokens": [
+          16,
+          80,
+          80
+        ],
+        "name": "responses_medium_branch",
+        "prefix_chars": 16384,
+        "protocols": [
+          "openai_responses",
+          "openai_responses",
+          "openai_responses"
+        ],
+        "steps": 3,
+        "stratum": "medium stored response continuation and sibling branch"
+      },
+      {
+        "max_output_tokens": [
+          16,
+          80,
+          80
+        ],
+        "name": "responses_long_replay",
+        "prefix_chars": 98304,
+        "protocols": [
+          "openai_responses",
+          "openai_responses",
+          "openai_responses"
+        ],
+        "steps": 3,
+        "stratum": "long stored response replay and sibling branch"
+      }
+    ],
+    "sha256": "9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623",
+    "thinking": {
+      "enable_thinking": true,
+      "preserve_thinking_server_default": true
+    },
+    "version": 3
+  },
+  "decision": {
+    "action": "no draft-depth decision",
+    "fastest_eligible_arm": null,
+    "fastest_observed_arm": 3,
+    "incumbent_arm": 3,
+    "promotion_margin": 0.05,
+    "reason": "MTP0 changed normalized output between identical repetitions; cross-arm output differences are not attributable to draft depth",
+    "selected_arm": null,
+    "status": "inconclusive"
+  },
+  "generated_utc": "2026-09-04T11:35:00Z",
+  "lane": "rtx4090",
+  "model": "qwen3.8-27b",
+  "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "quality": {
+    "baseline_repeatable": false,
+    "compared_steps": 24,
+    "eligible_arms": [],
+    "failed_arms": [],
+    "mismatches_by_arm": {
+      "0": {
+        "count": 0,
+        "step_ids": []
+      },
+      "3": {
+        "count": 20,
+        "step_ids": [
+          "chat_history_p50/r0/single",
+          "chat_history_p50/r1/single",
+          "chat_history_p90/r0/single",
+          "chat_history_p90/r1/single",
+          "chat_tool_roundtrip/r0/tool_call",
+          "chat_tool_roundtrip/r0/tool_result",
+          "chat_tool_roundtrip/r1/tool_call",
+          "chat_tool_roundtrip/r1/tool_result",
+          "responses_long_decode/r0/single",
+          "responses_long_decode/r1/single",
+          "responses_long_replay/r0/branch",
+          "responses_long_replay/r0/continuation",
+          "responses_long_replay/r1/branch",
+          "responses_long_replay/r1/continuation",
+          "responses_medium_branch/r0/branch",
+          "responses_medium_branch/r0/continuation",
+          "responses_medium_branch/r1/base",
+          "responses_medium_branch/r1/branch",
+          "responses_medium_branch/r1/continuation",
+          "responses_short/r1/single"
+        ]
+      },
+      "5": {
+        "count": 20,
+        "step_ids": [
+          "chat_history_p50/r0/single",
+          "chat_history_p50/r1/single",
+          "chat_history_p90/r0/single",
+          "chat_history_p90/r1/single",
+          "chat_tool_roundtrip/r0/tool_call",
+          "chat_tool_roundtrip/r0/tool_result",
+          "chat_tool_roundtrip/r1/tool_result",
+          "responses_long_decode/r0/single",
+          "responses_long_decode/r1/single",
+          "responses_long_replay/r0/branch",
+          "responses_long_replay/r0/continuation",
+          "responses_long_replay/r1/branch",
+          "responses_long_replay/r1/continuation",
+          "responses_medium_branch/r0/base",
+          "responses_medium_branch/r0/branch",
+          "responses_medium_branch/r0/continuation",
+          "responses_medium_branch/r1/base",
+          "responses_medium_branch/r1/branch",
+          "responses_medium_branch/r1/continuation",
+          "responses_short/r1/single"
+        ]
+      },
+      "7": {
+        "count": 21,
+        "step_ids": [
+          "chat_history_p50/r0/single",
+          "chat_history_p50/r1/single",
+          "chat_history_p90/r0/single",
+          "chat_history_p90/r1/single",
+          "chat_tool_roundtrip/r0/tool_call",
+          "chat_tool_roundtrip/r0/tool_result",
+          "chat_tool_roundtrip/r1/tool_result",
+          "responses_long_decode/r0/single",
+          "responses_long_decode/r1/single",
+          "responses_long_replay/r0/branch",
+          "responses_long_replay/r0/continuation",
+          "responses_long_replay/r1/branch",
+          "responses_long_replay/r1/continuation",
+          "responses_medium_branch/r0/base",
+          "responses_medium_branch/r0/branch",
+          "responses_medium_branch/r0/continuation",
+          "responses_medium_branch/r1/base",
+          "responses_medium_branch/r1/branch",
+          "responses_medium_branch/r1/continuation",
+          "responses_short/r0/single",
+          "responses_short/r1/single"
+        ]
+      }
+    },
+    "normalized_outputs_identical": false,
+    "reference_arm": 0,
+    "repeatability_compared_steps": 12,
+    "repeatability_mismatches_by_arm": {
+      "0": {
+        "count": 10,
+        "step_ids": [
+          "chat_history_p50/single",
+          "chat_history_p90/single",
+          "chat_tool_roundtrip/tool_call",
+          "chat_tool_roundtrip/tool_result",
+          "responses_long_decode/single",
+          "responses_long_replay/branch",
+          "responses_long_replay/continuation",
+          "responses_medium_branch/branch",
+          "responses_medium_branch/continuation",
+          "responses_short/single"
+        ]
+      },
+      "3": {
+        "count": 9,
+        "step_ids": [
+          "chat_history_p50/single",
+          "chat_history_p90/single",
+          "chat_tool_roundtrip/tool_call",
+          "chat_tool_roundtrip/tool_result",
+          "responses_long_decode/single",
+          "responses_long_replay/continuation",
+          "responses_medium_branch/base",
+          "responses_medium_branch/branch",
+          "responses_medium_branch/continuation"
+        ]
+      },
+      "5": {
+        "count": 10,
+        "step_ids": [
+          "chat_history_p50/single",
+          "chat_history_p90/single",
+          "chat_tool_roundtrip/tool_result",
+          "responses_long_decode/single",
+          "responses_long_replay/branch",
+          "responses_long_replay/continuation",
+          "responses_medium_branch/base",
+          "responses_medium_branch/branch",
+          "responses_medium_branch/continuation",
+          "responses_short/single"
+        ]
+      },
+      "7": {
+        "count": 9,
+        "step_ids": [
+          "chat_history_p90/single",
+          "chat_tool_roundtrip/tool_call",
+          "chat_tool_roundtrip/tool_result",
+          "responses_long_decode/single",
+          "responses_long_replay/branch",
+          "responses_long_replay/continuation",
+          "responses_medium_branch/base",
+          "responses_medium_branch/branch",
+          "responses_medium_branch/continuation"
+        ]
+      }
+    }
+  },
+  "schema_version": 1,
+  "scope": "within-lane experiment; not release qualification and not cross-lane comparable",
+  "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7"
+}
