@@ -181,8 +181,8 @@ if (-not (Test-Path $ApiKeyFile)) {
 
 The package controller binds loopback/Tailscale-only listening, mandatory bearer authentication,
 the external model hash, process-restart checkpoints, and active/previous rollback. Do not mix
-assets across variants or infer install authority from GPU-family names. RTX 4090 uses its exact
-MTP0 profile; RTX 3090 uses its exact MTP3 profile. Run the ordinary acceptance in section 8 after
+assets across variants or infer install authority from GPU-family names. RTX 4090 and RTX 3090 each use their exact
+MTP3 profile. Run the ordinary acceptance in section 8 after
 installation. Structured JSON-schema output remains unsupported and fails closed.
 
 ## Managed macOS SSH qualified route

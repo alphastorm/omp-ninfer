@@ -76,7 +76,7 @@ every chart is a rendering of the same receipts as the tables, never a separate 
 
 ![RTX 5090 prefill throughput (v0.3.0 runtime, historical) holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
 
-![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3 on the v0.3.0 fixed fixture (143-152 tok/s agent-shaped on v0.4.0), RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 97.69 tok/s peak with MTP0](../assets/chart-decode.png)
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 240.30 tok/s with MTP3 on the v0.3.0 fixed fixture (143-152 tok/s agent-shaped on v0.4.0), RTX 3090 at 90.17 tok/s with MTP3, RTX 4090 at 97.69 tok/s peak with MTP3 on v0.3.1](../assets/chart-decode.png)
 
 ### RTX 3090 — native Windows, MTP3, C1, 300 W cap
 

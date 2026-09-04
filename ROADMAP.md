@@ -35,7 +35,7 @@ what can ship next:
    MTP0/3/5/7 ran against the same binary and model within each lane on 24 deterministic
    agent-shaped requests. The corrected v3 corpus includes client-visible reasoning in its hashes.
    Review found that the original arm traces do not carry one shared campaign identity and compare
-   different arm processes without a separate fresh-process MTP0 control. Analysis revision 3
+   different arm processes without a separate fresh-process MTP0 control. Analysis revision 4
    therefore permits no lane decision from this evidence. Within-process observations remain
    useful diagnostics: MTP0 changed on 1/12 repeated steps on RTX 5090 and 10/12 on RTX 4090; all
    RTX 3090 arms repeated exactly within process, while MTP3/5/7 differed from MTP0 on 6/8/4 of 24

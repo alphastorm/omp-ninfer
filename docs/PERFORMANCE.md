@@ -93,9 +93,9 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-002 | Q5 linear+add post-mixer | A CTA-collective `mma-r64-c16` kernel beats SIMT split-2 | Candidate 190.46 µs vs production 51.20 µs — 3.72× slower | rejected |
 | EXP-003 | GDN state under speculation | Caching gate activations (ReplaySSM) removes recurrent-state drift on MTP rollback | Bit-identical recurrent fold at 167.82 µs/layer; no drift across long contexts | kept |
 | EXP-004 | Tensor-core prefill | W4A4 MMA prefill (NVFP4 artifacts) multiplies prefill throughput | 11,191 vs 3,218 tok/s at a 7,680-token prompt — 3.48× (upstream campaign, NVFP4 profile) | kept upstream |
-| EXP-005 | RTX 5090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | MTP3 was fastest observed at 172.94 decode tok/s; MTP0 changed on 1/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
-| EXP-006 | RTX 4090 agent-shaped MTP depth | A speculative arm beats output-identical MTP0 | MTP3 was fastest observed at 110.95 tok/s; MTP0 changed on 10/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
-| EXP-007 | RTX 3090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | All arms repeated within process; MTP3/5/7 differed from MTP0 on 6/8/4 outputs, but campaign/cross-process controls are absent | inconclusive |
+| EXP-005 | RTX 5090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | Raw K0/3/5/7 rates were 81.57/172.94/149.47/130.19 decode tok/s; MTP0 changed on 1/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
+| EXP-006 | RTX 4090 agent-shaped MTP depth | A speculative arm beats output-identical MTP0 | Raw K0/3/5/7 rates were 51.46/110.95/102.87/88.57 decode tok/s; MTP0 changed on 10/12 within-process repeats, and campaign/cross-process controls are absent | inconclusive |
+| EXP-007 | RTX 3090 agent-shaped MTP depth | A deeper draft beats MTP3 without changing normalized output | Raw K0/3/5/7 rates were 36.18/65.36/57.95/50.68 decode tok/s; all arms repeated within process, but campaign/cross-process controls are absent | inconclusive |
 
 Entry detail:
 
@@ -120,7 +120,7 @@ Entry detail:
 - **EXP-005–007 — frozen agent-shaped MTP depth campaign.** Each lane ran MTP0/3/5/7 with one
   unchanged binary, model, corpus, seed, and greedy request configuration. The v3 output projection
   hashes client-visible answer, reasoning, reasoning-summary, and tool-call content. Analysis
-  revision 3 requires exact within-arm repetition, one shared non-null campaign identity, and a
+  revision 4 requires exact within-arm repetition, one shared non-null campaign identity, and a
   separate fresh-process MTP0 control before cross-arm attribution. The original traces predate the
   latter two controls, so all three lane decisions are inconclusive. Within-process observations
   remain: MTP0 changed on 1/12 repeated steps on RTX 5090 and 10/12 on RTX 4090; RTX 3090 arms
@@ -156,7 +156,7 @@ hypothesis and method before writing code.
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus. All decisions are inconclusive until a shared campaign ID and fresh-process MTP0 control bind every lane | measured; controlled rerun next |
-| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes. Observed K7/K3 raw decode rates were 130.19/172.94, 88.57/110.95, and 50.68/65.36 tok/s on RTX 5090/4090/3090; absent campaign/cross-process controls, these comparisons do not establish a depth effect | inconclusive |
+| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes, but absent campaign/cross-process controls its per-arm raw rates remain diagnostic and do not establish a depth effect | inconclusive |
 
 ## Contributing a result
 

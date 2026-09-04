@@ -24,6 +24,24 @@ SHA_A = "a" * 64
 SHA_B = "b" * 64
 SHA_C = "c" * 64
 COMMIT = "d" * 40
+TEST_STEP_NAMES = {
+    "responses_short": ("single",),
+    "responses_long_decode": ("single",),
+    "chat_history_p50": ("single",),
+    "chat_history_p90": ("single",),
+    "chat_tool_roundtrip": ("tool_call", "tool_result"),
+    "responses_medium_branch": ("base", "continuation", "branch"),
+    "responses_long_replay": ("base", "continuation", "branch"),
+}
+
+
+def expected_step_ids() -> list[str]:
+    return [
+        f"{scenario}/r{repetition}/{step}"
+        for repetition in range(MODULE.REPETITIONS)
+        for scenario, steps in TEST_STEP_NAMES.items()
+        for step in steps
+    ]
 
 
 def arm_receipt(
@@ -33,7 +51,8 @@ def arm_receipt(
     campaign_id: str | None = SHA_A,
     instance_sha256: str = SHA_C,
 ) -> dict[str, object]:
-    expected_requests = MODULE.corpus_manifest()["request_count"]
+    step_ids = expected_step_ids()
+    expected_requests = len(step_ids)
     configuration = {"fixture": "frozen"}
     return {
         "artifact_type": MODULE.ARM_ARTIFACT_TYPE,
@@ -57,10 +76,7 @@ def arm_receipt(
         "expected_requests": expected_requests,
         "requests": [
             {
-                "step_id": (
-                    f"synthetic/r{index // (expected_requests // 2)}/"
-                    f"step-{index % (expected_requests // 2):02d}"
-                ),
+                "step_id": step_id,
                 "projection_sha256": "f" * 64,
                 "prompt_tokens": 64,
                 "completion_tokens": 101,
@@ -82,7 +98,7 @@ def arm_receipt(
                     "fallback_steps": 0 if arm == 0 else 10,
                 },
             }
-            for index in range(expected_requests)
+            for step_id in step_ids
         ],
     }
 
@@ -345,6 +361,47 @@ class CorpusContractTests(unittest.TestCase):
                 },
             )
 
+    def test_output_projection_rejects_or_preserves_nested_content(self) -> None:
+        first = {
+            "status": "completed",
+            "output": [
+                {
+                    "type": "message",
+                    "role": "assistant",
+                    "content": [{"type": "refusal", "refusal": "first"}],
+                }
+            ],
+        }
+        second = json.loads(json.dumps(first))
+        second["output"][0]["content"][0]["refusal"] = "second"
+        self.assertNotEqual(
+            MODULE.sha256_json(MODULE.response_projection("openai_responses", first)),
+            MODULE.sha256_json(MODULE.response_projection("openai_responses", second)),
+        )
+        unknown = json.loads(json.dumps(first))
+        unknown["output"][0]["content"] = [
+            {"type": "future_visible_content", "payload": "different"}
+        ]
+        with self.assertRaisesRegex(MODULE.AblationError, "content type"):
+            MODULE.response_projection("openai_responses", unknown)
+
+        wrong_section = json.loads(json.dumps(first))
+        wrong_section["output"][0]["content"] = [
+            {"type": "summary_text", "text": "visible"}
+        ]
+        with self.assertRaisesRegex(MODULE.AblationError, "content type"):
+            MODULE.response_projection("openai_responses", wrong_section)
+
+    def test_digest_validators_reject_noncanonical_hex(self) -> None:
+        for value in ("0x" + "a" * 62, " " + "a" * 63, "a_" + "a" * 62):
+            with self.subTest(value=value):
+                with self.assertRaises(MODULE.AblationError):
+                    MODULE.require_sha256(value, "digest")
+        for value in ("0x" + "a" * 38, " " + "a" * 39, "a_" + "a" * 38):
+            with self.subTest(value=value):
+                with self.assertRaises(MODULE.AblationError):
+                    MODULE.require_commit(value, "commit")
+
     def test_tool_roundtrip_preserves_assistant_reasoning(self) -> None:
         message = MODULE.chat_tool_message(
             {
@@ -401,17 +458,33 @@ class ReceiptTests(unittest.TestCase):
             root = Path(temporary)
             trace = root / "trace.json"
             log = root / "requests.jsonl"
-            request_id = "1" * 64
+            campaign_id = SHA_A
+            corpus_sha256 = SHA_A
+            lane = "rtx-test"
+            arm = 3
+            request_id = MODULE.identity_digest(
+                f"request/{campaign_id}/{corpus_sha256}/{lane}/{arm}/responses_short/r0/single"
+            )
+            second_request_id = MODULE.identity_digest(
+                f"request/{campaign_id}/{corpus_sha256}/{lane}/{arm}/responses_short/r1/single"
+            )
+            first_session_id = MODULE.identity_digest(
+                f"session/{campaign_id}/{corpus_sha256}/{lane}/{arm}/responses_short/r0"
+            )
+            second_session_id = MODULE.identity_digest(
+                f"session/{campaign_id}/{corpus_sha256}/{lane}/{arm}/responses_short/r1"
+            )
             instance = "srv-test"
             trace.write_text(
                 json.dumps(
                     {
                         "artifact_type": MODULE.RUN_ARTIFACT_TYPE,
                         "schema_version": 1,
-                        "lane": "rtx-test",
-                        "arm": 3,
+                        "lane": lane,
+                        "arm": arm,
                         "model": "qwen3.8-27b",
-                        "corpus_sha256": SHA_A,
+                        "campaign_id": campaign_id,
+                        "corpus_sha256": corpus_sha256,
                         "expected_requests": 2,
                         "scenarios": {
                             "responses_short/r0": {
@@ -428,7 +501,7 @@ class ReceiptTests(unittest.TestCase):
                                     },
                                     {
                                         "step_id": "responses_short/r1/single",
-                                        "request_sha256": "2" * 64,
+                                        "request_sha256": second_request_id,
                                         "protocol": "openai_responses",
                                         "prompt_tokens": 64,
                                         "completion_tokens": 32,
@@ -521,7 +594,10 @@ class ReceiptTests(unittest.TestCase):
                 "request": {
                     "protocol": "openai_responses",
                     "enable_thinking": True,
-                    "client_identity": {"request_sha256": request_id},
+                    "client_identity": {
+                        "request_sha256": request_id,
+                        "session_sha256": first_session_id,
+                    },
                 },
                 "result": {
                     "prompt_tokens": 64,
@@ -553,7 +629,8 @@ class ReceiptTests(unittest.TestCase):
             resumed_start = {**start, "server_instance_id": resumed_instance}
             resumed_done = json.loads(json.dumps(done))
             resumed_done["server_instance_id"] = resumed_instance
-            resumed_done["request"]["client_identity"]["request_sha256"] = "2" * 64
+            resumed_done["request"]["client_identity"]["request_sha256"] = second_request_id
+            resumed_done["request"]["client_identity"]["session_sha256"] = second_session_id
             log.write_text(
                 "\n".join(
                     json.dumps(item) for item in (start, done, resumed_start, resumed_done)
@@ -575,6 +652,19 @@ class ReceiptTests(unittest.TestCase):
             self.assertEqual(len(receipt["server_instance_sha256s"]), 2)
             self.assertNotIn("request_log_jsonl", MODULE.canonical_json(receipt["configuration"]))
             self.assertNotIn("C:/private", MODULE.canonical_json(receipt))
+
+            relabelled = json.loads(trace.read_text(encoding="utf-8"))
+            relabelled["campaign_id"] = SHA_B
+            trace.write_text(json.dumps(relabelled), encoding="utf-8")
+            with self.assertRaisesRegex(MODULE.AblationError, "request identity"):
+                MODULE.summarize_arm(
+                    trace,
+                    log,
+                    expected_binary_sha256=SHA_B,
+                    expected_model_sha256=SHA_C,
+                    expected_source_commit=COMMIT,
+                )
+            trace.write_text(json.dumps({**relabelled, "campaign_id": campaign_id}), encoding="utf-8")
 
             evidence = root / "failure.log"
             evidence.write_text("cudaErrorIllegalAddress\n", encoding="utf-8")
@@ -600,14 +690,19 @@ class ReceiptTests(unittest.TestCase):
         receipts = [arm_receipt(arm, seconds) for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.8, 8.0))]
         combined = combine_with_control(receipts)
         self.assertEqual(combined["decision"]["selected_arm"], 7)
-        self.assertEqual(combined["analysis"]["version"], 3)
+        self.assertEqual(combined["analysis"]["version"], 4)
+        self.assertTrue(combined["analysis"]["corpus_decision_rule_superseded"])
+        self.assertIn(
+            "fastest eligible output-identical fallback",
+            combined["analysis"]["selection_rule"]["incumbent_ineligible"],
+        )
         self.assertTrue(
             combined["analysis"]["cross_arm_attribution_requires_repeatable_baseline"]
         )
         self.assertTrue(combined["quality"]["normalized_outputs_identical"])
         self.assertEqual(
             combined["arms"]["0"]["normalized_output_sha256"][
-                "synthetic/r0/step-00"
+                expected_step_ids()[0]
             ],
             "f" * 64,
         )
@@ -646,6 +741,21 @@ class ReceiptTests(unittest.TestCase):
         ]
         receipts[2]["configuration"] = {"fixture": "changed"}
         with self.assertRaisesRegex(MODULE.AblationError, "configuration_sha256"):
+            MODULE.combine_receipts(receipts)
+
+        receipts = [
+            arm_receipt(arm, seconds)
+            for arm, seconds in zip(MODULE.ARMS, (20.0, 10.0, 9.8, 8.0))
+        ]
+        for receipt in receipts:
+            requests = receipt["requests"]
+            assert isinstance(requests, list)
+            for row in requests:
+                assert isinstance(row, dict)
+                parts = str(row["step_id"]).split("/")
+                parts[0] = "invalid_" + parts[0]
+                row["step_id"] = "/".join(parts)
+        with self.assertRaisesRegex(MODULE.AblationError, "corpus step inventory"):
             MODULE.combine_receipts(receipts)
 
     def test_combine_disqualifies_output_drift_and_retains_inside_margin(self) -> None:
@@ -689,6 +799,7 @@ class ReceiptTests(unittest.TestCase):
         ]
         without_control = MODULE.combine_receipts(receipts)
         self.assertIsNone(without_control["decision"]["selected_arm"])
+        self.assertIsNone(without_control["decision"]["fastest_observed_arm"])
         self.assertIn(
             "a fresh-process MTP0 control receipt is missing",
             without_control["quality"]["validity_failures"],

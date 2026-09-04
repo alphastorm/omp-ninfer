@@ -1,5 +1,6 @@
 {
   "analysis": {
+    "corpus_decision_rule_superseded": true,
     "cross_arm_attribution_requires_repeatable_baseline": true,
     "fresh_process_baseline_control": {
       "available": false,
@@ -11,7 +12,12 @@
     "requires_fresh_process_baseline_control": true,
     "requires_shared_campaign_identity": true,
     "requires_within_arm_repeatability": true,
-    "version": 3
+    "selection_rule": {
+      "incumbent_eligible": "retain MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition",
+      "incumbent_ineligible": "select the fastest eligible output-identical fallback without applying the promotion margin to the ineligible incumbent",
+      "validity_gate": "one shared campaign identity plus within-process and fresh-process MTP0 output identity"
+    },
+    "version": 4
   },
   "arms": {
     "0": {
@@ -30,7 +36,7 @@
       },
       "drafted_tokens": 0,
       "evidence": {
-        "arm_receipt_content_sha256": "9790b4edfc7ea3f5ee4eb6e04922232aaf71aa1a75bcbd0a6616d8d11c82f33e",
+        "arm_receipt_content_sha256": "533814e88ad704a5a2f7fa4559619d6e858281fdaf40168b54067b7d01c6abef",
         "server_instance_count": 1,
         "server_log_sha256": "68f764f7f0689a97a238b0dc7bd85333b27083279cb819448534758a0d4af880",
         "trace_sha256": "9a16960fbfd7988ec3045b27e3fb0cfeca6b15296c453928480abdd428425573"
@@ -94,7 +100,7 @@
       },
       "drafted_tokens": 2534,
       "evidence": {
-        "arm_receipt_content_sha256": "d4dab85caf22eb8b22f0294203427c7579e4e982954abe659f1a947e9725376e",
+        "arm_receipt_content_sha256": "62b24007bbab39dc0aa470b508f2368cf4021b74b0782e1f3da22346bb68df08",
         "server_instance_count": 1,
         "server_log_sha256": "be70583c7e9545508875cdc5cfe08c73bff9b99015158fabc20d30389709652e",
         "trace_sha256": "10c3f7d673d49cf5102091ea16d8c3646125e2b0844a29b7aa7ce82bdd4b4b00"
@@ -158,7 +164,7 @@
       },
       "drafted_tokens": 3742,
       "evidence": {
-        "arm_receipt_content_sha256": "f03a1088bd34fd5a44586e29f2c34d27bf4aa1fb93e2ea8887f98b4a455581ea",
+        "arm_receipt_content_sha256": "5ce71141fafb5bd8912a27a44326760344d343dd8853601f7d0bb9c8fa42ec47",
         "server_instance_count": 1,
         "server_log_sha256": "17b4c84adae7f696864272a0b3bdead4d512e3ce0cb3c9ec80d76417b3134c9f",
         "trace_sha256": "5e24ecc95c321b7374c31897d6be1ba138efd27ee4a7c0997040b248fdffd910"
@@ -222,7 +228,7 @@
       },
       "drafted_tokens": 4712,
       "evidence": {
-        "arm_receipt_content_sha256": "7283318df7b7de32264e521d0c198fd3cbf6dd73d671f809bf87b241894039bb",
+        "arm_receipt_content_sha256": "f3f1e1d59c3671342884de6964194caae3bb0e677109c7b6a78f84aea1cc044b",
         "server_instance_count": 1,
         "server_log_sha256": "edc89cca60b5c88571634cef9e79a06a5ba18fe52cd284ab6ad4ef33efe5bf5b",
         "trace_sha256": "9a52cc3b8c8a9876346d7ae002468f06d4d28805141438e35437784210e0f03c"
@@ -421,14 +427,14 @@
   "decision": {
     "action": "no draft-depth decision",
     "fastest_eligible_arm": null,
-    "fastest_observed_arm": 3,
+    "fastest_observed_arm": null,
     "incumbent_arm": 3,
     "promotion_margin": 0.05,
     "reason": "arm receipts lack one shared non-null campaign identity; a fresh-process MTP0 control receipt is missing",
     "selected_arm": null,
     "status": "inconclusive"
   },
-  "generated_utc": "2026-09-04T12:20:54Z",
+  "generated_utc": "2026-09-04T12:49:28Z",
   "lane": "rtx3090",
   "model": "q38-ninfer",
   "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",

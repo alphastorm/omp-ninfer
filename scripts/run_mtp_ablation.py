@@ -25,8 +25,23 @@ ARM_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_arm"
 LANE_ARTIFACT_TYPE = "omp_ninfer_mtp_ablation_lane"
 SCHEMA_VERSION = 1
 CONFIGURATION_SCHEMA_VERSION = 2
-ANALYSIS_VERSION = 3
+ANALYSIS_VERSION = 4
 PROMOTION_MARGIN = 0.05
+CORPUS_STEP_NAMES = {
+    "responses_short": ("single",),
+    "responses_long_decode": ("single",),
+    "chat_history_p50": ("single",),
+    "chat_history_p90": ("single",),
+    "chat_tool_roundtrip": ("tool_call", "tool_result"),
+    "responses_medium_branch": ("base", "continuation", "branch"),
+    "responses_long_replay": ("base", "continuation", "branch"),
+}
+EXPECTED_STEP_IDS = frozenset(
+    f"{scenario}/r{repetition}/{step}"
+    for repetition in range(REPETITIONS)
+    for scenario, steps in CORPUS_STEP_NAMES.items()
+    for step in steps
+)
 
 SHORT_PROMPT = (
     "State the transaction invariant that every successful operation commits all records or none. "
@@ -182,6 +197,10 @@ def corpus_blueprint() -> dict[str, Any]:
             "max_output_tokens": [16, 80, 80],
         },
     ]
+    for scenario in scenarios:
+        step_names = CORPUS_STEP_NAMES.get(scenario["name"])
+        if step_names is None or len(step_names) != scenario["steps"]:
+            raise AssertionError(f"corpus step inventory drifted for {scenario['name']}")
     input_hashes = {name: sha256_json(value) for name, value in sorted(inputs.items())}
     return {
         "version": CORPUS_VERSION,
@@ -224,26 +243,37 @@ def identity_digest(label: str) -> str:
     return sha256_bytes(f"omp-mtp-ablation-v1/{label}".encode("utf-8"))
 
 
+def scoped_identity(
+    kind: str,
+    *,
+    campaign_id: str | None,
+    corpus_sha256: str,
+    lane: str,
+    arm: int,
+    suffix: str,
+) -> str:
+    campaign = f"{campaign_id}/" if campaign_id is not None else ""
+    return identity_digest(f"{kind}/{campaign}{corpus_sha256}/{lane}/{arm}/{suffix}")
+
+
 def require_sha256(value: Any, label: str) -> str:
-    if not isinstance(value, str) or len(value) != 64:
-        raise AblationError(f"{label} must be a lowercase SHA-256")
-    try:
-        int(value, 16)
-    except ValueError as exc:
-        raise AblationError(f"{label} must be a lowercase SHA-256") from exc
-    if value != value.lower():
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
         raise AblationError(f"{label} must be a lowercase SHA-256")
     return value
 
 
 def require_commit(value: Any, label: str) -> str:
-    if not isinstance(value, str) or len(value) != 40:
-        raise AblationError(f"{label} must be a 40-character Git commit")
-    try:
-        int(value, 16)
-    except ValueError as exc:
-        raise AblationError(f"{label} must be a 40-character Git commit") from exc
-    return value.lower()
+    if (
+        not isinstance(value, str)
+        or len(value) != 40
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise AblationError(f"{label} must be a lowercase 40-character Git commit")
+    return value
 
 
 @dataclass
@@ -296,6 +326,58 @@ def parsed_arguments(value: Any) -> Any:
         return json.loads(value)
     except json.JSONDecodeError:
         return value
+
+
+def responses_content_projection(
+    chunk: Mapping[str, Any], *, section: str
+) -> dict[str, Any]:
+    kind = chunk.get("type")
+    if section == "message" and kind == "output_text":
+        unknown = set(chunk) - {"type", "text", "annotations", "logprobs"}
+        if unknown:
+            raise AblationError(
+                f"Responses message content has unsupported fields: {sorted(unknown)}"
+            )
+        text = chunk.get("text")
+        if not isinstance(text, str):
+            raise AblationError("Responses output_text content omitted text")
+        for field in ("annotations", "logprobs"):
+            if field in chunk and chunk[field] not in (None, []):
+                raise AblationError(
+                    f"Responses output_text has unsupported non-empty {field}"
+                )
+        return {"type": kind, "text": text}
+    if section == "message" and kind == "refusal":
+        unknown = set(chunk) - {"type", "refusal"}
+        if unknown:
+            raise AblationError(
+                f"Responses refusal content has unsupported fields: {sorted(unknown)}"
+            )
+        refusal = chunk.get("refusal")
+        if not isinstance(refusal, str):
+            raise AblationError("Responses refusal content omitted refusal text")
+        return {"type": kind, "refusal": refusal}
+    if section == "reasoning":
+        expected = "reasoning_text"
+    elif section == "summary":
+        expected = "summary_text"
+    else:
+        raise AblationError(
+            f"Responses message contains unsupported content type {kind!r}"
+        )
+    if kind == expected:
+        unknown = set(chunk) - {"type", "text"}
+        if unknown:
+            raise AblationError(
+                f"Responses {section} content has unsupported fields: {sorted(unknown)}"
+            )
+        text = chunk.get("text")
+        if not isinstance(text, str):
+            raise AblationError(f"Responses {expected} content omitted text")
+        return {"type": kind, "text": text}
+    raise AblationError(
+        f"Responses {section} contains unsupported content type {kind!r}"
+    )
 
 
 def response_projection(protocol: str, response: Mapping[str, Any]) -> dict[str, Any]:
@@ -354,7 +436,7 @@ def response_projection(protocol: str, response: Mapping[str, Any]) -> dict[str,
             for chunk in content:
                 if not isinstance(chunk, dict):
                     raise AblationError("Responses content contains a non-object item")
-                chunks.append({"type": chunk.get("type"), "text": chunk.get("text")})
+                chunks.append(responses_content_projection(chunk, section="message"))
             projected.append({"type": "message", "role": item.get("role"), "content": chunks})
         elif kind in {"function_call", "tool_call"}:
             projected.append(
@@ -374,14 +456,14 @@ def response_projection(protocol: str, response: Mapping[str, Any]) -> dict[str,
                 if not isinstance(chunk, dict):
                     raise AblationError("Responses reasoning content contains a non-object item")
                 reasoning_content.append(
-                    {"type": chunk.get("type"), "text": chunk.get("text")}
+                    responses_content_projection(chunk, section="reasoning")
                 )
             reasoning_summary: list[dict[str, Any]] = []
             for chunk in summary:
                 if not isinstance(chunk, dict):
                     raise AblationError("Responses reasoning summary contains a non-object item")
                 reasoning_summary.append(
-                    {"type": chunk.get("type"), "text": chunk.get("text")}
+                    responses_content_projection(chunk, section="summary")
                 )
             projected.append(
                 {
@@ -516,15 +598,25 @@ def execute_scenario(
     repetition: int,
 ) -> list[dict[str, Any]]:
     scenario_key = f"{name}/r{repetition}"
-    session = identity_digest(
-        f"session/{campaign_id}/{corpus_sha256}/{lane}/{arm}/{scenario_key}"
+    session = scoped_identity(
+        "session",
+        campaign_id=campaign_id,
+        corpus_sha256=corpus_sha256,
+        lane=lane,
+        arm=arm,
+        suffix=scenario_key,
     )
     results: list[dict[str, Any]] = []
 
     def send(protocol: str, step: str, payload: Mapping[str, Any]) -> dict[str, Any]:
         step_id = f"{scenario_key}/{step}"
-        request_id = identity_digest(
-            f"request/{campaign_id}/{corpus_sha256}/{lane}/{arm}/{step_id}"
+        request_id = scoped_identity(
+            "request",
+            campaign_id=campaign_id,
+            corpus_sha256=corpus_sha256,
+            lane=lane,
+            arm=arm,
+            suffix=step_id,
         )
         result, response = request_step(
             client,
@@ -987,6 +1079,19 @@ def summarize_arm(
     arm = state.get("arm")
     if arm not in ARMS:
         raise AblationError("trace has an unsupported arm")
+    lane = state.get("lane")
+    model = state.get("model")
+    if not isinstance(lane, str) or not lane:
+        raise AblationError("trace has an invalid lane")
+    if not isinstance(model, str) or not model:
+        raise AblationError("trace has an invalid model")
+    corpus_sha = require_sha256(state.get("corpus_sha256"), "corpus_sha256")
+    campaign_value = state.get("campaign_id")
+    campaign_id = (
+        None
+        if campaign_value is None
+        else require_sha256(campaign_value, "campaign_id")
+    )
     steps = flatten_steps(state)
     expected_requests = state.get("expected_requests")
     if not isinstance(expected_requests, int) or isinstance(expected_requests, bool):
@@ -1001,9 +1106,25 @@ def summarize_arm(
         raise AblationError("trace does not contain the expected request count")
     if failed and len(steps) >= expected_requests:
         raise AblationError("a failed arm must have fewer than the expected request count")
-    wanted = {require_sha256(step.get("request_sha256"), "request_sha256"): step for step in steps}
-    if len(wanted) != len(steps):
-        raise AblationError("trace contains duplicate request identities")
+    wanted: dict[str, dict[str, Any]] = {}
+    for step in steps:
+        step_id = step.get("step_id")
+        if not isinstance(step_id, str) or not step_id:
+            raise AblationError("trace contains a malformed step ID")
+        request_id = require_sha256(step.get("request_sha256"), "request_sha256")
+        expected_request_id = scoped_identity(
+            "request",
+            campaign_id=campaign_id,
+            corpus_sha256=corpus_sha,
+            lane=lane,
+            arm=arm,
+            suffix=step_id,
+        )
+        if request_id != expected_request_id:
+            raise AblationError(f"trace request identity mismatch for {step_id}")
+        if request_id in wanted:
+            raise AblationError("trace contains duplicate request identities")
+        wanted[request_id] = step
 
     starts: dict[str, dict[str, Any]] = {}
     latest: dict[str, dict[str, Any]] = {}
@@ -1042,12 +1163,6 @@ def summarize_arm(
     binary_sha = require_sha256(expected_binary_sha256, "expected binary SHA-256")
     model_sha = require_sha256(expected_model_sha256, "expected model SHA-256")
     source_commit = require_commit(expected_source_commit, "expected source commit")
-    campaign_value = state.get("campaign_id")
-    campaign_id = (
-        None
-        if campaign_value is None
-        else require_sha256(campaign_value, "campaign_id")
-    )
     configuration: dict[str, Any] | None = None
     expected_backend = "none" if arm == 0 else "mtp"
     for instance in instance_ids:
@@ -1069,7 +1184,7 @@ def summarize_arm(
             "binary_sha256": (identity.get("binary_sha256"), binary_sha),
             "model_artifact_sha256": (identity.get("model_artifact_sha256"), model_sha),
             "patch_stack_sha": (identity.get("patch_stack_sha"), source_commit),
-            "public_model_id": (server.get("public_model_id"), state.get("model")),
+            "public_model_id": (server.get("public_model_id"), model),
         }
         for label, (actual, expected) in checks.items():
             if actual != expected:
@@ -1140,6 +1255,22 @@ def summarize_arm(
             raise AblationError(f"request_done {request_id} omitted timing metrics")
         if not isinstance(speculative, dict):
             raise AblationError(f"request_done {request_id} omitted speculative metrics")
+        client_identity = request.get("client_identity")
+        if not isinstance(client_identity, dict):
+            raise AblationError(f"request_done {request_id} omitted client identity")
+        if client_identity.get("request_sha256") != request_id:
+            raise AblationError(f"request identity mismatch for {trace['step_id']}")
+        scenario_key = trace["step_id"].rsplit("/", 1)[0]
+        expected_session_id = scoped_identity(
+            "session",
+            campaign_id=campaign_id,
+            corpus_sha256=corpus_sha,
+            lane=lane,
+            arm=arm,
+            suffix=scenario_key,
+        )
+        if client_identity.get("session_sha256") != expected_session_id:
+            raise AblationError(f"session identity mismatch for {trace['step_id']}")
         if request.get("protocol") != trace.get("protocol"):
             raise AblationError(f"protocol mismatch for {trace['step_id']}")
         if result.get("prompt_tokens") != trace.get("prompt_tokens"):
@@ -1208,11 +1339,11 @@ def summarize_arm(
         "generated_utc": utc_now(),
         "scope": "within-lane experiment; not release qualification and not cross-lane comparable",
         "status": "failed" if failed else "completed",
-        "lane": state.get("lane"),
+        "lane": lane,
         "arm": arm,
-        "model": state.get("model"),
+        "model": model,
         "campaign_id": campaign_id,
-        "corpus_sha256": require_sha256(state.get("corpus_sha256"), "corpus_sha256"),
+        "corpus_sha256": corpus_sha,
         "source_commit": source_commit,
         "binary_sha256": binary_sha,
         "model_artifact_sha256": model_sha,
@@ -1427,6 +1558,19 @@ def validate_arm_receipt_content(
     if status == "failed" and completed_requests >= expected_requests:
         raise AblationError(f"failed {label} did not stop before corpus completion")
     outputs = projection_map(requests, label)
+    observed_step_ids = set(outputs)
+    if status == "completed" and observed_step_ids != EXPECTED_STEP_IDS:
+        missing = sorted(EXPECTED_STEP_IDS - observed_step_ids)
+        unexpected = sorted(observed_step_ids - EXPECTED_STEP_IDS)
+        raise AblationError(
+            f"{label} corpus step inventory mismatch: "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+    if status == "failed" and not observed_step_ids <= EXPECTED_STEP_IDS:
+        unexpected = sorted(observed_step_ids - EXPECTED_STEP_IDS)
+        raise AblationError(
+            f"{label} corpus step inventory contains unexpected steps: {unexpected}"
+        )
     configuration = receipt.get("configuration")
     if not isinstance(configuration, dict):
         raise AblationError(f"{label} omitted its safe configuration")
@@ -1677,7 +1821,7 @@ def combine_receipts(
     decision = {
         "status": "inconclusive" if not baseline_repeatable else "decided",
         "selected_arm": selected,
-        "fastest_observed_arm": fastest_observed,
+        "fastest_observed_arm": fastest_observed if baseline_repeatable else None,
         "fastest_eligible_arm": fastest_eligible,
         "incumbent_arm": 3,
         "promotion_margin": PROMOTION_MARGIN,
@@ -1726,6 +1870,21 @@ def combine_receipts(
             "requires_shared_campaign_identity": True,
             "requires_fresh_process_baseline_control": True,
             "promotion_requires_margin_in_each_repetition": True,
+            "corpus_decision_rule_superseded": True,
+            "selection_rule": {
+                "validity_gate": (
+                    "one shared campaign identity plus within-process and fresh-process "
+                    "MTP0 output identity"
+                ),
+                "incumbent_eligible": (
+                    "retain MTP3 unless another eligible arm improves decode throughput "
+                    "by at least 5% in every repetition"
+                ),
+                "incumbent_ineligible": (
+                    "select the fastest eligible output-identical fallback without applying "
+                    "the promotion margin to the ineligible incumbent"
+                ),
+            },
             "fresh_process_baseline_control": {
                 "available": baseline_control_available,
                 "evidence": baseline_control_evidence,

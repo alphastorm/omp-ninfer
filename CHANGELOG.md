@@ -15,9 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reasoning, reasoning-summary, and tool-call content. Review hardened the runner to reject
   unbound configuration fields and unknown response items, require a shared campaign identity and
   fresh-process MTP0 control, bind per-repetition promotion margins, and publish no process
-  fingerprints. Because the original traces predate the new campaign and cross-process controls,
-  all three lane decisions are inconclusive; observed differences remain diagnostic only. No
-  release profile changed.
+  fingerprints. Campaign-scoped request and session identities are re-derived during reduction;
+  receipts must carry the exact frozen corpus step inventory; unknown nested response content and
+  non-canonical digest strings fail closed; invalid campaigns publish no cross-arm winner. Because
+  the original traces predate the new campaign and cross-process controls, all three lane decisions
+  are inconclusive; observed per-arm rates remain diagnostic only. No release profile changed.
 
 ## [0.4.7] - 2026-09-01
 

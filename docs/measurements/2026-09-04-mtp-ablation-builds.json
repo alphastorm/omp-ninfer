@@ -5,11 +5,12 @@
   "scope": "Experiment build freeze only; not release qualification.",
   "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
   "corpus_sha256": "9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623",
-  "invariant": "Within each lane, MTP0/3/5/7 use one byte-identical clean-source server binary; only speculative backend/window arguments change.",
+  "invariant": "Within each lane, MTP0/3/5/7 use one byte-identical clean-source server binary; only speculative backend, draft-window, and proposal-head arguments change.",
   "arms": {
     "0": {
       "speculative_backend": "none",
-      "draft_tokens": 0
+      "draft_tokens": 0,
+      "proposal_head": "full"
     },
     "3": {
       "speculative_backend": "mtp",

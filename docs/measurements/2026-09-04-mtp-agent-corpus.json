@@ -412,13 +412,19 @@
     "version": 3
   },
   "analysis": {
-    "version": 3,
+    "version": 4,
     "quality_reference_arm": 0,
     "requires_within_arm_repeatability": true,
     "cross_arm_attribution_requires_repeatable_baseline": true,
     "requires_shared_campaign_identity": true,
     "requires_fresh_process_baseline_control": true,
-    "promotion_requires_margin_in_each_repetition": true
+    "promotion_requires_margin_in_each_repetition": true,
+    "corpus_decision_rule_superseded": true,
+    "selection_rule": {
+      "validity_gate": "one shared campaign identity plus within-process and fresh-process MTP0 output identity",
+      "incumbent_eligible": "retain MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition",
+      "incumbent_ineligible": "select the fastest eligible output-identical fallback without applying the promotion margin to the ineligible incumbent"
+    }
   },
   "rationale": [
     "OpenAI Responses and Chat Completions are both represented because every standing lane logged both protocols.",
@@ -427,6 +433,6 @@
     "Every input is generated public text; output receipts retain only normalized SHA-256 values and structural timing/token metrics.",
     "Output normalization includes client-visible answer, reasoning, reasoning-summary, and tool-call content while excluding generated object IDs.",
     "The forced tool round trip preserves the assistant reasoning_content in second-turn history.",
-    "The decision is within-lane only: all arms must share one campaign identity, MTP0 must repeat in process and across a separate fresh process, and any selected arm must repeat exactly. The original traces lack the campaign and fresh-process controls, so they are inconclusive. For a valid campaign, retain eligible MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition, or select the fastest eligible fallback when MTP3 changes output."
+    "Analysis revision 4 supersedes the frozen corpus decision_rule for lane selection. The decision is within-lane only: all arms must share one campaign identity, MTP0 must repeat in process and across a separate fresh process, and any selected arm must repeat exactly. The original traces lack the campaign and fresh-process controls, so they are inconclusive. For a valid campaign, retain eligible MTP3 unless another eligible arm improves decode throughput by at least 5% in every repetition, or select the fastest eligible fallback when MTP3 changes output."
   ]
 }
