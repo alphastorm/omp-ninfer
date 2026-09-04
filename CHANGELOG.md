@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   result when no candidate clears the 5% margin in either repetition: MTP3 remains the fastest arm
   on all three lanes, while missing campaign and cross-process controls limit only exact-output
   attribution and faster-arm promotion. No release profile changed.
+- A per-lane runtime variant campaign (`scripts/run_variant_campaign.py`, host launchers in
+  `scripts/hosts/`) reuses the frozen agent corpus to compare artifact, KV-format, prefill-chunk,
+  and context arms as fresh processes under one campaign identity, scores them by modeled session
+  time against two recorded session shapes, and binds a relative private role-corpus screen to
+  arms that change the artifact or KV format. Measured on 2026-09-04: the RTX 5090 retains
+  `groupwise-int`/BF16/MTP3 (`nvfp4` refuses to start with BF16 KV at 131,072 context and, with
+  INT8 KV, trades 2.22× prefill for a two-case grounding shift), the RTX 4090 promotes prefill
+  chunk 2,048 for requalification, and the RTX 3090 measures 131,072-token capacity on its shipped
+  profile. No release profile changed.
 
 ## [0.4.7] - 2026-09-01
 

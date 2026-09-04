@@ -262,13 +262,14 @@ intent remains to upstream reusable provider and lifecycle pieces to
 ## Roadmap
 
 `v0.4.7` exposes three qualified GPU lanes with durable restart and same-lane agent fanout.
-The agent-shaped MTP depth campaign retains MTP3 on all three lanes: neither K5 nor K7 beat it in
-either repetition. Next, decide whether a separately qualified `nvfp4` artifact is worth replacing
-the pinned model, then begin the v0.5 checkpoint-replication work. Exact-output attribution can be
-examined separately with targeted fresh-process MTP0 and K0/K3 divergence probes; it does not
-require rerunning the rejected deeper arms. Signing/notarization, a shared public client
-acceptance runner, and multi-owner clean-install evidence remain on the path to v1.0. No item becomes
-a support claim before an exact package, receipt, and product manifest bind it.
+The agent-shaped MTP depth campaign retains MTP3 on all three lanes, and the per-lane variant
+campaign settled the `nvfp4` question: the artifact cannot hold 131,072 context with BF16 KV on the
+RTX 5090, and with INT8 KV its 2.22× prefill comes with a measured two-case grounding shift, so the
+groupwise-int artifact stays pinned. Lanes are now tuned independently: next are the RTX 4090
+prefill-chunk 2,048 and RTX 3090 131,072-token context requalifications, then the v0.5
+checkpoint-replication work. Signing/notarization, a shared public client acceptance runner, and
+multi-owner clean-install evidence remain on the path to v1.0. No item becomes a support claim
+before an exact package, receipt, and product manifest bind it.
 
 Scope boundaries and explicit non-claims: [`ROADMAP.md`](ROADMAP.md).
 

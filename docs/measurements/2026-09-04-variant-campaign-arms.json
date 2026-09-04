@@ -1,0 +1,311 @@
+{
+  "artifact_type": "omp_ninfer_variant_campaign_arms",
+  "schema_version": 1,
+  "generated_utc": "2026-09-04",
+  "scope": "Per-lane runtime variant campaign on the frozen agent corpus; experiment build freeze only, not release qualification and not cross-lane comparable.",
+  "corpus_sha256": "9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623",
+  "corpus_generator": "omp-ninfer/scripts/run_mtp_ablation.py",
+  "decision_rule": {
+    "incumbent": "the shipped lane profile configuration, run as a fresh process inside the same campaign",
+    "primary_metric": "modeled session engine seconds = computed prefill tokens / measured prefill tokens per second + decode tokens / measured decode tokens per second, evaluated for every workload reference and every repetition",
+    "promotion_margin": 0.05,
+    "rule": "promote the candidate with the largest mean improvement only if it improves the primary metric by at least 5% for every workload reference in every repetition, retains at least the lane's qualified context in its automatic KV capacity, and has passed its quality gate; otherwise retain the incumbent",
+    "quality_gates": {
+      "byte-equivalent": "configuration-only change with identical arithmetic contract; output projection mismatches against the incumbent are recorded as facts, not gates",
+      "role-corpus": "artifact or KV-format change; the arm and the incumbent each run the private 89-case role corpus in their own fresh process (reasoning level low, greedy, concurrency 1) and the candidate must not exceed the incumbent on secret_leak_count, critical_miss_count, forbidden_claim_count, or failure_count, must not fall below it on redaction_control_pass_rate, must stay within 0.02 of it on schema_valid_rate, required_fact_recall, evidence_precision, tool_selection_accuracy, and tool_argument_accuracy, must not exceed it by more than 0.02 on unsupported_claim_rate, and must keep mean_output_tokens within 1.25x; concurrency-4 and cold-TTFT criteria of the private promotion gate are not applicable to a single-request lane and are not consumed"
+    },
+    "secondary_facts": [
+      "decode tokens per second",
+      "prefill tokens per second",
+      "long prefill TTFT",
+      "corpus client wall seconds",
+      "automatic KV capacity",
+      "artifact bytes and load seconds",
+      "peak device memory"
+    ]
+  },
+  "workload_references": [
+    {
+      "label": "session-2026-08-25",
+      "source": "RTX 5090 production request log requests-20260825T204600Z, 42 completed requests; token totals only",
+      "computed_prefill_tokens": 573956,
+      "prefix_hit_tokens": 155038,
+      "decode_tokens": 30936
+    },
+    {
+      "label": "session-2026-08-31",
+      "source": "RTX 5090 production request log requests-20260831T001135Z, 73 completed requests; token totals only",
+      "computed_prefill_tokens": 1543555,
+      "prefix_hit_tokens": 3142100,
+      "decode_tokens": 193440
+    }
+  ],
+  "artifacts": {
+    "groupwise-int": {
+      "filename": "qwen3_8_27b.ninfer",
+      "sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "bytes": 18210531328,
+      "source": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer"
+    },
+    "nvfp4": {
+      "filename": "qwen3_8_27b_nvfp4.ninfer",
+      "sha256": "bb3360522a06e136e0367f5703414d26272b7285c8a6ab6194135c17dbd81b32",
+      "bytes": 21492695040,
+      "source": "https://huggingface.co/neroued/Qwen3.8-27B-nvfp4-NInfer",
+      "cuda_architecture": "sm_120a",
+      "note": "MLP layers 0-55 NVFP4; attention, GDN, output head, and MLP layers 56-63 stay row-scaled FP8, so the artifact is 3.28 GB larger than groupwise-int. Probe 2026-09-04T15:20Z on the RTX 5090: with BF16 KV at 131,072 context the engine refused to start (minimum runtime reservation 10,409,364,224 bytes plus 1,073,741,824 bytes headroom against 10,949,661,184 bytes free after weights); upstream evaluates this artifact with INT8 KV, which the campaign measures."
+    }
+  },
+  "lanes": {
+    "rtx5090": {
+      "source_commit": "ce51ccb689521cadcff541f4bd4cdea9998b7cd5",
+      "binary_sha256": "989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea",
+      "build_profile": "mtp-depth-ablation-5090",
+      "cuda_architecture": "120a",
+      "qualified_context": 131072,
+      "incumbent": "gw-bf16-c1024-mtp3",
+      "arms": [
+        {
+          "label": "gw-bf16-c1024-mtp3",
+          "role": "incumbent",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "bf16",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-bf16-c1024-mtp0",
+          "role": "control",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "bf16",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "none",
+          "speculative_draft_window": 0,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-bf16-c2048-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "bf16",
+          "prefill_chunk": 2048,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-int8-c1024-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "role-corpus"
+        },
+        {
+          "label": "nvfp4-bf16-c1024-mtp3",
+          "role": "candidate",
+          "weights_id": "nvfp4",
+          "kv_dtype": "bf16",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "role-corpus"
+        },
+        {
+          "label": "nvfp4-int8-c1024-mtp3",
+          "role": "candidate",
+          "weights_id": "nvfp4",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "role-corpus"
+        },
+        {
+          "label": "nvfp4-int8-c1024-mtp0",
+          "role": "control",
+          "weights_id": "nvfp4",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "none",
+          "speculative_draft_window": 0,
+          "quality_gate": "role-corpus"
+        },
+        {
+          "label": "nvfp4-int8-c2048-mtp3",
+          "role": "candidate",
+          "weights_id": "nvfp4",
+          "kv_dtype": "int8",
+          "prefill_chunk": 2048,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "role-corpus"
+        }
+      ]
+    },
+    "rtx4090": {
+      "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7",
+      "binary_sha256": "a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2",
+      "build_profile": "qwen38-4090-v0.2",
+      "cuda_architecture": "89",
+      "qualified_context": 131072,
+      "incumbent": "gw-rk2v4e8-c512-mtp3",
+      "arms": [
+        {
+          "label": "gw-rk2v4e8-c512-mtp3",
+          "role": "incumbent",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "rk2v4-e8",
+          "prefill_chunk": 512,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-rk2v4e8-c1024-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "rk2v4-e8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-rk2v4e8-c2048-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "rk2v4-e8",
+          "prefill_chunk": 2048,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-rk2v4e8-c4096-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "rk2v4-e8",
+          "prefill_chunk": 4096,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-int8-c1024-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "role-corpus"
+        }
+      ]
+    },
+    "rtx3090": {
+      "source_commit": "3e37b03eac5633fe434afd84c45c54c2078f1556",
+      "binary_sha256": "13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53",
+      "build_profile": "mtp-depth-ablation-3090",
+      "cuda_architecture": "86",
+      "qualified_context": 65536,
+      "incumbent": "gw-int8-c1024-mtp3",
+      "arms": [
+        {
+          "label": "gw-int8-c1024-mtp3",
+          "role": "incumbent",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 65536,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-int8-c512-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 512,
+          "max_context": 65536,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-int8-c2048-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 2048,
+          "max_context": 65536,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        },
+        {
+          "label": "gw-int8-c1024-ctx131072-mtp3",
+          "role": "candidate",
+          "weights_id": "groupwise-int",
+          "kv_dtype": "int8",
+          "prefill_chunk": 1024,
+          "max_context": 131072,
+          "speculative_backend": "mtp",
+          "speculative_draft_window": 3,
+          "quality_gate": "byte-equivalent"
+        }
+      ]
+    }
+  },
+  "probes": [
+    {
+      "utc": "2026-09-04T15:20:49Z",
+      "lane": "rtx5090",
+      "arm": "nvfp4-bf16-c1024-mtp3",
+      "outcome": "server_start refused",
+      "detail": "minimum Engine runtime reservation requires 10409364224 bytes in addition to 1073741824 bytes of automatic headroom, but only 10949661184 bytes are available after weights",
+      "artifact_load_seconds_approx": 54
+    }
+  ],
+  "campaign_id": "dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+  "history": [
+    {
+      "utc": "2026-09-04T15:35:04Z",
+      "event": "launched all three lanes via WMI after Start-Process launches died with the SSH session"
+    },
+    {
+      "utc": "2026-09-04T16:01:24Z",
+      "event": "relaunched rtx5090 and rtx3090 after staging manifest.schema.json for the role corpus and accepting the engine's int8-group64 KV name"
+    },
+    {
+      "utc": "2026-09-04T16:35:46Z",
+      "event": "relaunched rtx4090 with Control-Release Start (not Run) as the restore action and rerun rtx3090 with a working VRAM sampler; first-pass rtx3090 receipts archived on the host"
+    },
+    {
+      "utc": "2026-09-04T17:16:29Z",
+      "event": "extended the rtx4090 lane with gw-rk2v4e8-c4096-mtp3 under the same campaign identity to locate the prefill-chunk knee"
+    },
+    {
+      "utc": "2026-09-04T17:01:20Z",
+      "event": "repeatability probe: rtx5090 incumbent and nvfp4-int8-c1024-mtp3 role-corpus screens run a second time in fresh processes"
+    }
+  ]
+}

@@ -294,6 +294,12 @@ BF16 KV and one active request, and its qualified numbers are the table at the t
 headroom of the engine family this product rides on. Full methodology:
 [upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md).
 
+Measured on the product build on 2026-09-04 with the frozen agent corpus, the Qwen3.8-27B `nvfp4`
+artifact prefilled 6,089 tok/s against 2,740 tok/s for the pinned `groupwise-int` artifact on the
+RTX 5090 (2.22×, INT8 KV, MTP3) and decoded 3.5% slower; with the shipped BF16 KV it cannot hold
+131,072-token context on 32 GB. It is not adopted; the receipts and the quality screen are in
+[`PERFORMANCE.md`](PERFORMANCE.md#experiment-ledger) (EXP-008).
+
 ## Community results
 
 Community leaderboard. One row per verified environment; newest first. Submit yours with the

@@ -1,0 +1,146 @@
+{
+  "artifact_type": "omp_ninfer_variant_campaign_quality_repeatability",
+  "campaign_id": "dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+  "finding": {
+    "conclusion": "Both arms reproduced every aggregate metric exactly across fresh processes, so the between-arm differences recorded in the lane receipt are systematic effects of the configuration, not run-to-run noise.",
+    "incumbent_self_delta": {
+      "critical_miss_count": 0,
+      "evidence_precision": 0.0,
+      "failure_count": 0,
+      "forbidden_claim_count": 0,
+      "mean_output_tokens": 0.0,
+      "redaction_control_pass_rate": 0.0,
+      "required_fact_recall": 0.0,
+      "schema_valid_rate": 0.0,
+      "secret_leak_count": 0,
+      "tool_argument_accuracy": 0.0,
+      "tool_selection_accuracy": 0.0,
+      "unsupported_claim_rate": 0.0
+    },
+    "nvfp4_int8_self_delta": {
+      "critical_miss_count": 0,
+      "evidence_precision": 0.0,
+      "failure_count": 0,
+      "forbidden_claim_count": 0,
+      "mean_output_tokens": 0.0,
+      "redaction_control_pass_rate": 0.0,
+      "required_fact_recall": 0.0,
+      "schema_valid_rate": 0.0,
+      "secret_leak_count": 0,
+      "tool_argument_accuracy": 0.0,
+      "tool_selection_accuracy": 0.0,
+      "unsupported_claim_rate": 0.0
+    }
+  },
+  "generated_utc": "2026-09-04T17:32:53Z",
+  "lane": "rtx5090",
+  "method": "Same corpus, reasoning level low, greedy, concurrency 1, --no-ssh; second run in a fresh container started by quality-rep2.sh after the campaign completed.",
+  "runs": {
+    "gw-bf16-c1024-mtp3": {
+      "aggregate": {
+        "critical_miss_count": 10,
+        "evidence_precision": 0.9785714285714285,
+        "failure_count": 5,
+        "forbidden_claim_count": 7,
+        "mean_output_tokens": 954.9642857142857,
+        "redaction_control_pass_rate": 0.75,
+        "required_fact_recall": 0.8865979381443299,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 8,
+        "tool_argument_accuracy": 1.0,
+        "tool_selection_accuracy": 1.0,
+        "unsupported_claim_rate": 0.2247191011235955
+      },
+      "concurrency": 1,
+      "corpus_sha256": "7be1bd85dca30c3689ed351d6a60546b46ed6c430269d0786e28b551778a7617",
+      "label": "rtx5090/gw-bf16-c1024-mtp3/dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+      "reasoning_level": "low",
+      "scores_sha256": "10a1b1ee241f702f66ba5569cb06ad72ae4c20e30de0a5ba361ca74fe81d2632",
+      "throughput": {
+        "cold_ttft_ms": 1865.8951839897782,
+        "decode_tps": 202.52974629726864,
+        "prefill_tps": 3033.410500641612
+      }
+    },
+    "gw-bf16-c1024-mtp3-rep2": {
+      "aggregate": {
+        "critical_miss_count": 10,
+        "evidence_precision": 0.9785714285714285,
+        "failure_count": 5,
+        "forbidden_claim_count": 7,
+        "mean_output_tokens": 954.9642857142857,
+        "redaction_control_pass_rate": 0.75,
+        "required_fact_recall": 0.8865979381443299,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 8,
+        "tool_argument_accuracy": 1.0,
+        "tool_selection_accuracy": 1.0,
+        "unsupported_claim_rate": 0.2247191011235955
+      },
+      "concurrency": 1,
+      "corpus_sha256": "7be1bd85dca30c3689ed351d6a60546b46ed6c430269d0786e28b551778a7617",
+      "label": "rtx5090/gw-bf16-c1024-mtp3-rep2/dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+      "reasoning_level": "low",
+      "scores_sha256": "505a790358670a1b0a830a2c35006713d19338290fe01b242051cae00ba687c1",
+      "throughput": {
+        "cold_ttft_ms": 1793.8570849364623,
+        "decode_tps": 202.51663697057765,
+        "prefill_tps": 3055.4279425855857
+      }
+    },
+    "nvfp4-int8-c1024-mtp3": {
+      "aggregate": {
+        "critical_miss_count": 9,
+        "evidence_precision": 0.9545454545454546,
+        "failure_count": 5,
+        "forbidden_claim_count": 6,
+        "mean_output_tokens": 1005.4642857142857,
+        "redaction_control_pass_rate": 0.75,
+        "required_fact_recall": 0.8831615120274914,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 4,
+        "tool_argument_accuracy": 1.0,
+        "tool_selection_accuracy": 1.0,
+        "unsupported_claim_rate": 0.24719101123595505
+      },
+      "concurrency": 1,
+      "corpus_sha256": "7be1bd85dca30c3689ed351d6a60546b46ed6c430269d0786e28b551778a7617",
+      "label": "rtx5090/nvfp4-int8-c1024-mtp3/dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+      "reasoning_level": "low",
+      "scores_sha256": "6ef92c20a60d4717cd0d56a67ec7389295f99f3937f141d0783ccfbfef6102e4",
+      "throughput": {
+        "cold_ttft_ms": 702.0522160455585,
+        "decode_tps": 205.23083513422426,
+        "prefill_tps": 6836.205575776439
+      }
+    },
+    "nvfp4-int8-c1024-mtp3-rep2": {
+      "aggregate": {
+        "critical_miss_count": 9,
+        "evidence_precision": 0.9545454545454546,
+        "failure_count": 5,
+        "forbidden_claim_count": 6,
+        "mean_output_tokens": 1005.4642857142857,
+        "redaction_control_pass_rate": 0.75,
+        "required_fact_recall": 0.8831615120274914,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 4,
+        "tool_argument_accuracy": 1.0,
+        "tool_selection_accuracy": 1.0,
+        "unsupported_claim_rate": 0.24719101123595505
+      },
+      "concurrency": 1,
+      "corpus_sha256": "7be1bd85dca30c3689ed351d6a60546b46ed6c430269d0786e28b551778a7617",
+      "label": "rtx5090/nvfp4-int8-c1024-mtp3-rep2/dd8ab05945124f256b34d786d24a46effda43fc59619cac9dc07fa33e00c1958",
+      "reasoning_level": "low",
+      "scores_sha256": "d5df976098a3d97d9486344b871bf9fe40c4fab667000702e28793b11663a2d3",
+      "throughput": {
+        "cold_ttft_ms": 685.8508430887014,
+        "decode_tps": 205.17687464883073,
+        "prefill_tps": 7114.830735078687
+      }
+    }
+  },
+  "schema_version": 1,
+  "scope": "Private 89-case role corpus (aggregate metrics only) run twice for two arms in separate fresh server processes to measure the screen's self-variance before interpreting 2pp tolerance failures."
+}

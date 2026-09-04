@@ -43,11 +43,31 @@ what can ship next:
    [4090](docs/measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). No public release profile
    changed.
-4. **`nvfp4` artifact decision — next.** The upstream campaign shows 3.48× groupwise-int prefill
-   and a higher GPQA row for `nvfp4`; adopting it swaps the pinned model artifact and forces
-   requalification of all three lanes. The groupwise-int artifact stays pinned until that campaign
-   makes the replacement decision.
-5. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
+4. **`nvfp4` artifact decision — completed post-v0.4.7; not adopted.** The per-lane variant
+   campaign measured the artifact on the RTX 5090 with the same corpus and campaign identity as
+   every other arm. With the shipped BF16 KV it cannot hold 131,072 context (the weights are
+   3.28 GB larger and the engine refuses its runtime reservation); with INT8 KV it prefills
+   2.22× faster (6,089 vs 2,740 tok/s), decodes 3.5% slower, and cuts modeled session time by
+   15.5–28.7%, but the private role-corpus screen — shown to be exactly repeatable across fresh
+   processes — records a two-case grounding shift (evidence precision −2.4 pp, unsupported-claim
+   rate +2.2 pp) alongside fewer canary leaks. The `sm_89`/`sm_86` lanes have no NVFP4 kernels.
+   The groupwise-int artifact stays pinned on all three lanes; `nvfp4` with INT8 KV remains a
+   v0.5 RTX 5090 candidate if that grounding shift is accepted and the durable checkpoint train
+   is requalified on INT8 pages. Receipts:
+   [5090](docs/measurements/2026-09-04-rtx5090-variant-campaign.json) ·
+   [4090](docs/measurements/2026-09-04-rtx4090-variant-campaign.json) ·
+   [3090](docs/measurements/2026-09-04-rtx3090-variant-campaign.json) ·
+   [repeatability](docs/measurements/2026-09-04-rtx5090-quality-repeatability.json).
+5. **Per-lane configuration changes from the same campaign — next, v0.4.8-class.** Lanes are
+   tuned independently: the goal is the best measured stack per card, not one shared
+   configuration. Two configuration-only changes cleared their gates and need lane
+   requalification before they ship: the RTX 4090 prefill chunk moves from 512 to 2,048 (+22.8%
+   prefill, 35K-token TTFT 21.9 s → 17.7 s, +270 MiB peak; 4,096 regresses decode), and the RTX
+   3090 lane qualifies 131,072-token context (automatic KV capacity 131,072 at 22,465 MiB peak with
+   unchanged throughput; the 64K exact-retrieval and restart gates rerun at the new ceiling). INT8
+   KV was rejected on the RTX 5090 (no speed gain) and RTX 4090 (23,180 MiB peak, screen
+   regression). No public profile changes until the rebound receipts exist.
+6. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
    missing fresh-process MTP0 controls and targeted K0/K3 first-divergence probes. Do not rerun the
    rejected K5/K7 arms without new evidence that could reverse their measured deficit.
 

@@ -96,6 +96,10 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-005 | RTX 5090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 81.57/172.94/149.47/130.19 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
 | EXP-006 | RTX 4090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 51.46/110.95/102.87/88.57 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
 | EXP-007 | RTX 3090 agent-shaped MTP depth | MTP3 remains the best depth on agent-shaped work | K0/3/5/7: 36.18/65.36/57.95/50.68 decode tok/s; K5 and K7 lost to MTP3 in both repetitions | kept |
+| EXP-008 | RTX 5090 `nvfp4` artifact | The NVFP4 Qwen3.8 artifact beats the pinned `groupwise-int` artifact on agent-shaped session time | Does not start with BF16 KV at 131,072 context (3.28 GB larger weights); with INT8 KV: prefill 6,089 vs 2,740 tok/s (2.22×), decode 168.23 vs 174.25 tok/s (−3.5%), modeled session time −15.5% to −28.7%; role-corpus screen: fewer canary leaks (4 vs 8) but evidence precision −2.4 pp and unsupported-claim rate +2.2 pp | rejected for v0.4; v0.5 RTX 5090 candidate |
+| EXP-009 | RTX 5090 KV format and prefill chunk | INT8 KV or a 2,048-token prefill chunk improves the BF16/1,024 incumbent | INT8 KV: +0.0% to +0.8% session time, 4.2 GB lower peak VRAM, worse role-corpus screen on every metric; chunk 2,048: −0.1% to −0.9% | rejected |
+| EXP-010 | RTX 4090 prefill chunk | A larger prefill chunk than the shipped 512 improves session time on `rk2v4-e8` | Chunk 512/1,024/2,048/4,096: prefill 1,605/1,877/1,971/1,974 tok/s, decode 110.69/111.82/112.92/108.37 tok/s; 2,048 clears the 5% margin in every repetition (+5.5% to +12.8%), 1,024 and 4,096 do not | kept — requalify at 2,048 |
+| EXP-011 | RTX 3090 prefill chunk and context | The shipped INT8/1,024/65,536 profile leaves speed or capacity on the table | Chunk 512/2,048: −2.9% to −0.5%; `--max-context 131072` fits with automatic KV capacity 131,072 at 22,465 MiB peak and identical throughput (65.08 vs 65.69 decode tok/s) | kept — qualify 131,072 context |
 
 Entry detail:
 
@@ -132,13 +136,38 @@ Entry detail:
   [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). The generated public corpus and
   frozen build identities are [recorded separately](measurements/2026-09-04-mtp-agent-corpus.json)
   ([builds](measurements/2026-09-04-mtp-ablation-builds.json)).
+- **EXP-008–011 — per-lane runtime variant campaign (2026-09-04).** One campaign identity, one
+  fresh server process per arm, the frozen 24-request agent corpus, and the shipped lane profile
+  as an in-campaign incumbent. The primary metric is modeled session engine seconds from measured
+  prefill and decode throughput against two recorded RTX 5090 session shapes (573,956 prefill /
+  30,936 decode tokens and 1,543,555 prefill / 193,440 decode tokens); promotion needs a 5%
+  improvement for every reference in every repetition, the lane's qualified context in automatic
+  KV capacity, and a passing quality gate. Arms that change the artifact or KV format also ran the
+  private 89-case role corpus against the incumbent's own run, and a repeated screen reproduced
+  every aggregate metric exactly across fresh processes
+  ([repeatability](measurements/2026-09-04-rtx5090-quality-repeatability.json)), so the small
+  differences are systematic. Results: the RTX 5090 retains `groupwise-int`/BF16/MTP3 — `nvfp4`
+  cannot hold 131,072 context with BF16 KV (the engine refuses its 10.41 GB runtime reservation
+  after 21.5 GB of weights), and with INT8 KV it halves long-prefix TTFT (11.7 s → 5.1 s on a
+  35K-token prefix) while shifting grounding by two cases in 89; the RTX 4090 promotes prefill
+  chunk 2,048 (TTFT 21.9 s → 17.7 s on the same prefix, +270 MiB peak); the RTX 3090 keeps its
+  profile and gains a measured 131,072-token capacity finding. INT8 KV on the RTX 4090 was faster
+  (+8.8% to +13.3%) but peaks at 23,180 of 24,564 MiB and fails the same screen. Receipts:
+  [5090](measurements/2026-09-04-rtx5090-variant-campaign.json) ·
+  [4090](measurements/2026-09-04-rtx4090-variant-campaign.json) ·
+  [3090](measurements/2026-09-04-rtx3090-variant-campaign.json); arm matrix and artifact facts:
+  [arms](measurements/2026-09-04-variant-campaign-arms.json). Runner:
+  [`scripts/run_variant_campaign.py`](../scripts/run_variant_campaign.py) with host launchers in
+  [`scripts/hosts/`](../scripts/hosts/).
 
 ## Current order
 
 The backlog below is a pool; the program's order is fixed in [`ROADMAP.md`](../ROADMAP.md). The
-MTP campaign retains MTP3 and rejects K5/K7 for the current artifacts. The `nvfp4` artifact swap is
-the next v0.4-class requalification decision. Exact-output attribution is a separate targeted
-diagnostic, not a reason to rerun the slower arms or block the artifact decision.
+MTP campaign retains MTP3 and rejects K5/K7 for the current artifacts. The per-lane variant
+campaign closed the `nvfp4` question for the v0.4 train (rejected on the RTX 5090; not buildable
+for `sm_89`/`sm_86`) and produced two configuration-only lane changes to requalify: RTX 4090
+prefill chunk 2,048 and RTX 3090 context 131,072. Each lane now carries its own best measured
+stack rather than one shared configuration.
 
 ## Ideas backlog
 
@@ -157,6 +186,10 @@ hypothesis and method before writing code.
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
 | DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
+| RTX 5090 `nvfp4` artifact swap | Measured on 2026-09-04: 2.22× prefill and −3.5% decode with INT8 KV, refuses to start with BF16 KV at 131,072 context; two-case grounding shift on the private screen | rejected for v0.4; v0.5 candidate with INT8 KV |
+| RTX 4090 prefill chunk 2,048 | Measured on 2026-09-04: +22.8% prefill, +2.0% decode, +270 MiB peak, session time +5.5% to +12.8% against the shipped 512; 4,096 regresses decode | kept; requalify |
+| RTX 3090 131,072-token context | Measured on 2026-09-04: automatic KV capacity 131,072 at 22,465 MiB peak with unchanged throughput on the shipped INT8 profile | kept; qualify |
+| INT8 KV on the RTX 5090 and RTX 4090 lanes | No session-time gain on the RTX 5090 (4.2 GB VRAM headroom only); +8.8% to +13.3% on the RTX 4090 at 23,180 of 24,564 MiB peak; worse role-corpus screen on both | rejected |
 
 ## Contributing a result
 
