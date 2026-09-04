@@ -43,17 +43,25 @@ what can ship next:
    [4090](docs/measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-mtp-agent-ablation.json). No public release profile
    changed.
-4. **`nvfp4` artifact decision — completed post-v0.4.7; not adopted.** The per-lane variant
-   campaign measured the artifact on the RTX 5090 with the same corpus and campaign identity as
-   every other arm. With the shipped BF16 KV it cannot hold 131,072 context (the weights are
-   3.28 GB larger and the engine refuses its runtime reservation); with INT8 KV it prefills
-   2.22× faster (6,089 vs 2,740 tok/s), decodes 3.5% slower, and cuts modeled session time by
-   15.5–28.7%, but the private role-corpus screen — shown to be exactly repeatable across fresh
-   processes — records a two-case grounding shift (evidence precision −2.4 pp, unsupported-claim
-   rate +2.2 pp) alongside fewer canary leaks. The `sm_89`/`sm_86` lanes have no NVFP4 kernels.
-   The groupwise-int artifact stays pinned on all three lanes; `nvfp4` with INT8 KV remains a
-   v0.5 RTX 5090 candidate if that grounding shift is accepted and the durable checkpoint train
-   is requalified on INT8 pages. Receipts:
+4. **`nvfp4` artifact decision — completed post-v0.4.7; not adopted on 32 GB.** The per-lane
+   variant campaign measured the artifact on the RTX 5090 with the same corpus and campaign
+   identity as every other arm. The chain is conditional on the card, not on the artifact's
+   numerics: the weights are 3.28 GB larger, so with the shipped BF16 KV the engine refuses its
+   runtime reservation at 131,072 context; the only way to run it here is INT8 KV; and INT8 KV
+   alone (same groupwise-int artifact) regresses every criterion of the private role-corpus
+   screen. On INT8 KV, `nvfp4` prefills 2.22× faster (6,089 vs 2,740 tok/s), decodes 3.5%
+   slower, cuts modeled session time by 15.5–28.7%, beats the INT8 control on every quality
+   criterion, and still lands two cases behind the BF16 incumbent on grounding (evidence
+   precision −2.4 pp, unsupported-claim rate +2.2 pp) while leaking fewer canaries (4 vs 8); the
+   screen reproduces exactly across fresh processes. Two verdicts are recorded side by side: the
+   campaign's executable gate says retain (the twelve-criterion screen fails on those two
+   grounding criteria, and under the three criteria the frozen manifest originally named —
+   leaks, schema validity, fact recall — the same arm would have passed; the amendment is
+   recorded in the arms manifest), and the product judgment is that `nvfp4` with INT8 KV is a
+   v0.5 RTX 5090 candidate if that grounding shift is accepted and the durable checkpoint train is
+   requalified on INT8 pages. NVFP4 W4A4 needs Blackwell tensor cores, so the `sm_89`/`sm_86`
+   lanes are out of scope (the 4090 upstream removed its NVFP4 path). The groupwise-int artifact
+   stays pinned on all three lanes. Receipts:
    [5090](docs/measurements/2026-09-04-rtx5090-variant-campaign.json) ·
    [4090](docs/measurements/2026-09-04-rtx4090-variant-campaign.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-variant-campaign.json) ·

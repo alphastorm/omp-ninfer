@@ -153,7 +153,8 @@
           "speculative_draft_window": 3,
           "quality_gate": "role-corpus"
         }
-      ]
+      ],
+      "incumbent_verified_against": "local-5090 ninfer-production.json: --max-context 131072 --kv-capacity auto --prefill-chunk 1024 --kv-dtype bf16 --spec mtp --draft-tokens 3 --lm-head-draft --vision"
     },
     "rtx4090": {
       "source_commit": "32aa589982c49d540a68a831d2c89aa83247f5c7",
@@ -218,7 +219,8 @@
           "speculative_draft_window": 3,
           "quality_gate": "role-corpus"
         }
-      ]
+      ],
+      "incumbent_verified_against": "releases/v0.4.7/qualification/rtx4090.json configuration: max_context 131072, kv_dtype rk2v4-e8, prefill_chunk 512, MTP3"
     },
     "rtx3090": {
       "source_commit": "3e37b03eac5633fe434afd84c45c54c2078f1556",
@@ -272,7 +274,8 @@
           "speculative_draft_window": 3,
           "quality_gate": "byte-equivalent"
         }
-      ]
+      ],
+      "incumbent_verified_against": "C:\\ProgramData\\NInfer\\qwen38-3090-omp-v0.2\\releases\\qwen38-3090-omp-v0.2.2-beta.1-72d34b706f18\\config\\server-config.json: max_context 65536, prefill_chunk 1024, kv_dtype int8"
     }
   },
   "probes": [
@@ -306,6 +309,14 @@
     {
       "utc": "2026-09-04T17:01:20Z",
       "event": "repeatability probe: rtx5090 incumbent and nvfp4-int8-c1024-mtp3 role-corpus screens run a second time in fresh processes"
+    }
+  ],
+  "amendments": [
+    {
+      "utc": "2026-09-04T17:45:00Z",
+      "field": "decision_rule.quality_gates.role-corpus",
+      "original_text": "artifact or KV-format change; requires a passing private role-corpus screen receipt (zero canary leaks, schema validity and fact recall not below the incumbent run) before the arm is eligible",
+      "reason": "The executable screen in scripts/run_variant_campaign.py (QUALITY_CRITERIA) was written before any arm ran and applies twelve criteria at a 0.02 tolerance; the manifest text named only three. The text was aligned to the code after the results were known, so both are preserved here. Under the three originally named criteria, nvfp4-int8-c1024-mtp3 would have passed (secret_leak_count 4 <= 8, schema_valid_rate equal, required_fact_recall 0.8832 within 0.02 of 0.8866); it fails the executable gate on evidence_precision (0.9545 vs 0.9786) and unsupported_claim_rate (0.2472 vs 0.2247). The lane receipt's decision follows the executable gate."
     }
   ]
 }
