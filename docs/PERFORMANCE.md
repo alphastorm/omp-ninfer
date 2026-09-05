@@ -105,6 +105,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-014 | Native-lane checkpoint restore | The slow restore is a first-read effect that a second restore avoids | Second restore not faster (4090 132.8 → 149.0 s at 1.13 GB; 3090 91.8 → 92.2 s at 1.68 GB); status endpoint blocked for the whole restore; restore path is the cost | open — filed upstream |
 | EXP-016 | Fleet routing (all lanes) | Splitting a fixed independent-job batch across lanes completes it faster than the RTX 5090 alone | 14-job frozen corpus: 5090 alone 66.8 s; 5090+4090 51.2 s naive / **43.4 s** cost-aware (1.54×); three lanes 47.2 s naive / **32.3 s** cost-aware (2.07×); role-pinned 100.3 s (0.66×). Long-prefill jobs are 3.3–6× more expensive off the 5090; short jobs cost the same everywhere | kept — measured boundary for the fleet configuration; cost-aware dispatch is the recommended policy |
 | EXP-017 | Native-lane checkpoint restore path | The per-page-segment reader, not the disk, is the restore cost; one read per staging window closes it | Fix on both native lanes, same session shapes as EXP-014: RTX 4090 1.13 GB **146.6 → 5.6 s** and **133.4 → 5.6 s** (24–26×); RTX 3090 1.68 GB **91.8 → 10.8 s** and **92.2 → 10.7 s** (8.5×); planted ledger keys quoted exactly after every restart on both lanes and in-process | fixed at source — lane commits `d22ce3fd` (4090) and `3756db6e` (3090); shipped in `v0.4.9` (components `v0.2.2-qwen38-4090-durable.1`, `v0.2.4-qwen38-3090-beta.1`) |
+| EXP-018 | Checkpoint replication (all lanes) | A checkpointed session survives the machine losing its local state, and a replica cannot be forged | Export, carry off, destroy the local copy with the server stopped, carry back, import, restart, exact retrieval of planted keys: RTX 5090 4.5 GB import 10.1 s / restored 24.8 s; RTX 4090 1.13 GB 4.2 s / 7.4 s; RTX 3090 1.69 GB 11.9 s / 11.5 s. Payload byte flip refused by the tool; manifest edit with consistent digests quarantined by the runtime's origin authentication (no resurrection) | delivered — roadmap v0.5 §1; origin authentication ported to both native lanes and requalified |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -314,6 +315,34 @@ Entry detail:
   [3090 shipped (EXP-014)](measurements/2026-09-05-restore-probe-rtx3090.json) ·
   [3090 candidate](measurements/2026-09-05-restore-probe-rtx3090-candidate.json). Publication
   follows the lane rule: each lane requalifies its exact binary before a component release.
+- **EXP-018 — checkpoint replication on all three lanes (2026-09-05).** Roadmap v0.5 §1, gated
+  on EXP-017 (restores in seconds) and on the security gate it names: manifest origin
+  authentication (ninfer#32) existed only on the RTX 5090 container, so it was ported to both
+  native lanes first (every save publishes `manifest.mac`, an HMAC-SHA256 over the manifest keyed
+  by material derived from the bearer key and held outside the checkpoint root; load and status
+  verify origin before trusting manifest content; a present-but-wrong tag quarantines, an absent
+  tag under `--session-checkpoint-require-origin-auth` refuses reversibly; RFC 4231 vectors and
+  window/strict/transient-fault tests; lane commits `17e2f87d` and `7031893c`).
+  [`scripts/checkpoint_sync.py`](../scripts/checkpoint_sync.py) replicates only verified,
+  published generations (manifest-listed files by size and SHA-256, staged outside every scanned
+  directory, one-rename publication, `current` last, unMAC'd generations refused by default).
+  [`scripts/sync_probe.py`](../scripts/sync_probe.py) then proved the contract on each lane
+  against the real store: checkpoint a 58K-token (5090, 4090) or 38K-token (3090) session,
+  export, carry the replica to the macOS workstation over the tailnet, stop the server, delete
+  the session directory, carry the replica back, import, restart, and the continuation restores
+  from the imported generation and quotes three planted ledger keys exactly. The same replica
+  with one payload byte flipped is refused by the tool at import (`does not match its manifest
+  digest`); the same replica with a coherent manifest edit passes the tool and is quarantined by
+  the runtime at load (`state: corrupt`, continuation `checkpoint_corrupt` on the native lanes
+  and `previous_response_not_found` on the container; no resurrection). Timings: RTX 5090
+  4.5 GB export 158 s, import 10.1 s, restored continuation 24.8 s; RTX 4090 1.13 GB export
+  6.2 s, import 4.2 s, restored 7.4 s; RTX 3090 1.69 GB export 19.7 s, import 11.9 s, restored
+  11.5 s. The off-machine hop itself ran at 1.8–3.5 MB/s over the tailnet (28 min for 4.5 GB)
+  and is not a runtime property. Cross-lane import is structurally unreachable: the session
+  namespace binds the bearer key and the fingerprint binds binary and profile. Receipts:
+  [5090](measurements/2026-09-05-sync-probe-rtx5090.json) ·
+  [4090](measurements/2026-09-05-sync-probe-rtx4090.json) ·
+  [3090](measurements/2026-09-05-sync-probe-rtx3090.json).
 
 ## Current order
 
@@ -339,7 +368,7 @@ hypothesis and method before writing code.
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
 | Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | Shipped in v0.4.0: transactional generational store + io_uring O_DIRECT restore; 109,589 tokens restored hot across a docker restart ([qualification](../docs/measurements/2026-08-30-rtx5090-durable-qualification.json)) | shipped v0.4.0 |
-| Checkpoint replication to shared storage | Native IO paths require local filesystems; replicate immutable SHA-manifested generations (copy out, copy back before restore); same-profile-pair portability only | open |
+| Checkpoint replication to shared storage | Delivered 2026-09-05 (EXP-018): `scripts/checkpoint_sync.py` copies verified published generations out and back; origin authentication on every lane; same-profile-pair portability only | completed |
 | Template-fork warm starts | Checkpoint immediately after system-prompt+context prefill and fork subagents from that generation for hot starts; operational pattern over the qualified fork contract | open |
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |

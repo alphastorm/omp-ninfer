@@ -519,6 +519,42 @@ three lanes completed the batch 2.07× faster than the RTX 5090 alone, naive dis
 pinning jobs by role alone 0.66×. Roles describe what a lane is for; where a job runs should
 follow measured per-lane cost (`scripts/fleet_dispatch.py --policy cost`).
 
+## Replicating sessions off the machine
+
+Every lane's session checkpoints are immutable, SHA-manifested generations published under one
+local checkpoint root. The native IO paths (O_DIRECT, DirectStorage) need a local filesystem, so
+a network share is never a checkpoint root; replication is a verified copy out to shared storage
+and a verified copy back before a restore. [`scripts/checkpoint_sync.py`](../scripts/checkpoint_sync.py)
+does exactly that with the standard library:
+
+```sh
+# on the inference host, with the checkpoint root the server was started with
+python3 scripts/checkpoint_sync.py export --root <checkpoint-root> --destination <replica-root> --receipt export.json
+# later, on the same profile (same binary and configuration identity), before the restore
+python3 scripts/checkpoint_sync.py import --source <replica-root> --root <checkpoint-root> --receipt import.json
+```
+
+What the tool guarantees: only the current generation of each session is copied, only after
+every manifest-listed file verifies by size and SHA-256; the copy stages outside every directory
+the runtime scans and publishes with one rename, the session's `current` pointer last; a
+generation without an origin tag (`manifest.mac`) is refused unless you pass
+`--allow-unauthenticated` for a locally produced legacy checkpoint. What the runtime guarantees on
+top: `manifest.mac` is an HMAC over the exact manifest bytes keyed by material derived from the
+lane's bearer key and held outside the checkpoint root, so a coherent rewrite of an imported
+generation is quarantined at load (`checkpoint_corrupt` on the native lanes,
+`previous_response_not_found` on the container) and never restored. Start the server with
+`--session-checkpoint-require-origin-auth` (32-character bearer floor) to refuse unMAC'd
+generations outright — the posture for roots that receive imports.
+
+Portability is same-profile-pair only: the runtime fingerprint binds binary and profile, and the
+session namespace binds the bearer key, so a replica from another lane or another key is not even
+addressable, let alone restorable. Measured on 2026-09-05 with
+[`scripts/sync_probe.py`](../scripts/sync_probe.py) (export, carry off the machine, destroy the
+local copy with the server stopped, carry back, import, restart, exact retrieval of planted
+keys): RTX 5090 4.5 GB import 10.1 s and restored continuation 24.8 s; RTX 4090 1.13 GB import
+4.2 s, restored 7.4 s; RTX 3090 1.69 GB import 11.9 s, restored 11.5 s — receipts in
+[`docs/measurements/`](measurements/) (`2026-09-05-sync-probe-*.json`).
+
 ## 9. Send feedback
 
 Choose the structured form that matches the result:

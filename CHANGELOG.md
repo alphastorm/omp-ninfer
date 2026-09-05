@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/checkpoint_sync.py` (roadmap v0.5 §1): replicate a checkpoint root's published
+  session generations to shared storage and import them back before a restore. Only the current
+  generation of each session is copied, only after every manifest-listed file verifies by size
+  and SHA-256; the copy stages outside every directory the runtime scans, publishes with one
+  rename, and replaces `current` last; generations without an origin tag are refused unless
+  `--allow-unauthenticated`. `scripts/sync_probe.py` proves the contract against a live lane
+  (export, carry off the machine, destroy the local copy, carry back, import, restart, exact
+  retrieval of planted keys; payload tamper refused by the tool; manifest forgery quarantined by
+  the runtime). Receipts for all three lanes (EXP-018).
+- Manifest origin authentication on both native Windows lanes
+  ([ninfer#32](https://github.com/alphastorm/ninfer/issues/32), ported from the RTX 5090
+  container): every save publishes `manifest.mac`, loads and status verify origin before
+  trusting manifest content, and `--session-checkpoint-require-origin-auth` is the strict,
+  reversible import posture. RTX 4090 v0.2.3 (head `e186e04e`) and RTX 3090 v0.2.5-beta.1
+  requalified on their own rigs; the `docs/QUICKSTART.md` "Replicating sessions off the machine"
+  section documents the operator path.
+
 ## [0.4.9] - 2026-09-05
 
 ### Added

@@ -103,15 +103,27 @@ what can ship next:
 
 The 0.5 series is about one thing: a session stops being bound to the card that created it.
 
-1. **Checkpoint sync — replicate, don't serve.** The native IO paths are O_DIRECT/DirectStorage
-   and require local filesystems, so network shares are never a checkpoint root. Generations are
-   immutable, SHA-manifested, and atomically published, so replication is a crash-consistent copy
-   of `sessions/` to shared storage (NAS/S3) and a copy-back to local NVMe before restore.
-   Security gate first: checkpoints that cross a trust boundary need manifest origin
-   authentication ([ninfer#32](https://github.com/alphastorm/ninfer/issues/32)) — a keyed MAC
-   with a compatibility window — before any import path opens. Portability stays
-   same-profile-pair only: the runtime fingerprint binds binary and profile, so identical-lane
-   machine pairs can resume and cross-lane resume (5090↔4090) structurally cannot.
+1. **Checkpoint sync — replicate, don't serve. Delivered 2026-09-05 (EXP-018).** The native IO
+   paths are O_DIRECT/DirectStorage and require local filesystems, so network shares are never a
+   checkpoint root; replication is a verified copy of published generations out and back.
+   The security gate came first: manifest origin authentication
+   ([ninfer#32](https://github.com/alphastorm/ninfer/issues/32)) existed only on the RTX 5090
+   container and is now on both native lanes (`manifest.mac`, keyed off the bearer, held outside
+   the root; strict `--session-checkpoint-require-origin-auth` posture for roots that receive
+   imports). [`scripts/checkpoint_sync.py`](scripts/checkpoint_sync.py) copies only verified
+   published generations, stages outside the runtime's scan, publishes with one rename and the
+   `current` pointer last, and refuses unMAC'd generations by default.
+   [`scripts/sync_probe.py`](scripts/sync_probe.py) proved on every lane that a session survives
+   the machine losing its local state (export → carry off → delete with the server stopped →
+   carry back → import → restart → exact retrieval of planted keys: 5090 4.5 GB restored in
+   24.8 s, 4090 1.13 GB in 7.4 s, 3090 1.69 GB in 11.5 s) and that a replica cannot be forged (a
+   payload flip is refused by the tool; a coherent manifest edit is quarantined by the runtime,
+   no resurrection). Portability stays same-profile-pair only: the runtime fingerprint binds
+   binary and profile and the session namespace binds the bearer key, so cross-lane resume
+   (5090↔4090) is not even addressable. Receipts:
+   [5090](docs/measurements/2026-09-05-sync-probe-rtx5090.json) ·
+   [4090](docs/measurements/2026-09-05-sync-probe-rtx4090.json) ·
+   [3090](docs/measurements/2026-09-05-sync-probe-rtx3090.json).
 2. **Template-fork warm starts — measured 2026-09-04; not yet a warm start.** Checkpoint a session
    immediately after the system prompt and repository context are prefilled, then fork every
    subagent from that generation so each one starts hot instead of paying a 30–90 s prefill. The
