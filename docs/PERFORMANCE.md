@@ -101,6 +101,8 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-010 | RTX 4090 prefill chunk | A larger prefill chunk than the shipped 512 improves session time on `rk2v4-e8` | Chunk 512/1,024/2,048/4,096: prefill 1,605/1,877/1,971/1,974 tok/s, decode 110.69/111.82/112.92/108.37 tok/s; 2,048 clears the 5% margin in every repetition (+5.5% to +12.8%), 1,024 and 4,096 do not | kept — requalify at 2,048 |
 | EXP-011 | RTX 3090 prefill chunk and context | The shipped INT8/1,024/65,536 profile leaves speed or capacity on the table | Chunk 512/2,048: −2.9% to −0.5%; `--max-context 131072` fits with automatic KV capacity 131,072 at 22,465 MiB peak and identical throughput (65.08 vs 65.69 decode tok/s) | kept — qualify 131,072 context |
 | EXP-012 | Template-fork warm starts (all lanes) | Checkpointing a prefilled template and forking subagents from it starts them hot, including across a process restart | RTX 5090 (57.9K-token template): device-resident sibling forks alternate 1.3 s / 22.5 s (anchor / full re-prefill) while a 67.7K template gives four 1.3 s forks; after restart the 4.51 GB checkpoint restores in ≈23.6 s ≈ the 21.8 s cold prefill. RTX 4090: no sibling reuse (41–47 s per fork) and a 1.13 GB restore takes ≈130 s vs a 41 s prefill. RTX 3090: no sibling reuse (49–51 s) and restore ≈91 s vs 49 s | negative; hot forks only on the 5090 and only reliably ≥ ~64K tokens; restore never beats re-prefill |
+| EXP-013 | RTX 5090 fanout anchor retention | The sub-64K alternation is a serve policy defect fixable in source | Capacity, not policy: private catalog 2 entries + 2 device-state slots; search-cap and marker source changes rejected on the probe; `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` on the unchanged binary gives 12/12 anchor hits at 57.9K, 67.7K, and loaded 57.9K for 0.43 GiB slack | kept — v0.4.8 RTX 5090 candidate profile |
+| EXP-014 | Native-lane checkpoint restore | The slow restore is a first-read effect that a second restore avoids | Second restore not faster (4090 132.8 → 149.0 s at 1.13 GB; 3090 91.8 → 92.2 s at 1.68 GB); status endpoint blocked for the whole restore; restore path is the cost | open — filed upstream |
 
 Entry detail:
 
@@ -198,6 +200,38 @@ Entry detail:
   Receipts: [5090](measurements/2026-09-04-template-fork-rtx5090.json) ·
   [4090](measurements/2026-09-04-template-fork-rtx4090.json) ·
   [3090](measurements/2026-09-04-template-fork-rtx3090.json).
+- **EXP-013 — fanout anchor retention on the RTX 5090: diagnosis and configuration fix
+  (2026-09-05).** The alternation in EXP-012 is capacity, not policy. Status counters sampled
+  between forks show `private_evictions` rising by exactly one per completed stored fork against a
+  private catalog of two entries (the default is 2 × concurrency) backed by two device-state slots,
+  and the cold forks' planner diagnostics record a 477 s incumbent with the anchor subtree still
+  queued at a 28 s lower bound. Two source changes were built and rejected on the same probe:
+  raising the planner's 5 ms search cap to 50 ms only changed the stop reason
+  (`value_of_next_expansion` after 354 targets, same decision), and marking only the inherited
+  frontier on stored continuations only shifted the phase (cold / hot / cold / hot).
+  `--max-private-continuations 8` alone fixed 57.9K and then lost all four forks of a following
+  67.7K template in the same process (`host_state 8/8` saturated, predicted materialization
+  ≈600 s). With the backing slots scaled — `--max-private-continuations 8 --device-state-slots 4
+  --host-state-slots 24` on the unchanged shipped v0.4.6 binary — one container served 12/12
+  anchor hits across 57.9K, 67.7K, and a loaded-catalog 57.9K (1.2–1.6 s per fork; one hit paid a
+  4.27 s state materialization) for 0.43 GiB of startup slack (3.56 → 3.13 GiB, headroom kept at
+  1.00 GiB) and 28,632 MiB after twelve forks vs 28,125–28,195 MiB on the shipped profile, with
+  automatic KV capacity unchanged at 131,072. That configuration is the v0.4.8 RTX 5090 candidate
+  profile; its acceptance receipt is this probe at both template sizes in one process. Filed as
+  [alphastorm/ninfer#35](https://github.com/alphastorm/ninfer/issues/35). Receipt:
+  [configuration sweep](measurements/2026-09-05-fanout-anchor-configuration-sweep-rtx5090.json).
+- **EXP-014 — checkpoint restore path on the native lanes (2026-09-05).**
+  [`scripts/restore_probe.py`](../scripts/restore_probe.py) restores one session across two
+  verified restarts while polling the checkpoint status endpoint. The second restore is not
+  faster (RTX 4090: 132.8 s then 149.0 s for 1.13 GB, ≈8.5 MB/s; RTX 3090: 91.8 s then 92.2 s for
+  1.68 GB, ≈18.5 MB/s), so page cache and first-read effects are excluded and the restore path
+  itself is the cost; the status endpoint stops answering for the whole restore on both lanes;
+  neither train logs restore progress. The RTX 4090's own qualification recorded a 120K-token
+  restore in 7.0–10.8 s on the same release identity, which is the first discrepancy to
+  establish. No IO-path change was made; filed with the numbers as
+  [alphastorm/ninfer#36](https://github.com/alphastorm/ninfer/issues/36). Receipts:
+  [4090](measurements/2026-09-05-restore-probe-rtx4090.json) ·
+  [3090](measurements/2026-09-05-restore-probe-rtx3090.json).
 
 ## Current order
 

@@ -1,0 +1,130 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 1,
+  "lane": "rtx3090",
+  "generated_utc": "2026-09-05T00:57:02Z",
+  "base_tokens_requested": 32000,
+  "summary": {
+    "template_input_tokens": 38215,
+    "cold_prefill_s": 49.278,
+    "checkpoint_bytes": null,
+    "restore_0_wall_s": 91.827,
+    "restore_1_wall_s": 92.207
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 49.278,
+      "input_tokens": 38215
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 9.917,
+      "mode": "explicit",
+      "generation": null,
+      "bytes": null,
+      "frontier": null
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 56.126,
+      "ready_after_s": 0.35,
+      "prefill_counter_before": 38268,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 91.827,
+      "id": "resp_155d98d4576a46e06c31bd9d4036b1c9",
+      "input_tokens": 38283,
+      "status_polls": [
+        {
+          "t_s": 0.47,
+          "bytes": 1683038447,
+          "created_at_unix_ms": 1788569512028,
+          "frontier_tokens": 38254,
+          "generation": "1788569502602-0",
+          "response_records": 1,
+          "restored_tokens": 38254,
+          "schema_version": 3,
+          "state": "available"
+        },
+        {
+          "t_s": 31.47,
+          "error": "TimeoutError('timed out')"
+        },
+        {
+          "t_s": 90.0,
+          "bytes": 1683038447,
+          "created_at_unix_ms": 1788569512028,
+          "frontier_tokens": 38254,
+          "generation": "1788569502602-0",
+          "response_records": 1,
+          "restored_tokens": 38254,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T00:52:46Z"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 9.697,
+      "mode": "explicit",
+      "generation": null
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 50.791,
+      "ready_after_s": 0.35,
+      "prefill_counter_before": 82,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 92.207,
+      "id": "resp_acccb70225fcd202fc6afbc19bb89f46",
+      "input_tokens": 38391,
+      "status_polls": [
+        {
+          "t_s": 0.47,
+          "bytes": 1687638363,
+          "created_at_unix_ms": 1788569670147,
+          "frontier_tokens": 38362,
+          "generation": "1788569660944-0",
+          "response_records": 2,
+          "restored_tokens": 38362,
+          "schema_version": 3,
+          "state": "available"
+        },
+        {
+          "t_s": 31.48,
+          "error": "TimeoutError('timed out')"
+        },
+        {
+          "t_s": 90.62,
+          "bytes": 1687638363,
+          "created_at_unix_ms": 1788569670147,
+          "frontier_tokens": 38362,
+          "generation": "1788569660944-0",
+          "response_records": 2,
+          "restored_tokens": 38362,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T00:55:19Z"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 9.925,
+      "mode": "explicit",
+      "generation": null
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

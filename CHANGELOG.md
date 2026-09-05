@@ -37,6 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   template alternates hot/cold forks), and checkpoint restore is slower than re-prefill on every
   lane (5090 24.7 s vs 21.8 s, 4090 130 s vs 41 s, 3090 91 s vs 49 s). Receipts published; no
   release profile changed.
+- The RTX 5090 fork alternation was diagnosed as context-cache capacity, not planner policy:
+  two source changes were rejected on the probe, and the unchanged shipped binary with
+  `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` served 12/12
+  anchor hits at 57.9K, 67.7K, and a loaded-catalog 57.9K for 0.43 GiB of slack — the v0.4.8
+  RTX 5090 candidate profile. `scripts/restore_probe.py` shows a second restore of the same
+  session is no faster on the native lanes (4090 132.8 → 149.0 s, 3090 91.8 → 92.2 s) and that the
+  status endpoint blocks for the restore; both findings are filed upstream (ninfer#35, #36).
 
 ## [0.4.7] - 2026-09-01
 

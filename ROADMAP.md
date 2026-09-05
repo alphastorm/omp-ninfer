@@ -101,13 +101,25 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    the private anchor catalog holds two entries and evicts the shared base anchor; 67.7K gives four
    1.3 s forks); across a process restart the checkpoint restore is never faster than
    re-prefilling the template (5090: 24.7 s vs 21.8 s at 4.5 GB; 4090: 130 s vs 41 s at 1.13 GB;
-   3090: 91 s vs 49 s), and the native lanes have no sibling reuse at all. Two runtime follow-ups
-   own this item: anchor retention for sub-64K templates on the 5090 (the next candidate build
-   uses this probe as its acceptance receipt) and checkpoint restore bandwidth on every lane,
-   which is diagnosed per lane with the same probe before any IO-path change is proposed. Receipts:
+   3090: 91 s vs 49 s), and the native lanes have no sibling reuse at all. The sub-64K loss was
+   diagnosed on 2026-09-05 as capacity, not policy: the shipped context-cache defaults (private
+   catalog 2, device-state slots 2) cannot hold a base anchor and one stored sibling. Two source
+   changes were rejected on the probe; the unchanged shipped binary with
+   `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` served 12/12
+   anchor hits at 57.9K, 67.7K, and a loaded-catalog 57.9K in one process for 0.43 GiB of slack.
+   That configuration is the v0.4.8 RTX 5090 candidate profile, gated by this probe at both
+   template sizes in one process; it changes the profile identity, so existing session checkpoints
+   do not carry across and the durable train requalifies with it
+   ([ninfer#35](https://github.com/alphastorm/ninfer/issues/35)). Restore bandwidth stays a
+   runtime item: a second restore of the same session is no faster on either native lane and the
+   status endpoint blocks for its duration
+   ([ninfer#36](https://github.com/alphastorm/ninfer/issues/36)). Receipts:
    [5090](docs/measurements/2026-09-04-template-fork-rtx5090.json) ·
    [4090](docs/measurements/2026-09-04-template-fork-rtx4090.json) ·
-   [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json).
+   [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json) ·
+   [anchor sweep](docs/measurements/2026-09-05-fanout-anchor-configuration-sweep-rtx5090.json) ·
+   [restore 4090](docs/measurements/2026-09-05-restore-probe-rtx4090.json) ·
+   [restore 3090](docs/measurements/2026-09-05-restore-probe-rtx3090.json).
 3. **Fleet routing.** One OMP configuration spanning the 3090/4090/5090 lanes with explicit
    per-lane roles. A fixed two-machine workload gets measured before any fleet completed-work or
    throughput claim — that boundary stands until the receipt exists.

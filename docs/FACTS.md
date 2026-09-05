@@ -72,7 +72,9 @@ during checkpoint traffic 0.91 s; automatic saves debounce to sustained-idle and
 already-catalogued frontiers). Measured on 2026-09-04, that sibling reuse holds for templates of
 roughly 64K tokens or more; a 57.9K-token template alternated anchored and re-prefilled forks, and
 restoring a checkpoint after a restart was no faster than re-prefilling it on any lane
-([EXP-012](PERFORMANCE.md#experiment-ledger)).
+([EXP-012](PERFORMANCE.md#experiment-ledger)); the sub-64K loss is context-cache capacity, and a larger
+private catalog with scaled state slots removed it on the unchanged binary as the v0.4.8 candidate
+profile ([EXP-013](PERFORMANCE.md#experiment-ledger)).
 
 Operators may describe this problem as persistent KV cache, restartable context, session
 checkpointing, stateful local inference, or avoiding cold re-prefill. The actual guarantee is
