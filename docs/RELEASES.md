@@ -7,13 +7,13 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.7`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.7` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.8`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.4.8` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
 
-### Post-v0.4.7 development evidence
+### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
 The corrected 2026-09-04 agent-shaped MTP0/3/5/7 campaign changes no released component or
 profile. MTP3 was fastest on every lane and in both repetitions; K5/K7 were 13.57%/24.72% slower
@@ -25,37 +25,30 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 [4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
 [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).
 
-### v0.4.8 draft (staged 2026-09-05, not cuttable yet)
-
-`releases/v0.4.8/manifest.json` is a `draft` that rebinds all three lanes to requalified
-configurations while the public release and the root compatibility authority stay at `v0.4.7`:
-
-- RTX 5090: same runtime component (`v0.4.5-qwen38-5090-beta.1`, image `876c7809...`), new
-  deployment profile `qwen38-5090-v0.4.8` with configuration `95765a38...` (context cache
-  `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`), measured through
-  the lifecycle tool ([receipt](../releases/v0.4.8/qualification/rtx5090.json)).
-- RTX 4090: `v0.2.1-qwen38-4090-durable.1` (`ninfer` commit `b9c4636b`, package `1c66f7d5...`),
-  prefill chunk 2,048 ([receipt](../releases/v0.4.8/qualification/rtx4090.json)).
-- RTX 3090: `v0.2.3-qwen38-3090-beta.1` (`ninfer` commit `2ce6c9dc`, package `96c9c37f...`),
-  131,072-token context ([receipt](../releases/v0.4.8/qualification/rtx3090.json)).
-
-Both native components are published and every manifest URL resolves to its bound hash
-([`v0.2.3-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.3-qwen38-3090-beta.1),
-[`v0.2.1-qwen38-4090-durable.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.1-qwen38-4090-durable.1)),
-and the composed external-installation acceptance was rerun on 2026-09-05
-([receipt](../releases/v0.4.8/acceptance/composed-external-installation.json): anonymous pull by
-digest, anonymous assets, workstation checksum verification, lifecycle launch identity, auth
-boundary, stateful resume, fail-closed delete, plus the
-[RTX 3090](../releases/v0.4.8/acceptance/rtx3090-public-install.json) and
-[RTX 4090](../releases/v0.4.8/acceptance/rtx4090-public-install.json) public-URL install
-acceptances driven by [`scripts/hosts/accept-native-public-install.ps1`](../scripts/hosts/accept-native-public-install.ps1)).
-What remains is the cut itself: apply the root authority flip that `scripts/stage_release.py`
-performs (profile release/deployment-profile rewrites, compatibility mirror and render), the pin
-dance (`rebind_release.py --pin`), and the product tag. `verify_release.py --release v0.4.8`
-reports exactly those remaining flips; `verify_release.py` without arguments still validates the
-ready `v0.4.7`.
-
 ## Version identities
+
+### v0.4.8 public release (requalified lane configurations)
+
+- Product release: `alphastorm/omp-ninfer@v0.4.8`, GitHub `Latest`. Each lane ships on its own
+  best measured configuration, requalified on its own rig on 2026-09-05 and accepted from the
+  published URLs:
+  - RTX 5090: same runtime component (`v0.4.5-qwen38-5090-beta.1`, image `876c7809...`) under
+    the new deployment profile `qwen38-5090-v0.4.8` (configuration `95765a38...`:
+    `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`, so sibling forks
+    of a stored template keep the shared base anchor) - measured through the lifecycle tool
+    ([receipt](../releases/v0.4.8/qualification/rtx5090.json)).
+  - RTX 4090: [`ninfer@v0.2.1-qwen38-4090-durable.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.1-qwen38-4090-durable.1)
+    (commit `b9c4636b`, package `1c66f7d5...`), prefill chunk 2,048
+    ([receipt](../releases/v0.4.8/qualification/rtx4090.json)).
+  - RTX 3090: [`ninfer@v0.2.3-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.3-qwen38-3090-beta.1)
+    (commit `2ce6c9dc`, package `96c9c37f...`), 131,072-token context
+    ([receipt](../releases/v0.4.8/qualification/rtx3090.json)).
+- Composed external-installation acceptance rerun on 2026-09-05
+  ([receipt](../releases/v0.4.8/acceptance/composed-external-installation.json)) with native
+  public-URL install acceptances on the
+  [RTX 3090](../releases/v0.4.8/acceptance/rtx3090-public-install.json) and
+  [RTX 4090](../releases/v0.4.8/acceptance/rtx4090-public-install.json), driven by
+  [`scripts/hosts/accept-native-public-install.ps1`](../scripts/hosts/accept-native-public-install.ps1).
 
 ### v0.4.7 public release (corrects v0.4.6 asset URLs)
 

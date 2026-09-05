@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-08-31 · Current stable release: **v0.4.7**
+Last verified: 2026-09-05 · Current stable release: **v0.4.8**
 
-Everything on this page is bound to the [v0.4.7 release manifest](../releases/v0.4.7/manifest.json)
+Everything on this page is bound to the [v0.4.8 release manifest](../releases/v0.4.8/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -42,9 +42,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.6 durable container with fanout, decoupled export, and origin-authenticated checkpoints |
-| RTX 4090 | native Windows service | 131,072 | durable v0.2 lane (native Windows, MTP3, bound by v0.4.6) |
-| RTX 3090 | native Windows service | 65,536 | durable v0.2.2 lane (bound by v0.4.7) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.8 profile on the v0.4.6 durable container: fanout, decoupled export, origin-authenticated checkpoints, and a context cache sized so sibling forks keep the base anchor |
+| RTX 4090 | native Windows service | 131,072 | durable v0.2.1 lane (native Windows, MTP3, prefill chunk 2,048, bound by v0.4.8) |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.3-beta.1 lane (bound by v0.4.8) |
 
 ## Current model and artifact
 
@@ -92,7 +92,9 @@ remote lanes reached through authenticated SSH local forwards.
   checkpoint vs **47.920 s** fresh-process cold rebuild.
 - **144.80 tok/s** decode on the agent-shaped qualification gate (44.10% MTP acceptance);
   152.2 tok/s at 83.3% acceptance on the retrieval workload.
-- Exact needle retrieval at a **130,448-token** prompt.
+- Exact needle retrieval at a **130,048-token** prompt (2,207.10 tok/s cold on the v0.4.8 profile;
+  the v0.4.0 gate measured 2,186.30 tok/s at 130,448 tokens).
+- **136.03 tok/s** decode at 41.20% MTP acceptance on the v0.4.8 profile's technical-writing gate.
 - Full receipts: [benchmarks](BENCHMARKS.md) · [release manifest](../releases/v0.4.0/manifest.json).
 
 Warm/cold figures are always retained state versus fresh-process cold start — never versus an

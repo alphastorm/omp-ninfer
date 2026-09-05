@@ -120,6 +120,21 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.4.8 — requalified lane configurations (2026-09-05)
+
+Each lane reran its own qualification with its changed configuration; receipts in
+[`releases/v0.4.8/qualification/`](../releases/v0.4.8/qualification/).
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 decode | **136.03 tok/s** | 2,048 completion tokens at temperature 0 on the technical-writing gate; 41.20% MTP3 acceptance (1,130 of 2,745 drafted tokens, 2.24 tokens/round); byte-identical across five runs ([gates receipt](measurements/2026-09-05-rtx5090-v048-profile-gates.json)) |
+| RTX 5090 130,048-token prefill | **2,207.10 tok/s** | exact planted-needle retrieval, cold process (58.92 s server prefill, 28,558 MiB used); 131,072-token ceiling |
+| RTX 5090 fanout | **4/4 anchor hits** | at 57,853 tokens (1.36 / 1.22 / 1.22 / 1.20 s) and 67,681 tokens (1.43 / 1.30 / 1.37 / 1.39 s) in one process under `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`; 4.5 GB explicit save in 12.6 s; verified restart ([57.9K](measurements/2026-09-05-rtx5090-v048-fanout-57k.json) · [67.7K](measurements/2026-09-05-rtx5090-v048-fanout-67k.json)) |
+| RTX 5090 restart | **first fork re-prefills once** | after a restart the resumed template's first sibling fork paid 22.2 s (`root`) before three hot forks: restored sessions carry the endpoint, not the base anchor |
+| RTX 4090 session | **68.0 s** for 102,060 tokens | 84.9 s on v0.2.0's prefill chunk 512; persistence restores 102,075 tokens via `append_frontier`; protocol 15/15; OMP Golden-equivalent exact (v0.2.1) |
+| RTX 3090 context | **130,048 prompt tokens** | exact retrieval in 218.2 s at the new 131,072 ceiling (v0.2.3-beta.1) |
+| RTX 3090 managed C1 | **90.23 tok/s** | 890.72 tok/s prefill, 93.43% MTP3, 300.4 W, 22,548 MiB peak; restart, rollback, security, and OMP gates passed |
+
 ### RTX 5090 — container, MTP3, durable checkpoints (v0.4.0)
 
 New runtime bytes (source `1ceaeebd`, image digest `8de5efdf…`) qualified live on the owner

@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.4.7](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.4.8](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -26,7 +26,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-135%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-136%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -48,8 +48,8 @@ re-sending the transcript.</sub>
 | --- | --- |
 | Retained state outlives the turn — and the process | Warm follow-up **1.790 s vs 47.920 s cold** at a 109,594-token session, and **0.778 s first token after a docker restart** from the durable checkpoint — the current measurement receipts |
 | Agent branches share the base, not re-prefill it | Four subagent branches from one 67.7K-token base: **148.7 s → 3.84 s** on v0.4.4, **0.40 s** to first token when the anchor is device-resident |
-| Interactive output is fast | **134.80 tok/s** decode on the qualified RTX 5090 profile (38.80% MTP acceptance at temperature 0 on the technical-writing gate) |
-| Long coding sessions fit | Exact retrieval at a **130,448-token** prompt; 131,072-token ceiling |
+| Interactive output is fast | **136.03 tok/s** decode on the qualified RTX 5090 profile (41.20% MTP acceptance at temperature 0 on the technical-writing gate) |
+| Long coding sessions fit | Exact retrieval at a **130,048-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
 | Checkpoints don't stall the session | Export runs off the engine lock on v0.4.4: warm follow-up during checkpoint traffic **15.26 s → 0.91 s**, explicit 5.19 GB save **31.6 s → 13.8 s** |
 
@@ -64,7 +64,7 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.4.7 is the current public release.** If you own a qualified card, the
+> **v0.4.8 is the current public release.** If you own a qualified card, the
 > [quickstart](docs/QUICKSTART.md) is the whole onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
@@ -123,15 +123,16 @@ give you together elsewhere:
 ![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.4.7/qualification.json):
+[`qualification.json`](releases/v0.4.8/qualification.json):
 
 | Gate | Result |
 | --- | --- |
-| RTX 5090 decode | **152.2 tok/s** over 2,048 tokens; MTP3, 99.87% acceptance |
-| RTX 5090 prefill | **2,186.30 tok/s** at 130,448 tokens, exact retrieval |
+| RTX 5090 decode | **136.03 tok/s** over 2,048 tokens at temperature 0; MTP3, 41.20% acceptance (1,130 of 2,745 drafted tokens), byte-identical across five runs |
+| RTX 5090 prefill | **2,207.10 tok/s** at 130,048 tokens, exact retrieval, cold process |
+| RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,681 tokens (1.20–1.43 s each) with the v0.4.8 context-cache profile; 4.5 GB explicit save; verified restart |
 | Warm vs cold follow-up | **1.790 s** vs 47.920 s at a 109,594-token session, and **0.778 s** first token after a process restart — v0.4.0 qualification, server-side, one sample per point |
-| RTX 3090 native | **90.00 tok/s** decode, 93.43% MTP3 acceptance, exact 64,512-token retrieval, 310 MB durable restart, durable v0.2.2 train, 299.9 W observed peak |
-| RTX 4090 native | **93–98 tok/s** decode (MTP3, v0.3.1), 107,851-token restored continuation, exact OMP Golden-equivalent |
+| RTX 3090 native | **90.23 tok/s** decode, 93.43% MTP3 acceptance, exact 130,048-token retrieval at the new 131,072 ceiling, 310 MB durable restart, durable v0.2.3-beta.1 train, 300.4 W observed peak |
+| RTX 4090 native | 102,060-token session in **68.0 s** (84.9 s on v0.2.0) with prefill chunk 2,048, 102,075-token restored continuation after a process restart, exact OMP Golden-equivalent (durable v0.2.1) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
 Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on
@@ -167,7 +168,7 @@ WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned
 route needs one published OMP client and about 40 GiB free disk.
 
 ```powershell
-git clone --branch v0.4.7 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.4.8 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -226,7 +227,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.4.7 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.4.8 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
@@ -261,15 +262,13 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
-`v0.4.7` exposes three qualified GPU lanes with durable restart and same-lane agent fanout.
-The agent-shaped MTP depth campaign retains MTP3 on all three lanes, and the per-lane variant
-campaign settled the `nvfp4` question: the artifact cannot hold 131,072 context with BF16 KV on the
-RTX 5090, and with INT8 KV its 2.22× prefill comes with a measured two-case grounding shift, so the
-groupwise-int artifact stays pinned. Lanes are now tuned independently: next are the RTX 4090
-prefill-chunk 2,048 and RTX 3090 131,072-token context requalifications, then the v0.5
-checkpoint-replication work. Signing/notarization, a shared public client acceptance runner, and
-multi-owner clean-install evidence remain on the path to v1.0. No item becomes a support claim
-before an exact package, receipt, and product manifest bind it.
+`v0.4.8` ships each lane on its own best measured configuration: the RTX 5090 context-cache
+profile that keeps sibling forks on the shared base anchor, RTX 4090 prefill chunk 2,048, and the
+RTX 3090 at 131,072-token context - every one requalified on its own rig and accepted from public
+URLs. Next comes the v0.5 checkpoint-replication work; the runtime follow-ups filed from the
+fanout diagnosis (ninfer#35, #36) stay upstream. Signing/notarization, a shared public client
+acceptance runner, and multi-owner clean-install evidence remain on the path to v1.0. No item
+becomes a support claim before an exact package, receipt, and product manifest bind it.
 
 Scope boundaries and explicit non-claims: [`ROADMAP.md`](ROADMAP.md).
 

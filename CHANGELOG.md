@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.8] - 2026-09-05
+
 ### Added
 
 - A deterministic, public-text agent corpus and stdlib-only MTP ablation runner now measure
@@ -447,7 +449,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.7...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...HEAD
+[0.4.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.4...v0.4.5

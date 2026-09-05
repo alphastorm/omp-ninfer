@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.4.7` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.4.8` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.4.7
+## Where this is now — v0.4.8
 
 All three lanes install from public URLs with durable, restart-resumable session state, and the
 RTX 5090 lane now reuses a session's base prefill across sibling agent branches: four branches
@@ -66,8 +66,8 @@ what can ship next:
    [4090](docs/measurements/2026-09-04-rtx4090-variant-campaign.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-variant-campaign.json) ·
    [repeatability](docs/measurements/2026-09-04-rtx5090-quality-repeatability.json).
-5. **Per-lane configuration changes from the same campaign — requalified 2026-09-05; `v0.4.8`
-   draft staged.** Lanes are tuned independently: the goal is the best measured stack per card,
+5. **Per-lane configuration changes from the same campaign — requalified 2026-09-05; shipped in
+   `v0.4.8`.** Lanes are tuned independently: the goal is the best measured stack per card,
    not one shared configuration. Each lane reran its own qualification on its own rig with the
    changed configuration and a rebound identity:
    - RTX 4090 `v0.2.1` (`ninfer` commit `b9c4636b`, package `1c66f7d5`): prefill chunk 512 →
@@ -91,10 +91,8 @@ what can ship next:
    `v0.2.3-qwen38-3090-beta.1`; every manifest URL verified against its hash) and the composed
    external-installation acceptance was rerun from those URLs on 2026-09-05
    ([receipt](releases/v0.4.8/acceptance/composed-external-installation.json)).
-   `releases/v0.4.8/manifest.json` stays a `draft` pending the cut itself: the root authority flip
-   (`stage_release.py`'s profile and compatibility rewrites), `rebind_release.py --pin`, and the
-   product tag. Until then the public release stays `v0.4.7` and the RTX 5090 appliance keeps
-   serving the v0.4.6 profile.
+   Cut as `v0.4.8` on 2026-09-05. The owner's RTX 5090 appliance promotes to the v0.4.8 profile
+   through its own private role-corpus gate, separately from the product release.
 6. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
    missing fresh-process MTP0 controls and targeted K0/K3 first-divergence probes. Do not rerun the
    rejected K5/K7 arms without new evidence that could reverse their measured deficit.
@@ -177,6 +175,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.4.8` | Each lane on its own best measured configuration: RTX 5090 context-cache profile (sibling forks keep the base anchor), RTX 4090 prefill chunk 2,048, RTX 3090 131,072-token context; every lane requalified on its rig and accepted from public URLs |
 | `v0.4.7` | Corrected immutable runtime asset URLs from v0.4.6; component bytes unchanged |
 | `v0.4.6` | Checkpoint-origin authentication for future cross-machine replication; 4090/3090 components rebound unchanged |
 | `v0.4.5` | RTX 3090 joined the durable train with automatic saves, explicit checkpoints, restart qualification, and fanout support |

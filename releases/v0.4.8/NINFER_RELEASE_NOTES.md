@@ -1,33 +1,41 @@
-# OMP NInfer v0.4.2 - the heavy lane joins the durable train
+# OMP NInfer v0.4.8 - each lane on its own best measured configuration
 
-The RTX 4090 native Windows lane moves to the durable v0.2 package: the v0.4.1 checkpoint-store
-hardening ported onto the native lineage, five upstream ports folded, and the pinned-client
-status contract fixed at source. All three lanes now serve the pinned OMP 18.0.9 client from a
-cold start.
+Three configuration-only changes, one per lane, each requalified on its own rig on 2026-09-05
+and accepted from the published URLs. No runtime source changed on the RTX 5090 lane; the two
+native lanes rebuilt code-identical binaries under new patch-stack identities so that their
+packaged configurations carry their own identity.
 
 ## What changed
 
-- **RTX 4090 durable v0.2** (`v0.2.0-qwen38-4090-durable.1`): named checkpoint skip reasons,
-  health-gated publish transient tolerance, post-publish reclamation acknowledgment, chunked
-  KV snapshot restore with a fail-closed cross-layout guard, hardened D3D12 residency
-  verification, WDDM evictable-budget CLI opt-in, streaming UTF-8 repair, MTP K=15 capacity
-  (shipped arm stays MTP3 - the ablation says wider drafts lose: 44.2% acceptance at K=3 vs
-  26.1/19.0 at K=5/7, and K>5 checkpoints cannot restore on a v0.3.1 rollback).
-- **ninfer#28 closed**: /v1/ninfer/status emits the full concrete telemetry hierarchy; the
-  pinned client validator accepts it (regression mirrors the validator field-for-field).
-- **Requalified on the owner rig**: protocol checks, a 102,060-token seeded session,
-  post-restart persistence restoring 102,075 tokens on a fresh process (0.171 s prepare),
-  and OMP golden equivalence - all passed (receipt in `qualification/rtx4090.json`).
-- **Fleet measurements**: 3090 power sweep (350 W knee, +5.9% over 300 W; PCIe gen3 x8 host
-  link documented), warm 0.419 s vs cold 3.519 s turn-checkpoint restore.
-- 5090 container (v0.4.1) and 3090 lanes rebound unchanged.
+- **RTX 5090 profile `qwen38-5090-v0.4.8`** (same `v0.4.5-qwen38-5090-beta.1` image, configuration
+  `95765a38...`): `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`.
+  The shipped defaults (private catalog 2, device-state slots 2) evicted the shared base anchor
+  once a stored sibling existed, so four sibling forks of a 57.9K-token template alternated
+  1.3 s / 22.5 s; the new profile keeps all four on the anchor at 57,853 and 67,681 tokens
+  (1.20-1.43 s each) for about 0.45 GiB of device memory. Measured through the lifecycle tool:
+  exact 130,048-token retrieval at 2,207 tok/s cold, 136.03 tok/s decode at 41.20% MTP
+  acceptance, the fork/delete/no-resurrection arc across a restart, a 4.5 GB explicit save and a
+  verified restart. After a restart the first sibling fork of a restored template re-prefills
+  once before its siblings run hot.
+- **RTX 4090 durable v0.2.1** (`v0.2.1-qwen38-4090-durable.1`, commit `b9c4636b`): prefill chunk
+  512 -> 2,048 on the unchanged rk2v4-e8 KV, MTP3, 131,072-context stack. Protocol 15/15, the
+  102,060-token session in 68.0 s (84.9 s on v0.2.0), persistence restoring 102,075 tokens after a
+  process restart, and the OMP Golden-equivalent run all passed.
+- **RTX 3090 durable v0.2.3-beta.1** (`v0.2.3-qwen38-3090-beta.1`, commit `2ce6c9dc`): context
+  ceiling 65,536 -> 131,072 on the unchanged INT8 KV, MTP3, prefill-chunk-1,024 stack. The
+  14-phase orchestrator passed with exact 130,048-token retrieval in 218 s, 90.2 tok/s decode at
+  93.4% MTP acceptance under the 300 W envelope (22,548 MiB peak), restart, rollback, security,
+  and OMP gates.
+- OMP client component unchanged (omp-18.0.9-cross-platform-beta-2, rebound).
 
-## Review and build route
+## Evidence route
 
-Cross-family council CR-20260831-durable4090 reviewed the frozen source before the expensive
-Windows build; the convergent P1 (D3D12 probe teardown) and a post-publish reclamation gap
-were remediated with regressions, and upstream's global fast-math flags were deliberately not
-adopted. Built on the owner rig with MSVC 19.44 + CUDA 13.3, sm_89, source_dirty=false.
+Lane receipts in `qualification/`; the composed external-installation acceptance in
+`acceptance/` reruns the runtime-side steps (anonymous pull by digest, anonymous assets,
+lifecycle launch identity, auth boundary, stateful resume, fail-closed delete) and adds
+public-URL install acceptances on both native lanes. The fanout diagnosis behind the RTX 5090
+profile is EXP-013 in `docs/PERFORMANCE.md`; two runtime follow-ups are filed upstream
+(ninfer#35, ninfer#36).
 
 ## Support boundary
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.4.8",
-  "status": "draft",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -153,7 +153,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "a9ca10179f9d1f0d7606098b12b5554eabd2799a17fa28e651b1bb6599c24d3d",
+    "summary_sha256": "e4be78d493a6d0746a4540a77aa52a13425a42cfa640fb6a3052693f22a02e30",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cb8d7dbc668d0f51bede38abbbfd3c4e16ed9c4c/releases/v0.4.7/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
@@ -177,13 +177,10 @@
     "targets": [
       "GitHub public release v0.4.8",
       "OMP component omp-18.0.9-cross-platform-beta-2 (rebound)",
-      "NInfer RTX 5090 durable runtime component v0.4.5-qwen38-5090-beta.1 (rebound; new deployment profile qwen38-5090-v0.4.8)",
+      "NInfer RTX 5090 durable runtime component v0.4.5-qwen38-5090-beta.1 (rebound; deployment profile qwen38-5090-v0.4.8)",
       "NInfer RTX 4090 durable component v0.2.1-qwen38-4090-durable.1",
       "NInfer RTX 3090 component v0.2.3-qwen38-3090-beta.1"
     ],
-    "blockers": [
-      "root compatibility authority and profiles still describe v0.4.7; apply the stage_release.py rewrites, rebind, and cut (founder decision)",
-      "the RTX 5090 appliance still serves the v0.4.6 profile; the v0.4.8 context-cache profile is qualified but not promoted"
-    ]
+    "blockers": []
   }
 }
