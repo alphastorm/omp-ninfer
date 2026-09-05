@@ -1,0 +1,81 @@
+# One OMP configuration spanning the three qualified lanes, with explicit per-lane roles.
+# Merge into ~/.omp/agent/models.yml (do not overwrite existing providers). Each lane stays
+# loopback-only on its own machine and is reached through an authenticated SSH local forward
+# (examples/fleet/open-tunnels.sh). Model ids are the lanes' exact published ids; the aliases
+# name the role a lane plays in a session, not a capability claim.
+#
+#   local-main   RTX 5090 container, v0.4.8 profile: the interactive lead session. Durable
+#                checkpoints, template-fork fanout that keeps the base anchor, 131,072 context.
+#   local-heavy  RTX 4090 durable v0.2.1: long-context background workers (prefill chunk 2,048,
+#                131,072 context, rk2v4-e8 KV). No sibling fanout reuse; one active request.
+#   local-scout  RTX 3090 durable v0.2.3-beta.1: bounded read-only scouting under the 300 W
+#                managed envelope, 131,072 context, INT8 KV. Explicit on-demand start; opt-in.
+#
+# Every lane is one active request per qualified profile; the fleet's completed-work boundary is
+# the measured receipt in docs/measurements/ (see docs/PERFORMANCE.md, EXP-016), not a throughput
+# claim.
+providers:
+  ninfer-main:
+    baseUrl: http://127.0.0.1:18191/v1
+    api: openai-responses
+    apiKey: '!cat "$HOME/.omp/agent/ninfer-5090.key"'
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-main
+        requestModelId: q38-ninfer
+        name: Qwen3.8 27B NInfer RTX 5090 (fleet main, durable, fanout)
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+          - image
+        supportsTools: true
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          ninferStatefulResponses: true
+  ninfer-heavy:
+    baseUrl: http://127.0.0.1:18192/v1
+    api: openai-responses
+    apiKey: '!cat "$HOME/.omp/agent/ninfer-4090.key"'
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-heavy
+        requestModelId: qwen3.8-27b
+        name: Qwen3.8 27B NInfer RTX 4090 durable v0.2.1 (fleet heavy)
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+        supportsTools: true
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          ninferStatefulResponses: true
+  ninfer-scout:
+    baseUrl: http://127.0.0.1:18193/v1
+    api: openai-responses
+    apiKey: '!cat "$HOME/.omp/agent/ninfer-3090.key"'
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-scout
+        requestModelId: q38-ninfer
+        name: Qwen3.8 27B NInfer RTX 3090 durable v0.2.3-beta.1 (fleet scout)
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+        supportsTools: true
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }
+        contextWindow: 131072
+        maxTokens: 8192
+        compat:
+          ninferStatefulResponses: true

@@ -498,6 +498,27 @@ omp --no-session --max-time 20s \
 Expected result: a connection failure and no model response. Any cloud-provider request is a release
 failure. Restart the tunnel only after observing the failure.
 
+## Fleet: three lanes in one OMP configuration
+
+If you own more than one qualified lane, [`examples/fleet/`](../examples/fleet/) binds them into
+one configuration with explicit roles: `ninfer-main/local-main` (RTX 5090) for the interactive
+lead session, `ninfer-heavy/local-heavy` (RTX 4090) for long-context background workers, and
+`ninfer-scout/local-scout` (RTX 3090) for bounded read-only scouting. Every lane stays
+loopback-only on its own machine and serves one active request.
+
+```sh
+# three authenticated forwards; pass - to skip a lane you do not own
+./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST USER@SCOUT_HOST
+install -m 600 examples/fleet/models.fragment.yml ~/.omp/agent/models.fleet.yml   # merge by hand
+install -m 600 examples/fleet/agents/fleet-scout.md examples/fleet/agents/fleet-heavy.md ~/.omp/agent/agents/
+```
+
+The fleet is not a throughput claim. Its measured boundary is EXP-016 in
+[`PERFORMANCE.md`](PERFORMANCE.md): on a fixed 14-job batch, cost-aware dispatch across the
+three lanes completed the batch 2.07× faster than the RTX 5090 alone, naive dispatch 1.41×, and
+pinning jobs by role alone 0.66×. Roles describe what a lane is for; where a job runs should
+follow measured per-lane cost (`scripts/fleet_dispatch.py --policy cost`).
+
 ## 9. Send feedback
 
 Choose the structured form that matches the result:

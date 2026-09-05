@@ -140,9 +140,23 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    [anchor sweep](docs/measurements/2026-09-05-fanout-anchor-configuration-sweep-rtx5090.json) ·
    [restore 4090](docs/measurements/2026-09-05-restore-probe-rtx4090.json) ·
    [restore 3090](docs/measurements/2026-09-05-restore-probe-rtx3090.json).
-3. **Fleet routing.** One OMP configuration spanning the 3090/4090/5090 lanes with explicit
-   per-lane roles. A fixed two-machine workload gets measured before any fleet completed-work or
-   throughput claim — that boundary stands until the receipt exists.
+3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
+   [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
+   explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on
+   the RTX 3090), fail-closed tunnels, and two role agents. The fixed workload is the frozen
+   24-request agent corpus as 14 independent jobs, dispatched by
+   [`scripts/fleet_dispatch.py`](scripts/fleet_dispatch.py) with one active request per lane.
+   Measured boundary (batch completion, two repetitions each, all jobs completed): the RTX 5090
+   alone 66.8 s; two machines (5090+4090) 51.2 s with naive longest-first dispatch and **43.4 s**
+   (1.54×) with cost-aware assignment from the lanes' measured per-scenario costs; three machines
+   47.2 s naive and **32.3 s** (2.07×) cost-aware, with all three lanes balanced within 2 s of
+   busy time. Pinning jobs to lanes by role alone is a loss (100.3 s, 0.66×): the long-prefill
+   jobs cost 14.9 s on the 5090 but 48.6 s on the 4090 and 91 s on the 3090, while short chat
+   jobs cost about the same everywhere - so roles describe what a lane is for, and the cost model
+   decides where work goes. No fleet claim beyond this workload; outputs are not comparable across
+   lanes (different KV formats), and the 4090's same-process output variation recorded on
+   2026-09-04 recurs here. Receipts: [`docs/measurements/2026-09-05-fleet-dispatch-*.json`](docs/measurements/)
+   (EXP-016).
 
 Parked until >131,072-token contexts matter: paged host-to-device KV prefetch and the
 E8-lattice/RotorQuant ceiling work the family ports carry upstream.

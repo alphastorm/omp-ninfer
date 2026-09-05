@@ -103,6 +103,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-012 | Template-fork warm starts (all lanes) | Checkpointing a prefilled template and forking subagents from it starts them hot, including across a process restart | RTX 5090 (57.9K-token template): device-resident sibling forks alternate 1.3 s / 22.5 s (anchor / full re-prefill) while a 67.7K template gives four 1.3 s forks; after restart the 4.51 GB checkpoint restores in ≈23.6 s ≈ the 21.8 s cold prefill. RTX 4090: no sibling reuse (41–47 s per fork) and a 1.13 GB restore takes ≈130 s vs a 41 s prefill. RTX 3090: no sibling reuse (49–51 s) and restore ≈91 s vs 49 s | negative; hot forks only on the 5090 and only reliably ≥ ~64K tokens; restore never beats re-prefill |
 | EXP-013 | RTX 5090 fanout anchor retention | The sub-64K alternation is a serve policy defect fixable in source | Capacity, not policy: private catalog 2 entries + 2 device-state slots; search-cap and marker source changes rejected on the probe; `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` on the unchanged binary keeps 12/12 forks on the anchor path at 57.9K, 67.7K, and loaded 57.9K for 0.43 GiB slack, at the cost of one 5.29 s (vs 1.39 s) first fork at 67.7K | kept — v0.4.8 RTX 5090 candidate profile, as a trade |
 | EXP-014 | Native-lane checkpoint restore | The slow restore is a first-read effect that a second restore avoids | Second restore not faster (4090 132.8 → 149.0 s at 1.13 GB; 3090 91.8 → 92.2 s at 1.68 GB); status endpoint blocked for the whole restore; restore path is the cost | open — filed upstream |
+| EXP-016 | Fleet routing (all lanes) | Splitting a fixed independent-job batch across lanes completes it faster than the RTX 5090 alone | 14-job frozen corpus: 5090 alone 66.8 s; 5090+4090 51.2 s naive / **43.4 s** cost-aware (1.54×); three lanes 47.2 s naive / **32.3 s** cost-aware (2.07×); role-pinned 100.3 s (0.66×). Long-prefill jobs are 3.3–6× more expensive off the 5090; short jobs cost the same everywhere | kept — measured boundary for the fleet configuration; cost-aware dispatch is the recommended policy |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -261,6 +262,32 @@ Entry detail:
   [5090 fanout 57.9K](measurements/2026-09-05-rtx5090-v048-fanout-57k.json) ·
   [5090 fanout 67.7K](measurements/2026-09-05-rtx5090-v048-fanout-67k.json) ·
   [lane receipts](../releases/v0.4.8/qualification/).
+- **EXP-016 — fleet routing on a fixed workload (2026-09-05).**
+  [`scripts/fleet_dispatch.py`](../scripts/fleet_dispatch.py) dispatches the frozen agent corpus
+  (7 scenarios × 2 repetitions = 14 independent jobs, 24 requests) across one, two, or three
+  lanes with one worker per lane, three policies, two batch repetitions per configuration, and
+  per-lane output projections. Solo batches: RTX 5090 66.8 / 66.7 s, RTX 4090 154.9 / 156.0 s,
+  RTX 3090 258.8 / 258.6 s. Measured per-scenario costs (5090 / 4090 / 3090): long replay
+  14.9 / 48.6 / 91.0 s, medium branch 4.7 / 13.5 / 17.3 s, long decode 3.8 / 5.7 / 9.0 s, tool
+  round trip 2.4 / 2.6 / 3.6 s, history p90 1.7 / 1.5 / 2.1 s, history p50 1.1 / 1.3 / 1.9 s,
+  short 0.8 / 1.1 / 1.1 s. Naive longest-first dynamic dispatch is bounded by the biggest job
+  landing on a slow lane: 5090+4090 51.2 / 52.5 s (the 4090 spends ~50 s on one long replay while
+  the 5090 finishes 12 jobs in 42 s), three lanes 47.2 / 50.9 s. Static role pinning sends both
+  long replays to the 4090 and loses outright: 100.3 / 101.5 s. Cost-aware assignment (longest
+  processing time first over the measured per-lane costs; `--policy cost` fed by the solo
+  receipts) lands within 4 s of its prediction: 5090+4090 43.4 / 43.9 s (predicted 39.5), three
+  lanes 32.3 / 32.9 s (predicted 29.7) with lane busy times 29.9 / 28.2 / 29.4 s. Outputs are
+  byte-identical across the two batch runs on the 5090 and 3090 lanes; the 4090 differs on 2-9
+  steps between runs, matching the same-process variation its MTP3 arms recorded on 2026-09-04
+  (17-22 of 24 requests). Receipts:
+  [5090](measurements/2026-09-05-fleet-dispatch-main-solo.json) ·
+  [4090](measurements/2026-09-05-fleet-dispatch-heavy-solo.json) ·
+  [3090](measurements/2026-09-05-fleet-dispatch-scout-solo.json) ·
+  [two-lane dynamic](measurements/2026-09-05-fleet-dispatch-main-heavy-dynamic.json) ·
+  [two-lane cost](measurements/2026-09-05-fleet-dispatch-main-heavy-cost.json) ·
+  [three-lane dynamic](measurements/2026-09-05-fleet-dispatch-three-lane-dynamic.json) ·
+  [three-lane role](measurements/2026-09-05-fleet-dispatch-three-lane-role.json) ·
+  [three-lane cost](measurements/2026-09-05-fleet-dispatch-three-lane-cost.json).
 
 ## Current order
 

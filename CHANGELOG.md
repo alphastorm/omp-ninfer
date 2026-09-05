@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `examples/fleet/`: one OMP configuration spanning the three qualified lanes with explicit
+  roles (`local-main` RTX 5090, `local-heavy` RTX 4090, `local-scout` RTX 3090), a fail-closed
+  three-lane tunnel opener, and two role agents. `scripts/fleet_dispatch.py` dispatches the frozen
+  agent corpus as 14 independent jobs across lanes with dynamic, role-pinned, or cost-aware
+  assignment and records batch completion, per-lane completed work, and output repeatability.
+  Measured on 2026-09-05 (EXP-016): cost-aware dispatch completes the batch 1.54× faster than the
+  RTX 5090 alone on two machines and 2.07× on three; naive dispatch 1.30× / 1.41×; role pinning
+  alone is a 0.66× loss. Documentation and receipts only; no release profile changed.
+
 ## [0.4.8] - 2026-09-05
 
 ### Added
