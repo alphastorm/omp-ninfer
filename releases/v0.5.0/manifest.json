@@ -96,7 +96,7 @@
         "qualification": {
           "summary": "releases/v0.5.0/qualification/rtx3090.json",
           "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/59c6ab80b4a77a768dd75e3c757f432dad0174dc/releases/v0.5.0/qualification/rtx3090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a6a67009268e62c218de9c533dd958e7894d1edf/releases/v0.5.0/qualification/rtx3090.json"
         },
         "checksums_sha256": "e215f2fbf15e5de57ad1d4f09b59ef5f7ed1f63d03c4aa313748620e31c07051"
       },
@@ -132,7 +132,7 @@
         "qualification": {
           "summary": "releases/v0.5.0/qualification/rtx4090.json",
           "sha256": "b7a9d364aea389baa89772f273d9023f9aa8edbb5a90f83ac43b9b6fb85c0109",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/59c6ab80b4a77a768dd75e3c757f432dad0174dc/releases/v0.5.0/qualification/rtx4090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a6a67009268e62c218de9c533dd958e7894d1edf/releases/v0.5.0/qualification/rtx4090.json"
         },
         "checksums_sha256": "ba25139a6c89bb817eb25ace57600d07704f1b14f3fcbf8255213d22a8a7ea44",
         "checksums_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.3-qwen38-4090-durable.1/SHA256SUMS"
