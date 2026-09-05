@@ -45,6 +45,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   RTX 5090 candidate profile. `scripts/restore_probe.py` shows a second restore of the same
   session is no faster on the native lanes (4090 132.8 → 149.0 s, 3090 91.8 → 92.2 s) and that the
   status endpoint blocks for the restore; both findings are filed upstream (ninfer#35, #36).
+- All three lane configuration changes were requalified on their own rigs on 2026-09-05 and
+  staged as the `v0.4.8` draft (`releases/v0.4.8/`, root authority still `v0.4.7`). RTX 3090
+  `v0.2.3-beta.1` raises the C1 context ceiling to 131,072 on the unchanged INT8/MTP3/1,024-chunk
+  stack and passed the 14-phase orchestrator with exact 130,048-token retrieval (218 s), 90.2
+  decode tok/s at 300 W, 22,548 MiB peak, restart, rollback, security, and OMP gates
+  (`tools/qualification/qualify_rtx3090.py` now binds the 128K fixture). RTX 4090 `v0.2.1` moves
+  prefill chunk to 2,048 on a rebuilt but code-identical binary and passed protocol 15/15,
+  the 102,060-token session in 68.0 s (84.9 s shipped), persistence, and the OMP golden run.
+  RTX 5090 `qwen38-5090-v0.4.8` keeps the shipped image and adds
+  `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`; measured through
+  the lifecycle tool: exact 130,048-token retrieval at 2,207 tok/s cold, 136.0 decode tok/s at
+  41.2% MTP acceptance, the fork/delete/no-resurrection arc across a restart, 4/4 anchor hits at
+  57.9K and 67.7K in one process, a 4.5 GB explicit save and verified restart (new
+  `scripts/qualify_rtx5090_profile.py`). After a restart the first sibling fork of a restored
+  template re-prefills once before its siblings run hot, which the receipt records as a scope
+  note. The draft is blocked on publishing the two native components and rerunning the composed
+  external-installation acceptance; no public profile changed.
 
 ## [0.4.7] - 2026-09-01
 

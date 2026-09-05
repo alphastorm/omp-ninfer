@@ -1,0 +1,112 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 2,
+  "lane": "rtx5090-v048",
+  "generated_utc": "2026-09-05T03:01:00Z",
+  "base_tokens_requested": 56000,
+  "branches": 4,
+  "post_restart_branches": 0,
+  "summary": {
+    "template_input_tokens": 67681,
+    "cold_prefill_s": 26.83,
+    "checkpoint_save_s": 15.444,
+    "checkpoint_bytes": 5188026299,
+    "hot_fork_median_s": 1.389,
+    "restart_ready_s": null,
+    "post_restart_resume_s": null,
+    "warm_start_first_fork_s": null,
+    "warm_start_fork_median_s": null
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 26.83,
+      "input_tokens": 67681,
+      "id": "resp_86b8fb97c076c4149e1cbae5c8f9e6e9"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 1.325,
+      "id": "resp_547d6c795947399418060604ff6dafd2"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 15.444,
+      "mode": "explicit",
+      "generation": "1788577236947-2",
+      "bytes": 5188026299,
+      "frontier": 67825,
+      "response_records": null
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 1.428,
+      "id": "resp_f103d5ebc3651c9c89c03c38b4ede8af"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 1.296,
+      "id": "resp_1643869532d7f01f8967143d5ccd0739"
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 1.374,
+      "id": "resp_fcffdcc47d7fcef06180fd7723165534"
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 1.389,
+      "id": "resp_8fe13575849fdc560a87b58c34fc8361"
+    },
+    {
+      "step": "session_delete",
+      "wall_s": 0.0,
+      "status": 200
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 67681,
+      "completion_tokens": 40,
+      "ttft_s": 26.118389112
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 67720,
+      "prompt_tokens": 67746,
+      "completion_tokens": 80,
+      "ttft_s": 0.26163833000000003
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.420901323
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.243071012
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.25575162100000004
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 67726,
+      "prompt_tokens": 67749,
+      "completion_tokens": 80,
+      "ttft_s": 0.255218564
+    }
+  ],
+  "transient_retries": 0
+}

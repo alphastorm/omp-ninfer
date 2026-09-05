@@ -66,15 +66,33 @@ what can ship next:
    [4090](docs/measurements/2026-09-04-rtx4090-variant-campaign.json) ·
    [3090](docs/measurements/2026-09-04-rtx3090-variant-campaign.json) ·
    [repeatability](docs/measurements/2026-09-04-rtx5090-quality-repeatability.json).
-5. **Per-lane configuration changes from the same campaign — next, v0.4.8-class.** Lanes are
-   tuned independently: the goal is the best measured stack per card, not one shared
-   configuration. Two configuration-only changes cleared their gates and need lane
-   requalification before they ship: the RTX 4090 prefill chunk moves from 512 to 2,048 (+22.8%
-   prefill, 35K-token TTFT 21.9 s → 17.7 s, +270 MiB peak; 4,096 regresses decode), and the RTX
-   3090 lane qualifies 131,072-token context (automatic KV capacity 131,072 at 22,465 MiB peak with
-   unchanged throughput; the 64K exact-retrieval and restart gates rerun at the new ceiling). INT8
-   KV was rejected on the RTX 5090 (no speed gain) and RTX 4090 (23,180 MiB peak, screen
-   regression). No public profile changes until the rebound receipts exist.
+5. **Per-lane configuration changes from the same campaign — requalified 2026-09-05; `v0.4.8`
+   draft staged.** Lanes are tuned independently: the goal is the best measured stack per card,
+   not one shared configuration. Each lane reran its own qualification on its own rig with the
+   changed configuration and a rebound identity:
+   - RTX 4090 `v0.2.1` (`ninfer` commit `b9c4636b`, package `1c66f7d5`): prefill chunk 512 →
+     2,048 on the rk2v4-e8/MTP3/131,072 stack; protocol 15/15, the 102,060-token session in
+     68.0 s against 84.9 s shipped, persistence via `append_frontier`, OMP golden run exact
+     ([receipt](releases/v0.4.8/qualification/rtx4090.json)).
+   - RTX 3090 `v0.2.3-beta.1` (`ninfer` commit `2ce6c9dc`, package `96c9c37f`): context ceiling
+     65,536 → 131,072 on the INT8/MTP3/1,024-chunk stack; the 14-phase orchestrator passed with
+     exact 130,048-token retrieval, 90.2 decode tok/s under the 300 W cap at 22,548 MiB peak,
+     restart, rollback, security, and OMP gates
+     ([receipt](releases/v0.4.8/qualification/rtx3090.json)).
+   - RTX 5090 `qwen38-5090-v0.4.8` (same image `876c7809`, configuration `95765a38`):
+     `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`; exact
+     130,048-token retrieval at 2,207 tok/s cold, 136.0 decode tok/s, the fork/delete arc across a
+     restart, 4/4 anchor hits at 57.9K and 67.7K, a 4.5 GB save and verified restart
+     ([receipt](releases/v0.4.8/qualification/rtx5090.json),
+     [gates](docs/measurements/2026-09-05-rtx5090-v048-profile-gates.json)). After a restart the
+     first sibling fork of a restored template re-prefills once; the receipt records it.
+   INT8 KV stays rejected on the RTX 5090 (no speed gain) and RTX 4090 (23,180 MiB peak, screen
+   regression). `releases/v0.4.8/manifest.json` is a `draft` whose blockers are external effects:
+   publish the two native components (`v0.2.1-qwen38-4090-durable.1`,
+   `v0.2.3-qwen38-3090-beta.1`), rerun the composed external-installation acceptance from the
+   published URLs, then flip the root authority (`stage_release.py`'s profile and compatibility
+   rewrites, `rebind_release.py --pin`) and cut. Until then the public release stays `v0.4.7` and
+   the RTX 5090 appliance keeps serving the v0.4.6 profile.
 6. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
    missing fresh-process MTP0 controls and targeted K0/K3 first-divergence probes. Do not rerun the
    rejected K5/K7 arms without new evidence that could reverse their measured deficit.

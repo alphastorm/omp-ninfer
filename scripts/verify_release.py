@@ -286,20 +286,21 @@ NINFER_RELEASE_TAG_RE = re.compile(
 )
 NINFER_VARIANT_RELEASE_TAG_RES = {
     "rtx3090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*)$"
+        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.3-qwen38-3090-beta\.[1-9][0-9]*)$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.0-qwen38-4090-durable\.[1-9][0-9]*)$"
+        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[01]-qwen38-4090-durable\.[1-9][0-9]*)$"
     ),
 }
 NINFER_VARIANT_PACKAGE_NAME_RES = {
     "rtx3090-windows-native": re.compile(
         r"^ninfer-rtx3090-omp-v(?:0\.2\.0-windows-x86_64-cuda12\.8|"
         r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3|"
-        r"0\.2\.2-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
+        r"0\.2\.2-beta\.1-windows-x86_64-cuda13\.3|"
+        r"0\.2\.3-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^ninfer-4090-qwen38-v0\.[12]\.0-win-x64\.zip$"
+        r"^ninfer-4090-qwen38-v(?:0\.[12]\.0|0\.2\.1)-win-x64\.zip$"
     ),
 }
 CHECKSUM_REQUIRED_ASSET_FIELDS = (

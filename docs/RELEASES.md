@@ -25,6 +25,28 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 [4090](measurements/2026-09-04-rtx4090-mtp-agent-ablation.json) ·
 [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).
 
+### v0.4.8 draft (staged 2026-09-05, not cuttable yet)
+
+`releases/v0.4.8/manifest.json` is a `draft` that rebinds all three lanes to requalified
+configurations while the public release and the root compatibility authority stay at `v0.4.7`:
+
+- RTX 5090: same runtime component (`v0.4.5-qwen38-5090-beta.1`, image `876c7809...`), new
+  deployment profile `qwen38-5090-v0.4.8` with configuration `95765a38...` (context cache
+  `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24`), measured through
+  the lifecycle tool ([receipt](../releases/v0.4.8/qualification/rtx5090.json)).
+- RTX 4090: `v0.2.1-qwen38-4090-durable.1` (`ninfer` commit `b9c4636b`, package `1c66f7d5...`),
+  prefill chunk 2,048 ([receipt](../releases/v0.4.8/qualification/rtx4090.json)).
+- RTX 3090: `v0.2.3-qwen38-3090-beta.1` (`ninfer` commit `2ce6c9dc`, package `96c9c37f...`),
+  131,072-token context ([receipt](../releases/v0.4.8/qualification/rtx3090.json)).
+
+Blockers, in order: publish the two native component releases from the lane branches
+(`lane/rtx4090-chunk-2048`, `lane/rtx3090-context-131072`) with the exact assets bound in the
+manifest; rerun the composed external-installation acceptance from those URLs; apply the root
+authority flip that `scripts/stage_release.py` performs (profile release/deployment-profile
+rewrites, compatibility mirror and render) so `verify_release.py --release v0.4.8` clears its six
+root-authority errors; then the pin dance and cut. `verify_release.py` without arguments still
+validates the ready `v0.4.7`.
+
 ## Version identities
 
 ### v0.4.7 public release (corrects v0.4.6 asset URLs)

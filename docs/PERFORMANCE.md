@@ -103,6 +103,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-012 | Template-fork warm starts (all lanes) | Checkpointing a prefilled template and forking subagents from it starts them hot, including across a process restart | RTX 5090 (57.9K-token template): device-resident sibling forks alternate 1.3 s / 22.5 s (anchor / full re-prefill) while a 67.7K template gives four 1.3 s forks; after restart the 4.51 GB checkpoint restores in ≈23.6 s ≈ the 21.8 s cold prefill. RTX 4090: no sibling reuse (41–47 s per fork) and a 1.13 GB restore takes ≈130 s vs a 41 s prefill. RTX 3090: no sibling reuse (49–51 s) and restore ≈91 s vs 49 s | negative; hot forks only on the 5090 and only reliably ≥ ~64K tokens; restore never beats re-prefill |
 | EXP-013 | RTX 5090 fanout anchor retention | The sub-64K alternation is a serve policy defect fixable in source | Capacity, not policy: private catalog 2 entries + 2 device-state slots; search-cap and marker source changes rejected on the probe; `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` on the unchanged binary keeps 12/12 forks on the anchor path at 57.9K, 67.7K, and loaded 57.9K for 0.43 GiB slack, at the cost of one 5.29 s (vs 1.39 s) first fork at 67.7K | kept — v0.4.8 RTX 5090 candidate profile, as a trade |
 | EXP-014 | Native-lane checkpoint restore | The slow restore is a first-read effect that a second restore avoids | Second restore not faster (4090 132.8 → 149.0 s at 1.13 GB; 3090 91.8 → 92.2 s at 1.68 GB); status endpoint blocked for the whole restore; restore path is the cost | open — filed upstream |
+| EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
 
@@ -233,6 +234,33 @@ Entry detail:
   [alphastorm/ninfer#36](https://github.com/alphastorm/ninfer/issues/36). Receipts:
   [4090](measurements/2026-09-05-restore-probe-rtx4090.json) ·
   [3090](measurements/2026-09-05-restore-probe-rtx3090.json).
+- **EXP-015 — lane requalification of the three configuration changes (2026-09-05).** Each lane
+  reran its own qualification tooling with the changed configuration. RTX 3090: the 14-phase
+  orchestrator (`tools/qualification/qualify_rtx3090.py`, long-context stage rebound to the
+  130,048-token `long_niah_128k` fixture) built `v0.2.3-beta.1` from commit `2ce6c9dc` on the
+  builder host, packaged it deterministically, installed it beside the shipped release, and
+  passed protocol 15/15, exact 128K retrieval in 218.2 s, restart (310,212,985-byte checkpoint,
+  45 cached tokens, PID replaced), two-direction rollback, security, the OMP read-tool run, and
+  managed C1 (90.23 decode / 890.72 prefill tok/s, 93.43% MTP, 300.38 W, 22,548 MiB), then
+  restored the 370 W owner state. RTX 4090: commit `b9c4636b` rebuilt the code-identical binary
+  with the new patch-stack identity in 40 s (incremental), `New-Package.ps1` assembled
+  `v0.2.1` (`1c66f7d5`), the installer placed it beside `v0.2.0` with the inherited operator
+  GPU-owner adapter, and `Invoke-Qualification.ps1 -Profile MTP3` passed protocol, the
+  102,060-token session (68.0 s first turn vs 84.9 s shipped; post-restart 225.6 s, unchanged),
+  persistence (`append_frontier`, 102,075 tokens), and the OMP golden run in 6m44s. RTX 5090:
+  the lifecycle tool started the candidate with the canonical configuration `95765a38` on the
+  shipped image; [`scripts/qualify_rtx5090_profile.py`](../scripts/qualify_rtx5090_profile.py)
+  measured exact 130,048-token retrieval cold (58.9 s server prefill, 2,207 tok/s, 28,558 MiB
+  used), 2,048-token decode at 136.0 tok/s (41.2% MTP acceptance, 2.24 tokens/round, byte-identical
+  across five runs), and the fork/delete/no-resurrection arc across a `docker restart`;
+  `fleet_probe.py` then held 4/4 anchor hits at 57.9K (1.36/1.22/1.22/1.20 s) and 67.7K
+  (1.43/1.30/1.37/1.39 s) in one process with a 4.5 GB explicit save and a verified restart.
+  After the restart the resumed template's first sibling fork re-prefilled once (22.2 s, `root`)
+  before three hot forks: restored sessions carry their endpoint, not the base anchor. Receipts:
+  [5090 gates](measurements/2026-09-05-rtx5090-v048-profile-gates.json) ·
+  [5090 fanout 57.9K](measurements/2026-09-05-rtx5090-v048-fanout-57k.json) ·
+  [5090 fanout 67.7K](measurements/2026-09-05-rtx5090-v048-fanout-67k.json) ·
+  [lane receipts](../releases/v0.4.8/qualification/).
 
 ## Current order
 
@@ -241,8 +269,10 @@ MTP campaign retains MTP3 and rejects K5/K7 for the current artifacts. The per-l
 campaign closed the `nvfp4` question for the v0.4 train (rejected on the RTX 5090 because the
 card forces INT8 KV; NVFP4 W4A4 needs Blackwell tensor cores, so the `sm_89`/`sm_86` lanes are
 out of scope and the 4090 upstream removed its NVFP4 path) and produced two configuration-only
-lane changes to requalify: RTX 4090 prefill chunk 2,048 and RTX 3090 context 131,072. Each lane
-now carries its own best measured stack rather than one shared configuration.
+lane changes; those and the RTX 5090 context-cache profile were requalified on 2026-09-05 and
+staged as the `v0.4.8` draft (EXP-015). Each lane now carries its own best measured stack
+rather than one shared configuration; publication waits on the component releases and the
+external-installation acceptance.
 
 ## Ideas backlog
 

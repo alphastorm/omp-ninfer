@@ -1,0 +1,86 @@
+{
+  "artifact_type": "ninfer_rtx3090_qualification_summary",
+  "schema_version": 1,
+  "release": "v0.4.8",
+  "as_of": "2026-09-05",
+  "automatic_route_activation_allowed": false,
+  "source_commit": "2ce6c9dc5cd18356a019d378b509a46154c503ac",
+  "qualification_tool_commit": "2ce6c9dc5cd18356a019d378b509a46154c503ac",
+  "qualified_utc": "2026-09-05T02:41:57Z",
+  "package": {
+    "bytes": 573231848,
+    "filename": "ninfer-rtx3090-omp-v0.2.3-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "sha256": "96c9c37f9c30897c93952eb2b06e9b306d5b36f9650cc72b97ed8e27f7c2225d"
+  },
+  "durable_train": {
+    "summary": "v0.4.4 checkpoint train ported to the native Windows lane: buffered export off the engine lock (fail-before-publication), sustained-idle debounce + covers() redundant-save skip with every-turn default, POST /v1/ninfer/checkpoints synchronous durability boundary, lineage-aware lazy-restore freshness guard, idempotent exact-endpoint restore, constant-time session-ownership comparisons; unchanged in v0.2.3-beta.1, which raises the C1 profile's context ceiling from 65,536 to 131,072 on the same INT8 KV, MTP3, prefill-chunk-1024 stack",
+    "council": "CRS-durable-3090 (initial + remediation epochs, closed; 15/15 findings resolved)"
+  },
+  "evidence": {
+    "protocol": {
+      "status": "passed",
+      "checks": "15/15 contract battery on the installed candidate"
+    },
+    "context_128k": {
+      "status": "passed",
+      "prompt_tokens": 130048,
+      "exact_output": true,
+      "elapsed_seconds": 218.23,
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
+    },
+    "restart": {
+      "status": "passed",
+      "checkpoint_bytes": 310212985,
+      "checkpoint_files": 9,
+      "cached_input_tokens": 45,
+      "exact_marker_recall": true,
+      "process_replaced": true
+    },
+    "rollback": {
+      "status": "passed",
+      "directions": 2
+    },
+    "security": {
+      "status": "passed"
+    },
+    "omp_acceptance": {
+      "status": "passed",
+      "exact_final_answer": true,
+      "typed_tool_name": "read"
+    },
+    "benchmark_c1": {
+      "status": "passed",
+      "decode_tokens_per_second": 90.23,
+      "prefill_tokens_per_second": 890.72,
+      "mtp_acceptance_percent": 93.43,
+      "max_power_w": 300.38,
+      "max_memory_used_mib": 22548,
+      "managed_power_envelope_w": 300
+    },
+    "neutral_build": {
+      "status": "passed",
+      "route": "deterministic path-neutral dual build on the builder host"
+    },
+    "private_path_scan": {
+      "status": "passed"
+    },
+    "restore": {
+      "status": "passed",
+      "gpu_task_owner_state": "370 W restored, scheduled task Ready"
+    }
+  },
+  "identity": {
+    "server_binary_sha256": "3cb22389569a76eda2faa9a72fe6f21698ed4790b5e046909f9ab56d4d398d35",
+    "configuration_sha256": "d731e2f04766637e8ab3314f0aba13dd186fa0d73c7546451af2faf0edaa7cea",
+    "deployment_profile": "qwen38-3090-omp-v0.2.3-beta.1-c1",
+    "build_profile": "omp-v0.2.3-rtx3090",
+    "cuda_architecture": "sm_86",
+    "maximum_context_tokens": 131072
+  },
+  "scope_exclusions": [
+    "no fanout/long anchors",
+    "no cross-session context cache (per-lane resident prefix only)",
+    "single active request"
+  ],
+  "status": "passed"
+}
