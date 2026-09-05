@@ -1,0 +1,87 @@
+{
+  "artifact_type": "ninfer_rtx3090_qualification_summary",
+  "schema_version": 1,
+  "release": "v0.5.0",
+  "as_of": "2026-09-05",
+  "automatic_route_activation_allowed": false,
+  "source_commit": "9719ea0995c3100471bd2a21d1dfcc8453dd8e75",
+  "qualification_tool_commit": "9719ea0995c3100471bd2a21d1dfcc8453dd8e75",
+  "qualified_utc": "2026-09-05T18:14:35Z",
+  "package": {
+    "bytes": 573344205,
+    "filename": "ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8"
+  },
+  "durable_train": {
+    "summary": "v0.4.4 checkpoint train ported to the native Windows lane: buffered export off the engine lock (fail-before-publication), sustained-idle debounce + covers() redundant-save skip with every-turn default, POST /v1/ninfer/checkpoints synchronous durability boundary, lineage-aware lazy-restore freshness guard, idempotent exact-endpoint restore, constant-time session-ownership comparisons; v0.2.5-beta.1 adds manifest origin authentication (manifest.mac keyed off the bearer and held outside the checkpoint root; strict --session-checkpoint-require-origin-auth posture; alphastorm/ninfer#32) on top of the v0.2.4-beta.1 restore-path fix, on the same INT8 KV, MTP3, prefill-chunk-1024, 131,072-context stack",
+    "council": "CRS-durable-3090 (initial + remediation epochs, closed; 15/15 findings resolved)"
+  },
+  "evidence": {
+    "protocol": {
+      "status": "passed",
+      "checks": "15/15 contract battery on the installed candidate"
+    },
+    "context_128k": {
+      "status": "passed",
+      "prompt_tokens": 130048,
+      "exact_output": true,
+      "elapsed_seconds": 218.3,
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
+    },
+    "restart": {
+      "status": "passed",
+      "checkpoint_bytes": 310213049,
+      "checkpoint_files": 10,
+      "cached_input_tokens": 45,
+      "exact_marker_recall": true,
+      "process_replaced": true
+    },
+    "rollback": {
+      "status": "passed",
+      "directions": 2
+    },
+    "security": {
+      "status": "passed"
+    },
+    "omp_acceptance": {
+      "status": "passed",
+      "exact_final_answer": true,
+      "typed_tool_name": "read"
+    },
+    "benchmark_c1": {
+      "status": "passed",
+      "decode_tokens_per_second": 90.66,
+      "prefill_tokens_per_second": 894.24,
+      "mtp_acceptance_percent": 93.43,
+      "max_power_w": 300.15,
+      "max_memory_used_mib": 22548,
+      "managed_power_envelope_w": 300,
+      "note": "first sample of this phase peaked over the 301 W tolerance at the 300 W managed cap; the phase was rerun (--resume) and passed"
+    },
+    "neutral_build": {
+      "status": "passed",
+      "route": "deterministic path-neutral dual build on the builder host"
+    },
+    "private_path_scan": {
+      "status": "passed"
+    },
+    "restore": {
+      "status": "passed",
+      "gpu_task_owner_state": "370 W restored, scheduled task Ready"
+    }
+  },
+  "identity": {
+    "server_binary_sha256": "a70faa28fb45db3388158416698bb91dffdd2d658373ac4077e7201549c7a8b7",
+    "configuration_sha256": "c9b980c927b865040839cc50a2e34df0a2f424ffd9a7022da7cfbea5c5e5fdb5",
+    "deployment_profile": "qwen38-3090-omp-v0.2.5-beta.1-c1",
+    "build_profile": "omp-v0.2.5-rtx3090",
+    "cuda_architecture": "sm_86",
+    "maximum_context_tokens": 131072
+  },
+  "scope_exclusions": [
+    "no fanout/long anchors",
+    "no cross-session context cache (per-lane resident prefix only)",
+    "single active request"
+  ],
+  "status": "passed"
+}

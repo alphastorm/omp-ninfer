@@ -27,6 +27,25 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.5.0 draft (staged 2026-09-05, not cuttable yet)
+
+- `releases/v0.5.0/manifest.json` is a `draft` for the first v0.5 deliverable - sessions leave the
+  machine (EXP-018) - while the public release and the root compatibility authority stay at
+  `v0.4.9`:
+  - RTX 4090: `ninfer@v0.2.3-qwen38-4090-durable.1` (qualified head `e186e04e`, packaging
+    `ccdac145`), origin-authenticated checkpoint manifests, qualified on the owner rig
+    ([receipt](../releases/v0.5.0/qualification/rtx4090.json)); staged as a GitHub draft.
+  - RTX 3090: `ninfer@v0.2.5-qwen38-3090-beta.1` (commit `9719ea09`), origin-authenticated
+    checkpoint manifests, 14/14 orchestrator phases
+    ([receipt](../releases/v0.5.0/qualification/rtx3090.json)); staged as a GitHub draft.
+  - RTX 5090 runtime, profile `qwen38-5090-v0.4.8`, and the OMP client are unchanged.
+- Replication proof on all three lanes with `scripts/sync_probe.py`
+  ([5090](measurements/2026-09-05-sync-probe-rtx5090.json) ·
+  [4090](measurements/2026-09-05-sync-probe-rtx4090.json) ·
+  [3090](measurements/2026-09-05-sync-probe-rtx3090.json)).
+- Blockers, in order: publish the two native component releases, rerun the composed
+  external-installation acceptance from the published URLs, then the pin dance and the cut.
+
 ### v0.4.9 public release (native-lane restore path fixed)
 
 - Product release: `alphastorm/omp-ninfer@v0.4.9`, GitHub `Latest`. The checkpoint restore path on
