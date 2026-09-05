@@ -105,8 +105,10 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    diagnosed on 2026-09-05 as capacity, not policy: the shipped context-cache defaults (private
    catalog 2, device-state slots 2) cannot hold a base anchor and one stored sibling. Two source
    changes were rejected on the probe; the unchanged shipped binary with
-   `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` served 12/12
-   anchor hits at 57.9K, 67.7K, and a loaded-catalog 57.9K in one process for 0.43 GiB of slack.
+   `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` kept 12/12 forks
+   on the anchor path at 57.9K, 67.7K, and a loaded-catalog 57.9K in one process for 0.43 GiB of
+   slack. It is a trade: it removes the two 22 s re-prefills per four forks at 57.9K and costs
+   about 3.9 s once on the first 67.7K fork (5.29 s vs 1.39 s) while the anchor state materializes.
    That configuration is the v0.4.8 RTX 5090 candidate profile, gated by this probe at both
    template sizes in one process; it changes the profile identity, so existing session checkpoints
    do not carry across and the durable train requalifies with it

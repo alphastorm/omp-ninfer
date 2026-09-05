@@ -1,10 +1,11 @@
 {
   "arms": [
     {
+      "anchor_hits": 2,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [],
-      "hot_forks": 2,
+      "forks_under_2s": 2,
       "label": "shipped-default-57.9k",
       "server_reuse": [
         "private_long_anchor",
@@ -31,11 +32,13 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [],
-      "hot_forks": 4,
+      "forks_under_2s": 4,
       "label": "shipped-default-67.7k",
+      "note": "no slow first fork on the shipped default at this size (1.39 s)",
       "server_reuse": [
         "private_long_anchor",
         "private_long_anchor",
@@ -54,10 +57,11 @@
       "template_input_tokens": 67681
     },
     {
+      "anchor_hits": 2,
       "binary_sha256": "a182b4a7fb97f47167512efe747696f05fa89f860a72fdfae47563004a34bc88",
       "container": "ninfer-anchor-5090:d8dea117 (experiment build, patch d8dea117, search cap 5 ms -> 50 ms)",
       "extra_flags": [],
-      "hot_forks": 2,
+      "forks_under_2s": 2,
       "label": "search-cap-50ms-57.9k",
       "note": "cold forks now stop on value_of_next_expansion after 354 targets with the same 477 s incumbent; rejected, branch discarded",
       "server_reuse": [
@@ -78,14 +82,15 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "a182b4a7fb97f47167512efe747696f05fa89f860a72fdfae47563004a34bc88",
       "container": "ninfer-anchor-5090:d8dea117",
       "extra_flags": [],
-      "hot_forks": 3,
+      "forks_under_2s": 3,
       "label": "search-cap-50ms-67.7k",
-      "note": "branch_0 4.31 s was a root prefill of the template followed by anchor hits",
+      "note": "branch_0 wall 4.31 s was an anchor hit with a 3.27 s TTFT (state materialization), not a re-prefill",
       "server_reuse": [
-        "root",
+        "private_long_anchor",
         "private_long_anchor",
         "private_long_anchor",
         "private_long_anchor"
@@ -102,10 +107,11 @@
       "template_input_tokens": 67681
     },
     {
+      "anchor_hits": 2,
       "binary_sha256": "2e9c79e6893eeda3feb6f5217330adfe14db4ee44b285f6c9048bf212165aac4",
       "container": "ninfer-anchor-5090:094c8f96 (experiment build, patch 094c8f96, stored continuations mark only the inherited frontier)",
       "extra_flags": [],
-      "hot_forks": 2,
+      "forks_under_2s": 2,
       "label": "single-frontier-marker-57.9k",
       "note": "period 2 unchanged, phase shifted; rejected, branch discarded",
       "server_reuse": [
@@ -126,12 +132,13 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 3,
       "binary_sha256": "2e9c79e6893eeda3feb6f5217330adfe14db4ee44b285f6c9048bf212165aac4",
       "container": "ninfer-anchor-5090:094c8f96",
       "extra_flags": [
         "--max-private-continuations 8"
       ],
-      "hot_forks": 3,
+      "forks_under_2s": 3,
       "label": "single-frontier-marker-private8-57.9k",
       "server_reuse": [
         "root",
@@ -151,12 +158,13 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [
         "--max-private-continuations 8"
       ],
-      "hot_forks": 4,
+      "forks_under_2s": 4,
       "label": "shipped-private8-57.9k",
       "sequence_order": 1,
       "server_reuse": [
@@ -177,12 +185,13 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 0,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [
         "--max-private-continuations 8"
       ],
-      "hot_forks": 0,
+      "forks_under_2s": 0,
       "label": "shipped-private8-67.7k",
       "note": "same container after the 57.9K session: host_state 8/8 saturated, private_catalog 6/8, last_materialization_predicted_nanoseconds 600693488718",
       "sequence_order": 2,
@@ -204,6 +213,7 @@
       "template_input_tokens": 67681
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [
@@ -211,7 +221,7 @@
         "--device-state-slots 4",
         "--host-state-slots 24"
       ],
-      "hot_forks": 4,
+      "forks_under_2s": 4,
       "label": "shipped-private8-slots-57.9k",
       "sequence_order": 1,
       "server_reuse": [
@@ -232,6 +242,7 @@
       "template_input_tokens": 57853
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [
@@ -239,9 +250,9 @@
         "--device-state-slots 4",
         "--host-state-slots 24"
       ],
-      "hot_forks": 4,
+      "forks_under_2s": 3,
       "label": "shipped-private8-slots-67.7k",
-      "note": "branch_0 wall 5.29 s was an anchor hit (23 computed tokens) with a 4.27 s TTFT while the anchor state materialized; the remaining forks had 0.19-0.23 s TTFT",
+      "note": "branch_0 wall 5.29 s was an anchor hit (23 computed tokens) with a 4.27 s TTFT while the anchor state materialized, against 1.39 s on the shipped default at the same size; the remaining forks had 0.19-0.23 s TTFT",
       "sequence_order": 2,
       "server_reuse": [
         "private_long_anchor",
@@ -261,6 +272,7 @@
       "template_input_tokens": 67681
     },
     {
+      "anchor_hits": 4,
       "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
       "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
       "extra_flags": [
@@ -268,7 +280,7 @@
         "--device-state-slots 4",
         "--host-state-slots 24"
       ],
-      "hot_forks": 4,
+      "forks_under_2s": 4,
       "label": "shipped-private8-slots-57.9k-loaded",
       "note": "private_catalog 5/8, host_state 6/24, device_state 5/5, last_materialization_predicted_nanoseconds 152884405, last_selection private_long_anchor@57898; the base prefill of this third session spent 0.70 s in planning (time_budget) against the loaded catalog",
       "sequence_order": 3,
@@ -291,7 +303,7 @@
     }
   ],
   "artifact_type": "omp_ninfer_fanout_anchor_configuration_sweep",
-  "conclusion": "Configuration only: --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 on the unchanged shipped binary gives 12/12 anchor hits across 57.9K, 67.7K, and a loaded-catalog 57.9K in one process (one hit paid a 4.27 s state materialization) for about 0.45 GiB of device memory; the search-cap and marker source changes and the catalog increase alone were rejected on the same probe.",
+  "conclusion": "Configuration only: --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 on the unchanged shipped binary keeps all 12 forks on the anchor path across 57.9K, 67.7K, and a loaded-catalog 57.9K in one process (11 of 12 under 2 s). It is a trade, not a pure win: it removes the two 22 s re-prefills the shipped default pays per four forks at 57.9K and costs about 3.9 s once on the first 67.7K fork (5.29 s vs 1.39 s) while the anchor state materializes, for about 0.45 GiB of device memory. The search-cap and marker source changes and the catalog increase alone were rejected on the same probe.",
   "generated_utc": "2026-09-05T01:23:19Z",
   "lane": "rtx5090",
   "memory": {
@@ -307,6 +319,11 @@
   },
   "schema_version": 1,
   "scope": "Diagnosis of sibling-fork anchor alternation on the shipped RTX 5090 profile; every arm ran the same fleet_probe.py sequence (stored base, warm edit, explicit save, four stored forks) as a fresh container on the production host with the production mounts and a separate checkpoint directory; not release qualification.",
+  "scoring": {
+    "anchor_hits": "server request_done prefix_reuse_path == private_long_anchor",
+    "forks_under_2s": "client wall below 2.0 s",
+    "note": "one threshold for every arm; the two counts differ only where an anchor hit paid a multi-second state materialization"
+  },
   "shipped_profile": {
     "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
     "container": "ninfer-5090-v046p",
