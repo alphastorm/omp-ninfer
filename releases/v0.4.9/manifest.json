@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.4.9",
-  "status": "draft",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "db8018ead003ea0d0bc0462c41d7de8a40f2dfefb7f700678771875bef520b8b",
+    "summary_sha256": "55f6423c6f87d8741d12da24c5513f408dce4ff892e9723c1a371db1cd094752",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2dc8d80b959971f0c32005df1739697649ac8173/releases/v0.4.8/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -181,10 +181,6 @@
       "NInfer RTX 4090 durable component v0.2.2-qwen38-4090-durable.1",
       "NInfer RTX 3090 component v0.2.4-qwen38-3090-beta.1"
     ],
-    "blockers": [
-      "NInfer RTX 4090 component v0.2.2-qwen38-4090-durable.1 (package d6f162cb) is qualified on the owner rig and staged as a GitHub draft; its manifest URLs do not resolve until it is published",
-      "NInfer RTX 3090 component v0.2.4-qwen38-3090-beta.1 (package e4fbbfca) is qualified on the owner rig and staged as a GitHub draft; its manifest URLs do not resolve until it is published",
-      "external-installation acceptance has not been rerun against the published v0.2.2 and v0.2.4-beta.1 components"
-    ]
+    "blockers": []
   }
 }

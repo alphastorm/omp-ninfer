@@ -1,0 +1,99 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "status": "passed",
+  "lane": "rtx4090",
+  "started_utc": "2026-09-05T11:20:34.4653646Z",
+  "source": {
+    "release_tag": "v0.2.2-qwen38-4090-durable.1",
+    "base_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.2-qwen38-4090-durable.1",
+    "product_release": "v0.4.9"
+  },
+  "integrity": {
+    "checksum_set_sha256": "0060ca7b0501ada9b2040c2ad835d6a988c1d3e5ca0202297100b540e8969480",
+    "checksum_entries": 14,
+    "assets": {
+      "package": {
+        "sha256": "d6f162cb313f73dcee30ebd24c948ec3b7032ec46d673da29c52b76d1592dbe7",
+        "bytes": 244719562,
+        "in_checksum_set": true
+      },
+      "sbom": {
+        "sha256": "8d1d3b3fac909011870ab28cb308c169bc84a653c5060f11f134076e11dbbdad",
+        "bytes": 22373,
+        "in_checksum_set": true
+      },
+      "source_archive": {
+        "sha256": "c13342914e5026b93dd912c4c59113192f325ee1b7e5820155e3663a3703623f",
+        "bytes": 5047573,
+        "in_checksum_set": true
+      },
+      "installer": {
+        "sha256": "e5db2c9f683fa307da32874e03db562e84bba24774dddea88722fb72e0959379",
+        "bytes": 60588,
+        "in_checksum_set": true
+      },
+      "controller": {
+        "sha256": "e9dc8676f59f1dd6a21622bd1bfba6570cb835cb3bba664ecd20b77a2f1276b9",
+        "bytes": 34209,
+        "in_checksum_set": true
+      },
+      "gpu_owner_controller": {
+        "sha256": "76e8b0947589641171feb5d38372bd269858f6291793bcd7ac76cbe3a32bef81",
+        "bytes": 6207,
+        "in_checksum_set": true
+      },
+      "state_protection": {
+        "sha256": "7770fd41380404d99f087bfc8cb67ae4f52d1cd1c4065a92b3a88ee5c22a6d55",
+        "bytes": 9103,
+        "in_checksum_set": true
+      }
+    },
+    "all_manifest_assets_downloaded_from_public_urls": true,
+    "all_manifest_asset_hashes_verified": true
+  },
+  "installed": {
+    "release_id": "qwen38-4090-v0.2-9834bf58e6c9",
+    "server_binary_sha256": "f731af9e0ab92c5983c706fecf786e00f154838b7b22aab81073e8a02860ec0c",
+    "configuration_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d",
+    "matches_manifest": true
+  },
+  "install": {
+    "execution_source": "downloaded-public-url",
+    "outcome": "already-installed-exact-bytes",
+    "note": "the installer refuses a duplicate release instance; public package members were compared against the installed release tree",
+    "members_in_package": 27,
+    "members_compared": 27,
+    "mismatches": 0
+  },
+  "smoke": {
+    "authenticated_status_http": 200,
+    "status_ms": 1.5,
+    "served_identity_matches_installed": true,
+    "anonymous_status_http": 401,
+    "completion_http": 200,
+    "completion_ms": 133.2,
+    "completion_tokens": 3,
+    "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+    "output_contains_marker": true,
+    "speculative_backend": "mtp",
+    "public_model_id": "qwen3.8-27b"
+  },
+  "restoration": {
+    "process_state": "running",
+    "endpoint_state": "ready",
+    "prior_state_restored": true,
+    "power_limit_w": 500,
+    "active_release": "qwen38-4090-v0.2-9834bf58e6c9"
+  },
+  "content_safety": {
+    "hostnames_recorded": 0,
+    "usernames_recorded": 0,
+    "private_paths_recorded": 0,
+    "secret_values_recorded": 0,
+    "raw_prompts_recorded": 0,
+    "model_outputs_recorded": 0,
+    "identities_bound_by_sha256": true
+  },
+  "completed_utc": "2026-09-05T11:20:56.2862407Z"
+}
