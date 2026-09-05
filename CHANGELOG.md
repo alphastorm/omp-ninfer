@@ -16,12 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Native-lane checkpoint restore path (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36)):
+- Native-lane checkpoint restore path (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36); staged as the `v0.4.9` draft with requalified components `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`):
   the reader issued one DirectStorage request per KV page segment; it now reads one staging
   window per request and submits a reader call as one bounded batch. Same sessions as EXP-014:
   RTX 4090 146.6 s / 133.4 s → 5.6 s / 5.6 s (1.13 GB), RTX 3090 91.8 s / 92.2 s → 10.8 s / 10.7 s
   (1.68 GB), retrievals exact throughout. Lane commits `d22ce3fd` (RTX 4090) and `3756db6e`
-  (RTX 3090); no published profile changes until each lane requalifies its exact binary.
+  (RTX 3090); both lanes requalified their exact release binaries on 2026-09-05 (RTX 4090
+  post-restart continuation of the 102,060-token session 225.6 s -> 9.5 s inside the gate);
+  no published profile changed.
 - `examples/fleet/`: one OMP configuration spanning the three qualified lanes with explicit
   roles (`local-main` RTX 5090, `local-heavy` RTX 4090, `local-scout` RTX 3090), a fail-closed
   three-lane tunnel opener, and two role agents. `scripts/fleet_dispatch.py` dispatches the frozen

@@ -137,7 +137,8 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    restore in 5.6 s on the RTX 4090 (was 146.6 s / 133.4 s) and 10.7 s on the RTX 3090 (was
    91.8 s / 92.2 s), quoting planted ledger keys exactly after every restart
    ([ninfer#36](https://github.com/alphastorm/ninfer/issues/36); lane commits `d22ce3fd` and
-   `3756db6e`, requalification pending before a component release). Receipts:
+   `3756db6e`; both lanes requalified on 2026-09-05 and staged as the `v0.4.9` draft with
+   component drafts `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`). Receipts:
    [5090](docs/measurements/2026-09-04-template-fork-rtx5090.json) ·
    [4090](docs/measurements/2026-09-04-template-fork-rtx4090.json) ·
    [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json) ·

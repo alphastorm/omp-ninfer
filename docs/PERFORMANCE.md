@@ -325,7 +325,8 @@ out of scope and the 4090 upstream removed its NVFP4 path) and produced two conf
 lane changes; those and the RTX 5090 context-cache profile were requalified on 2026-09-05 and
 staged and cut as `v0.4.8` (EXP-015). Each lane carries its own best measured stack rather
 than one shared configuration. The native-lane restore path is fixed at source (EXP-017:
-RTX 4090 restores 24–26× faster, RTX 3090 8.5×) and waits on requalification before it ships.
+RTX 4090 restores 24–26× faster, RTX 3090 8.5×); both lanes requalified it on 2026-09-05 and it
+is staged as the `v0.4.9` draft.
 
 ## Ideas backlog
 

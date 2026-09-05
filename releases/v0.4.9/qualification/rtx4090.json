@@ -1,0 +1,150 @@
+{
+  "artifact_type": "ninfer_windows_release_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified_utc": "2026-09-05T08:51:30.4329860Z",
+  "release_id": "qwen38-4090-v0.2-9834bf58e6c9",
+  "profile": "MTP3",
+  "identity": {
+    "binary_sha256": "f731af9e0ab92c5983c706fecf786e00f154838b7b22aab81073e8a02860ec0c",
+    "build_profile": "qwen38-4090-v0.2",
+    "build_type": "Release",
+    "config_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-4090-v0.2",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "9834bf58e6c9a8a71c1ec924de8addb793c093a1",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "9ec1b82c7afa021314682d7a95390f8935ead7c2",
+    "weights_id": "groupwise-int",
+    "gpu_index": 0,
+    "gpu_uuid": "GPU-f50f1af8-97bd-167b-b75c-b4b7412a8a94",
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "source_commit": "9834bf58e6c9a8a71c1ec924de8addb793c093a1",
+    "server_binary_sha256": "f731af9e0ab92c5983c706fecf786e00f154838b7b22aab81073e8a02860ec0c",
+    "configuration_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d"
+  },
+  "configuration": {
+    "public_model_id": "qwen3.8-27b",
+    "max_context": 131072,
+    "kv_capacity": 131072,
+    "kv_dtype": "rk2v4-e8",
+    "prefill_chunk": 2048,
+    "speculative_backend": "mtp",
+    "speculative_draft_tokens": 3,
+    "reasoning_effort": "xhigh",
+    "disk_cache_gib": 100,
+    "concurrency": 1,
+    "nonspeculative_config_sha256": "3efc6d03ac062dd8b605a9db60687863a254aeab0f5d5519c3f1f55196eae0e3"
+  },
+  "protocol": {
+    "artifact_type": "ninfer_agent_protocol_smoke",
+    "checks": {
+      "anthropic_count_tokens": true,
+      "authenticated_status": true,
+      "duplicate_tool_names_rejected": true,
+      "malformed_identity_rejected": true,
+      "private_cache_session_isolation": true,
+      "responses_continuation": true,
+      "responses_cross_session_isolation": true,
+      "responses_descendant_survival": true,
+      "responses_parent_deletion": true,
+      "responses_stored_route_isolation": true,
+      "responses_streaming_checkpoint": true,
+      "streaming_parity": true,
+      "tool_result_array": true,
+      "typed_tool_arguments": true,
+      "unsupported_structured_output_rejected": true
+    },
+    "identity": {
+      "binary_sha256": "f731af9e0ab92c5983c706fecf786e00f154838b7b22aab81073e8a02860ec0c",
+      "config_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d",
+      "deployment_profile": "qwen38-4090-v0.2",
+      "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "long_session": {
+    "first_prompt_tokens": 102060,
+    "first_completion_tokens": 16,
+    "first_elapsed_seconds": 68.0716556,
+    "post_restart_prompt_tokens": 102097,
+    "post_restart_completion_tokens": 16,
+    "post_restart_elapsed_seconds": 9.4691341
+  },
+  "persistence": {
+    "restored_tokens": 102075,
+    "reuse_path": "append_frontier",
+    "post_restart_prepare_seconds": 0.3088703
+  },
+  "golden_equivalent": {
+    "artifact_type": "ninfer_omp_golden_equivalent_receipt",
+    "contract": {
+      "contract_file_sha256": "494f12ad661921e320e1593f47e6af1158c83ecb1d0f7cc5a021b46cb64d08d9",
+      "contract_id": "qwen38-4090-omp-golden-equivalent-v1",
+      "contract_sha256": "0f02d656312f98b795fb7972a1739a46ab0897692b923cd24d7d680a17cdc958",
+      "extension_sha256": "2396724a674bb27ddcde4c2df2db1b7d848e69f0e229736d82f1c54172465bc2",
+      "fixture_provenance": "source-controlled synthetic fixture; the unavailable historical private corpus was not reused",
+      "historical_private_corpus_reused": false
+    },
+    "identity": {
+      "binary_sha256": "f731af9e0ab92c5983c706fecf786e00f154838b7b22aab81073e8a02860ec0c",
+      "build_profile": "qwen38-4090-v0.2",
+      "build_type": "Release",
+      "config_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d",
+      "cuda_architecture": "89",
+      "deployment_profile": "qwen38-4090-v0.2",
+      "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "patch_stack_sha": "9834bf58e6c9a8a71c1ec924de8addb793c093a1",
+      "source_dirty": false,
+      "upstream_base_sha": "9ec1b82c7afa021314682d7a95390f8935ead7c2"
+    },
+    "omp": {
+      "tool_name": "ninfer_golden_weather_lookup",
+      "transport": "openai-completions",
+      "version": "omp/18.0.9",
+      "wall_seconds": 5.719014
+    },
+    "oracles": {
+      "exact_visible_final_answer": "passed",
+      "expected_arguments": {
+        "city": "Paris",
+        "days": 3,
+        "metric": true
+      },
+      "final_visible_answer": "NINFER_GOLDEN_EQUIVALENT_OK|Paris|3|metric=true|18C|clear",
+      "final_visible_answer_sha256": "75d6a2553f0e9aa729b9da13a79530e830d1701b8eaa45d366a1f70922b9673e",
+      "tool_result_continuation": "passed",
+      "transcript_projection_sha256": "77f581081492b5a0b15a9667c557c20532e5461f998d854347e3019a19552a5a",
+      "typed_argument_oracle": "passed",
+      "typed_tool_invocation": "passed"
+    },
+    "qualified_utc": "2026-09-05T08:49:14.967020+00:00",
+    "raw_transcript_included": false,
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "deterministic_gates": {
+    "protocol": "passed",
+    "long_session": "passed",
+    "persistence": "passed",
+    "golden_equivalent": "passed"
+  },
+  "beta_qualified": true,
+  "package": {
+    "filename": "ninfer-4090-qwen38-v0.2.2-win-x64.zip",
+    "sha256": "d6f162cb313f73dcee30ebd24c948ec3b7032ec46d673da29c52b76d1592dbe7",
+    "bytes": 244719562,
+    "sbom_sha256": "8d1d3b3fac909011870ab28cb308c169bc84a653c5060f11f134076e11dbbdad",
+    "installer_sha256": "e5db2c9f683fa307da32874e03db562e84bba24774dddea88722fb72e0959379",
+    "controller_sha256": "e9dc8676f59f1dd6a21622bd1bfba6570cb835cb3bba664ecd20b77a2f1276b9",
+    "gpu_owner_controller_sha256": "76e8b0947589641171feb5d38372bd269858f6291793bcd7ac76cbe3a32bef81",
+    "state_protection_sha256": "7770fd41380404d99f087bfc8cb67ae4f52d1cd1c4065a92b3a88ee5c22a6d55"
+  }
+}

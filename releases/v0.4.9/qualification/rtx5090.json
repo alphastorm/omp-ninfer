@@ -1,0 +1,180 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "durable_qualification": {
+    "summary": "releases/v0.4.1/qualification/rtx5090-durable.json",
+    "sha256": "74a24eeb2681660e18bb0bca9137f5b272a0743e83207190f31920bbb77394e7",
+    "headline": "Durable checkpoints requalified on v0.4.1: explicit 316.8 MB checkpoint saved, docker-restart continuation restored warm (reuse=private_endpoint, 1.52 s); fork/delete arc proves no resurrection through the reworked quota/reclamation layer; decode 134.8 tok/s at temperature 0",
+    "note": "v0.4.1 durable summary remains the store-format authority; v0.4.4 changes export scheduling only (buffered writer, fail-before-publication preserved)"
+  },
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "narrative": "Configuration-only profile change on the unchanged v0.4.5-qwen38-5090-beta.1 image (binary afb691db, source dde8d070): the context cache grows from the derived private=2/device-state=2 defaults to --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 so sibling forks of a stored template keep the shared base anchor. Every gate below was measured on 2026-09-05 against a lifecycle-started candidate carrying the new configuration identity; nothing is inherited except the store-format authority and the origin-authentication arc, whose bases are stated where they apply.",
+    "packaged_build_identity_authoritative": true
+  },
+  "gates": {
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true
+    },
+    "decode": {
+      "completion_tokens": 2048,
+      "decode_tokens_per_second": 136.03,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "workload": "technical-writing generation at temperature 0 on the lifecycle-started candidate (2026-09-05); output byte-identical across five runs (916 rounds, 1,130 of 2,745 drafted tokens accepted)",
+      "counter_note": "rate and tokens-per-round from the serve's request completion line (decode 15.06 s for 2,048 tokens)"
+    },
+    "lifecycle": {
+      "status": "passed",
+      "incumbent_restored": true,
+      "incumbent_configuration_preserved": true,
+      "qualification_containers_running": 0,
+      "restart_policy": "unless-stopped",
+      "temporary_api_key_removed": true,
+      "note": "the candidate was started and stopped through tools/lifecycle/ninfer_container.py; restoring the incumbent under Docker Desktop required re-attaching it to the bridge network after a port-allocation race with the candidate's loopback publish (incumbent identity verified qwen38-5090-v0.4.6 / 81c8a577 afterwards)"
+    },
+    "prefill_curve": {
+      "exact_retrieval_at_every_point": true,
+      "points": [
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2207.1,
+          "server_prefill_seconds": 58.92,
+          "wall_seconds": 59.479,
+          "prefix_reuse_path": "root",
+          "vram_used_mib_after": 28558
+        }
+      ],
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "measured_on": "2026-09-05, cold process (prefix cache hit 0 tokens)"
+    },
+    "fanout_acceptance": {
+      "status": "passed",
+      "gate": "four stored sibling forks of one template must all reuse the base anchor (server prefix_reuse_path private_long_anchor) at 57,853 and 67,681 input tokens in one process",
+      "template_57853": {
+        "branch_wall_s": [
+          1.36,
+          1.22,
+          1.22,
+          1.2
+        ],
+        "server_reuse": [
+          "private_long_anchor",
+          "private_long_anchor",
+          "private_long_anchor",
+          "private_long_anchor"
+        ],
+        "cold_prefill_s": 21.871
+      },
+      "template_67681": {
+        "branch_wall_s": [
+          1.43,
+          1.3,
+          1.37,
+          1.39
+        ],
+        "server_reuse": [
+          "private_long_anchor",
+          "private_long_anchor",
+          "private_long_anchor",
+          "private_long_anchor"
+        ],
+        "cold_prefill_s": 26.83
+      },
+      "shipped_profile_reference": "docs/measurements/2026-09-04-template-fork-rtx5090.json (57.9K alternated 1.36 / 22.50 / 1.26 / 22.71 s on the v0.4.6 defaults)",
+      "receipts": [
+        "docs/measurements/2026-09-05-rtx5090-v048-fanout-57k.json",
+        "docs/measurements/2026-09-05-rtx5090-v048-fanout-67k.json"
+      ]
+    }
+  },
+  "identity": {
+    "source_commit": "dde8d07026e79f32afcf1fb367a80c6bc741e855",
+    "server_binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
+    "configuration_sha256": "95765a38a230e5dff96bb050aa9888de9c149e40074534fb8de2613c736d4e5c",
+    "deployment_profile": "qwen38-5090-v0.4.8",
+    "oci_manifest_digest": "sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4"
+  },
+  "context_cache_profile": {
+    "arguments": [
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24"
+    ],
+    "resolved_startup_line": "KV capacity auto resolved=131072 tokens pages=2048/2048 runtime=10.12 GiB free-after-weights=13.25 GiB free-after-startup=3.20 GiB headroom=1.00 GiB slack=3.13 GiB context-cache=on device-state=4-cache+1-active host-state=24 host-kv=8.00 GiB private=8 shared=1 anchors=2 markers=4",
+    "shipped_v046_startup_line": "free-after-startup=3.63 GiB slack=3.56 GiB device-state=1-cache+1-active host-state=8 private=2",
+    "configuration_sha256_tool": "tools/lifecycle/ninfer_container.py canonical_config_sha256 over the lifecycle RuntimeConfig (loopback bind, api key configured, args, deployment profile, model id, port 18088, request log, checkpoint mount, seccomp profile 3b7bf1e9, restart policy unless-stopped)"
+  },
+  "private_fleet_projection_included": false,
+  "private_paths_included": false,
+  "qualified": true,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "release_tag": "v0.4.5-qwen38-5090-beta.1",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
+  "schema_version": 1,
+  "scope_exclusions": [
+    "after a process restart the first sibling fork of a restored template re-prefills once (22.2 s at 57.9K) before its siblings run hot; restored sessions carry their endpoint, not the base anchor"
+  ],
+  "status": "passed",
+  "release": "v0.4.8",
+  "as_of": "2026-09-05",
+  "build": {
+    "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "ctest": "9/9 passed",
+    "receipt_release": "v0.4.5-qwen38-5090-beta.1",
+    "package_identity_note": "v0.4.5 tarball packaged from the exact qualified build tree; bin/ninfer-serve byte-identical to the acceptance candidate (afb691db)"
+  },
+  "arcs": {
+    "origin_authentication": {
+      "status": "inherited",
+      "inherited_from": "releases/v0.4.7/qualification/rtx5090.json",
+      "basis": "manifest MAC publication and verification are store-format behaviour of the unchanged binary; the 2026-09-05 restart arc loaded MAC-tagged generations from a fresh scratch store under the new configuration",
+      "probe_receipt": "docs/measurements/2026-08-31-origin-auth-probe.json",
+      "council": "CRS-origin-auth (initial + remediation epochs, closed; 7/7 findings resolved)"
+    },
+    "save_restart_restore": {
+      "status": "passed",
+      "checkpoint_generation": "1788577012311-0",
+      "explicit_checkpoint_bytes": 4505854445,
+      "explicit_save_wall_s": 12.57,
+      "process_restart": "docker restart (verified: cumulative prefill counter 58,024 -> 53; ready after 58.98 s)",
+      "post_restart_resume_reuse": "private_endpoint",
+      "post_restart_resume_wall_s": 23.98,
+      "post_restart_branches_wall_s": [
+        22.23,
+        1.19,
+        1.13,
+        1.19
+      ],
+      "post_restart_branch_reuse": [
+        "root",
+        "private_long_anchor",
+        "private_long_anchor",
+        "private_long_anchor"
+      ],
+      "post_restart_save_generation": "1788577169510-0",
+      "template_input_tokens": 57853,
+      "receipt": "docs/measurements/2026-09-05-rtx5090-v048-fanout-57k.json"
+    },
+    "checkpoint_scheduling": {
+      "status": "measured",
+      "note": "warm-edit 1.21 s and explicit save 12.57 s (4,505,854,445 bytes) at 57.9K; 1.32 s and 15.44 s (5,188,026,299 bytes) at 67.7K, measured in this process rather than inherited from the v0.4.4 acceptance"
+    }
+  },
+  "review": {
+    "council": "none - configuration-only lane change measured by scripts/qualify_rtx5090_profile.py and scripts/fleet_probe.py; the underlying capacity diagnosis is EXP-013",
+    "dispositions": "n/a",
+    "deferred": []
+  }
+}
