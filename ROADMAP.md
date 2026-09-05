@@ -119,7 +119,8 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    the private anchor catalog holds two entries and evicts the shared base anchor; 67.7K gives four
    1.3 s forks); across a process restart the checkpoint restore is never faster than
    re-prefilling the template (5090: 24.7 s vs 21.8 s at 4.5 GB; 4090: 130 s vs 41 s at 1.13 GB;
-   3090: 91 s vs 49 s), and the native lanes have no sibling reuse at all. The sub-64K loss was
+   3090: 91 s vs 49 s on the shipped binaries; the native-lane restore path was fixed at source
+   later the same day, see below), and the native lanes have no sibling reuse at all. The sub-64K loss was
    diagnosed on 2026-09-05 as capacity, not policy: the shipped context-cache defaults (private
    catalog 2, device-state slots 2) cannot hold a base anchor and one stored sibling. Two source
    changes were rejected on the probe; the unchanged shipped binary with
@@ -130,16 +131,21 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    That configuration is the v0.4.8 RTX 5090 candidate profile, gated by this probe at both
    template sizes in one process; it changes the profile identity, so existing session checkpoints
    do not carry across and the durable train requalifies with it
-   ([ninfer#35](https://github.com/alphastorm/ninfer/issues/35)). Restore bandwidth stays a
-   runtime item: a second restore of the same session is no faster on either native lane and the
-   status endpoint blocks for its duration
-   ([ninfer#36](https://github.com/alphastorm/ninfer/issues/36)). Receipts:
+   ([ninfer#35](https://github.com/alphastorm/ninfer/issues/35)). Restore bandwidth on the
+   native lanes was a runtime defect, not a disk limit: the reader issued one DirectStorage
+   request per KV page segment; it now reads one staging window at a time and the same sessions
+   restore in 5.6 s on the RTX 4090 (was 146.6 s / 133.4 s) and 10.7 s on the RTX 3090 (was
+   91.8 s / 92.2 s), quoting planted ledger keys exactly after every restart
+   ([ninfer#36](https://github.com/alphastorm/ninfer/issues/36); lane commits `d22ce3fd` and
+   `3756db6e`, requalification pending before a component release). Receipts:
    [5090](docs/measurements/2026-09-04-template-fork-rtx5090.json) ·
    [4090](docs/measurements/2026-09-04-template-fork-rtx4090.json) ·
    [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json) ·
    [anchor sweep](docs/measurements/2026-09-05-fanout-anchor-configuration-sweep-rtx5090.json) ·
    [restore 4090](docs/measurements/2026-09-05-restore-probe-rtx4090.json) ·
-   [restore 3090](docs/measurements/2026-09-05-restore-probe-rtx3090.json).
+   [restore 3090](docs/measurements/2026-09-05-restore-probe-rtx3090.json) ·
+   [restore fix 4090](docs/measurements/2026-09-05-restore-probe-rtx4090-candidate.json) ·
+   [restore fix 3090](docs/measurements/2026-09-05-restore-probe-rtx3090-candidate.json).
 3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
    [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
    explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on

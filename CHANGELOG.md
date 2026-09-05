@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `scripts/restore_probe.py` plants three run-specific ledger keys in its template and requires
+  every restored continuation to quote them (with one in-process control), so a restore that
+  scatters the wrong bytes cannot pass on timing alone (receipt schema 2, exit 1 on a failed
+  restored retrieval, exit 2 when the control is inconclusive).
+
+### Fixed
+
+- Native-lane checkpoint restore path (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36)):
+  the reader issued one DirectStorage request per KV page segment; it now reads one staging
+  window per request and submits a reader call as one bounded batch. Same sessions as EXP-014:
+  RTX 4090 146.6 s / 133.4 s → 5.6 s / 5.6 s (1.13 GB), RTX 3090 91.8 s / 92.2 s → 10.8 s / 10.7 s
+  (1.68 GB), retrievals exact throughout. Lane commits `d22ce3fd` (RTX 4090) and `3756db6e`
+  (RTX 3090); no published profile changes until each lane requalifies its exact binary.
 - `examples/fleet/`: one OMP configuration spanning the three qualified lanes with explicit
   roles (`local-main` RTX 5090, `local-heavy` RTX 4090, `local-scout` RTX 3090), a fail-closed
   three-lane tunnel opener, and two role agents. `scripts/fleet_dispatch.py` dispatches the frozen

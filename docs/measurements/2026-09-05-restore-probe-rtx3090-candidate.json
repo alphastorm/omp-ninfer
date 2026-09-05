@@ -1,0 +1,121 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 2,
+  "lane": "rtx3090",
+  "generated_utc": "2026-09-05T08:35:42Z",
+  "base_tokens_requested": 32000,
+  "summary": {
+    "template_input_tokens": 38251,
+    "cold_prefill_s": 46.178,
+    "checkpoint_bytes": null,
+    "restore_0_wall_s": 10.766,
+    "restore_1_wall_s": 10.654,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 46.178,
+      "input_tokens": 38251
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 2.783,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "We need respond to user: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe have context from previous",
+      "incomplete": null,
+      "output_sha256": "3097811c8f2d6e54f94a2062f428bc9d2a89f2690021814a15382d2aaf5c5ba2"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 8.778,
+      "mode": "explicit",
+      "generation": null,
+      "bytes": null,
+      "frontier": null
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 13.154,
+      "ready_after_s": 6.76,
+      "prefill_counter_before": 38352,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 10.766,
+      "id": "resp_a1508ad9b73d24bc072200f65f90478b",
+      "input_tokens": 38549,
+      "status_polls": [
+        {
+          "t_s": 0.47,
+          "bytes": 1692237086,
+          "created_at_unix_ms": 1788597274755,
+          "frontier_tokens": 38501,
+          "generation": "1788597266462-0",
+          "response_records": 2,
+          "restored_tokens": 38501,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:34:47Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need output exact keys. Same. Ensure no other words.\nORCHID=292799 COLOR=388927 SIGIL=485654",
+      "incomplete": null,
+      "output_sha256": "231952e45686762fdd28e590f0e1f2d4d4fd106ea99d76b3ff1ee9c3e7dd9826"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 9.003,
+      "mode": "explicit",
+      "generation": null
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 12.781,
+      "ready_after_s": 6.57,
+      "prefill_counter_before": 101,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 10.654,
+      "id": "resp_f692cd701a79d8db87df909a61446d0e",
+      "input_tokens": 38639,
+      "status_polls": [
+        {
+          "t_s": 0.47,
+          "bytes": 1694538628,
+          "created_at_unix_ms": 1788597308419,
+          "frontier_tokens": 38591,
+          "generation": "1788597299969-0",
+          "response_records": 3,
+          "restored_tokens": 38591,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:35:21Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need final only keys.\nORCHID=292799 COLOR=388927 SIGIL=485654",
+      "incomplete": null,
+      "output_sha256": "706b6eaef99cb37f24130fb1aca9a40d902cbbbd166d794c77d5c2f0aeffb2ed"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 9.652,
+      "mode": "explicit",
+      "generation": null
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

@@ -1,0 +1,121 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 2,
+  "lane": "rtx4090",
+  "generated_utc": "2026-09-05T08:12:38Z",
+  "base_tokens_requested": 48000,
+  "summary": {
+    "template_input_tokens": 57889,
+    "cold_prefill_s": 33.104,
+    "checkpoint_bytes": 1132281976,
+    "restore_0_wall_s": 5.615,
+    "restore_1_wall_s": 5.582,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 33.104,
+      "input_tokens": 57889
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 7.674,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user is asking to quote the ledger keys ORCHID, COLOR, and SIGIL exactly as KEY=VALUE separated by spaces, with no other words.\n\nFrom the previous message:\n- \"Ledger key ORCHID=626014.\"\n- \"Ledger ",
+      "incomplete": null,
+      "output_sha256": "5c2c3a476be9d8b66c72bb7806d5dff5f192dace01b3c1ec4cd21abf6fcabe1d"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 4.346,
+      "mode": "automatic",
+      "generation": "1788595906843-2",
+      "bytes": 1132281976,
+      "frontier": 58136
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 12.681,
+      "ready_after_s": 7.38,
+      "prefill_counter_before": 58043,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 5.615,
+      "id": "resp_adc51666383b8c03e2426983f1d36d58",
+      "input_tokens": 58184,
+      "status_polls": [
+        {
+          "t_s": 4.02,
+          "bytes": 1132281976,
+          "created_at_unix_ms": 1788595911189,
+          "frontier_tokens": 58136,
+          "generation": "1788595906843-2",
+          "response_records": 2,
+          "restored_tokens": 58136,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:12:04Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user is asking me to \"restore round 0\" and quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\n\nFrom the original ",
+      "incomplete": null,
+      "output_sha256": "a424c6e8a62af3c801d8d20c9ede7c1d908e7ee6258ed7505c0d3a9a1259466a"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 4.483,
+      "mode": "automatic",
+      "generation": "1788595930000-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 12.511,
+      "ready_after_s": 7.36,
+      "prefill_counter_before": 101,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 5.582,
+      "id": "resp_4a0fe8ac0145c8aec20cb3d65e0d70f4",
+      "input_tokens": 58419,
+      "status_polls": [
+        {
+          "t_s": 0.46,
+          "bytes": 1135909851,
+          "created_at_unix_ms": 1788595934411,
+          "frontier_tokens": 58371,
+          "generation": "1788595930000-0",
+          "response_records": 3,
+          "restored_tokens": 58371,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:12:27Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user is asking again to quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\n\nFrom the original operations ledger:\n",
+      "incomplete": null,
+      "output_sha256": "9e35ee785ecc5412b44c532433fee8de2b40fad084954206ec55eef10c6349e7"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 4.465,
+      "mode": "automatic",
+      "generation": "1788595953066-0"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

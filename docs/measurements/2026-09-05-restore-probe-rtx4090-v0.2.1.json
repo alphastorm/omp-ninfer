@@ -1,0 +1,140 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 2,
+  "lane": "rtx4090",
+  "generated_utc": "2026-09-05T08:21:36Z",
+  "base_tokens_requested": 48000,
+  "summary": {
+    "template_input_tokens": 57889,
+    "cold_prefill_s": 33.13,
+    "checkpoint_bytes": 1132282817,
+    "restore_0_wall_s": 146.569,
+    "restore_1_wall_s": 133.383,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 33.13,
+      "input_tokens": 57889
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 8.419,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe need extract from previous user message:",
+      "incomplete": null,
+      "output_sha256": "98ec1ea84f0cbf5921bc96f17424064b95d9a5eb7e3da98f8dd72178c8aca3b4"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 6.526,
+      "mode": "automatic",
+      "generation": "1788596095742-1",
+      "bytes": 1132282817,
+      "frontier": 58169
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 49.662,
+      "ready_after_s": 0.35,
+      "prefill_counter_before": 57991,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 146.569,
+      "id": "resp_54cbf29641709614b360f83ef1f80bb5",
+      "input_tokens": 58217,
+      "status_polls": [
+        {
+          "t_s": 0.52,
+          "bytes": 1132282817,
+          "created_at_unix_ms": 1788596102194,
+          "frontier_tokens": 58169,
+          "generation": "1788596095742-1",
+          "response_records": 2,
+          "restored_tokens": 58169,
+          "schema_version": 3,
+          "state": "available"
+        },
+        {
+          "t_s": 31.53,
+          "error": "TimeoutError('timed out')"
+        },
+        {
+          "t_s": 145.22,
+          "bytes": 1132282817,
+          "created_at_unix_ms": 1788596102194,
+          "frontier_tokens": 58169,
+          "generation": "1788596095742-1",
+          "response_records": 2,
+          "restored_tokens": 58169,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:15:52Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Restore round 0: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nThis seems a follow-up. Need likely",
+      "incomplete": null,
+      "output_sha256": "53f4baac9abe093ea2656bac4c3485a0bfc05ca9448de5ab816abb70e62c5fa5"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 6.735,
+      "mode": "automatic",
+      "generation": "1788596298969-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 49.641,
+      "ready_after_s": 0.35,
+      "prefill_counter_before": 101,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 133.383,
+      "id": "resp_9368c3f7f45acdad8caaa09d58bc80d5",
+      "input_tokens": 58391,
+      "status_polls": [
+        {
+          "t_s": 30.0,
+          "error": "TimeoutError('timed out')"
+        },
+        {
+          "t_s": 132.76,
+          "bytes": 1135004147,
+          "created_at_unix_ms": 1788596305572,
+          "frontier_tokens": 58343,
+          "generation": "1788596298969-0",
+          "response_records": 3,
+          "restored_tokens": 58343,
+          "schema_version": 3,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-05T08:19:15Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks again same. Need output exact keys. Ensure no extra.\nORCHID=666207 COLOR=946563 SIGIL=409685",
+      "incomplete": null,
+      "output_sha256": "ceeeeda0e6e137d08b41731c002124197136c7fea3db0d55b341cac6223977bc"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 6.4,
+      "mode": "automatic",
+      "generation": "1788596489194-0"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

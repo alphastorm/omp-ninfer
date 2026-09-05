@@ -104,6 +104,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-013 | RTX 5090 fanout anchor retention | The sub-64K alternation is a serve policy defect fixable in source | Capacity, not policy: private catalog 2 entries + 2 device-state slots; search-cap and marker source changes rejected on the probe; `--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24` on the unchanged binary keeps 12/12 forks on the anchor path at 57.9K, 67.7K, and loaded 57.9K for 0.43 GiB slack, at the cost of one 5.29 s (vs 1.39 s) first fork at 67.7K | kept — v0.4.8 RTX 5090 candidate profile, as a trade |
 | EXP-014 | Native-lane checkpoint restore | The slow restore is a first-read effect that a second restore avoids | Second restore not faster (4090 132.8 → 149.0 s at 1.13 GB; 3090 91.8 → 92.2 s at 1.68 GB); status endpoint blocked for the whole restore; restore path is the cost | open — filed upstream |
 | EXP-016 | Fleet routing (all lanes) | Splitting a fixed independent-job batch across lanes completes it faster than the RTX 5090 alone | 14-job frozen corpus: 5090 alone 66.8 s; 5090+4090 51.2 s naive / **43.4 s** cost-aware (1.54×); three lanes 47.2 s naive / **32.3 s** cost-aware (2.07×); role-pinned 100.3 s (0.66×). Long-prefill jobs are 3.3–6× more expensive off the 5090; short jobs cost the same everywhere | kept — measured boundary for the fleet configuration; cost-aware dispatch is the recommended policy |
+| EXP-017 | Native-lane checkpoint restore path | The per-page-segment reader, not the disk, is the restore cost; one read per staging window closes it | Fix on both native lanes, same session shapes as EXP-014: RTX 4090 1.13 GB **146.6 → 5.6 s** and **133.4 → 5.6 s** (24–26×); RTX 3090 1.68 GB **91.8 → 10.8 s** and **92.2 → 10.7 s** (8.5×); planted ledger keys quoted exactly after every restart on both lanes and in-process | fixed at source — lane commits `d22ce3fd` (4090) and `3756db6e` (3090); ships with the next component releases after requalification |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -288,6 +289,31 @@ Entry detail:
   [three-lane dynamic](measurements/2026-09-05-fleet-dispatch-three-lane-dynamic.json) ·
   [three-lane role](measurements/2026-09-05-fleet-dispatch-three-lane-role.json) ·
   [three-lane cost](measurements/2026-09-05-fleet-dispatch-three-lane-cost.json).
+- **EXP-017 — native-lane restore path fixed at source (2026-09-05).** EXP-014 left the cost
+  inside the restore path; a sequential read of the RTX 4090's real checkpoint files ran at
+  2,248 MiB/s on the same NVMe, so the disk was excluded. The reader issued one request per KV
+  page segment and, on Windows, every request was its own DirectStorage submit plus a fence
+  wait; with `rk2v4-e8` pages that fixed cost per request held restores near 8.5 MB/s. Payload
+  files are written contiguously in segment enumeration order, so the engine now plans one read
+  per staging window and scatters each window to the device with asynchronous copies and one
+  synchronization, and the store's Windows adapter submits a reader call as one bounded batch
+  (`plan_continuation_checkpoint_reads`, `split_continuation_checkpoint_read` in the runtime
+  contract; unit tests for the plan invariants and a 70 MiB batched read; lane commits `d22ce3fd`
+  on the RTX 4090 and `3756db6e` on the RTX 3090; on-disk format unchanged).
+  [`scripts/restore_probe.py`](../scripts/restore_probe.py) now also plants three run-specific
+  ledger keys near the template's start, middle, and end and requires every restored
+  continuation to quote them, with one in-process control, so a restore that scatters the wrong
+  bytes cannot pass on timing alone. Same session shapes as EXP-014, shipped binary versus the
+  candidate under the release's exact argv: RTX 4090 (57,889-token template, 1.13 GB)
+  146.6 s → 5.6 s and 133.4 s → 5.6 s, the restored turn now costing less than the 7.7 s
+  in-process control turn; RTX 3090 (38,251-token template, 1.68 GB) 91.8 s → 10.8 s and
+  92.2 s → 10.7 s. All retrievals exact on both binaries and lanes. The RTX 5090 container has
+  a different restore reader and is not affected. Receipts:
+  [4090 shipped](measurements/2026-09-05-restore-probe-rtx4090-v0.2.1.json) ·
+  [4090 candidate](measurements/2026-09-05-restore-probe-rtx4090-candidate.json) ·
+  [3090 shipped (EXP-014)](measurements/2026-09-05-restore-probe-rtx3090.json) ·
+  [3090 candidate](measurements/2026-09-05-restore-probe-rtx3090-candidate.json). Publication
+  follows the lane rule: each lane requalifies its exact binary before a component release.
 
 ## Current order
 
@@ -297,9 +323,9 @@ campaign closed the `nvfp4` question for the v0.4 train (rejected on the RTX 509
 card forces INT8 KV; NVFP4 W4A4 needs Blackwell tensor cores, so the `sm_89`/`sm_86` lanes are
 out of scope and the 4090 upstream removed its NVFP4 path) and produced two configuration-only
 lane changes; those and the RTX 5090 context-cache profile were requalified on 2026-09-05 and
-staged as the `v0.4.8` draft (EXP-015). Each lane now carries its own best measured stack
-rather than one shared configuration; publication waits on the component releases and the
-external-installation acceptance.
+staged and cut as `v0.4.8` (EXP-015). Each lane carries its own best measured stack rather
+than one shared configuration. The native-lane restore path is fixed at source (EXP-017:
+RTX 4090 restores 24–26× faster, RTX 3090 8.5×) and waits on requalification before it ships.
 
 ## Ideas backlog
 
