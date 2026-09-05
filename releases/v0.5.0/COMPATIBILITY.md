@@ -2,7 +2,7 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.3.0-qualified-1`
-Product release: `v0.4.9`
+Product release: `v0.5.0`
 Composition: **v0.3.0 public release**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.

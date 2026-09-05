@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CONTAINER=omp-ninfer-beta
-EXPECTED_RELEASE=v0.4.9
+EXPECTED_RELEASE=v0.5.0
 EXPECTED_PROFILE=qwen38-rtx5090-manual-tunnel
 
 if ! docker container inspect "$CONTAINER" >/dev/null 2>&1; then

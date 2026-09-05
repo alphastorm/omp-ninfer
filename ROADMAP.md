@@ -11,10 +11,11 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.4.9
+## Where this is now — v0.5.0
 
-All three lanes install from public URLs with durable, restart-resumable session state; the two
-native Windows lanes now restore a checkpointed session in seconds rather than minutes (RTX 4090
+All three lanes install from public URLs with durable, restart-resumable session state that now
+survives the machine losing its local copy (`scripts/checkpoint_sync.py`, origin-authenticated
+on every lane, EXP-018); the two native Windows lanes restore a checkpointed session in seconds rather than minutes (RTX 4090
 1.13 GB in 5.6 s, was 133-149 s; RTX 3090 1.68 GB in 10.7 s, was 92 s), and the
 RTX 5090 lane reuses a session's base prefill across sibling agent branches: four branches
 that replayed 67.7K tokens from scratch on v0.4.1 (148.7 s) run in 47.9 s, and a branch whose

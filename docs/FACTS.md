@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-05 · Current stable release: **v0.4.9**
+Last verified: 2026-09-05 · Current stable release: **v0.5.0**
 
-Everything on this page is bound to the [v0.4.9 release manifest](../releases/v0.4.9/manifest.json)
+Everything on this page is bound to the [v0.5.0 release manifest](../releases/v0.5.0/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -43,8 +43,8 @@ All of these should be materially true:
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
 | RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.8 profile on the v0.4.6 durable container: fanout, decoupled export, origin-authenticated checkpoints, and a context cache sized so sibling forks keep the base anchor |
-| RTX 4090 | native Windows service | 131,072 | durable v0.2.2 lane (native Windows, MTP3, prefill chunk 2,048, fixed restore path, bound by v0.4.9) |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.4-beta.1 lane (fixed restore path, bound by v0.4.9) |
+| RTX 4090 | native Windows service | 131,072 | durable v0.2.3 lane (native Windows, MTP3, prefill chunk 2,048, origin-authenticated checkpoints, bound by v0.5.0) |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.5.0) |
 
 ## Current model and artifact
 

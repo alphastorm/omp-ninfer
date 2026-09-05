@@ -120,6 +120,20 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.5.0 — sessions leave the machine (2026-09-05)
+
+Both native lanes requalified origin-authenticated checkpoint manifests on their own rigs;
+receipts in [`releases/v0.5.0/qualification/`](../releases/v0.5.0/qualification/). The
+replication proof is EXP-018.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 replication | **restored in 24.8 s** after wipe + import (4.5 GB) | export 158 s, import 10.1 s; planted keys exact; forged manifest quarantined ([receipt](measurements/2026-09-05-sync-probe-rtx5090.json)) |
+| RTX 4090 replication | **restored in 7.4 s** after wipe + import (1.13 GB) | export 6.2 s, import 4.2 s; payload flip refused by the tool; forged manifest `checkpoint_corrupt` ([receipt](measurements/2026-09-05-sync-probe-rtx4090.json)) |
+| RTX 3090 replication | **restored in 11.5 s** after wipe + import (1.69 GB) | export 19.7 s, import 11.9 s; same refusals ([receipt](measurements/2026-09-05-sync-probe-rtx3090.json)) |
+| RTX 4090 session | **68.0 s** for 102,060 tokens | post-restart continuation **9.3 s**; persistence restores 102,075 tokens via `append_frontier`; protocol 15/15; OMP Golden-equivalent exact (v0.2.3) |
+| RTX 3090 managed C1 | **90.66 tok/s** | 894.24 tok/s prefill, 93.43% MTP3, 300.2 W, 22,548 MiB peak; exact 130,048-token retrieval; restart, rollback, security, and OMP gates passed (v0.2.5-beta.1) |
+
 ### v0.4.9 — native-lane restore path fixed (2026-09-05)
 
 Both native lanes requalified the restore-path fix on their own rigs; receipts in

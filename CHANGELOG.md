@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-05
+
 ### Added
 
 - `scripts/checkpoint_sync.py` (roadmap v0.5 §1): replicate a checkpoint root's published
@@ -496,7 +498,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...v0.5.0
 [0.4.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.6...v0.4.7
