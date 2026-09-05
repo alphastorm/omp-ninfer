@@ -1,291 +1,91 @@
 {
-  "artifact_type": "ninfer_public_url_install_acceptance_receipt",
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
   "schema_version": 1,
   "status": "passed",
-  "acceptance_pass": true,
-  "campaign_id": "accept-3090-public-smoke-20260830T133811Z-f2db5d75a6",
-  "install_campaign_id": "accept-3090-public-20260830T082657Z-f991204d00",
-  "supersedes_failed_campaign_id": "accept-3090-public-20260830T082657Z-f991204d00",
-  "completed_utc": "2026-08-30T13:40:34.3076479Z",
+  "lane": "rtx3090",
+  "started_utc": "2026-09-05T04:09:18.8020495Z",
   "source": {
-    "release_tag": "v0.3.0-qwen38-3090.1",
-    "release_page_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.3.0-qwen38-3090.1",
-    "checksum_manifest_url": "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/SHA256SUMS",
-    "download_urls": [
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Control-GpuOwner.ps1",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Control-Release.ps1",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Install-Release.ps1",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/Protect-StateRoot.ps1",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-source.tar.gz",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.spdx.json",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "https://github.com/alphastorm/ninfer/releases/download/v0.3.0-qwen38-3090.1/package-build-receipt.json"
-    ]
-  },
-  "target": {
-    "host_identity_sha256": "b377e6cb30de09db9ae9ae1bdbcf0b31173393aaedf12941c604d814a7bd27da",
-    "gpu_identity_sha256": "549ac130f57ddebc19667771e066ef9fb9725ea83f219994d707017292331d81",
-    "gpu_model": "NVIDIA GeForce RTX 3090"
-  },
-  "baseline": {
-    "inventory_status": "passed",
-    "active_release": "qwen38-3090-omp-v0.2.1-beta.1-872ee508c1f9",
-    "previous_release": "qwen38-3090-omp-v0.2.1-beta.1-d2634e8d87f5",
-    "prepared_release": null,
-    "task_state": "Ready",
-    "process_state": "stopped",
-    "endpoint_state": "unavailable",
-    "real_cuda_compute_process_count": 0,
-    "desktop_graphics_contexts_with_not_applicable_memory_excluded": true,
-    "power_limit_w": 370,
-    "model_path_sha256": "569b09c571dc5a148780fabd4bd42d50e6adf36a26c8cfb434fc0be3db00dde5",
-    "model_bytes": 18210531328,
-    "api_key_path_sha256": "ed942f4c5b55319147f80ae0529fbe50f227d6bce96a9381a1aabfa580679298",
-    "api_key_file_present": true,
-    "api_key_value_recorded": false
+    "release_tag": "v0.2.3-qwen38-3090-beta.1",
+    "base_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.3-qwen38-3090-beta.1",
+    "product_release": "v0.4.8"
   },
   "integrity": {
-    "outer_sha256sums_sha256": "1c8cdbf211e3cb9222c3de805c80ccc386b3425db8b74b9eff63a6c2eee4007b",
-    "outer_sha256sums_entry_count": 9,
-    "outer_sha256sums_expected_set_exact": true,
+    "checksum_set_sha256": "b3048849880ca9dc96d328b012094b9697f68cf5b8899f1d6277c3b22be02795",
+    "checksum_entries": 9,
+    "assets": {
+      "package": {
+        "sha256": "96c9c37f9c30897c93952eb2b06e9b306d5b36f9650cc72b97ed8e27f7c2225d",
+        "bytes": 573231848,
+        "in_checksum_set": true
+      },
+      "sbom": {
+        "sha256": "62e6925dda24358e784b0bcbfa9b50700cc7cc811a8e299a86cfe83cf5f48788",
+        "bytes": 22227,
+        "in_checksum_set": true
+      },
+      "source_archive": {
+        "sha256": "719a31404a932012fdb9130f05da72f0dee2600315bff5cea6c94e4f5eccf4f5",
+        "bytes": 4977015,
+        "in_checksum_set": true
+      },
+      "installer": {
+        "sha256": "5ad3b139e76a4143021bbd674fd8f8dd78ba08cb8c3bbf5a5b53585acdd3719f",
+        "bytes": 69283,
+        "in_checksum_set": true
+      },
+      "controller": {
+        "sha256": "82a1b32d1a4e87bc7587392469e74a79a1f70afad52c700f0942502dd425fb1a",
+        "bytes": 35826,
+        "in_checksum_set": true
+      },
+      "gpu_owner_controller": {
+        "sha256": "e2b80702366fdf951910911f2619c110f601ef16f5c2672d4bac62fd13c81c04",
+        "bytes": 7967,
+        "in_checksum_set": true
+      },
+      "state_protection": {
+        "sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b",
+        "bytes": 13968,
+        "in_checksum_set": true
+      }
+    },
     "all_manifest_assets_downloaded_from_public_urls": true,
-    "all_manifest_asset_hashes_verified": true,
-    "package_filename": "ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-    "package_sha256_expected": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
-    "package_sha256_actual": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
-    "package_bytes_expected": 573355399,
-    "package_bytes_actual": 573355399,
-    "installer_sha256": "b5d4bcee014a3628482e80650f68a7f974ff2ac542d70dcbcb621a5ac1212150"
+    "all_manifest_asset_hashes_verified": true
   },
-  "installer": {
+  "installed": {
+    "release_id": "qwen38-3090-omp-v0.2.3-beta.1-2ce6c9dc5cd1",
+    "server_binary_sha256": "3cb22389569a76eda2faa9a72fe6f21698ed4790b5e046909f9ab56d4d398d35",
+    "configuration_sha256": "d731e2f04766637e8ab3314f0aba13dd186fa0d73c7546451af2faf0edaa7cea",
+    "matches_manifest": true
+  },
+  "install": {
     "execution_source": "downloaded-public-url",
-    "elevated": true,
-    "no_start": true,
     "outcome": "already_installed",
-    "operation_id": "6d6fdc1f79094bf3bc6dd9293e6c65ef",
-    "release_id": "qwen38-3090-omp-v0.2.1-beta.1-872ee508c1f9",
-    "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97",
+    "release_id": "qwen38-3090-omp-v0.2.3-beta.1-2ce6c9dc5cd1",
+    "package_sha256": "96c9c37f9c30897c93952eb2b06e9b306d5b36f9650cc72b97ed8e27f7c2225d",
     "exact_qualified_bytes_accepted": true,
-    "model_rehashed": false,
     "lifecycle_pointers_changed": false,
     "runtime_start_requested": false
   },
-  "corrective_intervention": {
-    "status": "passed",
-    "authorized": true,
-    "measurement_source": "plain-nvidia-smi-process-table",
-    "threshold_mib": 1024,
-    "memory_used_initial_mib": 1879,
-    "memory_used_after_first_allowlist_mib": 1413,
-    "memory_used_before_extended_allowlist_mib": 1343,
-    "memory_used_after_extended_allowlist_mib": 1301,
-    "console_session_logoff": true,
-    "console_session_id": 1,
-    "memory_used_after_logoff_mib": 180,
-    "threshold_satisfied": true,
-    "first_allowlist_measurements": [
-      {
-        "name": "NVIDIA Overlay",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1879,
-        "memory_used_after_mib": 1878
-      },
-      {
-        "name": "NVIDIA Overlay",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1878,
-        "memory_used_after_mib": 1725
-      },
-      {
-        "name": "SystemSettings",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1797,
-        "memory_used_after_mib": 1771
-      },
-      {
-        "name": "msedgewebview2",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1771,
-        "memory_used_after_mib": 1765
-      },
-      {
-        "name": "steamwebhelper",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1765,
-        "memory_used_after_mib": 1406
-      },
-      {
-        "name": "chrome",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1406,
-        "memory_used_after_mib": 1413
-      }
-    ],
-    "extended_allowlist_measurements": [
-      {
-        "name": "msedge",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1343,
-        "memory_used_after_mib": 1343
-      },
-      {
-        "name": "ShellExperienceHost",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1343,
-        "memory_used_after_mib": 1338
-      },
-      {
-        "name": "SearchHost",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1338,
-        "memory_used_after_mib": 1298
-      },
-      {
-        "name": "StartMenuExperienceHost",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1307,
-        "memory_used_after_mib": 1320
-      },
-      {
-        "name": "ApplicationFrameHost",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1330,
-        "memory_used_after_mib": 1310
-      },
-      {
-        "name": "CrossDeviceResume",
-        "reported_process_gpu_memory": "N/A",
-        "memory_used_before_mib": 1310,
-        "memory_used_after_mib": 1301
-      }
-    ],
-    "closed_processes": [
-      {
-        "name": "NVIDIA Overlay",
-        "count": 2
-      },
-      {
-        "name": "SystemSettings",
-        "count": 1
-      },
-      {
-        "name": "msedgewebview2",
-        "count": 1
-      },
-      {
-        "name": "steamwebhelper",
-        "count": 1
-      },
-      {
-        "name": "chrome",
-        "count": 1
-      },
-      {
-        "name": "msedge",
-        "count": 1
-      },
-      {
-        "name": "ShellExperienceHost",
-        "count": 1
-      },
-      {
-        "name": "SearchHost",
-        "count": 1
-      },
-      {
-        "name": "StartMenuExperienceHost",
-        "count": 1
-      },
-      {
-        "name": "ApplicationFrameHost",
-        "count": 1
-      },
-      {
-        "name": "CrossDeviceResume",
-        "count": 1
-      }
-    ],
-    "approved_but_not_present": [
-      "steam.exe"
-    ],
-    "only_authorized_restart_safe_processes_closed": true,
-    "protected_processes_touched": 0,
-    "closed_processes_intentionally_not_relaunched": true
-  },
   "smoke": {
-    "controller_start": {
-      "status": "passed",
-      "release_id": "qwen38-3090-omp-v0.2.1-beta.1-872ee508c1f9",
-      "task_state": "Running",
-      "process_state": "running",
-      "endpoint_state": "ready",
-      "duration_ms": 17755.631
-    },
-    "authenticated_status": {
-      "status": "passed",
-      "transport": "same-machine-loopback",
-      "endpoint_path": "/v1/ninfer/status",
-      "http_status": 200,
-      "server_identity_sha256": "92601987c6256d188cc988628132bbbdb4136219d0677556a6e3cca2da101dc4",
-      "matched_installed_release_identity": true,
-      "duration_ms": 7.245
-    },
-    "authenticated_completion": {
-      "status": "passed",
-      "transport": "same-machine-loopback",
-      "endpoint_path": "/v1/chat/completions",
-      "fixture_kind": "synthetic",
-      "fixture_sha256": "bd14e4e29b1b598ecd44f52a999c517e975a43358bc1d66d804be023fc4d1911",
-      "raw_fixture_recorded": false,
-      "http_status": 200,
-      "response_object": "chat.completion",
-      "response_id_sha256": "ff9d1489aa6142eaec5c1da032e31d28dbdb00d5f1ca1a04c06cdc945ac75e28",
-      "choice_count": 1,
-      "finish_reason": "stop",
-      "prompt_tokens": 19,
-      "completion_tokens": 2,
-      "total_tokens": 21,
-      "generated_content_present": true,
-      "model_output_recorded": false,
-      "duration_ms": 177.401
-    }
+    "authenticated_status_http": 200,
+    "status_ms": 2.1,
+    "served_identity_matches_installed": true,
+    "anonymous_status_http": 401,
+    "completion_http": 200,
+    "completion_ms": 294.5,
+    "completion_tokens": 3,
+    "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+    "output_contains_marker": true,
+    "speculative_backend": "mtp",
+    "public_model_id": "q38-ninfer"
   },
   "restoration": {
-    "status": "passed",
-    "active_release": "qwen38-3090-omp-v0.2.1-beta.1-872ee508c1f9",
-    "previous_release": "qwen38-3090-omp-v0.2.1-beta.1-d2634e8d87f5",
-    "prepared_release": null,
-    "task_state": "Ready",
-    "process_state": "stopped",
-    "endpoint_state": "unavailable",
-    "gpu_owner_status": "ok",
-    "gpu_owner_lease_active": false,
-    "gpu_owner_prior_pause_state_restored": true,
-    "real_cuda_compute_process_count": 0,
-    "power_limit_before_w": 370,
-    "power_limit_after_w": 370,
-    "power_limit_unchanged": true,
-    "memory_used_after_stop_mib": 180
-  },
-  "acceptance_chain": {
-    "public_urls_downloaded": true,
-    "outer_checksum_set_verified": true,
-    "exact_package_hash_verified": true,
-    "downloaded_installer_accepted_exact_qualified_bytes": true,
-    "controller_start_ready": true,
-    "authenticated_loopback_status": true,
-    "authenticated_tiny_completion": true,
-    "controller_stop_restored_machine": true
-  },
-  "prior_failure_evidence": {
-    "controller_start_gate": "GPU has an active interactive workload; close it before appliance start",
-    "resolved_by_authorized_intervention": true,
-    "retained_files": [
-      "campaign-receipt.json",
-      "failure.log",
-      "pre-correction-receipt.json"
-    ]
+    "process_state": "running",
+    "endpoint_state": "ready",
+    "prior_state_restored": true,
+    "power_limit_w": 300,
+    "active_release": "qwen38-3090-omp-v0.2.3-beta.1-2ce6c9dc5cd1"
   },
   "content_safety": {
     "hostnames_recorded": 0,
@@ -295,5 +95,8 @@
     "raw_prompts_recorded": 0,
     "model_outputs_recorded": 0,
     "identities_bound_by_sha256": true
-  }
+  },
+  "completed_utc": "2026-09-05T04:09:49.9715205Z",
+  "release": "v0.4.8",
+  "raw_prompts_outputs_or_secrets_included": false
 }

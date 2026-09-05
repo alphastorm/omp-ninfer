@@ -87,12 +87,14 @@ what can ship next:
      [gates](docs/measurements/2026-09-05-rtx5090-v048-profile-gates.json)). After a restart the
      first sibling fork of a restored template re-prefills once; the receipt records it.
    INT8 KV stays rejected on the RTX 5090 (no speed gain) and RTX 4090 (23,180 MiB peak, screen
-   regression). `releases/v0.4.8/manifest.json` is a `draft` whose blockers are external effects:
-   publish the two native components (`v0.2.1-qwen38-4090-durable.1`,
-   `v0.2.3-qwen38-3090-beta.1`), rerun the composed external-installation acceptance from the
-   published URLs, then flip the root authority (`stage_release.py`'s profile and compatibility
-   rewrites, `rebind_release.py --pin`) and cut. Until then the public release stays `v0.4.7` and
-   the RTX 5090 appliance keeps serving the v0.4.6 profile.
+   regression). The two native components are published (`v0.2.1-qwen38-4090-durable.1`,
+   `v0.2.3-qwen38-3090-beta.1`; every manifest URL verified against its hash) and the composed
+   external-installation acceptance was rerun from those URLs on 2026-09-05
+   ([receipt](releases/v0.4.8/acceptance/composed-external-installation.json)).
+   `releases/v0.4.8/manifest.json` stays a `draft` pending the cut itself: the root authority flip
+   (`stage_release.py`'s profile and compatibility rewrites), `rebind_release.py --pin`, and the
+   product tag. Until then the public release stays `v0.4.7` and the RTX 5090 appliance keeps
+   serving the v0.4.6 profile.
 6. **MTP exact-output attribution — focused, non-blocking follow-up.** If pursued, run only the
    missing fresh-process MTP0 controls and targeted K0/K3 first-divergence probes. Do not rerun the
    rejected K5/K7 arms without new evidence that could reverse their measured deficit.

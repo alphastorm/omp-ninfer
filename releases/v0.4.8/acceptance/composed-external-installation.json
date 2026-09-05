@@ -2,40 +2,57 @@
   "artifact_type": "omp_ninfer_composed_external_installation",
   "schema_version": 1,
   "release": "v0.4.8",
-  "as_of": "2026-08-31",
+  "as_of": "2026-09-05",
   "status": "passed",
   "operator_class": "owner-operated tester-equivalent",
-  "mode": "docker-local (pull by digest, launch from the published manifest identities)",
+  "mode": "docker-local (pull by digest, launch through the lifecycle tool from the manifest identities) plus native public-URL install acceptance on both Windows lanes",
   "steps": {
     "anonymous_image_pull": {
       "status": "passed",
-      "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:f66708f585ca1e379e578412b807dcc4608e6726139487a52fcb0ae1ae3495b6",
-      "note": "pulled with an empty scratch DOCKER_CONFIG (no credentials) on the owner appliance"
+      "reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
+      "note": "pulled by digest with an empty scratch DOCKER_CONFIG (no credentials) on the owner appliance; image id equals the manifest digest"
     },
     "anonymous_release_assets": {
       "status": "passed",
       "binary_http": 200,
-      "source_http": 200
+      "source_http": 200,
+      "sbom_http": 200,
+      "native_assets_verified_from_independent_host": 14
     },
     "checksum_verification": {
       "status": "passed",
-      "note": "SHA256SUMS verified for the binary archive and SBOM on an independent host (macOS workstation)"
+      "note": "the RTX 5090 binary archive (319,412,978 bytes), source archive, and SBOM re-downloaded and hashed on the macOS workstation against the manifest; every RTX 4090 and RTX 3090 asset URL in the manifest downloaded and hashed on the workstation (14/14 exact, sizes exact)"
     },
     "launch_identity": {
       "status": "passed",
-      "identity_line": "upstream=6e8b2e2a patch=82a1a227 dirty=false build=appliance-local deployment=qwen38-5090-v0.4.3"
+      "identity_line": "upstream=6e8b2e2a patch=dde8d070 dirty=false build=appliance-local deployment=qwen38-5090-v0.4.8 config_sha256=95765a38",
+      "note": "candidate started through tools/lifecycle/ninfer_container.py with --expect-image-id/--expect-binary-sha256/--expect-model-artifact-sha256/--expect-config-sha256 bound to the manifest"
     },
     "auth_boundary": {
       "status": "passed",
-      "anonymous_status_request": 401
+      "anonymous_status_request": 401,
+      "note": "measured on the appliance's serve; both native lanes also refused anonymous status with 401"
     },
     "stateful_resume": {
       "status": "passed",
-      "note": "save -> docker restart -> post-restart resume (reuse=private_endpoint, ttft 0.524 s at 67,828 reused tokens; fleet probe receipt)"
+      "note": "explicit save (4,505,854,445 bytes) -> docker restart verified by the prefill counter reset -> post-restart resume reuse=private_endpoint in 23.978 s at 57,853 reused tokens (fleet probe receipt)"
     },
     "fail_closed": {
       "status": "passed",
-      "note": "deleted continuation refuses 404 before and after restart; streamed import digest divergence marks the generation corrupt and quarantines on next load (agent-protocol smoke rc=0)"
+      "note": "deleted continuation refuses 404 (previous_response_not_found) before and after restart while the surviving sibling continues (profile gates receipt)"
+    },
+    "native_public_install": {
+      "status": "passed",
+      "rtx3090": {
+        "receipt": "releases/v0.4.8/acceptance/rtx3090-public-install.json",
+        "sha256": "32ad0da780d96d6bc20da8415b86bf93a342234cab4132795d1eff98b7691ee4",
+        "summary": "public URLs -> closed checksum set exact -> downloaded installer accepted the installed v0.2.3-beta.1 as exact qualified bytes (already_installed) -> authenticated status identity match, anonymous 401, tiny completion -> stopped, 370 W owner state"
+      },
+      "rtx4090": {
+        "receipt": "releases/v0.4.8/acceptance/rtx4090-public-install.json",
+        "sha256": "99a7a655bb63a8afa4e4371f9bafb3f1531f99aee1dff13507b56f98d1cf5818",
+        "summary": "public URLs -> closed checksum set exact -> 27/27 package members byte-identical to the installed v0.2.1 release (the installer refuses a duplicate instance) -> authenticated status identity match, anonymous 401, tiny completion -> left running as found"
+      }
     }
   },
   "client": {
@@ -60,5 +77,5 @@
       "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
     }
   ],
-  "note": "inherited from the v0.4.7 composed acceptance (2026-08-31) by staging; v0.4.8 changes the RTX 5090 deployment profile and both native packages, so this acceptance must be rerun from published URLs before the manifest leaves draft"
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7 (same omp-18.0.9-cross-platform-beta-2 component); the client-side receipts are carried, the runtime-side steps were rerun on 2026-09-05"
 }

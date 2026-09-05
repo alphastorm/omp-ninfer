@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "94165596ce4743ad79c511e24221c6e3222432c3530df2fb1ee701b6917d3f7d",
+    "summary_sha256": "a9ca10179f9d1f0d7606098b12b5554eabd2799a17fa28e651b1bb6599c24d3d",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cb8d7dbc668d0f51bede38abbbfd3c4e16ed9c4c/releases/v0.4.7/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -182,9 +182,7 @@
       "NInfer RTX 3090 component v0.2.3-qwen38-3090-beta.1"
     ],
     "blockers": [
-      "NInfer RTX 4090 component v0.2.1-qwen38-4090-durable.1 (package 1c66f7d5) is qualified on the owner rig but not yet published; its manifest URLs do not resolve",
-      "NInfer RTX 3090 component v0.2.3-qwen38-3090-beta.1 (package 96c9c37f) is qualified on the owner rig but not yet published; its manifest URLs do not resolve",
-      "external-installation acceptance has not been rerun for v0.4.8",
+      "root compatibility authority and profiles still describe v0.4.7; apply the stage_release.py rewrites, rebind, and cut (founder decision)",
       "the RTX 5090 appliance still serves the v0.4.6 profile; the v0.4.8 context-cache profile is qualified but not promoted"
     ]
   }

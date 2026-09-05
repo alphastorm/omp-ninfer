@@ -60,8 +60,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   57.9K and 67.7K in one process, a 4.5 GB explicit save and verified restart (new
   `scripts/qualify_rtx5090_profile.py`). After a restart the first sibling fork of a restored
   template re-prefills once before its siblings run hot, which the receipt records as a scope
-  note. The draft is blocked on publishing the two native components and rerunning the composed
-  external-installation acceptance; no public profile changed.
+  note. Both native components are published and hash-verified, and the composed
+  external-installation acceptance was rerun from the public URLs (new
+  `scripts/hosts/accept-native-public-install.ps1`); the draft now waits only on the cut. No
+  public profile changed.
 
 ## [0.4.7] - 2026-09-01
 

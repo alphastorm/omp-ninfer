@@ -39,13 +39,21 @@ configurations while the public release and the root compatibility authority sta
 - RTX 3090: `v0.2.3-qwen38-3090-beta.1` (`ninfer` commit `2ce6c9dc`, package `96c9c37f...`),
   131,072-token context ([receipt](../releases/v0.4.8/qualification/rtx3090.json)).
 
-Blockers, in order: publish the two native component releases from the lane branches
-(`lane/rtx4090-chunk-2048`, `lane/rtx3090-context-131072`) with the exact assets bound in the
-manifest; rerun the composed external-installation acceptance from those URLs; apply the root
-authority flip that `scripts/stage_release.py` performs (profile release/deployment-profile
-rewrites, compatibility mirror and render) so `verify_release.py --release v0.4.8` clears its six
-root-authority errors; then the pin dance and cut. `verify_release.py` without arguments still
-validates the ready `v0.4.7`.
+Both native components are published and every manifest URL resolves to its bound hash
+([`v0.2.3-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.3-qwen38-3090-beta.1),
+[`v0.2.1-qwen38-4090-durable.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.1-qwen38-4090-durable.1)),
+and the composed external-installation acceptance was rerun on 2026-09-05
+([receipt](../releases/v0.4.8/acceptance/composed-external-installation.json): anonymous pull by
+digest, anonymous assets, workstation checksum verification, lifecycle launch identity, auth
+boundary, stateful resume, fail-closed delete, plus the
+[RTX 3090](../releases/v0.4.8/acceptance/rtx3090-public-install.json) and
+[RTX 4090](../releases/v0.4.8/acceptance/rtx4090-public-install.json) public-URL install
+acceptances driven by [`scripts/hosts/accept-native-public-install.ps1`](../scripts/hosts/accept-native-public-install.ps1)).
+What remains is the cut itself: apply the root authority flip that `scripts/stage_release.py`
+performs (profile release/deployment-profile rewrites, compatibility mirror and render), the pin
+dance (`rebind_release.py --pin`), and the product tag. `verify_release.py --release v0.4.8`
+reports exactly those remaining flips; `verify_release.py` without arguments still validates the
+ready `v0.4.7`.
 
 ## Version identities
 

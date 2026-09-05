@@ -5,7 +5,7 @@
   "as_of": "2026-09-05",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 durable container advanced to v0.4.4 (fanout anchors, checkpoint-import integrity, session isolation; fanout-probe + restart-resume + protocol smokes qualified on the owner appliance); the RTX 4090 durable v0.2 package and the exact qualified RTX 3090 runtime rebound unchanged.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -68,7 +68,7 @@
       "status": "passed",
       "operator_class": "owner-operated tester-equivalent",
       "repository_path": "releases/v0.4.8/acceptance/composed-external-installation.json",
-      "sha256": "6d58d7f3c566eca90a62b136cd0fd14bc4d44536807991a561e1aa9103e8debf",
+      "sha256": "4cf2e1dad6c451c35a46a48b6d9a23ff3787c99b46735ac3de17e7348ac18e66",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
       "vision": true,
