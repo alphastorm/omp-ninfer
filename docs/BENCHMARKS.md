@@ -120,6 +120,20 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.4.9 — native-lane restore path fixed (2026-09-05)
+
+Both native lanes requalified the restore-path fix on their own rigs; receipts in
+[`releases/v0.4.9/qualification/`](../releases/v0.4.9/qualification/). Configurations are the
+`v0.4.8` ones; only the checkpoint reader changed.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 4090 restore (probe) | **5.6 s / 5.6 s** for 1.13 GB | 57,889-token template; 146.6 s / 133.4 s on v0.2.1 with the same probe; planted ledger keys quoted exactly after every restart ([shipped](measurements/2026-09-05-restore-probe-rtx4090-v0.2.1.json) · [candidate](measurements/2026-09-05-restore-probe-rtx4090-candidate.json)) |
+| RTX 4090 session | **68.1 s** for 102,060 tokens | post-restart continuation **9.5 s** (225.6 s on v0.2.1); persistence restores 102,075 tokens via `append_frontier`; protocol 15/15; OMP Golden-equivalent exact (v0.2.2) |
+| RTX 3090 restore (probe) | **10.8 s / 10.7 s** for 1.68 GB | 38,251-token template; 91.8 s / 92.2 s on v0.2.3-beta.1 (EXP-014); keys quoted exactly ([candidate](measurements/2026-09-05-restore-probe-rtx3090-candidate.json)) |
+| RTX 3090 context | **130,048 prompt tokens** | exact retrieval in 219.4 s at the 131,072 ceiling (v0.2.4-beta.1) |
+| RTX 3090 managed C1 | **90.56 tok/s** | 892.97 tok/s prefill, 93.43% MTP3, 300.7 W, 22,548 MiB peak; restart, rollback, security, and OMP gates passed |
+
 ### v0.4.8 — requalified lane configurations (2026-09-05)
 
 Each lane reran its own qualification with its changed configuration; receipts in

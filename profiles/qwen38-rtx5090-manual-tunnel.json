@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.4.8",
+  "release": "v0.4.9",
   "status": "public",
   "installation_mode": "manual-ssh-tunnel",
   "client": {

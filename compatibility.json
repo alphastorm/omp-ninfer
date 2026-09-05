@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.3.0-qualified-1",
-  "product_release": "v0.4.8",
+  "product_release": "v0.4.9",
   "composition": {
     "status": "v0.3.0 public release",
     "lifecycle_repository": "https://github.com/alphastorm/oh-my-pi",
@@ -37,7 +37,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.8",
+      "product_release": "v0.4.9",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -72,7 +72,7 @@
         "profile": "qwen38-5090-v0.4.8",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.8/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.9/qualification/rtx5090.json",
           "sha256": "8e847a39915dcaedb00a4f5221801687e319fc3ed73e18ff15d43102bc9254c6"
         }
       },
@@ -127,7 +127,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.8",
+      "product_release": "v0.4.9",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -162,7 +162,7 @@
         "profile": "qwen38-5090-v0.4.8",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.8/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.9/qualification/rtx5090.json",
           "sha256": "8e847a39915dcaedb00a4f5221801687e319fc3ed73e18ff15d43102bc9254c6"
         }
       },
@@ -217,7 +217,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.4.8",
+      "product_release": "v0.4.9",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -252,7 +252,7 @@
         "profile": "qwen38-5090-v0.4.8",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.8/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.9/qualification/rtx5090.json",
           "sha256": "8e847a39915dcaedb00a4f5221801687e319fc3ed73e18ff15d43102bc9254c6"
         }
       },
@@ -308,9 +308,9 @@
       "package_sha256": "57652260531a391f1a443437c200657ef90e85e322e078f6c7cb6e47682f5aa1",
       "package_bytes": 573249238,
       "qualification_receipt": {
-        "path": "releases/v0.4.8/qualification/rtx3090.json",
+        "path": "releases/v0.4.9/qualification/rtx3090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.3/qualification/rtx3090.json",
-        "sha256": "2de3f6c11ed56fd533e8121caaa5c68b2ca8ff858ef0584e0de39973c2590694"
+        "sha256": "eeb279bd243f296e53ba867c6eabee6c0d938ab23d8ce33ae40f167537a2d934"
       }
     },
     {
@@ -330,9 +330,9 @@
       "package_sha256": "1cced9e1f16ad0d1b4a5f9c5a28d00cb2b4449137f1652696799be70a74baf7d",
       "package_bytes": 227438715,
       "qualification_receipt": {
-        "path": "releases/v0.4.8/qualification/rtx4090.json",
+        "path": "releases/v0.4.9/qualification/rtx4090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ab54632438a6482821faefa23ac60870ca9e6c7a/releases/v0.4.3/qualification/rtx4090.json",
-        "sha256": "1c234a2d6a5a9374c54929df7235d31dbcb9c727d5d4b424f1368e1f1d795f0c"
+        "sha256": "dc5166a155e3d36ea076bb7ad1528dc7c31b23d18db4778229f2805dcdde1605"
       }
     }
   ]

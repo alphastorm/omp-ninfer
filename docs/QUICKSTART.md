@@ -21,7 +21,7 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The ready `v0.4.8` public release connects native Windows OMP over authenticated local loopback
+The ready `v0.4.9` public release connects native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
@@ -56,7 +56,7 @@ model, configuration, qualification summary, and clean-install acceptance receip
 Clone the tag in Windows and in the WSL2 namespace that owns Docker:
 
 ```powershell
-git clone --branch v0.4.8 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.4.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -88,13 +88,13 @@ qualified native lanes.
 
 The RTX 3090 package identity is:
 
-- filename: `ninfer-rtx3090-omp-v0.2.1-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`;
-- SHA-256: `96c9c37f9c30897c93952eb2b06e9b306d5b36f9650cc72b97ed8e27f7c2225d`;
-- byte count: `573,231,848`; and
-- source commit: `2ce6c9dc5cd18356a019d378b509a46154c503ac`.
+- filename: `ninfer-rtx3090-omp-v0.2.4-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`;
+- SHA-256: `e4fbbfca01343640c5a82ab81dedf777675b989ba54460c3e8b3fbd90a6c1557`;
+- byte count: `573,319,413`; and
+- source commit: `cd06e782f268416179521daff89bb67467744988`.
 
 Its component-release slot is
-[`alphastorm/ninfer@v0.2.3-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.3-qwen38-3090-beta.1).
+[`alphastorm/ninfer@v0.2.4-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.4-qwen38-3090-beta.1).
 That URL must resolve at release cut; the ready product manifest remains authoritative for every
 download URL and hash.
 
@@ -211,7 +211,7 @@ owner.
 From the public release tag, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.4.8 --depth 1 \
+git clone --branch v0.4.9 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -249,11 +249,11 @@ LOGS="$HOME/.local/state/omp-ninfer"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.8/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.4.9/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.8/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.4.9/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.4.8/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.4.9/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 curl --fail --location --continue-at - --output "$MODEL" "$MODEL_URL"

@@ -11,10 +11,12 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.4.8
+## Where this is now — v0.4.9
 
-All three lanes install from public URLs with durable, restart-resumable session state, and the
-RTX 5090 lane now reuses a session's base prefill across sibling agent branches: four branches
+All three lanes install from public URLs with durable, restart-resumable session state; the two
+native Windows lanes now restore a checkpointed session in seconds rather than minutes (RTX 4090
+1.13 GB in 5.6 s, was 133-149 s; RTX 3090 1.68 GB in 10.7 s, was 92 s), and the
+RTX 5090 lane reuses a session's base prefill across sibling agent branches: four branches
 that replayed 67.7K tokens from scratch on v0.4.1 (148.7 s) run in 47.9 s, and a branch whose
 anchor is still device-resident starts generating in 0.40 s
 ([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). Details:
@@ -137,8 +139,8 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    restore in 5.6 s on the RTX 4090 (was 146.6 s / 133.4 s) and 10.7 s on the RTX 3090 (was
    91.8 s / 92.2 s), quoting planted ledger keys exactly after every restart
    ([ninfer#36](https://github.com/alphastorm/ninfer/issues/36); lane commits `d22ce3fd` and
-   `3756db6e`; both lanes requalified on 2026-09-05 and staged as the `v0.4.9` draft with
-   component drafts `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`). Receipts:
+   `3756db6e`; both lanes requalified on 2026-09-05 and shipped in `v0.4.9` with components
+   `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`). Receipts:
    [5090](docs/measurements/2026-09-04-template-fork-rtx5090.json) ·
    [4090](docs/measurements/2026-09-04-template-fork-rtx4090.json) ·
    [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json) ·

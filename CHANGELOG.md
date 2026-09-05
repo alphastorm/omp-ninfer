@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.9] - 2026-09-05
+
 ### Added
 
 - `scripts/restore_probe.py` plants three run-specific ledger keys in its template and requires
@@ -16,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Native-lane checkpoint restore path (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36); staged as the `v0.4.9` draft with requalified components `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`):
+- Native-lane checkpoint restore path (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36); shipped in `v0.4.9` with requalified components `v0.2.2-qwen38-4090-durable.1` and `v0.2.4-qwen38-3090-beta.1`):
   the reader issued one DirectStorage request per KV page segment; it now reads one staging
   window per request and submits a reader call as one bounded batch. Same sessions as EXP-014:
   RTX 4090 146.6 s / 133.4 s → 5.6 s / 5.6 s (1.13 GB), RTX 3090 91.8 s / 92.2 s → 10.8 s / 10.7 s
@@ -475,7 +477,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...HEAD
+[0.4.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.5...v0.4.6

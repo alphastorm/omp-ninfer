@@ -27,28 +27,31 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.4.9 draft (staged 2026-09-05, not cuttable yet)
+### v0.4.9 public release (native-lane restore path fixed)
 
-- `releases/v0.4.9/manifest.json` is a `draft` that carries the native-lane restore-path fix
-  (EXP-017, [ninfer#36](https://github.com/alphastorm/ninfer/issues/36)) while the public
-  release and the root compatibility authority stay at `v0.4.8`:
+- Product release: `alphastorm/omp-ninfer@v0.4.9`, GitHub `Latest`. The checkpoint restore path on
+  both native Windows lanes is fixed at source (EXP-017,
+  [ninfer#36](https://github.com/alphastorm/ninfer/issues/36)) and each lane requalified its exact
+  release binary on its own rig on 2026-09-05:
   - RTX 4090: `ninfer@v0.2.2-qwen38-4090-durable.1` (qualified head `9834bf58`, packaging
     `e16fa354`, package `d6f162cb...`), qualified on the owner rig with the post-restart
     continuation of the 102,060-token session in 9.5 s (225.6 s on v0.2.1)
-    ([receipt](../releases/v0.4.9/qualification/rtx4090.json)); staged as a GitHub draft.
+    ([receipt](../releases/v0.4.9/qualification/rtx4090.json)).
   - RTX 3090: `ninfer@v0.2.4-qwen38-3090-beta.1` (commit `cd06e782`, package `e4fbbfca...`),
-    14/14 orchestrator phases ([receipt](../releases/v0.4.9/qualification/rtx3090.json)); staged
-    as a GitHub draft.
+    14/14 orchestrator phases ([receipt](../releases/v0.4.9/qualification/rtx3090.json)).
   - RTX 5090 runtime, profile `qwen38-5090-v0.4.8`, and the OMP client are unchanged.
 - Restore probe, shipped versus candidate on the same sessions: RTX 4090 146.6 s / 133.4 s ->
   5.6 s / 5.6 s ([shipped](measurements/2026-09-05-restore-probe-rtx4090-v0.2.1.json) ·
   [candidate](measurements/2026-09-05-restore-probe-rtx4090-candidate.json)); RTX 3090
   91.8 s / 92.2 s -> 10.8 s / 10.7 s ([shipped](measurements/2026-09-05-restore-probe-rtx3090.json) ·
   [candidate](measurements/2026-09-05-restore-probe-rtx3090-candidate.json)).
-- Blockers, in order: publish the two native component releases, rerun the composed
-  external-installation acceptance from the published URLs, then the pin dance and the cut.
+- Composed external-installation acceptance rerun on 2026-09-05 from the published component URLs
+  ([receipt](../releases/v0.4.9/acceptance/composed-external-installation.json)) with native
+  public-URL install acceptances on the
+  [RTX 3090](../releases/v0.4.9/acceptance/rtx3090-public-install.json) and
+  [RTX 4090](../releases/v0.4.9/acceptance/rtx4090-public-install.json).
 
-### v0.4.8 public release (requalified lane configurations)
+### v0.4.8 public release (requalified lane configurations; superseded by v0.4.9)
 
 - Product release: `alphastorm/omp-ninfer@v0.4.8`, GitHub `Latest`. Each lane ships on its own
   best measured configuration, requalified on its own rig on 2026-09-05 and accepted from the
