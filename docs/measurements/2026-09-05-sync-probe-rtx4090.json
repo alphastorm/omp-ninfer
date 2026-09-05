@@ -1,0 +1,218 @@
+{
+  "artifact_type": "omp_ninfer_sync_probe",
+  "schema_version": 1,
+  "lane": "rtx4090",
+  "generated_utc": "2026-09-05T17:09:46Z",
+  "status": "passed",
+  "error": null,
+  "summary": {
+    "template_input_tokens": 57889,
+    "checkpoint_bytes": 1132282557,
+    "export_wall_s": 6.225,
+    "import_wall_s": 4.154,
+    "restored_wall_s": 7.411,
+    "restored_retrieval_exact": true,
+    "tampered_payload_refused_by_tool": true,
+    "forged_manifest_state": "corrupt",
+    "forged_continuation_http": 500,
+    "forged_continuation_state": "missing"
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 33.036,
+      "input_tokens": 57889
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 7.992,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user is asking to quote the ORCHID, COLOR, and SIGIL ledger keys from the operations ledger exactly, in the format KEY=VALUE separated by spaces, with no other words.\n\nFrom the previous message:\n-",
+      "incomplete": null,
+      "output_sha256": "2d7eff8367c1346ff16f29787a785b0660e40d17d867a93b3e0987c4d5984190"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 4.398,
+      "mode": "automatic",
+      "generation": "1788627463974-2",
+      "bytes": 1132282557,
+      "frontier": 58153
+    },
+    {
+      "step": "export",
+      "command_sha256": "66ba20cb1d47ab4e",
+      "returncode": 0,
+      "wall_s": 6.225,
+      "stdout_tail": "session-dir 94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625\npassed  1132279332\n55f354c395cc1724c13655b00ffa6040132b6ccf759f305da27699bda19ba3b0",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "pull_offsite",
+      "command_sha256": "41b3b0063ba74022",
+      "returncode": 0,
+      "wall_s": 505.843,
+      "stdout_tail": "55f354c395cc1724c13655b00ffa6040132b6ccf759f305da27699bda19ba3b0\n      10",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore_stop",
+      "command_sha256": "c775a11a1b6a65fe",
+      "returncode": 0,
+      "wall_s": 2.187,
+      "stdout_tail": "stopped",
+      "stderr_tail": ""
+    },
+    {
+      "step": "wipe",
+      "command_sha256": "e331a693f205a199",
+      "returncode": 0,
+      "wall_s": 1.844,
+      "stdout_tail": "wiped 94137d5d5056",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "push_onsite",
+      "command_sha256": "e9a37da4ce9c88d8",
+      "returncode": 0,
+      "wall_s": 108.292,
+      "stdout_tail": "10",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "import",
+      "command_sha256": "d4a8965aab859c93",
+      "returncode": 0,
+      "wall_s": 4.154,
+      "stdout_tail": "passed",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "restore_start",
+      "command_sha256": "47890e86c6b01b21",
+      "returncode": 0,
+      "wall_s": 4.477,
+      "stdout_tail": "started",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore_ready",
+      "ready_after_s": 14.2
+    },
+    {
+      "step": "status_after_import",
+      "state": "available",
+      "generation": "1788627463974-2",
+      "bytes": 1132282557,
+      "frontier_tokens": 58153,
+      "error": null
+    },
+    {
+      "step": "restored_retrieval",
+      "wall_s": 7.411,
+      "input_tokens": 58199,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user is asking me to quote the ORCHID, COLOR, and SIGIL ledger keys from the operations ledger exactly, in the format KEY=VALUE separated by spaces, with no other words.\n\nFrom the ledger:\n- ORCHID",
+      "incomplete": null,
+      "output_sha256": "d076cd59da33f009a2e3412516e5fd953ef2b77bc26f4bb8ca7fba8d15b97486"
+    },
+    {
+      "step": "tamper_payload",
+      "command_sha256": "06f73447e3946ac0",
+      "returncode": 0,
+      "wall_s": 16.552,
+      "stdout_tail": "flipped backend-kv.bin",
+      "stderr_tail": "#< CLIXML\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "push_tampered_payload",
+      "command_sha256": "e9a37da4ce9c88d8",
+      "returncode": 0,
+      "wall_s": 0.006,
+      "stdout_tail": "host-side",
+      "stderr_tail": ""
+    },
+    {
+      "step": "import_tampered_payload",
+      "command_sha256": "d4a8965aab859c93",
+      "returncode": 1,
+      "wall_s": 1.823,
+      "stdout_tail": "failed 94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625/1788627463974-2: payload engine/backend-kv.bin does not match its manifest digest",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "tamper_manifest",
+      "command_sha256": "8cd134f995c4f195",
+      "returncode": 0,
+      "wall_s": 1.978,
+      "stdout_tail": "frontier 58153 -> 58154",
+      "stderr_tail": "#< CLIXML\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "push_forged_manifest",
+      "command_sha256": "e9a37da4ce9c88d8",
+      "returncode": 0,
+      "wall_s": 0.005,
+      "stdout_tail": "host-side",
+      "stderr_tail": ""
+    },
+    {
+      "step": "forged_stop",
+      "command_sha256": "c775a11a1b6a65fe",
+      "returncode": 0,
+      "wall_s": 2.146,
+      "stdout_tail": "stopped",
+      "stderr_tail": ""
+    },
+    {
+      "step": "wipe_again",
+      "command_sha256": "e331a693f205a199",
+      "returncode": 0,
+      "wall_s": 1.764,
+      "stdout_tail": "wiped 94137d5d5056",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "import_forged_manifest",
+      "command_sha256": "d4a8965aab859c93",
+      "returncode": 0,
+      "wall_s": 4.198,
+      "stdout_tail": "passed",
+      "stderr_tail": " N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>"
+    },
+    {
+      "step": "forged_start",
+      "command_sha256": "47890e86c6b01b21",
+      "returncode": 0,
+      "wall_s": 4.533,
+      "stdout_tail": "started",
+      "stderr_tail": ""
+    },
+    {
+      "step": "forged_ready",
+      "ready_after_s": 7.73
+    },
+    {
+      "step": "status_forged",
+      "state": "corrupt",
+      "generation": null,
+      "bytes": null,
+      "frontier_tokens": null,
+      "error": null
+    },
+    {
+      "step": "forged_continuation",
+      "http": 500,
+      "wall_s": 0.348,
+      "body": "{\"error\":{\"code\":\"checkpoint_corrupt\",\"message\":\"stored continuation failed integrity validation\",\"param\":\"previous_response_id\",\"type\":\"server_error\"}}",
+      "state_after": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 4
+}

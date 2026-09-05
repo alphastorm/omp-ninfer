@@ -1,0 +1,218 @@
+{
+  "artifact_type": "omp_ninfer_sync_probe",
+  "schema_version": 1,
+  "lane": "rtx5090",
+  "generated_utc": "2026-09-05T17:56:45Z",
+  "status": "passed",
+  "error": null,
+  "summary": {
+    "template_input_tokens": 57889,
+    "checkpoint_bytes": 4514771811,
+    "export_wall_s": 157.597,
+    "import_wall_s": 10.143,
+    "restored_wall_s": 24.772,
+    "restored_retrieval_exact": true,
+    "tampered_payload_refused_by_tool": true,
+    "forged_manifest_state": "corrupt",
+    "forged_continuation_http": 404,
+    "forged_continuation_state": "missing"
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 21.738,
+      "input_tokens": 57889
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 1.606,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe have context from previous user message:",
+      "incomplete": null,
+      "output_sha256": "5e3ea4f3c76f8274515b3139a0bc97b2fe095f5d83a35ddaea31e00248fcf10c"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 12.31,
+      "mode": "explicit",
+      "generation": "1788628381424-0",
+      "bytes": 4514771811,
+      "frontier": 58146
+    },
+    {
+      "step": "export",
+      "command_sha256": "11b3452244ed7777",
+      "returncode": 0,
+      "wall_s": 157.597,
+      "stdout_tail": "session-dir eb37f3118198e6abf96c4781f1596747ef8953f23fc08092bd286c76b9f1fc6c\npassed  4514768762\nc0fe146ca48e1d2b1121bfb6e8ce00487f8e46e8d0fb49d805cdb2c3e61020b8",
+      "stderr_tail": ""
+    },
+    {
+      "step": "pull_offsite",
+      "command_sha256": "e67f4b730bd32b5b",
+      "returncode": 0,
+      "wall_s": 1690.492,
+      "stdout_tail": "c0fe146ca48e1d2b1121bfb6e8ce00487f8e46e8d0fb49d805cdb2c3e61020b8\n      11",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore_stop",
+      "command_sha256": "fb0a9366711351c1",
+      "returncode": 0,
+      "wall_s": 17.725,
+      "stdout_tail": "stopped",
+      "stderr_tail": ""
+    },
+    {
+      "step": "wipe",
+      "command_sha256": "61323ff8e6409816",
+      "returncode": 0,
+      "wall_s": 3.242,
+      "stdout_tail": "wiped eb37f3118198",
+      "stderr_tail": ""
+    },
+    {
+      "step": "push_onsite",
+      "command_sha256": "f136c4fe31f5e424",
+      "returncode": 0,
+      "wall_s": 516.133,
+      "stdout_tail": "11",
+      "stderr_tail": ""
+    },
+    {
+      "step": "import",
+      "command_sha256": "f570bb4149547ef1",
+      "returncode": 0,
+      "wall_s": 10.143,
+      "stdout_tail": "passed",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore_start",
+      "command_sha256": "f196250c7031591b",
+      "returncode": 0,
+      "wall_s": 5.36,
+      "stdout_tail": "1",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore_ready",
+      "ready_after_s": 55.07
+    },
+    {
+      "step": "status_after_import",
+      "state": "available",
+      "generation": "1788628381424-0",
+      "bytes": 4514771811,
+      "frontier_tokens": 58146,
+      "error": null
+    },
+    {
+      "step": "restored_retrieval",
+      "wall_s": 24.772,
+      "input_tokens": 58192,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need answer exact keys. We have them. Final only ORCHID=460413 COLOR=620928 SIGIL=123924.\nORCHID=460413 COLOR=620928 SIGIL=123924",
+      "incomplete": null,
+      "output_sha256": "f42d4122b5e07424aedcbe2bed73c6d5300def96ab11b2646a614d3695bf21e2"
+    },
+    {
+      "step": "tamper_payload",
+      "command_sha256": "edd2c6b516557a6d",
+      "returncode": 0,
+      "wall_s": 5.206,
+      "stdout_tail": "flipped backend-kv.bin",
+      "stderr_tail": ""
+    },
+    {
+      "step": "push_tampered_payload",
+      "command_sha256": "f136c4fe31f5e424",
+      "returncode": 0,
+      "wall_s": 0.005,
+      "stdout_tail": "host-side",
+      "stderr_tail": ""
+    },
+    {
+      "step": "import_tampered_payload",
+      "command_sha256": "f570bb4149547ef1",
+      "returncode": 1,
+      "wall_s": 3.4,
+      "stdout_tail": "failed eb37f3118198e6abf96c4781f1596747ef8953f23fc08092bd286c76b9f1fc6c/1788628381424-0: payload engine/backend-kv.bin does not match its manifest digest",
+      "stderr_tail": ""
+    },
+    {
+      "step": "tamper_manifest",
+      "command_sha256": "1060d80a903bf2af",
+      "returncode": 0,
+      "wall_s": 5.206,
+      "stdout_tail": "frontier 58146 -> 58147",
+      "stderr_tail": ""
+    },
+    {
+      "step": "push_forged_manifest",
+      "command_sha256": "f136c4fe31f5e424",
+      "returncode": 0,
+      "wall_s": 0.008,
+      "stdout_tail": "host-side",
+      "stderr_tail": ""
+    },
+    {
+      "step": "forged_stop",
+      "command_sha256": "fb0a9366711351c1",
+      "returncode": 0,
+      "wall_s": 17.667,
+      "stdout_tail": "stopped",
+      "stderr_tail": ""
+    },
+    {
+      "step": "wipe_again",
+      "command_sha256": "61323ff8e6409816",
+      "returncode": 0,
+      "wall_s": 3.096,
+      "stdout_tail": "wiped eb37f3118198",
+      "stderr_tail": ""
+    },
+    {
+      "step": "import_forged_manifest",
+      "command_sha256": "f570bb4149547ef1",
+      "returncode": 0,
+      "wall_s": 12.551,
+      "stdout_tail": "passed",
+      "stderr_tail": ""
+    },
+    {
+      "step": "forged_start",
+      "command_sha256": "f196250c7031591b",
+      "returncode": 0,
+      "wall_s": 5.371,
+      "stdout_tail": "1",
+      "stderr_tail": ""
+    },
+    {
+      "step": "forged_ready",
+      "ready_after_s": 55.44
+    },
+    {
+      "step": "status_forged",
+      "state": "corrupt",
+      "generation": null,
+      "bytes": null,
+      "frontier_tokens": null,
+      "error": null
+    },
+    {
+      "step": "forged_continuation",
+      "http": 404,
+      "wall_s": 0.569,
+      "body": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_4398d081f26b89226bd7476c54d43539' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}",
+      "state_after": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 4
+}
