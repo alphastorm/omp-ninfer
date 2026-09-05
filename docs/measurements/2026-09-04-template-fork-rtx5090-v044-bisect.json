@@ -1,0 +1,101 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "base_tokens_requested": 48000,
+  "branches": 4,
+  "container": {
+    "deployment_profile": "qwen38-5090-v0.4.4",
+    "image_digest": "sha256:546bb6a8230ca52cdeaaf7ecd29f64ece38a18db3c430fc622af7285618a4d57",
+    "name": "ninfer-5090-v044p"
+  },
+  "generated_utc": "2026-09-04T23:38:36Z",
+  "lane": "rtx5090",
+  "note": "Bisect: the v0.4.4 production container (image 546bb6a8, identical configuration) run with the same 57,853-token template; no restart.",
+  "post_restart_branches": 0,
+  "schema_version": 2,
+  "server_reuse_records": [
+    {
+      "prompt_tokens": 57853,
+      "reuse": "root",
+      "reused_tokens": 0
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 57892
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0
+    }
+  ],
+  "server_reuse_source": "docker logs of ninfer-5090-v044p, request_done lines in probe order",
+  "steps": [
+    {
+      "id": "resp_f2c9492159e27a30cafb3d5faf1542c2",
+      "input_tokens": 57853,
+      "step": "base_prefill",
+      "wall_s": 21.617
+    },
+    {
+      "id": "resp_28bced31459ec63c01cdfda14f333062",
+      "step": "warm_edit",
+      "wall_s": 1.213
+    },
+    {
+      "bytes": 4505854380,
+      "frontier": 57997,
+      "generation": "1788565057892-0",
+      "mode": "explicit",
+      "step": "checkpoint_save",
+      "wall_s": 12.758
+    },
+    {
+      "id": "resp_930e6fa016ca4db0f93ca3d57f90e63f",
+      "step": "branch_0",
+      "wall_s": 1.345
+    },
+    {
+      "id": "resp_79e9af16a9ca60c08bb87eea83b322d1",
+      "step": "branch_1",
+      "wall_s": 22.418
+    },
+    {
+      "id": "resp_8c969c3e618b6667a219ceaea165162e",
+      "step": "branch_2",
+      "wall_s": 1.241
+    },
+    {
+      "id": "resp_26611eb18f504e8e59fd9007110d6fcf",
+      "step": "branch_3",
+      "wall_s": 22.651
+    },
+    {
+      "status": 200,
+      "step": "session_delete",
+      "wall_s": 0.0
+    }
+  ],
+  "summary": {
+    "checkpoint_bytes": 4505854380,
+    "checkpoint_save_s": 12.758,
+    "cold_prefill_s": 21.617,
+    "hot_fork_median_s": 22.418,
+    "post_restart_resume_s": null,
+    "restart_ready_s": null,
+    "template_input_tokens": 57853,
+    "warm_start_first_fork_s": null,
+    "warm_start_fork_median_s": null
+  },
+  "transient_retries": 0
+}

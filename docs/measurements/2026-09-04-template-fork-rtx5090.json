@@ -1,0 +1,179 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "base_tokens_requested": 48000,
+  "branches": 4,
+  "container": {
+    "deployment_profile": "qwen38-5090-v0.4.6",
+    "image_digest": "sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
+    "name": "ninfer-5090-v046p",
+    "release": "v0.4.7 (5090 components bound unchanged from v0.4.6)"
+  },
+  "generated_utc": "2026-09-05T00:03:32Z",
+  "lane": "rtx5090",
+  "post_restart_branches": 4,
+  "schema_version": 2,
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "step": "base_prefill"
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 57892,
+      "step": "warm_edit"
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898,
+      "step": "branch_0"
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "step": "branch_1"
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898,
+      "step": "branch_2"
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "step": "branch_3"
+    },
+    {
+      "note": "lazy restore of the 4,505,854,444-byte checkpoint ran before request timing started; client wall 24.7 s",
+      "reuse": "private_endpoint",
+      "reused_tokens": 58000,
+      "server_total_s": 0.89,
+      "step": "post_restart_resume",
+      "ttft_s": 0.41
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "step": "post_restart_branch_0"
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898,
+      "step": "post_restart_branch_1"
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "step": "post_restart_branch_2"
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 57898,
+      "step": "post_restart_branch_3"
+    }
+  ],
+  "server_reuse_source": "docker logs of ninfer-5090-v046p (request_done lines in probe order); the --log-cmd join produced no rows",
+  "steps": [
+    {
+      "id": "resp_d8e27d4eea31d15098c5ca0cfe34ca60",
+      "input_tokens": 57853,
+      "step": "base_prefill",
+      "wall_s": 21.779
+    },
+    {
+      "id": "resp_5cf1be9290aee231e3c23d0e9f0a2859",
+      "step": "warm_edit",
+      "wall_s": 1.246
+    },
+    {
+      "bytes": 4505854444,
+      "frontier": 57997,
+      "generation": "1788566259495-3",
+      "mode": "explicit",
+      "response_records": null,
+      "step": "checkpoint_save",
+      "wall_s": 12.951
+    },
+    {
+      "id": "resp_14b438f24b5e4de05eb11aeba5f7dd91",
+      "step": "branch_0",
+      "wall_s": 1.382
+    },
+    {
+      "id": "resp_dfcfa544af2c56b6665bf0a6bb138451",
+      "step": "branch_1",
+      "wall_s": 22.497
+    },
+    {
+      "id": "resp_c9defb7ed13f642e2caa38da5bfb7789",
+      "step": "branch_2",
+      "wall_s": 1.259
+    },
+    {
+      "id": "resp_bb44ad0d184d9706d627933c4c62b785",
+      "step": "branch_3",
+      "wall_s": 22.715
+    },
+    {
+      "prefill_counter_after": 53,
+      "prefill_counter_before": 357468,
+      "ready_after_s": 57.21,
+      "step": "restart",
+      "verified": true,
+      "wall_s": 88.302
+    },
+    {
+      "id": "resp_1f75567e83a83293cbda707c71dd47e8",
+      "step": "post_restart_resume",
+      "wall_s": 24.744
+    },
+    {
+      "id": "resp_f2e1118efe2f3715614add3152a1f3fd",
+      "input_tokens": 57925,
+      "step": "post_restart_branch_0",
+      "wall_s": 22.271
+    },
+    {
+      "id": "resp_c96f38c7bff8e0b2e59e6e6390458b1b",
+      "input_tokens": 57925,
+      "step": "post_restart_branch_1",
+      "wall_s": 1.231
+    },
+    {
+      "id": "resp_142226ab1e2f435ede5acc9d986bf026",
+      "input_tokens": 57925,
+      "step": "post_restart_branch_2",
+      "wall_s": 22.572
+    },
+    {
+      "id": "resp_c03289af099fecf96b83e7e13001faca",
+      "input_tokens": 57925,
+      "step": "post_restart_branch_3",
+      "wall_s": 1.229
+    },
+    {
+      "frontier": 58004,
+      "generation": "1788566481404-0",
+      "mode": "explicit",
+      "step": "post_restart_save",
+      "wall_s": 12.985
+    },
+    {
+      "status": 200,
+      "step": "session_delete",
+      "wall_s": 0.0
+    }
+  ],
+  "summary": {
+    "checkpoint_bytes": 4505854444,
+    "checkpoint_save_s": 12.951,
+    "cold_prefill_s": 21.779,
+    "hot_fork_median_s": 22.497,
+    "post_restart_resume_s": 24.744,
+    "restart_ready_s": 57.21,
+    "template_input_tokens": 57853,
+    "warm_start_first_fork_s": 22.271,
+    "warm_start_fork_median_s": 1.231
+  },
+  "transient_retries": 0
+}

@@ -1,0 +1,141 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "base_tokens_requested": 32000,
+  "branches": 4,
+  "generated_utc": "2026-09-05T00:07:41Z",
+  "lane": "rtx3090",
+  "post_restart_branches": 4,
+  "schema_version": 2,
+  "server_reuse_records": [
+    {
+      "reuse": "full_reset",
+      "reused_tokens": 0,
+      "step": "branch_*",
+      "ttft_s": 48.2
+    },
+    {
+      "note": "explicit checkpoint restored before request timing started; client wall 92.5 s",
+      "reuse": "append_frontier",
+      "reused_tokens": 38362,
+      "server_total_s": 1.75,
+      "step": "post_restart_resume",
+      "ttft_s": 0.49
+    },
+    {
+      "reuse": "full_reset",
+      "reused_tokens": 0,
+      "step": "post_restart_branch_*",
+      "ttft_s": 48.4
+    }
+  ],
+  "server_reuse_source": "release logs/requests.jsonl request_done lines; the --log-cmd join produced no rows",
+  "service": {
+    "deployment_profile": "qwen38-3090-omp-v0.2.2-beta.1-c1",
+    "note": "lane started for the probe with -Action Start and returned to its owner-stopped state afterwards",
+    "release_id": "qwen38-3090-omp-v0.2.2-beta.1-72d34b706f18",
+    "restart": "Control-Release.ps1 -Action Restart"
+  },
+  "steps": [
+    {
+      "id": "resp_14c86d2c13345e63fb4811f165b0bead",
+      "input_tokens": 38215,
+      "step": "base_prefill",
+      "wall_s": 49.323
+    },
+    {
+      "id": "resp_38cf3f427486dfd3783fa28d99391aaa",
+      "step": "warm_edit",
+      "wall_s": 1.955
+    },
+    {
+      "bytes": null,
+      "frontier": null,
+      "generation": null,
+      "mode": "explicit",
+      "response_records": null,
+      "step": "checkpoint_save",
+      "wall_s": 9.988
+    },
+    {
+      "id": "resp_de2c3f1dce6c11b4daee095cde667fdd",
+      "step": "branch_0",
+      "wall_s": 49.76
+    },
+    {
+      "id": "resp_794f2d3cb5544ae0e969ae9fe6d08378",
+      "step": "branch_1",
+      "wall_s": 49.75
+    },
+    {
+      "id": "resp_68fd510d55c3b156989988f5a11e902f",
+      "step": "branch_2",
+      "wall_s": 50.944
+    },
+    {
+      "id": "resp_d739a03f5d1c459aa01d8869169c3bd0",
+      "step": "branch_3",
+      "wall_s": 49.927
+    },
+    {
+      "prefill_counter_after": 53,
+      "prefill_counter_before": 191426,
+      "ready_after_s": 0.35,
+      "step": "restart",
+      "verified": true,
+      "wall_s": 50.743
+    },
+    {
+      "id": "resp_91ae67cf91a36484b2ac6bab6b5f9a6a",
+      "step": "post_restart_resume",
+      "wall_s": 92.542
+    },
+    {
+      "id": "resp_59804ec8416bddd4c24aa44d64987349",
+      "input_tokens": 38287,
+      "step": "post_restart_branch_0",
+      "wall_s": 49.862
+    },
+    {
+      "id": "resp_77e4c422c5a553847f1c3bbf4c7bf3d1",
+      "input_tokens": 38287,
+      "step": "post_restart_branch_1",
+      "wall_s": 49.861
+    },
+    {
+      "id": "resp_2d0d845d1f2234d0592ed9492e86038b",
+      "input_tokens": 38287,
+      "step": "post_restart_branch_2",
+      "wall_s": 50.715
+    },
+    {
+      "id": "resp_1c7b5413ad89b572656b6345afd5ef4e",
+      "input_tokens": 38287,
+      "step": "post_restart_branch_3",
+      "wall_s": 50.151
+    },
+    {
+      "frontier": null,
+      "generation": null,
+      "mode": "explicit",
+      "step": "post_restart_save",
+      "wall_s": 19.286
+    },
+    {
+      "status": 200,
+      "step": "session_delete",
+      "wall_s": 0.0
+    }
+  ],
+  "summary": {
+    "checkpoint_bytes": null,
+    "checkpoint_save_s": 9.988,
+    "cold_prefill_s": 49.323,
+    "hot_fork_median_s": 49.927,
+    "post_restart_resume_s": 92.542,
+    "restart_ready_s": 0.35,
+    "template_input_tokens": 38215,
+    "warm_start_first_fork_s": 49.862,
+    "warm_start_fork_median_s": 50.151
+  },
+  "transient_retries": 0
+}

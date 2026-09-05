@@ -100,6 +100,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-009 | RTX 5090 KV format and prefill chunk | INT8 KV or a 2,048-token prefill chunk improves the BF16/1,024 incumbent | INT8 KV: +0.0% to +0.8% session time, 4.2 GB lower peak VRAM, worse role-corpus screen on every metric; chunk 2,048: −0.1% to −0.9% | rejected |
 | EXP-010 | RTX 4090 prefill chunk | A larger prefill chunk than the shipped 512 improves session time on `rk2v4-e8` | Chunk 512/1,024/2,048/4,096: prefill 1,605/1,877/1,971/1,974 tok/s, decode 110.69/111.82/112.92/108.37 tok/s; 2,048 clears the 5% margin in every repetition (+5.5% to +12.8%), 1,024 and 4,096 do not | kept — requalify at 2,048 |
 | EXP-011 | RTX 3090 prefill chunk and context | The shipped INT8/1,024/65,536 profile leaves speed or capacity on the table | Chunk 512/2,048: −2.9% to −0.5%; `--max-context 131072` fits with automatic KV capacity 131,072 at 22,465 MiB peak and identical throughput (65.08 vs 65.69 decode tok/s) | kept — qualify 131,072 context |
+| EXP-012 | Template-fork warm starts (all lanes) | Checkpointing a prefilled template and forking subagents from it starts them hot, including across a process restart | RTX 5090 (57.9K-token template): device-resident sibling forks alternate 1.3 s / 22.5 s (anchor / full re-prefill) while a 67.7K template gives four 1.3 s forks; after restart the 4.51 GB checkpoint restores in ≈23.6 s ≈ the 21.8 s cold prefill. RTX 4090: no sibling reuse (41–47 s per fork) and a 1.13 GB restore takes ≈130 s vs a 41 s prefill. RTX 3090: no sibling reuse (49–51 s) and restore ≈91 s vs 49 s | negative; hot forks only on the 5090 and only reliably ≥ ~64K tokens; restore never beats re-prefill |
 
 Entry detail:
 
@@ -172,6 +173,31 @@ Entry detail:
   the recorded gate amendment: [arms](measurements/2026-09-04-variant-campaign-arms.json). Runner:
   [`scripts/run_variant_campaign.py`](../scripts/run_variant_campaign.py) with host launchers in
   [`scripts/hosts/`](../scripts/hosts/).
+- **EXP-012 — template-fork warm starts (2026-09-04).** [`scripts/fleet_probe.py`](../scripts/fleet_probe.py)
+  now forks from the template id after the restart as well, verifies the restart through the
+  lane's cumulative prefill counter, and waits for the RTX 4090's automatic save where no explicit
+  save exists. Measured on the shipped lanes: the RTX 5090 (v0.4.6 container) prefills a
+  57,853-token template in 21.8 s, saves it explicitly in 13.0 s (4,505,854,444 bytes), and serves
+  stored sibling forks at 1.38 / 22.50 / 1.26 / 22.71 s — the server records `private_long_anchor`
+  then `root` alternately, with `private_catalog capacity 2, occupied 2`; the same probe against
+  the retained v0.4.4 container reproduces the alternation
+  ([bisect](measurements/2026-09-04-template-fork-rtx5090-v044-bisect.json)), a 67,681-token
+  template gives four anchor hits at 1.25–1.39 s
+  ([67K](measurements/2026-09-04-template-fork-rtx5090-67k.json)), and unstored forks give three
+  of four ([unstored](measurements/2026-09-04-template-fork-rtx5090-unstored-forks.json)), so the
+  loss is a serve/engine anchor-retention policy below roughly 64K tokens, not an image
+  regression. After a verified restart (57 s to ready) the first continuation restores the
+  checkpoint before request timing starts (server TTFT 0.41 s, client wall 24.7 s ≈ 190 MB/s),
+  which equals the cold prefill, and template forks alternate again. The RTX 4090 (durable v0.2
+  service) saves automatically 6.5 s after the turn (1,130,468,708 bytes), serves every sibling
+  fork as `full_reset` (41–47 s), and restores in ≈130 s of client wall (server TTFT 0.26 s) against
+  a 41.2 s prefill; the RTX 3090 (38,215-token template) saves explicitly in 10.0 s, serves forks
+  as `full_reset` (49–51 s), and restores in ≈91 s against a 49.3 s prefill. Warm starts therefore
+  exist today only as device-resident forks on the RTX 5090; disk restore is slower than
+  re-prefill on every lane and 10–15× slower per byte on the native lanes than in the container.
+  Receipts: [5090](measurements/2026-09-04-template-fork-rtx5090.json) ·
+  [4090](measurements/2026-09-04-template-fork-rtx4090.json) ·
+  [3090](measurements/2026-09-04-template-fork-rtx3090.json).
 
 ## Current order
 

@@ -92,10 +92,22 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    with a compatibility window — before any import path opens. Portability stays
    same-profile-pair only: the runtime fingerprint binds binary and profile, so identical-lane
    machine pairs can resume and cross-lane resume (5090↔4090) structurally cannot.
-2. **Template-fork warm starts.** Checkpoint a session immediately after the system prompt and
-   repository context are prefilled, then fork every subagent from that generation: each one
-   starts hot instead of paying a 30–90 s prefill. Fork lineage is already a qualified contract
-   and shared-page fanout (0.4.x) makes the forks cheap; this receipts the operational pattern.
+2. **Template-fork warm starts — measured 2026-09-04; not yet a warm start.** Checkpoint a session
+   immediately after the system prompt and repository context are prefilled, then fork every
+   subagent from that generation so each one starts hot instead of paying a 30–90 s prefill. The
+   probe ([`scripts/fleet_probe.py`](scripts/fleet_probe.py)) measured the pattern on all three
+   shipped lanes: device-resident forks are hot only on the RTX 5090, and there only reliably for
+   templates of roughly 64K tokens or more (a 57.9K template alternates 1.3 s / 22.5 s because
+   the private anchor catalog holds two entries and evicts the shared base anchor; 67.7K gives four
+   1.3 s forks); across a process restart the checkpoint restore is never faster than
+   re-prefilling the template (5090: 24.7 s vs 21.8 s at 4.5 GB; 4090: 130 s vs 41 s at 1.13 GB;
+   3090: 91 s vs 49 s), and the native lanes have no sibling reuse at all. Two runtime follow-ups
+   own this item: anchor retention for sub-64K templates on the 5090 (the next candidate build
+   uses this probe as its acceptance receipt) and checkpoint restore bandwidth on every lane,
+   which is diagnosed per lane with the same probe before any IO-path change is proposed. Receipts:
+   [5090](docs/measurements/2026-09-04-template-fork-rtx5090.json) ·
+   [4090](docs/measurements/2026-09-04-template-fork-rtx4090.json) ·
+   [3090](docs/measurements/2026-09-04-template-fork-rtx3090.json).
 3. **Fleet routing.** One OMP configuration spanning the 3090/4090/5090 lanes with explicit
    per-lane roles. A fixed two-machine workload gets measured before any fleet completed-work or
    throughput claim — that boundary stands until the receipt exists.

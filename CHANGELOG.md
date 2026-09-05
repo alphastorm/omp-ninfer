@@ -30,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   INT8 KV, trades 2.22× prefill for a two-case grounding shift), the RTX 4090 promotes prefill
   chunk 2,048 for requalification, and the RTX 3090 measures 131,072-token capacity on its shipped
   profile. No release profile changed.
+- `scripts/fleet_probe.py` now forks from the template id after the restart, verifies the restart
+  through the lane's cumulative prefill counter, sends the session header the native lanes
+  require, and waits for the RTX 4090's automatic save. Measured on 2026-09-04: template-fork warm
+  starts are hot only as device-resident forks on the RTX 5090 (reliably at ≥ ~64K tokens; a 57.9K
+  template alternates hot/cold forks), and checkpoint restore is slower than re-prefill on every
+  lane (5090 24.7 s vs 21.8 s, 4090 130 s vs 41 s, 3090 91 s vs 49 s). Receipts published; no
+  release profile changed.
 
 ## [0.4.7] - 2026-09-01
 

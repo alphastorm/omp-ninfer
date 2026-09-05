@@ -1,0 +1,49 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "base_tokens_requested": 48000,
+  "branches": 4,
+  "container": {
+    "deployment_profile": "qwen38-5090-v0.4.6",
+    "name": "ninfer-5090-v046p"
+  },
+  "generated_utc": "2026-09-04T23:45:00Z",
+  "lane": "rtx5090",
+  "note": "Inline variant of the probe: the four forks used store=false so no fork records its own pre-generation frontier marker; wall times captured from the probe output, no restart.",
+  "post_restart_branches": 0,
+  "schema_version": 2,
+  "server_reuse_records": [],
+  "steps": [
+    {
+      "input_tokens": 57853,
+      "step": "base_prefill",
+      "wall_s": 21.74
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 1.23
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 1.46
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 22.67
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 1.43
+    }
+  ],
+  "summary": {
+    "cold_prefill_s": 21.74,
+    "hot_fork_walls_s": [
+      1.23,
+      1.46,
+      22.67,
+      1.43
+    ],
+    "template_input_tokens": 57853
+  },
+  "transient_retries": 0
+}
