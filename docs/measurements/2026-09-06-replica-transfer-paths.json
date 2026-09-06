@@ -1,0 +1,45 @@
+{
+  "artifact_type": "omp_ninfer_replica_transfer_paths",
+  "schema_version": 1,
+  "generated_utc": "2026-09-06",
+  "question": "Why did the EXP-018 off-machine hop run at 1.8-3.5 MB/s, and what does cross-site replication actually cost?",
+  "topology": {
+    "workstation": "macOS, in Japan for this measurement (nearest DERP Tokyo; hard NAT, no port mapping)",
+    "sf_site": "RTX 4090 and RTX 3090 hosts behind one easy NAT with UPnP/NAT-PMP/PCP",
+    "nyc_site": "RTX 5090 host",
+    "paths": {
+      "workstation-sf": {"transport": "tailscale direct WireGuard", "rtt_ms": {"min": 115, "avg_under_icmp": 423, "max": 942}, "note": "heavy queueing delay; 0% loss over 30 pings"},
+      "workstation-nyc": {"transport": "tailscale direct WireGuard", "rtt_ms": {"min": 185, "avg_under_icmp": 190, "max": 240}},
+      "sf-nyc": {"transport": "tailscale direct WireGuard", "rtt_ms": 67},
+      "relay_observation": "the RTX 4090 host's path to the workstation was relayed via DERP while idle and upgraded to direct after a few pings; the RTX 3090 host was direct and just as slow, so the relay did not set the EXP-018 rate"
+    }
+  },
+  "raw_internet_uplink_mb_per_s": {"workstation": 16.8, "nyc_host": 55.6, "sf_host": 57.5, "method": "100-256 MB POST to speed.cloudflare.com/__up; download probe against __down returned a stub and is not reported"},
+  "measurements": [
+    {"path": "sf->workstation", "method": "scp single stream, 256 MB zero file, ssh Compression=yes (global ssh_config)", "mb_per_s": 13.6, "verdict": "compression artifact: zeros compress to nothing"},
+    {"path": "nyc->workstation", "method": "scp single stream, 256 MB zero file, Compression=yes", "mb_per_s": 8.5, "verdict": "compression artifact"},
+    {"path": "sf->workstation", "method": "8 parallel ranged ssh reads (pscp.py), 256 MB zero file, Compression=yes", "mb_per_s": 68.9, "verdict": "compression artifact"},
+    {"path": "nyc->workstation", "method": "8 parallel ranged ssh reads, 256 MB zero file, Compression=yes", "mb_per_s": 46.9, "verdict": "compression artifact"},
+    {"path": "nyc->workstation", "method": "1 ranged ssh read, 1 GB random file, Compression=no", "mb_per_s": 2.2, "wall_s": 492.35},
+    {"path": "nyc->workstation", "method": "8 parallel ranged ssh reads, 1 GB random file, Compression=no", "mb_per_s": 5.0, "wall_s": 214.75},
+    {"path": "sf->workstation", "method": "8 parallel ranged ssh reads, 1 GB random file, Compression=yes", "mb_per_s": 5.9, "wall_s": 182.26},
+    {"path": "workstation->sf", "method": "8 parallel scp parts, 1 GB random file", "mb_per_s": 10.7},
+    {"path": "workstation->nyc", "method": "8 parallel scp parts, 1 GB random file", "mb_per_s": 11.4},
+    {"path": "nyc->workstation", "method": "single TCP stream over the tailnet, no ssh (HTTP), 1 GB random file", "mb_per_s": 0.22, "verdict": "the transpacific tunnel path is the limiter tonight, not ssh"},
+    {"path": "nyc->sf", "method": "single TCP stream over the tailnet (HTTP), 1 GB random file", "mb_per_s": 7.9, "wall_s": 136.7},
+    {"path": "nyc->sf", "method": "8 parallel TCP streams over the tailnet (HTTP), 8 x 1 GB random", "mb_per_s": 21.9, "wall_s": 392.7, "note": "http.server ignores Range, so every stream fetched the whole file; the aggregate rate stands"},
+    {"path": "local (nyc host)", "method": "tar with default 10 KiB records, WSL ext4 -> /mnt/c (9p), 2.74 GB replica", "mb_per_s": 37.6, "wall_s": 72.8},
+    {"path": "local (nyc host)", "method": "tar -b 8192 (4 MiB records), same replica, same mount", "mb_per_s": 287.0, "wall_s": 9.1},
+    {"path": "local (nyc host)", "method": "checkpoint_sync.py export of the same 2.74 GB session inside the helper container", "wall_s": 4.9},
+    {"path": "local (nyc host)", "method": "sha256 inside the helper container, single payload file", "mb_per_s": 1353}
+  ],
+  "findings": [
+    "The EXP-018 hop crossed the Pacific twice (workstation in Japan); the product's replication path never does. Between the two US sites a 4.5 GB replica moves in about 3.5 minutes with 8 parallel streams and about 10 minutes single-stream, not 28.",
+    "A single scp/sftp/ssh stream is bound by the SSH channel window (about 1.6 MB in flight); at 67-190 ms that is 8-14 MB/s at best. Parallel ranged reads scale it (scripts/hosts/pscp.py). More than about 8 concurrent connections trips the Windows sshd MaxStartups limit (connection resets).",
+    "The global ssh_config `Compression yes` on the workstation makes zero-filled test files meaningless and runs zlib on the sending sshd for incompressible checkpoint payloads; pscp.py forces Compression=no.",
+    "The export's 158 s was tar's 10 KiB record size against the 9p bounce (WSL ext4 -> /mnt/c); `tar -b 8192` is 8x faster on the same mount. The tool itself exports 2.74 GB in 4.9 s.",
+    "The WSL sshd alias on the NYC host is unusable (service inactive, loopback port 22 while the alias expects 2222); enabling it would let replicas skip the 9p bounce and the Windows sshd entirely. Host change; not made here.",
+    "The RTX 4090 host's tailnet path idles onto a DERP relay and upgrades to direct with traffic; the RTX 3090 host on the same NAT stayed direct. Not the rate limiter tonight."
+  ],
+  "runtime_impact": "none: import and restore timings in the EXP-018 receipts are local-disk figures"
+}

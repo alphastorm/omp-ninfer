@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/hosts/pscp.py`: parallel ranged file transfer over ssh for high-latency links
+  (eight independent connections, compression forced off, SHA-256 verified on both ends;
+  PowerShell FileStream or `dd` on the far side). Measured NYC↔SF over the tailnet at 21.9 MB/s
+  aggregate against 7.9 MB/s single-stream; the EXP-018 hop's 1.8–3.5 MB/s was a transpacific
+  workstation path, not the fleet's ([receipt](docs/measurements/2026-09-06-replica-transfer-paths.json)).
+
 ## [0.5.0] - 2026-09-05
 
 ### Added

@@ -555,6 +555,17 @@ keys): RTX 5090 4.5 GB import 10.1 s and restored continuation 24.8 s; RTX 4090 
 4.2 s, restored 7.4 s; RTX 3090 1.69 GB import 11.9 s, restored 11.5 s — receipts in
 [`docs/measurements/`](measurements/) (`2026-09-05-sync-probe-*.json`).
 
+Moving the replica is the slow part only when the transport is wrong for the latency. A single
+`scp`/`rsync`-over-ssh stream carries about 1.6 MB in flight, so it tops out near 8–14 MB/s on
+any 70–190 ms path regardless of link speed; [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py)
+moves one file as eight ranged reads over independent ssh connections (compression off, SHA-256
+verified on both ends) and needs nothing but ssh and PowerShell or `dd` on the far side.
+Measured between the two owner sites over the tailnet (67 ms): 7.9 MB/s single-stream,
+21.9 MB/s with eight streams — a 4.5 GB RTX 5090 replica in about 3.5 minutes
+([transfer paths](measurements/2026-09-06-replica-transfer-paths.json)). Keep more than ~8
+concurrent connections away from a Windows sshd (`MaxStartups`), and if a replica leaves WSL
+through `/mnt/c`, write the archive with `tar -b 8192`.
+
 ## 9. Send feedback
 
 Choose the structured form that matches the result:

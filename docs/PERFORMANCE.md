@@ -337,9 +337,20 @@ Entry detail:
   and `previous_response_not_found` on the container; no resurrection). Timings: RTX 5090
   4.5 GB export 158 s, import 10.1 s, restored continuation 24.8 s; RTX 4090 1.13 GB export
   6.2 s, import 4.2 s, restored 7.4 s; RTX 3090 1.69 GB export 19.7 s, import 11.9 s, restored
-  11.5 s. The off-machine hop itself ran at 1.8–3.5 MB/s over the tailnet (28 min for 4.5 GB)
-  and is not a runtime property. Cross-lane import is structurally unreachable: the session
-  namespace binds the bearer key and the fingerprint binds binary and profile. Receipts:
+  11.5 s. The off-machine hop ran at 1.8–3.5 MB/s because the workstation was in Japan that
+  night (two transpacific tunnel crossings, one of them queueing to 900 ms RTT); the follow-up
+  measurement ([transfer paths](measurements/2026-09-06-replica-transfer-paths.json)) puts the
+  path the fleet actually uses, NYC↔SF over the tailnet at 67 ms, at 7.9 MB/s per TCP stream
+  and 21.9 MB/s over eight — a 4.5 GB replica in about 3.5 minutes parallel, 10 single-stream.
+  A single scp/ssh stream is bound by the SSH channel window (≈1.6 MB in flight) at any
+  latency, so [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) moves a file as eight ranged
+  reads over independent connections with compression off (the workstation's global
+  `Compression yes` had made zero-filled test files look 10× faster than real payloads); above
+  ~8 connections the Windows sshd's `MaxStartups` resets. The 158 s export was tar's 10 KiB
+  record size against the 9p bounce on the container host: `tar -b 8192` is 8× faster there
+  and the tool itself exports 2.74 GB in 4.9 s. Cross-lane import is structurally unreachable:
+  the session namespace binds the bearer key and the fingerprint binds binary and profile.
+  Receipts:
   [5090](measurements/2026-09-05-sync-probe-rtx5090.json) ·
   [4090](measurements/2026-09-05-sync-probe-rtx4090.json) ·
   [3090](measurements/2026-09-05-sync-probe-rtx3090.json).
