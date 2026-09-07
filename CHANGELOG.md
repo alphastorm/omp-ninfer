@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   HTTP 500 on any resume of an anchor-carrying session. Not released, not qualified; the
   resume-first ordering and the hash-bound 24 s restore remain open
   ([receipt](docs/measurements/2026-09-07-warm-arrival-rtx5090.json)).
+- EXP-022: the remaining resume-first re-prefill was anchor replacement, not admission. Every
+  Responses request captures two private anchors into a per-continuation set of two, and the
+  victim rule (lowest frontier) evicted the template anchor every sibling fork reuses on the
+  first continuing turn. The runtime fork's replacement rule now evicts the anchor whose loss
+  costs the least re-prefill; across a restart the candidate serves resume then two forks in
+  4.2 / 2.9 / 1.3 s, every fork on `private_long_anchor`
+  ([receipt](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)).
+- EXP-023: a 5.2 GB checkpoint restores in 3.8 s on the candidate (was 24-27 s): payloads are
+  hashed once, as the engine streams them, with the x86 SHA extensions (2.66 vs 0.33 GB/s), and
+  the io_uring reads run eight deep overlapped with the hash. A flipped payload byte is still
+  refused (404) and quarantined
+  ([receipt](docs/measurements/2026-09-08-restore-probe-rtx5090-candidate.json)).
 
 ### Added
 
@@ -35,6 +47,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now leaves the RTX 5090 at 11.5 MB/s, returns at 56.3 MB/s, imports in 2.6 s and restores with
   its planted keys intact ([round trip](docs/measurements/2026-09-06-cross-site-replication-rtx5090.json) ·
   [transfer paths](docs/measurements/2026-09-06-replica-transfer-paths.json)).
+- `scripts/warm_arrival_probe.py`: template → fork → save → restart → {resume, fork} in both
+  orders, recording the lane's server-reported reuse decision for every request and the planted
+  ledger keys for every resume, so a re-prefill is a reuse path rather than a timing guess.
+- `scripts/restore_probe.py --tamper-cmd` (with `--stop-cmd`/`--start-cmd`): a third round
+  that flips one byte in an engine payload while the lane is down and requires the resume to be
+  refused and the generation quarantined.
 
 ## [0.5.0] - 2026-09-05
 

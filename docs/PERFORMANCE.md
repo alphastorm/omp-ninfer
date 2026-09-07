@@ -109,6 +109,8 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-019 | Replica transport (cross-site) | Moving a replica between owner sites is minutes, and the earlier 1.8–3.5 MB/s was the workstation's transpacific path plus single-stream ssh | Full round trip NYC→SF→NYC→restore on the 67 ms tailnet path: 1.13 GB out at **11.5 MB/s**, back at **56.3 MB/s**, imported in 2.6 s, planted keys exact after the return. Windows OpenSSH cannot carry bulk between two Windows hosts at all; a Linux receiver on the same link is 5× faster than a Windows one | fixed — `scripts/hosts/pscp.py` (ranged ssh reads, or bearer-token ranged HTTP for the Windows-to-Windows case); host ssh compression, the WSL sshd port collision, and fleet host-to-host trust corrected |
 | EXP-020 | NAS replication target | A LAN-local NAS is a better replication target than another workstation, and a Synology's tailnet path is not | Same-site LAN, 2 GiB incompressible, raw unbuffered IO: the RTX 4090 host **115.8 MB/s** write / **117.6 MB/s** read, the RTX 3090 host 96.0 / 102.3 - about 1 GbE line rate. The same NAS over the tailnet from the other site does **6.4 MB/s** write / 22.7 MB/s read, worse than the direct host-to-host path (11.5 / 56.3). One published generation replicated and verified in place from each co-located lane | adopted as the replication target for the two co-located lanes; the remote lane keeps host-to-host transport |
 | EXP-021 | Warm arrival after a restart (5090) | A restored session's first sibling fork reuses the template prefix instead of re-prefilling it | Two source defects found and fixed: a fanout fork left its long anchor on the parent, so every checkpoint taken after a fanout omitted it (payload 4,351,909,712 vs 4,505,864,319 bytes), and consuming a session endpoint double-charged a shared anchor to the entitlement (HTTP 500 on resume, now 1.19 s). With the fixes a fork issued as the first post-restart request hits `private_long_anchor` immediately; when an endpoint resume comes first, one fork still re-prefills (22.2 s) | partial - fixes proved on a candidate binary on branch `feat/warm-arrival`, not released; the resume-first path and the hash-bound 24 s restore remain open |
+| EXP-022 | Warm arrival, resume-first (5090) | The remaining re-prefill after an endpoint resume is a candidate-admission defect | Not admission: anchor replacement. A continuation keeps two long anchors and every Responses request captures two (inherited and pre-generation frontier), so a continuing turn replaced both, and the victim rule (lowest frontier first) evicted the template anchor every sibling reuses; the resume at 67.9K left the next fork on `root` (28.5 s). Replacement now evicts the anchor whose loss costs the least re-prefill (smallest gap to its lower neighbour, ties to the newer). After a restart, resume then two forks: **4.2 s / 2.9 s / 1.3 s**, both forks `private_long_anchor`; fork first: 3.7 s / 1.3 s. Restore plus the sequence is 8.4 s and 6.7 s against 26.7 s for not checkpointing at all | fixed at source - branch `feat/warm-arrival` commit `fb9b35da`; roadmap v0.5 §2 holds on the candidate |
+| EXP-023 | Checkpoint restore cost (5090) | Restore is hash-bound: two scalar SHA-256 passes over 5 GB at queue depth one | Scalar SHA-256 measured at 0.33 GB/s on the appliance's Zen 4 against 2.66 GB/s with the SHA extensions; the load pass was dropped (the streamed hash on the exact bytes the engine consumes is the single verification, `alphastorm/ninfer#21` closed by construction), the io_uring reader issues eight 4 MiB reads per batch on its own thread, and the next 32 MiB batch is on the device while the previous one hashes. A 5.2 GB session restores in **3.8 s / 3.8 s** (was 24-27 s), planted keys exact after both restarts; a flipped byte in the middle of the 4.4 GB KV payload is refused (404 `previous_response_not_found`, 2.8 s), the generation reports `corrupt`, then quarantines | fixed at source - commits `f841d42d`, `d956e6d6`; verified-or-refused re-proven live |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -418,6 +420,43 @@ Entry detail:
   capacity is not the cause: 4 and 8 slots behave identically. Nothing was released; the
   candidate binary was built outside the appliance's canonical build. Receipt:
   [warm arrival](measurements/2026-09-07-warm-arrival-rtx5090.json).
+- **EXP-022 — warm arrival holds: the anchor was evicted, not misjudged (2026-09-08).** The
+  EXP-021 reading was wrong about where the loss sat. A catalog trace on the candidate showed the
+  restored continuation carrying anchors at 67,762 and 67,780 before the resume and at 67,870 and
+  67,908 after it: the two StateImages a post-resume save carried were the resume's own new
+  anchors, not the template anchor. Every Responses request marks two private anchors (the
+  inherited frontier, for its siblings, and its pre-generation frontier, for its children), a
+  continuation retains two, and the replacement victim was the lowest frontier - the earliest
+  anchor on the lineage, which is exactly the template boundary every sibling fork reuses. One
+  continuing turn on a lineage was therefore enough to lose it, restart or not; the fanout
+  patterns measured in EXP-013 and the v0.4.8 gates never took that turn. The victim is now the
+  anchor whose loss costs the least re-prefill: the one with the smallest gap to its lower
+  neighbour (root for the earliest), ties evicting the newer anchor, so the earliest recovery point
+  survives for the life of the lineage and the retained set stays as widely spaced as possible.
+  It is a pure function of frontiers, so it holds right after a restart when no hit history
+  exists. Measured with the new `scripts/warm_arrival_probe.py` on the candidate at a 67.7K
+  template across a verified restart: resume first, 4.2 s for restore plus resume, then sibling
+  forks in **2.9 s and 1.3 s** on `private_long_anchor` (frontier 67,712); fork first, 3.7 s then
+  1.3 s. Restore plus the whole post-restart sequence is 8.4 s and 6.7 s against 26.7 s for not
+  checkpointing at all, so the v0.5 §2 promise holds on this candidate. Receipt:
+  [warm arrival](measurements/2026-09-08-warm-arrival-rtx5090-candidate.json).
+- **EXP-023 — restore is no longer hash-bound (2026-09-08).** The 24 s restore hashed every
+  payload byte twice, at load and again as the engine streamed it, with a scalar SHA-256 that
+  runs at 0.33 GB/s on the appliance's Zen 4, and read the disk at queue depth one both times.
+  Three source changes on `feat/warm-arrival`: the bulk path of the hasher now uses the x86 SHA
+  extensions when the CPU has them (2.66 GB/s on the same core, bit-exact against the scalar path
+  for every length from 0 to 1,024 bytes, ragged multi-megabyte updates, and the "abc" vector);
+  load no longer hashes engine payloads at all - the streamed hash on exactly the bytes the engine
+  consumes is the single verification, which is what closed `alphastorm/ninfer#21` in the first
+  place, and a mismatch still fails the import closed and quarantines on the next load; and the
+  io_uring reader runs on its own thread issuing eight 4 MiB reads per batch while the serve-side
+  reader keeps the next 32 MiB batch on the device as the previous one hashes. A 5.2 GB session
+  restores in **3.8 s and 3.8 s** across two verified restarts with exact planted-key retrieval
+  (was 24-27 s). Verified-or-refused was re-proven live with the new `--tamper-cmd` round of
+  `scripts/restore_probe.py`: one byte flipped in the middle of the 4.4 GB KV payload while the
+  lane was down, and the resume was refused with 404 `previous_response_not_found` in 2.8 s,
+  status reported `corrupt`, a second attempt was refused, and the generation was quarantined.
+  Receipt: [restore probe](measurements/2026-09-08-restore-probe-rtx5090-candidate.json).
 
 ## Current order
 

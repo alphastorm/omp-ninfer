@@ -32,6 +32,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
 from pathlib import Path
 from typing import Any
 
@@ -120,6 +121,12 @@ def main() -> int:
     parser.add_argument("--model", default="q38-ninfer")
     parser.add_argument("--base-tokens", type=int, default=48000)
     parser.add_argument("--restart-cmd", required=True)
+    parser.add_argument("--tamper-cmd",
+                        help="shell command that flips one byte inside an engine payload of the "
+                             "session's current generation while the lane is stopped; adds a "
+                             "third restart whose resume must be refused and quarantined")
+    parser.add_argument("--stop-cmd", help="shell command stopping the lane (with --tamper-cmd)")
+    parser.add_argument("--start-cmd", help="shell command starting the lane (with --tamper-cmd)")
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
 
@@ -170,6 +177,44 @@ def main() -> int:
         record(f"settle_save_{round_index}", {"wall_s": round(settle_wall, 3),
                                               "mode": settle_doc.get("mode"),
                                               "generation": settle_doc.get("generation")})
+    tamper: dict[str, Any] | None = None
+    if args.tamper_cmd:
+        # Verified-or-refused: a size-preserving flip must never restore. The flip happens
+        # while the lane is down, the resume after the restart must be refused rather than
+        # served from the corrupted bytes, and the generation must be quarantined.
+        if not args.stop_cmd or not args.start_cmd:
+            parser.error("--tamper-cmd requires --stop-cmd and --start-cmd")
+        subprocess.run(args.stop_cmd, shell=True, check=True, capture_output=True, timeout=600)
+        flipped = subprocess.run(args.tamper_cmd, shell=True, check=True, capture_output=True,
+                                 text=True, timeout=120).stdout.strip()
+        subprocess.run(args.start_cmd, shell=True, check=True, capture_output=True, timeout=600)
+        ready = wait_ready(lane, 600.0)
+        refused: dict[str, Any]
+        started = now()
+        try:
+            document, wall = lane.respond(retrieval_prompt(keys, "Tampered restore"),
+                                          previous=previous, max_output=256)
+            refused = {"refused": False, "wall_s": round(wall, 3),
+                       **retrieval_result(keys, document)}
+        except urllib.error.HTTPError as error:
+            body = error.read().decode("utf-8", "replace")[:300]
+            refused = {"refused": True, "http_status": error.code,
+                       "wall_s": round(now() - started, 3), "error_excerpt": body}
+        status_after = lane.checkpoint_status()
+        # The refusal marks the generation corrupt; the next load, triggered by another resume
+        # attempt, quarantines it, after which the session no longer advertises a checkpoint.
+        second_refused = False
+        try:
+            lane.respond(retrieval_prompt(keys, "Tampered restore again"), previous=previous,
+                         max_output=64)
+        except urllib.error.HTTPError:
+            second_refused = True
+        status_after_quarantine = lane.checkpoint_status()
+        tamper = {"flipped": flipped, "ready_after_s": round(ready, 2), **refused,
+                  "status_after_refusal": status_after.get("state"),
+                  "second_attempt_refused": second_refused,
+                  "status_after_quarantine": status_after_quarantine.get("state")}
+        record("tampered_restore", tamper)
 
     delete_status = lane.checkpoint_delete()
     record("session_delete", {"status": delete_status})
@@ -189,6 +234,7 @@ def main() -> int:
             "restore_1_wall_s": by_step["restore_1"]["wall_s"],
             "control_retrieval_exact": by_step["control_retrieval"]["exact"],
             "restored_retrieval_exact": by_step["restore_0"]["exact"] and by_step["restore_1"]["exact"],
+            "tampered_restore_refused": None if tamper is None else bool(tamper["refused"]),
         },
         "steps": steps,
         "transient_retries": lane.retries,
@@ -202,6 +248,9 @@ def main() -> int:
         return 2
     if not receipt["summary"]["restored_retrieval_exact"]:
         print("FAILED: a restored continuation did not quote the planted keys", flush=True)
+        return 1
+    if tamper is not None and not tamper["refused"]:
+        print("FAILED: a tampered checkpoint was served instead of refused", flush=True)
         return 1
     return 0
 

@@ -1,0 +1,136 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 2,
+  "lane": "rtx5090-candidate",
+  "generated_utc": "2026-09-07T16:01:14Z",
+  "base_tokens_requested": 56000,
+  "summary": {
+    "template_input_tokens": 67717,
+    "cold_prefill_s": 26.071,
+    "checkpoint_bytes": 5201400284,
+    "restore_0_wall_s": 3.774,
+    "restore_1_wall_s": 4.36,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true,
+    "tampered_restore_refused": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 26.071,
+      "input_tokens": 67717
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 1.647,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user asks to quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\n\nFrom the previous message:\n- \"Ledger key ORCHID=",
+      "incomplete": null,
+      "output_sha256": "a9b221b571ec67730112cf96671716d964fba97d38e2fb416c8f3afa78231206"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 3.984,
+      "mode": "explicit",
+      "generation": "1788796731287-0",
+      "bytes": 5201400284,
+      "frontier": 67985
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 33.353,
+      "ready_after_s": 21.79,
+      "prefill_counter_before": 67819,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 3.774,
+      "id": "resp_042ee569fe8a5f615af8e430e991ca10",
+      "input_tokens": 68033,
+      "status_polls": [
+        {
+          "t_s": 0.53,
+          "bytes": 5201400284,
+          "created_at_unix_ms": 1788796742804,
+          "frontier_tokens": 67985,
+          "generation": "1788796739166-1",
+          "read_backend": "io_uring-odirect",
+          "response_records": 2,
+          "restored_tokens": 67985,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-07T15:59:28Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user asks again to restore round 0 and quote the keys exactly. I already identified them. Need final only the three key=value pairs separated by spaces. No other words.\nORCHID=303990 COLOR=698219 ",
+      "incomplete": null,
+      "output_sha256": "9d1837625ef3dfcefab3d39d1467873a23a648364bf870e2288058496d4a4e3a"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 4.488,
+      "mode": "explicit",
+      "generation": "1788796772902-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 38.367,
+      "ready_after_s": 26.46,
+      "prefill_counter_before": 286,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 4.36,
+      "id": "resp_fa1b3ae81cdf543a4039ae9d887b69b9",
+      "input_tokens": 68147,
+      "status_polls": [
+        {
+          "t_s": 0.53,
+          "bytes": 5210318464,
+          "created_at_unix_ms": 1788796785173,
+          "frontier_tokens": 68099,
+          "generation": "1788796781417-1",
+          "read_backend": "io_uring-odirect",
+          "response_records": 3,
+          "restored_tokens": 68099,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-07T16:00:15Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "The user asks again: \"Restore round 1: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe need respond only with",
+      "incomplete": null,
+      "output_sha256": "6ab35853100ad7490e07db9af45bae4d8a54fab36db1ff9b6c00c68b0b804809"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 4.145,
+      "mode": "explicit",
+      "generation": "1788796820587-0"
+    },
+    {
+      "step": "tampered_restore",
+      "flipped": "sessions/92d1d1fb5e898c71f96e6564466ec1c9a4e1e05d2e8ba7ad1ec73877ee624d84/generations/1788796828191-1/engine/text-kv.bin offset=2239758336 146->200",
+      "ready_after_s": 26.38,
+      "refused": true,
+      "http_status": 404,
+      "wall_s": 2.813,
+      "error_excerpt": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_fa1b3ae81cdf543a4039ae9d887b69b9' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}",
+      "status_after_refusal": "corrupt",
+      "second_attempt_refused": true,
+      "status_after_quarantine": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}
