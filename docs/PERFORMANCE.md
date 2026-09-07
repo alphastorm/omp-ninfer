@@ -106,6 +106,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-016 | Fleet routing (all lanes) | Splitting a fixed independent-job batch across lanes completes it faster than the RTX 5090 alone | 14-job frozen corpus: 5090 alone 66.8 s; 5090+4090 51.2 s naive / **43.4 s** cost-aware (1.54×); three lanes 47.2 s naive / **32.3 s** cost-aware (2.07×); role-pinned 100.3 s (0.66×). Long-prefill jobs are 3.3–6× more expensive off the 5090; short jobs cost the same everywhere | kept — measured boundary for the fleet configuration; cost-aware dispatch is the recommended policy |
 | EXP-017 | Native-lane checkpoint restore path | The per-page-segment reader, not the disk, is the restore cost; one read per staging window closes it | Fix on both native lanes, same session shapes as EXP-014: RTX 4090 1.13 GB **146.6 → 5.6 s** and **133.4 → 5.6 s** (24–26×); RTX 3090 1.68 GB **91.8 → 10.8 s** and **92.2 → 10.7 s** (8.5×); planted ledger keys quoted exactly after every restart on both lanes and in-process | fixed at source — lane commits `d22ce3fd` (4090) and `3756db6e` (3090); shipped in `v0.4.9` (components `v0.2.2-qwen38-4090-durable.1`, `v0.2.4-qwen38-3090-beta.1`) |
 | EXP-018 | Checkpoint replication (all lanes) | A checkpointed session survives the machine losing its local state, and a replica cannot be forged | Export, carry off, destroy the local copy with the server stopped, carry back, import, restart, exact retrieval of planted keys: RTX 5090 4.5 GB import 10.1 s / restored 24.8 s; RTX 4090 1.13 GB 4.2 s / 7.4 s; RTX 3090 1.69 GB 11.9 s / 11.5 s. Payload byte flip refused by the tool; manifest edit with consistent digests quarantined by the runtime's origin authentication (no resurrection) | delivered — roadmap v0.5 §1; origin authentication ported to both native lanes and requalified |
+| EXP-019 | Replica transport (cross-site) | Moving a replica between owner sites is minutes, and the earlier 1.8–3.5 MB/s was the workstation's transpacific path plus single-stream ssh | Full round trip NYC→SF→NYC→restore on the 67 ms tailnet path: 1.13 GB out at **11.5 MB/s**, back at **56.3 MB/s**, imported in 2.6 s, planted keys exact after the return. Windows OpenSSH cannot carry bulk between two Windows hosts at all; a Linux receiver on the same link is 5× faster than a Windows one | fixed — `scripts/hosts/pscp.py` (ranged ssh reads, or bearer-token ranged HTTP for the Windows-to-Windows case); host ssh compression, the WSL sshd port collision, and fleet host-to-host trust corrected |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -337,23 +338,44 @@ Entry detail:
   and `previous_response_not_found` on the container; no resurrection). Timings: RTX 5090
   4.5 GB export 158 s, import 10.1 s, restored continuation 24.8 s; RTX 4090 1.13 GB export
   6.2 s, import 4.2 s, restored 7.4 s; RTX 3090 1.69 GB export 19.7 s, import 11.9 s, restored
-  11.5 s. The off-machine hop ran at 1.8–3.5 MB/s because the workstation was in Japan that
-  night (two transpacific tunnel crossings, one of them queueing to 900 ms RTT); the follow-up
-  measurement ([transfer paths](measurements/2026-09-06-replica-transfer-paths.json)) puts the
-  path the fleet actually uses, NYC↔SF over the tailnet at 67 ms, at 7.9 MB/s per TCP stream
-  and 21.9 MB/s over eight — a 4.5 GB replica in about 3.5 minutes parallel, 10 single-stream.
-  A single scp/ssh stream is bound by the SSH channel window (≈1.6 MB in flight) at any
-  latency, so [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) moves a file as eight ranged
-  reads over independent connections with compression off (the workstation's global
-  `Compression yes` had made zero-filled test files look 10× faster than real payloads); above
-  ~8 connections the Windows sshd's `MaxStartups` resets. The 158 s export was tar's 10 KiB
-  record size against the 9p bounce on the container host: `tar -b 8192` is 8× faster there
-  and the tool itself exports 2.74 GB in 4.9 s. Cross-lane import is structurally unreachable:
-  the session namespace binds the bearer key and the fingerprint binds binary and profile.
-  Receipts:
+  11.5 s. The off-machine hop's 1.8–3.5 MB/s was the workstation, not the fleet: it was in
+  Japan that night, two transpacific tunnel crossings with one leg queueing to 900 ms RTT.
+  EXP-019 measured and fixed the path the fleet actually uses. Cross-lane import is
+  structurally unreachable: the session namespace binds the bearer key and the fingerprint
+  binds binary and profile. Receipts:
   [5090](measurements/2026-09-05-sync-probe-rtx5090.json) ·
   [4090](measurements/2026-09-05-sync-probe-rtx4090.json) ·
   [3090](measurements/2026-09-05-sync-probe-rtx3090.json).
+- **EXP-019 — replica transport, measured and fixed (2026-09-06).** EXP-018 moved its replicas
+  through the macOS workstation, which was in Japan: every hop crossed the Pacific twice and one
+  leg queued to 900 ms RTT, so its 1.8–3.5 MB/s said nothing about the fleet. Four real causes
+  came out of the follow-up
+  ([transfer paths](measurements/2026-09-06-replica-transfer-paths.json)): a single ssh stream is
+  bound by the SSH channel window (≈1.6 MB in flight, so 8–14 MB/s at 67–190 ms whatever the
+  link); the workstation's `ssh_config` set `Compression yes` globally, which made zero-filled
+  test files look 10× faster than real payloads and put zlib in front of every real one;
+  `tar`'s default 10 KiB records made the container host's 9p bounce look like the problem
+  (`tar -b 8192` writes 2.6 GB to `/mnt/c` in 9.1 s against 72.8 s, and the export itself is
+  4.9 s for 2.74 GB); and Windows OpenSSH cannot carry bulk between two Windows hosts at all —
+  `ssh.exe` as a client inside an sshd session stalls on any large binary stream, whatever the
+  sender, and `wsl.exe` stalls on binary stdout, so a WSL-resident file cannot be served through
+  the Windows sshd either. [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) therefore moves a
+  file as N ranged reads over independent ssh connections where one end is not Windows
+  (compression off, file-backed handles because pipes hang Windows `ssh.exe`, SHA-256 verified on
+  both ends), and as bearer-token ranged HTTP over the tailnet where both ends are Windows —
+  eight streams for ssh (a Windows sshd resets above roughly that) and sixteen for HTTP, where
+  each connection is window-bound and more still scale. The end-to-end proof
+  ([round trip](measurements/2026-09-06-cross-site-replication-rtx5090.json)) checkpoints a
+  session on the RTX 5090, exports and archives it on ext4 (2.7 s + 0.5 s), serves it to the SF
+  host at **11.5 MB/s**, destroys the local copy with the container stopped, fetches the replica
+  back at **56.3 MB/s**, imports it in 2.6 s, and the restarted server's continuation quotes all
+  three planted ledger keys exactly. A 4.35 GB replica measured 63.4 MB/s on the return leg. The
+  asymmetry is the receiver, not the path: the same link and tool deliver 11.5 MB/s into a
+  Windows host and 56–63 MB/s into WSL ext4, so replication targets should be Linux endpoints.
+  Host-side corrections in the same pass: the global ssh compression, the WSL sshd's port
+  collision with the Windows sshd (loopback :22 under mirrored networking, socket unit failed
+  since July, now :2222 as documented), and per-host replica keys so any fleet host can address
+  any other over the tailnet.
 
 ## Current order
 

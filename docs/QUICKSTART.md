@@ -557,14 +557,24 @@ keys): RTX 5090 4.5 GB import 10.1 s and restored continuation 24.8 s; RTX 4090 
 
 Moving the replica is the slow part only when the transport is wrong for the latency. A single
 `scp`/`rsync`-over-ssh stream carries about 1.6 MB in flight, so it tops out near 8–14 MB/s on
-any 70–190 ms path regardless of link speed; [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py)
-moves one file as eight ranged reads over independent ssh connections (compression off, SHA-256
-verified on both ends) and needs nothing but ssh and PowerShell or `dd` on the far side.
-Measured between the two owner sites over the tailnet (67 ms): 7.9 MB/s single-stream,
-21.9 MB/s with eight streams — a 4.5 GB RTX 5090 replica in about 3.5 minutes
-([transfer paths](measurements/2026-09-06-replica-transfer-paths.json)). Keep more than ~8
-concurrent connections away from a Windows sshd (`MaxStartups`), and if a replica leaves WSL
-through `/mnt/c`, write the archive with `tar -b 8192`.
+any 70–190 ms path regardless of link speed, and between two Windows hosts ssh cannot carry bulk
+at all. [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) covers both cases:
+
+```sh
+# one end is not Windows: N ranged reads over independent ssh connections
+python3 scripts/hosts/pscp.py pull --host <host> --platform posix --remote <path> --local <path>
+# both ends are Windows: bearer-token ranged HTTP over the tailnet
+python3 scripts/hosts/pscp.py serve --local <archive>            # prints port + token, then exits
+python3 scripts/hosts/pscp.py fetch --url http://<host>:<port> --token <token> --local <archive>
+```
+
+Both directions verify the whole file by SHA-256 on both ends and need only the standard library
+plus ssh. Measured between the two owner sites over the tailnet (67 ms): 11.5 MB/s into a Windows
+host, 56–63 MB/s into a Linux one — so prefer a Linux replication target. A full round trip of a
+1.13 GB checkpoint, out and back and restored with its planted keys intact, takes about 3 minutes
+([round trip](measurements/2026-09-06-cross-site-replication-rtx5090.json) ·
+[transfer paths](measurements/2026-09-06-replica-transfer-paths.json)). If a replica leaves WSL
+through `/mnt/c`, write the archive with `tar -b 8192` — the default 10 KiB records cost 8×.
 
 ## 9. Send feedback
 

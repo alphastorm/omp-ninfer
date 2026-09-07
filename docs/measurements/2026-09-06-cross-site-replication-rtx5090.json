@@ -1,0 +1,87 @@
+{
+  "artifact_type": "omp_ninfer_cross_site_replication",
+  "schema_version": 1,
+  "generated_utc": "2026-09-07T07:20:20Z",
+  "status": "passed",
+  "route": "RTX 5090 (NYC, WSL ext4) -> RTX 3090 host (SF, NTFS) -> back -> import -> restore",
+  "transport": "authenticated ranged HTTP over the tailnet (scripts/hosts/pscp.py serve/fetch), 16 streams",
+  "archive_bytes": 1128267776,
+  "steps": [
+    {
+      "step": "prefill",
+      "wall_s": 3.94,
+      "input_tokens": 9258
+    },
+    {
+      "step": "control",
+      "wall_s": 1.51,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "We need respond to user: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nNeed extract from previous us",
+      "incomplete": null,
+      "output_sha256": "433c391d7f21767de6fa4ec0066137eae6a0912c0ccc424b72365386c514d7c6"
+    },
+    {
+      "step": "save",
+      "wall_s": 4.1,
+      "generation": "1788765373497-1",
+      "bytes": 1126209498
+    },
+    {
+      "step": "export",
+      "session_dir": "963e176be597",
+      "export_s": 2.68,
+      "tar_s": 0.51,
+      "archive_bytes": 1128267776
+    },
+    {
+      "step": "offsite_fetch",
+      "status": "passed",
+      "mb_per_s": 11.5,
+      "wall_s": 97.73,
+      "sha256_matches_server": true,
+      "round_trip_s": 105.5
+    },
+    {
+      "step": "wipe",
+      "note": "session_present False"
+    },
+    {
+      "step": "return_fetch",
+      "status": "passed",
+      "mb_per_s": 56.3,
+      "wall_s": 20.03,
+      "sha256_unchanged": true
+    },
+    {
+      "step": "import",
+      "import_s": 2.64,
+      "result": "passed 1788765373497-1 1126206455"
+    },
+    {
+      "step": "ready",
+      "ready_after_s": 56.9
+    },
+    {
+      "step": "status",
+      "state": "available",
+      "generation": "1788765373497-1",
+      "bytes": 1126209498,
+      "frontier_tokens": 9523
+    },
+    {
+      "step": "restored",
+      "wall_s": 7.29,
+      "input_tokens": 9569,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks again: \"Restored: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\" Need output only keys. We have them. ",
+      "incomplete": null,
+      "output_sha256": "d36034f1c9aab6d39f47b210c1732fa710703eb011a1536783a1d0319f0b0032"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ]
+}

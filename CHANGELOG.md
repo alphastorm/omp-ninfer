@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `scripts/hosts/pscp.py`: parallel ranged file transfer over ssh for high-latency links
-  (eight independent connections, compression forced off, SHA-256 verified on both ends;
-  PowerShell FileStream or `dd` on the far side). Measured NYC↔SF over the tailnet at 21.9 MB/s
-  aggregate against 7.9 MB/s single-stream; the EXP-018 hop's 1.8–3.5 MB/s was a transpacific
-  workstation path, not the fleet's ([receipt](docs/measurements/2026-09-06-replica-transfer-paths.json)).
+- `scripts/hosts/pscp.py`: parallel file transfer for high-latency links, either as N ranged
+  reads over independent ssh connections (compression forced off, file-backed handles, SHA-256
+  verified on both ends) or as bearer-token ranged HTTP over the tailnet for the Windows-to-
+  Windows case, where ssh cannot carry bulk at all. EXP-019: the EXP-018 hop's 1.8–3.5 MB/s was
+  a transpacific workstation path plus single-stream ssh, not the fleet's; a 1.13 GB checkpoint
+  now leaves the RTX 5090 at 11.5 MB/s, returns at 56.3 MB/s, imports in 2.6 s and restores with
+  its planted keys intact ([round trip](docs/measurements/2026-09-06-cross-site-replication-rtx5090.json) ·
+  [transfer paths](docs/measurements/2026-09-06-replica-transfer-paths.json)).
 
 ## [0.5.0] - 2026-09-05
 
