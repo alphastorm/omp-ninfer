@@ -36,6 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the io_uring reads run eight deep overlapped with the hash. A flipped payload byte is still
   refused (404) and quarantined
   ([receipt](docs/measurements/2026-09-08-restore-probe-rtx5090-candidate.json)).
+- EXP-024: the RTX 5090 candidate (`ninfer` `d956e6d6`, appliance-local binary `71edc2f6`,
+  packaged as `ninfer-qwen38-rtx5090-v0.5.1-linux-x86_64-cuda13.1.tar.gz` with its SBOM) passed
+  the lane's profile gates on the unchanged v0.4.8 arguments: 130,048-token exact retrieval at
+  2,196 tok/s, 138.2 decode tok/s, agent protocol with no resurrection, 24/24 fanout forks on the
+  anchor path across 57.9K / 67.7K / 80.0K templates in-process and after a restart, restore in
+  3.5-4.3 s. Staged for `v0.5.1`; the archive release, runtime-image workflow, and external
+  acceptance have not run
+  ([qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
+  [gates](docs/measurements/2026-09-08-rtx5090-v051-profile-gates.json) ·
+  [57.9K](docs/measurements/2026-09-08-rtx5090-v051-fanout-57k.json) ·
+  [67.7K](docs/measurements/2026-09-08-rtx5090-v051-fanout-67k.json) ·
+  [80.0K](docs/measurements/2026-09-08-rtx5090-v051-fanout-80k.json)).
+- Native-lane convergence, stage 1: the runtime fork's `port/native-lanes-on-mainline` branch
+  builds the mainline runtime - context cache, warm arrival, and the restore path included - for
+  Ada (`CMAKE_CUDA_ARCHITECTURES=89`) with the 4090 lane's architecture guards applied to
+  mainline (NVFP4 W4A4 excluded behind rejecting launchers, Ada's FP8 MMA spelling, W8 split-K
+  schedules that fit 48 KiB of static shared memory, ordinary launches in place of programmatic
+  dependent launch), and still builds for sm_120a. Porting the cache into the two divergent
+  native branches (~8K lines each) was rejected in favour of building both native lanes from
+  mainline; Ampere (sm_86) follows once its FP8 A8 and FP8-KV attention kernels are excluded,
+  and the Windows platform code (D3D12 residency arena, DirectStorage read queue, MSVC build)
+  is the next stage.
 
 ### Added
 
