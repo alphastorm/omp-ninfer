@@ -8,13 +8,36 @@
     "sf_site": "RTX 4090 and RTX 3090 hosts behind one easy NAT with UPnP/NAT-PMP/PCP",
     "nyc_site": "RTX 5090 host; replicas live on its WSL distro's ext4",
     "paths": {
-      "workstation-sf": {"transport": "tailscale direct WireGuard", "rtt_ms": {"min": 115, "avg_under_icmp": 423, "max": 942}, "note": "heavy queueing delay; 0% loss over 30 pings"},
-      "workstation-nyc": {"transport": "tailscale direct WireGuard", "rtt_ms": {"min": 185, "avg_under_icmp": 190, "max": 240}},
-      "sf-nyc": {"transport": "tailscale direct WireGuard", "rtt_ms": 67},
+      "workstation-sf": {
+        "transport": "tailscale direct WireGuard",
+        "rtt_ms": {
+          "min": 115,
+          "avg_under_icmp": 423,
+          "max": 942
+        },
+        "note": "heavy queueing delay; 0% loss over 30 pings"
+      },
+      "workstation-nyc": {
+        "transport": "tailscale direct WireGuard",
+        "rtt_ms": {
+          "min": 185,
+          "avg_under_icmp": 190,
+          "max": 240
+        }
+      },
+      "sf-nyc": {
+        "transport": "tailscale direct WireGuard",
+        "rtt_ms": 67
+      },
       "relay_observation": "the RTX 4090 host's path to the workstation was relayed via DERP while idle and upgraded to direct after a few pings; the RTX 3090 host was direct and just as slow, so the relay did not set the EXP-018 rate"
     }
   },
-  "raw_internet_uplink_mb_per_s": {"workstation": 16.8, "nyc_host": 55.6, "sf_host": 57.5, "method": "100-256 MB POST to speed.cloudflare.com/__up"},
+  "raw_internet_uplink_mb_per_s": {
+    "workstation": 16.8,
+    "nyc_host": 55.6,
+    "sf_host": 57.5,
+    "method": "100-256 MB POST to speed.cloudflare.com/__up"
+  },
   "corrected_causes": [
     "The EXP-018 hop crossed the Pacific twice: the workstation was in Japan, and its path to SF queues to 900 ms RTT under load. The fleet's own path (NYC<->SF, 67 ms) was never measured that night.",
     "A single ssh stream is bound by the SSH channel window (about 1.6 MB in flight): 8-14 MB/s at 67-190 ms whatever the link. Parallel ranged streams scale it.",
@@ -24,23 +47,95 @@
     "The first ranged-HTTP implementation probed the file size with a bodied GET and abandoned it, so the server wrote the whole file into a socket nobody read: every fetch moved the payload twice. Fixed to HEAD (schema 1 of this receipt reported 7.1 MB/s under that bug)."
   ],
   "measurements": [
-    {"path": "sf->workstation", "method": "scp single stream, 256 MB zeros, ssh Compression=yes", "mb_per_s": 13.6, "verdict": "compression artifact"},
-    {"path": "sf->workstation", "method": "8 parallel ranged ssh reads, 256 MB zeros, Compression=yes", "mb_per_s": 68.9, "verdict": "compression artifact"},
-    {"path": "nyc->workstation", "method": "1 ranged ssh read, 1 GB random, Compression=no", "mb_per_s": 2.2},
-    {"path": "nyc->workstation", "method": "8 parallel ranged ssh reads, 1 GB random, Compression=no", "mb_per_s": 5.0},
-    {"path": "nyc(wsl sshd)->workstation", "method": "scp single stream from ext4, 256 MB random", "mb_per_s": 7.1, "note": "Linux sshd sender, same link as the 2.2 MB/s Windows-sshd figure"},
-    {"path": "workstation->sf", "method": "8 parallel scp parts, 1 GB random", "mb_per_s": 10.7},
-    {"path": "nyc->sf", "method": "single TCP stream over the tailnet (HTTP), 1 GB random", "mb_per_s": 7.9},
-    {"path": "nyc->sf", "method": "8 independent curl processes over the tailnet, 8 x 1 GB", "mb_per_s": 21.9},
-    {"path": "nyc->sf", "method": "ranged HTTP, 8 streams, 512 MB random (pre-HEAD-fix)", "mb_per_s": 5.8},
-    {"path": "nyc->sf", "method": "ranged HTTP, 16 streams, 512 MB random (pre-HEAD-fix)", "mb_per_s": 9.2},
-    {"path": "nyc->sf", "method": "ranged HTTP, 16 streams, 1.13 GB checkpoint archive (HEAD fix)", "mb_per_s": 11.5},
-    {"path": "sf->nyc(wsl ext4)", "method": "ranged HTTP, 16 streams, 1.13 GB checkpoint archive", "mb_per_s": 56.3, "note": "same link, Linux receiver: the Windows receiver is the asymmetry, not the path"},
-    {"path": "sf->nyc(wsl ext4)", "method": "ranged HTTP, 16 streams, 4.35 GB archive", "mb_per_s": 63.4},
-    {"path": "local (nyc host)", "method": "tar with default 10 KiB records, ext4 -> /mnt/c (9p), 2.74 GB", "mb_per_s": 37.6},
-    {"path": "local (nyc host)", "method": "tar -b 8192 (4 MiB records), same replica and mount", "mb_per_s": 287.0},
-    {"path": "local (nyc host)", "method": "checkpoint_sync.py export of a 2.74 GB session in the helper container", "wall_s": 4.9},
-    {"path": "local (nyc host)", "method": "sha256 in the helper container, single payload file", "mb_per_s": 1353}
+    {
+      "path": "sf->workstation",
+      "method": "scp single stream, 256 MB zeros, ssh Compression=yes",
+      "mb_per_s": 13.6,
+      "verdict": "compression artifact"
+    },
+    {
+      "path": "sf->workstation",
+      "method": "8 parallel ranged ssh reads, 256 MB zeros, Compression=yes",
+      "mb_per_s": 68.9,
+      "verdict": "compression artifact"
+    },
+    {
+      "path": "nyc->workstation",
+      "method": "1 ranged ssh read, 1 GB random, Compression=no",
+      "mb_per_s": 2.2
+    },
+    {
+      "path": "nyc->workstation",
+      "method": "8 parallel ranged ssh reads, 1 GB random, Compression=no",
+      "mb_per_s": 5.0
+    },
+    {
+      "path": "nyc(wsl sshd)->workstation",
+      "method": "scp single stream from ext4, 256 MB random",
+      "mb_per_s": 7.1,
+      "note": "Linux sshd sender, same link as the 2.2 MB/s Windows-sshd figure"
+    },
+    {
+      "path": "workstation->sf",
+      "method": "8 parallel scp parts, 1 GB random",
+      "mb_per_s": 10.7
+    },
+    {
+      "path": "nyc->sf",
+      "method": "single TCP stream over the tailnet (HTTP), 1 GB random",
+      "mb_per_s": 7.9
+    },
+    {
+      "path": "nyc->sf",
+      "method": "8 independent curl processes over the tailnet, 8 x 1 GB",
+      "mb_per_s": 21.9
+    },
+    {
+      "path": "nyc->sf",
+      "method": "ranged HTTP, 8 streams, 512 MB random (pre-HEAD-fix)",
+      "mb_per_s": 5.8
+    },
+    {
+      "path": "nyc->sf",
+      "method": "ranged HTTP, 16 streams, 512 MB random (pre-HEAD-fix)",
+      "mb_per_s": 9.2
+    },
+    {
+      "path": "nyc->sf",
+      "method": "ranged HTTP, 16 streams, 1.13 GB checkpoint archive (HEAD fix)",
+      "mb_per_s": 11.5
+    },
+    {
+      "path": "sf->nyc(wsl ext4)",
+      "method": "ranged HTTP, 16 streams, 1.13 GB checkpoint archive",
+      "mb_per_s": 56.3,
+      "note": "same link, Linux receiver: the Windows receiver is the asymmetry, not the path"
+    },
+    {
+      "path": "sf->nyc(wsl ext4)",
+      "method": "ranged HTTP, 16 streams, 4.35 GB archive",
+      "mb_per_s": 63.4
+    },
+    {
+      "path": "local (nyc host)",
+      "method": "tar with default 10 KiB records, ext4 -> /mnt/c (9p), 2.74 GB",
+      "mb_per_s": 37.6
+    },
+    {
+      "path": "local (nyc host)",
+      "method": "tar -b 8192 (4 MiB records), same replica and mount",
+      "mb_per_s": 287.0
+    },
+    {
+      "path": "local (nyc host)",
+      "method": "checkpoint_sync.py export of a 2.74 GB session in the helper container",
+      "wall_s": 4.9
+    },
+    {
+      "path": "local (nyc host)",
+      "method": "sha256 in the helper container, single payload file",
+      "mb_per_s": 1353
+    }
   ],
   "conclusions": [
     "Replicate to a Linux endpoint wherever possible: the same 67 ms link carries 11.5 MB/s into a Windows host and 56-63 MB/s into WSL ext4 with the identical tool and stream count.",
@@ -50,7 +145,7 @@
   ],
   "host_changes_made": [
     "workstation ssh_config: global `Compression yes` removed (backup at ~/.ssh/config.bak-20260906)",
-    "nyc-pc WSL sshd: moved from loopback :22 (which collided with the Windows sshd through mirrored networking and left the socket unit failed since 2026-07-28) to loopback :2222, matching the documented nyc-pc-wsl alias; host key re-verified out of band and re-pinned on the workstation",
+    "the RTX 5090 host WSL sshd: moved from loopback :22 (which collided with the Windows sshd through mirrored networking and left the socket unit failed since 2026-07-28) to loopback :2222, matching the documented the RTX 5090 host's Linux distro alias; host key re-verified out of band and re-pinned on the workstation",
     "per-host ed25519 replica keys on all three Windows hosts and inside the WSL distro, cross-authorized with no-pty/no-forwarding restrictions and host keys pinned, so any fleet host can address any other over the tailnet"
   ]
 }

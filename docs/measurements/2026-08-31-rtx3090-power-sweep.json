@@ -12,8 +12,8 @@
     "measurement_only": true
   },
   "identity": {
-    "host_class": "sf-old RTX 3090",
-    "host_alias": "sf-old",
+    "host_class": "the RTX 3090 host RTX 3090",
+    "host_alias": "the RTX 3090 host",
     "host_os": "Windows (WDDM)",
     "operator_account_is_admin": true,
     "lane_release": "v0.2.1-beta.1",
@@ -499,7 +499,7 @@
     {
       "id": "client_side_wall_includes_tunnel_overhead",
       "severity": "low",
-      "detail": "All wall times are measured on the Mac across an ssh tunnel to sf-old:18082, so they include tunnel and HTTP framing overhead and slightly understate on-host throughput. Magnitude is bounded by the observed TTFT floor of ~0.26-0.49 s. Each point is a single run: the 0.02 tok/s gap between 350 and 370 W is well inside that noise."
+      "detail": "All wall times are measured on the Mac across an ssh tunnel to the RTX 3090 host:18082, so they include tunnel and HTTP framing overhead and slightly understate on-host throughput. Magnitude is bounded by the observed TTFT floor of ~0.26-0.49 s. Each point is a single run: the 0.02 tok/s gap between 350 and 370 W is well inside that noise."
     }
   ],
   "final_state": {
@@ -537,10 +537,10 @@
     "teardown_before_deadline": true
   },
   "method": {
-    "transport": "ssh BatchMode to sf-old; powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand",
-    "serve_reachability": "http://127.0.0.1:18193 via persistent tunnel (listener verified on 127.0.0.1:18193 and [::1]:18193), bearer key from /Users/srs/.omp/agent/ninfer-3090.key",
+    "transport": "ssh BatchMode to the RTX 3090 host; powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand",
+    "serve_reachability": "http://127.0.0.1:18193 via persistent tunnel (listener verified on 127.0.0.1:18193 and [::1]:18193), bearer key from ~/.omp/agent/ninfer-3090.key",
     "tunnel_verified": true,
-    "tunnel_note": "Tunnel listener was up throughout; probes returned RemoteDisconnected because nothing was listening on sf-old:18082 (lane stopped), not because the tunnel was down.",
+    "tunnel_note": "Tunnel listener was up throughout; probes returned RemoteDisconnected because nothing was listening on the RTX 3090 host:18082 (lane stopped), not because the tunnel was down.",
     "settle_seconds_per_point": 5,
     "samples_per_point": 3,
     "sample_offsets_s_into_generation": [

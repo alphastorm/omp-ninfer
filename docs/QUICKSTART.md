@@ -569,7 +569,12 @@ python3 scripts/hosts/pscp.py fetch --url http://<host>:<port> --token <token> -
 ```
 
 Both directions verify the whole file by SHA-256 on both ends and need only the standard library
-plus ssh. Measured between the two owner sites over the tailnet (67 ms): 11.5 MB/s into a Windows
+plus ssh. A file share on the same LAN is the better target where you have one: the
+fleet's NAS carries about 1 GbE line rate from the two lanes that share its network (115.8 MB/s
+write, 117.6 MB/s read, measured over 2 GiB of incompressible payload) while reaching the same
+appliance across the internet manages 6.4 MB/s - slower than the direct host-to-host path - so
+replicate to whatever storage is closest to each machine, and remember a share is a replication
+target, never a checkpoint root ([NAS](measurements/2026-09-07-nas-replication-sf-lanes.json)). Measured between the two owner sites over the tailnet (67 ms): 11.5 MB/s into a Windows
 host, 56–63 MB/s into a Linux one — so prefer a Linux replication target. A full round trip of a
 1.13 GB checkpoint, out and back and restored with its planted keys intact, takes about 3 minutes
 ([round trip](measurements/2026-09-06-cross-site-replication-rtx5090.json) ·

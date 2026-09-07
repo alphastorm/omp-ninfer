@@ -107,6 +107,8 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-017 | Native-lane checkpoint restore path | The per-page-segment reader, not the disk, is the restore cost; one read per staging window closes it | Fix on both native lanes, same session shapes as EXP-014: RTX 4090 1.13 GB **146.6 → 5.6 s** and **133.4 → 5.6 s** (24–26×); RTX 3090 1.68 GB **91.8 → 10.8 s** and **92.2 → 10.7 s** (8.5×); planted ledger keys quoted exactly after every restart on both lanes and in-process | fixed at source — lane commits `d22ce3fd` (4090) and `3756db6e` (3090); shipped in `v0.4.9` (components `v0.2.2-qwen38-4090-durable.1`, `v0.2.4-qwen38-3090-beta.1`) |
 | EXP-018 | Checkpoint replication (all lanes) | A checkpointed session survives the machine losing its local state, and a replica cannot be forged | Export, carry off, destroy the local copy with the server stopped, carry back, import, restart, exact retrieval of planted keys: RTX 5090 4.5 GB import 10.1 s / restored 24.8 s; RTX 4090 1.13 GB 4.2 s / 7.4 s; RTX 3090 1.69 GB 11.9 s / 11.5 s. Payload byte flip refused by the tool; manifest edit with consistent digests quarantined by the runtime's origin authentication (no resurrection) | delivered — roadmap v0.5 §1; origin authentication ported to both native lanes and requalified |
 | EXP-019 | Replica transport (cross-site) | Moving a replica between owner sites is minutes, and the earlier 1.8–3.5 MB/s was the workstation's transpacific path plus single-stream ssh | Full round trip NYC→SF→NYC→restore on the 67 ms tailnet path: 1.13 GB out at **11.5 MB/s**, back at **56.3 MB/s**, imported in 2.6 s, planted keys exact after the return. Windows OpenSSH cannot carry bulk between two Windows hosts at all; a Linux receiver on the same link is 5× faster than a Windows one | fixed — `scripts/hosts/pscp.py` (ranged ssh reads, or bearer-token ranged HTTP for the Windows-to-Windows case); host ssh compression, the WSL sshd port collision, and fleet host-to-host trust corrected |
+| EXP-020 | NAS replication target | A LAN-local NAS is a better replication target than another workstation, and a Synology's tailnet path is not | Same-site LAN, 2 GiB incompressible, raw unbuffered IO: the RTX 4090 host **115.8 MB/s** write / **117.6 MB/s** read, the RTX 3090 host 96.0 / 102.3 - about 1 GbE line rate. The same NAS over the tailnet from the other site does **6.4 MB/s** write / 22.7 MB/s read, worse than the direct host-to-host path (11.5 / 56.3). One published generation replicated and verified in place from each co-located lane | adopted as the replication target for the two co-located lanes; the remote lane keeps host-to-host transport |
+| EXP-021 | Warm arrival after a restart (5090) | A restored session's first sibling fork reuses the template prefix instead of re-prefilling it | Two source defects found and fixed: a fanout fork left its long anchor on the parent, so every checkpoint taken after a fanout omitted it (payload 4,351,909,712 vs 4,505,864,319 bytes), and consuming a session endpoint double-charged a shared anchor to the entitlement (HTTP 500 on resume, now 1.19 s). With the fixes a fork issued as the first post-restart request hits `private_long_anchor` immediately; when an endpoint resume comes first, one fork still re-prefills (22.2 s) | partial - fixes proved on a candidate binary on branch `feat/warm-arrival`, not released; the resume-first path and the hash-bound 24 s restore remain open |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -376,6 +378,46 @@ Entry detail:
   collision with the Windows sshd (loopback :22 under mirrored networking, socket unit failed
   since July, now :2222 as documented), and per-host replica keys so any fleet host can address
   any other over the tailnet.
+- **EXP-020 — a NAS is the right replication target for co-located lanes (2026-09-07).** The
+  fleet's Synology (`ninfer-cache` share, a least-privilege SMB identity with no access to any
+  other share) shares a LAN with two of the three lanes and reaches about 1 GbE line rate from
+  both: 115.8 MB/s write and 117.6 MB/s read from the RTX 4090 host, 96.0 / 102.3 from the RTX
+  3090 host, measured with raw unbuffered IO over 2 GiB of incompressible payload. Reaching the
+  same appliance from the remote RTX 5090 host over the tailnet is the opposite story - 6.4 MB/s
+  write, 22.7 MB/s read - because a DS918+ terminates WireGuard in userspace on a low-power CPU;
+  that is worse than EXP-019's direct host-to-host path, so that lane keeps using it. One
+  published generation per co-located lane is now replicated to the share and verified in place. Two
+  operational facts worth keeping: the 4090 lane's replica is origin-authenticated while the
+  3090 lane's surviving generations predate `manifest.mac` and replicate only under
+  `--allow-unauthenticated`; and SMB from a non-interactive session on these hosts requires a
+  registered SYSTEM scheduled task running `net use` with the credential as an argument -
+  `New-SmbMapping` and `New-SmbGlobalMapping` both fail with Windows error 1312 ("a specified
+  logon session does not exist"), even when spawned through `Win32_Process Create`. Receipt:
+  [NAS replication](measurements/2026-09-07-nas-replication-sf-lanes.json).
+- **EXP-021 — warm arrival: a restored session still re-prefills once (2026-09-07).** Roadmap
+  v0.5 §2 promised that a checkpointed template makes subagent forks start hot. It does not yet
+  hold across a restart, and the reason was not the restore path. Measured on the shipped v0.4.8
+  profile at 57.9K tokens: four forks before a restart are hot (1.17-1.32 s, all
+  `private_long_anchor`), and after a restart the resume costs 23.7 s while the first fork costs
+  **22.1 s with reuse path `root` and zero reused tokens**. Restore + four forks is 49.3 s
+  against 26.7 s for not checkpointing at all, so for the fanout pattern durable resume is
+  currently a net loss. The control that isolated it: restoring a checkpoint taken *before* any
+  fork serves four hot forks on the unmodified shipped binary, so restore reinstates anchors
+  correctly - the anchor simply was not in the payload. A session's binding follows the newest
+  continuation and a checkpoint serialises exactly one continuation, so a fork left its anchor
+  behind on the parent; the byte counts show it directly (4,505,854,445 bytes saved before a
+  fanout, 4,351,909,712 after, one StateImage fewer). Two fixes on branch `feat/warm-arrival`:
+  a fork admitted through a long anchor now inherits a reference to that immutable anchor image,
+  and consuming a session endpoint no longer charges a shared optional state to the new
+  lineage's entitlement - a latent accounting bug that the first fix made reachable and that
+  returned HTTP 500 on any resume of an anchor-carrying session. With both, the post-fanout
+  checkpoint carries the anchor again and a fork issued as the first post-restart request is hot;
+  an endpoint resume arriving first still leaves one 22.2 s re-prefill, with the anchor provably
+  retained (a save right after that resume still carries two StateImages) and indexed, which
+  puts the remaining defect in candidate admission for a just-consumed lineage. Device-state
+  capacity is not the cause: 4 and 8 slots behave identically. Nothing was released; the
+  candidate binary was built outside the appliance's canonical build. Receipt:
+  [warm arrival](measurements/2026-09-07-warm-arrival-rtx5090.json).
 
 ## Current order
 

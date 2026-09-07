@@ -1,0 +1,863 @@
+{
+  "artifact_type": "omp_ninfer_nas_replication",
+  "schema_version": 1,
+  "generated_utc": "2026-09-07T09:21:09Z",
+  "status": "passed_with_documented_deviations",
+  "scope": {
+    "hosts": [
+      "rtx4090-host (rtx4090-host, RTX 4090)",
+      "rtx3090-host (rtx3090-host, RTX 3090)"
+    ],
+    "nas": {
+      "address": "the NAS LAN address",
+      "tailnet_name": "the NAS tailnet name",
+      "model": "Synology DS918+",
+      "share": "ninfer-cache",
+      "identity": "ninfer-cache"
+    },
+    "non_goals": [
+      "the other site's host and its container",
+      "NInfer server or release lifecycle",
+      "release artifacts",
+      "DSM configuration",
+      "replicas/main-5090"
+    ]
+  },
+  "mechanism": {
+    "working": "registered SYSTEM scheduled task (RunLevel Highest, principal NT AUTHORITY\\SYSTEM with LogonType ServiceAccount) that runs `net use \\\\the NAS LAN address\\ninfer-cache <password> /user:ninfer-cache /persistent:no` and then does all share I/O over the UNC path inside that same task; the task is unregistered as soon as it finishes",
+    "runner": "scp the .ps1 to the host, then ssh -> powershell -File run-task.ps1, which registers, starts, polls for the JSON result file the script writes, and unregisters the task; host scripts set $ProgressPreference=SilentlyContinue and never rely on stdout",
+    "credential_handling": "password read at run time from the operator-staged path, passed base64 to the task action argument for the one task that authenticates, and never written to any file on either host; the task definition holding it is unregistered immediately, and later tasks reuse the SYSTEM logon session's SMB connection with no credential at all",
+    "drive_letter_needed": false,
+    "rejected": [
+      {
+        "mechanism": "New-SmbGlobalMapping -LocalPath Z: inside the SYSTEM scheduled task",
+        "error": "A specified logon session does not exist. It may already have been terminated. (1312)",
+        "hosts": [
+          "rtx4090-host",
+          "rtx3090-host"
+        ]
+      },
+      {
+        "mechanism": "net use with the password supplied on stdin (net use ... /user:<id> *)",
+        "error": "System error 86: the specified network password is not correct - net.exe reads the prompt from the console, not from redirected stdin, so it authenticated with nothing",
+        "hosts": [
+          "rtx4090-host",
+          "rtx3090-host"
+        ]
+      },
+      {
+        "mechanism": "plain UNC access from the ssh (user) session or from a SYSTEM task with no net use first",
+        "error": "The user name or password is incorrect / path does not exist",
+        "hosts": [
+          "rtx4090-host",
+          "rtx3090-host"
+        ]
+      }
+    ],
+    "not_needed": [
+      "WNetAddConnection2 (mpr.dll) fallback was implemented but never reached: net use with an argument password succeeded first"
+    ]
+  },
+  "nas_state": {
+    "free_bytes": 263392440320,
+    "total_bytes": 268435456000,
+    "free_gib": 245.3,
+    "agreement": "both hosts and the workstation mount report the same free space (263,392,440,320 bytes)",
+    "smb_dialect": "3.1.1",
+    "smb_encrypted": false
+  },
+  "hosts": {
+    "rtx4090-host": {
+      "ssh_alias": "rtx4090-host",
+      "computer_name": "rtx4090-host",
+      "lane": "RTX 4090 local-heavy",
+      "smb_path": {
+        "unc": "\\\\the NAS LAN address\\ninfer-cache",
+        "reachable_from_task": true,
+        "dialect": "3.1.1",
+        "encrypted": "False",
+        "read_write_proof": {
+          "scratch_dir": "\\\\the NAS LAN address\\ninfer-cache\\scratch\\rtx4090-host-rw-20260907T085832Z",
+          "mkdir": true,
+          "write_bytes": 1048576,
+          "readback_sha256_matches": true,
+          "delete_file": true,
+          "delete_dir": true
+        }
+      },
+      "throughput_2gib": {
+        "bytes": 2147483648,
+        "chunk_bytes": 8388608,
+        "payload": "incompressible: 8 MiB random seed block, unique 8-byte counter per chunk",
+        "write_mode": "raw-no-buffering-write-through",
+        "write_seconds": 18.538,
+        "write_mb_s": 115.84,
+        "write_mib_s": 110.48,
+        "read_mode": "raw-no-buffering",
+        "read_seconds": 18.266,
+        "read_mb_s": 117.57,
+        "read_mib_s": 112.12,
+        "mb_s_definition": "bytes / 1e6 / wall seconds; MiB/s given alongside for clarity",
+        "cache_bypass": "both directions used CreateFileW with FILE_FLAG_NO_BUFFERING (write also FILE_FLAG_WRITE_THROUGH) against page-aligned VirtualAlloc buffers, so neither number is served by the SMB client cache"
+      },
+      "nas_space_seen_by_host": {
+        "free_bytes": 263392440320,
+        "total_bytes": 268435456000,
+        "method": "GetDiskFreeSpaceExW on \\\\the NAS LAN address\\ninfer-cache\\"
+      },
+      "checkpoint_roots": [
+        {
+          "root": "%USERPROFILE%\\local-4090-data\\sf-long-persistent",
+          "exists": true,
+          "is_checkpoint_root": false,
+          "fenced_read_only_listing": false,
+          "exported_from": false,
+          "sessions": 0,
+          "generations": [],
+          "generation_bytes_total": 0,
+          "note": "briefed as the 4090 lane state root; verified NOT a checkpoint root - it has no sessions/ subtree, and the live OMP-SFLongPersistentRuntime launch (server-state.json arguments) carries no --session-checkpoint-dir, so this lane publishes no session checkpoints"
+        },
+        {
+          "root": "%USERPROFILE%\\cand4090\\cache\\responses",
+          "exists": false,
+          "is_checkpoint_root": false,
+          "fenced_read_only_listing": false,
+          "exported_from": false,
+          "sessions": 0,
+          "generations": [],
+          "generation_bytes_total": 0,
+          "note": "checkpoint root configured by the live local-4090 candidate lane launcher (cand4090\\launch.ps1: --session-checkpoint-dir (Join-Path $cache responses)); absent on disk - the candidate cache tree has been cleared"
+        },
+        {
+          "root": "%USERPROFILE%\\cand4090\\sync\\replica-clean",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": false,
+          "exported_from": true,
+          "sessions": 1,
+          "generations": [
+            {
+              "session": "94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625",
+              "generation": "1788627463974-2",
+              "files": 9,
+              "bytes": 1132282557,
+              "has_manifest_mac": true,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T16:57:52Z"
+            }
+          ],
+          "generation_bytes_total": 1132282557,
+          "note": "surviving published generation of the local-4090 candidate lane, produced by an earlier checkpoint_sync export from cand4090\\cache\\responses (receipt export-1788627463974-2.json on the host); carries manifest.mac; used as the export source because it is the only authenticated published generation on this host outside the fenced C:\\ProgramData\\NInfer tree"
+        },
+        {
+          "root": "C:\\ProgramData\\NInfer\\qwen38-4090\\cache\\qwen38-4090-v0.2-32aa589982c4\\responses",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": true,
+          "exported_from": false,
+          "sessions": 6,
+          "generations": [
+            {
+              "session": "1e8b500e7fbcddc6a6222df59397fe51d2be91b99b7a025ea5c9207974dfb232",
+              "generation": "1788564249822-3",
+              "files": 8,
+              "bytes": 1130468612,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-04T23:24:16Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788178190827-5",
+              "files": 8,
+              "bytes": 310638782,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-08-31T12:09:52Z"
+            },
+            {
+              "session": "86896f672387f70ae9c6d43d3068e49c4b7012e69ac4499f8b159a266f4ea57e",
+              "generation": "1788179465943-2",
+              "files": 8,
+              "bytes": 559928689,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-08-31T12:31:08Z"
+            },
+            {
+              "session": "90cb0e1b732af5800cfccea01eb2a6c862a3978f8af3c25de803a128d0f724bd",
+              "generation": "1788178549834-0",
+              "files": 8,
+              "bytes": 1755601245,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-08-31T12:15:59Z"
+            },
+            {
+              "session": "a87cb7487fe2c085d9a12b13eb9e1b3c3bf38eabd73fb5ad87491520151a7e6a",
+              "generation": "1788179337691-1",
+              "files": 8,
+              "bytes": 559929029,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-08-31T12:29:00Z"
+            },
+            {
+              "session": "ebd8ac7f5e17e49886788833de1e8bf89767da0dbedfa842a5cf5aa70a00ceed",
+              "generation": "1788563374283-1",
+              "files": 8,
+              "bytes": 1130468676,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-04T23:09:40Z"
+            }
+          ],
+          "generation_bytes_total": 5447035033,
+          "note": "NInfer release session-checkpoint root under C:\\ProgramData\\NInfer - enumerated read-only for completeness; not used as an export source because the assignment fences C:\\ProgramData\\NInfer\\* off"
+        },
+        {
+          "root": "C:\\ProgramData\\NInfer\\qwen38-4090\\cache\\qwen38-4090-v0.2-9834bf58e6c9\\responses",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": true,
+          "exported_from": false,
+          "sessions": 2,
+          "generations": [
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788598157172-1",
+              "files": 8,
+              "bytes": 309728773,
+              "has_manifest_mac": false,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T08:49:18Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788598158927-2",
+              "files": 8,
+              "bytes": 309730609,
+              "has_manifest_mac": false,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T08:49:20Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788598162236-4",
+              "files": 8,
+              "bytes": 310636960,
+              "has_manifest_mac": false,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T08:49:23Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788598165112-5",
+              "files": 8,
+              "bytes": 310638784,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T08:49:26Z"
+            },
+            {
+              "session": "90cb0e1b732af5800cfccea01eb2a6c862a3978f8af3c25de803a128d0f724bd",
+              "generation": "1788598233233-6",
+              "files": 8,
+              "bytes": 1754693528,
+              "has_manifest_mac": false,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T08:50:44Z"
+            },
+            {
+              "session": "90cb0e1b732af5800cfccea01eb2a6c862a3978f8af3c25de803a128d0f724bd",
+              "generation": "1788598290407-0",
+              "files": 8,
+              "bytes": 1755601223,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T08:51:40Z"
+            }
+          ],
+          "generation_bytes_total": 4751029877,
+          "note": "NInfer release session-checkpoint root under C:\\ProgramData\\NInfer - enumerated read-only for completeness; not used as an export source because the assignment fences C:\\ProgramData\\NInfer\\* off"
+        },
+        {
+          "root": "C:\\ProgramData\\NInfer\\qwen38-4090\\cache\\qwen38-4090-v0.2-b9c4636b0b88\\responses",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": true,
+          "exported_from": false,
+          "sessions": 17,
+          "generations": [
+            {
+              "session": "21e5d33daca6aa64398ccec490aef7ee29dcd2db25dec7ee39c5b18993ee0ed9",
+              "generation": "1788593873095-86",
+              "files": 8,
+              "bytes": 309727274,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:54Z"
+            },
+            {
+              "session": "2e21d15a0e415a0cf4d0c14f964e9edf896bd74a199ed7ec16681cc3a9b376c5",
+              "generation": "1788593777242-69",
+              "files": 8,
+              "bytes": 391331789,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:36:19Z"
+            },
+            {
+              "session": "424eef2a86012c7877a96b890985fdc0264c52274dd9b00582f59a3dc9cbedb2",
+              "generation": "1788593861214-84",
+              "files": 8,
+              "bytes": 316981632,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:42Z"
+            },
+            {
+              "session": "6cbe5ce45256717433c236f35c71fc23238385d4c28a43a4ce252b341829998f",
+              "generation": "1788593796664-73",
+              "files": 8,
+              "bytes": 316981366,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:36:38Z"
+            },
+            {
+              "session": "6de29db8c7aca5d5beb942eaa271772c588204efdbc70b3f094f0b894b0b2f33",
+              "generation": "1788593752217-65",
+              "files": 8,
+              "bytes": 316980440,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:35:53Z"
+            },
+            {
+              "session": "721f9c6d7c443a73f8dfdfbd6229b4977862738749f5ae04d23833cf6c52ddfa",
+              "generation": "1788593746156-64",
+              "files": 8,
+              "bytes": 391331838,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:35:48Z"
+            },
+            {
+              "session": "7e5ebc2ce015eff5126fc2a8f8ddcdf8b132320f8f4362412ba0f5a4dde6cc31",
+              "generation": "1788593733459-61",
+              "files": 8,
+              "bytes": 391331319,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:35:35Z"
+            },
+            {
+              "session": "88389aaf1267c11b56c06592546247ba5d79f3d167a850d991f36a733f34b3d0",
+              "generation": "1788593854516-83",
+              "files": 8,
+              "bytes": 391332011,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:36Z"
+            },
+            {
+              "session": "88583e8a93a13695bbb562118bea6a34aa7f55466437baccace13f80c104fc34",
+              "generation": "1788593835852-79",
+              "files": 8,
+              "bytes": 316981918,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:17Z"
+            },
+            {
+              "session": "8a6f532b84a38965bd472a663bbd531652986eaa001d721325b49695c6a85b7d",
+              "generation": "1788593619808-58",
+              "files": 8,
+              "bytes": 802957623,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:33:44Z"
+            },
+            {
+              "session": "9dfb837533e5e01950248c3f6765a0ab467e47d79dd15efbc1a418e5c8fb40c0",
+              "generation": "1788593829129-78",
+              "files": 8,
+              "bytes": 316981766,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:10Z"
+            },
+            {
+              "session": "a5a22cdd8c8e56ce8079383001050442a3d637a036ab0fb1c27f40951c4438eb",
+              "generation": "1788593822295-77",
+              "files": 8,
+              "bytes": 391331931,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:04Z"
+            },
+            {
+              "session": "b606abc5e60a2c50a65c07939f5c3d399ae2313db8698ebe7d2f717e037c06e1",
+              "generation": "1788593805051-74",
+              "files": 8,
+              "bytes": 309727274,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:36:46Z"
+            },
+            {
+              "session": "c77fdd39890b6e5981f0241c1b89714eebf2dd5ebfd36106d5ae30245c0cda43",
+              "generation": "1788593760963-66",
+              "files": 8,
+              "bytes": 309727274,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:36:02Z"
+            },
+            {
+              "session": "eb6ac0d3227c371582405d1710b23339617b2f057160bb415fa6b014730fa6a4",
+              "generation": "1788593841609-80",
+              "files": 8,
+              "bytes": 309727274,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:23Z"
+            },
+            {
+              "session": "f6511f688f1796100de515a441146a27005ce5826771bfc0864bb333fbf68539",
+              "generation": "1788593867446-85",
+              "files": 8,
+              "bytes": 316981276,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:37:48Z"
+            },
+            {
+              "session": "f728f0595de627a80f785bb8cd3d85493e26b654852fc95ab81f15a5000b632a",
+              "generation": "1788593790139-72",
+              "files": 8,
+              "bytes": 391331913,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T07:36:32Z"
+            }
+          ],
+          "generation_bytes_total": 6291745918,
+          "note": "NInfer release session-checkpoint root under C:\\ProgramData\\NInfer - enumerated read-only for completeness; not used as an export source because the assignment fences C:\\ProgramData\\NInfer\\* off"
+        },
+        {
+          "root": "C:\\ProgramData\\NInfer\\qwen38-4090\\cache\\qwen38-4090-v0.2-e186e04e1dee\\responses",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": true,
+          "exported_from": false,
+          "sessions": 2,
+          "generations": [
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788628622358-0",
+              "files": 9,
+              "bytes": 309726390,
+              "has_manifest_mac": true,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T17:17:03Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788628624279-2",
+              "files": 9,
+              "bytes": 309730673,
+              "has_manifest_mac": true,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T17:17:05Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788628627656-4",
+              "files": 9,
+              "bytes": 310637024,
+              "has_manifest_mac": true,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T17:17:09Z"
+            },
+            {
+              "session": "27f9e78a78e65c663a2be62b509a1c17b8c31dc25db6421df368312924774293",
+              "generation": "1788628630475-5",
+              "files": 9,
+              "bytes": 310638848,
+              "has_manifest_mac": true,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T17:17:12Z"
+            },
+            {
+              "session": "90cb0e1b732af5800cfccea01eb2a6c862a3978f8af3c25de803a128d0f724bd",
+              "generation": "1788628698473-6",
+              "files": 9,
+              "bytes": 1754693604,
+              "has_manifest_mac": true,
+              "published_current": false,
+              "mtime_utc": "2026-09-05T17:18:30Z"
+            },
+            {
+              "session": "90cb0e1b732af5800cfccea01eb2a6c862a3978f8af3c25de803a128d0f724bd",
+              "generation": "1788628755761-0",
+              "files": 9,
+              "bytes": 1755601293,
+              "has_manifest_mac": true,
+              "published_current": true,
+              "mtime_utc": "2026-09-05T17:19:26Z"
+            }
+          ],
+          "generation_bytes_total": 4751027832,
+          "note": "NInfer release session-checkpoint root under C:\\ProgramData\\NInfer - enumerated read-only for completeness; not used as an export source because the assignment fences C:\\ProgramData\\NInfer\\* off"
+        }
+      ],
+      "export": {
+        "source_root": "%USERPROFILE%\\cand4090\\sync\\replica-clean",
+        "destination_root": "\\\\the NAS LAN address\\ninfer-cache\\replicas\\local-heavy-4090",
+        "session": "94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625",
+        "generation": "1788627463974-2",
+        "payload_bytes": 1132279332,
+        "payload_files": 7,
+        "origin_tag_present": null,
+        "authenticated": true,
+        "unauthenticated_fallback_used": false,
+        "export_wall_seconds": 22.54,
+        "export_mb_s": 50.23,
+        "export_mib_s": 47.91,
+        "export_mb_s_definition": "payload bytes / wall seconds of checkpoint_sync export, which reads the source twice (manifest verification + copy), writes the replica, and re-reads every copied file off the NAS to re-digest it; it is therefore well below the raw sequential write rate",
+        "verify_wall_seconds": 11.172,
+        "verify_status": "passed",
+        "staging_left_on_share": [],
+        "attempts": [
+          {
+            "label": "export (origin tag required)",
+            "argv": "export --root %USERPROFILE%\\cand4090\\sync\\replica-clean --destination \\\\the NAS LAN address\\ninfer-cache\\replicas\\local-heavy-4090 --session 94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625",
+            "exit_code": 0,
+            "wall_seconds": 22.54,
+            "receipt_status": "passed",
+            "receipt_error": null,
+            "payload_bytes": 1132279332,
+            "effective_mb_s": 50.23,
+            "effective_mib_s": 47.91
+          },
+          {
+            "label": "verify (NAS replica root)",
+            "argv": "verify --root \\\\the NAS LAN address\\ninfer-cache\\replicas\\local-heavy-4090 --session 94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625",
+            "exit_code": 0,
+            "wall_seconds": 11.172,
+            "receipt_status": "passed",
+            "receipt_error": null,
+            "payload_bytes": 1132279332,
+            "effective_mb_s": 101.35,
+            "effective_mib_s": 96.65
+          }
+        ]
+      },
+      "ninfer_untouched": {
+        "ninfer_serve_processes": [
+          {
+            "pid": 22060,
+            "path": "C:\\ProgramData\\NInfer\\qwen38-4090\\releases\\qwen38-4090-v0.2-e186e04e1dee\\bin\\ninfer-serve.exe"
+          }
+        ],
+        "release_task_states": [
+          {
+            "name": "NInfer-Qwen38-4090-v0.1",
+            "state": "Running"
+          },
+          {
+            "name": "OMP-Local4090Supervisor",
+            "state": "Ready"
+          },
+          {
+            "name": "OMP-SFLongForkHeadQualification",
+            "state": "Ready"
+          },
+          {
+            "name": "OMP-SFLongPersistentRuntime",
+            "state": "Ready"
+          },
+          {
+            "name": "OMP-SFLongRuntime",
+            "state": "Ready"
+          },
+          {
+            "name": "OMP-SFLongSpeculativeEvaluation",
+            "state": "Ready"
+          }
+        ]
+      }
+    },
+    "rtx3090-host": {
+      "ssh_alias": "rtx3090-host",
+      "computer_name": "rtx3090-host",
+      "lane": "RTX 3090 local-scout",
+      "smb_path": {
+        "unc": "\\\\the NAS LAN address\\ninfer-cache",
+        "reachable_from_task": true,
+        "dialect": "3.1.1",
+        "encrypted": "False",
+        "read_write_proof": {
+          "scratch_dir": "\\\\the NAS LAN address\\ninfer-cache\\scratch\\rtx3090-host-rw-20260907T085849Z",
+          "mkdir": true,
+          "write_bytes": 1048576,
+          "readback_sha256_matches": true,
+          "delete_file": true,
+          "delete_dir": true
+        }
+      },
+      "throughput_2gib": {
+        "bytes": 2147483648,
+        "chunk_bytes": 8388608,
+        "payload": "incompressible: 8 MiB random seed block, unique 8-byte counter per chunk",
+        "write_mode": "raw-no-buffering-write-through",
+        "write_seconds": 22.361,
+        "write_mb_s": 96.04,
+        "write_mib_s": 91.59,
+        "read_mode": "raw-no-buffering",
+        "read_seconds": 20.995,
+        "read_mb_s": 102.29,
+        "read_mib_s": 97.55,
+        "mb_s_definition": "bytes / 1e6 / wall seconds; MiB/s given alongside for clarity",
+        "cache_bypass": "both directions used CreateFileW with FILE_FLAG_NO_BUFFERING (write also FILE_FLAG_WRITE_THROUGH) against page-aligned VirtualAlloc buffers, so neither number is served by the SMB client cache"
+      },
+      "nas_space_seen_by_host": {
+        "free_bytes": 263392440320,
+        "total_bytes": 268435456000,
+        "method": "GetDiskFreeSpaceExW on \\\\the NAS LAN address\\ninfer-cache\\"
+      },
+      "checkpoint_roots": [
+        {
+          "root": "%USERPROFILE%\\OMP\\qualification\\ninfer-3090-v020\\direct-0a7bf08e\\run\\checkpoints",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": false,
+          "exported_from": true,
+          "sessions": 1,
+          "generations": [
+            {
+              "session": "ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c",
+              "generation": "1787941868755-0",
+              "files": 8,
+              "bytes": 310212959,
+              "has_manifest_mac": false,
+              "published_current": false,
+              "mtime_utc": "2026-08-28T18:31:10Z"
+            },
+            {
+              "session": "ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c",
+              "generation": "1787941918667-0",
+              "files": 8,
+              "bytes": 312513158,
+              "has_manifest_mac": false,
+              "published_current": true,
+              "mtime_utc": "2026-08-28T18:32:00Z"
+            }
+          ],
+          "generation_bytes_total": 622726117,
+          "note": "live 3090 lane checkpoint root, resolved from the lane launcher qualification\\Run-Direct-Foreground.ps1: --session-checkpoint-dir (Join-Path $run checkpoints)"
+        },
+        {
+          "root": "C:\\ProgramData\\NInfer\\qwen38-3090-omp-v0.2\\cache\\*\\session-checkpoints",
+          "exists": true,
+          "is_checkpoint_root": true,
+          "fenced_read_only_listing": true,
+          "exported_from": false,
+          "sessions": 56,
+          "generations": [],
+          "generations_enumerated_per_generation": false,
+          "generation_bytes_total": null,
+          "note": "12 release cache roots hold published generations; enumerated read-only and summarised by count only - fenced off as C:\\ProgramData\\NInfer\\*, not an export source"
+        }
+      ],
+      "export": {
+        "source_root": "%USERPROFILE%\\OMP\\qualification\\ninfer-3090-v020\\direct-0a7bf08e\\run\\checkpoints",
+        "destination_root": "\\\\the NAS LAN address\\ninfer-cache\\replicas\\local-scout-3090",
+        "session": "ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c",
+        "generation": "1787941918667-0",
+        "payload_bytes": 312510263,
+        "payload_files": 7,
+        "origin_tag_present": null,
+        "authenticated": false,
+        "unauthenticated_fallback_used": true,
+        "export_wall_seconds": 9.03,
+        "export_mb_s": 34.61,
+        "export_mib_s": 33,
+        "export_mb_s_definition": "payload bytes / wall seconds of checkpoint_sync export, which reads the source twice (manifest verification + copy), writes the replica, and re-reads every copied file off the NAS to re-digest it; it is therefore well below the raw sequential write rate",
+        "verify_wall_seconds": 4.022,
+        "verify_status": "passed",
+        "staging_left_on_share": [],
+        "attempts": [
+          {
+            "label": "export (origin tag required)",
+            "argv": "export --root %USERPROFILE%\\OMP\\qualification\\ninfer-3090-v020\\direct-0a7bf08e\\run\\checkpoints --destination \\\\the NAS LAN address\\ninfer-cache\\replicas\\local-scout-3090 --session ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c",
+            "exit_code": 1,
+            "wall_seconds": 2.024,
+            "receipt_status": "failed",
+            "receipt_error": "ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c/1787941918667-0: generation carries no origin tag (manifest.mac); refuse to replicate an unauthenticated checkpoint across a trust boundary, or pass --allow-unauthenticated for a locally produced legacy generation",
+            "payload_bytes": null,
+            "effective_mb_s": null,
+            "effective_mib_s": null
+          },
+          {
+            "label": "export (--allow-unauthenticated)",
+            "argv": "export --root %USERPROFILE%\\OMP\\qualification\\ninfer-3090-v020\\direct-0a7bf08e\\run\\checkpoints --destination \\\\the NAS LAN address\\ninfer-cache\\replicas\\local-scout-3090 --session ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c --allow-unauthenticated",
+            "exit_code": 0,
+            "wall_seconds": 9.03,
+            "receipt_status": "passed",
+            "receipt_error": null,
+            "payload_bytes": 312510263,
+            "effective_mb_s": 34.61,
+            "effective_mib_s": 33
+          },
+          {
+            "label": "verify (NAS replica root)",
+            "argv": "verify --root \\\\the NAS LAN address\\ninfer-cache\\replicas\\local-scout-3090 --session ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c --allow-unauthenticated",
+            "exit_code": 0,
+            "wall_seconds": 4.022,
+            "receipt_status": "passed",
+            "receipt_error": null,
+            "payload_bytes": 312510263,
+            "effective_mb_s": 77.69,
+            "effective_mib_s": 74.09
+          }
+        ]
+      },
+      "ninfer_untouched": {
+        "ninfer_serve_processes": [],
+        "release_task_states": [
+          {
+            "name": "NInfer-Qwen38-3090-OMP-v0.2",
+            "state": "Ready"
+          }
+        ]
+      }
+    }
+  },
+  "replicas": [
+    {
+      "share_path": "replicas/local-heavy-4090",
+      "source_host": "rtx4090-host",
+      "session": "94137d5d505630c5a4d3ce055d936b9c2de3746ebf36f797935a403d0caec625",
+      "generation": "1788627463974-2",
+      "payload_bytes": 1132279332,
+      "authenticated": true,
+      "origin_tag": "present (manifest.mac replicated)",
+      "verify_on_nas_from_host": {
+        "verdict": "passed",
+        "wall_seconds": 11.172,
+        "command": "checkpoint_sync.py verify --root <share>/replicas/local-heavy-4090 --session <session>"
+      },
+      "verify_on_nas_independent_from_workstation": {
+        "verdict": "passed",
+        "command": "checkpoint_sync.py verify --root <mount>/replicas/local-heavy-4090  (whole replica root, no --session scoping)",
+        "mount": "mount_smbfs of //ninfer-cache@the NAS tailnet name/ninfer-cache on an ephemeral /tmp mountpoint (unmounted afterwards)",
+        "manifest_sha256": "bb8687795cec0d5febf8d342c206a58047eb016095256056f608c8e7d54d0fb8",
+        "origin_tag_seen": "4b9fbc968ac432d25b11d55eca9479ae558b3b30ecac78e0f21bf5dcfcd2daf5",
+        "payload_files": 7,
+        "payload_bytes": 1132279332
+      }
+    },
+    {
+      "share_path": "replicas/local-scout-3090",
+      "source_host": "rtx3090-host",
+      "session": "ebf238f8069ffcc1d828f4a6117dbefff997bde7f2695e1595a55204e7b5b15c",
+      "generation": "1787941918667-0",
+      "payload_bytes": 312510263,
+      "authenticated": false,
+      "origin_tag": "absent - generation carries no manifest.mac, replicated under --allow-unauthenticated; this replica is UNAUTHENTICATED",
+      "verify_on_nas_from_host": {
+        "verdict": "passed",
+        "wall_seconds": 4.022,
+        "command": "checkpoint_sync.py verify --root <share>/replicas/local-scout-3090 --session <session> --allow-unauthenticated"
+      },
+      "verify_on_nas_independent_from_workstation": {
+        "verdict": "passed",
+        "command": "checkpoint_sync.py verify --root <mount>/replicas/local-scout-3090 --allow-unauthenticated  (whole replica root, no --session scoping)",
+        "mount": "mount_smbfs of //ninfer-cache@the NAS tailnet name/ninfer-cache on an ephemeral /tmp mountpoint (unmounted afterwards)",
+        "manifest_sha256": "61cf3915173aa82b577204990848ae953fdda13859683dcef5b68d082b01a9b3",
+        "origin_tag_seen": null,
+        "payload_files": 7,
+        "payload_bytes": 312510263
+      }
+    }
+  ],
+  "cleanup": {
+    "share": {
+      "scratch_tree_removed": true,
+      "share_top_after": [
+        "replicas"
+      ],
+      "main_5090_untouched": true,
+      "main_5090_untouched_evidence": "replicas/main-5090 was never opened for write: the only share paths written were scratch/** (removed) and the two replica roots named above",
+      "empty_sync_staging_left": [
+        "replicas/local-heavy-4090/.sync-staging",
+        "replicas/local-scout-3090/.sync-staging"
+      ],
+      "empty_sync_staging_note": "checkpoint_sync creates and empties its own staging root under each destination; both are empty and are tool-managed, not scratch"
+    },
+    "hosts": {
+      "rtx4090-host": {
+        "scheduled_tasks_remaining": [],
+        "scheduled_task_xml_remaining": [],
+        "working_directory_removed": true,
+        "working_directory_listing_after": [],
+        "query_json_left": [],
+        "net_use_delete_result": "\\\\the NAS LAN address\\ninfer-cache was deleted successfully.",
+        "smb_mappings_after": [],
+        "smb_connections_after": [],
+        "stored_credentials_matching_nas": [],
+        "system_credential_manager_blobs": [],
+        "hkcu_network_persistent_mappings": [],
+        "credential_files_found": [],
+        "stray_processes": [],
+        "fresh_task_without_credential_can_reach_share": false,
+        "user_session_can_reach_share": false
+      },
+      "rtx3090-host": {
+        "scheduled_tasks_remaining": [],
+        "scheduled_task_xml_remaining": [],
+        "working_directory_removed": true,
+        "working_directory_listing_after": [],
+        "query_json_left": [],
+        "net_use_delete_result": "\\\\the NAS LAN address\\ninfer-cache was deleted successfully.",
+        "smb_mappings_after": [],
+        "smb_connections_after": [],
+        "stored_credentials_matching_nas": [],
+        "system_credential_manager_blobs": [],
+        "hkcu_network_persistent_mappings": [],
+        "credential_files_found": [],
+        "stray_processes": [],
+        "fresh_task_without_credential_can_reach_share": false,
+        "user_session_can_reach_share": false
+      }
+    },
+    "workstation": {
+      "smbfs_mount_removed": true,
+      "credential_bearing_temp_file_removed": true,
+      "credential_bearing_temp_file_note": "the url-encoded mount string written for mount_smbfs was deleted; the credential itself was read at run time from the path staged by the lead and never copied elsewhere"
+    }
+  },
+  "tooling": {
+    "checkpoint_sync": "scripts/checkpoint_sync.py (repository copy, staged to each host unmodified)",
+    "python_on_hosts": "Python 3.13 (per-user install, invoked by absolute path from the SYSTEM task)",
+    "repository": "."
+  },
+  "deviations": [
+    {
+      "item": "rtx4090-host export source",
+      "detail": "the briefed 4090 lane root %USERPROFILE%\\local-4090-data\\sf-long-persistent is not a checkpoint root (no sessions/, and the live persistent-runtime launch passes no --session-checkpoint-dir), and the local candidate lane's configured root %USERPROFILE%\\cand4090\\cache\\responses no longer exists. The generation replicated is the surviving published generation of that same candidate lane in %USERPROFILE%\\cand4090\\sync\\replica-clean, which carries manifest.mac. The live release checkpoint root under C:\\ProgramData\\NInfer holds authenticated generations but is fenced off by the assignment, so it was only listed, never read for export."
+    },
+    {
+      "item": "rtx3090-host replica is unauthenticated",
+      "detail": "every generation in the 3090 lane root lacks manifest.mac. export was first run without --allow-unauthenticated and refused with exactly that diagnostic (exit 1); only then was it re-run with --allow-unauthenticated. The replica is recorded as authenticated=false."
+    },
+    {
+      "item": "credential source",
+      "detail": "op item get could not authorize non-interactively (op whoami: account is not signed in; item fetch died with \"error initializing client: authorization timeout\" because the 1Password desktop approval was never answered). The password was instead read at run time from the path the lead had already staged."
+    }
+  ],
+  "gaps": []
+}

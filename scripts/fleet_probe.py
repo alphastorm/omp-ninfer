@@ -242,6 +242,18 @@ def main() -> int:
         branch_ids.append(branch_doc["id"])
         record(f"branch_{index}", branch_wall, {"id": branch_doc["id"]})
 
+    # The restart must resume from state that is actually durable. Only the base and the warm
+    # edit were saved above, so without a second explicit save the branch responses survive the
+    # restart only if an automatic save happened to fire during the fanout - and a resume from a
+    # branch id then fails with 404. Save the fanout frontier first, then restart.
+    if args.restart_cmd:
+        fanout_save_doc, fanout_save_wall = lane.checkpoint_save(2 + args.branches)
+        record("fanout_save", fanout_save_wall,
+               {"mode": fanout_save_doc.get("mode"),
+                "generation": fanout_save_doc.get("generation"),
+                "bytes": fanout_save_doc.get("bytes"),
+                "frontier": fanout_save_doc.get("frontier_tokens")})
+
     # Slice 8: restart + resume. The lane's cumulative prefill counter must reset, or the
     # restart command did not restart anything (a mangled path can still exit 0).
     if args.restart_cmd:

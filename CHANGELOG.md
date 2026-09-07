@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Measured, not shipped
+
+- `scripts/verify_release.py` now applies the private-marker rule to `docs/measurements/*.json`,
+  and the four dated receipts that carried a hostname or a Windows user path were rewritten to
+  lane-relative identities. Receipts are published next to the docs that cite them, so they were
+  the one public surface the content-safety check did not cover.
+- EXP-020: the fleet NAS is the replication target for the two lanes on its LAN (115.8 MB/s write
+  from the RTX 4090 host against 6.4 MB/s for the same appliance across the internet), with one
+  published generation replicated and verified in place per lane
+  ([receipt](docs/measurements/2026-09-07-nas-replication-sf-lanes.json)).
+- EXP-021: a restored session's first sibling fork still re-prefills the template on the shipped
+  RTX 5090 profile (22.1 s, reuse path `root`), so durable resume is a net loss for the fanout
+  pattern. Two fixes on the runtime fork's `feat/warm-arrival` branch put the long anchor back
+  into post-fanout checkpoints and repair a latent entitlement-accounting bug that returned
+  HTTP 500 on any resume of an anchor-carrying session. Not released, not qualified; the
+  resume-first ordering and the hash-bound 24 s restore remain open
+  ([receipt](docs/measurements/2026-09-07-warm-arrival-rtx5090.json)).
+
 ### Added
 
 - `scripts/hosts/pscp.py`: parallel file transfer for high-latency links, either as N ranged

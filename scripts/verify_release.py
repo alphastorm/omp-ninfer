@@ -37,8 +37,11 @@ PRIVATE_MARKERS = (
     "C:\\Users\\",
     "nyc-pc",
     "sf-pc",
+    "sf-old",
+    "sf-nas",
     "ALPHA-DESKTOP",
     "ALPHA-NG",
+    "ALPHA-OLD",
 )
 PLACEHOLDER_RE = re.compile(r"(?:<[^>]+>|\bTODO\b|\bTBD\b)", re.IGNORECASE)
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
@@ -711,6 +714,12 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
         documents.update(releases_root.rglob("*.json"))
         documents.update(releases_root.rglob("*.SHA256SUMS"))
         documents.update(releases_root.rglob("*.jsonl"))
+    # Dated receipts are published alongside the docs that cite them, and they are written from
+    # host measurements, so they are the likeliest place for a hostname or a home directory to
+    # reach the public repository. Scan them with the same rule as the prose.
+    measurements = root / "docs" / "measurements"
+    if measurements.is_dir():
+        documents.update(measurements.rglob("*.json"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
         for marker in PRIVATE_MARKERS:

@@ -124,7 +124,13 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    (5090↔4090) is not even addressable. Receipts:
    [5090](docs/measurements/2026-09-05-sync-probe-rtx5090.json) ·
    [4090](docs/measurements/2026-09-05-sync-probe-rtx4090.json) ·
-   [3090](docs/measurements/2026-09-05-sync-probe-rtx3090.json).
+   [3090](docs/measurements/2026-09-05-sync-probe-rtx3090.json) ·
+   [transport](docs/measurements/2026-09-06-replica-transfer-paths.json) ·
+   [NAS](docs/measurements/2026-09-07-nas-replication-sf-lanes.json).
+   Replication targets are now measured rather than assumed: a LAN-local NAS share carries about
+   1 GbE line rate from the two co-located lanes (115.8 MB/s write from the RTX 4090 host), while
+   the same appliance over the tailnet from the other site manages 6.4 MB/s - worse than direct
+   host-to-host transport, so each lane replicates to whatever is closest to it (EXP-020).
 2. **Template-fork warm starts — measured 2026-09-04; not yet a warm start.** Checkpoint a session
    immediately after the system prompt and repository context are prefilled, then fork every
    subagent from that generation so each one starts hot instead of paying a 30–90 s prefill. The
@@ -162,6 +168,20 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    [restore 3090](docs/measurements/2026-09-05-restore-probe-rtx3090.json) ·
    [restore fix 4090](docs/measurements/2026-09-05-restore-probe-rtx4090-candidate.json) ·
    [restore fix 3090](docs/measurements/2026-09-05-restore-probe-rtx3090-candidate.json).
+   **Still not a warm start across a restart (measured 2026-09-07, EXP-021).** On the shipped
+   v0.4.8 profile a restored 57.9K-token template serves its first sibling fork by re-prefilling
+   the whole prompt (22.1 s, reuse path `root`), so restore plus four forks costs 49.3 s against
+   26.7 s for not checkpointing at all. The cause was not the restore path: a checkpoint taken
+   before any fork restores four hot forks on the unmodified binary. A fork left its long anchor
+   on the parent continuation while the session binding moved to the fork, and a checkpoint
+   serialises one continuation, so every checkpoint taken after a fanout omitted the anchor. Two
+   fixes on the runtime fork's `feat/warm-arrival` branch put it back in the payload and repair a
+   latent entitlement-accounting bug the first fix exposed; a fork issued as the first
+   post-restart request is then hot, while an endpoint resume arriving first still leaves one
+   re-prefill. Not released and not qualified. The other half of the promise is restore cost
+   itself: 24 s for 4.5 GB is hash-bound, not disk-bound, because the store hashes each payload
+   twice per restore with a scalar SHA-256 at queue depth one. Receipt:
+   [warm arrival](docs/measurements/2026-09-07-warm-arrival-rtx5090.json).
 3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
    [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
    explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on

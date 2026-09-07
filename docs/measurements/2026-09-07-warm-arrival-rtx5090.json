@@ -1,0 +1,781 @@
+{
+  "artifact_type": "omp_ninfer_warm_arrival_probe",
+  "schema_version": 1,
+  "generated_utc": "2026-09-07",
+  "lane": "rtx5090",
+  "scope": "Experiment only. Two source fixes were measured on a candidate binary against the shipped v0.4.8 profile; no release, profile, or published artifact changed.",
+  "question": "After a restart, does a restored session's first sibling fork reuse the template prefix, or re-prefill it?",
+  "shipped_reference": {
+    "deployment_profile": "qwen38-5090-v0.4.8",
+    "binary_sha256": "afb691db1a0f6c9ee3e731c70c11437898f3de19cc4c3ccb08cd70fee8ff3b9a",
+    "source_commit": "dde8d07026e79f32afcf1fb367a80c6bc741e855",
+    "container": "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4"
+  },
+  "candidate": {
+    "deployment_profile": "warm-arrival-candidate",
+    "branch": "feat/warm-arrival",
+    "commits": [
+      "5de10f3a2b16c90baa7e2e5354c2926dc0fca8a0",
+      "364309ad"
+    ],
+    "binary_sha256": "6d7e55557cba1547f66d7a60448feba092f3ce8ab67676d3f31aba758381eb7b",
+    "note": "Same runtime image, same v0.4.8 argument set, only /usr/local/bin/ninfer-serve replaced. Built in the CUDA 13.1.2 devel image with bounded parallelism, not by the appliance's canonical build, so its bytes are not release-comparable."
+  },
+  "template_input_tokens": 57853,
+  "findings": [
+    {
+      "id": "anchor-absent-from-post-fanout-checkpoints",
+      "state": "fixed and measured",
+      "evidence": "On the shipped binary a save taken before any fork carried two StateImages (4,505,854,445 bytes) and a save taken after four forks carried one (4,351,909,712 bytes, exactly 153,954,304 fewer). The session binding follows the newest continuation and a checkpoint serialises exactly one continuation, so the base anchor stayed on the parent and never reached the payload. With the fix the post-fanout save carries it again (4,505,864,319 bytes).",
+      "control": "Restoring a save that does contain the anchor serves hot forks on the shipped binary too: 1.24/1.15/1.10/1.16 s, all private_long_anchor at 57,898 tokens. The restore path was never the defect."
+    },
+    {
+      "id": "optional-state-charged-twice",
+      "state": "fixed and measured",
+      "evidence": "Once an anchor image is shared between two continuations, consuming a session endpoint charged it to the new lineage's entitlement while resident_resources() declined to count it, and start_request() rejected the request: HTTP 500, 'materialized sequence does not match its active entitlement'. After the fix the same resume takes 1.19 s. This was latent in shipped code and unreachable until anchors could be shared."
+    },
+    {
+      "id": "first-fork-after-an-endpoint-resume-still-reprefills",
+      "state": "open, characterised",
+      "evidence": "When the endpoint resume is the request that triggers the lazy restore, the next sibling fork still re-prefills once (22.2 s, reuse path root, 0 reused tokens); the fork after that is hot again. When a fork is the first post-restart request instead, it hits private_long_anchor immediately. The anchor is provably still present after the consume - a save taken right after the resume carries two StateImages (4,510,316,105 bytes) - and finish() publishes long_anchors into the catalog summary, which rebuild_prefix_index() indexes. So the loss is in candidate admission for a just-consumed lineage, not in retention, serialisation, or restore. Device state capacity is ruled out: 4 and 8 device-state slots behave identically.",
+      "next": "Instrument candidate enumeration in inspect()/inspect_lane() for a post-consume lineage - specifically whether the anchor candidate is rejected by prefix_matches() against the extended ledger or discarded by the cost model once the KV pages are host-resident after a restore."
+    }
+  ],
+  "runs": {
+    "shipped_v048_fanout_then_restart": {
+      "steps": {
+        "base_prefill": {
+          "step": "base_prefill",
+          "wall_s": 21.804,
+          "input_tokens": 57853,
+          "id": "resp_7f47036b5a93fca2f09539dc2f89688e"
+        },
+        "warm_edit": {
+          "step": "warm_edit",
+          "wall_s": 1.172,
+          "id": "resp_25320b667c95f2aff144bad07f36468c"
+        },
+        "checkpoint_save": {
+          "step": "checkpoint_save",
+          "wall_s": 12.607,
+          "mode": "explicit",
+          "generation": "1788767275601-0",
+          "bytes": 4505854445,
+          "frontier": 57997,
+          "response_records": null
+        },
+        "branch_0": {
+          "step": "branch_0",
+          "wall_s": 1.321,
+          "id": "resp_2dd3c1f61b627d156142d5f21097558a"
+        },
+        "branch_1": {
+          "step": "branch_1",
+          "wall_s": 1.187,
+          "id": "resp_e55c074e084d8f48f8bfb08243224670"
+        },
+        "branch_2": {
+          "step": "branch_2",
+          "wall_s": 1.19,
+          "id": "resp_1e95fd0d653aad554c39916bf0a3f09d"
+        },
+        "branch_3": {
+          "step": "branch_3",
+          "wall_s": 1.17,
+          "id": "resp_045c2967ea06a8182d171a662fae1896"
+        },
+        "fanout_save": {
+          "step": "fanout_save",
+          "wall_s": 11.93,
+          "mode": "explicit",
+          "generation": "1788767293076-1",
+          "bytes": 4351909712,
+          "frontier": 58000
+        },
+        "restart": {
+          "step": "restart",
+          "wall_s": 74.603,
+          "ready_after_s": 58.21,
+          "verified": true,
+          "prefill_counter_before": 58024,
+          "prefill_counter_after": 53
+        },
+        "post_restart_resume": {
+          "step": "post_restart_resume",
+          "wall_s": 23.721,
+          "id": "resp_94062abfeb6d07a22636a35c49344e43"
+        },
+        "post_restart_branch_0": {
+          "step": "post_restart_branch_0",
+          "wall_s": 22.142,
+          "id": "resp_9578da9d40b576b256a1c1d4fd492811",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_1": {
+          "step": "post_restart_branch_1",
+          "wall_s": 1.152,
+          "id": "resp_6420155f62f75142c09d5cb56174e2f2",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_2": {
+          "step": "post_restart_branch_2",
+          "wall_s": 1.103,
+          "id": "resp_6bb9c1ed1a523ff638d123f21be46f9b",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_3": {
+          "step": "post_restart_branch_3",
+          "wall_s": 1.159,
+          "id": "resp_ad4d72e794e39b0fcc53a5783d5537e6",
+          "input_tokens": 57925
+        },
+        "post_restart_save": {
+          "step": "post_restart_save",
+          "wall_s": 11.988,
+          "mode": "explicit",
+          "generation": "1788767429429-0",
+          "frontier": 58004
+        },
+        "session_delete": {
+          "step": "session_delete",
+          "wall_s": 0.0,
+          "status": 200
+        }
+      },
+      "reuse": [
+        [
+          "root",
+          0
+        ],
+        [
+          "private_endpoint",
+          57892
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_endpoint",
+          58000
+        ],
+        [
+          "root",
+          0
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ]
+      ]
+    },
+    "shipped_v048_anchor_carrying_control": {
+      "steps": {
+        "base_prefill": {
+          "step": "base_prefill",
+          "wall_s": 22.724,
+          "input_tokens": 57853,
+          "id": "resp_452bf06dcade811ca80b615fc1d2adb6"
+        },
+        "warm_edit": {
+          "step": "warm_edit",
+          "wall_s": 1.262,
+          "id": "resp_30c3093ccfa2a7e43f4661b1b60ac694"
+        },
+        "checkpoint_save": {
+          "step": "checkpoint_save",
+          "wall_s": 12.745,
+          "mode": "explicit",
+          "generation": "1788768438882-2",
+          "bytes": 4505854445,
+          "frontier": 57997,
+          "response_records": null
+        },
+        "fanout_save": {
+          "step": "fanout_save",
+          "wall_s": 12.436,
+          "mode": "explicit",
+          "generation": "1788768451628-3",
+          "bytes": 4505854445,
+          "frontier": 57997
+        },
+        "restart": {
+          "step": "restart",
+          "wall_s": 76.192,
+          "ready_after_s": 59.72,
+          "verified": true,
+          "prefill_counter_before": 115966,
+          "prefill_counter_after": 53
+        },
+        "post_restart_resume": {
+          "step": "post_restart_resume",
+          "wall_s": 24.458,
+          "id": "resp_7bc0fb3261d40e02e4906c4c28ea93b8"
+        },
+        "post_restart_branch_0": {
+          "step": "post_restart_branch_0",
+          "wall_s": 1.241,
+          "id": "resp_c8fa7badf1a07060fd02bf20b2534806",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_1": {
+          "step": "post_restart_branch_1",
+          "wall_s": 1.173,
+          "id": "resp_151338a9537ccc6bb51e59048fddc785",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_2": {
+          "step": "post_restart_branch_2",
+          "wall_s": 1.115,
+          "id": "resp_2303e1a371b67595dc73401b53910413",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_3": {
+          "step": "post_restart_branch_3",
+          "wall_s": 1.155,
+          "id": "resp_82a99293e23c271d7c7702c317645a14",
+          "input_tokens": 57925
+        },
+        "post_restart_save": {
+          "step": "post_restart_save",
+          "wall_s": 12.637,
+          "mode": "explicit",
+          "generation": "1788768569959-0",
+          "frontier": 58004
+        },
+        "session_delete": {
+          "step": "session_delete",
+          "wall_s": 0.0,
+          "status": 200
+        }
+      },
+      "reuse": [
+        [
+          "root",
+          0
+        ],
+        [
+          "private_endpoint",
+          57892
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ]
+      ]
+    },
+    "candidate_device_state_slots_4": {
+      "steps": {
+        "base_prefill": {
+          "step": "base_prefill",
+          "wall_s": 21.73,
+          "input_tokens": 57853,
+          "id": "resp_d1c67c79813a02bafaa372eca2be2b60"
+        },
+        "warm_edit": {
+          "step": "warm_edit",
+          "wall_s": 1.181,
+          "id": "resp_845daf50fb7c3d8f1689e4c131727c3a"
+        },
+        "checkpoint_save": {
+          "step": "checkpoint_save",
+          "wall_s": 12.854,
+          "mode": "explicit",
+          "generation": "1788772170863-3",
+          "bytes": 4505854448,
+          "frontier": 57997,
+          "response_records": null
+        },
+        "branch_0": {
+          "step": "branch_0",
+          "wall_s": 1.448,
+          "id": "resp_9982193082522edd31a9adaf9746b7ca"
+        },
+        "branch_1": {
+          "step": "branch_1",
+          "wall_s": 1.195,
+          "id": "resp_0fa71ef5fdc06aef8fae6e38a87b00b1"
+        },
+        "branch_2": {
+          "step": "branch_2",
+          "wall_s": 1.197,
+          "id": "resp_8521780b1cd8dd01dea934b71fb6315d"
+        },
+        "branch_3": {
+          "step": "branch_3",
+          "wall_s": 1.21,
+          "id": "resp_e529e766b908ccd5f2daa335a15429f7"
+        },
+        "fanout_save": {
+          "step": "fanout_save",
+          "wall_s": 12.113,
+          "mode": "explicit",
+          "generation": "1788772188771-4",
+          "bytes": 4505864319,
+          "frontier": 58000
+        },
+        "restart": {
+          "step": "restart",
+          "wall_s": 75.979,
+          "ready_after_s": 59.6,
+          "verified": true,
+          "prefill_counter_before": 58103,
+          "prefill_counter_after": 53
+        },
+        "post_restart_resume": {
+          "step": "post_restart_resume",
+          "wall_s": 24.087,
+          "id": "resp_b57c4d0db78ae34a7e5a89c4f8ef6de1"
+        },
+        "post_restart_branch_0": {
+          "step": "post_restart_branch_0",
+          "wall_s": 22.191,
+          "id": "resp_82f626952a094a017e37d75e69f5e6c4",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_1": {
+          "step": "post_restart_branch_1",
+          "wall_s": 1.154,
+          "id": "resp_45e6487eeacca468b41e41ba6571d31e",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_2": {
+          "step": "post_restart_branch_2",
+          "wall_s": 1.099,
+          "id": "resp_13943b0573ed4045519afe3c5f5fe321",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_3": {
+          "step": "post_restart_branch_3",
+          "wall_s": 1.181,
+          "id": "resp_3971a205d9f2d9f1a341fbc9f7b8dbc2",
+          "input_tokens": 57925
+        },
+        "post_restart_save": {
+          "step": "post_restart_save",
+          "wall_s": 13.366,
+          "mode": "explicit",
+          "generation": "1788772327107-0",
+          "frontier": 58004
+        },
+        "session_delete": {
+          "step": "session_delete",
+          "wall_s": 0.0,
+          "status": 200
+        }
+      },
+      "reuse": [
+        [
+          "root",
+          0
+        ],
+        [
+          "private_endpoint",
+          57892
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_endpoint",
+          58000
+        ],
+        [
+          "root",
+          0
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ]
+      ]
+    },
+    "candidate_device_state_slots_8": {
+      "steps": {
+        "base_prefill": {
+          "step": "base_prefill",
+          "wall_s": 21.856,
+          "input_tokens": 57853,
+          "id": "resp_b1e901d9a645c74cf9d9dc374f0dd092"
+        },
+        "warm_edit": {
+          "step": "warm_edit",
+          "wall_s": 1.183,
+          "id": "resp_ddd5e9e82905fce10b34b927620fac9e"
+        },
+        "checkpoint_save": {
+          "step": "checkpoint_save",
+          "wall_s": 13.786,
+          "mode": "explicit",
+          "generation": "1788772531276-0",
+          "bytes": 4505854448,
+          "frontier": 57997,
+          "response_records": null
+        },
+        "branch_0": {
+          "step": "branch_0",
+          "wall_s": 1.299,
+          "id": "resp_796c0b161d12642efecc23045e3f08ec"
+        },
+        "branch_1": {
+          "step": "branch_1",
+          "wall_s": 1.183,
+          "id": "resp_9b179489e3aa5dd2545e9e7f1a709de3"
+        },
+        "branch_2": {
+          "step": "branch_2",
+          "wall_s": 1.189,
+          "id": "resp_7521cce950db5716b692ad1e27d2a6ef"
+        },
+        "branch_3": {
+          "step": "branch_3",
+          "wall_s": 1.193,
+          "id": "resp_c8d81b0f6b29fdef280debe2134f33a4"
+        },
+        "fanout_save": {
+          "step": "fanout_save",
+          "wall_s": 12.791,
+          "mode": "explicit",
+          "generation": "1788772549925-1",
+          "bytes": 4505864319,
+          "frontier": 58000
+        },
+        "restart": {
+          "step": "restart",
+          "wall_s": 75.744,
+          "ready_after_s": 58.93,
+          "verified": true,
+          "prefill_counter_before": 58024,
+          "prefill_counter_after": 53
+        },
+        "post_restart_resume": {
+          "step": "post_restart_resume",
+          "wall_s": 24.083,
+          "id": "resp_4a2130c82f14ee2b93df2c8d28191692"
+        },
+        "post_restart_branch_0": {
+          "step": "post_restart_branch_0",
+          "wall_s": 22.197,
+          "id": "resp_202ac504572f7d1fa616af8cfc694bc4",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_1": {
+          "step": "post_restart_branch_1",
+          "wall_s": 1.141,
+          "id": "resp_a806ffebd6054c8ee48a3a0ec96f854b",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_2": {
+          "step": "post_restart_branch_2",
+          "wall_s": 1.094,
+          "id": "resp_13d90e3e3d3fc685f77e920477448222",
+          "input_tokens": 57925
+        },
+        "post_restart_branch_3": {
+          "step": "post_restart_branch_3",
+          "wall_s": 1.164,
+          "id": "resp_12662c1b990333ebdd0043a776c6da80",
+          "input_tokens": 57925
+        },
+        "post_restart_save": {
+          "step": "post_restart_save",
+          "wall_s": 12.521,
+          "mode": "explicit",
+          "generation": "1788772688672-0",
+          "frontier": 58004
+        },
+        "session_delete": {
+          "step": "session_delete",
+          "wall_s": 0.0,
+          "status": 200
+        }
+      },
+      "reuse": [
+        [
+          "root",
+          0
+        ],
+        [
+          "private_endpoint",
+          57892
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_endpoint",
+          58000
+        ],
+        [
+          "root",
+          0
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ]
+      ]
+    },
+    "candidate_order_resume_first": {
+      "steps": {
+        "base_prefill": {
+          "step": "base_prefill",
+          "wall_s": 22.171,
+          "input_tokens": 57853
+        },
+        "pre_restart_fork": {
+          "step": "pre_restart_fork",
+          "wall_s": 1.314,
+          "id": "resp_b3cc07473cbb1cca30cd63a008ea97dc"
+        },
+        "save": {
+          "step": "save",
+          "wall_s": 12.625,
+          "generation": "1788772841162-2",
+          "bytes": 4505854595
+        },
+        "cache_before_restart": {
+          "step": "cache_before_restart",
+          "wall_s": 0.0,
+          "last_selection": {
+            "frontier_tokens": 57892,
+            "path": "private_endpoint"
+          },
+          "private_catalog": {
+            "capacity": 8,
+            "occupied": 6
+          },
+          "device_state": {
+            "capacity": 9,
+            "occupied": 9
+          },
+          "host_state": {
+            "capacity": 32,
+            "occupied": 6
+          },
+          "private_evictions": 0,
+          "shared_evictions": 0,
+          "reused_prompt_tokens": 289586
+        },
+        "restart": {
+          "step": "restart",
+          "wall_s": 76.265,
+          "ready_after_s": 60.12
+        },
+        "cache_after_restart": {
+          "step": "cache_after_restart",
+          "wall_s": 0.0,
+          "last_selection": {
+            "frontier_tokens": 0,
+            "path": "root"
+          },
+          "private_catalog": {
+            "capacity": 8,
+            "occupied": 0
+          },
+          "device_state": {
+            "capacity": 9,
+            "occupied": 0
+          },
+          "host_state": {
+            "capacity": 32,
+            "occupied": 0
+          },
+          "private_evictions": 0,
+          "shared_evictions": 0,
+          "reused_prompt_tokens": 0
+        },
+        "endpoint_resume_first": {
+          "step": "endpoint_resume_first",
+          "wall_s": 24.811,
+          "id": "resp_cce468a6d7329ff768e545039c0170a0"
+        },
+        "cache_after_resume": {
+          "step": "cache_after_resume",
+          "wall_s": 0.0,
+          "last_selection": {
+            "frontier_tokens": 58000,
+            "path": "private_endpoint"
+          },
+          "private_catalog": {
+            "capacity": 8,
+            "occupied": 1
+          },
+          "device_state": {
+            "capacity": 9,
+            "occupied": 3
+          },
+          "host_state": {
+            "capacity": 32,
+            "occupied": 0
+          },
+          "private_evictions": 0,
+          "shared_evictions": 0,
+          "reused_prompt_tokens": 58000
+        },
+        "fork_after_resume": {
+          "step": "fork_after_resume",
+          "wall_s": 22.21,
+          "id": "resp_fc1c7a140a991f49a2cad08b15e16425"
+        },
+        "cache_after_fork": {
+          "step": "cache_after_fork",
+          "wall_s": 0.0,
+          "last_selection": {
+            "frontier_tokens": 0,
+            "path": "root"
+          },
+          "private_catalog": {
+            "capacity": 8,
+            "occupied": 2
+          },
+          "device_state": {
+            "capacity": 9,
+            "occupied": 6
+          },
+          "host_state": {
+            "capacity": 32,
+            "occupied": 0
+          },
+          "private_evictions": 0,
+          "shared_evictions": 0,
+          "reused_prompt_tokens": 58000
+        },
+        "fork_second": {
+          "step": "fork_second",
+          "wall_s": 1.143,
+          "id": "resp_57a7ad9b70b846670e9dfe4efa060413"
+        },
+        "session_delete": {
+          "step": "session_delete",
+          "wall_s": 0.0,
+          "status": 200
+        }
+      },
+      "reuse": [
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ],
+        [
+          "root",
+          0
+        ],
+        [
+          "private_endpoint",
+          57892
+        ],
+        [
+          "private_endpoint",
+          58000
+        ],
+        [
+          "root",
+          0
+        ],
+        [
+          "private_long_anchor",
+          57898
+        ]
+      ]
+    }
+  },
+  "economics_at_57853_tokens": {
+    "cold_prefill_plus_four_forks_s": 26.7,
+    "shipped_restore_plus_four_forks_s": 49.3,
+    "candidate_restore_plus_four_forks_s": 49.7,
+    "candidate_fork_first_after_restore_s": [
+      24.24,
+      1.19,
+      1.11
+    ],
+    "reading": "For the fanout pattern the shipped durable resume is still a net loss against not checkpointing at all, because it pays a 24 s restore and then a 22 s re-prefill. The fixes remove the re-prefill only when a fork is the first post-restart request; the resume-first order remains a loss. The restore itself (24 s for 4.5 GB) is the next target and is hash-bound, not disk-bound: the store hashes the payload twice per restore, once in load-time verification and again inside the engine reader, with a scalar SHA-256 and queue depth one."
+  },
+  "trust_boundary": "Owner measurement on one host. Timings are client wall time through a loopback tunnel; reuse paths and byte counts are server-reported."
+}
