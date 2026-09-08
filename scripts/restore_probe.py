@@ -38,19 +38,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fleet_probe import Lane, now, wait_ready  # noqa: E402
-
-
-def verified_restart(lane: Lane, command: str) -> dict[str, Any]:
-    before = lane.status().get("scheduler", {}).get("computed_prefill_tokens")
-    started = now()
-    subprocess.run(command, shell=True, check=True, capture_output=True, timeout=600)
-    ready = wait_ready(lane, 600.0)
-    after = lane.status().get("scheduler", {}).get("computed_prefill_tokens")
-    if before is not None and after is not None and after >= before:
-        raise RuntimeError("restart command returned but the lane's counters did not reset")
-    return {"wall_s": round(now() - started, 3), "ready_after_s": round(ready, 2),
-            "prefill_counter_before": before, "prefill_counter_after": after}
+from fleet_probe import Lane, now, verified_restart, wait_ready  # noqa: E402
 
 
 def output_text(document: dict[str, Any]) -> str:
@@ -134,6 +122,7 @@ def main() -> int:
     session = hashlib.sha256(
         f"restore-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()
     lane = Lane(args.base_url, api_key, session, args.model)
+    identity = lane.identity()
     steps: list[dict[str, Any]] = []
 
     def record(step: str, payload: dict[str, Any]) -> None:
@@ -194,6 +183,8 @@ def main() -> int:
             subprocess.run(args.start_cmd, shell=True, check=True, capture_output=True,
                            timeout=600)
             ready = wait_ready(lane, 600.0)
+        if lane.identity() != identity:
+            raise RuntimeError("the lane came back from the tamper round as a different subject")
         refused: dict[str, Any]
         started = now()
         try:
@@ -227,8 +218,9 @@ def main() -> int:
     by_step = {entry["step"]: entry for entry in steps}
     receipt = {
         "artifact_type": "omp_ninfer_restore_probe",
-        "schema_version": 2,
+        "schema_version": 3,
         "lane": args.lane,
+        "identity": identity,
         "generated_utc": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "base_tokens_requested": args.base_tokens,
         "summary": {

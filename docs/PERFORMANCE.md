@@ -112,6 +112,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-022 | Warm arrival, resume-first (5090) | The remaining re-prefill after an endpoint resume is a candidate-admission defect | Not admission: anchor replacement. A continuation keeps two long anchors and every Responses request captures two (inherited and pre-generation frontier), so a continuing turn replaced both, and the victim rule (lowest frontier first) evicted the template anchor every sibling reuses; the resume at 67.9K left the next fork on `root` (28.5 s). Replacement now evicts the anchor whose loss costs the least re-prefill (smallest gap to its lower neighbour, ties to the newer). After a restart, resume then two forks: **4.2 s / 2.9 s / 1.3 s**, both forks `private_long_anchor`; fork first: 3.7 s / 1.3 s. Restore plus the sequence is 8.4 s and 6.7 s against 26.7 s for not checkpointing at all | fixed at source - branch `feat/warm-arrival` commit `fb9b35da`; roadmap v0.5 §2 holds on the candidate |
 | EXP-023 | Checkpoint restore cost (5090) | Restore is hash-bound: two scalar SHA-256 passes over 5 GB at queue depth one | Scalar SHA-256 measured at 0.33 GB/s on the appliance's Zen 4 against 2.66 GB/s with the SHA extensions; the load pass was dropped (the streamed hash on the exact bytes the engine consumes is the single verification, `alphastorm/ninfer#21` closed by construction), the io_uring reader issues eight 4 MiB reads per batch on its own thread, and the next 32 MiB batch is on the device while the previous one hashes. A 5.2 GB session restores in **3.8 s / 3.8 s** (was 24-27 s), planted keys exact after both restarts; a flipped byte in the middle of the 4.4 GB KV payload is refused (404 `previous_response_not_found`, 2.8 s), the generation reports `corrupt`, then quarantines | fixed at source - commits `f841d42d`, `d956e6d6`; verified-or-refused re-proven live |
 | EXP-024 | RTX 5090 requalification (v0.5.1 candidate) | The warm-arrival and restore changes hold under the lane's own qualification gates on the canonical build | Appliance-local build of `d956e6d6` (binary `71edc2f6`, 9/9 host tests, packaged with SBOM, published as `v0.5.1-qwen38-5090-beta.1` and wrapped by the runtime-image workflow into `12ef2d9e...`, whose binaries measure byte-identical) on the unchanged v0.4.8 arguments, started through the lifecycle tool from the published image (configuration `efacac23...`): exact 130,048-token retrieval at 2,180 tok/s cold (v0.4.8: 2,207), 2,048-token decode at 138.2 tok/s with 41.2% MTP acceptance (136.0), agent protocol with no resurrection across restart; fanout 24/24 forks on `private_long_anchor` across 57.9K, 67.7K, and 80.0K templates in-process and after a verified restart with the resume first (post-restart forks 1.25-1.41 s; v0.4.8 paid 22.2 s on the first); warm arrival in both orders with an in-process control; 4.5 GB explicit save 4.4 s (was 12.6 s, the writer's digest also runs on the SHA extensions) | passed - `v0.5.1` staged with the published component; external acceptance and the product cut remain |
+| EXP-025 | Native lanes on mainline (4090, 3090) | The mainline runtime - context cache, warm arrival, streamed restore - serves the two native Windows lanes at least as well as their divergent branches | `port/native-lanes-on-mainline` built with MSVC 19.44 for `sm_89` and `sm_86`, 100/100 registered tests on each build on the Ada GPU (94 run; the six real-artifact and external-tokenizer suites skip), and served in candidate windows on both hosts. Same fixture, gates, host, and day as the installed releases: RTX 4090 130,048-token exact retrieval **86.8 s vs 97.5 s** (1,499 vs 1,333 tok/s), 2,048-token decode **103.8 vs 88.4 tok/s** wall; RTX 3090 **208.6 vs 219.5 s** and **60.3 vs 52.8 tok/s**. 67.7K template: four sibling forks hot at 1.8-2.0 s (4090) / 2.5-2.9 s (3090) before a restart and 1.8-1.9 s / 2.5-2.6 s after it, every fork `private_long_anchor`; warm arrival in both orders; a 2.9 GB checkpoint restores in 4.2-5.0 s (4090) and 16.6-17.1 s (3090) with a flipped byte refused and quarantined. Five source defects surfaced only on the hardware (cooperative grids sized for 170 SMs, an INT8 prompt-attention CTA that spilled 200 B/thread on `sm_89`, a serialising DirectStorage read queue that failed every streamed restore, an unlogged restore refusal, an unbounded residency query). The RTX 4090's WDDM budget at 131K INT8 leaves 169 MiB with four device-state slots and the driver pages: decode 47 tok/s and every fork 2.5× slower; two slots (463 MiB free) is the profile, one slot re-prefills the first fork | kept - both lanes' next candidates build from mainline; requalify each through its lifecycle tool before any release |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -458,6 +459,69 @@ Entry detail:
   lane was down, and the resume was refused with 404 `previous_response_not_found` in 2.8 s,
   status reported `corrupt`, a second attempt was refused, and the generation was quarantined.
   Receipt: [restore probe](measurements/2026-09-08-restore-probe-rtx5090-candidate.json).
+- **EXP-025 — the native lanes serve mainline (2026-09-08).** The two native Windows lanes had
+  drifted ~8K lines each from mainline, so they had no context cache, no warm arrival, and the
+  restore path fixed in EXP-023 would have needed porting twice. Stage 1 compiled mainline for
+  Ada; this entry is stages 2 and 3: the Windows platform code (D3D12 residency arena,
+  DirectStorage read queue, MSVC 19.44 build of the host tree) and Ampere `sm_86`, then
+  serving. Every kernel suite runs on the hardware now - the earlier Windows run had excluded
+  them by name - and they pass 100/100 on both builds on the Ada GPU (the `sm_86` binaries run
+  on `sm_89`; 94 suites execute, the five real-artifact suites and the external-tokenizer
+  frontend suite skip). An activation path a build excludes (NVFP4 W4A4 on both, FP8 A8 and
+  FP8-KV on Ampere) ends a test arm as excluded on the stub's refusal and the dedicated suites
+  require that refusal, so a stub that quietly fell back to A16 would fail them. Five defects
+  showed only on the hardware, none in the earlier builds: the BF16 GDN gating plan hard-coded
+  the RTX 5090's cooperative-grid budgets (340/680 CTAs over 170 SMs), so on 128 SMs the first
+  prompt longer than one tile died with `cudaErrorCooperativeLaunchTooLarge` - the budget is now
+  the driver's occupancy for the exact instantiation times the SM count, with fall-through to
+  the next split; its residency query defaulted a different warp count from the launchers; the
+  INT8-cache prompt Attention kernel, shaped for Blackwell's allocator (16 warps at 120
+  registers), spilled 200 B/thread under Ada's 128-register cap for a 512-thread CTA, so a 42K
+  prompt ran at 390 tok/s and a 130K prompt did not finish in fourteen minutes at 130 W - on
+  `sm_89`/`sm_86` it now covers 32 query rows with eight warps at up to 255 registers, zero
+  spill; the streamed restore issued the next 32 MiB batch while the previous one hashed, which
+  io_uring supports and the one-slot, one-fence DirectStorage queue does not, so every native
+  restore was refused as `previous_response_not_found` while status said `available` - the
+  read-queue contract now names whether a backend overlaps batches; and that refusal was never
+  logged. Served in candidate windows against the installed releases with the same 130,048-token
+  fixture, gate script, host, and day: the RTX 4090 retrieves exactly in **86.8 s (1,499 tok/s)
+  against 97.5 s (1,333)** and decodes 2,048 tokens at **103.8 against 88.4 tok/s** wall; the
+  RTX 3090 **208.6 s against 219.5 s** and **60.3 against 52.8 tok/s**; the agent protocol
+  passes on both with no resurrection across a verified restart. The context cache arrives
+  whole: on a 67.7K template four sibling forks take 1.8-2.0 s (4090) and 2.5-2.9 s (3090)
+  device-resident, a 2.9 GB explicit save 4.0 s / 15.4 s, and after a restart the resume costs
+  4.1 s / 16.4 s and the four forks 1.8-1.9 s / 2.5-2.6 s, every one on `private_long_anchor`;
+  warm arrival holds in both orders (4090 resume-first 4.5 / 3.1 / 1.8 s, fork-first
+  4.1 / 1.6 / 3.0 s; 3090 17.3 / 3.1 / 2.6 s and 16.5 / 3.3 / 2.7 s) with planted keys exact
+  before and after; restore is 5.0 / 4.2 s on the 4090 and 17.1 / 16.6 s on the 3090 for
+  2.9 GB, and a flipped payload byte is refused (404), marked `corrupt`, and quarantined on
+  both. One sizing rule fell out: at 131K INT8 the RTX 4090 has 169 MiB of WDDM budget left
+  with four device-state slots and the driver pages device memory - decode drops to 47 tok/s
+  and every fork and resume is 2.5× slower - while two slots leave 463 MiB and full speed, and
+  one slot re-prefills the first fork (38.6 s on reuse path `root`: one cached device state
+  cannot hold both the template and the edit; the three forks after it are hot);
+  the RTX 3090 keeps 835 MiB at four slots and is unaffected. Both hosts were returned to their
+  found state (release serving on the 4090, stopped on the 3090). Every receipt is bound to the
+  server's reported identity (binary, source, model, resolved configuration), captured at the
+  start and checked after every restart; the probes gained that binding tonight, along with the
+  slowest-fork fields that a median had hidden. Runtime branch `port/native-lanes-on-mainline`
+  at `6fd9e135` (runtime through `8b3dd4a9`, tests after). Receipts, RTX 4090:
+  [ladder](measurements/2026-09-08-rtx4090-mainline-device-state-ladder.json) ·
+  [gates](measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
+  [release gates](measurements/2026-09-08-rtx4090-v0.2-profile-gates.json) ·
+  [fanout](measurements/2026-09-08-rtx4090-mainline-fanout-57k.json) ·
+  [one slot](measurements/2026-09-08-rtx4090-mainline-fanout-57k-slots1.json) ·
+  [four slots](measurements/2026-09-08-rtx4090-mainline-fanout-57k-slots4.json) ·
+  [warm arrival](measurements/2026-09-08-rtx4090-mainline-warm-arrival.json) ·
+  [restore](measurements/2026-09-08-rtx4090-mainline-restore.json); RTX 3090:
+  [ladder](measurements/2026-09-08-rtx3090-mainline-device-state-ladder.json) ·
+  [gates](measurements/2026-09-08-rtx3090-mainline-profile-gates.json) ·
+  [release gates](measurements/2026-09-08-rtx3090-v0.2.5-profile-gates.json) ·
+  [fanout](measurements/2026-09-08-rtx3090-mainline-fanout-57k.json) ·
+  [one slot](measurements/2026-09-08-rtx3090-mainline-fanout-57k-slots1.json) ·
+  [two slots](measurements/2026-09-08-rtx3090-mainline-fanout-57k-slots2.json) ·
+  [warm arrival](measurements/2026-09-08-rtx3090-mainline-warm-arrival.json) ·
+  [restore](measurements/2026-09-08-rtx3090-mainline-restore.json).
 
 ## Current order
 
@@ -470,7 +534,9 @@ lane changes; those and the RTX 5090 context-cache profile were requalified on 2
 staged and cut as `v0.4.8` (EXP-015). Each lane carries its own best measured stack rather
 than one shared configuration. The native-lane restore path is fixed at source (EXP-017:
 RTX 4090 restores 24–26× faster, RTX 3090 8.5×); both lanes requalified it on 2026-09-05 and it
-ships in `v0.4.9`.
+ships in `v0.4.9`. The native lanes now build from mainline (EXP-025): the next RTX 4090 and
+RTX 3090 candidates come from `port/native-lanes-on-mainline`, with the RTX 4090 profile at
+two device-state slots, and each is requalified through its own lifecycle tool before a cut.
 
 ## Ideas backlog
 

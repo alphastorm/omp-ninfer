@@ -23,7 +23,11 @@ anchor is still device-resident starts generating in 0.40 s
 ([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). As of `v0.5.1` that reuse
 also survives a restart on the RTX 5090: a restored template serves every sibling fork on the
 shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.8 s instead of 24 s
-([receipt](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)). Details:
+([receipt](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)). The same runtime
+now serves both native Windows lanes from mainline as unreleased candidates that beat the
+installed releases on their own gates and bring the whole cache with them (EXP-025,
+[4090](docs/measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
+[3090](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json)). Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
@@ -192,13 +196,26 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    restart, exact 130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s (EXP-024).
    Shipped as `v0.5.1` on 2026-09-08 after the composed external-installation acceptance from
    the published URLs.
-   The native lanes get the same architecture by building from mainline rather than porting the
-   cache into their branches: stage 1 (`port/native-lanes-on-mainline`) compiles mainline for
-   Ada `sm_89`, with Ampere and the Windows platform code as the next stages. Receipts:
+   **The native lanes serve mainline (measured 2026-09-08, EXP-025).** Rather than porting the
+   cache into two divergent branches, `port/native-lanes-on-mainline` builds mainline for Ada
+   and Ampere with the Windows platform code (D3D12 residency arena, DirectStorage read queue,
+   MSVC host tree); every registered suite passes on both builds on the hardware, and in
+   candidate windows on the two hosts the mainline runtime beats each installed release on the
+   same 130,048-token fixture (RTX 4090 86.8 s vs 97.5 s and 103.8 vs 88.4 decode tok/s;
+   RTX 3090 208.6 vs 219.5 s and 60.3 vs 52.8 tok/s) while bringing the whole architecture:
+   four hot sibling forks on a 67.7K template before and after a restart (1.8-2.0 s / 2.5-2.9 s),
+   warm arrival in both orders, a 2.9 GB restore in 4.2-5.0 s / 16.6-17.1 s with a flipped byte
+   refused. Five defects that only the hardware showed - cooperative grids sized for 170 SMs, a
+   prompt-attention CTA that spilled under Ada's register cap, a DirectStorage queue that could
+   not overlap streamed batches - are fixed at source. The RTX 4090 profile is two device-state
+   slots (four leave 169 MiB of WDDM budget and the driver pages). Next: requalify each native
+   lane's candidate through its lifecycle tool and cut the components. Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·
    [restore](docs/measurements/2026-09-08-restore-probe-rtx5090-candidate.json) ·
-   [EXP-021](docs/measurements/2026-09-07-warm-arrival-rtx5090.json).
+   [EXP-021](docs/measurements/2026-09-07-warm-arrival-rtx5090.json) ·
+   [4090 on mainline](docs/measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
+   [3090 on mainline](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json).
 3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
    [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
    explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on

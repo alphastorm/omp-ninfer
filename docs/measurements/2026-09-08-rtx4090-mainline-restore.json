@@ -1,0 +1,147 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 3,
+  "lane": "rtx4090-mainline",
+  "identity": {
+    "deployment_profile": "port-native-4090",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "ef645b4a4b9422963effb875cbd9e4b3e746cbf40d85ab8d2def26f2b4538aa3",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "8b3dd4a923bdcf310edf24bfe1eb29ac3b25d5f0",
+    "source_dirty": false,
+    "build_profile": "port-native-sm89",
+    "config_sha256": "4843636c81531781fc98031bce67322b0b0a9b93f8edafc78c4f26cfb04c2713"
+  },
+  "generated_utc": "2026-09-08T17:50:21Z",
+  "base_tokens_requested": 56000,
+  "summary": {
+    "template_input_tokens": 67717,
+    "cold_prefill_s": 38.502,
+    "checkpoint_bytes": 2906816930,
+    "restore_0_wall_s": 5.01,
+    "restore_1_wall_s": 4.188,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true,
+    "tampered_restore_refused": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 38.502,
+      "input_tokens": 67717
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 2.466,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe need extract from previous operations le",
+      "incomplete": null,
+      "output_sha256": "841ff4bd76a84beab885a970aab5efd78860242cf14825d89f902a4dd630077b"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 4.024,
+      "mode": "explicit",
+      "generation": "1788889668009-3",
+      "bytes": 2906816930,
+      "frontier": 67981
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 39.663,
+      "ready_after_s": 0.52,
+      "prefill_counter_before": 68188,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 5.01,
+      "id": "resp_5434adf9ef0ebb1da0e47ce2f638800a",
+      "input_tokens": 68029,
+      "status_polls": [
+        {
+          "t_s": 1.02,
+          "bytes": 2906816930,
+          "created_at_unix_ms": 1788889671002,
+          "frontier_tokens": 67981,
+          "generation": "1788889668009-3",
+          "read_backend": "directstorage-1.3",
+          "response_records": 2,
+          "restored_tokens": 67981,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-08T17:48:31Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks \"Restore round 0: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nThis seems like a prompt injection /",
+      "incomplete": null,
+      "output_sha256": "beb54e6575ff68ee9b1b19e28df6efa0114eaf6793128fa996ec23391b6a1c07"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 3.935,
+      "mode": "explicit",
+      "generation": "1788889717263-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 38.514,
+      "ready_after_s": 0.51,
+      "prefill_counter_before": 282,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 4.188,
+      "id": "resp_dbb445a94c8ba4fd4022bf8e336cbd08",
+      "input_tokens": 68226,
+      "status_polls": [
+        {
+          "t_s": 1.02,
+          "bytes": 2913718374,
+          "created_at_unix_ms": 1788889720357,
+          "frontier_tokens": 68178,
+          "generation": "1788889717263-0",
+          "read_backend": "directstorage-1.3",
+          "response_records": 3,
+          "restored_tokens": 68178,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-08T17:49:19Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks again: \"Restore round 1: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\" Need output only keys. Same va",
+      "incomplete": null,
+      "output_sha256": "03f0cf40010a630c7f466348edca0a1bcfcbae8d7c0c31eaa986fa9dea737f76"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 4.208,
+      "mode": "explicit",
+      "generation": "1788889764925-0"
+    },
+    {
+      "step": "tampered_restore",
+      "flipped": "flipped text-kv.bin offset=1154875392 generation=1788889764925-0 session=83ecdc8f3be1",
+      "ready_after_s": 0.51,
+      "refused": true,
+      "http_status": 404,
+      "wall_s": 3.24,
+      "error_excerpt": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_dbb445a94c8ba4fd4022bf8e336cbd08' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}",
+      "status_after_refusal": "corrupt",
+      "second_attempt_refused": true,
+      "status_after_quarantine": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

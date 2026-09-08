@@ -35,8 +35,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fleet_probe import Lane, now  # noqa: E402
-from restore_probe import plant_keys, retrieval_prompt, retrieval_result, verified_restart  # noqa: E402
+from fleet_probe import Lane, now, verified_restart  # noqa: E402
+from restore_probe import plant_keys, retrieval_prompt, retrieval_result  # noqa: E402
 
 ORDERS = ("resume-first", "fork-first")
 
@@ -212,6 +212,7 @@ def main() -> int:
 
     api_key = args.api_key_file.read_text().strip()
     orders = list(ORDERS) if args.order == "both" else [args.order]
+    identity: dict[str, Any] | None = None
     runs: dict[str, Any] = {}
     summaries: list[dict[str, Any]] = []
     for order in orders:
@@ -219,6 +220,10 @@ def main() -> int:
             f"warm-arrival-{args.lane}-{order}-{dt.datetime.now(dt.UTC).isoformat()}".encode()
         ).hexdigest()
         lane = Lane(args.base_url, api_key, session, args.model)
+        if identity is None:
+            identity = lane.identity()
+        elif lane.identity() != identity:
+            raise RuntimeError("the lane changed identity between orders")
         keys = plant_keys()
         run = Run(lane, keys, args.restore_status)
         print(f"== order {order}", flush=True)
@@ -228,8 +233,9 @@ def main() -> int:
 
     receipt = {
         "artifact_type": "omp_ninfer_warm_arrival_probe",
-        "schema_version": 2,
+        "schema_version": 3,
         "lane": args.lane,
+        "identity": identity,
         "generated_utc": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "base_tokens_requested": args.base_tokens,
         "summary": summaries,

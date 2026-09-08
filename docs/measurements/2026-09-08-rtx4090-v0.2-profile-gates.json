@@ -1,0 +1,69 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-09-08T18:01:54Z",
+  "identity": {
+    "binary_sha256": "b1ebd400d7a783f79bfcd7543a084725c647603fd43aa39648d8147a6c377939",
+    "build_profile": "qwen38-4090-v0.2",
+    "build_type": "Release",
+    "config_sha256": "d61ec15f38e292b10127c65e920b751a7294d4d1ae9bbcab7dd6ea9568c6947d",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-4090-v0.2",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "e186e04e1dee5acf9e1cae25dc279acb64c96274",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "9ec1b82c7afa021314682d7a95390f8935ead7c2",
+    "weights_id": "groupwise-int"
+  },
+  "runtime": {
+    "kv_cache": "rk2v4-e8",
+    "kv_capacity_mode": "explicit",
+    "kv_capacity_tokens": 131072,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "qwen3.8-27b",
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3
+  },
+  "vram_used_mib_idle": 20635,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 97.537,
+      "tokens_per_second_wall": 1333.3,
+      "vram_used_mib_after": 20635
+    },
+    "decode": {
+      "request_id": "9f275f6599283052a05d9f3cb6458d764afca36b644647e5714b418f380bda86",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 23.156,
+      "completion_tokens_per_second_wall": 88.44
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": 20635,
+  "transient_retries": 0
+}

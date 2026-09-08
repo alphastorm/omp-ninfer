@@ -137,6 +137,21 @@ class Lane:
     def status(self, timeout: float = 60.0) -> dict[str, Any]:
         return self._request("/v1/ninfer/status", None, timeout)
 
+    def identity(self, timeout: float = 60.0) -> dict[str, Any]:
+        return lane_identity(self.status(timeout))
+
+
+# The subset of ``GET /v1/ninfer/status`` identity a receipt binds to: the exact binary, source,
+# model, and resolved configuration that produced its numbers.
+IDENTITY_KEYS = ("deployment_profile", "model_id", "model_artifact_sha256", "binary_sha256",
+                 "upstream_base_sha", "patch_stack_sha", "source_dirty", "build_profile",
+                 "config_sha256")
+
+
+def lane_identity(status: dict[str, Any]) -> dict[str, Any]:
+    identity = status.get("identity") or {}
+    return {key: identity[key] for key in IDENTITY_KEYS if key in identity}
+
 
 def wait_ready(lane: Lane, deadline_seconds: float) -> float:
     started = now()
@@ -147,6 +162,33 @@ def wait_ready(lane: Lane, deadline_seconds: float) -> float:
         except (urllib.error.URLError, urllib.error.HTTPError, OSError):
             time.sleep(3.0)
     raise TimeoutError("lane did not become ready after restart")
+
+
+def verified_restart(lane: Lane, command: str) -> dict[str, Any]:
+    """Restart the lane and prove it: the prefill counter resets and the identity is unchanged.
+
+    A mangled restart command can exit 0 without restarting anything, and a launcher can bring
+    up a different binary or configuration; either would make the receipt measure the wrong
+    subject.
+    """
+    status_before = lane.status()
+    before = status_before.get("scheduler", {}).get("computed_prefill_tokens")
+    identity_before = lane_identity(status_before)
+    started = now()
+    subprocess.run(command, shell=True, check=True, capture_output=True, timeout=600)
+    ready = wait_ready(lane, 600.0)
+    status_after = lane.status()
+    after = status_after.get("scheduler", {}).get("computed_prefill_tokens")
+    if before is not None and after is not None and after >= before:
+        raise RuntimeError("restart command returned but the lane's counters did not reset")
+    identity_after = lane_identity(status_after)
+    if identity_after != identity_before:
+        changed = sorted(key for key in set(identity_before) | set(identity_after)
+                         if identity_before.get(key) != identity_after.get(key))
+        raise RuntimeError(f"the lane came back as a different subject ({', '.join(changed)} "
+                           f"changed); the receipt would mix two binaries or configurations")
+    return {"wall_s": round(now() - started, 3), "ready_after_s": round(ready, 2),
+            "prefill_counter_before": before, "prefill_counter_after": after}
 
 
 def reuse_classes(log_cmd: str, since_unix_ms: int) -> list[dict[str, Any]]:
@@ -197,6 +239,7 @@ def main() -> int:
     session = hashlib.sha256(
         f"fleet-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()
     lane = Lane(args.base_url, api_key, session, args.model)
+    identity = lane.identity()
     probe_started_ms = int(time.time() * 1000)
 
     steps: list[dict[str, Any]] = []
@@ -254,24 +297,11 @@ def main() -> int:
                 "bytes": fanout_save_doc.get("bytes"),
                 "frontier": fanout_save_doc.get("frontier_tokens")})
 
-    # Slice 8: restart + resume. The lane's cumulative prefill counter must reset, or the
-    # restart command did not restart anything (a mangled path can still exit 0).
+    # Slice 8: restart + resume. The restart is verified (counters reset, same identity) so a
+    # mangled command that exits 0 without restarting cannot pass as a warm start.
     if args.restart_cmd:
-        counter_before = lane.status().get("scheduler", {}).get("computed_prefill_tokens")
-        started = now()
-        subprocess.run(args.restart_cmd, shell=True, check=True,
-                       capture_output=True, timeout=600)
-        ready_wall = wait_ready(lane, 600.0)
-        counter_after = lane.status().get("scheduler", {}).get("computed_prefill_tokens")
-        verified = (
-            None if counter_before is None or counter_after is None
-            else counter_after < counter_before
-        )
-        record("restart", now() - started,
-               {"ready_after_s": round(ready_wall, 2), "verified": verified,
-                "prefill_counter_before": counter_before, "prefill_counter_after": counter_after})
-        if verified is False:
-            raise RuntimeError("restart command returned but the lane's counters did not reset")
+        restart = verified_restart(lane, args.restart_cmd)
+        record("restart", restart.pop("wall_s"), restart)
 
         resume_doc, resume_wall = lane.respond(
             "After the restart, summarize entry 9 in six words.",
@@ -313,15 +343,19 @@ def main() -> int:
         "checkpoint_save_s": by_step["checkpoint_save"]["wall_s"],
         "checkpoint_bytes": by_step["checkpoint_save"].get("bytes"),
         "hot_fork_median_s": hot[len(hot) // 2] if hot else None,
+        # One fork re-prefilling from root (a device-state slot short) hides behind the median.
+        "hot_fork_max_s": hot[-1] if hot else None,
         "restart_ready_s": by_step.get("restart", {}).get("ready_after_s"),
         "post_restart_resume_s": by_step.get("post_restart_resume", {}).get("wall_s"),
         "warm_start_first_fork_s": by_step.get("post_restart_branch_0", {}).get("wall_s"),
         "warm_start_fork_median_s": warm[len(warm) // 2] if warm else None,
+        "warm_start_fork_max_s": warm[-1] if warm else None,
     }
     receipt = {
         "artifact_type": "omp_ninfer_fleet_fanout_probe",
-        "schema_version": 2,
+        "schema_version": 3,
         "lane": args.lane,
+        "identity": identity,
         "generated_utc": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "base_tokens_requested": args.base_tokens,
         "branches": args.branches,

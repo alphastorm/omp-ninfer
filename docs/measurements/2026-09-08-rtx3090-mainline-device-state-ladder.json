@@ -1,0 +1,57 @@
+{
+  "artifact_type": "omp_ninfer_device_state_ladder",
+  "schema_version": 1,
+  "lane": "rtx3090-mainline",
+  "generated_utc": "2026-09-08T17:33:16Z",
+  "identity": {
+    "deployment_profile": "port-native-3090",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "4248ad67685544ee2627333876d8b838bc8a895b3c082323077a5af145814abb",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "8b3dd4a923bdcf310edf24bfe1eb29ac3b25d5f0",
+    "source_dirty": false,
+    "build_profile": "port-native-sm86"
+  },
+  "launch_arguments": "-KvDtype int8 -NoVision -KvCapacity 131072 -PrefillChunk 1024",
+  "decode_request": {
+    "endpoint": "/v1/chat/completions",
+    "max_tokens": 512,
+    "temperature": 0,
+    "reasoning_effort": "none"
+  },
+  "rows": [
+    {
+      "device_state_slots": 4,
+      "config_sha256": "9a1ce32aeadc14c706c7bb08caf31e20b00f7e29ff284542a9bf0360ace9619d",
+      "free_after_startup_mib": 835.0,
+      "device_state": "4-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 7.88,
+      "decode_tokens_per_second": 65.0
+    },
+    {
+      "device_state_slots": 1,
+      "config_sha256": "b23d2403c36f8e55db9151f3a738e35cb0612a46f0475603fdd4f13143f22572",
+      "free_after_startup_mib": 1280.0,
+      "device_state": "1-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 8.0,
+      "decode_tokens_per_second": 64.0
+    },
+    {
+      "device_state_slots": 2,
+      "config_sha256": "2cdb7c7ab1ccafcc44d2cad94083645cf0b57f95da460797d5ea189e0b0986d3",
+      "free_after_startup_mib": 1126.4,
+      "device_state": "2-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 7.96,
+      "decode_tokens_per_second": 64.3
+    }
+  ],
+  "selection_rule": "largest slot count whose decode rate is within 3% of the best row",
+  "selected_device_state_slots": 4
+}

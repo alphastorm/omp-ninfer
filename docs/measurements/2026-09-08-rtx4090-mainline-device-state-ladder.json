@@ -1,0 +1,57 @@
+{
+  "artifact_type": "omp_ninfer_device_state_ladder",
+  "schema_version": 1,
+  "lane": "rtx4090-mainline",
+  "generated_utc": "2026-09-08T17:30:43Z",
+  "identity": {
+    "deployment_profile": "port-native-4090",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "ef645b4a4b9422963effb875cbd9e4b3e746cbf40d85ab8d2def26f2b4538aa3",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "8b3dd4a923bdcf310edf24bfe1eb29ac3b25d5f0",
+    "source_dirty": false,
+    "build_profile": "port-native-sm89"
+  },
+  "launch_arguments": "-KvDtype int8 -NoVision -KvCapacity 131072",
+  "decode_request": {
+    "endpoint": "/v1/chat/completions",
+    "max_tokens": 512,
+    "temperature": 0,
+    "reasoning_effort": "none"
+  },
+  "rows": [
+    {
+      "device_state_slots": 4,
+      "config_sha256": "c981d3e42cde8163913d5ba9948115109136626e2c77333f1865f5d1c86d0938",
+      "free_after_startup_mib": 169.49,
+      "device_state": "4-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 10.87,
+      "decode_tokens_per_second": 47.1
+    },
+    {
+      "device_state_slots": 1,
+      "config_sha256": "e564bfceb6fe27e97e670c2a867da68f0127ab521e0d4d7f9919d6224772f056",
+      "free_after_startup_mib": 609.49,
+      "device_state": "1-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 4.82,
+      "decode_tokens_per_second": 106.2
+    },
+    {
+      "device_state_slots": 2,
+      "config_sha256": "4843636c81531781fc98031bce67322b0b0a9b93f8edafc78c4f26cfb04c2713",
+      "free_after_startup_mib": 463.49,
+      "device_state": "2-cache+1-active",
+      "prompt_tokens": 41,
+      "completion_tokens": 512,
+      "wall_s": 4.86,
+      "decode_tokens_per_second": 105.4
+    }
+  ],
+  "selection_rule": "largest slot count whose decode rate is within 3% of the best row",
+  "selected_device_state_slots": 2
+}

@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Measured
+
+- EXP-025: the two native Windows lanes serve the mainline runtime. Native-lane convergence
+  stages 2 and 3 on the runtime fork's `port/native-lanes-on-mainline` (`6fd9e135`): the
+  Windows platform code (D3D12 residency arena, DirectStorage read queue) and the host tree
+  build with MSVC 19.44 for Ada and Ampere, and every registered test suite runs on the
+  hardware, 100/100 on both builds (the five real-artifact suites and the external-tokenizer
+  frontend suite skip). Five defects showed only on the hardware and were fixed at source:
+  cooperative GDN gating grids sized for the RTX 5090's 170 SMs (fatal on the first prompt
+  longer than one tile on 128), an INT8 prompt-attention CTA that spilled 200 B/thread under
+  Ada's register cap (390 tok/s at 42K; 130K did not finish), a serialising DirectStorage read
+  queue that failed every streamed restore, that refusal going unlogged, and an unbounded
+  residency query. Same 130,048-token fixture, gate script, host, and day as the installed
+  releases: RTX 4090 exact retrieval **86.8 s vs 97.5 s** and 2,048-token decode **103.8 vs
+  88.4 tok/s**; RTX 3090 **208.6 vs 219.5 s** and **60.3 vs 52.8 tok/s**. A 67.7K template
+  serves four sibling forks in 1.8-2.0 s (4090) / 2.5-2.9 s (3090) before a restart and
+  1.8-1.9 s / 2.5-2.6 s after it, all on `private_long_anchor`; warm arrival holds in both
+  orders; a 2.9 GB checkpoint restores in 4.2-5.0 s / 16.6-17.1 s and a flipped byte is refused
+  and quarantined. RTX 4090 profile: two device-state slots at 131K INT8 - four leave 169 MiB of
+  WDDM budget and the driver pages (47 tok/s decode, forks 2.5× slower), one re-prefills the
+  first fork. No release changed; each lane's next candidate builds from this branch and is
+  requalified through its lifecycle tool
+  ([EXP-025 receipts](docs/measurements/) prefixed `2026-09-08-rtx4090-mainline-` and
+  `2026-09-08-rtx3090-mainline-`, release baselines
+  [4090](docs/measurements/2026-09-08-rtx4090-v0.2-profile-gates.json) ·
+  [3090](docs/measurements/2026-09-08-rtx3090-v0.2.5-profile-gates.json)).
+
+### Changed
+
+- `scripts/fleet_probe.py`, `scripts/warm_arrival_probe.py`, `scripts/restore_probe.py`
+  (receipt schema 3): every receipt carries the lane's self-reported identity - deployment
+  profile, model and artifact digests, binary, upstream and patch-stack commits, build profile,
+  resolved configuration digest - captured before the first request; a verified restart now
+  also requires the lane to come back as the same identity, so a launcher that swaps binaries or
+  arguments mid-probe fails the probe instead of mixing subjects. The fanout summary adds
+  `hot_fork_max_s` and `warm_start_fork_max_s`: one fork re-prefilling from root hid behind the
+  median.
+
 ## [0.5.1] - 2026-09-08
 
 Warm arrival across a restart on the RTX 5090. The runtime component
