@@ -120,6 +120,19 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.5.1 — warm arrival across a restart (2026-09-08)
+
+The RTX 5090 lane requalified on the published `v0.5.1` image through the lifecycle tool; receipts in
+[`releases/v0.5.1/qualification/`](../releases/v0.5.1/qualification/). The native lanes are
+byte-identical to `v0.5.0` and carry their receipts. Experiments EXP-022 through EXP-024.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 warm arrival | **every post-restart fork hot** | resume-first: resume 3.31 s, forks 1.34 / 1.34 s; fork-first: fork 3.74 s, resume 2.95 s, fork 2.92 s — all `private_long_anchor`; planted keys quoted exactly ([receipt](measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)) |
+| RTX 5090 restore | **3.8 s / 4.4 s** for 5.2 GB | two verified restarts (24.0 s on v0.4.8); a flipped payload byte refused with `previous_response_not_found` and the generation quarantined ([receipt](measurements/2026-09-08-restore-probe-rtx5090-candidate.json)) |
+| RTX 5090 fanout | **4/4 + 4/4** at 57,853 and 67,681 tokens | pre-restart 1.33–1.52 s; post-restart resume 3.35 / 3.96 s then forks 1.25–1.41 s, all on the base anchor; explicit saves 4.4 / 4.6 s ([57.9K](measurements/2026-09-08-rtx5090-v051-fanout-57k.json) · [67.7K](measurements/2026-09-08-rtx5090-v051-fanout-67k.json)) |
+| RTX 5090 gates | **138.16 tok/s** decode | 41.20% MTP acceptance; 2,180.30 tok/s prefill at 130,048 tokens with exact retrieval, 28,245 MiB; agent protocol with no resurrection across a restart ([receipt](measurements/2026-09-08-rtx5090-v051-profile-gates.json)) |
+
 ### v0.5.0 — sessions leave the machine (2026-09-05)
 
 Both native lanes requalified origin-authenticated checkpoint manifests on their own rigs;

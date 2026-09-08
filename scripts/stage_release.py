@@ -7,24 +7,26 @@ author evidence: lane-receipt arcs, qualification gate numbers, CHANGELOG, and
 doc prose remain the lead's job. What it owns:
 
   1. Copy releases/<from> -> releases/<release>.
-  2. Rewrite the NInfer component pins in manifest.json (release tag, source
-     commit, archive/binary/SBOM hashes, OCI digest, runtime receipt release,
-     download URLs) and the runtime-identity deployment profile.
+  2. Rewrite the NInfer component pins in manifest.json (release tag, upstream
+     and source commits, archive/binary/SBOM hashes, OCI digest, runtime receipt
+     release, download URLs) and the runtime identity (deployment profile and
+     configuration hash).
   3. Rewrite <from> -> <release> internal paths (variant qualification
-     summaries, compatibility receipt paths, profile files).
-  4. Rebase compatibility.json (product_release, 5090 profile string, image
-     digest and server-binary replacements, lane-receipt hash) and mirror it
-     byte-identical to the repository root.
+     summaries and every provisional public URL).
+  4. Rebase the release's compatibility.json (product_release, 5090 profile
+     string, image digest, server binary, configuration hash).
   5. Rebase qualification.json identity and local-release-packaging pins.
-  6. Recompute the hash chain in dependency order:
-     lane receipt -> behavioral/qualification bindings -> acceptance
-     compatibility binding -> acceptance hash -> qualification hash ->
-     manifest summary hash.
-  7. Render both COMPATIBILITY.md files and run the release verifier.
+  6. Recompute the hash chain through `rebind_release.py --draft`: lane
+     receipts -> compatibility variants/qualification/manifest bindings ->
+     acceptance compatibility binding -> acceptance hash -> qualification
+     hash -> manifest summary hash. The root authority and profiles stay on
+     the previous release (staged-draft posture) until the cut.
+  7. Run the release verifier; the only residue is the draft posture, the
+     commit-bound public-URL set, and the tag allowlist entry.
 
-Exit: verifier's error list printed; success when the only residue is the
-commit-bound public-URL set, which the existing two-stage
-`rebind_release.py --stage acceptance|manifest` dance resolves after commit.
+The cut is `rebind_release.py --pin <commit> --stage lane`, which promotes the
+root authority, profiles, and launcher pins, followed by the acceptance and
+manifest pin stages.
 """
 
 from __future__ import annotations
@@ -46,6 +48,15 @@ PIN_RESIDUE = {
     "components.ninfer_variants.rtx4090-windows-native.qualification.public_url must bind an immutable product commit and path",
     "external acceptance public_url must bind an immutable product commit and path",
     "qualification.public_url must bind an immutable product commit and path",
+}
+# The root authority, matrix, and profiles stay on the previous release until the cut.
+DRAFT_POSTURE_RESIDUE = {
+    "profile: release must match the manifest",
+    "profile: deployment_profile must match the manifest",
+    "profiles/qwen38-rtx5090-manual-tunnel.json: release must match the manifest",
+    "profiles/qwen38-rtx5090-manual-tunnel.json: deployment_profile must match the manifest",
+    "root and release compatibility authorities must be byte-identical",
+    "root and release compatibility matrices must be byte-identical",
 }
 
 
@@ -97,6 +108,13 @@ def main() -> int:
     parser.add_argument("--profile-from", default=None, metavar="vX.Y.Z",
                         help="release whose 5090 deployment profile is currently live, when a "
                              "variant-only rebind left it behind the source release")
+    parser.add_argument("--config-sha", default=None, metavar="SHA256",
+                        help="configuration identity of the new 5090 deployment profile as the "
+                             "lifecycle tool computes it (required unless "
+                             "--keep-deployment-profile)")
+    parser.add_argument("--upstream-commit", default=None, metavar="SHA40",
+                        help="new upstream base of the runtime fork; default keeps the source "
+                             "release's")
     parser.add_argument("--lane-receipt", type=Path, default=None, metavar="PATH",
                         help="the new release's RTX 5090 qualification receipt; installed as "
                              "releases/<release>/qualification/rtx5090.json before the hash "
@@ -112,6 +130,13 @@ def main() -> int:
         value = getattr(args, name)
         if len(value) != 64:
             parser.error(f"--{name.replace('_', '-')} must be a 64-hex sha256")
+    if args.keep_deployment_profile:
+        if args.config_sha is not None:
+            parser.error("--config-sha changes the deployment profile; drop --keep-deployment-profile")
+    elif args.config_sha is None or len(args.config_sha) != 64:
+        parser.error("--config-sha must be a 64-hex sha256 (or pass --keep-deployment-profile)")
+    if args.upstream_commit is not None and len(args.upstream_commit) != 40:
+        parser.error("--upstream-commit must be a full 40-hex commit")
 
     src_dir = ROOT / "releases" / args.source
     dst_dir = ROOT / "releases" / args.release
@@ -134,6 +159,11 @@ def main() -> int:
     profile_to = (
         profile_from if args.keep_deployment_profile else f"qwen38-5090-{args.release}"
     )
+    source_manifest = load(src_dir / "manifest.json")
+    config_sha = (
+        source_manifest["runtime_identity"]["configuration_sha256"]
+        if args.keep_deployment_profile else args.config_sha
+    )
 
     # 1. Copy the tree.
     shutil.copytree(src_dir, dst_dir)
@@ -146,9 +176,11 @@ def main() -> int:
     old = {
         "digest": ninfer["oci_manifest_digest"],
         "binary": ninfer["server_binary_sha256"],
+        "config": manifest["runtime_identity"]["configuration_sha256"],
     }
     ninfer.update({
         "release_tag": args.release_tag,
+        "upstream_commit": args.upstream_commit or ninfer["upstream_commit"],
         "source_commit": args.source_commit,
         "source_archive_sha256": args.source_archive_sha,
         "server_binary_sha256": args.binary_sha,
@@ -165,22 +197,32 @@ def main() -> int:
         ),
     })
     manifest["runtime_identity"]["deployment_profile"] = profile_to
-    # 3. Variant summaries stay inside the new release.
+    manifest["runtime_identity"]["configuration_sha256"] = config_sha
+    # A staged tree is a draft: the predecessor's acceptance does not carry, and the cut is
+    # gated on a fresh composed acceptance against the published component.
+    manifest["status"] = "draft"
+    manifest["qualification"]["external_installation_passed"] = False
+    manifest["publication"]["blockers"] = [
+        f"external-installation acceptance has not been rerun against the published "
+        f"{args.release_tag} component and runtime image {args.image_digest[7:15]}; the "
+        "composed acceptance receipt is absent until it is",
+    ]
+    # 3. Release-relative evidence paths move with the tree; the commit part of every public
+    #    URL is provisional until the pin dance.
     for variant in manifest["components"].get("ninfer_variants", []):
         qual = variant.get("qualification", {})
         for key in ("summary", "public_url"):
             if isinstance(qual.get(key), str):
                 qual[key] = qual[key].replace(f"/{args.source}/", f"/{args.release}/")
+    manifest_qualification = manifest["qualification"]
+    if isinstance(manifest_qualification.get("public_url"), str):
+        manifest_qualification["public_url"] = manifest_qualification["public_url"].replace(
+            f"/releases/{args.source}/", f"/releases/{args.release}/"
+        )
     dump(manifest_path, manifest)
 
-    # Profiles reference the release and deployment profile by value.
-    for profile_file in (ROOT / "profiles").glob("*.json"):
-        rewrite_text(profile_file, {
-            f'"{args.source}"': f'"{args.release}"',
-            profile_from: profile_to,
-        })
-
-    # 4. Compatibility authority: pins, paths, and the lane-receipt hash.
+    # 4. The release's compatibility copy: pins, paths, and the primary identities. Receipt
+    #    hashes and native variant rows are derived by rebind_release.py from the manifest.
     compat_path = dst_dir / "compatibility.json"
     lane_path = dst_dir / "qualification" / "rtx5090.json"
     if args.lane_receipt is not None:
@@ -188,34 +230,28 @@ def main() -> int:
     rewrite_text(compat_path, {
         old["digest"]: args.image_digest,
         old["binary"]: args.binary_sha,
+        old["config"]: config_sha,
         profile_from: profile_to,
         f'"product_release": "{args.source}"': f'"product_release": "{args.release}"',
         f"releases/{args.source}/": f"releases/{args.release}/",
     })
-    compat = load(compat_path)
-    lane_sha = sha256_file(lane_path)
-    for profile in compat.get("profiles", []):
-        gpu = profile.get("gpu_qualification")
-        if gpu and gpu.get("profile", "").startswith("qwen38-5090"):
-            gpu["receipt"]["sha256"] = lane_sha
-    for variant in compat.get("runtime_variants", []):
-        receipt = variant.get("qualification_receipt", {})
-        if isinstance(receipt.get("path"), str):
-            receipt["sha256"] = sha256_file(ROOT / receipt["path"])
-    dump(compat_path, compat)
 
     # 5. Qualification identity + packaging pins.
     qual_path = dst_dir / "qualification.json"
     qualification = load(qual_path)
     qualification["release"] = args.release
     identity = qualification["runtime_identity"]
-    identity["release_source_commit"] = args.source_commit
-    identity["release_server_binary_sha256"] = args.binary_sha
-    identity["deployment_profile"] = profile_to
+    identity.update({
+        "upstream_commit": ninfer["upstream_commit"],
+        "behavioral_source_commit": args.source_commit,
+        "release_source_commit": args.source_commit,
+        "release_source_archive_sha256": args.source_archive_sha,
+        "release_server_binary_sha256": args.binary_sha,
+        "configuration_sha256": config_sha,
+        "deployment_profile": profile_to,
+    })
     composition = qualification["composition"]
     behavioral = composition["behavioral_qualification"]
-    behavioral["repository_path"] = f"releases/{args.release}/qualification/rtx5090.json"
-    behavioral["sha256"] = lane_sha
     behavioral["source_commit"] = args.source_commit
     behavioral["server_binary_sha256"] = args.binary_sha
     packaging = composition["local_release_packaging"]
@@ -227,46 +263,35 @@ def main() -> int:
         "binary_package_sha256": args.archive_sha,
         "sbom_url": ninfer["sbom_url"],
         "sbom_sha256": args.sbom_sha,
+        "component_release_url": (
+            f"https://github.com/alphastorm/ninfer/releases/tag/{args.release_tag}"
+        ),
     })
-    acceptance = composition["external_installation_acceptance"]
-    acceptance["repository_path"] = (
-        f"releases/{args.release}/acceptance/composed-external-installation.json"
+    qualification["external_installation_qualified"] = False
+    composition["external_installation_acceptance"] = {
+        "status": "pending",
+        "note": (
+            f"rerun against the published {args.release_tag} component (image "
+            f"{args.image_digest[7:15]}) before the cut; the receipt lands at "
+            f"releases/{args.release}/acceptance/composed-external-installation.json"
+        ),
+    }
+    qualification["remaining_release_gates"] = [
+        f"external-installation acceptance against the published {args.release_tag} "
+        "component and runtime image"
+    ]
+    dump(qual_path, qualification)
+    shutil.rmtree(dst_dir / "acceptance", ignore_errors=True)
+
+    # 6. Hash chain in dependency order, release tree only: the root authority and profiles
+    #    stay on the previous release until the cut (staged-draft posture).
+    subprocess.run(
+        [sys.executable, "scripts/rebind_release.py", "--release", args.release, "--draft"],
+        cwd=ROOT, check=True,
     )
-    dump(qual_path, qualification)
 
-    # 6. Hash chain in dependency order.
-    root_compat = ROOT / "compatibility.json"
-    shutil.copyfile(compat_path, root_compat)
-    compat_sha = sha256_file(root_compat)
-
-    acceptance_path = dst_dir / "acceptance" / "composed-external-installation.json"
-    receipt = load(acceptance_path)
-    receipt["release"] = args.release
-    receipt["compatibility_sha256"] = compat_sha
-    dump(acceptance_path, receipt)
-
-    qualification = load(qual_path)
-    acceptance = qualification["composition"]["external_installation_acceptance"]
-    acceptance["sha256"] = sha256_file(acceptance_path)
-    acceptance["compatibility_sha256"] = compat_sha
-    dump(qual_path, qualification)
-
-    manifest = load(manifest_path)
-    manifest["components"]["omp"]["compatibility_sha256"] = compat_sha
-    manifest["qualification"]["summary_sha256"] = sha256_file(qual_path)
-    dump(manifest_path, manifest)
-
-    # 7. Render and verify.
-    for authority, output in (
-        ("compatibility.json", "docs/COMPATIBILITY.md"),
-        (f"releases/{args.release}/compatibility.json",
-         f"releases/{args.release}/COMPATIBILITY.md"),
-    ):
-        subprocess.run(
-            [sys.executable, "scripts/render_compatibility.py",
-             "--authority", authority, "--output", output],
-            cwd=ROOT, check=True,
-        )
+    # 7. Verify; the only residue a staging may leave is the draft posture and the deliberate
+    #    per-release tag allowlist entry (the URL pins are checked once the tree is ready).
     verify = subprocess.run(
         [sys.executable, "scripts/verify_release.py",
          "--release", args.release, "--json"],
@@ -277,12 +302,15 @@ def main() -> int:
     allowlist_error = "components.ninfer.release_tag is invalid"
     unexpected = [
         error for error in errors
-        if error not in PIN_RESIDUE and error != allowlist_error
+        if error not in PIN_RESIDUE and error not in DRAFT_POSTURE_RESIDUE
+        and error != allowlist_error
     ]
     print(f"staged releases/{args.release} from releases/{args.source}")
     for error in errors:
         if error in PIN_RESIDUE:
             marker = "pin-dance"
+        elif error in DRAFT_POSTURE_RESIDUE:
+            marker = "draft-posture"
         elif error == allowlist_error:
             marker = "allowlist"
         else:
@@ -295,13 +323,16 @@ def main() -> int:
     print("remaining work, in order:")
     print("  1. [allowlist] add the new tag to NINFER_RELEASE_TAG_RE in "
           "scripts/verify_release.py (deliberate per-release act)")
-    print("  2. author the release evidence by hand - lane-receipt arcs/gates, "
-          "CHANGELOG, RELEASES/BENCHMARKS/FACTS/README, tunnel scripts, and "
-          "the drift-test pins")
-    print(f"  3. commit, then scripts/rebind_release.py --release {args.release} "
-          "--pin <commit> --stage acceptance | manifest (two commits)")
-    print("  4. re-pin variant qualification public_urls to the final commit "
-          "(they keep the prior commit hash until then)")
+    print("  2. author the release evidence by hand - lane-receipt arcs/gates, the composed "
+          "acceptance receipt, CHANGELOG, RELEASES/BENCHMARKS/FACTS/README, and the "
+          f"drift-test pins; rerun scripts/rebind_release.py --release {args.release} --draft "
+          "after every edit and commit in the draft posture")
+    print(f"  3. cut: scripts/rebind_release.py --release {args.release} --pin <commit that "
+          "contains the final lane receipts> --stage lane promotes the root authority, "
+          "profiles, and launcher pins, then commit")
+    print(f"  4. scripts/rebind_release.py --release {args.release} --pin <commit> "
+          "--stage acceptance | manifest (two more commits; the manifest stage runs the "
+          "ready verifier with --check-pins)")
     return 0
 
 

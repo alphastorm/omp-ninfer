@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from collections.abc import Iterator
 from pathlib import Path
@@ -15,6 +16,8 @@ from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
+    RUNTIME_VARIANT_PACKAGE_NAME_RES,
+    RUNTIME_VARIANT_RELEASE_TAG_RES,
     load_authority,
     render as render_compatibility_matrix,
 )
@@ -133,6 +136,217 @@ def require_product_raw_url(value: Any, label: str, path: str, errors: list[str]
         f"{label} must bind an immutable product commit and path",
         errors,
     )
+
+
+PRODUCT_RAW_URL_RE = re.compile(
+    r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/([0-9a-f]{40})/(.+)"
+)
+
+
+def pinned_blob_sha256(
+    root: Path, commit: str, path: str, cache: dict[tuple[str, str], str | None]
+) -> str | None:
+    """SHA-256 of ``path`` at ``commit`` in the repository at ``root``.
+
+    None when the commit is not in local history (shallow clones, exported trees), the
+    string "absent" when the commit is known but does not contain the path.
+    """
+    key = (commit, path)
+    if key not in cache:
+        result: str | None = None
+        if (root / ".git").exists():
+            probe = subprocess.run(
+                ["git", "-C", str(root), "cat-file", "-e", f"{commit}^{{commit}}"],
+                capture_output=True,
+            )
+            if probe.returncode == 0:
+                shown = subprocess.run(
+                    ["git", "-C", str(root), "show", f"{commit}:{path}"],
+                    capture_output=True,
+                )
+                result = (
+                    hashlib.sha256(shown.stdout).hexdigest()
+                    if shown.returncode == 0
+                    else "absent"
+                )
+        cache[key] = result
+    return cache[key]
+
+
+def require_pinned_bytes(
+    root: Path,
+    url: Any,
+    expected_sha256: Any,
+    label: str,
+    errors: list[str],
+    cache: dict[tuple[str, str], str | None],
+) -> None:
+    """A pinned raw URL must serve exactly the bytes its companion SHA-256 records."""
+    match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
+    if match is None or not isinstance(expected_sha256, str):
+        return
+    commit, path = match.group(1), match.group(2)
+    observed = pinned_blob_sha256(root, commit, path, cache)
+    if observed is None:
+        return
+    require(observed != "absent",
+            f"{label} pins commit {commit[:12]} which does not contain {path}", errors)
+    require(observed == "absent" or observed == expected_sha256,
+            f"{label} pins commit {commit[:12]} whose {path} differs from the recorded SHA-256",
+            errors)
+
+
+def pinned_evidence(
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+) -> Iterator[tuple[str, Any, Any]]:
+    """Every (label, url, sha256) evidence pin a ready release publishes."""
+    manifest_qualification = manifest.get("qualification", {})
+    yield ("qualification.public_url", manifest_qualification.get("public_url"),
+           manifest_qualification.get("summary_sha256"))
+    omp = manifest.get("components", {}).get("omp", {})
+    yield ("components.omp.compatibility_url", omp.get("compatibility_url"),
+           omp.get("compatibility_sha256"))
+    for item in manifest.get("components", {}).get("ninfer_variants", []):
+        if isinstance(item, dict):
+            qual = item.get("qualification", {})
+            yield (f"components.ninfer_variants[{item.get('id')}].qualification.public_url",
+                   qual.get("public_url"), qual.get("sha256"))
+    acceptance = qualification.get("composition", {}).get("external_installation_acceptance", {})
+    yield ("external acceptance public_url", acceptance.get("public_url"), acceptance.get("sha256"))
+    for profile_item in compatibility.get("profiles", []):
+        if not isinstance(profile_item, dict):
+            continue
+        profile_id = profile_item.get("id")
+        receipt = profile_item.get("gpu_qualification", {}).get("receipt", {})
+        yield (f"compatibility {profile_id} gpu_qualification.receipt.url",
+               receipt.get("url"), receipt.get("sha256"))
+        acceptance_receipt = profile_item.get("acceptance_receipt", {})
+        if isinstance(acceptance_receipt, dict):
+            yield (f"compatibility {profile_id} acceptance_receipt.url",
+                   acceptance_receipt.get("url"), acceptance_receipt.get("sha256"))
+    for item in compatibility.get("runtime_variants", []):
+        if isinstance(item, dict):
+            receipt = item.get("qualification_receipt", {})
+            yield (f"compatibility.runtime_variants[{item.get('id')}].qualification_receipt.url",
+                   receipt.get("url"), receipt.get("sha256"))
+
+
+def validate_pinned_evidence(
+    root: Path,
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    cache: dict[tuple[str, str], str | None] = {}
+    for label, url, expected in pinned_evidence(manifest, compatibility, qualification):
+        require_pinned_bytes(root, url, expected, label, errors, cache)
+
+
+def validate_ga_evidence_bindings(
+    release: Any,
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    profiles: list[tuple[str, dict[str, Any]]],
+    errors: list[str],
+) -> None:
+    """A ready GA release's derived records must name the manifest's exact components.
+
+    Profile launch arguments, the qualification summary's runtime identity, and the native
+    variant rows of the compatibility authority and qualification composition are all copies of
+    manifest identities; a copy that drifts is a stale public claim.
+    """
+    components = manifest.get("components", {})
+    ninfer = components.get("ninfer", {})
+    model = components.get("model", {})
+    runtime = manifest.get("runtime_identity", {})
+
+    for label, profile in profiles:
+        arguments = profile.get("server", {}).get("arguments", [])
+        if not isinstance(arguments, list):
+            continue
+        for flag, expected, source in (
+            ("--binary-sha256", ninfer.get("server_binary_sha256"),
+             "components.ninfer.server_binary_sha256"),
+            ("--artifact-sha256", model.get("artifact_sha256"),
+             "components.model.artifact_sha256"),
+            ("--config-sha256", runtime.get("configuration_sha256"),
+             "runtime_identity.configuration_sha256"),
+        ):
+            require(arguments.count(flag) == 1 and argument_value(arguments, flag) == expected,
+                    f"{label}: {flag} must occur once and equal {source}", errors)
+
+    identity = qualification.get("runtime_identity", {})
+    composition = qualification.get("composition", {})
+    behavioral = composition.get("behavioral_qualification", {})
+    for key, expected, source in (
+        ("upstream_commit", ninfer.get("upstream_commit"), "components.ninfer.upstream_commit"),
+        ("release_source_archive_sha256", ninfer.get("source_archive_sha256"),
+         "components.ninfer.source_archive_sha256"),
+        ("behavioral_source_commit", behavioral.get("source_commit"),
+         "composition.behavioral_qualification.source_commit"),
+    ):
+        require(identity.get(key) == expected,
+                f"qualification.runtime_identity.{key} must equal {source}", errors)
+
+    manifest_variants = {
+        item.get("id"): item
+        for item in components.get("ninfer_variants", [])
+        if isinstance(item, dict)
+    }
+    for item in compatibility.get("runtime_variants", []):
+        if not isinstance(item, dict):
+            continue
+        source_item = manifest_variants.get(item.get("id"))
+        if source_item is None:
+            continue
+        prefix = f"compatibility.runtime_variants[{item.get('id')}]"
+        for key in ("release_tag", "source_commit", "package_name", "package_url",
+                    "package_sha256", "package_bytes", "maximum_context_tokens"):
+            require(item.get(key) == source_item.get(key),
+                    f"{prefix}.{key} must equal the manifest component", errors)
+        receipt = item.get("qualification_receipt", {})
+        qual = source_item.get("qualification", {})
+        require(receipt.get("path") == qual.get("summary"),
+                f"{prefix}.qualification_receipt.path must equal the manifest qualification summary",
+                errors)
+        require(receipt.get("sha256") == qual.get("sha256"),
+                f"{prefix}.qualification_receipt.sha256 must equal the manifest qualification hash",
+                errors)
+        if isinstance(qual.get("summary"), str):
+            require_product_raw_url(receipt.get("url"),
+                                    f"{prefix}.qualification_receipt.url", qual["summary"], errors)
+
+    native = composition.get("native_runtime_variants", {})
+    for variant_id, entry in (native.items() if isinstance(native, dict) else ()):
+        source_item = manifest_variants.get(variant_id)
+        if source_item is None or not isinstance(entry, dict):
+            continue
+        prefix = f"qualification.composition.native_runtime_variants[{variant_id}]"
+        qual = source_item.get("qualification", {})
+        for key, expected in (
+            ("release_tag", source_item.get("release_tag")),
+            ("package_sha256", source_item.get("package_sha256")),
+            ("repository_path", qual.get("summary")),
+            ("sha256", qual.get("sha256")),
+        ):
+            require(entry.get(key) == expected,
+                    f"{prefix}.{key} must equal the manifest component", errors)
+
+    for profile_item in compatibility.get("profiles", []):
+        if not isinstance(profile_item, dict):
+            continue
+        profile_id = profile_item.get("id")
+        gpu = profile_item.get("gpu_qualification", {})
+        require(gpu.get("profile") == runtime.get("deployment_profile"),
+                f"compatibility {profile_id} gpu_qualification.profile must equal the manifest deployment profile",
+                errors)
+        require_product_raw_url(gpu.get("receipt", {}).get("url"),
+                                f"compatibility {profile_id} gpu_qualification.receipt.url",
+                                f"releases/{release}/qualification/rtx5090.json", errors)
 
 
 def walk_strings(value: Any) -> list[str]:
@@ -287,25 +501,6 @@ NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
 NINFER_RELEASE_TAG_RE = re.compile(
     r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3|0\.4\.4|0\.4\.5|0\.5\.1)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
-NINFER_VARIANT_RELEASE_TAG_RES = {
-    "rtx3090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.[345]-qwen38-3090-beta\.[1-9][0-9]*)$"
-    ),
-    "rtx4090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[0-3]-qwen38-4090-durable\.[1-9][0-9]*)$"
-    ),
-}
-NINFER_VARIANT_PACKAGE_NAME_RES = {
-    "rtx3090-windows-native": re.compile(
-        r"^ninfer-rtx3090-omp-v(?:0\.2\.0-windows-x86_64-cuda12\.8|"
-        r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3|"
-        r"0\.2\.2-beta\.1-windows-x86_64-cuda13\.3|"
-        r"0\.2\.[345]-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
-    ),
-    "rtx4090-windows-native": re.compile(
-        r"^ninfer-4090-qwen38-v(?:0\.[12]\.0|0\.2\.[1-3])-win-x64\.zip$"
-    ),
-}
 CHECKSUM_REQUIRED_ASSET_FIELDS = (
     "package",
     "sbom",
@@ -482,7 +677,7 @@ def validate_ninfer_variants(
                 f"{prefix}.maximum_context_tokens must be positive", errors)
         release_tag = item.get("release_tag")
         require(isinstance(release_tag, str)
-                and NINFER_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
+                and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
                 f"{prefix}.release_tag is invalid", errors)
         asset_prefix = (
             "https://github.com/alphastorm/ninfer/releases/download/"
@@ -509,7 +704,7 @@ def validate_ninfer_variants(
         if package_name is None and isinstance(package_url, str):
             package_name = Path(urlparse(package_url).path).name
         require(isinstance(package_name, str)
-                and NINFER_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
+                and RUNTIME_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
                 f"{prefix}.package_name is invalid", errors)
         if isinstance(package_url, str) and isinstance(package_name, str):
             require(package_url == asset_prefix + package_name,
@@ -732,6 +927,7 @@ def validate(
     require_ready: bool,
     require_installable: bool = False,
     product_release: str | None = None,
+    check_pins: bool = False,
 ) -> tuple[dict[str, Any], list[str]]:
     selected_release = resolve_product_release(root, product_release)
     manifest_path = root / "releases" / selected_release / "manifest.json"
@@ -794,6 +990,7 @@ def validate(
     validate_profile_contract(profile, "profile", release, model,
                               runtime.get("public_model_id"),
                               runtime.get("deployment_profile"), errors)
+    profiles: list[tuple[str, dict[str, Any]]] = [("profile", profile)]
 
     profiles_dir = root / "profiles"
     if profiles_dir.is_dir():
@@ -808,6 +1005,7 @@ def validate(
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
                                       model, runtime.get("public_model_id"),
                                       runtime.get("deployment_profile"), errors)
+            profiles.append((f"profiles/{extra_path.name}", extra_profile))
 
     release_compatibility_path = manifest_path.parent / "compatibility.json"
     compatibility_path = (
@@ -1286,6 +1484,11 @@ def validate(
             validate_ready_state_consistency(
                 manifest, compatibility, qualification, errors
             )
+            validate_ga_evidence_bindings(
+                release, manifest, compatibility, qualification, profiles, errors
+            )
+            if check_pins:
+                validate_pinned_evidence(root, manifest, compatibility, qualification, errors)
 
     validate_markdown_links(root, errors)
     validate_public_text(root, errors)
@@ -1300,8 +1503,14 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--require-installable", action="store_true")
     mode.add_argument("--require-ready", action="store_true")
+    parser.add_argument("--check-pins", action="store_true",
+                        help="with --require-ready: every pinned raw evidence URL whose commit is "
+                             "in local git history must serve exactly its recorded SHA-256 "
+                             "(the final gate of the pin dance; needs full history)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
+    if args.check_pins and not args.require_ready:
+        parser.error("--check-pins requires --require-ready")
 
     try:
         manifest, errors = validate(
@@ -1309,6 +1518,7 @@ def main() -> int:
             args.require_ready,
             args.require_installable,
             args.release,
+            check_pins=args.check_pins,
         )
     except ContractError as error:
         errors = [str(error)]

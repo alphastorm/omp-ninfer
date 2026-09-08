@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-05 · Current stable release: **v0.5.0**
+Last verified: 2026-09-08 · Current stable release: **v0.5.1**
 
-Everything on this page is bound to the [v0.5.0 release manifest](../releases/v0.5.0/manifest.json)
+Everything on this page is bound to the [v0.5.1 release manifest](../releases/v0.5.1/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -42,9 +42,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.4.8 profile on the v0.4.6 durable container: fanout, decoupled export, origin-authenticated checkpoints, and a context cache sized so sibling forks keep the base anchor |
-| RTX 4090 | native Windows service | 131,072 | durable v0.2.3 lane (native Windows, MTP3, prefill chunk 2,048, origin-authenticated checkpoints, bound by v0.5.0) |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.5.0) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.5.1 runtime under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.5.1`): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints |
+| RTX 4090 | native Windows service | 131,072 | durable v0.2.3 lane (native Windows, MTP3, prefill chunk 2,048, origin-authenticated checkpoints, bound by v0.5.1) |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.5.1) |
 
 ## Current model and artifact
 
@@ -74,7 +74,10 @@ roughly 64K tokens or more; a 57.9K-token template alternated anchored and re-pr
 restoring a checkpoint after a restart was no faster than re-prefilling it on any lane
 ([EXP-012](PERFORMANCE.md#experiment-ledger)); the sub-64K loss is context-cache capacity, and a larger
 private catalog with scaled state slots removed it on the unchanged binary as the v0.4.8 candidate
-profile ([EXP-013](PERFORMANCE.md#experiment-ledger)).
+profile ([EXP-013](PERFORMANCE.md#experiment-ledger)). As of `v0.5.1` the restored template also
+arrives warm across a restart on the RTX 5090: every sibling fork is served on the shared anchor in
+either arrival order, and a 5.2 GB restore takes 3.8 s
+([EXP-022/EXP-023](PERFORMANCE.md#experiment-ledger)).
 
 Operators may describe this problem as persistent KV cache, restartable context, session
 checkpointing, stateful local inference, or avoiding cold re-prefill. The actual guarantee is
@@ -92,9 +95,9 @@ remote lanes reached through authenticated SSH local forwards.
   checkpoint vs **47.920 s** fresh-process cold rebuild.
 - **144.80 tok/s** decode on the agent-shaped qualification gate (44.10% MTP acceptance);
   152.2 tok/s at 83.3% acceptance on the retrieval workload.
-- Exact needle retrieval at a **130,048-token** prompt (2,207.10 tok/s cold on the v0.4.8 profile;
+- Exact needle retrieval at a **130,048-token** prompt (2,180.3 tok/s cold on the v0.5.1 runtime, 2,207.10 on v0.4.8;
   the v0.4.0 gate measured 2,186.30 tok/s at 130,448 tokens).
-- **136.03 tok/s** decode at 41.20% MTP acceptance on the v0.4.8 profile's technical-writing gate.
+- **138.16 tok/s** decode at 41.2% MTP acceptance on the v0.5.1 technical-writing gate (136.03 on v0.4.8).
 - Full receipts: [benchmarks](BENCHMARKS.md) · [release manifest](../releases/v0.4.0/manifest.json).
 
 Warm/cold figures are always retained state versus fresh-process cold start — never versus an

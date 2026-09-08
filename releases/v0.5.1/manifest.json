@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.5.1",
-  "status": "draft",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9794b625f0969054c9ca0470463756f47c7d7e86/compatibility.json",
-      "compatibility_sha256": "1338cdd82a83f660cb26b86dbba73ebb01f2207f4369d052897af7a5297e7fda"
+      "compatibility_sha256": "b103c3a6a36a2c26c39d216da3a0c1f58f6a4e5603d7071e67100ea415722eba"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -142,7 +142,7 @@
   "runtime_identity": {
     "public_model_id": "q38-ninfer",
     "deployment_profile": "qwen38-5090-v0.5.1",
-    "configuration_sha256": "95765a38a230e5dff96bb050aa9888de9c149e40074534fb8de2613c736d4e5c",
+    "configuration_sha256": "efacac2366136b70ffd9af7c282bc0ace71a0d6b845e2e489acab0f3ae151e1a",
     "maximum_context_tokens": 131072,
     "kv_dtype": "bf16",
     "maximum_concurrency": 1,
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "93d237898a2cc0c2f5d179790e1e934408a6d2f148f6289e802974807d6a174e",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9794b625f0969054c9ca0470463756f47c7d7e86/releases/v0.5.0/qualification.json",
+    "summary_sha256": "782101deaf758872eba879af8cae69c60a38da29f37245d145e5c4cb2549d4a9",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7bb430656b78699dfaabdd3c6fd97db1e9ff243a/releases/v0.5.1/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -181,9 +181,6 @@
       "NInfer RTX 4090 durable component v0.2.3-qwen38-4090-durable.1 (unchanged)",
       "NInfer RTX 3090 component v0.2.5-qwen38-3090-beta.1 (unchanged)"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.5.1-qwen38-5090-beta.1 component and runtime image 12ef2d9e; the composed acceptance receipt is absent until it is",
-      "the owner's RTX 5090 appliance still serves qwen38-5090-v0.4.8; promotion to qwen38-5090-v0.5.1 goes through its own private gate after the product release"
-    ]
+    "blockers": []
   }
 }

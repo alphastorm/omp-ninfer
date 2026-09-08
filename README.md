@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.5.0](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.5.1](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -26,7 +26,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-136%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-138%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -64,7 +64,7 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.5.0 is the current public release.** If you own a qualified card, the
+> **v0.5.1 is the current public release.** If you own a qualified card, the
 > [quickstart](docs/QUICKSTART.md) is the whole onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
@@ -123,13 +123,13 @@ give you together elsewhere:
 ![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
 
 Exact shipped profiles and receipts in
-[`qualification.json`](releases/v0.5.0/qualification.json):
+[`qualification.json`](releases/v0.5.1/qualification.json):
 
 | Gate | Result |
 | --- | --- |
-| RTX 5090 decode | **136.03 tok/s** over 2,048 tokens at temperature 0; MTP3, 41.20% acceptance (1,130 of 2,745 drafted tokens), byte-identical across five runs |
-| RTX 5090 prefill | **2,207.10 tok/s** at 130,048 tokens, exact retrieval, cold process |
-| RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,681 tokens (1.20–1.43 s each) with the v0.4.8 context-cache profile; 4.5 GB explicit save; verified restart |
+| RTX 5090 decode | **138.16 tok/s** over 2,048 tokens at temperature 0; MTP3, 41.20% acceptance (2.24 tokens per round) on the published v0.5.1 image through the lifecycle tool |
+| RTX 5090 prefill | **2,180.30 tok/s** at 130,048 tokens, exact retrieval, cold process |
+| RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,681 tokens (1.33–1.52 s each), and **4/4 again after a verified restart** (resume 3.35 s, forks 1.25–1.36 s) — a restored template arrives warm in either order; 4.5 GB explicit save in 4.4 s; a 5.2 GB restore in 3.8 s (was 24 s) |
 | Warm vs cold follow-up | **1.790 s** vs 47.920 s at a 109,594-token session, and **0.778 s** first token after a process restart — v0.4.0 qualification, server-side, one sample per point |
 | RTX 3090 native | **90.66 tok/s** decode, 93.43% MTP3 acceptance, exact 130,048-token retrieval at the 131,072 ceiling, 310 MB durable restart, durable v0.2.5-beta.1 train with origin-authenticated checkpoints, 300.2 W observed peak |
 | RTX 4090 native | 102,060-token session in **68.0 s** with prefill chunk 2,048; 102,075-token restored continuation after a process restart in **9.3 s**; exact OMP Golden-equivalent (durable v0.2.3, origin-authenticated checkpoints) |
@@ -168,7 +168,7 @@ WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned
 route needs one published OMP client and about 40 GiB free disk.
 
 ```powershell
-git clone --branch v0.5.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.5.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -227,7 +227,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.5.0 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.5.1 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
@@ -262,12 +262,15 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
-`v0.5.0` is the first v0.5 deliverable: sessions leave the machine. Origin-authenticated
-checkpoint manifests now hold on all three lanes, `scripts/checkpoint_sync.py` replicates
-verified generations out and back, and every lane proved that a checkpointed session survives
-the machine losing its local state while a forged replica is refused (EXP-018). Next: the
-template-fork warm-start follow-up (ninfer#35) and a same-profile machine-pair resume when a
-second card of one lane exists. Signing/notarization, a shared public client
+`v0.5.1` closes the second v0.5 promise on the RTX 5090: a checkpointed template arrives warm
+across a restart. Every sibling fork of a restored template is served on the shared anchor in
+either arrival order, and a 5 GB restore takes about 4 s instead of 24 s because the payload is
+hashed once, on the SHA extensions, as the engine streams it (EXP-022/EXP-023). `v0.5.0` made
+sessions leave the machine: origin-authenticated checkpoint manifests hold on all three lanes and
+`scripts/checkpoint_sync.py` replicates verified generations out and back (EXP-018). Next: the
+native Windows lanes get the same anchor architecture through the mainline port (stage 1 builds
+for sm_89 and sm_86), and a same-profile machine-pair resume when a second card of one lane
+exists. Signing/notarization, a shared public client
 acceptance runner, and multi-owner clean-install evidence remain on the path to v1.0. No item
 becomes a support claim before an exact package, receipt, and product manifest bind it.
 

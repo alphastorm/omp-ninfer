@@ -18,6 +18,27 @@ RUNTIME_VARIANT_IDS = (
     "rtx3090-windows-native",
     "rtx4090-windows-native",
 )
+# Component tag and package-name shapes per native lane. The exact values a release binds live
+# in its manifest; the verifier requires the authority's rows to equal that manifest.
+RUNTIME_VARIANT_RELEASE_TAG_RES = {
+    "rtx3090-windows-native": re.compile(
+        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.[345]-qwen38-3090-beta\.[1-9][0-9]*)$"
+    ),
+    "rtx4090-windows-native": re.compile(
+        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[0-3]-qwen38-4090-durable\.[1-9][0-9]*)$"
+    ),
+}
+RUNTIME_VARIANT_PACKAGE_NAME_RES = {
+    "rtx3090-windows-native": re.compile(
+        r"^ninfer-rtx3090-omp-v(?:0\.2\.0-windows-x86_64-cuda12\.8|"
+        r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3|"
+        r"0\.2\.2-beta\.1-windows-x86_64-cuda13\.3|"
+        r"0\.2\.[345]-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
+    ),
+    "rtx4090-windows-native": re.compile(
+        r"^ninfer-4090-qwen38-v(?:0\.[12]\.0|0\.2\.[1-3])-win-x64\.zip$"
+    ),
+}
 STATUSES = {"qualified", "preview", "blocked", "unsupported"}
 TRANSPORTS = {"ssh-loopback", "local-loopback"}
 COMMANDS = {
@@ -181,20 +202,13 @@ def load_authority(path: Path) -> dict[str, Any]:
                 and re.fullmatch(r"[0-9a-f]{64}", receipt["sha256"]) is not None,
                 f"{variant_id} qualification receipt SHA-256 is invalid")
         if "release_tag" in variant:
-            expected_release_tags = {
-                "rtx3090-windows-native": "v0.2.2-qwen38-3090-beta.1",
-                "rtx4090-windows-native": "v0.2.0-qwen38-4090-beta.1",
-            }
-            expected_package_names = {
-                "rtx3090-windows-native": (
-                    "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-"
-                    "cuda13.3-rtx3090.tar.gz"
-                ),
-                "rtx4090-windows-native": "ninfer-4090-qwen38-v0.1.0-win-x64.zip",
-            }
-            require(variant.get("release_tag") == expected_release_tags[variant_id],
+            release_tag = variant.get("release_tag")
+            require(isinstance(release_tag, str)
+                    and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
                     f"{variant_id} component release tag is invalid")
-            require(variant.get("package_name") == expected_package_names[variant_id],
+            package_name = variant.get("package_name")
+            require(isinstance(package_name, str)
+                    and RUNTIME_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
                     f"{variant_id} package name is invalid")
             require(isinstance(variant.get("source_commit"), str)
                     and re.fullmatch(r"[0-9a-f]{40}", variant["source_commit"]) is not None,

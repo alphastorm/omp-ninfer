@@ -27,26 +27,43 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.5.1 staged (warm arrival across a restart; not yet cut)
+### v0.5.1 public release (warm arrival across a restart)
 
-- Runtime component published: [`ninfer@v0.5.1-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1)
-  (source `d956e6d6`, archive `c0189387...`, SBOM `9f965373...`,
-  [source archive](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-source.1)
-  `4359c814...`), runtime image `ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e...` from the
-  [runtime receipt release](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-runtime-beta.1);
-  the binaries inside the published image measure byte-identical to the qualified candidate
-  (`71edc2f6`).
-- RTX 5090 requalified on 2026-09-08 through the lifecycle tool from the published image under
-  deployment profile `qwen38-5090-v0.5.1` (configuration `efacac23...`, same arguments as
-  `qwen38-5090-v0.4.8`): exact 130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s,
-  agent protocol with no resurrection, 24/24 fanout forks on the anchor path across three
-  template sizes in-process and after a restart, warm arrival in both post-restart orders,
-  4.5 GB restore in 3.3-4.0 s (EXP-022 to EXP-024;
-  [receipt](../releases/v0.5.1/qualification/rtx5090.json)).
-- The native lanes are unchanged (`v0.2.3-qwen38-4090-durable.1`, `v0.2.5-qwen38-3090-beta.1`).
-- Remaining before the cut: composed external-installation acceptance from the published URLs,
-  the pin dance, and the product release; the owner's appliance promotes separately through its
-  own gate.
+- Product release: `alphastorm/omp-ninfer@v0.5.1`, GitHub `Latest`. The second v0.5 deliverable
+  on the RTX 5090: a checkpointed template arrives warm across a restart (EXP-022 to EXP-024).
+  - RTX 5090 runtime component
+    [`ninfer@v0.5.1-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1)
+    (source `d956e6d6`, archive `c0189387...`, SBOM `9f965373...`,
+    [source archive](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-source.1)
+    `4359c814...`), runtime image `ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e...` from the
+    [runtime receipt release](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-runtime-beta.1);
+    the binaries inside the published image measure byte-identical to the qualified candidate
+    (`71edc2f6`). Deployment profile `qwen38-5090-v0.5.1` (configuration `efacac23...`) keeps the
+    `qwen38-5090-v0.4.8` context-cache arguments.
+  - RTX 4090 `ninfer@v0.2.3-qwen38-4090-durable.1` and RTX 3090 `ninfer@v0.2.5-qwen38-3090-beta.1`
+    are byte-identical to v0.5.0; their receipts and public-URL install acceptances carry by hash.
+- RTX 5090 requalified on 2026-09-08 through the lifecycle tool from the published image: exact
+  130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s, agent protocol with no
+  resurrection, 4/4 fanout forks on the anchor path at 57.9K and 67.7K in-process and again after
+  a verified restart, warm arrival in both post-restart orders, 5.2 GB restore in 3.8-4.4 s and a
+  tampered payload refused ([receipt](../releases/v0.5.1/qualification/rtx5090.json)).
+- Composed external-installation acceptance on 2026-09-08 from the published URLs: anonymous pull
+  by digest, lifecycle launch bound to the manifest identities, anonymous status refused (401),
+  identity re-read, one authenticated completion
+  ([receipt](../releases/v0.5.1/acceptance/composed-external-installation.json)); the five RTX 5090
+  assets and the runtime-image receipt downloaded anonymously and hashed exactly, and every native
+  asset URL answers.
+- Correction carried in this release: through v0.5.0 the compatibility authority's native
+  variant rows still named the v0.2.2/v0.2.0 components (and a 65,536-token RTX 3090 ceiling), the
+  root profiles' `--binary-sha256`/`--config-sha256` launch arguments named the v0.4.3 runtime,
+  the qualification summary's runtime identity carried a stale upstream commit and source-archive
+  hash, and the RTX 5090 receipt URLs pinned a commit that never contained them. The manifests
+  themselves were exact; the derived records had drifted. v0.5.1 rebinds every derived record
+  from the manifest and `scripts/verify_release.py` now refuses a ready release whose derived
+  records disagree with it, and (with `--check-pins`) whose pinned URLs do not serve their
+  recorded bytes.
+- The owner's appliance promotes to `qwen38-5090-v0.5.1` through its own gate after the product
+  release.
 
 ### v0.5.0 public release (sessions leave the machine)
 
@@ -343,6 +360,28 @@ product tag. The gate proved:
 
 The external smoke qualifies the installation composition; it does not repeat CUDA numerical or
 performance qualification without a concrete runtime change.
+
+## Cut procedure
+
+The release tree is staged as a draft and cut with the pin dance; every step is a script and
+the verifier decides what remains:
+
+1. `scripts/stage_release.py --from <previous> --release <new> ...` copies the tree, rewrites
+   the component and identity pins (including `--config-sha`, the lifecycle configuration
+   identity of the new deployment profile), and recomputes the chain with
+   `scripts/rebind_release.py --draft`. The root authority and profiles stay on the previous
+   release: that is the checked-in draft posture.
+2. Author the evidence: install the lane receipt, write the composed acceptance, rewrite the
+   qualification summary's gates and prose, CHANGELOG/RELEASES/BENCHMARKS/FACTS/README, and the
+   drift-test pins. Rerun `--draft` after every edit; commit.
+3. Cut: `scripts/rebind_release.py --release <new> --pin <commit containing the final lane
+   receipts> --stage lane` promotes the release's compatibility copy to the root authority,
+   rewrites the root profiles and launcher examples from the manifest, pins the authority's
+   receipt URLs, and reruns the chain. Flip the manifest to `ready`; commit.
+4. `--pin <that commit> --stage acceptance`; commit. `--pin <that commit> --stage manifest`;
+   commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
+   reads every pinned evidence URL out of local git history and requires it to serve exactly
+   the recorded SHA-256; CI repeats it on the release tag with full history.
 
 ## Release notes
 

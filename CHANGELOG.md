@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Measured, not shipped
+## [0.5.1] - 2026-09-08
+
+Warm arrival across a restart on the RTX 5090. The runtime component
+`v0.5.1-qwen38-5090-beta.1` ships the three context-cache fixes and the streamed, SHA-extension
+restore path measured below; deployment profile `qwen38-5090-v0.5.1` keeps the `qwen38-5090-v0.4.8`
+context-cache arguments. The RTX 4090 and RTX 3090 components and the OMP client are unchanged
+from v0.5.0. Composed external-installation acceptance reran on 2026-09-08 from the published
+URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- The compatibility authority, root profiles, and qualification summary are now derived from
+  the release manifest and verified against it. Through v0.5.0 the authority's native variant
+  rows still named the v0.2.2/v0.2.0 components with a 65,536-token RTX 3090 ceiling, the
+  profiles' `--binary-sha256`/`--config-sha256` launch arguments named the v0.4.3 runtime, the
+  qualification summary's runtime identity carried a stale upstream commit and source-archive
+  hash, and the RTX 5090 receipt URLs pinned a commit that never contained them; the manifests
+  were exact, the copies had drifted. `scripts/verify_release.py` refuses a ready release whose
+  derived records disagree with its manifest and, with `--check-pins` (run by the pin dance and
+  by CI on release tags), a pinned evidence URL that does not serve its recorded bytes.
+  `scripts/rebind_release.py` derives every copy from the manifest, owns the cut
+  (`--stage lane`), and `scripts/stage_release.py` stages a draft without touching the root
+  authority.
+- `scripts/render_compatibility.py` validates native variant tags and package names by lane
+  shape instead of a frozen v0.2.x value, which is what had kept the authority's rows stale.
+
+### Measured
 
 - `scripts/verify_release.py` now applies the private-marker rule to `docs/measurements/*.json`,
   and the four dated receipts that carried a hostname or a Windows user path were rewritten to
@@ -44,8 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `efacac23...`): 130,048-token exact retrieval at 2,180 tok/s, 138.2 decode tok/s, agent
   protocol with no resurrection, 24/24 fanout forks on the anchor path across 57.9K / 67.7K /
   80.0K templates in-process and after a restart, warm arrival in both orders, restore in
-  3.3-4.0 s. `v0.5.1` is staged with the published component; external acceptance and the
-  product cut have not run
+  3.3-4.0 s
   ([qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
   [gates](docs/measurements/2026-09-08-rtx5090-v051-profile-gates.json) ·
   [57.9K](docs/measurements/2026-09-08-rtx5090-v051-fanout-57k.json) ·
@@ -570,7 +595,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...v0.5.0
 [0.4.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.7...v0.4.8

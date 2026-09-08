@@ -36,9 +36,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
-        self.assertEqual(authority["product_release"], "v0.5.0")
+        self.assertEqual(authority["product_release"], "v0.5.1")
         receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.5.0" / "qualification" / "rtx5090.json").read_bytes()
+            (ROOT / "releases" / "v0.5.1" / "qualification" / "rtx5090.json").read_bytes()
         ).hexdigest()
         self.assertTrue(
             all(
@@ -50,9 +50,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(
                 profile["runtime"]["image_reference"]
-                == "ghcr.io/alphastorm/ninfer-runtime@sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4"
+                == "ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82"
                 and profile["runtime"]["image_digest"]
-                == "sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4"
+                == "sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82"
                 for profile in authority["profiles"]
             )
         )
@@ -208,33 +208,35 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_native_runtime_variants_render_and_fail_closed(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         variants = {item["id"]: item for item in authority["runtime_variants"]}
-        rtx3090 = variants["rtx3090-windows-native"]
-        self.assertEqual(rtx3090["status"], "qualified")
-        self.assertTrue(rtx3090["installable"])
-        self.assertEqual(rtx3090["release_tag"], "v0.2.2-qwen38-3090-beta.1")
-        self.assertEqual(
-            rtx3090["package_name"],
-            "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-"
-            "cuda13.3-rtx3090.tar.gz",
+        manifest = json.loads(
+            (ROOT / "releases" / authority["product_release"] / "manifest.json").read_text(
+                encoding="utf-8"
+            )
         )
-        self.assertEqual(
-            rtx3090["package_sha256"],
-            "57652260531a391f1a443437c200657ef90e85e322e078f6c7cb6e47682f5aa1",
-        )
-        self.assertEqual(rtx3090["package_bytes"], 573249238)
-        self.assertEqual(
-            rtx3090["qualification_receipt"]["path"],
-            "releases/v0.5.0/qualification/rtx3090.json",
-        )
-        self.assertEqual(
-            rtx3090["package_url"],
-            "https://github.com/alphastorm/ninfer/releases/download/v0.2.2-qwen38-3090-beta.1/"
-            "ninfer-rtx3090-omp-v0.2.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-        )
-        self.assertEqual(
-            variants["rtx4090-windows-native"]["release_tag"],
-            "v0.2.0-qwen38-4090-beta.1",
-        )
+        components = {item["id"]: item for item in manifest["components"]["ninfer_variants"]}
+        self.assertEqual(set(variants), set(components))
+        for variant_id, variant in variants.items():
+            component = components[variant_id]
+            self.assertEqual(variant["status"], "qualified")
+            self.assertTrue(variant["installable"])
+            for key in (
+                "release_tag",
+                "source_commit",
+                "package_name",
+                "package_url",
+                "package_sha256",
+                "package_bytes",
+                "maximum_context_tokens",
+            ):
+                self.assertEqual(variant[key], component[key], f"{variant_id} {key}")
+            self.assertEqual(
+                variant["qualification_receipt"]["path"],
+                component["qualification"]["summary"],
+            )
+            self.assertEqual(
+                variant["qualification_receipt"]["sha256"],
+                hashlib.sha256((ROOT / component["qualification"]["summary"]).read_bytes()).hexdigest(),
+            )
         variant = {
             "id": "rtx3090-windows-native",
             "status": "qualified",
@@ -265,7 +267,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
         current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.5.0")
+        self.assertEqual(current["product_release"], "v0.5.1")
 
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")

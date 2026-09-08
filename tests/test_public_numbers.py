@@ -107,9 +107,12 @@ class PublicNumbersTests(unittest.TestCase):
         interpretation = self.qualification["evidence_interpretation"]
         self.assertTrue(interpretation["packaged_build_identity_authoritative"])
         self.assertFalse(interpretation["documentation_benchmark_source_field_credited"])
+        manifest = json.loads(
+            (ROOT / "releases" / self.release / "manifest.json").read_text(encoding="utf-8")
+        )
         self.assertEqual(
             self.qualification["identity"]["source_commit"],
-            "dde8d07026e79f32afcf1fb367a80c6bc741e855",
+            manifest["components"]["ninfer"]["source_commit"],
         )
 
 

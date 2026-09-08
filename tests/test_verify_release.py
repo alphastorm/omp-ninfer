@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -36,7 +37,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_release_predicate_exempts_prerelease_contracts(self) -> None:
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.2.0-beta.1"))
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.3.0-rc.1"))
-        self.assertTrue(VERIFY_RELEASE.ga_release("v0.5.0"))
+        self.assertTrue(VERIFY_RELEASE.ga_release("v0.5.1"))
 
     def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary = tempfile.TemporaryDirectory()
@@ -119,17 +120,17 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(manifest["publication"]["blockers"], [])
         self.assertEqual(
             manifest["components"]["ninfer"]["oci_manifest_digest"],
-            "sha256:876c7809db734cc43a8acf968620d42bae33d5676fb2a626ef7e26f50693bfd4",
+            "sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82",
         )
         summary_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.5.0" / "qualification.json").read_bytes()
+            (ROOT / "releases" / "v0.5.1" / "qualification.json").read_bytes()
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        planted = root / "releases" / "v0.5.0" / "review" / "planted.json"
+        planted = root / "releases" / "v0.5.1" / "review" / "planted.json"
         planted.write_text('{"path": "/Users/someone/secret"}', encoding="utf-8")
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(
@@ -140,7 +141,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.5.0" / "manifest.json"
+        manifest_path = root / "releases" / "v0.5.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["limitations"] = list(manifest.get("limitations", [])) + [
             "The RTX 5090 identities remain pending."
@@ -159,7 +160,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.5.0" / "manifest.json"
+        manifest_path = root / "releases" / "v0.5.1" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["channel"] = "general-availability"
         self.save(manifest_path, manifest)
@@ -275,7 +276,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(field=field):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release = "v0.5.0"
+                    release = "v0.5.1"
                     release_root = root / "releases" / release
                     acceptance_path = (
                         release_root
@@ -353,7 +354,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.5.0"
+                    release_root = root / "releases" / "v0.5.1"
                     manifest_path = release_root / "manifest.json"
                     qualification_path = release_root / "qualification.json"
                     compatibility_path = release_root / "compatibility.json"
@@ -394,7 +395,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_ready_lane_set_must_match_qualification_composition(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        release_root = root / "releases" / "v0.5.0"
+        release_root = root / "releases" / "v0.5.1"
         qualification_path = release_root / "qualification.json"
         manifest_path = release_root / "manifest.json"
         qualification = self.load(qualification_path)
@@ -426,6 +427,132 @@ class ReleaseContractTest(unittest.TestCase):
             "ready release requires a non-empty components.ninfer_variants id set",
             empty_errors,
         )
+
+    def rebind_qualification(self, release_root: Path, mutate) -> None:
+        qualification_path = release_root / "qualification.json"
+        qualification = self.load(qualification_path)
+        mutate(qualification)
+        self.save(qualification_path, qualification)
+        manifest_path = release_root / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        self.save(manifest_path, manifest)
+
+    def test_ready_profile_launch_arguments_must_name_manifest_identities(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
+        profile = self.load(profile_path)
+        arguments = profile["server"]["arguments"]
+        arguments[arguments.index("--config-sha256") + 1] = "0" * 64
+        arguments[arguments.index("--binary-sha256") + 1] = "1" * 64
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "profile: --config-sha256 must occur once and equal runtime_identity.configuration_sha256",
+            errors,
+        )
+        self.assertIn(
+            "profile: --binary-sha256 must occur once and equal components.ninfer.server_binary_sha256",
+            errors,
+        )
+
+    def test_ready_qualification_identity_must_name_the_manifest_component(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+
+        def stale_identity(qualification: dict) -> None:
+            identity = qualification["runtime_identity"]
+            identity["upstream_commit"] = "4eef14a7560d87a3ba717898e1d488a4c4c7246d"
+            identity["release_source_archive_sha256"] = "2" * 64
+
+        self.rebind_qualification(root / "releases" / "v0.5.1", stale_identity)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "qualification.runtime_identity.upstream_commit must equal components.ninfer.upstream_commit",
+            errors,
+        )
+        self.assertIn(
+            "qualification.runtime_identity.release_source_archive_sha256 must equal components.ninfer.source_archive_sha256",
+            errors,
+        )
+
+    def test_ready_native_variant_rows_must_equal_manifest_components(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release_root = root / "releases" / "v0.5.1"
+        for compatibility_path in (root / "compatibility.json", release_root / "compatibility.json"):
+            compatibility = self.load(compatibility_path)
+            row = compatibility["runtime_variants"][0]
+            row["release_tag"] = "v0.2.2-qwen38-3090-beta.1"
+            row["package_url"] = (
+                "https://github.com/alphastorm/ninfer/releases/download/"
+                f"{row['release_tag']}/{row['package_name']}"
+            )
+            row["maximum_context_tokens"] = 65536
+            self.save(compatibility_path, compatibility)
+
+        def stale_composition(qualification: dict) -> None:
+            entry = qualification["composition"]["native_runtime_variants"]["rtx4090-windows-native"]
+            entry["repository_path"] = "releases/v0.4.3/qualification/rtx4090.json"
+
+        self.rebind_qualification(release_root, stale_composition)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        for key in ("release_tag", "package_url", "maximum_context_tokens"):
+            self.assertIn(
+                f"compatibility.runtime_variants[rtx3090-windows-native].{key} must equal the manifest component",
+                errors,
+            )
+        self.assertIn(
+            "qualification.composition.native_runtime_variants[rtx4090-windows-native].repository_path must equal the manifest component",
+            errors,
+        )
+
+    def test_pinned_evidence_urls_must_serve_their_recorded_bytes(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        repository = Path(temporary.name)
+        receipt = repository / "releases" / "v9.9.9" / "receipt.json"
+        receipt.parent.mkdir(parents=True)
+        receipt.write_text("{\"gate\": \"passed\"}\n", encoding="utf-8")
+        git = ("git", "-C", str(repository))
+        subprocess.run([*git, "init", "-q"], check=True)
+        subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
+                        "add", "-A"], check=True)
+        subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
+                        "commit", "-q", "-m", "receipt"], check=True)
+        commit = subprocess.run([*git, "rev-parse", "HEAD"], check=True,
+                                capture_output=True, text=True).stdout.strip()
+        receipt.write_text("{\"gate\": \"passed\", \"edited\": true}\n", encoding="utf-8")
+        recorded = hashlib.sha256(b"{\"gate\": \"passed\"}\n").hexdigest()
+        raw = f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{commit}"
+
+        cases = (
+            (f"{raw}/releases/v9.9.9/receipt.json", recorded, []),
+            (
+                f"{raw}/releases/v9.9.9/receipt.json",
+                hashlib.sha256(receipt.read_bytes()).hexdigest(),
+                [f"receipt pins commit {commit[:12]} whose releases/v9.9.9/receipt.json differs from the recorded SHA-256"],
+            ),
+            (
+                f"{raw}/releases/v9.9.9/absent.json",
+                recorded,
+                [f"receipt pins commit {commit[:12]} which does not contain releases/v9.9.9/absent.json"],
+            ),
+            (
+                f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'f' * 40}/releases/v9.9.9/receipt.json",
+                "3" * 64,
+                [],
+            ),
+        )
+        for url, expected, expected_errors in cases:
+            with self.subTest(url=url, expected=expected[:8]):
+                errors: list[str] = []
+                VERIFY_RELEASE.require_pinned_bytes(repository, url, expected, "receipt", errors, {})
+                self.assertEqual(errors, expected_errors)
 
     def test_cross_component_model_hash_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()
@@ -508,7 +635,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.5.0",
+            "v0.5.1",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -803,7 +930,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.5.0"
+                    release_root = root / "releases" / "v0.5.1"
                     manifest_path = release_root / "manifest.json"
                     manifest = self.load(manifest_path)
                     variant = next(
@@ -865,7 +992,7 @@ class ReleaseContractTest(unittest.TestCase):
 
         temporary, root = self.public_draft_copy()
         try:
-            release_root = root / "releases" / "v0.5.0"
+            release_root = root / "releases" / "v0.5.1"
             manifest_path = release_root / "manifest.json"
             manifest = self.load(manifest_path)
             variant = next(

@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.5.0
+## Where this is now — v0.5.1
 
 All three lanes install from public URLs with durable, restart-resumable session state that now
 survives the machine losing its local copy (`scripts/checkpoint_sync.py`, origin-authenticated
@@ -20,7 +20,10 @@ on every lane, EXP-018); the two native Windows lanes restore a checkpointed ses
 RTX 5090 lane reuses a session's base prefill across sibling agent branches: four branches
 that replayed 67.7K tokens from scratch on v0.4.1 (148.7 s) run in 47.9 s, and a branch whose
 anchor is still device-resident starts generating in 0.40 s
-([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). Details:
+([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). As of `v0.5.1` that reuse
+also survives a restart on the RTX 5090: a restored template serves every sibling fork on the
+shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.8 s instead of 24 s
+([receipt](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)). Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
@@ -187,7 +190,8 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    from that image through the lifecycle tool on the unchanged v0.4.8 arguments: 24/24 fanout
    forks on the anchor path across 57.9K, 67.7K, and 80.0K templates in-process and after a
    restart, exact 130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s (EXP-024).
-   `v0.5.1` is staged; external acceptance and the product cut remain.
+   Shipped as `v0.5.1` on 2026-09-08 after the composed external-installation acceptance from
+   the published URLs.
    The native lanes get the same architecture by building from mainline rather than porting the
    cache into their branches: stage 1 (`port/native-lanes-on-mainline`) compiles mainline for
    Ada `sm_89`, with Ampere and the Windows platform code as the next stages. Receipts:
