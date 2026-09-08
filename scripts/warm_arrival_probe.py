@@ -140,14 +140,18 @@ class Run:
         fork_id = self.request("pre_restart_fork",
                                "Branch role 0: summarize entry 5 in six words.",
                                previous=base_id, max_output=80)
-        self.save("save", 2)
+        # In-process control: a lane that cannot quote the planted keys before any restart
+        # makes the post-restart retrieval inconclusive rather than a restore defect.
+        control_id = self.request("control_retrieval", retrieval_prompt(self.keys, "Control"),
+                                  previous=fork_id, max_output=512, expect_keys=True)
+        self.save("save", 3)
         self.record("cache_before_restart", cache_snapshot(self.lane))
         self.record("restart", verified_restart(self.lane, restart_cmd))
         self.reused_before = 0
         self.record("cache_after_restart", cache_snapshot(self.lane))
         if order == "resume-first":
             self.request("endpoint_resume_first", retrieval_prompt(self.keys, "Resume"),
-                         previous=fork_id, max_output=256, expect_keys=True,
+                         previous=control_id, max_output=512, expect_keys=True,
                          poll_restore=self.restore_status)
             self.request("fork_after_resume",
                          "Branch role 1: summarize entry 6 in six words.",
@@ -161,7 +165,7 @@ class Run:
                          previous=base_id, max_output=80,
                          poll_restore=self.restore_status)
             self.request("endpoint_resume_after_fork", retrieval_prompt(self.keys, "Resume"),
-                         previous=fork_id, max_output=256, expect_keys=True)
+                         previous=control_id, max_output=512, expect_keys=True)
             self.request("fork_after_resume",
                          "Branch role 2: summarize entry 7 in six words.",
                          previous=base_id, max_output=80)
@@ -177,6 +181,7 @@ def summarize(order: str, steps: list[dict[str, Any]]) -> dict[str, Any]:
     resumes = [entry for entry in post if entry["step"].startswith("endpoint_resume")]
     return {
         "order": order,
+        "control_retrieval_exact": by_step["control_retrieval"].get("exact"),
         "template_input_tokens": by_step["base_prefill"].get("input_tokens"),
         "cold_prefill_s": by_step["base_prefill"]["wall_s"],
         "pre_restart_fork": [by_step["pre_restart_fork"]["reuse_path"],
@@ -237,6 +242,9 @@ def main() -> int:
     print(json.dumps(summaries, indent=2))
     hot = all(entry["every_post_restart_fork_hot"] for entry in summaries)
     exact = all(entry["restored_retrieval_exact"] for entry in summaries)
+    if not all(entry["control_retrieval_exact"] for entry in summaries):
+        print("inconclusive: the lane did not retrieve the planted keys in-process", flush=True)
+        return 2
     if not exact:
         print("FAILED: a restored continuation did not quote the planted keys", flush=True)
         return 1

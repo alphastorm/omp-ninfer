@@ -184,11 +184,16 @@ def main() -> int:
         # served from the corrupted bytes, and the generation must be quarantined.
         if not args.stop_cmd or not args.start_cmd:
             parser.error("--tamper-cmd requires --stop-cmd and --start-cmd")
+        # The lane is down between the stop and the start; whatever fails in between, the
+        # start runs and the lane is waited on before the exception propagates.
         subprocess.run(args.stop_cmd, shell=True, check=True, capture_output=True, timeout=600)
-        flipped = subprocess.run(args.tamper_cmd, shell=True, check=True, capture_output=True,
-                                 text=True, timeout=120).stdout.strip()
-        subprocess.run(args.start_cmd, shell=True, check=True, capture_output=True, timeout=600)
-        ready = wait_ready(lane, 600.0)
+        try:
+            flipped = subprocess.run(args.tamper_cmd, shell=True, check=True,
+                                     capture_output=True, text=True, timeout=120).stdout.strip()
+        finally:
+            subprocess.run(args.start_cmd, shell=True, check=True, capture_output=True,
+                           timeout=600)
+            ready = wait_ready(lane, 600.0)
         refused: dict[str, Any]
         started = now()
         try:
