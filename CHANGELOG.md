@@ -36,13 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the io_uring reads run eight deep overlapped with the hash. A flipped payload byte is still
   refused (404) and quarantined
   ([receipt](docs/measurements/2026-09-08-restore-probe-rtx5090-candidate.json)).
-- EXP-024: the RTX 5090 candidate (`ninfer` `d956e6d6`, appliance-local binary `71edc2f6`,
-  packaged as `ninfer-qwen38-rtx5090-v0.5.1-linux-x86_64-cuda13.1.tar.gz` with its SBOM) passed
-  the lane's profile gates on the unchanged v0.4.8 arguments: 130,048-token exact retrieval at
-  2,196 tok/s, 138.2 decode tok/s, agent protocol with no resurrection, 24/24 fanout forks on the
-  anchor path across 57.9K / 67.7K / 80.0K templates in-process and after a restart, restore in
-  3.5-4.3 s. Staged for `v0.5.1`; the archive release, runtime-image workflow, and external
-  acceptance have not run
+- EXP-024: the RTX 5090 component `v0.5.1-qwen38-5090-beta.1` (`ninfer` `d956e6d6`,
+  appliance-local binary `71edc2f6`, archive `c0189387...` with its SBOM, source archive
+  `4359c814...`, runtime image `12ef2d9e...` whose binaries measure byte-identical) passed the
+  lane's profile gates on the unchanged v0.4.8 arguments, started through the lifecycle tool
+  from the published image under deployment profile `qwen38-5090-v0.5.1` (configuration
+  `efacac23...`): 130,048-token exact retrieval at 2,180 tok/s, 138.2 decode tok/s, agent
+  protocol with no resurrection, 24/24 fanout forks on the anchor path across 57.9K / 67.7K /
+  80.0K templates in-process and after a restart, warm arrival in both orders, restore in
+  3.3-4.0 s. `v0.5.1` is staged with the published component; external acceptance and the
+  product cut have not run
   ([qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
   [gates](docs/measurements/2026-09-08-rtx5090-v051-profile-gates.json) ·
   [57.9K](docs/measurements/2026-09-08-rtx5090-v051-fanout-57k.json) ·

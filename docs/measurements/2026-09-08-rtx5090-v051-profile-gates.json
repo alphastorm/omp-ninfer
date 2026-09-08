@@ -1,16 +1,16 @@
 {
   "artifact_type": "omp_ninfer_rtx5090_profile_gates",
   "schema_version": 1,
-  "generated_utc": "2026-09-07T16:23:32Z",
+  "generated_utc": "2026-09-08T12:33:15Z",
   "identity": {
     "binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b",
     "build_profile": "appliance-local",
     "build_type": "Release",
-    "config_sha256": "893a0f1a78ae3f1d0d5ccbc1fff848f65d351c4a8fcf279a76af7edfcd1dc736",
+    "config_sha256": "efacac2366136b70ffd9af7c282bc0ace71a0d6b845e2e489acab0f3ae151e1a",
     "cuda_compiler": "NVIDIA-13.1.115",
     "cuda_toolkit": "13.1.115",
     "cxx_compiler": "GNU-13.3.0",
-    "deployment_profile": "warm-arrival-candidate",
+    "deployment_profile": "qwen38-5090-v0.5.1",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
     "model_id": "qwen3.8-27b",
     "patch_stack_sha": "d956e6d61174175684d42e73f1a16fad2a3f229c",
@@ -29,7 +29,7 @@
     "speculative_backend": "mtp",
     "speculative_draft_window": 3
   },
-  "vram_used_mib_idle": null,
+  "vram_used_mib_idle": 28245,
   "gates": {
     "prefill_curve": {
       "status": "passed",
@@ -38,24 +38,24 @@
       "completion_tokens": 17,
       "exact_output": true,
       "output": "ORCHID=493817; COLOR=COBALT",
-      "wall_s": 59.216,
-      "tokens_per_second_wall": 2196.2,
-      "vram_used_mib_after": null,
+      "wall_s": 59.647,
+      "tokens_per_second_wall": 2180.3,
+      "vram_used_mib_after": 28245,
       "server_prefix_cache_hit_tokens": 0,
       "server_prefix_reuse_path": "root",
       "server_computed_prefill_tokens": 130048,
-      "server_prefill_seconds": 58.61145619300002,
+      "server_prefill_seconds": 58.288280723000035,
       "cold": true
     },
     "decode": {
-      "request_id": "516038d0742b0c23a1e9bd272d2638141dac90c30eb43085808dfe9e5e54a597",
+      "request_id": "1dfea326466c4db39b4414da3a529ded4cab141803b1834d6f2b5cac71518369",
       "prompt_tokens": 118,
       "completion_tokens": 2048,
-      "wall_s": 15.292,
-      "completion_tokens_per_second_wall": 133.93,
+      "wall_s": 15.383,
+      "completion_tokens_per_second_wall": 133.13,
       "server_completion_tokens": 2048,
-      "server_decode_seconds": 14.819342117999993,
-      "decode_tokens_per_second": 138.2,
+      "server_decode_seconds": 14.82339278999999,
+      "decode_tokens_per_second": 138.16,
       "mtp_acceptance_rate": 0.412,
       "mtp_tokens_per_round": 2.24,
       "speculative": {
@@ -86,6 +86,6 @@
     }
   },
   "status": "passed",
-  "vram_used_mib_final": null,
+  "vram_used_mib_final": 28245,
   "transient_retries": 0
 }

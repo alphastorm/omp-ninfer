@@ -97,7 +97,14 @@ def main() -> int:
     parser.add_argument("--profile-from", default=None, metavar="vX.Y.Z",
                         help="release whose 5090 deployment profile is currently live, when a "
                              "variant-only rebind left it behind the source release")
+    parser.add_argument("--lane-receipt", type=Path, default=None, metavar="PATH",
+                        help="the new release's RTX 5090 qualification receipt; installed as "
+                             "releases/<release>/qualification/rtx5090.json before the hash "
+                             "chain is computed, so the lane-receipt hash binds the real "
+                             "evidence rather than the copied predecessor")
     args = parser.parse_args()
+    if args.lane_receipt is not None and not args.lane_receipt.is_file():
+        parser.error(f"missing lane receipt: {args.lane_receipt}")
 
     if not args.image_digest.startswith("sha256:"):
         parser.error("--image-digest must start with sha256:")
@@ -176,6 +183,8 @@ def main() -> int:
     # 4. Compatibility authority: pins, paths, and the lane-receipt hash.
     compat_path = dst_dir / "compatibility.json"
     lane_path = dst_dir / "qualification" / "rtx5090.json"
+    if args.lane_receipt is not None:
+        shutil.copyfile(args.lane_receipt, lane_path)
     rewrite_text(compat_path, {
         old["digest"]: args.image_digest,
         old["binary"]: args.binary_sha,

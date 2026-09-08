@@ -1,75 +1,77 @@
 {
   "artifact_type": "omp_ninfer_warm_arrival_probe",
   "schema_version": 2,
-  "lane": "rtx5090-candidate",
-  "generated_utc": "2026-09-07T16:04:33Z",
-  "base_tokens_requested": 56000,
+  "lane": "rtx5090-v051-candidate",
+  "generated_utc": "2026-09-08T12:41:57Z",
+  "base_tokens_requested": 48000,
   "summary": [
     {
       "order": "resume-first",
-      "template_input_tokens": 67717,
-      "cold_prefill_s": 25.913,
+      "control_retrieval_exact": true,
+      "template_input_tokens": 57889,
+      "cold_prefill_s": 21.557,
       "pre_restart_fork": [
         "private_endpoint",
-        1.217
+        1.167
       ],
-      "checkpoint_bytes": 5192483760,
+      "checkpoint_bytes": 4523689890,
       "post_restart_sequence": [
         [
           "endpoint_resume_first",
-          "private_endpoint",
-          67864,
-          4.209
+          "private_response_replay",
+          58080,
+          3.31
         ],
         [
           "fork_after_resume",
           "private_long_anchor",
-          67712,
-          2.923
+          57884,
+          1.341
         ],
         [
           "fork_second",
           "private_long_anchor",
-          67712,
-          1.308
+          57884,
+          1.343
         ]
       ],
       "every_post_restart_fork_hot": true,
       "restored_retrieval_exact": true,
-      "restore_plus_sequence_s": 8.44
+      "restore_plus_sequence_s": 5.994
     },
     {
       "order": "fork-first",
-      "template_input_tokens": 67717,
-      "cold_prefill_s": 26.946,
+      "control_retrieval_exact": true,
+      "template_input_tokens": 57889,
+      "cold_prefill_s": 23.337,
       "pre_restart_fork": [
         "private_endpoint",
-        1.302
+        1.185
       ],
-      "checkpoint_bytes": 5192483760,
+      "checkpoint_bytes": 4532607616,
       "post_restart_sequence": [
         [
           "fork_first",
           "private_long_anchor",
-          67712,
-          3.709
+          57884,
+          3.742
         ],
         [
           "endpoint_resume_after_fork",
-          "private_endpoint",
-          67864,
-          1.638
+          "private_response_replay",
+          58080,
+          2.945
         ],
         [
           "fork_after_resume",
           "private_long_anchor",
-          67712,
-          1.316
+          57884,
+          2.919
         ]
       ],
       "every_post_restart_fork_hot": true,
       "restored_retrieval_exact": true,
-      "restore_plus_sequence_s": 6.663
+      "restore_plus_sequence_s": 9.606
     }
   ],
   "runs": {
@@ -77,106 +79,143 @@
       "steps": [
         {
           "step": "base_prefill",
-          "wall_s": 25.913,
-          "id": "resp_aa1674add84795b51a3283c1f57cff4a",
-          "input_tokens": 67717,
+          "wall_s": 21.557,
+          "id": "resp_14626eed70e83e772ea3ba85b521becf",
+          "input_tokens": 57889,
           "reuse_path": "root",
           "reuse_frontier": 0,
-          "reused_tokens": 0,
+          "reused_tokens": 338532,
           "cache": {
             "last_selection": {
               "frontier_tokens": 0,
               "path": "root"
             },
-            "reused_prompt_tokens": 0,
+            "reused_prompt_tokens": 338532,
             "private_catalog": {
               "capacity": 8,
-              "occupied": 1
+              "occupied": 6
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 2
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 0
+              "capacity": 24,
+              "occupied": 8
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 0
+              "occupied_bytes": 4719378432
             }
           }
         },
         {
           "step": "pre_restart_fork",
-          "wall_s": 1.217,
-          "id": "resp_ffce9733e045ee71f4054c7bf8d904db",
-          "input_tokens": 67785,
+          "wall_s": 1.167,
+          "id": "resp_78ede7a9870c6a6d4affbd03d7d2b33d",
+          "input_tokens": 57957,
           "reuse_path": "private_endpoint",
-          "reuse_frontier": 67756,
-          "reused_tokens": 67756,
+          "reuse_frontier": 57928,
+          "reused_tokens": 57928,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67756,
+              "frontier_tokens": 57928,
               "path": "private_endpoint"
             },
-            "reused_prompt_tokens": 67756,
+            "reused_prompt_tokens": 396460,
             "private_catalog": {
               "capacity": 8,
-              "occupied": 1
+              "occupied": 6
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 3
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 0
+              "capacity": 24,
+              "occupied": 9
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 0
+              "occupied_bytes": 4719378432
             }
           }
         },
         {
+          "step": "control_retrieval",
+          "wall_s": 1.616,
+          "id": "resp_b7221f0f508a8eac9297cdd63560f984",
+          "input_tokens": 58085,
+          "reuse_path": "private_endpoint",
+          "reuse_frontier": 58036,
+          "reused_tokens": 58036,
+          "cache": {
+            "last_selection": {
+              "frontier_tokens": 58036,
+              "path": "private_endpoint"
+            },
+            "reused_prompt_tokens": 454496,
+            "private_catalog": {
+              "capacity": 8,
+              "occupied": 6
+            },
+            "device_state": {
+              "capacity": 5,
+              "occupied": 5
+            },
+            "host_state": {
+              "capacity": 24,
+              "occupied": 9
+            },
+            "host_kv": {
+              "capacity_bytes": 8589934592,
+              "occupied_bytes": 4719378432
+            }
+          },
+          "exact": true,
+          "missing_keys": [],
+          "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nNeed extract from previous huge ledger:\n\"Le",
+          "incomplete": null,
+          "output_sha256": "a5a8ad6427bfee88c0d9e1cb22ec28f9af3c4f8a57e10b00c5c30ead57082a5c"
+        },
+        {
           "step": "save",
-          "wall_s": 4.845,
+          "wall_s": 4.15,
           "mode": "explicit",
-          "generation": "1788796931390-1",
-          "bytes": 5192483760,
-          "frontier": 67864,
+          "generation": "1788871171726-4",
+          "bytes": 4523689890,
+          "frontier": 58258,
           "response_records": null
         },
         {
           "step": "cache_before_restart",
           "last_selection": {
-            "frontier_tokens": 67756,
+            "frontier_tokens": 58036,
             "path": "private_endpoint"
           },
-          "reused_prompt_tokens": 67756,
+          "reused_prompt_tokens": 454496,
           "private_catalog": {
             "capacity": 8,
-            "occupied": 1
+            "occupied": 6
           },
           "device_state": {
-            "capacity": 9,
-            "occupied": 3
+            "capacity": 5,
+            "occupied": 5
           },
           "host_state": {
-            "capacity": 32,
-            "occupied": 0
+            "capacity": 24,
+            "occupied": 9
           },
           "host_kv": {
             "capacity_bytes": 8589934592,
-            "occupied_bytes": 0
+            "occupied_bytes": 4719378432
           }
         },
         {
           "step": "restart",
-          "wall_s": 38.237,
-          "ready_after_s": 26.37,
-          "prefill_counter_before": 67799,
+          "wall_s": 41.734,
+          "ready_after_s": 26.44,
+          "prefill_counter_before": 58356,
           "prefill_counter_after": 53
         },
         {
@@ -191,11 +230,11 @@
             "occupied": 0
           },
           "device_state": {
-            "capacity": 9,
+            "capacity": 5,
             "occupied": 0
           },
           "host_state": {
-            "capacity": 32,
+            "capacity": 24,
             "occupied": 0
           },
           "host_kv": {
@@ -205,50 +244,50 @@
         },
         {
           "step": "endpoint_resume_first",
-          "wall_s": 4.209,
-          "id": "resp_ad67f38d8a253d5e1e017056cecad539",
-          "input_tokens": 67913,
-          "reuse_path": "private_endpoint",
-          "reuse_frontier": 67864,
-          "reused_tokens": 67864,
+          "wall_s": 3.31,
+          "id": "resp_8cf7d6b1b431b2c0219a3a2341f408d5",
+          "input_tokens": 58303,
+          "reuse_path": "private_response_replay",
+          "reuse_frontier": 58080,
+          "reused_tokens": 58080,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67864,
-              "path": "private_endpoint"
+              "frontier_tokens": 58080,
+              "path": "private_response_replay"
             },
-            "reused_prompt_tokens": 67864,
+            "reused_prompt_tokens": 58080,
             "private_catalog": {
               "capacity": 8,
               "occupied": 1
             },
             "device_state": {
-              "capacity": 9,
+              "capacity": 5,
               "occupied": 2
             },
             "host_state": {
-              "capacity": 32,
+              "capacity": 24,
               "occupied": 1
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4046454784
             }
           },
           "exact": true,
           "missing_keys": [],
-          "output_excerpt": "User asks: \"Resume: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nNeed extract from prior ledger:\n\"Ledger key ",
+          "output_excerpt": "Need resume quote keys exactly. Same output. Ensure no other words.\nORCHID=521183 COLOR=834991 SIGIL=954503",
           "incomplete": null,
-          "output_sha256": "d2669cfa342edcc5e54dde3d01f2d741faf6ac99c000e574671f9e68fe0fb0a2",
+          "output_sha256": "ae2ca8f17676b834170faa8b8f573d0fdea5807621c066de9a0ab8e7c3922df8",
           "restore_status_polls": [
             {
-              "t_s": 0.53,
-              "bytes": 5192483760,
-              "created_at_unix_ms": 1788796944433,
-              "frontier_tokens": 67864,
-              "generation": "1788796940387-2",
+              "t_s": 0.49,
+              "bytes": 4523689890,
+              "created_at_unix_ms": 1788871187740,
+              "frontier_tokens": 58258,
+              "generation": "1788871184462-6",
               "read_backend": "io_uring-odirect",
-              "response_records": 2,
-              "restored_tokens": 67864,
+              "response_records": 3,
+              "restored_tokens": 58258,
               "schema_version": 2,
               "state": "available"
             }
@@ -256,65 +295,65 @@
         },
         {
           "step": "fork_after_resume",
-          "wall_s": 2.923,
-          "id": "resp_b13d97641adac00fb89d3a5a9252ebf2",
-          "input_tokens": 67785,
+          "wall_s": 1.341,
+          "id": "resp_8f0e2a8647dbcc19b5f1aeeaf934c341",
+          "input_tokens": 57957,
           "reuse_path": "private_long_anchor",
-          "reuse_frontier": 67712,
-          "reused_tokens": 67712,
+          "reuse_frontier": 57884,
+          "reused_tokens": 57884,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67712,
+              "frontier_tokens": 57884,
               "path": "private_long_anchor"
             },
-            "reused_prompt_tokens": 135576,
+            "reused_prompt_tokens": 115964,
             "private_catalog": {
               "capacity": 8,
               "occupied": 2
             },
             "device_state": {
-              "capacity": 9,
+              "capacity": 5,
               "occupied": 4
             },
             "host_state": {
-              "capacity": 32,
+              "capacity": 24,
               "occupied": 1
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4046454784
             }
           }
         },
         {
           "step": "fork_second",
-          "wall_s": 1.308,
-          "id": "resp_5d47b3e448892e6172ab36bc8a9f0ebc",
-          "input_tokens": 67785,
+          "wall_s": 1.343,
+          "id": "resp_3c50c91539aae7a68fdafecde34a1b06",
+          "input_tokens": 57957,
           "reuse_path": "private_long_anchor",
-          "reuse_frontier": 67712,
-          "reused_tokens": 67712,
+          "reuse_frontier": 57884,
+          "reused_tokens": 57884,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67712,
+              "frontier_tokens": 57884,
               "path": "private_long_anchor"
             },
-            "reused_prompt_tokens": 203288,
+            "reused_prompt_tokens": 173848,
             "private_catalog": {
               "capacity": 8,
               "occupied": 3
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 6
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 1
+              "capacity": 24,
+              "occupied": 2
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4046454784
             }
           }
         },
@@ -329,106 +368,143 @@
       "steps": [
         {
           "step": "base_prefill",
-          "wall_s": 26.946,
-          "id": "resp_7d227a3bf1a90b54bfefd3388277c972",
-          "input_tokens": 67717,
+          "wall_s": 23.337,
+          "id": "resp_d3314284d0fededee299fe9a7dddb369",
+          "input_tokens": 57889,
           "reuse_path": "root",
           "reuse_frontier": 0,
-          "reused_tokens": 203288,
+          "reused_tokens": 173848,
           "cache": {
             "last_selection": {
               "frontier_tokens": 0,
               "path": "root"
             },
-            "reused_prompt_tokens": 203288,
+            "reused_prompt_tokens": 173848,
             "private_catalog": {
               "capacity": 8,
               "occupied": 4
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 8
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 1
+              "capacity": 24,
+              "occupied": 4
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4723834880
+              "occupied_bytes": 4041998336
             }
           }
         },
         {
           "step": "pre_restart_fork",
-          "wall_s": 1.302,
-          "id": "resp_a28b2e8f667ba0b519dea535a24305da",
-          "input_tokens": 67785,
+          "wall_s": 1.185,
+          "id": "resp_1797367b79927497d9da244818fc453c",
+          "input_tokens": 57957,
           "reuse_path": "private_endpoint",
-          "reuse_frontier": 67756,
-          "reused_tokens": 67756,
+          "reuse_frontier": 57928,
+          "reused_tokens": 57928,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67756,
+              "frontier_tokens": 57928,
               "path": "private_endpoint"
             },
-            "reused_prompt_tokens": 271044,
+            "reused_prompt_tokens": 231776,
             "private_catalog": {
               "capacity": 8,
               "occupied": 4
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 8
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 2
+              "capacity": 24,
+              "occupied": 5
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4723834880
+              "occupied_bytes": 4041998336
             }
           }
         },
         {
+          "step": "control_retrieval",
+          "wall_s": 2.726,
+          "id": "resp_5d6e6b0286cf8c36bf85bd6964eae424",
+          "input_tokens": 58085,
+          "reuse_path": "private_endpoint",
+          "reuse_frontier": 58036,
+          "reused_tokens": 58036,
+          "cache": {
+            "last_selection": {
+              "frontier_tokens": 58036,
+              "path": "private_endpoint"
+            },
+            "reused_prompt_tokens": 289812,
+            "private_catalog": {
+              "capacity": 8,
+              "occupied": 4
+            },
+            "device_state": {
+              "capacity": 5,
+              "occupied": 5
+            },
+            "host_state": {
+              "capacity": 24,
+              "occupied": 5
+            },
+            "host_kv": {
+              "capacity_bytes": 8589934592,
+              "occupied_bytes": 4041998336
+            }
+          },
+          "exact": true,
+          "missing_keys": [],
+          "output_excerpt": "The user wants me to quote the ORCHID, COLOR, and SIGIL ledger keys from the operations ledger exactly as KEY=VALUE separated by spaces, with no other words.\n\nLooking back at the previous message, I n",
+          "incomplete": null,
+          "output_sha256": "7a5ef8c0ebe511cf37ed9c0044e8de1f56772a510e1ee2d7a5cc43bbc244c760"
+        },
+        {
           "step": "save",
-          "wall_s": 3.983,
+          "wall_s": 4.231,
           "mode": "explicit",
-          "generation": "1788797016536-2",
-          "bytes": 5192483760,
-          "frontier": 67864,
+          "generation": "1788871257039-5",
+          "bytes": 4532607616,
+          "frontier": 58420,
           "response_records": null
         },
         {
           "step": "cache_before_restart",
           "last_selection": {
-            "frontier_tokens": 67756,
+            "frontier_tokens": 58036,
             "path": "private_endpoint"
           },
-          "reused_prompt_tokens": 271044,
+          "reused_prompt_tokens": 289812,
           "private_catalog": {
             "capacity": 8,
             "occupied": 4
           },
           "device_state": {
-            "capacity": 9,
-            "occupied": 8
+            "capacity": 5,
+            "occupied": 5
           },
           "host_state": {
-            "capacity": 32,
-            "occupied": 2
+            "capacity": 24,
+            "occupied": 5
           },
           "host_kv": {
             "capacity_bytes": 8589934592,
-            "occupied_bytes": 4723834880
+            "occupied_bytes": 4041998336
           }
         },
         {
           "step": "restart",
-          "wall_s": 43.383,
-          "ready_after_s": 26.37,
-          "prefill_counter_before": 67994,
+          "wall_s": 41.727,
+          "ready_after_s": 26.4,
+          "prefill_counter_before": 58389,
           "prefill_counter_after": 53
         },
         {
@@ -443,11 +519,11 @@
             "occupied": 0
           },
           "device_state": {
-            "capacity": 9,
+            "capacity": 5,
             "occupied": 0
           },
           "host_state": {
-            "capacity": 32,
+            "capacity": 24,
             "occupied": 0
           },
           "host_kv": {
@@ -457,45 +533,45 @@
         },
         {
           "step": "fork_first",
-          "wall_s": 3.709,
-          "id": "resp_d865993fd2c30a134c531971331d6073",
-          "input_tokens": 67785,
+          "wall_s": 3.742,
+          "id": "resp_2dcba535adcc68e4553224764e56fe4d",
+          "input_tokens": 57957,
           "reuse_path": "private_long_anchor",
-          "reuse_frontier": 67712,
-          "reused_tokens": 67712,
+          "reuse_frontier": 57884,
+          "reused_tokens": 57884,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67712,
+              "frontier_tokens": 57884,
               "path": "private_long_anchor"
             },
-            "reused_prompt_tokens": 67712,
+            "reused_prompt_tokens": 57884,
             "private_catalog": {
               "capacity": 8,
               "occupied": 2
             },
             "device_state": {
-              "capacity": 9,
+              "capacity": 5,
               "occupied": 2
             },
             "host_state": {
-              "capacity": 32,
+              "capacity": 24,
               "occupied": 3
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4068737024
             }
           },
           "restore_status_polls": [
             {
-              "t_s": 0.53,
-              "bytes": 5192483760,
-              "created_at_unix_ms": 1788797029247,
-              "frontier_tokens": 67864,
-              "generation": "1788797025261-3",
+              "t_s": 0.71,
+              "bytes": 4532607616,
+              "created_at_unix_ms": 1788871272924,
+              "frontier_tokens": 58420,
+              "generation": "1788871269766-7",
               "read_backend": "io_uring-odirect",
-              "response_records": 2,
-              "restored_tokens": 67864,
+              "response_records": 3,
+              "restored_tokens": 58420,
               "schema_version": 2,
               "state": "available"
             }
@@ -503,70 +579,70 @@
         },
         {
           "step": "endpoint_resume_after_fork",
-          "wall_s": 1.638,
-          "id": "resp_dfaa5bbcebad1bf16e44f6577fc281ac",
-          "input_tokens": 67913,
-          "reuse_path": "private_endpoint",
-          "reuse_frontier": 67864,
-          "reused_tokens": 67864,
+          "wall_s": 2.945,
+          "id": "resp_3099d4306a089c68124201673376d1c6",
+          "input_tokens": 58465,
+          "reuse_path": "private_response_replay",
+          "reuse_frontier": 58080,
+          "reused_tokens": 58080,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67864,
-              "path": "private_endpoint"
+              "frontier_tokens": 58080,
+              "path": "private_response_replay"
             },
-            "reused_prompt_tokens": 135576,
+            "reused_prompt_tokens": 115964,
             "private_catalog": {
               "capacity": 8,
               "occupied": 2
             },
             "device_state": {
-              "capacity": 9,
+              "capacity": 5,
               "occupied": 4
             },
             "host_state": {
-              "capacity": 32,
+              "capacity": 24,
               "occupied": 1
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4046454784
             }
           },
           "exact": true,
           "missing_keys": [],
-          "output_excerpt": "User asks: \"Resume: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nNeed extract from prior ledger:\n\"Ledger key ",
+          "output_excerpt": "The user is asking me to \"Resume: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nLooking at the previous turn, ",
           "incomplete": null,
-          "output_sha256": "91e87f02935bbd82173f8a42668dfd299f3099b04436701bf4660918bd1c17a4"
+          "output_sha256": "ef9880147363e34a7a82df4d9ec60a9d03b35cb6bf5fd877bacaf5abff3bc436"
         },
         {
           "step": "fork_after_resume",
-          "wall_s": 1.316,
-          "id": "resp_aa3d5732d834b1a4b1f32ace8dc1040a",
-          "input_tokens": 67785,
+          "wall_s": 2.919,
+          "id": "resp_d284f515694623bf12ca9dcc2448fde2",
+          "input_tokens": 57957,
           "reuse_path": "private_long_anchor",
-          "reuse_frontier": 67712,
-          "reused_tokens": 67712,
+          "reuse_frontier": 57884,
+          "reused_tokens": 57884,
           "cache": {
             "last_selection": {
-              "frontier_tokens": 67712,
+              "frontier_tokens": 57884,
               "path": "private_long_anchor"
             },
-            "reused_prompt_tokens": 203288,
+            "reused_prompt_tokens": 173848,
             "private_catalog": {
               "capacity": 8,
               "occupied": 3
             },
             "device_state": {
-              "capacity": 9,
-              "occupied": 6
+              "capacity": 5,
+              "occupied": 5
             },
             "host_state": {
-              "capacity": 32,
-              "occupied": 1
+              "capacity": 24,
+              "occupied": 2
             },
             "host_kv": {
               "capacity_bytes": 8589934592,
-              "occupied_bytes": 4728291328
+              "occupied_bytes": 4046454784
             }
           }
         },

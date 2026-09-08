@@ -27,6 +27,27 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.5.1 staged (warm arrival across a restart; not yet cut)
+
+- Runtime component published: [`ninfer@v0.5.1-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1)
+  (source `d956e6d6`, archive `c0189387...`, SBOM `9f965373...`,
+  [source archive](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-source.1)
+  `4359c814...`), runtime image `ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e...` from the
+  [runtime receipt release](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-runtime-beta.1);
+  the binaries inside the published image measure byte-identical to the qualified candidate
+  (`71edc2f6`).
+- RTX 5090 requalified on 2026-09-08 through the lifecycle tool from the published image under
+  deployment profile `qwen38-5090-v0.5.1` (configuration `efacac23...`, same arguments as
+  `qwen38-5090-v0.4.8`): exact 130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s,
+  agent protocol with no resurrection, 24/24 fanout forks on the anchor path across three
+  template sizes in-process and after a restart, warm arrival in both post-restart orders,
+  4.5 GB restore in 3.3-4.0 s (EXP-022 to EXP-024;
+  [receipt](../releases/v0.5.1/qualification/rtx5090.json)).
+- The native lanes are unchanged (`v0.2.3-qwen38-4090-durable.1`, `v0.2.5-qwen38-3090-beta.1`).
+- Remaining before the cut: composed external-installation acceptance from the published URLs,
+  the pin dance, and the product release; the owner's appliance promotes separately through its
+  own gate.
+
 ### v0.5.0 public release (sessions leave the machine)
 
 - Product release: `alphastorm/omp-ninfer@v0.5.0`, GitHub `Latest`. The first v0.5 deliverable

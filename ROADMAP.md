@@ -182,10 +182,12 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    24 s to 3.8 s for 5.2 GB: the payload is hashed once, as the engine streams it, with the x86
    SHA extensions, and the reads run at queue depth eight overlapped with the hash; a flipped
    payload byte is still refused and quarantined. The candidate was rebuilt on the appliance's
-   canonical route (clean tree `d956e6d6`, binary `71edc2f6`, packaged with its SBOM) and
-   requalified on the unchanged v0.4.8 arguments: 24/24 fanout forks on the anchor path across
-   57.9K, 67.7K, and 80.0K templates in-process and after a restart, exact 130,048-token
-   retrieval at 2,196 tok/s, 138.2 decode tok/s (EXP-024). Staged for `v0.5.1`; not published.
+   canonical route (clean tree `d956e6d6`, binary `71edc2f6`, packaged with its SBOM), published
+   as component `v0.5.1-qwen38-5090-beta.1` with runtime image `12ef2d9e...`, and requalified
+   from that image through the lifecycle tool on the unchanged v0.4.8 arguments: 24/24 fanout
+   forks on the anchor path across 57.9K, 67.7K, and 80.0K templates in-process and after a
+   restart, exact 130,048-token retrieval at 2,180 tok/s, 138.2 decode tok/s (EXP-024).
+   `v0.5.1` is staged; external acceptance and the product cut remain.
    The native lanes get the same architecture by building from mainline rather than porting the
    cache into their branches: stage 1 (`port/native-lanes-on-mainline`) compiles mainline for
    Ada `sm_89`, with Ampere and the Windows platform code as the next stages. Receipts:
