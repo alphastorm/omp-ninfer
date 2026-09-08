@@ -1,58 +1,56 @@
-# OMP NInfer v0.5.0 - sessions leave the machine
+# OMP NInfer v0.5.1 - warm arrival across a restart
 
-The first v0.5 deliverable: a checkpointed session survives the machine that created it losing
-its local state. Replication is a verified copy of published generations out to shared storage
-and back before a restore; the security gate the roadmap named for it - manifest origin
-authentication - now holds on all three lanes. The RTX 5090 runtime, its deployment profile
-(`qwen38-5090-v0.4.8`), and the OMP client are unchanged and rebound.
+The second v0.5 deliverable on the RTX 5090: a checkpointed template arrives warm across a
+restart. Every sibling fork of a restored template is served on the shared base anchor whether an
+endpoint resume or a fork arrives first, and a 5 GB checkpoint restores in about 4 s instead of
+24 s. The RTX 4090 and RTX 3090 components and the OMP client are byte-identical to v0.5.0 and
+carry their receipts.
 
 ## What changed
 
-- **Origin-authenticated checkpoints on the native lanes**
-  ([ninfer#32](https://github.com/alphastorm/ninfer/issues/32), ported from the RTX 5090
-  container). Every save publishes `manifest.mac`, an HMAC-SHA256 over the exact manifest bytes
-  keyed by material derived from the bearer key and held outside the checkpoint root; load and
-  status verify origin before trusting manifest content. A present-but-wrong tag quarantines as
-  tampering; a transient tag fault preserves `current` for retry; the default keeps the
-  compatibility window for locally produced unMAC'd generations and
-  `--session-checkpoint-require-origin-auth` (32-character bearer floor) is the strict,
-  reversible import posture for roots that receive imports.
-- **RTX 4090 durable v0.2.3** (`v0.2.3-qwen38-4090-durable.1`, qualified head `e186e04e`,
-  packaging `ccdac145`): origin authentication on the unchanged rk2v4-e8 KV, MTP3,
-  prefill-chunk-2,048, 131,072-context profile. Protocol 15/15, the 102,060-token session in
-  68.0 s, persistence restoring 102,075 tokens with the post-restart continuation in 9.3 s, and
-  the OMP Golden-equivalent run all passed; the qualification's own sessions carry `manifest.mac`.
-- **RTX 3090 durable v0.2.5-beta.1** (`v0.2.5-qwen38-3090-beta.1`, commit `9719ea09`): origin
-  authentication on the unchanged INT8 KV, MTP3, prefill-chunk-1,024, 131,072-context stack.
-  The 14-phase orchestrator passed with exact 130,048-token retrieval, 310 MB durable restart
-  with exact recall, 90.7 tok/s decode at 93.4% MTP acceptance under the 300 W envelope
-  (300.15 W peak; the first benchmark sample peaked over the 301 W tolerance at the cap and the
-  phase was rerun), rollback, security, and OMP gates.
-- **`scripts/checkpoint_sync.py`** replicates only verified, published generations: each
-  manifest-listed file by size and SHA-256, staged outside every directory the runtime scans,
-  published with one rename, `current` last; unMAC'd generations refused unless
-  `--allow-unauthenticated`. **`scripts/sync_probe.py`** proved the contract on every lane
-  against the real store (EXP-018): checkpoint a session, export, carry the replica off the
-  machine, stop the server, delete the session directory, carry the replica back, import,
-  restart, and the continuation restores from the imported generation and quotes three planted
-  ledger keys exactly - RTX 5090 4.5 GB import 10.1 s / restored 24.8 s, RTX 4090 1.13 GB
-  4.2 s / 7.4 s, RTX 3090 1.69 GB 11.9 s / 11.5 s. A payload byte flip is refused by the tool
-  before import; a coherent manifest edit passes the tool and is quarantined by the runtime at
-  load (`checkpoint_corrupt` on the native lanes, `previous_response_not_found` on the
-  container) - no resurrection.
-- Portability stays same-profile-pair only: the runtime fingerprint binds binary and profile and
-  the session namespace binds the bearer key, so a replica from another lane or key is not
-  addressable.
+- **RTX 5090 runtime `v0.5.1-qwen38-5090-beta.1`**
+  ([component](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1),
+  source `d956e6d6`, binary `71edc2f6`, runtime image `12ef2d9e...`), under deployment profile
+  `qwen38-5090-v0.5.1` (configuration `efacac23...`), which keeps the `qwen38-5090-v0.4.8`
+  context-cache arguments. Three context-cache fixes: a sibling fork inherits the long anchor it
+  forks from, so checkpoints taken after a fanout carry it; consuming a session endpoint no longer
+  double-charges a shared anchor against the entitlement (it returned HTTP 500 on any resume of an
+  anchor-carrying session); and anchor replacement evicts the anchor whose loss costs the least
+  re-prefill instead of the lowest frontier, which was the template boundary every sibling reuses
+  (EXP-021, EXP-022).
+- **Restore is no longer hash-bound** (EXP-023). Checkpoint payloads are hashed once, as the
+  engine streams them, with the x86 SHA extensions when the CPU has them (2.66 GB/s against
+  0.33 GB/s scalar), and the io_uring reads run eight deep overlapped with the hash. A 5.2 GB
+  session restores in 3.8-4.4 s across two verified restarts (24.0 s on v0.4.8); a flipped payload
+  byte is still refused (`previous_response_not_found`) and the generation quarantined.
+- **Qualified from the published image** (EXP-024). The candidate was started through the
+  lifecycle tool from `ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e...` with the manifest
+  identities bound at preflight: exact 130,048-token retrieval at 2,180.30 tok/s (28,245 MiB),
+  138.16 tok/s decode at 41.20% MTP acceptance, agent protocol with no resurrection across a
+  restart, 4/4 sibling forks on the anchor path at 57,853 and 67,681 tokens in-process and 4/4
+  again after a verified restart (resume 3.35 / 3.96 s, forks 1.25-1.41 s), warm arrival in both
+  post-restart orders, explicit saves of 4.5 GB in 4.4 s.
+- **Derived records rebound to the manifests.** Through v0.5.0 the compatibility authority's
+  native variant rows still named the v0.2.2/v0.2.0 components with a 65,536-token RTX 3090
+  ceiling, the profiles' `--binary-sha256`/`--config-sha256` launch arguments named the v0.4.3
+  runtime, the qualification summary's runtime identity carried a stale upstream commit and
+  source-archive hash, and the RTX 5090 receipt URLs pinned a commit that never contained them.
+  The manifests were exact; the copies had drifted. Every derived record is now rebound from the
+  manifest, `scripts/verify_release.py` refuses a ready release whose derived records disagree
+  with it, and `--check-pins` requires every pinned evidence URL to serve its recorded bytes.
 
 ## Evidence route
 
-Lane receipts in `qualification/`; replication receipts in
-`docs/measurements/2026-09-05-sync-probe-rtx{5090,4090,3090}.json`; the operator path is the
-"Replicating sessions off the machine" section of `docs/QUICKSTART.md`. The composed
-external-installation acceptance reruns against the published component URLs before the cut.
+Lane receipt in `qualification/rtx5090.json`; warm-arrival, restore, fanout, and profile-gate
+receipts in `docs/measurements/2026-09-08-*.json`; the composed external-installation acceptance
+in `acceptance/composed-external-installation.json` (anonymous pull by digest, lifecycle launch
+bound to the manifest identities, anonymous status refused, identity re-read, one authenticated
+completion; the native public-URL install acceptances carry by hash from v0.5.0). The RTX 4090
+and RTX 3090 receipts are the v0.5.0 receipts for the unchanged components.
 
 ## Support boundary
 
 Unchanged: one owner-operated machine per lane; one active request per qualified profile;
-loopback-only, bearer-authenticated, fail-closed. Replication targets are storage, never a
-checkpoint root. Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+loopback-only, bearer-authenticated, fail-closed. Checkpoints from an older runtime fingerprint
+replay once from the OMP transcript. Community project; not affiliated with or endorsed by
+Oh My Pi, Qwen, or NVIDIA.
