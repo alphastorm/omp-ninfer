@@ -12,7 +12,7 @@
     "server_binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b",
     "configuration_sha256": "efacac2366136b70ffd9af7c282bc0ace71a0d6b845e2e489acab0f3ae151e1a",
     "deployment_profile": "qwen38-5090-v0.5.1",
-    "oci_manifest_digest": "pending",
+    "oci_manifest_digest": "sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82",
     "image_id": "sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82"
   },
   "evidence_interpretation": {

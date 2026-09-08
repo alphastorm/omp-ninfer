@@ -23,7 +23,7 @@
   "composition": {
     "behavioral_qualification": {
       "repository_path": "releases/v0.5.1/qualification/rtx5090.json",
-      "sha256": "c3ec58a525e52b650745123fb5d82c8a94a321a4a3c08965747f14cd3b52574f",
+      "sha256": "de7f0d3037f59309d0ba095f0bb1f6edba78b1d29d34b911df7e6e5e1158c349",
       "status": "passed",
       "source_commit": "d956e6d61174175684d42e73f1a16fad2a3f229c",
       "server_binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b"
@@ -49,8 +49,8 @@
         "status": "passed",
         "beta_qualified": true,
         "installable": true,
-        "repository_path": "releases/v0.4.3/qualification/rtx4090.json",
-        "sha256": "8f815a37384a085d1475d8c65def9939e9617e33f4b2a0ea903d3e37de7cf24f",
+        "repository_path": "releases/v0.5.1/qualification/rtx4090.json",
+        "sha256": "b7a9d364aea389baa89772f273d9023f9aa8edbb5a90f83ac43b9b6fb85c0109",
         "release_tag": "v0.2.0-qwen38-4090-durable.1",
         "package_sha256": "5ce8b7a9e8982d4c58cdb1798d2fdee7f3a3514db59f1feefeb14293d08418fa"
       },
@@ -58,8 +58,8 @@
         "status": "passed",
         "beta_qualified": true,
         "installable": true,
-        "repository_path": "releases/v0.4.3/qualification/rtx3090.json",
-        "sha256": "c1f5f5f1315bf987afb6fa305c659a6bff81751ec5b806cbd384299c36b48392",
+        "repository_path": "releases/v0.5.1/qualification/rtx3090.json",
+        "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
         "release_tag": "v0.3.0-qwen38-3090.1",
         "package_sha256": "e7642d7069e85de497731735bde92a0c9b23f5b486848ab8cbe5c4da222baf97"
       }
