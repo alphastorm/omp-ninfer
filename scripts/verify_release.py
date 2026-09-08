@@ -148,7 +148,7 @@ def pinned_blob_sha256(
 ) -> str | None:
     """SHA-256 of ``path`` at ``commit`` in the repository at ``root``.
 
-    None when the commit is not in local history (shallow clones, exported trees), the
+    None when the commit is not in local history (shallow clones, exported trees); the
     string "absent" when the commit is known but does not contain the path.
     """
     key = (commit, path)
@@ -181,17 +181,22 @@ def require_pinned_bytes(
     errors: list[str],
     cache: dict[tuple[str, str], str | None],
 ) -> None:
-    """A pinned raw URL must serve exactly the bytes its companion SHA-256 records."""
+    """A pinned raw URL must serve exactly the bytes its companion SHA-256 records.
+
+    Fails closed: a commit that local history cannot resolve is an error, not a skip, because
+    the check is requested explicitly and a vacuous pass would read as verified.
+    """
     match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
     if match is None or not isinstance(expected_sha256, str):
         return
     commit, path = match.group(1), match.group(2)
     observed = pinned_blob_sha256(root, commit, path, cache)
-    if observed is None:
-        return
+    require(observed is not None,
+            f"{label} pins commit {commit[:12]} which is not in local git history "
+            "(full history is required to verify pins)", errors)
     require(observed != "absent",
             f"{label} pins commit {commit[:12]} which does not contain {path}", errors)
-    require(observed == "absent" or observed == expected_sha256,
+    require(observed in (None, "absent") or observed == expected_sha256,
             f"{label} pins commit {commit[:12]} whose {path} differs from the recorded SHA-256",
             errors)
 

@@ -545,7 +545,8 @@ class ReleaseContractTest(unittest.TestCase):
             (
                 f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'f' * 40}/releases/v9.9.9/receipt.json",
                 "3" * 64,
-                [],
+                [f"receipt pins commit {'f' * 12} which is not in local git history "
+                 "(full history is required to verify pins)"],
             ),
         )
         for url, expected, expected_errors in cases:

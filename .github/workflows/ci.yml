@@ -20,8 +20,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Release tags verify pinned evidence URLs against the commits they name.
-          fetch-depth: ${{ github.ref_type == 'tag' && 0 || 1 }}
+          # Full history: release tags verify pinned evidence URLs against the commits they
+          # name, and a shallow checkout would silently skip that check.
+          fetch-depth: 0
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
