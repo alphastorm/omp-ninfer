@@ -21,7 +21,7 @@
   },
   "build": {
     "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13.1.115, GNU 13.3.0), clean tree at d956e6d6 with NINFER_PATCH_STACK_SHA bound",
-    "ctest": "9/9 passed",
+    "ctest": "9/9 passed (release gate filter); additionally on the same release tree: ninfer_io_uring_checkpoint_backend_test passed on the appliance's ext4 root under the production seccomp profile (memory alignment 4, offset alignment 512), and the SHA-256 exact oracle (tests/test_sha256.cpp, committed on feat/warm-arrival as 29b77f8c after the release commit) passed with the SHA extensions present",
     "archive": "ninfer-qwen38-rtx5090-v0.5.1-linux-x86_64-cuda13.1.tar.gz sha256 c01893877428f3433da6e855f2347ce68f2f7ffd48184f7b1abccc8892231361",
     "sbom": "ninfer-qwen38-rtx5090-v0.5.1-linux-x86_64-cuda13.1.spdx.json sha256 9f96537378df9ce12bd031294585c7f64800790405f5899ba6b59eb5cc14b3e5",
     "package_identity_note": "packaged from the exact qualified build tree with tools/release/package.py; bin/ninfer-serve byte-identical to the acceptance candidate (71edc2f6), bin/ninfer 227c3b72"
@@ -332,7 +332,8 @@
   },
   "scope_exclusions": [
     "the candidate was not started through tools/lifecycle/ninfer_container.py; the configuration identity under the release profile name is computed at staging",
-    "no runtime image digest exists until the archive is published and the runtime-image workflow runs"
+    "no runtime image digest exists until the archive is published and the runtime-image workflow runs",
+    "the SHA-256 oracle test and the io_uring backend test are not in the canonical build's ctest filter; both were run separately against the release tree and the release commit predates the oracle test file"
   ],
   "review": {
     "council": "pending",
