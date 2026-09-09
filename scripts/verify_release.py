@@ -749,7 +749,13 @@ def validate_ninfer_variants(
                 errors,
             )
         receipt = load_json(summary_path) if summary_path.is_file() else {}
-        parity_receipt = (
+        # The RTX 3090 parity lineage and every mainline native lane qualify through an
+        # orchestrator summary; the RTX 4090 durable lineage through its beta receipt.
+        native_receipt = (
+            receipt.get("artifact_type") == "ninfer_native_qualification_summary"
+            and receipt.get("lane") == variant_id.split("-")[0]
+        )
+        parity_receipt = native_receipt or (
             variant_id == "rtx3090-windows-native"
             and receipt.get("artifact_type") == "ninfer_rtx3090_qualification_summary"
         )
@@ -781,6 +787,18 @@ def validate_ninfer_variants(
                     f"{prefix} qualification package must match", errors)
             require(package.get("bytes") == item.get("package_bytes"),
                     f"{prefix} qualification package size must match", errors)
+            if native_receipt:
+                require(receipt.get("server_binary_sha256") == item.get("server_binary_sha256"),
+                        f"{prefix} qualification server must match", errors)
+                require(receipt.get("configuration_sha256") == item.get("configuration_sha256"),
+                        f"{prefix} qualification configuration must match", errors)
+                support = receipt.get("support_assets", {})
+                for field in ("installer_sha256", "controller_sha256",
+                              "gpu_owner_controller_sha256", "state_protection_sha256"):
+                    require(support.get(field) == item.get(field),
+                            f"{prefix} qualification {field} must match", errors)
+                require(receipt.get("model_sha256") == item.get("model_artifact_sha256"),
+                        f"{prefix} qualification model must match the variant", errors)
         else:
             require(identity.get("source_commit") == item.get("source_commit"),
                     f"{prefix} qualification source must match", errors)

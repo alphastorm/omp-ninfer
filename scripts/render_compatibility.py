@@ -22,10 +22,10 @@ RUNTIME_VARIANT_IDS = (
 # in its manifest; the verifier requires the authority's rows to equal that manifest.
 RUNTIME_VARIANT_RELEASE_TAG_RES = {
     "rtx3090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.[345]-qwen38-3090-beta\.[1-9][0-9]*)$"
+        r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.[345]-qwen38-3090-beta\.[1-9][0-9]*|0\.6\.0-qwen38-3090-beta\.[1-9][0-9]*)$"
     ),
     "rtx4090-windows-native": re.compile(
-        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[0-3]-qwen38-4090-durable\.[1-9][0-9]*)$"
+        r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[0-3]-qwen38-4090-durable\.[1-9][0-9]*|0\.6\.0-qwen38-4090-beta\.[1-9][0-9]*)$"
     ),
 }
 RUNTIME_VARIANT_PACKAGE_NAME_RES = {
@@ -34,9 +34,11 @@ RUNTIME_VARIANT_PACKAGE_NAME_RES = {
         r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3|"
         r"0\.2\.2-beta\.1-windows-x86_64-cuda13\.3|"
         r"0\.2\.[345]-beta\.1-windows-x86_64-cuda13\.3)-rtx3090\.tar\.gz$"
+        r"|^ninfer-rtx3090-native-v0\.6\.0-beta\.[1-9][0-9]*-windows-x86_64-cuda13\.3-rtx3090\.tar\.gz$"
     ),
     "rtx4090-windows-native": re.compile(
         r"^ninfer-4090-qwen38-v(?:0\.[12]\.0|0\.2\.[1-3])-win-x64\.zip$"
+        r"|^ninfer-rtx4090-native-v0\.6\.0-beta\.[1-9][0-9]*-windows-x86_64-cuda13\.3-rtx4090\.tar\.gz$"
     ),
 }
 STATUSES = {"qualified", "preview", "blocked", "unsupported"}
