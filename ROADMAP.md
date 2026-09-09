@@ -208,14 +208,26 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    refused. Five defects that only the hardware showed - cooperative grids sized for 170 SMs, a
    prompt-attention CTA that spilled under Ada's register cap, a DirectStorage queue that could
    not overlap streamed batches - are fixed at source. The RTX 4090 profile is two device-state
-   slots (four leave 169 MiB of WDDM budget and the driver pages). Next: requalify each native
-   lane's candidate through its lifecycle tool and cut the components. Receipts:
+   slots (four leave 169 MiB of WDDM budget and the driver pages).
+   **Qualifying those candidates is in flight (2026-09-09, EXP-026).** The release path around
+   the port had never run: five blockers are fixed (the bench had no `--version` arm the
+   package's identity binding needs; the package relayed through the operator's Mac at
+   0.33 MB/s instead of host to host at 104.7 MB/s; the staging root inherited `BUILTIN\Users`
+   write access; the managed install splatted positionally; and mainline applied
+   `X-NInfer-Session` only on the bodyless Responses routes, so the lane probe's identity
+   conflict returned 200), and both lanes now reach the protocol phase. The RTX 4090 lane's
+   Host KV pool is halved to 4 GiB because the controller's 18 GB pre-launch read leaves no
+   free pages for 13.3 GB of pinned memory; both lanes keep 24 host state slots because at 8
+   the protocol's post-delete continuation hits an open runtime invariant defect. Next: bring
+   the RTX 3090 host back, re-run both lanes at the current candidate, then cut the components.
+   Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·
    [restore](docs/measurements/2026-09-08-restore-probe-rtx5090-candidate.json) ·
    [EXP-021](docs/measurements/2026-09-07-warm-arrival-rtx5090.json) ·
    [4090 on mainline](docs/measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
-   [3090 on mainline](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json).
+   [3090 on mainline](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json) ·
+   [lane qualification](docs/measurements/2026-09-09-native-lane-qualification-blockers.json).
 3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
    [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
    explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on

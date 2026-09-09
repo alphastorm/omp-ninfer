@@ -1,0 +1,128 @@
+{
+  "artifact_type": "omp_ninfer_native_lane_qualification_window",
+  "schema_version": 1,
+  "generated_utc": "2026-09-09",
+  "lanes": ["rtx4090", "rtx3090"],
+  "scope": "Qualification window only. Candidates are unreleased builds of the runtime fork's port/native-lanes-on-mainline branch; no product release, profile, manifest, or published artifact changed. The two shipped native releases (v0.2.3-qwen38-4090-durable.1 and v0.2.5-qwen38-3090-beta.1) were never started or modified: each candidate installs into its own lineage state root (qwen38-4090-native, qwen38-3090-native).",
+  "question": "Do the mainline-built native Windows lanes pass their own lifecycle qualification (tools/qualification/qualify_native.py) end to end, on the hosts, from a clean state?",
+  "answer": "Not yet. Five blockers in the release path were found, reproduced, fixed, and re-proven by advancing the orchestrator; both lanes now reach the protocol phase. One open runtime invariant defect and one unavailable host remain.",
+  "candidates": [
+    {
+      "branch": "port/native-lanes-on-mainline",
+      "commit": "03f56e58ec1b26b4d943ee7b9bb5ba129c10279b",
+      "release_id": "qwen38-{4090,3090}-native-v0.6.0-beta.1",
+      "note": "first candidate of the window; superseded"
+    },
+    {
+      "branch": "port/native-lanes-on-mainline",
+      "commit": "c36f8d980427",
+      "note": "session-header fix and the first host-pool sizing; RTX 4090 installed from it, protocol failed on the 8-slot sizing"
+    },
+    {
+      "branch": "port/native-lanes-on-mainline",
+      "commit": "4447fe93",
+      "note": "current candidate: 24 host state slots, 4 GiB Host KV on the RTX 4090 lane. Not yet built."
+    }
+  ],
+  "phases_reached": {
+    "rtx4090": {
+      "passed": ["preflight", "neutral_build", "private_path_scan", "package", "transfer_install"],
+      "failed": "protocol",
+      "state_dir": "the orchestrator state directory for candidate c36f8d98"
+    },
+    "rtx3090": {
+      "passed": ["preflight", "neutral_build", "private_path_scan", "package", "transfer_install"],
+      "failed": "protocol",
+      "state_dir": "the orchestrator state directory for candidate 03f56e58",
+      "note": "failed on the identity conflict later fixed in c36f8d98; not re-run because the host went offline"
+    }
+  },
+  "blockers_fixed": [
+    {
+      "id": 1,
+      "phase": "package",
+      "symptom": "New-Package.ps1 failed: ninfer_bench.exe command failed with exit 2: unknown argument: --version",
+      "cause": "The native package binds every shipped binary to one build identity and asks each for --version. ninfer and ninfer-serve answer; the mainline bench never had the lane branches' --version arm.",
+      "fix": "03f56e58 bench: report the build identity from ninfer_bench --version",
+      "class_note": "The lane branches carried this arm; it was one of the ~8K lines of drift the mainline port had to re-derive."
+    },
+    {
+      "id": 2,
+      "phase": "transfer_install",
+      "symptom": "scp -q -3 of the 0.6 GB package timed out after 900 s (RTX 3090: builder host to target host); the same-host RTX 4090 copy stalled at zero bytes for 19 minutes.",
+      "cause": "The orchestrator relayed the package through the operator's Mac (scp -3) across two ~120 ms links, and Windows OpenSSH cannot carry bulk between two Windows hosts in either direction (EXP-019).",
+      "fix": "723fa8b9 qualification: move the package between hosts directly",
+      "measurement": {
+        "same_host": "local Copy-Item",
+        "cross_host": {
+          "transport": "ranged HTTP (scripts/hosts/pscp.py serve/fetch), 16 streams, bearer token, tailnet",
+          "bytes": 591863254,
+          "wall_s": 5.65,
+          "mb_per_s": 104.7,
+          "sha256_verified_both_ends": true,
+          "hand_run_before_wiring": {"wall_s": 6.21, "mb_per_s": 95.3}
+        },
+        "prior_path": "scp -3 relay: 297,835,520 of 591,863,254 bytes in 900 s (0.33 MB/s) before the timeout"
+      }
+    },
+    {
+      "id": 3,
+      "phase": "transfer_install",
+      "symptom": "Protect-StateRoot.ps1: protected state inherits an external DACL: C:\\ProgramData\\NInferQualification",
+      "cause": "The orchestrator created its staging root with New-Item under ProgramData, so on a host where the qualification parent did not exist yet the parent inherited BUILTIN\\Users write access; the installer refuses to create protected state beneath such an ancestor. The RTX 3090 target already had a protected parent from earlier lane runs, so only the RTX 4090 host failed.",
+      "fix": "34d11a44 qualification: protect the qualification parent and splat the managed install by name",
+      "evidence": {
+        "rtx3090_target_parent": "owner=BUILTIN\\Administrators protected=True rules=SYSTEM:FullControl|Administrators:FullControl",
+        "rtx4090_target_parent_before": "owner=BUILTIN\\Administrators protected=False rules=SYSTEM|Administrators|CREATOR OWNER|Users:ReadAndExecute|Users:Write (all inherited)"
+      }
+    },
+    {
+      "id": 4,
+      "phase": "transfer_install",
+      "symptom": "Install-Release.ps1 : A positional parameter cannot be found that accepts argument '-PackagePath'.",
+      "cause": "The managed install passed its arguments as an array splat, which PowerShell binds positionally.",
+      "fix": "34d11a44 (hashtable splat binds by name)"
+    },
+    {
+      "id": 5,
+      "phase": "protocol",
+      "symptom": "agent_protocol.py: POST /v1/responses returned HTTP 200, expected 400 - the Responses identity conflict was accepted.",
+      "cause": "The probe sends the session credential on X-NInfer-Session alone and requires a header that disagrees with the body's ninfer_session to be refused. The lane branches applied the header on the Responses create route (apply_response_session_identity); mainline applied it only on the bodyless stored-response routes, so a header-scoped create was silently unscoped and the disagreement was ignored.",
+      "fix": "c36f8d98 serve: bind X-NInfer-Session on Responses create",
+      "regression_test": "tests/test_http_error_handler.cpp - header alone binds, agreement kept, absence stays absent, disagreement is invalid_ninfer_identity/400. Compiled and passed in the candidate's focused ctest set on the builder."
+    }
+  ],
+  "host_pool_sizing_rtx4090": {
+    "question": "The 32 GiB RTX 4090 host failed cudaMallocHost on managed start. Which pool has to shrink?",
+    "trigger": "The managed start reads the 18 GB model artifact through the file cache immediately before launch: sampled during a failing start, Free & Zero Page List fell 13.1 -> 0.0 GB while Standby Cache Reserve grew to 5.2 GB, then the pinned allocation failed. Three hand-launched probes with identical sizing on an idle host (including one as SYSTEM through a scheduled task) started normally, so the sizing alone is not the discriminator - the cache pressure is.",
+    "measurements": [
+      {"host_state_slots": 8, "host_kv_mib": 8192, "pinned_gb": 10.94, "start": "ready in 30 s"},
+      {"host_state_slots": 16, "host_kv_mib": 8192, "pinned_gb": 12.09, "start": "ready in 30 s"},
+      {"host_state_slots": 24, "host_kv_mib": 8192, "pinned_gb": 13.31, "start": "ready in 30 s hand-launched; failed cudaMallocHost on two managed starts"},
+      {"host_state_slots": 24, "host_kv_mib": 4096, "pinned_gb": 9.24, "start": "ready in 30 s"}
+    ],
+    "protocol_contract": [
+      {"host_state_slots": 8, "host_kv_mib": 4096, "agent_protocol": "failed in 41 s", "error": "POST /v1/responses returned HTTP 500: materialization source has no resident state"},
+      {"host_state_slots": 24, "host_kv_mib": 4096, "agent_protocol": "passed"}
+    ],
+    "decision": "4447fe93 keeps 24 host state slots on both lanes and halves only the RTX 4090 lane's Host KV pool to 4 GiB (9.2 GB pinned). Host state slots are not a memory dial: the contract needs them.",
+    "reading": "Startup pressure is the pool size; the protocol contract is bound by the slot count. The two are separate dials and only one of them was ever safe to turn."
+  },
+  "open_findings": [
+    {
+      "id": "materialization-source-eviction",
+      "severity": "runtime invariant violation, reproducible in 41 s",
+      "observation": "With 8 host state slots the agent-protocol step that continues a surviving descendant after its parent response is deleted returns HTTP 500 and the server logs 'materialization source has no resident state' (src/targets/qwen3_6/impl/runtime/program_impl.h:4803, a std::logic_error). The guard fires because a continuation slot still Catalogued at the planned generation has zero resident state replicas (device.state_slots == 0 and host.state_slots == 0), so admission planned reuse from a source whose last replica had been evicted.",
+      "why_it_matters": "The guard is an invariant assertion, not a capacity refusal: under host-state pressure the planner and the residency accounting disagree, and a legitimate request fails with a 500 instead of either keeping the source resident, retiring the catalogue entry, or re-materializing from the durable checkpoint the session already has.",
+      "status": "open, not fixed. Contained for the release by carrying 24 slots on both lanes; the defect is capacity-triggered, not configuration-specific.",
+      "reproduction": "Install a native lane candidate, launch its server with --host-state-slots 8, run <release>/bin/qualification/agent_protocol.py against it."
+    }
+  ],
+  "blocked_on": {
+    "host": "the RTX 3090 lane host",
+    "observation": "Unreachable since about 02:45 local: ssh to the tailnet name times out, tailscale reports 'offline, last seen 18m ago', and neither its LAN nor its tailnet address accepts a connection from the other host. The host is an attended workstation with no auto-login and no tested remote power-on path (per the private host inventory).",
+    "state_left_on_it": "The RTX 3090 candidate 03f56e58 is installed in its own lineage root (qwen38-3090-native, first release of that lineage) and its server was left running by the failed protocol phase. The shipped v0.2.5 lineage (qwen38-3090-omp-v0.2) was found stopped and was not started.",
+    "next_step": "Once reachable: stop the candidate, then re-run the lane at the current candidate commit."
+  },
+  "trust_boundary": "Owner measurement on two hosts. Pinned-memory figures are the server process working set after readiness; transfer figures are tool-reported with SHA-256 verified on both ends; phase results are the orchestrator's own state file."
+}

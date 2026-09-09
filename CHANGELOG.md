@@ -33,6 +33,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `2026-09-08-rtx3090-mainline-`, release baselines
   [4090](docs/measurements/2026-09-08-rtx4090-v0.2-profile-gates.json) ·
   [3090](docs/measurements/2026-09-08-rtx3090-v0.2.5-profile-gates.json)).
+- EXP-026: qualifying the mainline native lanes. The release path around the port had never
+  run; five blockers were reproduced and fixed on the runtime fork (`4447fe93`): the mainline
+  bench had no `--version` arm the package's identity binding requires; `transfer_install`
+  relayed the 0.6 GB package through the operator's Mac with `scp -3` (297 of 592 MB in 900 s,
+  **0.33 MB/s**, then a timeout) and now moves it host to host as 16-stream ranged HTTP at
+  **104.7 MB/s**, SHA-256 verified on both ends; the staging root inherited `BUILTIN\Users`
+  write access on the host whose qualification parent did not exist yet, so the installer
+  refused to create protected state beneath it; the managed install splatted its arguments
+  positionally; and mainline applied `X-NInfer-Session` only on the bodyless Responses routes,
+  so the lane probe's identity conflict returned 200 instead of 400. Both lanes now pass
+  preflight, build, private-path scan, package, and install and reach the protocol phase. The
+  RTX 4090 lane's Host KV pool is halved to 4 GiB (**9.2 GB** pinned, starts) because 24 slots
+  with the 8 GiB default is 13.3 GB and failed `cudaMallocHost` on two managed starts, where
+  the controller's 18 GB pre-launch read empties the free-and-zero list; both lanes keep 24
+  host state slots because at 8 the protocol's post-delete continuation fails in 41 s against
+  an open runtime invariant defect. No release changed; the RTX 3090 lane is blocked on its
+  host being offline
+  ([receipt](docs/measurements/2026-09-09-native-lane-qualification-blockers.json)).
 
 ### Changed
 

@@ -113,6 +113,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-023 | Checkpoint restore cost (5090) | Restore is hash-bound: two scalar SHA-256 passes over 5 GB at queue depth one | Scalar SHA-256 measured at 0.33 GB/s on the appliance's Zen 4 against 2.66 GB/s with the SHA extensions; the load pass was dropped (the streamed hash on the exact bytes the engine consumes is the single verification, `alphastorm/ninfer#21` closed by construction), the io_uring reader issues eight 4 MiB reads per batch on its own thread, and the next 32 MiB batch is on the device while the previous one hashes. A 5.2 GB session restores in **3.8 s / 3.8 s** (was 24-27 s), planted keys exact after both restarts; a flipped byte in the middle of the 4.4 GB KV payload is refused (404 `previous_response_not_found`, 2.8 s), the generation reports `corrupt`, then quarantines | fixed at source - commits `f841d42d`, `d956e6d6`; verified-or-refused re-proven live |
 | EXP-024 | RTX 5090 requalification (v0.5.1 candidate) | The warm-arrival and restore changes hold under the lane's own qualification gates on the canonical build | Appliance-local build of `d956e6d6` (binary `71edc2f6`, 9/9 host tests, packaged with SBOM, published as `v0.5.1-qwen38-5090-beta.1` and wrapped by the runtime-image workflow into `12ef2d9e...`, whose binaries measure byte-identical) on the unchanged v0.4.8 arguments, started through the lifecycle tool from the published image (configuration `efacac23...`): exact 130,048-token retrieval at 2,180 tok/s cold (v0.4.8: 2,207), 2,048-token decode at 138.2 tok/s with 41.2% MTP acceptance (136.0), agent protocol with no resurrection across restart; fanout 24/24 forks on `private_long_anchor` across 57.9K, 67.7K, and 80.0K templates in-process and after a verified restart with the resume first (post-restart forks 1.25-1.41 s; v0.4.8 paid 22.2 s on the first); warm arrival in both orders with an in-process control; 4.5 GB explicit save 4.4 s (was 12.6 s, the writer's digest also runs on the SHA extensions) | passed - `v0.5.1` staged with the published component; external acceptance and the product cut remain |
 | EXP-025 | Native lanes on mainline (4090, 3090) | The mainline runtime - context cache, warm arrival, streamed restore - serves the two native Windows lanes at least as well as their divergent branches | `port/native-lanes-on-mainline` built with MSVC 19.44 for `sm_89` and `sm_86`, 100/100 registered tests on each build on the Ada GPU (94 run; the six real-artifact and external-tokenizer suites skip), and served in candidate windows on both hosts. Same fixture, gates, host, and day as the installed releases: RTX 4090 130,048-token exact retrieval **86.8 s vs 97.5 s** (1,499 vs 1,333 tok/s), 2,048-token decode **103.8 vs 88.4 tok/s** wall; RTX 3090 **208.6 vs 219.5 s** and **60.3 vs 52.8 tok/s**. 67.7K template: four sibling forks hot at 1.8-2.0 s (4090) / 2.5-2.9 s (3090) before a restart and 1.8-1.9 s / 2.5-2.6 s after it, every fork `private_long_anchor`; warm arrival in both orders; a 2.9 GB checkpoint restores in 4.2-5.0 s (4090) and 16.6-17.1 s (3090) with a flipped byte refused and quarantined. Five source defects surfaced only on the hardware (cooperative grids sized for 170 SMs, an INT8 prompt-attention CTA that spilled 200 B/thread on `sm_89`, a serialising DirectStorage read queue that failed every streamed restore, an unlogged restore refusal, an unbounded residency query). The RTX 4090's WDDM budget at 131K INT8 leaves 169 MiB with four device-state slots and the driver pages: decode 47 tok/s and every fork 2.5× slower; two slots (463 MiB free) is the profile, one slot re-prefills the first fork | kept - both lanes' next candidates build from mainline; requalify each through its lifecycle tool before any release |
+| EXP-026 | Native lane release qualification (4090, 3090) | The mainline-built native lanes pass their own lifecycle qualification end to end from a clean state | Five blockers in the release path found, reproduced, and fixed: the mainline bench had no `--version` arm the package's identity binding requires; `transfer_install` relayed the 0.6 GB package through the operator's Mac (0.33 MB/s, 900 s timeout) instead of host to host (**104.7 MB/s**, 16 ranged-HTTP streams); the staging root inherited `BUILTIN\Users` write access on the host whose qualification parent did not exist yet; the managed install splatted its arguments positionally; and mainline applied `X-NInfer-Session` only on the bodyless Responses routes, so the lane probe's identity conflict returned 200. Both lanes now pass preflight through install and reach `protocol`. The RTX 4090 lane's pinned pools are sized from measurement: 24 host state slots with the 8 GiB default Host KV is 13.3 GB pinned and failed `cudaMallocHost` on two managed starts (the controller's 18 GB pre-launch read empties the free list), 4 GiB is 9.2 GB and starts; 8 slots start but fail the protocol contract in 41 s | in flight - one open runtime invariant defect (a catalogued continuation's last state replica is evictable while admission plans reuse from it) and the RTX 3090 host offline |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 
 Entry detail:
@@ -522,6 +523,37 @@ Entry detail:
   [two slots](measurements/2026-09-08-rtx3090-mainline-fanout-57k-slots2.json) ·
   [warm arrival](measurements/2026-09-08-rtx3090-mainline-warm-arrival.json) ·
   [restore](measurements/2026-09-08-rtx3090-mainline-restore.json).
+- **EXP-026 — qualifying the mainline native lanes (2026-09-09).** EXP-025 proved the mainline
+  runtime serves both native lanes; this is the release path around it, which had never run
+  since the port. Five blockers, each reproduced before it was fixed. The package builder asks
+  every shipped binary for `--version` to bind one build identity, and the mainline bench had
+  no such arm (the lane branches did). `transfer_install` relayed the 0.6 GB package through
+  the operator's Mac with `scp -3`: 297 of 592 MB in 900 s (**0.33 MB/s**) before the timeout,
+  and the same-host lane stalled at zero bytes, because Windows OpenSSH carries no bulk between
+  two Windows hosts (EXP-019). The package now copies locally on one host and otherwise travels
+  as ranged HTTP served by the builder and fetched by the target: **104.7 MB/s**, 16 streams,
+  SHA-256 verified on both ends and again by the installer. The staging root was created with
+  `New-Item` under `ProgramData`, so on the host whose qualification parent did not exist yet
+  it inherited `BUILTIN\Users` write access and the installer refused to create protected state
+  beneath it; the candidate's own protection library now creates or checks the parent. The
+  managed install passed its arguments as an array splat, which PowerShell binds positionally.
+  And the lane's protocol probe sends the session credential on `X-NInfer-Session` alone and
+  requires a header that disagrees with the body's `ninfer_session` to be refused: mainline
+  applied the header only on the bodyless stored-response routes, so a header-scoped create was
+  silently unscoped and the conflict returned 200. Both lanes now pass preflight, build, scan,
+  package, and install, and reach `protocol`.
+  Sizing the RTX 4090 lane's pinned pools took its own measurement. The managed start failed
+  `cudaMallocHost` twice while three hand-launched starts with identical arguments succeeded:
+  the controller reads the 18 GB model artifact through the file cache immediately before
+  launch, and sampling a failing start showed the free-and-zero list going 13.1 → 0.0 GB with
+  standby reserve at 5.2 GB. Pinned demand is the dial that matters — 24 slots plus the 8 GiB
+  default Host KV is 13.3 GB, 4 GiB is **9.2 GB** and starts — but the slot count is not
+  available to trade: at 8 slots the protocol's post-delete continuation fails in 41 s with a
+  500 from a `std::logic_error`, because admission planned reuse from a catalogued continuation
+  whose last state replica had been evicted. That invariant defect is open and capacity-
+  triggered; both lanes carry 24 slots, and only the RTX 4090 lane's pool was halved. The
+  RTX 3090 lane is blocked on its host, which went offline mid-window.
+  Receipt: [qualification window](measurements/2026-09-09-native-lane-qualification-blockers.json).
 
 ## Current order
 
@@ -536,7 +568,8 @@ than one shared configuration. The native-lane restore path is fixed at source (
 RTX 4090 restores 24–26× faster, RTX 3090 8.5×); both lanes requalified it on 2026-09-05 and it
 ships in `v0.4.9`. The native lanes now build from mainline (EXP-025): the next RTX 4090 and
 RTX 3090 candidates come from `port/native-lanes-on-mainline`, with the RTX 4090 profile at
-two device-state slots, and each is requalified through its own lifecycle tool before a cut.
+two device-state slots, 24 host state slots, and a 4 GiB Host KV pool, and each is requalified
+through its own lifecycle tool (EXP-026) before a cut.
 
 ## Ideas backlog
 
