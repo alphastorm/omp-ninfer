@@ -2,11 +2,11 @@
   "artifact_type": "ninfer_windows_release_qualification",
   "schema_version": 1,
   "status": "passed",
-  "qualified_utc": "2026-09-10T00:35:13Z",
+  "qualified_utc": "2026-09-10T01:55:15Z",
   "release_id": "qwen38-4090-native-v0.6.0-beta.1",
   "profile": "MTP3",
   "identity": {
-    "binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+    "binary_sha256": "b3f9374f2a3ec9be6bee6e64b6878b2393be6339335c60901e91c264139ef8fc",
     "build_profile": "native-v0.6.0-beta.1-rtx4090",
     "build_type": "Release",
     "config_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294",
@@ -17,7 +17,7 @@
     "deployment_profile": "qwen38-4090-native-v0.6.0-beta.1",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
     "model_id": "qwen3.8-27b",
-    "patch_stack_sha": "6912a15c0bf4f7e9e12dc44188f1f4f10b95e47b",
+    "patch_stack_sha": "075d442e9c4ee0eafddabd4c163c2fc0712816dd",
     "source_dirty": false,
     "target": "qwen3_8_27b",
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -25,8 +25,8 @@
     "weights_id": "groupwise-int",
     "gpu_index": 0,
     "gpu_name": "NVIDIA GeForce RTX 4090",
-    "source_commit": "6912a15c0bf4f7e9e12dc44188f1f4f10b95e47b",
-    "server_binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+    "source_commit": "075d442e9c4ee0eafddabd4c163c2fc0712816dd",
+    "server_binary_sha256": "b3f9374f2a3ec9be6bee6e64b6878b2393be6339335c60901e91c264139ef8fc",
     "configuration_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294"
   },
   "configuration": {
@@ -63,7 +63,7 @@
       "unsupported_structured_output_rejected": true
     },
     "identity": {
-      "binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+      "binary_sha256": "b3f9374f2a3ec9be6bee6e64b6878b2393be6339335c60901e91c264139ef8fc",
       "config_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294",
       "deployment_profile": "qwen38-4090-native-v0.6.0-beta.1",
       "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
@@ -82,17 +82,17 @@
   "long_session": {
     "prompt_tokens": 130048,
     "completion_tokens": 17,
-    "elapsed_seconds": 91.58842540001206,
+    "elapsed_seconds": 91.80729880000581,
     "exact_output": "ORCHID=493817; COLOR=COBALT",
     "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
   },
   "persistence": {
     "checkpoint_save": "explicit_endpoint",
-    "checkpoint_generation": "1789000199358-0",
+    "checkpoint_generation": "1789004938873-0",
     "checkpoint_save_bytes": 310213339,
     "checkpoint_frontier_tokens": 42,
     "checkpoint_files": 10,
-    "restart_seconds": 74.38889079999353,
+    "restart_seconds": 86.08174080000026,
     "process_replaced": true,
     "restored_cached_input_tokens": 42,
     "exact_output": "CHECKPOINT-NATIVE-731942",
@@ -100,8 +100,8 @@
   },
   "rollback": {
     "directions": 2,
-    "intermediate_release": "qwen38-4090-native-v0.6.0-beta.1-4447fe939680",
-    "active_release_after": "qwen38-4090-native-v0.6.0-beta.1-6912a15c0bf4",
+    "intermediate_release": "qwen38-4090-native-v0.6.0-beta.1-6912a15c0bf4",
+    "active_release_after": "qwen38-4090-native-v0.6.0-beta.1-075d442e9c4e",
     "status": "passed"
   },
   "state_security": {
@@ -140,13 +140,13 @@
   "benchmark_c1": {
     "prompt_tokens": 4541,
     "completion_tokens": 1024,
-    "prefill_tokens_per_second": 2101.62439228298,
-    "decode_tokens_per_second": 159.0222763809027,
+    "prefill_tokens_per_second": 2102.6362455964336,
+    "decode_tokens_per_second": 159.0495842981281,
     "mtp_acceptance_percent": 92.96296296296296,
-    "wall_seconds": 8.623721199997817,
+    "wall_seconds": 8.620702200001688,
     "max_memory_used_mib": 22814,
-    "max_power_w": 462.32,
-    "max_temperature_c": 67,
+    "max_power_w": 460.49,
+    "max_temperature_c": 65,
     "max_gpu_utilization_percent": 100
   },
   "deterministic_gates": {
@@ -167,9 +167,9 @@
   "beta_qualified": true,
   "package": {
     "filename": "ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-    "sha256": "58d17bd71abeba0a117dbddfe1ed6c4c396ee6920e2f944761674f81831d4973",
-    "bytes": 573730038,
-    "sbom_sha256": "7cff6eaa03af17a8ef82488dc3d7a140609956c6bb0565a02149b260e31a613d",
+    "sha256": "da343d64d548bac83b0f91166aac75bd341ee225971672274bc06f2bebd7d84f",
+    "bytes": 573714539,
+    "sbom_sha256": "76a1557fcad1796d9c9ca7926fd1bbfb37c876c8e502bd0aa6c0c421496dad37",
     "installer_sha256": "a9f6fd0900fbb11fcb9de07308acb39c0fa9168f72bbf8b6a8677a1430c032ba",
     "controller_sha256": "40657b33f5a673bd32f4ea6ac53186247b8d9627629b4b016fd2aded5cb487b3",
     "gpu_owner_controller_sha256": "0f8619a73d1dd9b8583b5f29db65ba3f561d9ec6fc0dfbab5b2efeb069fe8a44",

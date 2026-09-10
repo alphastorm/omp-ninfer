@@ -324,15 +324,15 @@
       "installable": true,
       "silent_cloud_fallback": false,
       "release_tag": "v0.6.0-qwen38-4090-beta.1",
-      "source_commit": "6912a15c0bf4f7e9e12dc44188f1f4f10b95e47b",
+      "source_commit": "075d442e9c4ee0eafddabd4c163c2fc0712816dd",
       "package_name": "ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
       "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.0-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "package_sha256": "58d17bd71abeba0a117dbddfe1ed6c4c396ee6920e2f944761674f81831d4973",
-      "package_bytes": 573730038,
+      "package_sha256": "da343d64d548bac83b0f91166aac75bd341ee225971672274bc06f2bebd7d84f",
+      "package_bytes": 573714539,
       "qualification_receipt": {
         "path": "releases/v0.6.0/qualification/rtx4090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7bb430656b78699dfaabdd3c6fd97db1e9ff243a/releases/v0.6.0/qualification/rtx4090.json",
-        "sha256": "2ad356c052d77f982a254daa4226079f4c4f75d14609512f0137ae46f2e68939"
+        "sha256": "28bddf12aa25e1954eeca8366d9dec7a8e0276b89e7f91b7773539e8344602c6"
       }
     }
   ]

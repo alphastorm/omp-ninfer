@@ -25,7 +25,7 @@ These variants use the same OMP clients but own separate native runtime packages
 Package bindings:
 
 - `rtx3090-windows-native`: component `v0.2.5-qwen38-3090-beta.1`; package [`ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8`; 573,344,205 bytes.
-- `rtx4090-windows-native`: component `v0.6.0-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.0-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `58d17bd71abeba0a117dbddfe1ed6c4c396ee6920e2f944761674f81831d4973`; 573,730,038 bytes.
+- `rtx4090-windows-native`: component `v0.6.0-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.0-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `da343d64d548bac83b0f91166aac75bd341ee225971672274bc06f2bebd7d84f`; 573,714,539 bytes.
 
 ## Profile boundaries
 

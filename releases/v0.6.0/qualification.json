@@ -50,9 +50,9 @@
         "beta_qualified": true,
         "installable": true,
         "repository_path": "releases/v0.6.0/qualification/rtx4090.json",
-        "sha256": "2ad356c052d77f982a254daa4226079f4c4f75d14609512f0137ae46f2e68939",
+        "sha256": "28bddf12aa25e1954eeca8366d9dec7a8e0276b89e7f91b7773539e8344602c6",
         "release_tag": "v0.6.0-qwen38-4090-beta.1",
-        "package_sha256": "58d17bd71abeba0a117dbddfe1ed6c4c396ee6920e2f944761674f81831d4973"
+        "package_sha256": "da343d64d548bac83b0f91166aac75bd341ee225971672274bc06f2bebd7d84f"
       },
       "rtx3090-windows-native": {
         "status": "passed",
@@ -66,7 +66,7 @@
     },
     "external_installation_acceptance": {
       "status": "pending",
-      "note": "rerun against the published v0.6.0-qwen38-4090-beta.1 component (package 58d17bd7) before the cut; the receipt lands at releases/v0.6.0/acceptance/composed-external-installation.json"
+      "note": "rerun against the published v0.6.0-qwen38-4090-beta.1 component (package da343d64) before the cut; the receipt lands at releases/v0.6.0/acceptance/composed-external-installation.json"
     }
   },
   "observed_gates": {

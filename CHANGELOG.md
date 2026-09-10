@@ -52,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   host being offline
   ([receipt](docs/measurements/2026-09-09-native-lane-qualification-blockers.json)).
 - EXP-027: the RTX 4090 mainline candidate passes its own lifecycle qualification end to end
-  (15/15 phases, runtime fork `6912a15c`, requalified at `075d442e`). Running the phases past
+  (15/15 phases at runtime fork `6912a15c`, then again at `075d442e`). Running the phases past
   `protocol` for the first time exposed two defects, both reproduced before the fix.
   **Admission refused a legitimate request under Host StateImage pressure**: at eight host
   state slots the protocol's post-delete continuation returned HTTP 500, because the guard asked
