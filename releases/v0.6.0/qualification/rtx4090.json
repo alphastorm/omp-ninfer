@@ -1,0 +1,178 @@
+{
+  "artifact_type": "ninfer_windows_release_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified_utc": "2026-09-10T00:35:13Z",
+  "release_id": "qwen38-4090-native-v0.6.0-beta.1",
+  "profile": "MTP3",
+  "identity": {
+    "binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+    "build_profile": "native-v0.6.0-beta.1-rtx4090",
+    "build_type": "Release",
+    "config_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-4090-native-v0.6.0-beta.1",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "6912a15c0bf4f7e9e12dc44188f1f4f10b95e47b",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "lineage_base_sha": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+    "weights_id": "groupwise-int",
+    "gpu_index": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "source_commit": "6912a15c0bf4f7e9e12dc44188f1f4f10b95e47b",
+    "server_binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+    "configuration_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294"
+  },
+  "configuration": {
+    "public_model_id": "qwen3.8-27b",
+    "max_context": 131072,
+    "kv_capacity": 131072,
+    "kv_dtype": "int8",
+    "prefill_chunk": 2048,
+    "speculative_backend": "mtp",
+    "speculative_draft_tokens": 3,
+    "concurrency": 1,
+    "device_state_slots": 2,
+    "host_state_slots": 24,
+    "host_kv_mib": 4096,
+    "max_private_continuations": 8
+  },
+  "protocol": {
+    "artifact_type": "ninfer_agent_protocol_smoke",
+    "checks": {
+      "anthropic_count_tokens": true,
+      "authenticated_status": true,
+      "duplicate_tool_names_rejected": true,
+      "malformed_identity_rejected": true,
+      "private_cache_session_isolation": true,
+      "responses_continuation": true,
+      "responses_cross_session_isolation": true,
+      "responses_descendant_survival": true,
+      "responses_parent_deletion": true,
+      "responses_stored_route_isolation": true,
+      "responses_streaming_checkpoint": true,
+      "streaming_parity": true,
+      "tool_result_array": true,
+      "typed_tool_arguments": true,
+      "unsupported_structured_output_rejected": true
+    },
+    "identity": {
+      "binary_sha256": "b0a88af2abb83f47b2be32d7dcd0680b182e2fffa3e47c6436e70a9d947fa3ae",
+      "config_sha256": "5ee3fb71c7f293189f05ef9298a17e2f1ae3201d3818ed12dd86c5471d2c6294",
+      "deployment_profile": "qwen38-4090-native-v0.6.0-beta.1",
+      "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "protocol_under_pool_pressure": {
+    "artifact_type": "ninfer_agent_protocol_smoke",
+    "why": "The shipped Host StateImage pool hides a class of admission defect that only appears when StateImage capacity binds. The same fifteen checks run against the same installed bytes with the Host pool reduced to a third of the shipped size.",
+    "device_state_slots": 2,
+    "host_state_slots": 8,
+    "checks_passed": 15,
+    "status": "passed"
+  },
+  "long_session": {
+    "prompt_tokens": 130048,
+    "completion_tokens": 17,
+    "elapsed_seconds": 91.58842540001206,
+    "exact_output": "ORCHID=493817; COLOR=COBALT",
+    "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
+  },
+  "persistence": {
+    "checkpoint_save": "explicit_endpoint",
+    "checkpoint_generation": "1789000199358-0",
+    "checkpoint_save_bytes": 310213339,
+    "checkpoint_frontier_tokens": 42,
+    "checkpoint_files": 10,
+    "restart_seconds": 74.38889079999353,
+    "process_replaced": true,
+    "restored_cached_input_tokens": 42,
+    "exact_output": "CHECKPOINT-NATIVE-731942",
+    "managed_stop": "process termination; a session survives a managed restart because it was published, not because the server flushed on the way out"
+  },
+  "rollback": {
+    "directions": 2,
+    "intermediate_release": "qwen38-4090-native-v0.6.0-beta.1-4447fe939680",
+    "active_release_after": "qwen38-4090-native-v0.6.0-beta.1-6912a15c0bf4",
+    "status": "passed"
+  },
+  "state_security": {
+    "root_owner_sid": "S-1-5-32-544",
+    "root_dacl_protected": true,
+    "low_privilege_effective_read_denials": 2,
+    "low_privilege_effective_write_denials": 2,
+    "null_dacl_rejections": 1,
+    "precreated_root_rejections": 1,
+    "unowned_root_rejections": 1,
+    "root_junction_rejections": 1,
+    "child_junction_rejections": 1,
+    "preplanted_gpu_owner_rejections": 1,
+    "atomic_race_collision_rejections": 1,
+    "raced_state_recursive_deletions": 0,
+    "status": "passed"
+  },
+  "golden_equivalent": {
+    "artifact_type": "ninfer_omp_golden_equivalent_receipt",
+    "omp": {
+      "transport": "openai-completions",
+      "version": "omp/18.0.9",
+      "events": 51,
+      "typed_tool_name": "read",
+      "tool_results": 1
+    },
+    "oracles": {
+      "exact_visible_final_answer": "passed",
+      "typed_tool_invocation": "passed",
+      "tool_result_continuation": "passed"
+    },
+    "raw_transcript_included": false,
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "benchmark_c1": {
+    "prompt_tokens": 4541,
+    "completion_tokens": 1024,
+    "prefill_tokens_per_second": 2101.62439228298,
+    "decode_tokens_per_second": 159.0222763809027,
+    "mtp_acceptance_percent": 92.96296296296296,
+    "wall_seconds": 8.623721199997817,
+    "max_memory_used_mib": 22814,
+    "max_power_w": 462.32,
+    "max_temperature_c": 67,
+    "max_gpu_utilization_percent": 100
+  },
+  "deterministic_gates": {
+    "protocol": "passed",
+    "protocol_under_pool_pressure": "passed",
+    "long_session": "passed",
+    "persistence": "passed",
+    "rollback": "passed",
+    "state_security": "passed",
+    "golden_equivalent": "passed",
+    "benchmark_c1": "passed"
+  },
+  "limitations": [
+    "One active request per profile; the lane ships --max-concurrency 1 and no concurrency claim is made.",
+    "A session that was never published - automatically above 32,768 frontier tokens, or explicitly through POST /v1/ninfer/checkpoints - does not survive a managed stop on Windows, which terminates the server rather than signalling it.",
+    "Measured numbers apply only to this package, this machine, and this profile."
+  ],
+  "beta_qualified": true,
+  "package": {
+    "filename": "ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "sha256": "58d17bd71abeba0a117dbddfe1ed6c4c396ee6920e2f944761674f81831d4973",
+    "bytes": 573730038,
+    "sbom_sha256": "7cff6eaa03af17a8ef82488dc3d7a140609956c6bb0565a02149b260e31a613d",
+    "installer_sha256": "a9f6fd0900fbb11fcb9de07308acb39c0fa9168f72bbf8b6a8677a1430c032ba",
+    "controller_sha256": "40657b33f5a673bd32f4ea6ac53186247b8d9627629b4b016fd2aded5cb487b3",
+    "gpu_owner_controller_sha256": "0f8619a73d1dd9b8583b5f29db65ba3f561d9ec6fc0dfbab5b2efeb069fe8a44",
+    "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b"
+  }
+}

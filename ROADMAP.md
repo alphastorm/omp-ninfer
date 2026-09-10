@@ -218,8 +218,24 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    conflict returned 200), and both lanes now reach the protocol phase. The RTX 4090 lane's
    Host KV pool is halved to 4 GiB because the controller's 18 GB pre-launch read leaves no
    free pages for 13.3 GB of pinned memory; both lanes keep 24 host state slots because at 8
-   the protocol's post-delete continuation hits an open runtime invariant defect. Next: bring
-   the RTX 3090 host back, re-run both lanes at the current candidate, then cut the components.
+   the protocol's post-delete continuation hits a runtime invariant defect.
+   **The RTX 4090 candidate is qualified (2026-09-10, EXP-027).** Running the phases past
+   `protocol` for the first time exposed two more defects, both fixed and re-proven: admission
+   refused a legitimate request whose only reuse source was a long anchor shared with a sibling,
+   because the guard measured exclusive ownership rather than residency
+   ([ninfer#37](https://github.com/alphastorm/ninfer/issues/37)); and the restart phase could
+   not observe durability, because its seed session was below the 32,768-token automatic
+   checkpoint gate and a Windows managed stop terminates the server instead of signalling it,
+   so nothing was ever published. The candidate (`6912a15c`) then passed 15/15 phases: exact
+   130,048-token retrieval in 91.6 s, C1 2,101.6 tok/s prefill and 159.0 tok/s decode at 93.0%
+   MTP acceptance, bidirectional rollback, the state-security set, the OMP golden run exact, a
+   310 MB checkpoint restored across a managed restart, and the same fifteen protocol checks at
+   a third of the shipped Host StateImage pool. Two findings stay open: a managed stop does not
+   flush unsaved sessions on either native lane, and a C=8 settlement leak that predates this
+   work and is unreachable at the lanes' shipped `--max-concurrency 1`
+   ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38)). Next: publish the RTX 4090
+   component and cut it as v0.6.0; the RTX 3090 lane waits for its host, expected about
+   2026-09-21, and ships separately.
    Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·
@@ -227,7 +243,8 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    [EXP-021](docs/measurements/2026-09-07-warm-arrival-rtx5090.json) ·
    [4090 on mainline](docs/measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
    [3090 on mainline](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json) ·
-   [lane qualification](docs/measurements/2026-09-09-native-lane-qualification-blockers.json).
+   [lane qualification](docs/measurements/2026-09-09-native-lane-qualification-blockers.json) ·
+   [4090 qualified](docs/measurements/2026-09-10-rtx4090-native-lane-qualification.json).
 3. **Fleet routing — configuration published and the fixed workload measured 2026-09-05.**
    [`examples/fleet/`](examples/fleet/) is one OMP configuration spanning the three lanes with
    explicit roles (`local-main` on the RTX 5090, `local-heavy` on the RTX 4090, `local-scout` on

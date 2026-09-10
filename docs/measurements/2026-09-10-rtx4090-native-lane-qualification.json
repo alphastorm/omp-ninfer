@@ -1,0 +1,70 @@
+{
+  "artifact_type": "omp_ninfer_native_lane_qualification_window",
+  "schema_version": 1,
+  "generated_utc": "2026-09-10",
+  "lanes": ["rtx4090"],
+  "continues": "docs/measurements/2026-09-09-native-lane-qualification-blockers.json",
+  "scope": "Qualification window only, RTX 4090 lane. The candidate is an unreleased build of the runtime fork's port/native-lanes-on-mainline branch installed in its own lineage state root (qwen38-4090-native); the shipped native components (v0.2.3-qwen38-4090-durable.1, v0.2.5-qwen38-3090-beta.1) were never started or modified. The RTX 3090 lane is not in this window: its host is unavailable until about 2026-09-21 (owner constraint), so the 3090 mainline candidate stays uncut and its shipped v0.2.5 component carries unchanged.",
+  "question": "With the release path's five blockers closed (EXP-026), does the RTX 4090 mainline candidate pass its own lifecycle qualification end to end, and what do the phases that had never run expose?",
+  "answer": "The phases beyond protocol ran for the first time and exposed two more defects, both fixed and re-proven: an admission invariant that refused a legitimate request under Host StateImage pressure, and a restart phase that could not observe durability because nothing published the session it restarted. A third defect - a concurrency settlement leak that predates this work and is unreachable at the lane's shipped max_concurrency=1 - is recorded open.",
+  "candidate": {
+    "branch": "port/native-lanes-on-mainline",
+    "commit": "6912a15cf1cc9c05a1cf5d2d2eae4b6d0ac1e2a9",
+    "predecessor": "4447fe93",
+    "release_id": "qwen38-4090-native-v0.6.0-beta.1",
+    "commits_added": [
+      "aef33996 fix(runtime): materialize from a resident source, not an exclusively owned one",
+      "dac505de fix(qualification): prove restart durability, and hold the protocol under pool pressure",
+      "6912a15c test(engine): separate cancelled-materialization settlement from staggered rows"
+    ]
+  },
+  "defects_fixed": [
+    {
+      "id": "materialization-residency-guard",
+      "issue": "https://github.com/alphastorm/ninfer/issues/37",
+      "phase": "protocol under Host StateImage pressure",
+      "supersedes": "the materialization-source-eviction open finding of 2026-09-09, whose stated cause (last replica evicted) was inference from the same conflated predicate and is corrected here",
+      "symptom": "At --host-state-slots 8 the agent protocol's request 10 (continue the surviving descendant after its parent Responses record is deleted) returned HTTP 500; the server logged 'materialization source has no resident state'. Reproduced in 34 s on the installed candidate.",
+      "cause": "prepare_materialization asked resident_resources(source) whether the planned source still had state. That function reports only what an owner holds exclusively - its exact transition effect - so a state another sequence also references contributes zero. Instrumenting the assertion on the failing request recorded: anchors=1 retained=0 endpoint=0 read==write=1 kv=1 read=invalid write=invalid anchor=res2/ref2/own1 - the continuation's endpoint had been retired and its remaining reuse source was a HostOnly long anchor with two checkpoint references against one owned, the ordinary shape after a sibling fork. Admission had legitimately planned private_long_anchor reuse from it.",
+      "fix": "aef33996 asserts on the selected source's replica residency, the question the planner itself asks (request_plan_impl.h: selected_state plus state_store->residency).",
+      "red_green": {
+        "configuration": "--device-state-slots 2 --host-state-slots 8 --host-kv-mib 4096 --max-private-continuations 8",
+        "before": {"commit": "4447fe93", "agent_protocol": "failed", "request_10": "HTTP 500 materialization source has no resident state"},
+        "after": {"commit": "dac505de", "agent_protocol": "passed 15/15", "request_10": "done prompt=133 gen=16 cache=53 reuse=private_long_anchor"}
+      },
+      "class_closure": "The only other uses of resident_resources() are effect accounting (pressure option effects, the planner's final_removed, and the post-materialization entitlement equality), where exclusive ownership is the correct measure; the guard was the single place using it as a residency question. A pressure_protocol qualification phase now runs the same protocol against the installed release at eight Host StateImage slots, so the class cannot reach a candidate window unobserved again."
+    },
+    {
+      "id": "restart-phase-observed-nothing",
+      "phase": "restart",
+      "symptom": "The restart phase failed: the post-restart continuation returned HTTP 404. The session checkpoint root held zero files after the restart.",
+      "cause": "The phase seeded a ~40-token session and restarted, expecting the continuation to resolve. Nothing had published that session: automatic saves start at 32,768 frontier tokens (kDefaultSessionCheckpointMinTokens), and the shutdown flush in apps/serve/main.cpp runs only when listen() returns from a SIGINT/SIGTERM handler, which a Windows managed stop never delivers. The shipped native lanes pass this phase only because their qualification restarts a 102K-token session, which clears the automatic gate.",
+      "fix": "dac505de publishes the session through the documented explicit endpoint (POST /v1/ninfer/checkpoints), verifies the generation became available, and requires the post-restart continuation to quote the marker with a nonzero cached-token count. The phase also records restart wall time, so a slow managed start is data rather than an opaque timeout.",
+      "evidence_integrity": "The same commit drops five fields the phase's receipt asserted as 'passed' without ever exercising them (middle_delete_restart_regression, latest_delete_nonrestorable_regression, standalone_delete_nonrestorable_regression, durable_only_lru_delete_regression, post_commit_sync_regression)."
+    }
+  ],
+  "open_findings": [
+    {
+      "id": "windows-managed-stop-does-not-flush",
+      "severity": "durability gap, pre-existing on both native Windows lanes",
+      "observation": "HttpServer::save_all_checkpoints() (src/serve/http_server.cpp) drains the automatic queue and saves every live session, and apps/serve/main.cpp calls it after listen() returns. listen() returns only via server.stop() from the SIGINT/SIGTERM handler. Windows never raises SIGTERM, the managed server has no console to receive SIGINT, and Control-Release.ps1's Stop-ManagedProcess stops the scheduled task and then calls Stop-Process -Force. The flush is therefore unreachable on the native lanes. Measured: after two managed restarts of a live session, the checkpoint root held zero files.",
+      "consequence": "A session below the 32,768-token automatic-checkpoint gate that was never saved explicitly does not survive a deliberate stop. Sessions above the gate, and any session saved explicitly, do survive - that is what both shipped native lanes qualified.",
+      "status": "open, unchanged by this window. The RTX 5090 container lane is unaffected: docker stop delivers SIGTERM and the flush runs.",
+      "not_fixed_here": "A graceful-stop channel is new control surface on a serving process and belongs in its own reviewed change, not in a release candidate."
+    },
+    {
+      "id": "c8-terminal-settlement-leak",
+      "issue": "https://github.com/alphastorm/ninfer/issues/38",
+      "severity": "registered test failure outside the shipped configuration",
+      "observation": "ninfer_qwen3_6_27b_prefix_real_test fails deterministically in exercise_concurrent_resource_settlement: after eight staggered rows each return their expected token count and OutputLimit, runtime_stats still reports running=1 and terminal_pending=1.",
+      "scope": "Reproduced identically at f3dacba8, 4447fe93, and 6912a15c, so it predates this window's work. An added settlement assertion after the earlier cancellation fixture passes, so the leak is inside the C=8 loop rather than the abandoned handle. Cause open; not yet run on a Linux lane.",
+      "release_relevance": "Both native lanes ship max_concurrency=1 and the standing support boundary is one active request per qualified profile, so the shipped configuration cannot reach this path.",
+      "coverage_correction": "ninfer_qwen3_6_27b_prefix_real_test skips unless a 27B artifact environment variable is exported, and the qualification's build phase runs only a focused serve-side ctest list. The EXP-025 statement that every registered suite passed on both native builds did not cover this scenario."
+    }
+  ],
+  "suite": {
+    "ctest_sm89": "101/101 passed, 6 skipped for absent artifacts (2026-09-10, builder tree at dac505de)",
+    "ctest_sm89_with_artifact": "ninfer_qwen3_6_27b_prefix_real_test fails as recorded above at every commit tested, including the candidate's predecessor"
+  },
+  "trust_boundary": "Owner measurement on one host (RTX 4090, sm_89, MSVC 14.44, CUDA 13.3). Protocol results are the lane probe's own exit status and receipt; the red-to-green pair ran the same probe against the same installed release bytes with only the Host StateImage pool size and the server binary changed; phase results are the orchestrator's state file."
+}

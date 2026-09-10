@@ -27,6 +27,25 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.0 development candidate (RTX 4090 on the mainline runtime)
+
+- Status: `draft`. The tree is staged and internally consistent; nothing is published and no
+  product tag exists. `python3 scripts/verify_release.py --release v0.6.0` reports only the
+  staged-draft posture.
+- RTX 4090 native component `ninfer@v0.6.0-qwen38-4090-beta.1` (runtime fork `6912a15c`,
+  package `58d17bd7...`, 573,730,038 bytes, configuration `5ee3fb71...`, server binary
+  `b0a88af2...`): the mainline runtime built for Ada with the Windows platform code, replacing
+  the divergent `v0.2.x` lane branch. Qualified on the owner rig through the lane's own
+  lifecycle tool, 15/15 phases
+  ([receipt](../releases/v0.6.0/qualification/rtx4090.json), EXP-027).
+- RTX 5090 runtime `v0.5.1-qwen38-5090-beta.1`, deployment profile `qwen38-5090-v0.5.1`, and
+  the OMP client are unchanged and carry by hash. The RTX 3090 lane stays on
+  `v0.2.5-qwen38-3090-beta.1`: its host is unavailable until about 2026-09-21, so its mainline
+  candidate is neither built nor cut here. Precedent for a single-lane release: v0.4.2 (RTX
+  4090 alone) and v0.4.5 (RTX 3090 alone).
+- Remaining gates: publish the component and its distribution set, then rerun the composed
+  external-installation acceptance from the published URLs.
+
 ### v0.5.1 public release (warm arrival across a restart)
 
 - Product release: `alphastorm/omp-ninfer@v0.5.1`, GitHub `Latest`. The second v0.5 deliverable

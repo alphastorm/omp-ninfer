@@ -51,6 +51,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an open runtime invariant defect. No release changed; the RTX 3090 lane is blocked on its
   host being offline
   ([receipt](docs/measurements/2026-09-09-native-lane-qualification-blockers.json)).
+- EXP-027: the RTX 4090 mainline candidate passes its own lifecycle qualification end to end
+  (15/15 phases, runtime fork `6912a15c`). Running the phases past `protocol` for the first
+  time exposed two defects, both reproduced before the fix. **Admission refused a legitimate
+  request under Host StateImage pressure**: at eight host state slots the protocol's
+  post-delete continuation returned HTTP 500, because the guard asked
+  `resident_resources(source)` - which reports only what an owner holds *exclusively* - whether
+  the planned source still had state, and a long anchor a sibling continuation also references
+  measures as zero while being perfectly resident (instrumented: endpoint retired, one anchor
+  `HostOnly` with two checkpoint references against one owned). It now asks the question the
+  planner asks, and the same 8-slot run passes 15/15 with `reuse=private_long_anchor`
+  ([ninfer#37](https://github.com/alphastorm/ninfer/issues/37)). **The restart phase could not
+  observe durability**: it seeded a ~40-token session, which is below the 32,768-token
+  automatic-checkpoint gate, and a managed stop on Windows terminates the server rather than
+  signalling it, so nothing was ever published and the continuation returned 404. The phase now
+  publishes through `POST /v1/ninfer/checkpoints`, verifies the generation, and requires the
+  post-restart continuation to quote the marker with a nonzero cached-token count; it also
+  drops five regression fields its receipt had asserted without exercising them. Measured on
+  the candidate: exact 130,048-token retrieval in **91.6 s**, C1 **2,101.6 tok/s** prefill and
+  **159.0 tok/s** decode at 93.0% MTP acceptance and 22,814 MiB peak, bidirectional rollback,
+  state-security gates, the OMP golden run exact, and a 310 MB checkpoint restored across a
+  managed restart. Two findings stay open and unfixed: a managed stop does not flush unsaved
+  sessions on either native lane, and `exercise_concurrent_resource_settlement` leaves one
+  request in `running`/`terminal_pending` at C=8 - reproduced identically at three commits, so
+  it predates this work, and unreachable at the lanes' shipped `--max-concurrency 1`
+  ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38))
+  ([receipt](docs/measurements/2026-09-10-rtx4090-native-lane-qualification.json)).
 
 ### Changed
 
@@ -62,6 +88,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arguments mid-probe fails the probe instead of mixing subjects. The fanout summary adds
   `hot_fork_max_s` and `warm_start_fork_max_s`: one fork re-prefilling from root hid behind the
   median.
+- `scripts/bind_native_variant.py`: a native lane's manifest row is now derived from the two
+  files its packager already produces - the closed outer `SHA256SUMS` and
+  `package-build-receipt.json` - plus the component tag. It refuses a set that does not carry
+  every bound asset, a package hash the receipt disputes, a receipt that does not hash to its
+  own entry, and a receipt from another lane, and it checks the distribution set into the
+  release tree where the verifier expects it. Transcribing those fifteen hashes and URLs by
+  hand is the drift class v0.5.1 had to correct with a whole release.
 
 ## [0.5.1] - 2026-09-08
 
