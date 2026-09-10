@@ -7,112 +7,79 @@
     "rtx4090"
   ],
   "continues": "docs/measurements/2026-09-10-native-managed-stop-flush.json",
-  "scope": "Qualification window only, RTX 4090 lane. The candidate is an unreleased build of the runtime fork's port/native-lanes-on-mainline installed in its own lineage state root (qwen38-4090-native) beside the shipped v0.6.0 release of that lineage; the RTX 5090 and RTX 3090 components were never started or modified, and the v0.2 incumbent lineage on the same host was found stopped and left untouched. Nothing was published: no component upload, no product release, no manifest, profile, or route change.",
-  "question": "Does the graceful-stop candidate pass the RTX 4090 lane's own lifecycle qualification, including the two new assertions - that a session nothing ever published survives a managed restart, and that each rollback direction is stopped the way its own release record declares?",
-  "answer": "Yes, at runtime fork 98193856 with the qualification tool at 708d66b9: 15/15 phases and 103/103 registered tests. Getting there cost three defects, all in the new lifecycle handoff and all found by the lane rather than by the preceding runtime probe: the wrapper's cleanup now races the controller, a stop was classified on an exit code this host does not expose, and the new restart phase was not re-runnable against its own published state.",
-  "candidate": {
+  "scope": "Qualification window only, RTX 4090 lane, across seven candidate commits of the runtime fork's port/native-lanes-on-mainline branch in one day. Each candidate installs into its own lineage state root (qwen38-4090-native) beside the shipped v0.6.0 release of that lineage; the RTX 5090 and RTX 3090 components were never started or modified, and the v0.2 incumbent lineage on the same host was found stopped and left untouched. Nothing was published: no component upload, no product release, no manifest, profile, or route change.",
+  "question": "Does the graceful-stop candidate pass the RTX 4090 lane's own lifecycle qualification - including a never-published session surviving a managed restart and each rollback direction stopped the way its release declares - and does it survive an independent focused review of the new control surface?",
+  "answer": "Yes, at runtime fork 63f28c95: 15/15 phases and 103/103 registered tests, after two focused review rounds (initial and remediation) whose eight confirmed findings are fixed at source and pinned by executable invariants. The lane itself found six more defects in the lifecycle handoff that no unit test or foreground probe could see, because they live in the moment a gracefully exiting wrapper hands the lifecycle back to the controller - a moment that never existed while stops were terminations.",
+  "final_candidate": {
     "branch": "port/native-lanes-on-mainline",
-    "commit": "9819385668d59794690aea85371c03b1900c0bda",
-    "qualification_tool_commit": "708d66b934984d79ab35611d49e01b5b37576d05",
+    "commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
     "release_id": "qwen38-4090-native-v0.6.1-beta.1",
-    "deployment_profile": "qwen38-4090-native-v0.6.1-beta.1",
-    "predecessor_in_lineage": "qwen38-4090-native-v0.6.0-beta.1-075d442e9c4e (the shipped v0.6.0 component)",
     "package": {
       "filename": "ninfer-rtx4090-native-v0.6.1-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "sha256": "9c8528827d66d49b8ea3a0656e7486cc423ac9b5d0c7f2b3ece921d8c6362ea3",
-      "bytes": 573732595
+      "sha256": "4390a8cb95b90a9c60a904e28eea6cc495155edca42f01aa11db852e022f4fdd",
+      "bytes": 573795974
     },
-    "server_binary_sha256": "b93dc67b3e8598e7",
-    "configuration_sha256": "a938aaa153ead408",
-    "note": "hashes abbreviated here; the exact values are in the lane's own qualification summary and SHA256SUMS, which bind the release manifest"
+    "server_binary_sha256_prefix": "39490a447517a11e",
+    "configuration_sha256_prefix": "a938aaa153ead408",
+    "phases": "15/15 passed 2026-09-10T13:19Z, host restored (450 W, no lease, no server process, incumbent untouched)",
+    "suite": "ctest sm89 103/103 at 63f28c95, 6 skipped for absent artifacts"
   },
-  "defects_fixed": [
-    {
-      "id": "wrapper-cleanup-race",
-      "commit": "805c1bd8",
-      "symptom": "The pressure_protocol phase failed: the controller's Stop threw ItemNotFoundException removing gpu-owner-lease.json (Control-Release.ps1 Restore-GpuOwnerLease).",
-      "cause": "A terminated launch released nothing, so the controller could always follow straight on. A graceful stop gives the managed wrapper its own thread of control on the way out: Invoke-Run's finally now runs, restoring the GPU owner and dropping the run lock. Both the wrapper and the controller reached Restore-GpuOwnerLease, and the loser deleted a lease the winner had already removed.",
-      "fix": "Wait-ManagedWrapperExit waits for the scheduled task to leave Running and for the run lock to be free; every controller action that touches shared launch state goes through it - a stop returns only once no wrapper is unwinding (signalled, terminated, or already gone), and a start refuses to acquire the lease while one still holds the lock. A stalled wrapper is recorded in last-stop.json before the stop fails. Restore-GpuOwnerLease also treats the lease's absence as its end state.",
-      "class_closure": "The contract test refuses a Stop-ManagedProcess or Start-ManagedRelease that reaches shared state without that wait."
-    },
-    {
-      "id": "unobservable-exit-code-classified",
-      "commit": "98193856",
-      "symptom": "The restart phase refused a stop the controller had recorded as outcome graceful_nonzero_exit with exit_code 0 - a receipt contradicting itself.",
-      "cause": "Reading ExitCode on a process the controller did not start yields $null on this host (the handle Get-Process returns lacks the rights .NET needs), and $null -ne 0 is true, so the receipt classified on a value it never observed and then recorded [int]$null as the code it had supposedly seen.",
-      "fix": "The graceful contract is what is observable: the request was delivered and the process exited within the declared bound. An exit code decides an outcome only when the host provides one, and the wrapper's own scheduled-task result - which does come from a real child handle - is recorded beside it as evidence rather than a verdict. The flush is proven by the session that comes back.",
-      "class_closure": "The contract test refuses a bare `$owned.ExitCode -ne 0` branch in the stop path."
-    },
-    {
-      "id": "restart-phase-not-rerunnable",
-      "commit": "708d66b9",
-      "symptom": "On the second run against the same installed release the restart phase failed its own precondition: 'the managed-stop session was already published before the stop'.",
-      "cause": "The phase proves that a session nothing ever published survives a managed stop, so it asserts the session is unpublished before stopping - but the cache root outlives the phase, and it found the generation its own previous run had flushed. The lane's idempotency contract, broken by the newest phase in it.",
-      "fix": "The phase erases that session's durable generation through the documented DELETE route before seeding, tolerating its absence, and then requires absence."
-    }
+  "windows_in_order": [
+    {"commit": "903b0e19", "result": "failed pressure_protocol", "found": "wrapper-cleanup-race"},
+    {"commit": "805c1bd8", "result": "failed restart", "found": "unobservable-exit-code-classified"},
+    {"commit": "98193856", "result": "15/15 (restart phase then failed on rerun)", "found": "restart-phase-not-rerunnable"},
+    {"commit": "708d66b9", "result": "tool-only fix; not requalified", "review": "initial focused review dispatched on this commit"},
+    {"commit": "23c71d12", "result": "failed transfer_install", "found": "action-lock-held-in-deleted-tree"},
+    {"commit": "641e66b9", "result": "failed restart", "found": "two-lease-restorers"},
+    {"commit": "d0fd0f51", "result": "failed restart", "found": "start-process-exit-code-unreadable"},
+    {"commit": "e229012d", "result": "failed rollback", "found": "new-flag-passed-to-legacy-binary"},
+    {"commit": "65c3ec0c", "result": "15/15 (after an ssh drop mid-protocol; resumed)", "review": "remediation focused review dispatched on this commit"},
+    {"commit": "63f28c95", "result": "15/15", "found": "nothing new"}
   ],
-  "measured_on_98193856": {
-    "phases": "15/15 passed 2026-09-10T09:18:45Z",
-    "managed_stop": {
-      "mode": "stop-event",
-      "outcome": "graceful",
-      "forced": false,
-      "elapsed_seconds": 2.682,
-      "graceful_wait_seconds": 900,
-      "exit_code": "not exposed by this host for a process the controller did not start; recorded as null rather than inferred"
+  "review": {
+    "class": "focused (reusable internal path); reciprocal cross-family strong critic, resolver-selected",
+    "sequence": "CR-2026-09-10-graceful-stop; initial on 708d66b9, remediation on 65c3ec0c; records, packets, scopes, receipts, and ledger under ~/reviews/omp-ninfer-graceful-stop*",
+    "initial_round": {
+      "R1 P2 mitigate": "the fallback decided from the runtime snapshot the stop opened with; it now reads state at each step",
+      "R2 P1 mitigate": "a shutdown that could not save a live session exited 0 and was recorded graceful; the flush now returns saved/skipped/refused and the process exits nonzero on any refusal",
+      "R3 P2 mitigate": "a terminating Stop-ScheduledTask error skipped the force-kill and the receipt; each termination step is now best-effort and the receipt is written in a finally",
+      "U1 P1 accept": "a low-privilege squatter pre-creating the Global event name: the window is milliseconds, the name is random per launch, the outcome is one refused start with a recorded reason, and reading a SYSTEM process command line from another session needs SeDebugPrivilege",
+      "U2 P2 mitigate": "concurrent Stop and Start could interleave over the GPU-owner lease; every mutating action now runs under an action lock",
+      "U3 P1 reject": "cpp-httplib 0.18.3 ThreadPool::shutdown joins every worker before listen returns; the dependency was outside the bound paths"
     },
-    "restart": {
-      "restart_seconds": 45.03,
-      "process_replaced": true,
-      "explicit_control": {
-        "checkpoint_save": "explicit_endpoint",
-        "frontier_tokens": 42,
-        "save_bytes": 310213339,
-        "cached_input_tokens": 42,
-        "exact_output": "CHECKPOINT-NATIVE-731942"
-      },
-      "managed_stop_flush": {
-        "checkpoint_save": "shutdown_flush",
-        "state_before_stop": "missing",
-        "state_after_restart": "available",
-        "cached_input_tokens": 45,
-        "exact_output": "MANAGED-STOP-FLUSH-408137"
-      }
+    "remediation_round": {
+      "R1 P1 mitigate": "Request-ManagedStop caught only the not-found case; it now returns signalled/absent/failed and never throws, and delivery runs inside the fail-closed scope",
+      "R2 P1 mitigate": "a previous launch's shutdown report could be read as this launch's; the wrapper mints a launch identity carried in the event name and runtime.json, the server echoes it, and the controller accepts only a matching report",
+      "R3 P1 mitigate": "the scheduled task retries a failed wrapper, so a nonzero exit after a requested stop would have been relaunched; a wrapper that finds this launch's report exits clean and leaves the verdict to the stop receipt",
+      "R4 P1 mitigate": "the uninstall released the action lock between its stop and the task removal; both now run under one scoped lock and the uninstall asserts no owned process survives",
+      "R5 P1 mitigate": "Copy-InstalledRelease rebuilt every existing record from a field list that predates the channel, so installing the next release stripped managed_stop from every 0.6.1 incumbent - proven on the host: every record installed before 63f28c95 had already lost it, and 65c3ec0c kept it through the 63f28c95 installer",
+      "U1 P1 resolved by observation": "the release logs directory carries exactly two inherited ACEs, SYSTEM and Administrators, FullControl; no standard-user ACE exists, so a low-privilege principal cannot create, replace, or lock the report",
+      "U2 P2 accept": "whether draining plus saving every live session always fits the 900 s bound at the configured 1,024-record store: the bound is the qualification's own restart timeout, the outcome at the bound is the pre-existing termination, and the receipt records it; no saturated-store measurement was taken"
     },
-    "rollback": {
-      "directions": 2,
-      "candidate_stop_mode": "stop-event, graceful, not forced",
-      "predecessor_stop_mode": "terminate, terminated, forced - the shipped v0.6.0 release, whose record carries no managed_stop field",
-      "intermediate_release": "qwen38-4090-native-v0.6.0-beta.1-075d442e9c4e"
-    },
-    "context_128k": {
-      "prompt_tokens": 130048,
-      "exact_output": "ORCHID=493817; COLOR=COBALT",
-      "elapsed_s": 91.47
-    },
-    "benchmark_c1": {
-      "prefill_tokens_per_second": 2106.09,
-      "decode_tokens_per_second": 159.13,
-      "mtp_acceptance_percent": 92.96,
-      "max_memory_used_mib": 22814,
-      "max_power_w": 454.29
-    },
+    "disposition": "no in-scope residual P0/P1; the credential path is unchanged (the stop event admits only SYSTEM and Administrators, the report directory the same); sequence closed"
+  },
+  "defects_the_lane_found": [
+    {"id": "wrapper-cleanup-race", "commit": "805c1bd8", "class": "two owners converging on one piece of shared state", "fix": "Wait-ManagedWrapperExit; every action touching launch state waits for a gracefully exiting wrapper"},
+    {"id": "unobservable-exit-code-classified", "commit": "98193856", "class": "deciding on a value the host did not expose", "fix": "an exit code decides only when provided"},
+    {"id": "restart-phase-not-rerunnable", "commit": "708d66b9", "class": "a phase that cannot run twice against its own published state", "fix": "the phase erases its flush session's generation before seeding"},
+    {"id": "action-lock-held-in-deleted-tree", "commit": "641e66b9", "class": "a lock inside the tree its holder deletes", "fix": "scoped to the stop"},
+    {"id": "two-lease-restorers", "commit": "d0fd0f51", "class": "two owners converging on one piece of shared state (second occurrence; class closed)", "fix": "the action lock decides ownership; the wrapper restores only when no action holds it"},
+    {"id": "start-process-exit-code-unreadable", "commit": "e229012d", "class": "deciding on a value the host did not expose (second occurrence; class closed)", "measured": "Start-Process -PassThru with redirected streams returns ExitCode $null for a child that exited 0; `$null -ne 0` is true; the wrapper's pre-existing check threw on every exit and had been unreachable because termination always killed the wrapper first", "fix": "--shutdown-report is the outcome channel; the contract test forbids exit-code comparisons in the shared scripts; one prior launch's logs survive"},
+    {"id": "new-flag-passed-to-legacy-binary", "commit": "65c3ec0c", "class": "an argument an older binary refuses (second occurrence; class closed)", "fix": "the set of flags newer than the shipped parser is derived from git and required inside the capability gate"}
+  ],
+  "measured_on_63f28c95": {
+    "managed_stop": {"mode": "stop-event", "outcome": "graceful", "forced": false},
+    "restart": {"unsaved_session_survived": true, "unsaved_session_cached_input_tokens": 45, "explicit_control_cached_input_tokens": 42},
+    "rollback": {"candidate": "stop-event / graceful", "predecessor_65c3ec0c": "stop-event / graceful_unreported (that binary predates the launch-id echo, so its report is rightly not trusted)", "predecessor_v0.6.0_proven_live_under_the_same_controller_family": "terminate / terminated / forced, no new flags passed"},
+    "context_128k": {"prompt_tokens": 130048, "exact_output": "ORCHID=493817; COLOR=COBALT", "elapsed_s": 91.36},
+    "benchmark_c1": {"prefill_tokens_per_second": 2104.95, "decode_tokens_per_second": 159.09, "mtp_acceptance_percent": 92.96, "max_memory_used_mib": 22814},
     "protocol": "15/15 at the shipped pool and 15/15 at 8 host state slots",
     "security": "root DACL protected, 2 low-privilege effective read denials",
-    "omp": "typed-tool golden run exact",
-    "restore": "incumbent untouched, 450 W restored, no lease, no server process, task Ready"
+    "omp": "typed-tool golden run exact"
   },
-  "suite": {
-    "ctest_sm89": "103/103 passed at 98193856, 6 skipped for absent artifacts (the two new tests are ninfer_stop_event_test and ninfer_http_server_stop_test)",
-    "stop_event_test": "asserts the event's DACL holds exactly two allow ACEs - SYSTEM and Administrators, each with full access - that a squatted name is refused, and that the stop request is re-asserted until it takes effect and never after"
-  },
-  "live_compatibility_check": {
-    "observation": "Before this window the newest (0.6.1) controller launched the shipped v0.6.0 release from the same lineage: runtime.json recorded managed_stop terminate with no event name, the server served its own identity (qwen38-4090-native-v0.6.0-beta.1), and its stop was mode terminate, outcome terminated, forced true after 31.3 s.",
-    "why_it_matters": "The shipped binary exits 1 with 'unknown argument: --stop-event', so a shared controller that passed the flag unconditionally would break every rollback. The capability lives in the release record, not in the controller."
-  },
-  "trust_boundary": "Owner measurement on one host (RTX 4090, sm_89, MSVC 14.44, CUDA 13.3). Phase results are the orchestrator's state file and its per-phase receipts; the managed-stop facts are the controller's own last-stop.json, read back by the phase.",
+  "trust_boundary": "Owner measurement on one host (RTX 4090, sm_89, MSVC 14.44, CUDA 13.3). Phase results are the orchestrator's state file and per-phase receipts; managed-stop facts are the controller's last-stop.json read back by the phase; the reviewer verdicts are the resolver-dispatched reviewer's own schema-valid output, verified by the lead against the bytes before any disposition.",
   "not_proven_here": [
     "The RTX 3090 lane: its host is unavailable until about 2026-09-21. Its specification also advances to 0.6.1-beta.1 but its candidate is neither built nor cut.",
-    "No component is published and no product release is cut; the independent focused review of this change has not run."
+    "No component is published and no product release is cut."
   ]
 }

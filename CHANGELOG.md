@@ -33,23 +33,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   phase now proves the unsaved session survives a managed restart and its rollback phase proves
   each direction's stop mode against what that release declares
   ([receipt](docs/measurements/2026-09-10-native-managed-stop-flush.json)).
-- EXP-029: the graceful-stop candidate passes the RTX 4090 lane's own lifecycle qualification,
-  unreleased. 15/15 phases at runtime fork `98193856` (tool `708d66b9`) and 103/103 registered
-  tests. The two new assertions hold on the managed path: the restart phase's second session -
-  45 tokens, never published, `missing` before the stop - comes back `available` quoting its
-  marker with 45 cached input tokens after a **graceful** managed stop that took **2.68 s** and
-  never fell back to termination, and the rollback phase records each direction's stop against
-  what that release declares (candidate `stop-event`/graceful; the shipped v0.6.0 predecessor
-  `terminate`/forced). Unchanged where it should be: exact 130,048-token retrieval in **91.5 s**,
-  C1 **2,106.1 tok/s** prefill and **159.1 tok/s** decode at 93.0% MTP acceptance and 22,814 MiB
-  peak, the 15-check protocol at both pool sizes, the state-security set, the OMP golden run
-  exact, and the host restored to 450 W with the incumbent untouched. Getting there cost three
-  defects, all in the new handoff and all found by the lane rather than by the runtime probe
-  before it: the wrapper's cleanup now races the controller for the GPU-owner lease (a stop, and
-  a start, now wait for the wrapper to release the run lock); a stop was classified on an exit
-  code this host does not expose for a process the controller did not start, producing
-  `graceful_nonzero_exit` with `exit_code: 0`; and the new restart phase was not re-runnable
-  against the generation its own previous run had flushed. No component is published and no
+- EXP-029: the graceful-stop candidate passes the RTX 4090 lane's own lifecycle qualification
+  and two rounds of independent focused review, unreleased. Final candidate runtime fork
+  `63f28c95`: 15/15 phases, 103/103 registered tests. The two new assertions hold on the managed
+  path: the restart phase's second session - 45 tokens, never published, `missing` before the
+  stop - comes back `available` quoting its marker with 45 cached input tokens after a
+  **graceful** managed stop, and the rollback phase records each direction's stop against what
+  that release declares. Unchanged where it should be: exact 130,048-token retrieval in
+  **91.4 s**, C1 **2,104.9 tok/s** prefill and **159.1 tok/s** decode at 93.0% MTP acceptance
+  and 22,814 MiB peak, the 15-check protocol at both pool sizes, the state-security set, the
+  OMP golden run exact, the host restored to 450 W with the incumbent untouched. Getting there
+  took seven candidate windows in one day: the lane found six defects in the lifecycle handoff
+  that no unit test or foreground probe could see, because they live in the moment a
+  gracefully exiting wrapper hands the lifecycle back to the controller - a moment that never
+  existed while stops were terminations - and the reviewer confirmed eight more. Three classes
+  recurred and were closed with executable invariants rather than patched per instance: two
+  owners converging on one piece of shared state (the GPU-owner lease has one restorer per
+  stop, decided by an action lock), deciding on a value the host did not expose (`Start-Process
+  -PassThru` with redirected streams reads `ExitCode` as `$null` for a child that exited 0, so
+  the server now writes a `--shutdown-report` bound to its launch and no shared script compares
+  an exit code), and an argument an older binary refuses (the set of flags newer than the
+  shipped parser is derived from git and required inside the capability gate). The worst
+  finding was the reviewer's: the installer rebuilt every existing release record from a field
+  list that predates the channel, so installing the *next* release would have silently turned
+  every 0.6.1 incumbent's stop back into a termination - proven on the host, where every record
+  installed before the fix had already lost its capability. No component is published and no
   release is cut
   ([receipt](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json)).
 

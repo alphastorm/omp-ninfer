@@ -245,16 +245,17 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    at its default 32,768: the candidate exits in 0.74 s having saved it and restores it exactly
    after a restart, where the shipped binary loses it and answers 404. The channel is a
    per-release capability, so a rollback to `v0.6.0` is still stopped by termination. **That
-   candidate is qualified (2026-09-10, EXP-029; still uncut):** 15/15 lane phases at `98193856`
-   and 103/103 registered tests, with a 45-token session that nothing ever published coming back
-   exactly after a graceful 2.68 s managed restart, both rollback directions stopped the way
-   their own records declare, and the shipped numbers unchanged (130,048-token retrieval in
-   91.5 s, 2,106 tok/s prefill, 159.1 tok/s decode). Three defects in the new handoff surfaced
-   only on the lane: the wrapper's cleanup raced the controller for the GPU-owner lease, a stop
-   was classified on an exit code the host does not expose, and the new restart phase could not
-   re-run against its own published generation. Next: publish the RTX 4090 component and cut it
-   as v0.6.1 after an independent review of the new control surface; the RTX 3090 lane waits for
-   its host, expected about 2026-09-21, and ships separately
+   candidate is qualified and reviewed (2026-09-10, EXP-029; still uncut):** 15/15 lane phases
+   at `63f28c95` and 103/103 registered tests, with a 45-token session that nothing ever
+   published coming back exactly after a graceful managed restart, both rollback directions
+   stopped the way their own records declare, and the shipped numbers unchanged (130,048-token
+   retrieval in 91.4 s, 2,105 tok/s prefill, 159.1 tok/s decode). Seven candidate windows: the
+   lane found six defects in the lifecycle handoff - the moment a gracefully exiting wrapper
+   hands the lifecycle back, which never existed while stops were terminations - and two rounds
+   of independent focused review confirmed eight more, the worst being an installer that
+   silently stripped the capability from every existing record. Three recurring classes are
+   closed with executable invariants. Next: publish the RTX 4090 component and cut it as
+   v0.6.1; the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
    ([EXP-028](docs/measurements/2026-09-10-native-managed-stop-flush.json) ·
    [EXP-029](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json)).
    Receipts:
