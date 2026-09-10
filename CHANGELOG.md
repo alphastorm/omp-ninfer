@@ -52,10 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   host being offline
   ([receipt](docs/measurements/2026-09-09-native-lane-qualification-blockers.json)).
 - EXP-027: the RTX 4090 mainline candidate passes its own lifecycle qualification end to end
-  (15/15 phases, runtime fork `6912a15c`). Running the phases past `protocol` for the first
-  time exposed two defects, both reproduced before the fix. **Admission refused a legitimate
-  request under Host StateImage pressure**: at eight host state slots the protocol's
-  post-delete continuation returned HTTP 500, because the guard asked
+  (15/15 phases, runtime fork `6912a15c`, requalified at `075d442e`). Running the phases past
+  `protocol` for the first time exposed two defects, both reproduced before the fix.
+  **Admission refused a legitimate request under Host StateImage pressure**: at eight host
+  state slots the protocol's post-delete continuation returned HTTP 500, because the guard asked
   `resident_resources(source)` - which reports only what an owner holds *exclusively* - whether
   the planned source still had state, and a long anchor a sibling continuation also references
   measures as zero while being perfectly resident (instrumented: endpoint retired, one anchor
@@ -71,11 +71,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the candidate: exact 130,048-token retrieval in **91.6 s**, C1 **2,101.6 tok/s** prefill and
   **159.0 tok/s** decode at 93.0% MTP acceptance and 22,814 MiB peak, bidirectional rollback,
   state-security gates, the OMP golden run exact, and a 310 MB checkpoint restored across a
-  managed restart. Two findings stay open and unfixed: a managed stop does not flush unsaved
-  sessions on either native lane, and `exercise_concurrent_resource_settlement` leaves one
-  request in `running`/`terminal_pending` at C=8 - reproduced identically at three commits, so
-  it predates this work, and unreachable at the lanes' shipped `--max-concurrency 1`
-  ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38))
+  managed restart. Running the registered suite with the artifact exported - which EXP-025's
+  "every suite passes" had not - found a third defect: after `wait()` returned for every one
+  of eight staggered rows, `runtime_stats()` still counted one as `running`/`terminal_pending`.
+  Not a leaked slot: the engine delivered a result and woke its waiter before it released the
+  lane and republished, so the consumer read the previous snapshot. Completion is now split
+  into finalize and deliver and a lane is retired finalize → release → publish → deliver
+  ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38)). Red at the port base
+  `f3dacba8` and at `4447fe93` on real rebuilds, green at `075d442e`, and the full sm_89 set
+  passes 101/101 with the artifact. An earlier three-commit A/B is retracted on the issue: its
+  nested `powershell -Command` line was split on `&` by cmd and never rebuilt. One finding
+  stays open and unfixed: a managed stop does not flush unsaved sessions on either native lane
   ([receipt](docs/measurements/2026-09-10-rtx4090-native-lane-qualification.json)).
 
 ### Changed

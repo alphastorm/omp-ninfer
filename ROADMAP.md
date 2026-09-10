@@ -230,12 +230,15 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    130,048-token retrieval in 91.6 s, C1 2,101.6 tok/s prefill and 159.0 tok/s decode at 93.0%
    MTP acceptance, bidirectional rollback, the state-security set, the OMP golden run exact, a
    310 MB checkpoint restored across a managed restart, and the same fifteen protocol checks at
-   a third of the shipped Host StateImage pool. Two findings stay open: a managed stop does not
-   flush unsaved sessions on either native lane, and a C=8 settlement leak that predates this
-   work and is unreachable at the lanes' shipped `--max-concurrency 1`
-   ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38)). Next: publish the RTX 4090
-   component and cut it as v0.6.0; the RTX 3090 lane waits for its host, expected about
-   2026-09-21, and ships separately.
+   a third of the shipped Host StateImage pool. Running the registered suite with the artifact
+   exported then found a third defect, fixed at `075d442e`: the engine delivered a result and
+   woke its waiter before releasing the lane and republishing statistics, so a consumer
+   returning from `wait()` could still see its own request as live
+   ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38)); red at the port base on a
+   real rebuild, green after, 101/101 with the artifact. One finding stays open: a managed stop
+   does not flush unsaved sessions on either native lane. Next: requalify at `075d442e`,
+   publish the RTX 4090 component, and cut it as v0.6.0; the RTX 3090 lane waits for its host,
+   expected about 2026-09-21, and ships separately.
    Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·

@@ -51,14 +51,25 @@
       "consequence": "A session below the 32,768-token automatic-checkpoint gate that was never saved explicitly does not survive a deliberate stop. Sessions above the gate, and any session saved explicitly, do survive - that is what both shipped native lanes qualified.",
       "status": "open, unchanged by this window. The RTX 5090 container lane is unaffected: docker stop delivers SIGTERM and the flush runs.",
       "not_fixed_here": "A graceful-stop channel is new control surface on a serving process and belongs in its own reviewed change, not in a release candidate."
-    },
+    }
+  ],
+  "defects_fixed_after_the_window": [
     {
-      "id": "c8-terminal-settlement-leak",
+      "id": "stale-live-membership-after-wait",
       "issue": "https://github.com/alphastorm/ninfer/issues/38",
-      "severity": "registered test failure outside the shipped configuration",
-      "observation": "ninfer_qwen3_6_27b_prefix_real_test fails deterministically in exercise_concurrent_resource_settlement: after eight staggered rows each return their expected token count and OutputLimit, runtime_stats still reports running=1 and terminal_pending=1.",
-      "scope": "Reproduced identically at f3dacba8, 4447fe93, and 6912a15c, so it predates this window's work. An added settlement assertion after the earlier cancellation fixture passes, so the leak is inside the C=8 loop rather than the abandoned handle. Cause open; not yet run on a Linux lane.",
-      "release_relevance": "Both native lanes ship max_concurrency=1 and the standing support boundary is one active request per qualified profile, so the shipped configuration cannot reach this path.",
+      "found_by": "ninfer_qwen3_6_27b_prefix_real_test, run for the first time on this host with the artifact exported",
+      "symptom": "exercise_concurrent_resource_settlement: after eight staggered rows each return their expected token count and OutputLimit, runtime_stats() still reports running=1 and terminal_pending=1.",
+      "cause": "A publication-order race between the engine and its consumer, not a leaked slot. commit_pending marks a terminal row ModelFinished and run_decode_round publishes statistics with the slot still occupied; on the next boundary settle_terminal_requests delivered the result - waking the waiter - before it released the lane and republished. wait() returned and read the stale snapshot. The same order existed in cancel_active_requests and the cancelled-terminal loop of commit_pending.",
+      "fix": "075d442e splits completion into finalize and deliver and retires a lane in the order finalize, release, publish, deliver at every site that releases one.",
+      "red_green": {
+        "harness": "one script per run that checks out, rebuilds, records whether the test binary changed and its hash, then runs the suite; every row below is a real rebuild",
+        "f3dacba8 (port base)": "rebuilt, binary a98acd42..., fails with the same message",
+        "4447fe93": "rebuilt, fails",
+        "dac505de": "rebuilt, fails",
+        "075d442e": "rebuilt, binary 057c67bb..., passes"
+      },
+      "evidence_correction": "An earlier A/B claimed three failing commits including 6912a15c and a passing cancellation-fixture assertion. Those runs were invoked through a nested powershell -Command line that Windows cmd split on '&', leaving the build script a trailing-semicolon phase name; they never rebuilt and tested the 4447fe93 binary. The claim is withdrawn on the issue and replaced by the table above; the conclusion that the defect predates this branch's runtime work stands on the real f3dacba8 and 4447fe93 builds.",
+      "release_relevance": "Both native lanes ship max_concurrency=1, so the shipped configuration could not reach the path; the engine change is nevertheless in the next candidate because the registered suite is the release gate.",
       "coverage_correction": "ninfer_qwen3_6_27b_prefix_real_test skips unless a 27B artifact environment variable is exported, and the qualification's build phase runs only a focused serve-side ctest list. The EXP-025 statement that every registered suite passed on both native builds did not cover this scenario."
     }
   ],
