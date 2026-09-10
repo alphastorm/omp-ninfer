@@ -254,9 +254,17 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    hands the lifecycle back, which never existed while stops were terminations - and two rounds
    of independent focused review confirmed eight more, the worst being an installer that
    silently stripped the capability from every existing record. Three recurring classes are
-   closed with executable invariants. Next: the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
+   closed with executable invariants. **The RTX 5090 lane's mainline candidate is qualified
+   (2026-09-10, EXP-030; uncut):** the same commit `63f28c95` built for the container lane holds
+   7/7 of that lane's gates on the owner appliance under the unchanged v0.5.1 context-cache
+   arguments - 2,144 tok/s prefill, 133.3 tok/s decode, 8/8 sibling forks on the shared anchor
+   at 57.9K and 67.7K before and after a restart, warm arrival in both orders, a 5.2 GB restore
+   in 3.6-4.0 s with a flipped byte refused - so all three lanes converge on one runtime tree.
+   Next: the founder-only cut publishes that component and `v0.6.2` follows the composed
+   acceptance; the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
    ([EXP-028](docs/measurements/2026-09-10-native-managed-stop-flush.json) ·
-   [EXP-029](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json)).
+   [EXP-029](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json) ·
+   [EXP-030](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)).
    Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·

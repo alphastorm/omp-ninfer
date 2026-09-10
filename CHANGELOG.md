@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Measured
+
+- EXP-030: the RTX 5090 container lane's mainline candidate - runtime fork `63f28c95`, the
+  commit both native Windows lanes now ship - passes 7/7 of the lane's gates on the owner
+  appliance under the unchanged v0.5.1 context-cache arguments: exact 130,048-token retrieval
+  at 2,144 tok/s wall, 133.3 tok/s decode, the agent protocol across a restart, 8/8 sibling
+  forks on the shared anchor at 57.9K and 67.7K templates before and after a restart, warm
+  arrival in both orders, and a 5.2 GB restore in 3.6-4.0 s with a flipped payload byte refused.
+  Within run-to-run noise of v0.5.1 (2,180 / 133.1 / 3.8-4.4 s). Built on the appliance's
+  canonical route with 11/11 focused suites; the full 102-test suite ran first on an ephemeral
+  RunPod RTX PRO 4000 (Blackwell, sm_120a) at 101/102 - the one failure is a small-SM-count
+  artefact of the cooperative fall-through the port added for Ada (alphastorm/ninfer#42). The
+  component is staged for the founder-only cut and not yet published; no release is cut
+  ([receipt](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)).
+- `scripts/verify_release.py` admits the `v0.6.2` RTX 5090 runtime tag.
+
 ## [0.6.1] - 2026-09-10
 
 A managed stop of the RTX 4090 native Windows lane now saves every live session. The runtime
