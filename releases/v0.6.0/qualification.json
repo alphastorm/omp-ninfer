@@ -68,7 +68,7 @@
       "status": "passed",
       "operator_class": "owner-operated tester-equivalent",
       "repository_path": "releases/v0.6.0/acceptance/composed-external-installation.json",
-      "sha256": "47899746dedb629348815d73bb585a5ccde86684906b158a133cd39f0c2ac162",
+      "sha256": "2cb1b2adf6ed3c71ce89db2bde04afc91ca9405924adc714bafad010262ecbad",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
       "vision": true,
@@ -78,7 +78,7 @@
       "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_sha256": "b1f97903389ca9df1e750775ba656a9403ef4b38ca45ce1614d5fc097b40144b"
+      "compatibility_sha256": "2ac01c4c7f9b01af4641fbca79108bd8a3aa015b59261f414099ea002a72731d"
     }
   },
   "observed_gates": {

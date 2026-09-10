@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
-MANIFEST="$ROOT/releases/v0.5.1/manifest.json"
+MANIFEST="$ROOT/releases/v0.6.0/manifest.json"
 PROFILE="$ROOT/profiles/qwen38-rtx5090-manual-tunnel.json"
 CONTAINER=omp-ninfer-beta
 MODEL_PATH=

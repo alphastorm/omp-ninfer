@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-10
+
+The RTX 4090 native Windows lane moves onto the mainline runtime. The runtime component
+`v0.6.0-qwen38-4090-beta.1` (runtime fork `075d442e`, built for Ada with the Windows platform
+code) replaces the divergent `v0.2.x` lane branch and brings the whole context-cache
+architecture the RTX 5090 container ships; deployment profile `qwen38-4090-native-v0.6.0-beta.1`
+(INT8 KV, MTP3, prefill chunk 2,048, 131,072-token context, two device-state slots, 24
+host-state slots, 4 GiB Host KV). The RTX 5090 runtime, its deployment profile, the RTX 3090
+component, and the OMP client are unchanged from v0.5.1. Composed external-installation
+acceptance ran on 2026-09-10 from the published URLs
+([receipt](releases/v0.6.0/acceptance/composed-external-installation.json)); the RTX 3090
+mainline candidate ships separately when its host returns.
+
 ### Measured
 
 - EXP-025: the two native Windows lanes serve the mainline runtime. Native-lane convergence
@@ -690,7 +703,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...v0.5.0
 [0.4.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.8...v0.4.9

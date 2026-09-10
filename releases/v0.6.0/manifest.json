@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.6.0",
-  "status": "draft",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b0422ce751f7c47a24295d6e705c4f8be5ce67e9/compatibility.json",
-      "compatibility_sha256": "b1f97903389ca9df1e750775ba656a9403ef4b38ca45ce1614d5fc097b40144b"
+      "compatibility_sha256": "2ac01c4c7f9b01af4641fbca79108bd8a3aa015b59261f414099ea002a72731d"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -153,7 +153,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "1ee0228e807eefbe6152fc0ccac0954b7914341b479263319bc50b454698b35a",
+    "summary_sha256": "101d2a022b8e9a1c59b714c146ab6b4cf3ffc02c023a3380a624bbbba8eef721",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b0422ce751f7c47a24295d6e705c4f8be5ce67e9/releases/v0.6.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
@@ -181,8 +181,6 @@
       "NInfer RTX 4090 native component v0.6.0-qwen38-4090-beta.1 (new: the mainline runtime built for Ada, package da343d64)",
       "NInfer RTX 3090 component v0.2.5-qwen38-3090-beta.1 (unchanged)"
     ],
-    "blockers": [
-      "the product release is not cut: the lane, acceptance, and manifest pin stages and the v0.6.0 product tag remain"
-    ]
+    "blockers": []
   }
 }

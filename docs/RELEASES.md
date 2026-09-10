@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.4.8`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.4.8` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.0`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.0` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,11 +27,10 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.6.0 development candidate (RTX 4090 on the mainline runtime)
+### v0.6.0 public release (RTX 4090 on the mainline runtime)
 
-- Status: `draft`. The tree is staged and internally consistent; nothing is published and no
-  product tag exists. `python3 scripts/verify_release.py --release v0.6.0` reports only the
-  staged-draft posture.
+- Product release: `alphastorm/omp-ninfer@v0.6.0`, GitHub `Latest`. The RTX 4090 native lane
+  moves off its divergent `v0.2.x` branch onto the mainline runtime (EXP-025 to EXP-027).
 - RTX 4090 native component `ninfer@v0.6.0-qwen38-4090-beta.1` (runtime fork `075d442e`,
   package `da343d64...`, 573,714,539 bytes, configuration `5ee3fb71...`, server binary
   `b3f9374f...`): the mainline runtime built for Ada with the Windows platform code, replacing
@@ -43,12 +42,21 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
   `v0.2.5-qwen38-3090-beta.1`: its host is unavailable until about 2026-09-21, so its mainline
   candidate is neither built nor cut here. Precedent for a single-lane release: v0.4.2 (RTX
   4090 alone) and v0.4.5 (RTX 3090 alone).
-- Remaining gates: publish the component and its distribution set, then rerun the composed
-  external-installation acceptance from the published URLs.
+- Composed external-installation acceptance on 2026-09-10 from the published URLs
+  ([receipt](../releases/v0.6.0/acceptance/composed-external-installation.json)): all ten RTX
+  4090 assets downloaded anonymously and hashed exactly; the lane's public-URL install
+  acceptance ([receipt](../releases/v0.6.0/acceptance/rtx4090-public-install.json)) had the
+  downloaded installer accept the installed release as the exact qualified bytes, matched the
+  served identity, refused anonymous status (401), completed, and restored the host; the RTX
+  5090 lane's served identity was re-read live and every RTX 5090 and RTX 3090 asset URL
+  answers.
+- Known limitation carried on both native lanes: a managed stop on Windows terminates the
+  server, so a session that was never published - automatically above 32,768 frontier tokens,
+  or explicitly through `POST /v1/ninfer/checkpoints` - does not survive a deliberate stop.
 
 ### v0.5.1 public release (warm arrival across a restart)
 
-- Product release: `alphastorm/omp-ninfer@v0.5.1`, GitHub `Latest`. The second v0.5 deliverable
+- Product release: `alphastorm/omp-ninfer@v0.5.1` (superseded by v0.6.0). The second v0.5 deliverable
   on the RTX 5090: a checkpointed template arrives warm across a restart (EXP-022 to EXP-024).
   - RTX 5090 runtime component
     [`ninfer@v0.5.1-qwen38-5090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1)

@@ -120,6 +120,26 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.0 — the RTX 4090 lane on the mainline runtime (2026-09-10)
+
+The RTX 4090 lane moved from its divergent `v0.2.x` branch to the mainline runtime built for
+Ada, and requalified through its own lifecycle tool on the owner rig, 15/15 phases; receipt in
+[`releases/v0.6.0/qualification/rtx4090.json`](../releases/v0.6.0/qualification/rtx4090.json).
+The RTX 5090 and RTX 3090 lanes are byte-identical to `v0.5.1` and carry their receipts.
+Experiments EXP-025 through EXP-027.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 4090 C1 | **159.05 tok/s** decode | 2,102.64 tok/s prefill over 4,541 prompt tokens, 92.96% MTP3 acceptance, 1,024 completion tokens in 8.62 s, 22,814 MiB peak, 460 W peak at the 450 W owner cap |
+| RTX 4090 128K | **91.8 s** | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens, cold process (86.8 s in the EXP-025 candidate window; 97.5 s on the shipped v0.2.3 the same day) |
+| RTX 4090 protocol | **15/15 + 15/15** | the agent-protocol battery at the shipped Host StateImage pool (24 slots) and again at 8 slots, where the pre-fix runtime returned HTTP 500 on the post-delete continuation ([ninfer#37](https://github.com/alphastorm/ninfer/issues/37)) |
+| RTX 4090 restart | **310 MB restored** | explicit save through `POST /v1/ninfer/checkpoints`, managed restart in 86 s including model load, post-restart continuation quoted the marker exactly with 42 cached input tokens |
+| RTX 4090 lifecycle | rollback, security, OMP | bidirectional rollback between two releases of the lineage; the Windows state-security regression set (2 low-privilege read denials, 2 write denials, junction and NULL-DACL rejections); OMP golden run exact over 51 events with one typed tool call |
+
+Same fixture and gate script as the installed release, one host, one day; owner measurement.
+The measured window found and fixed three runtime defects on the way to the candidate
+([EXP-027 receipt](measurements/2026-09-10-rtx4090-native-lane-qualification.json)).
+
 ### v0.5.1 — warm arrival across a restart (2026-09-08)
 
 The RTX 5090 lane requalified on the published `v0.5.1` image through the lifecycle tool; receipts in
