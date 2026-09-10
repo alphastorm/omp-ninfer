@@ -165,6 +165,26 @@ class RunpodCiTest(unittest.TestCase):
         )
         self.assertNotIn("ninfer_checkpoint_io_contract_test", script)
 
+    def test_remote_script_probes_the_server_only_when_it_was_built(self) -> None:
+        focused = MODULE.remote_script(
+            source_commit="1" * 40,
+            upstream_base="2" * 40,
+            cuda_arch="120a",
+            cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
+            build_targets=("ninfer_gdn_gating_proj_test",),
+            ctest_regex="gdn_gating_proj",
+        )
+        self.assertNotIn("ninfer-serve --version", focused)
+        everything = MODULE.remote_script(
+            source_commit="1" * 40,
+            upstream_base="2" * 40,
+            cuda_arch="120a",
+            cuda_packages=MODULE.DEFAULT_CUDA_PACKAGES,
+            build_targets=("all",),
+            ctest_regex=".",
+        )
+        self.assertIn("build/runpod/apps/ninfer-serve --version", everything)
+
     def test_remote_script_packages_exact_release_identity(self) -> None:
         script = MODULE.remote_script(
             source_commit="1" * 40,

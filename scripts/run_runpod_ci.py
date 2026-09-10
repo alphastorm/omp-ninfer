@@ -240,6 +240,13 @@ def remote_script(
         + " ".join(shlex.quote(package) for package in cuda_packages)
     )
     targets = " ".join(shlex.quote(target) for target in build_targets)
+    # The identity probe proves the built server runs; a target set that did not build it
+    # (a focused kernel-test run) has nothing to probe.
+    serve_probe = (
+        "build/runpod/apps/ninfer-serve --version"
+        if "all" in build_targets or "ninfer-serve" in build_targets
+        else ""
+    )
     package = ""
     if release_version is not None:
         package = f"""
@@ -277,7 +284,7 @@ cmake -S . -B build/runpod -G Ninja \\
   -DNINFER_PATCH_STACK_SHA={shlex.quote(source_commit)}
 cmake --build build/runpod --parallel --target {targets}
 ctest --test-dir build/runpod --output-on-failure -R {shlex.quote(ctest_regex)}
-build/runpod/apps/ninfer-serve --version
+{serve_probe}
 {package}
 """
 
