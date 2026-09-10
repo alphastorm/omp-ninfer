@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "6e4f398bb03fb40f22d9b4037164aeaeafb9e54132c16a8c889c3dd00fb9b2a8",
+    "summary_sha256": "1ee0228e807eefbe6152fc0ccac0954b7914341b479263319bc50b454698b35a",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b0422ce751f7c47a24295d6e705c4f8be5ce67e9/releases/v0.6.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -182,8 +182,7 @@
       "NInfer RTX 3090 component v0.2.5-qwen38-3090-beta.1 (unchanged)"
     ],
     "blockers": [
-      "the RTX 4090 component v0.6.0-qwen38-4090-beta.1 is not published: its package, source archive, SBOM, lifecycle scripts and SHA256SUMS are qualified on the owner rig but not uploaded",
-      "external-installation acceptance has not been rerun against that published component; the composed acceptance receipt is absent until it is"
+      "the product release is not cut: the lane, acceptance, and manifest pin stages and the v0.6.0 product tag remain"
     ]
   }
 }

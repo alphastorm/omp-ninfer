@@ -5,7 +5,7 @@
   "as_of": "2026-09-08",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image 12ef2d9e (runtime v0.5.1, source d956e6d6, binary 71edc2f6) under deployment profile qwen38-5090-v0.5.1 (the v0.4.8 context-cache arguments, configuration efacac23); the RTX 4090 durable v0.2.3 package (prefill chunk 2,048); the RTX 3090 durable v0.2.5-beta.1 package (131,072-token context). The RTX 5090 lane was requalified on its own rig on 2026-09-08 from the published image through the lifecycle tool and accepted from public URLs; the native lanes are byte-identical to v0.5.0 and carry their 2026-09-05 requalification and public-URL install acceptances by hash.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -65,8 +65,20 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.0-qwen38-4090-beta.1 component (package da343d64) before the cut; the receipt lands at releases/v0.6.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.6.0/acceptance/composed-external-installation.json",
+      "sha256": "47899746dedb629348815d73bb585a5ccde86684906b158a133cd39f0c2ac162",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "b1f97903389ca9df1e750775ba656a9403ef4b38ca45ce1614d5fc097b40144b"
     }
   },
   "observed_gates": {
@@ -160,8 +172,5 @@
     "The composed external-installation acceptance reran the docker-local runtime-side steps from the published v0.5.1 image through the lifecycle tool and carries the native public-URL install acceptances by hash because those components are byte-identical to v0.5.0.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
-  "remaining_release_gates": [
-    "publish the RTX 4090 native component v0.6.0-qwen38-4090-beta.1 and its distribution set",
-    "external-installation acceptance from the published URLs, including the new RTX 4090 assets"
-  ]
+  "remaining_release_gates": []
 }

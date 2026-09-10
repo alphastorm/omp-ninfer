@@ -69,10 +69,13 @@ try {
     if ($installedConfig -cne [string]$v.configuration_sha256) { throw 'installed configuration is not the manifest configuration' }
     $receipt.installed = [ordered]@{ release_id=$active; server_binary_sha256=$installedBinary; configuration_sha256=$installedConfig; matches_manifest=$true }
     $controller = Join-Path $StateRoot 'Control-Release.ps1'
-    # 4. Public bytes are the installed qualified bytes.
-    if ($Lane -ceq 'rtx3090') {
+    # 4. Public bytes are the installed qualified bytes. The native tar.gz packages (RTX 3090
+    #    since v0.2, RTX 4090 since v0.6.0) carry an installer whose already_installed
+    #    verification proves it; the RTX 4090 zip packages before v0.6.0 refused a duplicate
+    #    instance, so their members are compared against the installed tree.
+    if (([string]$v.package_name).EndsWith('.tar.gz')) {
         $installer = Join-Path $Workspace 'Install-Release.ps1'
-        $out = @(& $installer -PackagePath $pkgFile -PackageSha256 ([string]$v.package_sha256) -ModelArtifactPath $ModelArtifactPath -ApiKeyFile ([string]$rel.api_key_file) -NoStart)
+        $out = @(& $installer -PackagePath $pkgFile -PackageSha256 ([string]$v.package_sha256) -ModelArtifactPath $ModelArtifactPath -ApiKeyFile ([string]$rel.api_key_file) -StateRoot $StateRoot -NoStart)
         $last = ($out | Where-Object { $_ -is [string] -and $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
         $ins = $last | ConvertFrom-Json
         if ([string]$ins.status -cne 'already_installed' -or [string]$ins.release_id -cne $active -or [string]$ins.package_sha256 -cne [string]$v.package_sha256) { throw 'downloaded installer did not accept the installed release as the exact qualified bytes' }
