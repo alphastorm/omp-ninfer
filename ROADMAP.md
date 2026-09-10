@@ -235,10 +235,19 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    woke its waiter before releasing the lane and republishing statistics, so a consumer
    returning from `wait()` could still see its own request as live
    ([ninfer#38](https://github.com/alphastorm/ninfer/issues/38)); red at the port base on a
-   real rebuild, green after, 101/101 with the artifact. One finding stays open: a managed stop
-   does not flush unsaved sessions on either native lane. Next: requalify at `075d442e`,
-   publish the RTX 4090 component, and cut it as v0.6.0; the RTX 3090 lane waits for its host,
-   expected about 2026-09-21, and ships separately.
+   real rebuild, green after, 101/101 with the artifact. Shipped as `v0.6.0` on 2026-09-10.
+   **The managed stop now flushes (2026-09-10, EXP-028; unreleased).** The finding EXP-027 left
+   open was that a managed stop on Windows terminates the server, so a session that was never
+   published did not survive a deliberate stop. The manager now mints one manual-reset kernel
+   event per launch, the server creates it (refusing a squatted name, admitting only `SYSTEM`
+   and `Administrators`) and stops on it: listener closed, in-flight requests finished, every
+   live session saved. Measured on the RTX 4090 with a 43-token session and the automatic gate
+   at its default 32,768: the candidate exits in 0.74 s having saved it and restores it exactly
+   after a restart, where the shipped binary loses it and answers 404. The channel is a
+   per-release capability, so a rollback to `v0.6.0` is still stopped by termination. Both lanes
+   advance to `0.6.1-beta.1` and stay uncut until the RTX 4090 lane requalifies; the RTX 3090
+   lane waits for its host, expected about 2026-09-21, and ships separately
+   ([receipt](docs/measurements/2026-09-10-native-managed-stop-flush.json)).
    Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·

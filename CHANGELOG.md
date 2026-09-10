@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Measured
+
+- EXP-028: the open EXP-027 finding is fixed at source and proven red-to-green on the RTX 4090
+  host, unreleased. A managed stop on Windows terminated the server, so the shutdown flush that
+  saves every live session after the listener closes was unreachable and a session below the
+  32,768-token automatic gate that was never saved explicitly did not survive a deliberate stop.
+  The manager now mints one manual-reset kernel event per launch, passes it as `--stop-event`,
+  and signals it to stop: the server creates the object itself - refusing a name that already
+  exists, with a DACL admitting only `SYSTEM` and `Administrators` - closes its listener, lets
+  in-flight requests finish, then saves every live session. `HttpServer::stop()` is sticky and
+  the watcher re-asserts it, so a stop that lands while the model is still loading returns from
+  `listen()` without ever serving instead of being lost to cpp-httplib's pre-listen no-op.
+  Measured with a 43-token session and the gate at its default: signalled, the candidate exits in
+  **0.74 s** logging `shutdown: saved 1 of 1 live sessions`, publishes a 10-file generation, and
+  after a restart the continuation quotes the marker exactly with 43 cached input tokens; the
+  shipped v0.6.0 binary, stopped the way the managed stop stops it today, publishes nothing and
+  its continuation returns 404. The shipped binary also refuses `--stop-event` (`unknown
+  argument`), so the channel is a per-release capability: the installer copies
+  `lifecycle.managed_stop` into the release record and the shared controller - always the newest
+  installed one, including after a rollback - passes the flag only to a release that declares it,
+  signals it, waits out the declared bound, and only then stops the task and forces the process,
+  recording the outcome in `last-stop.json` (`last_stop` in the lifecycle status). Both lanes'
+  specifications advance to `0.6.1-beta.1` and remain uncut; the lane qualification's restart
+  phase now proves the unsaved session survives a managed restart and its rollback phase proves
+  each direction's stop mode against what that release declares
+  ([receipt](docs/measurements/2026-09-10-native-managed-stop-flush.json)).
+
 ## [0.6.0] - 2026-09-10
 
 The RTX 4090 native Windows lane moves onto the mainline runtime. The runtime component

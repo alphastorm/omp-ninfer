@@ -1,0 +1,62 @@
+{
+  "artifact_type": "omp_ninfer_runtime_probe",
+  "schema_version": 1,
+  "generated_utc": "2026-09-10",
+  "experiment": "EXP-028",
+  "continues": "docs/measurements/2026-09-10-rtx4090-native-lane-qualification.json",
+  "scope": "Runtime probe only, on the RTX 4090 host, against the candidate binary built from the runtime fork's port/native-lanes-on-mainline at aa1aba73 and the shipped v0.6.0 component binary. Both servers ran in the foreground from a scratch checkpoint root outside every lifecycle state root; no installed release, deployment profile, manifest, or published artifact was started or changed. No release was cut.",
+  "question": "Does the open finding from EXP-027 - a managed stop on Windows terminates the server, so a session that was never published does not survive a deliberate stop - close when the manager signals a named stop event, and does the shipped release still lose that session?",
+  "answer": "Yes, and yes. Signalled, the candidate closes its listener, finishes in-flight requests, saves the never-published session, and exits in 0.74 s; after a restart the continuation quotes the marker exactly with 43 cached input tokens. The shipped binary, stopped the way the managed stop stops it today, publishes nothing and its continuation returns HTTP 404. The shipped binary also refuses --stop-event outright, which is why the shared controller passes the flag only to a release whose record declares the channel.",
+  "subject": {
+    "candidate_commit": "aa1aba73",
+    "candidate_branch": "port/native-lanes-on-mainline",
+    "candidate_binary": "build-sm89/apps/ninfer-serve.exe",
+    "shipped_component": "v0.6.0-qwen38-4090-beta.1 (runtime fork 075d442e)",
+    "host": "RTX 4090 native lane host",
+    "server_arguments": "16,384-token context, INT8 KV, MTP3, 2 device-state slots, 4 host-state slots, 1 GiB Host KV, scratch --session-checkpoint-dir, default --session-checkpoint-min-tokens 32768"
+  },
+  "unit_tests_on_the_hardware": {
+    "ninfer_stop_event_test": "passed: a signal on a second handle reaches the callback and is re-asserted until it takes effect and never after; an unsignalled watcher is destroyed without calling back; a pre-existing name is refused; the event's DACL holds exactly two allow ACEs, SYSTEM and Administrators, each with full access",
+    "ninfer_http_server_stop_test": "passed: a stop before listen() reports that no accept loop was running (so a watcher re-asserts) and makes listen() return without serving",
+    "ninfer_serve_options_test": "passed: --stop-event preserves a well-formed Global/Local name and refuses an unnamespaced, uppercase, short, or foreign-prefixed one"
+  },
+  "green": {
+    "session_tokens": 43,
+    "automatic_checkpoint_gate_tokens": 32768,
+    "checkpoint_state_before_stop": "missing",
+    "stop": "one SetEvent from another process on the manager-minted Global\\NInfer-Serve-Stop-<32 hex>",
+    "stop_seconds": 0.74,
+    "server_log": [
+      "stop requested by the manager; finishing in-flight requests, then saving live sessions",
+      "listener closed; in-flight requests finished",
+      "shutdown: saved 1 of 1 live sessions"
+    ],
+    "published_generation_files": 10,
+    "published_generation_bytes": 308211101,
+    "restart_continuation": {
+      "exact_marker": true,
+      "cached_input_tokens": 43,
+      "checkpoint_state": "available"
+    },
+    "exit_code": "not observed by this probe (the Start-Process handle did not expose it); the lane qualification asserts exit code 0 through the controller's last-stop.json"
+  },
+  "red": {
+    "binary": "shipped v0.6.0 component",
+    "session_tokens": 43,
+    "checkpoint_state_before_stop": "missing",
+    "stop": "Stop-Process -Force, which is what Control-Release.ps1 -Action Stop reaches today",
+    "published_generation_files": 0,
+    "restart_continuation": "HTTP 404"
+  },
+  "compatibility": {
+    "shipped_binary_rejects_stop_event": {
+      "exit_code": 1,
+      "message": "unknown argument: --stop-event"
+    },
+    "consequence": "The channel is a per-release capability: the installer copies lifecycle.managed_stop from the lane specification into the release record, and the shared controller - always the newest installed one, including after a rollback - passes --stop-event only to a release that declares it."
+  },
+  "not_proven_here": [
+    "The managed lifecycle path (Control-Release.ps1 signalling, its bounded wait, the last-stop.json outcome, and the termination fallback) is proven by the lane's own qualification, not by this foreground probe.",
+    "No release, component, profile, or manifest changed; both lanes' specifications advance to 0.6.1-beta.1 and remain uncut."
+  ]
+}
