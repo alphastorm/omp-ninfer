@@ -1,0 +1,51 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_candidate_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-030",
+  "generated_utc": "2026-09-10",
+  "status": "qualified",
+  "release_tag": "pending - v0.6.2-qwen38-5090-beta.1 once the archive is published",
+  "runtime_image": "pending - published by the runtime-image workflow from the v0.6.2 archive",
+  "scope": "Candidate window only, on the owner RTX 5090 appliance. The RTX 5090 container lane moves from the feat/warm-arrival branch head d956e6d6 (shipped as v0.5.1 through v0.6.1) to the mainline runtime at 63f28c95 - the same source both native Windows lanes now build from - so the three shipped lanes converge on one tree. Production (ninfer-5090-v051p) was stopped for the window and restored on close; no published artifact, manifest, profile, or route changed.",
+  "question": "Does the mainline runtime at 63f28c95, built for sm_120a on the appliance's canonical route, hold every gate the RTX 5090 lane qualified v0.5.1 on, under the unchanged v0.5.1 context-cache arguments?",
+  "answer": "Yes, 7/7 gates: exact 130,048-token retrieval at 2,144 tok/s wall, 133.3 tok/s wall decode, the agent protocol across a restart, 8/8 sibling forks on private_long_anchor at 57.9K and 67.7K templates before and after a restart, warm arrival in both orders, and a 5.2 GB restore in 3.6-4.0 s with a flipped payload byte refused. Numbers are within run-to-run noise of v0.5.1 (2,180 / 133.1 / 3.8-4.4 s). The mainline runtime carries the native lanes' changes with no measurable effect on the container lane, which is what the shared tree is for.",
+  "identity": {
+    "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+    "ninfer_sha256": "b9b54b7f567968b5b813ac55636cee9188f26c90f92340234f5f745f27b402cb",
+    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "appliance_image_id": "sha256:0ce8d965ae543fb00fbd2c5645eb6f3ab8c0af02a79d77e529efeea7301fbe7d",
+    "base_image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "note": "the appliance image wraps the exact archive binaries onto the same digest-pinned base the publish-runtime-image workflow uses (two COPYs); the published image will differ only in the layer digests the workflow's buildx produces, and the acceptance re-verifies the served binary identity from the published image"
+  },
+  "build": {
+    "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13.1), clean tree at 63f28c95 with NINFER_PATCH_STACK_SHA bound; the same script shape as v0.5.1's release-build.sh with the two new serve suites added",
+    "ctest": "11/11 focused suites in the build container (checkpoint_io_contract, resource_manager, openai_schema, responses_schema, response_store, serve_options, request_log, http_error_handler, http_server_stop, session_checkpoint_store, automatic_checkpoint_queue)",
+    "archive": "ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.tar.gz sha256 05aa9c4b570d8864e684d2de1cacc7091055de96d6dea6fdf6776082d2fd00c2 (319,416,469 bytes)",
+    "sbom": "ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.spdx.json sha256 1654ba293e7e83a6e0128494b14d5b86e4a6bb03cd8a575a8df8801b1c6c811b",
+    "source_archive": "runtime-source-63f28c95.tar.gz sha256 5dc8abc9cc2f3fa65a91e822099d5414ed7df4f8a9ca74b5c63940a71672171b (git archive of the commit)"
+  },
+  "cloud_precheck": {
+    "route": "scripts/run_runpod_ci.py on an ephemeral RunPod RTX PRO 4000 Blackwell (compute capability 12.0, secure cloud, $0.57/h, pod retjnu8fyztrwk, deleted): full target set for sm_120a and the full ctest, run before the appliance window so the appliance's GPU time went only to the gates",
+    "result": "101/102 passed; the one failure (ninfer_gdn_gating_proj_test, workspace query/execution high-water mismatch at T=1024) is a small-SM-count artefact of the cooperative fall-through the port added for Ada - the query still sizes the preferred split - and does not occur on the 5090, 4090, or 3090 SM counts; filed as alphastorm/ninfer#42",
+    "why_not_a_3090": "RunPod has no RTX 3090 in its catalog today, and the RTX 3090 lane's product is a native Windows package whose lifecycle (Task Scheduler, the named-event stop) cannot run in a Linux pod; its qualification needs its own host"
+  },
+  "context_cache_profile": {
+    "arguments": ["--max-private-continuations", "8", "--device-state-slots", "4", "--host-state-slots", "24"],
+    "unchanged_from": "v0.4.8 / v0.5.1 (the deployment profile name advances, so the configuration identity advances with it)"
+  },
+  "gates": {
+    "prefill_curve": {"status": "passed", "prompt_tokens": 130048, "exact_output": "ORCHID=493817; COLOR=COBALT", "wall_s": 60.654, "tokens_per_second_wall": 2144.1, "v051_reference_tokens_per_second": 2180.3, "receipt": "docs/measurements/2026-09-10-rtx5090-v062-profile-gates.json"},
+    "decode": {"status": "passed", "completion_tokens": 2048, "completion_tokens_per_second_wall": 133.3, "v051_reference": 133.13},
+    "agent_protocol": {"status": "passed", "authenticated_session_identity": true, "stateful_continuation": true, "forks": 2, "parent_delete_status": 200, "deleted_continuation_status": 404, "post_restart_deleted_continuation_status": 404, "no_resurrection": true, "surviving_descendant_continued": true},
+    "fanout_acceptance": {"status": "passed", "gate": "four stored sibling forks of one template reuse the base anchor at 57.9K and 67.7K input tokens in one process, and again after a verified restart", "template_57853": {"cold_prefill_s": 22.203, "hot_fork_median_s": 1.403, "hot_fork_max_s": 1.619, "restart_ready_s": 20.89, "warm_start_fork_median_s": 1.354, "warm_start_fork_max_s": 1.367, "reuse": "8/8 private_long_anchor"}, "template_67717": {"hot_fork_median_s": 1.533, "hot_fork_max_s": 1.572, "restart_ready_s": 21.24, "warm_start_fork_median_s": 1.382, "warm_start_fork_max_s": 1.383, "reuse": "8/8 private_long_anchor"}, "transient_retries": 0, "receipts": ["docs/measurements/2026-09-10-rtx5090-v062-fanout-57k.json", "docs/measurements/2026-09-10-rtx5090-v062-fanout-67k.json"]},
+    "warm_arrival": {"status": "passed", "gate": "after a verified restart every sibling fork of a restored template is served on private_long_anchor whether an endpoint resume or a fork arrives first, and every resume quotes the planted ledger keys exactly", "orders": "resume-first and fork-first both every_post_restart_fork_hot with exact retrieval; resume-first sequence 4.39 / 2.88 / 1.35 s", "receipt": "docs/measurements/2026-09-10-warm-arrival-rtx5090-v062.json"},
+    "restore": {"status": "passed", "gate": "a 5 GB session restores across two verified restarts with exact planted-key retrieval, and a flipped payload byte is refused", "checkpoint_bytes": 5201400249, "restore_wall_s": [3.998, 3.625], "restored_retrieval_exact": true, "tampered_restore_refused": true, "tampered_http_status": 404, "receipt": "docs/measurements/2026-09-10-restore-probe-rtx5090-v062.json"},
+    "lifecycle": {"status": "passed", "note": "candidate ninfer-5090-v062c preflighted and started through tools/lifecycle/ninfer_container.py with image id, binary, model artifact, and configuration identity bound; preflight first refused because production still held the loopback port, which is the fail-closed behaviour the window script exists to sequence; production ninfer-5090-v051p (identity d956e6d6 / qwen38-5090-v0.5.1) restored and healthy 12 s after the window closed; zero qualification containers running"}
+  },
+  "trap_recorded": "a port forward through the nyc-pc-wsl alias (a ProxyCommand via wsl.exe and nc) resets on the first request; forward through the Windows sshd (nyc-pc) instead, whose mirrored loopback reaches the container port directly",
+  "scope_exclusions": ["no OMP client change", "no native lane change: the RTX 4090 lane ships this same commit as v0.6.1, the RTX 3090 lane waits for its host", "no publication: the archive, SBOM, and source archive are staged on the workstation for the founder-only cut script", "no shutdown-flush measurement on the container lane: docker stop delivers SIGTERM and the flush has run there since v0.4.0"],
+  "raw_prompts_outputs_or_secrets_included": false
+}
