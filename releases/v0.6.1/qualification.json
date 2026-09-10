@@ -1,0 +1,173 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.6.1",
+  "as_of": "2026-09-10",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image 12ef2d9e (runtime v0.5.1, source d956e6d6, binary 71edc2f6) under deployment profile qwen38-5090-v0.5.1 (configuration efacac23); the RTX 4090 native package v0.6.1-beta.1 (runtime fork 63f28c95, the mainline runtime built for Ada, with the managed graceful stop); the RTX 3090 durable v0.2.5-beta.1 package (131,072-token context). The RTX 4090 lane was requalified on its own rig on 2026-09-10 through its lifecycle tool, 15/15 phases, after two rounds of independent focused review of the new control surface; the RTX 5090 and RTX 3090 components are byte-identical to v0.6.0 and carry their qualification and public-URL install acceptances by hash.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+    "release_source_commit": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+    "release_source_archive_sha256": "4359c8143c62fcc2bad42a1f1b494d1ab7deea67abcb014d7e39f23564241304",
+    "release_server_binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "efacac2366136b70ffd9af7c282bc0ace71a0d6b845e2e489acab0f3ae151e1a",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.5.1"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.6.1/qualification/rtx5090.json",
+      "sha256": "de7f0d3037f59309d0ba095f0bb1f6edba78b1d29d34b911df7e6e5e1158c349",
+      "status": "passed",
+      "source_commit": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+      "server_binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+      "release_server_binary_sha256": "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82",
+      "oci_manifest_digest": "sha256:12ef2d9e54acaa554f20660928b290f7bb3cb409931902c615b2050cd8fdca82",
+      "binary_package_sha256": "c01893877428f3433da6e855f2347ce68f2f7ffd48184f7b1abccc8892231361",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.5.1-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.5.1-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "9f96537378df9ce12bd031294585c7f64800790405f5899ba6b59eb5cc14b3e5",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.5.1-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "built by the appliance's canonical route (pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 container on the owner appliance, clean tree d956e6d6, 9/9 host suites plus the io_uring checkpoint backend suite); the runtime image was built from the published release binaries by the publish-runtime-image workflow (run 34225710385) and its receipt is attached to the runtime-image release"
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.1/qualification/rtx4090.json",
+        "sha256": "5b6348894c8cf04fcc207c90b6e9f75137358c63bdf6b4c215f5311d29b76b63",
+        "release_tag": "v0.6.1-qwen38-4090-beta.1",
+        "package_sha256": "4390a8cb95b90a9c60a904e28eea6cc495155edca42f01aa11db852e022f4fdd"
+      },
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.1/qualification/rtx3090.json",
+        "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
+        "release_tag": "v0.2.5-qwen38-3090-beta.1",
+        "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.5.1-qwen38-5090-beta.1 component (image 12ef2d9e) before the cut; the receipt lands at releases/v0.6.1/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "context_cache_profile": "--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 (device-state=4-cache+1-active, host-state=24, private=8)",
+      "lifecycle": "candidate started and stopped through tools/lifecycle/ninfer_container.py from the published image (preflight bound image id, binary, model artifact, and configuration identity)",
+      "explicit_checkpoint_save_wall_s": 4.428,
+      "checkpoint_save_bytes": 4505854445,
+      "fanout_branch_reuse": "private_long_anchor (4/4 branches at 57,853 and 67,681 tokens in one process, and 4/4 again after a verified restart at each size)",
+      "fanout_branch_walls_s_57853": [
+        1.52,
+        1.33,
+        1.341,
+        1.341
+      ],
+      "fanout_branch_walls_s_67681": [
+        1.498,
+        1.426,
+        1.468,
+        1.449
+      ],
+      "restart_verified": "cumulative prefill counter reset (58,224 -> 53)",
+      "post_restart_resume_wall_s_57853": 3.346,
+      "post_restart_branch_walls_s_57853": [
+        1.305,
+        1.293,
+        1.246,
+        1.361
+      ],
+      "post_restart_resume_wall_s_67681": 3.958,
+      "post_restart_branch_walls_s_67681": [
+        1.411,
+        1.306,
+        1.316,
+        1.318
+      ],
+      "post_restart_branch_reuse": "private_long_anchor (8/8 across both sizes; no root re-prefill)",
+      "warm_arrival": "both orders hot after a verified restart: resume-first 5.994 s for resume + two forks, fork-first 9.606 s; every resume quoted the planted keys exactly",
+      "restore_wall_s_5gb": [
+        3.774,
+        4.36
+      ],
+      "restore_checkpoint_bytes": 5201400284,
+      "tampered_restore_refused": true,
+      "decode_tokens_per_second": 138.16,
+      "mtp_acceptance_rate": 0.412,
+      "prefill_tokens_per_second_130048": 2180.3,
+      "vram_used_mib_after_130048": 28245,
+      "agent_protocol": "fork/delete/no-resurrection across docker restart passed",
+      "origin_authentication": "inherited from v0.4.7 (store format unchanged; the lifecycle candidate loaded MAC-tagged generations from a fresh store)"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.1-qwen38-4090-beta.1",
+      "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+      "lifecycle_phases": "15/15",
+      "protocol_checks": "15/15 at the shipped pool and 15/15 at 8 host state slots",
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 91.36,
+      "managed_stop": "stop-event; graceful; not forced",
+      "unsaved_session_survived_managed_restart": true,
+      "unsaved_session_cached_input_tokens": 45,
+      "explicit_checkpoint_cached_input_tokens": 42,
+      "restart_seconds": 44.37,
+      "rollback": "bidirectional; candidate stopped by signal, predecessor by what its record declares",
+      "prefill_tokens_per_second": 2104.95,
+      "decode_tokens_per_second": 159.09,
+      "mtp_acceptance_percent": 92.96,
+      "max_power_w": 458.53,
+      "max_memory_used_mib": 22814,
+      "golden_equivalent": "passed",
+      "registered_tests": "103/103 (6 skipped for absent artifacts)",
+      "mtp_arm": "MTP3"
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "protocol_checks": "15/15",
+      "release_tag": "v0.2.5-qwen38-3090-beta.1",
+      "maximum_context_tokens": 131072,
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 218.3,
+      "restart_cached_input_tokens_restored": 45,
+      "durable_restart_checkpoint_bytes": 310213049,
+      "decode_tokens_per_second": 90.66,
+      "prefill_tokens_per_second": 894.24,
+      "mtp_acceptance_percent": 93.43,
+      "max_power_w": 300.15,
+      "max_memory_used_mib": 22548,
+      "carried_from": "v0.5.0 (component byte-identical; requalified on its own rig on 2026-09-05 with origin-authenticated checkpoints)"
+    }
+  },
+  "interpretation": [
+    "All three GPU lanes are qualified in one public release; every claim binds an exact package, profile, and receipt.",
+    "A managed stop on the RTX 4090 native lane now reaches the server's graceful shutdown: the manager mints a named kernel event per launch, the server (admitting only SYSTEM and Administrators) closes its listener, finishes in-flight requests, saves every live session, and reports what it saved; the lane proves a never-published session survives a managed restart, and the stop receipt records a stop that lost state instead of calling it graceful.",
+    "The channel is a per-release capability: the shared controller passes the new flags only to a release whose record declares them, so a rollback to v0.6.0 is stopped by termination as before, and the installer carries the capability through every rewrite of an existing record.",
+    "The RTX 5090 and RTX 3090 components carry unchanged from v0.6.0 by hash; the RTX 3090 mainline candidate ships separately when its host returns.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.6.1-qwen38-4090-beta.1 component"
+  ]
+}
