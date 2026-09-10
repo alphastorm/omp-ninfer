@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.5.1
+## Where this is now — v0.6.1
 
 All three lanes install from public URLs with durable, restart-resumable session state that now
 survives the machine losing its local copy (`scripts/checkpoint_sync.py`, origin-authenticated
@@ -245,7 +245,7 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    at its default 32,768: the candidate exits in 0.74 s having saved it and restores it exactly
    after a restart, where the shipped binary loses it and answers 404. The channel is a
    per-release capability, so a rollback to `v0.6.0` is still stopped by termination. **That
-   candidate is qualified and reviewed (2026-09-10, EXP-029; still uncut):** 15/15 lane phases
+   candidate is qualified, reviewed, and shipped as `v0.6.1` (2026-09-10, EXP-029):** 15/15 lane phases
    at `63f28c95` and 103/103 registered tests, with a 45-token session that nothing ever
    published coming back exactly after a graceful managed restart, both rollback directions
    stopped the way their own records declare, and the shipped numbers unchanged (130,048-token
@@ -254,8 +254,7 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    hands the lifecycle back, which never existed while stops were terminations - and two rounds
    of independent focused review confirmed eight more, the worst being an installer that
    silently stripped the capability from every existing record. Three recurring classes are
-   closed with executable invariants. Next: publish the RTX 4090 component and cut it as
-   v0.6.1; the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
+   closed with executable invariants. Next: the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
    ([EXP-028](docs/measurements/2026-09-10-native-managed-stop-flush.json) ·
    [EXP-029](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json)).
    Receipts:
@@ -316,6 +315,8 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.1` | A managed stop of the RTX 4090 native lane saves every live session: the manager signals a per-launch named kernel event, the server flushes and reports, the controller records a stop that lost state; the capability lives in each release's record so a rollback to v0.6.0 still terminates |
+| `v0.6.0` | The RTX 4090 native lane on the mainline runtime: the RTX 5090's context-cache architecture built for Ada, requalified 15/15 through its own lifecycle tool |
 | `v0.4.8` | Each lane on its own best measured configuration: RTX 5090 context-cache profile (sibling forks keep the base anchor), RTX 4090 prefill chunk 2,048, RTX 3090 131,072-token context; every lane requalified on its rig and accepted from public URLs |
 | `v0.4.7` | Corrected immutable runtime asset URLs from v0.4.6; component bytes unchanged |
 | `v0.4.6` | Checkpoint-origin authentication for future cross-machine replication; 4090/3090 components rebound unchanged |

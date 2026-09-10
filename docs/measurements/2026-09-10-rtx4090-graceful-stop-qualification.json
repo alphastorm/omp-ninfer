@@ -25,16 +25,56 @@
     "suite": "ctest sm89 103/103 at 63f28c95, 6 skipped for absent artifacts"
   },
   "windows_in_order": [
-    {"commit": "903b0e19", "result": "failed pressure_protocol", "found": "wrapper-cleanup-race"},
-    {"commit": "805c1bd8", "result": "failed restart", "found": "unobservable-exit-code-classified"},
-    {"commit": "98193856", "result": "15/15 (restart phase then failed on rerun)", "found": "restart-phase-not-rerunnable"},
-    {"commit": "708d66b9", "result": "tool-only fix; not requalified", "review": "initial focused review dispatched on this commit"},
-    {"commit": "23c71d12", "result": "failed transfer_install", "found": "action-lock-held-in-deleted-tree"},
-    {"commit": "641e66b9", "result": "failed restart", "found": "two-lease-restorers"},
-    {"commit": "d0fd0f51", "result": "failed restart", "found": "start-process-exit-code-unreadable"},
-    {"commit": "e229012d", "result": "failed rollback", "found": "new-flag-passed-to-legacy-binary"},
-    {"commit": "65c3ec0c", "result": "15/15 (after an ssh drop mid-protocol; resumed)", "review": "remediation focused review dispatched on this commit"},
-    {"commit": "63f28c95", "result": "15/15", "found": "nothing new"}
+    {
+      "commit": "903b0e19",
+      "result": "failed pressure_protocol",
+      "found": "wrapper-cleanup-race"
+    },
+    {
+      "commit": "805c1bd8",
+      "result": "failed restart",
+      "found": "unobservable-exit-code-classified"
+    },
+    {
+      "commit": "98193856",
+      "result": "15/15 (restart phase then failed on rerun)",
+      "found": "restart-phase-not-rerunnable"
+    },
+    {
+      "commit": "708d66b9",
+      "result": "tool-only fix; not requalified",
+      "review": "initial focused review dispatched on this commit"
+    },
+    {
+      "commit": "23c71d12",
+      "result": "failed transfer_install",
+      "found": "action-lock-held-in-deleted-tree"
+    },
+    {
+      "commit": "641e66b9",
+      "result": "failed restart",
+      "found": "two-lease-restorers"
+    },
+    {
+      "commit": "d0fd0f51",
+      "result": "failed restart",
+      "found": "start-process-exit-code-unreadable"
+    },
+    {
+      "commit": "e229012d",
+      "result": "failed rollback",
+      "found": "new-flag-passed-to-legacy-binary"
+    },
+    {
+      "commit": "65c3ec0c",
+      "result": "15/15 (after an ssh drop mid-protocol; resumed)",
+      "review": "remediation focused review dispatched on this commit"
+    },
+    {
+      "commit": "63f28c95",
+      "result": "15/15",
+      "found": "nothing new"
+    }
   ],
   "review": {
     "class": "focused (reusable internal path); reciprocal cross-family strong critic, resolver-selected",
@@ -59,27 +99,89 @@
     "disposition": "no in-scope residual P0/P1; the credential path is unchanged (the stop event admits only SYSTEM and Administrators, the report directory the same); sequence closed"
   },
   "defects_the_lane_found": [
-    {"id": "wrapper-cleanup-race", "commit": "805c1bd8", "class": "two owners converging on one piece of shared state", "fix": "Wait-ManagedWrapperExit; every action touching launch state waits for a gracefully exiting wrapper"},
-    {"id": "unobservable-exit-code-classified", "commit": "98193856", "class": "deciding on a value the host did not expose", "fix": "an exit code decides only when provided"},
-    {"id": "restart-phase-not-rerunnable", "commit": "708d66b9", "class": "a phase that cannot run twice against its own published state", "fix": "the phase erases its flush session's generation before seeding"},
-    {"id": "action-lock-held-in-deleted-tree", "commit": "641e66b9", "class": "a lock inside the tree its holder deletes", "fix": "scoped to the stop"},
-    {"id": "two-lease-restorers", "commit": "d0fd0f51", "class": "two owners converging on one piece of shared state (second occurrence; class closed)", "fix": "the action lock decides ownership; the wrapper restores only when no action holds it"},
-    {"id": "start-process-exit-code-unreadable", "commit": "e229012d", "class": "deciding on a value the host did not expose (second occurrence; class closed)", "measured": "Start-Process -PassThru with redirected streams returns ExitCode $null for a child that exited 0; `$null -ne 0` is true; the wrapper's pre-existing check threw on every exit and had been unreachable because termination always killed the wrapper first", "fix": "--shutdown-report is the outcome channel; the contract test forbids exit-code comparisons in the shared scripts; one prior launch's logs survive"},
-    {"id": "new-flag-passed-to-legacy-binary", "commit": "65c3ec0c", "class": "an argument an older binary refuses (second occurrence; class closed)", "fix": "the set of flags newer than the shipped parser is derived from git and required inside the capability gate"}
+    {
+      "id": "wrapper-cleanup-race",
+      "commit": "805c1bd8",
+      "class": "two owners converging on one piece of shared state",
+      "fix": "Wait-ManagedWrapperExit; every action touching launch state waits for a gracefully exiting wrapper"
+    },
+    {
+      "id": "unobservable-exit-code-classified",
+      "commit": "98193856",
+      "class": "deciding on a value the host did not expose",
+      "fix": "an exit code decides only when provided"
+    },
+    {
+      "id": "restart-phase-not-rerunnable",
+      "commit": "708d66b9",
+      "class": "a phase that cannot run twice against its own published state",
+      "fix": "the phase erases its flush session's generation before seeding"
+    },
+    {
+      "id": "action-lock-held-in-deleted-tree",
+      "commit": "641e66b9",
+      "class": "a lock inside the tree its holder deletes",
+      "fix": "scoped to the stop"
+    },
+    {
+      "id": "two-lease-restorers",
+      "commit": "d0fd0f51",
+      "class": "two owners converging on one piece of shared state (second occurrence; class closed)",
+      "fix": "the action lock decides ownership; the wrapper restores only when no action holds it"
+    },
+    {
+      "id": "start-process-exit-code-unreadable",
+      "commit": "e229012d",
+      "class": "deciding on a value the host did not expose (second occurrence; class closed)",
+      "measured": "Start-Process -PassThru with redirected streams returns ExitCode $null for a child that exited 0; `$null -ne 0` is true; the wrapper's pre-existing check threw on every exit and had been unreachable because termination always killed the wrapper first",
+      "fix": "--shutdown-report is the outcome channel; the contract test forbids exit-code comparisons in the shared scripts; one prior launch's logs survive"
+    },
+    {
+      "id": "new-flag-passed-to-legacy-binary",
+      "commit": "65c3ec0c",
+      "class": "an argument an older binary refuses (second occurrence; class closed)",
+      "fix": "the set of flags newer than the shipped parser is derived from git and required inside the capability gate"
+    }
   ],
   "measured_on_63f28c95": {
-    "managed_stop": {"mode": "stop-event", "outcome": "graceful", "forced": false},
-    "restart": {"unsaved_session_survived": true, "unsaved_session_cached_input_tokens": 45, "explicit_control_cached_input_tokens": 42},
-    "rollback": {"candidate": "stop-event / graceful", "predecessor_65c3ec0c": "stop-event / graceful_unreported (that binary predates the launch-id echo, so its report is rightly not trusted)", "predecessor_v0.6.0_proven_live_under_the_same_controller_family": "terminate / terminated / forced, no new flags passed"},
-    "context_128k": {"prompt_tokens": 130048, "exact_output": "ORCHID=493817; COLOR=COBALT", "elapsed_s": 91.36},
-    "benchmark_c1": {"prefill_tokens_per_second": 2104.95, "decode_tokens_per_second": 159.09, "mtp_acceptance_percent": 92.96, "max_memory_used_mib": 22814},
+    "managed_stop": {
+      "mode": "stop-event",
+      "outcome": "graceful",
+      "forced": false
+    },
+    "restart": {
+      "unsaved_session_survived": true,
+      "unsaved_session_cached_input_tokens": 45,
+      "explicit_control_cached_input_tokens": 42
+    },
+    "rollback": {
+      "candidate": "stop-event / graceful",
+      "predecessor_65c3ec0c": "stop-event / graceful_unreported (that binary predates the launch-id echo, so its report is rightly not trusted)",
+      "predecessor_v0.6.0_proven_live_under_the_same_controller_family": "terminate / terminated / forced, no new flags passed"
+    },
+    "context_128k": {
+      "prompt_tokens": 130048,
+      "exact_output": "ORCHID=493817; COLOR=COBALT",
+      "elapsed_s": 91.36
+    },
+    "benchmark_c1": {
+      "prefill_tokens_per_second": 2104.95,
+      "decode_tokens_per_second": 159.09,
+      "mtp_acceptance_percent": 92.96,
+      "max_memory_used_mib": 22814
+    },
     "protocol": "15/15 at the shipped pool and 15/15 at 8 host state slots",
     "security": "root DACL protected, 2 low-privilege effective read denials",
     "omp": "typed-tool golden run exact"
   },
   "trust_boundary": "Owner measurement on one host (RTX 4090, sm_89, MSVC 14.44, CUDA 13.3). Phase results are the orchestrator's state file and per-phase receipts; managed-stop facts are the controller's last-stop.json read back by the phase; the reviewer verdicts are the resolver-dispatched reviewer's own schema-valid output, verified by the lead against the bytes before any disposition.",
   "not_proven_here": [
-    "The RTX 3090 lane: its host is unavailable until about 2026-09-21. Its specification also advances to 0.6.1-beta.1 but its candidate is neither built nor cut.",
-    "No component is published and no product release is cut."
-  ]
+    "The RTX 3090 lane: its host is unavailable until about 2026-09-21. Its specification also advances to 0.6.1-beta.1 but its candidate is neither built nor cut."
+  ],
+  "release": {
+    "product": "v0.6.1 cut 2026-09-10 (main aee377d, tag v0.6.1, GitHub Latest)",
+    "component": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.1-qwen38-4090-beta.1",
+    "acceptance": "releases/v0.6.1/acceptance/composed-external-installation.json",
+    "publish_sequence": "10/10 assets hashed anonymously on the workstation -> host acceptance from public URLs (already_installed, identity match, anonymous 401, completion, 450 W restored) -> draft staged, variant row bound from the packager's outputs, lane receipt composed from the orchestrator's phase evidence -> lane / acceptance / manifest pin stages with --check-pins against GitHub -> tag CI green -> Latest"
+  }
 }
