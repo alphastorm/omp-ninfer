@@ -121,5 +121,11 @@
       "bytes": 573714539,
       "server_binary_sha256": "b3f9374f2a3ec9be6bee6e64b6878b2393be6339335c60901e91c264139ef8fc"
     }
+  },
+  "release": {
+    "product": "v0.6.0 cut 2026-09-10 (main 2ca20664, tag v0.6.0, GitHub Latest)",
+    "component": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.0-qwen38-4090-beta.1",
+    "acceptance": "releases/v0.6.0/acceptance/composed-external-installation.json",
+    "note": "the founder held the publish until the settlement race (ninfer#38) was fixed at source and the lane requalified at 075d442e; both conditions were met before any external effect"
   }
 }
