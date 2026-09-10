@@ -7,10 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-09-10
+
+A managed stop of the RTX 4090 native Windows lane now saves every live session. The runtime
+component `v0.6.1-qwen38-4090-beta.1` (runtime fork `63f28c95`) replaces v0.6.0's on the
+same engine and profile: the manager signals the server through a per-launch named kernel
+event instead of terminating it, the server saves every live session and reports what it
+saved, and the controller records a stop that lost state instead of calling it graceful.
+Deployment profile `qwen38-4090-native-v0.6.1-beta.1` keeps the v0.6.0 tuning. The RTX 5090
+runtime, its deployment profile, the RTX 3090 component, and the OMP client are unchanged from
+v0.6.0. Composed external-installation acceptance ran on 2026-09-10 from the published URLs
+([receipt](releases/v0.6.1/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- `packaging/windows/Control-Release.ps1` and `Install-Release.ps1` (in the component): a
+  release record declares `managed_stop` and `graceful_stop_timeout_seconds`, the controller
+  passes the channel's flags only to a release that declares them, every mutating action runs
+  under an action lock, the GPU-owner lease has exactly one restorer per stop, and no lifecycle
+  decision reads a child exit code - which a parent with redirected streams cannot observe on
+  this host. `last-stop.json` records every stop; the lifecycle status exposes it as
+  `last_stop`.
+- `scripts/render_compatibility.py` admits the `0.6.1` native component tag and package shapes.
+
 ### Measured
 
 - EXP-028: the open EXP-027 finding is fixed at source and proven red-to-green on the RTX 4090
-  host, unreleased. A managed stop on Windows terminated the server, so the shutdown flush that
+  host. A managed stop on Windows terminated the server, so the shutdown flush that
   saves every live session after the listener closes was unreachable and a session below the
   32,768-token automatic gate that was never saved explicitly did not survive a deliberate stop.
   The manager now mints one manual-reset kernel event per launch, passes it as `--stop-event`,
@@ -34,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   each direction's stop mode against what that release declares
   ([receipt](docs/measurements/2026-09-10-native-managed-stop-flush.json)).
 - EXP-029: the graceful-stop candidate passes the RTX 4090 lane's own lifecycle qualification
-  and two rounds of independent focused review, unreleased. Final candidate runtime fork
+  and two rounds of independent focused review. Final candidate runtime fork
   `63f28c95`: 15/15 phases, 103/103 registered tests. The two new assertions hold on the managed
   path: the restart phase's second session - 45 tokens, never published, `missing` before the
   stop - comes back `available` quoting its marker with 45 cached input tokens after a
@@ -57,8 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   finding was the reviewer's: the installer rebuilt every existing release record from a field
   list that predates the channel, so installing the *next* release would have silently turned
   every 0.6.1 incumbent's stop back into a termination - proven on the host, where every record
-  installed before the fix had already lost its capability. No component is published and no
-  release is cut
+  installed before the fix had already lost its capability
   ([receipt](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json)).
 
 ## [0.6.0] - 2026-09-10
@@ -757,7 +779,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.4.9...v0.5.0

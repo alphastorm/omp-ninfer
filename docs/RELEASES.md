@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.0`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.0` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.1`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.1` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,37 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.1 public release (a managed stop saves your session)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.1`, GitHub `Latest`. A managed stop of the RTX
+  4090 native lane now reaches the server's graceful shutdown (EXP-028, EXP-029).
+- RTX 4090 native component `ninfer@v0.6.1-qwen38-4090-beta.1` (runtime fork `63f28c95`,
+  package `4390a8cb...`, 573,795,974 bytes, configuration `a938aaa1...`, server binary
+  `39490a44...`): the same engine and profile as v0.6.0 with the manager-signalled stop, the
+  per-release capability record, the shutdown report, and the fail-closed controller. Qualified
+  on the owner rig through the lane's own lifecycle tool, 15/15 phases and 103/103 registered
+  tests, after two rounds of independent focused review
+  ([receipt](../releases/v0.6.1/qualification/rtx4090.json), EXP-029).
+- RTX 5090 runtime `v0.5.1-qwen38-5090-beta.1`, deployment profile `qwen38-5090-v0.5.1`, the
+  RTX 3090 component `v0.2.5-qwen38-3090-beta.1`, and the OMP client are unchanged from v0.6.0
+  and carry by hash. The RTX 3090 mainline candidate ships separately when its host returns.
+- Composed external-installation acceptance on 2026-09-10 from the published URLs
+  ([receipt](../releases/v0.6.1/acceptance/composed-external-installation.json)): all ten RTX
+  4090 assets downloaded anonymously and hashed exactly; the lane's public-URL install
+  acceptance ([receipt](../releases/v0.6.1/acceptance/rtx4090-public-install.json)) had the
+  downloaded installer accept the installed release as the exact qualified bytes, matched the
+  served identity, refused anonymous status (401), completed, and restored the host.
+- Known limitation, RTX 4090: a crash, a power loss, or a stop whose graceful wait expires still
+  loses what was never published; the stop receipt records which happened. The RTX 3090 lane
+  keeps the v0.2.5 behaviour - a managed stop terminates - until its mainline candidate ships.
+- A rollback to v0.6.0 is stopped by termination as before: the capability lives in each
+  release's record, and the shared controller passes the new flags only to a release that
+  declares them. Do not delete `release/v0.2.0-beta.1-final` from origin; the tag gate reads
+  pinned client receipts from it.
+
 ### v0.6.0 public release (RTX 4090 on the mainline runtime)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.0`, GitHub `Latest`. The RTX 4090 native lane
+- Product release: `alphastorm/omp-ninfer@v0.6.0` (superseded by v0.6.1). The RTX 4090 native lane
   moves off its divergent `v0.2.x` branch onto the mainline runtime (EXP-025 to EXP-027).
 - RTX 4090 native component `ninfer@v0.6.0-qwen38-4090-beta.1` (runtime fork `075d442e`,
   package `da343d64...`, 573,714,539 bytes, configuration `5ee3fb71...`, server binary

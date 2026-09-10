@@ -20,9 +20,9 @@ assert SPEC is not None and SPEC.loader is not None
 BINDER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BINDER)
 
-PACKAGE = "ninfer-rtx4090-native-v0.6.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz"
-SOURCE = "ninfer-rtx4090-native-v0.6.0-beta.1-source.tar.gz"
-TAG = "v0.6.0-qwen38-4090-beta.1"
+PACKAGE = "ninfer-rtx4090-native-v0.6.1-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz"
+SOURCE = "ninfer-rtx4090-native-v0.6.1-beta.1-source.tar.gz"
+TAG = "v0.6.1-qwen38-4090-beta.1"
 DOWNLOAD = f"https://github.com/alphastorm/ninfer/releases/download/{TAG}"
 
 
@@ -60,7 +60,7 @@ class BindNativeVariantTest(unittest.TestCase):
         self.write_checksums()
         # The binder writes the checked-in checksum copy and reads the lane receipt from the
         # release tree, so point it at a temporary repository root.
-        self.release_root = self.workspace / "releases" / "v0.6.0" / "qualification"
+        self.release_root = self.workspace / "releases" / "v0.6.1" / "qualification"
         self.release_root.mkdir(parents=True)
         (self.release_root / "rtx4090.json").write_text('{"status": "passed"}', encoding="utf-8")
         BINDER.ROOT = self.workspace
@@ -86,7 +86,7 @@ class BindNativeVariantTest(unittest.TestCase):
 
     def bind(self) -> dict[str, object]:
         return BINDER.bind(
-            self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.0"
+            self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.1"
         )
 
     def test_binds_every_published_asset_from_the_distribution_set(self) -> None:

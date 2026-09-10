@@ -120,6 +120,28 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.1 — a managed stop saves your session (2026-09-10)
+
+The RTX 4090 lane requalified at runtime fork `63f28c95` through its own lifecycle tool, 15/15
+phases, after two rounds of independent focused review; receipt in
+[`releases/v0.6.1/qualification/rtx4090.json`](../releases/v0.6.1/qualification/rtx4090.json).
+The engine and profile are unchanged from `v0.6.0`; the change is the stop. The RTX 5090 and
+RTX 3090 lanes are byte-identical to `v0.6.0` and carry their receipts. Experiments EXP-028
+and EXP-029.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 4090 managed stop | **graceful, 2.2 s** | the controller signals the per-launch named event; the server closes its listener, finishes in-flight requests, saves every live session, reports what it saved, and exits; never fell back to termination across seven windows |
+| RTX 4090 unsaved session | **survives** | a 45-token session nothing ever published, `missing` before the stop, comes back `available` after the managed restart quoting its marker exactly with 45 cached input tokens; the explicitly saved control comes back with 42 |
+| RTX 4090 rollback | stop modes match declarations | the candidate is stopped by signal; a predecessor is stopped the way its own record declares - v0.6.0 by termination, proven live under the same controller |
+| RTX 4090 C1 | **159.09 tok/s** decode | 2,104.95 tok/s prefill, 92.96% MTP3 acceptance, 22,814 MiB peak - unchanged, as the engine is |
+| RTX 4090 128K | **91.4 s** | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens, cold process |
+
+Same fixture and gate script as `v0.6.0`, one host, one day; owner measurement. The window
+found six defects in the lifecycle handoff and the reviewer confirmed eight more
+([EXP-029 receipt](measurements/2026-09-10-rtx4090-graceful-stop-qualification.json);
+[EXP-028 probe](measurements/2026-09-10-native-managed-stop-flush.json)).
+
 ### v0.6.0 — the RTX 4090 lane on the mainline runtime (2026-09-10)
 
 The RTX 4090 lane moved from its divergent `v0.2.x` branch to the mainline runtime built for
