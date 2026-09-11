@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-09-11
+
+No component changed. Every documented Windows route now runs end to end from its own quickstart
+blocks on a stock Windows 11 host, and a Git clone yields the recorded bytes on every platform
+(EXP-032, [receipt](docs/measurements/2026-09-11-documented-routes-qualification.json)). Component
+bytes, profiles and configuration are v0.6.3's and carry by hash; route acceptance ran on
+2026-09-11 ([receipt](releases/v0.6.4/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- `.gitattributes` pins `* -text`: Git for Windows installs with `core.autocrlf=true`, which
+  rewrote the hash-chained receipts at checkout and failed `verify_release.py` on every hash of a
+  stock clone. The verifier now names that cause first and once.
+- `docs/QUICKSTART.md`: every Windows block that invokes a script opens with a process-scope
+  `Set-ExecutionPolicy` (Windows' default `Restricted` policy blocked the first `.ps1`); Windows
+  blocks call `py -3` (the `python3` name is the Microsoft Store shortcut); the native section
+  opens with a clone-and-verify block, generates the key with .NET Framework APIs (the .NET 5
+  calls failed in Windows PowerShell), operates the lane as a pasteable sequence, and keeps the
+  interactive OMP launch out of the blocks the next section runs in the same process.
+- `scripts/documented_route.py` and `scripts/hosts/run-documented-route.{ps1,sh}`: a route's
+  blocks are extracted by heading and executed in one shell under the host's real execution
+  policy, every block hashed before it runs; tests refuse blocks that would break a paste.
+
+### Measured
+
+- EXP-032: the RTX 4090 native route from an uninstalled host - client install, clone and verify,
+  stage and install from public URLs with the 18 GB artifact pulled from Hugging Face, operate,
+  provider, acceptance - passed on the first-install and the rerun path; the RTX 5090 container
+  route's inference-host half and native Windows client half passed including Vision and the
+  fail-closed check. Six documentation defects fixed at source, each red first.
+
 ## [0.6.3] - 2026-09-11
 
 The documented RTX 5090 container route mounts a durable session store. Until this release the
@@ -884,7 +915,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...HEAD
+[0.6.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...v0.6.1

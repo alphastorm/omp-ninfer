@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.4",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "documented-route acceptance on both Windows routes: the RTX 4090 native route from an uninstalled host and the RTX 5090 container route's inference-host and native Windows client halves, each run from its own quickstart blocks under the host's real execution policy. Component bytes, profiles and configuration are unchanged from v0.6.3 and carry their acceptances by hash.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "a43cc3bbb79e6d881008a9107470aa44913cb89f58083078fc921bf506b751cf",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on both hosts by the documented block from its public URL and hashed. No component changed in this release: what changed is what a reader executes and the bytes a clone yields.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "the RTX 4090 route downloaded the five lane assets, the client archive and the 18 GB model artifact from their public URLs on the host and hashed each against the manifest; the RTX 5090 image was pulled by digest with an empty credential store"
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "the checked-in checksum sets are unchanged; .gitattributes now guarantees a clone yields the recorded bytes on every platform, which a stock Git for Windows clone of v0.6.3 did not"
+    },
+    "anonymous_image_pull": {
+      "status": "carried",
+      "note": "digest a62dd5b8, pulled again on the RTX 5090 host inside the documented start block"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "RTX 5090: the documented launcher computed and declared configuration 622ab621 under qwen38-5090-v0.6.3 and the status route reported it; RTX 4090: the documented installer installed v0.6.1-qwen38-4090-beta.1 and Control-Release Status reported it ready"
+    },
+    "auth_boundary": {
+      "status": "carried",
+      "note": "unchanged from v0.6.3; the routes' acceptance turns ran authenticated"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "both routes' tool turns returned the planted marker exactly"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "both routes returned the nonce on --continue; durable restore carried from v0.6.3 by hash"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "RTX 4090: the outage request failed after Control-Release -Action Stop; RTX 5090: after stop-ninfer.sh"
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.4/acceptance/documented-routes.json",
+      "sha256": "6a36c5881a72f4d4800e36bbb8fb1a382176edc8e36b91ec4ef406e95b6463e6",
+      "summary": "uninstalled host -> client install -> clone and verify -> stage and install from public URLs -> operate -> provider -> acceptance; and host half -> client half -> acceptance -> fail-closed on the RTX 5090"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "RTX 4090: the lane installed by the documented route serves (v0.6.1 release, 22,814 MiB, lease held, model at the documented ProgramData path), so the host now runs exactly what a reader would. RTX 5090: production serves again from its pinned image with its published port and restart policy, the lane supervisor's hold released, the owner's OMP configuration restored."
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.4",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Every documented Windows route executed from its own quickstart blocks on the owner hosts as a stranger meets them; the component bytes are v0.6.2's and the profiles and configuration are v0.6.3's, all carried by hash. What this release changes - and what this receipt accepts - is the documentation a reader executes and the bytes a clone yields.",
+  "document_sha256": "d754ae453da2",
+  "candidate_commit": "e2536788812522030b4fd52ad7fcc322fd1cfbf3",
+  "routes": {
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "first_install_run": "run5 (stage-and-install 775 s including the 18 GB artifact from Hugging Face)",
+      "full_pass_run": "run6 (rerun path, 484 s end to end)"
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ]
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "vision": "the image acceptance described the release icon",
+      "fail_closed": "the outage request failed after stop-ninfer.sh"
+    }
+  },
+  "steps": {
+    "clean_host": {
+      "status": "passed",
+      "note": "RTX 4090: the shipped lineage root (12 releases) was uninstalled through Control-Release -Action Uninstall, the scheduled task removed, the external model kept; RTX 5090: the documented paths under the WSL2 home were removed and the owner's OMP configuration moved aside for the window"
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "every executed step's bytes hashed to the documented block's SHA-256 recorded in the bundle manifest; the clone step alone was substituted with the candidate commit, recorded as such"
+    },
+    "execution_policy_faithful": {
+      "status": "passed",
+      "note": "the runner is launched as text without -ExecutionPolicy Bypass; the hosts' effective policy was Restricted, and the blocks' own Set-ExecutionPolicy lines carried them"
+    },
+    "public_urls_only": {
+      "status": "passed",
+      "note": "the native route downloaded the client archive, the five lane assets and the 18 GB model artifact from their public URLs and hashed each against the manifest; the container route pulled the image by digest"
+    },
+    "acceptance_turns": {
+      "status": "passed",
+      "note": "RTX 4090: tool turn read the marker exactly, nonce round-trip on --continue, outage request failed after -Action Stop; RTX 5090: the same plus Vision, outage request failed after stop-ninfer.sh"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "RTX 4090: the lane installed by the documented route serves (v0.6.1 release, 22,814 MiB, lease held, model at the documented ProgramData path), so the host now runs exactly what a reader would. RTX 5090: production serves again from its pinned image with its published port and restart policy, the lane supervisor's hold released, the owner's OMP configuration restored."
+    }
+  },
+  "qualification_receipt": "docs/measurements/2026-09-11-documented-routes-qualification.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

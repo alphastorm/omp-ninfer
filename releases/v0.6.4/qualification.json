@@ -5,8 +5,8 @@
   "as_of": "2026-09-11",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image a62dd5b8 (runtime v0.6.2, source 63f28c95, binary 6ab904d7) under deployment profile qwen38-5090-v0.6.3 (configuration 622ab621); the RTX 4090 native package v0.6.1-beta.1; the RTX 3090 durable v0.2.5-beta.1 package. No component changed from v0.6.2: this release changes the configuration the documented public container route launches - it now mounts a durable session store - and binds the identity that route declares to the configuration it actually runs. Measured on the owner appliance on 2026-09-11 (EXP-031).",
+  "external_installation_qualified": true,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image a62dd5b8 under deployment profile qwen38-5090-v0.6.3 (configuration 622ab621); the RTX 4090 native package v0.6.1-beta.1; the RTX 3090 durable v0.2.5-beta.1 package. No component, profile or configuration changed from v0.6.3. This release changes what a reader executes: every documented Windows route now runs verbatim from its own quickstart blocks on a stock host, and a clone yields the recorded bytes on every platform. Measured on the owner hosts on 2026-09-11 (EXP-032).",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -65,8 +65,21 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.2-qwen38-5090-beta.1 component (image a62dd5b8) before the cut; the receipt lands at releases/v0.6.4/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.6.4/acceptance/composed-external-installation.json",
+      "sha256": "2ab779953587b3212604cdb56d3575583f8a835c0bc2222933b2691306935e76",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "a43cc3bbb79e6d881008a9107470aa44913cb89f58083078fc921bf506b751cf",
+      "public_url": null
     }
   },
   "observed_gates": {
@@ -139,13 +152,11 @@
     }
   },
   "interpretation": [
-    "The route the documentation tells a stranger to run now delivers the product's claim: a session saved on it survives the server process and continues exactly, which the predecessor route could not do at all - its save endpoint answered 404 and its post-restart continuation answered previous_response_not_found.",
-    "The identity a server echoes is now the identity of the configuration it is running. The verifier computes it from the profile the way the runtime fork's lifecycle tool does, a ready release must record it, and the launcher refuses to start when computed, declared and recorded disagree.",
-    "The route is a bridge container published on the inference host's loopback. A host-network bind on Docker Desktop lives in the engine VM and is unreachable from both Windows and the WSL2 distro, which is what the v0.2 troubleshooting entry misattributed to WSL networking drift.",
-    "Component bytes, the RTX 4090 and RTX 3090 lanes, and the OMP client are unchanged and carry their receipts by hash.",
+    "Every documented Windows route passes end to end from its own blocks under Windows' default execution policy: the RTX 4090 native route from an uninstalled host including the 18 GB artifact from Hugging Face, and the RTX 5090 container route's host and client halves including Vision and the fail-closed check.",
+    "Six defects stood between a stranger and that outcome, none visible to any acceptance script because every script bypassed them: the execution policy, the Store's python3 shortcut, autocrlf rewriting the hash chain, .NET 5 APIs in Windows PowerShell, a menu block run as a sequence, and provider blocks that opened the interactive session.",
+    "The route a release accepts is now the route the documentation prints: scripts/documented_route.py extracts the blocks, the host runners execute them in one shell and record every block's hash, and tests refuse blocks that would break a stranger's paste.",
+    "Component bytes, profiles, configuration, the RTX 4090 and RTX 3090 lanes, and the OMP client are unchanged and carry their receipts by hash.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.2-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "remaining_release_gates": []
 }

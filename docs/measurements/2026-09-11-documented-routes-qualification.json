@@ -1,0 +1,501 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-032",
+  "generated_utc": "2026-09-11",
+  "status": "qualified",
+  "release": "v0.6.4",
+  "scope": "Every documented Windows route, executed from its own quickstart blocks - extracted by scripts/documented_route.py, run in one shell by scripts/hosts/run-documented-route.{ps1,sh} under the host's real execution policy, every block hashed before it runs - on the owner hosts as a stranger meets them: the RTX 4090 native route with its shipped lineage root uninstalled first, and the RTX 5090 container route's inference-host half inside the WSL2 distro plus its native Windows client half. The only non-verbatim step in each run is the clone: the tag the block names is created from the commit this run accepts, so the runner cloned that commit and verified it installable instead of ready, recording the substitution.",
+  "question": "Does the route a stranger runs, read block by block, reach the documented outcome on a stock Windows host?",
+  "answer": "Not before this release, on any Windows route, for four independent reasons that no acceptance script had ever met because every script bypassed them: Windows' default Restricted execution policy blocked the first .ps1 the blocks invoke; `python3` on Windows is the Microsoft Store shortcut, not Python; Git for Windows' default core.autocrlf=true rewrote the hash-chained receipts at checkout so verify_release failed on every hash; and the native route's key generation used .NET 5 APIs that Windows PowerShell lacks. Two more were documentation shape: the operate block was a menu a paste runs as a sequence, and the provider blocks ended by opening the interactive OMP session the next section says to run in the same process. With those fixed, the RTX 4090 route passes end to end twice - first install with the 18 GB artifact pulled from Hugging Face, then the rerun path - and the RTX 5090 host and client halves pass, including Vision and the fail-closed check.",
+  "candidate_commit": "e2536788812522030b4fd52ad7fcc322fd1cfbf3",
+  "defects_found_and_fixed": [
+    {
+      "id": "windows-execution-policy-blocks-every-script",
+      "found_by": "rtx4090 run 1, step client-install",
+      "observation": "`install.ps1 cannot be loaded because running scripts is disabled on this system` under the effective policy Restricted (LocalMachine Undefined), which is the Windows client default.",
+      "fix": "every block that invokes a .ps1 opens with `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force`, explained once; nothing on the machine changes."
+    },
+    {
+      "id": "python3-is-the-store-shortcut",
+      "found_by": "both hosts, `where python3`",
+      "observation": "`python3` resolves to WindowsApps\\python3.exe, which prints `Python was not found; run without arguments to install from the Microsoft Store` even with python.org's Python installed.",
+      "fix": "Windows blocks call `py -3`; the prerequisites name python.org's Python and its launcher."
+    },
+    {
+      "id": "autocrlf-rewrites-the-hash-chain",
+      "found_by": "rtx4090 run 2, step clone-and-verify",
+      "observation": "releases/v0.6.3/qualification.json checked out as 10,963 bytes against the tag's 10,801 with core.autocrlf=true at Git for Windows' system scope; verify_release reported nine hash mismatches and nothing else.",
+      "fix": ".gitattributes pins `* -text` so checkout never rewrites bytes on any platform, and verify_release names the cause first and once when a file's CRLF-to-LF bytes hash to a recorded value while its bytes do not. Only a tag carrying the attributes file fixes a stranger's clone, which is why this is a release."
+    },
+    {
+      "id": "key-generation-used-dotnet5-apis",
+      "found_by": "rtx4090 run 3, step stage-and-install",
+      "observation": "`RandomNumberGenerator::Fill` and `Convert::ToHexString` do not exist on .NET Framework, which Windows PowerShell 5.1 runs on; the block failed on its key line.",
+      "fix": "`RandomNumberGenerator::Create().GetBytes` and `BitConverter::ToString`; a test forbids the .NET 5 calls in every PowerShell block."
+    },
+    {
+      "id": "operate-block-was-a-menu",
+      "found_by": "reading, confirmed by the runner's one-shell semantics",
+      "observation": "Status/Start/Stop/Restart listed as alternatives run as a sequence when pasted, starting a running lane.",
+      "fix": "a real sequence (Status, Stop, Start, Status) that also works in a new window."
+    },
+    {
+      "id": "provider-blocks-opened-the-interactive-session",
+      "found_by": "rtx4090 run 5, step provider (native exit 129)",
+      "observation": "both provider blocks ended with `omp.cmd --model ...`, which opens the TUI, while the next section says to run the acceptance in the same process.",
+      "fix": "the launch moves to prose after the block; a test refuses any block that opens an interactive session."
+    },
+    {
+      "id": "native-route-had-no-verify-step",
+      "found_by": "reading",
+      "observation": "the native section's clone instruction was prose and never ran verify_release.",
+      "fix": "a clone-and-verify block opens the section."
+    }
+  ],
+  "runs": {
+    "rtx4090-native": {
+      "run1": {
+        "status": "failed",
+        "clone_commit": "06858a598888",
+        "document_sha256": "287cb10eb31b",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "failed",
+            "elapsed_s": 42.297,
+            "block_sha256": "8f0a7d8348db",
+            "error": "Invoke-Expression : File <route-root>\\omp-ninfer\\omp-18.0.9-windows-x64\\install.ps1 cannot \r"
+          },
+          {
+            "slug": "variant",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "36aab5b9ae63"
+          },
+          {
+            "slug": "operate",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "44a95752ab18"
+          },
+          {
+            "slug": "provider",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "a0c3eb0c3992"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      },
+      "run2": {
+        "status": "failed",
+        "clone_commit": "06858a598888",
+        "document_sha256": "5ae96dd0305a",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 43.728,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "clone-and-verify",
+            "status": "failed",
+            "elapsed_s": 4.364,
+            "block_sha256": "f06330887e9b",
+            "error": "block ended with native exit code 1\r"
+          },
+          {
+            "slug": "variant",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "4a30630d6e3d"
+          },
+          {
+            "slug": "operate",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "e41b9fe53d7c"
+          },
+          {
+            "slug": "provider",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "a0c3eb0c3992"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      },
+      "run3": {
+        "status": "failed",
+        "clone_commit": "555159497c5c",
+        "document_sha256": "0f230e454a99",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 44.964,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "clone-and-verify",
+            "status": "substituted",
+            "elapsed_s": 3.899,
+            "block_sha256": "698837d37e76",
+            "substitution": "cloned commit 555159497c5cc84939ec529395fc79caa20e2b78 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "variant",
+            "status": "passed",
+            "elapsed_s": 0.009,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "failed",
+            "elapsed_s": 0.099,
+            "block_sha256": "a8c1cd118439",
+            "error": "Invoke-Expression : Method invocation failed because [System.Security.Cryptography.RandomNumberGenerator] does not \r"
+          },
+          {
+            "slug": "operate",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "e41b9fe53d7c"
+          },
+          {
+            "slug": "provider",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "a0c3eb0c3992"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      },
+      "run4": {
+        "status": "failed",
+        "clone_commit": "b3e21a25ad99",
+        "document_sha256": "6b5fea62dbc8",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 42.986,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "clone-and-verify",
+            "status": "failed",
+            "elapsed_s": 3.229,
+            "block_sha256": "698837d37e76",
+            "error": "candidate v0.6.4 is not installable (exit 1)\r",
+            "substitution": "cloned commit b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "variant",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "aa9d80918c80"
+          },
+          {
+            "slug": "operate",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "e41b9fe53d7c"
+          },
+          {
+            "slug": "provider",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "a0c3eb0c3992"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      },
+      "run5": {
+        "status": "failed",
+        "clone_commit": "298bc0897034",
+        "document_sha256": "6b5fea62dbc8",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 44.381,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "clone-and-verify",
+            "status": "substituted",
+            "elapsed_s": 3.021,
+            "block_sha256": "698837d37e76",
+            "substitution": "cloned commit 298bc08970344c601af092367da908761ecb861c in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "variant",
+            "status": "passed",
+            "elapsed_s": 0.001,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "passed",
+            "elapsed_s": 774.959,
+            "block_sha256": "aa9d80918c80"
+          },
+          {
+            "slug": "operate",
+            "status": "passed",
+            "elapsed_s": 104.322,
+            "block_sha256": "e41b9fe53d7c"
+          },
+          {
+            "slug": "provider",
+            "status": "failed",
+            "elapsed_s": 1.453,
+            "block_sha256": "a0c3eb0c3992",
+            "error": "block ended with native exit code 129\r"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      },
+      "run6": {
+        "status": "passed",
+        "clone_commit": "e25367888125",
+        "document_sha256": "d754ae453da2",
+        "steps": [
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 43.73,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "clone-and-verify",
+            "status": "substituted",
+            "elapsed_s": 3.683,
+            "block_sha256": "698837d37e76",
+            "substitution": "cloned commit e2536788812522030b4fd52ad7fcc322fd1cfbf3 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "variant",
+            "status": "passed",
+            "elapsed_s": 0.002,
+            "block_sha256": "59aedbb7de8c"
+          },
+          {
+            "slug": "stage-and-install",
+            "status": "passed",
+            "elapsed_s": 323.366,
+            "block_sha256": "aa9d80918c80"
+          },
+          {
+            "slug": "operate",
+            "status": "passed",
+            "elapsed_s": 43.167,
+            "block_sha256": "e41b9fe53d7c"
+          },
+          {
+            "slug": "provider",
+            "status": "passed",
+            "elapsed_s": 0.011,
+            "block_sha256": "8c26859406d1"
+          },
+          {
+            "slug": "acceptance",
+            "status": "passed",
+            "elapsed_s": 65.092,
+            "block_sha256": "448bc30260e1"
+          }
+        ]
+      }
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "clone_commit": "e25367888125",
+      "document_sha256": "d754ae453da2",
+      "steps": [
+        {
+          "slug": "prepare",
+          "status": "passed",
+          "elapsed_s": 12.86,
+          "block_sha256": "65a0e398ca64"
+        },
+        {
+          "slug": "start",
+          "status": "passed",
+          "elapsed_s": 33.507,
+          "block_sha256": "d0b5ed3dc411"
+        }
+      ]
+    },
+    "rtx5090-windows-client": {
+      "run1": {
+        "status": "failed",
+        "clone_commit": "",
+        "document_sha256": "d754ae453da2",
+        "steps": [
+          {
+            "slug": "clone-and-verify",
+            "status": "failed",
+            "elapsed_s": 0.051,
+            "block_sha256": "698837d37e76",
+            "error": "& : The term 'git' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the \r",
+            "substitution": "cloned commit e2536788812522030b4fd52ad7fcc322fd1cfbf3 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "client-install",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "provider",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "142293036bda"
+          },
+          {
+            "slug": "acceptance",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "4a0ca70abc1a"
+          },
+          {
+            "slug": "fail-closed",
+            "status": "skipped",
+            "elapsed_s": 0,
+            "block_sha256": "8eba0213dfdd"
+          }
+        ]
+      },
+      "run2": {
+        "status": "failed",
+        "clone_commit": "e25367888125",
+        "document_sha256": "d754ae453da2",
+        "steps": [
+          {
+            "slug": "clone-and-verify",
+            "status": "substituted",
+            "elapsed_s": 3.86,
+            "block_sha256": "698837d37e76",
+            "substitution": "cloned commit e2536788812522030b4fd52ad7fcc322fd1cfbf3 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 32.958,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "provider",
+            "status": "passed",
+            "elapsed_s": 0.111,
+            "block_sha256": "142293036bda"
+          },
+          {
+            "slug": "acceptance",
+            "status": "passed",
+            "elapsed_s": 14.842,
+            "block_sha256": "4a0ca70abc1a"
+          },
+          {
+            "slug": "fail-closed",
+            "status": "failed",
+            "elapsed_s": 10.327,
+            "block_sha256": "8eba0213dfdd",
+            "error": "block ended with native exit code 1\r"
+          }
+        ]
+      },
+      "run3": {
+        "status": "passed",
+        "clone_commit": "e25367888125",
+        "document_sha256": "d754ae453da2",
+        "steps": [
+          {
+            "slug": "clone-and-verify",
+            "status": "substituted",
+            "elapsed_s": 2.76,
+            "block_sha256": "698837d37e76",
+            "substitution": "cloned commit e2536788812522030b4fd52ad7fcc322fd1cfbf3 in place of the tag this run's acceptance creates; verified as installable, not ready"
+          },
+          {
+            "slug": "client-install",
+            "status": "passed",
+            "elapsed_s": 29.999,
+            "block_sha256": "b0d59a866cc0"
+          },
+          {
+            "slug": "provider",
+            "status": "passed",
+            "elapsed_s": 0.109,
+            "block_sha256": "142293036bda"
+          },
+          {
+            "slug": "acceptance",
+            "status": "passed",
+            "elapsed_s": 12.779,
+            "block_sha256": "4a0ca70abc1a"
+          },
+          {
+            "slug": "fail-closed",
+            "status": "passed",
+            "elapsed_s": 10.677,
+            "block_sha256": "8eba0213dfdd"
+          }
+        ]
+      }
+    }
+  },
+  "run_notes": {
+    "rtx4090-native": "run 1: policy red on a fresh route; run 2: autocrlf red; run 3: key-generation red; run 4: candidate not yet installable (root authority unpromoted); run 5: first install from public URLs with the 18 GB artifact pulled from Hugging Face inside the 775 s stage-and-install step, operate passed, provider opened the TUI; run 6: full pass on the rerun path (`already_installed`).",
+    "rtx5090-windows-client": "run 1: Git absent on the Windows side (a stated prerequisite; installed with winget along with python.org Python, as a reader would); run 2: full acceptance passed including Vision, then the fail-closed step was mis-scored by the runner because its last native exit is the failure it asserts on - runner rule fixed: a block that reads $LASTEXITCODE owns its exit-code semantics; run 3: full pass.",
+    "rtx5090-container-host": "the 18 GB artifact was hard-linked to the documented path before the run so `curl --continue-at -` resumed at the end of a complete file; the block's byte-count and SHA-256 checks ran on the bytes. The route's Hugging Face download path itself was exercised on the RTX 4090 host."
+  },
+  "hosts_restored": "RTX 4090: the lane installed by the documented route serves (v0.6.1 release, 22,814 MiB, lease held, model at the documented ProgramData path), so the host now runs exactly what a reader would. RTX 5090: production serves again from its pinned image with its published port and restart policy, the lane supervisor's hold released, the owner's OMP configuration restored.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

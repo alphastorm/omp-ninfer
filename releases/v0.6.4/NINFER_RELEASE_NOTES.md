@@ -1,63 +1,53 @@
-# OMP NInfer v0.6.3 - your session survives the process on the route you actually run
+# OMP NInfer v0.6.4 - the documented routes, as a stranger runs them
 
-The documented RTX 5090 container route now mounts a durable session store. Until this release it
-did not: the launcher passed no `--session-checkpoint-dir`, so on the route the quickstart tells
-you to run, the explicit save endpoint answered 404 and a continuation after a container restart
-answered `previous_response_not_found` - while the server reported the configuration identity of
-the checkpointed configuration that had been qualified elsewhere. Both native Windows lanes and
-the maintainer's own production already ran with the store enabled; the published route did not.
-No component changed: the runtime image, server binary, model and client are v0.6.2's exact bytes.
+No component changed. This release changes what a reader executes: every documented Windows
+route now runs end to end from its own quickstart blocks on a stock Windows 11 host, and a Git
+clone yields the recorded bytes on every platform. Neither was true before, on any Windows route.
+
+## What was wrong
+
+Every release so far was accepted through scripts that bypassed what a reader meets. Running the
+RTX 4090 native route from its own blocks on an uninstalled host, and the RTX 5090 container
+route's inference-host and native Windows client halves, found six defects (EXP-032):
+
+- **Windows' default execution policy** (`Restricted`) blocked the first `.ps1` every block
+  invokes - the client installer, the lane installer, the controller.
+- **`python3` on Windows is the Microsoft Store shortcut**, not Python, even with python.org's
+  Python installed; the verify step never ran.
+- **Git for Windows installs with `core.autocrlf=true`**, which rewrote the hash-chained receipts
+  at checkout: `verify_release.py --require-ready` failed on every hash of a stock clone. Only a
+  tag carrying a `.gitattributes` fixes a stranger's clone, which is why this is a release.
+- **The native route's key generation used .NET 5 APIs** that Windows PowerShell 5.1 lacks.
+- The operate block was a menu that a paste runs as a sequence; both provider blocks ended by
+  opening the interactive OMP session the next section asks you to run in the same process.
 
 ## What changed
 
-- **The route is durable.** `examples/manual-tunnel/start-ninfer.sh` takes `--checkpoint-dir`,
-  prepares it private to you, mounts it at `/checkpoints` under the repository's io_uring seccomp
-  profile (pinned by hash), and passes the session-store arguments the qualified configuration
-  uses. Measured on the owner appliance: an explicitly saved session survived a full container
-  stop - the store held 48 files and 1.74 GB owned by the invoking user at mode 700 with no server
-  running - and the continuation returned its marker exactly in 1.17 s with 122 cached input
-  tokens, 25.5 s after the server came back. A 5.2 GB session restored in 3.9 s and 3.7 s across
-  two verified restarts, and a flipped payload byte was refused.
-- **The identity a server reports is the identity of what it is running.** Deployment profile
-  `qwen38-5090-v0.6.3`, configuration `622ab621...`. `scripts/verify_release.py` computes that
-  identity from the profile exactly as the runtime fork's lifecycle tool computes it, a ready
-  release must record it, and the launcher refuses to start when the computed, declared and
-  recorded values disagree.
-- **The route is reachable.** The container runs on a bridge network and publishes its port on the
-  inference host's `127.0.0.1:18089`. A `--network host` bind on Docker Desktop lives in the engine
-  VM: the server logs that it is listening and neither Windows nor the WSL2 distro can reach it.
-  That is what the old `wsl-mirrored-loopback-unavailable` diagnosis misattributed to WSL
-  networking drift; `wsl --shutdown` never fixed it.
-- **The route runs as you, with less.** Your own uid/gid, every capability dropped,
-  `no-new-privileges`, and the GPU probed inside the pinned image - so the host no longer needs
-  `nvidia-smi` on `PATH`, which a WSL2 distro reached over ssh does not have.
-- **The profiles say so.** Both container profiles now claim `process-restart-continuation` and
-  record the store mount and seccomp identity that make the claim true.
+- Every block that invokes a script opens with `Set-ExecutionPolicy -Scope Process
+  -ExecutionPolicy Bypass -Force`, explained once: this window only, nothing on the machine.
+- Windows blocks call `py -3`; the prerequisites name python.org's Python and its launcher.
+- `.gitattributes` pins `* -text`, and `verify_release.py` names a checkout that rewrote line
+  endings as the cause, first and once, instead of a page of mismatches.
+- The native section opens with a real clone-and-verify block, generates the key with .NET
+  Framework APIs, and operates the lane as a sequence; interactive launches live in prose.
+- `scripts/documented_route.py` extracts a route's blocks by heading, and
+  `scripts/hosts/run-documented-route.{ps1,sh}` execute them in one shell under the host's real
+  policy, hashing every block before it runs. Tests refuse blocks that would break a paste. The
+  route a release accepts is the route the documentation prints.
 
 ## Evidence route
 
-`docs/measurements/2026-09-11-rtx5090-public-route-qualification.json` holds the window, including
-the same sequence measured on the predecessor configuration for comparison; the route's acceptance
-is in `acceptance/rtx5090-public-route.json` and the composed acceptance in
-`acceptance/composed-external-installation.json`. The component's own anonymous public-URL
-acceptance is v0.6.2's, unchanged and carried by hash.
+`docs/measurements/2026-09-11-documented-routes-qualification.json` holds every run, red to green,
+with each block's hash; `acceptance/documented-routes.json` accepts the three routes and
+`acceptance/composed-external-installation.json` composes them with the carried component
+acceptances. The RTX 4090 host now runs exactly what the route installs from public URLs.
 
-## Upgrading from v0.6.2
+## Upgrading
 
-Stop the old container with `examples/manual-tunnel/stop-ninfer.sh`, then start the new route with
-`--checkpoint-dir` pointing at a local directory you own. Sessions from the old route were never
-saved, so there is nothing to migrate; from here they are.
+Re-clone the tag: a clone made with `core.autocrlf=true` before this release carries rewritten
+receipts and cannot pass verification. Installed lanes and sessions are unaffected.
 
 ## Known limitations
 
-Unchanged from v0.6.2 otherwise. A crash, a power loss, or a host reboot still loses whatever was
-never saved - automatically above 32,768 frontier tokens, or explicitly through
-`POST /v1/ninfer/checkpoints`. The RTX 3090 lane keeps the v0.2.5 behaviour, where a managed stop
-terminates, until its mainline candidate ships. Sibling branches beyond the first re-materialize
-the shared base from host KV.
-
-## Support boundary
-
-Unchanged: one owner-operated machine per lane; one active request per qualified profile;
-loopback-only, bearer-authenticated, fail-closed. Checkpoints bind the runtime fingerprint.
-Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
+Unchanged from v0.6.3. Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or
+NVIDIA.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.6.4",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "2107c74bccc07ea046e8056e4f7456b26b4d8de31673d1fbc946664d3f5b4c1d",
+    "summary_sha256": "7554593b9997c55739a311a4ca8464685f98f0e6158fa8f10fca0967057e81a8",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ecfc61f21f9613b7187f95aefd4bb16d3d6b2cbd/releases/v0.6.4/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -181,8 +181,6 @@
       "NInfer RTX 4090 native component v0.6.1-qwen38-4090-beta.1 (new: the managed graceful stop, package 4390a8cb)",
       "NInfer RTX 3090 component v0.2.5-qwen38-3090-beta.1 (unchanged)"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.2-qwen38-5090-beta.1 component and runtime image a62dd5b8; the composed acceptance receipt is absent until it is"
-    ]
+    "blockers": []
   }
 }

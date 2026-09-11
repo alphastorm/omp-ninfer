@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.3`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.3` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.4`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.4` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,28 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.4 public release (the documented routes, as a stranger runs them)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.4`, GitHub `Latest`. No component changed; every
+  documented Windows route runs from its own quickstart blocks on a stock host, and a clone
+  yields the recorded bytes on every platform (EXP-032).
+- Component bytes (RTX 5090 image `a62dd5b8...`, RTX 4090 `v0.6.1-qwen38-4090-beta.1`, RTX 3090
+  `v0.2.5-qwen38-3090-beta.1`, the model, the OMP client), deployment profile
+  `qwen38-5090-v0.6.3` and configuration `622ab621...` are byte-identical to v0.6.3.
+- Route acceptance on 2026-09-11 ([receipt](../releases/v0.6.4/acceptance/documented-routes.json) ·
+  [composed](../releases/v0.6.4/acceptance/composed-external-installation.json)): RTX 4090 native
+  from an uninstalled host through acceptance, twice (first install with the 18 GB artifact from
+  Hugging Face, then the rerun path); RTX 5090 host and client halves including Vision and the
+  fail-closed check.
+- Six documentation defects fixed at source: Windows' Restricted execution policy, the Store's
+  `python3` shortcut, `core.autocrlf` rewriting the hash chain, .NET 5 APIs in Windows
+  PowerShell, a menu block run as a sequence, provider blocks opening the interactive session.
+- Re-clone the tag if an earlier clone was made with `core.autocrlf=true`; installed lanes and
+  sessions are unaffected.
+
 ### v0.6.3 public release (the documented route is durable)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.3`, GitHub `Latest`. The documented RTX 5090
+- Product release: `alphastorm/omp-ninfer@v0.6.3` (superseded by v0.6.4). The documented RTX 5090
   container route mounts a durable session store, and the identity its server reports is the
   identity of the configuration it runs (EXP-031).
 - No component changed. The RTX 5090 runtime `v0.6.2-qwen38-5090-beta.1` (image `a62dd5b8...`,

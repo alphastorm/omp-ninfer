@@ -102,9 +102,13 @@ foreach ($step in $manifest.steps) {
         # Run the block as pasted text in this scope: its variables persist into the next block, and
         # the machine's execution policy applies exactly where it applies for a reader - to the
         # .ps1 files the block itself invokes, never to the pasted commands.
-        Invoke-Expression ([IO.File]::ReadAllText($path, [Text.UTF8Encoding]::new($false)))
-        # A block that ends on a native command with a non-zero exit is a failed step too.
-        if ((Test-Path variable:LASTEXITCODE) -and $LASTEXITCODE -ne 0) {
+        $text = [IO.File]::ReadAllText($path, [Text.UTF8Encoding]::new($false))
+        $global:LASTEXITCODE = 0
+        Invoke-Expression $text
+        # A block that reads $LASTEXITCODE owns its exit-code semantics (a fail-closed check
+        # expects its last native command to fail and throws if it does not). Any other block
+        # that ends on a failed native command is a failed step.
+        if (($text -notmatch 'LASTEXITCODE') -and (Test-Path variable:LASTEXITCODE) -and $LASTEXITCODE -ne 0) {
             throw "block ended with native exit code $LASTEXITCODE"
         }
         $record.status = 'passed'
