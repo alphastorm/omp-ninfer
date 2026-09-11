@@ -280,11 +280,12 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-& "$env:LOCALAPPDATA\OMP\omp.cmd" --model "$Provider/local-max"
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
-the key itself in YAML, command arguments, shell history, or support bundles.
+the key itself in YAML, command arguments, shell history, or support bundles. In that process,
+`& "$env:LOCALAPPDATA\OMP\omp.cmd" --model "$Provider/local-max"` opens an interactive session on
+the lane; run the acceptance below first, it uses the same process without opening one.
 
 ### Native lane acceptance
 
@@ -534,13 +535,14 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
-& "$env:LOCALAPPDATA\OMP\omp.cmd" --model ninfer-beta/local-max
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
 the key itself in YAML, command arguments, shell history, or support bundles. The block refuses to
 overwrite an existing OMP configuration; merge only `providers.ninfer-beta` and the `retry` mapping
-when those files already exist.
+when those files already exist. In that process,
+`& "$env:LOCALAPPDATA\OMP\omp.cmd" --model ninfer-beta/local-max` opens an interactive session;
+the **Native Windows command forms** in section 8 use the same process without opening one.
 
 The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
 the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a

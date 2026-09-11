@@ -64,6 +64,16 @@ class ExtractionTests(unittest.TestCase):
             for call in forbidden:
                 self.assertNotIn(call, block.text, f"{block.heading!r} uses {call}, which Windows PowerShell lacks")
 
+    def test_no_block_ends_by_opening_an_interactive_session(self) -> None:
+        """A block that launches the OMP TUI cannot be followed by 'run these in the same
+        process'; interactive launches live in prose, blocks stay non-interactive (EXP-032)."""
+        for block in documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8")):
+            for line in block.text.splitlines():
+                stripped = line.strip()
+                if "omp.cmd" in stripped and "--model" in stripped:
+                    self.assertTrue(" -p " in stripped or stripped.endswith("`"),
+                                    f"{block.heading!r} opens an interactive OMP session inside a block: {stripped}")
+
     def test_variant_blocks_select_the_lane(self) -> None:
         self.assertIn("git clone --branch", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)
         self.assertIn("'rtx4090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 1).text)
