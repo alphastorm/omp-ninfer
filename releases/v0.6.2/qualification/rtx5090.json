@@ -72,7 +72,11 @@
       "completion_tokens_per_second_wall": 132.53,
       "candidate_reference": 133.3,
       "v051_reference": 133.13,
-      "workload": "technical-writing generation at temperature 0 on the published image"
+      "workload": "technical-writing generation at temperature 0 on the published image",
+      "decode_tokens_per_second": 137.7,
+      "server_decode_seconds": 14.873,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24
     },
     "agent_protocol": {
       "status": "passed",

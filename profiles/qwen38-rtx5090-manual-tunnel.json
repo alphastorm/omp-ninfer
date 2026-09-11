@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.6.1",
+  "release": "v0.6.2",
   "status": "public",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
@@ -36,7 +36,7 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.5.1",
+    "deployment_profile": "qwen38-5090-v0.6.2",
     "container_network_mode": "host",
     "restart_policy": "no",
     "arguments": [
@@ -47,13 +47,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "71edc2f69e63a61346d469d64a0a4596529a6d15888b6475abd19c511e53dc6b",
+      "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
-      "efacac2366136b70ffd9af7c282bc0ace71a0d6b845e2e489acab0f3ae151e1a",
+      "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
       "--deployment-profile",
-      "qwen38-5090-v0.5.1",
+      "qwen38-5090-v0.6.2",
       "--max-context",
       "131072",
       "--kv-capacity",

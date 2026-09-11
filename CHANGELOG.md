@@ -7,21 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-09-11
+
+All three lanes now serve from one runtime tree. The RTX 5090 container lane moves off the
+branch head it had served from since v0.4.4 onto the mainline runtime at `63f28c95` - the commit
+the RTX 4090 lane shipped as v0.6.1 and the RTX 3090 mainline candidate builds from. The runtime
+component `v0.6.2-qwen38-5090-beta.1` (server binary `6ab904d7`, archive `05aa9c4b`, image
+`a62dd5b8`) carries deployment profile `qwen38-5090-v0.6.2` (configuration `5eb8a557`) with the
+v0.4.8 argument set unchanged: BF16 KV, MTP3, prefill chunk 1,024, 131,072-token context, four
+device-state slots, 24 host-state slots, eight private continuations. The RTX 4090 component,
+the RTX 3090 component, their profiles, and the OMP client are byte-identical to v0.6.1.
+Composed external-installation acceptance ran on 2026-09-11 from the published URLs
+([receipt](releases/v0.6.2/acceptance/composed-external-installation.json)); the RTX 3090
+mainline candidate still ships separately when its host returns.
+
+### Changed
+
+- `scripts/verify_release.py` admits the `v0.6.2` RTX 5090 runtime tag.
+- The documented public install path for the native Windows lanes is completable as written:
+  the RTX 4090/3090 section derives every installer input from the ready manifest (including the
+  mandatory state root and the model artifact it passes), names each lane's request model id and
+  `18082` endpoint, ships `examples/windows-native/models.fragment.yml`, documents
+  `Control-Release.ps1` `Status`/`Start`/`Stop`/`Restart` including after a reboot, and runs its
+  own text/tool, stateful and fail-closed acceptance. The macOS route states the `PATH` the
+  installer uses and names an image file that exists; troubleshooting points at the lane's own
+  status and last-stop record.
+
 ### Measured
 
-- EXP-030: the RTX 5090 container lane's mainline candidate - runtime fork `63f28c95`, the
-  commit both native Windows lanes now ship - passes 7/7 of the lane's gates on the owner
-  appliance under the unchanged v0.5.1 context-cache arguments: exact 130,048-token retrieval
-  at 2,144 tok/s wall, 133.3 tok/s decode, the agent protocol across a restart, 8/8 sibling
-  forks on the shared anchor at 57.9K and 67.7K templates before and after a restart, warm
-  arrival in both orders, and a 5.2 GB restore in 3.6-4.0 s with a flipped payload byte refused.
-  Within run-to-run noise of v0.5.1 (2,180 / 133.1 / 3.8-4.4 s). Built on the appliance's
-  canonical route with 11/11 focused suites; the full 102-test suite ran first on an ephemeral
-  RunPod RTX PRO 4000 (Blackwell, sm_120a) at 101/102 - the one failure is a small-SM-count
-  artefact of the cooperative fall-through the port added for Ada (alphastorm/ninfer#42). The
-  component is staged for the founder-only cut and not yet published; no release is cut
-  ([receipt](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)).
-- `scripts/verify_release.py` admits the `v0.6.2` RTX 5090 runtime tag.
+- EXP-030: the RTX 5090 mainline candidate passes 7/7 of the lane's gates on the owner
+  appliance under the unchanged argument set - exact 130,048-token retrieval, 8/8 sibling forks
+  on the shared anchor at 57.9K and 67.7K templates before and after a verified restart, warm
+  arrival hot in both orders, and a 5.2 GB session restored in 3.6-4.0 s with a flipped payload
+  byte refused ([receipt](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)). Every
+  gate a published artifact can answer was then re-run against the image pulled anonymously by
+  digest: 2,169.9 tok/s prefill, 132.53 tok/s decode, the agent protocol across a restart
+  ([receipt](docs/measurements/2026-09-11-rtx5090-v062-public-image-gates.json)). Both are
+  within run-to-run noise of v0.5.1 (2,180.3 / 133.13 / 3.8-4.4 s), which is what the shared
+  tree had to produce.
+- The full 102-test suite ran on an ephemeral RunPod RTX PRO 4000 (Blackwell, `sm_120a`) before
+  the appliance window, so the owner rig's GPU time went only to gates.
 - The runtime fork's GDN gating workspace query sizes what the current device resolves
   ([ninfer#42](https://github.com/alphastorm/ninfer/issues/42), fixed in `29caaf34`): it had
   sized every route at its preferred cooperative split, so a device whose resident-CTA budget
@@ -29,9 +54,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   over-provisioned, never unsafe, and latent on the three shipped SM counts. Proven on the
   pod class that found it: 101/102 at `63f28c95`, 102/102 at `29caaf34`
   ([receipt](docs/measurements/2026-09-11-runpod-ci-small-sm-29caaf34.json)); RTX 4090
-  103/103 unchanged. Not in any shipped component; it rides the next runtime cut.
+  103/103 unchanged. Not in this release's bytes; it rides the next runtime cut.
 - `scripts/run_runpod_ci.py` probes the built server's identity only when the requested target
   set built it, so a focused kernel-test run no longer records a passing suite as a failed run.
+- Recorded appliance fault, closed with an invariant: `docker start` brought the production
+  container up with no network attachment at all - `docker ps` read `Up` and the server logged
+  that it was listening, while `NetworkSettings.Networks` was empty and no host port was
+  published - and neither `restart` nor `stop`+`start` repaired it. The container was recreated
+  from its own promote path with no state loss (all lane state is in bind mounts). The
+  acceptance window's restore path now asserts a published port and recreates the incumbent
+  when a start comes up network-less: a container-state check is not a restore check.
 
 ## [0.6.1] - 2026-09-10
 
@@ -805,7 +837,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.0...v0.5.1

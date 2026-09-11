@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.1`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.1` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.2`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.2` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,36 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.2 public release (three cards, one runtime tree)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.2`, GitHub `Latest`. The RTX 5090 container lane
+  moves onto the mainline runtime, so all three lanes are built from one commit (EXP-030).
+- RTX 5090 runtime component `ninfer@v0.6.2-qwen38-5090-beta.1` (runtime fork `63f28c95`,
+  archive `05aa9c4b...`, 319,416,469 bytes, server binary `6ab904d7...`, image `a62dd5b8...`),
+  deployment profile `qwen38-5090-v0.6.2` (configuration `5eb8a557...`): the v0.4.8 argument set
+  unchanged - BF16 KV, MTP3, prefill chunk 1,024, 131,072-token context, four device-state
+  slots, 24 host-state slots, eight private continuations. Qualified on the owner appliance
+  7/7 gates ([receipt](../releases/v0.6.2/qualification/rtx5090.json), EXP-030), then every gate
+  a published artifact can answer re-run against the anonymously pulled image.
+- The RTX 4090 component `v0.6.1-qwen38-4090-beta.1`, the RTX 3090 component
+  `v0.2.5-qwen38-3090-beta.1`, their profiles, and the OMP client are unchanged from v0.6.1 and
+  carry by hash. The RTX 3090 mainline candidate ships separately when its host returns.
+- Composed external-installation acceptance on 2026-09-11 from the published URLs
+  ([receipt](../releases/v0.6.2/acceptance/composed-external-installation.json)): all four RTX
+  5090 assets downloaded anonymously and hashed exactly, the closed checksum set matched, the
+  image pulled anonymously by digest with an empty credential store, and the lane's own
+  acceptance ([receipt](../releases/v0.6.2/acceptance/rtx5090-public-image.json)) matched the
+  served identity, refused anonymous status (401), completed exactly, held the lane's gates on
+  the published bytes, and restored the host.
+- Numbers are within run-to-run noise of v0.5.1: 2,169.9 tok/s prefill at 130,048 tokens,
+  132.53 tok/s decode, a 5.2 GB session restored in 3.6-4.0 s, 8/8 sibling forks on the shared
+  anchor across a verified restart.
+- Known limitations are v0.6.1's, unchanged. Sessions checkpointed under the v0.5.1 runtime
+  replay once from the OMP transcript on this upgrade: checkpoints bind the runtime fingerprint.
+
 ### v0.6.1 public release (a managed stop saves your session)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.1`, GitHub `Latest`. A managed stop of the RTX
+- Product release: `alphastorm/omp-ninfer@v0.6.1` (superseded by v0.6.2). A managed stop of the RTX
   4090 native lane now reaches the server's graceful shutdown (EXP-028, EXP-029).
 - RTX 4090 native component `ninfer@v0.6.1-qwen38-4090-beta.1` (runtime fork `63f28c95`,
   package `4390a8cb...`, 573,795,974 bytes, configuration `a938aaa1...`, server binary

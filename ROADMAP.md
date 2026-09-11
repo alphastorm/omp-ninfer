@@ -11,23 +11,25 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.1
+## Where this is now — v0.6.2
 
-All three lanes install from public URLs with durable, restart-resumable session state that now
-survives the machine losing its local copy (`scripts/checkpoint_sync.py`, origin-authenticated
-on every lane, EXP-018); the two native Windows lanes restore a checkpointed session in seconds rather than minutes (RTX 4090
-1.13 GB in 5.6 s, was 133-149 s; RTX 3090 1.68 GB in 10.7 s, was 92 s), and the
-RTX 5090 lane reuses a session's base prefill across sibling agent branches: four branches
-that replayed 67.7K tokens from scratch on v0.4.1 (148.7 s) run in 47.9 s, and a branch whose
-anchor is still device-resident starts generating in 0.40 s
-([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). As of `v0.5.1` that reuse
+All three lanes install from public URLs, and from `v0.6.2` all three are built from one runtime
+tree: the RTX 5090 container lane moved off the branch head it had served from since `v0.4.4`
+onto the mainline commit the native Windows lanes build from, requalified 7/7 on the owner
+appliance and re-verified against the image pulled anonymously by digest, with throughput and
+durability within run-to-run noise of `v0.5.1`
+([receipt](releases/v0.6.2/qualification/rtx5090.json), EXP-030). Session state is durable and
+restart-resumable on every lane and survives the machine losing its local copy
+(`scripts/checkpoint_sync.py`, origin-authenticated, EXP-018); the two native Windows lanes
+restore a checkpointed session in seconds rather than minutes (RTX 4090 1.13 GB in 5.6 s, was
+133-149 s; RTX 3090 1.68 GB in 10.7 s, was 92 s), and the RTX 5090 lane reuses a session's base
+prefill across sibling agent branches: four branches that replayed 67.7K tokens from scratch on
+v0.4.1 (148.7 s) run in under 6 s of forks today
+([receipts](docs/measurements/2026-08-31-fanout-probe-v043.json)). Since `v0.5.1` that reuse
 also survives a restart on the RTX 5090: a restored template serves every sibling fork on the
-shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.8 s instead of 24 s
-([receipt](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json)). The same runtime
-now serves both native Windows lanes from mainline as unreleased candidates that beat the
-installed releases on their own gates and bring the whole cache with them (EXP-025,
-[4090](docs/measurements/2026-09-08-rtx4090-mainline-profile-gates.json) ·
-[3090](docs/measurements/2026-09-08-rtx3090-mainline-profile-gates.json)). Details:
+shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.6-4.0 s instead of
+24 s ([receipt](docs/measurements/2026-09-10-restore-probe-rtx5090-v062.json)). A managed stop
+of the RTX 4090 lane saves every live session (EXP-028/EXP-029). Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
@@ -254,17 +256,19 @@ The 0.5 series is about one thing: a session stops being bound to the card that 
    hands the lifecycle back, which never existed while stops were terminations - and two rounds
    of independent focused review confirmed eight more, the worst being an installer that
    silently stripped the capability from every existing record. Three recurring classes are
-   closed with executable invariants. **The RTX 5090 lane's mainline candidate is qualified
-   (2026-09-10, EXP-030; uncut):** the same commit `63f28c95` built for the container lane holds
-   7/7 of that lane's gates on the owner appliance under the unchanged v0.5.1 context-cache
-   arguments - 2,144 tok/s prefill, 133.3 tok/s decode, 8/8 sibling forks on the shared anchor
-   at 57.9K and 67.7K before and after a restart, warm arrival in both orders, a 5.2 GB restore
-   in 3.6-4.0 s with a flipped byte refused - so all three lanes converge on one runtime tree.
-   Next: the founder-only cut publishes that component and `v0.6.2` follows the composed
-   acceptance; the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
+   closed with executable invariants. **The RTX 5090 lane's mainline candidate is qualified and
+   shipped as `v0.6.2` (2026-09-11, EXP-030):** the same commit `63f28c95` built for the
+   container lane holds 7/7 of that lane's gates on the owner appliance under the unchanged
+   v0.4.8 context-cache arguments - 8/8 sibling forks on the shared anchor at 57.9K and 67.7K
+   before and after a restart, warm arrival in both orders, a 5.2 GB restore in 3.6-4.0 s with a
+   flipped byte refused - and every gate a published artifact can answer was re-run against the
+   image pulled anonymously by digest (2,169.9 tok/s prefill, 132.53 tok/s decode, the agent
+   protocol across a restart), so all three lanes now serve from one runtime tree.
+   Next: the RTX 3090 lane waits for its host, expected about 2026-09-21, and ships separately
    ([EXP-028](docs/measurements/2026-09-10-native-managed-stop-flush.json) ·
    [EXP-029](docs/measurements/2026-09-10-rtx4090-graceful-stop-qualification.json) ·
-   [EXP-030](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)).
+   [EXP-030](docs/measurements/2026-09-10-rtx5090-v062-qualification.json) ·
+   [published image](docs/measurements/2026-09-11-rtx5090-v062-public-image-gates.json)).
    Receipts:
    [qualification](docs/measurements/2026-09-08-rtx5090-v051-qualification.json) ·
    [warm arrival](docs/measurements/2026-09-08-warm-arrival-rtx5090-candidate.json) ·
@@ -323,6 +327,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.2` | The RTX 5090 container lane on the mainline runtime: all three lanes built from one commit, requalified 7/7 on the owner appliance and re-verified against the anonymously pulled image, numbers within run-to-run noise of v0.5.1 |
 | `v0.6.1` | A managed stop of the RTX 4090 native lane saves every live session: the manager signals a per-launch named kernel event, the server flushes and reports, the controller records a stop that lost state; the capability lives in each release's record so a rollback to v0.6.0 still terminates |
 | `v0.6.0` | The RTX 4090 native lane on the mainline runtime: the RTX 5090's context-cache architecture built for Ada, requalified 15/15 through its own lifecycle tool |
 | `v0.4.8` | Each lane on its own best measured configuration: RTX 5090 context-cache profile (sibling forks keep the base anchor), RTX 4090 prefill chunk 2,048, RTX 3090 131,072-token context; every lane requalified on its rig and accepted from public URLs |

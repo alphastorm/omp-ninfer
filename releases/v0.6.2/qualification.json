@@ -23,7 +23,7 @@
   "composition": {
     "behavioral_qualification": {
       "repository_path": "releases/v0.6.2/qualification/rtx5090.json",
-      "sha256": "08489c6e6bff89184ca04b9c8b3acaa8d415c029f5cca1081d8a77fadd058153",
+      "sha256": "a3655b5799b7e56f695ba2841d78e89cb3b9210b0c067e65e60deaa759d8bfbf",
       "status": "passed",
       "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
       "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047"
@@ -67,7 +67,7 @@
     "external_installation_acceptance": {
       "status": "pending",
       "note": "rerun against the published v0.6.2-qwen38-5090-beta.1 component (image a62dd5b8) before the cut; the receipt lands at releases/v0.6.2/acceptance/composed-external-installation.json",
-      "sha256": "12eeb27ad463cea6794a09909d3bae74a32e90b7e8c36817a864f1c2782f191c"
+      "sha256": "1fffa93e431c84c5226b59f6dde40fbf615031bd3a02247c14674baa8c6c8839"
     }
   },
   "observed_gates": {

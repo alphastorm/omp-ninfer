@@ -120,6 +120,30 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.2 — the RTX 5090 lane on the mainline runtime (2026-09-11)
+
+The RTX 5090 container lane moved off the branch head it had served from since `v0.4.4` onto the
+mainline runtime at `63f28c95`, the commit the RTX 4090 lane shipped as `v0.6.1`, on the
+unchanged `v0.4.8` argument set; receipt in
+[`releases/v0.6.2/qualification/rtx5090.json`](../releases/v0.6.2/qualification/rtx5090.json).
+The RTX 4090 and RTX 3090 lanes are byte-identical to `v0.6.1` and carry their receipts.
+Experiment EXP-030.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 128K | **2,169.90 tok/s** prefill | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens on the published image, cold process, 58.4 s server prefill in 59.9 s wall (`v0.5.1`: 2,180.30 tok/s) |
+| RTX 5090 C1 | **137.70 tok/s** decode | server-side over 2,048 completion tokens at temperature 0 on the published image, 132.53 tok/s wall; MTP3, 41.20% acceptance, 2.24 tokens per round (`v0.5.1`: 138.16 tok/s server-side, 133.13 wall) |
+| RTX 5090 restore | **3.6 s / 4.0 s** for 5.2 GB | two verified restarts with exact planted-key retrieval; a flipped payload byte refused with `previous_response_not_found` and the generation quarantined (`v0.5.1`: 3.8 s / 4.4 s) |
+| RTX 5090 fanout | **8/8** at 57,853 and 67,717 tokens | hot fork medians 1.40 s and 1.53 s in one process; after a verified restart the resume takes 3.36 / 3.85 s and every fork stays on the shared anchor at ~1.4 s |
+| RTX 5090 warm arrival | hot in both orders | resume-first 4.39 s resume then forks at 2.88 s and 1.35 s; fork-first likewise hot; every resume quoted the planted keys exactly |
+| RTX 5090 agent protocol | **passed** | authenticated session identity, stateful continuation, two forks, deleted parent 404 before and after a restart, surviving descendant continued - on the published image and on the candidate |
+
+Same fixture and gate scripts as `v0.5.1`, one host, one day; owner measurement. Retrieval,
+decode and the protocol were measured against the image pulled anonymously by digest
+([published-image receipt](measurements/2026-09-11-rtx5090-v062-public-image-gates.json));
+fanout, warm arrival and restore were measured on the same bytes built on the appliance
+([EXP-030 receipt](measurements/2026-09-10-rtx5090-v062-qualification.json)).
+
 ### v0.6.1 — a managed stop saves your session (2026-09-10)
 
 The RTX 4090 lane requalified at runtime fork `63f28c95` through its own lifecycle tool, 15/15

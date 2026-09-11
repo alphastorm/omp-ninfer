@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-10 · Current stable release: **v0.6.1**
+Last verified: 2026-09-11 · Current stable release: **v0.6.2**
 
-Everything on this page is bound to the [v0.6.1 release manifest](../releases/v0.6.1/manifest.json)
+Everything on this page is bound to the [v0.6.2 release manifest](../releases/v0.6.2/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -42,9 +42,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.5.1 runtime under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.5.1`): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints |
-| RTX 4090 | native Windows service | 131,072 | v0.6.1-beta.1 lane on the mainline runtime (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session) |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.1) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.2 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.2`): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints |
+| RTX 4090 | native Windows service | 131,072 | v0.6.1-beta.1 lane on the mainline runtime (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.2 |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.2) |
 
 ## Current model and artifact
 
