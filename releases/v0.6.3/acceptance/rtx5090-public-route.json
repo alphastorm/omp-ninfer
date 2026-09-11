@@ -1,0 +1,99 @@
+{
+  "artifact_type": "omp_ninfer_public_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.3",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The documented public RTX 5090 container route, run as a stranger runs it: a clean clone of the product candidate commit on the owner appliance, `examples/manual-tunnel/start-ninfer.sh` with the model, key, log and checkpoint paths, and nothing else. The component is v0.6.2's published bytes, whose own anonymous public-URL acceptance ran on 2026-09-11 and carries by hash; what this receipt accepts is the route and the configuration it launches.",
+  "route_inputs": {
+    "qualification_commit": "73a9694bc470d5fe67fd6820a218985b914c27a1",
+    "files": [
+      {
+        "path": "examples/manual-tunnel/start-ninfer.sh",
+        "sha256": "18dd3ab0d555e0d052d419c7be5bcd63086474a5b0f6311ddcd620e86503a390",
+        "unchanged_at_this_release": true
+      },
+      {
+        "path": "examples/manual-tunnel/stop-ninfer.sh",
+        "sha256": "1dc32aab165e3c930c67eb87ac5d55a7e91f78839a11d4dc619d2834baa194d3",
+        "unchanged_at_this_release": true
+      },
+      {
+        "path": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+        "sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+        "unchanged_at_this_release": true
+      },
+      {
+        "path": "profiles/qwen38-rtx5090-manual-tunnel.json",
+        "sha256": "ee0ce32d54996838783fd623f16d2568ba3c7557cfdda2559a637d27f033e387",
+        "unchanged_at_this_release": true
+      },
+      {
+        "path": "profiles/qwen38-rtx5090-windows-docker-local.json",
+        "sha256": "b3a215597a8f27a5a23f71b6dc0598d00e45b6361f1143dfd39db09f0f27f3e0",
+        "unchanged_at_this_release": true
+      }
+    ],
+    "note": "every file the route reads hashes identically at the qualification commit and at this release, so the accepted route is the shipped route"
+  },
+  "component": {
+    "release_tag": "v0.6.2-qwen38-5090-beta.1",
+    "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+    "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+    "anonymous_public_url_acceptance": "releases/v0.6.2/acceptance/rtx5090-public-image.json"
+  },
+  "steps": {
+    "clean_clone_and_contract": {
+      "status": "passed",
+      "note": "a fresh clone of the candidate commit verified installable before anything ran (scripts/verify_release.py --require-installable)"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "pulled by digest with an empty Docker credential store; the returned digest equals the manifest's"
+    },
+    "gpu_reachable_from_the_pinned_image": {
+      "status": "passed",
+      "note": "the launcher's in-image probe reported the RTX 5090 with 32,607 MiB at compute capability 12.0; the host carries no nvidia-smi on PATH, which no longer blocks the route"
+    },
+    "published_loopback_endpoint": {
+      "status": "passed",
+      "note": "the container published 127.0.0.1:18089 to its own 8080 and answered from both the WSL2 distro and an SSH local forward; the pre-v0.6.3 host-network shape answered from neither"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "the launcher computed configuration identity 622ab621 for the configuration it was about to run, matched it against the profile's declaration and the manifest, and the authenticated status route then reported that identity with deployment profile qwen38-5090-v0.6.3, binary 6ab904d7, model eec39564 and source_dirty false"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "note": "anonymous /v1/ninfer/status returned 401; the bearer key returned 200"
+    },
+    "text_and_tool": {
+      "status": "passed",
+      "note": "exact 130,048-token retrieval (ORCHID=493817; COLOR=COBALT) at 2,160.6 tok/s and 2,048-token decode at 131.1 tok/s wall on this route"
+    },
+    "durable_session_across_a_process_death": {
+      "status": "passed",
+      "note": "a session was saved explicitly through POST /v1/ninfer/checkpoints (316,830,738 bytes in 1.301 s), the container was stopped in full - the store then held 48 files and 1,742,569,436 bytes at mode 700 owned by the invoking user - started again (25.53 s to ready), and the continuation returned the planted marker exactly in 1.174 s with 122 cached input tokens"
+    },
+    "restore_and_refusal": {
+      "status": "passed",
+      "note": "a 5.2 GB session restored in 3.9 s and 3.7 s across two verified restarts with exact planted-key retrieval, and a flipped payload byte was refused with previous_response_not_found"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "a deleted parent refuses 404 while the surviving descendant continues, before and after a restart"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "the appliance's production lane serves again from its pinned v0.5.1 image with its published port, its restart policy restored, and its checkpoints preserved"
+    }
+  },
+  "predecessor_comparison": {
+    "note": "the same sequence on v0.6.2's store configuration, same host and same published image",
+    "explicit_save_http_status": 404,
+    "continuation_after_restart_http_status": 404,
+    "served_configuration_identity": "5eb8a557 (the checkpointed configuration's identity, declared by a configuration without a store)"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

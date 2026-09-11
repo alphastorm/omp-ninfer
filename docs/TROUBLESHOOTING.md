@@ -75,21 +75,22 @@ Common first failures are insufficient GPU memory, the NVIDIA runtime not being 
 mount/permission errors, or an identity mismatch. Do not restart unchanged input. Correct the named
 cause, stop the owned container, then start once.
 
-## The server listens but loopback is unreachable
+## The server logs that it is listening but the port is unreachable
 
-The launcher exits with `error: wsl-mirrored-loopback-unavailable` when the container logs
-`listening on http://127.0.0.1:18089` while the port stays unreachable from the invoking
-namespace. On Windows 11 + Docker Desktop WSL2 hosts this is WSL networking drift (for example
-after a WSL or Docker Desktop update): `.wslconfig` may still declare `networkingMode=mirrored`
-while the live VM no longer shares loopback, so a host-network container bind never surfaces on
-Windows or Ubuntu loopback.
+Fixed in `v0.6.3`, and worth knowing if you are on an older clone. Up to `v0.6.2` the launcher
+ran its container with `--network host` and the server bound `127.0.0.1:18089`. On Docker Desktop
+that namespace belongs to the engine VM, not to your machine: the server really is listening, and
+neither Windows nor the WSL2 distro can reach it. The launcher named this
+`wsl-mirrored-loopback-unavailable` and told you to run `wsl --shutdown` and restart Docker
+Desktop, which does not change the outcome - measured twice on the maintainer host on 2026-09-11,
+with a second host-network container reaching the same port from inside the VM
+([EXP-031](measurements/2026-09-11-rtx5090-public-route-qualification.json),
+[#15](https://github.com/alphastorm/omp-ninfer/issues/15)).
 
-1. From Windows run `wsl --shutdown`, start Docker Desktop, and wait for the engine.
-2. Rerun the launcher once. Do not change ports or bind addresses as a workaround; that would
-   diverge from the qualified profile identity.
-
-First observed post-release on the maintainer qualification host
-([#15](https://github.com/alphastorm/omp-ninfer/issues/15)).
+The route now publishes the container's port on the inference host's loopback, which is reachable
+from both. Update to the current release rather than changing ports or bind addresses by hand:
+the profile's identity covers them, and the launcher refuses a configuration that is not the one
+the release records.
 
 ## Docker credential helper fails over non-interactive SSH
 

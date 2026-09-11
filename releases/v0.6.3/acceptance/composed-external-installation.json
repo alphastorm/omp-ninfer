@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.3",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "route acceptance on the RTX 5090 container lane: the component bytes and runtime image are v0.6.2's, whose anonymous public-URL acceptance ran the same day and carries by hash, and the documented route was run end to end from a clean clone with the durable session store the release adds. The RTX 4090 native component and profile are byte-identical to v0.6.1 and the RTX 3090 component to v0.5.0; each carries its acceptance by hash.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "5561c584ee46f7f43465bea39649201f4553664a22f5056f643a190ba85705ee",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7 (same omp-18.0.9-cross-platform-beta-2 component). No component changed in this release: what changed is the configuration the documented public route launches and the identity it declares, and every observation below about it was measured on 2026-09-11 on that route.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "carried",
+      "note": "the RTX 5090 component's four assets hashed exactly from their public URLs on 2026-09-11 for v0.6.2 (releases/v0.6.2/acceptance/rtx5090-public-image.json); the URLs, bytes and hashes are unchanged in this release, and the RTX 4090 and RTX 3090 asset sets are unchanged from v0.6.1"
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "the published closed SHA256SUMS set still matches the manifest, and the repository-owned io_uring seccomp profile the route now mounts hashes to 3b7bf1e9, the same profile identity the runtime fork's lifecycle tool pins"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "re-pulled by digest with an empty Docker credential store at the start of the route window; the returned digest equals a62dd5b8"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "the route's launcher computed the configuration identity of what it launches (622ab621), refused to proceed unless the profile and manifest record it, and the authenticated status route then reported it under deployment profile qwen38-5090-v0.6.3. The predecessor route declared 5eb8a557 while running a configuration that hashes to 67c7cf97"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "note": "measured on the route: anonymous status 401, bearer 200"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "exact 130,048-token retrieval at 2,160.6 tok/s and 2,048-token decode at 131.1 tok/s on the route; RTX 4090 carried from v0.6.1"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "on the documented route a saved session survived a full container stop and returned its marker exactly with 122 cached input tokens 1.17 s after the server was back; a 5.2 GB session restored in 3.9 s and 3.7 s across two verified restarts. The predecessor route answered 404 to the save endpoint and 404 previous_response_not_found to the continuation"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "deleted parent 404 with the surviving descendant continuing, before and after a restart, and a flipped checkpoint payload byte refused; RTX 4090 refusals carry by hash"
+    },
+    "container_public_route": {
+      "status": "passed",
+      "receipt": "releases/v0.6.3/acceptance/rtx5090-public-route.json",
+      "sha256": "5b8b07eac129b58e0e5a2a1b8bfda7dcba7a94d0e0b53f6ba65b539babbfe5c7",
+      "summary": "clean clone -> installable contract -> anonymous digest pull -> in-image GPU probe -> computed identity accepted -> published loopback endpoint -> anonymous 401 -> exact retrieval and decode -> explicit save, full stop, restart, exact continuation -> 5 GB restore and tamper refusal -> host restored"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "the appliance's production lane serves again from its pinned v0.5.1 image with its published port and restart policy restored, its checkpoints preserved, and the lane supervisor's maintenance hold released"
+    }
+  }
+}
