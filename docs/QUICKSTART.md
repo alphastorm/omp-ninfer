@@ -189,10 +189,11 @@ if (-not (Test-Path $KeyDir)) {
 }
 $ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
 if (-not (Test-Path $ApiKeyFile)) {
+  # Windows PowerShell runs on .NET Framework: no RandomNumberGenerator.Fill or Convert.ToHexString.
   $Secret = [byte[]]::new(32)
-  [System.Security.Cryptography.RandomNumberGenerator]::Fill($Secret)
+  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($Secret)
   [IO.File]::WriteAllText($ApiKeyFile,
-    ([Convert]::ToHexString($Secret).ToLowerInvariant() + "`n"),
+    ([BitConverter]::ToString($Secret).Replace('-', '').ToLowerInvariant() + "`n"),
     [Text.UTF8Encoding]::new($false))
 }
 $ModelDir = Join-Path $env:ProgramData 'omp-ninfer-model'

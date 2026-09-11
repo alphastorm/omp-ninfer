@@ -93,8 +93,9 @@ foreach ($step in $manifest.steps) {
             & git -C omp-ninfer checkout -q $CloneOverride 2>$null
             Set-Location -LiteralPath omp-ninfer
             Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-            & py -3 scripts\verify_release.py --require-installable
-            if ($LASTEXITCODE -ne 0) { throw "candidate is not installable (exit $LASTEXITCODE)" }
+            $named = [regex]::Match([IO.File]::ReadAllText($path), '--branch (v[0-9][0-9.]*)').Groups[1].Value
+            & py -3 scripts\verify_release.py --release $named --require-installable
+            if ($LASTEXITCODE -ne 0) { throw "candidate $named is not installable (exit $LASTEXITCODE)" }
             $record.status = 'substituted'
             continue
         }

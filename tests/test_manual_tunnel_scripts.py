@@ -76,7 +76,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         # ... each produced before the call, from the manifest's own identities.
         self.assertIn("$Manifest.components.model.artifact_url", native)
         self.assertIn("$Manifest.components.model.artifact_sha256", native)
-        self.assertIn("RandomNumberGenerator]::Fill($Secret)", native)
+        self.assertIn("RandomNumberGenerator]::Create().GetBytes($Secret)", native)
         for state_root in ("qwen38-4090-native", "qwen38-3090-omp-v0.2"):
             self.assertIn(state_root, native)
         # The lifecycle surface a reader needs after a reboot, and the lane's own endpoint.

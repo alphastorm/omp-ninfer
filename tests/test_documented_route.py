@@ -54,6 +54,16 @@ class ExtractionTests(unittest.TestCase):
             self.assertFalse(missing, f"{step.slug} uses {sorted(missing)} before any block defines them")
             defined |= assigned
 
+    def test_windows_blocks_stay_within_windows_powershell(self) -> None:
+        """The Windows routes run in Windows PowerShell 5.1 on .NET Framework. These calls exist
+        only on .NET 5+ and failed the RTX 4090 route on a stock host (EXP-032)."""
+        forbidden = ("[Convert]::ToHexString", "RandomNumberGenerator]::Fill(", "[Convert]::FromHexString")
+        for block in documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8")):
+            if block.language != "powershell":
+                continue
+            for call in forbidden:
+                self.assertNotIn(call, block.text, f"{block.heading!r} uses {call}, which Windows PowerShell lacks")
+
     def test_variant_blocks_select_the_lane(self) -> None:
         self.assertIn("git clone --branch", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)
         self.assertIn("'rtx4090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 1).text)
