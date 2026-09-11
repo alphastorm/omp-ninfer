@@ -79,7 +79,7 @@
       "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_sha256": "a43cc3bbb79e6d881008a9107470aa44913cb89f58083078fc921bf506b751cf",
-      "public_url": null
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d02cc1000ce73f21eb987f0a56c87d27ad7f67aa/releases/v0.6.4/acceptance/composed-external-installation.json"
     }
   },
   "observed_gates": {
