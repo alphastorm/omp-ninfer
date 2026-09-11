@@ -65,7 +65,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             1
         ].split("## Managed macOS SSH qualified route", 1)[0]
         manifest = json.loads(
-            (ROOT / "releases" / "v0.6.3" / "manifest.json").read_text(encoding="utf-8")
+            (ROOT / "releases" / "v0.6.4" / "manifest.json").read_text(encoding="utf-8")
         )
         release = manifest["release"]
         self.assertIn(f"releases\\{release}\\manifest.json", native)

@@ -1,0 +1,6 @@
+# The release hash chain is over the bytes on disk: manifests, receipts, checksum sets and
+# profiles are verified by SHA-256 after checkout. No platform may rewrite them on the way out.
+# Git for Windows installs with core.autocrlf=true, which turned every checked-in receipt into
+# CRLF and failed `verify_release.py --require-ready` on a stock clone (EXP-032). Text diffs are
+# unaffected; only line-ending conversion is disabled.
+* -text

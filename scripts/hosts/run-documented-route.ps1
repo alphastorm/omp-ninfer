@@ -1,9 +1,10 @@
-#Requires -Version 5.1
 <#
 .SYNOPSIS
 Execute a documented route's PowerShell blocks exactly as the quickstart prints them.
 
 .DESCRIPTION
+Launch without -ExecutionPolicy Bypass, as text, so the host's real policy is what the route
+meets: powershell -NoProfile -Command "& ([scriptblock]::Create((Get-Content -Raw run-documented-route.ps1))) -Bundle ... -WorkDir ... -Receipt ..."
 Runs every step file of a bundle written by scripts/documented_route.py, in reading order, in
 this one PowerShell session - so variables one block defines ($VariantId, $StateRoot, $Provider,
 NINFER_NATIVE_API_KEY ...) are visible to the next, as they are for a reader pasting block after
@@ -15,17 +16,25 @@ exit states and error messages, never output.
 .PARAMETER Bundle
 Directory holding manifest.json and the NN-<slug>.ps1 step files.
 
-.PARAMETER Clone
-The product clone the blocks run from (the quickstart's "tagged product clone").
+.PARAMETER WorkDir
+The directory a reader starts in. A route whose first block clones the tag changes into the
+clone itself; the runner records the commit it ends up in.
 
 .PARAMETER Receipt
 Where to write the JSON receipt.
+
+.PARAMETER CloneOverride
+A commit to clone in place of the tag the route's clone-and-verify block names. Used only for
+the qualification run that precedes a cut - the tag is created from the commit this run
+accepts, so it cannot exist yet. The substituted step is recorded as such, verifies the
+candidate as installable rather than ready, and every other block runs verbatim.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$Bundle,
-    [Parameter(Mandatory = $true)][string]$Clone,
-    [Parameter(Mandatory = $true)][string]$Receipt
+    [Parameter(Mandatory = $true)][string]$WorkDir,
+    [Parameter(Mandatory = $true)][string]$Receipt,
+    [string]$CloneOverride = ''
 )
 
 Set-StrictMode -Version Latest
@@ -46,8 +55,7 @@ $result = [ordered]@{
     steps            = @()
     status           = 'running'
 }
-Set-Location -LiteralPath $Clone
-$result.clone_commit = (& git rev-parse HEAD 2>$null | Out-String).Trim()
+Set-Location -LiteralPath $WorkDir
 
 function Write-Receipt {
     $result.completed_utc = [DateTime]::UtcNow.ToString('o')
@@ -63,7 +71,7 @@ foreach ($step in $manifest.steps) {
         position = [int]$step.position; slug = [string]$step.slug; heading = [string]$step.heading
         index = [int]$step.index; block_sha256 = [string]$step.sha256; executed_sha256 = $actual
         started_utc = [DateTime]::UtcNow.ToString('o'); status = 'skipped'; elapsed_seconds = 0.0
-        error = $null
+        error = $null; substitution = $null
     }
     if ($failed) {
         $result.steps += $record
@@ -79,8 +87,21 @@ foreach ($step in $manifest.steps) {
     $stopwatch = [Diagnostics.Stopwatch]::StartNew()
     try {
         Write-Host ("== step {0}: {1} ({2} [{3}])" -f $step.position, $step.slug, $step.heading, $step.index)
-        # Dot-source so the block's variables persist into the next block, as in a reader's shell.
-        . $path
+        if ($CloneOverride -and [string]$step.slug -eq 'clone-and-verify') {
+            $record.substitution = "cloned commit $CloneOverride in place of the tag this run's acceptance creates; verified as installable, not ready"
+            & git clone -q https://github.com/alphastorm/omp-ninfer.git omp-ninfer 2>$null
+            & git -C omp-ninfer checkout -q $CloneOverride 2>$null
+            Set-Location -LiteralPath omp-ninfer
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+            & py -3 scripts\verify_release.py --require-installable
+            if ($LASTEXITCODE -ne 0) { throw "candidate is not installable (exit $LASTEXITCODE)" }
+            $record.status = 'substituted'
+            continue
+        }
+        # Run the block as pasted text in this scope: its variables persist into the next block, and
+        # the machine's execution policy applies exactly where it applies for a reader - to the
+        # .ps1 files the block itself invokes, never to the pasted commands.
+        Invoke-Expression ([IO.File]::ReadAllText($path, [Text.UTF8Encoding]::new($false)))
         # A block that ends on a native command with a non-zero exit is a failed step too.
         if ((Test-Path variable:LASTEXITCODE) -and $LASTEXITCODE -ne 0) {
             throw "block ended with native exit code $LASTEXITCODE"
@@ -98,6 +119,7 @@ foreach ($step in $manifest.steps) {
     }
 }
 $result.status = if ($failed) { 'failed' } else { 'passed' }
+if (Test-Path -LiteralPath '.git') { $result.clone_commit = (& git rev-parse HEAD 2>$null | Out-String).Trim() }
 Write-Receipt
 Write-Host ("route {0}: {1}" -f $result.lane, $result.status)
 if ($failed) { exit 1 }

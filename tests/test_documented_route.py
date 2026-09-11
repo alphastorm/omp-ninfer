@@ -55,8 +55,9 @@ class ExtractionTests(unittest.TestCase):
             defined |= assigned
 
     def test_variant_blocks_select_the_lane(self) -> None:
-        self.assertIn("'rtx4090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)
-        self.assertIn("'rtx3090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 1).text)
+        self.assertIn("git clone --branch", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)
+        self.assertIn("'rtx4090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 1).text)
+        self.assertIn("'rtx3090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 2).text)
 
 
 class RunnerTests(unittest.TestCase):

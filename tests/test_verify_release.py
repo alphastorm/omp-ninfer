@@ -127,6 +127,24 @@ class ReleaseContractTest(unittest.TestCase):
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
+    def test_a_checkout_that_rewrote_line_endings_is_named_as_the_cause(self) -> None:
+        """Git for Windows checks out with core.autocrlf=true by default; the hash chain then
+        fails everywhere. The reader must be told the cause, once, before the mismatches."""
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases" / "v0.6.3"
+        for path in release.rglob("*.json"):
+            path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(errors)
+        self.assertIn("rewritten to CRLF at checkout (git core.autocrlf)", errors[0])
+        self.assertIn("core.autocrlf=false", errors[0])
+
+    def test_repository_pins_checkout_bytes_on_every_platform(self) -> None:
+        attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+        rules = [line.split() for line in attributes if line and not line.startswith("#")]
+        self.assertIn(["*", "-text"], rules)
+
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)

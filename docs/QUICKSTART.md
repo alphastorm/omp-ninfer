@@ -21,7 +21,7 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The ready `v0.6.3` public release connects native Windows OMP over authenticated local loopback
+The ready `v0.6.4` public release connects native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
@@ -48,22 +48,28 @@ model, configuration, qualification summary, and clean-install acceptance receip
 
 - Windows 11 x64 and a single NVIDIA GeForce RTX 5090;
 - Docker Desktop using Linux containers, WSL2 Ubuntu 24.04, and the NVIDIA container runtime;
-- Git, PowerShell, and at least 40 GiB free for the model, image, client, and logs; and
+- Git, PowerShell, Python 3 from python.org (its `py` launcher; the `python3` name Windows
+  ships is a Microsoft Store shortcut, not Python), and at least 40 GiB free for the model,
+  image, client, and logs; and
 - one trusted owner for Windows and the WSL2 runtime.
 
 ### Clone and verify the exact product release
 
-Clone the tag in Windows and in the WSL2 namespace that owns Docker:
+Clone the tag in Windows and in the WSL2 namespace that owns Docker. Windows ships with script
+execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pinned scripts for
+this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.6.3 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.6.4 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
-python3 scripts/verify_release.py --require-ready
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+py -3 scripts\verify_release.py --require-ready
 ```
 
 ### Install the exact native Windows client
 
 ```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $Url = 'https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-windows-x64.tar.gz'
 $Expected = '0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-18.0.9-windows-x64.tar.gz
@@ -98,8 +104,20 @@ Its component-release slot is
 That URL must resolve at release cut; the ready product manifest remains authoritative for every
 download URL and hash.
 
-Start from an elevated PowerShell in the tagged product clone (`git clone --branch v0.6.3
---depth 1 https://github.com/alphastorm/omp-ninfer.git`, then `Set-Location omp-ninfer`).
+Prerequisites: Windows 11 x64, the matching single GPU with a current driver, Git, PowerShell,
+Python 3 from python.org (its `py` launcher; the `python3` name Windows ships is a Microsoft
+Store shortcut, not Python), and at least 40 GiB free. Install the OMP client first with
+**Install the exact native Windows client** above; the lane's own steps follow. Start from an
+elevated PowerShell. Windows ships with script execution disabled; the `Set-ExecutionPolicy`
+line enables the release's hash-pinned scripts for this window only and changes nothing on the
+machine - repeat it in any new window that runs one:
+
+```powershell
+git clone --branch v0.6.4 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+Set-Location omp-ninfer
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+py -3 scripts\verify_release.py --require-ready
+```
 
 Each lane has its own installed state root, its own served request model id, and one shared
 loopback port. These values are the lane's, not interchangeable:
@@ -125,8 +143,9 @@ $VariantId = 'rtx3090-windows-native'
 Then let the manifest supply every URL and hash:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.6.3\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.6.4\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -224,14 +243,17 @@ MTP3 profile. Structured JSON-schema output remains unsupported and fails closed
 ### Operate the native lane
 
 The installed controller is the only supported lifecycle surface, and every action needs the
-lane's state root. Run these from an elevated PowerShell:
+lane's state root. Run these in the window that installed the lane; in a new elevated window,
+first set `$StateRoot` to the lane's state root from the table above. `-Action Restart` does the
+stop and the start in one step:
 
 ```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $Controller = Join-Path $StateRoot 'Control-Release.ps1'
-& $Controller -Action Status -StateRoot $StateRoot   # authenticated identity and endpoint state
-& $Controller -Action Start -StateRoot $StateRoot    # after a reboot, or after a deliberate stop
+& $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
 & $Controller -Action Stop -StateRoot $StateRoot     # saves every live session, then exits
-& $Controller -Action Restart -StateRoot $StateRoot
+& $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
+& $Controller -Action Status -StateRoot $StateRoot
 ```
 
 `Status` is the success criterion: it must report the installed release id, the served binary and
@@ -326,7 +348,7 @@ owner.
 From the public release tag, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.6.3 --depth 1 \
+git clone --branch v0.6.4 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -368,11 +390,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.3/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.6.4/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.3/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.6.4/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.3/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.6.4/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 curl --fail --location --continue-at - --output "$MODEL" "$MODEL_URL"

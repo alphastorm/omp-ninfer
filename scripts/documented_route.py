@@ -54,11 +54,13 @@ class Step:
 # The documented routes, as a reader meets them. Every step is a fenced block in the quickstart;
 # prose between blocks (clone the tag, open an elevated shell) is the runner's precondition.
 LANES: dict[str, tuple[Step, ...]] = {
-    # RTX 4090 native Windows: the OMP client, then the lane section top to bottom.
+    # RTX 4090 native Windows: the OMP client, then the lane section top to bottom. The lane's
+    # first block clones the tag and changes into it; the runner starts in the parent directory.
     "rtx4090-native": (
         Step("client-install", "Install the exact native Windows client"),
-        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 0),
-        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 2),
+        Step("clone-and-verify", "Native Windows RTX 4090 and RTX 3090 release lanes", 0),
+        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 1),
+        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 3),
         Step("operate", "Operate the native lane"),
         Step("provider", "Point OMP at the native lane"),
         Step("acceptance", "Native lane acceptance"),
@@ -66,8 +68,9 @@ LANES: dict[str, tuple[Step, ...]] = {
     # RTX 3090 native Windows: identical route, the other variant id.
     "rtx3090-native": (
         Step("client-install", "Install the exact native Windows client"),
-        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 1),
-        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 2),
+        Step("clone-and-verify", "Native Windows RTX 4090 and RTX 3090 release lanes", 0),
+        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 2),
+        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 3),
         Step("operate", "Operate the native lane"),
         Step("provider", "Point OMP at the native lane"),
         Step("acceptance", "Native lane acceptance"),
@@ -79,6 +82,7 @@ LANES: dict[str, tuple[Step, ...]] = {
     ),
     # RTX 5090 container, native Windows OMP client half (the quickstart's primary row).
     "rtx5090-windows-client": (
+        Step("clone-and-verify", "Clone and verify the exact product release"),
         Step("client-install", "Install the exact native Windows client"),
         Step("provider", "Native Windows OMP"),
         Step("acceptance", "Native Windows command forms", 0),

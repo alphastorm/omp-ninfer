@@ -1030,6 +1030,30 @@ def validate(
     manifest_path = root / "releases" / selected_release / "manifest.json"
     manifest = load_json(manifest_path)
     errors: list[str] = []
+    # A clone whose checkout rewrote line endings (Git for Windows installs with
+    # core.autocrlf=true) fails every hash in the chain at once; name that cause first, as one
+    # actionable error, instead of leaving a reader with a page of mismatches (EXP-032). The
+    # signature is exact: the file's CRLF->LF bytes hash to a value the chain records while its
+    # actual bytes do not. Receipts checked in with CRLF hash as checked in and are not flagged.
+    recorded = set()
+    for name in ("manifest.json", "qualification.json", "compatibility.json"):
+        candidate = manifest_path.parent / name
+        if candidate.is_file():
+            recorded.update(re.findall(r"[0-9a-f]{64}", candidate.read_text(encoding="utf-8", errors="replace")))
+    rewritten = []
+    for path in sorted(manifest_path.parent.rglob("*.json")):
+        data = path.read_bytes()
+        if b"\r\n" not in data or hashlib.sha256(data).hexdigest() in recorded:
+            continue
+        if hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest() in recorded:
+            rewritten.append(str(path.relative_to(root)))
+    if rewritten:
+        errors.append(
+            f"{len(rewritten)} release file(s) were rewritten to CRLF at checkout (git"
+            " core.autocrlf), so their bytes no longer match the recorded hashes; clone a tag"
+            " that carries the repository's .gitattributes, or re-clone with"
+            f" core.autocrlf=false - first: {rewritten[0]}"
+        )
 
     require(manifest.get("schema_version") == 1, "manifest schema_version must be 1", errors)
     release = manifest.get("release")
