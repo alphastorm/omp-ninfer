@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Execute a documented route's shell blocks exactly as the quickstart prints them.
+#
+# Runs every step file of a bundle written by scripts/documented_route.py, in reading order, in
+# this one shell - so variables one block defines (ROOT, STATE, LOGS, CHECKPOINTS, MODEL ...) are
+# visible to the next, as they are for a reader pasting block after block into one terminal.
+# Each step's bytes are hashed before execution and compared with the bundle manifest; the first
+# failing command ends the run (fail-closed), and the receipt records every step's outcome either
+# way. The receipt carries hashes, timings, the failing command and its exit status, never output.
+#
+#   run-documented-route.sh BUNDLE CLONE RECEIPT
+set -eE -o pipefail
+BUNDLE=$1; CLONE=$2; RECEIPT=$3
+MANIFEST="$BUNDLE/manifest.json"
+cd -- "$CLONE"
+CLONE_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
+STARTED=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+RECORDS=()
+STATUS=running
+CURRENT_POSITION=0; CURRENT_SLUG=; CURRENT_HEADING=; CURRENT_INDEX=0; CURRENT_SHA=; CURRENT_T0=0
+
+record() {  # position slug heading index expected actual status elapsed error
+  RECORDS+=("$(python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps({"position":int(a[0]),"slug":a[1],"heading":a[2],"index":int(a[3]),"block_sha256":a[4],"executed_sha256":a[5],"status":a[6],"elapsed_seconds":float(a[7]),"error":(a[8] or None)}))' "$@")")
+}
+
+write_receipt() {
+  python3 - "$RECEIPT" "$MANIFEST" "$CLONE_COMMIT" "$STARTED" "$STATUS" "${RECORDS[@]}" <<'PY'
+import json, sys, datetime, pathlib
+receipt, manifest_path, commit, started, status, *records = sys.argv[1:]
+manifest = json.load(open(manifest_path))
+release = pathlib.Path("/etc/os-release")
+host_os = ""
+if release.is_file():
+    for line in release.read_text().splitlines():
+        if line.startswith("PRETTY_NAME="):
+            host_os = line.split("=", 1)[1].strip().strip('"')
+out = {
+    "artifact_type": "omp_ninfer_documented_route_run", "schema_version": 1,
+    "lane": manifest["lane"], "document": manifest["document"],
+    "document_sha256": manifest["document_sha256"], "started_utc": started,
+    "completed_utc": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "host_os": host_os, "clone_commit": commit,
+    "steps": [json.loads(r) for r in records], "status": status,
+}
+with open(receipt, "w") as handle:
+    json.dump(out, handle, indent=2); handle.write("\n")
+PY
+}
+
+elapsed() { python3 -c "import time; print(round(time.time() - $CURRENT_T0, 3))"; }
+
+on_error() {
+  local rc=$? cmd=$BASH_COMMAND
+  trap - ERR
+  record "$CURRENT_POSITION" "$CURRENT_SLUG" "$CURRENT_HEADING" "$CURRENT_INDEX" "$CURRENT_SHA" "$CURRENT_SHA" failed "$(elapsed)" "command failed with exit $rc: $cmd"
+  while IFS=$'\t' read -r position slug heading index sha file; do
+    if (( position > CURRENT_POSITION )); then
+      record "$position" "$slug" "$heading" "$index" "$sha" "$(sha256sum -- "$BUNDLE/$file" | cut -d ' ' -f 1)" skipped 0 ""
+    fi
+  done < <(steps)
+  STATUS=failed
+  write_receipt
+  echo "route $(lane): failed at step $CURRENT_POSITION ($CURRENT_SLUG)" >&2
+  exit 1
+}
+
+steps() {
+  python3 -c '
+import json, sys
+for s in json.load(open(sys.argv[1]))["steps"]:
+    print("\t".join([str(s["position"]), s["slug"], s["heading"], str(s["index"]), s["sha256"], s["file"]]))' "$MANIFEST"
+}
+lane() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["lane"])' "$MANIFEST"; }
+
+trap on_error ERR
+while IFS=$'\t' read -r position slug heading index sha file; do
+  path="$BUNDLE/$file"
+  actual=$(sha256sum -- "$path" | cut -d ' ' -f 1)
+  if [[ "$actual" != "$sha" ]]; then
+    record "$position" "$slug" "$heading" "$index" "$sha" "$actual" refused 0 "step file bytes do not match the documented block"
+    STATUS=failed; write_receipt; echo "route $(lane): refused step $position" >&2; exit 1
+  fi
+  CURRENT_POSITION=$position; CURRENT_SLUG=$slug; CURRENT_HEADING=$heading; CURRENT_INDEX=$index; CURRENT_SHA=$sha
+  CURRENT_T0=$(python3 -c 'import time; print(time.time())')
+  echo "== step $position: $slug ($heading [$index])"
+  # Source in this shell: the block's variables persist to the next block, and the ERR trap
+  # above turns its first failing command into the recorded failure.
+  . "$path"
+  record "$position" "$slug" "$heading" "$index" "$sha" "$actual" passed "$(elapsed)" ""
+  write_receipt
+done < <(steps)
+trap - ERR
+STATUS=passed
+write_receipt
+echo "route $(lane): passed"
