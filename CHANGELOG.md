@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   component is staged for the founder-only cut and not yet published; no release is cut
   ([receipt](docs/measurements/2026-09-10-rtx5090-v062-qualification.json)).
 - `scripts/verify_release.py` admits the `v0.6.2` RTX 5090 runtime tag.
+- The runtime fork's GDN gating workspace query sizes what the current device resolves
+  ([ninfer#42](https://github.com/alphastorm/ninfer/issues/42), fixed in `29caaf34`): it had
+  sized every route at its preferred cooperative split, so a device whose resident-CTA budget
+  makes that split fall through executed with a smaller high-water than the query declared -
+  over-provisioned, never unsafe, and latent on the three shipped SM counts. Proven on the
+  pod class that found it: 101/102 at `63f28c95`, 102/102 at `29caaf34`
+  ([receipt](docs/measurements/2026-09-11-runpod-ci-small-sm-29caaf34.json)); RTX 4090
+  103/103 unchanged. Not in any shipped component; it rides the next runtime cut.
+- `scripts/run_runpod_ci.py` probes the built server's identity only when the requested target
+  set built it, so a focused kernel-test run no longer records a passing suite as a failed run.
 
 ## [0.6.1] - 2026-09-10
 
