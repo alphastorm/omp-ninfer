@@ -66,13 +66,26 @@ class ExtractionTests(unittest.TestCase):
 
     def test_no_block_ends_by_opening_an_interactive_session(self) -> None:
         """A block that launches the OMP TUI cannot be followed by 'run these in the same
-        process'; interactive launches live in prose, blocks stay non-interactive (EXP-032)."""
+        process' and cannot be checked by a reader's shell; interactive launches live in prose,
+        blocks stay non-interactive on every platform (EXP-032)."""
+        import re
+        launch = re.compile(r"(?:^|[\s&;(])(?:omp|\$Launcher|& \"\$env:LOCALAPPDATA\\\\OMP\\\\omp\.cmd\")\s")
         for block in documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8")):
-            for line in block.text.splitlines():
-                stripped = line.strip()
-                if "omp.cmd" in stripped and "--model" in stripped:
-                    self.assertTrue(" -p " in stripped or stripped.endswith("`"),
-                                    f"{block.heading!r} opens an interactive OMP session inside a block: {stripped}")
+            if block.language not in ("sh", "powershell"):
+                continue
+            joined = " ".join(line.strip().rstrip("\\`") for line in block.text.splitlines())
+            for command in re.split(r"[;|]|&&|\|\|", joined):
+                if "--model" in command and ("omp " in command or "omp.cmd" in command or "$Launcher" in command):
+                    self.assertIn(" -p", command, f"{block.heading!r} opens an interactive OMP session inside a block: {command.strip()[:120]}")
+
+    def test_macos_acceptance_blocks_test_their_own_outcome(self) -> None:
+        """Every macOS acceptance block ends with a shell test of what the turn produced, so a
+        reader (and the runner) gets pass/fail from the shell, not from reading model prose."""
+        for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, "rtx5090-macos-client"):
+            if step.slug in ("tool", "vision", "resume", "survives-restart"):
+                self.assertRegex(block.text, r"(grep -q|test -s)", f"{step.slug} has no shell-checkable outcome")
+            if step.slug == "fail-closed":
+                self.assertIn("unexpectedly succeeded", block.text)
 
     def test_variant_blocks_select_the_lane(self) -> None:
         self.assertIn("git clone --branch", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)

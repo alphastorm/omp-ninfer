@@ -80,6 +80,22 @@ LANES: dict[str, tuple[Step, ...]] = {
         Step("prepare", "3. Prepare the model and key on the inference host", 0, "sh"),
         Step("start", "4. Start NInfer on the inference host", 0, "sh"),
     ),
+    # RTX 5090 container, macOS client half (the quickstart's managed-SSH route). The tunnel
+    # block is a foreground process a reader keeps open in another terminal; the runner opens it
+    # the same way in the background and records the substitution. The survival block's host
+    # restart runs verbatim over the reader's SSH destination.
+    "rtx5090-macos-client": (
+        Step("client-install", "2. Install the OMP beta on the Mac", 0, "sh"),
+        Step("tunnel", "5. Open the tunnel from the Mac", 0, "sh"),
+        Step("key", "6. Install the same key on the Mac", 0, "sh"),
+        Step("provider", "7. Add the OMP provider", 0, "sh"),
+        Step("fail-closed-config", "7. Add the OMP provider", 2, "sh"),
+        Step("tool", "Text and tool turn", 0, "sh"),
+        Step("vision", "Image input", 0, "sh"),
+        Step("resume", "Stateful follow-up and OMP resume", 0, "sh"),
+        Step("survives-restart", "Session survives the server process", 0, "sh"),
+        Step("fail-closed", "Fail closed", 0, "sh"),
+    ),
     # RTX 5090 container, native Windows OMP client half (the quickstart's primary row).
     "rtx5090-windows-client": (
         Step("clone-and-verify", "Clone and verify the exact product release"),

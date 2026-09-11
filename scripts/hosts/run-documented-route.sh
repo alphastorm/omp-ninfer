@@ -9,8 +9,16 @@
 # way. The receipt carries hashes, timings, the failing command and its exit status, never output.
 #
 #   run-documented-route.sh BUNDLE CLONE RECEIPT
+#
+# Two reader actions have no verbatim form for a runner and are recorded as substitutions: the
+# placeholder SSH destination `USER@RUNTIME_HOST` is replaced by ROUTE_SSH_DESTINATION when set,
+# and a block whose only command is a foreground tunnel (`open-tunnel.sh`) is started in the
+# background and stopped before a block whose heading is "Fail closed" - which is exactly what
+# the prose tells the reader to do with Ctrl-C.
 set -eE -o pipefail
 BUNDLE=$1; CLONE=$2; RECEIPT=$3
+TUNNEL_PID=""
+SUBSTITUTIONS=()
 MANIFEST="$BUNDLE/manifest.json"
 cd -- "$CLONE"
 CLONE_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
@@ -19,8 +27,8 @@ RECORDS=()
 STATUS=running
 CURRENT_POSITION=0; CURRENT_SLUG=; CURRENT_HEADING=; CURRENT_INDEX=0; CURRENT_SHA=; CURRENT_T0=0
 
-record() {  # position slug heading index expected actual status elapsed error
-  RECORDS+=("$(python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps({"position":int(a[0]),"slug":a[1],"heading":a[2],"index":int(a[3]),"block_sha256":a[4],"executed_sha256":a[5],"status":a[6],"elapsed_seconds":float(a[7]),"error":(a[8] or None)}))' "$@")")
+record() {  # position slug heading index expected actual status elapsed error [substitution]
+  RECORDS+=("$(python3 -c 'import json,sys; a=sys.argv[1:]; print(json.dumps({"position":int(a[0]),"slug":a[1],"heading":a[2],"index":int(a[3]),"block_sha256":a[4],"executed_sha256":a[5],"status":a[6],"elapsed_seconds":float(a[7]),"error":(a[8] or None),"substitution":(a[9] if len(a) > 9 and a[9] else None)}))' "$@")")
 }
 
 write_receipt() {
@@ -83,13 +91,39 @@ while IFS=$'\t' read -r position slug heading index sha file; do
   CURRENT_POSITION=$position; CURRENT_SLUG=$slug; CURRENT_HEADING=$heading; CURRENT_INDEX=$index; CURRENT_SHA=$sha
   CURRENT_T0=$(python3 -c 'import time; print(time.time())')
   echo "== step $position: $slug ($heading [$index])"
-  # Source in this shell: the block's variables persist to the next block, and the ERR trap
-  # above turns its first failing command into the recorded failure.
-  . "$path"
-  record "$position" "$slug" "$heading" "$index" "$sha" "$actual" passed "$(elapsed)" ""
+  substitution=""
+  text=$(cat -- "$path")
+  if [[ -n ${ROUTE_SSH_DESTINATION:-} && $text == *USER@RUNTIME_HOST* ]]; then
+    text=${text//USER@RUNTIME_HOST/$ROUTE_SSH_DESTINATION}
+    substitution="USER@RUNTIME_HOST replaced by the operator's SSH destination"
+  fi
+  if [[ $heading == "Fail closed" && -n $TUNNEL_PID ]]; then
+    kill "$TUNNEL_PID" 2>/dev/null; wait "$TUNNEL_PID" 2>/dev/null || true; TUNNEL_PID=""
+    substitution="${substitution:+$substitution; }tunnel stopped before this block, as the prose instructs"
+  fi
+  if [[ $text == *open-tunnel.sh* ]]; then
+    # a foreground process the reader keeps open in another terminal
+    ( cd "$CLONE" && eval "$text" ) & TUNNEL_PID=$!
+    for _ in $(seq 1 30); do sleep 1; kill -0 "$TUNNEL_PID" 2>/dev/null || break; python3 - <<'PY' && break
+import socket, sys
+s = socket.socket(); s.settimeout(1)
+try: s.connect(("127.0.0.1", 18089))
+except OSError: sys.exit(1)
+finally: s.close()
+PY
+    done
+    kill -0 "$TUNNEL_PID" 2>/dev/null || { false; }
+    substitution="${substitution:+$substitution; }foreground tunnel started in the background and kept open"
+  else
+    # Evaluate in this shell: the block's variables persist to the next block, and the ERR trap
+    # above turns its first failing command into the recorded failure.
+    eval "$text"
+  fi
+  record "$position" "$slug" "$heading" "$index" "$sha" "$actual" passed "$(elapsed)" "" "$substitution"
   write_receipt
 done < <(steps)
 trap - ERR
+[[ -n $TUNNEL_PID ]] && { kill "$TUNNEL_PID" 2>/dev/null; wait "$TUNNEL_PID" 2>/dev/null || true; }
 STATUS=passed
 write_receipt
 echo "route $(lane): passed"

@@ -599,86 +599,93 @@ request is a release failure. Restart NInfer with section 4 only after observing
 
 ### macOS/Linux command forms
 
+Run these in one terminal on the Mac, with the tunnel from section 5 open in another. Every check
+is a `-p` (print) turn, so it exits on its own; the shell tests the outcome, and `set -e` stops
+the sequence at the first failure.
+
 ### Text and tool turn
 
 ```sh
+set -e
 SMOKE=$(mktemp -d)
 printf 'OMP_NINFER_TOOL_OK\n' > "$SMOKE/marker.txt"
 cd "$SMOKE"
-omp --model ninfer-beta/local-max \
-  "Use a file-reading tool to read marker.txt, then report its exact single line."
+omp -p --no-session --auto-approve --model ninfer-beta/local-max \
+  "Use a file-reading tool to read marker.txt, then report its exact single line." \
+  | tee "$SMOKE/tool.txt"
+grep -q OMP_NINFER_TOOL_OK "$SMOKE/tool.txt"
 ```
 
-The turn must use the local model and successfully execute the file-reading tool. Model wording is
-not a numerical oracle; the observed tool result is the contract.
+The turn must use the local model and execute the file-reading tool; the `grep` is the contract,
+not the model's wording around it.
 
 ### Image input
 
-The previous step left you in an empty scratch directory, so name a file that exists - the
-release clone ships one:
+The release clone ships a non-sensitive image; adjust the path to your clone:
 
 ```sh
-omp --model ninfer-beta/local-max \
-  @"$HOME/omp-ninfer/assets/icon-512.png" "Describe the visible image in one sentence."
+omp -p --no-session --auto-approve --model ninfer-beta/local-max \
+  @"$HOME/omp-ninfer/assets/icon-512.png" "Describe the visible image in one sentence." \
+  | tee "$SMOKE/vision.txt"
+test -s "$SMOKE/vision.txt"
 ```
 
-Adjust the path to your clone, or use any non-sensitive PNG or JPEG. A completed response proves
-the configured Vision route is reachable; this check belongs to the RTX 5090 container lane only.
-Do not use private screenshots in an issue.
+A completed response proves the configured Vision route is reachable; this check belongs to the
+RTX 5090 container lane only. Do not use private screenshots in an issue.
 
 ### Stateful follow-up and OMP resume
 
-Start an interactive session:
-
 ```sh
-omp --model ninfer-beta/local-max \
-  "Remember the nonce COBALT-493817 for my next turn."
+omp -p --auto-approve --session-dir "$SMOKE/sessions" --model ninfer-beta/local-max \
+  "Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly."
+omp -p --auto-approve --session-dir "$SMOKE/sessions" --continue \
+  "Return only the nonce from the prior turn." | tee "$SMOKE/resume.txt"
+grep -q COBALT-493817 "$SMOKE/resume.txt"
 ```
 
-In the same session, ask for the nonce. Exit OMP normally, then resume that session:
-
-```sh
-omp --model ninfer-beta/local-max --continue \
-  "Return the nonce from the prior turn."
-```
-
-The transcript remains authoritative. This checks ordinary OMP exit/resume with NInfer stateful
-Responses while the NInfer process is alive; the next check covers the process dying.
+The transcript remains authoritative. This checks OMP exit and resume with NInfer stateful
+Responses while the server process stays up; the next check takes it down.
 
 ### Session survives the server process
 
-With the session from the previous check still in place, save it explicitly, take the server all
-the way down, bring it back, and continue:
+A session is written to the durable store automatically once it passes 32,768 frontier tokens,
+or on an explicit `POST /v1/ninfer/checkpoints` for its session digest. OMP derives that digest
+from its own session identity, so this check uses the automatic path: it seeds a session past
+the gate with the release's own documentation, restarts the server container on the inference
+host, and continues.
 
 ```sh
-# on the inference host
-KEY=$(cat "$STATE/api-key")
-SESSION=$(printf 'omp-ninfer-quickstart' | sha256sum | cut -d ' ' -f 1)
-curl --fail --silent --show-error -X POST http://127.0.0.1:18089/v1/ninfer/checkpoints \
-  -H "Authorization: Bearer $KEY" -H 'Content-Type: application/json' \
-  -d "{\"session_sha256\": \"$SESSION\"}"
-docker stop --timeout 60 omp-ninfer-beta
-docker start omp-ninfer-beta
+cat "$HOME/omp-ninfer/docs/BENCHMARKS.md" "$HOME/omp-ninfer/README.md" \
+    "$HOME/omp-ninfer/docs/ARCHITECTURE.md" "$HOME/omp-ninfer/docs/PERFORMANCE.md" \
+    "$HOME/omp-ninfer/CHANGELOG.md" > "$SMOKE/context.md"
+omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/local-max \
+  @"$SMOKE/context.md" "Hold this material in context. Remember the nonce COBALT-493817. Reply OK only."
+ssh USER@RUNTIME_HOST 'docker restart --timeout 60 omp-ninfer-beta && sleep 30'
+omp -p --auto-approve --session-dir "$SMOKE/durable" --continue \
+  "Return only the nonce I asked you to remember." | tee "$SMOKE/durable.txt"
+grep -q COBALT-493817 "$SMOKE/durable.txt"
 ```
 
-Then, from the Mac once the server answers again, ask for the nonce in that same OMP session. It
-comes back from the restored generation: the RTX 5090 lane restores a 5 GB session in 3.6-4.0 s
-and a small one in about a second, and a checkpoint whose payload was altered is refused rather
-than served ([EXP-031](measurements/2026-09-11-rtx5090-public-route-qualification.json)). A crash
-or a power loss still loses whatever was never saved.
+Use the SSH destination from section 5. The nonce comes back from the restored generation - the
+RTX 5090 lane restores a 5 GB session in 3.6-4.0 s and a small one in about a second - and a
+checkpoint whose payload was altered is refused rather than served
+([EXP-031](measurements/2026-09-11-rtx5090-public-route-qualification.json)). A session below
+the gate that was never saved explicitly, a crash, or a power loss still loses what was never
+written.
 
 ### Fail closed
 
-For the managed macOS route, stop the tunnel with `Ctrl-C`, then run:
+Stop the tunnel with `Ctrl-C` in its terminal, then run:
 
 ```sh
-omp --no-session --max-time 20s \
-  --model ninfer-beta/local-max \
-  "Return LOCAL_ONLY."
+if omp -p --no-session --max-time 20s --model ninfer-beta/local-max "Return LOCAL_ONLY."; then
+  echo 'outage request unexpectedly succeeded' >&2; false
+fi
 ```
 
-Expected result: a connection failure and no model response. Any cloud-provider request is a release
-failure. Restart the tunnel only after observing the failure.
+Expected result: a connection failure and no model response, so the block ends without the
+message. Any cloud-provider request is a release failure. Restart the tunnel only after observing
+the failure.
 
 ## Fleet: three lanes in one OMP configuration
 
