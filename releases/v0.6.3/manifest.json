@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.6.3",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
