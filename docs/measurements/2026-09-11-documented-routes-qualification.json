@@ -497,5 +497,56 @@
     "rtx5090-container-host": "the 18 GB artifact was hard-linked to the documented path before the run so `curl --continue-at -` resumed at the end of a complete file; the block's byte-count and SHA-256 checks ran on the bytes. The route's Hugging Face download path itself was exercised on the RTX 4090 host."
   },
   "hosts_restored": "RTX 4090: the lane installed by the documented route serves (v0.6.1 release, 22,814 MiB, lease held, model at the documented ProgramData path), so the host now runs exactly what a reader would. RTX 5090: production serves again from its pinned image with its published port and restart policy, the lane supervisor's hold released, the owner's OMP configuration restored.",
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "post_cut_verbatim_run": {
+    "note": "after the v0.6.4 tag existed, the RTX 4090 route ran again with no substitution: its own clone-and-verify block cloned `--branch v0.6.4` on Windows and `verify_release.py --require-ready` reported the manifest ready from that stock clone - the .gitattributes doing its work - and every later block passed as documented",
+    "clone_commit": "2c4d70b0d1edb531f941919053d19da04a30bd7c",
+    "status": "passed",
+    "document_sha256": "d754ae453da2",
+    "steps": [
+      {
+        "slug": "client-install",
+        "status": "passed",
+        "elapsed_s": 43.696,
+        "block_sha256": "b0d59a866cc0"
+      },
+      {
+        "slug": "clone-and-verify",
+        "status": "passed",
+        "elapsed_s": 3.361,
+        "block_sha256": "698837d37e76"
+      },
+      {
+        "slug": "variant",
+        "status": "passed",
+        "elapsed_s": 0.002,
+        "block_sha256": "59aedbb7de8c"
+      },
+      {
+        "slug": "stage-and-install",
+        "status": "passed",
+        "elapsed_s": 331.642,
+        "block_sha256": "aa9d80918c80"
+      },
+      {
+        "slug": "operate",
+        "status": "passed",
+        "elapsed_s": 41.664,
+        "block_sha256": "e41b9fe53d7c"
+      },
+      {
+        "slug": "provider",
+        "status": "passed",
+        "elapsed_s": 0.009,
+        "block_sha256": "8c26859406d1"
+      },
+      {
+        "slug": "acceptance",
+        "status": "passed",
+        "elapsed_s": 66.919,
+        "block_sha256": "448bc30260e1"
+      }
+    ]
+  },
+  "shipped_as": "product release v0.6.4 (2026-09-11), GitHub Latest"
 }
