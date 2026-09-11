@@ -1,0 +1,183 @@
+{
+  "artifact_type": "omp_ninfer_public_route_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-031",
+  "generated_utc": "2026-09-11",
+  "status": "qualified",
+  "release": "v0.6.3",
+  "scope": "The documented public RTX 5090 container route only: examples/manual-tunnel/start-ninfer.sh run from a clean clone of the product candidate commit on the owner appliance, never the lifecycle tool. Component bytes are v0.6.2's and unchanged (image a62dd5b8, binary 6ab904d7); what advances is the configuration the route launches and the identity it declares. Production was stopped for the window and restored on close.",
+  "question": "Does the route a stranger actually runs deliver the product's claim - a coding session that survives the process - and does the identity its server echoes describe the configuration it is running?",
+  "answer": "Before this change: no to both, measured. The route mounted no checkpoint store, so the documented explicit-save endpoint answered 404 and a continuation after a container restart answered 404 previous_response_not_found - while the server echoed configuration identity 5eb8a557, the identity of the checkpointed configuration the lifecycle tool qualified. It was also unreachable: its host-network bind lives in the Docker Desktop engine VM, which neither the Ubuntu distro nor Windows can reach. After: the same sequence saves a 302 MB generation in 1.3 s, survives a full container stop with the store owned by the operator at mode 700, and returns the marker exactly with 122 cached input tokens 1.17 s after the server is back. The route now declares 622ab621, the identity of what it launches, and the launcher refuses to start under any other.",
+  "identity": {
+    "product_candidate_commit": "73a9694bc470d5fe67fd6820a218985b914c27a1",
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "configuration_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
+    "predecessor_configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+    "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+    "checkpoint_seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
+  },
+  "defects_found_and_fixed": [
+    {
+      "id": "public-route-has-no-durable-store",
+      "observation": "start-ninfer.sh mounted the model, key and log directory and passed no --session-checkpoint-dir, so the route ran with the store disabled. Reproduced on the appliance with v0.6.2's exact profile arguments against the published image: POST /v1/ninfer/checkpoints -> 404, and after a container restart the continuation -> 404 previous_response_not_found.",
+      "consequence": "The lane whose restore numbers headline the public documentation could not restore anything on the route the documentation tells a stranger to run. Both native Windows lanes and the appliance's own production already ran with the store enabled.",
+      "fix": "The launcher takes --checkpoint-dir, prepares it private to the invoking user, mounts it at /checkpoints under the repository-owned io_uring seccomp profile (pinned by hash), and the profiles carry --session-checkpoint-dir with the quota and staging bounds the qualified configuration uses.",
+      "proof": {
+        "red": {
+          "served_identity": {
+            "config_sha256": "5eb8a557327acabd",
+            "deployment_profile": "qwen38-5090-v0.6",
+            "binary_sha256": "6ab904d7c3d44f5b"
+          },
+          "seed": {
+            "id": "resp_cec7cb1b5e9aa8025014ff339180ec92",
+            "wall_s": 1.084
+          },
+          "explicit_save": {
+            "http_status": 404,
+            "body": ""
+          },
+          "ready_after_restart_s": 24.43,
+          "continuation": {
+            "http_status": 404,
+            "body": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_cec7cb1b5e9aa8025014ff339180ec92' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}"
+          }
+        },
+        "green": {
+          "session_sha256_prefix": "06756452ed47f065",
+          "seed": {
+            "id": "resp_d8f62637b62cddbfef963b525ade721c",
+            "wall_s": 0.866,
+            "input_tokens": 83
+          },
+          "explicit_save": {
+            "mode": "explicit",
+            "generation": "1789119280132-0",
+            "bytes": 316830738,
+            "wall_s": 1.301
+          },
+          "store_while_server_absent": {
+            "files": 48,
+            "bytes": 1742569436,
+            "mode_owner": "700 sunil"
+          },
+          "ready_after_stop_s": 25.53,
+          "continuation": {
+            "wall_s": 1.174,
+            "cached_input_tokens": 122,
+            "input_tokens": 150,
+            "marker_exact": true
+          },
+          "checkpoint_status_after": {
+            "state": "available",
+            "generation": "1789119285368-1",
+            "bytes": 316830738,
+            "response_records": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "declared-configuration-identity-was-not-the-launched-one",
+      "observation": "Both container profiles instructed the operator to pass --config-sha256 5eb8a557, which reproduces from the lifecycle tool only for a configuration with a checkpoint store; the configuration the launcher ran hashes to 67c7cf97. The server echoes the declared value, so a stranger's authenticated status route reported an identity matching the manifest while durability was off.",
+      "consequence": "A false public identity claim, and an acceptance step that could pass on a configuration never qualified.",
+      "fix": "scripts/verify_release.py computes the configuration identity of what a profile launches exactly as the runtime fork's lifecycle tool does; a ready release must record that value for every profile, and the launcher refuses to start when the computed, declared and recorded identities disagree. A cross-repository test vector pins the reimplementation to the appliance's 5eb8a557."
+    },
+    {
+      "id": "host-network-bind-is-unreachable-on-docker-desktop",
+      "observation": "The route ran its container with --network host and the server bound 127.0.0.1:18089. On Docker Desktop that namespace is the engine VM's: a second host-network container reached the port, while the Ubuntu distro and Windows both could not (Test-NetConnection False). The shipped recovery - wsl --shutdown, restart Docker Desktop - did not change it, run twice. The workaround recorded in omp-ninfer#15 (bridge networking with a published port) was the actual fix all along.",
+      "consequence": "Every operator on the ready route - the quickstart's primary Windows path - waits 900 s and gets a diagnosis naming the wrong cause.",
+      "fix": "The route is a bridge container publishing 127.0.0.1:18089 to the container's 8080, the profile records that shape, the verifier requires it, and the launcher's readiness loop reports a container that exited instead of blaming WSL networking."
+    },
+    {
+      "id": "launcher-required-nvidia-smi-on-the-host-path",
+      "observation": "A WSL2 distro reached over ssh has /usr/lib/wsl/lib off PATH, so the prerequisite loop failed with `required command not found: nvidia-smi` while Docker reached the GPU fine.",
+      "consequence": "The documented route refused to run on a correctly provisioned host.",
+      "fix": "The GPU is probed inside the pinned image (`docker run --gpus all --entrypoint nvidia-smi`), which is what actually has to work; the host prerequisite list drops it."
+    }
+  ],
+  "gates_on_the_fixed_route": {
+    "prefill_curve": {
+      "status": "passed",
+      "prompt_tokens": 130048,
+      "exact_output": true,
+      "tokens_per_second_wall": 2160.6,
+      "wall_s": 60.191
+    },
+    "decode": {
+      "completion_tokens": 2048,
+      "completion_tokens_per_second_wall": 131.1,
+      "decode_tokens_per_second": 137.51,
+      "mtp_acceptance_rate": 0.412
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true
+    },
+    "restore": {
+      "template_input_tokens": 67717,
+      "cold_prefill_s": 26.861,
+      "checkpoint_bytes": 5201400649,
+      "restore_0_wall_s": 3.943,
+      "restore_1_wall_s": 3.708,
+      "control_retrieval_exact": true,
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": true
+    },
+    "durable_continuation_across_a_full_stop": {
+      "session_sha256_prefix": "06756452ed47f065",
+      "seed": {
+        "id": "resp_d8f62637b62cddbfef963b525ade721c",
+        "wall_s": 0.866,
+        "input_tokens": 83
+      },
+      "explicit_save": {
+        "mode": "explicit",
+        "generation": "1789119280132-0",
+        "bytes": 316830738,
+        "wall_s": 1.301
+      },
+      "store_while_server_absent": {
+        "files": 48,
+        "bytes": 1742569436,
+        "mode_owner": "700 sunil"
+      },
+      "ready_after_stop_s": 25.53,
+      "continuation": {
+        "wall_s": 1.174,
+        "cached_input_tokens": 122,
+        "input_tokens": 150,
+        "marker_exact": true
+      },
+      "checkpoint_status_after": {
+        "state": "available",
+        "generation": "1789119285368-1",
+        "bytes": 316830738,
+        "response_records": 1
+      }
+    }
+  },
+  "operational_findings": [
+    {
+      "id": "lane-supervisor-restarts-production-into-a-window",
+      "observation": "The appliance's OMP-LaneContainerSupervisor scheduled task reconciles declared lane containers every five minutes and started production 4 minutes into the window (RestartCount 0, an explicit start at :02 past the five-minute boundary). Two 18 GB servers do not fit: the candidate was OOM-killed, and on the next cycle production was OOM-killed in turn.",
+      "resolution": "The supervisor already honours an admin-only pause marker; the window now takes that hold for its duration and releases it on close, and pins the incumbent's restart policy off while it runs. A window that fights a supervisor is a window that cannot hold."
+    },
+    {
+      "id": "docker-credential-helper-under-non-interactive-ssh",
+      "observation": "Docker Desktop's credential helper fails for anonymous public pulls over ssh (`docker-credential-desktop.exe: Invalid argument`), already recorded in docs/TROUBLESHOOTING.md.",
+      "resolution": "The window points DOCKER_CONFIG at an empty credential store, which is the documented workaround."
+    }
+  ],
+  "production_restored": "ninfer-5090-v051p serves again from its pinned v0.5.1 image (identity d956e6d6), published on port 18088, restart policy back to unless-stopped, supervisor hold released, checkpoints preserved.",
+  "raw_prompts_outputs_or_secrets_included": false
+}
