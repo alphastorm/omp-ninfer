@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-09-11
+
+The documented RTX 5090 container route mounts a durable session store. Until this release the
+published launcher passed no `--session-checkpoint-dir`, so on the route the quickstart tells a
+reader to run, `POST /v1/ninfer/checkpoints` answered 404 and a continuation after a container
+restart answered `previous_response_not_found` - while the server reported configuration identity
+`5eb8a557`, the identity of the checkpointed configuration qualified through the lifecycle tool.
+Both native Windows lanes and the maintainer's production already ran with the store enabled. No
+component changed: image `a62dd5b8`, binary `6ab904d7`, model and client are v0.6.2's bytes. The
+deployment profile advances to `qwen38-5090-v0.6.3` (configuration `622ab621`) because the
+configuration does. Route acceptance ran on 2026-09-11
+([receipt](releases/v0.6.3/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- `examples/manual-tunnel/start-ninfer.sh` takes `--checkpoint-dir`, prepares it private to the
+  invoking user, mounts it at `/checkpoints` under `examples/manual-tunnel/ninfer_io_uring_seccomp.json`
+  (pinned by hash, the same profile identity the runtime fork's lifecycle tool pins), and passes
+  the session-store arguments. It runs the container as the invoking uid/gid with `--cap-drop ALL`
+  and `no-new-privileges`, publishes the container port on the runtime host's `127.0.0.1:18089`
+  instead of binding a host network, and probes the GPU inside the pinned image so the host needs
+  no `nvidia-smi` on `PATH`.
+- Both container profiles record the published endpoint, the store mount, and the seccomp
+  identity, claim `process-restart-continuation`, and declare configuration `622ab621`.
+- `scripts/verify_release.py` computes the configuration identity a profile launches exactly as
+  the lifecycle tool does - pinned by a cross-repository test vector to the appliance's
+  `5eb8a557` - and a ready release must record that value for every profile. The launcher refuses
+  to start when the computed, declared and recorded identities disagree.
+- `docs/TROUBLESHOOTING.md` replaces the `wsl-mirrored-loopback-unavailable` entry: the cause was
+  never WSL networking drift, and `wsl --shutdown` never fixed it.
+
+### Measured
+
+- EXP-031: the documented route, run from a clean clone on the owner appliance, saved a session
+  explicitly (302 MB in 1.3 s), survived a full container stop with the store owned by the
+  operator at mode 700, came back in 25.5 s, and returned the planted marker exactly in 1.17 s
+  with 122 cached input tokens; 5.2 GB restored in 3.9 s and 3.7 s across two verified restarts
+  with a flipped payload byte refused; exact 130,048-token retrieval at 2,160.6 tok/s and
+  2,048-token decode at 131.1 tok/s; the agent-protocol battery across a restart. The same
+  sequence on the predecessor configuration answered 404 twice
+  ([receipt](docs/measurements/2026-09-11-rtx5090-public-route-qualification.json)).
+- Recorded appliance finding, closed by taking a hold instead of racing it: the lane supervisor
+  reconciles declared containers every five minutes and started production into the window, which
+  OOM-killed the candidate (two 18 GB servers do not fit) and then production in turn. The window
+  now takes the supervisor's admin-only maintenance hold for its duration and pins the incumbent's
+  restart policy off while it runs.
+
 ## [0.6.2] - 2026-09-11
 
 All three lanes now serve from one runtime tree. The RTX 5090 container lane moves off the
@@ -837,7 +884,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.5.1...v0.6.0

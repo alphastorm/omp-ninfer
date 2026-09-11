@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.2`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.2` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.3`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.3` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,35 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.3 public release (the documented route is durable)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.3`, GitHub `Latest`. The documented RTX 5090
+  container route mounts a durable session store, and the identity its server reports is the
+  identity of the configuration it runs (EXP-031).
+- No component changed. The RTX 5090 runtime `v0.6.2-qwen38-5090-beta.1` (image `a62dd5b8...`,
+  binary `6ab904d7...`), the RTX 4090 component `v0.6.1-qwen38-4090-beta.1`, the RTX 3090
+  component `v0.2.5-qwen38-3090-beta.1`, the model and the OMP client are byte-identical to
+  v0.6.2 and carry their receipts by hash.
+- Deployment profile `qwen38-5090-v0.6.3` (configuration `622ab621...`): the v0.4.8 tuning plus
+  the session store the published route now mounts at `/checkpoints`, under the repository's
+  io_uring seccomp profile.
+- What the predecessor route did instead, measured on the same host and bytes: `POST
+  /v1/ninfer/checkpoints` answered 404, a continuation after a container restart answered
+  `previous_response_not_found`, and the server reported configuration `5eb8a557` - the identity
+  of a checkpointed configuration it was not running. Its host-network bind was also unreachable
+  from both Windows and the WSL2 distro.
+- Route acceptance on 2026-09-11 from a clean clone
+  ([route receipt](../releases/v0.6.3/acceptance/rtx5090-public-route.json) ·
+  [composed](../releases/v0.6.3/acceptance/composed-external-installation.json)): explicit save
+  302 MB in 1.3 s, full container stop with the store intact and operator-owned, ready again in
+  25.5 s, continuation exact in 1.17 s with 122 cached input tokens, 5.2 GB restored in 3.9 s and
+  3.7 s, flipped payload byte refused, anonymous status 401, host restored.
+- Upgrading from v0.6.2: stop the old container and start the route with `--checkpoint-dir`.
+  Sessions on the old route were never saved, so there is nothing to migrate.
+
 ### v0.6.2 public release (three cards, one runtime tree)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.2`, GitHub `Latest`. The RTX 5090 container lane
+- Product release: `alphastorm/omp-ninfer@v0.6.2` (superseded by v0.6.3). The RTX 5090 container lane
   moves onto the mainline runtime, so all three lanes are built from one commit (EXP-030).
 - RTX 5090 runtime component `ninfer@v0.6.2-qwen38-5090-beta.1` (runtime fork `63f28c95`,
   archive `05aa9c4b...`, 319,416,469 bytes, server binary `6ab904d7...`, image `a62dd5b8...`),

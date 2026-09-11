@@ -120,6 +120,25 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.3 — the documented route, measured on the documented route (2026-09-11)
+
+No component changed; the configuration the published RTX 5090 launcher runs did. Every number
+below was measured on `examples/manual-tunnel/start-ninfer.sh` from a clean clone, not through the
+lifecycle tool; receipt in
+[`releases/v0.6.3/acceptance/rtx5090-public-route.json`](../releases/v0.6.3/acceptance/rtx5090-public-route.json).
+Experiment EXP-031.
+
+| Route / gate | Result | Detail |
+| --- | ---: | --- |
+| Session survives the server process | **1.17 s**, marker exact | explicitly saved (302 MB in 1.3 s), container stopped in full, restarted, continuation resolved with 122 cached input tokens 25.5 s after the server was back; the same sequence on the predecessor configuration answered 404 to the save and `previous_response_not_found` to the continuation |
+| 5 GB restore | **3.9 s / 3.7 s** | two verified restarts with exact planted-key retrieval; a flipped payload byte refused and the generation quarantined |
+| 128K retrieval | **2,160.6 tok/s** | exact `ORCHID=493817; COLOR=COBALT` at 130,048 prompt tokens, cold process |
+| Decode | **131.1 tok/s** wall | 2,048 completion tokens at temperature 0 |
+| Agent protocol | **passed** | authenticated session identity, stateful continuation, two forks, deleted parent 404 before and after a restart, surviving descendant continued |
+
+One host, one day; owner measurement on the route a reader runs. Within run-to-run noise of the
+lifecycle-tool measurements of the same bytes in v0.6.2 (2,169.9 tok/s, 132.53 tok/s, 3.998/3.625 s).
+
 ### v0.6.2 — the RTX 5090 lane on the mainline runtime (2026-09-11)
 
 The RTX 5090 container lane moved off the branch head it had served from since `v0.4.4` onto the

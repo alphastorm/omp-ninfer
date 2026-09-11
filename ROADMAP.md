@@ -11,9 +11,12 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.2
+## Where this is now — v0.6.3
 
-All three lanes install from public URLs, and from `v0.6.2` all three are built from one runtime
+All three lanes install from public URLs with a durable session store on the route the
+documentation gives you - from `v0.6.3` the published RTX 5090 launcher mounts one, which it did
+not before ([EXP-031](docs/measurements/2026-09-11-rtx5090-public-route-qualification.json)).
+From `v0.6.2` all three lanes are built from one runtime
 tree: the RTX 5090 container lane moved off the branch head it had served from since `v0.4.4`
 onto the mainline commit the native Windows lanes build from, requalified 7/7 on the owner
 appliance and re-verified against the image pulled anonymously by digest, with throughput and
@@ -327,6 +330,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.3` | The documented public RTX 5090 route mounts a durable session store and declares the identity of the configuration it runs; no component changed |
 | `v0.6.2` | The RTX 5090 container lane on the mainline runtime: all three lanes built from one commit, requalified 7/7 on the owner appliance and re-verified against the anonymously pulled image, numbers within run-to-run noise of v0.5.1 |
 | `v0.6.1` | A managed stop of the RTX 4090 native lane saves every live session: the manager signals a per-launch named kernel event, the server flushes and reports, the controller records a stop that lost state; the capability lives in each release's record so a rollback to v0.6.0 still terminates |
 | `v0.6.0` | The RTX 4090 native lane on the mainline runtime: the RTX 5090's context-cache architecture built for Ada, requalified 15/15 through its own lifecycle tool |

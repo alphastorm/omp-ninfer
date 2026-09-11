@@ -1,60 +1,63 @@
-# OMP NInfer v0.6.2 - three cards, one runtime tree
+# OMP NInfer v0.6.3 - your session survives the process on the route you actually run
 
-The RTX 5090 container lane moves onto the mainline runtime. Since v0.4.4 it served from a
-separate branch head while the two native Windows lanes were ported to mainline; from this
-release all three lanes are built from one commit. Nothing about how the lane is tuned changed -
-the same context-cache arguments, the same 131,072-token ceiling, the same numbers - and the
-RTX 4090 component, the RTX 3090 component, and the OMP client are byte-identical to v0.6.1 and
-carry their receipts.
+The documented RTX 5090 container route now mounts a durable session store. Until this release it
+did not: the launcher passed no `--session-checkpoint-dir`, so on the route the quickstart tells
+you to run, the explicit save endpoint answered 404 and a continuation after a container restart
+answered `previous_response_not_found` - while the server reported the configuration identity of
+the checkpointed configuration that had been qualified elsewhere. Both native Windows lanes and
+the maintainer's own production already ran with the store enabled; the published route did not.
+No component changed: the runtime image, server binary, model and client are v0.6.2's exact bytes.
 
 ## What changed
 
-- **RTX 5090 runtime `v0.6.2-qwen38-5090-beta.1`**
-  ([component](https://github.com/alphastorm/ninfer/releases/tag/v0.6.2-qwen38-5090-beta.1),
-  runtime fork `63f28c95`, server binary `6ab904d7...`, archive `05aa9c4b...`, 319,416,469
-  bytes; image `ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b8...` wrapped onto the same
-  digest-pinned base), under deployment profile `qwen38-5090-v0.6.2` (configuration
-  `5eb8a557...`): BF16 KV, MTP3, prefill chunk 1,024, 131,072-token context, four device-state
-  slots, 24 host-state slots, eight private continuations, one active request - the v0.4.8
-  argument set, unchanged.
-- **One tree for three cards.** `63f28c95` is the commit the RTX 4090 lane shipped as v0.6.1
-  and the RTX 3090 mainline candidate builds from. The container lane therefore now carries the
-  portability and lifecycle work done for Windows, and the native lanes carry the container
-  lane's context-cache architecture, from the same source.
-- **Requalified on the owner appliance, 7/7 gates** (EXP-030): exact 130,048-token retrieval at
-  2,169.9 tok/s, 2,048-token decode at 132.53 tok/s, the agent-protocol battery across a
-  restart, 8/8 sibling forks on the shared anchor at 57.9K and 67.7K templates before and after
-  a verified restart, warm arrival hot in both orders, and a 5.2 GB session restored in 3.6-4.0 s
-  with exact planted-key retrieval and a flipped payload byte refused. Within run-to-run noise
-  of v0.5.1 (2,180.3 tok/s prefill, 133.13 tok/s decode, 3.8/4.4 s restore).
-- **Acceptance on the published bytes.** Every release asset was downloaded anonymously and
-  hashed on a workstation, the image was pulled anonymously by digest with an empty credential
-  store, and the lane's own gate script then ran against that pulled image. The configuration
-  identity computed from the published image equals the qualified one, so the profile did not
-  drift between qualification and publication.
+- **The route is durable.** `examples/manual-tunnel/start-ninfer.sh` takes `--checkpoint-dir`,
+  prepares it private to you, mounts it at `/checkpoints` under the repository's io_uring seccomp
+  profile (pinned by hash), and passes the session-store arguments the qualified configuration
+  uses. Measured on the owner appliance: an explicitly saved session survived a full container
+  stop - the store held 48 files and 1.74 GB owned by the invoking user at mode 700 with no server
+  running - and the continuation returned its marker exactly in 1.17 s with 122 cached input
+  tokens, 25.5 s after the server came back. A 5.2 GB session restored in 3.9 s and 3.7 s across
+  two verified restarts, and a flipped payload byte was refused.
+- **The identity a server reports is the identity of what it is running.** Deployment profile
+  `qwen38-5090-v0.6.3`, configuration `622ab621...`. `scripts/verify_release.py` computes that
+  identity from the profile exactly as the runtime fork's lifecycle tool computes it, a ready
+  release must record it, and the launcher refuses to start when the computed, declared and
+  recorded values disagree.
+- **The route is reachable.** The container runs on a bridge network and publishes its port on the
+  inference host's `127.0.0.1:18089`. A `--network host` bind on Docker Desktop lives in the engine
+  VM: the server logs that it is listening and neither Windows nor the WSL2 distro can reach it.
+  That is what the old `wsl-mirrored-loopback-unavailable` diagnosis misattributed to WSL
+  networking drift; `wsl --shutdown` never fixed it.
+- **The route runs as you, with less.** Your own uid/gid, every capability dropped,
+  `no-new-privileges`, and the GPU probed inside the pinned image - so the host no longer needs
+  `nvidia-smi` on `PATH`, which a WSL2 distro reached over ssh does not have.
+- **The profiles say so.** Both container profiles now claim `process-restart-continuation` and
+  record the store mount and seccomp identity that make the claim true.
 
 ## Evidence route
 
-Lane receipt in `qualification/rtx5090.json`; the candidate window in
-`docs/measurements/2026-09-10-rtx5090-v062-qualification.json` with its fanout, warm-arrival and
-restore probes beside it; the published-image gates in
-`docs/measurements/2026-09-11-rtx5090-v062-public-image-gates.json`; the lane's public-URL
-acceptance in `acceptance/rtx5090-public-image.json`; the composed acceptance in
-`acceptance/composed-external-installation.json`. The RTX 4090 and RTX 3090 receipts are the
-v0.6.1 receipts for the unchanged components.
+`docs/measurements/2026-09-11-rtx5090-public-route-qualification.json` holds the window, including
+the same sequence measured on the predecessor configuration for comparison; the route's acceptance
+is in `acceptance/rtx5090-public-route.json` and the composed acceptance in
+`acceptance/composed-external-installation.json`. The component's own anonymous public-URL
+acceptance is v0.6.2's, unchanged and carried by hash.
+
+## Upgrading from v0.6.2
+
+Stop the old container with `examples/manual-tunnel/stop-ninfer.sh`, then start the new route with
+`--checkpoint-dir` pointing at a local directory you own. Sessions from the old route were never
+saved, so there is nothing to migrate; from here they are.
 
 ## Known limitations
 
-Unchanged from v0.6.1. A managed stop of the RTX 4090 native lane saves every live session; a
-crash, a power loss, or a stop whose graceful wait expires still loses what was never published,
-and the stop receipt records which happened. The RTX 3090 lane keeps the v0.2.5 behaviour - a
-managed stop terminates - until its mainline candidate ships. Sibling branches beyond the first
-re-materialize the shared base from host KV until shared-page fanout lands.
+Unchanged from v0.6.2 otherwise. A crash, a power loss, or a host reboot still loses whatever was
+never saved - automatically above 32,768 frontier tokens, or explicitly through
+`POST /v1/ninfer/checkpoints`. The RTX 3090 lane keeps the v0.2.5 behaviour, where a managed stop
+terminates, until its mainline candidate ships. Sibling branches beyond the first re-materialize
+the shared base from host KV.
 
 ## Support boundary
 
 Unchanged: one owner-operated machine per lane; one active request per qualified profile;
-loopback-only, bearer-authenticated, fail-closed. Checkpoints written by an older runtime
-fingerprint replay once from the OMP transcript - sessions saved under the v0.5.1 runtime do
-that on this upgrade. Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or
-NVIDIA.
+loopback-only, bearer-authenticated, fail-closed. Checkpoints bind the runtime fingerprint.
+Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
