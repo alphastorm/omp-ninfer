@@ -5,7 +5,7 @@
   "as_of": "2026-09-11",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image a62dd5b8 (runtime v0.6.2, source 63f28c95, binary 6ab904d7) under deployment profile qwen38-5090-v0.6.2 (configuration 5eb8a557); the RTX 4090 native package v0.6.1-beta.1 (runtime fork 63f28c95, the mainline runtime built for Ada, with the managed graceful stop); the RTX 3090 durable v0.2.5-beta.1 package (131,072-token context). All three lanes now serve from one runtime tree: the RTX 5090 container lane moved off its feat/warm-arrival branch head onto the mainline commit both native lanes build from, and was qualified on the owner appliance on 2026-09-10 (7/7 gates, EXP-030) and re-verified on 2026-09-11 against the published image pulled anonymously by digest. The RTX 4090 and RTX 3090 components, their profiles, and the OMP client are byte-identical to v0.6.1 and carry their receipts by hash. The RTX 3090 mainline candidate still ships separately when its host returns.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -65,9 +65,21 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.2-qwen38-5090-beta.1 component (image a62dd5b8) before the cut; the receipt lands at releases/v0.6.2/acceptance/composed-external-installation.json",
-      "sha256": "1fffa93e431c84c5226b59f6dde40fbf615031bd3a02247c14674baa8c6c8839"
+      "status": "passed",
+      "operator_class": "owner-operated tester-equivalent",
+      "repository_path": "releases/v0.6.2/acceptance/composed-external-installation.json",
+      "sha256": "1fffa93e431c84c5226b59f6dde40fbf615031bd3a02247c14674baa8c6c8839",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "94703c7636d04cf5c3ebdbd2c24790b7f97e651e415f009a8264ca820a69ea0b",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3b07cb2dd6b52d6541de6798efc3f185f8204119/releases/v0.6.2/acceptance/composed-external-installation.json"
     }
   },
   "observed_gates": {
@@ -146,7 +158,5 @@
     "The RTX 4090 and RTX 3090 components carry unchanged from v0.6.1 by hash; the RTX 4090's managed graceful stop and the RTX 3090's package are exactly the bytes that release qualified. The RTX 3090 mainline candidate ships separately when its host returns.",
     "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
   ],
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.2-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "remaining_release_gates": []
 }
