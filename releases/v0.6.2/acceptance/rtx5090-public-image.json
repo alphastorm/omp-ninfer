@@ -1,0 +1,69 @@
+{
+  "artifact_type": "omp_ninfer_public_image_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.2",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The RTX 5090 container lane, installed on the owner appliance from the published v0.6.2 URLs and nothing else: every release asset downloaded anonymously on the macOS workstation, the runtime image pulled anonymously by digest on the appliance with an empty Docker credential store, and the lane started through tools/lifecycle/ninfer_container.py against that pulled image with its four identities bound. Production (the v0.5.1 lane) was stopped for the window and restored on close.",
+  "component": {
+    "release_tag": "v0.6.2-qwen38-5090-beta.1",
+    "source_release_tag": "v0.6.2-qwen38-5090-source.1",
+    "runtime_release_tag": "v0.6.2-qwen38-5090-runtime-beta.1",
+    "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+    "base_image_digest": "sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+    "image_publication_workflow": "https://github.com/alphastorm/ninfer/actions/runs/34555976412",
+    "deployment_profile": "qwen38-5090-v0.6.2"
+  },
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "assets_downloaded_and_hashed_on_workstation": 4,
+      "assets_exact": 4,
+      "note": "the three v0.6.2-qwen38-5090-beta.1 assets (binary archive 319,416,469 bytes sha256 05aa9c4b, SBOM 1654ba29, SHA256SUMS) and the source release's runtime-source-63f28c95.tar.gz (5dc8abc9) were fetched from their public browser download URLs with no credentials and hashed on the macOS workstation; every hash matched the recorded value, and both members of the published closed SHA256SUMS set matched the bytes that set names"
+    },
+    "source_archive_provenance": {
+      "status": "passed",
+      "note": "the published runtime-source-63f28c95.tar.gz hashes to 5dc8abc9cc2f3fa65a91e822099d5414ed7df4f8a9ca74b5c63940a71672171b, byte-identical to `git archive --format=tar.gz 63f28c95` of the runtime fork on the workstation - the archive is the exact tree of the commit, not a re-roll"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "pulled on the appliance by digest with DOCKER_CONFIG pointed at an empty credential store after removing the local copy; the returned repo digest equals the requested a62dd5b8 digest, and hashing the image's own binaries gives ninfer-serve 6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047 and ninfer b9b54b7f567968b5b813ac55636cee9188f26c90f92340234f5f745f27b402cb - exactly the binaries qualified in EXP-030 and named by the manifest"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "the lifecycle tool refused nothing and started the pulled image with --expect-image-id, --expect-binary-sha256, --expect-model-artifact-sha256 and --expect-config-sha256 all bound; the authenticated status route then reported patch_stack_sha 63f28c95, upstream_base_sha 6e8b2e2a, binary 6ab904d7, model eec39564, configuration 5eb8a557, deployment profile qwen38-5090-v0.6.2, source_dirty false. The configuration identity computed from the published image's config file equals the one EXP-030 qualified, so the lane's configuration did not drift between qualification and publication"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "note": "an anonymous GET of /v1/ninfer/status returned 401; the same request with the bearer key returned 200"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "OpenAI-compatible chat completion through the authenticated route returned the exact requested marker ACCEPT-V062 in 6 completion tokens, 821.1 ms"
+    },
+    "qualified_gates_on_the_published_bytes": {
+      "status": "passed",
+      "note": "the lane's own gate script ran against the pulled image: exact 130,048-token retrieval (ORCHID=493817; COLOR=COBALT) at 2,169.9 tok/s wall, 2,048-token decode at 132.53 tok/s, and the agent-protocol battery - authenticated session identity, stateful continuation, two forks, parent DELETE 200, deleted continuation 404 previous_response_not_found before and after a restart, no resurrection, surviving descendant continued",
+      "receipt": "docs/measurements/2026-09-11-rtx5090-v062-public-image-gates.json",
+      "candidate_reference": "docs/measurements/2026-09-10-rtx5090-v062-qualification.json (2,144.1 tok/s, 133.3 tok/s on the same bytes built locally)"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "inside the agent-protocol gate the session was continued across a container restart of the published image: the post-restart request resolved the surviving descendant while the deleted parent stayed 404"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "production ninfer-5090-v051p serves again from the pinned v0.5.1 image with identity d956e6d6 / binary 71edc2f6 / profile qwen38-5090-v0.5.1, healthy 15 s after start, port 18088 published, 15 checkpoint sessions preserved in the bind mount, 600 W board limit unchanged. Closing the window first hit a Docker fault, recorded below; the shipped v0.6.2 bytes were not involved"
+    }
+  },
+  "incident_during_close": {
+    "observation": "the window's restore ran `docker start` on the production container, which came up with NetworkSettings.Networks {} and no published port while `docker ps` read Up and the server logged that it was listening; `docker restart` and `docker stop`+`docker start` did not repair it, and the daemon was healthy (a fresh --network bridge container received 172.17.0.2)",
+    "resolution": "the container was removed and recreated through its own promote path; all lane state lives in bind mounts, so nothing was lost and the served identity is unchanged",
+    "closure": "the acceptance window's restore path now asserts a non-empty `docker port` and recreates the incumbent from that promote path when a start comes up network-less; a container-state check is not a restore check",
+    "production_unavailability_minutes": 27
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

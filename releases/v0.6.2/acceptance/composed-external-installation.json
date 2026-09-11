@@ -1,0 +1,78 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.2",
+  "as_of": "2026-09-11",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "container public-URL install acceptance on the RTX 5090 lane against the newly published v0.6.2-qwen38-5090-beta.1 component and runtime image a62dd5b8; the RTX 4090 native component and profile are byte-identical to v0.6.1 and the RTX 3090 component to v0.5.0, and each carries its acceptance by hash",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "ea61d8565a617a7ea87ac09a53de8eb05e9b92fbe37d4ae345048c72f7d46579",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7 (same omp-18.0.9-cross-platform-beta-2 component); the only component that changed in this release is the RTX 5090 container runtime and its deployment profile, and every observation below about it was measured on 2026-09-11 against the published v0.6.2 assets and image",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "rtx5090_assets_downloaded_and_hashed_on_workstation": 4,
+      "rtx5090_assets_exact": 4,
+      "note": "the three v0.6.2-qwen38-5090-beta.1 assets (binary archive 319,416,469 bytes sha256 05aa9c4b, SBOM 1654ba29, SHA256SUMS) and the source release's runtime-source-63f28c95.tar.gz (5dc8abc9) were fetched from their public browser download URLs with no credentials on the macOS workstation and hashed exactly against the manifest; both members of the published closed SHA256SUMS set matched the bytes that set names. The RTX 4090 and RTX 3090 asset URLs are unchanged from v0.6.1, where all ten 4090 assets hashed exactly"
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "the published SHA256SUMS asset is the closed set for the archive and SBOM and matched the downloaded bytes; the published source archive is byte-identical to `git archive --format=tar.gz 63f28c95` of the runtime fork, so the source asset is the exact tree of the commit rather than a re-roll; the checked-in rtx4090/rtx3090 checksum sets are unchanged from v0.6.1"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "the local copy was removed and the image re-pulled by digest on the appliance with DOCKER_CONFIG pointed at an empty credential store; the returned repo digest equals the requested a62dd5b8, and the image's own binaries hash to ninfer-serve 6ab904d7 and ninfer b9b54b7f - exactly the binaries EXP-030 qualified and the manifest names"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "the RTX 5090 lane was started from the pulled image through tools/lifecycle/ninfer_container.py with image id, binary, model artifact and configuration identity bound; the authenticated status route reported patch_stack_sha 63f28c95, upstream_base_sha 6e8b2e2a, binary 6ab904d7, model eec39564, configuration 5eb8a557, profile qwen38-5090-v0.6.2, source_dirty false. The RTX 4090 lane's identity carries from v0.6.1 by hash"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "note": "measured on 2026-09-11 on the published RTX 5090 image: anonymous /v1/ninfer/status returned 401, the same request with the bearer key returned 200; RTX 4090 carried from v0.6.1"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "RTX 5090: OpenAI-compatible chat completion through the authenticated route on the published image returned the exact requested marker (6 completion tokens, 821.1 ms); RTX 4090: carried from v0.6.1 (unchanged component)"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "RTX 5090: the agent-protocol battery on the published image continued a session across a container restart - the surviving descendant resolved while the deleted parent stayed 404 - and the candidate window of the same bytes restored a 5.2 GB session in 3.6-4.0 s across two verified restarts with exact planted-key retrieval; RTX 4090: carried from v0.6.1"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "RTX 5090: on the published image a deleted parent refuses 404 previous_response_not_found while the surviving descendant continues, before and after a restart, and a flipped checkpoint payload byte is refused with the generation quarantined (candidate window, same bytes); RTX 4090: the v0.6.1 refusals carry by hash"
+    },
+    "container_public_install": {
+      "status": "passed",
+      "receipt": "releases/v0.6.2/acceptance/rtx5090-public-image.json",
+      "sha256": "53d6b808a6c355542884824de04f601526558d7a6c1e8485b8f265337282a027",
+      "summary": "public URLs -> closed checksum set exact -> anonymous digest pull -> lifecycle start with four identities bound -> served identity matches the manifest -> anonymous 401 -> authenticated completion exact -> the lane's own gates (exact 130,048-token retrieval at 2,169.9 tok/s, 132.53 tok/s decode, agent protocol across a restart)"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "the appliance's production lane (the v0.5.1 profile) was stopped for the window and serves again from its pinned image with identity d956e6d6 / binary 71edc2f6 / profile qwen38-5090-v0.5.1, healthy 15 s after start with its 15 checkpoint sessions preserved and the 600 W board limit unchanged; closing the window hit a Docker fault in which the incumbent started with no network attachment, recorded in the lane acceptance receipt and closed by making the restore path assert a published port. The RTX 4090 and RTX 3090 hosts were not touched"
+    }
+  }
+}
