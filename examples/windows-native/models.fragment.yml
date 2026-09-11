@@ -1,0 +1,51 @@
+providers:
+  ninfer-native-4090:
+    baseUrl: http://127.0.0.1:18082/v1
+    api: openai-responses
+    apiKey: NINFER_NATIVE_API_KEY
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-max
+        requestModelId: qwen3.8-27b
+        name: Qwen3.8 27B NInfer RTX 4090 native
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+        supportsTools: true
+        cost:
+          input: 0
+          output: 0
+          cacheRead: 0
+          cacheWrite: 0
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          ninferStatefulResponses: true
+  ninfer-native-3090:
+    baseUrl: http://127.0.0.1:18082/v1
+    api: openai-responses
+    apiKey: NINFER_NATIVE_API_KEY
+    authHeader: true
+    compat:
+      ninferStatefulResponses: true
+    models:
+      - id: local-max
+        requestModelId: q38-ninfer
+        name: Qwen3.8 27B NInfer RTX 3090 native
+        api: openai-responses
+        reasoning: true
+        input:
+          - text
+        supportsTools: true
+        cost:
+          input: 0
+          output: 0
+          cacheRead: 0
+          cacheWrite: 0
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          ninferStatefulResponses: true

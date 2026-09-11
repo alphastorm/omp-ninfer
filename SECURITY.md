@@ -8,7 +8,7 @@ deployments.
 
 | Version | Supported |
 | --- | --- |
-| latest published `0.3.x` release | yes |
+| the latest published release (GitHub `Latest`) and its exact manifest/profile | yes |
 | older releases | no |
 | `main` / draft manifests | no |
 

@@ -98,8 +98,19 @@ Its component-release slot is
 That URL must resolve at release cut; the ready product manifest remains authoritative for every
 download URL and hash.
 
-Start from an elevated PowerShell in the tagged product clone. Set `$VariantId` once for the
-matching GPU:
+Start from an elevated PowerShell in the tagged product clone (`git clone --branch v0.6.1
+--depth 1 https://github.com/alphastorm/omp-ninfer.git`, then `Set-Location omp-ninfer`).
+
+Each lane has its own installed state root, its own served request model id, and one shared
+loopback port. These values are the lane's, not interchangeable:
+
+| Variant id | Installed state root | Request model id | Endpoint |
+| --- | --- | --- | --- |
+| `rtx4090-windows-native` | `%ProgramData%\NInfer\qwen38-4090-native` | `qwen3.8-27b` | `http://127.0.0.1:18082/v1` |
+| `rtx3090-windows-native` | `%ProgramData%\NInfer\qwen38-3090-omp-v0.2` | `q38-ninfer` | `http://127.0.0.1:18082/v1` |
+
+Both native lanes are text and tools only: Vision belongs to the RTX 5090 container profile
+([`docs/FACTS.md`](FACTS.md)). Set `$VariantId` once for the matching GPU:
 
 ```powershell
 $VariantId = 'rtx4090-windows-native'
@@ -114,15 +125,21 @@ $VariantId = 'rtx3090-windows-native'
 Then let the manifest supply every URL and hash:
 
 ```powershell
-$Manifest = Get-Content .\releases\v0.3.2\manifest.json -Raw | ConvertFrom-Json
+$ErrorActionPreference = 'Stop'
+$Manifest = Get-Content .\releases\v0.6.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
 }
+$StateRootName = switch ($VariantId) {
+  'rtx4090-windows-native' { 'qwen38-4090-native' }
+  'rtx3090-windows-native' { 'qwen38-3090-omp-v0.2' }
+  default { throw 'unknown native variant' }
+}
+$StateRoot = Join-Path $env:ProgramData (Join-Path 'NInfer' $StateRootName)
 # Stage under ProgramData with an administrators-only ACL so no medium-integrity process
 # under the same account can swap bytes between verification and elevated execution. Every
 # step below is fail-closed: an ACL error stops the session before anything is downloaded.
-$ErrorActionPreference = 'Stop'
 $Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
 if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
 New-Item -ItemType Directory -Path $Stage | Out-Null
@@ -144,13 +161,36 @@ if (@($Applied.Access | Where-Object {
       @('S-1-5-32-544', 'S-1-5-18') }).Count -ne 0) {
   throw 'staging ACL retains a non-administrator principal'
 }
-# The API key lives OUTSIDE the staging directory so reruns of this snippet never delete it.
+# The API key and the model live OUTSIDE the staging directory so reruns of this snippet never
+# delete them, and the installer refuses a model stored inside the lane's own state root.
 $KeyDir = Join-Path $env:ProgramData 'omp-ninfer-keys'
 if (-not (Test-Path $KeyDir)) {
   New-Item -ItemType Directory -Path $KeyDir | Out-Null
   Set-Acl $KeyDir $Acl
 }
 $ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
+if (-not (Test-Path $ApiKeyFile)) {
+  $Secret = [byte[]]::new(32)
+  [System.Security.Cryptography.RandomNumberGenerator]::Fill($Secret)
+  [IO.File]::WriteAllText($ApiKeyFile,
+    ([Convert]::ToHexString($Secret).ToLowerInvariant() + "`n"),
+    [Text.UTF8Encoding]::new($false))
+}
+$ModelDir = Join-Path $env:ProgramData 'omp-ninfer-model'
+if (-not (Test-Path $ModelDir)) {
+  New-Item -ItemType Directory -Path $ModelDir | Out-Null
+  Set-Acl $ModelDir $Acl
+}
+$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
+& curl.exe --fail --location --continue-at - --output $Model $Manifest.components.model.artifact_url
+if ($LASTEXITCODE -ne 0) { throw 'model artifact download failed' }
+if ((Get-Item $Model).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+  throw 'model artifact byte count mismatch'
+}
+if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+    $Manifest.components.model.artifact_sha256) {
+  throw 'model artifact checksum mismatch'
+}
 foreach ($Asset in @(
   @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
   @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
@@ -170,20 +210,95 @@ if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
   throw 'native runtime package byte count mismatch'
 }
 $Installer = Join-Path $Stage 'Install-Release.ps1'
-$Model = Resolve-Path .\models\qwen3_8_27b.ninfer
-if (-not (Test-Path $ApiKeyFile)) {
-  throw "create one random non-empty line at $ApiKeyFile, then rerun; never paste it into an issue"
-}
 & $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
-  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile `
+  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile -StateRoot $StateRoot `
   -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
 ```
 
-The package controller binds loopback/Tailscale-only listening, mandatory bearer authentication,
-the external model hash, process-restart checkpoints, and active/previous rollback. Do not mix
-assets across variants or infer install authority from GPU-family names. RTX 4090 and RTX 3090 each use their exact
-MTP3 profile. Run the ordinary acceptance in section 8 after
-installation. Structured JSON-schema output remains unsupported and fails closed.
+The install prints one JSON receipt and leaves the server running. The package controller binds
+loopback/Tailscale-only listening, mandatory bearer authentication, the external model hash,
+process-restart checkpoints, and active/previous rollback. Do not mix assets across variants or
+infer install authority from GPU-family names. RTX 4090 and RTX 3090 each use their exact
+MTP3 profile. Structured JSON-schema output remains unsupported and fails closed.
+
+### Operate the native lane
+
+The installed controller is the only supported lifecycle surface, and every action needs the
+lane's state root. Run these from an elevated PowerShell:
+
+```powershell
+$Controller = Join-Path $StateRoot 'Control-Release.ps1'
+& $Controller -Action Status -StateRoot $StateRoot   # authenticated identity and endpoint state
+& $Controller -Action Start -StateRoot $StateRoot    # after a reboot, or after a deliberate stop
+& $Controller -Action Stop -StateRoot $StateRoot     # saves every live session, then exits
+& $Controller -Action Restart -StateRoot $StateRoot
+```
+
+`Status` is the success criterion: it must report the installed release id, the served binary and
+configuration identity, and a ready endpoint. A machine reboot is not a managed stop - the
+scheduled task starts the release again, but a session that was never published (automatically
+above 32,768 frontier tokens, or explicitly through `POST /v1/ninfer/checkpoints`) does not
+survive it. A deliberate `-Action Stop` does save it.
+
+### Point OMP at the native lane
+
+Native Windows OMP does not support the POSIX `!cat` secret reference, so the key is loaded into
+the launching process. Copy the native fragment, then set `$Provider` to the lane you installed:
+
+```powershell
+$Provider = if ($VariantId -ceq 'rtx4090-windows-native') { 'ninfer-native-4090' } else { 'ninfer-native-3090' }
+$Agent = Join-Path $HOME '.omp\agent'
+New-Item -ItemType Directory -Force -Path $Agent | Out-Null
+$ModelsPath = Join-Path $Agent 'models.yml'
+$ConfigPath = Join-Path $Agent 'config.yml'
+if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
+  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+}
+Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
+Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
+& "$env:LOCALAPPDATA\OMP\omp.cmd" --model "$Provider/local-max"
+```
+
+The environment-backed value exists only in that PowerShell process and its children. Do not put
+the key itself in YAML, command arguments, shell history, or support bundles.
+
+### Native lane acceptance
+
+Run these in the same PowerShell process that loaded `NINFER_NATIVE_API_KEY`:
+
+```powershell
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.cmd"
+$Smoke = Join-Path $env:TEMP ("omp-ninfer-native-" + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
+Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
+Push-Location $Smoke
+try {
+  & $Launcher -p --no-session --auto-approve --model "$Provider/local-max" `
+    'Use a file-reading tool to read marker.txt, then report its exact single line.'
+  if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
+
+  $Session = Join-Path $Smoke 'sessions'
+  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/local-max" `
+    'Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly.'
+  if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
+  & $Launcher -p --auto-approve --session-dir $Session --continue `
+    'Return only the nonce from the prior turn.'
+  if ($LASTEXITCODE -ne 0) { throw 'stateful resume failed' }
+} finally { Pop-Location }
+
+& $Controller -Action Stop -StateRoot $StateRoot | Out-Null
+& $Launcher -p --no-session --auto-approve --max-time 20s `
+  --model "$Provider/local-max" 'Return LOCAL_ONLY.'
+if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+& $Controller -Action Start -StateRoot $StateRoot | Out-Null
+```
+
+Expected result: the first three turns succeed locally, the outage request fails with a
+connection error and no model response, and the lane serves again after `-Action Start`. Any
+cloud-provider request is a release failure. Skip the Vision check in section 8: these lanes are
+text and tools only. Report the outcome with the
+[clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
 
 ## Managed macOS SSH qualified route
 
@@ -236,7 +351,10 @@ tar -xzf omp-18.0.9-macos-arm64.tar.gz
 ```
 
 The version must be `omp/18.0.9`. This native beta package uses the same current/previous client
-pointer contract as Windows and Linux; it does not change the stable Homebrew cask.
+pointer contract as Windows and Linux; it does not change the stable Homebrew cask. The installer
+places the launcher in `${XDG_BIN_HOME:-$HOME/.local/bin}`; every later step in this guide calls
+bare `omp`, so put that directory on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your
+shell profile if you want it to persist) before continuing.
 
 ## 3. Prepare the model and key on the inference host
 
@@ -455,15 +573,17 @@ not a numerical oracle; the observed tool result is the contract.
 
 ### Image input
 
-From a directory containing a non-sensitive PNG or JPEG:
+The previous step left you in an empty scratch directory, so name a file that exists - the
+release clone ships one:
 
 ```sh
 omp --model ninfer-beta/local-max \
-  @sample.png "Describe the visible image in one sentence."
+  @"$HOME/omp-ninfer/assets/icon-512.png" "Describe the visible image in one sentence."
 ```
 
-A completed response proves the configured Vision route is reachable. Do not use private screenshots
-in an issue.
+Adjust the path to your clone, or use any non-sensitive PNG or JPEG. A completed response proves
+the configured Vision route is reachable; this check belongs to the RTX 5090 container lane only.
+Do not use private screenshots in an issue.
 
 ### Stateful follow-up and OMP resume
 

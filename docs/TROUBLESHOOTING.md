@@ -5,7 +5,7 @@ with a convenient local image.
 
 ## `release manifest is not installable`
 
-Use a clean clone of `v0.3.0` and run
+Use a clean clone of the current public release tag and run
 `python3 scripts/verify_release.py --require-ready`. Moving `main`, an older tag, or a partially
 published candidate is not installable. A draft/candidate intentionally retains explicit blockers;
 do not fill missing component identities from a local cache.
@@ -158,9 +158,14 @@ Separate correctness from acceleration:
 - If the OMP transcript is present and a full replay succeeds, transcript correctness is intact but
   provider state was not reused.
 - If the transcript itself is missing, inspect OMP session selection/storage rather than NInfer.
-- If a qualified native Windows RTX 3090 or RTX 4090 `v0.3.0` process restarted, inspect the
-  checkpoint status/receipt first. OMP must still remain able to replay its transcript when
-  acceleration state is unavailable or invalid.
+- If a qualified native Windows RTX 3090 or RTX 4090 process restarted, inspect what its stop
+  recorded before blaming the session: `& "$StateRoot\Control-Release.ps1" -Action Status
+  -StateRoot $StateRoot` reports the live endpoint and identity on both lanes, and on the RTX 4090
+  lane `$StateRoot\last-stop.json` (`last_stop` in that status) records the previous stop's mode,
+  whether it was graceful, and how many sessions it saved or refused. `$StateRoot` is the lane's
+  state root under `%ProgramData%\NInfer`. A reboot or a crash is not a managed stop: a session
+  that was never published does not survive one. OMP must still remain able to replay its
+  transcript when acceleration state is unavailable or invalid.
 - Endpoint, model, request-shape, branch, or committed-turn identity changes intentionally invalidate
   a provider snapshot.
 

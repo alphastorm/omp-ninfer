@@ -55,6 +55,53 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         self.assertIn("if ($LASTEXITCODE -eq 0)", acceptance)
         self.assertNotIn("Stop the tunnel", acceptance)
 
+    def test_native_lane_install_is_completable_from_the_document(self) -> None:
+        """Every input the native installer demands must be produced by the documented path.
+
+        Install-Release.ps1 on the RTX 4090 lane requires -StateRoot and a model artifact, and
+        refuses a key file it did not find; a reader with only this section must still finish."""
+        quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+        native = quickstart.split("## Native Windows RTX 4090 and RTX 3090 release lanes", 1)[
+            1
+        ].split("## Managed macOS SSH qualified route", 1)[0]
+        manifest = json.loads(
+            (ROOT / "releases" / "v0.6.1" / "manifest.json").read_text(encoding="utf-8")
+        )
+        release = manifest["release"]
+        self.assertIn(f"releases\\{release}\\manifest.json", native)
+        # The installer's mandatory inputs.
+        self.assertIn("-StateRoot $StateRoot", native)
+        self.assertIn("-ModelArtifactPath $Model", native)
+        self.assertIn("-ApiKeyFile $ApiKeyFile", native)
+        # ... each produced before the call, from the manifest's own identities.
+        self.assertIn("$Manifest.components.model.artifact_url", native)
+        self.assertIn("$Manifest.components.model.artifact_sha256", native)
+        self.assertIn("RandomNumberGenerator]::Fill($Secret)", native)
+        for state_root in ("qwen38-4090-native", "qwen38-3090-omp-v0.2"):
+            self.assertIn(state_root, native)
+        # The lifecycle surface a reader needs after a reboot, and the lane's own endpoint.
+        for action in ("-Action Status", "-Action Start", "-Action Stop"):
+            self.assertIn(f"{action} -StateRoot $StateRoot", native)
+        self.assertIn("127.0.0.1:18082", native)
+        # The native lanes carry neither the WSL2 key path nor a Vision check.
+        self.assertNotIn("wsl.exe", native)
+        self.assertNotIn("icon-512.png", native)
+
+    def test_native_fragment_matches_each_lane_served_identity(self) -> None:
+        fragment = (
+            ROOT / "examples" / "windows-native" / "models.fragment.yml"
+        ).read_text(encoding="utf-8")
+        for provider, request_model in (
+            ("ninfer-native-4090", "qwen3.8-27b"),
+            ("ninfer-native-3090", "q38-ninfer"),
+        ):
+            self.assertIn(f"  {provider}:", fragment)
+            self.assertIn(f"requestModelId: {request_model}", fragment)
+        self.assertIn("baseUrl: http://127.0.0.1:18082/v1", fragment)
+        self.assertIn("apiKey: NINFER_NATIVE_API_KEY", fragment)
+        # Native lanes are text and tools only; a vision input would advertise an absent route.
+        self.assertNotIn("image", fragment)
+
     @staticmethod
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):

@@ -2,7 +2,7 @@
 
 ## Supported trust boundary
 
-The current `v0.3.x` release supports one trusted owner controlling each OMP client and qualified RTX runtime
+Every published release supports one trusted owner controlling each OMP client and qualified RTX runtime
 host. Local administrators and root can inspect processes, files, container/native runtime state, GPU memory, and
 traffic endpoints. Shared shell hosts, hostile local users, untrusted containers, public HTTP
 service, and tenant isolation are outside the release claim.
