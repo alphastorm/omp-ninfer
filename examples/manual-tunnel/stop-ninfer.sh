@@ -21,4 +21,4 @@ fi
 
 docker stop --time 30 "$CONTAINER"
 docker rm "$CONTAINER"
-printf 'stopped and removed %s; model, key, and request-log files were retained\n' "$CONTAINER"
+printf 'stopped and removed %s; model, key, request-log, and checkpoint files were retained\n' "$CONTAINER"

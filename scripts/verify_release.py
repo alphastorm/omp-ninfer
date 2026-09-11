@@ -283,6 +283,13 @@ def validate_ga_evidence_bindings(
         ):
             require(arguments.count(flag) == 1 and argument_value(arguments, flag) == expected,
                     f"{label}: {flag} must occur once and equal {source}", errors)
+        # The identity a server echoes must be the identity of the configuration the launcher
+        # actually runs: a declared value copied from a qualification of a different
+        # configuration is a false public claim (measured on v0.6.2, whose route declared the
+        # checkpointed identity while running with no checkpoint store).
+        require(runtime.get("configuration_sha256") == configuration_identity(profile),
+                f"{label}: runtime_identity.configuration_sha256 must equal the identity of the "
+                "configuration this profile launches", errors)
 
     identity = qualification.get("runtime_identity", {})
     composition = qualification.get("composition", {})
@@ -832,11 +839,15 @@ def validate_server_arguments(
         return
 
     expected_values = {
-        "--host": transport.get("runtime_bind_host"),
-        "--port": str(transport.get("runtime_port")),
+        # The server binds every interface inside its own network namespace; Docker publishes
+        # that port on the runtime host's loopback. A host-network bind is unreachable from the
+        # operator on Docker Desktop, where "host" means the engine VM (omp-ninfer#15).
+        "--host": "0.0.0.0",
+        "--port": str(server.get("container_port")),
         "--model-id": model.get("public_id"),
         "--deployment-profile": server.get("deployment_profile"),
         "--max-context": str(provider.get("context_window")),
+        "--session-checkpoint-dir": server.get("checkpoint_mount_target"),
     }
     for flag, expected in expected_values.items():
         require(isinstance(expected, str) and expected not in {"", "None"},
@@ -850,6 +861,54 @@ def validate_server_arguments(
     for flag in REQUIRED_SERVER_FLAGS:
         require(arguments.count(flag) == 1, f"{label}: must include {flag} exactly once", errors)
     require("--api-key" not in arguments, f"{label}: must not embed an API key", errors)
+
+
+# Flags the launcher derives from the release and profile identities rather than from the
+# profile's tuning; the lifecycle tool passes their equivalents itself and excludes them from
+# the configuration it hashes.
+IDENTITY_FLAGS = frozenset({
+    "--host", "--port", "--model-id", "--binary-sha256", "--artifact-sha256",
+    "--config-sha256", "--deployment-profile", "--session-checkpoint-dir",
+})
+
+
+def tuning_arguments(arguments: list[str]) -> list[str]:
+    """The profile's arguments minus the identity flags: the configuration that is hashed."""
+    tuning: list[str] = []
+    skip = 0
+    for item in arguments:
+        if skip:
+            skip -= 1
+            continue
+        if item in IDENTITY_FLAGS:
+            skip = 1
+            continue
+        tuning.append(item)
+    return tuning
+
+
+def configuration_identity(profile: dict[str, Any]) -> str:
+    """SHA-256 of the configuration the public launcher runs, as the runtime fork's lifecycle
+    tool (tools/lifecycle/ninfer_container.py, canonical_identity) computes it for the same
+    configuration. The launcher refuses to start a container whose declared identity is not
+    this value, and a ready release must record it - so the identity a stranger's server echoes
+    names the configuration it is running, never one qualified elsewhere."""
+    server = profile.get("server", {})
+    canonical = {
+        "bind_host": server.get("published_bind_host"),
+        "api_key_configured": True,
+        "args": tuning_arguments(server.get("arguments", [])),
+        "deployment_profile": server.get("deployment_profile"),
+        "model_id": profile.get("model", {}).get("public_id"),
+        "port": server.get("published_port"),
+        "request_log_configured": True,
+        "checkpoint_configured": True,
+        "checkpoint_mount_target": server.get("checkpoint_mount_target"),
+        "checkpoint_seccomp_sha256": server.get("checkpoint_seccomp_sha256"),
+        "restart_policy": server.get("restart_policy"),
+    }
+    encoded = json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def validate_profile_contract(
@@ -878,8 +937,23 @@ def validate_profile_contract(
     require(server.get("deployment_profile") == deployment_profile,
             f"{label}: deployment_profile must match the manifest", errors)
     require(server.get("restart_policy") == "no", f"{label}: restart_policy must be no", errors)
-    require(server.get("container_network_mode") == "host",
-            f"{label}: container network mode must be host", errors)
+    require(server.get("container_network_mode") == "bridge",
+            f"{label}: container network mode must be bridge", errors)
+    require(server.get("container_port") == 8080,
+            f"{label}: container port must be 8080", errors)
+    require(server.get("published_bind_host") == transport.get("runtime_bind_host") == "127.0.0.1",
+            f"{label}: published port must bind the runtime host loopback", errors)
+    require(server.get("published_port") == transport.get("runtime_port"),
+            f"{label}: published port must be the transport's runtime port", errors)
+    require(server.get("checkpoint_mount_target") == "/checkpoints",
+            f"{label}: checkpoint mount target must be /checkpoints", errors)
+    seccomp_path = server.get("checkpoint_seccomp_profile")
+    require(seccomp_path == "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+            f"{label}: checkpoint seccomp profile must be the repository-owned io_uring profile",
+            errors)
+    require(isinstance(server.get("checkpoint_seccomp_sha256"), str)
+            and SHA256_RE.fullmatch(server.get("checkpoint_seccomp_sha256") or "") is not None,
+            f"{label}: checkpoint_seccomp_sha256 must be a SHA-256", errors)
     validate_server_arguments(profile, label, errors)
 
     omp_provider = profile.get("omp_provider", {})

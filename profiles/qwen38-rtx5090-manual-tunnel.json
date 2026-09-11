@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.6.2",
+  "release": "v0.6.3",
   "status": "public",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
@@ -36,14 +36,14 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.6.2",
-    "container_network_mode": "host",
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "container_network_mode": "bridge",
     "restart_policy": "no",
     "arguments": [
       "--host",
-      "127.0.0.1",
+      "0.0.0.0",
       "--port",
-      "18089",
+      "8080",
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
@@ -51,9 +51,9 @@
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
-      "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+      "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
       "--deployment-profile",
-      "qwen38-5090-v0.6.2",
+      "qwen38-5090-v0.6.3",
       "--max-context",
       "131072",
       "--kv-capacity",
@@ -71,13 +71,25 @@
       "--lm-head-draft",
       "--vision",
       "--preserve-thinking",
+      "--session-checkpoint-dir",
+      "/checkpoints",
+      "--session-checkpoint-quota-mib",
+      "24576",
+      "--session-checkpoint-staging-mib",
+      "256",
       "--max-private-continuations",
       "8",
       "--device-state-slots",
       "4",
       "--host-state-slots",
       "24"
-    ]
+    ],
+    "container_port": 8080,
+    "published_bind_host": "127.0.0.1",
+    "published_port": 18089,
+    "checkpoint_mount_target": "/checkpoints",
+    "checkpoint_seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+    "checkpoint_seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
   },
   "omp_provider": {
     "id": "ninfer-beta",
@@ -107,10 +119,10 @@
     "tools",
     "vision",
     "stateful-responses",
-    "prefix-reuse"
+    "prefix-reuse",
+    "process-restart-continuation"
   ],
   "unsupported": [
-    "process-restart-continuation",
     "managed-remote-install",
     "managed-upgrade",
     "appliance-rollback",

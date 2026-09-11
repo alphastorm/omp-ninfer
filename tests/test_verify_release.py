@@ -609,16 +609,53 @@ class ReleaseContractTest(unittest.TestCase):
             errors,
         )
 
-    def test_profile_rejects_container_private_loopback_networking(self) -> None:
+    def test_profile_rejects_host_networking_and_unpublished_ports(self) -> None:
+        """On Docker Desktop a host-network bind lives in the engine VM and never reaches the
+        operator (omp-ninfer#15); the route is a bridge container published on loopback."""
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)
         profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(profile_path)
-        profile["server"]["container_network_mode"] = "bridge"
+        profile["server"]["container_network_mode"] = "host"
+        profile["server"]["published_bind_host"] = "0.0.0.0"
         self.save(profile_path, profile)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
-        self.assertIn("profile: container network mode must be host", errors)
+        self.assertIn("profile: container network mode must be bridge", errors)
+        self.assertIn("profile: published port must bind the runtime host loopback", errors)
+
+    def test_configuration_identity_reproduces_the_lifecycle_tool(self) -> None:
+        """Cross-repository vector: the owner appliance's v0.6.2 lifecycle configuration
+        (published on 127.0.0.1:18088, restart unless-stopped, checkpoints on) hashes to the
+        identity tools/lifecycle/ninfer_container.py computed and the v0.6.2 receipts record."""
+        profile = self.load(ROOT / "profiles" / "qwen38-rtx5090-manual-tunnel.json")
+        server = profile["server"]
+        server["published_port"] = 18088
+        server["restart_policy"] = "unless-stopped"
+        server["deployment_profile"] = "qwen38-5090-v0.6.2"
+        self.assertEqual(
+            VERIFY_RELEASE.configuration_identity(profile),
+            "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+        )
+
+    def test_recorded_configuration_identity_must_be_the_launched_one(self) -> None:
+        """v0.6.2 declared the checkpointed identity while its launcher ran no checkpoint store;
+        a recorded identity that is not the identity of the launched configuration is a false
+        public claim and fails the release."""
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(profile_path)
+        arguments = profile["server"]["arguments"]
+        arguments[arguments.index("--host-state-slots") + 1] = "16"
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn(
+            "profiles/qwen38-rtx5090-manual-tunnel.json: runtime_identity.configuration_sha256 "
+            "must equal the identity of the configuration this profile launches",
+            errors,
+        )
 
     def test_profile_deployment_identity_must_match_manifest(self) -> None:
         temporary, root = self.candidate_copy()

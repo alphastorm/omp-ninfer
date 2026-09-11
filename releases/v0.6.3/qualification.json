@@ -1,0 +1,151 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.6.3",
+  "as_of": "2026-09-11",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image a62dd5b8 (runtime v0.6.2, source 63f28c95, binary 6ab904d7) under deployment profile qwen38-5090-v0.6.2 (configuration 5eb8a557); the RTX 4090 native package v0.6.1-beta.1 (runtime fork 63f28c95, the mainline runtime built for Ada, with the managed graceful stop); the RTX 3090 durable v0.2.5-beta.1 package (131,072-token context). All three lanes now serve from one runtime tree: the RTX 5090 container lane moved off its feat/warm-arrival branch head onto the mainline commit both native lanes build from, and was qualified on the owner appliance on 2026-09-10 (7/7 gates, EXP-030) and re-verified on 2026-09-11 against the published image pulled anonymously by digest. The RTX 4090 and RTX 3090 components, their profiles, and the OMP client are byte-identical to v0.6.1 and carry their receipts by hash. The RTX 3090 mainline candidate still ships separately when its host returns.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+    "release_source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+    "release_source_archive_sha256": "5dc8abc9cc2f3fa65a91e822099d5414ed7df4f8a9ca74b5c63940a71672171b",
+    "release_server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.6.3"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.6.3/qualification/rtx5090.json",
+      "sha256": "a3655b5799b7e56f695ba2841d78e89cb3b9210b0c067e65e60deaa759d8bfbf",
+      "status": "passed",
+      "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+      "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+      "release_server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+      "oci_manifest_digest": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+      "binary_package_sha256": "05aa9c4b570d8864e684d2de1cacc7091055de96d6dea6fdf6776082d2fd00c2",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.2-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "1654ba293e7e83a6e0128494b14d5b86e4a6bb03cd8a575a8df8801b1c6c811b",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.2-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "built by the appliance's canonical route (pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 container on the owner appliance, clean tree d956e6d6, 9/9 host suites plus the io_uring checkpoint backend suite); the runtime image was built from the published release binaries by the publish-runtime-image workflow (run 34225710385) and its receipt is attached to the runtime-image release"
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.3/qualification/rtx4090.json",
+        "sha256": "5b6348894c8cf04fcc207c90b6e9f75137358c63bdf6b4c215f5311d29b76b63",
+        "release_tag": "v0.6.1-qwen38-4090-beta.1",
+        "package_sha256": "4390a8cb95b90a9c60a904e28eea6cc495155edca42f01aa11db852e022f4fdd"
+      },
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.3/qualification/rtx3090.json",
+        "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
+        "release_tag": "v0.2.5-qwen38-3090-beta.1",
+        "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.2-qwen38-5090-beta.1 component (image a62dd5b8) before the cut; the receipt lands at releases/v0.6.3/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "context_cache_profile": "--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 (device-state=4-cache+1-active, host-state=24, private=8)",
+      "lifecycle": "candidate and published-image runs both started and stopped through tools/lifecycle/ninfer_container.py (preflight bound image id, binary, model artifact, and configuration identity); the configuration identity computed from the published image equals the qualified one, so the profile did not drift between qualification and publication",
+      "explicit_checkpoint_save_wall_s": 4.371,
+      "checkpoint_save_bytes": 5201400249,
+      "fanout_branch_reuse": "private_long_anchor (4/4 branches at 57,853 and 67,717 tokens in one process, and 4/4 again after a verified restart at each size)",
+      "fanout_branch_median_s_57853": 1.403,
+      "fanout_branch_median_s_67717": 1.533,
+      "restart_verified": "cumulative prefill counter reset (68,400 -> 53)",
+      "post_restart_resume_wall_s_57853": 3.357,
+      "post_restart_resume_wall_s_67717": 3.854,
+      "post_restart_branch_reuse": "private_long_anchor (8/8 across both sizes; no root re-prefill)",
+      "warm_arrival": "both orders hot after a verified restart: resume-first 4.386 s resume then forks at 2.876 s and 1.353 s, fork-first likewise hot; every resume quoted the planted keys exactly",
+      "restore_wall_s_5gb": [
+        3.998,
+        3.625
+      ],
+      "restore_checkpoint_bytes": 5201400249,
+      "tampered_restore_refused": true,
+      "decode_tokens_per_second_wall": 132.53,
+      "prefill_tokens_per_second_130048": 2169.9,
+      "exact_retrieval_130048": true,
+      "agent_protocol": "fork/delete/no-resurrection across docker restart passed on the published image and on the candidate",
+      "origin_authentication": "inherited from v0.4.7 (store format unchanged; the lifecycle candidate loaded MAC-tagged generations from a fresh store)",
+      "measured_on": "published image a62dd5b8 for retrieval, decode, agent protocol, identity, auth boundary and completion; the appliance-built image of the same bytes for fanout, warm arrival and restore"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.1-qwen38-4090-beta.1",
+      "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+      "lifecycle_phases": "15/15",
+      "protocol_checks": "15/15 at the shipped pool and 15/15 at 8 host state slots",
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 91.36,
+      "managed_stop": "stop-event; graceful; not forced",
+      "unsaved_session_survived_managed_restart": true,
+      "unsaved_session_cached_input_tokens": 45,
+      "explicit_checkpoint_cached_input_tokens": 42,
+      "restart_seconds": 44.37,
+      "rollback": "bidirectional; candidate stopped by signal, predecessor by what its record declares",
+      "prefill_tokens_per_second": 2104.95,
+      "decode_tokens_per_second": 159.09,
+      "mtp_acceptance_percent": 92.96,
+      "max_power_w": 458.53,
+      "max_memory_used_mib": 22814,
+      "golden_equivalent": "passed",
+      "registered_tests": "103/103 (6 skipped for absent artifacts)",
+      "mtp_arm": "MTP3"
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "protocol_checks": "15/15",
+      "release_tag": "v0.2.5-qwen38-3090-beta.1",
+      "maximum_context_tokens": 131072,
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 218.3,
+      "restart_cached_input_tokens_restored": 45,
+      "durable_restart_checkpoint_bytes": 310213049,
+      "decode_tokens_per_second": 90.66,
+      "prefill_tokens_per_second": 894.24,
+      "mtp_acceptance_percent": 93.43,
+      "max_power_w": 300.15,
+      "max_memory_used_mib": 22548,
+      "carried_from": "v0.5.0 (component byte-identical; requalified on its own rig on 2026-09-05 with origin-authenticated checkpoints)"
+    }
+  },
+  "interpretation": [
+    "All three GPU lanes are qualified in one public release, and from this release they are built from one runtime tree; every claim binds an exact package, profile, and receipt.",
+    "The RTX 5090 container lane moved from its feat/warm-arrival branch head to the mainline runtime at 63f28c95 on the unchanged v0.4.8 argument set. Throughput is within run-to-run noise of v0.5.1 (prefill 2,169.9 vs 2,180.3 tok/s; decode 132.53 vs 133.13 tok/s) and every durability gate holds: a 5.2 GB session restores in 3.6-4.0 s with exact retrieval, a flipped payload byte is refused, and 8/8 sibling forks stay on the shared anchor across a verified restart.",
+    "Publication evidence is measured on the published bytes: every release asset was downloaded anonymously and hashed on a workstation, the image was pulled anonymously by digest with an empty credential store, and the lane's own gate script then ran against that pulled image.",
+    "The RTX 4090 and RTX 3090 components carry unchanged from v0.6.1 by hash; the RTX 4090's managed graceful stop and the RTX 3090's package are exactly the bytes that release qualified. The RTX 3090 mainline candidate ships separately when its host returns.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.6.2-qwen38-5090-beta.1 component and runtime image"
+  ]
+}

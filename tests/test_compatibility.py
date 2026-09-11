@@ -136,12 +136,17 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             for key, value in expected.items():
                 self.assertEqual(profile["runtime"][key], value)
 
-    def test_primary_rtx5090_profiles_do_not_claim_process_restart(self) -> None:
+    def test_primary_rtx5090_profiles_claim_process_restart_with_a_durable_store(self) -> None:
+        """Since v0.6.3 the documented container route mounts a checkpoint store, so the
+        claim is made - and only alongside the store and seccomp identity that make it true."""
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         for profile in authority["profiles"]:
-            self.assertNotIn(
-                "process-restart-continuation",
-                profile["runtime"]["capabilities"],
+            self.assertIn("process-restart-continuation", profile["runtime"]["capabilities"])
+            store = profile["runtime"]["session_checkpoints"]
+            self.assertEqual(store["store_mount"], "/checkpoints")
+            self.assertEqual(
+                hashlib.sha256((ROOT / store["seccomp_profile"]).read_bytes()).hexdigest(),
+                store["seccomp_sha256"],
             )
 
         for filename in (
@@ -149,8 +154,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             "qwen38-rtx5090-windows-docker-local.json",
         ):
             profile = json.loads((ROOT / "profiles" / filename).read_text(encoding="utf-8"))
-            self.assertNotIn("process-restart-continuation", profile["capabilities"])
-            self.assertIn("process-restart-continuation", profile["unsupported"])
+            self.assertIn("process-restart-continuation", profile["capabilities"])
+            self.assertNotIn("process-restart-continuation", profile["unsupported"])
+            self.assertIn("--session-checkpoint-dir", profile["server"]["arguments"])
 
     def test_unknown_or_incomplete_profiles_fail_closed(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")

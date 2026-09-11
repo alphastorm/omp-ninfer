@@ -8,16 +8,17 @@ CONTAINER=omp-ninfer-beta
 MODEL_PATH=
 API_KEY_FILE=
 LOG_DIR=
+CHECKPOINT_DIR=
 CHECK_CONTRACT=false
 
 usage() {
   cat <<'EOF'
-usage: start-ninfer.sh --model PATH --api-key-file PATH --log-dir PATH
+usage: start-ninfer.sh --model PATH --api-key-file PATH --log-dir PATH --checkpoint-dir PATH
        start-ninfer.sh --check-contract
 
-Starts the exact digest-pinned v0.4.3 NInfer image on remote loopback.
-The release manifest must be installable (`candidate` or `ready`); a draft is rejected before
-Docker runs.
+Starts the exact digest-pinned NInfer image of the current release on the runtime host's
+loopback with a durable session store. The release manifest must be installable (`candidate`
+or `ready`); a draft is rejected before Docker runs.
 EOF
 }
 
@@ -29,6 +30,10 @@ while (($#)); do
       ;;
     --api-key-file)
       API_KEY_FILE=${2:?--api-key-file requires a path}
+      shift 2
+      ;;
+    --checkpoint-dir)
+      CHECKPOINT_DIR=${2:?--checkpoint-dir requires a path}
       shift 2
       ;;
     --log-dir)
@@ -57,14 +62,16 @@ if "$CHECK_CONTRACT"; then
   exit 0
 fi
 
-if [[ -z "$MODEL_PATH" || -z "$API_KEY_FILE" || -z "$LOG_DIR" ]]; then
+if [[ -z "$MODEL_PATH" || -z "$API_KEY_FILE" || -z "$LOG_DIR" || -z "$CHECKPOINT_DIR" ]]; then
   usage >&2
   exit 2
 fi
 
 python3 "$ROOT/scripts/verify_release.py" --require-installable
 
-for command in docker nvidia-smi python3 sha256sum; do
+# The GPU is probed inside the pinned image below: the host need not carry nvidia-smi on PATH
+# (a WSL2 distro reached over ssh does not), Docker reaching the device is what matters.
+for command in docker python3 sha256sum; do
   if ! command -v "$command" >/dev/null 2>&1; then
     printf 'error: required command not found: %s\n' "$command" >&2
     exit 1
@@ -73,9 +80,23 @@ done
 
 MODEL_PATH=$(realpath -- "$MODEL_PATH")
 API_KEY_FILE=$(realpath -- "$API_KEY_FILE")
-mkdir -p -- "$LOG_DIR"
+# Bind directories are private to the invoking user, who is also the user the server runs as
+# inside the container, so request logs and checkpoint generations come out owned by the
+# operator and readable by scripts/checkpoint_sync.py without root.
+for directory in "$LOG_DIR" "$CHECKPOINT_DIR"; do
+  mkdir -p -- "$directory"
+  chmod 700 -- "$directory"
+done
 LOG_DIR=$(realpath -- "$LOG_DIR")
-chmod 700 -- "$LOG_DIR"
+CHECKPOINT_DIR=$(realpath -- "$CHECKPOINT_DIR")
+if [[ "$CHECKPOINT_DIR" == "$LOG_DIR" || "$CHECKPOINT_DIR" == "$(dirname -- "$MODEL_PATH")" ]]; then
+  printf 'error: --checkpoint-dir must be its own directory, not the log or model directory\n' >&2
+  exit 1
+fi
+if [[ ! -O "$CHECKPOINT_DIR" ]]; then
+  printf 'error: --checkpoint-dir must be owned by the invoking user: %s\n' "$CHECKPOINT_DIR" >&2
+  exit 1
+fi
 
 python3 - "$API_KEY_FILE" <<'PY'
 import os
@@ -137,24 +158,55 @@ PROFILE_VALUES=()
 while IFS= read -r -d '' value; do
   PROFILE_VALUES+=("$value")
 done < <(
-  python3 - "$PROFILE" <<'PY'
+  python3 - "$ROOT" "$PROFILE" "$EXPECTED_CONFIG_SHA256" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-profile = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-print(profile["profile_id"], end="\0")
+root, profile_path, manifest_config_sha = sys.argv[1:]
+sys.path.insert(0, str(Path(root) / "scripts"))
+import verify_release  # noqa: E402
+
+profile = json.loads(Path(profile_path).read_text(encoding="utf-8"))
 server = profile["server"]
-print(server["container_network_mode"], end="\0")
-print(server["deployment_profile"], end="\0")
-for argument in server["arguments"]:
-    print(argument, end="\0")
+# The identity this launcher declares to the server is the identity of the configuration it
+# is about to run, computed the way the runtime fork's lifecycle tool computes it. Refuse to
+# launch under a copied identity: a stranger's status route must describe their own server.
+computed = verify_release.configuration_identity(profile)
+declared = verify_release.argument_value(server["arguments"], "--config-sha256")
+if computed != manifest_config_sha or declared != manifest_config_sha:
+    raise SystemExit(
+        "error: configuration identity mismatch\n"
+        f"computed from this profile's configuration: {computed}\n"
+        f"declared by the profile:                     {declared}\n"
+        f"recorded by the release manifest:            {manifest_config_sha}"
+    )
+seccomp = Path(root) / server["checkpoint_seccomp_profile"]
+if verify_release.sha256_file(seccomp) != server["checkpoint_seccomp_sha256"]:
+    raise SystemExit(f"error: checkpoint seccomp profile identity changed: {seccomp}")
+for value in (
+    profile["profile_id"],
+    server["container_network_mode"],
+    server["deployment_profile"],
+    server["published_bind_host"],
+    str(server["published_port"]),
+    str(server["container_port"]),
+    server["checkpoint_mount_target"],
+    str(seccomp),
+    *server["arguments"],
+):
+    print(value, end="\0")
 PY
 )
 PROFILE_ID=${PROFILE_VALUES[0]}
 CONTAINER_NETWORK_MODE=${PROFILE_VALUES[1]}
 EXPECTED_DEPLOYMENT_PROFILE=${PROFILE_VALUES[2]}
-PROFILE_ARGS=("${PROFILE_VALUES[@]:3}")
+PUBLISHED_BIND_HOST=${PROFILE_VALUES[3]}
+PUBLISHED_PORT=${PROFILE_VALUES[4]}
+CONTAINER_PORT=${PROFILE_VALUES[5]}
+CHECKPOINT_MOUNT_TARGET=${PROFILE_VALUES[6]}
+SECCOMP_PROFILE=${PROFILE_VALUES[7]}
+PROFILE_ARGS=("${PROFILE_VALUES[@]:8}")
 
 if [[ ! -f "$MODEL_PATH" ]]; then
   printf 'error: model is not a regular file: %s\n' "$MODEL_PATH" >&2
@@ -169,10 +221,10 @@ fi
 
 if docker container inspect "$CONTAINER" >/dev/null 2>&1; then
   printf 'error: container already exists: %s\n' "$CONTAINER" >&2
+  printf 'Run examples/manual-tunnel/stop-ninfer.sh first; checkpoints in %s survive it.\n' "$CHECKPOINT_DIR" >&2
   exit 1
 fi
 
-nvidia-smi --query-gpu=name,memory.total,compute_cap --format=csv,noheader
 docker pull "$IMAGE"
 ACTUAL_BINARY_SHA256=$(
   docker run --rm --entrypoint sha256sum "$IMAGE" /usr/local/bin/ninfer-serve |
@@ -183,41 +235,55 @@ if [[ "$ACTUAL_BINARY_SHA256" != "$EXPECTED_BINARY_SHA256" ]]; then
     "$EXPECTED_BINARY_SHA256" "$ACTUAL_BINARY_SHA256" >&2
   exit 1
 fi
+if ! docker run --rm --gpus all --entrypoint nvidia-smi "$IMAGE" \
+    --query-gpu=name,memory.total,compute_cap --format=csv,noheader; then
+  printf 'error: Docker cannot reach an NVIDIA GPU from the pinned image\n' >&2
+  exit 1
+fi
 
+# The container binds every interface inside its own network namespace and Docker publishes
+# that port on the runtime host's loopback only. This is the one shape that reaches the
+# operator on Docker Desktop, where a "host" network is the engine VM's, not the machine's
+# (omp-ninfer#15). The server runs as the invoking user with every capability dropped and the
+# repository-owned io_uring seccomp profile the durable store's restore path needs.
 CONTAINER_ID=$(
   docker run --detach \
     --name "$CONTAINER" \
     --restart no \
     --gpus all \
     --network "$CONTAINER_NETWORK_MODE" \
+    --publish "$PUBLISHED_BIND_HOST:$PUBLISHED_PORT:$CONTAINER_PORT" \
+    --user "$(id -u):$(id -g)" \
+    --cap-drop ALL \
+    --security-opt no-new-privileges=true \
+    --security-opt "seccomp=$SECCOMP_PROFILE" \
+    --ipc host \
     --label "org.omp-ninfer.release=$RELEASE" \
     --label "org.omp-ninfer.profile=$PROFILE_ID" \
     --label "org.ninfer.source-commit=$EXPECTED_SOURCE_COMMIT" \
+    --label "org.ninfer.config-sha256=$EXPECTED_CONFIG_SHA256" \
     --volume "$MODEL_PATH:/models/qwen3_8_27b.ninfer:ro" \
     --volume "$API_KEY_FILE:/run/secrets/ninfer_api_key:ro" \
     --volume "$LOG_DIR:/logs" \
+    --volume "$CHECKPOINT_DIR:$CHECKPOINT_MOUNT_TARGET" \
     "$IMAGE" \
-    /bin/sh -c \
-      'model="$1"; shift; exec /usr/local/bin/ninfer-serve "$model" "$@" --api-key "$(cat /run/secrets/ninfer_api_key)"' \
-    sh \
+    /usr/local/bin/ninfer-serve \
     /models/qwen3_8_27b.ninfer \
     "${PROFILE_ARGS[@]}" \
+    --api-key-file /run/secrets/ninfer_api_key \
     --request-log-jsonl /logs/requests.jsonl
 )
 printf 'started %s (%s)\n' "$CONTAINER" "$CONTAINER_ID"
 
-# Fail fast on the WSL mirrored-loopback drift signature: the server logs that it is
-# listening on host loopback, but the port is unreachable from this namespace
-# (docs/TROUBLESHOOTING.md, "The server listens but loopback is unreachable").
 probe_loopback() {
-  python3 - <<'PY'
+  python3 - "$PUBLISHED_BIND_HOST" "$PUBLISHED_PORT" <<'PY'
 import socket
 import sys
 
 probe = socket.socket()
 probe.settimeout(3)
 try:
-    probe.connect(("127.0.0.1", 18089))
+    probe.connect((sys.argv[1], int(sys.argv[2])))
 except OSError:
     sys.exit(1)
 finally:
@@ -225,26 +291,15 @@ finally:
 PY
 }
 
-LISTENING_PATTERN='listening on http://127.0.0.1:18089'
-LISTENING_GRACE=${NINFER_LOOPBACK_GRACE:-15}
 PREFLIGHT_DEADLINE=$((SECONDS + 900))
-LISTENING_SINCE=
 LOOPBACK_REACHABLE=false
 while ((SECONDS < PREFLIGHT_DEADLINE)); do
   if probe_loopback; then
     LOOPBACK_REACHABLE=true
     break
   fi
-  if [[ -z "$LISTENING_SINCE" ]]; then
-    if docker logs "$CONTAINER" 2>&1 | grep -qF "$LISTENING_PATTERN"; then
-      LISTENING_SINCE=$SECONDS
-    fi
-  elif ((SECONDS - LISTENING_SINCE >= LISTENING_GRACE)); then
-    printf 'error: wsl-mirrored-loopback-unavailable\n' >&2
-    printf 'NInfer logs "%s", but host loopback cannot reach the port.\n' "$LISTENING_PATTERN" >&2
-    printf 'The WSL/Docker Desktop loopback path has drifted on this host.\n' >&2
-    printf 'Recovery: from Windows run `wsl --shutdown`, start Docker Desktop, then rerun this launcher.\n' >&2
-    printf 'See docs/TROUBLESHOOTING.md; the container stays up for `docker logs %s`.\n' "$CONTAINER" >&2
+  if [[ "$(docker container inspect --format '{{.State.Running}}' "$CONTAINER")" != true ]]; then
+    printf 'error: %s exited before it became ready; see `docker logs %s`\n' "$CONTAINER" "$CONTAINER" >&2
     exit 1
   fi
   sleep 5
@@ -262,7 +317,8 @@ python3 - \
   "$EXPECTED_BINARY_SHA256" \
   "$EXPECTED_MODEL_SHA256" \
   "$EXPECTED_CONFIG_SHA256" \
-  "$EXPECTED_DEPLOYMENT_PROFILE" <<'PY'
+  "$EXPECTED_DEPLOYMENT_PROFILE" \
+  "http://$PUBLISHED_BIND_HOST:$PUBLISHED_PORT/v1/ninfer/status" <<'PY'
 import json
 import sys
 import time
@@ -270,10 +326,11 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-key_path, upstream, source, binary_sha, model_sha, config_sha, deployment_profile = sys.argv[1:]
+(key_path, upstream, source, binary_sha, model_sha, config_sha, deployment_profile,
+ status_url) = sys.argv[1:]
 api_key = Path(key_path).read_text(encoding="utf-8").strip()
 request = urllib.request.Request(
-    "http://127.0.0.1:18089/v1/ninfer/status",
+    status_url,
     headers={"Authorization": f"Bearer {api_key}"},
 )
 deadline = time.monotonic() + 900
@@ -327,4 +384,5 @@ print(json.dumps({
 }, indent=2, sort_keys=True))
 PY
 
-printf 'NInfer is ready on remote loopback http://127.0.0.1:18089\n'
+printf 'NInfer is ready on the runtime host loopback http://%s:%s with a durable session store at %s\n' \
+  "$PUBLISHED_BIND_HOST" "$PUBLISHED_PORT" "$CHECKPOINT_DIR"
