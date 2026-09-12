@@ -1,0 +1,138 @@
+{
+  "artifact_type": "omp_ninfer_upstream_backport_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-035",
+  "generated_utc": "2026-09-13",
+  "status": "passed",
+  "release": "v0.6.7",
+  "scope": "Selective backport of upstream Neroued/ninfer master onto the mainline runtime for the RTX 5090 lane (omp-ninfer #33, first tranche): watch correction, commit-by-commit selection with reasons, cherry-picks with provenance, appliance build, full suite on an ephemeral sm_120a GPU, lane qualification against the lifecycle-started candidate, independent review on the frozen subject, component publication by digest, product cut, route acceptance against the published image, and post-cut verbatim runs from the tag.",
+  "question": "Can the shipped RTX 5090 runtime take the upstream engine work that touches its execution paths without changing what this product qualifies - exact retrieval, durable checkpoints, the HTTP boundary, tokenisation - and how much of the upstream delta is reachable without the deferred campaigns?",
+  "answer": "Yes for 18 of 158 upstream commits. Every lane gate is within run-to-run noise of v0.6.2 and the full 102-test suite passes on the target architecture. The runtime materialization/pressure family - including the fix for upstream #229, this product's own workload - is unreachable without value-aware shared prefix scheduling, which pulls the serve-adapter campaign: that is the next engine window, with the pressure_protocol and fanout phases as its arbiter. Upstream's GDN capacity fix overlaps this product's #42 fix and needs its own merge window.",
+  "ledger": "docs/measurements/2026-09-12-upstream-backport-ledger.json",
+  "watch": "docs/measurements/2026-09-12-upstream-watch.json",
+  "candidate_commit": "8818b88b46aad630e9e761d4ab7e5f57a157378d",
+  "component": {
+    "release_tag": "v0.6.3-qwen38-5090-beta.1",
+    "source_tag": "v0.6.3-qwen38-5090-source.1",
+    "runtime_receipt_release": "v0.6.3-qwen38-5090-runtime-beta.1",
+    "image_digest": "sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61",
+    "binary_sha256": "9afa8824fdf35098aae663400ace512075d129b4ce47f162746eff16efae11e2"
+  },
+  "evidence": {
+    "appliance_build": "backport-build.log 322/322, 11/11 serve suites",
+    "ephemeral_suite": "docs/measurements/2026-09-13-runpod-ci-full-8818b88b.json 102/102",
+    "lane": "releases/v0.6.7/qualification/rtx5090.json",
+    "public_route_gates": "docs/measurements/2026-09-13-rtx5090-v067-public-route-profile-gates.json",
+    "route_acceptance": "releases/v0.6.7/acceptance/documented-routes.json"
+  },
+  "review": {
+    "review_id": "CR-20260913T1843Z-8818b88b",
+    "class": "production/hard-to-reverse -> full council",
+    "record": "~/.omp/agent/critical-review/CR-20260913T1843Z-8818b88b/review-record.json",
+    "members": {
+      "grok": "completed, zero findings",
+      "daybreak-blue": "missing/transport_failure - selector openai-codex/gpt-daybreak-blue-latest not in the codex catalog served to OMP 18.1.18 (upgraded today; the lane completed on 2026-09-11)",
+      "gemini": "missing/provider_policy_refusal - 429 quota"
+    },
+    "disposition": "closed on disposition, no P0/P1; residual: the reciprocal strong critic rendered no verdict this epoch; follow-up: re-qualify the strong-critic selector in the live authority"
+  },
+  "build_failures_on_the_way": [
+    "d139d338 needed the template extension from d5aaa202 (taken as a recorded dependency, reordered)",
+    "cpp-httplib 0.54.1 removed is_connection_alive and the patched hold_resource slot: adapted in http_server.cpp and responses_http.cpp the way upstream adapted its own transport file",
+    "the documented prepare block failed on a complete-file resume (HTTP 416, curl 8.5 --fail): fixed at source, red then green in the window",
+    "the pre-cut route run refused the new binary because root profiles are promoted at the cut: for a component change the cut precedes the route acceptance"
+  ],
+  "post_cut_verbatim_runs": {
+    "note": "from a stock clone of the v0.6.7 tag inside a proper route window: the inference-host route pulled the published image by digest and the launcher accepted the identity; the macOS client route passed 10 of 10 from an isolated HOME; installed client setting read back false.",
+    "rtx5090-container-host": {
+      "status": "passed",
+      "clone_commit": "b2242f93b7afb616b2142fe33d540aa8b89998c0",
+      "document_sha256": "7d15f93f848e",
+      "host_os": "Ubuntu 24.04.4 LTS",
+      "steps": [
+        {
+          "slug": "prepare",
+          "status": "passed",
+          "elapsed_s": 12.252,
+          "block_sha256": "ec2dbb1592b5"
+        },
+        {
+          "slug": "start",
+          "status": "passed",
+          "elapsed_s": 33.248,
+          "block_sha256": "d0b5ed3dc411"
+        }
+      ]
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "clone_commit": "b2242f93b7afb616b2142fe33d540aa8b89998c0",
+      "document_sha256": "7d15f93f848e",
+      "host_os": "macOS 26.6.2 arm64",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 18.808,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 3.706,
+          "block_sha256": "89d723de4acb"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.643,
+          "block_sha256": "82abb4c053ea"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.028,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.025,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 10.645,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 2.991,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 4.863,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 108.232,
+          "block_sha256": "aa93f908c330"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "passed",
+          "elapsed_s": 0.809,
+          "block_sha256": "200150e3b940"
+        }
+      ]
+    }
+  },
+  "hosts_restored": "RTX 5090 appliance verified on the incumbent's own port after the window: ninfer-5090-v051p running with restart policy unless-stopped, /health 200 on 18088, route port answering nothing, supervisor hold marker absent. Mac: isolated HOME, nothing to restore.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

@@ -35,7 +35,10 @@ shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.6-4
 of the RTX 4090 lane saves every live session (EXP-028/EXP-029). Since `v0.6.4` the route a
 release accepts is the route the documentation prints: every documented route - the three Windows
 routes and, from `v0.6.5`, the quickstart's primary macOS row - runs verbatim from its own blocks
-with shell-decided outcomes (EXP-032, EXP-033). Details:
+with shell-decided outcomes (EXP-032, EXP-033). From `v0.6.7` the RTX 5090 runtime carries the
+first tranche of upstream engine work - 18 of 158 commits, taken with reasons and requalified within
+noise of the shipped runtime (EXP-035); the next engine window is the upstream pressure-planner fix
+family, which needs a dedicated rebase. Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
