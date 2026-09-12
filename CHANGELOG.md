@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.7] - 2026-09-13
+
+The RTX 5090 runtime component advances to `v0.6.3-qwen38-5090-beta.1` (source `8818b88b`,
+image `fc244576`): the mainline runtime plus a selective backport of 18 upstream Neroued/ninfer
+commits and one downstream adaptation ([ledger](docs/measurements/2026-09-12-upstream-backport-ledger.json)).
+Deployment profile `qwen38-5090-v0.6.3`, configuration `622ab621`, the native components and the
+OMP client are unchanged. Lane qualification on 2026-09-13
+([receipt](releases/v0.6.7/qualification/rtx5090.json)); route acceptance against the published image
+on 2026-09-13 ([receipt](releases/v0.6.7/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- RTX 5090 runtime: MoE prefill and decode kernel work, GDN prefill convolution into q/k/v, fp8
+  w8a16 vocabulary GEMM, sparse-MoE gather lifetimes and S2 CTA-per-token, GDN record snapshot bits,
+  host uploads completed before returning, ASCII NFC skip and a flat BPE merge table, cpp-httplib
+  0.54.1 with the serve layer following its disconnect (`is_connection_closed`) and lifetime
+  (`Response::user_data`) APIs. Every applied commit carries `cherry-pick -x` provenance.
+- `docs/QUICKSTART.md`: both model download blocks survive a rerun with a complete file (curl 8.5
+  turns the CDN's HTTP 416 into exit 22); the byte count and checksum decide.
+- `scripts/upstream_watch.py` records its manifest repo-relative; `upstream-watch.json` records the
+  5090 fork point as the mainline base `6e8b2e2a` (the retired container mirror point had made the
+  delta read 175 instead of 158).
+- `scripts/verify_release.py` allowlists the `v0.6.3-qwen38-5090-beta.N` runtime tag.
+
+### Measured
+
+- Lane: 130,048-token retrieval exact at 2,174.5 tok/s, decode 134.15 tok/s wall, 5.2 GB restore in
+  3.89/3.86 s, fanout 4/4 hot at 57K and 67K after a verified restart, warm arrival both orders,
+  tampered restore refused, agent protocol 200/404/404 - all within noise of v0.6.2. Full 102-test
+  suite on an ephemeral sm_120a GPU. Documented route on the published image: exact at 2,172.5 tok/s;
+  macOS client route 10/10.
+- Review: one full council on the frozen subject; supplement zero findings; strong critic missing
+  (harness selector no longer resolves on OMP 18.1.18); closed on disposition with no P0/P1.
+
 ## [0.6.6] - 2026-09-12
 
 No component changed. The config every documented client route installs now turns the pinned
@@ -985,7 +1019,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.6...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.7...HEAD
+[0.6.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...v0.6.4

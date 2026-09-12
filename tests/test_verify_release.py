@@ -120,7 +120,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(manifest["publication"]["blockers"], [])
         self.assertEqual(
             manifest["components"]["ninfer"]["oci_manifest_digest"],
-            "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+            "sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61",
         )
         summary_sha = hashlib.sha256(
             (ROOT / "releases" / "v0.6.7" / "qualification.json").read_bytes()

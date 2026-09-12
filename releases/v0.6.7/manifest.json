@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.6.7",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ae1d2d52fa3af25ed30702e36dd751d8a828c0a5/compatibility.json",
-      "compatibility_sha256": "785c8cc668b9a0e351b9053243b1744b8fabbeeb5e73f6ec656625a3b00ea191"
+      "compatibility_sha256": "a1515c47c79d65c5ee7121ffa5aa10fed51e5d48ab9d453b59d5cc7a90948b26"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "57c5be6af9d5f1a21827586654102f6d7a043ca557d5fc5903b8ae5e8900977c",
+    "summary_sha256": "0a25bae7936a1d4b6b738af763434d12f7d86cd3c1cac369fb19e45f3d306205",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ae1d2d52fa3af25ed30702e36dd751d8a828c0a5/releases/v0.6.7/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -175,14 +175,12 @@
   "publication": {
     "authorized": false,
     "targets": [
-      "GitHub public release v0.6.6",
+      "GitHub public release v0.6.7",
       "OMP component omp-18.0.9-cross-platform-beta-2 (unchanged)",
-      "NInfer RTX 5090 runtime component v0.6.2-qwen38-5090-beta.1 (unchanged; image a62dd5b8, deployment profile qwen38-5090-v0.6.3)",
+      "NInfer RTX 5090 runtime component v0.6.3-qwen38-5090-beta.1 (new: upstream-2026-09 backport; image fc244576, deployment profile qwen38-5090-v0.6.3 unchanged)",
       "NInfer RTX 4090 native component v0.6.1-qwen38-4090-beta.1 (unchanged)",
       "NInfer RTX 3090 component v0.2.5-qwen38-3090-beta.1 (unchanged)"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.3-qwen38-5090-beta.1 component and runtime image fc244576; the composed acceptance receipt is absent until it is"
-    ]
+    "blockers": []
   }
 }

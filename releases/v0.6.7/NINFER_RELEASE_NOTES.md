@@ -1,53 +1,57 @@
-# OMP NInfer v0.6.6 - the pinned client stays on its channel
+# OMP NInfer v0.6.7 - the RTX 5090 runtime takes the upstream engine work
 
-No component changed. The config every documented route installs now turns the client's startup
-update check off. Until this release the pinned OMP 18.0.9 client advertised
+The RTX 5090 runtime component advances to `v0.6.3-qwen38-5090-beta.1` (source `8818b88b`,
+image `fc244576…`): the mainline runtime plus a selective backport of 18 commits from upstream
+Neroued/ninfer master and one downstream adaptation. Deployment profile, configuration, the RTX
+4090 and RTX 3090 components, and the OMP client are unchanged.
 
-    Update Available
-    New version 18.1.x is available. Run: omp update
+## What is in the backport
 
-which is not an instruction for this channel: the client is a hash-pinned release asset bound
-into the manifest, and `omp update` replaces it outside the release procedure. A reader who
-followed the banner left the qualified combination while everything still looked supported
-([#18](https://github.com/alphastorm/omp-ninfer/issues/18), open since 2026-08-29).
+Kernel work on the paths this profile executes - MoE prefill weight staging, w8 rowsplit decode
+and the w8 vocabulary t64 route, the fp8 w8a16 vocabulary GEMM, routed gate/up tile staging and
+pipeline depth by route, shared-expert down-weight prefetch and L2 warm from the MoE down tail,
+the GDN prefill convolution written straight into q/k/v, rmsnorm weight-first reads, sparse-MoE
+one-CTA-per-token S2 - and correctness fixes: sparse-MoE gather index lifetimes, GDN record
+snapshot bits with batched fp8 projection (and its template dependency), host uploads completed
+before returning. Frontend: pure-ASCII NFC skip and a flat BPE merge table. Vendored cpp-httplib
+moves to 0.54.1 (byte-identical to the upstream release), with this product's serve layer
+adapted to its disconnect and lifetime APIs.
 
-## What changed
+Deferred with reasons, in `docs/measurements/2026-09-12-upstream-backport-ledger.json`: the
+runtime materialization/pressure fix family (unreachable without upstream's value-aware shared
+prefix scheduling, which pulls the serve-adapter campaign), that campaign itself, dflash2, the
+nvfp4/k8v4 kv-cache formats, the spdlog logging rework, and upstream's GDN cooperative-capacity
+fix, which overlaps this product's own fix for alphastorm/ninfer#42 and needs its own window.
 
-- `examples/manual-tunnel/fail-closed.yml` - the one config file every client route copies to
-  `~/.omp/agent/config.yml` - adds `startup: checkUpdate: false`. The pinned client reads that
-  setting only in nested form; a dotted `startup.checkUpdate:` key parses as an unrelated
-  setting and leaves the default on. A test refuses any other shape.
-- The quickstart says what the config does instead of pointing at an open issue: upgrade by
-  cloning the next tag and rerunning the install step.
-- `scripts/hosts/run-documented-route.sh` refuses to start a tunnel on a port it does not own
-  and releases its forward when a run fails. A forward left by an earlier failed run used to
-  answer the readiness probe - the tunnel step passed without binding anything, and the stale
-  listener then made the fail-closed check report a live route.
+## Measured
 
-## Evidence route
+Every RTX 5090 lane gate re-run on the lifecycle-started candidate and compared with v0.6.2:
+130,048-token retrieval exact at 2,174.5 tok/s (2,169.9), decode 134.15 tok/s wall (132.53),
+5.2 GB restore in 3.89/3.86 s (4.00/3.63), fanout 4/4 hot after a verified restart at 57K and
+67K, warm arrival in both orders, tampered restore refused, agent protocol 200/404/404. Full
+102-test suite on an ephemeral sm_120a GPU. On the documented route the published image, pulled
+by digest, served the launcher-computed identity, re-measured exact at 2,172.5 tok/s, and the
+macOS client route passed 10 of 10 including a server restart with the session continued
+([receipts](qualification/rtx5090.json), [acceptance](acceptance/composed-external-installation.json)).
 
-`docs/measurements/2026-09-12-client-channel-contract-qualification.json` holds every run with
-each block's hash: the macOS route 10/10 from an isolated HOME, the native Windows client route
-5/5, the RTX 4090 native route 7/7, each ending by reading `startup.checkUpdate` back from the
-client its own route installed. `acceptance/documented-routes.json` accepts them and
-`acceptance/composed-external-installation.json` composes them with the carried component
-acceptances.
+## Review
 
-## Correction of record
+One full independent council was dispatched on the frozen subject. The cross-family supplement
+completed with zero findings; the strong critic could not render a verdict because its model
+selector no longer resolves in the upgraded review harness, and a second supplement returned a
+provider quota error. The epoch closed on disposition with no P0/P1 and that residual on record.
 
-v0.6.5's receipts state that the RTX 5090 appliance's production container was serving again
-after that window. It was not: production had been stopped for a route window on 2026-09-11 with
-its restart policy pinned off, and was not restored until 2026-09-12. The claim had been read off
-the route's own container on the route's port. No v0.6.5 measurement is affected - every route
-there ran against the route container, which is what those routes install and use - but the
-restored-incumbent statement was false. Published receipts are immutable, so the correction lives
-in this release's qualification receipt.
+## Route fix
+
+The inference-host prepare block now survives a rerun with a complete model file: curl 8.5 turned
+the CDN's HTTP 416 into a failure, which stopped a reader who reran the block after any later
+step failed. The byte count and checksum decide.
 
 ## Upgrading
 
-Nothing to reinstall: component bytes, profiles, and configuration are v0.6.3's. Re-clone the tag
-and rerun the config install step to pick up the channel setting. Installed lanes and sessions
-are unaffected.
+Re-clone the tag and rerun section 4 on the inference host: the start block pulls the new image by
+digest. Installed sessions and checkpoints are unaffected - the store format and configuration are
+unchanged.
 
 ## Known limitations
 

@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.7",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "external-installation acceptance of the changed RTX 5090 component from its published URLs and image digest on the documented route (host and macOS client halves), with the profile gates re-measured through the documented tunnel; the unchanged native components carry their acceptances by hash.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "a1515c47c79d65c5ee7121ffa5aa10fed51e5d48ab9d453b59d5cc7a90948b26",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on the Mac by the documented block from its public URL and hashed.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "the runtime image was pulled anonymously by digest fc244576 on the inference host inside the documented start block; the client archive from its public URL on the Mac; the binary archive's SHA-256 (295e042a) and the source archive (730460ea) were verified against the component release's checksum set"
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "the component release's SHA256SUMS verified the binary archive and SBOM; the image's /usr/local/bin/ninfer-serve hashes to the manifest's server_binary_sha256 9afa8824"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "digest fc244576, pulled with an empty credential store; labels bind revision 8818b88b and base a19e00c5"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "the documented launcher computed configuration 622ab621 under qwen38-5090-v0.6.3 and the status route reported binary 9afa8824 / patch stack 8818b88b"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "note": "authenticated_session_identity true in the public-route gates; anonymous status refused by the route's launcher preflight"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "the macOS route's tool turn returned the planted marker exactly; 130,048-token retrieval exact through the documented tunnel"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "nonce on --continue, and again after the server container was restarted from the Mac"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "the outage request failed with the tunnel stopped"
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.7/acceptance/documented-routes.json",
+      "sha256": "3c43660d1439cbec57cadf6fa00cd17edbb18472d732b2d7e18aed64e2dfdc5d",
+      "summary": "RTX 5090 host half 2/2 and macOS client half 10/10 from a stock clone of the promoted candidate against the published image; public-route gates exact at 2,172.5 tok/s; Windows client and RTX 4090 routes carried from v0.6.6"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance verified on the incumbent's own port after the window: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, route port answering nothing, supervisor hold marker absent. Mac: isolated HOME, nothing to restore."
+    }
+  }
+}

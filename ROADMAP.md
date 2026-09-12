@@ -333,6 +333,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.7` | RTX 5090 runtime v0.6.3: selective backport of 18 upstream engine commits (MoE/GDN/vocab kernels, sparse-MoE and GDN record fixes, cpp-httplib 0.54.1), every lane gate within noise of v0.6.2; the deferred upstream families named with reasons |
 | `v0.6.6` | The config every documented route installs keeps the pinned client on its channel: no out-of-channel `omp update` advice; every client-installing route re-run and the setting read back from the installed client; no component changed |
 | `v0.6.5` | The quickstart's primary macOS route runs verbatim from its own blocks with shell-decided outcomes, including a server restart with the session continued; every documented route is now runner-covered; no component changed |
 | `v0.6.4` | Every documented Windows route runs verbatim from its own quickstart blocks on a stock host; a clone yields the recorded bytes on every platform; no component changed |

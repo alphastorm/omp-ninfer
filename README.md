@@ -26,7 +26,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/decode-138%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/decode-139%20tok%2Fs%20measured-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130K%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -127,9 +127,9 @@ Exact shipped profiles and receipts in
 
 | Gate | Result |
 | --- | --- |
-| RTX 5090 decode | **137.70 tok/s** server-side over 2,048 tokens at temperature 0 on the published v0.6.2 image (132.53 tok/s wall through the lifecycle tool); MTP3, 41.20% acceptance, 2.24 tokens per round |
-| RTX 5090 prefill | **2,169.90 tok/s** at 130,048 tokens, exact retrieval, cold process, on the published v0.6.2 image |
-| RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,717 tokens (medians 1.40 s and 1.53 s), and **4/4 again after a verified restart** (resume 3.36 / 3.85 s, forks ~1.4 s) — a 5.2 GB session restores in 3.6-4.0 s and a flipped payload byte is refused |
+| RTX 5090 decode | **139.23 tok/s** server-side over 2,048 tokens at temperature 0 on the lifecycle-started v0.6.3 candidate (134.15 tok/s wall); MTP3, 41.20% acceptance, 2.24 tokens per round |
+| RTX 5090 prefill | **2,174.50 tok/s** at 130,048 tokens, exact retrieval, cold process, on the v0.6.3 candidate (2,172.50 tok/s again on the published image through the documented tunnel) |
+| RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,681 tokens (medians 1.40 s and 1.52 s), and **4/4 again after a verified restart** (resume 3.38 / 3.65 s, forks ~1.4 s) — a 5.2 GB session restores in 3.9-3.9 s and a flipped payload byte is refused |
 | Warm vs cold follow-up | **1.790 s** vs 47.920 s at a 109,594-token session, and **0.778 s** first token after a process restart — v0.4.0 qualification, server-side, one sample per point |
 | RTX 3090 native | **90.66 tok/s** decode, 93.43% MTP3 acceptance, exact 130,048-token retrieval at the 131,072 ceiling, 310 MB durable restart, durable v0.2.5-beta.1 train with origin-authenticated checkpoints, 300.2 W observed peak |
 | RTX 4090 native | exact 130,048-token retrieval in **91.4 s**; **159.1 tok/s** decode at 93.0% MTP3 acceptance and 2,104.9 tok/s prefill on the C1 gate; 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.1-beta.1, sm_89) |
@@ -262,6 +262,9 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
+`v0.6.7` moves the RTX 5090 runtime onto a selective backport of the upstream engine work - 18
+commits taken with reasons, the rest deferred with reasons - requalified on every lane gate within
+noise of the shipped runtime (EXP-035).
 `v0.6.6` keeps the pinned client on its channel: the config every route installs turns the
 client's startup update check off, so nobody is advised to `omp update` away from the hash-pinned
 release bytes (#18).

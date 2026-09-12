@@ -1,0 +1,95 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.7",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The RTX 5090 runtime component changed (v0.6.3-qwen38-5090-beta.1, the upstream-2026-09 backport), so the documented RTX 5090 container route ran against the published image from a stock clone of the promoted candidate: the inference-host half on the appliance and the macOS client half from an isolated HOME. The RTX 5090 profile gates were also re-measured through the documented tunnel on that route. The native Windows client route and the RTX 4090 route carry from v0.6.6 with reasons.",
+  "document_sha256": "7d15f93f848e",
+  "candidate_commit": "ba850f304461f23d873af7178da9b01721224762",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "note": "from a stock clone of the promoted candidate: the documented start block pulled ghcr.io/alphastorm/ninfer-runtime@sha256:fc244576… by digest with an empty credential store and the launcher accepted the identity it computed - binary 9afa8824, configuration 622ab621 under qwen38-5090-v0.6.3 (the deployment profile does not advance: the configuration is unchanged). The prepare block's model download hit HTTP 416 on a complete-file resume (curl 8.5 + --fail); the block now lets the byte count and checksum decide, a change measured red then green in this window."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 159.765,
+      "note": "10 of 10 from an isolated HOME against the published image: tool marker, Vision, nonce on --continue, a server restart from the Mac with the session continued, fail-closed with the tunnel stopped; installed client setting startup.checkUpdate read back false"
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is",
+      "carried_from": "v0.6.6: the client bytes and blocks are unchanged; the server behaviours that route checks (tool, Vision, resume, fail-closed) are a subset of what the macOS client route exercised against the new image in this window"
+    },
+    "rtx4090-native": {
+      "status": "carried",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 163.849,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "rerun path with the 18 GB artifact present; operate, provider and acceptance passed",
+      "carried_from": "v0.6.6: the RTX 4090 component v0.6.1-qwen38-4090-beta.1 is unchanged"
+    }
+  },
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-13-rtx5090-v067-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2172.5,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 134.09,
+    "agent_protocol": "passed"
+  },
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "anonymous pull of the published digest inside the documented start block; the launcher's computed identity equals the manifest's"
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "every executed step's bytes hashed to the documented block's SHA-256; the only substitution is the reader's own SSH destination"
+    },
+    "tunnel_route": {
+      "status": "passed",
+      "note": "the runner refused nothing it did not own and required /health through its own forward"
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance verified on the incumbent's own port after the window: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, route port answering nothing, supervisor hold marker absent. Mac: isolated HOME, nothing to restore."
+    }
+  },
+  "qualification_receipt": "releases/v0.6.7/qualification/rtx5090.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

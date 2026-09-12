@@ -120,6 +120,29 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.7 — the RTX 5090 runtime takes the upstream engine work (2026-09-13)
+
+The RTX 5090 runtime component advances to `v0.6.3-qwen38-5090-beta.1`: the mainline runtime at
+`8818b88b` plus a selective backport of 18 upstream commits (MoE, GDN and vocabulary kernels,
+sparse-MoE and GDN record fixes, cpp-httplib 0.54.1) on the unchanged `v0.6.3` configuration; receipt
+in [`releases/v0.6.7/qualification/rtx5090.json`](../releases/v0.6.7/qualification/rtx5090.json),
+ledger of what was taken and deferred in
+[`docs/measurements/2026-09-12-upstream-backport-ledger.json`](measurements/2026-09-12-upstream-backport-ledger.json).
+Experiment EXP-035.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 128K | **2,174.50 tok/s** prefill | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens on the lifecycle-started candidate, cold process (`v0.6.2`: 2,169.90 tok/s); 2,172.50 tok/s again on the published image through the documented tunnel |
+| RTX 5090 C1 | **139.23 tok/s** decode | server-side over 2,048 completion tokens at temperature 0, 134.15 tok/s wall; MTP3, 41.20% acceptance, 2.24 tokens per round (`v0.6.2`: 137.70 server-side, 132.53 wall) |
+| RTX 5090 restore | **3.9 s / 3.9 s** for 5.2 GB | two verified restarts with exact planted-key retrieval; a flipped payload byte refused with `previous_response_not_found` and the generation quarantined (`v0.6.2`: 4.0 s / 3.6 s) |
+| RTX 5090 fanout | **8/8** at 57,853 and 67,681 tokens | hot fork medians 1.40 s and 1.52 s in one process; after a verified restart the resume takes 3.38 / 3.65 s and every fork stays on the shared anchor at ~1.4 s (`v0.6.2`: 1.40 / 1.53 s, resume 3.36 / 3.85 s) |
+| RTX 5090 warm arrival | hot in both orders | resume-first and fork-first sequences after a verified restart, every resume quoting the planted keys exactly |
+| RTX 5090 agent protocol | **passed** | authenticated session identity, stateful continuation, two forks, deleted parent 404 before and after a restart, surviving descendant continued - on the candidate and on the published image |
+| Full test suite | **102/102** | every ops kernel suite the perf commits touch, on an ephemeral RTX PRO 4000 Blackwell (sm_120a) |
+
+Same fixtures, gate scripts and parameters as `v0.6.2`, one host, one day; owner measurement.
+Every gate within run-to-run noise of the shipped runtime.
+
 ### v0.6.3 — the documented route, measured on the documented route (2026-09-11)
 
 No component changed; the configuration the published RTX 5090 launcher runs did. Every number

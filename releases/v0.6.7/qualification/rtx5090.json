@@ -6,7 +6,7 @@
   "release": "v0.6.7",
   "as_of": "2026-09-13",
   "release_tag": "v0.6.3-qwen38-5090-beta.1",
-  "runtime_image": "PENDING-PUBLICATION (the appliance-built candidate image sha256:94470d3debd46e3fecc978c72bfba43d448fd91cdefa369688c8aeec8a5c51f8 wraps the same binaries onto the same digest-pinned base the publication workflow uses)",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61 (the appliance-built candidate image sha256:94470d3d… wraps the same binaries onto the same digest-pinned base; the published image was pulled by digest on the documented route and re-measured: docs/measurements/2026-09-13-rtx5090-v067-public-route-profile-gates.json)",
   "identity": {
     "source_commit": "8818b88b46aad630e9e761d4ab7e5f57a157378d",
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -16,7 +16,11 @@
     "oci_manifest_digest": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
     "image_id": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a"
   },
-  "evidence_interpretation": "Every gate measured in this window against the lifecycle-started candidate ninfer-5090-v063c (image id 94470d3d, binary 9afa8824, configuration 5eb8a557 - the same lifecycle configuration identity v0.6.2 qualified) on the owner appliance, through the same tools, fixtures and parameters as the v0.6.2 qualification, and compared against that receipt. Nothing is inherited except the origin-authentication arc, whose store format this change does not touch. The candidate is the mainline runtime plus 17 upstream commits selected in docs/measurements/2026-09-12-upstream-backport-ledger.json and two downstream adaptations.",
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true,
+    "narrative": "Every gate measured in this window against the lifecycle-started candidate ninfer-5090-v063c (image id 94470d3d, binary 9afa8824, configuration 5eb8a557 - the same lifecycle configuration identity v0.6.2 qualified) on the owner appliance, through the same tools, fixtures and parameters as the v0.6.2 qualification, and compared against that receipt. Nothing is inherited except the origin-authentication arc, whose store format this change does not touch. The candidate is the mainline runtime plus 17 upstream commits selected in docs/measurements/2026-09-12-upstream-backport-ledger.json and two downstream adaptations."
+  },
   "build": {
     "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, clean tree at 8818b88b with NINFER_PATCH_STACK_SHA bound (backport-build.log); the candidate image wraps that archive's binaries onto the digest-pinned base a19e00c5, exactly as the publication workflow does",
     "ctest": "11/11 focused serve suites in the build container (checkpoint_io_contract, resource_manager, openai_schema, responses_schema, response_store, serve_options, request_log, http_error_handler, http_server_stop, session_checkpoint_store, automatic_checkpoint_queue)",
@@ -58,9 +62,28 @@
     "decode": {
       "status": "passed",
       "completion_tokens": 2048,
-      "wall_s": 15.267,
       "completion_tokens_per_second_wall": 134.15,
-      "v062_reference_completion_tokens_per_second_wall": 132.53,
+      "candidate_reference": 134.15,
+      "v062_reference": 132.53,
+      "v051_reference": 133.13,
+      "workload": "technical-writing generation at temperature 0 on the lifecycle-started candidate",
+      "decode_tokens_per_second": 139.23,
+      "server_decode_seconds": 14.71,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "speculative": {
+        "accepted_per_position": [
+          597,
+          340,
+          193
+        ],
+        "accepted_tokens": 1130,
+        "backend": "mtp",
+        "draft_window": 3,
+        "drafted_tokens": 2745,
+        "fallback_steps": 1,
+        "rounds": 916
+      },
       "request_id": "a8fd560366719becbcc44a07e9e5dce6576d20780695795473bde168495fa0b7"
     },
     "agent_protocol": {

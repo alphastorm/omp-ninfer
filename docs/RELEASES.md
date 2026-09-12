@@ -27,9 +27,26 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.7 public release (the RTX 5090 runtime takes the upstream engine work)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.7`, GitHub `Latest`. The RTX 5090 runtime component
+  advances to `v0.6.3-qwen38-5090-beta.1` (source `8818b88b`, image `fc244576…`): the mainline
+  runtime plus a selective backport of 18 upstream commits and one downstream adaptation; deployment
+  profile `qwen38-5090-v0.6.3` and configuration `622ab621` unchanged; native components and the
+  client unchanged.
+- Lane qualification on 2026-09-13 ([receipt](../releases/v0.6.7/qualification/rtx5090.json)): every
+  gate within noise of v0.6.2; full 102-test suite on an ephemeral sm_120a GPU.
+- Route acceptance on 2026-09-13 ([receipt](../releases/v0.6.7/acceptance/documented-routes.json) ·
+  [composed](../releases/v0.6.7/acceptance/composed-external-installation.json)): the published image
+  by digest on the documented host route, profile gates through the documented tunnel, macOS client
+  route 10 of 10; Windows client and RTX 4090 routes carried with reasons.
+- Review: one full council on the frozen subject; the cross-family supplement completed with zero
+  findings; the strong critic is recorded missing (harness selector regression) - see the release notes.
+- Upgrade: re-clone the tag and rerun the inference-host start block; sessions and checkpoints carry.
+
 ### v0.6.6 public release (the pinned client stays on its channel)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.6`, GitHub `Latest`. No component changed; the
+- Product release: `alphastorm/omp-ninfer@v0.6.6` (superseded by v0.6.7). No component changed; the
   config every documented route installs turns the pinned client's startup update check off, so
   it no longer advertises an out-of-channel `omp update` (#18, EXP-034).
 - Component bytes, deployment profile `qwen38-5090-v0.6.3` and configuration `622ab621...` are

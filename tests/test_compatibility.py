@@ -50,9 +50,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(
                 profile["runtime"]["image_reference"]
-                == "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a"
+                == "ghcr.io/alphastorm/ninfer-runtime@sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61"
                 and profile["runtime"]["image_digest"]
-                == "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a"
+                == "sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61"
                 for profile in authority["profiles"]
             )
         )
