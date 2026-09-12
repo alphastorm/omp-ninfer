@@ -173,12 +173,63 @@ class RunnerTests(unittest.TestCase):
             listener = root / "clone" / "open-tunnel.sh"
             listener.write_text("#!/bin/sh\nexec python3 -c 'import socket, time\ns = socket.socket()\n"
                                 "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
-                                "s.bind((\"127.0.0.1\", 18089)); s.listen(1); time.sleep(600)'\n")
+                                "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
             listener.chmod(0o755)
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 0, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
             self.assertIn("tunnel stopped before this block", receipt["steps"][1]["substitution"])
+
+    def test_the_route_refuses_to_start_a_tunnel_on_a_port_it_does_not_own(self) -> None:
+        """A forward left by an earlier run answers the readiness probe: the tunnel step would
+        pass without binding and its listener would survive stop_tunnel, so the fail-closed
+        block sees a live route. The run must refuse instead (measured 2026-09-12)."""
+        import contextlib
+        squatter = socket.socket()
+        squatter.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            squatter.bind(("127.0.0.1", 18089))
+        except OSError:
+            self.skipTest("local port 18089 is in use")
+        squatter.listen(1)
+        with contextlib.closing(squatter), tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
+            listener = root / "clone" / "open-tunnel.sh"
+            listener.write_text("#!/bin/sh\nexec sleep 600\n")
+            listener.chmod(0o755)
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 1, receipt)
+            self.assertEqual(receipt["steps"][0]["status"], "failed")
+
+    def test_a_failed_run_stops_the_tunnel_it_started(self) -> None:
+        """The error path must release the forward, or the next run inherits it."""
+        probe = socket.socket()
+        probe.settimeout(0.5)
+        try:
+            probe.connect(("127.0.0.1", 18089))
+        except OSError:
+            pass
+        else:
+            self.skipTest("local port 18089 is in use")
+        finally:
+            probe.close()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("break", "false\n")])
+            listener = root / "clone" / "open-tunnel.sh"
+            listener.write_text("#!/bin/sh\nexec python3 -c 'import socket, time\ns = socket.socket()\n"
+                                "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
+                                "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
+            listener.chmod(0o755)
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 1)
+            self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "failed"])
+            after = socket.socket()
+            after.settimeout(1)
+            with self.assertRaises(OSError):
+                after.connect(("127.0.0.1", 18089))
+            after.close()
 
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

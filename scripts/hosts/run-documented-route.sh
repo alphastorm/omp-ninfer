@@ -59,27 +59,31 @@ PY
 
 elapsed() { python3 -c "import time; print(round(time.time() - $CURRENT_T0, 3))"; }
 
+# A predicate, not a command that fails: `set -E` propagates the ERR trap into functions, so a
+# bare failing probe here would be recorded as the step's failure instead of answering "closed".
+port_open() {
+  python3 -c 'import socket, sys
+s = socket.socket(); s.settimeout(1)
+try: s.connect(("127.0.0.1", 18089))
+except OSError: sys.exit(1)
+finally: s.close()' && return 0 || return 1
+}
+
 stop_tunnel() {
   # the block exec'd ssh inside a subshell; stop every process the wrapper started
   pkill -P "$TUNNEL_PID" 2>/dev/null || true
   kill "$TUNNEL_PID" 2>/dev/null || true
   wait "$TUNNEL_PID" 2>/dev/null || true
-  for _ in $(seq 1 10); do
-    python3 - <<'PY' || break
-import socket, sys
-s = socket.socket(); s.settimeout(1)
-try: s.connect(("127.0.0.1", 18089))
-except OSError: sys.exit(1)
-finally: s.close()
-PY
-    sleep 1
-  done
+  for _ in $(seq 1 10); do port_open || break; sleep 1; done
   TUNNEL_PID=""
 }
 
 on_error() {
   local rc=$? cmd=$BASH_COMMAND
   trap - ERR
+  # A failed run must not leave its forward listening: the next run's tunnel step would pass on
+  # this listener without binding, and its fail-closed check would see a live route.
+  [[ -n $TUNNEL_PID ]] && stop_tunnel
   record "$CURRENT_POSITION" "$CURRENT_SLUG" "$CURRENT_HEADING" "$CURRENT_INDEX" "$CURRENT_SHA" "$CURRENT_SHA" failed "$(elapsed)" "command failed with exit $rc: $cmd"
   while IFS=$'\t' read -r position slug heading index sha file; do
     if (( position > CURRENT_POSITION )); then
@@ -128,18 +132,23 @@ for line in "${STEP_LINES[@]}"; do
     substitution="${substitution:+$substitution; }tunnel stopped before this block, as the prose instructs"
   fi
   if [[ $text == *open-tunnel.sh* ]]; then
-    # a foreground process the reader keeps open in another terminal
-    # its own process group, so stopping the tunnel stops the ssh the block exec'd, not just a wrapper
+    # A foreground process the reader keeps open in another terminal. The route's own tunnel must
+    # own the port: a listener left by an earlier run answers the probe below, which would pass
+    # this step without binding anything and then survive stop_tunnel, so the fail-closed block
+    # sees a live route (measured 2026-09-12).
+    if port_open; then
+      echo "127.0.0.1:18089 is already listening; stop the stale forward before running the route" >&2
+      false
+    fi
     ( trap - ERR; set +eE; cd "$CLONE" && eval "$text" ) </dev/null & TUNNEL_PID=$!
-    for _ in $(seq 1 30); do sleep 1; kill -0 "$TUNNEL_PID" 2>/dev/null || break; python3 - <<'PY' && break
-import socket, sys
-s = socket.socket(); s.settimeout(1)
-try: s.connect(("127.0.0.1", 18089))
-except OSError: sys.exit(1)
-finally: s.close()
-PY
+    tunnel_ready=0
+    for _ in $(seq 1 30); do
+      sleep 1
+      kill -0 "$TUNNEL_PID" 2>/dev/null || break
+      if port_open; then tunnel_ready=1; break; fi
     done
     kill -0 "$TUNNEL_PID" 2>/dev/null || { false; }
+    (( tunnel_ready == 1 )) || { false; }
     substitution="${substitution:+$substitution; }foreground tunnel started in the background and kept open"
   else
     # Evaluate in this shell: the block's variables persist to the next block, and the ERR trap
