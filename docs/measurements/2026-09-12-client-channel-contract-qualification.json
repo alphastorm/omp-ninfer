@@ -29,6 +29,13 @@
       "defect": "a failed run left its forward listening, which is what produced the stale listener above",
       "fix": "the error path stops the tunnel before recording the failure",
       "proof": "tests…RunnerTests.test_a_failed_run_stops_the_tunnel_it_started, red on the previous runner"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh (post-cut)",
+      "defect": "the tunnel step passed on a bound local forward even when the inference host served nothing, so the first post-cut attempt failed two blocks later at the tool turn - a misleading diagnosis of a missing runtime",
+      "fix": "a tunnel step passes only when the route answers /health through the forward, and says what to start when it does not",
+      "proof": "tests…RunnerTests.test_a_tunnel_that_reaches_nothing_fails_its_own_step, red on the pre-fix runner (step passed, exit 0); the corrected post-cut run below is green",
+      "shipped": "committed after the v0.6.6 tag: internal acceptance tooling, not part of any documented route's blocks or shipped bytes, so it does not change the release"
     }
   ],
   "runs": {
@@ -210,6 +217,77 @@
       "class": "an incumbent-restored claim must be measured on the incumbent's own port and restart policy, never on whatever container answers the route's port"
     }
   ],
-  "hosts_restored": "RTX 5090 appliance: production serving on 18088, restart policy `unless-stopped`, supervisor hold released, the route container removed. RTX 4090 host: the lane the route installed serves (v0.6.1-beta.1, running, ready, lease held) and the owner's OMP agent directory is restored. Windows client host: owner's OMP agent directory restored. Mac: nothing to restore - the route ran in an isolated HOME.",
-  "raw_prompts_outputs_or_secrets_included": false
+  "hosts_restored": "RTX 5090 appliance, verified on the incumbent's own port after the window closed: `ninfer-5090-v051p` running with restart policy `unless-stopped`, /health 200 on 18088, the route's port 18089 answering nothing, the route container removed and the lane supervisor's hold marker absent. RTX 4090 host: the lane the route installed serves (v0.6.1-beta.1, running, ready, lease held) and the owner's OMP agent directory is restored. Windows client host: owner's OMP agent directory restored. Mac: nothing to restore - both route runs used an isolated HOME.",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "post_cut_verbatim_run": {
+    "note": "run from a stock clone of the v0.6.6 tag with no substitution beyond the reader's own SSH destination, inside a proper route window: the supervisor hold engaged, the incumbent stopped, the route runtime started by the documented inference-host block. The first attempt ran with no runtime on the inference host (the incumbent had been restored and the route container removed) and is what exposed the tunnel-reachability defect above.",
+    "status": "passed",
+    "clone_commit": "a96c6c4e953091d10fedbb0a1dd308e18ad3be49",
+    "document_sha256": "360cf8732f2a",
+    "host_os": "macOS 26.6.2 arm64",
+    "steps": [
+      {
+        "slug": "client-install",
+        "status": "passed",
+        "elapsed_s": 20.948,
+        "block_sha256": "808f95967ee9"
+      },
+      {
+        "slug": "tunnel",
+        "status": "passed",
+        "elapsed_s": 4.917,
+        "block_sha256": "89d723de4acb"
+      },
+      {
+        "slug": "key",
+        "status": "passed",
+        "elapsed_s": 3.042,
+        "block_sha256": "82abb4c053ea"
+      },
+      {
+        "slug": "provider",
+        "status": "passed",
+        "elapsed_s": 0.028,
+        "block_sha256": "77dac1a96f56"
+      },
+      {
+        "slug": "fail-closed-config",
+        "status": "passed",
+        "elapsed_s": 0.028,
+        "block_sha256": "11c5c38592fb"
+      },
+      {
+        "slug": "tool",
+        "status": "passed",
+        "elapsed_s": 12.383,
+        "block_sha256": "9deb640163ef"
+      },
+      {
+        "slug": "vision",
+        "status": "passed",
+        "elapsed_s": 2.98,
+        "block_sha256": "f6eb896ba04c"
+      },
+      {
+        "slug": "resume",
+        "status": "passed",
+        "elapsed_s": 5.332,
+        "block_sha256": "680fc78d4e5b"
+      },
+      {
+        "slug": "survives-restart",
+        "status": "passed",
+        "elapsed_s": 110.384,
+        "block_sha256": "aa93f908c330"
+      },
+      {
+        "slug": "fail-closed",
+        "status": "passed",
+        "elapsed_s": 0.811,
+        "block_sha256": "200150e3b940"
+      }
+    ],
+    "installed_client_setting": "startup.checkUpdate = false"
+  },
+  "shipped_as": "product release v0.6.6 (2026-09-12), GitHub Latest"
 }
