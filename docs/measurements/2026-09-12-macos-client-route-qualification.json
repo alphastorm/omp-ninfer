@@ -41,7 +41,7 @@
       "where": "scripts/hosts/run-documented-route.sh",
       "defect": "a backgrounded block shared the step loop's stdin: run 6 recorded 3 of 10 steps as `passed`",
       "fix": "steps read into an array first; stdin detached; a run that executed fewer steps than the bundle lists is a failure",
-      "proof": "tests\u2026RunnerTests.test_a_step_that_consumes_stdin_cannot_end_the_run_early (red at the c14111f runner: rc 0, status passed, 1 of 2 steps)"
+      "proof": "tests…RunnerTests.test_a_step_that_consumes_stdin_cannot_end_the_run_early (red at the c14111f runner: rc 0, status passed, 1 of 2 steps)"
     },
     {
       "where": "scripts/hosts/run-documented-route.sh",
@@ -53,7 +53,7 @@
       "where": "scripts/hosts/run-documented-route.sh",
       "defect": "stopping the wrapper orphaned the exec'd ssh: the outage request succeeded (run 8)",
       "fix": "stop_tunnel kills the wrapper's children, waits for the port to close",
-      "proof": "tests\u2026RunnerTests.test_the_tunnel_block_is_stopped_for_real_before_fail_closed (previous runner hangs/fails); run 9 fail-closed passed"
+      "proof": "tests…RunnerTests.test_the_tunnel_block_is_stopped_for_real_before_fail_closed (previous runner hangs/fails); run 9 fail-closed passed"
     }
   ],
   "runs": {
@@ -78,49 +78,49 @@
         {
           "slug": "key",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "82abb4c053ea"
         },
         {
           "slug": "provider",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "77dac1a96f56"
         },
         {
           "slug": "fail-closed-config",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "11c5c38592fb"
         },
         {
           "slug": "tool",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "9deb640163ef"
         },
         {
           "slug": "vision",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "f6eb896ba04c"
         },
         {
           "slug": "resume",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "680fc78d4e5b"
         },
         {
           "slug": "survives-restart",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "aa93f908c330"
         },
         {
           "slug": "fail-closed",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "200150e3b940"
         }
       ]
@@ -146,49 +146,49 @@
         {
           "slug": "key",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "82abb4c053ea"
         },
         {
           "slug": "provider",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "77dac1a96f56"
         },
         {
           "slug": "fail-closed-config",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "11c5c38592fb"
         },
         {
           "slug": "tool",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "9deb640163ef"
         },
         {
           "slug": "vision",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "f6eb896ba04c"
         },
         {
           "slug": "resume",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "680fc78d4e5b"
         },
         {
           "slug": "survives-restart",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "aa93f908c330"
         },
         {
           "slug": "fail-closed",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "200150e3b940"
         }
       ]
@@ -214,49 +214,49 @@
         {
           "slug": "key",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "82abb4c053ea"
         },
         {
           "slug": "provider",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "77dac1a96f56"
         },
         {
           "slug": "fail-closed-config",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "11c5c38592fb"
         },
         {
           "slug": "tool",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "9deb640163ef"
         },
         {
           "slug": "vision",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "f6eb896ba04c"
         },
         {
           "slug": "resume",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "680fc78d4e5b"
         },
         {
           "slug": "survives-restart",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "aa93f908c330"
         },
         {
           "slug": "fail-closed",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "200150e3b940"
         }
       ]
@@ -282,49 +282,49 @@
         {
           "slug": "key",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "82abb4c053ea"
         },
         {
           "slug": "provider",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "77dac1a96f56"
         },
         {
           "slug": "fail-closed-config",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "11c5c38592fb"
         },
         {
           "slug": "tool",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "9deb640163ef"
         },
         {
           "slug": "vision",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "f6eb896ba04c"
         },
         {
           "slug": "resume",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "680fc78d4e5b"
         },
         {
           "slug": "survives-restart",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "aa93f908c330"
         },
         {
           "slug": "fail-closed",
           "status": "skipped",
-          "elapsed_s": 0.0,
+          "elapsed_s": 0,
           "block_sha256": "200150e3b940"
         }
       ]
@@ -705,5 +705,10 @@
       ]
     }
   },
-  "shipped_as": "product release v0.6.5 (2026-09-12), GitHub Latest"
+  "shipped_as": "product release v0.6.5 (2026-09-12), GitHub Latest",
+  "correction": {
+    "corrected_by": "docs/measurements/2026-09-12-client-channel-contract-qualification.json (EXP-034, 2026-09-12)",
+    "field": "hosts_restored",
+    "note": "This receipt's hosts_restored sentence claimed the RTX 5090 appliance's production container was serving again. It was not: production had been stopped for a route window at 2026-09-11T23:59:37Z with its restart policy pinned off and was not restored until 2026-09-12. The claim had been read off the route's own container on port 18089. No measurement in this receipt is affected - every run here used the route container - but the restored-incumbent statement was false."
+  }
 }

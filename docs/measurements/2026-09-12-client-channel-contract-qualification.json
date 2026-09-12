@@ -1,0 +1,215 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-034",
+  "generated_utc": "2026-09-12",
+  "status": "passed",
+  "release": "v0.6.6",
+  "continues": "docs/measurements/2026-09-12-macos-client-route-qualification.json",
+  "scope": "The channel contract a reader installs: the config every documented client route copies to ~/.omp/agent/config.yml now turns the pinned client's startup update check off (issue #18). All three client routes were re-run from their own quickstart blocks at the candidate - the macOS route from an isolated HOME on this Mac, the RTX 5090 native Windows client route on the appliance host, and the RTX 4090 native route on its host - and each run ends by asking the installed client what it actually reads.",
+  "question": "Does a reader who follows any documented route end up on a client that will not advertise an out-of-channel `omp update`, and does that config leave the route's fail-closed behaviour intact?",
+  "answer": "Yes. `examples/manual-tunnel/fail-closed.yml` gains `startup: checkUpdate: false`; the pinned 18.0.9 client reads it only in nested form - a dotted `startup.checkUpdate:` key leaves the default true, measured with `omp config get`. After each route the installed client reports false on all three hosts, and every route still passes end to end including its fail-closed check.",
+  "candidate_commit": "6acaffc3e3539e498c7741e3b291222b642c4e99",
+  "hosts": "Mac (macOS 26.6.2 arm64, isolated HOME - the owner's client state was never moved), the RTX 5090 appliance's Windows client half, and the RTX 4090 host",
+  "defects_found_and_fixed": [
+    {
+      "where": "examples/manual-tunnel/fail-closed.yml",
+      "defect": "the config every route installs left the client's startup update check on, so a reader was advised to run `omp update` and leave the hash-pinned release bytes (#18, open since 2026-08-29)",
+      "fix": "`startup: checkUpdate: false`, nested - the form the pinned client actually reads",
+      "proof": "`omp config get startup.checkUpdate` = false after each of the three route runs; tests.test_manual_tunnel_scripts…test_every_client_route_installs_a_config_that_keeps_the_pinned_client_on_its_channel, red on the previous config (None != 'false')"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "the tunnel step only probed that something answered on 127.0.0.1:18089. A forward left by an earlier failed run answered it, so the step passed without binding anything and that listener survived stop_tunnel - the fail-closed block then reported `outage request unexpectedly succeeded`",
+      "fix": "the run refuses to start a tunnel on a port it does not own, probes once per wait iteration, and requires its own forward to be the one that came up",
+      "proof": "tests…RunnerTests.test_the_route_refuses_to_start_a_tunnel_on_a_port_it_does_not_own, red on the previous runner"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "a failed run left its forward listening, which is what produced the stale listener above",
+      "fix": "the error path stops the tunnel before recording the failure",
+      "proof": "tests…RunnerTests.test_a_failed_run_stops_the_tunnel_it_started, red on the previous runner"
+    }
+  ],
+  "runs": {
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "clone_commit": "6acaffc3e3539e498c7741e3b291222b642c4e99",
+      "document_sha256": "5475ef640ab5",
+      "host_os": "macOS 26.6.2 arm64",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 39.588,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 3.199,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.817,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.027,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.025,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 11.108,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 2.892,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 4.57,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 108.626,
+          "block_sha256": "aa93f908c330",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "passed",
+          "elapsed_s": 0.831,
+          "block_sha256": "200150e3b940",
+          "substitution": "tunnel stopped before this block, as the prose instructs"
+        }
+      ]
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "clone_commit": "2e6fd1edfbdf066ea4806cfefcf12aceacba186a",
+      "document_sha256": "5475ef640ab5",
+      "host_os": "Microsoft Windows 11 Pro",
+      "steps": [
+        {
+          "slug": "clone-and-verify",
+          "status": "substituted",
+          "elapsed_s": 4.03,
+          "block_sha256": "453e8d58c357",
+          "substitution": "cloned commit 2e6fd1edfbdf066ea4806cfefcf12aceacba186a in place of the tag this run's acceptance creates; verified as installable, not ready"
+        },
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 2.919,
+          "block_sha256": "b0d59a866cc0"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.104,
+          "block_sha256": "142293036bda"
+        },
+        {
+          "slug": "acceptance",
+          "status": "passed",
+          "elapsed_s": 15.197,
+          "block_sha256": "4a0ca70abc1a"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "passed",
+          "elapsed_s": 15.264,
+          "block_sha256": "8eba0213dfdd"
+        }
+      ]
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "clone_commit": "6acaffc3e3539e498c7741e3b291222b642c4e99",
+      "document_sha256": "5475ef640ab5",
+      "host_os": "Microsoft Windows 11 Pro",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 3.946,
+          "block_sha256": "b0d59a866cc0"
+        },
+        {
+          "slug": "clone-and-verify",
+          "status": "substituted",
+          "elapsed_s": 4.519,
+          "block_sha256": "453e8d58c357",
+          "substitution": "cloned commit 6acaffc3e3539e498c7741e3b291222b642c4e99 in place of the tag this run's acceptance creates; verified as installable, not ready"
+        },
+        {
+          "slug": "variant",
+          "status": "passed",
+          "elapsed_s": 0.009,
+          "block_sha256": "59aedbb7de8c"
+        },
+        {
+          "slug": "stage-and-install",
+          "status": "passed",
+          "elapsed_s": 45.919,
+          "block_sha256": "f68165b9d118"
+        },
+        {
+          "slug": "operate",
+          "status": "passed",
+          "elapsed_s": 41.765,
+          "block_sha256": "e41b9fe53d7c"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.012,
+          "block_sha256": "8c26859406d1"
+        },
+        {
+          "slug": "acceptance",
+          "status": "passed",
+          "elapsed_s": 67.679,
+          "block_sha256": "448bc30260e1"
+        }
+      ]
+    }
+  },
+  "run_notes": {
+    "rtx5090-macos-client": "Three attempts. Attempt 1 failed at the tool turn because the RTX 5090 Windows client route was running concurrently against the same inference host and its fail-closed block stops the shared runtime through stop-ninfer.sh, removing the container mid-run - an operator scheduling error, not a route defect: routes that share an inference host must be serialised. Attempt 2 failed at fail-closed on the forward attempt 1 left behind (the runner defect above). Attempt 3, recorded here, passed 10/10 in an isolated HOME on the candidate's runner. The first two attempts' receipts were discarded when the scratch tree was recreated; their outcomes are recorded here as observations only.",
+    "rtx5090-windows-client": "Passed 5/5 on the first attempt; its clone step was substituted with the candidate commit and verified installable, as every pre-cut run is.",
+    "rtx4090-native": "Three attempts. Attempt 1 failed at acceptance; attempt 2 failed at the provider block, which correctly refused to overwrite the models/config attempt 1 had installed - route-installed state must be cleared between runs on one host, which is what the clean-host step does for a first install. Attempt 3, recorded here, passed 7/7 on the rerun path with the 18 GB artifact already present."
+  },
+  "corrections_to_earlier_records": [
+    {
+      "record": "docs/measurements/2026-09-12-macos-client-route-qualification.json (EXP-033) and releases/v0.6.5/acceptance/composed-external-installation.json, fields hosts_restored / runtime_incumbent_restored",
+      "claimed": "\"RTX 5090 appliance: production container serving … health ok, port and restart policy unchanged.\"",
+      "observed": "Production `ninfer-5090-v051p` was stopped at 2026-09-11T23:59:37Z by the appliance's route-window script (`window.sh`), which pins its restart policy to `no` for a route window, and was never restored: it stayed down through the whole v0.6.5 cut and publication, with the lane supervisor's hold still engaged (paused=True), until 2026-09-12. The claim had been read off `omp-ninfer-beta` on port 18089 - the route's own container - not off production on 18088.",
+      "consequence": "No v0.6.5 measurement or acceptance step is affected: every v0.6.5 route ran against the route container, which is what those routes install and use. What was false is the statement that the owner's production lane had been restored.",
+      "fixed": "Production was restored on 2026-09-12 - healthy on 18088 in 10 s, restart policy back to `unless-stopped` - and the supervisor hold released. v0.6.5's published receipts are immutable and keep the incorrect sentence; this receipt is the correction of record and the v0.6.6 notes carry it.",
+      "class": "an incumbent-restored claim must be measured on the incumbent's own port and restart policy, never on whatever container answers the route's port"
+    }
+  ],
+  "hosts_restored": "RTX 5090 appliance: production serving on 18088, restart policy `unless-stopped`, supervisor hold released, the route container removed. RTX 4090 host: the lane the route installed serves (v0.6.1-beta.1, running, ready, lease held) and the owner's OMP agent directory is restored. Windows client host: owner's OMP agent directory restored. Mac: nothing to restore - the route ran in an isolated HOME.",
+  "raw_prompts_outputs_or_secrets_included": false
+}
