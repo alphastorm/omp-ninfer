@@ -57,6 +57,24 @@ PY
 
 elapsed() { python3 -c "import time; print(round(time.time() - $CURRENT_T0, 3))"; }
 
+stop_tunnel() {
+  # the block exec'd ssh inside a subshell; stop every process the wrapper started
+  pkill -P "$TUNNEL_PID" 2>/dev/null || true
+  kill "$TUNNEL_PID" 2>/dev/null || true
+  wait "$TUNNEL_PID" 2>/dev/null || true
+  for _ in $(seq 1 10); do
+    python3 - <<'PY' || break
+import socket, sys
+s = socket.socket(); s.settimeout(1)
+try: s.connect(("127.0.0.1", 18089))
+except OSError: sys.exit(1)
+finally: s.close()
+PY
+    sleep 1
+  done
+  TUNNEL_PID=""
+}
+
 on_error() {
   local rc=$? cmd=$BASH_COMMAND
   trap - ERR
@@ -104,12 +122,13 @@ for line in "${STEP_LINES[@]}"; do
     substitution="USER@RUNTIME_HOST replaced by the operator's SSH destination"
   fi
   if [[ $heading == "Fail closed" && -n $TUNNEL_PID ]]; then
-    kill "$TUNNEL_PID" 2>/dev/null; wait "$TUNNEL_PID" 2>/dev/null || true; TUNNEL_PID=""
+    stop_tunnel
     substitution="${substitution:+$substitution; }tunnel stopped before this block, as the prose instructs"
   fi
   if [[ $text == *open-tunnel.sh* ]]; then
     # a foreground process the reader keeps open in another terminal
-    ( cd "$CLONE" && eval "$text" ) </dev/null & TUNNEL_PID=$!
+    # its own process group, so stopping the tunnel stops the ssh the block exec'd, not just a wrapper
+    ( trap - ERR; set +eE; cd "$CLONE" && eval "$text" ) </dev/null & TUNNEL_PID=$!
     for _ in $(seq 1 30); do sleep 1; kill -0 "$TUNNEL_PID" 2>/dev/null || break; python3 - <<'PY' && break
 import socket, sys
 s = socket.socket(); s.settimeout(1)
@@ -129,7 +148,7 @@ PY
   write_receipt
 done
 trap - ERR
-[[ -n $TUNNEL_PID ]] && { kill "$TUNNEL_PID" 2>/dev/null; wait "$TUNNEL_PID" 2>/dev/null || true; }
+[[ -n $TUNNEL_PID ]] && stop_tunnel
 if (( ${#RECORDS[@]} != ${#STEP_LINES[@]} )); then
   STATUS=failed; write_receipt
   echo "route $(lane): only ${#RECORDS[@]} of ${#STEP_LINES[@]} steps ran" >&2; exit 1

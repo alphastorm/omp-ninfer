@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import socket
 import subprocess
 import sys
 import tempfile
@@ -94,14 +95,16 @@ class ExtractionTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
-    def write_bundle(self, root: Path, steps: list[tuple[str, str]]) -> Path:
+    def write_bundle(self, root: Path, steps: list[tuple[str, ...]]) -> Path:
         bundle = root / "bundle"
         bundle.mkdir()
         manifest = []
-        for position, (slug, body) in enumerate(steps, start=1):
+        for position, step in enumerate(steps, start=1):
+            slug, body = step[0], step[1]
+            heading = step[2] if len(step) > 2 else "H"
             name = f"{position:02d}-{slug}.sh"
             (bundle / name).write_text(body, encoding="utf-8")
-            manifest.append({"position": position, "slug": slug, "file": name, "heading": "H",
+            manifest.append({"position": position, "slug": slug, "file": name, "heading": heading,
                              "index": 0, "language": "sh",
                              "sha256": hashlib.sha256(body.encode()).hexdigest()})
         (bundle / "manifest.json").write_text(json.dumps({
@@ -145,6 +148,37 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(code, 0, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
             self.assertTrue((root / "after.txt").exists())
+
+    def test_the_tunnel_block_is_stopped_for_real_before_fail_closed(self) -> None:
+        """The tunnel block execs ssh inside the runner's wrapper; stopping only the wrapper
+        leaves the listener up and the fail-closed check sees a live route (macOS run 8)."""
+        probe = socket.socket()
+        probe.settimeout(0.5)
+        try:
+            probe.connect(("127.0.0.1", 18089))
+        except OSError:
+            pass
+        else:
+            self.skipTest("local port 18089 is in use")
+        finally:
+            probe.close()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [
+                ("tunnel", "./open-tunnel.sh\n"),
+                ("fail-closed", "python3 - <<'PY'\nimport socket, sys\ns = socket.socket(); s.settimeout(1)\n"
+                                "try: s.connect(('127.0.0.1', 18089))\nexcept OSError: sys.exit(0)\n"
+                                "print('outage request unexpectedly succeeded'); sys.exit(1)\nPY\n", "Fail closed"),
+            ])
+            listener = root / "clone" / "open-tunnel.sh"
+            listener.write_text("#!/bin/sh\nexec python3 -c 'import socket, time\ns = socket.socket()\n"
+                                "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
+                                "s.bind((\"127.0.0.1\", 18089)); s.listen(1); time.sleep(600)'\n")
+            listener.chmod(0o755)
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 0, receipt)
+            self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
+            self.assertIn("tunnel stopped before this block", receipt["steps"][1]["substitution"])
 
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
