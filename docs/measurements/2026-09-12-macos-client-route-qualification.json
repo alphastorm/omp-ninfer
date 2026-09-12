@@ -579,5 +579,131 @@
     "run9": "full pass, 10/10, 158 s: client-install 9.0 s, survives-restart 110.3 s (docker restart --timeout 60 plus health wait through the tunnel)"
   },
   "hosts_restored": "Mac: the owner's ~/.omp/agent, launcher, and client restored; the reader-path clone removed. RTX 5090 appliance: production container serving (restarted once by the route's survives-restart block, as documented), health ok, port and restart policy unchanged.",
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "post_cut_verbatim_runs": {
+    "note": "after the v0.6.5 tag existed, both routes ran again from a stock clone of the tag with no substitution beyond the reader's own SSH destination: the macOS route from this Mac with the owner's client state moved aside (its clone at the reader's path is the tag), and the RTX 4090 native route on its host, whose clone-and-verify block cloned `--branch v0.6.5` and reported the manifest ready. The 4090 host serves the route-installed lane afterwards (v0.6.1-beta.1, running, ready, lease held, 450 W).",
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "clone_commit": "76bde65b425f06a3d96666b66d8c8e456375391c",
+      "document_sha256": "13ee191cc59f",
+      "host_os": "macOS 26.6.2 arm64",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 13.623,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 2.361,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.679,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.109,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.111,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 17.045,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 3.321,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 6.209,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 112.921,
+          "block_sha256": "aa93f908c330",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "passed",
+          "elapsed_s": 1.56,
+          "block_sha256": "200150e3b940",
+          "substitution": "tunnel stopped before this block, as the prose instructs"
+        }
+      ]
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "clone_commit": "76bde65b425f06a3d96666b66d8c8e456375391c",
+      "document_sha256": "13ee191cc59f",
+      "host_os": "Microsoft Windows 11 Pro",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 7.174,
+          "block_sha256": "b0d59a866cc0"
+        },
+        {
+          "slug": "clone-and-verify",
+          "status": "passed",
+          "elapsed_s": 4.436,
+          "block_sha256": "453e8d58c357"
+        },
+        {
+          "slug": "variant",
+          "status": "passed",
+          "elapsed_s": 0.012,
+          "block_sha256": "59aedbb7de8c"
+        },
+        {
+          "slug": "stage-and-install",
+          "status": "passed",
+          "elapsed_s": 51.158,
+          "block_sha256": "f68165b9d118"
+        },
+        {
+          "slug": "operate",
+          "status": "passed",
+          "elapsed_s": 41.367,
+          "block_sha256": "e41b9fe53d7c"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.011,
+          "block_sha256": "8c26859406d1"
+        },
+        {
+          "slug": "acceptance",
+          "status": "passed",
+          "elapsed_s": 66.925,
+          "block_sha256": "448bc30260e1"
+        }
+      ]
+    }
+  },
+  "shipped_as": "product release v0.6.5 (2026-09-12), GitHub Latest"
 }
