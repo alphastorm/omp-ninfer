@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.6] - 2026-09-12
+
+No component changed. The config every documented client route installs now turns the pinned
+client's startup update check off, so it no longer advertises an out-of-channel `omp update`
+([#18](https://github.com/alphastorm/omp-ninfer/issues/18)); every client-installing route was
+re-run from its own blocks and reads the setting back from the client it installed (EXP-034,
+[receipt](docs/measurements/2026-09-12-client-channel-contract-qualification.json)). Component
+bytes, profiles and configuration are v0.6.3's and carry by hash; route acceptance ran on
+2026-09-12 ([receipt](releases/v0.6.6/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- `examples/manual-tunnel/fail-closed.yml` adds `startup: checkUpdate: false`. The pinned
+  18.0.9 client reads the setting only in nested form - a dotted `startup.checkUpdate:` key
+  leaves the default on - and a test refuses any other shape. `docs/QUICKSTART.md` now states
+  what the config does and how to upgrade instead of pointing at an open issue.
+- `scripts/hosts/run-documented-route.sh`: a run refuses to start its tunnel on a port it does
+  not own and releases its forward on the error path. A forward left by an earlier failed run
+  answered the readiness probe, so the tunnel step passed without binding anything and the stale
+  listener made the fail-closed check report a live route.
+
+### Fixed
+
+- Evidence correction: v0.6.5's receipts claimed the appliance's production lane had been
+  restored after that window. It had been stopped for a route window with its restart policy
+  pinned off and stayed down through the v0.6.5 cut; the claim had been read off the route's own
+  container. No v0.6.5 measurement is affected. Production was restored on 2026-09-12 and the
+  correction is recorded in this release's qualification receipt.
+
+### Measured
+
+- EXP-034: macOS client route 10/10 from an isolated HOME (including a server restart with the
+  session continued), native Windows client route 5/5, RTX 4090 native route 7/7; the installed
+  client reports `startup.checkUpdate` false on all three hosts and every fail-closed check
+  still fails its outage request.
+
 ## [0.6.5] - 2026-09-12
 
 No component changed. The quickstart's primary route - macOS client, Windows 11 + Docker Desktop
@@ -949,7 +985,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.6...HEAD
+[0.6.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...v0.6.3

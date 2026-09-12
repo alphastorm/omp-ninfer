@@ -1,0 +1,92 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.6",
+  "as_of": "2026-09-12",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Every documented route that installs an OMP client config was re-run from its own quickstart blocks at the candidate, and each run reads the setting back from the client it installed. The inference-host route carries from v0.6.5: it installs no client config and its blocks are unchanged. No component changed.",
+  "document_sha256": "5475ef640ab5",
+  "candidate_commit": "6acaffc3e3539e498c7741e3b291222b642c4e99",
+  "routes": {
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 163.849,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "rerun path with the 18 GB artifact present; operate, provider and acceptance passed"
+    },
+    "rtx5090-container-host": {
+      "status": "carried",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "carried_from": "v0.6.5; the inference-host route installs no client config and its blocks are unchanged"
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 173.683,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "run from an isolated HOME; vision, resume, a server restart with the session continued, and fail-closed all passed"
+    }
+  },
+  "steps": {
+    "channel_contract": {
+      "status": "passed",
+      "note": "the config every client route installs disables the pinned client's startup update check; `omp config get startup.checkUpdate` returned false on all three hosts after their routes ran"
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "every executed step's bytes hashed to the documented block's SHA-256 in the bundle manifest; the only substitutions are the reader's own SSH destination and, on the two Windows routes, the pre-cut clone of the candidate commit"
+    },
+    "fail_closed_intact": {
+      "status": "passed",
+      "note": "each route's fail-closed check still fails the outage request: macOS with the tunnel stopped, the Windows client after stop-ninfer.sh, the RTX 4090 after Control-Release -Action Stop"
+    },
+    "tunnel_ownership": {
+      "status": "passed",
+      "note": "the runner now refuses a forward it does not own and releases its forward on the error path; both are regression tests that fail on the previous runner"
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance: production serving on 18088, restart policy `unless-stopped`, supervisor hold released, the route container removed. RTX 4090 host: the lane the route installed serves (v0.6.1-beta.1, running, ready, lease held) and the owner's OMP agent directory is restored. Windows client host: owner's OMP agent directory restored. Mac: nothing to restore - the route ran in an isolated HOME."
+    }
+  },
+  "qualification_receipt": "docs/measurements/2026-09-12-client-channel-contract-qualification.json",
+  "corrections_carried": "This release's evidence also carries the correction to v0.6.5's restored-incumbent claim; see corrections_to_earlier_records in the qualification receipt.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

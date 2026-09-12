@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.6",
+  "as_of": "2026-09-12",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "documented-route acceptance of every route that installs an OMP client config - the macOS route, the native Windows client route, and the RTX 4090 native route - each re-run from its own blocks at the candidate and each reading the installed client's channel setting back. Component bytes, profiles and configuration are unchanged from v0.6.3.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "5e59988be74e257a3fb877236c5f807d9f276cbad3d1f94bd4cf8c856ae9e681",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7. What changed is the config a route installs alongside the client: the pinned client no longer advertises an out-of-channel `omp update` (#18).",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "each route downloaded the client archive from its public URL and hashed it; the RTX 4090 route installed from the lane's public URLs on the rerun path"
+    },
+    "checksum_verification": {
+      "status": "carried",
+      "note": "the checked-in checksum sets are unchanged from v0.6.5"
+    },
+    "anonymous_image_pull": {
+      "status": "carried",
+      "note": "digest a62dd5b8, unchanged; the appliance serves it"
+    },
+    "launch_identity": {
+      "status": "carried",
+      "note": "RTX 5090: configuration 622ab621 under qwen38-5090-v0.6.3, reported by the status route this window; RTX 4090: the route-installed lane reported v0.6.1-beta.1 ready with its lease held"
+    },
+    "auth_boundary": {
+      "status": "carried",
+      "note": "unchanged from v0.6.3; the route's turns ran authenticated through the tunnel with the key copied by the documented block"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "all three routes' tool turns returned the planted marker exactly"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "the nonce came back on --continue on every route, and again after the macOS route restarted the server container"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "every route's outage request failed as documented"
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.6/acceptance/documented-routes.json",
+      "sha256": "0ca33e041f7437e0257a3db08a9a7873dcdba905c7d216d85877ee34c0800792",
+      "summary": "macOS 10/10 from an isolated HOME, native Windows client 5/5, RTX 4090 native 7/7; installed client setting read back false on all three hosts"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance: production serving on 18088, restart policy `unless-stopped`, supervisor hold released, the route container removed. RTX 4090 host: the lane the route installed serves (v0.6.1-beta.1, running, ready, lease held) and the owner's OMP agent directory is restored. Windows client host: owner's OMP agent directory restored. Mac: nothing to restore - the route ran in an isolated HOME."
+    }
+  }
+}

@@ -60,7 +60,7 @@ class BindNativeVariantTest(unittest.TestCase):
         self.write_checksums()
         # The binder writes the checked-in checksum copy and reads the lane receipt from the
         # release tree, so point it at a temporary repository root.
-        self.release_root = self.workspace / "releases" / "v0.6.5" / "qualification"
+        self.release_root = self.workspace / "releases" / "v0.6.6" / "qualification"
         self.release_root.mkdir(parents=True)
         (self.release_root / "rtx4090.json").write_text('{"status": "passed"}', encoding="utf-8")
         BINDER.ROOT = self.workspace
@@ -86,7 +86,7 @@ class BindNativeVariantTest(unittest.TestCase):
 
     def bind(self) -> dict[str, object]:
         return BINDER.bind(
-            self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.5"
+            self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.6"
         )
 
     def test_binds_every_published_asset_from_the_distribution_set(self) -> None:

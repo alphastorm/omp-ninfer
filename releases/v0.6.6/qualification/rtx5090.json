@@ -1,0 +1,208 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified": true,
+  "release": "v0.6.2",
+  "as_of": "2026-09-11",
+  "release_tag": "v0.6.2-qwen38-5090-beta.1",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+  "identity": {
+    "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "server_binary_sha256": "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "oci_manifest_digest": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+    "image_id": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a"
+  },
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true,
+    "narrative": "Lane convergence, not a tuning change: the RTX 5090 container lane moves from the feat/warm-arrival branch head d956e6d6 (shipped v0.5.1 through v0.6.1) onto the mainline runtime at 63f28c95 - the same commit both native Windows lanes now build from - on the unchanged v0.4.8 argument set (--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24). The candidate was qualified on 2026-09-10 against an appliance-built image (EXP-030, 7/7 gates), and every gate that a published artifact can answer was then re-run on 2026-09-11 against the published image pulled anonymously by digest. Throughput is within run-to-run noise of v0.5.1 (prefill 2,169.9 published / 2,144.1 candidate / 2,180.3 on v0.5.1; decode 132.53 / 133.3 / 133.13), which is the result the shared tree had to produce: the native lanes' changes reach the container lane with no measurable effect on it."
+  },
+  "build": {
+    "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13.1.115, GNU 13.3.0), clean tree at 63f28c95 with NINFER_PATCH_STACK_SHA bound; the published image is that archive's binaries wrapped onto the same digest-pinned base by the runtime-image workflow (run 34555976412)",
+    "ctest": "11/11 focused serve suites in the build container (checkpoint_io_contract, resource_manager, openai_schema, responses_schema, response_store, serve_options, request_log, http_error_handler, http_server_stop, session_checkpoint_store, automatic_checkpoint_queue); additionally the full 102-test suite ran on an ephemeral RunPod RTX PRO 4000 Blackwell (sm_120a) before the appliance window at 101/102, whose single failure is the small-SM-count workspace-query artefact alphastorm/ninfer#42 - fixed after this candidate at 29caaf34, latent on all three shipped SM counts, and not in these bytes",
+    "archive": "ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.tar.gz sha256 05aa9c4b570d8864e684d2de1cacc7091055de96d6dea6fdf6776082d2fd00c2 (319,416,469 bytes)",
+    "sbom": "ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.spdx.json sha256 1654ba293e7e83a6e0128494b14d5b86e4a6bb03cd8a575a8df8801b1c6c811b",
+    "source_archive": "runtime-source-63f28c95.tar.gz sha256 5dc8abc9cc2f3fa65a91e822099d5414ed7df4f8a9ca74b5c63940a71672171b, byte-identical to git archive of the commit",
+    "package_identity_note": "packaged from the exact qualified build tree with tools/release/package.py; the published image's own ninfer-serve hashes to the manifest's server binary and its ninfer CLI to b9b54b7f567968b5b813ac55636cee9188f26c90f92340234f5f745f27b402cb"
+  },
+  "context_cache_profile": {
+    "arguments": [
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24"
+    ],
+    "resolved_startup_line": "KV capacity auto resolved=131072 tokens pages=2048/2048 runtime=10.12 GiB free-after-weights=13.25 GiB free-after-startup=3.20 GiB headroom=1.00 GiB slack=3.13 GiB context-cache=on",
+    "unchanged_from": "v0.4.8"
+  },
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "exact_retrieval_at_every_point": true,
+      "points": [
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2169.9,
+          "server_prefill_seconds": 58.363,
+          "wall_seconds": 59.933,
+          "prefix_reuse_path": "root",
+          "measured_on": "the published image"
+        },
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2144.1,
+          "wall_seconds": 60.654,
+          "prefix_reuse_path": "root",
+          "measured_on": "the appliance-built candidate (EXP-030)"
+        }
+      ],
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "expected_output": "ORCHID=493817; COLOR=COBALT",
+      "v051_reference_tokens_per_second": 2180.3
+    },
+    "decode": {
+      "status": "passed",
+      "completion_tokens": 2048,
+      "completion_tokens_per_second_wall": 132.53,
+      "candidate_reference": 133.3,
+      "v051_reference": 133.13,
+      "workload": "technical-writing generation at temperature 0 on the published image",
+      "decode_tokens_per_second": 137.7,
+      "server_decode_seconds": 14.873,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "measured_on": "the published image, and again on the candidate"
+    },
+    "fanout_acceptance": {
+      "status": "passed",
+      "gate": "four stored sibling forks of one template reuse the base anchor in one process and again after a verified restart, at two template sizes",
+      "template_57853": {
+        "cold_prefill_s": 22.203,
+        "hot_fork_median_s": 1.403,
+        "hot_fork_max_s": 1.619,
+        "restart_ready_s": 20.89,
+        "post_restart_resume_s": 3.357,
+        "warm_start_fork_median_s": 1.354,
+        "reuse": "8/8 private_long_anchor"
+      },
+      "template_67717": {
+        "hot_fork_median_s": 1.533,
+        "hot_fork_max_s": 1.572,
+        "restart_ready_s": 21.24,
+        "post_restart_resume_s": 3.854,
+        "warm_start_fork_median_s": 1.382,
+        "reuse": "8/8 private_long_anchor"
+      },
+      "transient_retries": 0,
+      "measured_on": "the appliance-built candidate; the published image carries these by binary identity"
+    },
+    "warm_arrival": {
+      "status": "passed",
+      "gate": "after a verified restart every sibling fork of a restored template is served on the shared anchor whether an endpoint resume or a fork arrives first, and every resume quotes the planted ledger keys exactly",
+      "resume_first": {
+        "sequence": [
+          [
+            "endpoint_resume_first",
+            "private_response_replay",
+            4.386
+          ],
+          [
+            "fork_after_resume",
+            "private_long_anchor",
+            2.876
+          ],
+          [
+            "fork_second",
+            "private_long_anchor",
+            1.353
+          ]
+        ],
+        "every_post_restart_fork_hot": true,
+        "restored_retrieval_exact": true
+      },
+      "checkpoint_bytes": 4537065577,
+      "measured_on": "the appliance-built candidate"
+    },
+    "restore": {
+      "status": "passed",
+      "checkpoint_bytes": 5201400249,
+      "restore_wall_s": [
+        3.998,
+        3.625
+      ],
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": true,
+      "tampered_http_status": 404,
+      "v051_reference_restore_wall_s": [
+        3.8,
+        4.4
+      ],
+      "measured_on": "the appliance-built candidate"
+    },
+    "lifecycle": {
+      "status": "passed",
+      "note": "candidate and published-image runs were both preflighted and started through tools/lifecycle/ninfer_container.py with image id, binary, model artifact and configuration identity bound; preflight refuses while the loopback port is held, which is the fail-closed sequencing the window script exists for. The configuration identity computed from the published image's config equals the candidate's, so the profile did not drift between qualification and publication."
+    }
+  },
+  "arcs": {
+    "origin_authentication": {
+      "status": "inherited",
+      "inherited_from": "releases/v0.6.1/qualification/rtx5090.json",
+      "basis": "manifest MAC publication and verification are store-format behaviour this change does not touch; the tamper round loaded a MAC-tagged generation and refused it on the streamed payload digest"
+    },
+    "save_restart_restore": {
+      "status": "passed",
+      "template_input_tokens": 67717,
+      "explicit_checkpoint_bytes": 5201400249,
+      "process_restart": "docker restart (verified: cumulative prefill counter 68400 -> 53; ready after 21.29 s)",
+      "post_restart_resume_reuse": "private_endpoint",
+      "post_restart_resume_wall_s": 3.998,
+      "second_restart_resume_wall_s": 3.625
+    },
+    "checkpoint_scheduling": {
+      "status": "passed",
+      "explicit_save_wall_s": [
+        4.371,
+        4.181,
+        4.212
+      ],
+      "note": "explicit saves of a 5.2 GB session stayed near four seconds across two settle cycles; automatic queue behaviour unchanged (store schema 2)"
+    }
+  },
+  "scope_exclusions": [
+    "the fanout, warm-arrival and restore probes were measured on the candidate image built from these exact bytes on the appliance, before the published image existed; every gate a published artifact can answer (retrieval, decode, agent protocol across a restart, identity, auth boundary, completion) was re-run on the pulled image and the served binary hash is identical",
+    "no RTX 4090 or RTX 3090 change: the 4090 carries v0.6.1 and the 3090 v0.2.5 unchanged, and the 3090 mainline candidate waits for its host",
+    "no OMP client change",
+    "alphastorm/ninfer#42 is fixed after these bytes (29caaf34) and is not in this release; it is over-provisioning on devices with fewer resident CTAs than the preferred split, latent on the 5090, 4090 and 3090 SM counts"
+  ],
+  "review": {
+    "council": "not invoked",
+    "dispositions": "n/a",
+    "deferred": []
+  },
+  "private_fleet_projection_included": false,
+  "private_paths_included": false,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "durable_qualification": {
+    "summary": "releases/v0.4.1/qualification/rtx5090-durable.json",
+    "note": "store format unchanged (schema 2); this release changes which source tree the lane is built from, not what it writes"
+  }
+}

@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.5`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.5` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.6`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.6` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,27 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.6 public release (the pinned client stays on its channel)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.6`, GitHub `Latest`. No component changed; the
+  config every documented route installs turns the pinned client's startup update check off, so
+  it no longer advertises an out-of-channel `omp update` (#18, EXP-034).
+- Component bytes, deployment profile `qwen38-5090-v0.6.3` and configuration `622ab621...` are
+  byte-identical to v0.6.3.
+- Route acceptance on 2026-09-12 ([receipt](../releases/v0.6.6/acceptance/documented-routes.json) ·
+  [composed](../releases/v0.6.6/acceptance/composed-external-installation.json)): the macOS route
+  10 of 10 from an isolated HOME, the native Windows client route 5 of 5, the RTX 4090 native
+  route 7 of 7, each reading `startup.checkUpdate` back from the client its own route installed,
+  and each fail-closed check still failing its outage request.
+- Correction of record: v0.6.5's receipts claimed the appliance's production lane had been
+  restored after that window; it had been stopped for a route window with its restart policy
+  pinned off and stayed down through the v0.6.5 cut. No v0.6.5 measurement is affected. See
+  [the v0.6.6 qualification receipt](../docs/measurements/2026-09-12-client-channel-contract-qualification.json).
+- Nothing to reinstall; re-clone the tag and rerun the config install step.
+
 ### v0.6.5 public release (the macOS route, as a stranger runs it)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.5`, GitHub `Latest`. No component changed; the
+- Product release: `alphastorm/omp-ninfer@v0.6.5` (superseded by v0.6.6). No component changed; the
   quickstart's primary macOS route runs from its own blocks on a Mac with every outcome decided
   by the shell, so every documented route is covered by the runner (EXP-033).
 - Component bytes, deployment profile `qwen38-5090-v0.6.3` and configuration `622ab621...` are

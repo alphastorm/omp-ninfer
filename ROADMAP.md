@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.5
+## Where this is now — v0.6.6
 
 All three lanes install from public URLs with a durable session store on the route the
 documentation gives you - from `v0.6.3` the published RTX 5090 launcher mounts one, which it did
@@ -333,6 +333,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.6` | The config every documented route installs keeps the pinned client on its channel: no out-of-channel `omp update` advice; every client-installing route re-run and the setting read back from the installed client; no component changed |
 | `v0.6.5` | The quickstart's primary macOS route runs verbatim from its own blocks with shell-decided outcomes, including a server restart with the session continued; every documented route is now runner-covered; no component changed |
 | `v0.6.4` | Every documented Windows route runs verbatim from its own quickstart blocks on a stock host; a clone yields the recorded bytes on every platform; no component changed |
 | `v0.6.3` | The documented public RTX 5090 route mounts a durable session store and declares the identity of the configuration it runs; no component changed |
