@@ -46,7 +46,7 @@ out = {
     "artifact_type": "omp_ninfer_documented_route_run", "schema_version": 1,
     "lane": manifest["lane"], "document": manifest["document"],
     "document_sha256": manifest["document_sha256"], "started_utc": started,
-    "completed_utc": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "completed_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     "host_os": host_os, "clone_commit": commit,
     "steps": [json.loads(r) for r in records], "status": status,
 }
@@ -81,7 +81,13 @@ for s in json.load(open(sys.argv[1]))["steps"]:
 lane() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["lane"])' "$MANIFEST"; }
 
 trap on_error ERR
-while IFS=$'\t' read -r position slug heading index sha file; do
+# The step list is read up front and iterated as an array: a block that starts a background
+# process or reads input must never share the loop's stdin, or the loop ends early and a
+# partial run reads as a pass (measured on the macOS route's tunnel step).
+STEP_LINES=()
+while IFS= read -r line; do STEP_LINES+=("$line"); done < <(steps)
+for line in "${STEP_LINES[@]}"; do
+  IFS=$'\t' read -r position slug heading index sha file <<<"$line"
   path="$BUNDLE/$file"
   actual=$(sha256sum -- "$path" | cut -d ' ' -f 1)
   if [[ "$actual" != "$sha" ]]; then
@@ -103,7 +109,7 @@ while IFS=$'\t' read -r position slug heading index sha file; do
   fi
   if [[ $text == *open-tunnel.sh* ]]; then
     # a foreground process the reader keeps open in another terminal
-    ( cd "$CLONE" && eval "$text" ) & TUNNEL_PID=$!
+    ( cd "$CLONE" && eval "$text" ) </dev/null & TUNNEL_PID=$!
     for _ in $(seq 1 30); do sleep 1; kill -0 "$TUNNEL_PID" 2>/dev/null || break; python3 - <<'PY' && break
 import socket, sys
 s = socket.socket(); s.settimeout(1)
@@ -121,9 +127,13 @@ PY
   fi
   record "$position" "$slug" "$heading" "$index" "$sha" "$actual" passed "$(elapsed)" "" "$substitution"
   write_receipt
-done < <(steps)
+done
 trap - ERR
 [[ -n $TUNNEL_PID ]] && { kill "$TUNNEL_PID" 2>/dev/null; wait "$TUNNEL_PID" 2>/dev/null || true; }
+if (( ${#RECORDS[@]} != ${#STEP_LINES[@]} )); then
+  STATUS=failed; write_receipt
+  echo "route $(lane): only ${#RECORDS[@]} of ${#STEP_LINES[@]} steps ran" >&2; exit 1
+fi
 STATUS=passed
 write_receipt
 echo "route $(lane): passed"

@@ -132,6 +132,20 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed", "failed", "skipped"])
             self.assertIn("exit 1: false", receipt["steps"][2]["error"])
 
+    def test_a_step_that_consumes_stdin_cannot_end_the_run_early(self) -> None:
+        """A block that reads stdin or backgrounds a process must not eat the step list;
+        a run that executed only some steps is a failure, never a pass (macOS route, EXP-032)."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [
+                ("eats-stdin", "cat >/dev/null\n"),
+                ("after", "echo reached > \"$PWD/../after.txt\"\n"),
+            ])
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 0, receipt)
+            self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
+            self.assertTrue((root / "after.txt").exists())
+
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
