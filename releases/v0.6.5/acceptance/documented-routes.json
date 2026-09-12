@@ -1,0 +1,106 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.5",
+  "as_of": "2026-09-12",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The quickstart's primary macOS route executed from its own blocks on a Mac as a stranger meets it, against the RTX 5090 appliance serving the published durable route through its Windows OpenSSH server; the three Windows routes carry from v0.6.4 by hash - their component bytes, profiles, and configuration are unchanged and the blocks they execute differ only in the release tag the clone block names. What this release changes - and what this receipt accepts - is the macOS documentation a reader executes.",
+  "document_sha256": "bbe0a3b15487",
+  "candidate_commit": "c14111fc6148fbcc2dbc4008c8f8957f40297b44",
+  "routes": {
+    "rtx4090-native": {
+      "status": "carried",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "first_install_run": "run5 (stage-and-install 775 s including the 18 GB artifact from Hugging Face)",
+      "full_pass_run": "run6 (rerun path, 484 s end to end)",
+      "carried_from": "v0.6.4 (releases/v0.6.4/acceptance/documented-routes.json); component bytes, profiles, and configuration unchanged; the Windows blocks these routes execute are byte-identical except the release tag the clone block names"
+    },
+    "rtx5090-container-host": {
+      "status": "carried",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "carried_from": "v0.6.4 (releases/v0.6.4/acceptance/documented-routes.json); component bytes, profiles, and configuration unchanged; the Windows blocks these routes execute are byte-identical except the release tag the clone block names"
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "vision": "the image acceptance described the release icon",
+      "fail_closed": "the outage request failed after stop-ninfer.sh",
+      "carried_from": "v0.6.4 (releases/v0.6.4/acceptance/documented-routes.json); component bytes, profiles, and configuration unchanged; the Windows blocks these routes execute are byte-identical except the release tag the clone block names"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 153.86,
+      "vision": "the image acceptance described the release icon",
+      "resume": "the nonce came back on --continue in the same session",
+      "survives_restart": "the server container was restarted from the Mac through the documented block and the continued session returned the nonce exactly",
+      "fail_closed": "with the tunnel stopped, the outage request failed and the block ended without the failure message",
+      "substitutions": [
+        "USER@RUNTIME_HOST replaced by the operator's SSH destination",
+        "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open",
+        "tunnel stopped before this block, as the prose instructs"
+      ]
+    }
+  },
+  "steps": {
+    "clean_host": {
+      "status": "passed",
+      "note": "Mac: the owner's OMP client, launcher, agent configuration and sessions moved aside; the release cloned at the reader's path (~/omp-ninfer); the only inherited state was the operator's SSH identity for the destination, which the route requires a reader to have"
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "every executed step's bytes hashed to the documented block's SHA-256 recorded in the bundle manifest; the only substitution is USER@RUNTIME_HOST -> the operator's destination, which is the reader's own value"
+    },
+    "tunnel_semantics": {
+      "status": "passed",
+      "note": "the tunnel block ran in the background where the prose says 'in another terminal', the runner waited for the local port, and stopped the exec'd ssh - not just its wrapper - before the fail-closed block where the prose says Ctrl-C"
+    },
+    "system_python": {
+      "status": "passed",
+      "note": "the runner and every block ran on macOS's system python3 (3.9.6), the only Python a stranger has"
+    },
+    "windows_destination": {
+      "status": "passed",
+      "note": "the key-copy and restart blocks were executed against a Windows OpenSSH destination whose default shell is cmd.exe; both forms were also measured byte-identical on a Linux destination"
+    },
+    "complete_run": {
+      "status": "passed",
+      "note": "a run that executes fewer steps than the bundle lists is a failure; run 6 of this window was exactly that false pass and is now a regression test"
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "note": "Mac: the owner's ~/.omp/agent, launcher, and client restored; the reader-path clone removed. RTX 5090 appliance: production container serving (restarted once by the route's survives-restart block, as documented), health ok, port and restart policy unchanged."
+    }
+  },
+  "qualification_receipt": "docs/measurements/2026-09-12-macos-client-route-qualification.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

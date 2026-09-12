@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.4
+## Where this is now — v0.6.5
 
 All three lanes install from public URLs with a durable session store on the route the
 documentation gives you - from `v0.6.3` the published RTX 5090 launcher mounts one, which it did
@@ -32,7 +32,10 @@ v0.4.1 (148.7 s) run in under 6 s of forks today
 also survives a restart on the RTX 5090: a restored template serves every sibling fork on the
 shared anchor in either arrival order, and a 5.2 GB checkpoint restores in 3.6-4.0 s instead of
 24 s ([receipt](docs/measurements/2026-09-10-restore-probe-rtx5090-v062.json)). A managed stop
-of the RTX 4090 lane saves every live session (EXP-028/EXP-029). Details:
+of the RTX 4090 lane saves every live session (EXP-028/EXP-029). Since `v0.6.4` the route a
+release accepts is the route the documentation prints: every documented route - the three Windows
+routes and, from `v0.6.5`, the quickstart's primary macOS row - runs verbatim from its own blocks
+with shell-decided outcomes (EXP-032, EXP-033). Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
@@ -330,6 +333,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.5` | The quickstart's primary macOS route runs verbatim from its own blocks with shell-decided outcomes, including a server restart with the session continued; every documented route is now runner-covered; no component changed |
 | `v0.6.4` | Every documented Windows route runs verbatim from its own quickstart blocks on a stock host; a clone yields the recorded bytes on every platform; no component changed |
 | `v0.6.3` | The documented public RTX 5090 route mounts a durable session store and declares the identity of the configuration it runs; no component changed |
 | `v0.6.2` | The RTX 5090 container lane on the mainline runtime: all three lanes built from one commit, requalified 7/7 on the owner appliance and re-verified against the anonymously pulled image, numbers within run-to-run noise of v0.5.1 |

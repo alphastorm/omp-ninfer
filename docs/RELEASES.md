@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.4`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.4` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.5`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.5` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,27 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.5 public release (the macOS route, as a stranger runs it)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.5`, GitHub `Latest`. No component changed; the
+  quickstart's primary macOS route runs from its own blocks on a Mac with every outcome decided
+  by the shell, so every documented route is covered by the runner (EXP-033).
+- Component bytes, deployment profile `qwen38-5090-v0.6.3` and configuration `622ab621...` are
+  byte-identical to v0.6.3; the three Windows routes carry their v0.6.4 acceptance by hash.
+- Route acceptance on 2026-09-12 ([receipt](../releases/v0.6.5/acceptance/documented-routes.json) ·
+  [composed](../releases/v0.6.5/acceptance/composed-external-installation.json)): client install
+  from the public URL, tunnel, key, provider, fail-closed configuration, tool, Vision, resume, a
+  server restart from the Mac with the session continued, fail-closed with the tunnel stopped -
+  10 of 10 steps.
+- Three documentation defects fixed at source (the key copy and restart blocks against a Windows
+  OpenSSH destination; an interactive acceptance no runner could score) and three runner defects
+  (a backgrounded block ending the run early as a pass, an inherited ERR trap, a tunnel whose
+  exec'd `ssh` outlived its wrapper), each a regression test.
+- Nothing to reinstall; re-clone the tag for the corrected blocks.
+
 ### v0.6.4 public release (the documented routes, as a stranger runs them)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.4`, GitHub `Latest`. No component changed; every
+- Product release: `alphastorm/omp-ninfer@v0.6.4` (superseded by v0.6.5). No component changed; every
   documented Windows route runs from its own quickstart blocks on a stock host, and a clone
   yields the recorded bytes on every platform (EXP-032).
 - Component bytes (RTX 5090 image `a62dd5b8...`, RTX 4090 `v0.6.1-qwen38-4090-beta.1`, RTX 3090

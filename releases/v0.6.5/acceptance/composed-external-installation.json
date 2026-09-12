@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.5",
+  "as_of": "2026-09-12",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "documented-route acceptance of the quickstart's primary macOS route (client install from the public URL, tunnel, key, provider, tool, vision, resume, survives-restart, fail-closed) against the RTX 5090 appliance serving the published durable route; the three Windows routes carry from v0.6.4 by hash. Component bytes, profiles and configuration are unchanged from v0.6.3.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "62e74d0731eb86ee2dab59539a536055a18d4f1805c191464a5ea1d6989ea344",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on the Mac by the documented block from its public URL and hashed (`omp/18.0.9`). No component changed in this release: what changed is the macOS documentation a reader executes.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "the macOS route downloaded the client archive from its public URL and hashed it against the documented value; the inference host served the image pulled by digest in the v0.6.4 acceptance, unchanged"
+    },
+    "checksum_verification": {
+      "status": "carried",
+      "note": "the checked-in checksum sets are unchanged from v0.6.4"
+    },
+    "anonymous_image_pull": {
+      "status": "carried",
+      "note": "digest a62dd5b8, unchanged; the appliance serves it"
+    },
+    "launch_identity": {
+      "status": "carried",
+      "note": "RTX 5090: configuration 622ab621 under qwen38-5090-v0.6.3, declared by the documented launcher in the v0.6.4 acceptance and reported by the status route on the appliance this window; RTX 4090: carried from v0.6.4"
+    },
+    "auth_boundary": {
+      "status": "carried",
+      "note": "unchanged from v0.6.3; the route's turns ran authenticated through the tunnel with the key copied by the documented block"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "the macOS tool turn returned the planted marker exactly"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "the nonce came back on --continue, and again after the server container was restarted from the Mac"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "macOS: the outage request failed with the tunnel stopped; Windows routes carried"
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.5/acceptance/documented-routes.json",
+      "sha256": "df4c3088323df55f4efa933f8fd1d2536c1508716e7522c9de2d3980f9bbb15b",
+      "summary": "Mac: client install -> tunnel -> key -> provider -> fail-closed config -> tool -> vision -> resume -> survives-restart -> fail-closed, 10/10; the three Windows routes carried from v0.6.4 by hash"
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "Mac: the owner's ~/.omp/agent, launcher, and client restored; the reader-path clone removed. RTX 5090 appliance: production container serving (restarted once by the route's survives-restart block, as documented), health ok, port and restart policy unchanged."
+    }
+  }
+}

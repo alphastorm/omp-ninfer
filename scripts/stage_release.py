@@ -152,14 +152,17 @@ def main() -> int:
         f"ninfer-qwen38-rtx5090-{runtime_version}-linux-x86_64-cuda13.1.tar.gz"
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
+    source_manifest = load(src_dir / "manifest.json")
+    # The previous release may itself have kept an older profile (v0.6.4 shipped
+    # qwen38-5090-v0.6.3): a kept profile is the one the source manifest records, not one
+    # derived from the source release number.
     profile_from = (
         f"qwen38-5090-{args.profile_from}" if args.profile_from
-        else f"qwen38-5090-{args.source}"
+        else source_manifest["runtime_identity"]["deployment_profile"]
     )
     profile_to = (
         profile_from if args.keep_deployment_profile else f"qwen38-5090-{args.release}"
     )
-    source_manifest = load(src_dir / "manifest.json")
     config_sha = (
         source_manifest["runtime_identity"]["configuration_sha256"]
         if args.keep_deployment_profile else args.config_sha

@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-09-12
+
+No component changed. The quickstart's primary route - macOS client, Windows 11 + Docker Desktop
+inference host - now runs end to end from its own blocks with every outcome decided by the shell,
+so every documented route is covered by the runner (EXP-033,
+[receipt](docs/measurements/2026-09-12-macos-client-route-qualification.json)). Component bytes,
+profiles and configuration are v0.6.3's and carry by hash; route acceptance ran on 2026-09-12
+([receipt](releases/v0.6.5/acceptance/composed-external-installation.json)).
+
+### Changed
+
+- `docs/QUICKSTART.md`: the key-copy block used `$HOME` and `2>/dev/null`, which the Windows
+  OpenSSH default shell (`cmd.exe`) does not interpret - a reader got an empty key file; the
+  restart block ran `sleep` remotely. Both now use forms measured byte-identical on a Linux and a
+  Windows destination, and the survival check waits for `/health` through the tunnel. The macOS
+  acceptance is non-interactive: `-p` turns that each end in a shell test - tool marker, image
+  description, nonce on `--continue`, nonce after the server container is restarted from the Mac,
+  and fail-closed with the tunnel stopped.
+- `scripts/hosts/run-documented-route.sh`: runs on macOS's system Python; reads the step list up
+  front so a block that backgrounds a process cannot end the run early (a partial run had read
+  as a pass); keeps the tunnel block open where the prose says "in another terminal" and stops
+  the `ssh` it exec'd, not just its wrapper, before the fail-closed block; a run that executed
+  fewer steps than the bundle lists fails; records the host OS on macOS.
+- `scripts/stage_release.py`: a kept deployment profile is the one the source manifest records,
+  not one derived from the source release number (v0.6.4 itself kept v0.6.3's).
+
+### Measured
+
+- EXP-033: the macOS client route passed 10 of 10 steps in 158 s from a Mac with the owner's
+  client state moved aside - client install from the public URL, tunnel, key, provider,
+  fail-closed configuration, tool, Vision, resume, a server restart from the Mac with the session
+  continued (110 s), and fail-closed. Three documentation defects and three runner defects fixed
+  at source, each red first.
+
 ## [0.6.4] - 2026-09-11
 
 No component changed. Every documented Windows route now runs end to end from its own quickstart
@@ -915,7 +949,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...HEAD
+[0.6.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.1...v0.6.2
