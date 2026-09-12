@@ -7,8 +7,8 @@
       "upstream": "Neroued/ninfer",
       "upstream_ref": "master",
       "fork_repo": "alphastorm/ninfer",
-      "fork_point": "4eef14a7560d87a3ba717898e1d488a4c4c7246d",
-      "fork_point_meaning": "vendor/neroued-dev mirror head incorporated into the shipped 5090 container lineage (feat/unified-durable-resume)",
+      "fork_point": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "fork_point_meaning": "upstream base of the mainline runtime tree every shipped lane now builds from (port/native-lanes-on-mainline; the RTX 5090 container lane moved onto it in v0.6.2). Supersedes the retired vendor/neroued-dev mirror point 4eef14a7, which was the container lineage's base before v0.6.2 and made this delta read 17 commits larger than it is.",
       "overlap_paths": [
         "src/serve/",
         "src/runtime/engine/",
