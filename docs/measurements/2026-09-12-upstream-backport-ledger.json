@@ -15,7 +15,8 @@
     "repository": "alphastorm/ninfer",
     "branch": "backport/upstream-2026-09",
     "base_commit": "29caaf34457d66151af855752dc950b844da64db",
-    "base_meaning": "mainline head after the v0.6.2 lane move, the graceful-stop work (v0.6.1) and the GDN workspace fix for alphastorm/ninfer#42"
+    "base_meaning": "mainline head after the v0.6.2 lane move, the graceful-stop work (v0.6.1) and the GDN workspace fix for alphastorm/ninfer#42",
+    "candidate": "8818b88b46aad630e9e761d4ab7e5f57a157378d"
   },
   "applied": [
     {
@@ -125,20 +126,34 @@
     },
     {
       "order": 16,
-      "downstream": "44dcdf2d",
+      "downstream": "cbd27cd7",
+      "upstream": "d5aaa202",
+      "subject": "refactor(ops): bucket target fp8 attention projection columns",
+      "reason": "template dependency of d139d338: adds the MaskedColumns parameter and columns argument to fp8_a16_small_t_mma_kernel (the build failed without it). Its attention-projection consumer hunk targets src/ops/attn_input_proj/fp8/fp8_attn_input_a16_small_t.cu, a file this tree does not have (the attention projection here does not instantiate that template), so that hunk was dropped; both call sites in this tree compile with the new parameters' defaults"
+    },
+    {
+      "order": 17,
+      "downstream": "06ea96f0",
       "upstream": "d139d338",
       "subject": "fix(ops): preserve gdn record snapshot bits and batch fp8 projection",
       "reason": "GDN record snapshot bits and batched fp8 projection"
     },
     {
-      "order": 17,
-      "downstream": "525123a4",
+      "order": 18,
+      "downstream": "2483bd37",
       "upstream": "f0eb3ac7",
       "subject": "fix(serve): upgrade cpp-httplib to 0.54.1",
       "reason": "cpp-httplib 0.54.1 - vendored dependency currency"
+    },
+    {
+      "order": 19,
+      "downstream": "8818b88b",
+      "upstream": null,
+      "subject": "fix(serve): follow cpp-httplib 0.54.1's disconnect and lifetime APIs",
+      "reason": "downstream adaptation: cpp-httplib 0.54.1 replaced the optional is_connection_alive predicate with an always-present is_connection_closed std::function and its header replacement dropped the hold_resource slot upstream's 031a0015 had patched in; this tree's http_server.cpp and responses_http.cpp carry the same five guards and the owned-content helper, adapted exactly as upstream adapted its own transport file (user_data slot for the lifetime). ThreadPool(n, max_n=n, mqr) keeps the fixed pool and bounded queue"
     }
   ],
-  "applied_count": 17,
+  "applied_count": 19,
   "already_present": [
     {
       "upstream": "09212c89",
@@ -220,5 +235,22 @@
     "runtime image built from those binaries and pushed by digest",
     "the RTX 5090 lane's own qualification, compared against the v0.6.2 baseline for retrieval exactness, prefill and decode throughput, fanout reuse, restore timings, agent protocol and durability",
     "independent review of the backport diff at freeze"
+  ],
+  "build_and_test": {
+    "appliance": "backport-build.log: 322/322 objects, 11/11 focused serve suites, packaged as ninfer-qwen38-rtx5090-v0.6.3-linux-x86_64-cuda13.1.tar.gz (295e042a) with SBOM (c7cb88ac)",
+    "ephemeral_gpu": "docs/measurements/2026-09-13-runpod-ci-full-8818b88b.json: full 102-test suite on an ephemeral RTX PRO 4000 Blackwell (sm_120a), 102/102 - including the ops kernel suites the perf commits touch and the #42 capacity contract test that was the single failure on this GPU class before 29caaf34",
+    "lane": "releases/v0.6.7/qualification/rtx5090.json"
+  },
+  "build_failures_on_the_way": [
+    {
+      "at": "525123a4 (first ordering)",
+      "error": "fp8_gdn_input_matrix.cu: no instance of fp8_a16_small_t_mma_kernel matches - d139d338 needs the template extension from d5aaa202",
+      "fix": "d5aaa202 taken as a recorded dependency, ordered before its consumer"
+    },
+    {
+      "at": "second ordering",
+      "error": "http_server.cpp: httplib::Request has no member is_connection_alive; Response has no member hold_resource",
+      "fix": "the downstream adaptation commit; a sweep found the same guards in responses_http.cpp, which the first pass had missed"
+    }
   ]
 }
