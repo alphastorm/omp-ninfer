@@ -466,24 +466,31 @@ In a dedicated terminal inside the Mac release clone:
 ./examples/manual-tunnel/open-tunnel.sh USER@RUNTIME_HOST
 ```
 
-Replace the destination with the SSH user and host that terminate in the Linux/WSL namespace owning
-Docker. Keep this process running. `ExitOnForwardFailure` prevents a false-green tunnel when local
-port `18089` is occupied; keepalive options make a dead route observable.
+Replace the destination with the SSH user and host of the inference machine. On a Linux host that
+is the account that ran section 4; on Windows 11 with Docker Desktop it is the Windows account
+and the stock Windows OpenSSH server - the container publishes its port on the machine's own
+loopback, which that server forwards. Keep this process running. `ExitOnForwardFailure` prevents
+a false-green tunnel when local port `18089` is occupied; keepalive options make a dead route
+observable.
 
 ## 6. Install the same key on the Mac
 
-In another Mac terminal:
+In another Mac terminal. The key lives in the shell that ran section 4: on Linux the SSH login
+shell, on Windows the WSL2 distro behind the Windows OpenSSH server, which `wsl.exe` reaches.
+The command below tries the login shell first and falls back to the distro; on a Windows
+destination the first attempt prints one harmless `cannot find the path` line:
 
 ```sh
 install -d -m 700 "$HOME/.omp/agent"
 umask 077
-ssh USER@RUNTIME_HOST 'cat "$HOME/.config/omp-ninfer/api-key"' \
-  > "$HOME/.omp/agent/ninfer-beta.key"
+ssh USER@RUNTIME_HOST 'sh -lc "cat ~/.config/omp-ninfer/api-key" 2>/dev/null || wsl.exe -d Ubuntu-24.04 -- sh -lc "cat ~/.config/omp-ninfer/api-key"' \
+  | tr -d '\r' > "$HOME/.omp/agent/ninfer-beta.key"
 chmod 600 "$HOME/.omp/agent/ninfer-beta.key"
+test "$(wc -c < "$HOME/.omp/agent/ninfer-beta.key")" -gt 32
 ```
 
-This streams the secret inside SSH and does not print it. Use the exact destination from the tunnel.
-Do not paste the key into YAML, shell history, an issue, or a support bundle.
+This streams the secret inside SSH and does not print it. Use the exact destination from the
+tunnel. Do not paste the key into YAML, shell history, an issue, or a support bundle.
 
 ## 7. Add the OMP provider
 
@@ -660,13 +667,15 @@ cat "$HOME/omp-ninfer/docs/BENCHMARKS.md" "$HOME/omp-ninfer/README.md" \
     "$HOME/omp-ninfer/CHANGELOG.md" > "$SMOKE/context.md"
 omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/local-max \
   @"$SMOKE/context.md" "Hold this material in context. Remember the nonce COBALT-493817. Reply OK only."
-ssh USER@RUNTIME_HOST 'docker restart --timeout 60 omp-ninfer-beta && sleep 30'
+ssh USER@RUNTIME_HOST docker restart --timeout 60 omp-ninfer-beta
+until curl -sf -m 3 -o /dev/null http://127.0.0.1:18089/health; do sleep 3; done
 omp -p --auto-approve --session-dir "$SMOKE/durable" --continue \
   "Return only the nonce I asked you to remember." | tee "$SMOKE/durable.txt"
 grep -q COBALT-493817 "$SMOKE/durable.txt"
 ```
 
-Use the SSH destination from section 5. The nonce comes back from the restored generation - the
+Use the SSH destination from section 5; `docker` answers there on Linux and on Windows alike, and
+the loop waits through the tunnel for the server to come back. The nonce comes back from the restored generation - the
 RTX 5090 lane restores a 5 GB session in 3.6-4.0 s and a small one in about a second - and a
 checkpoint whose payload was altered is refused rather than served
 ([EXP-031](measurements/2026-09-11-rtx5090-public-route-qualification.json)). A session below
