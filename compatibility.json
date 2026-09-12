@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.3.0-qualified-1",
-  "product_release": "v0.6.4",
+  "product_release": "v0.6.5",
   "composition": {
     "status": "v0.3.0 public release",
     "lifecycle_repository": "https://github.com/alphastorm/oh-my-pi",
@@ -37,7 +37,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.6.4",
+      "product_release": "v0.6.5",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -72,7 +72,7 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02/releases/v0.6.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c2bf43eb5d6808ebf064e829baedbe9265fecde3/releases/v0.6.5/qualification/rtx5090.json",
           "sha256": "a3655b5799b7e56f695ba2841d78e89cb3b9210b0c067e65e60deaa759d8bfbf"
         }
       },
@@ -133,7 +133,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.6.4",
+      "product_release": "v0.6.5",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -168,7 +168,7 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02/releases/v0.6.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c2bf43eb5d6808ebf064e829baedbe9265fecde3/releases/v0.6.5/qualification/rtx5090.json",
           "sha256": "a3655b5799b7e56f695ba2841d78e89cb3b9210b0c067e65e60deaa759d8bfbf"
         }
       },
@@ -229,7 +229,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.6.4",
+      "product_release": "v0.6.5",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -264,7 +264,7 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02/releases/v0.6.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c2bf43eb5d6808ebf064e829baedbe9265fecde3/releases/v0.6.5/qualification/rtx5090.json",
           "sha256": "a3655b5799b7e56f695ba2841d78e89cb3b9210b0c067e65e60deaa759d8bfbf"
         }
       },
@@ -326,8 +326,8 @@
       "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8",
       "package_bytes": 573344205,
       "qualification_receipt": {
-        "path": "releases/v0.6.4/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02/releases/v0.6.4/qualification/rtx3090.json",
+        "path": "releases/v0.6.5/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c2bf43eb5d6808ebf064e829baedbe9265fecde3/releases/v0.6.5/qualification/rtx3090.json",
         "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943"
       }
     },
@@ -348,8 +348,8 @@
       "package_sha256": "4390a8cb95b90a9c60a904e28eea6cc495155edca42f01aa11db852e022f4fdd",
       "package_bytes": 573795974,
       "qualification_receipt": {
-        "path": "releases/v0.6.4/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b3e21a25ad99452aa0ab4b1b7c8c5c806f212f02/releases/v0.6.4/qualification/rtx4090.json",
+        "path": "releases/v0.6.5/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c2bf43eb5d6808ebf064e829baedbe9265fecde3/releases/v0.6.5/qualification/rtx4090.json",
         "sha256": "5b6348894c8cf04fcc207c90b6e9f75137358c63bdf6b4c215f5311d29b76b63"
       }
     }
