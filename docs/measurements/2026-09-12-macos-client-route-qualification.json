@@ -1,0 +1,583 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-033",
+  "generated_utc": "2026-09-12",
+  "status": "passed",
+  "release": "v0.6.5",
+  "continues": "docs/measurements/2026-09-11-documented-routes-qualification.json",
+  "scope": "The last documented route the runner had not covered: the quickstart's primary macOS row (sections 2, 5, 6, 7, 8 - install the client, open the tunnel, copy the key, add the provider, and the whole acceptance through fail-closed) executed from its own blocks on this Mac as a stranger meets them - the owner's OMP client, configuration, and sessions moved aside, the release cloned at the reader's path, every block hashed before it ran, the tunnel block kept open in the background exactly where the prose says 'in another terminal', and stopped before the fail-closed block where the prose says Ctrl-C. The inference host is the RTX 5090 appliance serving its published v0.6.3+ durable route through the Windows OpenSSH server.",
+  "question": "Does a Mac reader who follows the primary route block by block, against a Windows 11 + Docker Desktop inference host, reach every documented outcome - including a session that survives the server process - with pass/fail decided by the shell, not by reading model prose?",
+  "answer": "Not before this window. The macOS acceptance was interactive prose (open OMP, ask, look), so no runner could score it; rewritten as `-p` turns each ending in a shell test. Two blocks were wrong for a Windows destination: the key-copy block used `$HOME` and `2>/dev/null`, which cmd.exe (the Windows OpenSSH default shell) does not interpret, so a reader got zero bytes and a 'cannot find the path' error; the restart block ran `sleep` on the remote shell. Both now use forms proven byte-identical on a Linux and a Windows destination. The runner itself had three defects that only this route's shape exposed: (1) a block that backgrounds a process shared the step loop's stdin, so the loop ended after the tunnel block and two of ten steps read as a full pass; (2) the tunnel wrapper inherited the runner's ERR trap, so stopping it failed the fail-closed step; (3) stopping the wrapper left the exec'd ssh listening, so the outage request succeeded. Each is now a regression test that fails on the previous runner. With those fixed the route passes 10/10 with no substitution beyond the reader's own destination.",
+  "candidate_commit": "c14111fc6148fbcc2dbc4008c8f8957f40297b44",
+  "document_sha256": "bbe0a3b154870bd47807e657ab641f434372be55b52b692007458956a2189fbc",
+  "host": "macOS 26.6.2 arm64 (system python3 3.9.6, the only Python a stranger has)",
+  "defects_found_and_fixed": [
+    {
+      "where": "docs/QUICKSTART.md section 8 (macOS acceptance)",
+      "defect": "interactive prose with no shell-verifiable criterion",
+      "fix": "non-interactive `-p` turns; each block ends in `grep -q`/`test -s`; survival check is honest about the 32,768-token automatic gate",
+      "proof": "tests.test_documented_route.ExtractionTests.test_macos_acceptance_blocks_test_their_own_outcome"
+    },
+    {
+      "where": "docs/QUICKSTART.md section 6 (key copy)",
+      "defect": "`$HOME`/`2>/dev/null` on a Windows OpenSSH destination: 0 bytes copied, `cannot find the path`",
+      "fix": "`sh -lc` form with a `wsl.exe` fallback; measured byte-identical (sha bf0f31c3faae) on both a Linux and a Windows destination",
+      "proof": "run 9 key step passed; test -gt 32 bytes"
+    },
+    {
+      "where": "docs/QUICKSTART.md section 8 (survives-restart)",
+      "defect": "`sleep` on the remote shell",
+      "fix": "restart, then wait for `/health` through the tunnel locally",
+      "proof": "run 9 survives-restart passed in 110 s"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "`datetime.UTC` needs Python 3.11; macOS system python3 is 3.9",
+      "fix": "`datetime.timezone.utc`",
+      "proof": "run 2 onward"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "a backgrounded block shared the step loop's stdin: run 6 recorded 3 of 10 steps as `passed`",
+      "fix": "steps read into an array first; stdin detached; a run that executed fewer steps than the bundle lists is a failure",
+      "proof": "tests\u2026RunnerTests.test_a_step_that_consumes_stdin_cannot_end_the_run_early (red at the c14111f runner: rc 0, status passed, 1 of 2 steps)"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "tunnel wrapper inherited the ERR trap; `kill` in the fail-closed step failed the run (run 7)",
+      "fix": "trap cleared inside the wrapper; kill tolerant",
+      "proof": "run 8 reached the fail-closed check"
+    },
+    {
+      "where": "scripts/hosts/run-documented-route.sh",
+      "defect": "stopping the wrapper orphaned the exec'd ssh: the outage request succeeded (run 8)",
+      "fix": "stop_tunnel kills the wrapper's children, waits for the port to close",
+      "proof": "tests\u2026RunnerTests.test_the_tunnel_block_is_stopped_for_real_before_fail_closed (previous runner hangs/fails); run 9 fail-closed passed"
+    }
+  ],
+  "runs": {
+    "run2": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 12.024,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "failed",
+          "elapsed_s": 3.135,
+          "block_sha256": "89d723de4acb",
+          "error": "command failed with exit 1: false"
+        },
+        {
+          "slug": "key",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "82abb4c053ea"
+        },
+        {
+          "slug": "provider",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "aa93f908c330"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "200150e3b940"
+        }
+      ]
+    },
+    "run3": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 12.028,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "failed",
+          "elapsed_s": 3.106,
+          "block_sha256": "89d723de4acb",
+          "error": "command failed with exit 1: false"
+        },
+        {
+          "slug": "key",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "82abb4c053ea"
+        },
+        {
+          "slug": "provider",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "aa93f908c330"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "200150e3b940"
+        }
+      ]
+    },
+    "run4": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 57.534,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "failed",
+          "elapsed_s": 3.504,
+          "block_sha256": "89d723de4acb",
+          "error": "command failed with exit 1: false"
+        },
+        {
+          "slug": "key",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "82abb4c053ea"
+        },
+        {
+          "slug": "provider",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "aa93f908c330"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "200150e3b940"
+        }
+      ]
+    },
+    "run5": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 11.913,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "failed",
+          "elapsed_s": 4.694,
+          "block_sha256": "89d723de4acb",
+          "error": "command failed with exit 1: false"
+        },
+        {
+          "slug": "key",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "82abb4c053ea"
+        },
+        {
+          "slug": "provider",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "aa93f908c330"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "skipped",
+          "elapsed_s": 0.0,
+          "block_sha256": "200150e3b940"
+        }
+      ]
+    },
+    "run6": {
+      "status": "passed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 40.174,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 2.387,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.754,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        }
+      ]
+    },
+    "run7": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 43.59,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 1.264,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.727,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.125,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.12,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 18.883,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 3.491,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 8.909,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 109.616,
+          "block_sha256": "aa93f908c330",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "failed",
+          "elapsed_s": 0.118,
+          "block_sha256": "200150e3b940",
+          "error": "command failed with exit 1: kill \"$TUNNEL_PID\" 2> /dev/null"
+        }
+      ]
+    },
+    "run8": {
+      "status": "failed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 26.875,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 1.246,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.732,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.119,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.117,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 16.342,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 3.409,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 19.067,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 113.824,
+          "block_sha256": "aa93f908c330",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "failed",
+          "elapsed_s": 4.433,
+          "block_sha256": "200150e3b940",
+          "error": "command failed with exit 1: false"
+        }
+      ]
+    },
+    "run9": {
+      "status": "passed",
+      "clone_commit": "c14111fc6148",
+      "document_sha256": "bbe0a3b15487",
+      "steps": [
+        {
+          "slug": "client-install",
+          "status": "passed",
+          "elapsed_s": 8.999,
+          "block_sha256": "808f95967ee9"
+        },
+        {
+          "slug": "tunnel",
+          "status": "passed",
+          "elapsed_s": 2.367,
+          "block_sha256": "89d723de4acb",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+        },
+        {
+          "slug": "key",
+          "status": "passed",
+          "elapsed_s": 2.726,
+          "block_sha256": "82abb4c053ea",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "provider",
+          "status": "passed",
+          "elapsed_s": 0.128,
+          "block_sha256": "77dac1a96f56"
+        },
+        {
+          "slug": "fail-closed-config",
+          "status": "passed",
+          "elapsed_s": 0.124,
+          "block_sha256": "11c5c38592fb"
+        },
+        {
+          "slug": "tool",
+          "status": "passed",
+          "elapsed_s": 17.377,
+          "block_sha256": "9deb640163ef"
+        },
+        {
+          "slug": "vision",
+          "status": "passed",
+          "elapsed_s": 3.341,
+          "block_sha256": "f6eb896ba04c"
+        },
+        {
+          "slug": "resume",
+          "status": "passed",
+          "elapsed_s": 6.875,
+          "block_sha256": "680fc78d4e5b"
+        },
+        {
+          "slug": "survives-restart",
+          "status": "passed",
+          "elapsed_s": 110.278,
+          "block_sha256": "aa93f908c330",
+          "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+        },
+        {
+          "slug": "fail-closed",
+          "status": "passed",
+          "elapsed_s": 1.645,
+          "block_sha256": "200150e3b940",
+          "substitution": "tunnel stopped before this block, as the prose instructs"
+        }
+      ]
+    }
+  },
+  "run_notes": {
+    "run1": "runner crashed on macOS system python3 (datetime.UTC) after the client install passed; no receipt written",
+    "run2-5": "tunnel failed: the isolated HOME had no SSH identity for the destination (runs 2, 3, 5) and an alias violates open-tunnel.sh's `user@host` contract (run 4) - operator-environment, not route defects; the route was then run as the owner's account with only the OMP state moved aside",
+    "run6": "false pass: 3 of 10 steps recorded, status `passed` - the runner defect above",
+    "run7": "9 of 10 passed including Vision, resume, and survives-restart; fail-closed failed on the inherited ERR trap",
+    "run8": "fail-closed failed: outage request succeeded because the exec'd ssh outlived its wrapper",
+    "run9": "full pass, 10/10, 158 s: client-install 9.0 s, survives-restart 110.3 s (docker restart --timeout 60 plus health wait through the tunnel)"
+  },
+  "hosts_restored": "Mac: the owner's ~/.omp/agent, launcher, and client restored; the reader-path clone removed. RTX 5090 appliance: production container serving (restarted once by the route's survives-restart block, as documented), health ok, port and restart policy unchanged.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

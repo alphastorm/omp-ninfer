@@ -33,7 +33,7 @@ record() {  # position slug heading index expected actual status elapsed error [
 
 write_receipt() {
   python3 - "$RECEIPT" "$MANIFEST" "$CLONE_COMMIT" "$STARTED" "$STATUS" "${RECORDS[@]}" <<'PY'
-import json, sys, datetime, pathlib
+import json, sys, datetime, pathlib, platform
 receipt, manifest_path, commit, started, status, *records = sys.argv[1:]
 manifest = json.load(open(manifest_path))
 release = pathlib.Path("/etc/os-release")
@@ -42,6 +42,8 @@ if release.is_file():
     for line in release.read_text().splitlines():
         if line.startswith("PRETTY_NAME="):
             host_os = line.split("=", 1)[1].strip().strip('"')
+elif platform.system() == "Darwin":
+    host_os = f"macOS {platform.mac_ver()[0]} {platform.machine()}"
 out = {
     "artifact_type": "omp_ninfer_documented_route_run", "schema_version": 1,
     "lane": manifest["lane"], "document": manifest["document"],
