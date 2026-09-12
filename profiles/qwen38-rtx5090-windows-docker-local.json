@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.6.6",
+  "release": "v0.6.7",
   "status": "public",
   "installation_mode": "native-windows-docker-local",
   "client": {
@@ -50,7 +50,7 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "6ab904d7c3d44f5b00acf61c59ec2b4c04d3009d7645d3be2e5d5e6ee52f6047",
+      "9afa8824fdf35098aae663400ace512075d129b4ce47f162746eff16efae11e2",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
