@@ -2,7 +2,7 @@
   "artifact_type": "omp_ninfer_upstream_watch_report",
   "schema_version": 1,
   "generated_utc": "2026-09-12T17:09:54Z",
-  "manifest": "/Users/srs/Development/omp-ninfer/upstream-watch.json",
+  "manifest": "./upstream-watch.json",
   "upstreams": [
     {
       "id": "ninfer-5090",

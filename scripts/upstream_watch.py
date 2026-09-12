@@ -160,7 +160,9 @@ def main() -> int:
         "artifact_type": "omp_ninfer_upstream_watch_report",
         "schema_version": 1,
         "generated_utc": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "manifest": str(args.manifest),
+        # repo-relative: a committed receipt must not carry the operator's absolute path
+        "manifest": "./" + str(args.manifest.resolve().relative_to(Path(__file__).resolve().parent.parent))
+        if args.manifest.resolve().is_relative_to(Path(__file__).resolve().parent.parent) else args.manifest.name,
         "upstreams": [],
     }
 

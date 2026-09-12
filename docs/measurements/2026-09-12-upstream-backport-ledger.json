@@ -1,0 +1,224 @@
+{
+  "artifact_type": "omp_ninfer_upstream_backport_ledger",
+  "schema_version": 1,
+  "campaign": "upstream-2026-09 selective backport (omp-ninfer #33, 5090 engine tranche)",
+  "generated_utc": "2026-09-12",
+  "upstream": {
+    "repository": "Neroued/ninfer",
+    "head": "d49296868dcc",
+    "head_date": "2026-09-10",
+    "base": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "base_meaning": "upstream base of the mainline runtime tree every shipped lane builds from; the watch manifest recorded the retired container mirror point 4eef14a7 until this campaign, which made the delta read 175 instead of 158",
+    "delta_commits": 158
+  },
+  "downstream": {
+    "repository": "alphastorm/ninfer",
+    "branch": "backport/upstream-2026-09",
+    "base_commit": "29caaf34457d66151af855752dc950b844da64db",
+    "base_meaning": "mainline head after the v0.6.2 lane move, the graceful-stop work (v0.6.1) and the GDN workspace fix for alphastorm/ninfer#42"
+  },
+  "applied": [
+    {
+      "order": 1,
+      "downstream": "65b16882",
+      "upstream": "8d343527",
+      "subject": "perf(ops): widen moe prefill weight staging to eight codes per thread",
+      "reason": "widen MoE prefill weight staging"
+    },
+    {
+      "order": 2,
+      "downstream": "04956ab6",
+      "upstream": "92bb06eb",
+      "subject": "feat(ops): write the gdn prefill convolution straight into q/k/v",
+      "reason": "write the GDN prefill convolution straight into q/k/v"
+    },
+    {
+      "order": 3,
+      "downstream": "dca3ef56",
+      "upstream": "3a61ef3f",
+      "subject": "fix(ops): separate sparse moe gather index lifetimes",
+      "reason": "sparse-MoE gather index lifetimes - our MoE prefill path"
+    },
+    {
+      "order": 4,
+      "downstream": "5fb4efb7",
+      "upstream": "1fc1cb76",
+      "subject": "perf(linear): add fp8 w8a16 vocabulary gemm",
+      "reason": "fp8 w8a16 vocabulary gemm"
+    },
+    {
+      "order": 5,
+      "downstream": "6342aaf5",
+      "upstream": "93cdc264",
+      "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+      "reason": "widen w8 rowsplit weight decode"
+    },
+    {
+      "order": 6,
+      "downstream": "38459d31",
+      "upstream": "0a204aee",
+      "subject": "perf(ops): stage the routed MoE gate/up tile from x instead of a gathered copy",
+      "reason": "stage the routed MoE gate/up tile from x"
+    },
+    {
+      "order": 7,
+      "downstream": "916739d9",
+      "upstream": "9954867a",
+      "subject": "perf(rmsnorm): read the weight before the reduction, and compile that out where it costs occupancy",
+      "reason": "rmsnorm: read the weight before the reduction"
+    },
+    {
+      "order": 8,
+      "downstream": "fc2e6e83",
+      "upstream": "487f8977",
+      "subject": "perf(sparse_moe): one CTA per token in small-T S2, and a warp merge in place of eight dependent rounds",
+      "reason": "sparse-MoE one CTA per token in small-T S2"
+    },
+    {
+      "order": 9,
+      "downstream": "e0def367",
+      "upstream": "641ef3e7",
+      "subject": "perf(text): skip NFC normalisation when the text is already pure ASCII",
+      "reason": "skip NFC normalisation for pure ASCII"
+    },
+    {
+      "order": 10,
+      "downstream": "37c2dafe",
+      "upstream": "b158afe2",
+      "subject": "perf(frontend): store the BPE merge rules in a flat open-addressed table",
+      "reason": "flat open-addressed BPE merge table"
+    },
+    {
+      "order": 11,
+      "downstream": "cb955bb4",
+      "upstream": "437e9f98",
+      "subject": "perf(moe): choose the routed gate/up pipeline depth by route, size the grid by work",
+      "reason": "routed gate/up pipeline depth by route"
+    },
+    {
+      "order": 12,
+      "downstream": "74cefb7b",
+      "upstream": "ce954918",
+      "subject": "perf(ops): prefetch the shared-expert down weights from the D1 tail",
+      "reason": "prefetch shared-expert down weights from the D1 tail"
+    },
+    {
+      "order": 13,
+      "downstream": "cf2af961",
+      "upstream": "7f14d963",
+      "subject": "perf(ops): warm L2 for the next projection from the MoE down tail, issuing the hint before the block barrier",
+      "reason": "warm L2 for the next projection from the MoE down tail"
+    },
+    {
+      "order": 14,
+      "downstream": "db343a9a",
+      "upstream": "b88c0f6f",
+      "subject": "fix(core): complete host uploads before returning",
+      "reason": "complete host uploads before returning - our host-state slot path"
+    },
+    {
+      "order": 15,
+      "downstream": "e5551e44",
+      "upstream": "22d8a1d3",
+      "subject": "perf(ops): optimize w8 vocabulary t64 route",
+      "reason": "optimize the w8 vocabulary t64 route"
+    },
+    {
+      "order": 16,
+      "downstream": "44dcdf2d",
+      "upstream": "d139d338",
+      "subject": "fix(ops): preserve gdn record snapshot bits and batch fp8 projection",
+      "reason": "GDN record snapshot bits and batched fp8 projection"
+    },
+    {
+      "order": 17,
+      "downstream": "525123a4",
+      "upstream": "f0eb3ac7",
+      "subject": "fix(serve): upgrade cpp-httplib to 0.54.1",
+      "reason": "cpp-httplib 0.54.1 - vendored dependency currency"
+    }
+  ],
+  "applied_count": 17,
+  "already_present": [
+    {
+      "upstream": "09212c89",
+      "subject": "fix(frontend): reject invalid media enum values",
+      "note": "cherry-pick came out empty: this product already carries the change"
+    },
+    {
+      "upstream": "4cece118",
+      "subject": "fix(frontend): repair malformed generated utf-8",
+      "note": "cherry-pick came out empty: already carried"
+    }
+  ],
+  "deferred": [
+    {
+      "upstream": "e51b585c",
+      "subject": "fix(gdn): respect cooperative launch capacity",
+      "reason": "two fixes for one class from opposite directions. Upstream sources the multiprocessor count from DeviceContext and partitions token tiles when a cooperative grid exceeds resident capacity; this product's 29caaf34 (alphastorm/ninfer#42) makes the capacity query resolve at the split's step breakpoints so the declared high-water matches the executed plan. Upstream rewrites the same plan (144 lines) and kernels (280 lines) our fix rewrote. Merging them is its own change with the capacity contract test - which sweeps every column count - as the arbiter, not a rider inside a backport.",
+      "next": "first item of the next engine window"
+    },
+    {
+      "upstream": "3b50962b, 0c5d570c",
+      "subject": "fix(frontend): qwen tool argument parsing and embedded tool markup",
+      "reason": "both apply to src/targets/qwen3_6/impl/frontend/tool_call_parser.{h,cpp}, files this tree does not have: they were extracted by 70434721 (fix(engine): close tool output and sampling contracts), which is part of the deferred serve-adapter campaign.",
+      "next": "rides the serve-adapter campaign"
+    },
+    {
+      "upstream": "6b94b8c5, 5e4bf313, 3d9fda22, da49c0d6, 138d76ae, b8786751, 03177b91, a140e7ae, d4929686",
+      "subject": "the runtime materialization and pressure fix family, including the fix for upstream #229",
+      "reason": "unreachable, not merely risky. The family sits on 099d9032 (feat(runtime): add value-aware shared prefix scheduling), which adds src/runtime/engine/context_portfolio_value.h and shared_capture_planner.h - absent here - and is itself 3,496 insertions across 45 files that rewrite src/serve/openai_common, anthropic_messages_request, openai_responses_request, request_log and translate. Pulling the family therefore pulls the serve-adapter campaign. Where the missing headers do not block (da49c0d6, 03177b91), the remaining conflicts are in pressure_planner.h and program_impl.h, the structures that feature reorganised, so applying them would be a hand port into different scaffolding - in the exact code this product's #37 materialization-residency guard protects.",
+      "value_if_pulled": "upstream #229 (fixed 5 ms pressure-search budget forcing root re-prefill for large requests in multi-session states) is this product's workload: agent fanout over host-state slots. The campaign is worth its own window with the pressure_protocol phase at 8 host slots and the fanout anchor phases as the arbiter.",
+      "next": "dedicated rebase campaign, highest value of the remaining upstream work"
+    },
+    {
+      "upstream": "9f0575bb",
+      "subject": "fix(build): include bf16 definitions in q4 topk kernel",
+      "reason": "the file it fixes, src/ops/linear_topk/q4_m64.cu, arrives with 5499799d (feat(ops): add fused linear top-k), which this tranche does not take: the fix is moot here."
+    }
+  ],
+  "excluded_classes": [
+    {
+      "name": "dflash2 program",
+      "commits": "about 30 (feat/perf/test/docs)",
+      "reason": "a second speculative-decode architecture with its own weights and converter. This product ships MTP3; adopting dflash2 is a product decision with its own artifact, profile and measurement campaign, not a backport."
+    },
+    {
+      "name": "kv-cache format work",
+      "commits": "4ac73c47, 21a0e85f, a2761ec1",
+      "reason": "nvfp4 and k8v4 modes plus fp16 V storage change the KV format. This lane's profile is INT8 KV and its durable checkpoints are bytes on disk with a manifest; a format change is a profile advance with a checkpoint-compatibility question of its own."
+    },
+    {
+      "name": "spdlog logging rework",
+      "commits": "4a1a2188, 5438b743, 6e2786c5",
+      "reason": "replaces the operational log surface this product's console_log, launcher log contract and status parsing are built on."
+    },
+    {
+      "name": "serve protocol-adapter campaign",
+      "commits": "70434721, eda40242, 65f620a7, 82191552, 5c957c60, 6d0a6f1b, 412b11f3, bf9dbb01, ce09aee5, 0c02e53a, f8fc0f50, 5f6d44e4, e3aeaf8c, 719d56ef, 550d0ac3",
+      "reason": "rewrites the wire surface this product patches downstream and qualifies against the pinned OMP client. Needs the response-wire comparison harness as its gate; the 2026-08-30 triage already deferred it."
+    },
+    {
+      "name": "value-aware shared prefix scheduling",
+      "commits": "099d9032 and its bench follow-ups",
+      "reason": "changes when the engine reuses versus re-prefills, under this product's published fanout-anchor claims. See the deferred family above."
+    },
+    {
+      "name": "variable-width ops retuning chain",
+      "commits": "about 40 perf/refactor commits from 2026-09-05 onward",
+      "reason": "the bucketing and variable-width work is the dflash2 op program's scaffolding; without dflash2 the commits are dead code or do not apply."
+    },
+    {
+      "name": "tooling and documentation",
+      "commits": "perplexity evaluator, nvtx instrumentation, python reference stack removal, artifact v1 migration removal, benchmarks, docs, chores",
+      "reason": "no product path."
+    }
+  ],
+  "method": "cherry-pick -x in upstream topological order onto the mainline head; every applied commit records its upstream source. An empty pick is recorded as already-present. A pick blocked by a file this tree does not have is dropped only when the absent file is incidental (a dflash2 documentation checklist, or src/serve/http_transport.cpp from the deferred serve campaign); otherwise the commit is deferred with its dependency named.",
+  "verification_required_before_release": [
+    "appliance build of the branch with the host test suites",
+    "runtime image built from those binaries and pushed by digest",
+    "the RTX 5090 lane's own qualification, compared against the v0.6.2 baseline for retrieval exactness, prefill and decode throughput, fanout reuse, restore timings, agent protocol and durability",
+    "independent review of the backport diff at freeze"
+  ]
+}
