@@ -114,6 +114,19 @@ class RunnerTests(unittest.TestCase):
         subprocess.run(["git", "init", "-q"], cwd=clone, check=True)
         return bundle
 
+    HEALTH_LISTENER = ("#!/bin/sh\n"
+                       "exec python3 -c 'from http.server import BaseHTTPRequestHandler, HTTPServer\n"
+                       "class H(BaseHTTPRequestHandler):\n"
+                       "    def do_GET(self):\n"
+                       "        self.send_response(200); self.send_header(\"Content-Length\", \"2\"); self.end_headers(); self.wfile.write(b\"ok\")\n"
+                       "    def log_message(self, *a): pass\n"
+                       "HTTPServer((\"127.0.0.1\", 18089), H).serve_forever()'\n")
+
+    def write_tunnel_listener(self, root: Path, body: str | None = None) -> None:
+        listener = root / "clone" / "open-tunnel.sh"
+        listener.write_text(body if body is not None else self.HEALTH_LISTENER)
+        listener.chmod(0o755)
+
     def run_bundle(self, root: Path, bundle: Path) -> tuple[int, dict]:
         receipt = root / "receipt.json"
         completed = subprocess.run(["bash", str(RUNNER), str(bundle), str(root / "clone"), str(receipt)],
@@ -170,11 +183,7 @@ class RunnerTests(unittest.TestCase):
                                 "try: s.connect(('127.0.0.1', 18089))\nexcept OSError: sys.exit(0)\n"
                                 "print('outage request unexpectedly succeeded'); sys.exit(1)\nPY\n", "Fail closed"),
             ])
-            listener = root / "clone" / "open-tunnel.sh"
-            listener.write_text("#!/bin/sh\nexec python3 -c 'import socket, time\ns = socket.socket()\n"
-                                "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
-                                "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
-            listener.chmod(0o755)
+            self.write_tunnel_listener(root)
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 0, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
@@ -217,11 +226,7 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("break", "false\n")])
-            listener = root / "clone" / "open-tunnel.sh"
-            listener.write_text("#!/bin/sh\nexec python3 -c 'import socket, time\ns = socket.socket()\n"
-                                "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
-                                "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
-            listener.chmod(0o755)
+            self.write_tunnel_listener(root)
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "failed"])
@@ -230,6 +235,32 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaises(OSError):
                 after.connect(("127.0.0.1", 18089))
             after.close()
+
+    def test_a_tunnel_that_reaches_nothing_fails_its_own_step(self) -> None:
+        """A bound forward only proves ssh exists. When the far end serves nothing the tunnel
+        step used to pass and the failure surfaced two blocks later as a tool-turn error
+        (measured 2026-09-12, post-cut). The step owns that diagnosis."""
+        probe = socket.socket()
+        probe.settimeout(0.5)
+        try:
+            probe.connect(("127.0.0.1", 18089))
+        except OSError:
+            pass
+        else:
+            self.skipTest("local port 18089 is in use")
+        finally:
+            probe.close()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("after", "echo never\n")])
+            # binds the forward's port but answers no HTTP: ssh is up, the route is not
+            self.write_tunnel_listener(root, "#!/bin/sh\nexec python3 -c 'import socket, time\n"
+                                             "s = socket.socket()\n"
+                                             "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
+                                             "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 1, receipt)
+            self.assertEqual([s["status"] for s in receipt["steps"]], ["failed", "skipped"])
 
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

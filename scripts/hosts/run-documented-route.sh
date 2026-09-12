@@ -69,6 +69,18 @@ except OSError: sys.exit(1)
 finally: s.close()' && return 0 || return 1
 }
 
+# A bound local port only proves ssh's forward exists; the far end may serve nothing, which used
+# to surface as a confusing failure two blocks later (measured 2026-09-12, post-cut). A tunnel
+# step passes only when the route is actually reachable through it.
+route_reachable() {
+  python3 -c 'import sys, urllib.request
+try:
+    with urllib.request.urlopen("http://127.0.0.1:18089/health", timeout=3) as r:
+        sys.exit(0 if r.status == 200 else 1)
+except Exception:
+    sys.exit(1)' && return 0 || return 1
+}
+
 stop_tunnel() {
   # the block exec'd ssh inside a subshell; stop every process the wrapper started
   pkill -P "$TUNNEL_PID" 2>/dev/null || true
@@ -145,10 +157,13 @@ for line in "${STEP_LINES[@]}"; do
     for _ in $(seq 1 30); do
       sleep 1
       kill -0 "$TUNNEL_PID" 2>/dev/null || break
-      if port_open; then tunnel_ready=1; break; fi
+      if route_reachable; then tunnel_ready=1; break; fi
     done
     kill -0 "$TUNNEL_PID" 2>/dev/null || { false; }
-    (( tunnel_ready == 1 )) || { false; }
+    if (( tunnel_ready != 1 )); then
+      echo "the tunnel is up but the route does not answer /health through it; start the runtime on the inference host first" >&2
+      false
+    fi
     substitution="${substitution:+$substitution; }foreground tunnel started in the background and kept open"
   else
     # Evaluate in this shell: the block's variables persist to the next block, and the ERR trap
