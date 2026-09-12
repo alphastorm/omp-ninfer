@@ -22,7 +22,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         source = (ROOT / "examples" / "manual-tunnel" / "start-ninfer.sh").read_text(
             encoding="utf-8"
         )
-        self.assertIn('MANIFEST="$ROOT/releases/v0.6.6/manifest.json"', source)
+        self.assertIn('MANIFEST="$ROOT/releases/v0.6.7/manifest.json"', source)
         self.assertIn('EXPECTED_DEPLOYMENT_PROFILE=${PROFILE_VALUES[2]}', source)
         self.assertIn('"deployment_profile": (identity.get("deployment_profile"), deployment_profile)', source)
         self.assertNotIn('"qwen38-5090-v0.1.0"', source)
@@ -30,7 +30,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         stop_source = (ROOT / "examples" / "manual-tunnel" / "stop-ninfer.sh").read_text(
             encoding="utf-8"
         )
-        self.assertIn("EXPECTED_RELEASE=v0.6.6", stop_source)
+        self.assertIn("EXPECTED_RELEASE=v0.6.7", stop_source)
 
     def test_every_client_route_installs_a_config_that_keeps_the_pinned_client_on_its_channel(self) -> None:
         """The client is a hash-pinned asset: the config every documented route installs must
@@ -91,7 +91,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             1
         ].split("## Managed macOS SSH qualified route", 1)[0]
         manifest = json.loads(
-            (ROOT / "releases" / "v0.6.6" / "manifest.json").read_text(encoding="utf-8")
+            (ROOT / "releases" / "v0.6.7" / "manifest.json").read_text(encoding="utf-8")
         )
         release = manifest["release"]
         self.assertIn(f"releases\\{release}\\manifest.json", native)
@@ -187,7 +187,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.copy_contract_tree(root)
-            manifest_path = root / "releases" / "v0.6.6" / "manifest.json"
+            manifest_path = root / "releases" / "v0.6.7" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
             manifest["components"]["omp"]["artifact_published"] = False

@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.6
+## Where this is now — v0.6.7
 
 All three lanes install from public URLs with a durable session store on the route the
 documentation gives you - from `v0.6.3` the published RTX 5090 launcher mounts one, which it did

@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.6`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.6` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.7`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.7` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.

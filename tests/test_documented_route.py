@@ -88,6 +88,20 @@ class ExtractionTests(unittest.TestCase):
             if step.slug == "fail-closed":
                 self.assertIn("unexpectedly succeeded", block.text)
 
+    def test_model_download_blocks_survive_a_rerun_with_a_complete_file(self) -> None:
+        """curl 8.5 with --fail turns the CDN's HTTP 416 for a complete-file resume into exit 22,
+        so a reader who reruns the prepare block after any later failure was stopped there
+        (measured 2026-09-13). Both download blocks must let the byte count decide instead."""
+        doc = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        blocks = [b for b in documented_route.parse_blocks(doc) if "--continue-at -" in b.text]
+        self.assertEqual(len(blocks), 2, "one shell and one PowerShell download block")
+        for block in blocks:
+            self.assertIn("artifact_bytes", block.text)
+            if block.language == "sh":
+                self.assertRegex(block.text, r'curl --fail[^\n]*\\\n\s*\|\| test "\$\(stat -c %s "\$MODEL"\)" = "\$MODEL_BYTES"')
+            else:
+                self.assertIn("$LASTEXITCODE -ne 0 -and (Get-Item $Model", block.text)
+
     def test_variant_blocks_select_the_lane(self) -> None:
         self.assertIn("git clone --branch", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 0).text)
         self.assertIn("'rtx4090-windows-native'", documented_route.extract(documented_route.DEFAULT_DOC, "Native Windows RTX 4090 and RTX 3090 release lanes", 1).text)
