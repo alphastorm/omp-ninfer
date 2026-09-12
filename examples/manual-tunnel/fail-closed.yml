@@ -3,3 +3,7 @@ retry:
   enabled: false
   modelFallback: false
   fallbackRevertPolicy: never
+# The client is a hash-pinned release asset bound into the manifest. The generic startup check
+# would advertise `omp update`, which replaces it outside the release procedure (issue #18).
+startup:
+  checkUpdate: false

@@ -12,6 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples" / "manual-tunnel"
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import documented_route  # noqa: E402
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
@@ -28,6 +31,29 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("EXPECTED_RELEASE=v0.6.5", stop_source)
+
+    def test_every_client_route_installs_a_config_that_keeps_the_pinned_client_on_its_channel(self) -> None:
+        """The client is a hash-pinned asset: the config every documented route installs must
+        disable the startup update check (issue #18) and model fallback. The pinned 18.0.9
+        client reads `startup.checkUpdate` only in nested form, not as a dotted key."""
+        config = (ROOT / "examples" / "manual-tunnel" / "fail-closed.yml").read_text(encoding="utf-8")
+        settings: dict[str, str] = {}
+        section = ""
+        for line in config.splitlines():
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            key, _, value = line.partition(":")
+            if line.startswith(" "):
+                settings[f"{section}.{key.strip()}"] = value.strip()
+            else:
+                section = key.strip()
+                self.assertEqual(value.strip(), "", f"top-level {section} must be a nested section")
+        self.assertEqual(settings.get("startup.checkUpdate"), "false")
+        self.assertEqual(settings.get("retry.modelFallback"), "false")
+        for lane in ("rtx5090-macos-client", "rtx5090-windows-client", "rtx4090-native"):
+            installs = [step.slug for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
+                        if "manual-tunnel/fail-closed.yml" in block.text.replace("\\", "/")]
+            self.assertEqual(len(installs), 1, f"{lane} must install the one channel config exactly once: {installs}")
 
     def test_windows_ready_path_materializes_key_and_refuses_overwrite(self) -> None:
         quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")

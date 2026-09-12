@@ -37,10 +37,10 @@ That gate binds the Windows client archive and binary, compatibility authority, 
 model, configuration, qualification summary, and clean-install acceptance receipt.
 
 > [!WARNING]
-> Stay on the exact OMP 18.0.9 beta archive pinned by this release. Until
-> [issue #18](https://github.com/alphastorm/omp-ninfer/issues/18) is resolved, a generic
-> `omp update` banner is not an instruction for this qualified channel: updating can move the
-> client away from the checksummed release bytes.
+> Stay on the exact OMP 18.0.9 beta archive pinned by this release. The config every route below
+> installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
+> off: a generic `omp update` would replace the client outside the release procedure and move it
+> away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
