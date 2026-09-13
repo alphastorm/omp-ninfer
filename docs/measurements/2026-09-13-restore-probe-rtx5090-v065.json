@@ -1,0 +1,147 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 3,
+  "lane": "rtx5090-v065-candidate",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2"
+  },
+  "generated_utc": "2026-09-13T01:20:07Z",
+  "base_tokens_requested": 56000,
+  "summary": {
+    "template_input_tokens": 67717,
+    "cold_prefill_s": 26.705,
+    "checkpoint_bytes": 5201400116,
+    "restore_0_wall_s": 3.848,
+    "restore_1_wall_s": 3.647,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true,
+    "tampered_restore_refused": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 26.705,
+      "input_tokens": 67717
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 1.671,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe need extract from previous operations le",
+      "incomplete": null,
+      "output_sha256": "e361dd7a73608bb0f7c03174a88db57655fe7c3ea7103391103ed8eb1ab37c65"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 4.398,
+      "mode": "explicit",
+      "generation": "1789262260679-3",
+      "bytes": 5201400116,
+      "frontier": 67976
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 38.138,
+      "ready_after_s": 23.0,
+      "prefill_counter_before": 68189,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 3.848,
+      "id": "resp_83933ad2217ac56ba758ef40685d7513",
+      "input_tokens": 68024,
+      "status_polls": [
+        {
+          "t_s": 0.6,
+          "bytes": 5201400116,
+          "created_at_unix_ms": 1789262276244,
+          "frontier_tokens": 67976,
+          "generation": "1789262272737-5",
+          "read_backend": "io_uring-odirect",
+          "response_records": 2,
+          "restored_tokens": 67976,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-13T01:18:23Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks restore round 0: quote keys exactly. We have them. Need final only KEY=VALUE separated by spaces. No other words. Ensure exact.\nORCHID=506100 COLOR=252369 SIGIL=116961",
+      "incomplete": null,
+      "output_sha256": "6910a5bd38cf229c865b02d73684f39685f02625a745b77a1527b151a1a0897e"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 4.17,
+      "mode": "explicit",
+      "generation": "1789262307662-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 34.781,
+      "ready_after_s": 22.25,
+      "prefill_counter_before": 277,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 3.647,
+      "id": "resp_a838e38866e12f1c7930f57f431f39f5",
+      "input_tokens": 68134,
+      "status_polls": [
+        {
+          "t_s": 0.6,
+          "bytes": 5205861678,
+          "created_at_unix_ms": 1789262320261,
+          "frontier_tokens": 68086,
+          "generation": "1789262316463-1",
+          "read_backend": "io_uring-odirect",
+          "response_records": 3,
+          "restored_tokens": 68086,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-13T01:19:06Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need output only keys. Same.\nORCHID=506100 COLOR=252369 SIGIL=116961",
+      "incomplete": null,
+      "output_sha256": "b5c85148e5136fcb5c388da89fd7a95dfce0760883afa3b1d70114d508fb8976"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 4.225,
+      "mode": "explicit",
+      "generation": "1789262350867-0"
+    },
+    {
+      "step": "tampered_restore",
+      "flipped": "sessions/dbc3edcf1740676924d911b972ad460f226bade1e52d4e93021a5821c6ee98c6/generations/1789262358867-1/engine/text-kv.bin offset=2235564032 195->153",
+      "ready_after_s": 26.42,
+      "refused": true,
+      "http_status": 404,
+      "wall_s": 2.85,
+      "error_excerpt": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_a838e38866e12f1c7930f57f431f39f5' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}",
+      "status_after_refusal": "corrupt",
+      "second_attempt_refused": true,
+      "status_after_quarantine": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

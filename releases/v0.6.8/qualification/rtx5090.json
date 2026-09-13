@@ -1,0 +1,257 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified": true,
+  "release": "v0.6.7",
+  "as_of": "2026-09-13",
+  "release_tag": "v0.6.3-qwen38-5090-beta.1",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61 (the appliance-built candidate image sha256:94470d3d… wraps the same binaries onto the same digest-pinned base; the published image was pulled by digest on the documented route and re-measured: docs/measurements/2026-09-13-rtx5090-v067-public-route-profile-gates.json)",
+  "identity": {
+    "source_commit": "8818b88b46aad630e9e761d4ab7e5f57a157378d",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "server_binary_sha256": "9afa8824fdf35098aae663400ace512075d129b4ce47f162746eff16efae11e2",
+    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "oci_manifest_digest": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a",
+    "image_id": "sha256:a62dd5b81b22bb10d2891b799c013ad8078c90cdc6849696aa067a191a36f45a"
+  },
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true,
+    "narrative": "Every gate measured in this window against the lifecycle-started candidate ninfer-5090-v063c (image id 94470d3d, binary 9afa8824, configuration 5eb8a557 - the same lifecycle configuration identity v0.6.2 qualified) on the owner appliance, through the same tools, fixtures and parameters as the v0.6.2 qualification, and compared against that receipt. Nothing is inherited except the origin-authentication arc, whose store format this change does not touch. The candidate is the mainline runtime plus 17 upstream commits selected in docs/measurements/2026-09-12-upstream-backport-ledger.json and two downstream adaptations."
+  },
+  "build": {
+    "route": "appliance-local in pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404, clean tree at 8818b88b with NINFER_PATCH_STACK_SHA bound (backport-build.log); the candidate image wraps that archive's binaries onto the digest-pinned base a19e00c5, exactly as the publication workflow does",
+    "ctest": "11/11 focused serve suites in the build container (checkpoint_io_contract, resource_manager, openai_schema, responses_schema, response_store, serve_options, request_log, http_error_handler, http_server_stop, session_checkpoint_store, automatic_checkpoint_queue)",
+    "archive": "ninfer-qwen38-rtx5090-v0.6.3-linux-x86_64-cuda13.1.tar.gz sha256 295e042a6f9d89774594c3daaaea6387aabe200407d19111ef2f90b701735683",
+    "sbom": "ninfer-qwen38-rtx5090-v0.6.3-linux-x86_64-cuda13.1.spdx.json sha256 c7cb88ac51726f74934e869c0f8c75c8c719161c54d15548711c66de45b46cd8",
+    "source_archive": "runtime-source-8818b88b.tar.gz sha256 730460eaf7ac (full value in the component release)"
+  },
+  "context_cache_profile": {
+    "arguments": [
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24"
+    ],
+    "resolved_startup_line": "KV capacity auto resolved=131072 tokens pages=2048/2048 runtime=10.12 GiB free-after-weights=13.25 GiB free-after-startup=3.20 GiB headroom=1.00 GiB slack=3.13 GiB context-cache=on",
+    "unchanged_from": "v0.4.8"
+  },
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "exact_retrieval_at_every_point": true,
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "points": [
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2174.5,
+          "wall_seconds": 59.805,
+          "prefix_reuse_path": "root",
+          "measured_on": "the appliance-built candidate 8818b88b",
+          "output_exact": true
+        }
+      ],
+      "v062_reference_tokens_per_second": 2169.9,
+      "v051_reference_tokens_per_second": 2180.3,
+      "vram_used_mib_after": 28144
+    },
+    "decode": {
+      "status": "passed",
+      "completion_tokens": 2048,
+      "completion_tokens_per_second_wall": 134.15,
+      "candidate_reference": 134.15,
+      "v062_reference": 132.53,
+      "v051_reference": 133.13,
+      "workload": "technical-writing generation at temperature 0 on the lifecycle-started candidate",
+      "decode_tokens_per_second": 139.23,
+      "server_decode_seconds": 14.71,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "speculative": {
+        "accepted_per_position": [
+          597,
+          340,
+          193
+        ],
+        "accepted_tokens": 1130,
+        "backend": "mtp",
+        "draft_window": 3,
+        "drafted_tokens": 2745,
+        "fallback_steps": 1,
+        "rounds": 916
+      },
+      "request_id": "a8fd560366719becbcc44a07e9e5dce6576d20780695795473bde168495fa0b7"
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true
+    },
+    "fanout_acceptance": {
+      "status": "passed",
+      "receipts": [
+        "docs/measurements/2026-09-13-rtx5090-v063-fanout-57k.json",
+        "docs/measurements/2026-09-13-rtx5090-v063-fanout-67k.json"
+      ],
+      "57k": {
+        "template_input_tokens": 57853,
+        "hot_fork_median_s": 1.398,
+        "restart_ready_s": 21.97,
+        "post_restart_resume_s": 3.375,
+        "warm_start_fork_median_s": 1.35,
+        "checkpoint_bytes": 4505854472
+      },
+      "67k": {
+        "template_input_tokens": 67681,
+        "hot_fork_median_s": 1.519,
+        "restart_ready_s": 22.2,
+        "post_restart_resume_s": 3.651,
+        "warm_start_fork_median_s": 1.377,
+        "checkpoint_bytes": 5188026326
+      },
+      "v062_reference": {
+        "fanout_branch_median_s_57853": 1.403,
+        "fanout_branch_median_s_67717": 1.533,
+        "post_restart_resume_wall_s_57853": 3.357,
+        "post_restart_resume_wall_s_67717": 3.854
+      }
+    },
+    "warm_arrival": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-warm-arrival-rtx5090-v063.json",
+      "orders": [
+        {
+          "order": "resume-first",
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 7.577,
+          "post_restart_sequence": [
+            [
+              "endpoint_resume_first",
+              "private_response_replay",
+              58080,
+              4.935
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              57884,
+              1.309
+            ],
+            [
+              "fork_second",
+              "private_long_anchor",
+              57884,
+              1.333
+            ]
+          ]
+        },
+        {
+          "order": "fork-first",
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 6.387,
+          "post_restart_sequence": [
+            [
+              "fork_first",
+              "private_long_anchor",
+              57884,
+              3.52
+            ],
+            [
+              "endpoint_resume_after_fork",
+              "private_response_replay",
+              58080,
+              1.424
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              57884,
+              1.443
+            ]
+          ]
+        }
+      ],
+      "checkpoint_bytes": 4537065577
+    },
+    "restore": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-restore-probe-rtx5090-v063.json",
+      "template_input_tokens": 67717,
+      "checkpoint_bytes": 5201400116,
+      "restore_wall_s": [
+        3.891,
+        3.863
+      ],
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": true,
+      "v062_reference_restore_wall_s": [
+        3.998,
+        3.625
+      ],
+      "v051_reference_restore_wall_s": [
+        3.8,
+        4.4
+      ]
+    },
+    "lifecycle": {
+      "status": "passed",
+      "note": "candidate started and stopped through tools/lifecycle/ninfer_container.py with the image id, binary, model artifact and configuration identity bound at preflight (receipt in the window log); the configuration identity 5eb8a557 equals the one v0.6.2 qualified, so the lifecycle profile did not drift; production was stopped for the window and restored, verified on its own port with restart policy unless-stopped"
+    }
+  },
+  "arcs": {
+    "origin_authentication": {
+      "status": "inherited",
+      "inherited_from": "releases/v0.6.6/qualification/rtx5090.json",
+      "basis": "manifest MAC publication and verification are store-format behaviour this change does not touch; the tamper round loaded a MAC-tagged generation and refused it on the streamed payload digest"
+    },
+    "save_restart_restore": {
+      "status": "passed",
+      "template_input_tokens": 67717,
+      "explicit_checkpoint_bytes": 5201400116,
+      "process_restart": "docker restart (verified: cumulative prefill counter 68388 -> 53; ready after 22.2 s)",
+      "post_restart_resume_reuse": "private_response_replay then private_long_anchor on every fork, both arrival orders"
+    }
+  },
+  "comparison_to_v062": {
+    "prefill_tokens_per_second": [
+      2169.9,
+      2174.5
+    ],
+    "decode_wall_tokens_per_second": [
+      132.53,
+      134.15
+    ],
+    "restore_wall_s": [
+      [
+        3.998,
+        3.625
+      ],
+      [
+        3.891,
+        3.863
+      ]
+    ],
+    "fanout_median_s_57k": [
+      1.403,
+      1.398
+    ],
+    "fanout_median_s_67k": [
+      1.533,
+      1.519
+    ],
+    "verdict": "within run-to-run noise on every gate; retrieval exact at 130,048 tokens; durability and protocol unchanged"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-037",
+  "generated_utc": "2026-09-13T01:58:15Z",
+  "status": "closed",
+  "scope": "RTX 4090 native lane candidate 68a0722f (upstream-2026-09 backport + GDN capacity fixes). The lane's 15 phases passed; only the benchmark_c1 numbers moved against every earlier candidate this month.",
+  "question": "The 4090 lane's C1 decode moved from 159.1 tok/s at 93.0% MTP acceptance (every candidate 63f28c95..8818b88b) to 153.4 tok/s at 87.6% on e962f98c/a98b150e/68a0722f. Is the candidate slower, less accurate, or is the fixture measuring something else?",
+  "answer": "The fixture. Bisected on the 4090 itself with a bare server and the lane's exact C1 request: the shift enters at 842d355b (the GDN gating launcher partition), the only kernel-touching commit after the 18-commit upstream tranche, which is byte-identical to the baseline. 842d355b changes which split-K a 2,048-token prefill chunk runs on 128 SMs (before: the split-4 grid of 192 CTAs did not fit and fell through to a narrower split; after: split-4 runs partitioned). That is a different fp32 summation order, exact within 1.5e-6 relative-L2 of the double-precision reference on this device (GDN suites run on the 4090 at 68a0722f), and it flips one near-tie token in the C1 trajectory. Decode is untouched: five diverse 512-token prompts are byte-identical between 8818b88b and 68a0722f with identical acceptance and decode rate. The C1 fixture is 28,000 characters of one repeated sentence; on the same binary a 1% length change swings its acceptance from 52.0% to 87.1%, and at 28,280 characters both binaries are byte-identical again. The published C1 number therefore carries the fixture's trajectory sensitivity, not the candidate's speed.",
+  "method": {
+    "probe": "ssh to the lane host; checkout each commit inside the lane's build tree (C:/b/ninfer-rtx4090-68a0722f/source), reconfigure the patch-stack binding, incremental build of ninfer-serve, bare server on 127.0.0.1:18099 with the lane's serving argv (INT8 KV, MTP3, prefill chunk 2,048, 32K context for the probe), the lane's exact C1 request (28,000-char prompt, max_tokens 1024, temperature 0, seed 57004, reasoning_effort medium), acceptance read from /v1/ninfer/status after one warm request and the C1 request.",
+    "classification": "acceptance_ratio > 0.88 = baseline trajectory (text sha c3b0c744211c1bf8); < 0.87 = shifted trajectory (cd7e0513df057424)",
+    "tree_restoration": "neutral-bin/ninfer-serve.exe restored from the installed release (sha256 170e2bf41bd9c6ab..., equal to the lane's neutral_build receipt); the installed release was never touched."
+  },
+  "bisect": [
+    {
+      "commit": "63f28c95",
+      "acceptance": 0.8985,
+      "text_sha": "c3b0c744211c1bf8",
+      "verdict": "baseline"
+    },
+    {
+      "commit": "37c2dafe",
+      "acceptance": 0.8985,
+      "text_sha": "c3b0c744211c1bf8",
+      "verdict": "baseline"
+    },
+    {
+      "commit": "06ea96f0",
+      "acceptance": 0.8974,
+      "text_sha": "c3b0c744211c1bf8",
+      "verdict": "baseline"
+    },
+    {
+      "commit": "8818b88b",
+      "acceptance": 0.8985,
+      "text_sha": "c3b0c744211c1bf8",
+      "verdict": "baseline"
+    },
+    {
+      "commit": "842d355b",
+      "acceptance": 0.8488,
+      "text_sha": "cd7e0513df057424",
+      "verdict": "shifted - first shifted commit"
+    },
+    {
+      "commit": "68a0722f",
+      "acceptance": 0.8479,
+      "text_sha": "cd7e0513df057424",
+      "verdict": "shifted - identical to 842d355b"
+    }
+  ],
+  "device_suite_at_68a0722f": {
+    "host": "the RTX 4090 lane host",
+    "commit": "68a0722f",
+    "tests": [
+      "ninfer_gdn_gating_test",
+      "ninfer_gdn_input_proj_test",
+      "ninfer_gdn_input_proj_conv_snapshot_test",
+      "ninfer_gdn_input_proj_conv_record_test",
+      "ninfer_gdn_replay_fold_test"
+    ],
+    "result": "5/5 passed; the gating suite bounds every route, partitioned cooperative splits included, at relative-L2 1.5e-6 against a double-precision reference (tests/ops/test_gdn_gating_proj.cpp kGdnProjectionFp32).",
+    "note": "The lane's neutral_build phase runs only serve-side suites on the host; the kernel suites had run at 68a0722f only on the RunPod small-SM class (docs/measurements/2026-09-13-runpod-ci-full-68a0722f.json). This is their first run on the 4090."
+  },
+  "decode_unchanged": {
+    "prompts": [
+      "code",
+      "story",
+      "technical",
+      "translation",
+      "structured"
+    ],
+    "completion_tokens": 512,
+    "temperature": 0,
+    "result": "byte-identical output, acceptance and decode rate on all five between 8818b88b and 68a0722f",
+    "rows": [
+      {
+        "prompt": "code",
+        "acceptance_pct": 61.99,
+        "decode_tps": [
+          123.14,
+          123.16
+        ]
+      },
+      {
+        "prompt": "story",
+        "acceptance_pct": 45.96,
+        "decode_tps": [
+          103.03,
+          103.02
+        ]
+      },
+      {
+        "prompt": "technical",
+        "acceptance_pct": 51.41,
+        "decode_tps": [
+          110.12,
+          110.13
+        ]
+      },
+      {
+        "prompt": "translation",
+        "acceptance_pct": 68.66,
+        "decode_tps": [
+          132.47,
+          132.45
+        ]
+      },
+      {
+        "prompt": "structured",
+        "acceptance_pct": 66.86,
+        "decode_tps": [
+          130.1,
+          130.1
+        ]
+      }
+    ]
+  },
+  "fixture_sensitivity": [
+    {
+      "commit": "68a0722f",
+      "prompt_chars": 27720,
+      "acceptance": 0.5201,
+      "text_sha": "178d2bef70911104"
+    },
+    {
+      "commit": "68a0722f",
+      "prompt_chars": 28000,
+      "acceptance": 0.8479,
+      "text_sha": "cd7e0513df057424"
+    },
+    {
+      "commit": "68a0722f",
+      "prompt_chars": 28280,
+      "acceptance": 0.871,
+      "text_sha": "c8ba3455ad498acc"
+    },
+    {
+      "commit": "8818b88b",
+      "prompt_chars": 27720,
+      "acceptance": 0.5829,
+      "text_sha": "9e3c5f696f683bb2"
+    },
+    {
+      "commit": "8818b88b",
+      "prompt_chars": 28000,
+      "acceptance": 0.8985,
+      "text_sha": "c3b0c744211c1bf8"
+    },
+    {
+      "commit": "8818b88b",
+      "prompt_chars": 28280,
+      "acceptance": 0.871,
+      "text_sha": "c8ba3455ad498acc"
+    }
+  ],
+  "why_only_large_chunks": "27B cooperative geometry: 128-token tiles x 3 head tiles. A 2,048-token chunk at split-4 asks for 16 x 3 x 4 = 192 CTAs; the 4090 keeps 128 resident (one CTA per SM for this instantiation). Chunks that fit (the 445-token tail, every short prompt) take the same route on both binaries and are byte-identical.",
+  "disposition": "Not a defect. The candidate ships with its measured C1 numbers (153.4 tok/s decode, 87.6% acceptance) and this receipt; the fixture's sensitivity is a documented property of the benchmark, and replacing the degenerate fixture is a product decision outside this window.",
+  "related": [
+    "docs/measurements/2026-09-13-upstream-backport-qualification.json",
+    "docs/measurements/2026-09-13-runpod-ci-full-68a0722f.json",
+    "docs/measurements/2026-09-13-sibling-entitlement-qualification.json"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "artifact_type": "ninfer_rtx5090_durable_qualification",
+  "schema_version": 1,
+  "release": "v0.4.1",
+  "as_of": "2026-08-31",
+  "identity": {
+    "source_commit": "f4fb315a76cce474b9b320ad71890d9dfc5335ef",
+    "server_binary_sha256": "b85d8b901995d6578a4b2efcb6cd3a2933488f0d58d464523a80888833bfbc4a",
+    "configuration_sha256": "81c8a5778cbf0b6a09e8e8b72058a419122fd31117ac2c29dc6271cc8f4e6f54",
+    "deployment_profile": "qwen38-5090-v0.4.1",
+    "oci_manifest_digest": "sha256:ce3cd21591d9a5a424a56c78652e0e8e70a7e0c85983df96fd55727058c04937"
+  },
+  "arcs": {
+    "save_restart_restore": {
+      "status": "passed",
+      "explicit_checkpoint_bytes": 316830856,
+      "checkpoint_generation": "1788161336547-0",
+      "frontier_tokens": 128,
+      "process_restart": "docker restart",
+      "continuation_recall": "codeword recalled verbatim after restart",
+      "continuation_reuse": "private_endpoint",
+      "continuation_cached_tokens": 128,
+      "continuation_wall_s": 1.523
+    },
+    "fork_delete_no_resurrection": {
+      "status": "passed",
+      "forks": 2,
+      "checkpoint_with_forks_bytes": 321292000,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "surviving_descendant_wall_s": 1.543
+    },
+    "cross_version_store": {
+      "status": "passed",
+      "observation": "v0.4.0-era checkpoints under a changed runtime fingerprint degrade to the documented clean replay path (404 previous_response_not_found); no corruption, no partial restore",
+      "store_format": "unchanged; rollback to v0.4.0 reads the same store"
+    }
+  },
+  "quota_transition": {
+    "council_review": "CR-20260831-v041delta (cross-family; P1 remediated in alphastorm/ninfer#30)",
+    "behavior": "health-gated publish transient tolerance; post-publish reclamation acknowledged best effort; fail-closed refusal while reclamation is unhealthy",
+    "regression_suite": "ninfer_session_checkpoint_store_test 9-suite battery green in release CI (appliance-local receipt)"
+  }
+}

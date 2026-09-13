@@ -1,0 +1,152 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.6.8",
+  "as_of": "2026-09-13",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Qualified OMP 18.0.9 macOS arm64, Windows x64, and Linux x64 clients; the digest-pinned RTX 5090 runtime image fc244576 (component v0.6.3-qwen38-5090-beta.1, source 8818b88b: the mainline runtime plus a selective backport of 18 upstream Neroued/ninfer commits and one downstream adaptation) under deployment profile qwen38-5090-v0.6.3 (configuration 622ab621, unchanged); the RTX 4090 native package v0.6.1-beta.1; the RTX 3090 durable v0.2.5-beta.1 package. The RTX 5090 component is the only change from v0.6.6. Measured on the owner appliance on 2026-09-13 through the lifecycle tool (candidate) and the documented route (published image).",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "release_source_commit": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "release_source_archive_sha256": "2062a6eceddb5e6ed6bd898471006276ffc9a855d2802dcfbfaa7c249e00c681",
+    "release_server_binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.6.3"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.6.8/qualification/rtx5090.json",
+      "sha256": "317afb31df423b0fb869fd2b7ff59618f8dc5f12727e73f8703245d0edac90c4",
+      "status": "passed",
+      "source_commit": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+      "server_binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+      "release_server_binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:d346174a024dd5bb1a633f090a9f87e9947096a3f468cfdc58a07dc65a1f95a5",
+      "oci_manifest_digest": "sha256:d346174a024dd5bb1a633f090a9f87e9947096a3f468cfdc58a07dc65a1f95a5",
+      "binary_package_sha256": "d23cd9c17a1adccce651d3685b7baf11758e101b8e012a2caaca5f3d9c8f369e",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.4-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.4-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "30ca6397a616f8ceae102cfe78e79e10da6729eca5a861c3848d1cdfebdd2486",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.4-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "built by the appliance's canonical route (pinned runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 container on the owner appliance, clean tree d956e6d6, 9/9 host suites plus the io_uring checkpoint backend suite); the runtime image was built from the published release binaries by the publish-runtime-image workflow (run 34225710385) and its receipt is attached to the runtime-image release"
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.8/qualification/rtx4090.json",
+        "sha256": "0f9f99dffbc784ccf25a99abdd8e310563fcf6a983c2caf0278c1425fe32235e",
+        "release_tag": "v0.6.2-qwen38-4090-beta.1",
+        "package_sha256": "4fc5106ffacc8cc42e45e7691a3d596ecd30dcb3a3fc0d7654d801c7df189ca2"
+      },
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.6.8/qualification/rtx3090.json",
+        "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
+        "release_tag": "v0.2.5-qwen38-3090-beta.1",
+        "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.4-qwen38-5090-beta.1 component (image d346174a) before the cut; the receipt lands at releases/v0.6.8/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "maximum_context_tokens": 131072,
+      "context_cache_profile": "--max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 (device-state=4-cache+1-active, host-state=24, private=8)",
+      "lifecycle": "candidate and published-image runs both started and stopped through tools/lifecycle/ninfer_container.py (preflight bound image id, binary, model artifact, and configuration identity); the configuration identity computed from the published image equals the qualified one, so the profile did not drift between qualification and publication",
+      "explicit_checkpoint_save_wall_s": 4.371,
+      "checkpoint_save_bytes": 5201400249,
+      "fanout_branch_reuse": "private_long_anchor (4/4 branches at 57,853 and 67,717 tokens in one process, and 4/4 again after a verified restart at each size)",
+      "fanout_branch_median_s_57853": 1.403,
+      "fanout_branch_median_s_67717": 1.533,
+      "restart_verified": "cumulative prefill counter reset (68,400 -> 53)",
+      "post_restart_resume_wall_s_57853": 3.357,
+      "post_restart_resume_wall_s_67717": 3.854,
+      "post_restart_branch_reuse": "private_long_anchor (8/8 across both sizes; no root re-prefill)",
+      "warm_arrival": "both orders hot after a verified restart: resume-first 4.386 s resume then forks at 2.876 s and 1.353 s, fork-first likewise hot; every resume quoted the planted keys exactly",
+      "restore_wall_s_5gb": [
+        3.998,
+        3.625
+      ],
+      "restore_checkpoint_bytes": 5201400249,
+      "tampered_restore_refused": true,
+      "decode_tokens_per_second_wall": 132.53,
+      "prefill_tokens_per_second_130048": 2169.9,
+      "exact_retrieval_130048": true,
+      "agent_protocol": "fork/delete/no-resurrection across docker restart passed on the published image and on the candidate",
+      "origin_authentication": "inherited from v0.4.7 (store format unchanged; the lifecycle candidate loaded MAC-tagged generations from a fresh store)",
+      "measured_on": "published image a62dd5b8 for retrieval, decode, agent protocol, identity, auth boundary and completion; the appliance-built image of the same bytes for fanout, warm arrival and restore"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.1-qwen38-4090-beta.1",
+      "source_commit": "63f28c95562f30002f7d5db74c2c3d3c7c1f8c40",
+      "lifecycle_phases": "15/15",
+      "protocol_checks": "15/15 at the shipped pool and 15/15 at 8 host state slots",
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 91.36,
+      "managed_stop": "stop-event; graceful; not forced",
+      "unsaved_session_survived_managed_restart": true,
+      "unsaved_session_cached_input_tokens": 45,
+      "explicit_checkpoint_cached_input_tokens": 42,
+      "restart_seconds": 44.37,
+      "rollback": "bidirectional; candidate stopped by signal, predecessor by what its record declares",
+      "prefill_tokens_per_second": 2104.95,
+      "decode_tokens_per_second": 159.09,
+      "mtp_acceptance_percent": 92.96,
+      "max_power_w": 458.53,
+      "max_memory_used_mib": 22814,
+      "golden_equivalent": "passed",
+      "registered_tests": "103/103 (6 skipped for absent artifacts)",
+      "mtp_arm": "MTP3"
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "protocol_checks": "15/15",
+      "release_tag": "v0.2.5-qwen38-3090-beta.1",
+      "maximum_context_tokens": 131072,
+      "exact_retrieval_prompt_tokens": 130048,
+      "exact_retrieval_seconds": 218.3,
+      "restart_cached_input_tokens_restored": 45,
+      "durable_restart_checkpoint_bytes": 310213049,
+      "decode_tokens_per_second": 90.66,
+      "prefill_tokens_per_second": 894.24,
+      "mtp_acceptance_percent": 93.43,
+      "max_power_w": 300.15,
+      "max_memory_used_mib": 22548,
+      "carried_from": "v0.5.0 (component byte-identical; requalified on its own rig on 2026-09-05 with origin-authenticated checkpoints)"
+    }
+  },
+  "interpretation": [
+    "The backported runtime matches the shipped v0.6.2 runtime on every lane gate within run-to-run noise: 130,048-token retrieval exact at 2,174.5 tok/s (2,169.9 before), decode 134.15 tok/s wall (132.53), 5.2 GB restore in 3.89/3.86 s (4.00/3.63), fanout medians 1.40/1.52 s (1.40/1.53), tampered restore refused, agent protocol 200/404/404.",
+    "The full 102-test suite passed on an ephemeral sm_120a GPU, including every ops kernel suite the perf commits touch and the #42 capacity contract test.",
+    "On the documented route the published image pulled by digest served the same identity the launcher computed, the profile gates re-measured exact through the documented tunnel (2,172.5 tok/s), and the macOS client route passed 10 of 10 including a server restart with the session continued.",
+    "Independent review: one full council was dispatched on the frozen subject (CR-20260913T1843Z-8818b88b). The cross-family supplement (Grok) completed with zero findings; the strong critic (Daybreak Blue) did not render a verdict because its model selector no longer resolves in the upgraded OMP 18.1.18 harness, and Gemini returned a provider 429. The epoch closed on disposition with no P0/P1 and that residual recorded; the release evidence therefore rests on the lead's verification, one cross-family supplement, the deterministic suite and the complete lane qualification.",
+    "Deferred upstream work with reasons - the materialization/pressure fix family, the serve protocol-adapter campaign, dflash2, kv-cache formats, spdlog, upstream's GDN capacity fix - is recorded in docs/measurements/2026-09-12-upstream-backport-ledger.json.",
+    "Raw prompts, model outputs, private host identifiers, and raw request logs are excluded."
+  ],
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.6.4-qwen38-5090-beta.1 component and runtime image"
+  ]
+}
