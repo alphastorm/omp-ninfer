@@ -1,0 +1,133 @@
+{
+  "artifact_type": "omp_ninfer_fleet_fanout_probe",
+  "schema_version": 3,
+  "lane": "rtx5090-v068-int8kv-12g",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112"
+  },
+  "generated_utc": "2026-09-13T03:42:19Z",
+  "base_tokens_requested": 56000,
+  "branches": 4,
+  "post_restart_branches": 4,
+  "summary": {
+    "template_input_tokens": 67681,
+    "cold_prefill_s": 26.679,
+    "checkpoint_save_s": 2.803,
+    "checkpoint_bytes": 2899918807,
+    "hot_fork_median_s": 1.423,
+    "hot_fork_max_s": 1.444,
+    "restart_ready_s": 26.42,
+    "post_restart_resume_s": 2.573,
+    "warm_start_first_fork_s": 1.304,
+    "warm_start_fork_median_s": 1.32,
+    "warm_start_fork_max_s": 1.337
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 26.679,
+      "input_tokens": 67681,
+      "id": "resp_2f430d93252687ac5b517345049b76bb"
+    },
+    {
+      "step": "warm_edit",
+      "wall_s": 1.215,
+      "id": "resp_3fabffb2875a88af4073f92e7e132acd"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 2.803,
+      "mode": "explicit",
+      "generation": "1789270876690-2",
+      "bytes": 2899918807,
+      "frontier": 67825,
+      "response_records": null
+    },
+    {
+      "step": "branch_0",
+      "wall_s": 1.361,
+      "id": "resp_354fb04a12c2959c529a583c5c942a00"
+    },
+    {
+      "step": "branch_1",
+      "wall_s": 1.423,
+      "id": "resp_ba58d815b6d0f2b5dca3005c9452e846"
+    },
+    {
+      "step": "branch_2",
+      "wall_s": 1.386,
+      "id": "resp_8aadc9f40c82d2b5bdea59afb4eadc8b"
+    },
+    {
+      "step": "branch_3",
+      "wall_s": 1.444,
+      "id": "resp_3dbdb0af410d86fe865af7b39fdd69ab"
+    },
+    {
+      "step": "fanout_save",
+      "wall_s": 2.941,
+      "mode": "explicit",
+      "generation": "1789270885097-3",
+      "bytes": 2899928530,
+      "frontier": 67828
+    },
+    {
+      "step": "restart",
+      "wall_s": 39.864,
+      "ready_after_s": 26.42,
+      "prefill_counter_before": 68388,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "post_restart_resume",
+      "wall_s": 2.573,
+      "id": "resp_eca5cb22cbc5c7dcd09635d21933a737"
+    },
+    {
+      "step": "post_restart_branch_0",
+      "wall_s": 1.304,
+      "id": "resp_53feeb8ff217e9e46e94bb48aa747ab0",
+      "input_tokens": 67753
+    },
+    {
+      "step": "post_restart_branch_1",
+      "wall_s": 1.312,
+      "id": "resp_8652de71986049b7fd842ed7a3fc0454",
+      "input_tokens": 67753
+    },
+    {
+      "step": "post_restart_branch_2",
+      "wall_s": 1.32,
+      "id": "resp_10c5ee5bc0ad4857a8e770949509d050",
+      "input_tokens": 67753
+    },
+    {
+      "step": "post_restart_branch_3",
+      "wall_s": 1.337,
+      "id": "resp_81e555180566c58a3138360c85382d70",
+      "input_tokens": 67753
+    },
+    {
+      "step": "post_restart_save",
+      "wall_s": 2.766,
+      "mode": "explicit",
+      "generation": "1789270936364-0",
+      "frontier": 67832
+    },
+    {
+      "step": "session_delete",
+      "wall_s": 0.0,
+      "status": 200
+    }
+  ],
+  "server_reuse_records": [],
+  "transient_retries": 0
+}

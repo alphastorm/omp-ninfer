@@ -1,0 +1,207 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-039",
+  "generated_utc": "2026-09-13T04:09:11Z",
+  "status": "closed",
+  "release": "v0.6.8",
+  "component": "v0.6.4-qwen38-5090-beta.1 (published image d346174a, source 68a0722f)",
+  "scope": "RTX 5090 appliance, published v0.6.8 image by digest on the documented profile, with only the host KV pool size and the KV dtype varied. Production was stopped for the window and restored; the lane supervisor's hold was taken and released.",
+  "question": "EXP-036 measured that a continuation whose head is not the most recently completed turn re-prefills from root when two 126K-token sessions alternate, and judged it undiagnosable without upstream's planner diagnostics. Is it actually a planner defect, or is it the host KV pool binding?",
+  "answer": "It is the host KV pool binding, and it is fully explained by occupancy. A 126K-token session's bf16 KV footprint is about 4.2 GB; the shipped profile's Host KV pool is 4 GiB on the native lanes and 8 GiB on the 5090 container, so two alternating 126K bf16 sessions cannot both stay resident and each turn evicts the other's endpoint. Every variation moves the result exactly as capacity predicts: two 75K bf16 sessions in the shipped 8 GiB pool lose nothing (0/4 continuations, private_evictions 0); two 126K bf16 sessions in a 12 GiB pool lose half (2/4, private_evictions 2, 8.44 of 12.88 GB occupied); the same two 126K sessions with INT8 KV - halving the footprint to about 2.5 GB - lose nothing in the same 12 GiB pool (0/4, private_evictions 0). No planner diagnostics were needed and no engine change is implied.",
+  "supersedes": {
+    "receipt": "docs/measurements/2026-09-13-sibling-entitlement-qualification.json",
+    "field": "session_switch_finding.interpretation",
+    "was": "It reads as the host KV / private catalog not retaining a swapped-out session's endpoint across another session's turn ... it needs the planner and cache diagnostics upstream added in d4929686 to diagnose, and it sits in the deferred materialization/pressure family's code.",
+    "now": "The retention is capacity-bound, not policy-broken: the pool cannot hold two sessions of that size. It is an operator sizing question with two levers (--host-kv-mib, --kv-dtype int8), not an engine defect, and it does not require the deferred upstream family."
+  },
+  "arms": [
+    {
+      "arm": "A",
+      "host_kv_mib": 8192,
+      "kv_dtype": "bf16 (shipped profile)",
+      "sessions": 2,
+      "session_input_tokens": 75115,
+      "result": "0/4 continuations lost, private_evictions 0",
+      "continuations": [
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 1.002,
+          "cached_tokens": 75130,
+          "reuse_lost": false
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 0.983,
+          "cached_tokens": 75131,
+          "reuse_lost": false
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 1.339,
+          "cached_tokens": 75110,
+          "reuse_lost": false
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 1.38,
+          "cached_tokens": 75111,
+          "reuse_lost": false
+        }
+      ],
+      "receipt": "docs/measurements/2026-09-13-multisession-hostkv-8g-rtx5090-v068.json"
+    },
+    {
+      "arm": "B",
+      "host_kv_mib": 12288,
+      "kv_dtype": "bf16",
+      "sessions": 2,
+      "session_input_tokens": 125891,
+      "result": "2/4 continuations lost (both of D2's, each re-prefilling from root in ~58 s), private_evictions 2, host KV 8.44 of 12.88 GB occupied, private catalog 3 of 8",
+      "continuations": [
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 4.495,
+          "cached_tokens": 125906,
+          "reuse_lost": false
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 57.529,
+          "cached_tokens": 0,
+          "reuse_lost": true
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 1.828,
+          "cached_tokens": 125886,
+          "reuse_lost": false
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 58.259,
+          "cached_tokens": 0,
+          "reuse_lost": true
+        }
+      ],
+      "receipt": "docs/measurements/2026-09-13-multisession-hostkv-12g-rtx5090-v068.json"
+    },
+    {
+      "arm": "C",
+      "host_kv_mib": 18432,
+      "kv_dtype": "bf16",
+      "sessions": 2,
+      "session_input_tokens": 125891,
+      "result": "the server was OOM-killed during the second base prefill: the appliance's WSL2 VM has 23 GiB of RAM and an 18 GiB pinned pool plus the process leaves nothing. This is the ceiling on this machine, not an engine limit.",
+      "evidence": "dmesg: 'Out of memory: Killed process (ninfer-serve) total-vm:83677308kB'; container exit 137"
+    },
+    {
+      "arm": "D",
+      "host_kv_mib": 12288,
+      "kv_dtype": "int8-group64",
+      "sessions": 2,
+      "session_input_tokens": 125891,
+      "result": "0/4 continuations lost, private_evictions 0, host KV 8.70 of 12.88 GB occupied, private catalog 4 of 8 - the same two sessions that lost half their reuse in arm B",
+      "continuations": [
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 1.285,
+          "cached_tokens": 125906,
+          "reuse_lost": false
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 1.751,
+          "cached_tokens": 125907,
+          "reuse_lost": false
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 3.228,
+          "cached_tokens": 125886,
+          "reuse_lost": false
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 1.955,
+          "cached_tokens": 125887,
+          "reuse_lost": false
+        }
+      ],
+      "receipt": "docs/measurements/2026-09-13-multisession-int8kv-12g-rtx5090-v068.json"
+    }
+  ],
+  "baseline": {
+    "receipt": "docs/measurements/2026-09-13-multisession-probe-rtx5090-v064-two.json",
+    "result": "4/4 continuations lost: two 126K bf16 sessions in the shipped 8 GiB pool - the worst case of the same relation (EXP-036)"
+  },
+  "int8_arm_qualification": {
+    "why": "INT8 KV is what both native Windows lanes already ship; before recommending it as the 5090 lever, its gates were measured on the same window.",
+    "profile_gates": {
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v068-int8kv-profile-gates.json",
+      "prefill_tokens_per_second": 2171.9,
+      "exact_retrieval": true,
+      "decode_tokens_per_second_wall": 138.27,
+      "agent_protocol": "passed",
+      "bf16_reference": {
+        "prefill_tokens_per_second": 2178.8,
+        "decode_tokens_per_second_wall": 134.8
+      }
+    },
+    "fanout": {
+      "57k": {
+        "receipt": "docs/measurements/2026-09-13-rtx5090-v068-int8kv-fanout-57k.json",
+        "hot_fork_median_s": 1.334,
+        "post_restart_resume_s": 2.752,
+        "checkpoint_bytes": 2548011471,
+        "bf16_checkpoint_bytes": 4505854472
+      },
+      "67k": {
+        "receipt": "docs/measurements/2026-09-13-rtx5090-v068-int8kv-fanout-67k.json",
+        "hot_fork_median_s": 1.423,
+        "post_restart_resume_s": 2.573,
+        "checkpoint_bytes": 2899918807,
+        "bf16_checkpoint_bytes": 5188026326
+      }
+    },
+    "warm_arrival": {
+      "receipt": "docs/measurements/2026-09-13-warm-arrival-rtx5090-v068-int8kv.json",
+      "orders": [
+        {
+          "order": "resume-first",
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 6.491
+        },
+        {
+          "order": "fork-first",
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 5.326
+        }
+      ]
+    },
+    "restore": {
+      "receipt": "docs/measurements/2026-09-13-restore-probe-rtx5090-v068-int8kv.json",
+      "restore_wall_s": [
+        3,
+        2.64
+      ],
+      "checkpoint_bytes": 2906816944,
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": true,
+      "bf16_reference_restore_wall_s": [
+        3.848,
+        3.647
+      ]
+    },
+    "verdict": "Every gate passes on INT8 KV and the durable artefacts roughly halve (2.55 GB against 4.51 GB at 57K, 2.91 GB against 5.20 GB at 67K), with restore correspondingly faster (3.00/2.64 s against 3.85/3.65 s) and retrieval still exact at 130,048 tokens. Decode is faster on this fixture (138.27 against 134.80 tok/s wall) and prefill within noise (2,171.9 against 2,178.8). This is a measured alternative, not a shipped profile change: a profile advance requires its own full requalification and release."
+  },
+  "product_disposition": {
+    "claims_unchanged": "No published claim covers prefix reuse across a session switch; every qualified fanout, warm-arrival and restore number is within one session, and the single-active-request profile is documented. v0.6.8 ships unchanged.",
+    "operator_guidance": "An operator alternating between two long sessions on one lane should either raise --host-kv-mib until the pool holds every resident session's KV (about 4.2 GB per 126K bf16 session, about 2.5 GB with INT8 KV) or switch the profile to INT8 KV. On this appliance the pool ceiling is about 12 GiB: 18 GiB OOM-kills the server in a 23 GiB VM.",
+    "not_done_here": "Advancing the shipped 5090 profile to INT8 KV or a larger pool is a release decision with its own qualification; this window only measures what each choice costs and buys."
+  },
+  "window_hygiene": "Production stopped for the window and restored: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on its own port; the window container and its scratch removed; the lane supervisor's hold released.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

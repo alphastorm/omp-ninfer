@@ -1,0 +1,147 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 3,
+  "lane": "rtx5090-v068-int8kv-12g",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112"
+  },
+  "generated_utc": "2026-09-13T03:47:56Z",
+  "base_tokens_requested": 56000,
+  "summary": {
+    "template_input_tokens": 67717,
+    "cold_prefill_s": 26.926,
+    "checkpoint_bytes": 2906816944,
+    "restore_0_wall_s": 3.0,
+    "restore_1_wall_s": 2.64,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true,
+    "tampered_restore_refused": true
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 26.926,
+      "input_tokens": 67717
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 1.63,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe need extract from previous user message:",
+      "incomplete": null,
+      "output_sha256": "7b1df4d7fa092bd9e5324ec6fc8c9e0bd8ad2a6987270ff37023977d00dee06c"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 2.895,
+      "mode": "explicit",
+      "generation": "1789271132024-3",
+      "bytes": 2906816944,
+      "frontier": 67981
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 39.971,
+      "ready_after_s": 26.42,
+      "prefill_counter_before": 68189,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 3.0,
+      "id": "resp_0325c3eb85329bf53d71b5397a71a908",
+      "input_tokens": 68029,
+      "status_polls": [
+        {
+          "t_s": 0.6,
+          "bytes": 2906816944,
+          "created_at_unix_ms": 1789271143806,
+          "frontier_tokens": 67981,
+          "generation": "1789271141594-5",
+          "read_backend": "io_uring-odirect",
+          "response_records": 2,
+          "restored_tokens": 67981,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-13T03:46:14Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks restore round 0: quote keys exactly. Same as before. Need final only ORCHID=279954 COLOR=435926 SIGIL=537083. Ensure no other words.\nORCHID=279954 COLOR=435926 SIGIL=537083",
+      "incomplete": null,
+      "output_sha256": "5b20a516deffd24d20ee1f7a249a82c0310c95a508fec4c534f7c3fd1a585589"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 3.187,
+      "mode": "explicit",
+      "generation": "1789271178905-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 37.643,
+      "ready_after_s": 26.41,
+      "prefill_counter_before": 282,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 2.64,
+      "id": "resp_9387ae5703db471210126b2aeba91d74",
+      "input_tokens": 68158,
+      "status_polls": [
+        {
+          "t_s": 0.61,
+          "bytes": 2911418255,
+          "created_at_unix_ms": 1789271188258,
+          "frontier_tokens": 68110,
+          "generation": "1789271185917-1",
+          "read_backend": "io_uring-odirect",
+          "response_records": 3,
+          "restored_tokens": 68110,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-13T03:46:59Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need output same. User says restore round 1. No other words. Final exact.\nORCHID=279954 COLOR=435926 SIGIL=537083",
+      "incomplete": null,
+      "output_sha256": "12af3fe38b52ea75e14955e5278a9d385927f9b14ba3e7465501a38d86465fff"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 2.79,
+      "mode": "explicit",
+      "generation": "1789271222571-0"
+    },
+    {
+      "step": "tampered_restore",
+      "flipped": "sessions/d18b84e9167e5f294fc506dbbb8f87a61829585dc015d359a421e5c23ca4a49a/generations/1789271229082-1/engine/text-kv.bin offset=1152712704 41->3",
+      "ready_after_s": 27.01,
+      "refused": true,
+      "http_status": 404,
+      "wall_s": 1.884,
+      "error_excerpt": "{\"error\":{\"code\":\"previous_response_not_found\",\"message\":\"previous response 'resp_9387ae5703db471210126b2aeba91d74' not found\",\"param\":\"previous_response_id\",\"type\":\"invalid_request_error\"}}",
+      "status_after_refusal": "corrupt",
+      "second_attempt_refused": true,
+      "status_after_quarantine": "missing"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

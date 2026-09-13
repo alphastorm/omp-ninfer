@@ -1,0 +1,188 @@
+{
+  "artifact_type": "omp_ninfer_multisession_pressure_probe",
+  "schema_version": 1,
+  "lane": "rtx5090-v068-hostkv-12g",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112"
+  },
+  "generated_utc": "2026-09-13T03:25:11Z",
+  "question": "With several large sessions resident, does a byte-identical-extension continuation or a fork issued immediately after another session's turn lose its prefix reuse (upstream Neroued/ninfer#229)?",
+  "parameters": {
+    "sessions": 2,
+    "base_tokens_requested": 100000,
+    "rounds": 2,
+    "forks_per_session_per_round": 1
+  },
+  "counters_before": {},
+  "counters_after": {},
+  "summary": {
+    "continuations_and_forks": 8,
+    "reuse_lost": 2,
+    "exposed": true,
+    "server_errors": [],
+    "server_reuse_paths": [
+      "private_endpoint",
+      "private_long_anchor",
+      "root"
+    ],
+    "server_root_requests_after_bases": 2
+  },
+  "steps": [
+    {
+      "step": "base_D1",
+      "wall_s": 56.692,
+      "input_tokens": 125891,
+      "id": "resp_af556d516755f5dbf67d1e1f1e832233"
+    },
+    {
+      "step": "base_D2",
+      "wall_s": 57.726,
+      "input_tokens": 125892,
+      "id": "resp_0bdd93ce56984d46c2c9f288e354bc74"
+    },
+    {
+      "step": "r1_continue_D1",
+      "wall_s": 4.495,
+      "prompt_tokens": 125937,
+      "cached_tokens": 125906,
+      "exact": false,
+      "reuse_lost": false,
+      "since_previous_turn_s": 4.495
+    },
+    {
+      "step": "r1_fork1_D1",
+      "wall_s": 1.132,
+      "prompt_tokens": 125992,
+      "cached_tokens": 125960,
+      "reuse_lost": false
+    },
+    {
+      "step": "r1_continue_D2",
+      "wall_s": 57.529,
+      "prompt_tokens": 125938,
+      "cached_tokens": 0,
+      "exact": false,
+      "reuse_lost": true,
+      "since_previous_turn_s": 57.529
+    },
+    {
+      "step": "r1_fork1_D2",
+      "wall_s": 1.061,
+      "prompt_tokens": 125993,
+      "cached_tokens": 125961,
+      "reuse_lost": false
+    },
+    {
+      "step": "r2_continue_D1",
+      "wall_s": 1.828,
+      "prompt_tokens": 125991,
+      "cached_tokens": 125886,
+      "exact": false,
+      "reuse_lost": false,
+      "since_previous_turn_s": 1.828
+    },
+    {
+      "step": "r2_fork1_D1",
+      "wall_s": 1.027,
+      "prompt_tokens": 126046,
+      "cached_tokens": 126014,
+      "reuse_lost": false
+    },
+    {
+      "step": "r2_continue_D2",
+      "wall_s": 58.259,
+      "prompt_tokens": 125992,
+      "cached_tokens": 0,
+      "exact": false,
+      "reuse_lost": true,
+      "since_previous_turn_s": 58.259
+    },
+    {
+      "step": "r2_fork1_D2",
+      "wall_s": 1.048,
+      "prompt_tokens": 126047,
+      "cached_tokens": 126015,
+      "reuse_lost": false
+    }
+  ],
+  "server_reuse_records": [
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 125891,
+      "completion_tokens": 16,
+      "ttft_s": 55.725676941
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 125892,
+      "completion_tokens": 16,
+      "ttft_s": 56.537393229
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 125906,
+      "prompt_tokens": 125937,
+      "completion_tokens": 24,
+      "ttft_s": 3.716184723
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 125960,
+      "prompt_tokens": 125992,
+      "completion_tokens": 24,
+      "ttft_s": 0.35593781300000005
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 125938,
+      "completion_tokens": 24,
+      "ttft_s": 56.767201181000004
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 125961,
+      "prompt_tokens": 125993,
+      "completion_tokens": 24,
+      "ttft_s": 0.309711859
+    },
+    {
+      "reuse": "private_long_anchor",
+      "reused_tokens": 125886,
+      "prompt_tokens": 125991,
+      "completion_tokens": 24,
+      "ttft_s": 1.034138344
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 126014,
+      "prompt_tokens": 126046,
+      "completion_tokens": 24,
+      "ttft_s": 0.29435878499999996
+    },
+    {
+      "reuse": "root",
+      "reused_tokens": 0,
+      "prompt_tokens": 125992,
+      "completion_tokens": 24,
+      "ttft_s": 57.47893919
+    },
+    {
+      "reuse": "private_endpoint",
+      "reused_tokens": 126015,
+      "prompt_tokens": 126047,
+      "completion_tokens": 24,
+      "ttft_s": 0.289533476
+    }
+  ]
+}

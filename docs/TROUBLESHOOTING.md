@@ -173,6 +173,22 @@ Separate correctness from acceleration:
 Report the transition (same turn, OMP resume, tunnel reconnect, or NInfer restart), not private
 conversation content.
 
+## Two long sessions alternate and each one re-prefills from scratch
+
+This is the Host KV pool, not a lost session. Every session that stays resident holds its KV in
+that pool; when the pool cannot hold them all, a turn on one session evicts the other's endpoint
+and the next continuation re-prefills from root. Measured on the RTX 5090 container profile: two
+126,000-token `bf16` sessions lose half their continuations at a 12 GiB pool and all of them at
+the shipped 8 GiB pool, while two 75,000-token sessions at 8 GiB lose none
+([EXP-039](measurements/2026-09-13-hostkv-capacity-multisession.json)).
+
+Check `cache.host_kv` and `cache.private_evictions` in `GET /v1/ninfer/status`: occupancy near
+capacity with a rising eviction count is this, and a single session is unaffected either way.
+Budget roughly 4.2 GB per 126K-token session on `bf16` and about 2.5 GB on `--kv-dtype int8`, then
+either raise `--host-kv-mib` until the pool holds every session you keep open, or run the profile
+on INT8 KV. Both are launch-time changes to a profile you build yourself: the published profiles
+ship the qualified values, and changing either one leaves the qualified envelope.
+
 ## Fail-closed check returns a cloud answer
 
 Stop testing. Preserve the command, explicit model ID, overlay identity, and provider/model name from

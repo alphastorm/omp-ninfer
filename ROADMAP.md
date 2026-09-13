@@ -40,8 +40,11 @@ release accepts is the route the documentation prints: every documented route - 
 routes and, from `v0.6.5`, the quickstart's primary macOS row - runs verbatim from its own blocks
 with shell-decided outcomes (EXP-032, EXP-033). From `v0.6.7` the RTX 5090 runtime carries the
 first tranche of upstream engine work - 18 of 158 commits, taken with reasons and requalified within
-noise of the shipped runtime (EXP-035); the next engine window is the upstream pressure-planner fix
-family, which needs a dedicated rebase. Details:
+noise of the shipped runtime (EXP-035). The reuse loss measured when two long sessions alternate
+turns is host KV capacity, not planner policy: it tracks pool size and KV footprint exactly, and
+INT8 KV or a larger `--host-kv-mib` removes it on the same binary
+([EXP-039](docs/measurements/2026-09-13-hostkv-capacity-multisession.json)), so the upstream
+pressure-planner family is no longer what that finding waits on. Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
