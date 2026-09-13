@@ -11,8 +11,11 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.7
+## Where this is now — v0.6.8
 
+From `v0.6.8` both mainline lanes run one runtime source: the RTX 4090 native lane carries the
+upstream engine tranche and the GDN capacity fix the 5090 took in `v0.6.7`, and a fork continued
+while its sibling is alive no longer answers HTTP 500 on any lane (ninfer#43, EXP-036).
 All three lanes install from public URLs with a durable session store on the route the
 documentation gives you - from `v0.6.3` the published RTX 5090 launcher mounts one, which it did
 not before ([EXP-031](docs/measurements/2026-09-11-rtx5090-public-route-qualification.json)).
@@ -336,6 +339,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.8` | Both mainline lanes on source 68a0722f: RTX 5090 runtime v0.6.4 and RTX 4090 native v0.6.2-beta.1; the live-sibling continuation 500 fixed at source (ninfer#43); GDN gating grids partitioned by device residency; the 4090 C1 fixture's trajectory sensitivity measured and recorded (EXP-037) |
 | `v0.6.7` | RTX 5090 runtime v0.6.3: selective backport of 18 upstream engine commits (MoE/GDN/vocab kernels, sparse-MoE and GDN record fixes, cpp-httplib 0.54.1), every lane gate within noise of v0.6.2; the deferred upstream families named with reasons |
 | `v0.6.6` | The config every documented route installs keeps the pinned client on its channel: no out-of-channel `omp update` advice; every client-installing route re-run and the setting read back from the installed client; no component changed |
 | `v0.6.5` | The quickstart's primary macOS route runs verbatim from its own blocks with shell-decided outcomes, including a server restart with the session continued; every documented route is now runner-covered; no component changed |

@@ -120,6 +120,32 @@ baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
 
+### v0.6.8 — both mainline lanes on one runtime, and a fork bug fixed (2026-09-13)
+
+The RTX 5090 runtime component advances to `v0.6.4-qwen38-5090-beta.1` and the RTX 4090 native
+component to `v0.6.2-qwen38-4090-beta.1`, both from source `68a0722f`: `v0.6.3` plus the live-sibling
+entitlement fix (ninfer#43), the GDN gating launcher partition for grids a device cannot keep resident,
+and its review remediation. Receipts in
+[`releases/v0.6.8/qualification/rtx5090.json`](../releases/v0.6.8/qualification/rtx5090.json) and
+[`releases/v0.6.8/qualification/rtx4090.json`](../releases/v0.6.8/qualification/rtx4090.json); the
+sibling reproduction and fix in
+[`docs/measurements/2026-09-13-sibling-entitlement-qualification.json`](measurements/2026-09-13-sibling-entitlement-qualification.json)
+(EXP-036); the RTX 4090 C1 bisect in
+[`docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json`](measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json)
+(EXP-037).
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 128K | **2,178.80 tok/s** prefill | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens on the lifecycle-started candidate, cold process (`v0.6.7`: 2,174.50 tok/s); 2,177.70 tok/s again on the published image through the documented tunnel |
+| RTX 5090 C1 | **139.78 tok/s** decode | server-side over 2,048 completion tokens at temperature 0, 134.80 tok/s wall; MTP3, 41.20% acceptance, 2.24 tokens per round (`v0.6.7`: 139.23 server-side, 134.15 wall) |
+| RTX 5090 restore | **3.8 s / 3.6 s** for 5.2 GB | two verified restarts with exact planted-key retrieval; a flipped payload byte refused with `previous_response_not_found` and the generation quarantined (`v0.6.7`: 3.9 s / 3.9 s) |
+| RTX 5090 fanout | **8/8** at 57,853 and 67,681 tokens | hot fork medians 1.41 s and 1.82 s in one process; after a verified restart the resume takes 3.45 / 3.65 s and every fork stays on the shared anchor at ~1.4 s (`v0.6.7`: 1.40 / 1.52 s, resume 3.38 / 3.65 s) |
+| RTX 5090 warm arrival | hot in both orders | resume-first (6.67 s) and fork-first (6.68 s) sequences after a verified restart, every resume quoting the planted keys exactly |
+| RTX 5090 agent protocol | **passed** | authenticated session identity, stateful continuation, two forks, deleted parent 404 before and after a restart, surviving descendant continued, **live sibling continued at 200** (HTTP 500 on every release since v0.6.2) - on the candidate and on the published image |
+| RTX 4090 128K | **91.5 s** | exact `ORCHID=493817; COLOR=COBALT` retrieval at 130,048 prompt tokens on the installed candidate (`v0.6.7`: 91.4 s) |
+| RTX 4090 C1 | **153.44 tok/s** decode | 2,114.08 tok/s prefill over 4,541 prompt tokens, 87.59% MTP3 acceptance, 22,774 MiB peak (`v0.6.7`: 159.09 tok/s at 92.96%). Bisected on the host: the shift enters at the GDN launcher partition, a summation-order change exact within 1.5e-6 relative-L2 on this GPU; five diverse prompts are byte-identical between the runtimes and the fixture itself swings 52-87% with a 1% change in its own length |
+| RTX 4090 restart | **54.4 s** | a never-published 45-token session and an explicitly saved 42-token session both restored across a graceful managed stop, markers exact |
+
 ### v0.6.7 — the RTX 5090 runtime takes the upstream engine work (2026-09-13)
 
 The RTX 5090 runtime component advances to `v0.6.3-qwen38-5090-beta.1`: the mainline runtime at

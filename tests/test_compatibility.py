@@ -36,9 +36,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
         )
-        self.assertEqual(authority["product_release"], "v0.6.7")
+        self.assertEqual(authority["product_release"], "v0.6.8")
         receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.6.7" / "qualification" / "rtx5090.json").read_bytes()
+            (ROOT / "releases" / "v0.6.8" / "qualification" / "rtx5090.json").read_bytes()
         ).hexdigest()
         self.assertTrue(
             all(
@@ -50,9 +50,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         self.assertTrue(
             all(
                 profile["runtime"]["image_reference"]
-                == "ghcr.io/alphastorm/ninfer-runtime@sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61"
+                == "ghcr.io/alphastorm/ninfer-runtime@sha256:d346174a024dd5bb1a633f090a9f87e9947096a3f468cfdc58a07dc65a1f95a5"
                 and profile["runtime"]["image_digest"]
-                == "sha256:fc24457651f63fe544bf35b96fa08faaaac592aa46edb3cec6b29552bb741b61"
+                == "sha256:d346174a024dd5bb1a633f090a9f87e9947096a3f468cfdc58a07dc65a1f95a5"
                 for profile in authority["profiles"]
             )
         )
@@ -273,7 +273,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
         current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.6.7")
+        self.assertEqual(current["product_release"], "v0.6.8")
 
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")

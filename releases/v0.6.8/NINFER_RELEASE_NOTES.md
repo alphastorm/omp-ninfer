@@ -29,7 +29,7 @@ The lane's fixed C1 fixture moved with it - 153.4 tok/s decode at 87.6% MTP3 acc
 the partition commit, which changes the fp32 summation order of those chunks; five diverse prompts
 are byte-identical between the two runtimes, and the fixture (28,000 characters of one repeated
 sentence) swings from 52% to 87% acceptance on the same binary when its own length changes by 1%
-([EXP-037](../../docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json)). The
+(EXP-037, `docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json`). The
 published number carries the fixture's trajectory sensitivity, not a slower runtime.
 
 ## Measured
@@ -42,7 +42,7 @@ at 57K and 67K, warm arrival in both orders, tampered restore refused, agent pro
 install, protocol at the shipped pool and at a third of it, 130,048-token exact retrieval in
 91.5 s, a never-published session and an explicitly saved one both restored across a graceful
 managed restart, rollback both directions, state security, OMP Golden-equivalent exact
-([5090 receipts](qualification/rtx5090.json), [4090 receipt](qualification/rtx4090.json)).
+([5090 receipts](qualification/rtx5090.json), [4090 receipt](qualification/rtx4090.json), [acceptance](acceptance/composed-external-installation.json)).
 
 ## Review
 

@@ -72,8 +72,8 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/fbd31aa562a66f444b496ff9176fe2c824f24baa/releases/v0.6.8/qualification/rtx5090.json",
-          "sha256": "317afb31df423b0fb869fd2b7ff59618f8dc5f12727e73f8703245d0edac90c4"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/qualification/rtx5090.json",
+          "sha256": "1e5d21006c2d6faa807d0afd6c4db79d063699cdbf9aa6270457798297e42732"
         }
       },
       "runtime": {
@@ -168,8 +168,8 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/fbd31aa562a66f444b496ff9176fe2c824f24baa/releases/v0.6.8/qualification/rtx5090.json",
-          "sha256": "317afb31df423b0fb869fd2b7ff59618f8dc5f12727e73f8703245d0edac90c4"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/qualification/rtx5090.json",
+          "sha256": "1e5d21006c2d6faa807d0afd6c4db79d063699cdbf9aa6270457798297e42732"
         }
       },
       "runtime": {
@@ -264,8 +264,8 @@
         "profile": "qwen38-5090-v0.6.3",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/fbd31aa562a66f444b496ff9176fe2c824f24baa/releases/v0.6.8/qualification/rtx5090.json",
-          "sha256": "317afb31df423b0fb869fd2b7ff59618f8dc5f12727e73f8703245d0edac90c4"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/qualification/rtx5090.json",
+          "sha256": "1e5d21006c2d6faa807d0afd6c4db79d063699cdbf9aa6270457798297e42732"
         }
       },
       "runtime": {
@@ -327,7 +327,7 @@
       "package_bytes": 573344205,
       "qualification_receipt": {
         "path": "releases/v0.6.8/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/fbd31aa562a66f444b496ff9176fe2c824f24baa/releases/v0.6.8/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/qualification/rtx3090.json",
         "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943"
       }
     },
@@ -349,7 +349,7 @@
       "package_bytes": 572678944,
       "qualification_receipt": {
         "path": "releases/v0.6.8/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/fbd31aa562a66f444b496ff9176fe2c824f24baa/releases/v0.6.8/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/qualification/rtx4090.json",
         "sha256": "0f9f99dffbc784ccf25a99abdd8e310563fcf6a983c2caf0278c1425fe32235e"
       }
     }

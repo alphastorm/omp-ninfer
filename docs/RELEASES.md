@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.7`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.7` work |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.8`, GitHub `Latest` |
+| Development | Unpublished candidates with no install or support claim | post-`v0.6.8` work |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,9 +27,31 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.8 public release (both mainline lanes on one runtime, and a fork bug fixed)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.8`, GitHub `Latest`. Both mainline runtime
+  components advance to source `68a0722f`: RTX 5090 `v0.6.4-qwen38-5090-beta.1` (image
+  `d346174a…`), RTX 4090 native `v0.6.2-qwen38-4090-beta.1` - v0.6.3 plus the live-sibling
+  entitlement fix (ninfer#43), the GDN gating launcher partition and its review remediation;
+  deployment profile `qwen38-5090-v0.6.3` and configuration `622ab621` unchanged; the RTX 3090
+  component and the client unchanged.
+- Lane qualification on 2026-09-13 ([5090](../releases/v0.6.8/qualification/rtx5090.json) ·
+  [4090](../releases/v0.6.8/qualification/rtx4090.json)): every 5090 gate within noise of v0.6.7
+  and the live sibling at 200; 15/15 orchestrated phases on the 4090 lane host; full 102-test suite
+  on an ephemeral sm_120a GPU. The 4090 C1 fixture's shift is bisected and explained (EXP-037).
+- Route acceptance on 2026-09-13 ([receipt](../releases/v0.6.8/acceptance/documented-routes.json) ·
+  [composed](../releases/v0.6.8/acceptance/composed-external-installation.json)): the published
+  image by digest on the documented host route, profile gates through the documented tunnel, macOS
+  client route 10 of 10, the RTX 4090 component accepted from its public URLs through the
+  documented installer; Windows client route carried with reasons.
+- Review: two councils on frozen subjects; two P2 findings on the GDN capacity contract closed
+  by `68a0722f` before the cut; the strong critic's selector resolves again.
+- Upgrade: RTX 5090 - re-clone the tag and rerun the inference-host start block; RTX 4090 -
+  install the new component with its `Install-Release.ps1`; sessions and checkpoints carry.
+
 ### v0.6.7 public release (the RTX 5090 runtime takes the upstream engine work)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.7`, GitHub `Latest`. The RTX 5090 runtime component
+- Product release: `alphastorm/omp-ninfer@v0.6.7` (superseded by v0.6.8). The RTX 5090 runtime component
   advances to `v0.6.3-qwen38-5090-beta.1` (source `8818b88b`, image `fc244576…`): the mainline
   runtime plus a selective backport of 18 upstream commits and one downstream adaptation; deployment
   profile `qwen38-5090-v0.6.3` and configuration `622ab621` unchanged; native components and the

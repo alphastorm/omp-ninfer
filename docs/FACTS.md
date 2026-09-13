@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-13 · Current stable release: **v0.6.7**
+Last verified: 2026-09-13 · Current stable release: **v0.6.8**
 
-Everything on this page is bound to the [v0.6.7 release manifest](../releases/v0.6.7/manifest.json)
+Everything on this page is bound to the [v0.6.8 release manifest](../releases/v0.6.8/manifest.json)
 and its qualification receipts; the test suite rejects drift between these claims and the receipts.
 
 ## What it is
@@ -43,8 +43,8 @@ All of these should be materially true:
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
 | RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.2 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints |
-| RTX 4090 | native Windows service | 131,072 | v0.6.1-beta.1 lane on the mainline runtime (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.4 |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.7) |
+| RTX 4090 | native Windows service | 131,072 | v0.6.2-beta.1 lane on the mainline runtime (source 68a0722f, shared with the 5090's v0.6.4) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.4 |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.8) |
 
 ## Current model and artifact
 

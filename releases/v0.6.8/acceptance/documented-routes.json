@@ -1,0 +1,95 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.8",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Both mainline runtime components changed (RTX 5090 v0.6.4-qwen38-5090-beta.1, RTX 4090 v0.6.2-qwen38-4090-beta.1, source 68a0722f). The documented RTX 5090 container route ran against the published image from a stock clone of the promoted candidate: the inference-host half on the appliance and the macOS client half from an isolated HOME, with the RTX 5090 profile gates re-measured through the documented tunnel. The RTX 4090 component was accepted from its public URLs on the lane host through the documented installer (acceptance/rtx4090-public-install.json). The native Windows client route carries from v0.6.6 with reasons.",
+  "document_sha256": "7d15f93f848e",
+  "candidate_commit": "c36e9688c3d1234096ec812a7a5700974577be7b",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 45.858,
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v068-host-route-run.json",
+      "note": "from a stock clone of the promoted candidate: the documented start block pulled ghcr.io/alphastorm/ninfer-runtime@sha256:d346174a\u2026 by digest with an empty credential store and the launcher accepted the identity it computed - binary 9ad469e0, configuration 622ab621 under qwen38-5090-v0.6.3 (the deployment profile does not advance: the configuration is unchanged). The launcher refused the tree twice before that, correctly: once while the release notes linked an acceptance receipt that did not exist yet, once while the manifest was still a draft."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 149.437,
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v068-macos-route-run.json",
+      "note": "10 of 10 from an isolated HOME against the published image: tool marker, Vision, nonce on --continue, a server restart from the Mac with the session continued, fail-closed with the tunnel stopped; installed client setting startup.checkUpdate read back false"
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is",
+      "carried_from": "v0.6.6: the client bytes and blocks are unchanged; the server behaviours that route checks (tool, Vision, resume, fail-closed) are a subset of what the macOS client route exercised against the new image in this window"
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "public-assets",
+        "checksum-set",
+        "installer",
+        "smoke",
+        "restore"
+      ],
+      "receipt": "releases/v0.6.8/acceptance/rtx4090-public-install.json",
+      "note": "the documented installer, downloaded from the component's public URL, accepted the installed v0.6.2-beta.1 as the exact qualified bytes (already_installed, lifecycle pointers unchanged) after every manifest asset hashed exactly against the closed checksum set; authenticated status identity match, anonymous 401, tiny completion 200 in 113 ms; stopped and returned to the 450 W owner state"
+    }
+  },
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-13-rtx5090-v068-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2177.7,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 134.39,
+    "agent_protocol": "passed",
+    "live_sibling_continuation_status": 200
+  },
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "anonymous pull of the published digest inside the documented start block; the launcher's computed identity equals the manifest's; the image's /usr/local/bin/ninfer-serve hashes to the manifest's server_binary_sha256 9ad469e0"
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "every executed step's bytes hashed to the documented block's SHA-256; the only substitution is the reader's own SSH destination"
+    },
+    "tunnel_route": {
+      "status": "passed",
+      "note": "the runner refused nothing it did not own and required /health through its own forward"
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance verified on the incumbent's own port after the window: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, supervisor hold released (marker absent). RTX 4090 lane host: candidate lineage returned to stopped at 450 W. Mac: isolated HOME, nothing to restore."
+    }
+  },
+  "qualification_receipt": "releases/v0.6.8/qualification/rtx5090.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

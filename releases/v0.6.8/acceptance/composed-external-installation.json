@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.8",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "external-installation acceptance of both changed mainline components from their published URLs and image: the RTX 5090 runtime v0.6.4-qwen38-5090-beta.1 on the documented container route (appliance host half, macOS client half) and the RTX 4090 native v0.6.2-qwen38-4090-beta.1 through its downloaded installer on the lane host",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "pinned OMP 18.0.9 client unchanged from the v0.4.0 composed acceptance; wire contract and closed error vocabulary unchanged in this delta"
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "4fb4bd65c03281d8b7590568e4c9e5af6bf55ca77a21e0ba2546e5e6d7806748",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on the Mac by the documented block from its public URL and hashed.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "all fourteen assets of the three component releases (ten of v0.6.2-qwen38-4090-beta.1, three of v0.6.4-qwen38-5090-beta.1, the v0.6.4 source archive) downloaded without a token on the macOS workstation and hashed exactly against the lane checksum sets; the runtime image was pulled anonymously by digest d346174a on the inference host inside the documented start block and again before it; the RTX 4090 assets were downloaded a second time on the lane host by the acceptance script"
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "the checked-in rtx4090-windows-native.SHA256SUMS is byte-identical to the published outer set (2798d1e5), the package-build receipt hashes to its own entry, and the manifest row was derived from those two files by scripts/bind_native_variant.py; the 5090 component's SHA256SUMS verified the binary archive and SBOM, and the image's /usr/local/bin/ninfer-serve hashes to the manifest's server_binary_sha256 9ad469e0"
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "digest d346174a, pulled with an empty credential store; labels bind revision 68a0722f and base a19e00c5"
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "RTX 5090: the documented launcher computed configuration 622ab621 under qwen38-5090-v0.6.3 and the status route reported binary 9ad469e0 / patch stack 68a0722f. RTX 4090: the installed release's served identity matched the manifest row (binary 170e2bf4, configuration b9ffd9c0) through its own controller"
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "anonymous_status_request": 401,
+      "note": "RTX 4090: anonymous status 401, authenticated 200 with identity match, on the lane host; RTX 5090: authenticated_session_identity true in the public-route gates; anonymous status refused by the route's launcher preflight"
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "RTX 4090: OpenAI-compatible chat completion through the authenticated route on the installed release (3 completion tokens, marker present, 113.1 ms); RTX 5090: the macOS route's tool turn returned the planted marker exactly and the 130,048-token retrieval was exact through the documented tunnel"
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "RTX 5090: nonce on --continue, and again after the server container was restarted from the Mac; the live-sibling continuation answered 200 on the published image. RTX 4090: two sessions restored across a graceful managed restart in the lane qualification (releases/v0.6.8/qualification/rtx4090.json) - one explicitly saved (42 cached input tokens) and one never published (45), both quoting their markers exactly"
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "RTX 5090: the outage request failed with the tunnel stopped. RTX 4090: deleted parent refuses 404 while the surviving descendant continues, at the shipped pool and at eight host-state slots; a low-privilege principal is denied read and write on the protected state root - in the lane qualification"
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.8/acceptance/documented-routes.json",
+      "sha256": "b8fc23d5eba1d372fbb99105da8a5a2f43cce7e094238de7578a3ee6b0b02603",
+      "summary": "RTX 5090 host half 2/2 and macOS client half 10/10 from a stock clone of the promoted candidate against the published image; public-route gates exact at 2177.7 tok/s; RTX 4090 public-install acceptance passed; Windows client route carried from v0.6.6"
+    },
+    "native_public_install": {
+      "status": "passed",
+      "rtx4090": {
+        "receipt": "releases/v0.6.8/acceptance/rtx4090-public-install.json",
+        "sha256": "f870e31013cb197a6e50c810dc689e7ca746056a3a141ce3df18529d3fb51015",
+        "summary": "public URLs -> closed checksum set exact -> every manifest asset downloaded and hashed exactly -> the downloaded installer accepted the installed v0.6.2-beta.1 as the exact qualified bytes (already_installed, lifecycle pointers unchanged) -> authenticated status identity match, anonymous 401, tiny completion -> stopped, 450 W owner state"
+      },
+      "rtx3090": {
+        "receipt": "releases/v0.5.0/acceptance/rtx3090-public-install.json",
+        "sha256": "4adcf32b93ace46f0af1f509a63be89ce4423b60fb9947a37d9d65fa3ee379bd",
+        "summary": "carried: the v0.2.5-qwen38-3090-beta.1 component is byte-identical to v0.5.0; public URLs -> closed checksum set exact -> downloaded installer accepted the installed v0.2.5-beta.1 as exact qualified bytes (already_installed) -> authenticated status identity match, anonymous 401, tiny completion -> stopped, 370 W owner state",
+        "carried_from": "v0.6.1 (the RTX 3090 component v0.2.5-qwen38-3090-beta.1 is unchanged)"
+      }
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "RTX 5090 appliance verified on the incumbent's own port after the window: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, supervisor hold released. RTX 4090 lane host: the candidate lineage returned to stopped at 450 W after both the qualification and the acceptance; the shipped v0.2 lineage was never started. Mac: isolated HOME, nothing to restore."
+    }
+  }
+}

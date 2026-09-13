@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.8] - 2026-09-13
+
+Both mainline runtime components advance to source `68a0722f`: the RTX 5090 component to
+`v0.6.4-qwen38-5090-beta.1` (image `d346174a…`) and the RTX 4090 native component to
+`v0.6.2-qwen38-4090-beta.1`. The 5090 deployment profile and configuration, the RTX 3090
+component, and the OMP client are unchanged from v0.6.7. Composed external-installation
+acceptance ran on 2026-09-13 from the published URLs and image
+([receipt](releases/v0.6.8/acceptance/composed-external-installation.json)).
+
+### Fixed
+
+- Continuing a fork while its sibling is still alive answered HTTP 500 (`sequence StateImage
+  entitlement is inconsistent`) on every release since v0.6.2, unqualified because the
+  agent-protocol gate deleted one sibling before continuing the other
+  ([ninfer#43](https://github.com/alphastorm/ninfer/issues/43)). Found by the multi-session
+  pressure probe, reduced to a 40-second deterministic reproduction
+  (`scripts/sibling_continue_probe.py`), fixed at source: a sequence's entitlement is charged for
+  the device slots it alone owns. Green across six fork shapes; the gate now continues a live
+  sibling and records `live_sibling_continuation_status` (EXP-036).
+- The BF16 GDN gating launcher partitions a cooperative grid the device cannot keep resident over
+  disjoint token-tile intervals instead of falling through to a narrower split, and the fused
+  fallback and residency budget stay inside the capacity contract (the two P2 findings of the
+  candidate's independent review). Exact within 1.5e-6 relative-L2 of the double-precision
+  reference on sm_89, sm_120a and the RunPod small-SM class.
+
+### Changed
+
+- The RTX 4090 native lane takes the upstream-2026-09 backport (18 commits) that v0.6.7 shipped
+  on the 5090, byte-identical on the lane's fixed C1 fixture. Its published C1 number moves to
+  153.4 tok/s at 87.6% MTP3 acceptance (from 159.1 at 93.0%) with the
+  launcher partition's summation order; bisected on the lane host, exact on the 4090 itself,
+  byte-identical on five diverse prompts, and the fixture (28,000 characters of one repeated
+  sentence) swings 52-87% on the same binary with a 1% change in its own length (EXP-037,
+  `docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json`).
+- RTX 5090 gates on the candidate: 130,048-token retrieval exact at 2,178.8 tok/s, decode
+  134.80 tok/s wall, 5.2 GB restore in 3.85/3.65 s, fanout 4/4 hot after a verified restart at 57K
+  and 67K, warm arrival both orders, tampered restore refused; 2,177.7 tok/s again on the
+  published image through the documented tunnel, macOS client route 10 of 10.
+- `scripts/compose_native_qualification.py` composes a native lane's release receipt from the
+  orchestrator window's own artifacts (it reproduces the shipped v0.6.1 receipt byte-for-byte)
+  instead of the hand composition every native cut used until now.
+
 ## [0.6.7] - 2026-09-13
 
 The RTX 5090 runtime component advances to `v0.6.3-qwen38-5090-beta.1` (source `8818b88b`,
@@ -1019,7 +1061,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.7...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.8...HEAD
+[0.6.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.7...v0.6.8
 [0.6.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.4...v0.6.5

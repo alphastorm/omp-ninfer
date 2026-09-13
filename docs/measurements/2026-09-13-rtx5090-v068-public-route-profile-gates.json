@@ -1,0 +1,72 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-09-13T02:35:44Z",
+  "identity": {
+    "binary_sha256": "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
+    "build_profile": "appliance-local",
+    "build_type": "Release",
+    "config_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131072,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3
+  },
+  "vram_used_mib_idle": null,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 59.717,
+      "tokens_per_second_wall": 2177.7,
+      "vram_used_mib_after": null
+    },
+    "decode": {
+      "request_id": "238892a5278550b7cecbabae5b90858205343652a0d25f8e98ac63f324269f70",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 15.239,
+      "completion_tokens_per_second_wall": 134.39
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "log_join_error": "Command '<inference-host> 'cat <route-state>/requests-*.jsonl'' returned non-zero exit status 1.",
+  "status": "passed",
+  "vram_used_mib_final": null,
+  "transient_retries": 0
+}
