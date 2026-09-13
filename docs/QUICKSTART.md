@@ -5,12 +5,9 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **These blocks are prepared for v0.6.9 promotion.** The runtime components are published and
-> lane-qualified. RTX 4090 public-URL already-installed acceptance passed, but the RTX 5090
-> host/macOS routes remain pending. v0.6.8 remains the current public release; use its
-> [tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.8/docs/QUICKSTART.md)
-> for supported installation until v0.6.9 is promoted. Do not bypass `--require-ready` or mix
-> one release's manifest with another release's commands.
+> **Use the exact v0.6.9 release.** Both mainline components passed lane qualification and
+> published-component acceptance. Do not bypass `--require-ready` or mix one release's
+> manifest with another release's commands.
 
 ## Choose your lane
 
@@ -29,7 +26,7 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The `v0.6.9` release target connects native Windows OMP over authenticated local loopback
+The `v0.6.9` release connects native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
@@ -40,7 +37,7 @@ The new runtime components are RTX 5090 `v0.6.5-qwen38-5090-beta.1` and RTX 4090
 upstream Qwen parser semantics without a serve-adapter rebase. Model, OMP client, RTX 3090
 component, and serving settings are unchanged. The public RTX 5090 deployment profile remains
 `qwen38-5090-v0.6.3` / configuration `622ab621`; the lifecycle candidate's qualification on
-`qwen38-5090-v0.6.2` / `5eb8a557` is not acceptance of this documented route.
+`qwen38-5090-v0.6.2` / `5eb8a557` is recorded separately from acceptance of this documented route.
 
 Start only from the product tag and require its ready contract:
 

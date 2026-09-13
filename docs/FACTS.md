@@ -1,11 +1,10 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-13 · Current stable release: **v0.6.8**
+Last verified: 2026-09-13 · Current stable release: **v0.6.9**
 
 Public-release claims on this page are bound to the
-[v0.6.8 release manifest](../releases/v0.6.8/manifest.json) and its qualification receipts.
-The v0.6.9 candidate is identified separately below; its RTX 5090 host/macOS route acceptance
-is pending, so it is not yet the public install authority.
+[v0.6.9 release manifest](../releases/v0.6.9/manifest.json) and its qualification receipts.
+Candidate lane measurements and published-route acceptance remain separately attributed below.
 
 ## What it is
 
@@ -44,11 +43,11 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.4 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.8 |
-| RTX 4090 | native Windows service | 131,072 | v0.6.2-beta.1 lane on the mainline runtime (source 68a0722f, shared with the 5090's v0.6.4) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.8 |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.8) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.5 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.9 |
+| RTX 4090 | native Windows service | 131,072 | v0.6.3-beta.1 lane on the mainline runtime (source 696e78c7, shared with the 5090's v0.6.5) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.9 |
+| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.9) |
 
-## v0.6.9 candidate — not yet the public release
+## v0.6.9 — Qwen parser semantic port
 
 - Reviewed runtime source: `696e78c7b4e3ac28ffcffafc73acc1496e65ef03`. Published components:
   RTX 5090 `v0.6.5-qwen38-5090-beta.1` (image `5e3e1558…`) and RTX 4090 native
@@ -62,7 +61,8 @@ All of these should be materially true:
   regressions and an 8,192-deep union case pass.
 - RTX 5090 lifecycle qualification: profile `qwen38-5090-v0.6.2` / configuration `5eb8a557`,
   unchanged. The public deployment profile remains `qwen38-5090-v0.6.3` / `622ab621`; its
-  route acceptance is pending and must not be inferred from the lifecycle candidate.
+  route passed separately: host 2/2 and macOS 10/10 documented blocks, exact 130,048-token
+  retrieval at 2,153.6 tok/s and decode at 133.76 tok/s wall.
 - Candidate measurements: RTX 5090 exact 130,048-token retrieval at 2,193.3 tok/s and
   2,048-token decode at 134.87 tok/s wall; RTX 4090 15/15 native phases, exact retrieval in
   91.2377 s and C1 decode 153.464 tok/s at 87.58865% MTP acceptance.
@@ -147,7 +147,7 @@ ordinary in-process follow-up.
 
 ## Primary evidence
 
-[Public release manifest](../releases/v0.6.8/manifest.json) ·
+[Public release manifest](../releases/v0.6.9/manifest.json) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
 [Security model](SECURITY.md) · [Quickstart](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

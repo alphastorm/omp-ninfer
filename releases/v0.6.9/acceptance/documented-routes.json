@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.9",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Both mainline components advance to696e78c7. Stock candidate92ff980 ran the documented RTX5090 host2blocks and macOS10blocks against published image5e3e1558. Native4090 public-URL already-installed acceptance passed separately. Windows5090client route and unchanged3090component retain explicitly attributed prior evidence.",
+  "document_sha256": "cfc4bdbe246792cfedd1192a4a3238183e00588c8f3b0ce5638ca4a705df49ef",
+  "candidate_commit": "92ff98055bceefe58c604c224ade162f475b7089",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 42.869,
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v069-host-route-run.json",
+      "note": "Stock clone at92ff980. Documented prepare/start blocks accepted published image5e3e1558, binaryb8a0a2c3 and public configuration622ab621 underqwen38-5090-v0.6.3."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 165.788,
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v069-macos-route-run.json",
+      "note": "Isolated HOME with the stock checkout at its documented HOME/omp-ninfer path: tool, image input, continue, server restart with session continuation, and fail-closed all passed. Initial driver layout failure was corrected locally; no product code or documented block changed."
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is",
+      "carried_from": "v0.6.6: the client bytes and blocks are unchanged; the server behaviours that route checks (tool, Vision, resume, fail-closed) are a subset of what the macOS client route exercised against the new image in this window"
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "public-assets",
+        "checksum-set",
+        "installer",
+        "smoke",
+        "restore"
+      ],
+      "receipt": "releases/v0.6.9/acceptance/rtx4090-public-install.json",
+      "note": "Downloaded public installer accepted exact already-installedv0.6.3-beta.1 bytes; no pointer change or start request. Served identity matched, anonymous401, ACCEPTED completion113.5ms; stopped450W state restored."
+    }
+  },
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2153.6,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 133.76,
+    "agent_protocol": "passed",
+    "live_sibling_continuation_status": 200
+  },
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "Published digest5e3e1558 pulled without registry credentials; contained server hashes tob8a0a2c3, matching the manifest and served identity."
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "All12executed block hashes equal their extracted document block hashes. The runner records the operator SSH destination and foreground-tunnel scheduling substitutions; blocks are not edited."
+    },
+    "tunnel_route": {
+      "status": "passed",
+      "note": "the runner refused nothing it did not own and required /health through its own forward"
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "note": "After candidate acceptance: production healthy on18088, runningunless-stopped with published port; beta container removed and supervisor hold released. Native4090 stopped450W. Isolated macOS HOME removed."
+    }
+  },
+  "qualification_receipt": "releases/v0.6.9/qualification/rtx5090.json",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "current_document_sha256": "58fe4ddc9b8e4ff52709cfb4028f50f95d3eaec7df9610c671f2a5a6bf37ae88",
+  "executed_blocks_match_current": true,
+  "document_change": "Only release-status prose changed after candidate execution; all12 current extracted executable block hashes equal the accepted block hashes. Original executed document hash and candidate commit are retained."
+}

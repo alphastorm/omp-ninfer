@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.9",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Published-component external installation acceptance: RTX5090v0.6.5-beta.1 on the documented host/macOS route and RTX4090nativev0.6.3-beta.1 through its downloaded installer. Both bind runtime source696e78c7.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "Pinned OMP18.0.9 bytes unchanged; parser semantics advance behind the preserved wire shape. Current macOS route and native Windows golden-equivalent tool turn exercised these bytes against the new runtime."
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "1ebb82b4eb455190fbc325fabaa23abd6171c1ea47ca62dd61503c45816374ec",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on the Mac by the documented block from its public URL and hashed.",
+  "steps": {
+    "anonymous_release_assets": {
+      "status": "passed",
+      "note": "Fourteen component assets downloaded anonymously: ten native distribution files including outerSHA256SUMS, three5090binary assets, and the exact source archive. All checksum members passed; native installer independently downloaded its seven manifest-bound assets on the target."
+    },
+    "checksum_verification": {
+      "status": "passed",
+      "note": "Native outerSHA256SUMS and original package-build receipt bind the exact published set. The5090 archive/SBOM/source checksums passed; published image server hashb8a0a2c3 matches the manifest."
+    },
+    "anonymous_image_pull": {
+      "status": "passed",
+      "note": "Image digest5e3e1558 pulled with an emptyDocker configuration; receipt34743949656 binds source696e78c7, archive91e1e05d and basea19e00c5."
+    },
+    "launch_identity": {
+      "status": "passed",
+      "note": "Documented5090launcher and public profile gates report binaryb8a0a2c3/source696e78c7/config622ab621. Native public-install smoke reports binary36d95347/config976a454b, matching its manifest variant."
+    },
+    "auth_boundary": {
+      "status": "passed",
+      "anonymous_status_request": 401,
+      "note": "Native anonymous status401 and authenticated200; public5090authenticated identity and launcher authentication preflight passed."
+    },
+    "tiny_completion": {
+      "status": "passed",
+      "note": "Native ACCEPTED marker present,3tokens,113.5ms. macOS documented tool marker passed; public5090exact130048-token retrieval passed."
+    },
+    "stateful_resume": {
+      "status": "passed",
+      "note": "macOS continue and server-restart continuation passed; published5090live sibling200. Native qualification restored explicitly saved42cached-token and never-published45cached-token sessions across graceful managed restart."
+    },
+    "fail_closed": {
+      "status": "passed",
+      "note": "macOS outage request failed after its own tunnel stopped. Native shipped/pressure protocol preserved deleted-parent404 and surviving descendant; state-security qualification denied low-privilege read/write."
+    },
+    "documented_routes": {
+      "status": "passed",
+      "receipt": "releases/v0.6.9/acceptance/documented-routes.json",
+      "sha256": "7a17d298921a8f2c71f9f9cb915c667c792becb82628bc424243e74918feba5e",
+      "summary": "Stock candidate host2/2 and macOS10/10 on published image; public130048 retrieval2153.6tok/s, decode133.76tok/s wall. Native public-install passed. Windows5090client route carried fromv0.6.6 with unchanged client bytes and covered server contracts."
+    },
+    "native_public_install": {
+      "status": "passed",
+      "rtx4090": {
+        "receipt": "releases/v0.6.9/acceptance/rtx4090-public-install.json",
+        "sha256": "91618886bb2f4371ea4b09faecda43a2dfb71bac02624218d0065b1c980f238d",
+        "summary": "PublicURLs -> exact closedchecksum set -> downloaded installer accepts already-installedv0.6.3-beta.1 without pointer/start changes -> served identity, anonymous401, ACCEPTED completion -> stopped450W restored."
+      },
+      "rtx3090": {
+        "receipt": "releases/v0.5.0/acceptance/rtx3090-public-install.json",
+        "sha256": "4adcf32b93ace46f0af1f509a63be89ce4423b60fb9947a37d9d65fa3ee379bd",
+        "summary": "carried: the v0.2.5-qwen38-3090-beta.1 component is byte-identical to v0.5.0; public URLs -> closed checksum set exact -> downloaded installer accepted the installed v0.2.5-beta.1 as exact qualified bytes (already_installed) -> authenticated status identity match, anonymous 401, tiny completion -> stopped, 370 W owner state",
+        "carried_from": "v0.6.1 (the RTX 3090 component v0.2.5-qwen38-3090-beta.1 is unchanged)"
+      }
+    },
+    "runtime_incumbent_restored": {
+      "status": "passed",
+      "note": "After candidate acceptance: production healthy on18088, runningunless-stopped with published port; beta container removed and supervisor hold released. Native4090 stopped450W. Isolated macOS HOME removed."
+    }
+  }
+}

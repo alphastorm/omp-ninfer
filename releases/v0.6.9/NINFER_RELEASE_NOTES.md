@@ -1,9 +1,9 @@
 # OMP NInfer v0.6.9 - Qwen tool-parser semantics without a serve-adapter rebase
 
-**Staged product release; RTX 5090 host/macOS route acceptance pending.** v0.6.8 remains the
-current public release and install authority. Both new runtime components are published and
-lane-qualified. RTX 4090 public-URL already-installed acceptance passed; the integrated product
-is not yet promoted.
+Both mainline runtime components are published, lane-qualified, and accepted from public
+distribution. RTX 5090 documented host 2/2 and macOS 10/10 blocks passed; RTX 4090
+public-URL already-installed acceptance passed
+([composed receipt](acceptance/composed-external-installation.json)).
 
 ## Exact components
 
@@ -80,13 +80,15 @@ returned the `ACCEPTED` marker. The host was restored to its stopped state and *
 ([receipt](acceptance/rtx4090-public-install.json)). This is not a fresh-install observation.
 
 The published RTX 5090 image was pulled with an empty Docker configuration and its binary hash
-matched `b8a0a2c3`. That verifies published bytes, not the documented serving route. RTX 5090
-host and macOS route acceptance remain pending; no composed external-installation acceptance
-is claimed yet.
+matched `b8a0a2c3`. The documented serving route was then exercised separately: exact
+130,048-token retrieval at **2,153.6 tok/s**, decode at **133.76 tok/s wall**, and live sibling
+continuation HTTP 200. Host **2/2** and macOS **10/10** blocks passed, including image input,
+server-restart continuation, and fail-closed ([routes](acceptance/documented-routes.json)).
+Both hosts were restored after acceptance.
 
 ## Upgrading
 
-After product promotion and public-route acceptance, use the exact v0.6.9 tagged quickstart.
+Use the exact v0.6.9 tagged quickstart.
 RTX 5090: re-clone the tag and rerun section 4 on the inference host; the start block selects the
 new image by digest. RTX 4090: install `v0.6.3-qwen38-4090-beta.1` with its
 `Install-Release.ps1`; retain the predecessor for rollback. Candidate qualification exercised

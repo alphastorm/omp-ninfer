@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.6.8](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.6.9](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -64,17 +64,16 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.6.8 is the current public release.** If you own a qualified card, the
-> [v0.6.8 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.8/docs/QUICKSTART.md)
+> **v0.6.9 is the current public release.** If you own a qualified card, the
+> [v0.6.9 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.9/docs/QUICKSTART.md)
 > is the supported onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
 > explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
-> **v0.6.9 is staged, not yet a public release.** Its parser runtime components are published
-> and lane-qualified. RTX 4090 public-URL already-installed acceptance passed; the RTX 5090
-> host and macOS routes remain pending. The install blocks in this working tree target
-> v0.6.9 for that acceptance window.
+> Both parser runtime components passed lane qualification and published-component acceptance:
+> RTX 5090 documented host 2/2 and macOS 10/10 blocks; RTX 4090 public-URL already-installed
+> acceptance. [Composed receipt](releases/v0.6.9/acceptance/composed-external-installation.json).
 
 ## What this is — and isn't
 
@@ -179,9 +178,7 @@ machine and profile, not universal GPU claims.
 Pick your lane: the RTX 5090 container route needs Docker with the NVIDIA runtime on Windows 11 +
 WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned packages. Every
 route needs one published OMP client and about 40 GiB free disk.
-The block below is prepared for v0.6.9 promotion; until its public-route acceptance is complete,
-use the [v0.6.8 tagged guide](https://github.com/alphastorm/omp-ninfer/blob/v0.6.8/docs/QUICKSTART.md)
-for supported installation. Do not mix the two releases.
+Use the exact v0.6.9 tagged guide and manifest together; do not mix releases.
 
 ```powershell
 git clone --branch v0.6.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
@@ -243,7 +240,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.6.8 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.6.9 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
@@ -278,12 +275,13 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
-`v0.6.9` is staged with an independently implemented semantic port of upstream Qwen tool-parser
+`v0.6.9` ships an independently implemented semantic port of upstream Qwen tool-parser
 fixes `3b50962b` and `0c5d570c`: supported scalar unions, case-insensitive booleans, precise
 numeric lexemes and mathematically integral values, duplicate parameters, and balanced embedded
 markup. It preserves custom raw input, history, opaque IDs, and stream ownership; review
 remediation prevents malformed-region rescans and recursive union traversal. Both mainline
-components are published and lane-qualified; public-route acceptance remains pending.
+components are published and lane-qualified; documented host/macOS and native public-install
+acceptance passed against their published bytes.
 `v0.6.8` puts both mainline lanes on one runtime source (`68a0722f`): the RTX 4090 native lane takes
 the upstream engine work and the GDN capacity fix, and a fork continued while its sibling is alive no
 longer answers HTTP 500 on any lane (ninfer#43, EXP-036).

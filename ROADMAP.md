@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.6.8` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.6.9` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,9 +11,9 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.9 staged; v0.6.8 public
+## Where this is now — v0.6.9
 
-The `v0.6.9` candidate keeps the two mainline lanes on one reviewed source (`696e78c7`):
+The `v0.6.9` release keeps the two mainline lanes on one reviewed source (`696e78c7`):
 RTX 5090 runtime `v0.6.5-qwen38-5090-beta.1` and RTX 4090 native
 `v0.6.3-qwen38-4090-beta.1`, both published and lane-qualified. It independently implements
 the semantics of upstream Qwen tool-parser fixes `3b50962b` and `0c5d570c` without taking the
@@ -23,9 +23,9 @@ Custom raw input, history, opaque IDs, and stream ownership stay intact. Review 
 prevents malformed-region rescans and recursive union traversal; bytewise regressions and an
 8,192-deep union case pass. Model, serving settings, client, and RTX 3090 component are unchanged.
 The 5090 candidate gates and 15/15 native lane phases are complete. RTX 4090 public-URL
-already-installed acceptance passed; the RTX 5090 host/macOS routes remain pending, so
-v0.6.8 still owns the public install contract.
-[Candidate release notes](releases/v0.6.9/NINFER_RELEASE_NOTES.md).
+already-installed acceptance and RTX 5090 host 2/2 / macOS 10/10 documented routes passed.
+[Release notes](releases/v0.6.9/NINFER_RELEASE_NOTES.md) ·
+[Composed acceptance](releases/v0.6.9/acceptance/composed-external-installation.json).
 
 From `v0.6.8` both mainline lanes run one runtime source: the RTX 4090 native lane carries the
 upstream engine tranche and the GDN capacity fix the 5090 took in `v0.6.7`, and a fork continued
@@ -356,6 +356,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.9` | Both mainline lanes on source 696e78c7: independent Qwen parser semantic port, malformed-region and deep-union remediation, preserved custom/history/stream contracts; both lane qualifications and published-component acceptance passed |
 | `v0.6.8` | Both mainline lanes on source 68a0722f: RTX 5090 runtime v0.6.4 and RTX 4090 native v0.6.2-beta.1; the live-sibling continuation 500 fixed at source (ninfer#43); GDN gating grids partitioned by device residency; the 4090 C1 fixture's trajectory sensitivity measured and recorded (EXP-037) |
 | `v0.6.7` | RTX 5090 runtime v0.6.3: selective backport of 18 upstream engine commits (MoE/GDN/vocab kernels, sparse-MoE and GDN record fixes, cpp-httplib 0.54.1), every lane gate within noise of v0.6.2; the deferred upstream families named with reasons |
 | `v0.6.6` | The config every documented route installs keeps the pinned client on its channel: no out-of-channel `omp update` advice; every client-installing route re-run and the setting read back from the installed client; no component changed |

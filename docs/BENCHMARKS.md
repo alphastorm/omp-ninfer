@@ -132,8 +132,10 @@ are unchanged. Receipts:
 
 These are **candidate lane measurements**. The RTX 5090 window used the unchanged lifecycle
 profile `qwen38-5090-v0.6.2`, configuration `5eb8a557`; the public deployment remains
-`qwen38-5090-v0.6.3`, configuration `622ab621`. Its host/macOS route acceptance is pending;
-no row below substitutes for exercising that public configuration. RTX 4090 public-URL
+`qwen38-5090-v0.6.3`, configuration `622ab621`. That public route separately passed host 2/2
+and macOS 10/10 blocks, exact 130,048-token retrieval at **2,153.6 tok/s**, and decode at
+**133.76 tok/s wall** ([public-profile receipt](measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json)).
+No candidate row below substitutes for that public-configuration measurement. RTX 4090 public-URL
 already-installed acceptance passed separately
 ([receipt](../releases/v0.6.9/acceptance/rtx4090-public-install.json)); it is not a fresh-install
 or throughput measurement.

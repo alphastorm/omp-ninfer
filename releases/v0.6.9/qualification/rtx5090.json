@@ -19,7 +19,7 @@
   "evidence_interpretation": {
     "documentation_benchmark_source_field_credited": false,
     "packaged_build_identity_authoritative": true,
-    "narrative": "Candidate 696e78c7 (local image 793f9c05, binary b8a0a2c3, lifecycle configuration 5eb8a557) was measured through the existing lifecycle tools and unchanged fixtures/parameters. The semantic parser port and bounded-work remediation advance v0.6.8; engine, model, BF16 KV and serving profile are unchanged. Only the origin-authentication arc is inherited; the window exercised payload tamper refusal. Published-image route acceptance is recorded separately after execution."
+    "narrative": "Candidate 696e78c7 (local image 793f9c05, binary b8a0a2c3, lifecycle configuration 5eb8a557) was measured through the existing lifecycle tools and unchanged fixtures/parameters. The semantic parser port and bounded-work remediation advance v0.6.8; engine, model, BF16 KV and serving profile are unchanged. Only the origin-authentication arc is inherited; the window exercised payload tamper refusal. Published image5e3e1558 was independently pulled and its binary verified, then measured on the documented public profile622ab621; stock-clone host2/2 and macOS10/10 routes passed."
   },
   "build": {
     "route": "Canonical appliance-local CUDA 13.1 build from clean source 696e78c7; digest-pinned base a19e00c5. Workflow 34743949656 wraps the published archive onto the same base.",
@@ -288,5 +288,11 @@
       200
     ],
     "verdict": "All exercised contracts preserved; single-window timings, not a parser throughput improvement claim."
+  },
+  "documented_route": {
+    "public_route_gates": "docs/measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2153.6,
+    "decode_wall_tokens_per_second": 133.76,
+    "live_sibling_continuation_status": 200
   }
 }

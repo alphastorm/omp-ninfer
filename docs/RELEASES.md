@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.8`, GitHub `Latest` |
-| Development | Product candidates with no public install or support claim | `v0.6.9` staged; runtime components published, public-route acceptance pending |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.9`, GitHub `Latest` |
+| Development | Product candidates with no public install or support claim | No newer product candidate published |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,10 +27,10 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.6.9 candidate (Qwen tool-parser semantic port)
+### v0.6.9 public release (Qwen tool-parser semantic port)
 
-- Product release is staged, not promoted. `v0.6.8` remains GitHub `Latest` and the public
-  authority; the RTX 5090 host/macOS routes remain pending.
+- Product release: `alphastorm/omp-ninfer@v0.6.9`, GitHub `Latest`. Published-component
+  [composed acceptance](../releases/v0.6.9/acceptance/composed-external-installation.json) passed.
 - Published components: RTX 5090 `v0.6.5-qwen38-5090-beta.1`, image
   `sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8`; RTX 4090
   native `v0.6.3-qwen38-4090-beta.1`. Both build from reviewed source
@@ -53,7 +53,7 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
   `68a0722f` predecessor in both directions.
 - Build verification: appliance focused suites 13/13, Windows parser/wire suites 4/4; Blackwell
   CI 95 passed, 7 skipped, 0 failed out of 102 registered. See the
-  [candidate notes](../releases/v0.6.9/NINFER_RELEASE_NOTES.md) for the complete measurement
+  [release notes](../releases/v0.6.9/NINFER_RELEASE_NOTES.md) for the complete measurement
   boundary and upgrade intent.
 - RTX 4090 public-URL acceptance passed
   ([receipt](../releases/v0.6.9/acceptance/rtx4090-public-install.json)): downloaded installer
@@ -61,11 +61,13 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
   runtime start; authenticated status 200, anonymous status 401, completion marker accepted;
   stopped state and 450 W restored. This does not claim a fresh install. The published RTX
   5090 image was pulled with an empty Docker configuration and its binary hash matched
-  `b8a0a2c3`; host/macOS route acceptance is still separate and pending.
+  `b8a0a2c3`. Its separate public-profile run retrieved 130,048 tokens exactly at 2,153.6 tok/s
+  and decoded at 133.76 tok/s wall. Documented host 2/2 and macOS 10/10 blocks passed
+  ([routes](../releases/v0.6.9/acceptance/documented-routes.json)).
 
 ### v0.6.8 public release (both mainline lanes on one runtime, and a fork bug fixed)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.8`, GitHub `Latest`. Both mainline runtime
+- Product release: `alphastorm/omp-ninfer@v0.6.8`, superseded by v0.6.9. Both mainline runtime
   components advance to source `68a0722f`: RTX 5090 `v0.6.4-qwen38-5090-beta.1` (image
   `d346174a…`), RTX 4090 native `v0.6.2-qwen38-4090-beta.1` - v0.6.3 plus the live-sibling
   entitlement fix (ninfer#43), the GDN gating launcher partition and its review remediation;

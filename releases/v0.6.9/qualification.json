@@ -5,8 +5,8 @@
   "as_of": "2026-09-13",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "OMP NInfer v0.6.9: both mainline runtime components advance to source696e78c7 with the semantic tool-call parser port and bounded-work remediation. RTX5090 componentv0.6.5-qwen38-5090-beta.1, image5e3e1558, unchanged public deploymentqwen38-5090-v0.6.3/config622ab621; RTX4090 nativev0.6.3-beta.1. OMP18.0.9, model and RTX3090v0.2.5-beta.1 unchanged. Candidate hardware qualification measured2026-09-13. Native public-URL installer accepted already-installed exact bytes without pointer or start side effects; authenticated completion and anonymous401 passed, stopped450W state restored. Published-image documented-route acceptance remains pending.",
+  "external_installation_qualified": true,
+  "scope": "OMP NInfer v0.6.9 qualifies both mainline runtimes from source 696e78c7: RTX 5090 component v0.6.5-qwen38-5090-beta.1, published image 5e3e1558, and RTX 4090 native v0.6.3-beta.1. The semantic Qwen parser port and bounded-work remediation preserve the wire shape, custom raw input, history and stream ownership. Model, serving settings, OMP 18.0.9 and RTX 3090 v0.2.5-beta.1 are unchanged. Both owner hardware lanes were qualified on 2026-09-13; public native already-installed acceptance and documented RTX 5090 host/macOS routes passed against published components.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -23,7 +23,7 @@
   "composition": {
     "behavioral_qualification": {
       "repository_path": "releases/v0.6.9/qualification/rtx5090.json",
-      "sha256": "d71255dd4f347c28cc06673d9eb9d47aa11cd92b524ef77349c46825b74230fb",
+      "sha256": "f762774c5156ce0e15ebc47a76a232b69f33777a9a66455e00e9e19f177c918b",
       "status": "passed",
       "source_commit": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
       "server_binary_sha256": "b8a0a2c33d79304afb1701ca7d179a6ed750685d1365a75634fdc738bab6a831"
@@ -65,8 +65,22 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.5-qwen38-5090-beta.1 component (image 5e3e1558) before the cut; the receipt lands at releases/v0.6.9/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "as_of": "2026-09-13",
+      "repository_path": "releases/v0.6.9/acceptance/composed-external-installation.json",
+      "operator_class": "owner-operated tester-equivalent",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "1ebb82b4eb455190fbc325fabaa23abd6171c1ea47ca62dd61503c45816374ec",
+      "release": "v0.6.9",
+      "sha256": "ac57cec4280bb5977ba1881eb09ed2a3560c80bfb6b620c3cb8187d7a854b97d"
     }
   },
   "observed_gates": {
@@ -96,7 +110,16 @@
       "agent_protocol": "Candidate authenticated identity, fork, live sibling200, delete200 and404before/afterrestart; surviving descendant continued.",
       "origin_authentication": "Inherited fromv0.6.8; store format unchanged. Payload tamper refusal re-exercised.",
       "measured_on": "2026-09-13,lifecycle candidate696e78c7,image793f9c05,binaryb8a0a2c3,configuration5eb8a557",
-      "live_sibling_continuation": "200 on candidate; published route pending"
+      "live_sibling_continuation": "200 on the lifecycle candidate and published image; deleted continuation404before and after restart on both.",
+      "public_route": {
+        "configuration_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112",
+        "deployment_profile": "qwen38-5090-v0.6.3",
+        "prefill_tokens_per_second": 2153.6,
+        "decode_tokens_per_second_wall": 133.76,
+        "live_sibling_continuation_status": 200,
+        "host_documented_blocks": "2/2",
+        "macos_documented_blocks": "10/10"
+      }
     },
     "rtx4090_windows_native": {
       "status": "passed",
@@ -145,8 +168,13 @@
       "carried_from": "v0.5.0 (component byte-identical; requalified on its own rig on 2026-09-05 with origin-authenticated checkpoints)"
     }
   },
-  "interpretation": "Parser semantics and bounded-work behavior advance; engine/model/profile/client remain unchanged. Candidate gates preserved. Public install and route evidence will be composed only after execution. RTX3090 evidence is inherited for its byte-identical component, not remeasured.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.5-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "interpretation": [
+    "Both runtime components bind source696e78c7. Candidate lane contracts pass; timings are single-window observations, not a parser throughput improvement claim.",
+    "Appliance13/13 focused suites; Windows4/4 parser and wire suites. Blackwell CI95passed,7skipped,0failed out of102registered; skipped cases are not credited as passes.",
+    "Published5090 image5e3e1558 served binaryb8a0a2c3/configuration622ab621 through the documented route: exact130048-token retrieval2153.6tok/s and decode133.76tok/s wall. Host2/2 and macOS10/10 blocks passed, including image input, restart continuation and fail-closed.",
+    "Native4090 passed15/15 qualification phases and public-URL already-installed acceptance. No installer pointer change or start request; served identity, anonymous401 and completion marker passed. Both hosts returned to their owner states.",
+    "Independent release council findings on malformed-region rescans, deep union traversal and bytewise coverage were closed in696e78c7; the remediation record resolved lead-close. The Gemini supplement was unavailable with429 and is not claimed as approval. Preexisting generation-cancellation behavior was explicitly deferred outside the completed-output contract.",
+    "RTX3090 and platform-client receipts are explicitly inherited for unchanged component bytes; no fresh3090 host qualification is claimed."
+  ],
+  "remaining_release_gates": []
 }

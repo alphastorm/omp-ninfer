@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.9] - Unreleased
+## [0.6.9] - 2026-09-13
 
 Both mainline runtime components advance to reviewed source
 `696e78c7b4e3ac28ffcffafc73acc1496e65ef03`: RTX 5090
@@ -15,8 +15,9 @@ Both mainline runtime components advance to reviewed source
 `v0.6.3-qwen38-4090-beta.1`. Both components are published. The model, OMP client, RTX 3090
 component, and serving settings are unchanged. The RTX 5090 public deployment remains
 `qwen38-5090-v0.6.3` / configuration `622ab621`; its lifecycle qualification uses the unchanged
-`qwen38-5090-v0.6.2` / `5eb8a557` candidate profile. Product promotion and the RTX 5090
-host/macOS route acceptance are pending; v0.6.8 remains the public authority.
+`qwen38-5090-v0.6.2` / `5eb8a557` candidate profile. Published-component acceptance passed:
+RTX 5090 host 2/2 and macOS 10/10 blocks; RTX 4090 public-URL already-installed path
+([composed receipt](releases/v0.6.9/acceptance/composed-external-installation.json)).
 
 ### Fixed
 
@@ -48,7 +49,9 @@ host/macOS route acceptance are pending; v0.6.8 remains the public authority.
   anonymous status 401, completion marker accepted, stopped state and 450 W restored
   ([receipt](releases/v0.6.9/acceptance/rtx4090-public-install.json)). This is not a fresh-install
   observation. The published RTX 5090 image was pulled with an empty Docker configuration and
-  its binary hash matched `b8a0a2c3`; that byte check is not host/macOS route acceptance.
+  its binary hash matched `b8a0a2c3`. The documented public profile separately measured exact
+  130,048-token retrieval at 2,153.6 tok/s and decode at 133.76 tok/s wall; host 2/2 and
+  macOS 10/10 blocks passed, including image input, restart continuation, and fail-closed.
 
 ## [0.6.8] - 2026-09-13
 
