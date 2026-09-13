@@ -1,0 +1,90 @@
+{
+  "artifact_type": "omp_ninfer_runtime_defect_qualification",
+  "schema_version": 1,
+  "experiment": "EXP-036",
+  "generated_utc": "2026-09-13",
+  "status": "passed",
+  "scope": "What started as the #229 exposure probe on the published v0.6.3 RTX 5090 runtime: a multi-session pressure probe that issues continuations and forks round-robin across several 126K-token sessions. It found a server error first, which was reduced, fixed at source, and proven red to green on the appliance; the pressure probe then ran clean and produced a separate, scoped finding about reuse across a session switch.",
+  "defect": {
+    "id": "alphastorm/ninfer#43",
+    "symptom": "HTTP 500 'sequence StateImage entitlement is inconsistent' on continuing a fork while its sibling is alive: base -> turn -> {A, B} -> continue B",
+    "reproduction": "scripts/sibling_continue_probe.py, 140-token prompts, one session, no pressure, no restart; deterministic on the published v0.6.3 image (docs/measurements/2026-09-13-sibling-continue-rtx5090-red.json) and on the v0.6.3 single-session pressure probe (…-v063-single.json, step r2_fork1_D1)",
+    "present_since": "5de10f3a (sibling long-anchor inheritance), i.e. every release from v0.6.2; not introduced by the upstream-2026-09 backport, whose commits do not touch the state path",
+    "cause": "reserve_state_entitlement compared the plan's device-state entitlement with a footprint that counted every device-resident image the sequence referenced, including a long anchor its sibling also holds; the store counts that image once, so the sibling that ran next was charged for the other's residency",
+    "why_unqualified": "the agent-protocol gate forked two siblings and continued the survivor only after deleting the other, which releases the shared anchor",
+    "fix": {
+      "commit": "a98b150e4036666a7efd4b0efc307ca81bb1cbf6",
+      "branch": "fix/sibling-entitlement",
+      "change": "the entitlement counts the device-resident images exclusive to the sequence (state_exclusive_to_sequence), the same predicate the rest of the state accounting uses; upstream's b8786751 reaches the same conclusion via a 356-line ownership rework"
+    },
+    "green": {
+      "candidate": "a98b150e4036666a7efd4b0efc307ca81bb1cbf6",
+      "image_id": "sha256:1c80dff02686a6d4399ef53725c0c3fc0a6ba63d23440f706deec14cd9ed814c",
+      "binary_sha256": "1802353b35f22956275c0052c363656c273055a9102f954eed0346b9c502f6ca",
+      "exact_shape": {
+        "reproduced": false,
+        "continue_sibling_2_cached_tokens": 155
+      },
+      "shape_sweep": {
+        "depth1_siblings2_continue1": {
+          "reproduced": false,
+          "cached_tokens": 155
+        },
+        "depth1_siblings3_continue2": {
+          "reproduced": false,
+          "cached_tokens": 155
+        },
+        "depth1_siblings3_continue3": {
+          "reproduced": false,
+          "cached_tokens": 155
+        },
+        "depth2_siblings2_continue2": {
+          "reproduced": false,
+          "cached_tokens": 190
+        },
+        "depth0_siblings2_continue2": {
+          "reproduced": false,
+          "cached_tokens": 120
+        },
+        "depth2_siblings4_continue3": {
+          "reproduced": false,
+          "cached_tokens": 190
+        }
+      },
+      "profile_gates": {
+        "receipt": "docs/measurements/2026-09-13-rtx5090-v064-profile-gates.json",
+        "prefill_tokens_per_second": 2181.6,
+        "exact": true,
+        "decode_wall": 134.28,
+        "live_sibling_continuation_status": 200,
+        "agent_protocol": "passed"
+      },
+      "durability": {
+        "restore_wall_s": [
+          4.01,
+          3.654
+        ],
+        "restored_retrieval_exact": true,
+        "tampered_restore_refused": true,
+        "fanout_57k_median_s": 1.397,
+        "fanout_67k_median_s": 1.52,
+        "warm_arrival": "docs/measurements/2026-09-13-warm-arrival-rtx5090-v064.json"
+      }
+    },
+    "gate_closure": "scripts/qualify_rtx5090_profile.py agent-protocol phase now continues a sibling while the other sibling is alive, before the delete sequence, and records live_sibling_continuation_status; a candidate that regresses fails the gate"
+  },
+  "session_switch_finding": {
+    "question": "does a byte-identical-extension continuation keep its prefix reuse when another large session has taken a turn in between?",
+    "observation": "No. With two or three 126K-token sessions resident and turns alternating between them, every continuation of a session whose head is not the most recently completed turn re-prefills from root (cached_tokens 0, ~58 s), while a fork from the response that just completed reuses (~1 s). 4 of 4 continuations lost reuse in both the two- and three-session runs; the three-session run's D1 reused because it was created last. private_evictions counted 11 after the two-session run; host KV showed 8.44 of 8.59 GB occupied with only three catalog entries after the sessions were deleted.",
+    "receipts": [
+      "docs/measurements/2026-09-13-multisession-probe-rtx5090-v064.json",
+      "docs/measurements/2026-09-13-multisession-probe-rtx5090-v064-two.json"
+    ],
+    "interpretation": "This is not upstream #229's budget race (the request log here carries no planner diagnostics; the effect is deterministic and independent of session count from two upward). It reads as the host KV / private catalog not retaining a swapped-out session's endpoint across another session's turn, with host KV occupancy that does not return to the sessions' sizes. It needs the planner and cache diagnostics upstream added in d4929686 to diagnose, and it sits in the deferred materialization/pressure family's code.",
+    "product_scope": "No published claim covers reuse across a session switch: every qualified fanout, warm-arrival and restore number is within one session, and the single-active-request profile is documented. It is a real limitation for an operator alternating between two long OMP sessions on one lane, and the next engine window's arbiter.",
+    "not_fixed_here": "diagnosing the eviction policy blind, without the planner diagnostics, is the anti-pattern; it goes to the dedicated rebase campaign (omp-ninfer #33) as its first measured target, with this probe as the acceptance."
+  },
+  "window_hygiene_fix": "every 5090 lifecycle window script (v062/v063/v064-lifecycle-window.sh) now restores the incumbent's restart policy to unless-stopped on its exit path; the route window had pinned it off and the lifecycle window's docker start left it so - the third instance of the class, mechanized",
+  "hosts_restored": "RTX 5090 appliance verified on the incumbent's own port: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, candidate and A/B containers removed, supervisor hold marker absent.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

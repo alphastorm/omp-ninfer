@@ -1,0 +1,77 @@
+{
+  "artifact_type": "omp_ninfer_sibling_continuation_probe",
+  "schema_version": 1,
+  "lane": "rtx5090-v063-published",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.3",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "9afa8824fdf35098aae663400ace512075d129b4ce47f162746eff16efae11e2",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "8818b88b46aad630e9e761d4ab7e5f57a157378d",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "622ab621d3ed318c21151a94c46c10efd5ea00ffe9d33f38e35beeae771a0112"
+  },
+  "generated_utc": "2026-09-12T23:43:14Z",
+  "shape": {
+    "depth": 1,
+    "siblings": 2,
+    "continued_sibling": 2
+  },
+  "reproduced": true,
+  "error": {
+    "step": "continue_sibling_2",
+    "previous_response_id": "resp_bbc9a383a7cf8cc0ebfde5c12e1484d3",
+    "http_status": 500,
+    "body": {
+      "error": {
+        "code": null,
+        "message": "sequence StateImage entitlement is inconsistent",
+        "param": null,
+        "type": "server_error"
+      }
+    }
+  },
+  "steps": [
+    {
+      "step": "base",
+      "previous": null,
+      "id": "resp_1dc04c89857736f2ab9be496227dd663",
+      "prompt_tokens": 66,
+      "cached_tokens": 0,
+      "wall_s": 0.81
+    },
+    {
+      "step": "depth_1",
+      "previous": "resp_1dc04c89857736f2ab9be496227dd663",
+      "id": "resp_73a0768297b71448160139822a6867c7",
+      "prompt_tokens": 101,
+      "cached_tokens": 81,
+      "wall_s": 0.773
+    },
+    {
+      "step": "sibling_1",
+      "previous": "resp_73a0768297b71448160139822a6867c7",
+      "id": "resp_905e595f667ea12a4271328d3308df10",
+      "prompt_tokens": 140,
+      "cached_tokens": 116,
+      "wall_s": 0.749
+    },
+    {
+      "step": "sibling_2",
+      "previous": "resp_73a0768297b71448160139822a6867c7",
+      "id": "resp_bbc9a383a7cf8cc0ebfde5c12e1484d3",
+      "prompt_tokens": 140,
+      "cached_tokens": 61,
+      "wall_s": 0.883
+    },
+    {
+      "step": "continue_sibling_2",
+      "previous": "resp_bbc9a383a7cf8cc0ebfde5c12e1484d3",
+      "http_status": 500,
+      "wall_s": 0.605
+    }
+  ],
+  "note": "the red: published v0.6.3 image, 2/2 attempts"
+}

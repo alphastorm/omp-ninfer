@@ -1,0 +1,66 @@
+{
+  "artifact_type": "omp_ninfer_sibling_continuation_probe",
+  "schema_version": 1,
+  "lane": "rtx5090-a98b150e-candidate",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "1802353b35f22956275c0052c363656c273055a9102f954eed0346b9c502f6ca",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "a98b150e4036666a7efd4b0efc307ca81bb1cbf6",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2"
+  },
+  "generated_utc": "2026-09-13T00:08:13Z",
+  "shape": {
+    "depth": 1,
+    "siblings": 2,
+    "continued_sibling": 2
+  },
+  "reproduced": false,
+  "error": null,
+  "steps": [
+    {
+      "step": "base",
+      "previous": null,
+      "id": "resp_5f3d492b4aebefe6c6181718cf76506d",
+      "prompt_tokens": 66,
+      "cached_tokens": 0,
+      "wall_s": 1.37
+    },
+    {
+      "step": "depth_1",
+      "previous": "resp_5f3d492b4aebefe6c6181718cf76506d",
+      "id": "resp_687ee4ccc1414e44f3ba94c12c248799",
+      "prompt_tokens": 101,
+      "cached_tokens": 81,
+      "wall_s": 0.778
+    },
+    {
+      "step": "sibling_1",
+      "previous": "resp_687ee4ccc1414e44f3ba94c12c248799",
+      "id": "resp_5ef88fe439452ef855b75f28a8018378",
+      "prompt_tokens": 140,
+      "cached_tokens": 116,
+      "wall_s": 0.77
+    },
+    {
+      "step": "sibling_2",
+      "previous": "resp_687ee4ccc1414e44f3ba94c12c248799",
+      "id": "resp_1d52c21c9042095d88f44eefbfd41e18",
+      "prompt_tokens": 140,
+      "cached_tokens": 61,
+      "wall_s": 0.882
+    },
+    {
+      "step": "continue_sibling_2",
+      "previous": "resp_1d52c21c9042095d88f44eefbfd41e18",
+      "id": "resp_ecdcce38e1edb5034430c2f211b7e784",
+      "prompt_tokens": 181,
+      "cached_tokens": 155,
+      "wall_s": 1.285
+    }
+  ]
+}

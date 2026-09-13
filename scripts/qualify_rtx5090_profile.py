@@ -157,6 +157,11 @@ def gate_agent_protocol(lane: Lane, restart_cmd: str | None) -> dict[str, Any]:
                 pass
             return error.code, code
 
+    # Both siblings are alive here. Deleting one first releases the long anchor they share, which
+    # is why the delete sequence below never exercised this: a continuation taken while the other
+    # sibling still holds that anchor was charged for its residency and answered HTTP 500
+    # (alphastorm/ninfer#43). This is the ordinary two-subagent fanout shape.
+    live_sibling_status, live_sibling_code = continue_status(fork_b["id"])
     parent_delete_status = delete(fork_a["id"])
     deleted_status, deleted_code = continue_status(fork_a["id"])
     survivor_status, _ = continue_status(fork_b["id"])
@@ -165,7 +170,7 @@ def gate_agent_protocol(lane: Lane, restart_cmd: str | None) -> dict[str, Any]:
         subprocess.run(restart_cmd, shell=True, check=True, capture_output=True, timeout=600)
         wait_ready(lane, 600.0)
         post_restart_deleted_status, _ = continue_status(fork_a["id"])
-    passed = (parent_delete_status == 200 and deleted_status == 404
+    passed = (live_sibling_status == 200 and parent_delete_status == 200 and deleted_status == 404
               and deleted_code == "previous_response_not_found" and survivor_status == 200
               and (post_restart_deleted_status in (None, 404)))
     return {
@@ -179,6 +184,8 @@ def gate_agent_protocol(lane: Lane, restart_cmd: str | None) -> dict[str, Any]:
         "post_restart_deleted_continuation_status": post_restart_deleted_status,
         "no_resurrection": post_restart_deleted_status == 404 if restart_cmd else None,
         "surviving_descendant_continued": survivor_status == 200,
+        "live_sibling_continuation_status": live_sibling_status,
+        "live_sibling_continuation_error_code": live_sibling_code,
     }
 
 

@@ -1,0 +1,29 @@
+{
+  "artifact_type": "omp_ninfer_runpod_ci_receipt",
+  "build_profile": "runpod-ci-port",
+  "build_targets": [
+    "all"
+  ],
+  "cloud_type": "SECURE",
+  "cuda_arch": "120a",
+  "cuda_packages": [
+    "cuda-compiler-13-1",
+    "cuda-libraries-dev-13-1",
+    "cuda-nvtx-13-1"
+  ],
+  "data_center_ids": null,
+  "failed_step": null,
+  "finished_at": "2026-09-12T23:34:41.661621+00:00",
+  "gpu_id": "NVIDIA RTX PRO 4000 Blackwell",
+  "hourly_price_usd": 0.57,
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "pod_deleted": true,
+  "pod_id": "8gduk3t1z7ulbs",
+  "release_artifacts": [],
+  "release_version": null,
+  "schema_version": 1,
+  "source_commit": "e962f98c4cfcdf6cba4292b13e73bba1de308682",
+  "started_at": "2026-09-12T23:16:57.763625+00:00",
+  "status": "passed",
+  "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc"
+}
