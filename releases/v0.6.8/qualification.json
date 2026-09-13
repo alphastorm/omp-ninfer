@@ -69,7 +69,7 @@
       "as_of": "2026-09-13",
       "repository_path": "releases/v0.6.8/acceptance/composed-external-installation.json",
       "sha256": "9bc81c6de5518c1a6eb662234e1ec19ffc9156d402897458ecb5465354fbb79a",
-      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c36e9688c3d1234096ec812a7a5700974577be7b/releases/v0.6.8/acceptance/composed-external-installation.json",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a2888f9a73cb320f81ee099a7f8380c8f375cf28/releases/v0.6.8/acceptance/composed-external-installation.json",
       "operator_class": "owner-operated tester-equivalent",
       "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
       "tools": true,
