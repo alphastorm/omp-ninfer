@@ -2,7 +2,7 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.3.0-qualified-1`
-Product release: `v0.6.8`
+Product release: `v0.6.9`
 Composition: **v0.3.0 public release**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
@@ -19,13 +19,13 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/999e14ee8e40ad18fa351b751682a60e2dfaeb52/releases/v0.6.8/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/999e14ee8e40ad18fa351b751682a60e2dfaeb52/releases/v0.6.8/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/386e91120ece876b1b722dbb7b3a1af49da62e41/releases/v0.6.9/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/386e91120ece876b1b722dbb7b3a1af49da62e41/releases/v0.6.9/qualification/rtx4090.json) |
 
 Package bindings:
 
 - `rtx3090-windows-native`: component `v0.2.5-qwen38-3090-beta.1`; package [`ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8`; 573,344,205 bytes.
-- `rtx4090-windows-native`: component `v0.6.2-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.2-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `4fc5106ffacc8cc42e45e7691a3d596ecd30dcb3a3fc0d7654d801c7df189ca2`; 572,678,944 bytes.
+- `rtx4090-windows-native`: component `v0.6.3-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.3-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `f68b57ac0fffe800c95282cb43cf988f4eb670f1428c1a8655ca48153211b5ac`; 572,654,856 bytes.
 
 ## Profile boundaries
 
