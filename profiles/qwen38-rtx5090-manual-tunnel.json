@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.6.7",
+  "release": "v0.6.8",
   "status": "public",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
@@ -47,7 +47,7 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "9afa8824fdf35098aae663400ace512075d129b4ce47f162746eff16efae11e2",
+      "9ad469e0433f19f2e04e2efa74ce2b959da407f4558b2ebd5d7b34168693f0fe",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
