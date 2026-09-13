@@ -40,9 +40,20 @@
 <main>
 <p class="eyebrow">Benchmarks</p>
 <h1>Measured, receipted, reproducible</h1>
-<p class="lede">Every number is bound to a versioned qualification receipt on exact released
-bytes. Warm/cold figures are retained state versus fresh-process cold start — never versus an
+<p class="lede">Each result names its release and measurement scope: lifecycle qualification
+and published-route acceptance are distinct. Warm/cold figures are retained state versus fresh-process cold start — never versus an
 ordinary in-process follow-up.</p>
+<h2>Current release: v0.6.9</h2>
+<table>
+<tr><th>Scope</th><th>Measurement</th></tr>
+<tr><td>RTX 5090 published documented route</td><td>Exact 130,048-token retrieval at 2,153.6 tok/s; 133.76 tok/s wall decode</td></tr>
+<tr><td>RTX 5090 lifecycle candidate</td><td>Exact 130,048-token retrieval at 2,193.3 tok/s; 134.87 tok/s wall decode over 2,048 tokens</td></tr>
+<tr><td>RTX 4090 native qualification</td><td>Exact retrieval in 91.2377 s; 153.464 tok/s C1 decode; 87.58865% MTP acceptance</td></tr>
+</table>
+<p>Different workloads and measurement scopes, not a GPU ranking or a head-to-head comparison
+against vLLM or llama.cpp. The 4090 public-URL acceptance exercised the already-installed path,
+not a fresh install. <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#v069--qwen-parser-semantic-port">Current facts and linked receipts</a>.</p>
+<h2>Historical restart measurements: v0.4.0</h2>
 <table>
 <tr><th>Claim</th><th>Measurement (RTX 5090 · v0.4.0)</th></tr>
 <tr><td>Restart recovery</td><td>109,589 tokens restored; 0.778&nbsp;s to first token vs 47.920&nbsp;s cold</td></tr>
@@ -53,7 +64,7 @@ ordinary in-process follow-up.</p>
 <p>Method, per-lane numbers, and historical sections:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">Last verified 2026-08-31.</p>
+<p class="verified">Updated 2026-09-13 from published receipts. Historical v0.4.0 results retain their original scope.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

@@ -110,6 +110,41 @@ Operators may describe this problem as persistent KV cache, restartable context,
 checkpointing, stateful local inference, or avoiding cold re-prefill. The actual guarantee is
 explicit restorable continuation state; it does **not** claim that new input avoids prefill.
 
+## Checkpoint transport and NAS replication
+
+**Available now, not roadmap-only:** [`checkpoint_sync.py`](../scripts/checkpoint_sync.py)
+exports published checkpoint generations, verifies their file sizes and SHA-256 hashes, and
+imports replicas into a local checkpoint root. Copies can be stored on another host or a NAS.
+This is explicit export/import, not automatic failover or live session migration.
+
+- **Recovery proved on all three lanes:** export → carry off-machine → remove local state with
+  the server stopped → carry back → import → restart → exact retrieval of planted keys
+  ([5090](measurements/2026-09-05-sync-probe-rtx5090.json),
+  [4090](measurements/2026-09-05-sync-probe-rtx4090.json),
+  [3090](measurements/2026-09-05-sync-probe-rtx3090.json)). These are the 2026-09-05 profiles,
+  not a new sync qualification of every later runtime release.
+- **Transport proved separately:** [cross-site host transport](measurements/2026-09-06-replica-transfer-paths.json)
+  and [NAS replication](measurements/2026-09-07-nas-replication-sf-lanes.json). The NAS run
+  copied and verified one published generation from each co-located native lane; it did not
+  exercise runtime restore from the NAS or change the release lifecycle.
+- **Restore compatibility:** the runtime fingerprint binds the binary, model artifact, and
+  profile; the session namespace and origin authentication bind the bearer key. A remote
+  storage destination need not have a GPU, but restoring the state needs the matching runtime
+  environment and credentials. These receipts do not demonstrate running a 5090 session on a
+  4090, cross-version conversion, or resuming on a second inference host.
+- **Local runtime storage only:** O_DIRECT/DirectStorage require a local checkpoint root.
+  Import from the replica before restore; do not point the server at a network share.
+- **Integrity is not origin authentication or encryption:** sync checks payload hashes and
+  requires `manifest.mac` by default; the runtime verifies that tag under
+  `--session-checkpoint-require-origin-auth`. Protect replica access and transport as private
+  session data. Do not use `--allow-unauthenticated` for imports across a trust boundary.
+
+Use the sync tool's [export/import examples](../scripts/checkpoint_sync.py) and
+`python3 scripts/checkpoint_sync.py --help`. Publish the intended checkpoint before export,
+stop the destination runtime before import, and keep its matching profile and credentials.
+The [roadmap](../ROADMAP.md#v05x--sessions-leave-the-machine) records the original experiments
+and their limits.
+
 ## Security boundary
 
 Loopback-only listeners; bearer authentication with a user-only key file; fail-closed instead of

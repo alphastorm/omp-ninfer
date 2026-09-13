@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer status — current qualified release and lanes</title>
-<meta name="description" content="Current stable release v0.4.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and known caveats.">
+<meta name="description" content="Current stable release v0.6.9: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/status/">
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer status — current qualified release and lanes">
-<meta property="og:description" content="Current stable release v0.4.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and known caveats.">
+<meta property="og:description" content="Current stable release v0.6.9: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
 <meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/status/">
@@ -40,24 +40,28 @@
 <main>
 <p class="eyebrow">Status</p>
 <h1>Current qualified release</h1>
-<p class="lede"><strong>v0.4.0</strong> — durable session state on every lane. Published, hash-pinned,
-and acceptance-tested from public URLs.</p>
+<p class="lede"><strong>v0.6.9</strong> — durable session state on every lane. Both mainline
+runtime components carry the Qwen tool-parser semantic port. Published-component acceptance:
+RTX 5090 documented host and macOS routes; RTX 4090 already-installed public-URL path.
+The RTX 3090 component and its prior qualification are unchanged.</p>
 <table>
 <tr><th>Lane</th><th>Form</th><th>Context ceiling</th><th>Notes</th></tr>
 <tr><td>RTX 5090</td><td>Linux container (Docker/WSL2)</td><td>131,072</td><td>Durable container; vision available</td></tr>
 <tr><td>RTX 4090</td><td>Native Windows service</td><td>131,072</td><td>MTP3 profile; DirectStorage checkpoints; text-only</td></tr>
-<tr><td>RTX 3090</td><td>Native Windows service</td><td>65,536</td><td>64K working class; text-only</td></tr>
+<tr><td>RTX 3090</td><td>Native Windows service</td><td>131,072</td><td>64K comfortable working class; text-only</td></tr>
 </table>
 <h2>Known caveats</h2>
 <ul>
 <li>One active request per lane (max concurrency 1); not a serving farm.</li>
-<li>Checkpoints restore only on an identical lane (same binary, artifact, profile).</li>
-<li>The pinned Oh My Pi client build is <code>18.0.9</code>; do not run <code>omp update</code> over a lane install.</li>
+<li>Host/NAS replicas are supported; restore requires the same binary, artifact, profile, and
+session credentials. Transport is not cross-GPU migration or automatic failover.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Evidence and limits</a>.</li>
+<li>Use the exact Oh My Pi client pinned by the release manifest; do not run <code>omp update</code> over a lane install.</li>
 </ul>
-<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/releases/v0.4.0/manifest.json">release manifest</a> ·
+<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/releases/v0.6.9/manifest.json">release manifest</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md">release lifecycle</a></p>
-<p class="verified">Last verified 2026-08-31.</p>
+<p class="verified">Updated 2026-09-13 from the v0.6.9 manifest and published receipts; no new live qualification implied.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

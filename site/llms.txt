@@ -7,6 +7,8 @@
 
 ## Canonical documents
 
+- [Checkpoint transport and NAS replication](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication): implemented export/import and verified off-machine replicas; restore requires matching runtime, model, profile, and credentials; not cross-GPU migration or live NAS serving
+
 - [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity, fit, guarantees, measured proof, limitations
 - [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose this vs Ollama, LM Studio, llama.cpp, vLLM
 - [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md): lane selection and install

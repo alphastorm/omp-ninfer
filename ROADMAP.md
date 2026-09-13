@@ -142,6 +142,11 @@ what can ship next:
 
 The 0.5 series is about one thing: a session stops being bound to the card that created it.
 
+**Current boundary:** checkpoint export/import, off-machine transport, and NAS replication
+are delivered. The records below distinguish transporting a replica from executing its session:
+restore remains runtime/profile/credential-bound, and the transport receipts do not prove
+cross-GPU or second-inference-host resume. See [current operator guidance](docs/FACTS.md#checkpoint-transport-and-nas-replication).
+
 1. **Checkpoint sync — replicate, don't serve. Delivered 2026-09-05 (EXP-018).** The native IO
    paths are O_DIRECT/DirectStorage and require local filesystems, so network shares are never a
    checkpoint root; replication is a verified copy of published generations out and back.

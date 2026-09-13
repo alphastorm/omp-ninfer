@@ -92,8 +92,13 @@ on the 4090](releases/v0.2.0-beta.1/qualification/rtx4090.json), [310 MB checkpo
 the 3090](docs/measurements/2026-08-30-rtx3090-parity.json). A prefix cache cannot outlive its
 process; a checkpoint can.
 
-Next on the [roadmap](ROADMAP.md): portable checkpoints — store them on shared storage, restore
-the session on another compatible machine — which in-process caches structurally cannot do.
+**Checkpoints already leave the machine.** The shipped sync tool exports verified generations,
+copies them to another host or NAS, and imports them back to local storage for restore. Recovery
+after loss of local state was exercised on all three lanes; host-to-host transport and NAS
+replication have separate receipts. Restore requires the same runtime binary, model, profile,
+and session credentials: copying a checkpoint to a 4090 does not make a 5090 session runnable
+there. Network shares are replica storage, never the live checkpoint root.
+[Scope, usage, and evidence](docs/FACTS.md#checkpoint-transport-and-nas-replication).
 
 ## Why this exists
 
@@ -110,8 +115,8 @@ give you together elsewhere:
 
 1. **Continuation is explicit and durable, not guessed.** OMP drives NInfer through stateful
    OpenAI Responses (`previous_response_id`): continuation is addressed by transactional lineage —
-   forks and rollback qualified — instead of inferred by longest-prefix matching, and on the
-   native Windows lanes the continuation is checkpointed and survives process restarts. OMP
+   forks and rollback qualified — instead of inferred by longest-prefix matching, and on all
+   three lanes the continuation is checkpointed and survives process restarts. OMP
    commits its transcript before advancing provider state, so losing retained state degrades to a
    replay, never a broken session.
 2. **Private and fail-closed.** Both endpoints bind loopback only; the route is
@@ -126,7 +131,7 @@ give you together elsewhere:
 
 ![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
 
-Exact v0.6.8 shipped profiles and receipts in
+Historical v0.6.8 profiles and receipts in
 [`qualification.json`](releases/v0.6.8/qualification.json):
 
 | Gate | Result |
@@ -139,7 +144,7 @@ Exact v0.6.8 shipped profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-The **v0.6.9 candidate** moves both mainline lanes to source `696e78c7` for the independently
+The **v0.6.9 release** moves both mainline lanes to source `696e78c7` for the independently
 implemented Qwen tool-parser semantic port, without rebasing the serve adapters. The RTX 5090
 lifecycle candidate measured exact 130,048-token retrieval at **2,193.3 tok/s** and 2,048-token
 decode at **134.87 tok/s wall**; the RTX 4090 candidate retrieved exactly in **91.2377 s** and
@@ -197,13 +202,19 @@ native Windows 3090/4090 paths.
 
 - **OMP owns the truth.** Transcript, tools, branches, and replay live in OMP. A turn advances
   provider state only after a complete valid stream and durable transcript publication.
-- **NInfer owns the speed.** Process-local Responses state and GPU cache scoped by authenticated
-  client and session identity. Retained state is an acceleration, never the source of truth.
+- **NInfer owns inference and retained state.** The hardware-tuned C++/CUDA engine comes from
+  [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports; this project's runtime
+  adds explicit Responses state and durable checkpoints, scoped by authenticated client and
+  session identity. Retained state is an acceleration, never the source of truth.
 - **The manifest owns identity.** Exact client, image, model, configuration, and qualification
   bytes; `ready` status requires the composed external acceptance from public URLs.
 
 Deep dive: [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) ·
 [Release lifecycle](docs/RELEASES.md).
+
+Engine throughput and avoiding repeated prefill are separate benefits. The
+[benchmarks](docs/BENCHMARKS.md) measure specific profiles and workloads, not a matched
+head-to-head speed ranking against vLLM or llama.cpp.
 
 ## How it compares
 
@@ -215,6 +226,7 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | --- | --- | --- | --- | --- | --- |
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; in-process prefix reuse avoids recomputing matching prefixes | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
+| Restart and off-machine checkpoints | Durable restore on all three lanes; verified host/NAS replicas; same-runtime/profile/credentials restore only ([scope](docs/FACTS.md#checkpoint-transport-and-nas-replication)) | Different mechanism/contract; verify current support | Different mechanism/contract; verify current support | Different mechanism/contract; verify current support | Different architecture, including external KV systems |
 | Speculative decoding on the shipped model | Profile-specific: MTP3 on all three shipped lanes | Model/config dependent | Desktop app plus headless daemon with a large model catalog | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |

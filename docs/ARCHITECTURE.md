@@ -4,7 +4,7 @@ OMP NInfer is an integration and release product, not a third inference runtime.
 version to an exact OMP client, NInfer runtime, Qwen artifact, hardware profile, connection topology,
 and qualification summary.
 
-## v0.3 topology
+## Runtime topology
 
 ```mermaid
 sequenceDiagram
@@ -34,9 +34,8 @@ the HTTP endpoint. The NInfer process uses one resident model and one active req
 profile. Native Windows 3090/4090 variants retain their own ports, packages, and receipts rather
 than inheriting the primary container identity.
 
-The RTX 3090 release lane keeps that separation while converging restart semantics: its native
-package writes authenticated, session-scoped checkpoints under protected release state,
-then restores the prior Responses chain after a managed process replacement. OMP's transcript
+All three release lanes write authenticated, session-scoped checkpoints to local storage,
+then restore the prior Responses chain after a process restart. OMP's transcript
 remains authoritative if any retained state is absent or invalid.
 
 ## State ownership
@@ -44,8 +43,8 @@ remains authoritative if any retained state is absent or invalid.
 - **OMP transcript:** authoritative messages, tool calls/results, branches, and session history.
 - **OMP provider snapshot:** a private acceleration envelope containing the committed NInfer response
   baseline and identity needed to append the next turn.
-- **NInfer Responses state:** process-local retained response/cache state scoped by authenticated
-  client and session identity.
+- **NInfer Responses state:** retained response/cache state scoped by authenticated client and
+  session identity, with durable checkpoints for restart recovery on all three lanes.
 - **Qwen artifact:** immutable model bytes pinned by revision, size, and SHA-256.
 
 A turn advances provider state only after a complete valid stream and durable transcript publication.
@@ -56,9 +55,19 @@ transcript remains sufficient for a full replay.
 This is why another stateful gateway is not inserted between OMP and NInfer. It would create a second
 owner for continuation, persistence, and failure recovery without solving a first-release problem.
 
+## Checkpoint transport
+
+`scripts/checkpoint_sync.py` exports verified published generations to replica storage and
+imports them into a local checkpoint root before restore. Host-to-host copying and NAS
+replication are implemented; the live runtime never serves a network-share checkpoint root.
+Sync checks payload hashes; the runtime authenticates `manifest.mac`. Restore requires the
+matching runtime binary, model, profile, and bearer-bound session identity. The recorded
+recovery probes return state to its original lane, not a second inference host or different GPU.
+See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-replication).
+
 ## Identity chain
 
-[`manifest.json`](../releases/v0.3.0/manifest.json) binds:
+The [current release manifest](../releases/v0.6.9/manifest.json) binds:
 
 1. product release and support channel;
 2. OMP public source revision, all three native client artifacts, Homebrew beta cask, sizes, and hashes;

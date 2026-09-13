@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Correct the README, decision guide, architecture, and website: checkpoint export/import,
+  host-to-host transport, and NAS replication are implemented, not future-only. Link the
+  existing receipts and distinguish replica storage from runtime restore, which remains
+  binary/model/profile/credential-bound; no cross-GPU or second-inference-host resume claim.
+- Refresh website release status and current benchmark scopes for v0.6.9, retaining the
+  historical measurements under their original versions. Credit the NInfer engine and GPU
+  ports separately from the durable-state work and OMP agent layer.
+
 ## [0.6.9] - 2026-09-13
 
 Both mainline runtime components advance to reviewed source

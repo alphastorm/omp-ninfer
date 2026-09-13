@@ -2,6 +2,8 @@
 
 Last verified: 2026-08-31, against each project's public documentation. Capabilities change
 quickly — reverify before deciding; corrections welcome as issues.
+OMP NInfer checkpoint transport status updated 2026-09-13 from repository receipts; this does
+not reverify the other projects' capabilities.
 
 OMP NInfer deliberately occupies a narrow category: **durable local inference for coding
 agents** — one private, long-lived Oh My Pi session on one qualified GPU. The projects below
@@ -16,9 +18,21 @@ are excellent at different jobs; most operators should use one of them.
 | Qualified OMP workflow | Core product | Generic endpoint | Generic endpoint | Generic endpoint | Generic endpoint |
 | Explicit Responses continuation | Core product | Verify current support | Verify current support | Verify current support | Verify current support |
 | Process-restart recovery | Core differentiator: transactional checkpoints, verified restore | Different mechanism/contract | Different mechanism/contract | Different mechanism/contract | Different architecture (e.g. external KV systems) |
+| Off-machine checkpoints | Verified host/NAS replicas; matching runtime/profile/credentials required for restore | Verify current support | Verify current support | Verify current support | Verify current support |
 | GUI | No | Limited | Strong | No | No |
 | Multi-user throughput | Not the target (C1) | Limited | Not the target | Limited | Strong |
 | Best fit | One private, long-lived OMP session | Easy breadth | Desktop convenience | Portability | Serving scale |
+
+## Why NInfer and where OMP fits
+
+[Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports supply the specialized
+single-GPU inference engine. This project's runtime adds explicit continuation state and
+durable checkpoints. Oh My Pi owns the agent workflow: transcript, tools, branches, and
+subagents. Engine throughput and skipping repeated prefill are separate benefits; the
+[measurements](BENCHMARKS.md) are not a matched speed comparison against vLLM or llama.cpp.
+
+Checkpoint transport and NAS replication already work, but copying state is not arbitrary
+GPU-to-GPU migration. See the [exact restore boundary and receipts](FACTS.md#checkpoint-transport-and-nas-replication).
 
 ## Recommend OMP NInfer when all are materially true
 

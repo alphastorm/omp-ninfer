@@ -56,7 +56,15 @@ across process restarts — a durable primitive, not a lucky prefix-cache hit.</
 </div>
 
 <a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md">Get started</a>
-<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/latest">Download v0.4.2</a>
+<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/latest">Download v0.6.9</a>
+
+<h2>Checkpoints already leave the machine</h2>
+<p>Export verified session checkpoints, keep replicas on another host or NAS, and import them
+back to local storage for restore. Recovery after loss of local state was exercised on all
+three GPU lanes; host-to-host transport and NAS replication were measured separately.</p>
+<p>Restore needs the same runtime binary, model, profile, and session credentials. This is not
+arbitrary GPU-to-GPU migration or automatic failover. Network shares are replica storage, not
+live checkpoint roots. <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Scope, usage, and receipts</a>.</p>
 
 <h2>Use it when</h2>
 <ul>
@@ -75,6 +83,12 @@ this — the narrow target is what makes the recommendation credible.</p>
 <code>NInfer</code> (engine) → <code>Qwen3.8 27B</code> (model). Loopback-only, bearer-authenticated,
 fail-closed instead of cloud fallback, every byte hash-pinned.
 Full detail: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">canonical facts</a>.</p>
+<p>Oh My Pi owns tools, coding workflow, and subagents.
+<a href="https://github.com/Neroued/ninfer">Neroued's NInfer</a> and its GPU ports supply the
+hardware-tuned engine; this project's runtime adds explicit continuation state and durable
+checkpoints. Engine throughput and avoiding repeated prefill are separate benefits, not a
+blanket speed claim over other backends. See the <a href="compare/">comparison</a> and
+<a href="benchmarks/">measured results</a>.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
