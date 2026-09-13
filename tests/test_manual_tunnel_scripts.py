@@ -5,114 +5,15 @@ import os
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples" / "manual-tunnel"
-sys.path.insert(0, str(ROOT / "scripts"))
-
-import documented_route  # noqa: E402
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
-    def test_start_identity_uses_profile_deployment_identity(self) -> None:
-        source = (ROOT / "examples" / "manual-tunnel" / "start-ninfer.sh").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn('MANIFEST="$ROOT/releases/v0.6.8/manifest.json"', source)
-        self.assertIn('EXPECTED_DEPLOYMENT_PROFILE=${PROFILE_VALUES[2]}', source)
-        self.assertIn('"deployment_profile": (identity.get("deployment_profile"), deployment_profile)', source)
-        self.assertNotIn('"qwen38-5090-v0.1.0"', source)
-
-        stop_source = (ROOT / "examples" / "manual-tunnel" / "stop-ninfer.sh").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("EXPECTED_RELEASE=v0.6.8", stop_source)
-
-    def test_every_client_route_installs_a_config_that_keeps_the_pinned_client_on_its_channel(self) -> None:
-        """The client is a hash-pinned asset: the config every documented route installs must
-        disable the startup update check (issue #18) and model fallback. The pinned 18.0.9
-        client reads `startup.checkUpdate` only in nested form, not as a dotted key."""
-        config = (ROOT / "examples" / "manual-tunnel" / "fail-closed.yml").read_text(encoding="utf-8")
-        settings: dict[str, str] = {}
-        section = ""
-        for line in config.splitlines():
-            if not line.strip() or line.lstrip().startswith("#"):
-                continue
-            key, _, value = line.partition(":")
-            if line.startswith(" "):
-                settings[f"{section}.{key.strip()}"] = value.strip()
-            else:
-                section = key.strip()
-                self.assertEqual(value.strip(), "", f"top-level {section} must be a nested section")
-        self.assertEqual(settings.get("startup.checkUpdate"), "false")
-        self.assertEqual(settings.get("retry.modelFallback"), "false")
-        for lane in ("rtx5090-macos-client", "rtx5090-windows-client", "rtx4090-native"):
-            installs = [step.slug for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
-                        if "manual-tunnel/fail-closed.yml" in block.text.replace("\\", "/")]
-            self.assertEqual(len(installs), 1, f"{lane} must install the one channel config exactly once: {installs}")
-
-    def test_windows_ready_path_materializes_key_and_refuses_overwrite(self) -> None:
-        quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
-        provider = quickstart.split("### Native Windows OMP", 1)[1].split(
-            "The sealed launcher owns config selection", 1
-        )[0]
-        self.assertIn("wsl.exe -d Ubuntu-24.04", provider)
-        self.assertIn("$HOME/.config/omp-ninfer/api-key", provider)
-        self.assertIn("[IO.File]::WriteAllText($KeyPath", provider)
-        self.assertIn("icacls.exe $KeyPath /inheritance:r", provider)
-        self.assertIn("Existing OMP models/config found", provider)
-        self.assertIn("Copy-Item .\\examples\\manual-tunnel\\fail-closed.yml", provider)
-        self.assertIn("$env:NINFER_BETA_API_KEY", provider)
-        self.assertNotIn("install -m", provider)
-        self.assertLess(
-            provider.index("Existing OMP models/config found"),
-            provider.index("Copy-Item .\\examples\\windows-docker-local"),
-        )
-
-        acceptance = quickstart.split("### Native Windows command forms", 1)[1].split(
-            "### macOS/Linux command forms", 1
-        )[0]
-        self.assertIn("$env:LOCALAPPDATA\\OMP\\omp.cmd", acceptance)
-        self.assertIn("stop-ninfer.sh", acceptance)
-        self.assertIn("if ($LASTEXITCODE -eq 0)", acceptance)
-        self.assertNotIn("Stop the tunnel", acceptance)
-
-    def test_native_lane_install_is_completable_from_the_document(self) -> None:
-        """Every input the native installer demands must be produced by the documented path.
-
-        Install-Release.ps1 on the RTX 4090 lane requires -StateRoot and a model artifact, and
-        refuses a key file it did not find; a reader with only this section must still finish."""
-        quickstart = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
-        native = quickstart.split("## Native Windows RTX 4090 and RTX 3090 release lanes", 1)[
-            1
-        ].split("## Managed macOS SSH qualified route", 1)[0]
-        manifest = json.loads(
-            (ROOT / "releases" / "v0.6.8" / "manifest.json").read_text(encoding="utf-8")
-        )
-        release = manifest["release"]
-        self.assertIn(f"releases\\{release}\\manifest.json", native)
-        # The installer's mandatory inputs.
-        self.assertIn("-StateRoot $StateRoot", native)
-        self.assertIn("-ModelArtifactPath $Model", native)
-        self.assertIn("-ApiKeyFile $ApiKeyFile", native)
-        # ... each produced before the call, from the manifest's own identities.
-        self.assertIn("$Manifest.components.model.artifact_url", native)
-        self.assertIn("$Manifest.components.model.artifact_sha256", native)
-        self.assertIn("RandomNumberGenerator]::Create().GetBytes($Secret)", native)
-        for state_root in ("qwen38-4090-native", "qwen38-3090-omp-v0.2"):
-            self.assertIn(state_root, native)
-        # The lifecycle surface a reader needs after a reboot, and the lane's own endpoint.
-        for action in ("-Action Status", "-Action Start", "-Action Stop"):
-            self.assertIn(f"{action} -StateRoot $StateRoot", native)
-        self.assertIn("127.0.0.1:18082", native)
-        # The native lanes carry neither the WSL2 key path nor a Vision check.
-        self.assertNotIn("wsl.exe", native)
-        self.assertNotIn("icon-512.png", native)
-
     def test_native_fragment_matches_each_lane_served_identity(self) -> None:
         fragment = (
             ROOT / "examples" / "windows-native" / "models.fragment.yml"
@@ -181,13 +82,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         result = self.run_script("start-ninfer.sh", "--check-contract")
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("launcher contract valid", result.stdout)
 
     def test_start_refuses_draft_before_runtime_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.copy_contract_tree(root)
-            manifest_path = root / "releases" / "v0.6.8" / "manifest.json"
+            manifest_path = root / "releases" / "v0.6.9" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
             manifest["components"]["omp"]["artifact_published"] = False

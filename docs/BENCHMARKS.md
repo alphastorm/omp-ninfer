@@ -4,9 +4,9 @@ Every number on this page is a recorded measurement with a receipt, or it is exp
 someone else's published result. Measurements belong to the exact candidate, profile, and machine
 that produced them; none is a universal GPU, model, or end-to-end latency claim.
 
-- **Qualified product results** come from the release qualifications bound into
-  [`releases/v0.3.0/qualification.json`](../releases/v0.3.0/qualification.json) and the immutable
-  prior-release authorities.
+- **Qualified product results** come from the release qualifications linked in each section and
+  their immutable prior-release authorities. Candidate measurements are labelled separately;
+  lane qualification is not evidence of public-route acceptance.
 - **Engine campaign results** are published upstream by
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
@@ -119,6 +119,42 @@ The prior MTP0 receipt (52.330 tok/s over 1,168 tokens, 1,410.691 tok/s prefill,
 baseline this campaign was compared against. Receipts:
 [decode measurement](measurements/2026-08-30-rtx4090-mtp3-decode.json) ·
 [qualification summary](../releases/v0.4.0/qualification/rtx4090.json).
+
+### v0.6.9 candidate — Qwen tool-parser semantic port (2026-09-13)
+
+RTX 5090 `v0.6.5-qwen38-5090-beta.1` and RTX 4090 native
+`v0.6.3-qwen38-4090-beta.1` share reviewed source `696e78c7`. The Qwen parser semantic port is
+independently implemented from upstream `3b50962b` / `0c5d570c`, not a serve-adapter rebase or
+an engine/profile tuning change. The model, client, serving settings, and RTX 3090 component
+are unchanged. Receipts:
+[RTX 5090](../releases/v0.6.9/qualification/rtx5090.json) ·
+[RTX 4090](../releases/v0.6.9/qualification/rtx4090.json).
+
+These are **candidate lane measurements**. The RTX 5090 window used the unchanged lifecycle
+profile `qwen38-5090-v0.6.2`, configuration `5eb8a557`; the public deployment remains
+`qwen38-5090-v0.6.3`, configuration `622ab621`. Its host/macOS route acceptance is pending;
+no row below substitutes for exercising that public configuration. RTX 4090 public-URL
+already-installed acceptance passed separately
+([receipt](../releases/v0.6.9/acceptance/rtx4090-public-install.json)); it is not a fresh-install
+or throughput measurement.
+
+| Lane / gate | Result | Detail |
+| --- | ---: | --- |
+| RTX 5090 128K | **2,193.3 tok/s** prefill | exact retrieval at 130,048 prompt tokens on the lifecycle candidate |
+| RTX 5090 decode | **134.87 tok/s wall** | 2,048 completion tokens; not a server-side decode timing |
+| RTX 5090 fanout | **4/4 + 4/4 hot** | 57K / 67K bases; medians 1.401 / 1.520 s |
+| RTX 5090 warm arrival | **hot in both orders** | resume-first and fork-first after restart |
+| RTX 5090 restore | **4.155 / 3.886 s** | 5.201 GB; exact retrieval after restore; payload tamper refused |
+| RTX 5090 agent protocol | **HTTP 200 / 404** | live sibling continued at 200; deleted continuation refused at 404 before and after restart |
+| RTX 4090 qualification | **15/15 phases** | native lane lifecycle qualification, not public installer acceptance |
+| RTX 4090 128K | **91.2377 s** | exact retrieval at 130,048 prompt tokens |
+| RTX 4090 C1 | **153.464 tok/s** decode | 87.58865% MTP acceptance on the trajectory-sensitive C1 fixture; the v0.6.8 measurement and EXP-037 attribution below remain unchanged |
+| RTX 4090 durability / rollback | **passed** | explicitly saved and never-published sessions restored after managed stop/flush; rollback with the `68a0722f` predecessor graceful in both directions |
+
+Verification on this source: appliance focused suites **13/13**, Windows parser/wire suites
+**4/4**, and Blackwell CI **95 passed, 7 skipped, 0 failed out of 102 registered**
+([receipt](measurements/2026-09-13-runpod-ci-full-696e78c7.json)). A skipped test is not a pass.
+These measurements do not establish a parser-driven throughput improvement.
 
 ### v0.6.8 — both mainline lanes on one runtime, and a fork bug fixed (2026-09-13)
 

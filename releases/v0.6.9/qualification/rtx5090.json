@@ -1,0 +1,292 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified": true,
+  "release": "v0.6.9",
+  "as_of": "2026-09-13",
+  "release_tag": "v0.6.5-qwen38-5090-beta.1",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
+  "identity": {
+    "source_commit": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "server_binary_sha256": "b8a0a2c33d79304afb1701ca7d179a6ed750685d1365a75634fdc738bab6a831",
+    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "oci_manifest_digest": "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
+    "image_id": "sha256:793f9c057f639878e5fbf1e85ecadb2f1e8113e0babb67ea2f728979417eaa26"
+  },
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true,
+    "narrative": "Candidate 696e78c7 (local image 793f9c05, binary b8a0a2c3, lifecycle configuration 5eb8a557) was measured through the existing lifecycle tools and unchanged fixtures/parameters. The semantic parser port and bounded-work remediation advance v0.6.8; engine, model, BF16 KV and serving profile are unchanged. Only the origin-authentication arc is inherited; the window exercised payload tamper refusal. Published-image route acceptance is recorded separately after execution."
+  },
+  "build": {
+    "route": "Canonical appliance-local CUDA 13.1 build from clean source 696e78c7; digest-pinned base a19e00c5. Workflow 34743949656 wraps the published archive onto the same base.",
+    "ctest": "13/13 focused suites passed in the appliance build. Blackwell sm_120a CI: 95 passed, 7 skipped, 0 failed out of 102 registered (io_uring backend and six model-fixture suites skipped); all four parser/wire suites passed. docs/measurements/2026-09-13-runpod-ci-full-696e78c7.json",
+    "archive": "ninfer-qwen38-rtx5090-v0.6.5-linux-x86_64-cuda13.1.tar.gz sha256 91e1e05d7e1dd0eb4d4d841dfe00af70509f818093151ba7522bd3b9c8a0a49d",
+    "sbom": "ninfer-qwen38-rtx5090-v0.6.5-linux-x86_64-cuda13.1.spdx.json sha256 b1930e2b092dbc1ef76f606332ff1d9e060dbe503e7a818228d4d5d9419dc39d",
+    "source_archive": "runtime-source-696e78c7.tar.gz sha256 aaf380ae94dd13b70b8d5234a9ee3f9aa918832fbc63a30298fe9f92b3df5040"
+  },
+  "context_cache_profile": {
+    "arguments": [
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24"
+    ],
+    "resolved_startup_line": "KV capacity auto resolved=131072 tokens pages=2048/2048 runtime=10.12 GiB free-after-weights=13.25 GiB free-after-startup=3.20 GiB headroom=1.00 GiB slack=3.13 GiB context-cache=on",
+    "unchanged_from": "v0.4.8"
+  },
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "exact_retrieval_at_every_point": true,
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "points": [
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2193.3,
+          "wall_seconds": 59.294,
+          "prefix_reuse_path": "root",
+          "measured_on": "lifecycle candidate 696e78c7",
+          "output_exact": true
+        }
+      ],
+      "v068_reference_tokens_per_second": 2178.8,
+      "vram_used_mib_after": 28144
+    },
+    "decode": {
+      "status": "passed",
+      "request_id": "de36b92db81d878f30a03abab383c35dd3d76ee4d7a13942f131f11b787e1133",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 15.185,
+      "completion_tokens_per_second_wall": 134.87,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 14.624816112000001,
+      "decode_tokens_per_second": 140.04,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "speculative": {
+        "accepted_per_position": [
+          597,
+          340,
+          193
+        ],
+        "accepted_tokens": 1130,
+        "backend": "mtp",
+        "draft_window": 3,
+        "drafted_tokens": 2745,
+        "fallback_steps": 1,
+        "rounds": 916
+      },
+      "workload": "technical-writing generation at temperature 0 on the lifecycle-started candidate",
+      "v068_reference": 134.8
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    },
+    "fanout_acceptance": {
+      "status": "passed",
+      "receipts": [
+        "docs/measurements/2026-09-13-rtx5090-v069-fanout-57k.json",
+        "docs/measurements/2026-09-13-rtx5090-v069-fanout-67k.json"
+      ],
+      "57k": {
+        "template_input_tokens": 57853,
+        "cold_prefill_s": 21.918,
+        "checkpoint_save_s": 3.954,
+        "checkpoint_bytes": 4505854472,
+        "hot_fork_median_s": 1.401,
+        "hot_fork_max_s": 1.577,
+        "restart_ready_s": 22.82,
+        "post_restart_resume_s": 3.388,
+        "warm_start_first_fork_s": 1.348,
+        "warm_start_fork_median_s": 1.357,
+        "warm_start_fork_max_s": 1.362
+      },
+      "67k": {
+        "template_input_tokens": 67681,
+        "cold_prefill_s": 26.605,
+        "checkpoint_save_s": 4.362,
+        "checkpoint_bytes": 5188026326,
+        "hot_fork_median_s": 1.52,
+        "hot_fork_max_s": 1.563,
+        "restart_ready_s": 22.46,
+        "post_restart_resume_s": 3.64,
+        "warm_start_first_fork_s": 1.465,
+        "warm_start_fork_median_s": 1.371,
+        "warm_start_fork_max_s": 1.373
+      },
+      "v068_reference": {
+        "hot_fork_median_s_57853": 1.406,
+        "hot_fork_median_s_67681": 1.821,
+        "post_restart_resume_s_57853": 3.45,
+        "post_restart_resume_s_67681": 3.654
+      }
+    },
+    "warm_arrival": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-warm-arrival-rtx5090-v069.json",
+      "orders": [
+        {
+          "order": "resume-first",
+          "control_retrieval_exact": true,
+          "template_input_tokens": 57889,
+          "cold_prefill_s": 22.043,
+          "pre_restart_fork": [
+            "private_endpoint",
+            1.217
+          ],
+          "checkpoint_bytes": 4523689946,
+          "post_restart_sequence": [
+            [
+              "endpoint_resume_first",
+              "private_response_replay",
+              58080,
+              3.542
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              57884,
+              1.397
+            ],
+            [
+              "fork_second",
+              "private_long_anchor",
+              57884,
+              1.437
+            ]
+          ],
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 6.376
+        },
+        {
+          "order": "fork-first",
+          "control_retrieval_exact": true,
+          "template_input_tokens": 57889,
+          "cold_prefill_s": 22.483,
+          "pre_restart_fork": [
+            "private_endpoint",
+            1.221
+          ],
+          "checkpoint_bytes": 4523690004,
+          "post_restart_sequence": [
+            [
+              "fork_first",
+              "private_long_anchor",
+              57884,
+              3.746
+            ],
+            [
+              "endpoint_resume_after_fork",
+              "private_response_replay",
+              58080,
+              1.241
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              57884,
+              1.385
+            ]
+          ],
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 6.372
+        }
+      ],
+      "checkpoint_bytes": 4523690004
+    },
+    "restore": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-restore-probe-rtx5090-v069.json",
+      "template_input_tokens": 67717,
+      "checkpoint_bytes": 5201400249,
+      "restore_wall_s": [
+        4.155,
+        3.886
+      ],
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": true,
+      "v068_reference_restore_wall_s": [
+        3.848,
+        3.647
+      ]
+    },
+    "live_sibling_continuation": {
+      "status": "passed",
+      "receipts": [
+        "docs/measurements/2026-09-13-rtx5090-v069-profile-gates.json"
+      ],
+      "note": "live sibling continuation returned 200; parent DELETE returned 200, deleted continuation returned 404 before and after restart, and the surviving descendant continued"
+    },
+    "lifecycle": {
+      "status": "passed",
+      "note": "Candidate lifecycle preflight bound image, binary, model and configuration. After the 1255.66-second window production was healthy on its own port, running with unless-stopped, and the supervisor hold was released."
+    }
+  },
+  "arcs": {
+    "origin_authentication": {
+      "status": "inherited",
+      "inherited_from": "releases/v0.6.8/qualification/rtx5090.json",
+      "basis": "Manifest MAC publication/verification and store format are unchanged by the parser port; this window separately refused a tampered payload."
+    },
+    "save_restart_restore": {
+      "status": "passed",
+      "template_input_tokens": 67717,
+      "explicit_checkpoint_bytes": 5201400249,
+      "process_restart": "docker restart; ready after 22.46 s in the 67K fanout run",
+      "post_restart_resume_reuse": "private endpoint resume then private_long_anchor on every fork; warm-arrival probe confirms private_response_replay and both arrival orders"
+    }
+  },
+  "comparison_to_v068": {
+    "prefill_tokens_per_second": [
+      2178.8,
+      2193.3
+    ],
+    "decode_wall_tokens_per_second": [
+      134.8,
+      134.87
+    ],
+    "restore_wall_s": [
+      [
+        3.848,
+        3.647
+      ],
+      [
+        4.155,
+        3.886
+      ]
+    ],
+    "hot_fork_median_s_57k": [
+      1.406,
+      1.401
+    ],
+    "hot_fork_median_s_67k": [
+      1.821,
+      1.52
+    ],
+    "live_sibling_continuation_status": [
+      200,
+      200
+    ],
+    "verdict": "All exercised contracts preserved; single-window timings, not a parser throughput improvement claim."
+  }
+}

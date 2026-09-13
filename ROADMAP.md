@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.4.8` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.6.8` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,7 +11,21 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.8
+## Where this is now — v0.6.9 staged; v0.6.8 public
+
+The `v0.6.9` candidate keeps the two mainline lanes on one reviewed source (`696e78c7`):
+RTX 5090 runtime `v0.6.5-qwen38-5090-beta.1` and RTX 4090 native
+`v0.6.3-qwen38-4090-beta.1`, both published and lane-qualified. It independently implements
+the semantics of upstream Qwen tool-parser fixes `3b50962b` and `0c5d570c` without taking the
+serve-adapter rebase: supported scalar unions, case-insensitive booleans, precise numeric
+lexemes, mathematically integral values, duplicate parameters, and balanced embedded markup.
+Custom raw input, history, opaque IDs, and stream ownership stay intact. Review remediation
+prevents malformed-region rescans and recursive union traversal; bytewise regressions and an
+8,192-deep union case pass. Model, serving settings, client, and RTX 3090 component are unchanged.
+The 5090 candidate gates and 15/15 native lane phases are complete. RTX 4090 public-URL
+already-installed acceptance passed; the RTX 5090 host/macOS routes remain pending, so
+v0.6.8 still owns the public install contract.
+[Candidate release notes](releases/v0.6.9/NINFER_RELEASE_NOTES.md).
 
 From `v0.6.8` both mainline lanes run one runtime source: the RTX 4090 native lane carries the
 upstream engine tranche and the GDN capacity fix the 5090 took in `v0.6.7`, and a fork continued

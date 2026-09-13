@@ -65,11 +65,16 @@ serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
 > **v0.6.8 is the current public release.** If you own a qualified card, the
-> [quickstart](docs/QUICKSTART.md) is the whole onboarding: three GPU lanes with public
+> [v0.6.8 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.8/docs/QUICKSTART.md)
+> is the supported onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
 > explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
+> **v0.6.9 is staged, not yet a public release.** Its parser runtime components are published
+> and lane-qualified. RTX 4090 public-URL already-installed acceptance passed; the RTX 5090
+> host and macOS routes remain pending. The install blocks in this working tree target
+> v0.6.9 for that acceptance window.
 
 ## What this is — and isn't
 
@@ -122,7 +127,7 @@ give you together elsewhere:
 
 ![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
 
-Exact shipped profiles and receipts in
+Exact v0.6.8 shipped profiles and receipts in
 [`qualification.json`](releases/v0.6.8/qualification.json):
 
 | Gate | Result |
@@ -134,6 +139,14 @@ Exact shipped profiles and receipts in
 | RTX 3090 native | **90.66 tok/s** decode, 93.43% MTP3 acceptance, exact 130,048-token retrieval at the 131,072 ceiling, 310 MB durable restart, durable v0.2.5-beta.1 train with origin-authenticated checkpoints, 300.2 W observed peak |
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
+
+The **v0.6.9 candidate** moves both mainline lanes to source `696e78c7` for the independently
+implemented Qwen tool-parser semantic port, without rebasing the serve adapters. The RTX 5090
+lifecycle candidate measured exact 130,048-token retrieval at **2,193.3 tok/s** and 2,048-token
+decode at **134.87 tok/s wall**; the RTX 4090 candidate retrieved exactly in **91.2377 s** and
+decoded at **153.464 tok/s** on C1. These are candidate measurements, not public-route
+acceptance. [Parser changes](releases/v0.6.9/NINFER_RELEASE_NOTES.md) ·
+[Measurement scope and receipts](docs/BENCHMARKS.md#v069-candidate--qwen-tool-parser-semantic-port-2026-09-13).
 
 Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on
 the RTX 4090 and RTX 3090 a follow-up continues from restored state even across a process
@@ -166,9 +179,12 @@ machine and profile, not universal GPU claims.
 Pick your lane: the RTX 5090 container route needs Docker with the NVIDIA runtime on Windows 11 +
 WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned packages. Every
 route needs one published OMP client and about 40 GiB free disk.
+The block below is prepared for v0.6.9 promotion; until its public-route acceptance is complete,
+use the [v0.6.8 tagged guide](https://github.com/alphastorm/omp-ninfer/blob/v0.6.8/docs/QUICKSTART.md)
+for supported installation. Do not mix the two releases.
 
 ```powershell
-git clone --branch v0.6.8 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.6.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -262,6 +278,12 @@ intent remains to upstream reusable provider and lifecycle pieces to
 
 ## Roadmap
 
+`v0.6.9` is staged with an independently implemented semantic port of upstream Qwen tool-parser
+fixes `3b50962b` and `0c5d570c`: supported scalar unions, case-insensitive booleans, precise
+numeric lexemes and mathematically integral values, duplicate parameters, and balanced embedded
+markup. It preserves custom raw input, history, opaque IDs, and stream ownership; review
+remediation prevents malformed-region rescans and recursive union traversal. Both mainline
+components are published and lane-qualified; public-route acceptance remains pending.
 `v0.6.8` puts both mainline lanes on one runtime source (`68a0722f`): the RTX 4090 native lane takes
 the upstream engine work and the GDN capacity fix, and a fork continued while its sibling is alive no
 longer answers HTTP 500 on any lane (ninfer#43, EXP-036).

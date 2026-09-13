@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.9] - Unreleased
+
+Both mainline runtime components advance to reviewed source
+`696e78c7b4e3ac28ffcffafc73acc1496e65ef03`: RTX 5090
+`v0.6.5-qwen38-5090-beta.1` (image `5e3e1558…`) and RTX 4090 native
+`v0.6.3-qwen38-4090-beta.1`. Both components are published. The model, OMP client, RTX 3090
+component, and serving settings are unchanged. The RTX 5090 public deployment remains
+`qwen38-5090-v0.6.3` / configuration `622ab621`; its lifecycle qualification uses the unchanged
+`qwen38-5090-v0.6.2` / `5eb8a557` candidate profile. Product promotion and the RTX 5090
+host/macOS route acceptance are pending; v0.6.8 remains the public authority.
+
+### Fixed
+
+- Independently ported the semantics of upstream Qwen tool-parser fixes `3b50962b` and
+  `0c5d570c`: supported scalar unions, case-insensitive booleans, precise numeric lexemes,
+  mathematically integral values, duplicate parameters, and balanced embedded markup. This is
+  not a wholesale serve-adapter rebase; custom raw input, history, opaque IDs, and stream
+  ownership remain intact.
+- Review remediation prevents repeated rescanning of malformed regions and replaces recursive
+  union traversal with bounded-work traversal. Bytewise regressions and an 8,192-deep union
+  case pass on the frozen source.
+
+### Measured
+
+- RTX 5090 lifecycle candidate: exact 130,048-token retrieval at 2,193.3 tok/s; 2,048-token
+  decode at 134.87 tok/s wall; fanout 4/4 hot at each of 57K and 67K tokens (medians
+  1.401 / 1.520 s), warm arrival hot in both orders; exact 5.201 GB restores in
+  4.155 / 3.886 s; payload tamper refused; live sibling continuation HTTP 200 and deleted
+  continuation HTTP 404 before and after restart
+  ([receipt](releases/v0.6.9/qualification/rtx5090.json)).
+- RTX 4090 native: 15/15 qualification phases; exact 130,048-token retrieval in 91.2377 s;
+  C1 decode 153.464 tok/s at 87.58865% MTP acceptance; explicitly saved and never-published
+  sessions restored across managed stop/flush; rollback with the `68a0722f` predecessor
+  graceful in both directions ([receipt](releases/v0.6.9/qualification/rtx4090.json)).
+- Appliance focused suites 13/13; Windows parser/wire suites 4/4; Blackwell CI 95 passed,
+  7 skipped, 0 failed out of 102 registered. These are not public-route acceptance results.
+- RTX 4090 public-URL installer acceptance passed on the already-installed path: exact bytes
+  accepted, no lifecycle pointer change or runtime start requested; authenticated status 200,
+  anonymous status 401, completion marker accepted, stopped state and 450 W restored
+  ([receipt](releases/v0.6.9/acceptance/rtx4090-public-install.json)). This is not a fresh-install
+  observation. The published RTX 5090 image was pulled with an empty Docker configuration and
+  its binary hash matched `b8a0a2c3`; that byte check is not host/macOS route acceptance.
+
 ## [0.6.8] - 2026-09-13
 
 Both mainline runtime components advance to source `68a0722f`: the RTX 5090 component to

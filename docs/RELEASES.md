@@ -8,7 +8,7 @@ the product manifest binds the exact combination.
 | Channel | Meaning | Current state |
 | --- | --- | --- |
 | Public release | Published exact profiles with stated limitations and non-claims | `v0.6.8`, GitHub `Latest` |
-| Development | Unpublished candidates with no install or support claim | post-`v0.6.8` work |
+| Development | Product candidates with no public install or support claim | `v0.6.9` staged; runtime components published, public-route acceptance pending |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -26,6 +26,42 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).
 
 ## Version identities
+
+### v0.6.9 candidate (Qwen tool-parser semantic port)
+
+- Product release is staged, not promoted. `v0.6.8` remains GitHub `Latest` and the public
+  authority; the RTX 5090 host/macOS routes remain pending.
+- Published components: RTX 5090 `v0.6.5-qwen38-5090-beta.1`, image
+  `sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8`; RTX 4090
+  native `v0.6.3-qwen38-4090-beta.1`. Both build from reviewed source
+  `696e78c7b4e3ac28ffcffafc73acc1496e65ef03`.
+- Independently implemented semantics from upstream `3b50962b` / `0c5d570c`, not a wholesale
+  serve-adapter rebase: supported scalar unions, case-insensitive booleans, precise numeric
+  lexemes and mathematically integral values, duplicate parameters, balanced embedded markup.
+  Custom raw input, history, opaque IDs, and stream ownership are preserved. Review remediation
+  prevents malformed-region rescans and recursive union traversal; bytewise regressions and an
+  8,192-deep union case pass.
+- The model, OMP client, RTX 3090 component, and serving settings are unchanged. The RTX 5090
+  public profile stays `qwen38-5090-v0.6.3` / configuration `622ab621`; candidate lifecycle
+  qualification uses `qwen38-5090-v0.6.2` / `5eb8a557`, unchanged. These identities are not
+  interchangeable evidence of route acceptance.
+- Lane qualification on 2026-09-13 ([5090](../releases/v0.6.9/qualification/rtx5090.json) ·
+  [4090](../releases/v0.6.9/qualification/rtx4090.json)): exact 130,048-token retrieval on
+  each; 5090 prefill 2,193.3 tok/s and decode 134.87 tok/s wall; 4090 retrieval 91.2377 s,
+  C1 decode 153.464 tok/s at 87.58865% MTP acceptance, 15/15 native phases, saved and
+  never-published sessions restored across managed stop/flush, graceful rollback with the
+  `68a0722f` predecessor in both directions.
+- Build verification: appliance focused suites 13/13, Windows parser/wire suites 4/4; Blackwell
+  CI 95 passed, 7 skipped, 0 failed out of 102 registered. See the
+  [candidate notes](../releases/v0.6.9/NINFER_RELEASE_NOTES.md) for the complete measurement
+  boundary and upgrade intent.
+- RTX 4090 public-URL acceptance passed
+  ([receipt](../releases/v0.6.9/acceptance/rtx4090-public-install.json)): downloaded installer
+  accepted the exact already-installed bytes, changed no lifecycle pointers, and requested no
+  runtime start; authenticated status 200, anonymous status 401, completion marker accepted;
+  stopped state and 450 W restored. This does not claim a fresh install. The published RTX
+  5090 image was pulled with an empty Docker configuration and its binary hash matched
+  `b8a0a2c3`; host/macOS route acceptance is still separate and pending.
 
 ### v0.6.8 public release (both mainline lanes on one runtime, and a fork bug fixed)
 
