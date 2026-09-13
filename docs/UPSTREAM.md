@@ -20,7 +20,7 @@ are `up-to-date`, `upgrade-available`, or `error`; every upstream commit gets a 
 (`pull-candidate`, `next-release`, `review-now`, `ignore`). Recommendations are triage, not
 decisions - a human owns every pull.
 
-## Tracked upstreams and current position (2026-09-13)
+## Tracked upstreams and current position (2026-09-13, post v0.6.8)
 
 | Upstream | Fork point | Delta | Position |
 |---|---|---|---|

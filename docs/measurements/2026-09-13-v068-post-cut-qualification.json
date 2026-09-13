@@ -1,0 +1,112 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-038",
+  "generated_utc": "2026-09-13T03:13:35Z",
+  "status": "closed",
+  "release": "v0.6.8",
+  "release_commit": "c96b47d47053647692bc25e4e3921767a910cb27",
+  "scope": "Post-cut verbatim runs of the documented RTX 5090 route from a stock clone of the published tag, after v0.6.8 became Latest; the upstream position after the second engine tranche.",
+  "question": "Does the tag a stranger clones reproduce the acceptance the candidate passed - inference-host half and macOS client half - and where does the product stand against its upstreams after shipping the backport on both mainline lanes?",
+  "answer": "Yes. Host half 2/2 (prepare, start: image pulled by digest, launcher identity equal to the manifest's) and macOS client half 10/10 including the server restart survived, both from clone c96b47d4 = tag v0.6.8, receipts below. Upstream Neroued/ninfer: the 18-commit tranche now runs on both mainline lanes; the deferred families are unchanged from the v0.6.7 ledger, and the pressure-planner rebase (upstream #229's root re-prefill fallback measured in EXP-036) is the next engine window.",
+  "post_cut_runs": {
+    "host": {
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v068-post-cut-host-route-run.json",
+      "status": "passed",
+      "clone_commit": "c96b47d47053647692bc25e4e3921767a910cb27",
+      "steps": [
+        [
+          "prepare",
+          "passed",
+          11.679
+        ],
+        [
+          "start",
+          "passed",
+          33.821
+        ]
+      ]
+    },
+    "macos": {
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v068-post-cut-macos-route-run.json",
+      "status": "passed",
+      "clone_commit": "c96b47d47053647692bc25e4e3921767a910cb27",
+      "steps": [
+        [
+          "client-install",
+          "passed",
+          21.771
+        ],
+        [
+          "tunnel",
+          "passed",
+          3.054
+        ],
+        [
+          "key",
+          "passed",
+          2.74
+        ],
+        [
+          "provider",
+          "passed",
+          0.106
+        ],
+        [
+          "fail-closed-config",
+          "passed",
+          0.104
+        ],
+        [
+          "tool",
+          "passed",
+          11.371
+        ],
+        [
+          "vision",
+          "passed",
+          4.792
+        ],
+        [
+          "resume",
+          "passed",
+          5.125
+        ],
+        [
+          "survives-restart",
+          "passed",
+          113.147
+        ],
+        [
+          "fail-closed",
+          "passed",
+          1.021
+        ]
+      ],
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed"
+    },
+    "hosts_restored": "RTX 5090 appliance: ninfer-5090-v051p running, restart policy unless-stopped, /health 200 on 18088, route port answering nothing, supervisor hold released; Mac: isolated HOME removed"
+  },
+  "shipped": {
+    "product": "v0.6.8 (Latest, tag CI green with full-history pin checks)",
+    "components": {
+      "rtx5090": "v0.6.4-qwen38-5090-beta.1 / v0.6.4-qwen38-5090-source.1 / v0.6.4-qwen38-5090-runtime-beta.1 (image d346174a)",
+      "rtx4090": "v0.6.2-qwen38-4090-beta.1 (package 4fc5106f, server 170e2bf4)",
+      "rtx3090": "v0.2.5-qwen38-3090-beta.1 unchanged",
+      "client": "omp-18.0.9-cross-platform-beta-2 unchanged"
+    },
+    "source": "68a0722f3791b7ea2a7a54a5c356ec41d38d13c5"
+  },
+  "upstream_position": {
+    "Neroued/ninfer": "18 commits of the upstream-2026-09 tranche on both mainline lanes; deferred with reasons (docs/measurements/2026-09-12-upstream-backport-ledger.json): the materialization/pressure fix family behind the serve-adapter campaign, dflash2, nvfp4/k8v4 kv-cache formats, spdlog. Upstream's own GDN capacity fix (e51b585c) was merged with this product's #42 fix under the capacity contract test in this window.",
+    "next_engine_window": "the pressure-planner rebase: EXP-036 measured a root re-prefill fallback when sessions alternate at 126K (two sessions suffice, forks unaffected, no published claim covers it); upstream's planner diagnostics are needed to diagnose it, which pulls the serve-adapter campaign the ledger deferred.",
+    "UDPSendToFailed/ninfer-4090": "unchanged (15 commits, folded into the durable-4090 campaign backlog)",
+    "Don-Chad/ninfer-3090": "unchanged; triage rides the 3090 mainline candidate's window on host return (~21 Sept)",
+    "can1357/oh-my-pi": "stay pinned at 18.0.9"
+  },
+  "open": [
+    "3090 lane: the mainline candidate ships when the host returns (~21 Sept); stop candidate 03f56e58 first, then run the lane at 68a0722f (the same source both mainline lanes now ship).",
+    "The RTX 4090 C1 benchmark fixture is a degenerate repeated paragraph whose acceptance is trajectory-sensitive (EXP-037); replacing it is a product decision that changes every published 4090 C1 number.",
+    "Windows managed stop below the auto-checkpoint gate is flushed since v0.6.1; a crash or expired graceful wait still loses what was never published (documented)."
+  ]
+}
