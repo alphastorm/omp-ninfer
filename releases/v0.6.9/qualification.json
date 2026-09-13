@@ -80,7 +80,8 @@
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_sha256": "2e459d7ac56c76f14137e88e05680381bc9d3b1643f5ddd3b22919e0231a634b",
       "release": "v0.6.9",
-      "sha256": "41b537bc90e8807a90c470307040e11e19d864188306b2bbf33283ceed77207b"
+      "sha256": "41b537bc90e8807a90c470307040e11e19d864188306b2bbf33283ceed77207b",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5919fcfc92f6a7d081b4eb810f445c9764d795b/releases/v0.6.9/acceptance/composed-external-installation.json"
     }
   },
   "observed_gates": {
