@@ -34,7 +34,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         for directory in ("examples", "profiles", "releases", "scripts"):
             shutil.copytree(ROOT / directory, root / directory)
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
-        (root / "docs").mkdir()
+        shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
 
     @staticmethod

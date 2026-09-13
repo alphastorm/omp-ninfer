@@ -44,7 +44,7 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
-        (root / "docs").mkdir()
+        shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         historical = root / "releases" / "v0.2.0-beta.1"
         shutil.copy2(historical / "compatibility.json", root / "compatibility.json")
         shutil.copy2(historical / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
@@ -67,12 +67,8 @@ class ReleaseContractTest(unittest.TestCase):
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
-        (root / "docs" / "measurements").mkdir(parents=True)
+        shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
-        shutil.copy2(
-            ROOT / "docs" / "measurements" / "2026-08-30-rtx3090-parity.json",
-            root / "docs" / "measurements" / "2026-08-30-rtx3090-parity.json",
-        )
         return temporary, root
 
     @staticmethod
