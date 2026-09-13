@@ -1,0 +1,134 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.9",
+  "as_of": "2026-09-13",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Post-cut stock-clone repetition after v0.6.9 became GitHub Latest. Published-tag host and macOS blocks were executed; prior profile throughput evidence is reused, not remeasured.",
+  "published_tag": "v0.6.9",
+  "candidate_commit": "ee581c556a89ba6e718c27641c674bb84d507b4a",
+  "runtime_source_commit": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
+  "image_digest": "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
+  "document_sha256": "58fe4ddc9b8e4ff52709cfb4028f50f95d3eaec7df9610c671f2a5a6bf37ae88",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v069-post-cut-host-route-run.json",
+      "clone_commit": "ee581c556a89ba6e718c27641c674bb84d507b4a",
+      "steps": [
+        [
+          "prepare",
+          "passed",
+          11.456
+        ],
+        [
+          "start",
+          "passed",
+          33.808
+        ]
+      ],
+      "elapsed_s": 45.264
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-13-rtx5090-v069-post-cut-macos-route-run.json",
+      "clone_commit": "ee581c556a89ba6e718c27641c674bb84d507b4a",
+      "steps": [
+        [
+          "client-install",
+          "passed",
+          18.106
+        ],
+        [
+          "tunnel",
+          "passed",
+          3.622
+        ],
+        [
+          "key",
+          "passed",
+          2.64
+        ],
+        [
+          "provider",
+          "passed",
+          0.023
+        ],
+        [
+          "fail-closed-config",
+          "passed",
+          0.024
+        ],
+        [
+          "tool",
+          "passed",
+          12.425
+        ],
+        [
+          "vision",
+          "passed",
+          5.487
+        ],
+        [
+          "resume",
+          "passed",
+          6.984
+        ],
+        [
+          "survives-restart",
+          "passed",
+          120.45
+        ],
+        [
+          "fail-closed",
+          "passed",
+          1.675
+        ]
+      ],
+      "elapsed_s": 171.436
+    }
+  },
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "The documented host start block accepted the manifest-bound published image and computed identity."
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "All12 block hashes match the final tagged documentation; only the documented SSH destination and foreground-tunnel scheduling substitutions were made."
+    },
+    "tunnel_route": {
+      "status": "passed",
+      "note": "The macOS route passed tool, image input, continuation, server-restart continuation, and fail-closed after stopping its own forward."
+    },
+    "hosts_restored": {
+      "status": "passed",
+      "production": "Incumbent healthy on18088, runningunless-stopped with its port published; beta container removed; supervisor hold released.",
+      "windows_public_port_18089": "connection refused",
+      "mac_temporary_forward_ports_closed": [
+        18089,
+        18192
+      ],
+      "wsl_port_observation": {
+        "connect_ex": 11,
+        "result": "2-second connection timeout; ss reported no local listener. Refusal is claimed only for the actual Windows route endpoint, not the WSL mirror."
+      },
+      "native_owner": {
+        "process_count": 0,
+        "power_limit_w": 450,
+        "task_state": "Ready",
+        "active_release": "qwen38-4090-native-v0.6.3-beta.1-696e78c7b4e3"
+      },
+      "isolated_macos_home": "removed"
+    }
+  },
+  "qualification_receipt": "releases/v0.6.9/qualification/rtx5090.json",
+  "standing_public_profile_receipt": "docs/measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json",
+  "github": {
+    "release": "https://github.com/alphastorm/omp-ninfer/releases/tag/v0.6.9",
+    "main_ci": "https://github.com/alphastorm/omp-ninfer/actions/runs/34746757714",
+    "tag_ci": "https://github.com/alphastorm/omp-ninfer/actions/runs/34746880254"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}
