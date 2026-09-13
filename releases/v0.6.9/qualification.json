@@ -78,9 +78,9 @@
       "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_sha256": "1ebb82b4eb455190fbc325fabaa23abd6171c1ea47ca62dd61503c45816374ec",
+      "compatibility_sha256": "2e459d7ac56c76f14137e88e05680381bc9d3b1643f5ddd3b22919e0231a634b",
       "release": "v0.6.9",
-      "sha256": "ac57cec4280bb5977ba1881eb09ed2a3560c80bfb6b620c3cb8187d7a854b97d"
+      "sha256": "41b537bc90e8807a90c470307040e11e19d864188306b2bbf33283ceed77207b"
     }
   },
   "observed_gates": {
