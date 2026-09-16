@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_capacity_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-042",
+  "title": "RTX 4090 native lane: the host-KV pool that keeps two long sessions and their state",
+  "generated_utc": "2026-09-16T20:55:00Z",
+  "lane": "rtx4090-windows-native",
+  "component": "v0.6.3-qwen38-4090-beta.1",
+  "binary_sha256": "36d95347c99632d6b13fb7ad759a9b75548b84d3009fa576648cfacaf4b906e5",
+  "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "method": "One binary, one host, one workload: two sessions of about 125,900 input tokens alternating turns, then explicit checkpoints, a graceful stop through the lane's own --stop-event path, a restart, and a resume of each session's planted desk code. Only the host-KV pool size changed between arms; every other argument matches the shipped configuration.",
+  "device_kv": {
+    "kv_dtype": "int8",
+    "arena_pages": 2048,
+    "arena_gib": 5.22,
+    "page_stride_mib": 2.61,
+    "ceiling_session_kv_gib": 5.02,
+    "note": "a session at the 131,072-token ceiling needs about 5.02 GiB of KV, so the shipped 4 GiB host pool cannot hold even one"
+  },
+  "arms": [
+    {
+      "host_kv_mib": 4096,
+      "shipped": true,
+      "reuse_lost": "4 of 4 continuations",
+      "automatic_export": "refused while both sessions were live (program refused continuation export)",
+      "graceful_stop": "saved 1, refused 1 - 'the shutdown could not save 1 live session(s); their state is lost'",
+      "source": "EXP-041, 2026-09-16, the lane's own managed stop receipt"
+    },
+    {
+      "host_kv_mib": 8192,
+      "reuse_lost": "2 of 8: the second session's continuation re-prefilled from root in 91 s every round",
+      "per_request": [
+        {
+          "request": 5,
+          "prompt_tokens": 125938,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "ttft_ms": 90967
+        },
+        {
+          "request": 9,
+          "prompt_tokens": 125992,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "ttft_ms": 91047
+        }
+      ],
+      "note": "holds one ceiling session, so whichever session is not device-resident loses its KV"
+    },
+    {
+      "host_kv_mib": 11264,
+      "candidate": true,
+      "reuse_lost": "0 of 8",
+      "continuation_wall_s": [
+        1.97,
+        1.99,
+        2.54,
+        3.11
+      ],
+      "fork_wall_s": [
+        1.4,
+        1.37,
+        1.41,
+        1.41
+      ],
+      "cached_tokens": 125906,
+      "explicit_checkpoint_bytes": [
+        4988282672,
+        4988282699
+      ],
+      "graceful_stop": "shutdown: saved 2, nothing to save 0, refused 0",
+      "restore_declines": 0,
+      "both_sessions_resumed": true,
+      "resume_wall_s": [
+        5.66,
+        7.61
+      ],
+      "receipts": [
+        "multisession",
+        "durability"
+      ]
+    },
+    {
+      "host_kv_mib": 12288,
+      "result": "cudaMallocHost failed: cudaErrorMemoryAllocation: out of memory",
+      "note": "the pinned-memory ceiling on this 32.4 GiB host, not a shortage of free RAM (27.6 GiB was free). 11 GiB is the largest pool that pins here."
+    }
+  ],
+  "finding": "The shipped RTX 4090 host-KV pool is 4096 MiB - half the engine's own 8192 MiB default and below the 5.02 GiB a single ceiling-sized session needs. That one number causes all three symptoms: an evicted session's KV is dropped rather than spilled, so its next turn re-prefills from root; an export needs live KV, so the automatic checkpoint is refused; and a graceful stop can then only save the session that happens to be resident, reporting the other as lost. At 11264 MiB - enough for both sessions at once - reuse holds, both sessions checkpoint, the graceful stop saves both, and both resume exactly after a restart.",
+  "restore_needs_the_whole_sum": "Restore is stricter than live alternation. A live pair only needs the pool to hold the session that is not device-resident; restore materialises every checkpointed session into host extents, so it needs the pool to hold their sum. That is why two sessions both restored here at 11264 MiB (2 x 5.02 GiB) while the RTX 5090's 16 GiB pool, which holds one 8.6 GiB bf16 session with room to spare, admits only one of two at restart (omp-ninfer#40)."
+}

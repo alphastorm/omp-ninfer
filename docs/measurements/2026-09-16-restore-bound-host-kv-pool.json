@@ -1,0 +1,61 @@
+{
+  "artifact_type": "omp_ninfer_capacity_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-043",
+  "title": "The host-KV pool is the restore bound, and an export can outlive its own restorability",
+  "generated_utc": "2026-09-16T21:15:00Z",
+  "method": "A candidate binary built from source 4c7b11a1 (appliance-local, sm_120a) adds named gates to the restore path, refuses an export whose checkpoint the configuration could not admit back, and prints the largest restorable session at startup. Measured by running two sessions of about 125,900 input tokens on one lane, checkpointing both, stopping gracefully, restarting, and resuming each session's planted desk code.",
+  "binary_sha256": "27f50c766e0aa97b5d153c50456b6120c2842f145269d8caf9d34ef421363c2f",
+  "mechanism": "Live alternation and restore ask different questions of the host-KV pool. Alternating turns only need the pool to hold the session that is not device-resident, so one session's worth of pool keeps two sessions reusing. Restore materialises every checkpointed continuation into host extents, so it needs the pool to hold their sum. That is why a pool sized for live alternation still declines the second session at restart.",
+  "named_gate": {
+    "before": "checkpoint restore declined for session <id>: the engine did not accept the checkpointed continuation",
+    "after": "checkpoint restore declined for session <id>: program refused continuation import (host KV pool capacity exhausted)",
+    "startup_disclosure": "host-kv=16.00 GiB host-kv-restorable=131072-tokens"
+  },
+  "rtx5090": {
+    "kv_dtype": "bf16",
+    "checkpoint_bytes_per_ceiling_session": 9236391703,
+    "arms": [
+      {
+        "host_kv_mib": 16384,
+        "shipped": true,
+        "reuse_lost": "0 of 2 continuations (1.45 s, 1.29 s)",
+        "both_checkpointed": true,
+        "graceful_stop": "shutdown: saved 2, nothing to save 0, refused 0",
+        "after_restart": "D1 resumed exactly; D2 declined - host KV pool capacity exhausted - and answered 404",
+        "restorable_tokens": 131072,
+        "interpretation": "one ceiling session restores; two do not"
+      },
+      {
+        "host_kv_mib": 20480,
+        "both_checkpointed": true,
+        "graceful_stop": "shutdown: saved 2, nothing to save 0, refused 0",
+        "after_restart": "both resumed exactly (5.75 s and 9.22 s), no declines",
+        "cost": "the container reached 28.28 GiB of a 31.34 GiB utility VM (90%), leaving 1.78 GiB available - it holds on an idle host but has no margin, so shipping it would raise the declared runtime-host floor to about 40 GiB"
+      }
+    ]
+  },
+  "rtx4090": {
+    "kv_dtype": "int8",
+    "checkpoint_bytes_per_ceiling_session": 4988282672,
+    "single_session_on_shipped_pool": {
+      "host_kv_mib": 4096,
+      "explicit_checkpoint": "succeeded, 4,834,325,255 B reported saved",
+      "after_restart": "HTTP 404 previous_response_not_found",
+      "interpretation": "the shipped pool cannot restore even one ceiling-sized session, so the reported save was never restorable"
+    },
+    "two_sessions": {
+      "4096": "4 of 4 reuse lost; one explicit checkpoint refused 409; stop saved 1 refused 1; both 404 after restart",
+      "11264": "0 of 8 reuse lost; both checkpointed; stop saved 2 refused 0; both resumed exactly"
+    }
+  },
+  "engine_changes": [
+    "restore declines name their gate (SessionRestoreSkipReason plus the target's ContinuationImportSkipReason)",
+    "an export is refused when the configuration's host-KV pool could not admit the checkpoint back",
+    "the startup line publishes host-kv-restorable=<tokens>, and the request log publishes host_kv_restorable_tokens"
+  ],
+  "tests": [
+    "ninfer_checkpoint_io_contract_test pins the restore bound for both lanes' measured page strides, the exact 4096 MiB INT8 shortfall (100,288 tokens), the two-session sums, and the speculative extent halving",
+    "ninfer_resource_manager_test pins that each decline names its gate, including a forwarded host-KV capacity refusal"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "artifact_type": "omp_ninfer_native_lane_durability_requalification",
+  "schema_version": 1,
+  "experiment": "EXP-044",
+  "title": "RTX 4090 native component v0.6.4-beta.1: two ceiling sessions survive a graceful stop",
+  "generated_utc": "2026-09-16T22:45:00Z",
+  "lane": "rtx4090-windows-native",
+  "component": {
+    "release_id": "qwen38-4090-native-v0.6.4-beta.1",
+    "build_profile": "native-v0.6.4-beta.1-rtx4090",
+    "cuda_architecture": "sm_89",
+    "patch_stack_sha": "736ac43a0a5d9eef17df60bcc417be566c9d8395",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "lineage_base_sha": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+    "archive_sha256": "8d6e4b7b06fef6e86dbaed95ac8f337ebf80ca4b02bd43a56107dfb9b3132672",
+    "packaged_server_sha256": "9f41e1e97eec4ccb1a866d07b52f6abb5818ffc1223be22ef8d09dde4461c51d",
+    "configuration_sha256": "cbebe3a6639143fcc8498ef0dba990d6763fb4a6f7a0adf6de4ba91384085096"
+  },
+  "changes": [
+    "host-KV pool 4096 -> 11264 MiB so restore can admit the lane's own ceiling-sized sessions",
+    "the profile declares runtime_host.minimum_runtime_memory_mib 32768",
+    "an export is refused when the configuration's pool could not admit the checkpoint back",
+    "restore declines name their gate; the startup line publishes host-kv-restorable=<tokens>"
+  ],
+  "measured_on_packaged_bytes": {
+    "workload": "two sessions of about 125,900 input tokens, one alternating continuation each, explicit checkpoints, graceful --stop-event shutdown, restart, resume by planted desk code",
+    "continuation_wall_s": [
+      1.97,
+      2.01
+    ],
+    "cached_tokens": [
+      125906,
+      125907
+    ],
+    "explicit_checkpoint_bytes": [
+      4988282672,
+      4988282699
+    ],
+    "graceful_stop": "shutdown: saved 2, nothing to save 0, refused 0",
+    "restore_declines": 0,
+    "resume": {
+      "D1": {
+        "wall_s": 5.63,
+        "exact": true
+      },
+      "D2": {
+        "wall_s": 7.78,
+        "exact": true
+      }
+    },
+    "startup_disclosure": "pool=11.00GiB restorable=131072 tokens"
+  },
+  "shipped_configuration_it_replaces": {
+    "host_kv_mib": 4096,
+    "startup_disclosure": "pool=4.00GiB restorable=119616 tokens",
+    "single_ceiling_session": "explicit checkpoint reported 4,834,325,255 B saved; after a graceful stop and restart the session answered HTTP 404 previous_response_not_found",
+    "two_ceiling_sessions": "4 of 4 continuations lost; one explicit checkpoint refused 409; stop saved 1 refused 1; both sessions 404 after restart",
+    "with_the_new_binary_on_that_pool": "the export is now refused up front (HTTP 409, 'checkpoint save refused: program refused continuation export') instead of reporting a save that cannot be restored"
+  },
+  "tests": [
+    "ninfer_checkpoint_io_contract_test: the restore bound reproduces the lane's disclosed 119,616-token value, clamps at kv_capacity, holds the exact page boundary, and halves under a speculative extent",
+    "ninfer_resource_manager_test: every restore decline names its gate, including a forwarded host-KV capacity refusal",
+    "both suites pass on Windows/MSVC in this component's own build (6/6 focused targets)"
+  ],
+  "not_yet_done": [
+    "the component is built and packaged but not published; the product release that carries it, its public-install acceptance, and the RTX 5090 image carrying the same engine changes are the next step"
+  ]
+}
