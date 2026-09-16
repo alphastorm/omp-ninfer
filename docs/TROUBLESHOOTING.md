@@ -76,6 +76,59 @@ broken engine is refused with what that container saw instead of a crash loop. I
 start the WSL distro that owns the paths, restart Docker Desktop while that distro is running, and
 retry: the engine only stages a distro it saw when it initialised.
 
+## `needs N MiB of runtime-host memory; this host offers M MiB`
+
+From `v0.7.0` the profile's Host KV pool holds two sessions at the 131,072-token ceiling, and
+that pool is pinned runtime-host memory. `start-ninfer.sh` reads the floor the profile declares
+and compares it with the memory a throwaway container sees, refusing before the 18 GB load.
+
+On Docker Desktop the container sees the WSL2 utility VM, which takes half the machine's RAM by
+default - every distro and the engine share that one VM. Raise it and restart WSL:
+
+```ini
+[wsl2]
+memory=32GB
+```
+
+```sh
+wsl --shutdown
+```
+
+The refusal exists because the alternative is worse. The same configuration in a 24 GiB VM
+reached 24,006 MiB and was killed mid-request:
+
+```sh
+docker container inspect omp-ninfer-beta --format '{{.State.ExitCode}} {{.State.OOMKilled}}'
+# 137 true
+dmesg | grep -i 'out of memory'
+# Out of memory: Killed process 2347 (ninfer-serve) total-vm:85995096kB ...
+```
+
+A host that cannot give the container that memory runs `v0.6.10`, whose smaller pool holds one
+session at the context ceiling and two of about 75,000 tokens.
+
+## Two long sessions and what survives a restart
+
+With two sessions at the 131,072-token ceiling on one lane, `v0.7.0` keeps prefix reuse: each
+continuation reuses about 125,900 cached tokens in 1.6-3.5 s instead of re-prefilling from root
+in about 58 s. Entering that state from a pool another long session already occupies costs one
+re-prefill per session, once; the turns after it reuse.
+
+Durability is narrower than reuse, and the boundary is measured. Both sessions checkpoint
+(9.24 GB each at the ceiling) and a graceful `docker stop` saves both (`shutdown: saved 2,
+nothing to save 0, refused 0` in the server log). After the restart, one of the two is accepted
+back and the other is declined:
+
+```sh
+docker logs omp-ninfer-beta 2>&1 | grep 'restore declined'
+# checkpoint restore declined for session <id>: the engine did not accept the checkpointed continuation
+```
+
+A declined checkpoint is refused, not corrupted - the session re-prefills from its transcript and
+the store is untouched - but a second full-ceiling session does not come back warm. Sessions
+below the ceiling are unaffected; this is reproducible with two 126K sessions and recorded in
+[EXP-041](measurements/2026-09-16-two-long-session-capacity.json).
+
 ## GPU is unavailable inside Docker
 
 Establish the failure at the smallest boundary:

@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-16
+
+The RTX 5090 serving configuration advances to a 16 GiB Host KV pool so two sessions at the
+131,072-token ceiling keep their prefix reuse. The component, image, model, client, and KV dtype
+are unchanged; the configuration identity is not, so checkpoints written under `v0.6.10` do not
+carry across ([EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json)).
+
+### Changed
+
+- RTX 5090 deployment profile `qwen38-5090-v0.7.0`: Host KV pool 8 GiB to 16 GiB. Two 126K
+  sessions alternating turns lose 0 of 8 continuations and forks, against 4 of 4 lost on the
+  shipped pool; each continuation reuses about 125,900 cached tokens in 1.6-3.5 s instead of
+  re-prefilling from root in about 58 s. Lane gates re-measured on the new configuration: exact
+  130,048-token retrieval at 2,203.0 tok/s, 2,048-token decode at 133.03 tok/s wall, the agent
+  protocol across a restart, four hot sibling forks at 67.7K and 80.0K templates before and after
+  a restart, warm arrival in both orders, and a 4.51 GB checkpoint restored in 3.5-3.7 s.
+- The profile declares `runtime_host.minimum_runtime_memory_mib` 28,672 and
+  `examples/manual-tunnel/start-ninfer.sh` refuses a host that cannot back the pool, naming the
+  `.wslconfig` remedy. This is a new host requirement: the pool is pinned memory, and the same
+  configuration in a 24 GiB WSL utility VM is OOM-killed mid-request (container exit 137). A host
+  that cannot give the container 28 GiB runs `v0.6.10`.
+
+### Measured
+
+- **Both 8-bit KV dtypes fix the same reuse loss and are rejected on quality.** Re-scored on one
+  runtime against the private role corpus (89 deterministic cases), fp8 and int8 both drop the
+  redaction control pass rate from 0.750 to 0.625 and add a secret leak (8 to 9); fp8 loses 2.1
+  points of required fact recall, int8 loses 1.7 and adds unsupported claims (0.225 to 0.247) and
+  critical misses (10 to 12). Throughput is within noise. fp8 holds two long sessions even in the
+  shipped 8 GiB pool and halves device KV (5.91 GiB of runtime against 10.12 GiB), so it stays the
+  lever to revisit if an artifact closes the grounding gap.
+- **Two long sessions are a durability boundary, not only a latency one.** On the shipped RTX 4090
+  native lane (INT8 KV, 4 GiB pool) two 126K sessions lose every continuation to a 90 s
+  re-prefill, the server refuses every automatic checkpoint while both are live
+  (`program refused continuation export`), and its managed stop saved one session and lost the
+  other. On the v0.7.0 RTX 5090 configuration both sessions checkpoint and a graceful stop saves
+  both, but after a restart one of the two is declined
+  (`the engine did not accept the checkpointed continuation`) and re-prefills from its transcript.
+  Sessions below the ceiling are unaffected. The RTX 4090 pool change and the restore-admission
+  work are follow-ups, not part of this release.
+
 ## [0.6.10] - 2026-09-16
 
 No component, model, client, or serving configuration changed. Both RTX 5090 documented routes
@@ -1159,7 +1200,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...v0.7.0
 [0.6.10]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.9...v0.6.10
 [0.6.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.8...v0.6.9
 [0.6.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.7...v0.6.8

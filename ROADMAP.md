@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.6.10` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.7.0` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,9 +11,21 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.10
+## Where this is now — v0.7.0
 
-The `v0.6.10` release changes no component: it makes the documented container route refuse a
+The `v0.7.0` release keeps two sessions at the 131,072-token ceiling reusing their prefixes on
+one card: the RTX 5090 Host KV pool moves from 8 GiB to 16 GiB, so alternating turns reuse about
+125,900 cached tokens in 1.6-3.5 s where the shipped pool re-prefilled every one of them from
+root in about 58 s. The component, image, model, client and KV dtype are unchanged, the
+configuration identity is not, and the pool is pinned memory - so the profile declares the
+28,672 MiB of runtime-host memory it needs and the documented launcher refuses a smaller host
+rather than being OOM-killed mid-request. Both 8-bit KV dtypes fix the same loss and were
+rejected on the private corpus' redaction and grounding criteria, re-measured on one runtime.
+Durability is narrower than reuse and now bounded in writing: both sessions checkpoint and a
+graceful stop saves both, but after a restart one of the two is declined and re-prefills
+([EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json)).
+
+The `v0.6.10` release before it changed no component: it makes the documented container route refuse a
 launch whose bind mounts the engine cannot stage, and names the two ways a reboot breaks that
 route. The `v0.6.9` components it ships keep the two mainline lanes on one reviewed source
 (`696e78c7`):
@@ -371,6 +383,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.7.0` | Two sessions at the 131,072-token ceiling keep prefix reuse on one card (Host KV pool 8 to 16 GiB, KV dtype unchanged after both 8-bit dtypes were rejected on the private corpus); the profile declares and the launcher enforces the runtime-host memory that pool needs; the two-session restore boundary is measured and named (EXP-041) |
 | `v0.6.10` | The documented container route refuses a launch whose bind mounts the engine cannot stage - proven inside a throwaway container before the 18 GB load - and both post-reboot failure signatures are named with recreation as the recovery; no component changed, both RTX 5090 routes re-run (EXP-040) |
 | `v0.6.9` | Both mainline lanes on source 696e78c7: independent Qwen parser semantic port, malformed-region and deep-union remediation, preserved custom/history/stream contracts; both lane qualifications and published-component acceptance passed |
 | `v0.6.8` | Both mainline lanes on source 68a0722f: RTX 5090 runtime v0.6.4 and RTX 4090 native v0.6.2-beta.1; the live-sibling continuation 500 fixed at source (ninfer#43); GDN gating grids partitioned by device residency; the 4090 C1 fixture's trajectory sensitivity measured and recorded (EXP-037) |

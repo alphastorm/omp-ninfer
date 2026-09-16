@@ -1,0 +1,267 @@
+{
+  "artifact_type": "ninfer_rtx5090_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified": true,
+  "release": "v0.7.0",
+  "as_of": "2026-09-16",
+  "release_tag": "v0.6.5-qwen38-5090-beta.1",
+  "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
+  "identity": {
+    "source_commit": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "server_binary_sha256": "b8a0a2c33d79304afb1701ca7d179a6ed750685d1365a75634fdc738bab6a831",
+    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
+    "deployment_profile": "qwen38-5090-v0.6.2",
+    "oci_manifest_digest": "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
+    "image_id": "sha256:793f9c057f639878e5fbf1e85ecadb2f1e8113e0babb67ea2f728979417eaa26"
+  },
+  "evidence_interpretation": "A configuration-only advance on the published v0.6.5 component: every gate above was measured on a candidate container started from the published image with the v0.7.0 arguments, and nothing is inherited from the v0.6.10 configuration. The two-session durability row is a bounded finding, not a passing gate.",
+  "build": {
+    "route": "Canonical appliance-local CUDA 13.1 build from clean source 696e78c7; digest-pinned base a19e00c5. Workflow 34743949656 wraps the published archive onto the same base.",
+    "ctest": "13/13 focused suites passed in the appliance build. Blackwell sm_120a CI: 95 passed, 7 skipped, 0 failed out of 102 registered (io_uring backend and six model-fixture suites skipped); all four parser/wire suites passed. docs/measurements/2026-09-13-runpod-ci-full-696e78c7.json",
+    "archive": "ninfer-qwen38-rtx5090-v0.6.5-linux-x86_64-cuda13.1.tar.gz sha256 91e1e05d7e1dd0eb4d4d841dfe00af70509f818093151ba7522bd3b9c8a0a49d",
+    "sbom": "ninfer-qwen38-rtx5090-v0.6.5-linux-x86_64-cuda13.1.spdx.json sha256 b1930e2b092dbc1ef76f606332ff1d9e060dbe503e7a818228d4d5d9419dc39d",
+    "source_archive": "runtime-source-696e78c7.tar.gz sha256 aaf380ae94dd13b70b8d5234a9ee3f9aa918832fbc63a30298fe9f92b3df5040"
+  },
+  "context_cache_profile": {
+    "arguments": [
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24",
+      "--host-kv-mib",
+      "16384"
+    ],
+    "resolved_startup_line": "KV capacity auto resolved=131072 tokens pages=2048/2048 runtime=10.12 GiB free-after-weights=13.25 GiB free-after-startup=3.20 GiB headroom=1.00 GiB slack=3.13 GiB context-cache=on host-state=24 host-kv=16.00 GiB",
+    "changed_from": "v0.6.10: Host KV pool 8 GiB to 16 GiB; every other context-cache argument unchanged since v0.4.8",
+    "runtime_host_memory_floor_mib": 28672,
+    "peak_runtime_host_memory_mib": 27731
+  },
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "exact_retrieval_at_every_point": true,
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "points": [
+        {
+          "prompt_tokens": 130048,
+          "tokens_per_second": 2203.0,
+          "wall_seconds": 59.033,
+          "prefix_reuse_path": "root",
+          "measured_on": "candidate qwen38-5090-v0.7.0 on published image 5e3e1558",
+          "output_exact": true
+        }
+      ],
+      "v0610_reference_tokens_per_second": 2193.3,
+      "vram_used_mib_after": 28144
+    },
+    "decode": {
+      "status": "passed",
+      "request_id": "15aed7da2e3eede82a57b192bb69462698fe6bee113f9beba85fddd7d479df89",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 15.395,
+      "completion_tokens_per_second_wall": 133.03,
+      "workload": "technical-writing generation at temperature 0 on the candidate container",
+      "v0610_reference": 134.87
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    },
+    "fanout_acceptance": {
+      "status": "passed",
+      "receipts": [
+        "docs/measurements/2026-09-16-rtx5090-v070-fanout-57k.json",
+        "docs/measurements/2026-09-16-rtx5090-v070-fanout-67k.json"
+      ],
+      "67k": {
+        "template_input_tokens": 67681,
+        "cold_prefill_s": 27.401,
+        "checkpoint_save_s": 5.759,
+        "checkpoint_bytes": 5188026327,
+        "hot_fork_median_s": 1.799,
+        "hot_fork_max_s": 1.839,
+        "restart_ready_s": 27.15,
+        "post_restart_resume_s": 3.982,
+        "warm_start_first_fork_s": 1.764,
+        "warm_start_fork_median_s": 1.641,
+        "warm_start_fork_max_s": 1.688
+      },
+      "80k": {
+        "template_input_tokens": 79957,
+        "cold_prefill_s": 32.481,
+        "checkpoint_save_s": 5.636,
+        "checkpoint_bytes": 6044083057,
+        "hot_fork_median_s": 1.966,
+        "hot_fork_max_s": 2.029,
+        "restart_ready_s": 27.89,
+        "post_restart_resume_s": 4.336,
+        "warm_start_first_fork_s": 1.662,
+        "warm_start_fork_median_s": 1.748,
+        "warm_start_fork_max_s": 1.762
+      },
+      "note": "re-measured on the v0.7.0 configuration; the probe's --base-tokens 56000 and 66000 produce 67,681 and 79,957-token templates on this tokenizer"
+    },
+    "warm_arrival": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-16-warm-arrival-rtx5090-v070.json",
+      "orders": [
+        {
+          "order": "resume-first",
+          "control_retrieval_exact": true,
+          "template_input_tokens": 67717,
+          "cold_prefill_s": 26.555,
+          "pre_restart_fork": [
+            "private_endpoint",
+            3.526
+          ],
+          "checkpoint_bytes": 5201402704,
+          "post_restart_sequence": [
+            [
+              "endpoint_resume_first",
+              "private_response_replay",
+              67908,
+              4.565
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              67712,
+              3.268
+            ],
+            [
+              "fork_second",
+              "private_long_anchor",
+              67712,
+              1.647
+            ]
+          ],
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 9.48
+        },
+        {
+          "order": "fork-first",
+          "control_retrieval_exact": true,
+          "template_input_tokens": 67717,
+          "cold_prefill_s": 26.25,
+          "pre_restart_fork": [
+            "private_endpoint",
+            1.608
+          ],
+          "checkpoint_bytes": 5205861705,
+          "post_restart_sequence": [
+            [
+              "fork_first",
+              "private_long_anchor",
+              67712,
+              4.084
+            ],
+            [
+              "endpoint_resume_after_fork",
+              "private_response_replay",
+              67908,
+              3.261
+            ],
+            [
+              "fork_after_resume",
+              "private_long_anchor",
+              67712,
+              1.645
+            ]
+          ],
+          "every_post_restart_fork_hot": true,
+          "restored_retrieval_exact": true,
+          "restore_plus_sequence_s": 8.99
+        }
+      ]
+    },
+    "restore": {
+      "status": "passed",
+      "receipt": "docs/measurements/2026-09-16-restore-probe-rtx5090-v070.json",
+      "checkpoint_bytes": 4514771839,
+      "restore_wall_s": [
+        3.673,
+        3.534
+      ],
+      "restored_retrieval_exact": true,
+      "tampered_restore_refused": "not re-run on this configuration: the server binary is unchanged from v0.6.10, whose receipt records the flipped-payload refusal",
+      "v0610_reference_restore_wall_s": [
+        4.155,
+        3.886
+      ]
+    },
+    "live_sibling_continuation": {
+      "status": "passed",
+      "receipts": [
+        "docs/measurements/2026-09-16-rtx5090-v070-profile-gates.json"
+      ],
+      "note": "live sibling continuation returned 200; parent DELETE returned 200, the deleted continuation returned 404 before and after a restart, and the surviving descendant continued"
+    },
+    "lifecycle": {
+      "status": "passed",
+      "note": "The candidate ran from the published image with the v0.7.0 arguments and echoed its own identity (deployment qwen38-5090-v0.7.0, configuration 762e6bf4). Production was stopped for the window, recreated from its pinned relaunch script afterwards, verified healthy on its own port with unless-stopped, and the supervisor hold was released."
+    },
+    "two_long_sessions": {
+      "status": "passed",
+      "workload": "two sessions of 125,891 input tokens, one continuation plus one fork each per round, two rounds",
+      "reuse_lost": 0,
+      "continuations_and_forks": 8,
+      "continuation_wall_s": [
+        3.54,
+        1.58,
+        2.16,
+        2.41
+      ],
+      "cached_tokens": 125886,
+      "shipped_pool_reference": "4 of 4 continuations lost on the v0.6.10 8 GiB pool (EXP-039)",
+      "entry_cost": "entering the steady state from a pool another long session occupies costs one re-prefill per session, once: 2 of 8 lost on first entry, 0 of 8 on the repeat from the same server",
+      "receipt": "docs/measurements/2026-09-16-multisession-rtx5090-v070.json"
+    },
+    "two_session_durability": {
+      "status": "bounded",
+      "both_checkpointed": true,
+      "checkpoint_bytes_each": 9236391697,
+      "graceful_stop": "shutdown: saved 2, nothing to save 0, refused 0",
+      "after_restart": "one of the two sessions is accepted back and resumes exactly; the other's checkpoint is declined - the engine did not accept the checkpointed continuation - and it re-prefills from its transcript",
+      "reproductions": 3,
+      "interpretation": "refused, not corrupted: the store is untouched and the declined session re-prefills. Stated as a release boundary, not a passing gate.",
+      "receipt": "docs/measurements/2026-09-16-two-long-session-capacity.json"
+    }
+  },
+  "documented_route": {
+    "public_route_gates": "docs/measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2153.6,
+    "decode_wall_tokens_per_second": 133.76,
+    "live_sibling_continuation_status": 200
+  },
+  "comparison_to_v0610": {
+    "prefill_tokens_per_second": {
+      "v0.6.10": 2193.3,
+      "v0.7.0": 2203.0
+    },
+    "decode_tokens_per_second_wall": {
+      "v0.6.10": 134.87,
+      "v0.7.0": 133.03
+    },
+    "two_long_sessions_reuse_lost": {
+      "v0.6.10": "4 of 4",
+      "v0.7.0": "0 of 8"
+    },
+    "note": "throughput is within run-to-run noise; the pool change is what moves"
+  }
+}

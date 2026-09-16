@@ -19,6 +19,9 @@ usage: start-ninfer.sh --model PATH --api-key-file PATH --log-dir PATH --checkpo
 Starts the exact digest-pinned NInfer image of the current release on the runtime host's
 loopback with a durable session store. The release manifest must be installable (`candidate`
 or `ready`); a draft is rejected before Docker runs.
+
+The profile's Host KV pool holds two sessions at the 131,072-token ceiling, so it declares the
+runtime-host memory that pool needs; the launcher refuses before the load if the host is smaller.
 EOF
 }
 
@@ -193,6 +196,9 @@ for value in (
     str(server["container_port"]),
     server["checkpoint_mount_target"],
     str(seccomp),
+    # 0 when the profile declares no runtime-host memory floor; the long-session profile does,
+    # because its Host KV pool holds two sessions at the context ceiling instead of one.
+    str(profile.get("runtime_host", {}).get("minimum_runtime_memory_mib", 0)),
     *server["arguments"],
 ):
     print(value, end="\0")
@@ -206,7 +212,8 @@ PUBLISHED_PORT=${PROFILE_VALUES[4]}
 CONTAINER_PORT=${PROFILE_VALUES[5]}
 CHECKPOINT_MOUNT_TARGET=${PROFILE_VALUES[6]}
 SECCOMP_PROFILE=${PROFILE_VALUES[7]}
-PROFILE_ARGS=("${PROFILE_VALUES[@]:8}")
+MINIMUM_RUNTIME_MEMORY_MIB=${PROFILE_VALUES[8]}
+PROFILE_ARGS=("${PROFILE_VALUES[@]:9}")
 
 if [[ ! -f "$MODEL_PATH" ]]; then
   printf 'error: model is not a regular file: %s\n' "$MODEL_PATH" >&2
@@ -255,10 +262,11 @@ STAGING_PROBE=$(
     --volume "$API_KEY_FILE:/run/secrets/ninfer_api_key:ro" \
     --volume "$CHECKPOINT_DIR:$CHECKPOINT_MOUNT_TARGET" \
     --entrypoint /bin/sh "$IMAGE" -c \
-    'printf "model=%s key=%s store=%s\n" \
+    'printf "model=%s key=%s store=%s mem=%s\n" \
        "$(wc -c < /models/qwen3_8_27b.ninfer 2>/dev/null | tr -d "[:space:]" || echo 0)" \
        "$(wc -c < /run/secrets/ninfer_api_key 2>/dev/null | tr -d "[:space:]" || echo 0)" \
-       "$(test -d "$1" && echo directory || echo missing)"' sh "$CHECKPOINT_MOUNT_TARGET"
+       "$(test -d "$1" && echo directory || echo missing)" \
+       "$(awk "/^MemTotal:/ {print int(\$2 / 1024)}" /proc/meminfo)"' sh "$CHECKPOINT_MOUNT_TARGET"
 ) || {
   printf 'error: Docker could not read this route'"'"'s bind mounts from a throwaway container\n' >&2
   exit 1
@@ -268,6 +276,8 @@ PROBE_MODEL_BYTES=${PROBE_MODEL_BYTES%% *}
 PROBE_KEY_BYTES=${STAGING_PROBE#*key=}
 PROBE_KEY_BYTES=${PROBE_KEY_BYTES%% *}
 PROBE_STORE=${STAGING_PROBE##*store=}
+PROBE_MEMORY_MIB=${STAGING_PROBE##*mem=}
+PROBE_STORE=${PROBE_STORE%% *}
 ACTUAL_MODEL_BYTES=$(wc -c < "$MODEL_PATH" | tr -d '[:space:]')
 if [[ "$PROBE_MODEL_BYTES" != "$ACTUAL_MODEL_BYTES" || "$PROBE_KEY_BYTES" == 0 || "$PROBE_STORE" != directory ]]; then
   printf 'error: Docker staged this route'"'"'s bind mounts incompletely\n' >&2
@@ -276,6 +286,21 @@ if [[ "$PROBE_MODEL_BYTES" != "$ACTUAL_MODEL_BYTES" || "$PROBE_KEY_BYTES" == 0 |
     "$ACTUAL_MODEL_BYTES" "$(wc -c < "$API_KEY_FILE" | tr -d '[:space:]')" "$CHECKPOINT_DIR" >&2
   printf 'On Docker Desktop this is the engine having lost the filesystem these paths live on:\n' >&2
   printf 'start the WSL distro that owns them, restart Docker Desktop while it is running, and retry.\n' >&2
+  exit 1
+fi
+
+# A Host KV pool the runtime host cannot back does not degrade, it dies: the same 16 GiB pool
+# that keeps two 131,072-token sessions resident in a 32 GiB WSL VM was OOM-killed mid-request
+# in a 24 GiB one (container exit 137, `Out of memory: Killed process (ninfer-serve)` in the
+# kernel log, and the kill took an unrelated process with it). The profile declares the floor it
+# measured, and this refusal is what an operator gets instead of that.
+if ((MINIMUM_RUNTIME_MEMORY_MIB > 0)) && ((PROBE_MEMORY_MIB < MINIMUM_RUNTIME_MEMORY_MIB)); then
+  printf 'error: profile %s needs %s MiB of runtime-host memory; this host offers %s MiB\n' \
+    "$PROFILE_ID" "$MINIMUM_RUNTIME_MEMORY_MIB" "$PROBE_MEMORY_MIB" >&2
+  printf 'On Docker Desktop the container sees the WSL utility VM, which takes half the machine'"'"'s\n' >&2
+  printf 'RAM by default. Raise it in %%UserProfile%%\\.wslconfig:\n\n  [wsl2]\n  memory=32GB\n\n' >&2
+  printf 'then `wsl --shutdown` and retry. A host that cannot give the container this much memory\n' >&2
+  printf 'runs v0.6.10, whose smaller pool holds one session at the ceiling and two of about 75,000.\n' >&2
   exit 1
 fi
 

@@ -1,0 +1,135 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-041",
+  "generated_utc": "2026-09-16T16:30:00Z",
+  "status": "closed",
+  "release": "v0.7.0",
+  "component": "v0.6.5-qwen38-5090-beta.1 (published image 5e3e1558, source 696e78c7) - unchanged; only the serving configuration moves",
+  "scope": "RTX 5090 appliance, every arm on the published v0.6.5 image so no comparison spans two runtimes, plus one measurement of the shipped RTX 4090 native lane. Production was stopped for each window and restored after it.",
+  "question": "EXP-039 showed that two alternating 126K-token sessions lose their prefix reuse because the Host KV pool holds one of them, and named two levers - a larger pool or INT8 KV - without choosing. Which lever ships, what does it cost, and is losing reuse the whole cost?",
+  "answer": "The pool ships: bf16 with a 16 GiB Host KV pool. On one runtime, two 126K sessions lose 2 of 8 continuations and forks at 14 GiB and none at 16 or 18 GiB; both 8-bit KV dtypes also fix the reuse (fp8 holds even in the shipped 8 GiB pool) but both cost redaction and grounding on the private role corpus, which is not a trade this product makes. Losing reuse was also not the whole cost: measured on the shipped RTX 4090 native lane, two long sessions additionally cannot be checkpointed - the server refused every automatic export while both were live, and its managed stop saved one session and lost the other. A pool that cannot hold both sessions is therefore a durability defect, not only a latency one.",
+  "capacity_ladder": {
+    "workload": "two sessions of 125,891 input tokens each, alternating one continuation plus one fork per round for two rounds (scripts/multisession_probe.py --sessions 2 --base-tokens 100000 --rounds 2)",
+    "arms": [
+      {
+        "host_kv_mib": 8192,
+        "kv_dtype": "bf16",
+        "note": "the shipped v0.6.10 configuration; EXP-039 measured 4 of 4 continuations lost on the v0.6.4 runtime",
+        "reuse_lost": "4/4 (EXP-039)",
+        "runtime": "v0.6.4 candidate"
+      },
+      {
+        "host_kv_mib": 14336,
+        "kv_dtype": "bf16",
+        "reuse_lost": "2/8",
+        "lost_steps": ["r1_continue_D2", "r2_continue_D2"],
+        "lost_turn_wall_s": 58.4,
+        "peak_runtime_host_mib": 20841,
+        "receipt": "docs/measurements/2026-09-16-multisession-rtx5090-bf16-14g.json"
+      },
+      {
+        "host_kv_mib": 16384,
+        "kv_dtype": "bf16",
+        "reuse_lost": "0/8",
+        "continuation_wall_s": [3.39, 1.66, 2.19, 2.36],
+        "cached_tokens": 125886,
+        "peak_runtime_host_mib": 27731,
+        "receipt": "docs/measurements/2026-09-16-multisession-rtx5090-bf16-16g.json",
+        "verdict": "the shipped v0.7.0 configuration"
+      },
+      {
+        "host_kv_mib": 18432,
+        "kv_dtype": "bf16",
+        "reuse_lost": "0/8",
+        "continuation_wall_s": [4.24, 1.61, 2.13, 5.21],
+        "peak_runtime_host_mib": 28978,
+        "receipt": "docs/measurements/2026-09-16-multisession-rtx5090-bf16-18g.json",
+        "verdict": "holds, and buys nothing over 16 GiB for 1.2 GB more of pinned memory"
+      },
+      {
+        "host_kv_mib": 12288,
+        "kv_dtype": "int8",
+        "reuse_lost": "0/8",
+        "peak_runtime_host_mib": 22694,
+        "verdict": "rejected on quality, see kv_dtype_quality"
+      },
+      {
+        "host_kv_mib": 8192,
+        "kv_dtype": "fp8",
+        "reuse_lost": "0/8",
+        "verdict": "rejected on quality, and notable because it needs no pool change at all"
+      }
+    ],
+    "runtime_host_memory_boundary": {
+      "finding": "a pool the runtime host cannot back does not degrade, it is killed",
+      "evidence": "the 16 GiB pool holds two sessions in a 32 GiB WSL utility VM (peak 27,731 MiB of 32,091 MiB); the identical configuration in a 24 GiB VM reached 24,006 MiB and was OOM-killed mid-request - container exit 137, `Out of memory: Killed process (ninfer-serve) total-vm:85995096kB` in the kernel log, and the kill also took an unrelated process on the host",
+      "declared_floor_mib": 28672,
+      "profile_field": "runtime_host.minimum_runtime_memory_mib",
+      "enforcement": "examples/manual-tunnel/start-ninfer.sh reads the floor from the profile and compares it with the memory a throwaway container sees, refusing with the .wslconfig remedy before the 18 GB load",
+      "wsl_note": "the WSL2 utility VM takes half the machine's RAM by default, so a 47 GB host offered 23 GiB until `memory=32GB` was set; every distro and the Docker Desktop engine share that one VM"
+    }
+  },
+  "kv_dtype_quality": {
+    "why": "INT8 KV was rejected for the v0.4 train on the private role corpus, but that comparison put an INT8 arm on one runtime against a bf16 arm on another. Both 8-bit dtypes fix the reuse loss, so the question had to be re-answered on one runtime before a dtype could ship.",
+    "corpus": "private role corpus, 89 cases, deterministic (the 2026-09-04 repeatability receipt records every aggregate reproducing exactly across fresh processes)",
+    "runtime": "published v0.6.5 image for all three arms",
+    "arms": {
+      "bf16_shipped": {
+        "required_fact_recall": 0.8865979381443299,
+        "evidence_precision": 0.9785714285714285,
+        "unsupported_claim_rate": 0.2247191011235955,
+        "forbidden_claim_count": 7,
+        "critical_miss_count": 10,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 8,
+        "redaction_control_pass_rate": 0.75,
+        "decode_tps": 210.27187554186997,
+        "prefill_tps": 3123.108629008355
+      },
+      "fp8": {
+        "required_fact_recall": 0.865979381443299,
+        "evidence_precision": 0.9794520547945206,
+        "unsupported_claim_rate": 0.2247191011235955,
+        "forbidden_claim_count": 8,
+        "critical_miss_count": 10,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 9,
+        "redaction_control_pass_rate": 0.625,
+        "decode_tps": 212.0419671198158,
+        "prefill_tps": 3121.9544987892114
+      },
+      "int8": {
+        "required_fact_recall": 0.8694158075601375,
+        "evidence_precision": 0.9772727272727273,
+        "unsupported_claim_rate": 0.24719101123595505,
+        "forbidden_claim_count": 9,
+        "critical_miss_count": 12,
+        "schema_valid_rate": 0.9438202247191011,
+        "secret_leak_count": 9,
+        "redaction_control_pass_rate": 0.625,
+        "decode_tps": 211.99135953292492,
+        "prefill_tps": 3123.787140875367
+      }
+    },
+    "verdict": "Rejected. Both 8-bit dtypes drop the redaction control pass rate from 0.750 to 0.625 and add a secret leak (8 to 9); fp8 also loses 2.1 points of required fact recall and int8 loses 1.7 while adding unsupported claims (0.225 to 0.247) and critical misses (10 to 12). Throughput is within noise either way (decode 210.3 bf16 against 212.0). Capacity bought with redaction is not a trade this product makes, so the pool moves and the dtype does not.",
+    "device_side_note": "fp8 halves device KV too - the engine resolved 5.91 GiB of runtime against bf16's 10.12 GiB at the same 131,072-token ceiling - so the dtype remains the lever to revisit if a future artifact closes the grounding gap"
+  },
+  "durability_finding": {
+    "lane": "RTX 4090 native Windows lane, shipped v0.6.3-beta.1 configuration (INT8 KV, 4 GiB Host KV pool, 24 GiB checkpoint quota)",
+    "reuse": "4 of 8 lost: every continuation re-prefilled from root at 89.2-91.7 s while both sessions were live; forks kept reusing through the long anchor",
+    "checkpoints": "while both sessions were live the server refused every automatic checkpoint with `automatic session checkpoint skipped: program refused continuation export`; one save succeeded only after the workload stopped",
+    "managed_stop": "the documented managed stop then recorded `saved 1, nothing to save 0, refused 1` and `shutdown did not save 1 live session(s); their state is lost` - outcome graceful_incomplete_shutdown, sessions_saved 1, sessions_refused 1",
+    "interpretation": "On a lane whose pool cannot hold both sessions, the second session is not merely slow: it cannot be exported, so a graceful stop loses it. This is the durable-state contract degrading under two long sessions, and it is why the pool is sized for two rather than documented as a performance note.",
+    "receipt": "docs/measurements/2026-09-16-multisession-rtx4090-shipped.json",
+    "not_done_here": "the RTX 4090 fix is its own pool change on a 31.7 GB host whose controller already halves that pool, and it requires the native lane's own 15-phase requalification; it is not in this release"
+  },
+  "product_disposition": {
+    "shipped": "v0.7.0 advances both RTX 5090 profiles to one new configuration identity: Host KV pool 16 GiB, KV dtype unchanged at bf16, deployment profile qwen38-5090-v0.7.0. The profile declares runtime_host.minimum_runtime_memory_mib 28672 and the documented launcher refuses a smaller host before loading the artifact.",
+    "compatibility_change": "This raises the runtime-host memory the lane needs. A host that cannot give the container 28 GiB - on Docker Desktop, a WSL utility VM of that size - runs v0.6.10, whose 8 GiB pool holds one session at the ceiling and two of about 75,000 tokens (EXP-039 arm A).",
+    "session_state": "The configuration identity changes, so checkpoints written under v0.6.10 do not carry across, exactly as the v0.4.8 profile advance recorded.",
+    "claims_unchanged": "One active request per qualified profile; no concurrency, multi-tenant, or throughput claim changes. The new claim is bounded: two sessions at the 131,072-token ceiling keep prefix reuse on alternating turns, measured on this package and profile."
+  },
+  "window_hygiene": "Every arm ran with production stopped and the lane supervisor held; production was recreated from its pinned relaunch script and verified healthy (health 200, deployment qwen38-5090-v0.5.1, binary 71edc2f6) after each window. The appliance's WSL utility VM ceiling was raised from its default to 32 GB for these measurements and the lane recovered unattended from every VM shutdown (27 s and 257 s and 317 s observed).",
+  "raw_prompts_outputs_or_secrets_included": false
+}

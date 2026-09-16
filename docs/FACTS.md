@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-16 · Current stable release: **v0.6.10**
+Last verified: 2026-09-16 · Current stable release: **v0.7.0**
 
 Public-release claims on this page are bound to the
 [v0.6.10 release manifest](../releases/v0.6.10/manifest.json) and its qualification receipts.
@@ -46,6 +46,27 @@ All of these should be materially true:
 | RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.5 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.9 |
 | RTX 4090 | native Windows service | 131,072 | v0.6.3-beta.1 lane on the mainline runtime (source 696e78c7, shared with the 5090's v0.6.5) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.9 |
 | RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.9) |
+
+## v0.7.0 — two long sessions keep their reuse
+
+- The RTX 5090 serving configuration advances to a 16 GiB Host KV pool (deployment profile
+  `qwen38-5090-v0.7.0`); the component, image, model, client and KV dtype are unchanged.
+- Two sessions at the 131,072-token ceiling keep prefix reuse on alternating turns: each
+  continuation reuses about 125,900 cached tokens in 1.6-3.5 s. The shipped 8 GiB pool loses every
+  one of them to a root re-prefill of about 58 s. Entering the steady state from a pool another
+  long session occupies costs one re-prefill per session, once.
+- The pool is pinned runtime-host memory, so the profile declares
+  `runtime_host.minimum_runtime_memory_mib` 28,672 and the documented launcher refuses a smaller
+  host. The same configuration in a 24 GiB WSL VM is OOM-killed mid-request (exit 137).
+- Both 8-bit KV dtypes fix the same reuse loss and were rejected on quality, measured on one
+  runtime: fp8 and int8 both drop the private corpus' redaction control pass rate from 0.750 to
+  0.625 and add a secret leak, and int8 also adds unsupported claims and critical misses.
+- Durability is narrower than reuse and the boundary is measured: both sessions checkpoint
+  (9.24 GB each) and a graceful stop saves both, but after a restart one of the two is accepted
+  back and the other's checkpoint is declined - refused, not corrupted.
+- Configuration identity changes, so checkpoints written under `v0.6.10` do not carry across.
+- [EXP-041](measurements/2026-09-16-two-long-session-capacity.json) ·
+  [lane gates](measurements/2026-09-16-rtx5090-v070-profile-gates.json).
 
 ## v0.6.10 — the documented route refuses a launch the engine cannot stage
 

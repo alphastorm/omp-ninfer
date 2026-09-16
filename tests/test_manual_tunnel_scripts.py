@@ -160,11 +160,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         environment["EXPECTED_MODEL_SHA256"] = manifest["components"]["model"]["artifact_sha256"]
         # What the fake docker reports from inside the bind-staging probe container. The defaults
         # are a correctly staged route; a test overrides them to stage one incompletely.
-        answers = {"key_bytes": str(len("test-key\n")), "store": "directory"}
+        answers = {"key_bytes": str(len("test-key\n")), "store": "directory", "memory_mib": "65536"}
         answers.update(probe or {})
         environment["EXPECTED_MODEL_BYTES"] = str(manifest["components"]["model"]["artifact_bytes"])
         environment["PROBE_KEY_BYTES"] = answers["key_bytes"]
         environment["PROBE_STORE"] = answers["store"]
+        environment["PROBE_MEMORY_MIB"] = answers["memory_mib"]
         result = subprocess.run(
             [
                 "bash",
@@ -185,7 +186,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
 
     STAGING_PROBE_BRANCH = (
         "    if [ \"${argument#*model=%s key=%s}\" != \"$argument\" ]; then\n"
-        "      printf 'model=%s key=%s store=%s\\n' \"$EXPECTED_MODEL_BYTES\" \"$PROBE_KEY_BYTES\" \"$PROBE_STORE\"\n"
+        "      printf 'model=%s key=%s store=%s mem=%s\\n' \"$EXPECTED_MODEL_BYTES\" \"$PROBE_KEY_BYTES\" \"$PROBE_STORE\" \"$PROBE_MEMORY_MIB\"\n"
         "      exit 0\n"
         "    fi\n"
     )
@@ -277,6 +278,23 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertIn("bind mounts incompletely", result.stderr)
             self.assertIn("key=0", result.stderr)
+            self.assertFalse(capture.exists(), "the launcher must refuse before the server runs")
+
+    def test_start_refuses_a_host_that_cannot_back_the_host_kv_pool(self) -> None:
+        """The profile's Host KV pool holds two sessions at the context ceiling, and a host that
+        cannot back it does not degrade: the same configuration was OOM-killed mid-request in a
+        24 GiB WSL VM (container exit 137). The launcher compares the profile's declared floor
+        with what a throwaway container sees and refuses before the 18 GB load."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result, capture, _ = self.launch_with_fakes(
+                root, self.CAPTURING_DOCKER, probe={"memory_mib": "24576"}
+            )
+
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("MiB of runtime-host memory", result.stderr)
+            self.assertIn("24576", result.stderr)
+            self.assertIn("memory=32GB", result.stderr)
             self.assertFalse(capture.exists(), "the launcher must refuse before the server runs")
 
     @staticmethod

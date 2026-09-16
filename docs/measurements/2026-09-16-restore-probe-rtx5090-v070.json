@@ -1,0 +1,135 @@
+{
+  "artifact_type": "omp_ninfer_restore_probe",
+  "schema_version": 3,
+  "lane": "rtx5090-v070",
+  "identity": {
+    "deployment_profile": "qwen38-5090-v0.7.0",
+    "model_id": "qwen3.8-27b",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "binary_sha256": "b8a0a2c33d79304afb1701ca7d179a6ed750685d1365a75634fdc738bab6a831",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "patch_stack_sha": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
+    "source_dirty": false,
+    "build_profile": "appliance-local",
+    "config_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8"
+  },
+  "generated_utc": "2026-09-16T15:24:58Z",
+  "base_tokens_requested": 48000,
+  "summary": {
+    "template_input_tokens": 57889,
+    "cold_prefill_s": 23.319,
+    "checkpoint_bytes": 4514771839,
+    "restore_0_wall_s": 3.673,
+    "restore_1_wall_s": 3.534,
+    "control_retrieval_exact": true,
+    "restored_retrieval_exact": true,
+    "tampered_restore_refused": null
+  },
+  "steps": [
+    {
+      "step": "base_prefill",
+      "wall_s": 23.319,
+      "input_tokens": 57889
+    },
+    {
+      "step": "control_retrieval",
+      "wall_s": 1.898,
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "User asks: \"Control: quote the ORCHID, COLOR, SIGIL ledger keys from the operations ledger exactly, as KEY=VALUE separated by spaces, with no other words.\"\n\nWe have context from previous user message:",
+      "incomplete": null,
+      "output_sha256": "f0f66765011fbf7dc5264bdedea6707af4e54c09812461ee9399e22a5983a544"
+    },
+    {
+      "step": "checkpoint_save",
+      "wall_s": 4.263,
+      "mode": "explicit",
+      "generation": "1789572191291-3",
+      "bytes": 4514771839,
+      "frontier": 58146
+    },
+    {
+      "step": "restart_0",
+      "wall_s": 44.757,
+      "ready_after_s": 28.23,
+      "prefill_counter_before": 58361,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_0",
+      "wall_s": 3.673,
+      "id": "resp_adfb999868ae4fe2e9590408ff469e09",
+      "input_tokens": 58194,
+      "status_polls": [
+        {
+          "t_s": 0.87,
+          "bytes": 4514771839,
+          "created_at_unix_ms": 1789572202580,
+          "frontier_tokens": 58146,
+          "generation": "1789572199281-4",
+          "read_backend": "io_uring-odirect",
+          "response_records": 2,
+          "restored_tokens": 58146,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-16T15:24:00Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need answer only keys. Same. Ensure no extra.\nORCHID=603463 COLOR=995095 SIGIL=850932",
+      "incomplete": null,
+      "output_sha256": "7a3ded1280b5cdd345d8414d2b213069940cd52d60c45a09d1ecc4be71e0aa77"
+    },
+    {
+      "step": "settle_save_0",
+      "wall_s": 3.978,
+      "mode": "explicit",
+      "generation": "1789572244622-0"
+    },
+    {
+      "step": "restart_1",
+      "wall_s": 41.073,
+      "ready_after_s": 28.16,
+      "prefill_counter_before": 275,
+      "prefill_counter_after": 53
+    },
+    {
+      "step": "restore_1",
+      "wall_s": 3.534,
+      "id": "resp_33e3f35ec7a8789d55df272bacc92ab5",
+      "input_tokens": 58283,
+      "status_polls": [
+        {
+          "t_s": 0.87,
+          "bytes": 4519232685,
+          "created_at_unix_ms": 1789572256024,
+          "frontier_tokens": 58235,
+          "generation": "1789572252647-1",
+          "read_backend": "io_uring-odirect",
+          "response_records": 3,
+          "restored_tokens": 58235,
+          "schema_version": 2,
+          "state": "available"
+        }
+      ],
+      "started_utc": "2026-09-16T15:24:49Z",
+      "exact": true,
+      "missing_keys": [],
+      "output_excerpt": "Need final only keys.\nORCHID=603463 COLOR=995095 SIGIL=850932",
+      "incomplete": null,
+      "output_sha256": "6f05ea13addc4d448e8837b6ba7fa9bf0069a26ceb88d64a75242484cfe5c942"
+    },
+    {
+      "step": "settle_save_1",
+      "wall_s": 4.275,
+      "mode": "explicit",
+      "generation": "1789572294301-0"
+    },
+    {
+      "step": "session_delete",
+      "status": 200
+    }
+  ],
+  "transient_retries": 0
+}

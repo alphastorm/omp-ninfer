@@ -353,8 +353,23 @@ text and tools only. Report the outcome with the
 
 - a single-user Linux or WSL2 environment owning one NVIDIA GeForce RTX 5090;
 - a current NVIDIA driver, Docker with Linux host-network support, and NVIDIA Container Toolkit;
-- OpenSSH access terminating in the same Linux/WSL namespace as Docker; and
-- at least 40 GiB free for the 18,210,531,328-byte model, image, and logs.
+- OpenSSH access terminating in the same Linux/WSL namespace as Docker;
+- at least 40 GiB free for the 18,210,531,328-byte model, image, and logs; and
+- **at least 28 GiB of memory available to the container.** From `v0.7.0` the profile's Host KV
+  pool holds two sessions at the 131,072-token ceiling instead of one, and that pool is pinned
+  runtime-host memory. On Docker Desktop the container sees the WSL2 utility VM, which takes half
+  the machine's RAM by default - a 48 GB machine offers 24 GiB, which is not enough. Raise it in
+  `%UserProfile%\.wslconfig` and run `wsl --shutdown`:
+
+  ```ini
+  [wsl2]
+  memory=32GB
+  ```
+
+  `start-ninfer.sh` reads the floor from the profile and refuses before loading the artifact if
+  the host is smaller, because a pool the host cannot back is OOM-killed mid-request rather than
+  degraded. A host that cannot give the container this much memory runs `v0.6.10`, whose 8 GiB
+  pool holds one session at the ceiling and two of about 75,000 tokens.
 
 The NInfer endpoint binds only to remote loopback. Never publish port `18089` on a LAN or public
 interface. This release assumes both machines and local accounts are controlled by one trusted
