@@ -1,0 +1,79 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.7.0",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Published-component external installation acceptance for a release that changes the RTX 5090 serving configuration and no component: image 5e3e1558 was pulled without registry credentials and started from a clone at candidate 0ef4ccb on deployment profile qwen38-5090-v0.7.0, then driven through the full macOS client route (pinned client 18.0.9, tool, image input, resume, resume after a server restart, fail-closed). The RTX 4090 native component's downloaded-installer acceptance carries its v0.6.9 receipt unchanged.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "Pinned OMP18.0.9 bytes unchanged; parser semantics advance behind the preserved wire shape. Current macOS route and native Windows golden-equivalent tool turn exercised these bytes against the new runtime."
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "389a3ed20fae8b08c2880caaf7627bc96d2df27b5e4f188b743902468108e17a",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "Pinned client omp-18.0.9-cross-platform-beta-2 unchanged; the macOS route installed it from the published asset inside an isolated HOME and read its version back. The new profile is server-side only: no client, wire shape, or provider setting changed.",
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "published digest 5e3e1558 pulled anonymously and served binary b8a0a2c3"
+    },
+    "documented_host_route": {
+      "status": "passed",
+      "note": "2/2 blocks, receipt docs/measurements/2026-09-16-rtx5090-v0610-host-route-run.json"
+    },
+    "documented_macos_route": {
+      "status": "passed",
+      "note": "10/10 blocks from an isolated HOME, receipt docs/measurements/2026-09-16-rtx5090-v0610-macos-route-run.json"
+    },
+    "rtx4090_public_install": {
+      "status": "carried",
+      "note": "v0.6.9 receipt acceptance/rtx4090-public-install.json; component and blocks unchanged"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.7.0/acceptance/documented-routes.json",
+      "sha256": "2666c3ebea17f1e1c815db01dce926c9e1f206d00a7f9a2ec6cf9a09e30dbe8b"
+    },
+    "qualification": {
+      "repository_path": "releases/v0.7.0/qualification/rtx5090.json",
+      "sha256": "68399b39b741194b588f90651621431d8e80f5845b896a9506cd92a5f7d6a8fc"
+    },
+    "capacity_finding": {
+      "repository_path": "docs/measurements/2026-09-16-two-long-session-capacity.json",
+      "sha256": "5c3947e1362c6b8cdf94b9de94a88a392704f9e0c6ccddf34d51b9d542b78414"
+    },
+    "host_route_run": {
+      "repository_path": "docs/measurements/2026-09-16-rtx5090-v070-host-route-run.json",
+      "sha256": "0dc7a5750d104590fc4400cee6bc5ebe3c2aac0edcb308096a187286e6d362c8"
+    },
+    "macos_route_run": {
+      "repository_path": "docs/measurements/2026-09-16-rtx5090-v070-macos-route-run.json",
+      "sha256": "61675b39e90c06d701981de6ec8d91c9aee0432abdb60436c8d6acd0d2ccee24"
+    }
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "runtime_incumbent_restored_note": "The production container was stopped for the window and recreated from its pinned relaunch script afterwards: running on its own port with unless-stopped and answering /health, and the supervisor hold released."
+}

@@ -1,0 +1,104 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.0",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The serving configuration changed, so both RTX 5090 routes were re-run end to end from candidate 0ef4ccb against the unchanged published image 5e3e1558: the host route started the container on deployment profile qwen38-5090-v0.7.0 with configuration 762e6bf4, passing the launcher's new runtime-host memory floor, and the macOS client route then drove that container through all ten documented blocks. The Windows client and RTX 4090 native routes carry explicitly attributed evidence: every extracted block of each is byte-identical and neither component changed.",
+  "document_sha256": "90e4bc8aa01801ff56824d1e59b598fe40348c8d134a2258e3f44749b0db47f3",
+  "current_document_sha256": "90e4bc8aa01801ff56824d1e59b598fe40348c8d134a2258e3f44749b0db47f3",
+  "executed_blocks_match_current": true,
+  "document_change": "The container route gained the runtime-host memory prerequisite and its refusal signature; both routes were executed after that change, and every extracted executable block hash still equals the hash the runners executed.",
+  "candidate_commit": "0ef4ccbe19454097079d8c29d38fb793c8c8d4ee",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 55.587,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v070-host-route-run.json",
+      "note": "Clone at candidate 0ef4ccb. The documented prepare/start blocks accepted published image 5e3e1558 with the v0.7.0 arguments; the launcher's new runtime-host memory floor of 28,672 MiB passed against a 32 GiB WSL utility VM and the started container echoed deployment qwen38-5090-v0.7.0, configuration 762e6bf4."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 172.054,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v070-macos-route-run.json",
+      "note": "10/10 blocks from an isolated HOME against the container the host route started on the new profile: pinned client 18.0.9 installed and reported, tool turn, image input, nonce resume, the same nonce after a container restart, and an authenticated request refused with the tunnel closed."
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is",
+      "carried_from": "v0.6.9: every extracted block of this route is byte-identical and the pinned client is unchanged. This release changes only the serving configuration on the other side of the tunnel, which the macOS client route exercised end to end in this window against a v0.7.0 container."
+    },
+    "rtx4090-native": {
+      "status": "carried",
+      "steps": [
+        "public-assets",
+        "checksum-set",
+        "installer",
+        "smoke",
+        "restore"
+      ],
+      "receipt": "releases/v0.6.9/acceptance/rtx4090-public-install.json",
+      "note": "Downloaded public installer accepted exact already-installedv0.6.3-beta.1 bytes; no pointer change or start request. Served identity matched, anonymous401, ACCEPTED completion113.5ms; stopped450W state restored.",
+      "carried_from": "v0.6.9: blocks and component unchanged; this release changes the RTX 5090 serving configuration only. A real reboot of that host confirmed its documented recovery separately (docs/measurements/2026-09-16-lane-reboot-survivability.json)."
+    }
+  },
+  "steps": [
+    {
+      "lane": "rtx5090-container-host",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-macos-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-windows-client",
+      "status": "carried"
+    },
+    {
+      "lane": "rtx4090-native",
+      "status": "carried"
+    }
+  ],
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-16-rtx5090-v070-profile-gates.json",
+    "prefill_tokens_per_second": 2203.0,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 133.03,
+    "agent_protocol": "passed",
+    "live_sibling_continuation_status": 200,
+    "two_long_sessions_reuse_lost": "0 of 8",
+    "note": "re-measured on the v0.7.0 configuration rather than carried: the deployment profile this release ships is what the public route now starts."
+  },
+  "qualification_receipt": {
+    "repository_path": "releases/v0.7.0/qualification/rtx5090.json",
+    "sha256": "68399b39b741194b588f90651621431d8e80f5845b896a9506cd92a5f7d6a8fc"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

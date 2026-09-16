@@ -5,7 +5,7 @@
   "as_of": "2026-09-16",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "OMP NInfer v0.6.9 qualifies both mainline runtimes from source 696e78c7: RTX 5090 component v0.6.5-qwen38-5090-beta.1, published image 5e3e1558, and RTX 4090 native v0.6.3-beta.1. The semantic Qwen parser port and bounded-work remediation preserve the wire shape, custom raw input, history and stream ownership. Model, serving settings, OMP 18.0.9 and RTX 3090 v0.2.5-beta.1 are unchanged. Both owner hardware lanes were qualified on 2026-09-13; public native already-installed acceptance and documented RTX 5090 host/macOS routes passed against published components.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -65,13 +65,43 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.5-qwen38-5090-beta.1 component (image 5e3e1558) before the cut; the receipt lands at releases/v0.7.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.7.0/acceptance/composed-external-installation.json",
+      "sha256": "dc3b965b64a37d1ba6a2bb54f5b7dcd8b8d7a1f3174ad8f2d002f21f74869527",
+      "public_url": null,
+      "note": "Re-run for this release because the serving configuration changed: the documented host route started the published image on deployment profile qwen38-5090-v0.7.0 (2/2 blocks, including the launcher's new runtime-host memory floor) and the macOS client route drove that container through 10/10 blocks from candidate 0ef4ccb, with the RTX 4090 native installer acceptance carried from v0.6.9.",
+      "as_of": "2026-09-16",
+      "operator_class": "owner-operated tester-equivalent",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "389a3ed20fae8b08c2880caaf7627bc96d2df27b5e4f188b743902468108e17a",
+      "release": "v0.7.0",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+        }
+      ]
     },
     "documented_route_acceptance": {
       "status": "passed",
-      "repository_path": "releases/v0.6.10/acceptance/documented-routes.json",
-      "sha256": "33ef40cf1e9a835e2f4dd7e6abdec62918d7c62e48984efce2ffa1df91c78f43"
+      "repository_path": "releases/v0.7.0/acceptance/documented-routes.json",
+      "sha256": "2666c3ebea17f1e1c815db01dce926c9e1f206d00a7f9a2ec6cf9a09e30dbe8b"
     }
   },
   "observed_gates": {
@@ -160,7 +190,5 @@
     }
   },
   "interpretation": "A configuration-only advance on the published v0.6.5 component: the RTX 5090 Host KV pool moves from 8 GiB to 16 GiB so two sessions at the 131,072-token ceiling keep prefix reuse. Every RTX 5090 gate was re-measured on a candidate started from the published image with the new arguments; the RTX 4090 and RTX 3090 components and their lane receipts are unchanged. The two-session restore boundary is recorded as a bounded finding, not a passing gate.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.5-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "remaining_release_gates": []
 }

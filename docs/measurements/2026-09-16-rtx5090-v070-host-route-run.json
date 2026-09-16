@@ -1,0 +1,35 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-container-host",
+  "release": "v0.7.0",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "90e4bc8aa01801ff56824d1e59b598fe40348c8d134a2258e3f44749b0db47f3",
+  "started_utc": "2026-09-16T16:01:49Z",
+  "completed_utc": "2026-09-16T16:02:44Z",
+  "host_os": "Ubuntu 24.04.4 LTS",
+  "clone_commit": "0ef4ccbe19454097079d8c29d38fb793c8c8d4ee",
+  "status": "passed",
+  "executed_blocks_match_document": true,
+  "note": "Clone at candidate 0ef4ccb. The documented prepare/start blocks accepted published image 5e3e1558 with the v0.7.0 profile: the launcher's new runtime-host memory floor (28,672 MiB) passed against a 32 GiB WSL utility VM, and the started container echoed deployment qwen38-5090-v0.7.0 with configuration 762e6bf4.",
+  "steps": [
+    {
+      "slug": "prepare",
+      "heading": "3. Prepare the model and key on the inference host",
+      "status": "passed",
+      "elapsed_seconds": 13.159,
+      "block_sha256": "2258ccd84fe4f0e8627a091a0f965c9fdfc53190798f5cf4a9b47a57a309303b",
+      "executed_sha256": "2258ccd84fe4f0e8627a091a0f965c9fdfc53190798f5cf4a9b47a57a309303b",
+      "substitution": null
+    },
+    {
+      "slug": "start",
+      "heading": "4. Start NInfer on the inference host",
+      "status": "passed",
+      "elapsed_seconds": 42.428,
+      "block_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "executed_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "substitution": null
+    }
+  ]
+}
