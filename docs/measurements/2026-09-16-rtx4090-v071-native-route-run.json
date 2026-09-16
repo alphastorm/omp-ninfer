@@ -1,0 +1,80 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx4090-native",
+  "release": "v0.7.1",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "58c48bef319a87385ff624c9215ecff1518cc548625f99b44b2f0f78713f4b10",
+  "started_utc": "2026-09-16T23:23:07.7411651Z",
+  "completed_utc": "2026-09-16T23:32:05.3972762Z",
+  "host_os": "Microsoft Windows 11 Pro",
+  "clone_commit": "8992f185d15dfdd4d5ab42ebd9290de454482168",
+  "status": "passed",
+  "executed_blocks_match_document": true,
+  "note": "7/7 documented blocks on the RTX 4090 host from an isolated profile: the pinned client, the candidate clone verified installable, the variant selected, the newly published v0.6.4-qwen38-4090-beta.1 package downloaded from its public URLs and installed against the manifest's hashes, the lane started and managed-stopped, OMP pointed at it, and the lane acceptance passed.",
+  "steps": [
+    {
+      "slug": "client-install",
+      "heading": "Install the exact native Windows client",
+      "status": "passed",
+      "elapsed_seconds": 43.055,
+      "block_sha256": "b0d59a866cc0c7cac7e6e30b1e53e962c0f9566eb0f65626559053a0055041ad",
+      "executed_sha256": "b0d59a866cc0c7cac7e6e30b1e53e962c0f9566eb0f65626559053a0055041ad",
+      "substitution": null
+    },
+    {
+      "slug": "clone-and-verify",
+      "heading": "Native Windows RTX 4090 and RTX 3090 release lanes",
+      "status": "substituted",
+      "elapsed_seconds": 3.906,
+      "block_sha256": "5b918acfb63ce9c49d7969c948ae7fcb7736d314d06f338e9039e93a37563837",
+      "executed_sha256": "5b918acfb63ce9c49d7969c948ae7fcb7736d314d06f338e9039e93a37563837",
+      "substitution": "cloned commit 8992f185d15dfdd4d5ab42ebd9290de454482168 in place of the tag this run's acceptance creates; verified as installable, not ready"
+    },
+    {
+      "slug": "variant",
+      "heading": "Native Windows RTX 4090 and RTX 3090 release lanes",
+      "status": "passed",
+      "elapsed_seconds": 0.004,
+      "block_sha256": "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c",
+      "executed_sha256": "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c",
+      "substitution": null
+    },
+    {
+      "slug": "stage-and-install",
+      "heading": "Native Windows RTX 4090 and RTX 3090 release lanes",
+      "status": "passed",
+      "elapsed_seconds": 325.607,
+      "block_sha256": "5159808d6a1ca8980c07144c5593606ef792239c517bc68fc2c9adba3cc34c8f",
+      "executed_sha256": "5159808d6a1ca8980c07144c5593606ef792239c517bc68fc2c9adba3cc34c8f",
+      "substitution": null
+    },
+    {
+      "slug": "operate",
+      "heading": "Operate the native lane",
+      "status": "passed",
+      "elapsed_seconds": 72.476,
+      "block_sha256": "e41b9fe53d7c92850c6b027091c51cfc16d042f510a2f8fabe699f8198fc6390",
+      "executed_sha256": "e41b9fe53d7c92850c6b027091c51cfc16d042f510a2f8fabe699f8198fc6390",
+      "substitution": null
+    },
+    {
+      "slug": "provider",
+      "heading": "Point OMP at the native lane",
+      "status": "passed",
+      "elapsed_seconds": 0.008,
+      "block_sha256": "8c26859406d141817561c79f112186af1192d5829092d3d64d59b13015b2bd35",
+      "executed_sha256": "8c26859406d141817561c79f112186af1192d5829092d3d64d59b13015b2bd35",
+      "substitution": null
+    },
+    {
+      "slug": "acceptance",
+      "heading": "Native lane acceptance",
+      "status": "passed",
+      "elapsed_seconds": 92.409,
+      "block_sha256": "448bc30260e120302ad01cdfdeec4b75b692951b48fe81f947fd7f51cb522eef",
+      "executed_sha256": "448bc30260e120302ad01cdfdeec4b75b692951b48fe81f947fd7f51cb522eef",
+      "substitution": null
+    }
+  ]
+}

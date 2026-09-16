@@ -1,0 +1,103 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.1",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "The RTX 4090 native component changed, so its documented route was run end to end from the published package: 7/7 blocks, downloading and installing v0.6.4-qwen38-4090-beta.1 from its public URLs against the manifest's hashes. Both RTX 5090 routes were re-run as well because their own text now names the v0.7.1 release directory, though that lane's component, image and deployment profile are unchanged. The Windows client route carries explicitly attributed evidence: its blocks are byte-identical and the client is unchanged.",
+  "document_sha256": "58c48bef319a87385ff624c9215ecff1518cc548625f99b44b2f0f78713f4b10",
+  "current_document_sha256": "58c48bef319a87385ff624c9215ecff1518cc548625f99b44b2f0f78713f4b10",
+  "executed_blocks_match_current": true,
+  "document_change": "The quickstart's release-directory references advanced to v0.7.1 and its component paragraph names the new RTX 4090 component; every extracted executable block hash equals the hash the runners executed, except the clone step, which the pre-cut run substitutes with the candidate commit as every pre-cut run does.",
+  "candidate_commit": "8992f185d15dfdd4d5ab42ebd9290de454482168",
+  "routes": {
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 537.465,
+      "receipt": "docs/measurements/2026-09-16-rtx4090-v071-native-route-run.json",
+      "note": "the fix's own acceptance: the route downloaded the newly published package (05685402\u2026, 572,639,774 bytes) and its support scripts from GitHub, verified them against the manifest, installed the lane, started and managed-stopped it, pointed OMP at it from an isolated profile, and passed the lane acceptance"
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 55.327,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v071-host-route-run.json",
+      "note": "published image 5e3e1558 on deployment profile qwen38-5090-v0.7.0, unchanged from v0.7.0"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 182.354,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v071-macos-route-run.json",
+      "note": "10/10 blocks from an isolated HOME against the container the host route started"
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "carried_from": "v0.6.9: every extracted block of this route is byte-identical apart from the release-directory pointer, the pinned client is unchanged, and this release changes the RTX 4090 component, which that route does not install"
+    }
+  },
+  "steps": [
+    {
+      "lane": "rtx4090-native",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-container-host",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-macos-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-windows-client",
+      "status": "carried"
+    }
+  ],
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-16-rtx5090-v070-profile-gates.json",
+    "prefill_tokens_per_second": 2203.0,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 133.03,
+    "agent_protocol": "passed",
+    "live_sibling_continuation_status": 200,
+    "two_long_sessions_reuse_lost": "0 of 8",
+    "note": "re-measured on the v0.7.0 configuration rather than carried: the deployment profile this release ships is what the public route now starts."
+  },
+  "qualification_receipt": {
+    "repository_path": "releases/v0.7.1/qualification/rtx4090.json",
+    "sha256": "6a525a3f690a04166a989b548ab78dee0961a2b5051f50366d39252937efeb12"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

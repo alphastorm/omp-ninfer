@@ -1,0 +1,62 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.1",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "variant": "rtx4090-windows-native",
+  "component_release_tag": "v0.6.4-qwen38-4090-beta.1",
+  "mode": "A real download-and-install of the published component, not an already-installed acceptance: the route fetched the package, SBOM, checksums, installer, controller, GPU-owner controller and state-protection script from their public URLs, verified each against the manifest, installed the lane under an administrators-only state root, started it, managed-stopped it, pointed OMP at it from an isolated profile, and passed the lane acceptance.",
+  "package": {
+    "name": "ninfer-rtx4090-native-v0.6.4-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "sha256": "05685402e647ece45810ad9f90c2c457ec1e3421cc0f72e0f0619825d810c088",
+    "bytes": 572639774
+  },
+  "installed_release_id": "qwen38-4090-native-v0.6.4-beta.1-736ac43a0a5d",
+  "steps": [
+    {
+      "slug": "client-install",
+      "status": "passed",
+      "elapsed_seconds": 43.055
+    },
+    {
+      "slug": "clone-and-verify",
+      "status": "substituted",
+      "elapsed_seconds": 3.906
+    },
+    {
+      "slug": "variant",
+      "status": "passed",
+      "elapsed_seconds": 0.004
+    },
+    {
+      "slug": "stage-and-install",
+      "status": "passed",
+      "elapsed_seconds": 325.607
+    },
+    {
+      "slug": "operate",
+      "status": "passed",
+      "elapsed_seconds": 72.476
+    },
+    {
+      "slug": "provider",
+      "status": "passed",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "slug": "acceptance",
+      "status": "passed",
+      "elapsed_seconds": 92.409
+    }
+  ],
+  "managed_stop": {
+    "outcome": "graceful",
+    "sessions_saved": 0,
+    "sessions_refused": 0,
+    "note": "no long session was live at the route's stop; the ceiling-session durability arm is the qualification receipt's own measurement"
+  },
+  "receipt": "docs/measurements/2026-09-16-rtx4090-v071-native-route-run.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

@@ -1,0 +1,35 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-container-host",
+  "release": "v0.7.1",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "58c48bef319a87385ff624c9215ecff1518cc548625f99b44b2f0f78713f4b10",
+  "started_utc": "2026-09-16T23:33:49Z",
+  "completed_utc": "2026-09-16T23:34:44Z",
+  "host_os": "Ubuntu 24.04.4 LTS",
+  "clone_commit": "8992f185d15dfdd4d5ab42ebd9290de454482168",
+  "status": "passed",
+  "executed_blocks_match_document": true,
+  "note": "2/2 documented blocks re-run because the route's own text now names the v0.7.1 release directory; the RTX 5090 component, image and deployment profile are unchanged from v0.7.0.",
+  "steps": [
+    {
+      "slug": "prepare",
+      "heading": "3. Prepare the model and key on the inference host",
+      "status": "passed",
+      "elapsed_seconds": 13.242,
+      "block_sha256": "b5ad7b63ad719aa56f135e0de84598cb9dfc924aedb7c04b2ab5f86841b14314",
+      "executed_sha256": "b5ad7b63ad719aa56f135e0de84598cb9dfc924aedb7c04b2ab5f86841b14314",
+      "substitution": null
+    },
+    {
+      "slug": "start",
+      "heading": "4. Start NInfer on the inference host",
+      "status": "passed",
+      "elapsed_seconds": 42.085,
+      "block_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "executed_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "substitution": null
+    }
+  ]
+}

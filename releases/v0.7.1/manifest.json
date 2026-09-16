@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.1",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "273871d9cf3209c5442c86aae33c99beff92fd638c0ff9c3a073a469bfcd5d74",
+    "summary_sha256": "f205e57dfbe15586632b07d4b425ccc814062cd6922b5a3c7ab3bc9db7b82033",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c70167c7cb157bc487daa396b57f6a10f073553/releases/v0.7.1/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -181,9 +181,7 @@
       "NInfer RTX 4090 native component v0.6.4-qwen38-4090-beta.1 (host-KV pool 4096 to 11264 MiB so restore admits a ceiling-sized session; export refuses a checkpoint this configuration could not restore)",
       "NInfer RTX 3090 native component (unchanged)"
     ],
-    "blockers": [
-      "external-install acceptance for v0.7.1 must be pinned to committed bytes before publication"
-    ],
+    "blockers": [],
     "external_installation_qualified": true
   }
 }

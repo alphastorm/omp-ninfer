@@ -1,0 +1,107 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-macos-client",
+  "release": "v0.7.1",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "58c48bef319a87385ff624c9215ecff1518cc548625f99b44b2f0f78713f4b10",
+  "started_utc": "2026-09-16T23:34:50Z",
+  "completed_utc": "2026-09-16T23:37:56Z",
+  "host_os": "macOS 26.6.2 arm64",
+  "clone_commit": "",
+  "status": "passed",
+  "executed_blocks_match_document": true,
+  "note": "10/10 blocks from an isolated HOME against the container the host route started: pinned client 18.0.9, tool turn, image input, nonce resume, the same nonce after a container restart, and an authenticated request refused with the tunnel closed.",
+  "steps": [
+    {
+      "slug": "client-install",
+      "heading": "2. Install the OMP beta on the Mac",
+      "status": "passed",
+      "elapsed_seconds": 10.769,
+      "block_sha256": "808f95967ee9aab3fbd1f167bdbcece1af50546c106ad7f565d522c00da2f505",
+      "executed_sha256": "808f95967ee9aab3fbd1f167bdbcece1af50546c106ad7f565d522c00da2f505",
+      "substitution": null
+    },
+    {
+      "slug": "tunnel",
+      "heading": "5. Open the tunnel from the Mac",
+      "status": "passed",
+      "elapsed_seconds": 4.261,
+      "block_sha256": "89d723de4acbbcd41e2a2430b615c6c15517c9f37f2db504ec925c17ee33e9b8",
+      "executed_sha256": "89d723de4acbbcd41e2a2430b615c6c15517c9f37f2db504ec925c17ee33e9b8",
+      "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination; foreground tunnel started in the background and kept open"
+    },
+    {
+      "slug": "key",
+      "heading": "6. Install the same key on the Mac",
+      "status": "passed",
+      "elapsed_seconds": 3.927,
+      "block_sha256": "82abb4c053ead673606f344899314b17a0dcae0d9baf3febd821439163cfcb58",
+      "executed_sha256": "82abb4c053ead673606f344899314b17a0dcae0d9baf3febd821439163cfcb58",
+      "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+    },
+    {
+      "slug": "provider",
+      "heading": "7. Add the OMP provider",
+      "status": "passed",
+      "elapsed_seconds": 0.113,
+      "block_sha256": "77dac1a96f5645732fab2be7fa208b266131f85995852fcb10c5aa528971797a",
+      "executed_sha256": "77dac1a96f5645732fab2be7fa208b266131f85995852fcb10c5aa528971797a",
+      "substitution": null
+    },
+    {
+      "slug": "fail-closed-config",
+      "heading": "7. Add the OMP provider",
+      "status": "passed",
+      "elapsed_seconds": 0.113,
+      "block_sha256": "11c5c38592fb37b7cd2684be4a826c4d07dbf5d2fe25d9774e8550fab979e281",
+      "executed_sha256": "11c5c38592fb37b7cd2684be4a826c4d07dbf5d2fe25d9774e8550fab979e281",
+      "substitution": null
+    },
+    {
+      "slug": "tool",
+      "heading": "Text and tool turn",
+      "status": "passed",
+      "elapsed_seconds": 15.498,
+      "block_sha256": "9deb640163ef3837a29bd7f9b69c92977ac920ae3b8be1bdd80efed4907110ff",
+      "executed_sha256": "9deb640163ef3837a29bd7f9b69c92977ac920ae3b8be1bdd80efed4907110ff",
+      "substitution": null
+    },
+    {
+      "slug": "vision",
+      "heading": "Image input",
+      "status": "passed",
+      "elapsed_seconds": 4.876,
+      "block_sha256": "f6eb896ba04cee021344bc140e09011223e27592916877714de830d71a6fef46",
+      "executed_sha256": "f6eb896ba04cee021344bc140e09011223e27592916877714de830d71a6fef46",
+      "substitution": null
+    },
+    {
+      "slug": "resume",
+      "heading": "Stateful follow-up and OMP resume",
+      "status": "passed",
+      "elapsed_seconds": 8.031,
+      "block_sha256": "680fc78d4e5b893047facff742157723fec8715487deec14f6649adb7d767783",
+      "executed_sha256": "680fc78d4e5b893047facff742157723fec8715487deec14f6649adb7d767783",
+      "substitution": null
+    },
+    {
+      "slug": "survives-restart",
+      "heading": "Session survives the server process",
+      "status": "passed",
+      "elapsed_seconds": 132.999,
+      "block_sha256": "aa93f908c33098ac593856cfb8e26fb25d69bc3759392f3a2b75d10f497e0320",
+      "executed_sha256": "aa93f908c33098ac593856cfb8e26fb25d69bc3759392f3a2b75d10f497e0320",
+      "substitution": "USER@RUNTIME_HOST replaced by the operator's SSH destination"
+    },
+    {
+      "slug": "fail-closed",
+      "heading": "Fail closed",
+      "status": "passed",
+      "elapsed_seconds": 1.767,
+      "block_sha256": "200150e3b940da6ddd88ecf836624a16c5ff46b572a1f21e505c1f014234f893",
+      "executed_sha256": "200150e3b940da6ddd88ecf836624a16c5ff46b572a1f21e505c1f014234f893",
+      "substitution": "tunnel stopped before this block, as the prose instructs"
+    }
+  ]
+}
