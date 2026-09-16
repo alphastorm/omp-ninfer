@@ -68,7 +68,7 @@
       "status": "passed",
       "repository_path": "releases/v0.7.1/acceptance/composed-external-installation.json",
       "sha256": "dc5fc30dfb9e5473b222280a8d8130896ef44b7e1ac7604f4f2ef53bfaee42d0",
-      "public_url": null,
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a71bae6a8c4609d8a8d5be4bc3b97756365ccb04/releases/v0.7.1/acceptance/composed-external-installation.json",
       "note": "Re-run for this release because the RTX 4090 component changed: its documented route downloaded and installed the newly published package from its public URLs (7/7 blocks) and both RTX 5090 routes were re-run on the unchanged image.",
       "as_of": "2026-09-16",
       "operator_class": "owner-operated tester-equivalent",
