@@ -7,7 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.10`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.0`, GitHub `Latest` |
 | Development | Product candidates with no public install or support claim | No newer product candidate published |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
@@ -27,9 +27,46 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.7.0 public release (two long sessions keep their reuse)
+
+- Product release: `alphastorm/omp-ninfer@v0.7.0`, GitHub `Latest`. Published-component
+  [composed acceptance](../releases/v0.7.0/acceptance/composed-external-installation.json)
+  passed; both RTX 5090 documented routes were re-run on the new serving configuration
+  ([routes](../releases/v0.7.0/acceptance/documented-routes.json)).
+- No component, image, model, client, or KV dtype changed from `v0.6.9`; the RTX 5090 serving
+  configuration did. Deployment profile `qwen38-5090-v0.7.0`, configuration identity
+  `762e6bf4…` (was `5eb8a557…` from v0.6.2 through v0.6.10), Host KV pool 8 GiB to 16 GiB.
+  Checkpoints written under the previous identity do not carry across.
+- Two sessions at the 131,072-token ceiling keep prefix reuse: 0 of 8 continuations and forks
+  lost, each reusing about 125,900 cached tokens in 1.6-3.5 s, against 4 of 4 lost to a 58 s root
+  re-prefill on the shipped pool. Entering the steady state from an occupied pool costs one
+  re-prefill per session, once
+  ([EXP-041](measurements/2026-09-16-two-long-session-capacity.json)).
+- The lane was requalified on the new configuration rather than carried
+  ([receipt](../releases/v0.7.0/qualification/rtx5090.json)): exact 130,048-token retrieval at
+  2,203.0 tok/s, 2,048-token decode at 133.03 tok/s wall, the agent protocol across a restart,
+  hot sibling forks at two template sizes before and after a restart, warm arrival in both
+  orders, and a 4.51 GB checkpoint restored in 3.5-3.7 s. VRAM 28,144 MiB.
+- New host requirement: the profile declares `runtime_host.minimum_runtime_memory_mib` 28,672
+  and `examples/manual-tunnel/start-ninfer.sh` refuses a host that cannot back the pool, naming
+  the `.wslconfig` remedy. The same configuration in a 24 GiB WSL utility VM is OOM-killed
+  mid-request (container exit 137). A host that cannot meet the floor runs `v0.6.10`.
+- Both 8-bit KV dtypes fix the same reuse loss and were rejected on quality, re-scored on one
+  runtime against the private role corpus: fp8 and int8 each drop the redaction control pass
+  rate from 0.750 to 0.625 and add a secret leak; int8 also adds unsupported claims and critical
+  misses. fp8 remains the lever to revisit if an artifact closes the grounding gap.
+- Stated boundary, not a passing gate: with two sessions at the ceiling both checkpoint
+  (9.24 GB each) and a graceful stop saves both, but after a restart one of the two is declined -
+  `the engine did not accept the checkpointed continuation` - and re-prefills from its
+  transcript. Sessions below the ceiling are unaffected. On the RTX 4090 native lane the same
+  workload loses every continuation and its automatic checkpoints are refused while both sessions
+  are live; that pool change and the restore-admission work are follow-ups.
+- Support boundary unchanged: prerelease, no SLA, one owner-operated machine per lane, one active
+  request per qualified profile, no silent cloud fallback.
+
 ### v0.6.10 public release (the documented route refuses a launch the engine cannot stage)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.10`, GitHub `Latest`. Published-component
+- Product release: `alphastorm/omp-ninfer@v0.6.10`, superseded by v0.7.0. Published-component
   [composed acceptance](../releases/v0.6.10/acceptance/composed-external-installation.json)
   passed; both RTX 5090 documented routes were re-run
   ([routes](../releases/v0.6.10/acceptance/documented-routes.json)).
