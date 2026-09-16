@@ -6,11 +6,11 @@
   "status": "closed",
   "release": "v0.6.9",
   "component": "v0.6.5-qwen38-5090-beta.1 published image d346174a is unchanged by this window; the appliance lane under test runs the v0.5.1 container profile qwen38-5090-v0.5.1 (image 12ef2d9e, binary 71edc2f6)",
-  "scope": "RTX 5090 appliance (nyc-pc) container lane and the published manual-tunnel route's launcher. Four real cold reboots of the appliance plus four scripted supervisor exercises. No release component, model, or serving configuration changed.",
+  "scope": "RTX 5090 appliance (the RTX 5090 appliance) container lane and the published manual-tunnel route's launcher. Four real cold reboots of the appliance plus four scripted supervisor exercises. No release component, model, or serving configuration changed.",
   "question": "After a host reboot, does the RTX 5090 container lane come back without an operator - and if not, why did the supervisor written for that exact purpose after 2026-09-09 fail to bring it back?",
   "answer": "It did not, for two reasons that are both now fixed and proven. (1) Docker Desktop stages a container's WSL bind mounts once, when the container is created, for a distro that is running when the engine initialises. Nothing starts that distro at boot, so after a reboot the existing lane container cannot use its staging: `docker start` fails with `error mounting .../docker-desktop-bind-mounts/Ubuntu-24.04/<hash> ... not a directory`, which Docker records as exit 127 with RestartCount 0 and never retries. (2) The supervisor logged that failure as `docker start ... failed:` with an empty reason, because it joined the child's stdout while docker writes failures to stderr, and its only escalation was a five-minute exit 30 nobody was watching. Measured while diagnosing it, a start attempted against replaced staging can be worse than a failure: the container runs with empty file mounts, the server rejects its own empty --api-key, prints usage text, exits 1, and `unless-stopped` turns that into a crash loop (14 restarts observed). After the fix, four consecutive reboots recovered the lane unattended, the last in 158 s.",
   "outage_of_record": {
-    "lane": "ninfer-5090-v051p on nyc-pc",
+    "lane": "ninfer-5090-v051p on the RTX 5090 appliance",
     "host_boot_utc": "2026-09-15T05:32:27Z",
     "container_exit_utc": "2026-09-15T05:33:16Z",
     "container_exit_code": 127,
@@ -23,10 +23,10 @@
   },
   "mechanism": {
     "bind_sources": [
-      "/home/sunil/builds/models/qwen3_8_27b.ninfer -> /models/model.ninfer",
-      "/home/sunil/services/ninfer-5090/secrets/api_key -> /run/secrets/ninfer_api_key",
-      "/home/sunil/services/ninfer-5090/logs -> /logs",
-      "/home/sunil/services/ninfer-5090/checkpoints -> /checkpoints"
+      "<model artifact on the runtime host> -> /models/model.ninfer",
+      "<api key file on the runtime host> -> /run/secrets/ninfer_api_key",
+      "<log directory on the runtime host> -> /logs",
+      "<checkpoint store on the runtime host> -> /checkpoints"
     ],
     "staging_path_shape": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu-24.04/<sha256>",
     "hard_shape": "start refused: mount src=<staging> dst=/models/model.ninfer flags=MS_BIND|MS_REC: not a directory; recorded as exit 127, RestartCount 0",
@@ -90,7 +90,7 @@
     "stale_staging": "container stopped and its WSL distro terminated - the outage state without a reboot; the substrate supervisor then the lane supervisor recovered it in 51 s, both task results 0, and no failure line was logged without a reason"
   },
   "native_lane_reboot": {
-    "scope": "RTX 4090 native Windows lane (sf-pc), component qwen38-4090-native-v0.6.3-beta.1 (patch stack 696e78c7), started for this window through its documented controller",
+    "scope": "RTX 4090 native Windows lane (the RTX 4090 host), component qwen38-4090-native-v0.6.3-beta.1 (patch stack 696e78c7), started for this window through its documented controller",
     "question": "The quickstart says `Control-Release.ps1 -Action Start` brings the native lane back after a reboot. No receipt had ever exercised that with a real reboot, or shown whether a published session survives one.",
     "planted": "a session with an explicit checkpoint published before the reboot: 314,814,110 bytes, generation 1789554502097-0, 140 frontier tokens, state available",
     "unattended_return": "none within 240 s of ssh answering - correct for this route, which declares no boot start",
@@ -104,6 +104,6 @@
     "documentation": "docs/TROUBLESHOOTING.md names both failure shapes with their exact signatures and states that recovery is recreation (`stop-ninfer.sh` then `start-ninfer.sh`), not `docker start`; docs/QUICKSTART.md says the container route does not return by itself after a reboot and points at that entry.",
     "claims_unchanged": "No published claim changes. The route was already documented as `--restart no`, and the durable store still carries sessions across recreation; nothing here is a new throughput, latency, or availability claim, and no release component, model, or serving configuration changed."
   },
-  "window_hygiene": "Production was recreated and verified healthy before, between, and after every window (health 200, identity qwen38-5090-v0.5.1, binary 71edc2f6, KV capacity 131,072). The four reboots were authorised for this work. The appliance's supervisors and their declaration were installed from the private repository's sources, and the staged copies under C:\\Users\\Sunil\\OMP\\windows-hosts-staging match them.",
+  "window_hygiene": "Production was recreated and verified healthy before, between, and after every window (health 200, identity qwen38-5090-v0.5.1, binary 71edc2f6, KV capacity 131,072). The four reboots were authorised for this work. The appliance's supervisors and their declaration were installed from the private repository's sources, and the staged copies under the host's staging directory match them.",
   "raw_prompts_outputs_or_secrets_included": false
 }
