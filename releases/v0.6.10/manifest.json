@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.6.10",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -36,7 +36,7 @@
       "artifact_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/1b45a24b8e20dc3af5da9cf667a8c17c32cda5f0/compatibility.json",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0ee06740086e8a587caddc71934bc55608796482/compatibility.json",
       "compatibility_sha256": "7b71c0b997820b52354a516ac770e963d61ac338339fbd35f87b26a3bbb89434"
     },
     "ninfer": {
@@ -96,7 +96,7 @@
         "qualification": {
           "summary": "releases/v0.6.10/qualification/rtx3090.json",
           "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/1b45a24b8e20dc3af5da9cf667a8c17c32cda5f0/releases/v0.6.10/qualification/rtx3090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0ee06740086e8a587caddc71934bc55608796482/releases/v0.6.10/qualification/rtx3090.json"
         },
         "checksums_sha256": "e215f2fbf15e5de57ad1d4f09b59ef5f7ed1f63d03c4aa313748620e31c07051"
       },
@@ -132,7 +132,7 @@
         "qualification": {
           "summary": "releases/v0.6.10/qualification/rtx4090.json",
           "sha256": "48f0142c1ac89e49f39df998cee16360fffed6c2a6fc7b58b9ce3a625fbe75f2",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/1b45a24b8e20dc3af5da9cf667a8c17c32cda5f0/releases/v0.6.10/qualification/rtx4090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0ee06740086e8a587caddc71934bc55608796482/releases/v0.6.10/qualification/rtx4090.json"
         },
         "checksums_sha256": "5259e4c05faa1ae1ee59bce70d1ad79b11ccf6e674b07128d4331d56d94585e0",
         "checksums_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.3-qwen38-4090-beta.1/SHA256SUMS"
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "e6e5c695b0ce232d1c1b342e025694f8502fa9a1a7741b854336479d4055017b",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/1b45a24b8e20dc3af5da9cf667a8c17c32cda5f0/releases/v0.6.10/qualification.json",
+    "summary_sha256": "6d90b73a649fb1ee156f9a12a97c12c751467358128cbe824b3103658ae9b28a",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0ee06740086e8a587caddc71934bc55608796482/releases/v0.6.10/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -181,8 +181,6 @@
       "NInfer RTX 4090 native component v0.6.3-qwen38-4090-beta.1 (unchanged)",
       "NInfer RTX 3090 native component (unchanged)"
     ],
-    "blockers": [
-      "external-install acceptance for v0.6.10 must be pinned to committed bytes before publication"
-    ]
+    "blockers": []
   }
 }

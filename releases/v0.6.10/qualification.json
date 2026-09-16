@@ -5,7 +5,7 @@
   "as_of": "2026-09-16",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "OMP NInfer v0.6.9 qualifies both mainline runtimes from source 696e78c7: RTX 5090 component v0.6.5-qwen38-5090-beta.1, published image 5e3e1558, and RTX 4090 native v0.6.3-beta.1. The semantic Qwen parser port and bounded-work remediation preserve the wire shape, custom raw input, history and stream ownership. Model, serving settings, OMP 18.0.9 and RTX 3090 v0.2.5-beta.1 are unchanged. Both owner hardware lanes were qualified on 2026-09-13; public native already-installed acceptance and documented RTX 5090 host/macOS routes passed against published components.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -69,7 +69,20 @@
       "repository_path": "releases/v0.6.10/acceptance/composed-external-installation.json",
       "sha256": "605911cd0e53fb399b84638d122c1809ca03074c41c3a472445823b483a9472b",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/17de2b4338523af530c92cf2d22934a4839db0a7/releases/v0.6.10/acceptance/composed-external-installation.json",
-      "note": "Re-run for this release because the container route's launcher changed: documented host route 2/2 and macOS client route 10/10 blocks from candidate 5494061 against the unchanged published image, with the RTX 4090 native installer acceptance carried from v0.6.9."
+      "note": "Re-run for this release because the container route's launcher changed: documented host route 2/2 and macOS client route 10/10 blocks from candidate 5494061 against the unchanged published image, with the RTX 4090 native installer acceptance carried from v0.6.9.",
+      "as_of": "2026-09-16",
+      "operator_class": "owner-operated tester-equivalent",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "7b71c0b997820b52354a516ac770e963d61ac338339fbd35f87b26a3bbb89434",
+      "release": "v0.6.10"
     },
     "documented_route_acceptance": {
       "status": "passed",
@@ -163,7 +176,5 @@
     }
   },
   "interpretation": "No component, model, client, or serving configuration changed, so no lane requalification was required or performed: the RTX 5090 behavioural qualification and the RTX 4090/3090 lane receipts stand as recorded for v0.6.9 under the same component identities. What this release changes is the documented container route's handling of a bind-mount staging the engine cannot satisfy, and both RTX 5090 documented routes were re-run end to end to accept it.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.5-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "remaining_release_gates": []
 }
