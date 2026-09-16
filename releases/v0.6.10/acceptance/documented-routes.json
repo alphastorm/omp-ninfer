@@ -1,0 +1,96 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.6.10",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "No component, model, or serving configuration changed. The container route's launcher gained a bind-staging preflight and its documentation gained the post-reboot failure signatures, so both RTX 5090 routes were re-run from candidate 5494061 against the unchanged published image 5e3e1558. The Windows client and RTX 4090 native routes carry explicitly attributed v0.6.9 evidence: their blocks are byte-identical and no component moved.",
+  "document_sha256": "3ad617e14cf8eaad8dd28c9e545c010fb71742b86b3b52c2ecd30bfe237cd889",
+  "current_document_sha256": "3ad617e14cf8eaad8dd28c9e545c010fb71742b86b3b52c2ecd30bfe237cd889",
+  "executed_blocks_match_current": true,
+  "document_change": "Release-status prose only after execution; every extracted executable block hash still equals the hash the runners executed.",
+  "candidate_commit": "549406138a2f30434d7991d2c2faca6abdeecdf1",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 45.457,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v0610-host-route-run.json",
+      "note": "Clone at candidate 5494061. The documented prepare/start blocks accepted published image 5e3e1558 and the new bind-staging preflight, which compares the model byte count seen inside a throwaway container with the host's before the server loads."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 166.387,
+      "receipt": "docs/measurements/2026-09-16-rtx5090-v0610-macos-route-run.json",
+      "note": "10/10 blocks from an isolated HOME against the container the host route started: pinned client 18.0.9 installed and reported, tool turn, image input, nonce resume, the same nonce after a container restart, and an authenticated request refused with the tunnel closed."
+    },
+    "rtx5090-windows-client": {
+      "status": "carried",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 37.514,
+      "installed_client_setting": "startup.checkUpdate = false, read back from the client the route installed",
+      "note": "clone substituted with the candidate commit and verified installable, as every pre-cut run is",
+      "carried_from": "v0.6.9: every extracted block of this route is byte-identical, no component changed, and the only repository change it could execute - the container route's launcher - was accepted by the host route in this window"
+    },
+    "rtx4090-native": {
+      "status": "carried",
+      "steps": [
+        "public-assets",
+        "checksum-set",
+        "installer",
+        "smoke",
+        "restore"
+      ],
+      "receipt": "releases/v0.6.9/acceptance/rtx4090-public-install.json",
+      "note": "Downloaded public installer accepted exact already-installedv0.6.3-beta.1 bytes; no pointer change or start request. Served identity matched, anonymous401, ACCEPTED completion113.5ms; stopped450W state restored.",
+      "carried_from": "v0.6.9: blocks and component unchanged. A real reboot of that host in this window confirmed its documented recovery separately (docs/measurements/2026-09-16-lane-reboot-survivability.json)"
+    }
+  },
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "Published digest 5e3e1558 pulled with an empty Docker configuration - no registry credentials - and served the manifest's binary b8a0a2c3."
+    },
+    "documented_blocks_verbatim": {
+      "status": "passed",
+      "note": "Every executed block hash equals its extracted hash in both receipts; the two reader actions without a verbatim form (the SSH destination placeholder and the foreground tunnel) are recorded as substitutions."
+    },
+    "bind_staging_preflight": {
+      "status": "passed",
+      "note": "New in this release: the launcher proves the route's mounts inside a throwaway container before loading 18 GB. It passed on the correctly staged route here, and refuses a route staged incompletely (tests/test_manual_tunnel_scripts.py, and the mechanism in EXP-040)."
+    }
+  },
+  "public_route_gates": {
+    "receipt": "docs/measurements/2026-09-13-rtx5090-v069-public-route-profile-gates.json",
+    "prefill_tokens_per_second": 2153.6,
+    "exact_retrieval": true,
+    "decode_tokens_per_second_wall": 133.76,
+    "agent_protocol": "passed",
+    "live_sibling_continuation_status": 200,
+    "carried_from": "v0.6.9: the published image, its configuration identity and the deployment profile are unchanged by this release, so its profile gates stand as recorded rather than re-measured."
+  },
+  "qualification_receipt": "releases/v0.6.10/qualification/rtx5090.json",
+  "raw_prompts_outputs_or_secrets_included": false
+}

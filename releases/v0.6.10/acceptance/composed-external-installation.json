@@ -1,0 +1,63 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.6.10",
+  "as_of": "2026-09-16",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Published-component external installation acceptance for a release that changes no component: RTX 5090 v0.6.5-beta.1 re-accepted on the documented host route and the full macOS client route from candidate 5494061 (image 5e3e1558 pulled without registry credentials, pinned client 18.0.9, tool, image input, resume, resume after a server restart, fail-closed). The RTX 4090 native component's downloaded-installer acceptance carries its v0.6.9 receipt unchanged; a real reboot of that host in this window separately confirmed its documented recovery and that a checkpointed session resumes.",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "Pinned OMP18.0.9 bytes unchanged; parser semantics advance behind the preserved wire shape. Current macOS route and native Windows golden-equivalent tool turn exercised these bytes against the new runtime."
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "868016f30911ac04ff6ff054b1b8dc582fc6222d37626b541e336632411e297a",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP client bytes and the three platform client receipts are unchanged from v0.4.7; the client was installed on the Mac by the documented block from its public URL and hashed.",
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "published digest 5e3e1558 pulled anonymously and served binary b8a0a2c3"
+    },
+    "documented_host_route": {
+      "status": "passed",
+      "note": "2/2 blocks, receipt docs/measurements/2026-09-16-rtx5090-v0610-host-route-run.json"
+    },
+    "documented_macos_route": {
+      "status": "passed",
+      "note": "10/10 blocks from an isolated HOME, receipt docs/measurements/2026-09-16-rtx5090-v0610-macos-route-run.json"
+    },
+    "rtx4090_public_install": {
+      "status": "carried",
+      "note": "v0.6.9 receipt acceptance/rtx4090-public-install.json; component and blocks unchanged"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "evidence": {
+    "tools": "macOS route step `tool`: the model used a file-reading tool and returned the marker line",
+    "vision": "macOS route step `vision`: image input described from assets/icon-512.png",
+    "stateful_resume": "macOS route step `resume`: nonce COBALT-493817 returned on a continued session",
+    "fail_closed": "macOS route step `fail-closed`: an authenticated request failed with the tunnel closed",
+    "runtime_incumbent_restored": "the appliance's production container was recreated from its pinned relaunch script and verified healthy after the window (identity qwen38-5090-v0.5.1, binary 71edc2f6)"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}
