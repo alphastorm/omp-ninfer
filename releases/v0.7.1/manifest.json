@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.1",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c70167c7cb157bc487daa396b57f6a10f073553/compatibility.json",
-      "compatibility_sha256": "62600613d099c47d58667ff5b890a5509825837fade4885ba4bd16c7f1e2f28f"
+      "compatibility_sha256": "fb959c00f6b70e6c06ea6c5b2d4f5708037fe015e8e5dd2c2525f8aa643039fc"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
