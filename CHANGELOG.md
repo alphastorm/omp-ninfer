@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.10] - 2026-09-16
+
+No component, model, client, or serving configuration changed. Both RTX 5090 documented routes
+were re-run against the unchanged published image: host 2/2 blocks and macOS 10/10 blocks
+([composed receipt](releases/v0.6.10/acceptance/composed-external-installation.json),
+[routes](releases/v0.6.10/acceptance/documented-routes.json)).
+
 ### Fixed
 
 - `examples/manual-tunnel/start-ninfer.sh` proves the route's bind mounts inside a throwaway
@@ -1152,7 +1159,9 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.8...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...HEAD
+[0.6.10]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.9...v0.6.10
+[0.6.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.8...v0.6.9
 [0.6.8]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.7...v0.6.8
 [0.6.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.5...v0.6.6

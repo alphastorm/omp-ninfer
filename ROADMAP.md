@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.6.9` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.6.10` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,9 +11,12 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.6.9
+## Where this is now — v0.6.10
 
-The `v0.6.9` release keeps the two mainline lanes on one reviewed source (`696e78c7`):
+The `v0.6.10` release changes no component: it makes the documented container route refuse a
+launch whose bind mounts the engine cannot stage, and names the two ways a reboot breaks that
+route. The `v0.6.9` components it ships keep the two mainline lanes on one reviewed source
+(`696e78c7`):
 RTX 5090 runtime `v0.6.5-qwen38-5090-beta.1` and RTX 4090 native
 `v0.6.3-qwen38-4090-beta.1`, both published and lane-qualified. It independently implements
 the semantics of upstream Qwen tool-parser fixes `3b50962b` and `0c5d570c` without taking the
@@ -368,6 +371,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.6.10` | The documented container route refuses a launch whose bind mounts the engine cannot stage - proven inside a throwaway container before the 18 GB load - and both post-reboot failure signatures are named with recreation as the recovery; no component changed, both RTX 5090 routes re-run (EXP-040) |
 | `v0.6.9` | Both mainline lanes on source 696e78c7: independent Qwen parser semantic port, malformed-region and deep-union remediation, preserved custom/history/stream contracts; both lane qualifications and published-component acceptance passed |
 | `v0.6.8` | Both mainline lanes on source 68a0722f: RTX 5090 runtime v0.6.4 and RTX 4090 native v0.6.2-beta.1; the live-sibling continuation 500 fixed at source (ninfer#43); GDN gating grids partitioned by device residency; the 4090 C1 fixture's trajectory sensitivity measured and recorded (EXP-037) |
 | `v0.6.7` | RTX 5090 runtime v0.6.3: selective backport of 18 upstream engine commits (MoE/GDN/vocab kernels, sparse-MoE and GDN record fixes, cpp-httplib 0.54.1), every lane gate within noise of v0.6.2; the deferred upstream families named with reasons |

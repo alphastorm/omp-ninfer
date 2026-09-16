@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.6.9](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.6.10](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -64,16 +64,17 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.6.9 is the current public release.** If you own a qualified card, the
-> [v0.6.9 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.9/docs/QUICKSTART.md)
+> **v0.6.10 is the current public release.** If you own a qualified card, the
+> [v0.6.10 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.6.10/docs/QUICKSTART.md)
 > is the supported onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
 > explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
-> Both parser runtime components passed lane qualification and published-component acceptance:
-> RTX 5090 documented host 2/2 and macOS 10/10 blocks; RTX 4090 public-URL already-installed
-> acceptance. [Composed receipt](releases/v0.6.9/acceptance/composed-external-installation.json).
+> Components are unchanged from v0.6.9 and both RTX 5090 documented routes were re-run for this
+> release: host 2/2 and macOS 10/10 blocks, including tool use, image input, resume, resume
+> after a server restart, and a refused request with the tunnel closed.
+> [Composed receipt](releases/v0.6.10/acceptance/composed-external-installation.json).
 
 ## What this is — and isn't
 
@@ -144,6 +145,16 @@ Historical v0.6.8 profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
+The **v0.6.10 release** changes no component: it makes the documented container route refuse a
+launch whose bind mounts the engine cannot stage. Docker Desktop stages those mounts once, at
+container creation, so after the WSL distro holding them restarts - every reboot does - the
+existing container either refuses to start (`not a directory`, exit `127` with `RestartCount 0`)
+or starts with empty mounts until the server rejects its own empty `--api-key` and a restart
+policy loops on it. `start-ninfer.sh` now proves the mounts inside a throwaway container before
+loading 18 GB, and recovery here is recreation rather than `docker start`.
+[Release notes](releases/v0.6.10/NINFER_RELEASE_NOTES.md) ·
+[EXP-040](docs/measurements/2026-09-16-lane-reboot-survivability.json).
+
 The **v0.6.9 release** moves both mainline lanes to source `696e78c7` for the independently
 implemented Qwen tool-parser semantic port, without rebasing the serve adapters. The RTX 5090
 lifecycle candidate measured exact 130,048-token retrieval at **2,193.3 tok/s** and 2,048-token
@@ -183,10 +194,10 @@ machine and profile, not universal GPU claims.
 Pick your lane: the RTX 5090 container route needs Docker with the NVIDIA runtime on Windows 11 +
 WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned packages. Every
 route needs one published OMP client and about 40 GiB free disk.
-Use the exact v0.6.9 tagged guide and manifest together; do not mix releases.
+Use the exact v0.6.10 tagged guide and manifest together; do not mix releases.
 
 ```powershell
-git clone --branch v0.6.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.6.10 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -252,7 +263,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.6.9 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.6.10 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard

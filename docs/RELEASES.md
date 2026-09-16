@@ -7,7 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.9`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.6.10`, GitHub `Latest` |
 | Development | Product candidates with no public install or support claim | No newer product candidate published |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
@@ -27,9 +27,40 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.6.10 public release (the documented route refuses a launch the engine cannot stage)
+
+- Product release: `alphastorm/omp-ninfer@v0.6.10`, GitHub `Latest`. Published-component
+  [composed acceptance](../releases/v0.6.10/acceptance/composed-external-installation.json)
+  passed; both RTX 5090 documented routes were re-run
+  ([routes](../releases/v0.6.10/acceptance/documented-routes.json)).
+- No component, model, client, or serving configuration changed from `v0.6.9`, so no lane
+  requalification was required: RTX 5090 `v0.6.5-qwen38-5090-beta.1` (image
+  `sha256:5e3e1558…`), RTX 4090 native `v0.6.3-qwen38-4090-beta.1`, and the RTX 3090 component
+  all stand under their v0.6.9 identities and receipts.
+- `examples/manual-tunnel/start-ninfer.sh` proves the route's bind mounts inside a throwaway
+  container before loading the 18 GB artifact and refuses a route the engine has staged
+  incompletely. Docker Desktop stages those mounts once, at creation, so after the WSL distro
+  holding them restarts - which every reboot does - an existing container either refuses to start
+  (`not a directory`, exit `127` with `RestartCount 0`) or starts with empty mounts until the
+  server rejects its own empty `--api-key` and a restart policy loops on it.
+- Recovery on this route is recreation, not `docker start`: `stop-ninfer.sh` then the same
+  `start-ninfer.sh`, which the durable store makes a continuation. Both signatures and the
+  recovery are in [troubleshooting](TROUBLESHOOTING.md#the-container-exists-but-will-not-start-after-a-host-reboot).
+- Acceptance on 2026-09-16: documented host route 2/2 blocks
+  ([receipt](measurements/2026-09-16-rtx5090-v0610-host-route-run.json)) and the macOS client
+  route 10/10 blocks from an isolated HOME
+  ([receipt](measurements/2026-09-16-rtx5090-v0610-macos-route-run.json)) - pinned client
+  18.0.9, tool turn, image input, nonce resume, the same nonce after a container restart, and an
+  authenticated request refused with the tunnel closed. The Windows client and RTX 4090 native
+  routes carry explicitly attributed v0.6.9 evidence; their blocks are byte-identical.
+- Field evidence for the class: [EXP-040](measurements/2026-09-16-lane-reboot-survivability.json)
+  records the owner appliance's 26 h 51 min outage, four authorised reboots recovering the lane
+  unattended (282 s, 646 s, 442 s, 158 s), and the first receipt of the RTX 4090 native lane's
+  documented post-reboot start with its checkpointed session resuming exactly.
+
 ### v0.6.9 public release (Qwen tool-parser semantic port)
 
-- Product release: `alphastorm/omp-ninfer@v0.6.9`, GitHub `Latest`. Published-component
+- Product release: `alphastorm/omp-ninfer@v0.6.9`, superseded by v0.6.10. Published-component
   [composed acceptance](../releases/v0.6.9/acceptance/composed-external-installation.json) passed.
 - Published components: RTX 5090 `v0.6.5-qwen38-5090-beta.1`, image
   `sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8`; RTX 4090

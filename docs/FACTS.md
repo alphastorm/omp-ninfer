@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-13 · Current stable release: **v0.6.9**
+Last verified: 2026-09-16 · Current stable release: **v0.6.10**
 
 Public-release claims on this page are bound to the
-[v0.6.9 release manifest](../releases/v0.6.9/manifest.json) and its qualification receipts.
+[v0.6.10 release manifest](../releases/v0.6.10/manifest.json) and its qualification receipts.
 Candidate lane measurements and published-route acceptance remain separately attributed below.
 
 ## What it is
@@ -46,6 +46,27 @@ All of these should be materially true:
 | RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.5 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.9 |
 | RTX 4090 | native Windows service | 131,072 | v0.6.3-beta.1 lane on the mainline runtime (source 696e78c7, shared with the 5090's v0.6.5) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.9 |
 | RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.9) |
+
+## v0.6.10 — the documented route refuses a launch the engine cannot stage
+
+- No component, model, client, or serving configuration changed from `v0.6.9`; no lane
+  requalification was required or performed.
+- Docker Desktop stages a container's bind mounts once, at creation, from the filesystem those
+  paths live on. After that filesystem's WSL distro restarts - which every host reboot does - an
+  existing container either refuses to start (`not a directory` against the staging placeholder,
+  recorded as exit `127` with `RestartCount 0`, which no restart policy retries) or starts with
+  empty file mounts until the server rejects its own empty `--api-key`, prints usage and exits `1`.
+- `examples/manual-tunnel/start-ninfer.sh` proves the mounts inside a throwaway container before
+  loading the 18 GB artifact and refuses with what that container saw. Recovery on this route is
+  recreation - `stop-ninfer.sh` then the same `start-ninfer.sh` - which the durable store makes a
+  continuation rather than a loss.
+- Acceptance re-ran both RTX 5090 documented routes from the candidate: host 2/2 blocks and macOS
+  10/10 blocks against the unchanged published image
+  ([routes](../releases/v0.6.10/acceptance/documented-routes.json)).
+- [EXP-040](measurements/2026-09-16-lane-reboot-survivability.json) records the owner appliance's
+  26 h 51 min outage from this cause, four authorised reboots recovering the lane unattended, and
+  the first receipt of the RTX 4090 native lane's documented post-reboot start with its
+  checkpointed session resuming exactly.
 
 ## v0.6.9 — Qwen parser semantic port
 
@@ -182,7 +203,7 @@ ordinary in-process follow-up.
 
 ## Primary evidence
 
-[Public release manifest](../releases/v0.6.9/manifest.json) ·
+[Public release manifest](../releases/v0.6.10/manifest.json) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
 [Security model](SECURITY.md) · [Quickstart](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)
