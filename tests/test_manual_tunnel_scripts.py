@@ -121,7 +121,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         self.assertIn("release manifest is not installable", result.stderr)
 
     def launch_with_fakes(
-        self, root: Path, docker_script: str, mutate_profile=None
+        self, root: Path, docker_script: str, mutate_profile=None, probe: dict | None = None
     ) -> tuple[subprocess.CompletedProcess[str], Path, dict]:
         """Run the launcher against a synthetic release with a fake docker on PATH; the fake
         captures the `run` argv the launcher would hand to Docker. The synthetic manifest
@@ -158,6 +158,13 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         environment["DOCKER_ARGUMENT_CAPTURE"] = str(capture)
         environment["EXPECTED_BINARY_SHA256"] = manifest["components"]["ninfer"]["server_binary_sha256"]
         environment["EXPECTED_MODEL_SHA256"] = manifest["components"]["model"]["artifact_sha256"]
+        # What the fake docker reports from inside the bind-staging probe container. The defaults
+        # are a correctly staged route; a test overrides them to stage one incompletely.
+        answers = {"key_bytes": str(len("test-key\n")), "store": "directory"}
+        answers.update(probe or {})
+        environment["EXPECTED_MODEL_BYTES"] = str(manifest["components"]["model"]["artifact_bytes"])
+        environment["PROBE_KEY_BYTES"] = answers["key_bytes"]
+        environment["PROBE_STORE"] = answers["store"]
         result = subprocess.run(
             [
                 "bash",
@@ -176,6 +183,13 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         )
         return result, capture, manifest
 
+    STAGING_PROBE_BRANCH = (
+        "    if [ \"${argument#*model=%s key=%s}\" != \"$argument\" ]; then\n"
+        "      printf 'model=%s key=%s store=%s\\n' \"$EXPECTED_MODEL_BYTES\" \"$PROBE_KEY_BYTES\" \"$PROBE_STORE\"\n"
+        "      exit 0\n"
+        "    fi\n"
+    )
+
     CAPTURING_DOCKER = (
         "#!/bin/sh\n"
         "if [ \"$1:$2\" = \"container:inspect\" ]; then exit 1; fi\n"
@@ -190,6 +204,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         "      printf 'NVIDIA GeForce RTX 5090, 32607 MiB, 12.0\\n'\n"
         "      exit 0\n"
         "    fi\n"
+        + STAGING_PROBE_BRANCH +
         "  done\n"
         "  printf '%s\\n' \"$@\" > \"$DOCKER_ARGUMENT_CAPTURE\"\n"
         "  exit 42\n"
@@ -246,6 +261,23 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertIn("configuration identity mismatch", result.stderr)
             self.assertFalse(capture.exists(), "the launcher must refuse before Docker runs")
+
+    def test_start_refuses_a_route_whose_bind_mounts_are_staged_incompletely(self) -> None:
+        """A reboot replaces Docker Desktop's per-container bind staging, and a container created
+        against the replacement can start with empty file mounts: the server then rejects its own
+        empty --api-key, prints usage, exits 1, and a restart policy loops on it. The launcher
+        proves the mounts inside a throwaway container first, so that costs one refusal instead of
+        an outage."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result, capture, _ = self.launch_with_fakes(
+                root, self.CAPTURING_DOCKER, probe={"key_bytes": "0"}
+            )
+
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("bind mounts incompletely", result.stderr)
+            self.assertIn("key=0", result.stderr)
+            self.assertFalse(capture.exists(), "the launcher must refuse before the server runs")
 
     @staticmethod
     def write_common_fakes(fake_bin: Path) -> None:

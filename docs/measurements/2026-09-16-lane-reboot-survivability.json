@@ -1,0 +1,109 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-040",
+  "generated_utc": "2026-09-16T11:05:00Z",
+  "status": "closed",
+  "release": "v0.6.9",
+  "component": "v0.6.5-qwen38-5090-beta.1 published image d346174a is unchanged by this window; the appliance lane under test runs the v0.5.1 container profile qwen38-5090-v0.5.1 (image 12ef2d9e, binary 71edc2f6)",
+  "scope": "RTX 5090 appliance (nyc-pc) container lane and the published manual-tunnel route's launcher. Four real cold reboots of the appliance plus four scripted supervisor exercises. No release component, model, or serving configuration changed.",
+  "question": "After a host reboot, does the RTX 5090 container lane come back without an operator - and if not, why did the supervisor written for that exact purpose after 2026-09-09 fail to bring it back?",
+  "answer": "It did not, for two reasons that are both now fixed and proven. (1) Docker Desktop stages a container's WSL bind mounts once, when the container is created, for a distro that is running when the engine initialises. Nothing starts that distro at boot, so after a reboot the existing lane container cannot use its staging: `docker start` fails with `error mounting .../docker-desktop-bind-mounts/Ubuntu-24.04/<hash> ... not a directory`, which Docker records as exit 127 with RestartCount 0 and never retries. (2) The supervisor logged that failure as `docker start ... failed:` with an empty reason, because it joined the child's stdout while docker writes failures to stderr, and its only escalation was a five-minute exit 30 nobody was watching. Measured while diagnosing it, a start attempted against replaced staging can be worse than a failure: the container runs with empty file mounts, the server rejects its own empty --api-key, prints usage text, exits 1, and `unless-stopped` turns that into a crash loop (14 restarts observed). After the fix, four consecutive reboots recovered the lane unattended, the last in 158 s.",
+  "outage_of_record": {
+    "lane": "ninfer-5090-v051p on nyc-pc",
+    "host_boot_utc": "2026-09-15T05:32:27Z",
+    "container_exit_utc": "2026-09-15T05:33:16Z",
+    "container_exit_code": 127,
+    "restart_policy": "unless-stopped",
+    "docker_restart_count": 0,
+    "recovered_utc": "2026-09-16T08:23:58Z",
+    "duration": "26 h 51 min",
+    "supervisor_behaviour": "OMP-LaneContainerSupervisor retried `docker start` every 5 minutes for the whole outage and logged `local-5090: docker start ninfer-5090-v051p failed:` with no reason; it exited 30 each time, which only Task Scheduler saw",
+    "occurrence": "third of this class; the second (2026-09-09, 6 h 50 min) is what created the lane supervisor, and its own header records it"
+  },
+  "mechanism": {
+    "bind_sources": [
+      "/home/sunil/builds/models/qwen3_8_27b.ninfer -> /models/model.ninfer",
+      "/home/sunil/services/ninfer-5090/secrets/api_key -> /run/secrets/ninfer_api_key",
+      "/home/sunil/services/ninfer-5090/logs -> /logs",
+      "/home/sunil/services/ninfer-5090/checkpoints -> /checkpoints"
+    ],
+    "staging_path_shape": "/run/desktop/mnt/host/wsl/docker-desktop-bind-mounts/Ubuntu-24.04/<sha256>",
+    "hard_shape": "start refused: mount src=<staging> dst=/models/model.ninfer flags=MS_BIND|MS_REC: not a directory; recorded as exit 127, RestartCount 0",
+    "quiet_shape": "container runs with empty file mounts; `--api-key \"$(cat /run/secrets/ninfer_api_key)\"` resolves empty, the server prints its usage text and exits 1, and the restart policy loops (observed status `restarting`, 14 restarts)",
+    "engine_side_cause": "Docker Desktop provisions WSL integration by running `wsl -d ubuntu-24.04 -e whoami`; with the WSL service wedged that call returned Wsl/Service/0x8007274c (timeout) and the engine gave up on the distro while reporting itself healthy (com.docker.backend log, 2026-09-16T09:39:47Z)",
+    "why_the_windows_cli_looked_fine": "the Windows docker CLI answered `docker version` throughout, so a substrate check built on it reported healthy for 26 hours while no lane container could be staged"
+  },
+  "appliance_remediation": {
+    "record": "private appliance repository (omp-private appliances/windows-hosts, appliances/local-5090)",
+    "lane_supervisor": [
+      "waits for the Docker engine (300 s) instead of refusing on the first look, which alone cost 4 of the 7 minutes measured in the third reboot",
+      "starts the lane's declared WSL distro and waits for the engine's integration in it (240 s) before touching the container, because a start is only safe once the engine can stage the binds",
+      "quotes stderr in every failure reason (the class that made the outage unreadable)",
+      "treats a failed start, or a start that leaves the running state inside the ready window, as unusable staging and recreates the container from a SHA-256-pinned relaunch script rather than leaving a crash loop",
+      "stops a container found `restarting`, `paused`, `dead` or `removing` and records its exit code and last log lines",
+      "keeps an unhealthy lane in a durable state file with first-seen time and attempt count, and writes a Windows Application event under source OMP-LaneSupervisor once an outage crosses 15 minutes"
+    ],
+    "substrate_supervisor": [
+      "starts every declared lane distro before any engine decision, so the boot path converges without an engine restart when possible",
+      "treats WSL integration in the declared distros as part of substrate health rather than only `docker version`",
+      "repairs unprovisioned integration by restarting Docker Desktop with the distro started between the stop and the launch (stopping the engine tears down the whole WSL VM), and escalates once to `wsl --shutdown` plus a fresh engine when that is not enough",
+      "never restarts the engine while a container is running, and rate-limits engine restarts to one per 10 minutes - boot-relative, because a limiter carried across a reboot delayed the first repair after one by 6 minutes"
+    ],
+    "recreation_authority": "one reviewed relaunch script per lane, named in the lane declaration with its SHA-256 verified inside the distro before every run, rate-limited to one recreation per 20 minutes; the created container must carry the declared image digest or it is stopped and refused"
+  },
+  "reboots": [
+    {
+      "reboot": 1,
+      "pre_state": "container exited - the outage state",
+      "healthy_after_seconds": 282,
+      "recovery": "engine reconciled, integration repaired in 12 s by an engine restart with the distro up, container started, healthy 24 s later",
+      "exposed": "nothing; first proof that the class is closed"
+    },
+    {
+      "reboot": 2,
+      "pre_state": "container running and healthy",
+      "healthy_after_seconds": 646,
+      "recovery": "same ladder",
+      "exposed": "the engine-restart limiter carried across the reboot: the stamp written during reboot 1 blocked the first repair for 6 minutes. Fixed by making the limiter boot-relative."
+    },
+    {
+      "reboot": 3,
+      "pre_state": "container running and healthy",
+      "healthy_after_seconds": 442,
+      "recovery": "integration provisioned 12 s after the boot-relative repair",
+      "exposed": "the lane supervisor's boot run refused because the engine was not up yet, then waited out its own 5-minute repetition. Fixed by waiting for the substrate inside the run."
+    },
+    {
+      "reboot": 4,
+      "pre_state": "container running and healthy",
+      "healthy_after_seconds": 158,
+      "recovery": "lane healthy 58 s after ssh answered, with no human action",
+      "exposed": "nothing"
+    }
+  ],
+  "exercises": {
+    "harness": "test-lane-container-supervisor.ps1 in the private appliance repository, run through the installed scheduled tasks",
+    "undeclared_digest": "exit 30, refusal logged, lane untouched and healthy throughout",
+    "stopped_lane": "clean stop recovered in 29 s, task result 0",
+    "relaunch_from_absent": "container removed entirely; a relaunch script whose bytes are not the declared SHA-256 is refused (exit 30, nothing created), then the declared script recreates the lane in 29 s with the declared image digest, task result 0",
+    "stale_staging": "container stopped and its WSL distro terminated - the outage state without a reboot; the substrate supervisor then the lane supervisor recovered it in 51 s, both task results 0, and no failure line was logged without a reason"
+  },
+  "native_lane_reboot": {
+    "scope": "RTX 4090 native Windows lane (sf-pc), component qwen38-4090-native-v0.6.3-beta.1 (patch stack 696e78c7), started for this window through its documented controller",
+    "question": "The quickstart says `Control-Release.ps1 -Action Start` brings the native lane back after a reboot. No receipt had ever exercised that with a real reboot, or shown whether a published session survives one.",
+    "planted": "a session with an explicit checkpoint published before the reboot: 314,814,110 bytes, generation 1789554502097-0, 140 frontier tokens, state available",
+    "unattended_return": "none within 240 s of ssh answering - correct for this route, which declares no boot start",
+    "documented_recovery": "Control-Release.ps1 -Action Start exited 0 after 110 s; the lane was serving 114 s after it was invoked (process_state running, endpoint_state ready)",
+    "session_survived": true,
+    "evidence": "continuing resp_8f7843126fc0c93f9ac59c3a1ee02fee after the reboot returned the planted canary ZEPHYR-4090-7731 exactly, with the server identity unchanged",
+    "disposition": "the documented claim holds as written; the native route is manual by design and this window is the first receipt that proves both halves of it"
+  },
+  "product_remediation": {
+    "launcher": "examples/manual-tunnel/start-ninfer.sh proves the route's bind mounts inside a throwaway container before loading 18 GB: it compares the model byte count seen in the container with the host's, requires a non-empty key file and a mounted store directory, and refuses with what the container saw. Verified against the published image and the appliance's real bind sources (model=18210531328 key=64 store=directory), and against a staged-incomplete route in tests/test_manual_tunnel_scripts.py.",
+    "documentation": "docs/TROUBLESHOOTING.md names both failure shapes with their exact signatures and states that recovery is recreation (`stop-ninfer.sh` then `start-ninfer.sh`), not `docker start`; docs/QUICKSTART.md says the container route does not return by itself after a reboot and points at that entry.",
+    "claims_unchanged": "No published claim changes. The route was already documented as `--restart no`, and the durable store still carries sessions across recreation; nothing here is a new throughput, latency, or availability claim, and no release component, model, or serving configuration changed."
+  },
+  "window_hygiene": "Production was recreated and verified healthy before, between, and after every window (health 200, identity qwen38-5090-v0.5.1, binary 71edc2f6, KV capacity 131,072). The four reboots were authorised for this work. The appliance's supervisors and their declaration were installed from the private repository's sources, and the staged copies under C:\\Users\\Sunil\\OMP\\windows-hosts-staging match them.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

@@ -470,6 +470,14 @@ remove only the correctly labelled beta container with:
 That removes the container and retains the model, key, request logs, and checkpoints, so the next
 `start-ninfer.sh` continues the sessions the store holds.
 
+A machine reboot is not a managed stop for this route either. The container is created with
+`--restart no`, and on Docker Desktop an existing container cannot be started again once the WSL
+distro holding these paths has restarted, which a reboot always does. Bring the lane back by
+recreating it - `stop-ninfer.sh`, then the same `start-ninfer.sh` command - and the checkpoint
+store makes that a continuation rather than a loss. The exact failure signature, including the
+quiet variant where the container starts with empty mounts, is in
+[Troubleshooting](TROUBLESHOOTING.md#the-container-exists-but-will-not-start-after-a-host-reboot).
+
 The server receives the key through a read-only secret mount, so the key is not embedded in the
 Docker configuration or host shell history. The resulting server process argument is visible to
 root inside the trusted container/host boundary; this is not a multi-tenant secret-isolation

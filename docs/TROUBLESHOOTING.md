@@ -41,6 +41,41 @@ If it was created by this release, use `examples/manual-tunnel/stop-ninfer.sh`; 
 unexpected ownership labels. If labels do not match, do not stop or remove it through the release
 script.
 
+## The container exists but will not start after a host reboot
+
+Docker Desktop stages a container's bind mounts when the container is created, from the
+filesystem those paths live on. Restarting that filesystem's WSL distro - which every host reboot
+does, because nothing starts a WSL distro at boot - replaces the staging, and the container that
+was created against it cannot use it again. Two shapes, both from the same cause:
+
+```sh
+docker start omp-ninfer-beta
+# Error response from daemon: ... error mounting
+# ".../docker-desktop-bind-mounts/<distro>/<hash>" to rootfs at
+# "/models/qwen3_8_27b.ninfer": ... not a directory
+docker container inspect omp-ninfer-beta --format '{{.State.ExitCode}} {{.RestartCount}}'
+# 127 0
+```
+
+`RestartCount 0` with exit `127` means Docker did not retry and will not: a restart policy cannot
+fix a mount it cannot stage. The second shape is quieter and worse - the container starts, its
+file mounts are empty, the server rejects its own empty `--api-key`, prints usage text, and exits
+`1`; with a restart policy `docker ps` then shows `restarting` while the logs show usage rather
+than an error.
+
+Recovery is recreation, not a start. Checkpoints live in the store directory, not in the
+container, so this continues the sessions it holds:
+
+```sh
+./examples/manual-tunnel/stop-ninfer.sh
+./examples/manual-tunnel/start-ninfer.sh --model ... # the same arguments as the first launch
+```
+
+`start-ninfer.sh` proves the mounts inside a throwaway container before loading 18 GB, so a still
+broken engine is refused with what that container saw instead of a crash loop. If it refuses,
+start the WSL distro that owns the paths, restart Docker Desktop while that distro is running, and
+retry: the engine only stages a distro it saw when it initialised.
+
 ## GPU is unavailable inside Docker
 
 Establish the failure at the smallest boundary:

@@ -7,8 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `examples/manual-tunnel/start-ninfer.sh` proves the route's bind mounts inside a throwaway
+  container before loading the 18 GB artifact: the model byte count seen inside the container
+  must match the host's, the key file must be non-empty, and the store must be a directory.
+  Docker Desktop stages a container's bind mounts once, at creation, from the filesystem those
+  paths live on; after that filesystem's WSL distro restarts, a container created against the
+  old staging either refuses to start (`not a directory`, recorded as exit 127 with
+  `RestartCount 0`) or starts with empty mounts, whereupon the server rejects its own empty
+  `--api-key`, prints usage, and exits 1. The launcher now refuses with what the probe container
+  saw instead of leaving either shape to an operator
+  ([EXP-040](docs/measurements/2026-09-16-lane-reboot-survivability.json)).
+
 ### Documentation
 
+- Name both post-reboot failure signatures in the troubleshooting guide, including the quiet one
+  where the container runs with empty mounts, and state that recovery on this route is
+  recreation (`stop-ninfer.sh` then `start-ninfer.sh`) rather than `docker start`; the durable
+  store makes that a continuation. The quickstart now says the container route does not return by
+  itself after a machine reboot and links that entry.
 - Correct the README, decision guide, architecture, and website: checkpoint export/import,
   host-to-host transport, and NAS replication are implemented, not future-only. Link the
   existing receipts and distinguish replica storage from runtime restore, which remains
@@ -16,6 +34,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refresh website release status and current benchmark scopes for v0.6.9, retaining the
   historical measurements under their original versions. Credit the NInfer engine and GPU
   ports separately from the durable-state work and OMP agent layer.
+
+### Measured
+
+- **EXP-040 - a host reboot no longer takes the owner appliance's lane down, and the native
+  lane's documented recovery is receipted.** The RTX 5090 appliance lane was exited for 26 h
+  51 min from 2026-09-15 because nothing starts the WSL distro holding its bind sources at boot,
+  and the five-minute supervisor written after the same class in 2026-09-09 retried
+  `docker start` throughout while logging an empty reason (it joined stdout; docker writes
+  failures to stderr) and exiting 30 where nothing watched. Four consecutive authorised reboots
+  after the appliance-side fix recovered the lane unattended in 282 s, 646 s, 442 s, and 158 s;
+  the second and third exposed a restart limiter that carried across a reboot and a supervisor
+  that refused instead of waiting for its substrate, both fixed before the fourth. On the RTX
+  4090 native lane a real reboot confirmed the documented claim: the lane does not return by
+  itself (correct for that route), `Control-Release.ps1 -Action Start` had it serving 114 s
+  later, and the session checkpointed before the reboot resumed with its planted canary exact.
+  Appliance supervision lives in the private appliance repository; no release component, model,
+  or serving configuration changed.
 
 ## [0.6.9] - 2026-09-13
 

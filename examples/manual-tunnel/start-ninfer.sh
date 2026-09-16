@@ -241,6 +241,44 @@ if ! docker run --rm --gpus all --entrypoint nvidia-smi "$IMAGE" \
   exit 1
 fi
 
+# Prove Docker can actually stage this route's bind mounts before launching an 18 GB server on
+# them. On Docker Desktop the mounts are staged per container, from the filesystem the paths
+# live on - a WSL distro for the documented Windows route - and a distro or engine restart
+# replaces that staging. A container created against replaced staging does not fail cleanly: it
+# either cannot start ("not a directory" against the staging placeholder, recorded as exit 127)
+# or it starts with empty files, the server rejects its own empty `--api-key`, prints usage, and
+# exits 1 - which `--restart` policies turn into a loop. Both shapes cost an operator hours to
+# read; an empty mount seen from inside a throwaway container is one line.
+STAGING_PROBE=$(
+  docker run --rm \
+    --volume "$MODEL_PATH:/models/qwen3_8_27b.ninfer:ro" \
+    --volume "$API_KEY_FILE:/run/secrets/ninfer_api_key:ro" \
+    --volume "$CHECKPOINT_DIR:$CHECKPOINT_MOUNT_TARGET" \
+    --entrypoint /bin/sh "$IMAGE" -c \
+    'printf "model=%s key=%s store=%s\n" \
+       "$(wc -c < /models/qwen3_8_27b.ninfer 2>/dev/null | tr -d "[:space:]" || echo 0)" \
+       "$(wc -c < /run/secrets/ninfer_api_key 2>/dev/null | tr -d "[:space:]" || echo 0)" \
+       "$(test -d "$1" && echo directory || echo missing)"' sh "$CHECKPOINT_MOUNT_TARGET"
+) || {
+  printf 'error: Docker could not read this route'"'"'s bind mounts from a throwaway container\n' >&2
+  exit 1
+}
+PROBE_MODEL_BYTES=${STAGING_PROBE#model=}
+PROBE_MODEL_BYTES=${PROBE_MODEL_BYTES%% *}
+PROBE_KEY_BYTES=${STAGING_PROBE#*key=}
+PROBE_KEY_BYTES=${PROBE_KEY_BYTES%% *}
+PROBE_STORE=${STAGING_PROBE##*store=}
+ACTUAL_MODEL_BYTES=$(wc -c < "$MODEL_PATH" | tr -d '[:space:]')
+if [[ "$PROBE_MODEL_BYTES" != "$ACTUAL_MODEL_BYTES" || "$PROBE_KEY_BYTES" == 0 || "$PROBE_STORE" != directory ]]; then
+  printf 'error: Docker staged this route'"'"'s bind mounts incompletely\n' >&2
+  printf 'inside a throwaway container: %s\n' "$STAGING_PROBE" >&2
+  printf 'on this host: model=%s key=%s store=%s\n' \
+    "$ACTUAL_MODEL_BYTES" "$(wc -c < "$API_KEY_FILE" | tr -d '[:space:]')" "$CHECKPOINT_DIR" >&2
+  printf 'On Docker Desktop this is the engine having lost the filesystem these paths live on:\n' >&2
+  printf 'start the WSL distro that owns them, restart Docker Desktop while it is running, and retry.\n' >&2
+  exit 1
+fi
+
 # The container binds every interface inside its own network namespace and Docker publishes
 # that port on the runtime host's loopback only. This is the one shape that reaches the
 # operator on Docker Desktop, where a "host" network is the engine VM's, not the machine's

@@ -58,7 +58,14 @@ noise of the shipped runtime (EXP-035). The reuse loss measured when two long se
 turns is host KV capacity, not planner policy: it tracks pool size and KV footprint exactly, and
 INT8 KV or a larger `--host-kv-mib` removes it on the same binary
 ([EXP-039](docs/measurements/2026-09-13-hostkv-capacity-multisession.json)), so the upstream
-pressure-planner family is no longer what that finding waits on. Details:
+pressure-planner family is no longer what that finding waits on. A machine reboot does not return
+either route by itself, and that is now documented rather than discovered: the container route is
+created with `--restart no` and, on Docker Desktop, an existing container cannot be started again
+once the WSL distro holding its paths has restarted, so recovery is recreation - which the
+launcher now refuses to attempt against mounts the engine cannot stage, naming what a throwaway
+container saw. The native route's documented `-Action Start` was exercised by a real reboot for
+the first time: the lane served 114 s later and the session checkpointed beforehand resumed
+exactly ([EXP-040](docs/measurements/2026-09-16-lane-reboot-survivability.json)). Details:
 [`CHANGELOG.md`](CHANGELOG.md) · [release status](docs/RELEASES.md) ·
 [benchmarks](docs/BENCHMARKS.md).
 
