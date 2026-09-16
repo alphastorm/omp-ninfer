@@ -11,7 +11,7 @@
     "note": "Pinned OMP18.0.9 bytes unchanged; parser semantics advance behind the preserved wire shape. Current macOS route and native Windows golden-equivalent tool turn exercised these bytes against the new runtime."
   },
   "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
-  "compatibility_sha256": "389a3ed20fae8b08c2880caaf7627bc96d2df27b5e4f188b743902468108e17a",
+  "compatibility_sha256": "0e35b4f5eb26df7034e6e805128733d3de8463a255b242a94f85e439f2bb29c9",
   "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
   "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
   "platform_receipts": [
