@@ -55,11 +55,11 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.7.0/acceptance/documented-routes.json",
-      "sha256": "2666c3ebea17f1e1c815db01dce926c9e1f206d00a7f9a2ec6cf9a09e30dbe8b"
+      "sha256": "d4ccb350d69b6d65a1d5f822709f17c26c43aafc40d20409c6c7f1927878e1e8"
     },
     "qualification": {
       "repository_path": "releases/v0.7.0/qualification/rtx5090.json",
-      "sha256": "68399b39b741194b588f90651621431d8e80f5845b896a9506cd92a5f7d6a8fc"
+      "sha256": "bcd29c2d881443bdf7582fbba937d3ce2d0f95117bd048f4662ae08b672ac3f4"
     },
     "capacity_finding": {
       "repository_path": "docs/measurements/2026-09-16-two-long-session-capacity.json",

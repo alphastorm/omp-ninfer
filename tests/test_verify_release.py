@@ -37,7 +37,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_release_predicate_exempts_prerelease_contracts(self) -> None:
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.2.0-beta.1"))
         self.assertFalse(VERIFY_RELEASE.ga_release("v0.3.0-rc.1"))
-        self.assertTrue(VERIFY_RELEASE.ga_release("v0.6.10"))
+        self.assertTrue(VERIFY_RELEASE.ga_release("v0.7.0"))
 
     def candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary = tempfile.TemporaryDirectory()
@@ -119,14 +119,14 @@ class ReleaseContractTest(unittest.TestCase):
             "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
         )
         summary_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.6.10" / "qualification.json").read_bytes()
+            (ROOT / "releases" / "v0.7.0" / "qualification.json").read_bytes()
         ).hexdigest()
         self.assertEqual(manifest["qualification"].get("summary_sha256"), summary_sha)
 
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        planted = root / "releases" / "v0.6.10" / "review" / "planted.json"
+        planted = root / "releases" / "v0.7.0" / "review" / "planted.json"
         planted.write_text('{"path": "/Users/someone/secret"}', encoding="utf-8")
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(
@@ -137,7 +137,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.6.10" / "manifest.json"
+        manifest_path = root / "releases" / "v0.7.0" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["limitations"] = list(manifest.get("limitations", [])) + [
             "The RTX 5090 identities remain pending."
@@ -156,7 +156,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        manifest_path = root / "releases" / "v0.6.10" / "manifest.json"
+        manifest_path = root / "releases" / "v0.7.0" / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["channel"] = "general-availability"
         self.save(manifest_path, manifest)
@@ -272,7 +272,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(field=field):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release = "v0.6.10"
+                    release = "v0.7.0"
                     release_root = root / "releases" / release
                     acceptance_path = (
                         release_root
@@ -350,7 +350,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.6.10"
+                    release_root = root / "releases" / "v0.7.0"
                     manifest_path = release_root / "manifest.json"
                     qualification_path = release_root / "qualification.json"
                     compatibility_path = release_root / "compatibility.json"
@@ -391,7 +391,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ga_ready_lane_set_must_match_qualification_composition(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        release_root = root / "releases" / "v0.6.10"
+        release_root = root / "releases" / "v0.7.0"
         qualification_path = release_root / "qualification.json"
         manifest_path = release_root / "manifest.json"
         qualification = self.load(qualification_path)
@@ -465,7 +465,7 @@ class ReleaseContractTest(unittest.TestCase):
             identity["upstream_commit"] = "4eef14a7560d87a3ba717898e1d488a4c4c7246d"
             identity["release_source_archive_sha256"] = "2" * 64
 
-        self.rebind_qualification(root / "releases" / "v0.6.10", stale_identity)
+        self.rebind_qualification(root / "releases" / "v0.7.0", stale_identity)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertIn(
             "qualification.runtime_identity.upstream_commit must equal components.ninfer.upstream_commit",
@@ -479,7 +479,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_ready_native_variant_rows_must_equal_manifest_components(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        release_root = root / "releases" / "v0.6.10"
+        release_root = root / "releases" / "v0.7.0"
         for compatibility_path in (root / "compatibility.json", release_root / "compatibility.json"):
             compatibility = self.load(compatibility_path)
             row = compatibility["runtime_variants"][0]
@@ -623,16 +623,53 @@ class ReleaseContractTest(unittest.TestCase):
     def test_configuration_identity_reproduces_the_lifecycle_tool(self) -> None:
         """Cross-repository vector: the owner appliance's v0.6.2 lifecycle configuration
         (published on 127.0.0.1:18088, restart unless-stopped, checkpoints on) hashes to the
-        identity tools/lifecycle/ninfer_container.py computed and the v0.6.2 receipts record."""
-        profile = self.load(ROOT / "profiles" / "qwen38-rtx5090-manual-tunnel.json")
-        server = profile["server"]
-        server["published_port"] = 18088
-        server["restart_policy"] = "unless-stopped"
-        server["deployment_profile"] = "qwen38-5090-v0.6.2"
+        identity tools/lifecycle/ninfer_container.py computed and the v0.6.2 receipts record.
+        The configuration is pinned here rather than derived from the shipping profile, which
+        advances between releases - v0.7.0 added the Host KV pool argument - so the vector keeps
+        testing agreement with the other repository instead of restating this one."""
+        profile = {
+            "model": {"public_id": "q38-ninfer"},
+            "server": {
+                "published_bind_host": "127.0.0.1",
+                "published_port": 18088,
+                "restart_policy": "unless-stopped",
+                "deployment_profile": "qwen38-5090-v0.6.2",
+                "checkpoint_mount_target": "/checkpoints",
+                "checkpoint_seccomp_sha256": (
+                    "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
+                ),
+                "arguments": [
+                    "--max-context", "131072",
+                    "--kv-capacity", "auto",
+                    "--prefill-chunk", "1024",
+                    "--kv-dtype", "bf16",
+                    "--max-concurrency", "1",
+                    "--spec", "mtp",
+                    "--draft-tokens", "3",
+                    "--lm-head-draft",
+                    "--vision",
+                    "--preserve-thinking",
+                    "--session-checkpoint-quota-mib", "24576",
+                    "--session-checkpoint-staging-mib", "256",
+                    "--max-private-continuations", "8",
+                    "--device-state-slots", "4",
+                    "--host-state-slots", "24",
+                ],
+            },
+        }
         self.assertEqual(
             VERIFY_RELEASE.configuration_identity(profile),
             "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
         )
+
+    def test_shipping_profile_declares_the_identity_it_hashes_to(self) -> None:
+        """The launcher refuses a container whose declared identity is not the identity of the
+        configuration it launches, so the shipping profile's --config-sha256 must be its own
+        hash: v0.7.0's pool change moved it from 5eb8a557 to 762e6bf4."""
+        profile = self.load(ROOT / "profiles" / "qwen38-rtx5090-manual-tunnel.json")
+        arguments = profile["server"]["arguments"]
+        declared = arguments[arguments.index("--config-sha256") + 1]
+        self.assertEqual(VERIFY_RELEASE.configuration_identity(profile), declared)
 
     def test_recorded_configuration_identity_must_be_the_launched_one(self) -> None:
         """v0.6.2 declared the checkpointed identity while its launcher ran no checkpoint store;
@@ -669,7 +706,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_release_defaults_to_compatibility_authority(self) -> None:
         self.assertEqual(
             VERIFY_RELEASE.resolve_product_release(ROOT, None),
-            "v0.6.10",
+            "v0.7.0",
         )
         with self.assertRaisesRegex(VERIFY_RELEASE.ContractError, "versioned release"):
             VERIFY_RELEASE.resolve_product_release(ROOT, "../v0.2.0")
@@ -964,7 +1001,7 @@ class ReleaseContractTest(unittest.TestCase):
             with self.subTest(case=case):
                 temporary, root = self.public_draft_copy()
                 try:
-                    release_root = root / "releases" / "v0.6.10"
+                    release_root = root / "releases" / "v0.7.0"
                     manifest_path = release_root / "manifest.json"
                     manifest = self.load(manifest_path)
                     variant = next(
@@ -1021,7 +1058,7 @@ class ReleaseContractTest(unittest.TestCase):
 
         temporary, root = self.public_draft_copy()
         try:
-            release_root = root / "releases" / "v0.6.10"
+            release_root = root / "releases" / "v0.7.0"
             manifest_path = release_root / "manifest.json"
             manifest = self.load(manifest_path)
             variant = next(

@@ -11,12 +11,16 @@
     "source_commit": "696e78c7b4e3ac28ffcffafc73acc1496e65ef03",
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
     "server_binary_sha256": "b8a0a2c33d79304afb1701ca7d179a6ed750685d1365a75634fdc738bab6a831",
-    "configuration_sha256": "5eb8a557327acabd91149c3e31ac62fab5f767e113df762f7539176ed91d62f2",
-    "deployment_profile": "qwen38-5090-v0.6.2",
+    "configuration_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "deployment_profile": "qwen38-5090-v0.7.0",
     "oci_manifest_digest": "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8",
     "image_id": "sha256:793f9c057f639878e5fbf1e85ecadb2f1e8113e0babb67ea2f728979417eaa26"
   },
-  "evidence_interpretation": "A configuration-only advance on the published v0.6.5 component: every gate above was measured on a candidate container started from the published image with the v0.7.0 arguments, and nothing is inherited from the v0.6.10 configuration. The two-session durability row is a bounded finding, not a passing gate.",
+  "evidence_interpretation": {
+    "documentation_benchmark_source_field_credited": false,
+    "packaged_build_identity_authoritative": true,
+    "narrative": "A configuration-only advance on the published v0.6.5 component: source 696e78c7, image 5e3e1558 and binary b8a0a2c3 are unchanged, and the lifecycle configuration advances from 5eb8a557 to 762e6bf4 by raising the Host KV pool from 8 GiB to 16 GiB. Every gate above was measured on a candidate container started from the published image with the v0.7.0 arguments - prefill, decode, agent protocol, fanout at two template sizes, warm arrival in both orders, restore, and two 126K sessions keeping reuse - so nothing is inherited from the v0.6.10 configuration. The tamper arm is bound by reference to v0.6.10 because the binary is unchanged. The two-session durability row is a bounded finding, not a passing gate."
+  },
   "build": {
     "route": "Canonical appliance-local CUDA 13.1 build from clean source 696e78c7; digest-pinned base a19e00c5. Workflow 34743949656 wraps the published archive onto the same base.",
     "ctest": "13/13 focused suites passed in the appliance build. Blackwell sm_120a CI: 95 passed, 7 skipped, 0 failed out of 102 registered (io_uring backend and six model-fixture suites skipped); all four parser/wire suites passed. docs/measurements/2026-09-13-runpod-ci-full-696e78c7.json",

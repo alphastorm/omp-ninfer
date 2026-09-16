@@ -87,7 +87,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.copy_contract_tree(root)
-            manifest_path = root / "releases" / "v0.6.10" / "manifest.json"
+            manifest_path = root / "releases" / "v0.7.0" / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
             manifest["components"]["omp"]["artifact_published"] = False
