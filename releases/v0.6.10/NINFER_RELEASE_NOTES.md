@@ -32,11 +32,11 @@ empty `--api-key`, prints usage text, and exits `1`; a restart policy then loops
   before loading the 18 GB artifact: the model byte count seen inside the container must equal the
   host's, the key file must be non-empty, and the store must be a directory. It refuses with what
   that container saw and how to repair the engine, instead of leaving either shape running.
-- [Troubleshooting](../../docs/TROUBLESHOOTING.md) names both signatures and states that recovery
-  here is recreation - `stop-ninfer.sh`, then the same `start-ninfer.sh` - which the durable store
-  makes a continuation rather than a loss.
-- The [quickstart](../../docs/QUICKSTART.md) says plainly that the container route does not return
-  by itself after a machine reboot, alongside the native route's existing statement.
+- `docs/TROUBLESHOOTING.md` names both signatures and states that recovery here is recreation -
+  `stop-ninfer.sh`, then the same `start-ninfer.sh` - which the durable store makes a
+  continuation rather than a loss.
+- `docs/QUICKSTART.md` says plainly that the container route does not return by itself after a
+  machine reboot, alongside the native route's existing statement.
 
 Evidence for the class this came from, including the owner appliance's 26 h 51 min outage, four
 authorised reboots recovering unattended, and the first receipt of the native lane's documented

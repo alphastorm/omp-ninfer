@@ -67,7 +67,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.6.10/acceptance/composed-external-installation.json",
-      "sha256": "9cbc0c5624f0e9734e5d53e19f0c00dc0ce637bfbb00ab2c25a83f2f73644bd7",
+      "sha256": "605911cd0e53fb399b84638d122c1809ca03074c41c3a472445823b483a9472b",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5919fcfc92f6a7d081b4eb810f445c9764d795b/releases/v0.6.10/acceptance/composed-external-installation.json",
       "note": "Re-run for this release because the container route's launcher changed: documented host route 2/2 and macOS client route 10/10 blocks from candidate 5494061 against the unchanged published image, with the RTX 4090 native installer acceptance carried from v0.6.9."
     },
