@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.0",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
       "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/be0c71e03ff3ad39792f2b604b79f1f8653809a0/compatibility.json",
-      "compatibility_sha256": "7f2e04b77764e0eda964960670b62b5f146d4e6a145b51d70e26d2d6c9b01120"
+      "compatibility_sha256": "389a3ed20fae8b08c2880caaf7627bc96d2df27b5e4f188b743902468108e17a"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -175,14 +175,14 @@
   "publication": {
     "authorized": false,
     "targets": [
-      "GitHub public release v0.6.10",
+      "GitHub public release v0.7.0",
       "OMP component omp-18.0.9-cross-platform-beta-2 (unchanged)",
-      "NInfer RTX 5090 runtime component v0.6.5-qwen38-5090-beta.1 (unchanged; image 5e3e1558, deployment profile qwen38-5090-v0.6.3 unchanged)",
+      "NInfer RTX 5090 runtime component v0.6.5-qwen38-5090-beta.1 (unchanged image 5e3e1558; new deployment profile qwen38-5090-v0.7.0 with a 16 GiB Host KV pool)",
       "NInfer RTX 4090 native component v0.6.3-qwen38-4090-beta.1 (unchanged)",
       "NInfer RTX 3090 native component (unchanged)"
     ],
     "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.5-qwen38-5090-beta.1 component and runtime image 5e3e1558; the composed acceptance receipt is absent until it is"
+      "external-install acceptance for v0.7.0 must be pinned to committed bytes before publication"
     ]
   }
 }
