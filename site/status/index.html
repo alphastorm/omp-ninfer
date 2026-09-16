@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer status — current qualified release and lanes</title>
-<meta name="description" content="Current stable release v0.7.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
+<meta name="description" content="Current stable release v0.7.1: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/status/">
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer status — current qualified release and lanes">
-<meta property="og:description" content="Current stable release v0.7.0: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
+<meta property="og:description" content="Current stable release v0.7.1: qualified RTX 5090, 4090, and 3090 lanes, ceilings, and checkpoint transport boundaries.">
 <meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/status/">
@@ -40,7 +40,7 @@
 <main>
 <p class="eyebrow">Status</p>
 <h1>Current qualified release</h1>
-<p class="lede"><strong>v0.7.0</strong> — two sessions at the 131,072-token ceiling keep prefix
+<p class="lede"><strong>v0.7.1</strong> — two sessions at the 131,072-token ceiling keep prefix
 reuse on the RTX 5090 lane: the Host KV pool moves from 8 GiB to 16 GiB, no component changes, and
 the container now needs 28 GiB of runtime-host memory. Published-component acceptance: RTX 5090
 documented host and macOS routes re-run on the new configuration; RTX 4090 already-installed
@@ -54,18 +54,20 @@ public-URL path. The RTX 3090 component and its prior qualification are unchange
 <h2>Known caveats</h2>
 <ul>
 <li>One active request per lane (max concurrency 1); not a serving farm.</li>
-<li>Two sessions at the context ceiling keep their reuse, but only one of the two is accepted back
-after a restart; the other re-prefills from its transcript. Refused, not corrupted.
+<li>On the RTX 5090 lane, two sessions at the context ceiling keep their reuse, but only one of the
+two is accepted back after a restart; the other re-prefills from its transcript. Refused, not
+corrupted, and the refusal now names the host-KV pool bound behind it. The RTX 4090 lane restores
+both from v0.7.1.
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/measurements/2026-09-16-two-long-session-capacity.json">Receipt</a>.</li>
 <li>Host/NAS replicas are supported; restore requires the same binary, artifact, profile, and
 session credentials. Transport is not cross-GPU migration or automatic failover.
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Evidence and limits</a>.</li>
 <li>Use the exact Oh My Pi client pinned by the release manifest; do not run <code>omp update</code> over a lane install.</li>
 </ul>
-<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/releases/v0.7.0/manifest.json">release manifest</a> ·
+<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/releases/v0.7.1/manifest.json">release manifest</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md">release lifecycle</a></p>
-<p class="verified">Updated 2026-09-16 from the v0.7.0 manifest and published receipts; no new live qualification implied.</p>
+<p class="verified">Updated 2026-09-16 from the v0.7.1 manifest and published receipts; no new live qualification implied.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

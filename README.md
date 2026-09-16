@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.7.0](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](docs/QUICKSTART.md)** · **[Download v0.7.1](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -64,8 +64,8 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.7.0 is the current public release.** If you own a qualified card, the
-> [v0.7.0 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.0/docs/QUICKSTART.md)
+> **v0.7.1 is the current public release.** If you own a qualified card, the
+> [v0.7.1 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md)
 > is the supported onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
@@ -147,6 +147,16 @@ Historical v0.6.8 profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
+The **v0.7.1 release** fixes a durability defect on the RTX 4090 native lane. Restore materialises
+a session's KV into the host-KV pool, so that pool bounds what can come back; the lane shipped
+4 GiB against the 5.02 GiB a 131,072-token session needs. A ceiling-sized session's checkpoint
+reported nearly 4.9 GB saved and the session answered `404` after a clean restart. The new
+component ships an 11 GiB pool with a declared 32 GiB host-memory requirement, two ceiling sessions
+now survive a graceful stop and resume exactly, and an export whose checkpoint this configuration
+could not restore is refused at save time instead of written.
+[Release notes](releases/v0.7.1/NINFER_RELEASE_NOTES.md) ·
+[EXP-043](docs/measurements/2026-09-16-restore-bound-host-kv-pool.json).
+
 The **v0.7.0 release** keeps two long sessions reusing their prefixes on one card. A 126K-token
 session's KV is about 4.2 GB and the shipped pool was 8 GiB, so alternating between two of them
 evicted each endpoint and re-prefilled from root every turn - about 58 s. The RTX 5090 Host KV
@@ -208,10 +218,10 @@ machine and profile, not universal GPU claims.
 Pick your lane: the RTX 5090 container route needs Docker with the NVIDIA runtime on Windows 11 +
 WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned packages. Every
 route needs one published OMP client and about 40 GiB free disk.
-Use the exact v0.7.0 tagged guide and manifest together; do not mix releases.
+Use the exact v0.7.1 tagged guide and manifest together; do not mix releases.
 
 ```powershell
-git clone --branch v0.7.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
@@ -277,7 +287,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.7.0 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.7.1 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard

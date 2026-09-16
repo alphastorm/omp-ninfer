@@ -7,7 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.0`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.1`, GitHub `Latest` |
 | Development | Product candidates with no public install or support claim | No newer product candidate published |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
@@ -27,9 +27,32 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.7.1 public release (a reported save is a restorable save)
+
+- Product release: `alphastorm/omp-ninfer@v0.7.1`, GitHub `Latest`. Published-component
+  [composed acceptance](../releases/v0.7.1/acceptance/composed-external-installation.json) passed;
+  the RTX 4090 route downloaded and installed the newly published component from its public URLs
+  (7/7 blocks) and both RTX 5090 routes were re-run
+  ([routes](../releases/v0.7.1/acceptance/documented-routes.json)).
+- Fixes a durability defect on the RTX 4090 native lane. Restore materialises a continuation's KV
+  into the host-KV pool, and the lane shipped 4096 MiB against the 5.02 GiB a 131,072-token session
+  needs: an explicit checkpoint reported 4,834,325,255 B saved and the session answered HTTP 404
+  after a graceful stop and restart. New component `v0.6.4-qwen38-4090-beta.1` ships an 11264 MiB
+  pool, a declared `runtime_host.minimum_runtime_memory_mib` of 32,768, and an export that is
+  refused when the configuration could not admit the checkpoint back
+  ([requalification](../releases/v0.7.1/qualification/rtx4090.json)).
+- Two ceiling-sized sessions on that lane now keep reuse (125,906 cached tokens in 1.97 s), both
+  checkpoint (4.99 GB each), the graceful stop reports `saved 2, nothing to save 0, refused 0`, and
+  both resume exactly in 5.63 s and 7.78 s.
+- RTX 5090 component, image `5e3e1558` and deployment profile `qwen38-5090-v0.7.0` unchanged; its
+  two-session restore boundary is the same bound and is now reported with a named reason
+  ([EXP-043](measurements/2026-09-16-restore-bound-host-kv-pool.json)).
+- Support boundary unchanged: prerelease, no SLA, one owner-operated machine per lane, one active
+  request per qualified profile, no silent cloud fallback.
+
 ### v0.7.0 public release (two long sessions keep their reuse)
 
-- Product release: `alphastorm/omp-ninfer@v0.7.0`, GitHub `Latest`. Published-component
+- Product release: `alphastorm/omp-ninfer@v0.7.0`, superseded by v0.7.1. Published-component
   [composed acceptance](../releases/v0.7.0/acceptance/composed-external-installation.json)
   passed; both RTX 5090 documented routes were re-run on the new serving configuration
   ([routes](../releases/v0.7.0/acceptance/documented-routes.json)).

@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-16 · Current stable release: **v0.7.0**
+Last verified: 2026-09-16 · Current stable release: **v0.7.1**
 
 Public-release claims on this page are bound to the
 [v0.6.10 release manifest](../releases/v0.6.10/manifest.json) and its qualification receipts.
@@ -46,6 +46,28 @@ All of these should be materially true:
 | RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.5 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.9 |
 | RTX 4090 | native Windows service | 131,072 | v0.6.3-beta.1 lane on the mainline runtime (source 696e78c7, shared with the 5090's v0.6.5) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.9 |
 | RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.9) |
+
+## v0.7.1 — a reported save is a restorable save
+
+- Restore materialises a continuation's KV into the host-KV pool, so that pool - not the device KV
+  arena - bounds the largest session a configuration can admit back, and two sessions need their
+  sum.
+- The RTX 4090 native lane shipped a 4096 MiB pool against a 5.02 GiB ceiling-sized session. A
+  125,888-token session's explicit checkpoint reported 4,834,325,255 B saved and the session
+  answered HTTP 404 after a graceful stop and restart. The lane now ships 11264 MiB (component
+  `v0.6.4-qwen38-4090-beta.1`): two ceiling sessions keep reuse, both checkpoint, a graceful stop
+  reports `saved 2, nothing to save 0, refused 0`, and both resume exactly.
+- That pool is pinned memory, so the lane declares `runtime_host.minimum_runtime_memory_mib`
+  32,768; 12288 MiB fails `cudaMallocHost` on a 32.4 GiB host.
+- An export is refused when the configuration could not admit the checkpoint back (HTTP 409,
+  `checkpoint save refused: program refused continuation export`), a declined restore names its
+  gate, and the startup line publishes `host-kv-restorable=<tokens>`.
+- The RTX 5090's two-session restore boundary has the same cause: two BF16 ceiling sessions need
+  about 18 GiB against that lane's 16 GiB pool. A 20 GiB pool restores both but reaches 28.28 GiB
+  of a 31.34 GiB utility VM, so the lane keeps its pool and reports the boundary.
+- [EXP-043](measurements/2026-09-16-restore-bound-host-kv-pool.json) ·
+  [EXP-044](measurements/2026-09-16-rtx4090-v064-durability-requalification.json) ·
+  [pool ladder](measurements/2026-09-16-rtx4090-host-kv-pool-ladder.json).
 
 ## v0.7.0 — two long sessions keep their reuse
 

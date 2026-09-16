@@ -2,7 +2,7 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090, and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.7.0` public release exposes only those
+lanes, each bound to exact bytes and a receipt. The `v0.7.1` public release exposes only those
 exact installable profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part of a release until its exact binary and
 profile are rebound through a new qualification receipt.
@@ -11,7 +11,18 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.7.0
+## Where this is now — v0.7.1
+
+The `v0.7.1` release fixes a durability defect on the RTX 4090 native lane: its host-KV pool was
+smaller than one ceiling-sized session, so a checkpoint could be reported saved and then refused at
+restore, leaving the session unresumable. The pool is now sized to hold two such sessions, the lane
+declares the host memory that pins, and the engine refuses an export whose checkpoint its own
+configuration could not admit back - a reported save is a restorable save. The same bound explains
+the RTX 5090's two-session restore boundary, which is now reported with a named reason rather than
+an opaque one
+([EXP-043](docs/measurements/2026-09-16-restore-bound-host-kv-pool.json)).
+
+## Where this was — v0.7.0
 
 The `v0.7.0` release keeps two sessions at the 131,072-token ceiling reusing their prefixes on
 one card: the RTX 5090 Host KV pool moves from 8 GiB to 16 GiB, so alternating turns reuse about
@@ -401,6 +412,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.7.1` | The RTX 4090 native lane can restore its own ceiling-sized sessions (host-KV pool 4096 to 11264 MiB with a declared 32,768 MiB host floor), an export is refused when the configuration could not restore it, and a declined restore names its gate (EXP-043/EXP-044) |
 | `v0.7.0` | Two sessions at the 131,072-token ceiling keep prefix reuse on one card (Host KV pool 8 to 16 GiB, KV dtype unchanged after both 8-bit dtypes were rejected on the private corpus); the profile declares and the launcher enforces the runtime-host memory that pool needs; the two-session restore boundary is measured and named (EXP-041) |
 | `v0.6.10` | The documented container route refuses a launch whose bind mounts the engine cannot stage - proven inside a throwaway container before the 18 GB load - and both post-reboot failure signatures are named with recreation as the recovery; no component changed, both RTX 5090 routes re-run (EXP-040) |
 | `v0.6.9` | Both mainline lanes on source 696e78c7: independent Qwen parser semantic port, malformed-region and deep-union remediation, preserved custom/history/stream contracts; both lane qualifications and published-component acceptance passed |

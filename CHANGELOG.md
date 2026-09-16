@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-09-16
+
+The RTX 4090 native lane could report a successful checkpoint for a session at the context ceiling
+and then fail to restore it. This release fixes that lane and makes the bound behind it visible and
+enforced ([EXP-043](docs/measurements/2026-09-16-restore-bound-host-kv-pool.json)).
+
+### Fixed
+
+- **RTX 4090 native component `v0.6.4-qwen38-4090-beta.1`.** Restore materialises a continuation's
+  KV into the host-KV pool, so that pool bounds the largest session a configuration can admit back.
+  The lane shipped 4096 MiB - below the 5.02 GiB a 131,072-token session needs. Measured on the
+  shipped component: a 125,888-token session's explicit checkpoint reported 4,834,325,255 B saved
+  and the session answered HTTP 404 after a graceful stop and restart; with two such sessions all
+  four continuations lost reuse, the stop reported `saved 1 ... refused 1`, and both sessions
+  answered 404. The pool is now 11264 MiB: two ceiling sessions keep reuse (125,906 cached tokens
+  in 1.97 s), both checkpoint, the stop reports `saved 2, nothing to save 0, refused 0`, and both
+  resume exactly in 5.63 s and 7.78 s.
+- **An export can no longer outlive its own restorability.** The restore admission check now runs
+  at save time: a pool that could not re-admit the checkpoint answers HTTP 409 with
+  `checkpoint save refused: program refused continuation export` instead of writing it.
+
+### Changed
+
+- The RTX 4090 lane declares `runtime_host.minimum_runtime_memory_mib` 32,768. The pool is pinned
+  memory: 11264 MiB pins on a 32.4 GiB host with 11.6 GiB free, and 12288 MiB fails
+  `cudaMallocHost` there.
+- A refused restore names its gate - `program refused continuation import (host KV pool capacity
+  exhausted)` - instead of `the engine did not accept the checkpointed continuation`.
+- The startup capacity line publishes `host-kv-restorable=<tokens>` and the request log publishes
+  `host_kv_restorable_tokens`, so a pool that cannot restore the configured ceiling is visible
+  before any session exists.
+
+### Measured
+
+- **The RTX 5090 two-session restore boundary recorded in v0.7.0 has the same cause.** Two BF16
+  ceiling sessions need about 18 GiB of pool against the lane's 16 GiB. A 20 GiB pool restores both
+  (5.75 s and 9.22 s) but takes 28.28 GiB of a 31.34 GiB utility VM, which would raise that lane's
+  runtime-host floor to roughly 40 GiB - so the lane keeps its pool and now reports the boundary
+  with a named reason instead of an opaque one.
+
+### Unchanged
+
+RTX 5090 component `v0.6.5-qwen38-5090-beta.1` (image `5e3e1558`, deployment profile
+`qwen38-5090-v0.7.0`), the RTX 3090 component, the pinned client
+`omp-18.0.9-cross-platform-beta-2`, and the model artifact.
+
 ## [0.7.0] - 2026-09-16
 
 The RTX 5090 serving configuration advances to a 16 GiB Host KV pool so two sessions at the
@@ -1200,7 +1246,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...v0.7.0
 [0.6.10]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.9...v0.6.10
 [0.6.9]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.8...v0.6.9
