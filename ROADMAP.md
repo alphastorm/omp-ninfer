@@ -25,9 +25,27 @@ Durability is narrower than reuse and now bounded in writing: both sessions chec
 graceful stop saves both, but after a restart one of the two is declined and re-prefills
 ([EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json)).
 
-The `v0.6.10` release before it changed no component: it makes the documented container route refuse a
-launch whose bind mounts the engine cannot stage, and names the two ways a reboot breaks that
-route. The `v0.6.9` components it ships keep the two mainline lanes on one reviewed source
+**Next on this lane, from EXP-041's boundary:**
+
+1. **Restore admission for a second full-ceiling session**
+   ([#40](https://github.com/alphastorm/omp-ninfer/issues/40)). Two sessions at the
+   131,072-token ceiling both checkpoint and a graceful stop saves both, but after the restart
+   exactly one is accepted back; the other is declined with `the engine did not accept the
+   checkpointed continuation` and re-prefills from its transcript. Reproduced three times on
+   the shipped configuration. The refusal is safe - the store is untouched and nothing is
+   served from a partially restored session - so this is an admission-capacity limit to find
+   and raise, not a correctness defect.
+2. **RTX 4090 Host KV pool sizing**
+   ([#41](https://github.com/alphastorm/omp-ninfer/issues/41)). The same two-session workload on
+   the native lane loses every continuation to a 90 s re-prefill at its 4 GiB pool, and the
+   server refuses automatic checkpoints while both sessions are live (`program refused
+   continuation export`), so a managed stop saved one session and lost the other. Its INT8 KV
+   makes the pool cheaper per session than the 5090's, so the sizing question is the same one
+   this release answered on the container lane.
+
+The `v0.6.10` release before it changed no component: it makes the documented container route
+refuse a launch whose bind mounts the engine cannot stage, and names the two ways a reboot
+breaks that route. The `v0.6.9` components it ships keep the two mainline lanes on one reviewed source
 (`696e78c7`):
 RTX 5090 runtime `v0.6.5-qwen38-5090-beta.1` and RTX 4090 native
 `v0.6.3-qwen38-4090-beta.1`, both published and lane-qualified. It independently implements
