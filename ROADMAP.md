@@ -36,6 +36,19 @@ Durability is narrower than reuse and now bounded in writing: both sessions chec
 graceful stop saves both, but after a restart one of the two is declined and re-prefills
 ([EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json)).
 
+**Upstream campaigns, re-triaged 2026-09-17
+([#33](https://github.com/alphastorm/omp-ninfer/issues/33)):** the forks are 194 / 57 / 141 commits
+ahead, and applicability was measured rather than assumed - every recommended commit was
+cherry-picked into a scratch worktree and reverted. On the RTX 5090, 11 of 129 apply cleanly and
+none of them changes served behaviour on a shipped profile; the serve-layer fixes the 2026-08-30
+plan named now conflict because `v0.6.9` implemented those semantics independently and upstream
+restructured `src/serve` and moved to artifact v3. On the RTX 4090, 9 of 51 apply cleanly and every
+fix this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished
+snapshot saves, WDDM residency, the D3D12 fence, the admission-shortfall and `/health` fixes -
+conflicts in files this fork changed. Selective backporting is therefore closed on the 5090 and the
+4090 item becomes a scoped rebase, read against `v0.7.1`'s durability work
+([EXP-045](docs/measurements/2026-09-17-upstream-applicability-triage.json)).
+
 **Next on this lane, from EXP-041's boundary:**
 
 1. **Restore admission for a second full-ceiling session**

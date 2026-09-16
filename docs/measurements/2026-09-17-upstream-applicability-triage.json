@@ -1,0 +1,192 @@
+{
+  "artifact_type": "omp_ninfer_upstream_applicability_triage",
+  "schema_version": 1,
+  "experiment": "EXP-045",
+  "title": "What the upstream backlogs can still contribute as cherry-picks",
+  "generated_utc": "2026-09-17T00:05:00Z",
+  "method": "Every commit the dated watch recommends was applied to our fork tip with `git cherry-pick -n -x` in a scratch worktree and then reverted. A clean pick with an empty index means the change is already in our tree; a clean pick with staged files means it still applies; anything else records the conflicting paths. Nothing was committed and no tree was left modified.",
+  "watch_receipt": "docs/measurements/2026-09-17-upstream-watch.json",
+  "bases": {
+    "ninfer-5090": {
+      "ours": "4c7b11a1bf9198a4a5296a342af24e1419674ddf",
+      "upstream": "neroued/master",
+      "upstream_head_date": "2026-09-16",
+      "ahead_by": 194
+    },
+    "ninfer-4090": {
+      "ours": "736ac43a0a5d9eef17df60bcc417be566c9d8395",
+      "upstream": "udp4090/feat/rtx-4090-sm89-native",
+      "upstream_head_date": "2026-09-09",
+      "ahead_by": 57
+    }
+  },
+  "ninfer_5090": {
+    "candidates": 129,
+    "applies_clean": 11,
+    "already_present": 13,
+    "conflicts": 105,
+    "conflict_hot_directories": {
+      "docs/maintainer": 51,
+      "src/serve": 28,
+      "docs": 24,
+      "bench/ops": 20,
+      "bench": 19,
+      "tests": 14,
+      "include/ninfer/ops": 14,
+      "src/runtime/engine": 12
+    },
+    "clean_set": [
+      {
+        "sha": "11e76d8d3e9d",
+        "class": "feature",
+        "subject": "feat(perplexity): add fixed evaluation corpus",
+        "status": "applies-clean",
+        "changed_files": 25
+      },
+      {
+        "sha": "0b5b7c9aab4a",
+        "class": "feature",
+        "subject": "feat(ops): add target logprob reduction",
+        "status": "applies-clean",
+        "changed_files": 8
+      },
+      {
+        "sha": "00369f631073",
+        "class": "perf",
+        "subject": "perf(nvfp4): register the fused TMA SwiGLU for every width its block accepts",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "ec8b6a259ce9",
+        "class": "perf",
+        "subject": "bench(eval): add qwen3.8 gpqa budget campaign",
+        "status": "applies-clean",
+        "changed_files": 2
+      },
+      {
+        "sha": "abf820a4e9f9",
+        "class": "fix",
+        "subject": "fix(media): correct benchmark address range",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "377f71a11bed",
+        "class": "perf",
+        "subject": "perf(ops): add dflash2 w8 feature projection",
+        "status": "applies-clean",
+        "changed_files": 5
+      },
+      {
+        "sha": "efd012fd4270",
+        "class": "feature",
+        "subject": "feat(ops): add dflash2 tail rmsnorm",
+        "status": "applies-clean",
+        "changed_files": 10
+      },
+      {
+        "sha": "0af0b79a56ca",
+        "class": "feature",
+        "subject": "feat(ops): add dynamic grouped conv prepare",
+        "status": "applies-clean",
+        "changed_files": 13
+      },
+      {
+        "sha": "95037fe4d2b7",
+        "class": "perf",
+        "subject": "perf(ops): add dflash2 w8 linear swiglu",
+        "status": "applies-clean",
+        "changed_files": 16
+      },
+      {
+        "sha": "47bb19a5f715",
+        "class": "fix",
+        "subject": "fix(bench): allow unaligned artifact sizes in ttft staging",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "05507ab06608",
+        "class": "perf",
+        "subject": "perf(nvfp4): approximate silu in the fused SwiGLU TMA epilogue",
+        "status": "applies-clean",
+        "changed_files": 2
+      }
+    ],
+    "finding": "None of the eleven clean-applying commits changes served behaviour on a shipped profile: they are dflash2 operators for a speculative backend this product does not run, perplexity and GPQA evaluation tooling, benchmark fixes, and nvfp4 fused-SwiGLU work that our groupwise-int artifact never reaches. Every commit the 2026-08-30 plan named - the tool-parser and protocol-adapter fixes - now conflicts, because v0.6.9 implemented those semantics independently and upstream has since restructured src/serve. Upstream has also moved converter, loader and engine to artifact v3, which the pinned artifact predates."
+  },
+  "ninfer_4090": {
+    "candidates": 51,
+    "applies_clean": 9,
+    "already_present": 1,
+    "conflicts": 41,
+    "clean_set": [
+      {
+        "sha": "e9f196e8f007",
+        "class": "perf",
+        "subject": "perf(ops): retune prefill GEMM warp tiles and CTA rasterization",
+        "status": "applies-clean",
+        "changed_files": 11
+      },
+      {
+        "sha": "b7052a888cb5",
+        "class": "perf",
+        "subject": "perf(gdn): keep the value_z projection on split4 across the whole SIMT band",
+        "status": "applies-clean",
+        "changed_files": 2
+      },
+      {
+        "sha": "4a4d8c9bda94",
+        "class": "perf",
+        "subject": "perf(ops): stop starving the wide Q5 SIMT column tiles of registers",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "796b379d7df2",
+        "class": "perf",
+        "subject": "perf(attn): keep the attention gate/value projection on split4 across the SIMT band",
+        "status": "applies-clean",
+        "changed_files": 2
+      },
+      {
+        "sha": "5a13153824c7",
+        "class": "perf",
+        "subject": "perf(ops): share the widened activation across two rows in the Q5 split2 decode GEMM",
+        "status": "applies-clean",
+        "changed_files": 2
+      },
+      {
+        "sha": "67320ddb2ddd",
+        "class": "perf",
+        "subject": "perf(ops): share the widened activation across two rows in the Q5 split4 decode GEMMs",
+        "status": "applies-clean",
+        "changed_files": 3
+      },
+      {
+        "sha": "c85b44f1a20c",
+        "class": "perf",
+        "subject": "perf(ops): extend the shared-activation split2 to the 6144 output projection",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "bdfb828735e5",
+        "class": "perf",
+        "subject": "perf(ops/q4): double-buffer q4 small-t mma software pipeline",
+        "status": "applies-clean",
+        "changed_files": 1
+      },
+      {
+        "sha": "39a6f20ca982",
+        "class": "perf",
+        "subject": "perf(ops): route T=1 draft head projections to double-buffered Ada MMA",
+        "status": "applies-clean",
+        "changed_files": 3
+      }
+    ],
+    "finding": "The nine clean-applying commits are all kernel retunes. Everything this lane actually wants - chunked KV snapshot staging, the MTP restore stride fix, publishing snapshot saves whose write already finished, WDDM residency budgeting, the D3D12 residency fence, the admission-shortfall fix and the /health executor state - sits in the conflicting 41, in the same files this fork has changed. Those are a rebase, not a cherry-pick."
+  },
+  "disposition": "The 2026-08-30 campaign plan in omp-ninfer#33 is superseded. Selective backporting is no longer the economic lane on either fork: on the RTX 5090 the clean set is product-inert, and on the RTX 4090 the valuable set conflicts by construction. What remains worth doing is a scoped rebase per lane, each landing measured and requalified, with upstream's artifact v3 migration treated as its own project rather than a side effect."
+}

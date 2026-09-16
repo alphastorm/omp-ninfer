@@ -1,0 +1,5192 @@
+{
+  "artifact_type": "omp_ninfer_upstream_watch_report",
+  "schema_version": 1,
+  "generated_utc": "2026-09-16T23:49:02Z",
+  "manifest": "./upstream-watch.json",
+  "upstreams": [
+    {
+      "id": "ninfer-5090",
+      "upstream": "Neroued/ninfer",
+      "verdict": "upgrade-available",
+      "upstream_head": "5b4303c0ea0e8ab2be3efa54a677829f3edab6e5",
+      "upstream_head_date": "2026-09-16T15:48:22Z",
+      "fork_point": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "ahead_by": 194,
+      "aggregate_overlap": "no-direct-path-overlap",
+      "commits": [
+        {
+          "sha": "8d343527d1ff",
+          "date": "2026-08-28",
+          "subject": "perf(ops): widen moe prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "92bb06eb7c33",
+          "date": "2026-08-28",
+          "subject": "feat(ops): write the gdn prefill convolution straight into q/k/v",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "70434721b1ae",
+          "date": "2026-08-28",
+          "subject": "fix(engine): close tool output and sampling contracts",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "09212c89a209",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): reject invalid media enum values",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "eda402422126",
+          "date": "2026-08-28",
+          "subject": "feat(serve): align protocol adapters with engine capabilities",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "65f620a7f34e",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete anthropic messages semantics",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "821915529931",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete responses api adapter",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5c957c608944",
+          "date": "2026-08-28",
+          "subject": "refactor(serve): clarify protocol adapter boundaries",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6d0a6f1b4854",
+          "date": "2026-08-28",
+          "subject": "fix(serve): validate thinking signatures and expose request ids",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4cece118b93d",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): repair malformed generated utf-8",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0c02e53a6893",
+          "date": "2026-08-28",
+          "subject": "fix(serve): reject constrained decoding extensions",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "412b11f3e58c",
+          "date": "2026-08-28",
+          "subject": "feat(serve): close OpenAI compatibility gaps",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3a61ef3f8ad5",
+          "date": "2026-08-28",
+          "subject": "fix(ops): separate sparse moe gather index lifetimes",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bf9dbb016c15",
+          "date": "2026-08-29",
+          "subject": "fix(serve): coalesce responses assistant history",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "fd48e2fae270",
+          "date": "2026-08-29",
+          "subject": "test(cache): fix host restore output oracle",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f8fc0f5098d7",
+          "date": "2026-08-29",
+          "subject": "fix(serve): accept neutral tool message names",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1fc1cb765425",
+          "date": "2026-08-29",
+          "subject": "perf(linear): add fp8 w8a16 vocabulary gemm",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ce09aee5ab8a",
+          "date": "2026-08-29",
+          "subject": "fix(serve): cancel abandoned streaming requests",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "11e76d8d3e9d",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add fixed evaluation corpus",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0b5b7c9aab4a",
+          "date": "2026-08-29",
+          "subject": "feat(ops): add target logprob reduction",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "f6b3ba93d491",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add causal scoring evaluator",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "93cdc264d6f1",
+          "date": "2026-08-29",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "00369f631073",
+          "date": "2026-08-29",
+          "subject": "perf(nvfp4): register the fused TMA SwiGLU for every width its block accepts",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c2a81e6b4ee8",
+          "date": "2026-08-29",
+          "subject": "chore: ignore local workspace artifacts",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "89e297e1d6c5",
+          "date": "2026-08-29",
+          "subject": "feat(profiling): instrument engine execution with nvtx",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5327d676bd61",
+          "date": "2026-08-29",
+          "subject": "test(nvfp4): cover a width the fused SwiGLU route newly reaches",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "099d9032fdbc",
+          "date": "2026-08-29",
+          "subject": "feat(runtime): add value-aware shared prefix scheduling",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4ce08e341f24",
+          "date": "2026-08-29",
+          "subject": "bench(ttft): cover shared prefix value scheduling",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6b94b8c5721f",
+          "date": "2026-08-29",
+          "subject": "fix(runtime): preserve reusable checkpoints under pressure",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "953a7b2fcb1d",
+          "date": "2026-08-29",
+          "subject": "docs(architecture): record artifact decoupling decisions",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "af0bd2d08883",
+          "date": "2026-08-30",
+          "subject": "chore(tools): remove python inference reference stack",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6143271fd2d6",
+          "date": "2026-08-30",
+          "subject": "chore(artifact): remove v1 migration path",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "68324a9799e2",
+          "date": "2026-08-30",
+          "subject": "chore(bench): remove obsolete tuning benchmarks",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d9dbe1ce4d1a",
+          "date": "2026-08-30",
+          "subject": "chore(repo): clean obsolete peripheral tooling",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ec8b6a259ce9",
+          "date": "2026-08-31",
+          "subject": "bench(eval): add qwen3.8 gpqa budget campaign",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5e4bf313cb2f",
+          "date": "2026-08-31",
+          "subject": "fix(runtime): bound shared capture target expansion",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "36f23d79265f",
+          "date": "2026-08-31",
+          "subject": "docs(performance): publish qwen3.8 groupwise benchmarks",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bd99ce4efd68",
+          "date": "2026-08-31",
+          "subject": "bench(ttft): cover long-session host rotation",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3d9fda2229eb",
+          "date": "2026-08-31",
+          "subject": "fix(runtime): preserve reuse under bounded pressure search",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "da49c0d60f47",
+          "date": "2026-09-01",
+          "subject": "fix(runtime): exclude materialization sources from pressure",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "138d76aea3c2",
+          "date": "2026-09-01",
+          "subject": "refactor(runtime): clarify resource scheduling ownership",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "57b033af061c",
+          "date": "2026-09-01",
+          "subject": "bench(ttft): cover two-cohort stream pressure",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4a1a21884687",
+          "date": "2026-09-01",
+          "subject": "build(logging): add spdlog foundation",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "28b5f15bacca",
+          "date": "2026-09-01",
+          "subject": "docs(agents): remove obsolete qus reference",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5438b743daac",
+          "date": "2026-09-01",
+          "subject": "refactor(logging): unify product operational logs",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4ac73c471bcd",
+          "date": "2026-09-01",
+          "subject": "feat(kv-cache): add nvfp4 and k8v4 modes",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "21a0e85f8819",
+          "date": "2026-09-01",
+          "subject": "feat(kv-cache): use fp16 V storage and PV compute",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a2761ec1e676",
+          "date": "2026-09-02",
+          "subject": "refactor(kv-cache): centralize format contracts",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0a204aee3e8f",
+          "date": "2026-09-02",
+          "subject": "perf(ops): stage the routed MoE gate/up tile from x instead of a gathered copy",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9954867aa7ae",
+          "date": "2026-09-02",
+          "subject": "perf(rmsnorm): read the weight before the reduction, and compile that out where it costs occupancy",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3b50962bab5b",
+          "date": "2026-09-02",
+          "subject": "fix(frontend): normalize qwen tool argument parsing",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0c5d570c3a39",
+          "date": "2026-09-02",
+          "subject": "fix(frontend): preserve embedded qwen tool markup",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "abf820a4e9f9",
+          "date": "2026-09-02",
+          "subject": "fix(media): correct benchmark address range",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e51b585cb193",
+          "date": "2026-09-02",
+          "subject": "fix(gdn): respect cooperative launch capacity",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "f0eb3ac71ccd",
+          "date": "2026-09-02",
+          "subject": "fix(serve): upgrade cpp-httplib to 0.54.1",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5f6d44e4e11d",
+          "date": "2026-09-02",
+          "subject": "fix(serve): report engine readiness from health",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5973313d7f1e",
+          "date": "2026-09-02",
+          "subject": "test(frontend): make fixtures self-contained",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "550d0ac3a50c",
+          "date": "2026-09-02",
+          "subject": "feat(serve): add llama.cpp timing and prompt progress",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6e2786c5e5a5",
+          "date": "2026-09-02",
+          "subject": "fix(logging): restore readable operational logs",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "719d56ef93f7",
+          "date": "2026-09-03",
+          "subject": "fix(frontend): preserve structured tool call intent",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e3aeaf8c0b6f",
+          "date": "2026-09-03",
+          "subject": "fix(serve): preserve anthropic thinking across restarts",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a140e7ae82a1",
+          "date": "2026-09-03",
+          "subject": "fix(engine): preserve exact agent prefix reuse",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b87867513f65",
+          "date": "2026-09-04",
+          "subject": "fix(runtime): correct aliased state ownership",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "863aa8a5f1e8",
+          "date": "2026-09-04",
+          "subject": "fix(dflash): allow vision prompts",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ad0f3d384b5c",
+          "date": "2026-09-04",
+          "subject": "chore: add project funding information",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4df5e0b42bf4",
+          "date": "2026-09-06",
+          "subject": "feat(converter): add qwen3.8 dflash2 weights",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "917d4c89ecea",
+          "date": "2026-09-06",
+          "subject": "docs(maintainer): record architecture and dflash2 plans",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "377f71a11bed",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 feature projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "426d129fe6ad",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 selector projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "efd012fd4270",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 tail rmsnorm",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5499799dc512",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add fused linear top-k",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0af0b79a56ca",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dynamic grouped conv prepare",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "221baf55836b",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 attention projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "95037fe4d2b7",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 linear swiglu",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3ba9d4a6cb01",
+          "date": "2026-09-06",
+          "subject": "feat(ops): support 2048 cyclic kv append",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d51a07f3a69e",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add fused dflash2 rmsnorm rope",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "67a90a5c51f3",
+          "date": "2026-09-06",
+          "subject": "perf(ops): tune k5120 linear pair routes",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "45f9b4d05480",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 context kv materialization",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9f61a0ca37d8",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add 2048 sliding window attention",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d01e6a09cf7a",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 speculative acceptance",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1efaa84679c9",
+          "date": "2026-09-06",
+          "subject": "docs(maintainer): consolidate dflash2 op progress",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "050b21382783",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 dynamic grouped conv finish",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3447146d2ff2",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 candidate selector",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6d1da9cef7d3",
+          "date": "2026-09-06",
+          "subject": "perf(ops): remove q5 linear add aggregate cliff",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4b0eb36ccd29",
+          "date": "2026-09-06",
+          "subject": "perf(ops): route h24 verify attention through small t",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1c8f8acc7f31",
+          "date": "2026-09-06",
+          "subject": "perf(ops): fuse nvfp4 swiglu through t96",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "aa429f28b4de",
+          "date": "2026-09-06",
+          "subject": "perf(ops): route gdn input t16 through grouped mma",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "22d8a1d3600b",
+          "date": "2026-09-06",
+          "subject": "perf(ops): optimize w8 vocabulary t64 route",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3b77ea12d424",
+          "date": "2026-09-06",
+          "subject": "feat(qwen3.8): bind optional dflash2 weights",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3be58d8ac1c7",
+          "date": "2026-09-06",
+          "subject": "docs(dflash2): correct draft width contract and replace op checklist",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "96a83127b06a",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width dynamic conv prepare",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "99627b307dbe",
+          "date": "2026-09-06",
+          "subject": "perf(ops): extend and tune variable-width dynamic conv add",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b1dbbcfe5b25",
+          "date": "2026-09-06",
+          "subject": "perf(ops): widen rmsnorm rope and parallelize head groups",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "844333eae531",
+          "date": "2026-09-06",
+          "subject": "fix(ops): support variable-width rmsnorm tail packing",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ea360239d893",
+          "date": "2026-09-06",
+          "subject": "docs(agents): streamline guidance and consolidate project contracts",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e4e81015cbf9",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-column projection top-k",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "17e48a443c09",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-length candidate selector paths",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "07b9f20aa290",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width context kv materialization",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5bde5ed53921",
+          "date": "2026-09-06",
+          "subject": "docs(architecture): define model weight and execution contracts",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5323fad5b24f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize variable-length sparse draft acceptance",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "74f83878cdff",
+          "date": "2026-09-06",
+          "subject": "perf(ops): tune variable-column dflash2 feature projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "fd72759a8dbc",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize variable-column selector projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1539a6e0ba1a",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune variable-column draft qkv projection",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b3316bad471f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and retune variable-column draft swiglu",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "47f9d1216a48",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune variable-width sliding attention",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "eef7467d85f1",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and parallelize cyclic prefix append",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0ded3d6e06bf",
+          "date": "2026-09-06",
+          "subject": "docs(ops): close dflash2 linear pair dependency review",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "113b9a4939fd",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize ragged feature prefix preparation",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "55ca1d777c90",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and vectorize dflash2 embedding gathers",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a84a066fec83",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune dflash2 rmsnorm row geometries",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8e20a5a25d06",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tile batched feature capture",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "f6a658ef2e8f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): retune variable-width target attention projections",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a7818988a56d",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width causal cache attention",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "02be37cbc739",
+          "date": "2026-09-06",
+          "subject": "perf(ops): fuse and qualify variable-width gdn norm control",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8b3fefbc0647",
+          "date": "2026-09-06",
+          "subject": "docs(ops): define contract-specific dflash2 acceptance and cleanup",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "99b6084e0d59",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket dynamic conv prepare widths",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "012d5be28b9a",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): replace dynamic conv exact-token projections with tiles",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "00f020554a99",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket feature projection live columns",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "647c9c9095e9",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): use one target head rmsnorm row layout",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "edb2aabf163d",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket draft swiglu columns and mask pair outputs",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a1b9396c902c",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bound draft qkv specialization to the latency regime",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f5ae87909b15",
+          "date": "2026-09-06",
+          "subject": "docs(ops): close context materialization route review",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a20789e7ebd2",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket top-k producer columns across head formats",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d5aaa202f5d7",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket target fp8 attention projection columns",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a5dbfb6c47e",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): share sliding attention kernels across window sizes",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c71795e1fd5c",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): consolidate causal attention prompt thresholds",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d139d3388c35",
+          "date": "2026-09-06",
+          "subject": "fix(ops): preserve gdn record snapshot bits and batch fp8 projection",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a07a901783d4",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify gdn replay records across draft widths",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c29c9583cd3b",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target gated rmsnorm through 128 columns",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0f0899c9c2e8",
+          "date": "2026-09-06",
+          "subject": "perf(ops): extend fused target swiglu and bound q4 column templates",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "73e5732d9aab",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): simplify fp8 residual schedules and qualify target widths",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "37242d3a70f2",
+          "date": "2026-09-06",
+          "subject": "perf(ops): bound vocabulary templates and use c96 for target head",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5a6a54d9d9ba",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target argmax masking and replay",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "898603fd43f5",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target partial rope across speculative lanes",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5c6dad35ed0d",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target sigmoid gating through 128 columns",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d1d28c67334d",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify per-lane position offsets and graph updates",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e81b0924349b",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify dflash2 masked blocks with ragged lanes",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "fb8cea32aa03",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify verify input preparation for every draft prefix",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "81b2d050f803",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify committed hidden selection for each prefix",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f2faab70a247",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify continuation gather and scatter composition",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f9a3b1e799b4",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify replay fold against full-block snapshots",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "385b30ce1757",
+          "date": "2026-09-06",
+          "subject": "feat(engine): integrate dflash2 with configurable draft counts",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d4253222aa69",
+          "date": "2026-09-06",
+          "subject": "feat(bench): add dflash2 corpus measurement and artifact release metadata",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "03177b910e70",
+          "date": "2026-09-06",
+          "subject": "fix(runtime): preserve kv coverage during speculative terminal settlement",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ce7dee504925",
+          "date": "2026-09-06",
+          "subject": "docs(perf): record dflash2 single-request serving results",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "47bb19a5f715",
+          "date": "2026-09-06",
+          "subject": "fix(bench): allow unaligned artifact sizes in ttft staging",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "699adfcebab4",
+          "date": "2026-09-06",
+          "subject": "docs: remove dflash2 op checklist",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "487f89773f07",
+          "date": "2026-09-06",
+          "subject": "perf(sparse_moe): one CTA per token in small-T S2, and a warp merge in place of eight dependent rounds",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a16b64428566",
+          "date": "2026-09-07",
+          "subject": "docs: organize performance reports and update 35b results",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "641ef3e7af08",
+          "date": "2026-09-08",
+          "subject": "perf(text): skip NFC normalisation when the text is already pure ASCII",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b158afe294a2",
+          "date": "2026-09-08",
+          "subject": "perf(frontend): store the BPE merge rules in a flat open-addressed table",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ee9d519230d5",
+          "date": "2026-09-08",
+          "subject": "perf(nvfp4): rasterise the W4A4 TMA CTAs token-fastest, and fetch each activation-scale box once",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "437e9f980a76",
+          "date": "2026-09-08",
+          "subject": "perf(moe): choose the routed gate/up pipeline depth by route, size the grid by work",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ce95491874e1",
+          "date": "2026-09-08",
+          "subject": "perf(ops): prefetch the shared-expert down weights from the D1 tail",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7f14d963e17d",
+          "date": "2026-09-08",
+          "subject": "perf(ops): warm L2 for the next projection from the MoE down tail, issuing the hint before the block barrier",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b88c0f6fc7e9",
+          "date": "2026-09-08",
+          "subject": "fix(core): complete host uploads before returning",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9f0575bb2fa9",
+          "date": "2026-09-10",
+          "subject": "fix(build): include bf16 definitions in q4 topk kernel",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d49296868dcc",
+          "date": "2026-09-10",
+          "subject": "perf(runtime): improve materialization search and adapt planning budgets",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "99f08f00c816",
+          "date": "2026-09-13",
+          "subject": "docs(architecture): define model and weight decoupling contracts",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "168fdd81a237",
+          "date": "2026-09-13",
+          "subject": "refactor(converter): switch artifact production to v3",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4cde7ad04e1b",
+          "date": "2026-09-14",
+          "subject": "refactor(loader): switch C++ weight loading to v3",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "04350ba94c20",
+          "date": "2026-09-14",
+          "subject": "refactor(engine): run v3 models from bound instance parameters",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9b884034469e",
+          "date": "2026-09-14",
+          "subject": "docs: consolidate references for the v3 architecture",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "469f014c68ba",
+          "date": "2026-09-14",
+          "subject": "fix(artifact): guide v2 users to the offline upgrade tool",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1cf237f85c86",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): unify q8 linear shape dispatch and capacity kernels",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ad36f438d2e1",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): isolate q5 linear shape selection",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7d50a0eb3a34",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): consolidate q6 linear shape routes",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "40d7744bc3de",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): use shape-owned q4 capacity dispatch",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5f38ce81535e",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): select bf16 capacity schedules per shape",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "278e13e836aa",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): centralize fp8 routes in shape implementations",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c491cd15e430",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): organize nvfp4 execution by matrix shape",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c82038671da1",
+          "date": "2026-09-15",
+          "subject": "docs: define linear tuning priorities and workload anchors",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "61535c6cf60e",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune q4 6144x5120 linear and document performance",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "fb0035bc6c71",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune q4 1024x5120 and add 5120x6144 linear",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "abbeea0a3641",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune nvfp4 34816x5120 linear routes",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0972949aebf5",
+          "date": "2026-09-15",
+          "subject": "feat(ops): add q4 and q8 dense linear-add shapes",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "cde57e48fa78",
+          "date": "2026-09-15",
+          "subject": "docs: add concise v3 artifact upgrade instructions",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "fa5f41a8c5db",
+          "date": "2026-09-15",
+          "subject": "docs: add pull request template and verification guidance",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e360c4c06773",
+          "date": "2026-09-15",
+          "subject": "build: organize explicit cmake sources by component",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a2b7ed11cae3",
+          "date": "2026-09-15",
+          "subject": "fix(logging): simplify user-facing model summaries",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b9219f3f0b4b",
+          "date": "2026-09-15",
+          "subject": "build: import llama.cpp jinja source base",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "98dada0e03cb",
+          "date": "2026-09-15",
+          "subject": "feat(frontend): execute custom jinja chat templates",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6cc95cc5023b",
+          "date": "2026-09-15",
+          "subject": "docs(models): update artifacts with maintained chat templates",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8eaed5381e84",
+          "date": "2026-09-16",
+          "subject": "fix(frontend): preserve literal content in chat templates",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bb844c43cc59",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 4096x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1d8587bcfe85",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): read W4A4 activation scales one tile per TMA request",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "beedffa05280",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 7168x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d3c125ed433c",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 34816x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "05507ab06608",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): approximate silu in the fused SwiGLU TMA epilogue",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5f5fccab2afd",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): let the W4A4 TMA route take a partial last M tile",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "028eb61e4976",
+          "date": "2026-09-16",
+          "subject": "perf(ops): choose the predicated Q8 GEMM cache policy instead of inheriting it",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "dc58675fed7f",
+          "date": "2026-09-16",
+          "subject": "perf(sparse_moe): widen the Q5 routed-down Rows2 window to its measured crossover",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "f9c4a04bd123",
+          "date": "2026-09-16",
+          "subject": "bench: add state cache working-set scenarios",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5b4303c0ea0e",
+          "date": "2026-09-16",
+          "subject": "perf(ops): retune the Q4 34816x5120 LinearSwiGLu dispatch around the #261 linear routes",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        }
+      ]
+    },
+    {
+      "id": "ninfer-4090",
+      "upstream": "UDPSendToFailed/ninfer-4090",
+      "verdict": "upgrade-available",
+      "upstream_head": "5c60b7c9b455231795c09da21a9fbb6aa53f08e5",
+      "upstream_head_date": "2026-09-09T22:24:14Z",
+      "fork_point": "11aae2d6342d1fbdc7ef2b9ee17096858be44271",
+      "ahead_by": 57,
+      "aggregate_overlap": "high-review-overlap",
+      "commits": [
+        {
+          "sha": "ef4605a8cd01",
+          "date": "2026-08-25",
+          "subject": "perf(spec): expand linear MTP draft capacity to K=15 and optimize GQA decode kernels",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4b66c8824653",
+          "date": "2026-08-25",
+          "subject": "perf(build): enable fast-math device flags and compiler warning guards in CMake",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0978ac0928a6",
+          "date": "2026-08-25",
+          "subject": "fix(gqa): synchronize cached attention routing and update MTP test boundary",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a25294c36098",
+          "date": "2026-08-25",
+          "subject": "chore(release): prepare v1.1.0 release",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c15e0e9e7f71",
+          "date": "2026-08-26",
+          "subject": "fix(cache): chunk KV snapshot staging to bounded page batches",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92c360fbced1",
+          "date": "2026-08-26",
+          "subject": "fix(core,runtime): make WDDM residency budgeting opt-in on desktop-shared GPUs",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "72e931b2db2b",
+          "date": "2026-08-26",
+          "subject": "fix(core): verify the D3D12 residency arena round-trips before using it",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d083f9d3eed3",
+          "date": "2026-08-27",
+          "subject": "Merge pull request #6 from eyedark/feat/rtx-4090-sm89-native",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5e76d11add02",
+          "date": "2026-08-27",
+          "subject": "fix(cache): correct MTP restore stride and streamline chunked save staging",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "378e0ad8d904",
+          "date": "2026-08-27",
+          "subject": "feat(serve): scale default max tokens to context size and support unconstrained generation",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "80c8fc26b3eb",
+          "date": "2026-08-27",
+          "subject": "feat(build): auto-sync WebUI release tag and bump to b10655",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dabae909db17",
+          "date": "2026-08-27",
+          "subject": "chore(ops): yeet NVFP4 into the trash",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "387affc061d5",
+          "date": "2026-08-29",
+          "subject": "Merge pull request #7 from keylimesoda/fix/d3d12-residency-fence",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dfe932b8a062",
+          "date": "2026-08-29",
+          "subject": "feat(core,cli): promote WDDM evictable budgeting to explicit CLI toggle",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8bba5eb45c75",
+          "date": "2026-08-29",
+          "subject": "fix(frontend): repair malformed generated utf-8 in streaming decoder",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8dbff7e3bdd8",
+          "date": "2026-08-30",
+          "subject": "fix(arena): drain WDDM touch-fill before arena pointers are published",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "33d5e71a8f8c",
+          "date": "2026-09-01",
+          "subject": "Merge pull request #9 from Suffice/fix/wddm-touchfill-sync-followup",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6e9b5511a455",
+          "date": "2026-09-01",
+          "subject": "perf(build): compile whole-program and report ptxas usage everywhere",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "45a5ae57a230",
+          "date": "2026-09-01",
+          "subject": "perf(ops): size CTA waves from the target SM count, not an RTX 5090",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3bd39ddb90c3",
+          "date": "2026-09-01",
+          "subject": "perf(ops): cut decode spills and instruction footprint",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e9f196e8f007",
+          "date": "2026-09-01",
+          "subject": "perf(ops): retune prefill GEMM warp tiles and CTA rasterization",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "696d85476d89",
+          "date": "2026-09-01",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d6e1ff9b7ea3",
+          "date": "2026-09-01",
+          "subject": "perf(runtime): keep the MTP prefill alignment token on device",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9d8f74e22d2d",
+          "date": "2026-09-01",
+          "subject": "perf(ops): widen dense Q4/Q5/Q6 prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2107bb4abe51",
+          "date": "2026-09-01",
+          "subject": "perf(ops): remove the dominated causal conv sequence route",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "022da67ad870",
+          "date": "2026-09-01",
+          "subject": "perf(gdn): plan the gating projection for this card's SM count and occupancy",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e2556b508972",
+          "date": "2026-09-01",
+          "subject": "fix(serve): render mid-conversation system turns in place to preserve prefix reuse",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "64af80ff55cd",
+          "date": "2026-09-01",
+          "subject": "docs(cli): describe --lm-head-draft as what it does",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b7052a888cb5",
+          "date": "2026-09-01",
+          "subject": "perf(gdn): keep the value_z projection on split4 across the whole SIMT band",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4a4d8c9bda94",
+          "date": "2026-09-01",
+          "subject": "perf(ops): stop starving the wide Q5 SIMT column tiles of registers",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "796b379d7df2",
+          "date": "2026-09-01",
+          "subject": "perf(attn): keep the attention gate/value projection on split4 across the SIMT band",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b1114a4f43b4",
+          "date": "2026-09-01",
+          "subject": "docs(ops): correct the Q5 split2 slab-schedule table after the occupancy retune",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a13153824c7",
+          "date": "2026-09-01",
+          "subject": "perf(ops): share the widened activation across two rows in the Q5 split2 decode GEMM",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "67320ddb2ddd",
+          "date": "2026-09-01",
+          "subject": "perf(ops): share the widened activation across two rows in the Q5 split4 decode GEMMs",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c85b44f1a20c",
+          "date": "2026-09-01",
+          "subject": "perf(ops): extend the shared-activation split2 to the 6144 output projection",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8488278c4133",
+          "date": "2026-09-01",
+          "subject": "fix(cache): publish snapshot saves whose write already finished",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "05a8871222a6",
+          "date": "2026-09-01",
+          "subject": "fix(engine): stop a transient admission shortfall from bricking the executor",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dd5206f05d48",
+          "date": "2026-09-01",
+          "subject": "fix(serve): make /health report the executor's actual state",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7368aacdfbe9",
+          "date": "2026-09-01",
+          "subject": "perf(build): parallelize nvcc compiler optimizations across all cpu cores",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "717479febe8d",
+          "date": "2026-09-01",
+          "subject": "docs: streamline AGENTS.md for rtx-4090 sm89 and purge obsolete upstream prose",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bdfb828735e5",
+          "date": "2026-09-01",
+          "subject": "perf(ops/q4): double-buffer q4 small-t mma software pipeline",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "718fae7e1da1",
+          "date": "2026-09-01",
+          "subject": "perf(ops/q5): tensorize small-t linear projections and fused residual add",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c8fa0dd8b68",
+          "date": "2026-09-01",
+          "subject": "perf(ops): route small-t attention and gdn input projections to tensor cores",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d011700d6dc7",
+          "date": "2026-09-01",
+          "subject": "perf(ops/w8): bound unroll and stage scales in smem to eliminate register choke",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e4ca72a5218",
+          "date": "2026-09-01",
+          "subject": "perf(ops/gqa): align decode grid to 1 resident wave and cap register budget",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3d11fd64089d",
+          "date": "2026-09-01",
+          "subject": "perf(ops/gdn): bridge mma column layout to causal conv via in-cta staging",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cc113c714724",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 2.5-wave quantization tax in Q5 residual MMA via Split-K = 2",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "18ee68515483",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 3.5-wave quantization tax in attention input via stream fork-join",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d6c0da754231",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 2.5-wave quantization tax in W8 MTP small-T projections",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "39a6f20ca982",
+          "date": "2026-09-02",
+          "subject": "perf(ops): route T=1 draft head projections to double-buffered Ada MMA",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "25c3099f15b7",
+          "date": "2026-09-08",
+          "subject": "feat(serve): enforce structured JSON generation",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f34c33588c63",
+          "date": "2026-09-08",
+          "subject": "perf(serve): preserve MTP for structured output",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f589d6846530",
+          "date": "2026-09-08",
+          "subject": "fix(serve): scope grammar mask to first MTP position",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e8b920982a20",
+          "date": "2026-09-09",
+          "subject": "Merge pull request #12 from diodiogod/feat/structured-json",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2323def8d984",
+          "date": "2026-09-09",
+          "subject": "fix(core,tests): make WDDM residency fallback crash-safe and guard physical VRAM",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "912cbb56fb60",
+          "date": "2026-09-09",
+          "subject": "fix(load): stub validate-only dflash2 weights for qwen3.8 compatibility",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5c60b7c9b455",
+          "date": "2026-09-09",
+          "subject": "chore(release): prepare v1.2.0 release",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        }
+      ]
+    },
+    {
+      "id": "ninfer-3090",
+      "upstream": "Don-Chad/ninfer-3090",
+      "verdict": "upgrade-available",
+      "upstream_head": "75d94eab17619bf3723a8d66e1881a6673bc25ee",
+      "upstream_head_date": "2026-08-31T20:30:35Z",
+      "fork_point": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
+      "ahead_by": 141,
+      "aggregate_overlap": "review-overlap",
+      "commits": [
+        {
+          "sha": "6065a6b3aefa",
+          "date": "2026-08-15",
+          "subject": "fix(serving): preserve ordered instruction turns",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "604bdc5fec9c",
+          "date": "2026-08-15",
+          "subject": "perf(runtime): optimize thinking-preserving prefix reuse",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c94153b79d8",
+          "date": "2026-08-16",
+          "subject": "fix(serving): unify multimodal context admission",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ca457dc58a97",
+          "date": "2026-08-16",
+          "subject": "feat(artifact): register row-scaled fp8 weights",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1874224fa540",
+          "date": "2026-08-16",
+          "subject": "docs(agents): use unrestricted build parallelism",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9a6b63fb01d9",
+          "date": "2026-08-16",
+          "subject": "docs(artifact): define qwen3.8 nvfp4 contract",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "651d77965798",
+          "date": "2026-08-16",
+          "subject": "feat(artifact): add qwen3.8 nvfp4 converter",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5b5cbea4047e",
+          "date": "2026-08-16",
+          "subject": "docs(ops): add qwen3.8 nvfp4 op checklist",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a7b2fd83079",
+          "date": "2026-08-16",
+          "subject": "docs(ops): define route tuning methodology",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c8ca80b51f31",
+          "date": "2026-08-16",
+          "subject": "feat(ops): add fp8 t1 projection routes",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1f08f7c17314",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 linear routes",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c5a8b24ecc01",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 attention input projection",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "47dbfa10e71f",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 gdn input projection",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cdd0fa8c48bb",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 mlp projection",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9f7277266976",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 projection routes",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "935c44a5b47e",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 gdn snapshot and record",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9cd7bcd8b1e6",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 output head",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "34052d8a8f0c",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 token embedding",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c31b9dc297db",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fused qwen3.8 gdn control parent",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5d2c1f5590b8",
+          "date": "2026-08-17",
+          "subject": "feat(qwen3.8): integrate nvfp4 artifact runtime",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1bb7d0c127fc",
+          "date": "2026-08-17",
+          "subject": "test(cli): add Jacobian counterexample reasoning prompt",
+          "class": "test",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "32c9881b6783",
+          "date": "2026-08-17",
+          "subject": "docs(qwen3.8): publish nvfp4 artifact card",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7dea757771fe",
+          "date": "2026-08-17",
+          "subject": "docs(performance): publish qwen3.8 nvfp4 serving results",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "cf5010d0271e",
+          "date": "2026-08-17",
+          "subject": "fix(docs): integrate qwen3.8 concurrency summary",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "87422a82d0e7",
+          "date": "2026-08-17",
+          "subject": "docs(performance): report qwen3.8 decode saturation",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f08597d6eaaf",
+          "date": "2026-08-17",
+          "subject": "fix(qwen3.8): isolate gdn snapshot workspace",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "312b9b1e1868",
+          "date": "2026-08-17",
+          "subject": "docs(performance): publish qwen3.8 mtp0 results",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5f45a26f81b6",
+          "date": "2026-08-17",
+          "subject": "fix(vision): admit media by resource budget",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3b6075456e7b",
+          "date": "2026-08-17",
+          "subject": "perf(vision): streamline multimodal preparation",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b2b96bae4dd8",
+          "date": "2026-08-17",
+          "subject": "fix(media): align swscale destination buffers",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a05746aad764",
+          "date": "2026-08-18",
+          "subject": "docs(eval): publish qwen3.8 nvfp4 gpqa result",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b3ac5be9d1c4",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add ifbench, erqa, and real_world_qa datasets",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "69a36d5a12b3",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add qwen3.8 nvfp4 reasoning suite",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d1c4a0ddaa5d",
+          "date": "2026-08-19",
+          "subject": "docs(eval): publish qwen3.8 nvfp4 reasoning results",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a99407c63fc5",
+          "date": "2026-08-19",
+          "subject": "docs(eval): add official qwen3.8 bf16 comparison to model card",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "17b494ccfb0a",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add qwen3.8 groupwise-int reasoning suite",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "feaf4dd0983f",
+          "date": "2026-08-19",
+          "subject": "docs(eval): publish qwen3.8 groupwise-int results",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d6af046a5f27",
+          "date": "2026-08-20",
+          "subject": "refactor(engine): close execution ownership boundaries",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "383e1c159b85",
+          "date": "2026-08-20",
+          "subject": "docs(engine): consolidate architecture reference",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e9c7046faae1",
+          "date": "2026-08-20",
+          "subject": "refactor(gdn): unify recurrent kernel semantics",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "72a940bfa44b",
+          "date": "2026-08-21",
+          "subject": "docs(architecture): consolidate context cache design",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a58a946cba4b",
+          "date": "2026-08-21",
+          "subject": "refactor(ops): consolidate softmax attention ownership",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "17a7275fcc6e",
+          "date": "2026-08-21",
+          "subject": "feat(attention): add int8 kv hadamard rotation",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6183c9be0662",
+          "date": "2026-08-21",
+          "subject": "feat(attention): add fp8 kv cache support",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c648a13211d5",
+          "date": "2026-08-21",
+          "subject": "feat(runtime): add state image physical containers",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9d4cc6f9ffdf",
+          "date": "2026-08-21",
+          "subject": "feat(runtime): add paged kv physical containers",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "26fe86ddf486",
+          "date": "2026-08-22",
+          "subject": "feat(runtime): close device continuation lifecycle",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f7bcd2ba2478",
+          "date": "2026-08-23",
+          "subject": "feat(engine): implement prefix caching resource scheduling",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3a011c70c952",
+          "date": "2026-08-23",
+          "subject": "feat(engine): provision default host context cache",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "18e813a02470",
+          "date": "2026-08-23",
+          "subject": "fix(engine): preserve valid context replicas under pressure",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "670319602001",
+          "date": "2026-08-23",
+          "subject": "fix(engine): compare complete pressure closures",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ab6ab5a8cbf7",
+          "date": "2026-08-23",
+          "subject": "fix(engine): restore agent prefix cache reuse",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dda31c75491b",
+          "date": "2026-08-24",
+          "subject": "feat(runtime): add measured context cost scheduling",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a87d1fc635f2",
+          "date": "2026-08-24",
+          "subject": "feat(engine): add qwen thinking budget control",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fdf05a33c4fb",
+          "date": "2026-08-24",
+          "subject": "docs(engine): plan host work governance",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "94d0ef499607",
+          "date": "2026-08-24",
+          "subject": "feat(engine): expose host work timing",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2fb1a504b1ad",
+          "date": "2026-08-24",
+          "subject": "fix(frontend): reject oversized prompts during tokenization",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8f0aea6f89b4",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): commit only changed kv frontier pages",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8e85e94f5746",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): advance continuation rebuild work",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e3cba1f4f10d",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): invalidate replica policy on state changes",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a82382d9e369",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): append forced tokens without history copy",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c047b1fb5c64",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): reuse decoded token records",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7b780a95a9fd",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): skip aggregate output notifications",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1965308a9118",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): prepare speculative gdn fold",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "268409bffd65",
+          "date": "2026-08-24",
+          "subject": "perf(kv-cache): batch page allocation and mapping",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "669bc14ad9d4",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): linearize protected resource checks",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8554dfa02289",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): partition host kv extents by run",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0e6d4f4567ef",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): index prefix checkpoints by content",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92b1a7211bde",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): linearize bpe merge scheduling",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "189a0a12ebaf",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): resolve prompt boundaries in one encode",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8ba4bfd08cfe",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): expand media placeholders in one pass",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ddc8d9ed205b",
+          "date": "2026-08-24",
+          "subject": "perf(vision): advance prefill use cursors",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eb0e17ab476f",
+          "date": "2026-08-24",
+          "subject": "perf(vision): materialize only unreused media control",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e45f27dc12a",
+          "date": "2026-08-24",
+          "subject": "perf(vision): use uniform segment attention",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "609d881d1bf6",
+          "date": "2026-08-24",
+          "subject": "fix(engine): retain host timing exposure snapshots",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "114a075fd817",
+          "date": "2026-08-24",
+          "subject": "build(bench): remove persistent host timing benchmark",
+          "class": "other",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "500dbb427f0f",
+          "date": "2026-08-24",
+          "subject": "fix(build): restore complete target compilation",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "02bd904e164c",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): keep mtp prefill token on device",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ae9d1a4d81c7",
+          "date": "2026-08-24",
+          "subject": "perf(serve): account response contexts incrementally",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1fc69e221d1b",
+          "date": "2026-08-24",
+          "subject": "perf(serve): stream tool-call whitespace linearly",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ceba8d4094f8",
+          "date": "2026-08-24",
+          "subject": "perf(serve): avoid duplicate stream readiness probes",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e4e6f897ca5e",
+          "date": "2026-08-24",
+          "subject": "perf(serve): move response history ownership",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3218d67f8274",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): inspect media geometry for token counts",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e196f09f0920",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): resize decoded media in place",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "04dabcb600f3",
+          "date": "2026-08-24",
+          "subject": "fix(engine): preserve terminal result timing semantics",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9fb04ac57892",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): retain prompt-frontier rebuild splits",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bf791dbbc4cf",
+          "date": "2026-08-24",
+          "subject": "fix(frontend): honor control after media tokenization",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c80b2bf2a10f",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): make failed timing observation optional",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fc5c48349959",
+          "date": "2026-08-24",
+          "subject": "perf(vision): reclaim transient workspace memory",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e0829866ed51",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): restore anonymous prefix reuse",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4eef14a7560d",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): transfer ownership after alias eviction",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "020ca8853ab8",
+          "date": "2026-08-25",
+          "subject": "refactor(runtime): make program the resource authority",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "baaeeb09e991",
+          "date": "2026-08-25",
+          "subject": "bench(ttft): add managed serve latency campaign",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "123bf1a11cd1",
+          "date": "2026-08-25",
+          "subject": "fix(serve): keep warmup out of context cache",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "59febed27ca2",
+          "date": "2026-08-26",
+          "subject": "fix(cache): retain prefixes across rewritten suffixes",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3e903b704ce4",
+          "date": "2026-08-26",
+          "subject": "feat(runtime): plan materialization under pressure",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "55222c546a1b",
+          "date": "2026-08-27",
+          "subject": "docs: refresh serving and scheduling architecture",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "081c6039f91d",
+          "date": "2026-08-27",
+          "subject": "docs(maintainer): remove obsolete host-work plan",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "1d13c21336f6",
+          "date": "2026-08-27",
+          "subject": "fix(engine): bind cuda device across engine lifecycle",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fbd04729c835",
+          "date": "2026-08-27",
+          "subject": "fix(sparse-moe): synchronize prefill scan reuse",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ab82f8860356",
+          "date": "2026-08-27",
+          "subject": "fix(serve): gate readiness on successful warmup",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "79c292bc07e5",
+          "date": "2026-08-27",
+          "subject": "fix(serve): accept text-part tool results",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0e4cdf84f04d",
+          "date": "2026-08-27",
+          "subject": "fix(serve): type tool arguments by schema",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "780d57679177",
+          "date": "2026-08-27",
+          "subject": "fix(frontend): preserve literal control token provenance",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9dbc074005a1",
+          "date": "2026-08-27",
+          "subject": "fix(runtime): publish valid long anchor slots",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2190c4a1ab14",
+          "date": "2026-08-27",
+          "subject": "bench(ttft): cover bidirectional host kv swaps",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a77910ce2268",
+          "date": "2026-08-27",
+          "subject": "docs: define issue-first contribution workflow",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6e8b2e2ad5d5",
+          "date": "2026-08-27",
+          "subject": "docs: target contributions at master",
+          "class": "docs",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8d343527d1ff",
+          "date": "2026-08-28",
+          "subject": "perf(ops): widen moe prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92bb06eb7c33",
+          "date": "2026-08-28",
+          "subject": "feat(ops): write the gdn prefill convolution straight into q/k/v",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "70434721b1ae",
+          "date": "2026-08-28",
+          "subject": "fix(engine): close tool output and sampling contracts",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "09212c89a209",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): reject invalid media enum values",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eda402422126",
+          "date": "2026-08-28",
+          "subject": "feat(serve): align protocol adapters with engine capabilities",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "65f620a7f34e",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete anthropic messages semantics",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "821915529931",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete responses api adapter",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5c957c608944",
+          "date": "2026-08-28",
+          "subject": "refactor(serve): clarify protocol adapter boundaries",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6d0a6f1b4854",
+          "date": "2026-08-28",
+          "subject": "fix(serve): validate thinking signatures and expose request ids",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4cece118b93d",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): repair malformed generated utf-8",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c02e53a6893",
+          "date": "2026-08-28",
+          "subject": "fix(serve): reject constrained decoding extensions",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "412b11f3e58c",
+          "date": "2026-08-28",
+          "subject": "feat(serve): close OpenAI compatibility gaps",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3a61ef3f8ad5",
+          "date": "2026-08-28",
+          "subject": "fix(ops): separate sparse moe gather index lifetimes",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bf9dbb016c15",
+          "date": "2026-08-29",
+          "subject": "fix(serve): coalesce responses assistant history",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fd48e2fae270",
+          "date": "2026-08-29",
+          "subject": "test(cache): fix host restore output oracle",
+          "class": "test",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f8fc0f5098d7",
+          "date": "2026-08-29",
+          "subject": "fix(serve): accept neutral tool message names",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1fc1cb765425",
+          "date": "2026-08-29",
+          "subject": "perf(linear): add fp8 w8a16 vocabulary gemm",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ce09aee5ab8a",
+          "date": "2026-08-29",
+          "subject": "fix(serve): cancel abandoned streaming requests",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "11e76d8d3e9d",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add fixed evaluation corpus",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0b5b7c9aab4a",
+          "date": "2026-08-29",
+          "subject": "feat(ops): add target logprob reduction",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f6b3ba93d491",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add causal scoring evaluator",
+          "class": "feature",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "93cdc264d6f1",
+          "date": "2026-08-29",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7be837831528",
+          "date": "2026-08-29",
+          "subject": "Merge upstream Neroued/ninfer master into ninfer-3090",
+          "class": "other",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "096c30c6d7b6",
+          "date": "2026-08-29",
+          "subject": "chore(bench): note that the rk8v4 harness is blocked on the RotorQuant port",
+          "class": "chore",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "093f0d8bd001",
+          "date": "2026-08-29",
+          "subject": "fix(portability): build the new upstream runtime code on MSVC",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4a4cdd9fb8e7",
+          "date": "2026-08-29",
+          "subject": "fix(portability): reach <cstdlib> before nvtx3 in core/nvtx.h",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eeec57f55917",
+          "date": "2026-08-29",
+          "subject": "fix(portability): reach <cstdlib> before nvtx3 in core/nvtx_range.h too",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9880c24e11e0",
+          "date": "2026-08-29",
+          "subject": "fix: repair a bad auto-merge and finish the MSVC portability pass",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7a8c3b108f1a",
+          "date": "2026-08-29",
+          "subject": "build(win): link every target through NINFER_CUDART_TARGET",
+          "class": "other",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ee620a32a398",
+          "date": "2026-08-29",
+          "subject": "test: let the sm_86 build run the FP8/NVFP4 and official-resource suites",
+          "class": "test",
+          "overlap": "review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "899a9c21632c",
+          "date": "2026-08-29",
+          "subject": "build(win): report the real __cplusplus so constexpr dim3 compiles on MSVC",
+          "class": "other",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5820660db9ba",
+          "date": "2026-08-29",
+          "subject": "fix(gdn): sum the unsplit gating projection's K reduction pairwise",
+          "class": "fix",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "75d94eab1761",
+          "date": "2026-08-31",
+          "subject": "Merge pull request #15 from ashalliants/merge/upstream-catchup-20260829",
+          "class": "other",
+          "overlap": "review-overlap",
+          "recommendation": "next-release"
+        }
+      ]
+    },
+    {
+      "id": "oh-my-pi-client",
+      "upstream": "can1357/oh-my-pi",
+      "verdict": "upgrade-available",
+      "upstream_head": "f45673fbb2c4cf4431c05aacee7f7891572979f0",
+      "upstream_head_date": "2026-09-16T23:20:46Z",
+      "fork_point": "cc14e04f075de82c5c0c0ccd2f9dfbce6f03fe9e",
+      "ahead_by": 3521,
+      "aggregate_overlap": "no-direct-path-overlap",
+      "commits": [
+        {
+          "sha": "5769fabadce5",
+          "date": "2026-09-15",
+          "subject": "test(advisor): complete quarantine reset fixture",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "98bcef45d849",
+          "date": "2026-09-15",
+          "subject": "test(coding-agent): scope retry fallback credential block",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "2b6fbb49b8b1",
+          "date": "2026-09-15",
+          "subject": "style(coding-agent): format retry fallback fixture",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "1011ae67300f",
+          "date": "2026-09-15",
+          "subject": "docs(coding-agent): correct advisor changelog placement",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "022dc4062c5e",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11232: perf(tui): reduce retained thinking snapshot data (@iliaal)",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c8c5fb33e120",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11122: fix(session): repair interrupted tail when forking a live /tan parent (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2e48a70fab5f",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11230: fix(collab): exclude advisor transcripts from shared sessions (@iliaal)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "05c954a1b7ec",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11008: fix(tui): keep editor pinned to bottom after inline content shrinks (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e756b2059970",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11222: fix(tui): guard optimistic skill row reconcile against duplicate card (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c7c61096d868",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11242: fix(tui): evict retired Kitty images from terminal memory (@iliaal)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "cbb900306290",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10957: fix(ai): accept content:null on auth-gateway responses/chat routes (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9132ac563e1a",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11108: fix(tools): use advertised Antigravity image models (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4f3d3b1b1a7c",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11236: perf(session): hydrate only retained read-only history (@iliaal)",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "df3d3eae1207",
+          "date": "2026-09-15",
+          "subject": "test(coding-agent): aligned merged advisor and tool-visibility tests with current APIs",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "00b2e4b06d1a",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11009: fix(coding-agent): genericize orchestrate-notice verification wording (@szavadsky)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6dd00db5e560",
+          "date": "2026-09-15",
+          "subject": "docs(coding-agent): keep Unreleased sections unique",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5819564af5fe",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10995: fix(catalog): clamp anthropic adaptive minimal effort to low (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e5752992d68f",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10989: fix(eval): persist reserved global reassignment across cells (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a151e94ea024",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11112: fix(tui): guard synchronized output terminal identity (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "854020cad1de",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10941: fix(coding-agent): re-read RULES.md on /clear and /new (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2c0b9c3dcba7",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11061: fix(tui): refresh argument completions after spaces (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "863513b9d861",
+          "date": "2026-09-15",
+          "subject": "style: formatted merged TypeScript sources with oxfmt",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "17b4472712f2",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10927: fix(catalog): correct Alibaba Qwen 3.8 reasoning (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3091153a2463",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11231: fix(collab): preserve snapshot delivery for departed and rejoining peers (@iliaal)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2248da0eaf60",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10975: fix(coding-agent): preserve cached models across extension reloads (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a8c765ae3bd9",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10936: fix(catalog): apply DeepInfra promotional discount to model cost (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "59032f967690",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10931: fix(coding-agent): classify Codex reset windows by duration (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "35a14411897f",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11013: fix(tui): detect wmux multiplexer so the transcript renders (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "86f84ec9e8a6",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11120: fix(tan): restore request after compaction (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9532806373e5",
+          "date": "2026-09-15",
+          "subject": "chore(changelog): drop unrelated formatting churn",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "48d30c6bfe72",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10883: fix(tools): advertise mirrored artifact in column-cap truncation notice (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "673b0eb537ea",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11092: fix(plugins): detect lock-vs-disk version drift in doctor (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "11d04cdf950b",
+          "date": "2026-09-15",
+          "subject": "fix(plugins): preserve package when drift repair fails",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "f1eae3f07453",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10890: fix(tools): label column-truncation notice with the enforced unit (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "908982df686f",
+          "date": "2026-09-15",
+          "subject": "docs(tools): describe grep column unit accurately",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ce6e7637274f",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10830: fix(marketplace): allow uppercase in marketplace and plugin names (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a17901fb050f",
+          "date": "2026-09-15",
+          "subject": "test(marketplace): make case assertions filesystem-safe",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5fa23afed1cc",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10851: fix(acp): honor granted permission instead of re-prompting (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ae3f6b77a967",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10856: fix(model-resolver): resolve nested modelRoles role references (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9cfa89ccd024",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11056: fix(azure): disable astra reasoning with function tools (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "313161cc1a4a",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11015: fix(utils): interpret Zhipu reset times as UTC+8 (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e4dcf6b23397",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10969: fix(cli): preserve Cursor sessions on signal exit (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ea1199f736f9",
+          "date": "2026-09-15",
+          "subject": "fix(catalog): regenerated compat rules and rebaked bundled rows after merged KDL changes",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "705698619f24",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): kept the resolver's nested-role expansion on the main implementation",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5e9b4744a98d",
+          "date": "2026-09-15",
+          "subject": "test(coding-agent): gave the print-mode signal fixture the persistence-error subscription",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7faef8e0ad50",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10918: fix(task): preserve isolated worktrees across yields (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e4dbcad8243e",
+          "date": "2026-09-15",
+          "subject": "style: formatted merged sources",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "73b7dd109511",
+          "date": "2026-09-15",
+          "subject": "docs: placed every merged changelog entry under Unreleased",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "df0147227556",
+          "date": "2026-09-15",
+          "subject": "fix(catalog): resolved the deepseek-flash strip-image tie and aligned Bedrock compat expectations",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "24081c98ccd1",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): migrate retired local tiny title models to current equivalents",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "dfa9b27f6781",
+          "date": "2026-09-15",
+          "subject": "test(ai): reconciled Muse reasoning replay expectations with the filter policy",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8ecb218d37c9",
+          "date": "2026-09-15",
+          "subject": "test(coding-agent): aligned fixtures with skill-reader metadata and Bedrock stream revision",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4a7df9c2a926",
+          "date": "2026-09-15",
+          "subject": "test(collab): gave guest fixtures the displaceable-component drain",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "169aed2ff7b7",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): promote retired flat tinyModel keys into nested setting",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9076ebe2acb4",
+          "date": "2026-09-15",
+          "subject": "Revert \"Merge PR #11543: fix(coding-agent): preserve xd tool mounting across toolset restoration (@shivamklr)\"",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "06d3fdc6c231",
+          "date": "2026-09-15",
+          "subject": "fix(collab): delivered the host goodbye past a room teardown and unblocked sends behind a drained snapshot",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9160a8f95a6c",
+          "date": "2026-09-15",
+          "subject": "fix(session): invalidated the conversion memo after in-place mid-run compaction",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b154785aadde",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11240:",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b3a4f178b199",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11256: perf(gc): stream session scanning and archive I/O (@jiwangyihao)",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9ab7c166dbaf",
+          "date": "2026-09-15",
+          "subject": "docs(coding-agent): drop stale duplicate changelog entry",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c62ce0348116",
+          "date": "2026-09-15",
+          "subject": "test(pi-walker): isolate global scan-cache tests",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d915ac7c4325",
+          "date": "2026-09-15",
+          "subject": "Merge PR #12064: fix: support Perplexity SSO browser login (@lance0)",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a4a1747902ed",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11869: fix(pi-natives): respect CC in darwin oauth callback build (@Malix-Labs)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3df1c1cc7b62",
+          "date": "2026-09-15",
+          "subject": "Merge PR #11255: perf(read): omit duplicate body from truncation metadata (@jiwangyihao)",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c603cd791a05",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10697: fix(catalog): raise Cursor context windows to documented sizes (@dbc-hbin)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bab512a9b4b8",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10867: fix(tui): guard gradient palette against uninitialized theme (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "32e1bf319a55",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10933: fix(catalog): prevent clinepass proxy reference leaks (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8aafb5f2b4ad",
+          "date": "2026-09-15",
+          "subject": "Merge PR #10824: fix(pi-natives): make oauth_callback session probe hermetic in tests (@roboomp)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "786b098a34db",
+          "date": "2026-09-15",
+          "subject": "docs: placed the newly merged changelog entries under Unreleased",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b7199ec74f62",
+          "date": "2026-09-15",
+          "subject": "Merge remote-tracking branch 'origin/main'",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "566349761719",
+          "date": "2026-09-15",
+          "subject": "Merge branch 'fix/tiny-title-retired-model-migration'",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "922835ef2d5a",
+          "date": "2026-09-15",
+          "subject": "perf: small hotpath and startup wins",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "48b900ec999b",
+          "date": "2026-09-15",
+          "subject": "fix(advisor): preserve late non-blocking advisor notes during terminal unwind",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6d30880bb6e0",
+          "date": "2026-09-15",
+          "subject": "docs(changelog): add PR link and contributor attribution for advisor fix",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0b72258fe11c",
+          "date": "2026-09-15",
+          "subject": "fix(catalog,read): recompute cache freshness per read, track WAL writes, keep magic sniff for renamed images",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "92cfbd4854fe",
+          "date": "2026-09-15",
+          "subject": "test(advisor): drop duplicate nit routing unit case in favor of integration coverage",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bfdf5b140da8",
+          "date": "2026-09-15",
+          "subject": "fix(catalog): use PRAGMA data_version for row-cache invalidation",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "82255dc2af0c",
+          "date": "2026-09-15",
+          "subject": "fix(perf): revert unsafe transcript guard, sniff buffered magic bytes, format",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "fab5db708ab4",
+          "date": "2026-09-15",
+          "subject": "fix(read): sniff magic bytes regardless of extension, use full metadata window",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "11fa12e6ae01",
+          "date": "2026-09-15",
+          "subject": "Merge branch 'perf/hotpath-wins-2'",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2f13f6757f69",
+          "date": "2026-09-15",
+          "subject": "Merge branch 'nitfix-modelcache-freshness-wal-read-magic'",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "75d0a0a0e939",
+          "date": "2026-09-15",
+          "subject": "feat(tools): added status descriptions for browser and computer calls",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b4927a1c1422",
+          "date": "2026-09-15",
+          "subject": "fix(fetch): return scanned head window when close tag is later",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c5a8e0e09296",
+          "date": "2026-09-15",
+          "subject": "Merge pull request #12154 from korri123/fix/preserve-late-terminal-advisor-nits",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "59ddc8d6ef47",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): invalidate command-backed credentials on online refresh",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0aa0d6e0d0c2",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): fixed transcript retirement stalling after history replay",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4950c998908f",
+          "date": "2026-09-15",
+          "subject": "docs(coding-agent): added PR attribution for history replay fix",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7b1d46bdd8b1",
+          "date": "2026-09-15",
+          "subject": "Merge branch 'main' into fix/resume-render-deadlock",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "408203a55a83",
+          "date": "2026-09-15",
+          "subject": "docs(coding-agent): moved history replay fix under merged Fixed section",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b01421afc111",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): invalidate runtime header commands on provider refresh",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b6f1a66fb2f9",
+          "date": "2026-09-15",
+          "subject": "Merge PR #9770: feat(web-search): support explicitly selected keyless Parallel search (@georgeatparallel)",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "42d74e130987",
+          "date": "2026-09-15",
+          "subject": "feat(coding-agent): renamed `/drop` slash command to `/delete`",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "48b07e000c63",
+          "date": "2026-09-15",
+          "subject": "fix(advisor): dropped the quarantine latch and cut the advise acks to one line",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "73c41f4dccd8",
+          "date": "2026-09-15",
+          "subject": "feat: added Cerebras Qwen compatibility, prevented DashScope thinking fields",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2c290ad4fa69",
+          "date": "2026-09-15",
+          "subject": "feat(ai): added disabling reasoning support for Cerebras provider",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5d59f1032e48",
+          "date": "2026-09-15",
+          "subject": "chore(catalog): added Cerebras model specs and compatibility rules",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "238f5b892455",
+          "date": "2026-09-15",
+          "subject": "chore: bump version to 18.2.1",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b7b4694532df",
+          "date": "2026-09-15",
+          "subject": "fix(shell): made OutputDecoder::new non-const on windows",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1237ba572858",
+          "date": "2026-09-15",
+          "subject": "style(shell): formatted OutputDecoder::new per rustfmt",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d0ecc1181916",
+          "date": "2026-09-15",
+          "subject": "feat(coding-agent): add tui.titleSpinner terminal title spinner styles",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "be30d3c08e23",
+          "date": "2026-09-15",
+          "subject": "Merge pull request #12189 from can1357/feat/title-spinner-styles",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "217d4cbd19a3",
+          "date": "2026-09-15",
+          "subject": "style(coding-agent): fix oxfmt import wrapping in selector-controller",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "2529464b5700",
+          "date": "2026-09-15",
+          "subject": "Merge pull request #12196 from can1357/fix/title-spinner-oxfmt",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c9ac45c6ad37",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): preserve prewalk @default with --model",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1e57a90f1a25",
+          "date": "2026-09-15",
+          "subject": "fix(coding-agent): repaired test regressions surfaced by the release run",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "acf943d3c8dc",
+          "date": "2026-09-15",
+          "subject": "test: fixed linux-only ci failures in status-line and ptree tests",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "73c8cabe4439",
+          "date": "2026-09-15",
+          "subject": "fix(agents): unnest security-reviewer finding optionalProperties",
+          "class": "security",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "review-now"
+        },
+        {
+          "sha": "9811f2471939",
+          "date": "2026-09-15",
+          "subject": "docs(changelog): note security-reviewer optionalProperties fix",
+          "class": "security",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "review-now"
+        },
+        {
+          "sha": "cde11978b5f3",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): price Devin and Kimi Code when discovery omits cost",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b70c6ea6af81",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): keep Devin/Kimi cost-fallback scoped to list cards",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ffaf7063fc1c",
+          "date": "2026-09-16",
+          "subject": "Merge branch 'main' into fix/resume-render-deadlock",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "fd7a3e4c79ef",
+          "date": "2026-09-16",
+          "subject": "docs(coding-agent): moved history replay entry under unreleased section",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "acbb42093430",
+          "date": "2026-09-16",
+          "subject": "fix(ai): stamp TTFT on first structured tool-call delta in openai-completions",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "243a1368d98c",
+          "date": "2026-09-16",
+          "subject": "test(coding-agent): stop composer in new history-resize tests",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "eec1d05422d7",
+          "date": "2026-09-16",
+          "subject": "fix(mcp): honor configured deadlines for silent waits",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9ff3ac7fa376",
+          "date": "2026-09-16",
+          "subject": "Fix duplicate entry in CHANGELOG.md",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "193eff678306",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): keep command credentials off passive model refreshes",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "a2afd4edc8e7",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): let F5 upgrade a pending provider refresh",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c4fd8d53bdb3",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): keep F5 credential refresh after leaving a provider",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "91cf85babf56",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): keep cursorMaxMode when collapsing reviewed Cursor families",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "dce98df0d2e7",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): track descriptor discovery state",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "dcffe49499c0",
+          "date": "2026-09-16",
+          "subject": "fix(auth-gateway): report tool_use when a client-executed tool call ends the turn on stop",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b5f6004d9ce7",
+          "date": "2026-09-16",
+          "subject": "docs(coding-agent): note descriptor discovery fix",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b5eb8d27f66e",
+          "date": "2026-09-16",
+          "subject": "feat(catalog): fill unreviewed effort ladders from the published catalog",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4916555e7660",
+          "date": "2026-09-16",
+          "subject": "docs: attribute MCP wait fix to upstream PR",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b721f9c466f7",
+          "date": "2026-09-16",
+          "subject": "feat(secrets): widen built-in credential shapes",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "36ff46fc106b",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): reconcile cursor max mode on merged rows",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c5465e63d7be",
+          "date": "2026-09-16",
+          "subject": "fix(browser): discover wrapper-launched Chromium when reusing CDP endpoints",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0085bf41b517",
+          "date": "2026-09-16",
+          "subject": "fix(auth-gateway): keep Cursor's already-executed calls off the Anthropic wire",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "b9b6927e45be",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): scope published effort ladders to their publishing host",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "333b6b4544a8",
+          "date": "2026-09-16",
+          "subject": "fix(ai): stop the gateway state store from colliding, bleeding or closing live state",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9a93b87dc1f3",
+          "date": "2026-09-16",
+          "subject": "docs: credit the gateway hardening entries to their pull request",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "418544712a99",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): isolate and retain published effort ladders",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "90e8025b27d7",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): derive Cursor max mode from bundled routes",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1751de368288",
+          "date": "2026-09-16",
+          "subject": "test(catalog): cover bundled Cursor max-mode fallback",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f4cac92ec5a6",
+          "date": "2026-09-16",
+          "subject": "test(catalog): exercise bundled Cursor collapse path",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f396eac3bb77",
+          "date": "2026-09-16",
+          "subject": "test(catalog): finalize bundled Cursor fallback coverage",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6ac20107a60c",
+          "date": "2026-09-16",
+          "subject": "fix(browser): restrict wrapper CDP reuse to Chromium launchers",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5d3927f9fd8c",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): avoid cold empty effort memo and share timeout",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "22337b16e022",
+          "date": "2026-09-16",
+          "subject": "fix(cursor): derive max mode from routed tier",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8616722f7c56",
+          "date": "2026-09-16",
+          "subject": "fix(browser): read wrapper script with Bun.file",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "32c000e99cec",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): drop bare-id ladders any host publishes diallessly",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ccd8620334fe",
+          "date": "2026-09-16",
+          "subject": "style(catalog): oxfmt openai-compat ladder fetch",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "3d597a01f96a",
+          "date": "2026-09-16",
+          "subject": "test(catalog): pin the shared catalog deadline across both ladder sources",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "3877fb1022b6",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): let a second Ctrl+C exit when session close fails",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "2df6097ae0c4",
+          "date": "2026-09-16",
+          "subject": "fix(cursor): resolve max mode per routed wire id",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "24fcb212c023",
+          "date": "2026-09-16",
+          "subject": "docs(changelog): add PR link and contributor credit for the session-close escape hatch",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "32bea1b57531",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): prefer published ladders over unknown defaults",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1c25d7671279",
+          "date": "2026-09-16",
+          "subject": "fix(cursor): honor explicit markers on routed wire rows",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c10aa78f5d88",
+          "date": "2026-09-16",
+          "subject": "style(catalog): oxfmt the published-ladder regressions",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b3d90764667b",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): reach the Ctrl+C escape with a single press after a failed close",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "54b300309bf0",
+          "date": "2026-09-16",
+          "subject": "feat(ai): allow overriding the hardcoded Bedrock host via baseUrl",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "64da24f764b0",
+          "date": "2026-09-16",
+          "subject": "fix(ai): preserve a Bedrock baseUrl's query string",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "eef91f30f8c5",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): corrected /handoff copy that still described a new session",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6a021f54e476",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): evict settled background-job rows shortly after their result is consumed",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "cc120b1316b2",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): trim mid-turn orphan head from the collapsed post-compaction transcript",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0552cd2b422e",
+          "date": "2026-09-16",
+          "subject": "docs(ai): add CHANGELOG entry for Bedrock baseUrl override",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0e320a4560cf",
+          "date": "2026-09-16",
+          "subject": "fix(ai): redact query strings in persisted http-400 request dumps",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "13a0ce1f6ee9",
+          "date": "2026-09-16",
+          "subject": "feat(coding-agent): animate terminal title on Windows, add pulse spinner style",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e17e531de46d",
+          "date": "2026-09-16",
+          "subject": "docs(changelog): attribute title spinner PR #12250",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ece37ae1ceaf",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): defer TTSR AST matching to finalized tool calls",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "636d1892baef",
+          "date": "2026-09-16",
+          "subject": "docs(coding-agent): attribute changelog entries to PR #12252",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "16a0fa5ed716",
+          "date": "2026-09-16",
+          "subject": "fix(ai): sort SigV4 canonical query params by encoded form, not decoded",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "67ac7d4f5b43",
+          "date": "2026-09-16",
+          "subject": "fix(ai): prevented overflow in Anthropic signature parsing",
+          "class": "security",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "review-now"
+        },
+        {
+          "sha": "de88a4e00cbd",
+          "date": "2026-09-16",
+          "subject": "Merge remote-tracking branch 'origin/fix/ttsr-ast-defer-to-toolcall-end'",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "01e375bed756",
+          "date": "2026-09-16",
+          "subject": "test(coding-agent): name TTSR coordinator mock types",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "585d0096e49d",
+          "date": "2026-09-16",
+          "subject": "fix: corrected SQLite handling by shared opener and annotating errors",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "933b22a2b333",
+          "date": "2026-09-16",
+          "subject": "test(coding-agent): drive the shutdown write-conflict regression through the real storage guard",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "042028fd018b",
+          "date": "2026-09-16",
+          "subject": "fix: resolved SQLite corruption via opt-in backups and auto-recreation",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "18c17fa00844",
+          "date": "2026-09-16",
+          "subject": "Merge branch 'main' into feat/override_hardcoded_host_for_amazon_badrock",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "5dfdbf879d86",
+          "date": "2026-09-16",
+          "subject": "usage(openai-codex): keep credit-funded accounts selectable past plan limit",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "97a0239c971b",
+          "date": "2026-09-16",
+          "subject": "ai: prove codex credit-overage selection and block healing",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "92c7434014e4",
+          "date": "2026-09-16",
+          "subject": "usage(openai-codex): apply oxfmt to isCodexRequestAllowed signature",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "29b74eabca31",
+          "date": "2026-09-16",
+          "subject": "ai: assert legacy shared block clears when codex heals",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "089d08a9df8f",
+          "date": "2026-09-16",
+          "subject": "usage(openai-codex): scope the credit override to the plan meter",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d31c1ebe1340",
+          "date": "2026-09-16",
+          "subject": "ai: shorten the codex credit-overage changelog entry",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "3b36266a51b3",
+          "date": "2026-09-16",
+          "subject": "natives(test): compare walker mtime with sub-millisecond tolerance",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4269b013c2cf",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): latch Windows title static on native-path failure, hermetic title tests",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4653941d0dfd",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12249: fix(coding-agent): corrected /handoff copy that still described a new session (@BrahmingWu)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "df48a848023a",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12213: fix(ai): stamp TTFT on first structured tool-call delta in openai-completions (@STRML)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "31e68fec86d6",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12224: fix(auth-gateway): report tool_use when a client-executed tool call ends the turn on stop (@Xytronix)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ca471d0efb7a",
+          "date": "2026-09-16",
+          "subject": "docs(ai): credit PR 12224 in changelog",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "04f8369d3a63",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12241: fix(ai): stop the gateway state store from colliding, bleeding or closing live state (@camjac251)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7720fb0c09b5",
+          "date": "2026-09-16",
+          "subject": "fix(ai): reset gateway state during credential retry",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "efbc9436af57",
+          "date": "2026-09-16",
+          "subject": "refactor(ai): keep gateway state limit internal",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "12df37c3701f",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12171: usage(openai-codex): keep credit-funded accounts selectable past the plan limit (@pedropaulovc)",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "12d212c36a4b",
+          "date": "2026-09-16",
+          "subject": "fix(ai): preserve Codex overage after successful headers",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "df083da3b27a",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12219: fix(catalog): keep cursorMaxMode when collapsing reviewed Cursor families (@Xytronix)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "48e0021aaa58",
+          "date": "2026-09-16",
+          "subject": "fix(cursor): preserve max-mode markers on thinking pairs",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "18c3f6a3fb6f",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12204: fix(catalog): price Devin and Kimi Code when discovery omits cost (@eggpeat)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1da51a510530",
+          "date": "2026-09-16",
+          "subject": "docs(catalog): attribute PR 12204 changelog entries",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bb06c09329a7",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12200: fix(agents): unnest security-reviewer finding optionalProperties (@dhofheinz)",
+          "class": "security",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "review-now"
+        },
+        {
+          "sha": "10f5ba8ab7c9",
+          "date": "2026-09-16",
+          "subject": "test(agents): cover security reviewer finding schema",
+          "class": "security",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "review-now"
+        },
+        {
+          "sha": "74acc61b7633",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12223: fix(coding-agent): track catalog descriptor discovery state (@Dante-dan)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "34872c976b48",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): settle timed out discovery state",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bb74a74240e6",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12172: fix(coding-agent): invalidate command-backed credentials on online refresh (@harshaygadekar)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4c9296739b0d",
+          "date": "2026-09-16",
+          "subject": "docs(coding-agent): note credential refresh recovery",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e0599e326e43",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12191: fix(coding-agent): preserve prewalk @default with --model (@taibenvenuti)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "255a4c2d993a",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12177: fix(coding-agent): fixed transcript retirement stalling after history replay (@shivamklr)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c7580518f0e9",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12245: fix(coding-agent): let a second Ctrl+C exit when session close fails (@xiechimon)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9e8d5fb404e4",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): harden failed teardown escape",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d24fea15f277",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12232: fix(mcp): honor configured deadlines for silent waits (@aramalipoor)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ad4e4d3c11d7",
+          "date": "2026-09-16",
+          "subject": "test(mcp): tolerate Bun idle-config drift",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5e46672ab3a1",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12236: fix(browser): discover wrapper-launched Chromium when reusing CDP endpoints (@shivamklr)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7f93844765a4",
+          "date": "2026-09-16",
+          "subject": "test(browser): cover Chromium distro wrapper reuse",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "eee1e14dfe0d",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12174: natives(test): compare walker mtime with sub-millisecond tolerance (@pedropaulovc)",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "4262daf02347",
+          "date": "2026-09-16",
+          "subject": "test(natives): tolerate workspace mtime precision variance",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c75693acaf92",
+          "date": "2026-09-16",
+          "subject": "Honor hard session-stop blocks beyond advisory limits and preserve cancellation",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "d773a9870398",
+          "date": "2026-09-16",
+          "subject": "test(coding-agent): cover hard session-stop semantics",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "1dcbd01a2589",
+          "date": "2026-09-16",
+          "subject": "feat(secrets): register passwords embedded in connection-URL env vars",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "6817615f3b1a",
+          "date": "2026-09-16",
+          "subject": "fix(secrets): allow empty userinfo in connection-URL password extraction",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "52e6e15ade43",
+          "date": "2026-09-16",
+          "subject": "fix(secrets): redact full URL passwords containing at signs",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "91298d12436a",
+          "date": "2026-09-16",
+          "subject": "fix(task): settle jobs when Agent Hub kills subagents",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "77327c691cf6",
+          "date": "2026-09-16",
+          "subject": "docs(changelog): normalized merged entries for the 2026-09-16 sweep",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a13a83423b8b",
+          "date": "2026-09-16",
+          "subject": "style: formatted tests added by the 2026-09-16 merge sweep",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8cb59bacca08",
+          "date": "2026-09-16",
+          "subject": "test(coding-agent): typed model-hub refreshProvider mocks with the registry signature",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "1c600e206e33",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12227: catalog: fill unreviewed effort ladders from the published catalog (@Xytronix)",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7d65ddeb1b28",
+          "date": "2026-09-16",
+          "subject": "fix(catalog): read published effort ladders from the shared catalog only",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9d85851c2a63",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12246: feat(ai): support overriding the Amazon Bedrock host via baseUrl (@rmskkn)",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "1103c9f117a5",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12234: feat(secrets): widen built-in credential shapes (@wtfsayo)",
+          "class": "feature",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7edc104271f3",
+          "date": "2026-09-16",
+          "subject": "Merge PR #12252: fix(coding-agent): evict consumed background-job rows early and trim the collapsed transcript's mid-turn head (@eggpeat)",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7e2ca3e9dad9",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): close background eviction and transcript edge cases",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bb7eeb9f9dc8",
+          "date": "2026-09-16",
+          "subject": "docs(changelog): normalized entries for #12227, #12234, #12246, #12252",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "56d9d4b79053",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): fixed blank rows between blocks after persistent chrome growth",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "79fa14615817",
+          "date": "2026-09-16",
+          "subject": "chore: rewrite changelogs",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6a3127262eb6",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12251 from can1357/fix/ttsr-ast-defer-to-toolcall-end",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "db757ebe4210",
+          "date": "2026-09-16",
+          "subject": "chore: bump version to 18.2.2",
+          "class": "chore",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "60c9a115b2e8",
+          "date": "2026-09-16",
+          "subject": "test(ai): used SQLITE_IOERR as the non-retryable open() exemplar",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a6e7c08de83b",
+          "date": "2026-09-16",
+          "subject": "fix(pi-edit): gate sloppy closest_fragment tail window on char boundary",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "e220aab07e9a",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12268 from can1357/fix/sloppy-cjk-char-boundary",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "0bac7daad2d0",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): address codex nits on windows title fallback",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8c4c4034f2f7",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): reset changelog to main, drop stale title entries",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "24964b6058e0",
+          "date": "2026-09-16",
+          "subject": "fix(coding-agent): make title dedupe test host-agnostic",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "bf3192a1e769",
+          "date": "2026-09-16",
+          "subject": "Merge remote-tracking branch 'origin/main' into feat/title-windows-spinner-pulse",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "791990c72c85",
+          "date": "2026-09-16",
+          "subject": "fix(agent): retain cancelled jobs until execution settles",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "c74847153aec",
+          "date": "2026-09-16",
+          "subject": "perf(edit): cache retained snapshot UTF-16 accounting",
+          "class": "perf",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "800dd48b8b29",
+          "date": "2026-09-16",
+          "subject": "docs: add PR attribution to changelog",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5e0abcd60e3f",
+          "date": "2026-09-16",
+          "subject": "docs: add PR attribution to changelog",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "571767bba22f",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12254 from H4vC/feat/title-windows-spinner-pulse",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "498e3a781b7c",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12278 from iliaal/fix/audit-cancel-reap",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "dea7be711bba",
+          "date": "2026-09-16",
+          "subject": "Merge branch 'main' into perf/audit-snapshot-accounting",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "ac70773276bb",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12279 from iliaal/perf/audit-snapshot-accounting",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "9dd4b93ddb96",
+          "date": "2026-09-16",
+          "subject": "fix(edit): reject invalid UTF-8 before staging edits",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "59600437e0d1",
+          "date": "2026-09-16",
+          "subject": "docs: add PR attribution to changelog",
+          "class": "docs",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "354f1cdc0e88",
+          "date": "2026-09-16",
+          "subject": "fix(edit): keep delete and create-exists working on invalid UTF-8",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "38ab0ac299b0",
+          "date": "2026-09-16",
+          "subject": "fix(edit): address review nits on invalid-UTF-8 bypass",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "90d7ea5a3832",
+          "date": "2026-09-16",
+          "subject": "fix(edit): keep streaming REM preview on invalid UTF-8",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "7a2628ac45ae",
+          "date": "2026-09-16",
+          "subject": "fix(edit): preserve patch guards and respect operation order",
+          "class": "fix",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        },
+        {
+          "sha": "8df0db2fe7b6",
+          "date": "2026-09-16",
+          "subject": "test(edit): cover streaming deletion previews and rejection guards",
+          "class": "test",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f45673fbb2c4",
+          "date": "2026-09-16",
+          "subject": "Merge pull request #12277 from iliaal/fix/audit-utf8-edit",
+          "class": "other",
+          "overlap": "no-direct-path-overlap",
+          "recommendation": "pull-candidate"
+        }
+      ]
+    }
+  ]
+}
