@@ -68,7 +68,7 @@
       "status": "passed",
       "repository_path": "releases/v0.7.0/acceptance/composed-external-installation.json",
       "sha256": "2c0c8bc6cc44e30883860874e7835504c25994f52b293ee8127b2d046757cd62",
-      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/755890483c6ffc7fc1ce61a3a55e112ea54bca23/releases/v0.7.0/acceptance/composed-external-installation.json",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0048451b96c44bc99a23726e33e10c1793029765/releases/v0.7.0/acceptance/composed-external-installation.json",
       "note": "Re-run for this release because the serving configuration changed: the documented host route started the published image on deployment profile qwen38-5090-v0.7.0 (2/2 blocks, including the launcher's new runtime-host memory floor) and the macOS client route drove that container through 10/10 blocks from candidate 0ef4ccb, with the RTX 4090 native installer acceptance carried from v0.6.9.",
       "as_of": "2026-09-16",
       "operator_class": "owner-operated tester-equivalent",
