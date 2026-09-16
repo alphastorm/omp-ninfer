@@ -1,0 +1,9 @@
+3921ad65eb500d6879dc160371246aef571bbda36e7d6741860a43af7040feac  Control-GpuOwner.ps1
+d3b53b1e9a8b3f9e085f8786c28905289a48890c049f05cac25ba14ae0e69c25  Control-Release.ps1
+2b5fb89077aec856cb0df0764ea6619a52ec86dafa73b4f564194eb018e53b67  Install-Release.ps1
+e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b  Protect-StateRoot.ps1
+4a541ab6873767c9f5ebde3c816f6b61627765a06aadd43728f481737ec7f2b7  ninfer-rtx4090-native-v0.6.4-beta.1-source.tar.gz
+8071872a65533b04bba1596bbacb4ca3a8ae800276656c21a661f546374670ad  ninfer-rtx4090-native-v0.6.4-beta.1-windows-x86_64-cuda13.3-rtx4090.SHA256SUMS
+1765496300b4ea93c804e0ece8929b82baf606e3f056ff0dfc7c5b504e09e551  ninfer-rtx4090-native-v0.6.4-beta.1-windows-x86_64-cuda13.3-rtx4090.spdx.json
+05685402e647ece45810ad9f90c2c457ec1e3421cc0f72e0f0619825d810c088  ninfer-rtx4090-native-v0.6.4-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz
+e4efb89561a64c1e92b1158006d8aa7c3f63f62c252af9798bc439805ef4e98e  package-build-receipt.json

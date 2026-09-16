@@ -5,7 +5,7 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **Use the exact v0.6.9 release.** Both mainline components passed lane qualification and
+> **Use the exact v0.7.1 release.** Both mainline components passed lane qualification and
 > published-component acceptance. Do not bypass `--require-ready` or mix one release's
 > manifest with another release's commands.
 
@@ -26,14 +26,15 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The `v0.6.9` release connects native Windows OMP over authenticated local loopback
+The `v0.7.1` release connects native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
 and RTX 3090 use separate native Windows packages.
 
-The new runtime components are RTX 5090 `v0.6.5-qwen38-5090-beta.1` and RTX 4090
-`v0.6.3-qwen38-4090-beta.1`, both from source `696e78c7`. They independently implement the
+The runtime components are RTX 5090 `v0.6.5-qwen38-5090-beta.1` from source `696e78c7`
+and RTX 4090 `v0.6.4-qwen38-4090-beta.1` from source `736ac43a`, which fixes a lane that
+could report a checkpoint it could not restore. They independently implement the
 upstream Qwen parser semantics without a serve-adapter rebase. Model, OMP client, RTX 3090
 component, and serving settings are unchanged. The public RTX 5090 deployment profile remains
 `qwen38-5090-v0.6.3` / configuration `622ab621`; the lifecycle candidate's qualification on
@@ -72,7 +73,7 @@ execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pi
 this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.6.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -125,7 +126,7 @@ line enables the release's hash-pinned scripts for this window only and changes 
 machine - repeat it in any new window that runs one:
 
 ```powershell
-git clone --branch v0.6.9 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -157,7 +158,7 @@ Then let the manifest supply every URL and hash:
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.6.9\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.7.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -380,7 +381,7 @@ owner.
 From the public release tag, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.6.9 --depth 1 \
+git clone --branch v0.7.1 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -422,11 +423,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.9/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.9/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.6.9/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
