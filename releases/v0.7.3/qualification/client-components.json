@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-public-client-components",
+  "release": "v0.7.3",
+  "observed_utc": "2026-09-17T23:44:32.485133+00:00",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "tag": "omp-v18.2.3-ninfer-beta.1",
+    "commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "tree": "454d121cf221c1928de9503c71210cf015b048dc"
+  },
+  "component": {
+    "repository": "https://github.com/alphastorm/homebrew-omp",
+    "tag": "omp-18.2.3-cross-platform-beta-1",
+    "release_id": 391118997
+  },
+  "assets": [
+    {
+      "name": "omp-18.2.3-linux-x64.tar.gz",
+      "id": 571366439,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-linux-x64.tar.gz",
+      "bytes": 88783418,
+      "sha256": "07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "omp-18.2.3-macos-arm64.tar.gz",
+      "id": 571366444,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-macos-arm64.tar.gz",
+      "bytes": 68327188,
+      "sha256": "00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "omp-18.2.3-windows-x64.tar.gz",
+      "id": 571366441,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-windows-x64.tar.gz",
+      "bytes": 84845155,
+      "sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "qualification.json",
+      "id": 571366440,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/qualification.json",
+      "bytes": 853,
+      "sha256": "c6acb805fb22e01e874c3c124ca089679c12309e4a0776bcef6b94cf0f759900",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "receipt.json",
+      "id": 571366452,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/receipt.json",
+      "bytes": 1265,
+      "sha256": "7783837feafe58242f5f2a47c166f51f45f61db5503d43f3887548b71a1c1802",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "SHA256SUMS",
+      "id": 571366453,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/SHA256SUMS",
+      "bytes": 547,
+      "sha256": "fd6014ff1336b61b1a33d8b8ae9c7b863b384e799b96b5c97d6dd38a0f553766",
+      "anonymous_download_verified": true
+    },
+    {
+      "name": "windows-x64-qualification.json",
+      "id": 571366442,
+      "url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/windows-x64-qualification.json",
+      "bytes": 1196,
+      "sha256": "835244691621655c6550a372fee46e0713a7859ec0ff1484f9b20bb090a6ccab",
+      "anonymous_download_verified": true
+    }
+  ],
+  "scope": "Anonymous public downloads, exact byte counts and SHA-256 against the qualified publication set; public source tag resolves to the qualified source commit. Not client hardware or route acceptance."
+}

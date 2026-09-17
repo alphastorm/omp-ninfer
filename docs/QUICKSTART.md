@@ -1,14 +1,18 @@
 # Quickstart
 
-> **Qualified on RTX 5090 · 4090 · 3090**
+> **Qualified runtime lanes: RTX 5090 · 4090 · 3090; v0.7.3 client candidate pending acceptance**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.7.2 is the current public release.** Its changed runtime components passed the
-> documented RTX 5090 host, macOS and Windows client routes, and RTX 4090 native route.
-> [Acceptance and recorded substitutions](../releases/v0.7.2/acceptance/documented-routes.json).
-> Do not bypass `--require-ready` or mix one release's manifest with another release's commands.
+> **v0.7.3 is a client candidate, pending every-route acceptance.** It is not yet a public,
+> Latest, or accepted product release. All five documented lanes must pass: RTX 5090 container
+> host, macOS client, Windows client, and the RTX 4090 and RTX 3090 native lanes.
+> v0.7.2 remains the current public release; its
+> [acceptance and recorded substitutions](../releases/v0.7.2/acceptance/documented-routes.json)
+> are historical evidence, not acceptance of this client candidate. The commands below target
+> v0.7.3 for use only after publication and readiness. Do not bypass `--require-ready` or mix
+> one release's manifest with another release's commands.
 
 ## Choose your lane
 
@@ -17,9 +21,9 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.2 accepted route** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.7.2 accepted route** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **unchanged qualified lane** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 Each native lane is installable only through its exact manifest variant. Do not substitute GPU
@@ -27,29 +31,43 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The `v0.7.2` release composes native Windows OMP over authenticated local loopback
+The `v0.7.3` candidate composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
-native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
-and RTX 3090 use separate native Windows packages.
+native Linux client profiles share the same compatibility authority; RTX 4090
+and RTX 3090 use separate native Windows packages. Client acceptance for this candidate is pending.
 
 The published runtime components are RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090
 `v0.6.5-qwen38-4090-beta.1`, both from source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`.
 They add bounded checkpoint-backed reclaim when restore encounters occupied host-KV capacity.
-Both changed components passed exact-package public installation and documented-route acceptance.
-Model, OMP 18.0.9 client, RTX 3090 component, and serving settings are unchanged. The public
+Both changed components passed exact-package public installation and documented-route acceptance
+for v0.7.2. The v0.7.3 candidate changes only the OMP client to 18.2.3; runtime components,
+model, configuration, and serving floors/settings are unchanged from v0.7.2. The public
 RTX 5090 deployment profile remains `qwen38-5090-v0.7.0` / configuration `762e6bf4`, with
 16384 MiB host KV and a 28672 MiB runtime-host floor. The native RTX 4090 keeps 11264 MiB
 host KV, 24 host-state slots, and its 32768 MiB host floor. Qualification scratch settings do
 not replace either public profile.
 
-The [EXP-047 final reviewed candidate](measurements/2026-09-17-restore-reclaim.json) restored
+The historical v0.7.2 [EXP-047 final reviewed candidate](measurements/2026-09-17-restore-reclaim.json) restored
 both target 126K-token RTX 5090 sessions. Its combined probe process also reported three unsaved
 predecessor sessions at shutdown: this is not a loss-free shutdown guarantee for every session.
 Automatic checkpoints remain best effort under traffic. The extra multisession control recorded
 root fallback on 2 of 8 continuations/forks without server errors
 ([lane receipt](../releases/v0.7.2/qualification/rtx5090.json)); universal warm reuse is not claimed.
-[Public-route acceptance](../releases/v0.7.2/acceptance/documented-routes.json) is recorded separately.
+[v0.7.2 public-route acceptance](../releases/v0.7.2/acceptance/documented-routes.json) is recorded
+separately. These reclaim limitations also apply to v0.7.3 because its runtime is unchanged.
+
+The OMP 18.2.3 client comes from source tag `omp-v18.2.3-ninfer-beta.1`
+(commit `5ade242de59ac0f4606a1158bf564410c96918d4`) and published component release
+[`omp-18.2.3-cross-platform-beta-1`](https://github.com/alphastorm/homebrew-omp/releases/tag/omp-18.2.3-cross-platform-beta-1).
+Component publication does not establish product readiness or every-route acceptance. The exact
+native archive identities are:
+
+| Client archive | SHA-256 |
+| --- | --- |
+| `omp-18.2.3-windows-x64.tar.gz` | `4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311` |
+| `omp-18.2.3-linux-x64.tar.gz` | `07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46` |
+| `omp-18.2.3-macos-arm64.tar.gz` | `00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f` |
 
 Start only from the product tag and require its ready contract:
 
@@ -61,7 +79,7 @@ That gate binds the Windows client archive and binary, compatibility authority, 
 model, configuration, qualification summary, and clean-install acceptance receipt.
 
 > [!WARNING]
-> Stay on the exact OMP 18.0.9 beta archive pinned by this release. The config every route below
+> Stay on the exact OMP 18.2.3 beta archive pinned by this release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
@@ -84,7 +102,7 @@ execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pi
 this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.7.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.3 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -94,16 +112,16 @@ py -3 scripts\verify_release.py --require-ready
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$Url = 'https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-windows-x64.tar.gz'
-$Expected = '0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9'
-Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-18.0.9-windows-x64.tar.gz
-if ((Get-FileHash omp-18.0.9-windows-x64.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP archive checksum mismatch' }
-tar -xzf omp-18.0.9-windows-x64.tar.gz
-& .\omp-18.0.9-windows-x64\install.ps1
+$Url = 'https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-windows-x64.tar.gz'
+$Expected = '4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311'
+Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-18.2.3-windows-x64.tar.gz
+if ((Get-FileHash omp-18.2.3-windows-x64.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP archive checksum mismatch' }
+tar -xzf omp-18.2.3-windows-x64.tar.gz
+& .\omp-18.2.3-windows-x64\install.ps1
 & "$env:LOCALAPPDATA\OMP\omp.cmd" --version
 ```
 
-The version must be `omp/18.0.9`. The installer retains the previous client pointer when one exists.
+The version must be `omp/18.2.3`. The installer retains the previous client pointer when one exists.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
 the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to native
@@ -139,7 +157,7 @@ line enables the release's hash-pinned scripts for this window only and changes 
 machine - repeat it in any new window that runs one:
 
 ```powershell
-git clone --branch v0.7.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.3 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -171,7 +189,7 @@ Then let the manifest supply every URL and hash:
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.7.2\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.7.3\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -359,8 +377,8 @@ text and tools only. Report the outcome with the
 
 **Mac**
 
-- Apple silicon running the macOS version declared by the `omp-beta` cask;
-- Homebrew and OpenSSH; and
+- Apple silicon macOS supported by the pinned native beta archive;
+- OpenSSH, curl, tar, and Python 3; and
 - at least 1 GiB free for OMP and local state.
 
 **Inference host**
@@ -391,10 +409,10 @@ owner.
 
 ## 1. Clone the exact release on both machines
 
-Once v0.7.2 is published and ready, run this on the Mac and inference host:
+Once v0.7.3 is published and ready, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.7.2 --depth 1 \
+git clone --branch v0.7.3 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -408,17 +426,17 @@ Do not install from moving `main`, an untagged archive, or a manifest whose stat
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-macos-arm64.tar.gz'
-EXPECTED='ba85e7aba6a6dba7d734e58d741c09798e8b3323f8abda0485bedafebc6c00c7'
-curl --fail --location --output omp-18.0.9-macos-arm64.tar.gz "$URL"
-test "$(shasum -a 256 omp-18.0.9-macos-arm64.tar.gz | cut -d ' ' -f 1)" = "$EXPECTED"
-tar -xzf omp-18.0.9-macos-arm64.tar.gz
-./omp-18.0.9-macos-arm64/install.sh
+URL='https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-macos-arm64.tar.gz'
+EXPECTED='00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f'
+curl --fail --location --output omp-18.2.3-macos-arm64.tar.gz "$URL"
+test "$(shasum -a 256 omp-18.2.3-macos-arm64.tar.gz | cut -d ' ' -f 1)" = "$EXPECTED"
+tar -xzf omp-18.2.3-macos-arm64.tar.gz
+./omp-18.2.3-macos-arm64/install.sh
 "${XDG_BIN_HOME:-$HOME/.local/bin}/omp" --version
 )
 ```
 
-The version must be `omp/18.0.9`. This native beta package uses the same current/previous client
+The version must be `omp/18.2.3`. This native beta package uses the same current/previous client
 pointer contract as Windows and Linux; it does not change the stable Homebrew cask. The installer
 places the launcher in `${XDG_BIN_HOME:-$HOME/.local/bin}`; every later step in this guide calls
 bare `omp`, so put that directory on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your
@@ -436,11 +454,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.7.3/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.7.3/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.7.3/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
