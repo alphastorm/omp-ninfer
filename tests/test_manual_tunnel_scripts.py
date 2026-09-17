@@ -36,6 +36,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        for document in ("QUICKSTART.md", "SECURITY.md"):
+            (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
 
     @staticmethod
     def materialize_synthetic_runtime(
@@ -87,7 +89,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self.copy_contract_tree(root)
-            manifest_path = root / "releases" / "v0.7.1" / "manifest.json"
+            release = json.loads((root / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+            manifest_path = root / "releases" / release / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             manifest["status"] = "draft"
             manifest["components"]["omp"]["artifact_published"] = False

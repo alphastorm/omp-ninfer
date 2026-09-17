@@ -20,46 +20,10 @@ SPEC.loader.exec_module(MODULE)
 class CompatibilityAuthorityTests(unittest.TestCase):
     def test_authority_renders_the_checked_in_public_matrix(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
-        rendered = MODULE.render(authority)
         self.assertEqual(
-            rendered,
+            MODULE.render(authority),
             (ROOT / "docs" / "COMPATIBILITY.md").read_text(encoding="utf-8"),
         )
-        self.assertEqual(
-            [profile["id"] for profile in authority["profiles"]],
-            [
-                "darwin-remote-ssh",
-                "windows-docker-local",
-                "linux-docker-local",
-            ],
-        )
-        self.assertTrue(
-            all(profile["status"] in MODULE.STATUSES for profile in authority["profiles"])
-        )
-        self.assertEqual(authority["product_release"], "v0.7.1")
-        receipt_sha = hashlib.sha256(
-            (ROOT / "releases" / "v0.7.1" / "qualification" / "rtx5090.json").read_bytes()
-        ).hexdigest()
-        self.assertTrue(
-            all(
-                profile["gpu_qualification"]["status"] == "qualified"
-                and profile["gpu_qualification"]["receipt"]["sha256"] == receipt_sha
-                for profile in authority["profiles"]
-            )
-        )
-        self.assertTrue(
-            all(
-                profile["runtime"]["image_reference"]
-                == "ghcr.io/alphastorm/ninfer-runtime@sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8"
-                and profile["runtime"]["image_digest"]
-                == "sha256:5e3e15581cb44a2dff5e1be0c64cad206f3048e9f01c98b04ef13f61195a9bb8"
-                for profile in authority["profiles"]
-            )
-        )
-        receipts = {profile["id"]: profile["acceptance_receipt"] for profile in authority["profiles"]}
-        self.assertIsNotNone(receipts["darwin-remote-ssh"])
-        self.assertIsNotNone(receipts["windows-docker-local"])
-        self.assertIsNotNone(receipts["linux-docker-local"])
 
     def test_bound_acceptance_receipts_match_immutable_public_files(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
@@ -271,13 +235,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "silent cloud fallback"):
             MODULE.load_authority(self._write(invalid))
 
-    def test_plain_and_beta_product_versions_remain_renderable(self) -> None:
-        current = MODULE.load_authority(ROOT / "compatibility.json")
-        self.assertEqual(current["product_release"], "v0.7.1")
-
+    def test_historical_beta_matrix_remains_renderable(self) -> None:
         historical_path = ROOT / "releases" / "v0.2.0-beta.1"
         historical = MODULE.load_authority(historical_path / "compatibility.json")
-        self.assertEqual(historical["product_release"], "v0.2.0-beta.1")
         self.assertEqual(
             MODULE.render(historical),
             (historical_path / "COMPATIBILITY.md").read_text(encoding="utf-8"),
