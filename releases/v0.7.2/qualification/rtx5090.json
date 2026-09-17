@@ -6,7 +6,7 @@
     "release_tag": "v0.6.7-qwen38-5090-beta.1",
     "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24",
     "qualified_source": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
-    "evidence_interpretation": "Profile and additional source qualification ran the exact d125 binary mounted over the predecessor image. Subsequent anonymous published-image preflight verified the same binary and executable dependencies without a mount. Documented-route acceptance remains pending. Configuration762e6bf4 matches the checked-in public profile; the restored owner production service separately reports7d2664bc.",
+    "evidence_interpretation": "Profile and additional source qualification ran the exact d125 binary mounted over the predecessor image. Subsequent anonymous published-image preflight and profile gates exercised the same binary without a mount. The documented RTX5090 host, macOS and Windows client routes passed against that published image; see acceptance/documented-routes.json. Configuration762e6bf4 matches the checked-in public profile; the restored owner production service separately reports7d2664bc.",
     "additional_probes": {
       "fanout-57k": {
         "exit_code": 0,
@@ -163,7 +163,7 @@
       "limitation": "The combined probe process contained predecessor sessions. Shutdown reported three unsaved live sessions. This proves restoration of the two target sessions, not loss-free shutdown for every process session."
     },
     "production_restored": true,
-    "published_route_acceptance": "pending",
+    "published_route_acceptance": "passed",
     "published_image_profile": {
       "status": "passed",
       "generated_utc": "2026-09-17T10:29:55Z",
