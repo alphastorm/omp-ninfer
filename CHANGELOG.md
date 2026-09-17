@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### v0.7.2 runtime draft — bounded restore reclaim
+
+- Both mainline lanes target reviewed runtime source
+  `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090 component
+  `v0.6.7-qwen38-5090-beta.1` (component-published) and intended RTX 4090 native component
+  `v0.6.5-qwen38-4090-beta.1`. No product publication or public-route acceptance is claimed.
+- Restore can reclaim reproducible checkpoint-backed resident sessions under host-KV pressure,
+  saving a resident session first when its checkpoint is behind and retrying import with a fresh
+  reader. The reviewed candidate bounds retry/reclaim progress; regression evidence covers
+  capacity refusal before commit and preservation of unrelated sessions.
+- [EXP-047 `final_reviewed_candidate`](docs/measurements/2026-09-17-restore-reclaim.json): both
+  RTX 5090 target 126K-token sessions resumed (5.96 s and 23.57 s); all seven named probe families
+  exited 0. The combined process also reported three unsaved predecessor sessions at shutdown
+  (`saved 2`, `refused 3`) and three automatic checkpoint refusals. This is not proof of loss-free
+  shutdown for every session or zero automatic refusals. The extra multisession control recorded
+  root fallback on 2 of 8 continuations/forks without server errors: zero exit status does not
+  establish universal warm reuse. The exact RTX 4090 package passed
+  15 qualification phases, including exact 130,048-token retrieval; measured decode was
+  153.431 tok/s and prefill 2,113.995 tok/s on its recorded fixture.
+- Serving settings and floors stay unchanged: public RTX 5090 profile `qwen38-5090-v0.7.0`
+  retains 16384 MiB host KV and the 28672 MiB runtime-host floor; native RTX 4090 retains
+  11264 MiB host KV, 24 host-state slots, and the 32768 MiB floor. Scratch qualification
+  settings and earlier smaller-pool experiments are not new supported defaults.
+- OMP remains `omp-18.0.9-cross-platform-beta-2`; the RTX 3090 component and model are unchanged.
+  Documented route references are staged for v0.7.2 and retain the ready gate. Public authority
+  remains v0.7.1 until the product cut and independent route acceptance.
+
 ## [0.7.1] - 2026-09-16
 
 The RTX 4090 native lane could report a successful checkpoint for a session at the context ceiling

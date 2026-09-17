@@ -5,9 +5,11 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **Use the exact v0.7.1 release.** Both mainline components passed lane qualification and
-> published-component acceptance. Do not bypass `--require-ready` or mix one release's
-> manifest with another release's commands.
+> **v0.7.2 is a draft, not a published product or an accepted public install route.** The
+> commands below are staged for its exact components; lane qualification does not make them
+> accepted routes. For supported onboarding, use the
+> [published v0.7.1 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md).
+> Do not bypass `--require-ready` or mix one release's manifest with another release's commands.
 
 ## Choose your lane
 
@@ -16,9 +18,9 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **qualified release** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **qualified release** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **qualified release** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.2 draft route** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.7.2 draft route** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **unchanged lane; v0.7.2 draft route** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 Each native lane is installable only through its exact manifest variant. Do not substitute GPU
@@ -26,19 +28,29 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The `v0.7.1` release connects native Windows OMP over authenticated local loopback
+The `v0.7.2` draft composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
 and RTX 3090 use separate native Windows packages.
 
-The runtime components are RTX 5090 `v0.6.5-qwen38-5090-beta.1` from source `696e78c7`
-and RTX 4090 `v0.6.4-qwen38-4090-beta.1` from source `736ac43a`, which fixes a lane that
-could report a checkpoint it could not restore. They independently implement the
-upstream Qwen parser semantics without a serve-adapter rebase. Model, OMP client, RTX 3090
-component, and serving settings are unchanged. The public RTX 5090 deployment profile remains
-`qwen38-5090-v0.6.3` / configuration `622ab621`; the lifecycle candidate's qualification on
-`qwen38-5090-v0.6.2` / `5eb8a557` is recorded separately from acceptance of this documented route.
+The intended runtime components are RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090
+`v0.6.5-qwen38-4090-beta.1`, both from source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`.
+They add bounded checkpoint-backed reclaim when restore encounters occupied host-KV capacity.
+The RTX 5090 component is published; the product and these routes are not accepted.
+Model, OMP 18.0.9 client, RTX 3090 component, and serving settings are unchanged. The public
+RTX 5090 deployment profile remains `qwen38-5090-v0.7.0` / configuration `762e6bf4`, with
+16384 MiB host KV and a 28672 MiB runtime-host floor. The native RTX 4090 keeps 11264 MiB
+host KV, 24 host-state slots, and its 32768 MiB host floor. Qualification scratch settings do
+not replace either public profile.
+
+The [EXP-047 final reviewed candidate](measurements/2026-09-17-restore-reclaim.json) restored
+both target 126K-token RTX 5090 sessions. Its combined probe process also reported three unsaved
+predecessor sessions at shutdown: this is not a loss-free shutdown guarantee for every session.
+Automatic checkpoints remain best effort under traffic. The extra multisession control recorded
+root fallback on 2 of 8 continuations/forks without server errors
+([lane receipt](../releases/v0.7.2/qualification/rtx5090.json)); universal warm reuse is not claimed.
+Public-route acceptance is a separate gate.
 
 Start only from the product tag and require its ready contract:
 
@@ -73,7 +85,7 @@ execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pi
 this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -101,8 +113,8 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Native Windows RTX 4090 and RTX 3090 release lanes
 
-These are separate native NInfer packages, not substitutions for the RTX 5090 image. The ready
-manifest publishes exactly `rtx4090-windows-native` and `rtx3090-windows-native` as
+These are separate native NInfer packages, not substitutions for the RTX 5090 image. Before
+installation, the ready manifest must publish exactly `rtx4090-windows-native` and `rtx3090-windows-native` as
 qualified native lanes.
 
 The RTX 3090 package identity is:
@@ -120,13 +132,15 @@ download URL and hash.
 Prerequisites: Windows 11 x64, the matching single GPU with a current driver, Git, PowerShell,
 Python 3 from python.org (its `py` launcher; the `python3` name Windows ships is a Microsoft
 Store shortcut, not Python), and at least 40 GiB free. Install the OMP client first with
-**Install the exact native Windows client** above; the lane's own steps follow. Start from an
+**Install the exact native Windows client** above; the lane's own steps follow. RTX 4090 also
+requires at least 32768 MiB of runtime-host memory for its unchanged 11264 MiB pinned host-KV
+pool and 24 host-state slots. Start from an
 elevated PowerShell. Windows ships with script execution disabled; the `Set-ExecutionPolicy`
 line enables the release's hash-pinned scripts for this window only and changes nothing on the
 machine - repeat it in any new window that runs one:
 
 ```powershell
-git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -158,7 +172,7 @@ Then let the manifest supply every URL and hash:
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.7.1\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.7.2\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -268,7 +282,7 @@ stop and the start in one step:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 & $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
-& $Controller -Action Stop -StateRoot $StateRoot     # saves every live session, then exits
+& $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
 & $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
 & $Controller -Action Status -StateRoot $StateRoot
 ```
@@ -378,10 +392,10 @@ owner.
 
 ## 1. Clone the exact release on both machines
 
-From the public release tag, run this on the Mac and inference host:
+Once v0.7.2 is published and ready, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.7.1 --depth 1 \
+git clone --branch v0.7.2 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -423,11 +437,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.7.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.7.2/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide

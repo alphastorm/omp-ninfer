@@ -1,0 +1,37 @@
+{
+  "review_sequence_id": "CRS-20260830-ninfer5090-v03src",
+  "review_id": "CR-1",
+  "review_class": "focused",
+  "reviewer": "review-daybreak-blue",
+  "subject_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
+  "envelope_sha256": "a5916c59d6aeb5ad0ba5dda8eee8fa2602a8e99c6d3c57b90876f0c9c0ab5ba1",
+  "dispositions": [
+    {
+      "id": "R1",
+      "severity_claimed": "P1",
+      "disposition": "reject",
+      "rationale": "Verified mechanics match the claim, and they are the documented bounded-pool design inside the declared single-principal trust boundary: pressure inputs deliberately include every inactive private owner (resource_manager.h:1205-1208 in-diff comment) because session-pinned capacity would let one session pin the shared device/host pools. Payload isolation holds: the admission-side scan is session-guarded (resource_manager.h:290), eviction requires a committed pressure action and erases the session binding and continuation before any slot reuse (resource_manager.h:1648-1656), and no handle crosses sessions. Durability is owned by the checkpoint store whose deletion contracts (cross-session LRU, durable-only delete, restart shapes) are release-gated, and the product recovery contract makes retained state an acceleration: OMP commits its transcript first, so eviction degrades a follow-up from warm to replay. Residual impact after controls is intra-principal warm-state eviction under self-generated load, which is the accepted appliance capacity semantics.",
+      "action": "Class closure: add fake-manager invariant test asserting a foreign-session eviction erases the victim's session binding and clears its continuation before the evictor's publication reuses the slot (test-only commit on the candidate; runs in the RunPod CI ctest set)."
+    },
+    {
+      "id": "U1",
+      "severity_claimed": "P1",
+      "disposition": "defer",
+      "rationale": "In-memory session_index_ is process-local by design; durable deleted-state refusal after restart is owned by the checkpoint backends and caller gate outside the four bound files. Backend restart integrity is tested (test_io_uring_checkpoint_backend.cpp:498-499 refuses restart promotion of a reported-failed generation), and the 3090 campaign's deletion contracts passed middle/latest/standalone restart shapes.",
+      "action": "Named acceptance assertion added to the v0.3 RTX 5090 qualification restart gate: publish and delete a session, restart the process, attempt stale republication/continuation, require refusal before any state becomes retrievable. Gate receipt binds the answer before the manifest reaches ready."
+    },
+    {
+      "id": "U2",
+      "severity_claimed": "P1",
+      "disposition": "reject",
+      "rationale": "The exact interleaving is already asserted: tests/test_resource_manager.cpp:1684-1721 publishes at order 10 and 20, starts a consumer at order 30 that consumes the order-20 owner, requires the session to leave an ordered tombstone immediately (session_publication_order nullopt at the intermediate state), requires a stale finish to be refused against that tombstone before the consumer finishes, and requires the consumer's finish to replace the tombstone at order 30."
+    },
+    {
+      "id": "U3",
+      "severity_claimed": "P1",
+      "disposition": "reject",
+      "rationale": "Per-request authentication precedes every handler: http_server.cpp:289-308 set_pre_routing_handler rejects any request (except /health and CORS OPTIONS preflight) whose Authorization bearer or x-api-key does not equal the configured key, with a 401 rendered before routing. require_authenticated_client_identity is the complementary path: it refuses identity-bearing fields on a server with no key configured. Shipped product profiles always configure an API key file, so authentication_configured=true coincides with pre-routing enforcement."
+    }
+  ],
+  "closure": "No in-scope residual P0/P1. Sequence closes on dispositions; remediation is one test-only class-closure commit plus one named qualification-gate assertion."
+}

@@ -1,0 +1,339 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "release_evidence": {
+    "release": "v0.7.2",
+    "release_tag": "v0.6.7-qwen38-5090-beta.1",
+    "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24",
+    "qualified_source": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+    "evidence_interpretation": "Profile and additional source qualification ran the exact d125 binary mounted over the predecessor image. Subsequent anonymous published-image preflight verified the same binary and executable dependencies without a mount. Documented-route acceptance remains pending. Configuration762e6bf4 matches the checked-in public profile; the restored owner production service separately reports7d2664bc.",
+    "additional_probes": {
+      "fanout-57k": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 67681,
+          "cold_prefill_s": 26.947,
+          "checkpoint_save_s": 5.888,
+          "checkpoint_bytes": 5188026327,
+          "hot_fork_median_s": 1.773,
+          "hot_fork_max_s": 1.951,
+          "restart_ready_s": 27.25,
+          "post_restart_resume_s": 3.966,
+          "warm_start_first_fork_s": 1.737,
+          "warm_start_fork_median_s": 1.644,
+          "warm_start_fork_max_s": 1.674
+        }
+      },
+      "fanout-67k": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 79957,
+          "cold_prefill_s": 33.426,
+          "checkpoint_save_s": 4.792,
+          "checkpoint_bytes": 6044083057,
+          "hot_fork_median_s": 1.924,
+          "hot_fork_max_s": 2.04,
+          "restart_ready_s": 30.32,
+          "post_restart_resume_s": 4.317,
+          "warm_start_first_fork_s": 1.664,
+          "warm_start_fork_median_s": 1.678,
+          "warm_start_fork_max_s": 1.686
+        }
+      },
+      "warm-arrival": {
+        "exit_code": 0,
+        "summary": [
+          {
+            "order": "resume-first",
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 27.221,
+            "pre_restart_fork": [
+              "private_endpoint",
+              2.815
+            ],
+            "checkpoint_bytes": 5205861741,
+            "post_restart_sequence": [
+              [
+                "endpoint_resume_first",
+                "private_response_replay",
+                67908,
+                4.029
+              ],
+              [
+                "fork_after_resume",
+                "private_long_anchor",
+                67712,
+                3.183
+              ],
+              [
+                "fork_second",
+                "private_long_anchor",
+                67712,
+                1.649
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 8.861
+          },
+          {
+            "order": "fork-first",
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 28.111,
+            "pre_restart_fork": [
+              "private_endpoint",
+              3.404
+            ],
+            "checkpoint_bytes": 5205861705,
+            "post_restart_sequence": [
+              [
+                "fork_first",
+                "private_long_anchor",
+                67712,
+                4.32
+              ],
+              [
+                "endpoint_resume_after_fork",
+                "private_response_replay",
+                67908,
+                3.367
+              ],
+              [
+                "fork_after_resume",
+                "private_long_anchor",
+                67712,
+                1.689
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 9.376
+          }
+        ]
+      },
+      "restore": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 57889,
+          "cold_prefill_s": 22.116,
+          "checkpoint_bytes": 4514771839,
+          "restore_0_wall_s": 3.683,
+          "restore_1_wall_s": 3.504,
+          "control_retrieval_exact": true,
+          "restored_retrieval_exact": true,
+          "tampered_restore_refused": null
+        }
+      },
+      "multisession": {
+        "exit_code": 0,
+        "summary": {
+          "continuations_and_forks": 8,
+          "reuse_lost": 2,
+          "exposed": true,
+          "server_errors": [],
+          "server_reuse_paths": [
+            "private_endpoint",
+            "private_long_anchor",
+            "root"
+          ],
+          "server_root_requests_after_bases": 2
+        }
+      }
+    },
+    "two_long_session_restore": {
+      "input_tokens": [
+        125891,
+        125892
+      ],
+      "continuation_cached_tokens": [
+        125906,
+        125907
+      ],
+      "resume_seconds": [
+        5.96,
+        23.57
+      ],
+      "both_target_sessions_resumed": true,
+      "automatic_saved": 13,
+      "automatic_refused": 3,
+      "shutdown_saved": 2,
+      "shutdown_refused": 3,
+      "limitation": "The combined probe process contained predecessor sessions. Shutdown reported three unsaved live sessions. This proves restoration of the two target sessions, not loss-free shutdown for every process session."
+    },
+    "production_restored": true,
+    "published_route_acceptance": "pending",
+    "published_image_profile": {
+      "status": "passed",
+      "generated_utc": "2026-09-17T10:29:55Z",
+      "identity": {
+        "binary_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+        "build_profile": "appliance-local",
+        "build_type": "Release",
+        "config_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+        "cuda_architecture": "120a",
+        "cuda_compiler": "NVIDIA-13.1.115",
+        "cuda_toolkit": "13.1.115",
+        "cxx_compiler": "GNU-13.3.0",
+        "deployment_profile": "qwen38-5090-v0.7.0",
+        "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "model_id": "qwen3.8-27b",
+        "patch_stack_sha": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+        "source_dirty": false,
+        "target": "qwen3_8_27b",
+        "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+        "weights_id": "groupwise-int"
+      },
+      "gates": {
+        "prefill_curve": {
+          "status": "passed",
+          "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "exact_output": true,
+          "output": "ORCHID=493817; COLOR=COBALT",
+          "wall_s": 60.441,
+          "tokens_per_second_wall": 2151.7,
+          "vram_used_mib_after": 28144,
+          "server_prefix_cache_hit_tokens": 0,
+          "server_prefix_reuse_path": "root",
+          "server_computed_prefill_tokens": 130048,
+          "server_prefill_seconds": 58.245382882000015,
+          "cold": true
+        },
+        "decode": {
+          "request_id": "06d48f3ae953a36f225b568358c113b8ddc8988bb298d113222a70d05dd94629",
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "wall_s": 15.449,
+          "completion_tokens_per_second_wall": 132.57,
+          "server_completion_tokens": 2048,
+          "server_decode_seconds": 14.64957869000001,
+          "decode_tokens_per_second": 139.8,
+          "mtp_acceptance_rate": 0.412,
+          "mtp_tokens_per_round": 2.24,
+          "speculative": {
+            "accepted_per_position": [
+              597,
+              340,
+              193
+            ],
+            "accepted_tokens": 1130,
+            "backend": "mtp",
+            "draft_window": 3,
+            "drafted_tokens": 2745,
+            "fallback_steps": 1,
+            "rounds": 916
+          }
+        },
+        "agent_protocol": {
+          "status": "passed",
+          "authenticated_session_identity": true,
+          "stateful_continuation": true,
+          "forks": 2,
+          "parent_delete_status": 200,
+          "deleted_continuation_status": 404,
+          "deleted_continuation_error_code": "previous_response_not_found",
+          "post_restart_deleted_continuation_status": 404,
+          "no_resurrection": true,
+          "surviving_descendant_continued": true,
+          "live_sibling_continuation_status": 200,
+          "live_sibling_continuation_error_code": null
+        }
+      },
+      "production_restored": true,
+      "supervisor_hold_released": true
+    }
+  },
+  "generated_utc": "2026-09-17T09:22:23Z",
+  "identity": {
+    "binary_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+    "build_profile": "appliance-local",
+    "build_type": "Release",
+    "config_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.7.0",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131072,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3
+  },
+  "vram_used_mib_idle": 28144,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 60.579,
+      "tokens_per_second_wall": 2146.8,
+      "vram_used_mib_after": 28144,
+      "server_prefix_cache_hit_tokens": 0,
+      "server_prefix_reuse_path": "root",
+      "server_computed_prefill_tokens": 130048,
+      "server_prefill_seconds": 58.31020698,
+      "cold": true
+    },
+    "decode": {
+      "request_id": "556ebc365804751ab68b7819658c81cc465a4585b14f81b5e8bb6c963b0d3f19",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 15.427,
+      "completion_tokens_per_second_wall": 132.75,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 14.698436662999988,
+      "decode_tokens_per_second": 139.33,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "speculative": {
+        "accepted_per_position": [
+          597,
+          340,
+          193
+        ],
+        "accepted_tokens": 1130,
+        "backend": "mtp",
+        "draft_window": 3,
+        "drafted_tokens": 2745,
+        "fallback_steps": 1,
+        "rounds": 916
+      }
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": 28144,
+  "transient_retries": 0
+}

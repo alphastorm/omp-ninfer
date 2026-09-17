@@ -8,7 +8,7 @@ the product manifest binds the exact combination.
 | Channel | Meaning | Current state |
 | --- | --- | --- |
 | Public release | Published exact profiles with stated limitations and non-claims | `v0.7.1`, GitHub `Latest` |
-| Development | Product candidates with no public install or support claim | No newer product candidate published |
+| Development | Product candidates with no public install or support claim | `v0.7.2` runtime draft; exact-source lane qualification, public-route acceptance pending |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -26,6 +26,33 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 [3090](measurements/2026-09-04-rtx3090-mtp-agent-ablation.json).
 
 ## Version identities
+
+### v0.7.2 runtime draft (bounded checkpoint-backed restore reclaim)
+
+- Status: staged product draft, not a published product or an accepted public install route.
+  Root public authority remains v0.7.1. The RTX 5090 component is founder-published; that does
+  not establish product readiness. [Draft notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md).
+- Both mainline components target exact reviewed source
+  `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090 `v0.6.7-qwen38-5090-beta.1`,
+  image `sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24`;
+  RTX 4090 native `v0.6.5-qwen38-4090-beta.1`, package
+  `b26643d735d58eafac33f1595c0588baf0e6682a69af73e8e82f96839f4b7646`.
+- Restore can save and reclaim reproducible resident sessions when host-KV capacity is occupied,
+  then retry with a fresh reader. Bounded progress and refusal before commit preserve the
+  capacity/admission contract rather than promising that every save or restore succeeds.
+- [EXP-047 `final_reviewed_candidate`](measurements/2026-09-17-restore-reclaim.json) restored
+  both target 126K-token RTX 5090 sessions in 5.96 s and 23.57 s. The combined probe process
+  reported `shutdown_saved=2`, `shutdown_refused=3`: three unsaved predecessor sessions remain
+  a measured limitation, not a loss-free-shutdown result. Automatic checkpoints remain best
+  effort. The extra multisession control recorded root fallback on 2 of 8 continuations/forks
+  without server errors; a zero probe exit code is not proof of universal warm reuse. The final
+  native RTX 4090 package passed 15 qualification phases.
+- No public serving knobs or floors change: RTX 5090 keeps `qwen38-5090-v0.7.0`, configuration
+  `762e6bf4…`, 16384 MiB host KV and a 28672 MiB runtime-host floor; RTX 4090 keeps 11264 MiB
+  host KV, 24 host-state slots and its 32768 MiB floor. Scratch qualification settings are
+  separate. RTX 3090, the model and `omp-18.0.9-cross-platform-beta-2` remain unchanged.
+- The working quickstart targets v0.7.2 for subsequent exact-component route acceptance. Do not
+  bypass its ready gate or treat copied predecessor acceptance receipts as new evidence.
 
 ### v0.7.1 public release (a reported save is a restorable save)
 

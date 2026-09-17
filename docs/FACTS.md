@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-16 · Current stable release: **v0.7.1**
+Last verified: 2026-09-17 · Current stable release: **v0.7.1** · Runtime draft: **v0.7.2**
 
 Public-release claims on this page are bound to the
-[v0.6.10 release manifest](../releases/v0.6.10/manifest.json) and its qualification receipts.
+[v0.7.1 release manifest](../releases/v0.7.1/manifest.json) and its qualification receipts.
 Candidate lane measurements and published-route acceptance remain separately attributed below.
 
 ## What it is
@@ -43,9 +43,35 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.6.5 runtime on the mainline tree under the v0.4.8 context-cache arguments (profile `qwen38-5090-v0.6.3`, durable session store on the documented route): warm arrival across a restart, restore hashed once on the SHA extensions, decoupled export, origin-authenticated checkpoints; bound by v0.6.9 |
-| RTX 4090 | native Windows service | 131,072 | v0.6.3-beta.1 lane on the mainline runtime (source 696e78c7, shared with the 5090's v0.6.5) (sm_89; INT8 KV, MTP3, prefill chunk 2,048; sibling forks on a shared long anchor, warm arrival across a restart, streamed SHA-verified restore, origin-authenticated checkpoints; a managed stop saves every live session), bound by v0.6.9 |
-| RTX 3090 | native Windows service | 131,072 | durable v0.2.5-beta.1 lane (origin-authenticated checkpoints, bound by v0.6.9) |
+| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.7.1 binds component `v0.6.5-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; the historical two-session restore boundary is recorded below |
+| RTX 4090 | native Windows service | 131,072 | v0.7.1 binds component `v0.6.4-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 3090 | native Windows service | 131,072 | unchanged durable `v0.2.5-qwen38-3090-beta.1` lane (origin-authenticated checkpoints, bound by v0.7.1) |
+
+## v0.7.2 runtime draft — bounded restore reclaim
+
+- Not a published product or an accepted public route. Exact-source runtime qualification and
+  component publication are separate from product readiness; supported onboarding stays on v0.7.1.
+- Both mainline lanes target reviewed source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090
+  `v0.6.7-qwen38-5090-beta.1` (component-published) and intended RTX 4090 native
+  `v0.6.5-qwen38-4090-beta.1`. Restore can save and reclaim reproducible checkpoint-backed
+  resident sessions, then retry with a fresh reader under bounded progress. A pool must still
+  admit the session being restored; this is not unbounded capacity or universal durability.
+- The final RTX 5090 candidate restored both target sessions (125,891 and 125,892 input tokens)
+  in 5.96 s and 23.57 s, with 125,906 and 125,907 cached continuation tokens. Its combined
+  process also reported three unsaved predecessor sessions at shutdown (`saved 2`, `refused 3`)
+  and three automatic checkpoint refusals. The extra multisession control lost warm reuse on
+  2 of 8 continuations/forks without server errors. Neither loss-free shutdown for all sessions
+  nor universal warm reuse is established.
+- The final RTX 4090 package passed 15 qualification phases with exact 130,048-token retrieval,
+  153.431 tok/s decode and 2,113.995 tok/s prefill on the recorded fixture. Earlier smaller-pool
+  experiments are not qualification of a smaller supported host or equivalent automatic durability.
+- Public profile and serving knobs stay unchanged: RTX 5090 `qwen38-5090-v0.7.0`, 16384 MiB
+  host KV, 28672 MiB runtime-host floor; RTX 4090 11264 MiB host KV, 24 host-state slots,
+  32768 MiB floor. Scratch qualification settings do not replace those profiles. OMP remains
+  18.0.9; RTX 3090 and the model are unchanged.
+- [EXP-047 `final_reviewed_candidate`](measurements/2026-09-17-restore-reclaim.json) ·
+  [draft notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md). Earlier EXP-047 findings are attributed
+  to their predecessor binaries and do not substitute for this final source-bound evidence.
 
 ## v0.7.1 — a reported save is a restorable save
 

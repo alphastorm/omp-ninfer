@@ -11,6 +11,36 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## v0.7.2 runtime draft — final reviewed reclaim candidate (2026-09-17)
+
+These are runtime qualification measurements, **not accepted public-route results**. The
+[EXP-047 `final_reviewed_candidate`](measurements/2026-09-17-restore-reclaim.json) binds
+source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`, RTX 5090 server `83547bc6…`, and RTX 4090
+server `e1210845…` / package `b26643d7…`. Earlier findings in the same experiment belong to
+predecessor binaries; their timings and clean two-session stops are not substituted for this run.
+
+| Final candidate observation | RTX 5090 | RTX 4090 native |
+| --- | --- | --- |
+| Target-session durability | Both target sessions resumed: 125,891 / 125,892 input tokens; 125,906 / 125,907 cached continuation tokens | 15 qualification phases passed |
+| Target-session resume wall time | **5.96 s / 23.57 s** | No new per-session timing asserted from the final summary |
+| Long-context gate | Profile probe exit 0 | Exact **130,048-token** retrieval |
+| Recorded throughput | No new throughput claim from the final summary | **153.431 tok/s** decode; **2,113.995 tok/s** prefill on its recorded fixture |
+| Combined-process checkpoint counts | Automatic: saved 13, refused 3; shutdown: saved 2, refused 3 | Automatic checkpointing remains best effort; no zero-refusal guarantee |
+
+The RTX 5090 final summary records exit 0 for profile, 57K/67K fanout, warm arrival, restore,
+multisession and durability probes. Exit status is not a universal reuse result: the extra
+multisession control recorded **2 root fallbacks among 8 continuations/forks**, without server
+errors ([lane receipt](../releases/v0.7.2/qualification/rtx5090.json)). The combined process
+contained predecessor sessions and reported **three unsaved live sessions at shutdown**. These
+results establish the two target restores, not loss-free shutdown for every process session.
+
+The public RTX 5090 profile stays `qwen38-5090-v0.7.0`, configuration `762e6bf4…`, with
+16384 MiB host KV and a 28672 MiB runtime-host floor. Native RTX 4090 retains 11264 MiB host
+KV, 24 host-state slots and the 32768 MiB floor. Scratch qualification configurations, including
+earlier smaller-pool experiments, are not new public defaults or proof of a smaller-host floor.
+OMP 18.0.9, RTX 3090 and the model remain unchanged. No cross-lane speed ranking or
+reclaim-driven throughput improvement is established.
+
 ## Qualified `v0.4.4` results — checkpoint export off the engine (RTX 5090 lane)
 
 v0.4.3's remaining fanout ceiling was not KV cloning: request-log decomposition showed sibling

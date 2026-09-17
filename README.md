@@ -8,7 +8,7 @@ on all three lanes: measured, hash-pinned, fail-closed.
 
 <div align="center">
 
-**[Get started →](docs/QUICKSTART.md)** · **[Download v0.7.1](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md)** · **[Download v0.7.1](https://github.com/alphastorm/omp-ninfer/releases/latest)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -71,12 +71,10 @@ serving, or generic OpenAI-compatible inference.
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
 > explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
-> Components are unchanged from v0.6.9; the RTX 5090 serving configuration advances, so both its
-> documented routes were re-run on the new profile: host 2/2 and macOS 10/10 blocks, including
-> tool use, image input, resume, resume after a server restart, and a refused request with the
-> tunnel closed. The container now needs 28 GiB of runtime-host memory and the launcher refuses
-> a smaller host.
-> [Composed receipt](releases/v0.7.0/acceptance/composed-external-installation.json).
+> [v0.7.1 composed receipt](releases/v0.7.1/acceptance/composed-external-installation.json).
+> **v0.7.2 is a staged runtime draft.** Both mainline lanes passed exact-source qualification,
+> but the draft is not a published product and its public routes have not passed acceptance.
+> The [working quickstart](docs/QUICKSTART.md) targets that draft, not the supported v0.7.1 install.
 
 ## What this is — and isn't
 
@@ -147,45 +145,21 @@ Historical v0.6.8 profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-The **v0.7.1 release** fixes a durability defect on the RTX 4090 native lane. Restore materialises
-a session's KV into the host-KV pool, so that pool bounds what can come back; the lane shipped
-4 GiB against the 5.02 GiB a 131,072-token session needs. A ceiling-sized session's checkpoint
-reported nearly 4.9 GB saved and the session answered `404` after a clean restart. The new
-component ships an 11 GiB pool with a declared 32 GiB host-memory requirement, two ceiling sessions
-now survive a graceful stop and resume exactly, and an export whose checkpoint this configuration
-could not restore is refused at save time instead of written.
-[Release notes](releases/v0.7.1/NINFER_RELEASE_NOTES.md) ·
-[EXP-043](docs/measurements/2026-09-16-restore-bound-host-kv-pool.json).
+The **v0.7.2 runtime draft** moves both mainline lanes to reviewed source `d125ffff` for
+bounded checkpoint-backed reclaim: when restore needs host-KV capacity, the runtime can save
+and reclaim reproducible resident sessions and retry with a fresh checkpoint reader. The final
+RTX 5090 candidate restored both target 126K-token sessions in **5.96 s and 23.57 s** without
+increasing the public profile's 16 GiB pool. Its combined probe process also reported **three
+unsaved predecessor sessions at shutdown**; this proves the two target restores, not universally
+loss-free shutdown. The final RTX 4090 package passed 15 qualification phases.
 
-The **v0.7.0 release** keeps two long sessions reusing their prefixes on one card. A 126K-token
-session's KV is about 4.2 GB and the shipped pool was 8 GiB, so alternating between two of them
-evicted each endpoint and re-prefilled from root every turn - about 58 s. The RTX 5090 Host KV
-pool moves to 16 GiB and that workload loses nothing: 0 of 8 continuations and forks, each
-reusing about 125,900 cached tokens in 1.6-3.5 s. No component changed; the configuration
-identity did, so `v0.6.10` checkpoints do not carry across. The pool is pinned memory, so the
-profile declares the 28,672 MiB it needs and the launcher refuses a smaller host rather than
-being OOM-killed mid-request. Both 8-bit KV dtypes fix the same loss and were rejected on the
-private corpus' redaction and grounding criteria. Durability is narrower than reuse: both
-sessions checkpoint and a graceful stop saves both, but after a restart one of the two is
-declined and re-prefills.
-[Release notes](releases/v0.7.0/NINFER_RELEASE_NOTES.md) ·
-[EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json).
-
-The **v0.6.10 release** changed no component: it makes the documented container route refuse a
-launch whose bind mounts the engine cannot stage - Docker Desktop stages them once, at container
-creation, so after the WSL distro holding them restarts the existing container either refuses to
-start or starts with empty mounts. `start-ninfer.sh` proves the mounts inside a throwaway
-container before loading 18 GB.
-[Release notes](releases/v0.6.10/NINFER_RELEASE_NOTES.md) ·
-[EXP-040](docs/measurements/2026-09-16-lane-reboot-survivability.json).
-
-The **v0.6.9 release** moves both mainline lanes to source `696e78c7` for the independently
-implemented Qwen tool-parser semantic port, without rebasing the serve adapters. The RTX 5090
-lifecycle candidate measured exact 130,048-token retrieval at **2,193.3 tok/s** and 2,048-token
-decode at **134.87 tok/s wall**; the RTX 4090 candidate retrieved exactly in **91.2377 s** and
-decoded at **153.464 tok/s** on C1. These are candidate measurements, not public-route
-acceptance. [Parser changes](releases/v0.6.9/NINFER_RELEASE_NOTES.md) ·
-[Measurement scope and receipts](docs/BENCHMARKS.md#v069-candidate--qwen-tool-parser-semantic-port-2026-09-13).
+RTX 5090 `v0.6.7-qwen38-5090-beta.1` is component-published; RTX 4090
+`v0.6.5-qwen38-4090-beta.1` is the intended native component. OMP stays on 18.0.9, RTX 3090
+and the model are unchanged, and neither public serving profile nor host-memory floor moves.
+These are runtime qualification results, not acceptance of the staged public install routes.
+[Draft release notes](releases/v0.7.2/NINFER_RELEASE_NOTES.md) ·
+[EXP-047 final reviewed candidate](docs/measurements/2026-09-17-restore-reclaim.json) ·
+[Historical releases](docs/RELEASES.md#version-identities).
 
 Durable session checkpoints ship on both native Windows lanes — DirectStorage-backed — so on
 the RTX 4090 and RTX 3090 a follow-up continues from restored state even across a process
@@ -226,7 +200,8 @@ Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
-Then follow the [quickstart](docs/QUICKSTART.md): install the checksummed OMP client, fetch the
+Then follow the [v0.7.1 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md):
+install the checksummed OMP client, fetch the
 hash-pinned model, start the digest-pinned NInfer container, add the provider fragment, and run the
 documented acceptance checks. The same document contains managed macOS SSH, native Linux, and
 native Windows 3090/4090 paths.
