@@ -35,7 +35,11 @@
       "cleanup_repair_commit": "1c1bb61c8521c1bf319c063bb87a7981a281f145",
       "cleanup_red_green": "A Bazel workspace symlink triggers reroll cleanup refusal; existing removeBazelConvenienceSymlinks removes only symlinks and makes cleanup succeed.",
       "corrected_run": 35208892148,
-      "corrected_run_status": "in-progress"
+      "corrected_run_status": "passed",
+      "corrected_qualification_commit": "1c1bb61c8521c1bf319c063bb87a7981a281f145",
+      "corrected_archive_sha256": "00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f",
+      "corrected_binary_sha256": "98fa5871f43ee369db410c4733d998d924cf9e2aa4d1c6a5145d5269c129ba32",
+      "publication_selection": "Only the corrected run35208892148 artifact is selected; the initial cleanup-failed artifact remains historical."
     },
     "public_source_scan": {
       "tracked_files": 7400,
@@ -44,7 +48,64 @@
       "secret_shaped_files": 25,
       "candidate_files_identical_to_public_upstream": true
     },
-    "boundary": "Hosted evidence is provider-free build/install/CLI qualification only. No hardware acceptance, client publication, compatibility repin, or product release is claimed."
+    "boundary": "All three final hosted build/install/CLI qualifications passed. They are provider-free and do not establish hardware acceptance. The founder-only component publication remains pending; v0.7.2 stays on OMP18.0.9. Compatibility repinning, every-route acceptance for18.2.3, and the subsequent client product release remain outstanding.",
+    "qualification_commit_scope": "The top-level qualification_commit identifies the Windows/Linux run; corrected macOS qualification_commit is recorded separately.",
+    "post_qualification_tooling": {
+      "main_commit": "a7275375a9cd283a78baa1e0d311dc0e264ae829",
+      "cleanup_error_masking": "A real locked worktree reproduced cleanup exit0 before the fix. Removal failures now propagate, including registered worktrees whose directories are absent; absent unregistered lanes remain idempotent.",
+      "verification": {
+        "focused_tests_passed": 19,
+        "focused_tests_failed": 0,
+        "lsp_diagnostics": "OK"
+      },
+      "artifact_source_changed": false,
+      "cleanse": {
+        "status": "ready_for_review",
+        "changed_paths": [],
+        "branch": null
+      }
+    },
+    "publication_set": {
+      "status": "qualified-unpublished",
+      "source_tag": "omp-v18.2.3-ninfer-beta.1",
+      "distribution_tag": "omp-18.2.3-cross-platform-beta-1",
+      "checksums_sha256": "fd6014ff1336b61b1a33d8b8ae9c7b863b384e799b96b5c97d6dd38a0f553766",
+      "platforms": {
+        "windows-x64": {
+          "workflow_run": 35204510265,
+          "qualification_commit": "d235a82152cf971468a3ebcd6232694e07c2d376",
+          "archive": {
+            "name": "omp-18.2.3-windows-x64.tar.gz",
+            "bytes": 84845155,
+            "sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311"
+          },
+          "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
+          "receipt_sha256": "835244691621655c6550a372fee46e0713a7859ec0ff1484f9b20bb090a6ccab"
+        },
+        "linux-x64": {
+          "workflow_run": 35204510294,
+          "qualification_commit": "d235a82152cf971468a3ebcd6232694e07c2d376",
+          "archive": {
+            "name": "omp-18.2.3-linux-x64.tar.gz",
+            "bytes": 88783418,
+            "sha256": "07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46"
+          },
+          "binary_sha256": "30f29b28d4ca3d849a34fc5c944be45366e997990a0ceb5f78ef11cca0cfbb3f",
+          "receipt_sha256": "c6acb805fb22e01e874c3c124ca089679c12309e4a0776bcef6b94cf0f759900"
+        },
+        "macos-arm64": {
+          "workflow_run": 35208892148,
+          "qualification_commit": "1c1bb61c8521c1bf319c063bb87a7981a281f145",
+          "archive": {
+            "name": "omp-18.2.3-macos-arm64.tar.gz",
+            "bytes": 68327188,
+            "sha256": "00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f"
+          },
+          "binary_sha256": "98fa5871f43ee369db410c4733d998d924cf9e2aa4d1c6a5145d5269c129ba32",
+          "receipt_sha256": "7783837feafe58242f5f2a47c166f51f45f61db5503d43f3887548b71a1c1802"
+        }
+      }
+    }
   },
   "title": "What a newer OMP client would have to close before it can be pinned",
   "generated_utc": "2026-09-17T00:45:00Z",

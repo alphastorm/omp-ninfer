@@ -43,7 +43,20 @@
 <p class="lede">Each result names its release and measurement scope: lifecycle qualification
 and published-route acceptance are distinct. Warm/cold figures are retained state versus fresh-process cold start — never versus an
 ordinary in-process follow-up.</p>
-<h2>Current release: v0.7.1</h2>
+<h2>Current release: v0.7.2</h2>
+<table>
+<tr><th>Scope</th><th>Measurement</th></tr>
+<tr><td>RTX 5090 published image</td><td>Exact 130,048-token retrieval at 2,151.7 tok/s wall; 139.8 tok/s server decode (132.57 wall) over 2,048 tokens</td></tr>
+<tr><td>RTX 5090 target-session restore</td><td>125,891 / 125,892 input tokens; both resume with cached continuation state in 5.96 s and 23.57 s</td></tr>
+<tr><td>RTX 5090 measured limits</td><td>Three unsaved predecessor sessions in the combined process; 2 of 8 continuations/forks lose warm reuse in the separate control</td></tr>
+<tr><td>RTX 4090 exact-source qualification</td><td>15 phases passed, including exact 130,048-token retrieval; C1 decode 153.431 tok/s and prefill 2,113.995 tok/s</td></tr>
+</table>
+<p>Single qualification samples, not a GPU ranking or a throughput gain attributed to reclaim.
+The two target restores do not prove loss-free shutdown for every session.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/qualification/rtx5090.json">RTX 5090 receipt</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/qualification/rtx4090.json">RTX 4090 receipt</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/acceptance/documented-routes.json">Separate public-route acceptance</a>.</p>
+<h2>Historical qualification: v0.7.1</h2>
 <table>
 <tr><th>Scope</th><th>Measurement</th></tr>
 <tr><td>RTX 5090 qualified v0.7.0 configuration</td><td>Exact 130,048-token retrieval at 2,203.0 tok/s; 133.03 tok/s wall decode over 2,048 tokens</td></tr>
@@ -51,9 +64,9 @@ ordinary in-process follow-up.</p>
 <tr><td>RTX 5090 two sessions at the ceiling</td><td>0 of 8 continuations and forks lost; about 125,900 cached tokens reused in 1.6–3.5 s, against a 58 s root re-prefill on the v0.6.10 pool</td></tr>
 <tr><td>RTX 4090 native qualification</td><td>Exact retrieval in 91.2377 s; 153.464 tok/s C1 decode; 87.58865% MTP acceptance</td></tr>
 </table>
-<p>Different workloads and measurement scopes, not a GPU ranking or a head-to-head comparison
-against vLLM or llama.cpp. The 4090 public-URL acceptance exercised the already-installed path,
-not a fresh install. <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#v070--two-long-sessions-keep-their-reuse">Current facts and linked receipts</a>.</p>
+<p>These v0.7.1 measurements retain their original scope; they do not qualify the new binaries.
+Different workloads are not a GPU ranking or a head-to-head comparison against vLLM or llama.cpp.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/FACTS.md">Historical facts and receipts</a>.</p>
 <h2>Historical restart measurements: v0.4.0</h2>
 <table>
 <tr><th>Claim</th><th>Measurement (RTX 5090 · v0.4.0)</th></tr>
@@ -65,7 +78,7 @@ not a fresh install. <a href="https://github.com/alphastorm/omp-ninfer/blob/main
 <p>Method, per-lane numbers, and historical sections:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">Updated 2026-09-13 from published receipts. Historical v0.4.0 results retain their original scope.</p>
+<p class="verified">Updated 2026-09-17 from published receipts. Historical v0.7.1 and v0.4.0 results retain their original scope.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
