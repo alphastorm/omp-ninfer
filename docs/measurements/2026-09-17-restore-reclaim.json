@@ -1,0 +1,50 @@
+{
+  "artifact_type": "omp_ninfer_experiment_receipt",
+  "schema_version": 1,
+  "experiment": "EXP-047",
+  "generated_utc": "2026-09-17T04:35:00Z",
+  "status": "closed",
+  "release": "unreleased candidate",
+  "component": "RTX 5090 lane rebuilt from the engine branch feat/restore-skip-reasons at 10449cc4, serve binary e933f1df; RTX 4090 native lane rebuilt from the same source, serve binary 0036d210",
+  "scope": "RTX 5090 appliance. Production was stopped for each window and recreated afterwards. Every arm ran the same candidate binary over the published runtime image; only the host-KV pool size and the session sizes change between arms.",
+  "question": "A session checkpoint could only be restored when the host KV pool had room for it on top of every session already resident, so durability depended on the pool holding the sum of all sessions rather than the largest one (alphastorm/omp-ninfer#40). Does reclaiming a resident session whose checkpoint is current on disk make a restore depend only on its own size?",
+  "method": [
+    "Two sessions are grown to the 131,072-token ceiling (126K input tokens each), checkpointed, and the lane is stopped gracefully and restarted.",
+    "Each session is then asked for a code planted in its first turn. A session that cannot be restored answers HTTP 404 previous_response_not_found.",
+    "The shipped pool for this lane is 16 GiB, which holds exactly one ceiling session: startup reports host-kv-restorable=131072-tokens.",
+    "A 384 MiB pool with 3.6K-token sessions reproduces the same capacity boundary in about three minutes and was used to isolate the two defects below."
+  ],
+  "findings": [
+    {
+      "id": "baseline",
+      "observed": "Before the change, the second session answered HTTP 404 after a restart while the first resumed exactly. The refusal named its gate: program refused continuation import (host KV pool capacity exhausted).",
+      "detail": "The pool was never the whole story - it held one ceiling session and the second one needed the same room again."
+    },
+    {
+      "id": "reclaim-declines-a-session-that-is-ahead-of-its-checkpoint",
+      "observed": "First candidate: 'checkpoint restore declined ... after reclaiming 0, kept 1 unreproducible'.",
+      "detail": "The resident session had taken one turn since its last save, so dropping it would have lost that turn and the oracle refused - correctly. Bringing those sessions up to date before asking the engine to drop them is what makes the guarantee unconditional rather than a race against the automatic checkpoint interval."
+    },
+    {
+      "id": "a-checkpoint-reader-is-a-single-verified-pass",
+      "observed": "Second candidate: reclaim reported 'saved 1 of 1 resident session(s) to make room' and 'after reclaiming 1, kept 0 unreproducible', yet the import still failed as 'continuation metadata unreadable'.",
+      "detail": "Isolated by removing the save from the sequence: with the resident session explicitly checkpointed first, no save ran, reclaim still fired, and the import still failed. The refused first attempt had already consumed the reader, so retrying the import in place could never succeed. The engine now frees room and reports it; the serve layer, which owns the store, retries with a fresh reader while each pass makes progress."
+    },
+    {
+      "id": "ceiling-proof",
+      "observed": "At the shipped 16 GiB pool, both 126K-token sessions resumed exactly after a restart: D1 in 5.36 s and D2 in 19.64 s. The graceful stop recorded 'saved 2, nothing to save 0, refused 0'.",
+      "detail": "The server log shows the whole sequence for the second session: 'saved 1 of 1 resident session(s) to make room' then 'reclaimed 1 checkpoint-backed session(s)'. The extra wall time over D1 is that save plus the second read, paid only under pressure."
+    },
+    {
+      "id": "small-scale-confirmation",
+      "observed": "At a 384 MiB pool with 3.6K-token sessions - a pool that holds one of them - both sessions resumed exactly, through both the save-then-retry path and the already-current path.",
+      "detail": "Kept as the fast reproduction for this class: three minutes per run instead of six."
+    }
+  ],
+  "conclusion": "A restore now depends on the pool holding the session being restored, not the sum of every resident session. Reclaim only ever drops a session this server can reproduce from its own current checkpoint, so the cost is a later restore for the dropped session and never lost context; a session whose stored copy has fallen behind is saved first. Two defects were found and fixed by measurement, not review: an oracle that correctly refused a session one turn ahead of its checkpoint, and an in-place import retry that reused a spent single-pass reader.",
+  "verification": [
+    "ninfer_resource_manager_test covers the engine half: the oldest reproducible session is dropped, an unprovable one is kept, a session with an unfinished turn is never a candidate, a full catalog is reclaimed the same way, and a refused attempt reports what it freed so the caller can retry.",
+    "Both lanes build and pass their focused suites: RTX 5090 7 suites, RTX 4090 native 7 suites.",
+    "The live proof above is the acceptance evidence; the unit test fails against the pre-change manager and passes after."
+  ]
+}
