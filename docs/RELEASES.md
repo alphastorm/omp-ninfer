@@ -744,6 +744,14 @@ the verifier decides what remains:
 
 ## Release notes
 
+Native OMP client components use `scripts/hosts/cut-omp-client-component.sh`. Its `--dry-run`
+checks the exact closed archive/receipt set, source commit and tree, embedded binary identities,
+and GitHub/SSH write access without publishing. The live command is founder-only: it creates
+the source tag and two prereleases, without changing a cask, installed client, product authority,
+or production service. Publication spans two repositories and is not transactional; on a live
+failure inspect the completed effects before preparing a bounded recovery command. Existing
+tag/release slots are refused rather than overwritten.
+
 At cut time, move the applicable human-readable entries from `[Unreleased]` in
 [`CHANGELOG.md`](../CHANGELOG.md) into the exact version heading, using the actual ISO 8601
 release date, and add comparison/tag links as defined by

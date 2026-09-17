@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add a founder-run, checksum-bound native client component publisher with a no-effect
+  preflight for the three qualified archives, source/tree identities, and remote write access.
+  Component publication does not update casks, installed clients, or product compatibility.
+
 ## [0.7.2] - 2026-09-17
 
 ### Bounded restore reclaim
