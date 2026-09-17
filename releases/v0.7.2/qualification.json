@@ -95,7 +95,8 @@
           "profile": "linux-docker-local",
           "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
         }
-      ]
+      ],
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/846ea8d44996a9b2e062d4f27d9de10e0e523966/releases/v0.7.2/acceptance/composed-external-installation.json"
     },
     "documented_route_acceptance": {
       "status": "passed",
