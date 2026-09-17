@@ -1,0 +1,92 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.7.2",
+  "as_of": "2026-09-17",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "published exact-component install and documented-route acceptance",
+  "client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "note": "Pinned OMP18.0.9 bytes unchanged; parser semantics advance behind the preserved wire shape. Current macOS route and native Windows golden-equivalent tool turn exercised these bytes against the new runtime."
+  },
+  "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+  "compatibility_sha256": "25e7299a36c5534271c56c802ba5af52480ea581695a5364878c0dbef3513da5",
+  "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+  "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+    }
+  ],
+  "client_note": "OMP 18.0.9 and its three platform qualification receipts are unchanged and explicitly carried. Live RTX5090 macOS/Windows and RTX4090 native compositions were reaccepted against the newly published runtime bytes; no OMP18.2.3 or fresh RTX3090 qualification is claimed.",
+  "steps": {
+    "image_by_digest": {
+      "status": "passed",
+      "note": "Anonymous digest pull of image74667e73, server83547bc6, followed by published-image profile gates without a binary overlay."
+    },
+    "documented_host_route": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "documented_macos_route": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "documented_windows_route": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090_public_install": {
+      "status": "passed",
+      "note": "Published package b26643d7 and all manifest-bound support assets downloaded and verified; authenticated200, anonymous401, completion200."
+    },
+    "rtx4090_documented_route": {
+      "status": "passed",
+      "blocks": 7,
+      "note": "Pre-cut clone substitution recorded; public package installed and accepted from an isolated client profile."
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.7.2/acceptance/documented-routes.json",
+      "sha256": "dc079e201b841e19fd3d88d54d83c02eb5c2e39fe01603f84df0d5fabd72813a"
+    },
+    "rtx5090_qualification": {
+      "repository_path": "releases/v0.7.2/qualification/rtx5090.json",
+      "sha256": "c11526f7091bdf928cc6a27143a4400d27e784ec75e892dc5b9076e7feed377e"
+    },
+    "rtx4090_qualification": {
+      "repository_path": "releases/v0.7.2/qualification/rtx4090.json",
+      "sha256": "7f26054761d19c96bd6826b786667ae704a94f97a9eafcf32017c0c0ee5c3eb7"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.7.2/acceptance/rtx4090-public-install.json",
+      "sha256": "4e42d0ff17dd583344a1df4c8db1143a011fddc2da00f297d9d8cfe5a78e74c5"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-09-17-v072-acceptance-restoration.json",
+      "sha256": "a4d41f3f50c32e3d0feb59b23ef5b8fd42edb797d68d622fff474a04bd006b06"
+    },
+    "restore_reclaim": {
+      "repository_path": "docs/measurements/2026-09-17-restore-reclaim.json",
+      "sha256": "2c9f5fcb7e900c048e6baba4fe8538f3504d8288598d97193284a8ebd58426be"
+    }
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "runtime_incumbent_restored_note": "Both RTX5090 windows restored production health and released the supervisor hold. RTX4090 returned to byte-identical original state, f098 active/d125 previous, stopped process, Ready SYSTEM task, and450W. No production upgrade was activated."
+}

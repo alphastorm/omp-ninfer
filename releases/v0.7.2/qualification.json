@@ -5,8 +5,8 @@
   "as_of": "2026-09-17",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "v0.7.2 advances both mainline runtimes to reviewed reclaim source d125ffff. RTX5090 component v0.6.7 and RTX4090 native component v0.6.5 preserve model, OMP18.0.9, RTX3090, serving arguments and declared host memory floors. Published-component route acceptance remains pending.",
+  "external_installation_qualified": true,
+  "scope": "v0.7.2 advances both mainline runtimes to reviewed reclaim source d125ffff. RTX5090 component v0.6.7 and RTX4090 native component v0.6.5 preserve model, OMP18.0.9, RTX3090, serving arguments and declared host memory floors. All four changed-runtime documented routes passed against published components; unchanged client-platform and RTX3090 qualification are explicitly carried.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -23,7 +23,7 @@
   "composition": {
     "behavioral_qualification": {
       "repository_path": "releases/v0.7.2/qualification/rtx5090.json",
-      "sha256": "f837b548d77b00de5b7b0fc74c6728cb06017abb45f8b6eeb118a91e68b001b5",
+      "sha256": "c11526f7091bdf928cc6a27143a4400d27e784ec75e892dc5b9076e7feed377e",
       "status": "passed",
       "source_commit": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
       "server_binary_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0"
@@ -65,12 +65,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.7-qwen38-5090-beta.1 component (image 74667e73) before the cut; the receipt lands at releases/v0.7.2/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.7.2/acceptance/composed-external-installation.json",
+      "sha256": "b306794b72bb952023e263da2f3c6562f3c2448f1b8631c1a3734a1125e04177",
+      "note": "Both changed runtime components were downloaded from public immutable URLs and accepted. RTX5090 host/macOS/Windows and RTX4090 native documented routes passed; original host state was restored.",
+      "as_of": "2026-09-17",
+      "operator_class": "owner-operated tester-equivalent",
+      "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
+      "windows_binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81",
+      "compatibility_authority": "omp-ninfer-v0.3.0-qualified-1",
+      "compatibility_sha256": "25e7299a36c5534271c56c802ba5af52480ea581695a5364878c0dbef3513da5",
+      "release": "v0.7.2",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "23a075974d0d1e84f6f5d7bfd1e920af5b0f8abc10fe5440578d53459d4f13d8"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "f4a68d632fe7cd554946d56a05ca21b2660e8a13d6c0b0926b05991b1d5113b3"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "82bcf31499d327c861de20a5fa9d98e4d80d7b81385400bf3c1c6ff93cc3f103"
+        }
+      ]
     },
     "documented_route_acceptance": {
-      "status": "pending",
-      "note": "New image/native package require the documented v0.7.2 routes; v0.7.1 route hashes are not carried as current acceptance."
+      "status": "passed",
+      "repository_path": "releases/v0.7.2/acceptance/documented-routes.json",
+      "sha256": "dc079e201b841e19fd3d88d54d83c02eb5c2e39fe01603f84df0d5fabd72813a"
     }
   },
   "observed_gates": {
@@ -337,8 +367,6 @@
       "carried_from": "v0.5.0 (component byte-identical; requalified on its own rig on 2026-09-05 with origin-authenticated checkpoints)"
     }
   },
-  "interpretation": "Verified disk-backed restore reclaims eligible inactive sessions and retries with fresh checkpoint readers under a finite bound. Two126K target sessions resumed on the5090; this does not prove all process sessions durable: combined-sequence shutdown reported3 unsaved sessions and multisession observed2 root fallbacks in8 continuations/forks. Native lifecycle15/15 passed; host pools/floors remain unchanged. Published route acceptance is a separate pending boundary.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.7-qwen38-5090-beta.1 component and runtime image"
-  ]
+  "interpretation": "Verified disk-backed restore reclaims eligible inactive sessions and retries with fresh checkpoint readers under a finite bound. Two126K target sessions resumed on the5090; this does not prove all process sessions durable: combined-sequence shutdown reported3 unsaved sessions and multisession observed2 root fallbacks in8 continuations/forks. Native lifecycle15/15 passed; host pools/floors remain unchanged. Published-route acceptance passed separately, with all 24 blocks and required substitutions recorded.",
+  "remaining_release_gates": []
 }
