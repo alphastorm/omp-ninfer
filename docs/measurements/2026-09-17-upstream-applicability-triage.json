@@ -2,6 +2,114 @@
   "artifact_type": "omp_ninfer_upstream_applicability_triage",
   "schema_version": 1,
   "experiment": "EXP-045",
+  "scoped_4090_followup": {
+    "source_commit": "f098cc3ef8cd38c4f6d0e8359ab5b7fa722d3545",
+    "baseline_source_commit": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+    "status": "hardware-qualified-unpublished",
+    "change": "Independent semantic port of dd5206f05d48227c6488ef25a3284dfe8bf35243: /health reports EngineCore stopping/failed state under queue_mutex_. No cache, allocator, residency, model, or pool configuration change.",
+    "commit_dispositions": [
+      {
+        "commit": "c15e0e9e7f71c7ffcdac08869843cff68c42a004",
+        "subject": "Chunk KV snapshot staging to bounded page batches",
+        "disposition": "Bounded-transfer intent already met by a different implementation. checkpoint_continuation (program_impl.h:8599-8773) exports text/backend KV one physical page at a time, reuses current host replicas, and allocates at most a one-page temporary host extent on the device-resident path. restore_continuation (:8777 onward) reads directly into reserved host extents in chunks no larger than staging_bytes. Neither path allocates a whole-snapshot CUDA staging buffer. Do not reintroduce the obsolete snapshot_lane/start_prefill disk-cache path."
+      },
+      {
+        "commit": "5e76d11add0256ae76e5624fa8446243dfabb2df",
+        "subject": "Correct MTP restore stride and streamline chunked save staging",
+        "disposition": "Correct geometric stride is already enforced independently. restore_kv inside restore_continuation uses host_kv_extents->page_layout(pages).page_stride and requires file_size == kv_pages_for_frontier(frontier) * page_stride. Text and backend layouts are resolved independently. It never divides total saved MTP bytes by the number of restored pages. Save staging is already independent of the obsolete pinned-buffer inner loop. Preserve this implementation; do not add the upstream test wholesale because it exercises a different pool/API."
+      },
+      {
+        "commit": "8488278c413333afa2e276c7255ceed44fd3b399",
+        "subject": "Publish snapshot saves whose write already finished",
+        "disposition": "Intent already present, with stronger durable-publication machinery. That file/class is absent at e5630a74. SessionCheckpointStore::save (src/serve/session_checkpoint_store.cpp:1275-1423) waits for BufferedCheckpointWriter::finish, completes and validates payloads, syncs manifest, publishes generation, atomically replaces current, and returns success despite best-effort post-publication reclamation failure. There is no request-arrival cancel_requested_ check discarding a completed write. Preserve legitimate pre-publication quota/error refusal; it is not the upstream latency-priority cancellation bug."
+      },
+      {
+        "commit": "92c360fbced1a29114b1b0b4740f46da855f166b",
+        "subject": "Opt-in WDDM budgeting, residency fence wait, correct CUDA import flags",
+        "disposition": "The safe default is already the only allocation policy: DeviceArena::DeviceArena (arena.cu:141) calls cudaMalloc, without eager arena touch-fill; registry.cpp:70-87 budgets measured free bytes, and construct_registered remeasures after weight materialization. No D3D12 allocation, import flags, residency fence, evictable-budget option, or planned-budget global exists. Do not add a35acf6a merely to make its repairs applicable."
+      },
+      {
+        "commit": "72e931b2db2be14287d8af3146aadbabd37bcc2a",
+        "subject": "Verify imported D3D12 arena round-trip",
+        "disposition": "Not applicable to current cudaMalloc allocator. If D3D12 is intentionally introduced later, this is a required safety component, together with the later synchronization and cleanup fixes—not a standalone performance patch."
+      },
+      {
+        "commit": "dfe932b8a062481acd4f2c68d3005527d028d341",
+        "subject": "Promote evictable budgeting to explicit CLI option",
+        "disposition": "Defer with the D3D12 subsystem. It is a new exposed policy, not needed to preserve existing behavior. Also do not mechanically import its unrelated removal of automatic-KV option validation from registry.cpp."
+      },
+      {
+        "commit": "8dbff7e3bdd81b9d8aaea5745290e219e34330be",
+        "subject": "Drain WDDM touch-fill before publishing arena pointers",
+        "disposition": "The two touch-fill races cannot occur in the current constructor because those fills do not exist. PinnedHostBuffer already uses cudaMallocHost, matching the useful final host-buffer behavior. Separately preserve db343a9ade035a7e071b7f526777783c41b7c1ff: DeviceBuffer::copy_from_host synchronizes the default stream before callers launch non-blocking-stream consumers. That is present, but is not a substitute for a future D3D12 fill fence."
+      },
+      {
+        "commit": "2323def8d9841b23f3b8109dfdb4dc2f61488613",
+        "subject": "D3D12 fallback cleanup and physical-VRAM guards",
+        "disposition": "No failing external-memory mapping exists to clean up downstream. The standalone constructor guard is absent and portable, but our shipped path already rejects impossible capacity through measured-free preflight and post-weight KV resolution. Do not count it as a demonstrated cache/residency win; include only if the implementation scope explicitly wants a generic DeviceArena contract change and a direct oversize-allocation scenario justifies it. Upstream's claim that cudaGetLastError leaves a faulted context pristine is not locally validated by this investigation."
+      },
+      {
+        "commit": "05a8871222a6c0c546228b3af51e8237f255c965",
+        "subject": "Treat transient admission shortfall as scheduling, not permanent executor failure",
+        "disposition": "Original exception site and ConcurrentExecutor are gone. Equivalent stale-reservation handling exists in ResourceManager::reserve_materialization (resource_manager.h:415-443): resource revision mismatch returns Stale, and aborted reservation rolls back. EngineCore::admit_planned_request (engine_core.h:1488 onward) requests another admission check on Stale. try_admit_one turns PermanentlyInfeasible into request-local ContextLengthExceeded and applies pending deadlines. Preserve these rather than transplant old lane-plan code."
+      },
+      {
+        "commit": "dd5206f05d48227c6488ef25a3284dfe8bf35243",
+        "subject": "Make /health reflect executor state",
+        "disposition": "ported at f098cc3e"
+      }
+    ],
+    "qualification": {
+      "phases": 15,
+      "passed": 15,
+      "protocol_checks": 15,
+      "context_prompt_tokens": 130048,
+      "exact_context_output": true,
+      "restart_cached_input_tokens": 42,
+      "unsaved_session_cached_input_tokens": 45,
+      "rollback": "passed",
+      "low_privilege_read_denials": 2,
+      "omp_exact_final_answer": true,
+      "restore": {
+        "process_count": 0,
+        "gpu_lease_active": false,
+        "task_state": "Ready",
+        "power_limit_w": 450
+      }
+    },
+    "measurement": {
+      "v071": {
+        "source_commit": "736ac43a0a5d9eef17df60bcc417be566c9d8395",
+        "prefill_tps": 2110.054514310849,
+        "decode_tps": 153.46413743181108,
+        "context_seconds": 91.23773039999651
+      },
+      "reclaim_d125": {
+        "prefill_tps": 2113.9954224853136,
+        "decode_tps": 153.43065551689278,
+        "context_seconds": 90.99662869999884
+      },
+      "health_f098": {
+        "prefill_tps": 2115.9539010016883,
+        "decode_tps": 153.37451339164693,
+        "context_seconds": 91.21002169999701
+      },
+      "all_max_memory_mib": 22774,
+      "all_mtp_acceptance_percent": 87.58865248226951,
+      "interpretation": "One C1 sample per candidate; no statistically supported performance improvement claimed. Health query changes no inference scheduling or cache behavior."
+    },
+    "preserved": {
+      "host_kv_mib": 11264,
+      "host_state_slots": 24,
+      "declared_host_floor_mib": 32768
+    },
+    "limitations": [
+      "Normal /health exercised by actual lifecycle qualification; failed/stopping 503 path was not induced on hardware.",
+      "No D3D12/WDDM allocator introduced; related fixes remain inapplicable or deferred.",
+      "No artifact-v3 migration or kernel-retune campaign.",
+      "Qualification summary retained under local orchestrator state; public release not cut."
+    ]
+  },
   "title": "What the upstream backlogs can still contribute as cherry-picks",
   "generated_utc": "2026-09-17T00:05:00Z",
   "method": "Every commit the dated watch recommends was applied to our fork tip with `git cherry-pick -n -x` in a scratch worktree and then reverted. A clean pick with an empty index means the change is already in our tree; a clean pick with staged files means it still applies; anything else records the conflicting paths. Nothing was committed and no tree was left modified.",

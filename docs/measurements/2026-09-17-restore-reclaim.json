@@ -2,6 +2,70 @@
   "artifact_type": "omp_ninfer_experiment_receipt",
   "schema_version": 1,
   "experiment": "EXP-047",
+  "final_reviewed_candidate": {
+    "source_commit": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+    "qualification_date": "2026-09-17",
+    "review": {
+      "sequence": "CRS-20260917-ninfer-reclaim",
+      "closure": "CR-20260917-ninfer-reclaim-r3",
+      "record_sha256": "31e8c26ee7258ed89ced329e5f93b6aa48e88d0081565f128eefc6f360e3b6bc",
+      "unresolved_in_scope_p0_p1": 0
+    },
+    "regressions": [
+      "Bounded restore terminates after at most 17 import attempts and 16 reclaims under sustained republishing; immediate parent fails.",
+      "ResponseStore restore refuses capacity exhaustion before committing and preserves unrelated sessions; immediate parent fails."
+    ],
+    "rtx5090": {
+      "server_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+      "probe_exit_codes": {
+        "profile": 0,
+        "fanout_57k": 0,
+        "fanout_67k": 0,
+        "warm_arrival": 0,
+        "restore": 0,
+        "multisession": 0,
+        "durability": 0
+      },
+      "durability": {
+        "input_tokens": [
+          125891,
+          125892
+        ],
+        "continuation_cached_tokens": [
+          125906,
+          125907
+        ],
+        "resume_seconds": [
+          5.96,
+          23.57
+        ],
+        "both_target_sessions_resumed": true,
+        "automatic_saved": 13,
+        "automatic_refused": 3,
+        "shutdown_saved": 2,
+        "shutdown_refused": 3,
+        "limitation": "The combined probe process contained predecessor sessions. Shutdown reported three unsaved live sessions. This proves restoration of the two target sessions, not loss-free shutdown for every process session."
+      },
+      "production_restored": true,
+      "supervisor_hold_released": true
+    },
+    "rtx4090": {
+      "server_sha256": "e121084557c342398fb57411c088238d5745d0d5bcfc6bea6084786473fe506f",
+      "package_sha256": "b26643d735d58eafac33f1595c0588baf0e6682a69af73e8e82f96839f4b7646",
+      "qualification_summary_sha256": "bfb8236ac2f82e24768231cb829f91bc2faf12ca76c16b58f047c4f0668f234b",
+      "phases_passed": 15,
+      "context_prompt_tokens": 130048,
+      "decode_tps": 153.43065551689278,
+      "prefill_tps": 2113.9954224853136,
+      "restoration": {
+        "process_count": 0,
+        "gpu_lease_active": false,
+        "task_state": "Ready",
+        "power_limit_w": 450
+      }
+    },
+    "publication": "Founder-only RTX5090 component command passed dry-run and was staged, not executed by the agent. No product cut claimed."
+  },
   "generated_utc": "2026-09-17T04:35:00Z",
   "status": "closed",
   "release": "unreleased candidate",

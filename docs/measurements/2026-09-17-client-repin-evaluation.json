@@ -2,6 +2,50 @@
   "artifact_type": "omp_ninfer_client_repin_evaluation",
   "schema_version": 1,
   "experiment": "EXP-046",
+  "downstream_v1823_followup": {
+    "upstream_tag": "v18.2.3",
+    "upstream_commit": "a2d83061c5d673bf3ee495d7652b63ee5a0ceb14",
+    "source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "source_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "source_patch_count": 35,
+    "wire_delta_disposition": "All four wire deltas already closed by the current downstream series; no additional OMP source patch required. Focused suite passed 56/0 and real loopback capture verified request shape.",
+    "qualification_commit": "d235a82152cf971468a3ebcd6232694e07c2d376",
+    "qualification_repairs": [
+      "Use npm_execpath in Bun package scripts without POSIX-only parameter expansion.",
+      "Use cross-platform path containment for series patches.",
+      "Skip unsupported Windows directory fsync after file fsync and same-directory rename."
+    ],
+    "windows": {
+      "run": 35204510265,
+      "status": "passed",
+      "archive_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+      "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf"
+    },
+    "linux": {
+      "run": 35204510294,
+      "status": "passed",
+      "archive_sha256": "07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46",
+      "binary_sha256": "30f29b28d4ca3d849a34fc5c944be45366e997990a0ceb5f78ef11cca0cfbb3f"
+    },
+    "macos": {
+      "run": 35204510451,
+      "status": "client-qualification-passed-workflow-cleanup-failed",
+      "archive_sha256": "9a64412ea679d94fa15f3a9fc00d72bd8ce5390fc33694049dd6b1dd16eeaa95",
+      "binary_sha256": "da27f75f628d93c3f85262419637fa1cb1342d1faa297ae521cb76b5f8a1a138",
+      "cleanup_repair_commit": "1c1bb61c8521c1bf319c063bb87a7981a281f145",
+      "cleanup_red_green": "A Bazel workspace symlink triggers reroll cleanup refusal; existing removeBazelConvenienceSymlinks removes only symlinks and makes cleanup succeed.",
+      "corrected_run": 35208892148,
+      "corrected_run_status": "in-progress"
+    },
+    "public_source_scan": {
+      "tracked_files": 7400,
+      "private_marker_files": 0,
+      "secret_shaped_matches": 54,
+      "secret_shaped_files": 25,
+      "candidate_files_identical_to_public_upstream": true
+    },
+    "boundary": "Hosted evidence is provider-free build/install/CLI qualification only. No hardware acceptance, client publication, compatibility repin, or product release is claimed."
+  },
   "title": "What a newer OMP client would have to close before it can be pinned",
   "generated_utc": "2026-09-17T00:45:00Z",
   "pinned_client": {
