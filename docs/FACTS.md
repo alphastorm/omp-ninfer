@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-17 · Current stable release: **v0.7.1** · Runtime draft: **v0.7.2**
+Last verified: 2026-09-17 · Current stable release: **v0.7.2**
 
 Public-release claims on this page are bound to the
-[v0.7.1 release manifest](../releases/v0.7.1/manifest.json) and its qualification receipts.
+[v0.7.2 release manifest](../releases/v0.7.2/manifest.json) and its qualification receipts.
 Candidate lane measurements and published-route acceptance remain separately attributed below.
 
 ## What it is
@@ -47,12 +47,12 @@ All of these should be materially true:
 | RTX 4090 | native Windows service | 131,072 | v0.7.1 binds component `v0.6.4-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 | RTX 3090 | native Windows service | 131,072 | unchanged durable `v0.2.5-qwen38-3090-beta.1` lane (origin-authenticated checkpoints, bound by v0.7.1) |
 
-## v0.7.2 runtime draft — bounded restore reclaim
+## v0.7.2 — bounded restore reclaim
 
-- Not a published product or an accepted public route. Exact-source runtime qualification and
-  component publication are separate from product readiness; supported onboarding stays on v0.7.1.
+- Published exact-profile product. Runtime qualification and public-route acceptance are
+  recorded separately; the changed RTX 5090 and RTX 4090 components passed both.
 - Both mainline lanes target reviewed source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090
-  `v0.6.7-qwen38-5090-beta.1` (component-published) and intended RTX 4090 native
+  `v0.6.7-qwen38-5090-beta.1` and RTX 4090 native
   `v0.6.5-qwen38-4090-beta.1`. Restore can save and reclaim reproducible checkpoint-backed
   resident sessions, then retry with a fresh reader under bounded progress. A pool must still
   admit the session being restored; this is not unbounded capacity or universal durability.
@@ -70,7 +70,7 @@ All of these should be materially true:
   32768 MiB floor. Scratch qualification settings do not replace those profiles. OMP remains
   18.0.9; RTX 3090 and the model are unchanged.
 - [EXP-047 `final_reviewed_candidate`](measurements/2026-09-17-restore-reclaim.json) ·
-  [draft notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md). Earlier EXP-047 findings are attributed
+  [release notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md). Earlier EXP-047 findings are attributed
   to their predecessor binaries and do not substitute for this final source-bound evidence.
 
 ## v0.7.1 — a reported save is a restorable save

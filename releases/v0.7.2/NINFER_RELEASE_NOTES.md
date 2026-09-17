@@ -1,9 +1,12 @@
-# OMP NInfer v0.7.2 draft — bounded checkpoint-backed restore reclaim
+# OMP NInfer v0.7.2 — bounded checkpoint-backed restore reclaim
 
-**Draft, not a published product or an accepted public install route.** The current public
-product remains v0.7.1. Both mainline lanes passed exact-source runtime qualification; the RTX
-5090 component is founder-published, but component publication does not establish product
-readiness. The staged quickstart must still pass exact-component public-route acceptance.
+**Owner-operated, exact-profile 0.x release; no SLA.** RTX 5090 uses the manual Docker/SSH
+route; RTX 4090 and RTX 3090 use separate native Windows packages. Both changed mainline
+components passed runtime qualification and exact-component documented-route acceptance.
+
+[Manifest](manifest.json) · [Qualification](qualification.json) ·
+[Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
+[Acceptance](acceptance/composed-external-installation.json) · [Limitations](#release-and-support-boundaries)
 
 ## What changes
 
@@ -26,11 +29,11 @@ Both changed components target source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`
 - RTX 5090 container **`v0.6.7-qwen38-5090-beta.1`** (component-published): image
   `sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24`; server
   `83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0`.
-- Intended RTX 4090 native **`v0.6.5-qwen38-4090-beta.1`**: package
+- RTX 4090 native **`v0.6.5-qwen38-4090-beta.1`**: package
   `b26643d735d58eafac33f1595c0588baf0e6682a69af73e8e82f96839f4b7646`; server
   `e121084557c342398fb57411c088238d5745d0d5bcfc6bea6084786473fe506f`.
 - RTX 3090 native `v0.2.5-qwen38-3090-beta.1` and OMP client
-  `omp-18.0.9-cross-platform-beta-2` — unchanged. The later OMP client cut is not part of this draft.
+  `omp-18.0.9-cross-platform-beta-2` — unchanged. The later OMP client cut is not part of this release.
 - Model artifact `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e` — unchanged.
 
 ## Final reviewed candidate evidence
@@ -70,10 +73,12 @@ historical evidence for predecessor candidates, not qualification of the final b
 
 ## Release and support boundaries
 
-The documented commands target v0.7.2 and retain `--require-ready`. Do not use the draft as
-install authority, mix it with a predecessor manifest, or count copied predecessor acceptance
-receipts as new evidence. Native component publication and exact-component public-route
-acceptance remain separate release gates.
+The documented commands target v0.7.2 and retain `--require-ready`. The RTX 5090 host
+(2 blocks), macOS client (10), Windows client (5), and RTX 4090 native route (7) passed against
+the published components. Pre-cut clone substitutions and SSH host parameterization are
+recorded in the receipts. Both host windows restored their incumbent state. Unchanged client
+platform receipts and the RTX 3090 lane are carried, not presented as fresh runs. Do not mix
+a predecessor manifest with these commands.
 
 Unchanged: prerelease support only with no SLA; one owner-operated machine per lane; one active
 request per qualified profile; no multi-GPU, multi-tenant, priority, or preemptive scheduling

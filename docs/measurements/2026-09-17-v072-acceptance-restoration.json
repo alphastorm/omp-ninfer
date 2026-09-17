@@ -1,0 +1,34 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.7.2",
+  "status": "passed",
+  "rtx5090_host_and_macos": {
+    "production_restored": true,
+    "supervisor_hold_released": true,
+    "route_container_stopped": true
+  },
+  "rtx5090_windows_client": {
+    "production_restored": true,
+    "supervisor_hold_released": true,
+    "route_container_stopped": true
+  },
+  "rtx4090_public_install_window": {
+    "status": "passed",
+    "pointers_restored": true,
+    "process_count": 0,
+    "power_limit_w": 450
+  },
+  "rtx4090_documented_route": {
+    "status": "passed",
+    "original_state_sha256": "e5e288081d4649d52c36f04818b81ee387ccddcbc9b0fa1384241c480075ae8f",
+    "original_state_byte_identical": true,
+    "active_release": "qwen38-4090-native-v0.6.5-beta.1-f098cc3ef8cd",
+    "previous_release": "qwen38-4090-native-v0.6.5-beta.1-d125ffffd87e",
+    "process_count": 0,
+    "task_state": "Ready",
+    "power_limit_w": 450
+  },
+  "client_profiles": "Mac HOME and Windows HOME/USERPROFILE/LOCALAPPDATA/APPDATA were isolated; owner client configuration was not used or overwritten.",
+  "production_activation": false
+}

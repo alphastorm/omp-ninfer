@@ -1,0 +1,108 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.2",
+  "as_of": "2026-09-17",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "published exact components; documented blocks; isolated client profiles",
+  "document_sha256": "1dc16aababf90fff11c0437a425ac144324581a59c31f9201c15605f4137270f",
+  "current_document_sha256": "d9ae1c85165cdec5706d85a4435f23cd8cc52bd35c11b46f15977be1a9c1c994",
+  "executed_blocks_match_current": true,
+  "document_change": "Release-posture prose only. All 24 extracted blocks match the executed snapshot; the two pre-cut clone substitutions and required SSH parameterization are recorded, not relabeled as verbatim execution.",
+  "candidate_commit": "99b2c8abb1eabdc8bce719385e6d796b61b644af",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 50.564,
+      "receipt": "docs/measurements/2026-09-17-rtx5090-v072-host-route-run.json",
+      "sha256": "97ecd1f17700c16a7176110dc1584e3e3dee06afe648b7865c151a3a9e24f95a",
+      "note": "Published image 74667e73 / server 83547bc6; required parameterization is recorded in the route receipt."
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 168.793,
+      "receipt": "docs/measurements/2026-09-17-rtx5090-v072-macos-route-run.json",
+      "sha256": "409647de77649bbc502de970d5535acb721b092257f50b65fbbac82f2af976fa",
+      "note": "Published image 74667e73 / server 83547bc6; required parameterization is recorded in the route receipt."
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 36.284,
+      "receipt": "docs/measurements/2026-09-17-rtx5090-v072-windows-route-run.json",
+      "sha256": "862a6d3526b04abdf9f2270f659609f0612c43f664b562792cd7ca4fae2b074b",
+      "note": "Published image 74667e73 / server 83547bc6; required parameterization is recorded in the route receipt."
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 354.449,
+      "receipt": "docs/measurements/2026-09-17-rtx4090-v072-native-route-run.json",
+      "sha256": "cfbed17af50f7d91cbfcd2d4cc09d4bcbc4a7f5bef6aa8fb1a9bdc40c6636674",
+      "note": "Public native package b26643d7 downloaded, verified, installed in the canonical documented location, and exercised. Original stopped f098/d125 state bytes and task were restored afterward."
+    }
+  },
+  "steps": [
+    {
+      "lane": "rtx5090-container-host",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-macos-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-windows-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx4090-native",
+      "status": "passed"
+    }
+  ],
+  "public_route_gates": {
+    "status": "passed",
+    "receipt": "releases/v0.7.2/qualification/rtx5090.json",
+    "note": "The release_evidence.published_image_profile records gates exercised on the anonymous digest-pulled image, without a binary overlay. Reuse and durability limitations remain in the separate exact-source probe records."
+  },
+  "qualification_receipt": {
+    "repository_path": "releases/v0.7.2/qualification/rtx4090.json",
+    "sha256": "7f26054761d19c96bd6826b786667ae704a94f97a9eafcf32017c0c0ee5c3eb7"
+  },
+  "restoration_receipt": {
+    "repository_path": "docs/measurements/2026-09-17-v072-acceptance-restoration.json",
+    "sha256": "a4d41f3f50c32e3d0feb59b23ef5b8fd42edb797d68d622fff474a04bd006b06"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

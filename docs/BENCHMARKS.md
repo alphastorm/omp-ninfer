@@ -11,9 +11,10 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.7.2 runtime draft — final reviewed reclaim candidate (2026-09-17)
+## v0.7.2 — final reviewed reclaim measurements (2026-09-17)
 
-These are runtime qualification measurements, **not accepted public-route results**. The
+These are runtime qualification measurements. [Public-route acceptance](../releases/v0.7.2/acceptance/documented-routes.json)
+is separate evidence, not a substitute for these measurements. The
 [EXP-047 `final_reviewed_candidate`](measurements/2026-09-17-restore-reclaim.json) binds
 source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`, RTX 5090 server `83547bc6…`, and RTX 4090
 server `e1210845…` / package `b26643d7…`. Earlier findings in the same experiment belong to

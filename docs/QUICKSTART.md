@@ -5,10 +5,9 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.7.2 is a draft, not a published product or an accepted public install route.** The
-> commands below are staged for its exact components; lane qualification does not make them
-> accepted routes. For supported onboarding, use the
-> [published v0.7.1 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md).
+> **v0.7.2 is the current public release.** Its changed runtime components passed the
+> documented RTX 5090 host, macOS and Windows client routes, and RTX 4090 native route.
+> [Acceptance and recorded substitutions](../releases/v0.7.2/acceptance/documented-routes.json).
 > Do not bypass `--require-ready` or mix one release's manifest with another release's commands.
 
 ## Choose your lane
@@ -18,9 +17,9 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.2 draft route** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.7.2 draft route** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **unchanged lane; v0.7.2 draft route** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.2 accepted route** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.7.2 accepted route** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **unchanged qualified lane** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 Each native lane is installable only through its exact manifest variant. Do not substitute GPU
@@ -28,16 +27,16 @@ family names, package URLs, component tags, or variant IDs between lanes.
 
 ## Verify the release before setup
 
-The `v0.7.2` draft composes native Windows OMP over authenticated local loopback
+The `v0.7.2` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux clients are qualified client profiles under the same compatibility authority; RTX 4090
 and RTX 3090 use separate native Windows packages.
 
-The intended runtime components are RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090
+The published runtime components are RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090
 `v0.6.5-qwen38-4090-beta.1`, both from source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`.
 They add bounded checkpoint-backed reclaim when restore encounters occupied host-KV capacity.
-The RTX 5090 component is published; the product and these routes are not accepted.
+Both changed components passed exact-package public installation and documented-route acceptance.
 Model, OMP 18.0.9 client, RTX 3090 component, and serving settings are unchanged. The public
 RTX 5090 deployment profile remains `qwen38-5090-v0.7.0` / configuration `762e6bf4`, with
 16384 MiB host KV and a 28672 MiB runtime-host floor. The native RTX 4090 keeps 11264 MiB
@@ -50,7 +49,7 @@ predecessor sessions at shutdown: this is not a loss-free shutdown guarantee for
 Automatic checkpoints remain best effort under traffic. The extra multisession control recorded
 root fallback on 2 of 8 continuations/forks without server errors
 ([lane receipt](../releases/v0.7.2/qualification/rtx5090.json)); universal warm reuse is not claimed.
-Public-route acceptance is a separate gate.
+[Public-route acceptance](../releases/v0.7.2/acceptance/documented-routes.json) is recorded separately.
 
 Start only from the product tag and require its ready contract:
 

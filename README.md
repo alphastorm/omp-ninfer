@@ -64,17 +64,16 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.7.1 is the current public release.** If you own a qualified card, the
-> [v0.7.1 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md)
+> **v0.7.2 is the current public release.** If you own a qualified card, the
+> [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 > is the supported onboarding: three GPU lanes with public
 > install authority — the RTX 5090 durable container plus native Windows RTX 4090 and
 > RTX 3090 — each bound to exact bytes and a qualification receipt. The 0.x series carries an
 > explicit support boundary: the latest published release and its exact manifest/profile.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
-> [v0.7.1 composed receipt](releases/v0.7.1/acceptance/composed-external-installation.json).
-> **v0.7.2 is a staged runtime draft.** Both mainline lanes passed exact-source qualification,
-> but the draft is not a published product and its public routes have not passed acceptance.
-> The [working quickstart](docs/QUICKSTART.md) targets that draft, not the supported v0.7.1 install.
+> [v0.7.2 composed receipt](releases/v0.7.2/acceptance/composed-external-installation.json).
+> The published RTX 5090 host, macOS and Windows client routes, and RTX 4090 native route
+> passed exact-component acceptance. OMP remains 18.0.9; the RTX 3090 lane is unchanged.
 
 ## What this is — and isn't
 
@@ -145,7 +144,7 @@ Historical v0.6.8 profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-The **v0.7.2 runtime draft** moves both mainline lanes to reviewed source `d125ffff` for
+The **v0.7.2 runtime release** moves both mainline lanes to reviewed source `d125ffff` for
 bounded checkpoint-backed reclaim: when restore needs host-KV capacity, the runtime can save
 and reclaim reproducible resident sessions and retry with a fresh checkpoint reader. The final
 RTX 5090 candidate restored both target 126K-token sessions in **5.96 s and 23.57 s** without
@@ -153,11 +152,11 @@ increasing the public profile's 16 GiB pool. Its combined probe process also rep
 unsaved predecessor sessions at shutdown**; this proves the two target restores, not universally
 loss-free shutdown. The final RTX 4090 package passed 15 qualification phases.
 
-RTX 5090 `v0.6.7-qwen38-5090-beta.1` is component-published; RTX 4090
-`v0.6.5-qwen38-4090-beta.1` is the intended native component. OMP stays on 18.0.9, RTX 3090
+RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090 native
+`v0.6.5-qwen38-4090-beta.1` are published and accepted. OMP stays on 18.0.9, RTX 3090
 and the model are unchanged, and neither public serving profile nor host-memory floor moves.
-These are runtime qualification results, not acceptance of the staged public install routes.
-[Draft release notes](releases/v0.7.2/NINFER_RELEASE_NOTES.md) ·
+Runtime measurements and [public-route acceptance](releases/v0.7.2/acceptance/documented-routes.json)
+are recorded separately. [Release notes](releases/v0.7.2/NINFER_RELEASE_NOTES.md) ·
 [EXP-047 final reviewed candidate](docs/measurements/2026-09-17-restore-reclaim.json) ·
 [Historical releases](docs/RELEASES.md#version-identities).
 

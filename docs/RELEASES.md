@@ -7,8 +7,8 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.1`, GitHub `Latest` |
-| Development | Product candidates with no public install or support claim | `v0.7.2` runtime draft; exact-source lane qualification, public-route acceptance pending |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.2`, GitHub `Latest` |
+| Development | Product candidates with no public install or support claim | OMP 18.2.3 client repin and separately measured RTX 4090 health delta; not part of v0.7.2 |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,11 +27,11 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.7.2 runtime draft (bounded checkpoint-backed restore reclaim)
+### v0.7.2 public release (bounded checkpoint-backed restore reclaim)
 
-- Status: staged product draft, not a published product or an accepted public install route.
-  Root public authority remains v0.7.1. The RTX 5090 component is founder-published; that does
-  not establish product readiness. [Draft notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md).
+- Status: published exact-profile product. Both changed components and their documented routes
+  passed acceptance; unchanged client-platform and RTX 3090 qualification are explicitly carried.
+  [Release notes](../releases/v0.7.2/NINFER_RELEASE_NOTES.md).
 - Both mainline components target exact reviewed source
   `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090 `v0.6.7-qwen38-5090-beta.1`,
   image `sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24`;
@@ -51,8 +51,9 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
   `762e6bf4…`, 16384 MiB host KV and a 28672 MiB runtime-host floor; RTX 4090 keeps 11264 MiB
   host KV, 24 host-state slots and its 32768 MiB floor. Scratch qualification settings are
   separate. RTX 3090, the model and `omp-18.0.9-cross-platform-beta-2` remain unchanged.
-- The working quickstart targets v0.7.2 for subsequent exact-component route acceptance. Do not
-  bypass its ready gate or treat copied predecessor acceptance receipts as new evidence.
+- The quickstart targets v0.7.2. RTX 5090 host/macOS/Windows and RTX 4090 native routes passed
+  24 documented steps, with pre-cut clone substitutions recorded. Both host windows restored
+  their incumbent state. Do not bypass the ready gate or relabel carried receipts as new runs.
 
 ### v0.7.1 public release (a reported save is a restorable save)
 

@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### v0.7.2 runtime draft — bounded restore reclaim
+## [0.7.2] - 2026-09-17
 
-- Both mainline lanes target reviewed runtime source
+### Bounded restore reclaim
+
+- Both mainline lanes use reviewed runtime source
   `d125ffffd87ef38d9a221f9830e19dfa274ddd34`: RTX 5090 component
-  `v0.6.7-qwen38-5090-beta.1` (component-published) and intended RTX 4090 native component
-  `v0.6.5-qwen38-4090-beta.1`. No product publication or public-route acceptance is claimed.
+  `v0.6.7-qwen38-5090-beta.1` and RTX 4090 native component
+  `v0.6.5-qwen38-4090-beta.1`, both published and accepted through their documented routes.
 - Restore can reclaim reproducible checkpoint-backed resident sessions under host-KV pressure,
   saving a resident session first when its checkpoint is behind and retrying import with a fresh
   reader. The reviewed candidate bounds retry/reclaim progress; regression evidence covers
@@ -31,8 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   11264 MiB host KV, 24 host-state slots, and the 32768 MiB floor. Scratch qualification
   settings and earlier smaller-pool experiments are not new supported defaults.
 - OMP remains `omp-18.0.9-cross-platform-beta-2`; the RTX 3090 component and model are unchanged.
-  Documented route references are staged for v0.7.2 and retain the ready gate. Public authority
-  remains v0.7.1 until the product cut and independent route acceptance.
+  The RTX 5090 host (2 blocks), macOS client (10), Windows client (5), and RTX 4090 native
+  route (7) passed against the published components. Pre-cut clone substitutions are recorded;
+  the final product retains the ready gate. Both host windows restored their incumbent state.
 
 ## [0.7.1] - 2026-09-16
 
@@ -1273,7 +1276,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...v0.7.0
 [0.6.10]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.9...v0.6.10
