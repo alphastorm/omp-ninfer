@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Publish the already-qualified native clients and their exact public source.
-# FOUNDER-ONLY / AGENT MUST NOT EXECUTE without --dry-run.
+# Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE. Default is dry-run.
 set -euo pipefail
-version=; sequence=1; source_dir=; commit=; assets=; checksums_sha=; dry_run=0
+version=; sequence=1; source_dir=; commit=; assets=; checksums_sha=; dry_run=0; publish=0
 while (($#)); do
   case "$1" in
     --version) version="$2"; shift 2 ;;
@@ -12,9 +12,12 @@ while (($#)); do
     --assets) assets="$2"; shift 2 ;;
     --checksums-sha) checksums_sha="$2"; shift 2 ;;
     --dry-run) dry_run=1; shift ;;
+    --publish) publish=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+if ((publish && dry_run)); then echo '--publish and --dry-run are mutually exclusive' >&2; exit 2; fi
+if ((!publish)); then dry_run=1; fi
 [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && $sequence =~ ^[1-9][0-9]*$ ]] || { echo 'invalid version or sequence' >&2; exit 2; }
 [[ $commit =~ ^[0-9a-f]{40}$ && $checksums_sha =~ ^[0-9a-f]{64}$ ]] || { echo 'exact source and checksum identities are required' >&2; exit 2; }
 [[ -d $source_dir && -d $assets ]] || { echo 'source and asset directories must exist' >&2; exit 2; }

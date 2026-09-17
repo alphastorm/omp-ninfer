@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Add a founder-run, checksum-bound native client component publisher with a no-effect
-  preflight for the three qualified archives, source/tree identities, and remote write access.
+- Add a founder-run, checksum-bound native client component publisher that defaults to a
+  no-effect preflight for the qualified archives, source/tree identities, and authentication
+  routes. Live publication requires explicit `--publish`; final server-side authorization is
+  evaluated by the intended live operations.
   Component publication does not update casks, installed clients, or product compatibility.
 
 ## [0.7.2] - 2026-09-17

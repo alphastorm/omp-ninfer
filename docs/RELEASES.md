@@ -744,12 +744,15 @@ the verifier decides what remains:
 
 ## Release notes
 
-Native OMP client components use `scripts/hosts/cut-omp-client-component.sh`. Its `--dry-run`
-checks the exact closed archive/receipt set, source commit and tree, embedded binary identities,
-and GitHub/SSH write access without publishing. The live command is founder-only: it creates
+Native OMP client components use `scripts/hosts/cut-omp-client-component.sh`. The default mode
+and explicit `--dry-run` check the exact closed archive/receipt set, source commit and tree,
+embedded binary identities, GitHub authentication/repository role, and SSH push negotiation.
+These no-effect checks cannot prove every token restriction or server-side creation rule;
+authorization failures at the intended live effects remain possible. `--publish` is founder-only: it creates
 the source tag and two prereleases, without changing a cask, installed client, product authority,
 or production service. Publication spans two repositories and is not transactional; on a live
-failure inspect the completed effects before preparing a bounded recovery command. Existing
+failure, including a source tag created before a release-creation failure, inspect the completed
+effects before preparing a bounded recovery command. Existing
 tag/release slots are refused rather than overwritten.
 
 At cut time, move the applicable human-readable entries from `[Unreleased]` in
