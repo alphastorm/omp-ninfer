@@ -94,6 +94,13 @@ def load_authority(path: Path) -> dict[str, Any]:
         require(isinstance(profile.get("client_distribution"), dict),
                 f"{profile_id} client distribution is absent")
         require(isinstance(profile.get("runtime"), dict), f"{profile_id} runtime is absent")
+        # OMP consumes this authority with a closed appliance capability vocabulary.
+        capabilities = profile["runtime"].get("capabilities")
+        require(isinstance(capabilities, list) and all(
+            capability in ("tools", "reasoning", "thinking-history",
+                           "stateful-responses", "vision", "durable-checkpoint")
+            for capability in capabilities
+        ), f"{profile_id} runtime contains an unknown client capability")
         lifecycle = profile.get("lifecycle")
         require(isinstance(lifecycle, dict), f"{profile_id} lifecycle is absent")
         require(

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.3",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/886304132b31e7ebd43521540deaf1c52d47d0ca/compatibility.json",
-      "compatibility_sha256": "7cb4accf9c42a9cad6a4871823d3007e3c6e6ff05a5b70dc75a24bb6150966cc"
+      "compatibility_sha256": "f2687d242d47e179bc790adda4b9e52abe2c540febf5edbad8a27f998a61f797"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -182,7 +182,7 @@
       "NInfer RTX3090 v0.2.5-qwen38-3090-beta.1 (unchanged from v0.7.2)"
     ],
     "blockers": [
-      "OMP 18.2.3 authenticated live acceptance on macOS, Windows, and Linux",
+      "External-installation acceptance for OMP 18.2.3 on macOS, Windows, and Linux",
       "All five documented routes on the published client, including RTX 3090",
       "Composed acceptance and exact restoration of every qualification host"
     ],

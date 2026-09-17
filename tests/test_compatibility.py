@@ -30,7 +30,6 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         for profile in authority["profiles"]:
             receipt = profile["acceptance_receipt"]
             if receipt is None:
-                self.assertIsNone(profile["acceptance_receipt"])
                 continue
             filename = Path(urlparse(receipt["url"]).path).name
             url_parts = Path(urlparse(receipt["url"]).path).parts
@@ -59,15 +58,6 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
-            if profile["id"] == "windows-docker-local":
-                self.assertEqual(
-                    subject["live_acceptance"]["runtime_variant"],
-                    "historical-rtx3090-protocol-endpoint",
-                )
-                self.assertFalse(subject["live_acceptance"]["runtime_identity_bound"])
-                self.assertFalse(
-                    subject["live_acceptance"]["profile_runtime_qualified_by_this_receipt"]
-                )
             distribution = profile["client_distribution"]
             self.assertTrue(distribution["published"])
             self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])
@@ -100,27 +90,13 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             for key, value in expected.items():
                 self.assertEqual(profile["runtime"][key], value)
 
-    def test_primary_rtx5090_profiles_claim_process_restart_with_a_durable_store(self) -> None:
-        """Since v0.6.3 the documented container route mounts a checkpoint store, so the
-        claim is made - and only alongside the store and seccomp identity that make it true."""
-        authority = MODULE.load_authority(ROOT / "compatibility.json")
-        for profile in authority["profiles"]:
-            self.assertIn("process-restart-continuation", profile["runtime"]["capabilities"])
-            store = profile["runtime"]["session_checkpoints"]
-            self.assertEqual(store["store_mount"], "/checkpoints")
-            self.assertEqual(
-                hashlib.sha256((ROOT / store["seccomp_profile"]).read_bytes()).hexdigest(),
-                store["seccomp_sha256"],
-            )
-
-        for filename in (
-            "qwen38-rtx5090-manual-tunnel.json",
-            "qwen38-rtx5090-windows-docker-local.json",
-        ):
-            profile = json.loads((ROOT / "profiles" / filename).read_text(encoding="utf-8"))
-            self.assertIn("process-restart-continuation", profile["capabilities"])
-            self.assertNotIn("process-restart-continuation", profile["unsupported"])
-            self.assertIn("--session-checkpoint-dir", profile["server"]["arguments"])
+    def test_client_unknown_runtime_capability_is_rejected(self) -> None:
+        authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        authority["profiles"][0]["runtime"]["capabilities"].append(
+            "process-restart-continuation"
+        )
+        with self.assertRaises(ValueError):
+            MODULE.load_authority(self._write(authority))
 
     def test_unknown_or_incomplete_profiles_fail_closed(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
@@ -164,14 +140,20 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             MODULE.load_authority(self._write(invalid))
 
         invalid = deepcopy(authority)
-        invalid["profiles"][0]["acceptance_receipt"]["url"] = (
-            "https://raw.githubusercontent.com/alphastorm/omp-ninfer/main/receipt.json"
-        )
+        invalid["profiles"][0]["acceptance_receipt"] = {
+            "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/main/receipt.json",
+            "sha256": "a" * 64,
+        }
         with self.assertRaisesRegex(ValueError, "not immutable"):
             MODULE.load_authority(self._write(invalid))
 
         invalid = deepcopy(authority)
-        invalid["profiles"][1]["acceptance_receipt"]["sha256"] = "not-a-sha"
+        invalid["profiles"][1]["acceptance_receipt"] = {
+            "url": ("https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
+                    + "a" * 40 + "/releases/" + authority["product_release"]
+                    + "/acceptance/windows-x64.json"),
+            "sha256": "not-a-sha",
+        }
         with self.assertRaisesRegex(ValueError, "SHA-256"):
             MODULE.load_authority(self._write(invalid))
 

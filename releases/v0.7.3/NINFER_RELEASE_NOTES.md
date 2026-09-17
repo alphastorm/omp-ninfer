@@ -17,6 +17,10 @@ The source preserves the downstream NInfer request contract. Windows launcher an
 portability fixes, and successful macOS qualification cleanup, are included in the selected
 component evidence. This release does not update a Homebrew cask or activate an installed client.
 
+The authority uses OMP's existing `durable-checkpoint` capability. Its previous
+`process-restart-continuation` spelling was rejected by the client's closed capability schema;
+the product verifier now rejects unsupported capability names before installation.
+
 ## Unchanged runtimes
 
 - RTX 5090: `v0.6.7-qwen38-5090-beta.1`, image
