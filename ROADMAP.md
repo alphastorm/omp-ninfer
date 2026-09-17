@@ -36,6 +36,17 @@ Durability is narrower than reuse and now bounded in writing: both sessions chec
 graceful stop saves both, but after a restart one of the two is declined and re-prefills
 ([EXP-041](docs/measurements/2026-09-16-two-long-session-capacity.json)).
 
+**Client re-pin, evaluated 2026-09-17
+([#43](https://github.com/alphastorm/omp-ninfer/issues/43)):** the pinned client is this fork's
+build of upstream `v18.0.9`, and upstream is 3,521 commits ahead at `v18.2.2`. Run against the
+production lane, the newer client is refused four ways - it sends `prompt_cache_key`, asks for
+`include: ["reasoning.encrypted_content"]` and `reasoning.summary`, all of which the server refuses
+as features it will not silently ignore, and it sent the local model alias instead of the mapped
+`requestModelId`. The structural finding is that the upstream binary carries no `ninfer*` symbols at
+all: the provider compat layer is the fork's, so a re-pin is a rebase rather than an adoption. With
+those four closed at a proxy, the candidate drove the lane cleanly, including stateful resume
+([EXP-046](docs/measurements/2026-09-17-client-repin-evaluation.json)).
+
 **Upstream campaigns, re-triaged 2026-09-17
 ([#33](https://github.com/alphastorm/omp-ninfer/issues/33)):** the forks are 194 / 57 / 141 commits
 ahead, and applicability was measured rather than assumed - every recommended commit was

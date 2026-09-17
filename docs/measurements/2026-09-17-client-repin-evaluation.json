@@ -1,0 +1,70 @@
+{
+  "artifact_type": "omp_ninfer_client_repin_evaluation",
+  "schema_version": 1,
+  "experiment": "EXP-046",
+  "title": "What a newer OMP client would have to close before it can be pinned",
+  "generated_utc": "2026-09-17T00:45:00Z",
+  "pinned_client": {
+    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
+    "upstream_tag": "v18.0.9",
+    "upstream_commit": "cc14e04f075de82c5c0c0ccd2f9dfbce6f03fe9e",
+    "built_from": "alphastorm/oh-my-pi (fork)"
+  },
+  "candidate_client": {
+    "upstream_tag": "v18.2.2",
+    "asset": "omp-darwin-arm64",
+    "sha256": "e0302a99643efefb62bf3d0601d5d84ebab6ed1f3ad105cc2874c8274af448a9",
+    "reported_version": "omp/18.2.2",
+    "upstream_commits_ahead_of_pin": 3521
+  },
+  "method": "The candidate binary was run from an isolated HOME against the production RTX 5090 lane with the documented provider fragment. Because the server refuses unknown and server-managed request fields by design, each rejection would otherwise surface one at a time; a local proxy stripped each refused field in turn and recorded it, so one sweep produced the complete delta rather than one round trip per field.",
+  "findings": [
+    {
+      "id": "prompt_cache_key",
+      "severity": "blocking",
+      "observed": "HTTP 400 prompt_cache_key is not supported (parameter_not_supported)",
+      "detail": "the candidate sends a prompt-cache affinity hint on every Responses request; the server lists it among the server-managed features it refuses rather than silently ignores. This lane's reuse is session-based, so the hint is redundant, not merely unimplemented."
+    },
+    {
+      "id": "include.reasoning.encrypted_content",
+      "severity": "blocking",
+      "observed": "HTTP 400 additional response fields are not supported (include_not_supported)",
+      "detail": "the candidate asks for encrypted reasoning content the engine does not emit"
+    },
+    {
+      "id": "reasoning.summary",
+      "severity": "blocking",
+      "observed": "HTTP 400 reasoning.summary is not supported (reasoning_option_not_supported)",
+      "detail": "the candidate requests a synthesised reasoning summary; reasoning.effort, which it also sends, is supported"
+    },
+    {
+      "id": "requestModelId",
+      "severity": "blocking",
+      "observed": "HTTP 404 model 'local-max' not found (model_not_found)",
+      "detail": "the documented fragment maps a local alias to the served model id, and the candidate sent the alias as `model` instead. The key still exists in the binary (106 occurrences), so this is a behaviour change to find in the rebase, not a removed feature"
+    },
+    {
+      "id": "ninfer-compat-layer",
+      "severity": "structural",
+      "observed": "no ninfer* symbols in the upstream binary; the pinned build has 11 occurrences of ninferStatefulResponses",
+      "detail": "the provider compat layer this product relies on is carried by the fork, not upstream, so a re-pin is a rebase of alphastorm/oh-my-pi onto v18.2.2 - never an adoption of the upstream binary"
+    }
+  ],
+  "what_worked_once_the_delta_was_closed": {
+    "text_turn": "exact output CLIENT_1822_OK",
+    "stateful_resume": "a planted nonce survived a --continue turn in a fresh session directory: CLIENTPIN-7741 returned exactly",
+    "note": "with the four request-shape items handled, the candidate drives this lane's Responses surface, which is the useful half of the answer: the work is in the request shape and the fork's compat layer, not in the engine"
+  },
+  "requests_observed": {
+    "total": 8,
+    "accepted": 3,
+    "rejected": 5,
+    "stripped_field_frequency": {
+      "prompt_cache_key": 8,
+      "include": 7,
+      "reasoning.summary": 6
+    }
+  },
+  "disposition": "Do not re-pin yet. A re-pin is a rebase of the client fork onto v18.2.2 that carries the ninfer compat layer forward, suppresses or adapts the three refused request fields for ninfer providers, and restores requestModelId mapping - then a cross-platform rebuild, a new component release, and a re-run of every documented route on every lane, because the compatibility authority pins one client for all of them. The alternative - relaxing the server to accept fields it does not implement - would trade a deliberate product property for convenience and is rejected.",
+  "raw_prompts_outputs_or_secrets_included": false
+}
