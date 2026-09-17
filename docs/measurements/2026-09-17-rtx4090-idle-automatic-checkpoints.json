@@ -1,0 +1,152 @@
+{
+  "experiment": "automatic-export-idle-discriminator",
+  "steps": [
+    {
+      "step": "base_D1",
+      "wall_s": 89.6911537910346,
+      "usage": {
+        "input_tokens": 125891,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 16,
+        "output_tokens_details": {
+          "reasoning_tokens": 16
+        },
+        "total_tokens": 125907
+      },
+      "response_id": "resp_ba2d531c11d2355720683770a0aa5577"
+    },
+    {
+      "step": "idle_automatic_D1",
+      "covered": true,
+      "checkpoint": {
+        "artifact_type": "ninfer_session_checkpoint_status",
+        "bytes": 4834325378,
+        "created_at_unix_ms": 1789628672783,
+        "frontier_tokens": 125906,
+        "generation": "1789628666907-0",
+        "read_backend": "directstorage-1.3",
+        "response_records": 1,
+        "restored_tokens": 125906,
+        "schema_version": 2,
+        "state": "available"
+      }
+    },
+    {
+      "step": "base_D2",
+      "wall_s": 89.7756142920116,
+      "usage": {
+        "input_tokens": 125892,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 16,
+        "output_tokens_details": {
+          "reasoning_tokens": 16
+        },
+        "total_tokens": 125908
+      },
+      "response_id": "resp_e4c41a8c66b2feb35a327b5573fa439b"
+    },
+    {
+      "step": "idle_automatic_D2",
+      "covered": true,
+      "checkpoint": {
+        "artifact_type": "ninfer_session_checkpoint_status",
+        "bytes": 4834325405,
+        "created_at_unix_ms": 1789628768252,
+        "frontier_tokens": 125907,
+        "generation": "1789628764084-1",
+        "read_backend": "directstorage-1.3",
+        "response_records": 1,
+        "restored_tokens": 125907,
+        "schema_version": 2,
+        "state": "available"
+      }
+    },
+    {
+      "step": "idle_after_continue_1",
+      "wall_s": 2.3978806670056656,
+      "usage": {
+        "input_tokens": 125926,
+        "input_tokens_details": {
+          "cached_tokens": 125906
+        },
+        "output_tokens": 16,
+        "output_tokens_details": {
+          "reasoning_tokens": 16
+        },
+        "total_tokens": 125942
+      },
+      "covered": true,
+      "checkpoint": {
+        "artifact_type": "ninfer_session_checkpoint_status",
+        "bytes": 4988282672,
+        "created_at_unix_ms": 1789628777649,
+        "frontier_tokens": 125941,
+        "generation": "1789628773006-2",
+        "read_backend": "directstorage-1.3",
+        "response_records": 2,
+        "restored_tokens": 125941,
+        "schema_version": 2,
+        "state": "available"
+      }
+    },
+    {
+      "step": "idle_after_continue_2",
+      "wall_s": 1.9625490410253406,
+      "usage": {
+        "input_tokens": 125927,
+        "input_tokens_details": {
+          "cached_tokens": 125907
+        },
+        "output_tokens": 16,
+        "output_tokens_details": {
+          "reasoning_tokens": 16
+        },
+        "total_tokens": 125943
+      },
+      "covered": true,
+      "checkpoint": {
+        "artifact_type": "ninfer_session_checkpoint_status",
+        "bytes": 4988282699,
+        "created_at_unix_ms": 1789628786369,
+        "frontier_tokens": 125942,
+        "generation": "1789628781973-3",
+        "read_backend": "directstorage-1.3",
+        "response_records": 2,
+        "restored_tokens": 125942,
+        "schema_version": 2,
+        "state": "available"
+      }
+    },
+    {
+      "step": "export_log",
+      "lines": [
+        "[2026-09-17 00:04:32.802] [info] ninfer-serve: automatic session checkpoint saved",
+        "[2026-09-17 00:06:08.269] [info] ninfer-serve: automatic session checkpoint saved",
+        "[2026-09-17 00:06:17.678] [info] ninfer-serve: automatic session checkpoint saved",
+        "[2026-09-17 00:06:26.391] [info] ninfer-serve: automatic session checkpoint saved"
+      ]
+    }
+  ],
+  "identity": {
+    "binary_sha256": "adb48e5ebdaa7f40a0ef175c2ecb3f655aa26bf9c61903a1be924979c8006fd9",
+    "build_profile": "native-v0.6.5-beta.1-rtx4090",
+    "build_type": "Release",
+    "config_sha256": "32a1d6b1cc2b91622c317f95c5ca4be9a51d667527ba85d41e46ab6b5bfbdbaf",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-4090-candidate-hostkv11264",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "df2e9544fc56456364f2647aa60235675ae1619a",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "artifact_type": "omp_ninfer_two_session_durability_probe",
+  "schema_version": 1,
+  "lane": "rtx4090-windows-native",
+  "label": "v065-final-packaged-bytes",
+  "host_kv_mib": 11264,
+  "started_utc": "20260917T065129Z",
+  "steps": [
+    {
+      "step": "base_D1",
+      "wall_s": 89.73,
+      "input_tokens": 125891,
+      "id": "resp_5f9be5740b68518511da77ad6cc3b720"
+    },
+    {
+      "step": "base_D2",
+      "wall_s": 91.47,
+      "input_tokens": 125892,
+      "id": "resp_3947b80349efb73106363af13f12f05d"
+    },
+    {
+      "step": "continue_D1",
+      "wall_s": 1.96,
+      "cached_tokens": 125906,
+      "reuse_lost": false
+    },
+    {
+      "step": "continue_D2",
+      "wall_s": 1.84,
+      "cached_tokens": 125907,
+      "reuse_lost": false
+    },
+    {
+      "step": "explicit_checkpoint_D1",
+      "result": "[{\"artifact_type\": \"ninfer_session_checkpoint_status\", \"bytes\": 4988282672, \"frontier_tokens\": 125941, \"generation\": \"1789628075316-3\", \"restored_tokens\": 125941, \"state\": \"available\", \"mode\": \"explicit\"}, 5.259634208050"
+    },
+    {
+      "step": "explicit_checkpoint_D2",
+      "result": "[{\"artifact_type\": \"ninfer_session_checkpoint_status\", \"bytes\": 4988282699, \"frontier_tokens\": 125942, \"generation\": \"1789628085644-5\", \"restored_tokens\": 125942, \"state\": \"available\", \"mode\": \"explicit\"}, 10.78537349996"
+    },
+    {
+      "step": "automatic_checkpoints_before_stop",
+      "saved": 2,
+      "refused": 2
+    },
+    {
+      "step": "graceful_stop",
+      "lines": [
+        "[2026-09-16 23:53:06.092] [info] ninfer-serve: automatic session checkpoint saved",
+        "[2026-09-16 23:54:32.225] [warning] ninfer-serve: automatic session checkpoint skipped: program refused continuation export (attempted resp_3947b80349efb73106363af13f12f05d)",
+        "[2026-09-16 23:54:34.185] [warning] ninfer-serve: automatic session checkpoint skipped: program refused continuation export (attempted resp_93f49ebcfeb65de189a1efdea6f75d87)",
+        "[2026-09-16 23:54:45.643] [info] ninfer-serve: automatic session checkpoint saved",
+        "[2026-09-16 23:55:06.662] [info] ninfer-serve: shutdown: saved 2, nothing to save 0, refused 0"
+      ]
+    },
+    {
+      "step": "shutdown_accounting",
+      "line": "[2026-09-16 23:55:06.662] [info] ninfer-serve: shutdown: saved 2, nothing to save 0, refused 0"
+    },
+    {
+      "step": "restarted",
+      "healthy": true
+    },
+    {
+      "step": "restore_declines",
+      "lines": [],
+      "count": 0
+    },
+    {
+      "step": "resume_D1",
+      "wall_s": 5.67,
+      "expected": "D1-4111",
+      "got": "D1-4111",
+      "exact": true
+    },
+    {
+      "step": "resume_D2",
+      "wall_s": 7.76,
+      "expected": "D2-12030",
+      "got": "D2-12030",
+      "exact": true
+    }
+  ],
+  "identity": {
+    "binary_sha256": "adb48e5ebdaa7f40a0ef175c2ecb3f655aa26bf9c61903a1be924979c8006fd9",
+    "build_profile": "native-v0.6.5-beta.1-rtx4090",
+    "build_type": "Release",
+    "config_sha256": "32a1d6b1cc2b91622c317f95c5ca4be9a51d667527ba85d41e46ab6b5bfbdbaf",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-4090-candidate-hostkv11264",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "df2e9544fc56456364f2647aa60235675ae1619a",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  },
+  "summary": {
+    "both_sessions_resumed": true,
+    "resumed": {
+      "D1": true,
+      "D2": true
+    },
+    "restore_declines": 0
+  }
+}
