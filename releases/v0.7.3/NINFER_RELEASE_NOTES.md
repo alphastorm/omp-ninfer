@@ -1,5 +1,10 @@
 # OMP NInfer v0.7.3 — OMP 18.2.3 client repin
 
+**Owner-operated, exact-profile 0.x release; no SLA.** RTX 5090 uses the manual Docker/SSH
+route; RTX 4090 uses the native Windows package. The OMP client advances; both GPU components,
+the model artifact and every serving setting are carried unchanged from v0.7.2. RTX 3090 is
+deferred.
+
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md)
 
@@ -80,3 +85,11 @@ recorded root fallback on 2 of 8 continuations/forks. No loss-free shutdown, uni
 or new throughput claim is made. Owner-operated exact profiles only; no SLA, multi-GPU,
 multi-tenant, priority/preemption, or silent cloud fallback. Native Windows RTX 4090 is text/tools;
 vision remains an RTX 5090 container capability.
+
+Only the RTX 5090 container host and the RTX 4090 native Windows lane are install lanes here, and
+every install surface binds those two: the quickstart fleet recipe, both model fragments, the role
+map and the tunnel script. The RTX 3090 route stays at the immutable
+[v0.7.2 tag](https://github.com/alphastorm/omp-ninfer/tree/v0.7.2) on OMP 18.0.9. Read EXP-016 for
+two lanes: the fixed 14-job batch completes in 43.4 s against 66.8 s on the RTX 5090 alone; the
+faster three-lane figure used the deferred GPU. Do not mix a predecessor manifest with these
+commands.
