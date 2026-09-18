@@ -49,6 +49,12 @@ PRIVATE_MARKERS = (
 PLACEHOLDER_RE = re.compile(r"(?:<[^>]+>|\bTODO\b|\bTBD\b)", re.IGNORECASE)
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
 MARKDOWN_REFERENCE_RE = re.compile(r'^\[[^]]+\]:\s+(\S+)', re.MULTILINE)
+ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# A NInfer component tag and an OMP client component tag, as they appear in public prose.
+COMPONENT_TAG_RE = re.compile(
+    r"\bv\d+\.\d+\.\d+-qwen38-[0-9a-z-]+\.\d+\b"
+    r"|\bomp-\d+\.\d+\.\d+-cross-platform-(?:preview|beta)-\d+\b"
+)
 
 
 class ContractError(Exception):
@@ -445,7 +451,6 @@ def validate_ready_state_consistency(
                 )
 
 
-
 def validate_exact_lane_set(
     manifest: dict[str, Any],
     compatibility: dict[str, Any],
@@ -490,6 +495,132 @@ def validate_exact_lane_set(
         "ready components.ninfer_variants ids must exactly match qualification.composition.native_runtime_variants keys",
         errors,
     )
+
+
+# The capability an 18.2.3 client uses to continue a session whose server restarted. The
+# vocabulary is release-specific, so the timeless floor lives in render_compatibility and this
+# binding lives here, where the release's own receipts are readable.
+CONTINUATION_CAPABILITY = "durable-checkpoint"
+
+
+def validate_continuation_capability(
+    root: Path,
+    release: Any,
+    compatibility: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """A profile whose receipt observed a restart continuation must still advertise it.
+
+    Dropping the capability while keeping the receipt leaves the profile qualified on paper and
+    silently withdraws the continuation OMP selects the lane for; the allowlist alone cannot see
+    the removal, because a shorter capability list is still a subset of the vocabulary.
+    """
+    for profile_item in compatibility.get("profiles", []):
+        if not isinstance(profile_item, dict) or profile_item.get("status") != "qualified":
+            continue
+        receipt = profile_item.get("acceptance_receipt")
+        url = receipt.get("url") if isinstance(receipt, dict) else None
+        if not isinstance(url, str):
+            continue
+        receipt_path = root / "releases" / str(release) / "acceptance" / url.rsplit("/", 1)[-1]
+        if not receipt_path.is_file():
+            continue
+        observed = load_json(receipt_path).get("live_acceptance", {})
+        if not isinstance(observed, dict):
+            continue
+        if observed.get("documented_server_restart_nonce_returned") is not True:
+            continue
+        capabilities = profile_item.get("runtime", {}).get("capabilities")
+        require(
+            isinstance(capabilities, list) and CONTINUATION_CAPABILITY in capabilities,
+            f"compatibility {profile_item.get('id')} binds a receipt that observed the documented "
+            f"restart continuation but does not advertise {CONTINUATION_CAPABILITY}",
+            errors,
+        )
+
+
+def validate_aggregate_as_of(
+    root: Path,
+    release: Any,
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """The product qualification's date is an aggregate cutoff, never older than its evidence.
+
+    A parent date that predates a receipt it incorporates reads as evidence that existed before
+    it was observed, and the immutable hashes preserve the contradiction rather than catch it.
+    """
+    parent = qualification.get("as_of")
+    require(isinstance(parent, str) and ISO_DATE_RE.fullmatch(parent) is not None,
+            "qualification as_of must be an ISO date", errors)
+    if not isinstance(parent, str):
+        return
+    composition = qualification.get("composition", {})
+    children: list[tuple[str, str]] = []
+    for key in ("external_installation_acceptance", "documented_route_acceptance"):
+        section = composition.get(key, {})
+        if not isinstance(section, dict):
+            continue
+        inline = section.get("as_of")
+        if isinstance(inline, str):
+            children.append((f"composition.{key}.as_of", inline))
+        reference = section.get("repository_path")
+        if isinstance(reference, str) and (root / reference).is_file():
+            observed = load_json(root / reference).get("as_of")
+            if isinstance(observed, str):
+                children.append((reference, observed))
+    for profile_item in compatibility.get("profiles", []):
+        if not isinstance(profile_item, dict):
+            continue
+        receipt = profile_item.get("acceptance_receipt")
+        url = receipt.get("url") if isinstance(receipt, dict) else None
+        if not isinstance(url, str):
+            continue
+        path = root / "releases" / str(release) / "acceptance" / url.rsplit("/", 1)[-1]
+        if not path.is_file():
+            continue
+        observed = load_json(path).get("as_of")
+        if isinstance(observed, str):
+            children.append((f"{profile_item.get('id')} acceptance receipt", observed))
+    for label, observed in children:
+        require(observed <= parent,
+                f"qualification as_of {parent} is older than {label} ({observed})", errors)
+
+
+def validate_manifest_tag_prose(
+    manifest: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """Public prose may only name component tags this manifest actually binds.
+
+    Limitation and publication text is the operator's rollback and legacy reference. A tag
+    inherited from an earlier release survives every hash check, because prose is not a
+    component binding, and sends an operator to a package this release never published.
+    """
+    components = manifest.get("components", {})
+    bound = {
+        components.get("ninfer", {}).get("release_tag"),
+        components.get("omp", {}).get("component_release_tag"),
+        *(
+            item.get("release_tag")
+            for item in components.get("ninfer_variants", [])
+            if isinstance(item, dict)
+        ),
+    }
+    publication = manifest.get("publication", {})
+    prose: list[str] = [
+        text for text in manifest.get("limitations", []) if isinstance(text, str)
+    ]
+    if isinstance(publication, dict):
+        prose += [
+            text for text in publication.get("targets", []) if isinstance(text, str)
+        ]
+    for text in prose:
+        for named in COMPONENT_TAG_RE.findall(text):
+            require(named in bound,
+                    f"manifest prose names component tag {named} which this release does not "
+                    f"bind: {text!r}", errors)
 
 
 def argument_value(arguments: list[Any], flag: str) -> Any:
@@ -1609,6 +1740,9 @@ def validate(
             validate_ga_evidence_bindings(
                 release, manifest, compatibility, qualification, profiles, errors
             )
+            validate_continuation_capability(root, release, compatibility, errors)
+            validate_aggregate_as_of(root, release, compatibility, qualification, errors)
+            validate_manifest_tag_prose(manifest, errors)
             if check_pins:
                 validate_pinned_evidence(root, manifest, compatibility, qualification, errors)
 

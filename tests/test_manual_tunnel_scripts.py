@@ -18,12 +18,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         fragment = (
             ROOT / "examples" / "windows-native" / "models.fragment.yml"
         ).read_text(encoding="utf-8")
-        for provider, request_model in (
-            ("ninfer-native-4090", "qwen3.8-27b"),
-            ("ninfer-native-3090", "q38-ninfer"),
-        ):
+        for provider, request_model in (("ninfer-native-4090", "qwen3.8-27b"),):
             self.assertIn(f"  {provider}:", fragment)
             self.assertIn(f"requestModelId: {request_model}", fragment)
+        # The deferred RTX 3090 lane shares this port and key name, so a leftover provider block
+        # would offer an unqualified lane that answers from whatever serves 18082.
+        self.assertNotIn("3090", fragment)
         self.assertIn("baseUrl: http://127.0.0.1:18082/v1", fragment)
         self.assertIn("apiKey: NINFER_NATIVE_API_KEY", fragment)
         # Native lanes are text and tools only; a vision input would advertise an absent route.

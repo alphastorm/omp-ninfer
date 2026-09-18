@@ -1,6 +1,6 @@
-# Fleet: three model-bound agents, one per qualified lane
+# Fleet: two model-bound agents, one per qualified lane
 
-Run up to three concurrent OMP agents, each statically pinned to one qualified NInfer lane. Every
+Run up to two concurrent OMP agents, each statically pinned to one qualified NInfer lane. Every
 endpoint stays loopback-only on its own machine; reach remote lanes through authenticated SSH
 local forwards (the managed route), never by exposing a listener.
 
@@ -8,7 +8,10 @@ local forwards (the managed route), never by exposing a listener.
 | --- | --- | --- | --- |
 | `main` | RTX 5090 container | `provider-5090.json` | 131,072-token ceiling; durable checkpoints as of v0.4.0 |
 | `heavy` | RTX 4090 native Windows | `provider-4090.json` | MTP3 profile (v0.3.1); durable DirectStorage checkpoints |
-| `scout` | RTX 3090 native Windows | `provider-3090.json` | 64K-class working context is the comfortable envelope on this lane |
+
+The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.7.3 lane, so no scout
+fragment ships here. Its three-lane form and the legacy OMP 18.0.9 instructions for that lane
+stay at the immutable v0.7.2 tag.
 
 `models.yml` maps the roles for an OMP agent configuration. Fill each fragment's `<...>`
 placeholders from your own deployment: the local forward port for that lane and the path to that

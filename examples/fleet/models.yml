@@ -1,4 +1,5 @@
-# Role -> lane mapping for a three-agent fleet. Static pinning; one lane per agent.
+# Role -> lane mapping for a two-agent fleet. Static pinning; one lane per agent. The RTX 3090
+# scout role is deferred with its GPU and is not part of v0.7.3.
 roles:
   main:
     provider: ninfer/local-max
@@ -6,7 +7,3 @@ roles:
   heavy:
     provider: ninfer/local-max
     fragment: provider-4090.json
-  scout:
-    provider: ninfer/local-max
-    fragment: provider-3090.json
-    context_note: keep working sets in the 64K class on this lane

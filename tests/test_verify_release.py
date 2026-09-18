@@ -314,6 +314,77 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertIn("ready release requires qualification.summary_sha256", errors)
         self.assertIn("ready release requires a passing external installation", errors)
 
+    def test_ready_release_requires_the_continuation_capability_it_observed(self) -> None:
+        """A receipt that observed a restart continuation pins the capability that provides it."""
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        for authority_path in (
+            root / "compatibility.json",
+            root / "releases" / PUBLIC_RELEASE / "compatibility.json",
+        ):
+            authority = self.load(authority_path)
+            runtime = authority["profiles"][0]["runtime"]
+            runtime["capabilities"] = [
+                item
+                for item in runtime["capabilities"]
+                if item != VERIFY_RELEASE.CONTINUATION_CAPABILITY
+            ]
+            self.save(authority_path, authority)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertTrue(
+            any(
+                "restart continuation" in error
+                and VERIFY_RELEASE.CONTINUATION_CAPABILITY in error
+                for error in errors
+            ),
+            errors,
+        )
+
+    def test_ready_qualification_date_cannot_precede_its_own_evidence(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release_root = root / "releases" / PUBLIC_RELEASE
+        qualification_path = release_root / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["as_of"] = "2026-01-01"
+        self.save(qualification_path, qualification)
+        manifest_path = release_root / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["qualification"]["summary_sha256"] = hashlib.sha256(
+            qualification_path.read_bytes()
+        ).hexdigest()
+        self.save(manifest_path, manifest)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertTrue(
+            any("qualification as_of 2026-01-01 is older than" in error for error in errors),
+            errors,
+        )
+
+    def test_ready_prose_cannot_name_a_component_tag_this_release_omits(self) -> None:
+        """Limitation and publication text is the operator's rollback reference.
+
+        A tag inherited from an earlier release survives every hash check, because prose is not
+        a component binding, and sends a reader to a package this release never published.
+        """
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / PUBLIC_RELEASE / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["limitations"] = list(manifest["limitations"]) + [
+            "Native Windows RTX 4090 support binds only "
+            "alphastorm/ninfer@v0.6.1-qwen38-4090-beta.1 and its exact package."
+        ]
+        self.save(manifest_path, manifest)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertTrue(
+            any(
+                "names component tag v0.6.1-qwen38-4090-beta.1" in error
+                and "does not bind" in error
+                for error in errors
+            ),
+            errors,
+        )
+
     def test_ga_ready_state_sweep_rejects_stale_machine_state(self) -> None:
         cases = (
             (

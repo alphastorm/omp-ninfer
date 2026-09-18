@@ -2,7 +2,7 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 2,
   "release": "v0.7.3",
-  "as_of": "2026-09-17",
+  "as_of": "2026-09-18",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": true,
@@ -58,7 +58,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.7.3/acceptance/composed-external-installation.json",
-      "sha256": "7a34b546238871dc5365672972387328a9615a76bc93a1b95aba404c7a30680b",
+      "sha256": "9c230b61936bd3eb0fa7d4263d5a4d6e7fda439ac6b6c5703e55b3463c4a3f1a",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ea995bfed4b15386e7708bec4992fbcdde3099f3/releases/v0.7.3/acceptance/composed-external-installation.json",
       "as_of": "2026-09-18",
       "release": "v0.7.3",
@@ -91,7 +91,7 @@
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.7.3/acceptance/documented-routes.json",
-      "sha256": "d99f1c0d33db311f635a3f0e80108e2222ceab0afd414251164a3c019f121c05"
+      "sha256": "62ee65b38d587a1b2496f00ea55e084ccbf1914d78fba1b0f990b9ac53b3fcd3"
     }
   },
   "observed_gates": {

@@ -67,7 +67,7 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.7.3/acceptance/documented-routes.json",
-      "sha256": "d99f1c0d33db311f635a3f0e80108e2222ceab0afd414251164a3c019f121c05"
+      "sha256": "62ee65b38d587a1b2496f00ea55e084ccbf1914d78fba1b0f990b9ac53b3fcd3"
     },
     "rtx4090_public_install": {
       "repository_path": "releases/v0.7.3/acceptance/rtx4090-public-install.json",

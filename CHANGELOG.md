@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.7.3]
+## [0.7.3] - 2026-09-18
 
 ### OMP 18.2.3 client repin
 
@@ -37,6 +37,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   memory floors. Runtime performance is carried evidence, not remeasured throughput.
   Automatic checkpoints remain best effort; the three unsaved predecessor sessions and
   two root fallbacks among eight continuations/forks remain limitations.
+- Withdraw the RTX 3090 scout lane from every v0.7.3 install surface: the fleet recipe, model
+  fragment, role map and tunnel script now bind only the two qualified lanes, the scout agent
+  and its provider fragment are gone, and the native-Windows fragment drops the RTX 3090
+  provider it declared on the RTX 4090 port. The three-lane form stays at the immutable
+  [v0.7.2 tag](https://github.com/alphastorm/omp-ninfer/tree/v0.7.2/examples/fleet).
+  The fleet's measured boundary is restated for two lanes: cost-aware dispatch of the fixed
+  14-job batch in 43.4 s against 66.8 s on the RTX 5090 alone; the faster three-lane figure in
+  EXP-016 used the deferred GPU. All 24 accepted executable step bodies are unchanged.
+- Extend release verification after focused review: acceptance and native qualification receipt
+  URLs must name this product release, a qualified profile must declare the core client
+  capabilities and the continuation capability its own receipt observed, the product
+  qualification date must be the aggregate cutoff of its evidence, and manifest prose may name
+  only component tags the release binds. Install surfaces are covered too: every payload a
+  documented block installs must declare only qualified lanes.
+  [Review dispositions](releases/v0.7.3/review/composition-ledger.json).
 
 ## [0.7.2] - 2026-09-17
 

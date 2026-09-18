@@ -53,6 +53,21 @@ COMMANDS = {
     "rollback",
     "support-bundle",
 }
+# OMP consumes this authority with a closed appliance capability vocabulary.
+CLIENT_CAPABILITIES = (
+    "tools",
+    "reasoning",
+    "thinking-history",
+    "stateful-responses",
+    "vision",
+    "durable-checkpoint",
+)
+# What every qualified client profile must still advertise, in any release's vocabulary: the
+# typed tool/result turn, reasoning, and stateful continuation. `thinking-history` and `vision`
+# stay optional because a lane may qualify without them, and the continuation capability a
+# release's client requires is release-specific, so the ready verifier binds that one against
+# the acceptance receipt that observed it.
+REQUIRED_CLIENT_CAPABILITIES = frozenset({"tools", "reasoning", "stateful-responses"})
 
 
 def require(condition: bool, message: str) -> None:
@@ -94,13 +109,12 @@ def load_authority(path: Path) -> dict[str, Any]:
         require(isinstance(profile.get("client_distribution"), dict),
                 f"{profile_id} client distribution is absent")
         require(isinstance(profile.get("runtime"), dict), f"{profile_id} runtime is absent")
-        # OMP consumes this authority with a closed appliance capability vocabulary.
         capabilities = profile["runtime"].get("capabilities")
         require(isinstance(capabilities, list) and all(
-            capability in ("tools", "reasoning", "thinking-history",
-                           "stateful-responses", "vision", "durable-checkpoint")
-            for capability in capabilities
+            capability in CLIENT_CAPABILITIES for capability in capabilities
         ), f"{profile_id} runtime contains an unknown client capability")
+        require(len(set(capabilities)) == len(capabilities),
+                f"{profile_id} runtime capabilities are duplicated")
         lifecycle = profile.get("lifecycle")
         require(isinstance(lifecycle, dict), f"{profile_id} lifecycle is absent")
         require(
@@ -147,8 +161,9 @@ def load_authority(path: Path) -> dict[str, Any]:
                 isinstance(acceptance.get("url"), str)
                 and re.fullmatch(
                     r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
-                    r"[0-9a-f]{40}/releases/v\d+\.\d+\.\d+(?:-beta\.\d+)?/"
-                    r"acceptance/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
+                    r"[0-9a-f]{40}/releases/"
+                    + re.escape(product_release)
+                    + r"/acceptance/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
                     acceptance["url"],
                 )
                 is not None,
@@ -162,6 +177,9 @@ def load_authority(path: Path) -> dict[str, Any]:
         if profile["status"] == "qualified":
             require(profile.get("acceptance_receipt") is not None,
                     f"{profile_id} qualified without acceptance")
+            missing = sorted(REQUIRED_CLIENT_CAPABILITIES.difference(capabilities))
+            require(not missing,
+                    f"{profile_id} qualified without required capabilities {missing}")
     variants = value.get("runtime_variants", [])
     require(isinstance(variants, list), "runtime_variants must be an array")
     variant_ids = [variant.get("id") for variant in variants if isinstance(variant, dict)]
@@ -195,8 +213,9 @@ def load_authority(path: Path) -> dict[str, Any]:
             isinstance(receipt_url, str)
             and re.fullmatch(
                 r"https://raw\.githubusercontent\.com/alphastorm/omp-ninfer/"
-                r"[0-9a-f]{40}/releases/v\d+\.\d+\.\d+(?:-beta\.\d+)?/"
-                r"qualification/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
+                r"[0-9a-f]{40}/releases/"
+                + re.escape(product_release)
+                + r"/qualification/[a-z0-9-]+(?:\.[a-z0-9-]+)*\.json",
                 receipt_url,
             ) is not None
         )

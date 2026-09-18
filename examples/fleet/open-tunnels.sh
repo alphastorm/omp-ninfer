@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Open the three authenticated SSH local forwards the fleet fragment expects:
+# Open the two authenticated SSH local forwards the fleet fragment expects:
 #   127.0.0.1:18191 -> RTX 5090 container (loopback 18088 on its host)
 #   127.0.0.1:18192 -> RTX 4090 native service (loopback 18082 on its host)
-#   127.0.0.1:18193 -> RTX 3090 native service (loopback 18082 on its host)
+# RTX 3090 is not a v0.7.3 lane, so this script opens no scout forward; the three-lane form
+# stays at the immutable v0.7.2 tag.
 # Each argument is one SSH user@host. Pass "-" to skip a lane. The forwards run in the
 # foreground of this shell; stop them with Ctrl-C. Nothing here starts or stops a runtime.
 set -euo pipefail
 
-if (($# != 3)); then
-  printf 'usage: open-tunnels.sh user@main-host|- user@heavy-host|- user@scout-host|-\n' >&2
+if (($# != 2)); then
+  printf 'usage: open-tunnels.sh user@main-host|- user@heavy-host|-\n' >&2
   exit 2
 fi
 
@@ -37,7 +38,6 @@ forward() {
 
 forward "$1" 18191 18088
 forward "$2" 18192 18082
-forward "$3" 18193 18082
 
 if ((${#pids[@]} == 0)); then
   printf 'error: every lane was skipped\n' >&2

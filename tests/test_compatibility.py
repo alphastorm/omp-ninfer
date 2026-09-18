@@ -225,6 +225,50 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             (historical_path / "COMPATIBILITY.md").read_text(encoding="utf-8"),
         )
 
+    def test_receipt_urls_must_bind_this_product_release(self) -> None:
+        """A receipt path names the release whose evidence it is.
+
+        Without that binding a self-consistent receipt from another release, carrying the same
+        client identity, authenticates a qualified profile: the bytes hash correctly and the
+        evidence is still the wrong release's.
+        """
+        authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        release = authority["product_release"]
+        elsewhere = "v0.0.1"
+        stale_profile = deepcopy(authority)
+        receipt = stale_profile["profiles"][0]["acceptance_receipt"]
+        receipt["url"] = receipt["url"].replace(
+            f"/releases/{release}/", f"/releases/{elsewhere}/"
+        )
+        with self.assertRaisesRegex(ValueError, "acceptance receipt URL is not immutable"):
+            MODULE.load_authority(self._write(stale_profile))
+
+        stale_variant = deepcopy(authority)
+        variant_receipt = stale_variant["runtime_variants"][0]["qualification_receipt"]
+        variant_receipt["url"] = variant_receipt["url"].replace(
+            f"/releases/{release}/", f"/releases/{elsewhere}/"
+        )
+        with self.assertRaisesRegex(ValueError, "qualification receipt binding is invalid"):
+            MODULE.load_authority(self._write(stale_variant))
+
+    def test_qualified_profile_must_keep_the_core_client_capabilities(self) -> None:
+        """An allowlist cannot see a removal: a shorter list is still a subset."""
+        authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        for capability in sorted(MODULE.REQUIRED_CLIENT_CAPABILITIES):
+            with self.subTest(capability=capability):
+                invalid = deepcopy(authority)
+                runtime = invalid["profiles"][0]["runtime"]
+                runtime["capabilities"] = [
+                    item for item in runtime["capabilities"] if item != capability
+                ]
+                with self.assertRaisesRegex(ValueError, "without required capabilities"):
+                    MODULE.load_authority(self._write(invalid))
+        duplicated = deepcopy(authority)
+        capabilities = duplicated["profiles"][0]["runtime"]["capabilities"]
+        capabilities.append(capabilities[0])
+        with self.assertRaisesRegex(ValueError, "capabilities are duplicated"):
+            MODULE.load_authority(self._write(duplicated))
+
     def _write(self, value: object) -> Path:
         path = Path(self._testMethodName + ".compatibility.tmp.json")
         self.addCleanup(path.unlink, missing_ok=True)

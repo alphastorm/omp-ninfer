@@ -7,9 +7,9 @@
   "operator_class": "owner-operated tester-equivalent",
   "mode": "Published exact OMP18.2.3 components; documented block files with recorded pre-cut substitutions; isolated client profiles.",
   "document_sha256": "77b3f3b101bfb20cb0e148249ddc9dd61003fe6bec4310f0c3405111fd2a3623",
-  "current_document_sha256": "4956de8605c33f72bf7f07a1c9beb7ee3b2f22bf74c872f6419ee193e45536b3",
+  "current_document_sha256": "263a1991569e5ca693b177e2f28867bb9cec919b93686bd967f09045a35fc8b8",
   "executed_blocks_match_current": true,
-  "document_change": "Post-acceptance prose narrows v0.7.3 to RTX5090 and RTX4090 by explicit user decision. The unexecuted RTX3090 selection fence is removed and native heading/index addresses change. All 24 surviving executable block files are byte-identical to their executed snapshot; pre-cut clone and SSH substitutions remain recorded rather than claimed verbatim.",
+  "document_change": "Post-acceptance prose narrows v0.7.3 to RTX5090 and RTX4090 by explicit user decision. The unexecuted RTX3090 selection fence is removed and native heading/index addresses change. The unexecuted fleet section now recites only the two qualified lanes: its RTX3090 scout recipe, fragment provider and agent are withdrawn from this release and remain at the immutable v0.7.2 tag. All 24 surviving executable block files are byte-identical to their executed snapshot; pre-cut clone and SSH substitutions remain recorded rather than claimed verbatim.",
   "candidate_commit": "096c8b889eef4bc89ee2dc316694b847bdf8a39d",
   "routes": {
     "rtx5090-container-host": {

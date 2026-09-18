@@ -784,26 +784,29 @@ Expected result: a connection failure and no model response, so the block ends w
 message. Any cloud-provider request is a release failure. Restart the tunnel only after observing
 the failure.
 
-## Fleet: three lanes in one OMP configuration
+## Fleet: the two qualified lanes in one OMP configuration
 
-If you own more than one qualified lane, [`examples/fleet/`](../examples/fleet/) binds them into
+If you own both qualified lanes, [`examples/fleet/`](../examples/fleet/) binds them into
 one configuration with explicit roles: `ninfer-main/local-main` (RTX 5090) for the interactive
-lead session, `ninfer-heavy/local-heavy` (RTX 4090) for long-context background workers, and
-`ninfer-scout/local-scout` (RTX 3090) for bounded read-only scouting. Every lane stays
-loopback-only on its own machine and serves one active request.
+lead session and `ninfer-heavy/local-heavy` (RTX 4090) for long-context background workers.
+Every lane stays loopback-only on its own machine and serves one active request. The fleet's
+RTX 3090 scout role is deferred with its GPU: it is not a v0.7.3 install lane, so neither the
+fragment nor this recipe declares it. Its three-lane form stays at the immutable v0.7.2 tag with
+the legacy OMP 18.0.9 instructions for that lane.
 
 ```sh
-# three authenticated forwards; pass - to skip a lane you do not own
-./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST USER@SCOUT_HOST
+# two authenticated forwards; pass - to skip a lane you do not own
+./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST
 install -m 600 examples/fleet/models.fragment.yml ~/.omp/agent/models.fleet.yml   # merge by hand
-install -m 600 examples/fleet/agents/fleet-scout.md examples/fleet/agents/fleet-heavy.md ~/.omp/agent/agents/
+install -m 600 examples/fleet/agents/fleet-heavy.md ~/.omp/agent/agents/
 ```
 
 The fleet is not a throughput claim. Its measured boundary is EXP-016 in
-[`PERFORMANCE.md`](PERFORMANCE.md): on a fixed 14-job batch, cost-aware dispatch across the
-three lanes completed the batch 2.07× faster than the RTX 5090 alone, naive dispatch 1.41×, and
-pinning jobs by role alone 0.66×. Roles describe what a lane is for; where a job runs should
-follow measured per-lane cost (`scripts/fleet_dispatch.py --policy cost`).
+[`PERFORMANCE.md`](PERFORMANCE.md): on a fixed 14-job batch, cost-aware dispatch across these
+two lanes completed the batch 1.54× faster than the RTX 5090 alone (43.4 s against 66.8 s),
+naive dispatch 1.30×, and pinning jobs by role alone 0.66×. That receipt's faster 2.07× figure
+used a third RTX 3090 lane this release does not qualify. Roles describe what a lane is for;
+where a job runs should follow measured per-lane cost (`scripts/fleet_dispatch.py --policy cost`).
 
 ## Replicating sessions off the machine
 

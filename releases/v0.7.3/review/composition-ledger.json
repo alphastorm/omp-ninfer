@@ -1,0 +1,46 @@
+{
+  "review_sequence_id": "CRS-20260918-ompninfer-v073",
+  "review_id": "CR-1",
+  "review_class": "focused",
+  "reviewer": "review-daybreak-blue",
+  "subject_commit": "25191e07efa62c4affb153de1108f41eb62ba542",
+  "envelope_sha256": "5029609b7e9a9c16a2fae1651be9f1b9f5d9e0b6c7de22559875d01af2671391",
+  "dispositions": [
+    {
+      "id": "R1",
+      "severity": "P1",
+      "disposition": "mitigate",
+      "rationale": "Lead-verified. The quickstart header limits v0.7.3 to RTX 5090 and RTX 4090 and forbids combining the legacy RTX 3090 lane with this release, while the fleet section installed a three-lane fragment, a scout agent and a third SSH forward for that GPU. Checksums and the ready verifier cannot see it: neither reads the recipe a reader follows or the payload a reader merges. The same class was present in the native-Windows fragment, which declared an RTX 3090 provider on the RTX 4090 port.",
+      "action": "Fleet recipe, fragment, role map, README and tunnel script now carry only the two qualified lanes; the scout agent and scout provider file are withdrawn and remain available at the immutable v0.7.2 tag. The native-Windows fragment drops its RTX 3090 provider. The documented-route record states the narrowing, and all 24 accepted executable step bodies remain byte-identical to their receipts. Class closure: tests assert that every payload a quickstart block installs, and every merged example payload, declares only lanes the current release binds, and that the native route still pins its qualified variant id, so the deferred arm inside the frozen accepted bytes stays unreachable."
+    },
+    {
+      "id": "R2",
+      "severity": "P2",
+      "disposition": "mitigate",
+      "rationale": "Lead-verified. The GPU qualification receipt URL was bound to product_release, but the profile acceptance receipt and the native variant qualification receipt accepted any release segment, so a self-consistent receipt from another release satisfied a qualified profile with correct hashes and the wrong evidence.",
+      "action": "Both receipt URL shapes now bind product_release exactly, closing the class across all three receipt kinds. A test points each at another release and requires rejection; the historical beta authority still renders, because its receipts live under their own release."
+    },
+    {
+      "id": "R3",
+      "severity": "P2",
+      "disposition": "mitigate",
+      "rationale": "Lead-verified. The capability check was an allowlist, so deleting a capability left a shorter list that is still a subset and a still-qualified profile. This release exists because the client rejected the process-restart spelling and requires durable-checkpoint instead, and every acceptance receipt observed the documented restart continuation.",
+      "action": "The authority validator requires the timeless core capabilities and rejects duplicates; the vocabulary is release-specific, so the ready verifier binds the continuation capability to the receipt that observed it and fails a qualified profile that drops it. Tests cover both layers."
+    },
+    {
+      "id": "R4",
+      "severity": "P2",
+      "disposition": "reject",
+      "rationale": "Confirmed and out of this change's reach. The contradiction is in the published v0.7.2 manifest: its limitation prose names component tags v0.6.1-qwen38-4090-beta.1 and v0.3.0-qwen38-3090.1, inherited verbatim from v0.7.0, while its component and publication sections bind v0.6.5 and v0.2.5. The in-tree file is byte-identical to the immutable v0.7.2 tag, so rewriting it would create two different byte sets under one release name and invalidate the hashes that record it. v0.7.3 does not repeat the stale tags: its own prose names only the components it binds.",
+      "action": "Class closure forward: the ready verifier rejects a current-release manifest whose limitation or publication prose names a component tag the release does not bind, so the inherited-prose class cannot recur in v0.7.3 or later."
+    },
+    {
+      "id": "R5",
+      "severity": "P3",
+      "disposition": "mitigate",
+      "rationale": "Lead-verified. The product qualification recorded an aggregate date one day older than the external acceptance it incorporates, so the record read as evidence that existed before it was observed.",
+      "action": "The product qualification date is the aggregate cutoff, 2026-09-18, and the ready verifier rejects a parent date older than any incorporated child receipt, including the composed acceptance, the documented-route record and every platform receipt."
+    }
+  ],
+  "closure": "One focused cross-family round on the final candidate. Every returned item has a disposition, no in-scope residual P0/P1 remains, and the three mechanical classes are closed with invariants that fail on the reviewed subject and pass on the remediation. The reviewer reported no credential exposure in the public evidence."
+}

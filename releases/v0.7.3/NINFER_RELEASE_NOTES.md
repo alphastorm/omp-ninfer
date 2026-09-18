@@ -33,6 +33,15 @@ RTX 3090 is deliberately omitted from this release pending access to its physica
 host. Its [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 and OMP 18.0.9 client remain a separate historical route, not a v0.7.3 qualification claim.
 
+Focused review found the deferral incomplete: the fleet recipe still installed an RTX 3090
+scout provider and agent, and the native-Windows fragment still declared an RTX 3090 provider.
+Both are withdrawn here, together with the scout role map and its third SSH forward; the
+three-lane form remains at the immutable v0.7.2 tag. The fleet's two-lane boundary is the same
+EXP-016 receipt read for two lanes: 43.4 s cost-aware against 66.8 s on the RTX 5090 alone. The
+24 accepted executable block bodies are unchanged by that edit, and release verification now
+fails when any documented payload declares a lane this release does not bind.
+[Dispositions](review/composition-ledger.json).
+
 Runtime qualification is carried from [v0.7.2](../v0.7.2/qualification.json), not presented as
 new performance evidence. RTX 5090 retains deployment `qwen38-5090-v0.7.0`, configuration
 `762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8`, 16384 MiB host KV,

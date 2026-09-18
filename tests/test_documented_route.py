@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import socket
 import subprocess
 import sys
@@ -279,6 +280,99 @@ class RunnerTests(unittest.TestCase):
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1)
             self.assertEqual(receipt["steps"][1]["status"], "refused")
+
+
+class QualifiedLaneSurfaceTests(unittest.TestCase):
+    """An install surface may only offer a lane the current release qualifies.
+
+    v0.7.3 narrowed to RTX 5090 and RTX 4090 while the quickstart's fleet recipe still installed
+    an RTX 3090 scout provider and agent: every hash matched and the ready verifier passed,
+    because the authority reads neither the recipe a reader follows nor the payload a reader
+    merges into `~/.omp/agent`.
+    """
+
+    LANE_TOKEN = re.compile(r"(?:rtx[\s-]?|ninfer-(?:native-)?|provider-|qwen38-)(\d{4})", re.I)
+    PAYLOADS = (
+        "examples/**/*.yml",
+        "examples/**/*.json",
+        "examples/**/*.sh",
+        "examples/**/agents/*.md",
+        "profiles/*.json",
+    )
+
+    def qualified_lanes(self) -> set[str]:
+        release = json.loads(
+            (ROOT / "compatibility.json").read_text(encoding="utf-8")
+        )["product_release"]
+        authority = (ROOT / "compatibility.json").read_text(encoding="utf-8")
+        manifest = (ROOT / "releases" / release / "manifest.json").read_text(encoding="utf-8")
+        lanes = set(re.findall(r"rtx(\d{4})", authority + manifest, re.I))
+        lanes |= set(re.findall(r"qwen38-(\d{4})", manifest))
+        self.assertTrue(lanes, "the release authority names no GPU lane")
+        return lanes
+
+    def test_merged_payloads_declare_only_qualified_lanes(self) -> None:
+        qualified = self.qualified_lanes()
+        for pattern in self.PAYLOADS:
+            for path in sorted(ROOT.glob(pattern)):
+                # Comments carry the deferral note; declarations are what OMP ends up loading.
+                body = "\n".join(
+                    line
+                    for line in path.read_text(encoding="utf-8").splitlines()
+                    if not line.lstrip().startswith("#")
+                )
+                named = set(self.LANE_TOKEN.findall(body))
+                self.assertFalse(
+                    named - qualified,
+                    f"{path.relative_to(ROOT)} declares unqualified lanes "
+                    f"{sorted(named - qualified)}",
+                )
+
+    def test_every_block_installs_only_qualified_lane_payloads(self) -> None:
+        """Follow the recipe: a block installs files, and those files declare the lanes.
+
+        The withdrawn fleet recipe named no GPU itself; it installed a fragment and a scout
+        agent that did. An install surface is the block plus every payload it reaches.
+        """
+        qualified = self.qualified_lanes()
+        reference = re.compile(r"(?:examples|profiles)[\\/][\w./\\-]+")
+        seen = 0
+        for block in documented_route.parse_blocks(
+            documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        ):
+            for raw in set(reference.findall(block.text)):
+                path = ROOT / raw.replace("\\", "/")
+                self.assertTrue(
+                    path.exists(),
+                    f"block {block.heading!r}[{block.index}] installs missing {raw}",
+                )
+                if not path.is_file():
+                    continue
+                seen += 1
+                body = "\n".join(
+                    line
+                    for line in path.read_text(encoding="utf-8").splitlines()
+                    if not line.lstrip().startswith("#")
+                )
+                named = set(self.LANE_TOKEN.findall(body))
+                self.assertFalse(
+                    named - qualified,
+                    f"block {block.heading!r}[{block.index}] installs {raw}, which declares "
+                    f"unqualified lanes {sorted(named - qualified)}",
+                )
+        self.assertGreater(seen, 0, "no block installs a repository payload")
+
+    def test_accepted_blocks_pin_the_qualified_variant_they_branch_on(self) -> None:
+        """The frozen accepted bytes still carry a deferred-variant arm of an earlier release.
+
+        It is unreachable only while the route assigns the qualified variant id itself; an edit
+        that turns that assignment into a reader's choice would make the deferred arm live, and
+        those bytes cannot be rewritten without invalidating the recorded acceptance.
+        """
+        document = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        assignments = set(re.findall(r"\$VariantId\s*=\s*'([^']+)'", document))
+        self.assertEqual(assignments, {"rtx4090-windows-native"})
+
 
 
 if __name__ == "__main__":
