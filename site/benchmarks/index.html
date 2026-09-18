@@ -17,8 +17,8 @@
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
- "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 native)",
+ "description": "Durable local inference for coding agents. Qwen3.8 27B via NInfer with restart-resumable OpenAI Responses state. v0.7.3 scope: RTX 5090 or RTX 4090 with OMP 18.2.3; RTX 3090 deferred.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -43,7 +43,13 @@
 and published-route acceptance are distinct. Warm/cold request pairs compare retained state
 with a fresh cold build; they do not measure restart duration or compare against other
 runtimes’ in-process prefix caches.</p>
-<h2>Current release: v0.7.2</h2>
+<h2>v0.7.3: client repin, no new throughput measurement</h2>
+<p>OMP 18.2.3 client and documented-route acceptance is fresh; runtime measurements below are
+<strong>carried v0.7.2 evidence, not remeasured throughput</strong>. Runtime image/package bytes,
+model, serving arguments and memory floors are unchanged. Eligibility is RTX 5090 on Windows 11
++ Docker Desktop/WSL2 and RTX 4090 native Windows 11; RTX 3090 is deferred.
+<a href="../status/">Release state, client proof and historical RTX 3090 route</a>.</p>
+<h2>Historical runtime qualification: v0.7.2</h2>
 <table>
 <tr><th>Scope</th><th>Measurement</th></tr>
 <tr><td>RTX 5090 published image</td><td>Exact 130,048-token retrieval at 2,151.7 tok/s wall; 139.8 tok/s server decode (132.57 wall) over 2,048 tokens</td></tr>
@@ -84,7 +90,7 @@ a subsecond reboot or a 61× restart speedup.
 <p>Method, per-lane numbers, and historical sections:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">Updated 2026-09-17 from published receipts. Historical v0.7.1 and v0.4.0 results retain their original scope.</p>
+<p class="verified">Updated 2026-09-18: v0.7.2 runtime evidence is carried into the client repin; historical v0.7.1 and v0.4.0 results retain their original scope.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

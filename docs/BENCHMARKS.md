@@ -11,7 +11,23 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.7.2 — final reviewed reclaim measurements (2026-09-17)
+## v0.7.3 — client repin, no new throughput measurement
+
+v0.7.3 repins the client to OMP 18.2.3 for RTX 5090 (Windows 11 + Docker Desktop/WSL2)
+and RTX 4090 (native Windows 11). RTX 3090 is deferred; its separately preserved
+[v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+uses OMP 18.0.9 and is not new-client qualification.
+
+The exact v0.7.2 runtime image/package, model, serving arguments and floors are unchanged.
+The v0.7.2 performance and durability observations below are **carried evidence, not fresh
+measurements**. Fresh proof is client and route acceptance: all three published client
+platforms passed live inference, and 24 documented steps passed across the RTX 5090
+host/macOS/Windows and RTX 4090 native routes. Linux live proof used Ubuntu under WSL2,
+not a separately qualified non-WSL Linux OS. Provider-free hosted client qualifications are
+also public. [Release state](RELEASES.md) · [qualification](../releases/v0.7.3/qualification.json) ·
+[documented routes](../releases/v0.7.3/acceptance/documented-routes.json).
+
+## Historical v0.7.2 — final reviewed reclaim measurements (2026-09-17)
 
 These are runtime qualification measurements. [Public-route acceptance](../releases/v0.7.2/acceptance/documented-routes.json)
 is separate evidence, not a substitute for these measurements. The
@@ -39,7 +55,7 @@ The public RTX 5090 profile stays `qwen38-5090-v0.7.0`, configuration `762e6bf4�
 16384 MiB host KV and a 28672 MiB runtime-host floor. Native RTX 4090 retains 11264 MiB host
 KV, 24 host-state slots and the 32768 MiB floor. Scratch qualification configurations, including
 earlier smaller-pool experiments, are not new public defaults or proof of a smaller-host floor.
-OMP 18.0.9, RTX 3090 and the model remain unchanged. No cross-lane speed ranking or
+In v0.7.2, OMP 18.0.9, RTX 3090 and the model remained unchanged. No cross-lane speed ranking or
 reclaim-driven throughput improvement is established.
 
 ## Qualified `v0.4.4` results — checkpoint export off the engine (RTX 5090 lane)

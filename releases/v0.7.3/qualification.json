@@ -5,8 +5,8 @@
   "as_of": "2026-09-17",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "Client-only OMP 18.2.3 repin. All three GPU runtime components, model, serving arguments and memory floors are byte-identical to v0.7.2. Runtime qualification below is carried evidence; new client platform and every documented-route acceptance remain pending.",
+  "external_installation_qualified": true,
+  "scope": "OMP 18.2.3 client-only release for RTX 5090 container and RTX 4090 native Windows. All three published client binaries passed live inference; all four in-scope documented routes passed 24 executable steps. RTX 3090 is omitted by explicit user decision pending physical-host access. Runtime/model/configuration/performance evidence is carried unchanged from v0.7.2.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -53,24 +53,45 @@
         "sha256": "7f26054761d19c96bd6826b786667ae704a94f97a9eafcf32017c0c0ee5c3eb7",
         "release_tag": "v0.6.5-qwen38-4090-beta.1",
         "package_sha256": "b26643d735d58eafac33f1595c0588baf0e6682a69af73e8e82f96839f4b7646"
-      },
-      "rtx3090-windows-native": {
-        "status": "passed",
-        "beta_qualified": true,
-        "installable": true,
-        "repository_path": "releases/v0.7.3/qualification/rtx3090.json",
-        "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
-        "release_tag": "v0.2.5-qwen38-3090-beta.1",
-        "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8"
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Compose only after all three client profiles and every documented route pass and host state is restored."
+      "status": "passed",
+      "repository_path": "releases/v0.7.3/acceptance/composed-external-installation.json",
+      "sha256": "7a34b546238871dc5365672972387328a9615a76bc93a1b95aba404c7a30680b",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/096c8b889eef4bc89ee2dc316694b847bdf8a39d/releases/v0.7.3/acceptance/composed-external-installation.json",
+      "as_of": "2026-09-18",
+      "release": "v0.7.3",
+      "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+      "windows_binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "29f47ea1b864582e9212eba4a9fb6f6c09362a0fb78df1dca1c263dca7fc7b40",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "3c021fed1f3718d6d18c9bc1e16fe8a9f2f2e3f042d9e7508e0df01cc62f93bd"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "3051f471d324db00cab44cdf68a0a9d6baa048002152be159e2d006c8afea7c5"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "d73b25b463ceae02a71ad394f1f0dace55c96c788ba5f68eb03fea6cc7676bea"
+        }
+      ],
+      "note": "Fresh client acceptance on all three architectures and all four in-scope documented GPU routes; byte-identical runtime qualification carried separately."
     },
     "documented_route_acceptance": {
-      "status": "pending",
-      "note": "All five documented lanes must run with the new client; none is carried as new client acceptance."
+      "status": "passed",
+      "repository_path": "releases/v0.7.3/acceptance/documented-routes.json",
+      "sha256": "d99f1c0d33db311f635a3f0e80108e2222ceab0afd414251164a3c019f121c05"
     }
   },
   "observed_gates": {
@@ -321,28 +342,16 @@
       "unsaved_session_survived_managed_stop": true,
       "registered_tests": "Eight direct focused suites passed; canonical native orchestrator build receipt names its own focused suites. No full native suite claimed.",
       "carried_from": "v0.7.2; runtime component and serving profile unchanged in v0.7.3"
-    },
-    "rtx3090_windows_native": {
-      "status": "passed",
-      "protocol_checks": "15/15",
-      "release_tag": "v0.2.5-qwen38-3090-beta.1",
-      "maximum_context_tokens": 131072,
-      "exact_retrieval_prompt_tokens": 130048,
-      "exact_retrieval_seconds": 218.3,
-      "restart_cached_input_tokens_restored": 45,
-      "durable_restart_checkpoint_bytes": 310213049,
-      "decode_tokens_per_second": 90.66,
-      "prefill_tokens_per_second": 894.24,
-      "mtp_acceptance_percent": 93.43,
-      "max_power_w": 300.15,
-      "max_memory_used_mib": 22548,
-      "carried_from": "v0.7.2; runtime component and serving profile unchanged in v0.7.3"
     }
   },
-  "interpretation": "Published provider-free client qualifications do not prove live inference or route acceptance. The v0.7.2 runtime measurements and limitations remain unchanged.",
-  "remaining_release_gates": [
-    "OMP 18.2.3 authenticated live acceptance on macOS, Windows, and Linux",
-    "All five documented routes on the published client, including RTX 3090",
-    "Composed acceptance and exact restoration of every qualification host"
-  ]
+  "interpretation": "OMP18.2.3 preserves the required authenticated local tool, continuation, vision-on5090, and fail-closed behavior on the exercised routes. Twenty-four surviving documented blocks match the executed snapshot. RTX3090 is not part of this release. Runtime performance and best-effort durability/reuse limitations remain the separately recorded v0.7.2 observations.",
+  "remaining_release_gates": [],
+  "deferred_scope": {
+    "rtx3090-windows-native": {
+      "reason": "Client-repin route not exercised; omitted from this release by user direction.",
+      "legacy_release": "v0.7.2",
+      "legacy_client": "18.0.9-cross-platform-beta-2",
+      "future_condition": "Qualify when the physical RTX 3090 host is available again, expected around 2026-09-30."
+    }
+  }
 }

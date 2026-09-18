@@ -470,7 +470,9 @@ class ReleaseContractTest(unittest.TestCase):
         for compatibility_path in (root / "compatibility.json", release_root / "compatibility.json"):
             compatibility = self.load(compatibility_path)
             row = compatibility["runtime_variants"][0]
-            row["release_tag"] = "v0.2.2-qwen38-3090-beta.1"
+            variant_id = row["id"]
+            tag_base, tag_iteration = row["release_tag"].rsplit(".", 1)
+            row["release_tag"] = f"{tag_base}.{int(tag_iteration) + 1}"
             row["package_url"] = (
                 "https://github.com/alphastorm/ninfer/releases/download/"
                 f"{row['release_tag']}/{row['package_name']}"
@@ -486,7 +488,7 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         for key in ("release_tag", "package_url", "maximum_context_tokens"):
             self.assertIn(
-                f"compatibility.runtime_variants[rtx3090-windows-native].{key} must equal the manifest component",
+                f"compatibility.runtime_variants[{variant_id}].{key} must equal the manifest component",
                 errors,
             )
         self.assertIn(
@@ -1044,15 +1046,11 @@ class ReleaseContractTest(unittest.TestCase):
             release_root = root / "releases" / PUBLIC_RELEASE
             manifest_path = release_root / "manifest.json"
             manifest = self.load(manifest_path)
-            variant = next(
-                item
-                for item in manifest["components"]["ninfer_variants"]
-                if item["id"] == "rtx3090-windows-native"
-            )
+            variant = manifest["components"]["ninfer_variants"][0]
             checksums_path = (
                 release_root
                 / "qualification"
-                / "rtx3090-windows-native.SHA256SUMS"
+                / f"{variant['id']}.SHA256SUMS"
             )
             source_filename = variant["source_archive_url"].rsplit("/", 1)[-1]
             checksums_text = checksums_path.read_text(encoding="utf-8")
@@ -1071,7 +1069,7 @@ class ReleaseContractTest(unittest.TestCase):
 
             _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
             self.assertIn(
-                "components.ninfer_variants.rtx3090-windows-native checksums entry "
+                f"components.ninfer_variants.{variant['id']} checksums entry "
                 f"{source_filename} must match source_archive_sha256",
                 errors,
             )

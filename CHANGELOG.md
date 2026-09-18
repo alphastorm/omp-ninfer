@@ -7,11 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3]
+
+### OMP 18.2.3 client repin
+
 - Add a founder-run, checksum-bound native client component publisher that defaults to a
   no-effect preflight for the qualified archives, source/tree identities, and authentication
   routes. Live publication requires explicit `--publish`; final server-side authorization is
   evaluated by the intended live operations.
   Component publication does not update casks, installed clients, or product compatibility.
+
+- Repin macOS arm64, Windows x64 and Linux x64 clients from OMP 18.0.9 to
+  `omp-18.2.3-cross-platform-beta-1` at public source
+  `5ade242de59ac0f4606a1158bf564410c96918d4`. All three client archives and provider-free
+  hosted qualifications are public, and each client passed live inference.
+- Fresh documented-route acceptance passed **24 steps**: RTX 5090 host 2, macOS client 10,
+  Windows client 5, RTX 4090 native 7, on frozen product source
+  `096c8b889eef4bc89ee2dc316694b847bdf8a39d`. The additional Linux live-client run used
+  **Ubuntu under WSL2**; it is not non-WSL Linux OS qualification. Pre-cut substitutions are
+  recorded and all hosts were restored. [Routes](releases/v0.7.3/acceptance/documented-routes.json) ·
+  [qualification](releases/v0.7.3/qualification.json).
+- Fix capability vocabulary to the client's existing `durable-checkpoint` rather than the
+  rejected `process-restart-continuation` spelling; reject unsupported names in release verification.
+- Limit v0.7.3 eligibility to RTX 5090 on Windows 11 + Docker Desktop/WSL2 and RTX 4090 native
+  Windows 11. **RTX 3090 is deferred** until its host returns for new-client qualification.
+  Its [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+  remains on OMP 18.0.9 and is not qualification with the new client.
+- Carry the exact v0.7.2 RTX 5090 image and RTX 4090 package, model, serving arguments and
+  memory floors. Runtime performance is carried evidence, not remeasured throughput.
+  Automatic checkpoints remain best effort; the three unsaved predecessor sessions and
+  two root fallbacks among eight continuations/forks remain limitations.
 
 ## [0.7.2] - 2026-09-17
 
@@ -1282,7 +1307,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.3...HEAD
+[0.7.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.6.10...v0.7.0

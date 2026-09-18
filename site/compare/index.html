@@ -17,8 +17,8 @@
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
- "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 native)",
+ "description": "Durable local inference for coding agents. Qwen3.8 27B via NInfer with restart-resumable OpenAI Responses state. v0.7.3 scope: RTX 5090 or RTX 4090 with OMP 18.2.3; RTX 3090 deferred.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -64,9 +64,13 @@ in-process prefix caching already avoids repeated prefill of matching input in o
 <a href="../benchmarks/">Engine throughput and retained-state measurements</a> are separate
 results, not a matched head-to-head speed ranking against these backends.</p>
 <h2>The one-sentence answer</h2>
-<p>For an Oh My Pi operator running Qwen3.8 27B on a qualified RTX 5090, 4090, or 3090 who values
+<p>For an Oh My Pi operator running Qwen3.8 27B on an eligible RTX 5090 or RTX 4090 who values
 private, restart-resumable long sessions, OMP NInfer is the strongest fit. Choose Ollama or
 LM&nbsp;Studio for breadth and convenience, llama.cpp for portability, or vLLM for serving scale.</p>
+<p>v0.7.3 scope: OMP 18.2.3 with RTX 5090 on Windows 11 + Docker Desktop/WSL2 or RTX 4090 native
+Windows 11. <a href="../status/">Release state and acceptance</a>. RTX 3090 is deferred; its
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md">historical v0.7.2 route</a>
+remains on OMP 18.0.9, not qualified with the new client.</p>
 <p>Full criteria: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md">decision guide</a> ·
 prior art: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELATED_WORK.md">related work</a></p>
 </main>

@@ -17,8 +17,8 @@
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
- "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 native)",
+ "description": "Durable local inference for coding agents. Qwen3.8 27B via NInfer with restart-resumable OpenAI Responses state. v0.7.3 scope: RTX 5090 or RTX 4090 with OMP 18.2.3; RTX 3090 deferred.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -46,6 +46,8 @@
 <li><strong>Everything hash-pinned</strong> — model artifact, server binary, container image, and launch config are bound by the release manifest and verified at boot.</li>
 <li><strong>Checkpoints stay local</strong> — durable state lives on local NVMe with owner-only permissions; wrong-profile checkpoints are rejected, not partially loaded.</li>
 </ul>
+<p>The v0.7.3 scope is RTX 5090 Windows 11 + Docker Desktop/WSL2 and RTX 4090 native Windows 11,
+with OMP 18.2.3; RTX 3090 is deferred. <a href="../status/">Release state and exact eligibility</a>.</p>
 <p>The full model, boundaries, and support rules:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md">docs/SECURITY.md</a></p>
 <p class="verified">Last verified 2026-08-31.</p>

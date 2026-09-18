@@ -1,9 +1,16 @@
 # OMP NInfer
 
 > Durable local inference for coding agents: the qualified local inference appliance for
-> Oh My Pi. Qwen3.8 27B via the NInfer engine on one NVIDIA RTX 5090, 4090, or 3090, with
+> Oh My Pi. Qwen3.8 27B via NInfer; v0.7.3 scope is one NVIDIA RTX 5090 or RTX 4090, with
 > restart-resumable OpenAI Responses continuation state. Community project; not affiliated
 > with Oh My Pi, Qwen, or NVIDIA.
+
+v0.7.3 is the current public release. It repins only the client to OMP 18.2.3; runtime
+bytes, model, serving arguments and floors remain v0.7.2, and performance is carried evidence.
+RTX 3090 is deferred, not qualified with the new client. All three published client platforms
+passed live inference and provider-free hosted qualification; Linux live proof used Ubuntu
+under WSL2, not a separately qualified non-WSL Linux OS. Fresh documented-route proof covers
+24 steps across RTX 5090 host/macOS/Windows and RTX 4090 native routes.
 
 ## Canonical documents
 
@@ -11,8 +18,10 @@
 
 - [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity, fit, guarantees, measured proof, limitations
 - [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose this vs Ollama, LM Studio, llama.cpp, vLLM
-- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md): supported v0.7.2 lane selection and install; Windows 11 + Docker Desktop/WSL2 for RTX 5090, native Windows for RTX 4090/3090
-- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json): exact client, runtime, model, and profile; no support implied for other deployments
+- [v0.7.3 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/docs/QUICKSTART.md): RTX 5090 on Windows 11 + Docker Desktop/WSL2, RTX 4090 native Windows 11; do not bypass the ready gate
+- [v0.7.3 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/releases/v0.7.3/manifest.json): exact client, runtime, model, and profile; no support implied for other deployments
+- [Release state](https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md): support boundary and acceptance receipts
+- [Historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md): immutable three-GPU / OMP 18.0.9 route, including RTX 3090; not new-client qualification
 - [Compatibility](https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md): qualified client/runtime combinations
 - [Benchmarks](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md): method and receipt-bound numbers
 - [Security](https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md): boundaries and support rules

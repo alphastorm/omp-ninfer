@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.3",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/886304132b31e7ebd43521540deaf1c52d47d0ca/compatibility.json",
-      "compatibility_sha256": "f2687d242d47e179bc790adda4b9e52abe2c540febf5edbad8a27f998a61f797"
+      "compatibility_sha256": "29f47ea1b864582e9212eba4a9fb6f6c09362a0fb78df1dca1c263dca7fc7b40"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -65,41 +65,6 @@
       "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
     },
     "ninfer_variants": [
-      {
-        "id": "rtx3090-windows-native",
-        "status": "qualified",
-        "installable": true,
-        "repository": "https://github.com/alphastorm/ninfer",
-        "release_tag": "v0.2.5-qwen38-3090-beta.1",
-        "source_commit": "9719ea0995c3100471bd2a21d1dfcc8453dd8e75",
-        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/ninfer-rtx3090-omp-v0.2.5-beta.1-source.tar.gz",
-        "source_archive_sha256": "a878ba8033f81ab5a23303f20a76b8899a201ec34ff27db90bec070b4d96e777",
-        "package_name": "ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-        "package_sha256": "dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8",
-        "package_bytes": 573344205,
-        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.spdx.json",
-        "sbom_sha256": "ccb7823459ef7e337434268369441205536a1723b7a94b2ed93ae9696dd277d8",
-        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/Install-Release.ps1",
-        "installer_sha256": "42dd6e03e3f936ac8409b459d7aebd9a03d8fccb0d8705a5cbb643d47e38bd43",
-        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/Control-Release.ps1",
-        "controller_sha256": "57dd8f803bd9db7bd79bd1c15077375a504c993c6d0ead0ab6cf33ffe5806aba",
-        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/Control-GpuOwner.ps1",
-        "gpu_owner_controller_sha256": "e2b80702366fdf951910911f2619c110f601ef16f5c2672d4bac62fd13c81c04",
-        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.2.5-qwen38-3090-beta.1/Protect-StateRoot.ps1",
-        "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b",
-        "server_binary_sha256": "a70faa28fb45db3388158416698bb91dffdd2d658373ac4077e7201549c7a8b7",
-        "configuration_sha256": "c9b980c927b865040839cc50a2e34df0a2f424ffd9a7022da7cfbea5c5e5fdb5",
-        "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "maximum_context_tokens": 131072,
-        "deferred_gates": [],
-        "qualification": {
-          "summary": "releases/v0.7.3/qualification/rtx3090.json",
-          "sha256": "3ce3aa8cb5b2375ad8ce45760186ae6459bccf7cfe08b9b026bdcb5173ed1943",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/886304132b31e7ebd43521540deaf1c52d47d0ca/releases/v0.7.3/qualification/rtx3090.json"
-        },
-        "checksums_sha256": "e215f2fbf15e5de57ad1d4f09b59ef5f7ed1f63d03c4aa313748620e31c07051"
-      },
       {
         "id": "rtx4090-windows-native",
         "status": "qualified",
@@ -153,10 +118,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "499657b796eed2b271c343f23d643b7c0f49ba2bb60f01ae712ebe119fb15170",
+    "summary_sha256": "5a1e876972b72b46bdcf01ce5b7dfbbf677d389632f32d834227900aa3f6d07f",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/886304132b31e7ebd43521540deaf1c52d47d0ca/releases/v0.7.3/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -165,7 +130,7 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "Native RTX 4090 and RTX 3090 support binds only the exact packages in this manifest; their runtime qualification is carried from v0.7.2, not repeated for this client-only release.",
+    "This release qualifies the RTX 5090 container and RTX 4090 native Windows routes only. RTX 3090 is deferred; its separately qualified v0.7.2 route retains OMP 18.0.9 and is not qualified with this new client.",
     "Checkpointing remains best effort: the RTX 5090 qualification restored both target 126K sessions but reported three unsaved predecessor sessions at shutdown; it does not prove loss-free persistence of every session.",
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
     "Checkpoints are bound to the exact runtime fingerprint; older incompatible checkpoints replay from the OMP transcript.",
@@ -178,14 +143,9 @@
       "GitHub public release v0.7.3",
       "OMP component omp-18.2.3-cross-platform-beta-1 (published)",
       "NInfer RTX5090 v0.6.7-qwen38-5090-beta.1 (unchanged from v0.7.2)",
-      "NInfer RTX4090 v0.6.5-qwen38-4090-beta.1 (unchanged from v0.7.2)",
-      "NInfer RTX3090 v0.2.5-qwen38-3090-beta.1 (unchanged from v0.7.2)"
+      "NInfer RTX4090 v0.6.5-qwen38-4090-beta.1 (unchanged from v0.7.2)"
     ],
-    "blockers": [
-      "External-installation acceptance for OMP 18.2.3 on macOS, Windows, and Linux",
-      "All five documented routes on the published client, including RTX 3090",
-      "Composed acceptance and exact restoration of every qualification host"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

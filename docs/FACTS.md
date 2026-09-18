@@ -1,16 +1,19 @@
 # OMP NInfer — canonical facts
 
-Last verified: 2026-09-17 · Current stable release: **v0.7.2**
+Updated: 2026-09-18 · **Current public release: v0.7.3.**
 
-Public-release claims on this page are bound to the
-[v0.7.2 release manifest](../releases/v0.7.2/manifest.json) and its qualification receipts.
-Candidate lane measurements and published-route acceptance remain separately attributed below.
+The [v0.7.3 manifest](../releases/v0.7.3/manifest.json) binds the client repin and
+two eligible GPU routes. Runtime measurements remain attributed to their historical releases;
+fresh client/route acceptance is separate evidence. The immutable
+[v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
+retains the historical three-GPU / OMP 18.0.9 combination.
 
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. It runs Qwen3.8 27B through the NInfer engine on one NVIDIA RTX 5090,
-4090, or 3090 and preserves explicit OpenAI Responses continuation state across process restarts.
+appliance for Oh My Pi. Its v0.7.3 scope runs Qwen3.8 27B through the NInfer engine on one
+NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
+continuation state across process restarts, within the profile’s restore limits.
 
 ## Entity relationships
 
@@ -26,7 +29,7 @@ Qwen3.8 27B  = the served model (registered NInfer artifact, hash-pinned per rel
 All of these should be materially true:
 
 - the operator uses, or intends to use, Oh My Pi;
-- they own a qualified RTX 5090, 4090, or 3090 setup;
+- they own an eligible RTX 5090 or RTX 4090 setup in the exact release profile;
 - Qwen3.8 27B is the model they want;
 - sessions are long-lived and stateful, and restart recovery matters;
 - privacy and owned hardware matter more than breadth or multi-user throughput.
@@ -39,15 +42,37 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## Qualified hardware
+## v0.7.3 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | v0.7.2 binds component `v0.6.7-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows service | 131,072 | v0.7.2 binds component `v0.6.5-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
-| RTX 3090 | native Windows service | 131,072 | unchanged durable `v0.2.5-qwen38-3090-beta.1` lane (origin-authenticated checkpoints, bound by v0.7.2) |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.2.3 with unchanged v0.7.2 component `v0.6.7-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.2.3 with unchanged v0.7.2 component `v0.6.5-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 
-## v0.7.2 — bounded restore reclaim
+**RTX 3090 is deferred for v0.7.3**, not qualified with OMP 18.2.3. The separately linked
+[historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
+waits for that host’s return.
+
+## v0.7.3 — client-only OMP 18.2.3 repin
+
+- Exact client component: `omp-18.2.3-cross-platform-beta-1`, public source
+  `5ade242de59ac0f4606a1158bf564410c96918d4`. The macOS arm64, Windows x64 and Linux x64
+  archives and all three provider-free hosted qualification receipts are public.
+- All three clients passed live inference. Linux live proof ran in **Ubuntu under WSL2**;
+  it does not qualify a non-WSL Linux OS or establish managed-install readiness from diagnostics.
+- Fresh route acceptance passed **24 documented steps**: RTX 5090 host 2, macOS client 10,
+  Windows client 5, RTX 4090 native 7. The run used frozen product source
+  `096c8b889eef4bc89ee2dc316694b847bdf8a39d` with pre-cut substitutions recorded; all hosts
+  were restored. [Routes](../releases/v0.7.3/acceptance/documented-routes.json) ·
+  [qualification](../releases/v0.7.3/qualification.json).
+- The authority uses OMP’s existing `durable-checkpoint` capability instead of the rejected
+  `process-restart-continuation` name. This vocabulary correction adds no runtime capability.
+- Runtime image/package bytes, model, serving arguments and memory floors remain v0.7.2.
+  Runtime measurements are **carried evidence, not fresh measurements**; no throughput gain
+  or stronger durability guarantee is claimed.
+
+## Historical v0.7.2 — bounded restore reclaim
 
 - Published exact-profile product. Runtime qualification and public-route acceptance are
   recorded separately; the changed RTX 5090 and RTX 4090 components passed both.
@@ -166,8 +191,8 @@ All of these should be materially true:
 ## Current model and artifact
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
-18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across all three
-lanes by the release manifest.
+18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
+v0.7.3 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -207,7 +232,7 @@ exports published checkpoint generations, verifies their file sizes and SHA-256 
 imports replicas into a local checkpoint root. Copies can be stored on another host or a NAS.
 This is explicit export/import, not automatic failover or live session migration.
 
-- **Recovery proved on all three lanes:** export → carry off-machine → remove local state with
+- **Historical recovery proved on the three 2026-09-05 profiles:** export → carry off-machine → remove local state with
   the server stopped → carry back → import → restart → exact retrieval of planted keys
   ([5090](measurements/2026-09-05-sync-probe-rtx5090.json),
   [4090](measurements/2026-09-05-sync-probe-rtx4090.json),
@@ -267,8 +292,11 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 - One model, one active request per lane (max concurrency 1); not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- The 3090 lane's comfortable working envelope is the 64K class.
-- Vision is available on the 5090 container profile; the native Windows lanes are text-only.
+- RTX 3090 is deferred for v0.7.3; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
+- Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
+- Automatic checkpoints remain best effort. Carried v0.7.2 evidence includes three unsaved
+  predecessor sessions and two root fallbacks among eight continuations/forks, not universal
+  warm reuse or loss-free shutdown.
 
 ## Claims we do not make
 
@@ -279,7 +307,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[Public release manifest](../releases/v0.7.2/manifest.json) ·
+[v0.7.3 manifest](../releases/v0.7.3/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.7.3 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

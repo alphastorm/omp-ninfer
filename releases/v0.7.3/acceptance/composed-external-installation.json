@@ -13,7 +13,7 @@
     "note": "All three published native client binaries passed authenticated typed-tool/result, exact final marker, continuation and fail-closed inference against the exact RTX5090 runtime. Native RTX4090 documented acceptance passed separately."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "1e4576104398b173cf10c8907c479007626d8eca3ff26373867c0b876ea0e0af",
+  "compatibility_sha256": "29f47ea1b864582e9212eba4a9fb6f6c09362a0fb78df1dca1c263dca7fc7b40",
   "windows_asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
   "windows_binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
   "platform_receipts": [

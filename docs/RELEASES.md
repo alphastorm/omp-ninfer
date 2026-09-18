@@ -7,8 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.2`, GitHub `Latest` |
-| Development | Product candidates with no public install or support claim | OMP 18.2.3 client repin and separately measured RTX 4090 health delta; not part of v0.7.2 |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.3`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -27,7 +26,34 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.7.2 public release (bounded checkpoint-backed restore reclaim)
+### v0.7.3 public release — OMP 18.2.3 client repin
+
+- Status: published exact-profile product. [Manifest](../releases/v0.7.3/manifest.json) ·
+  [guide](QUICKSTART.md) · [qualification](../releases/v0.7.3/qualification.json).
+- Client-only change from OMP 18.0.9 to `omp-18.2.3-cross-platform-beta-1`, built from public
+  source `5ade242de59ac0f4606a1158bf564410c96918d4`. The macOS arm64, Windows x64 and Linux x64
+  archives and all three provider-free hosted qualification receipts are public; hosted proof
+  and live inference are distinct, and both passed for these clients.
+- Fresh live Linux-client proof ran in **Ubuntu under WSL2**, not on a separately qualified
+  non-WSL Linux OS. RTX 5090 host (2), macOS client (10), Windows client (5), and RTX 4090 native
+  (7) passed **24 documented steps** on frozen product source
+  `096c8b889eef4bc89ee2dc316694b847bdf8a39d`, with pre-cut substitutions recorded and all
+  hosts restored. [Documented routes](../releases/v0.7.3/acceptance/documented-routes.json).
+- Eligibility: **RTX 5090 on Windows 11 + Docker Desktop/WSL2** and **RTX 4090 native Windows 11**.
+  **RTX 3090 is deferred**, not qualified with OMP 18.2.3. Its immutable
+  [v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) and
+  [manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
+  remain separately available with OMP 18.0.9; new-client qualification waits for its host’s return.
+- Capability vocabulary uses OMP’s existing `durable-checkpoint`; the old
+  `process-restart-continuation` name was rejected by the closed client schema. This fixes
+  authority vocabulary, not runtime behavior; the verifier rejects unsupported names.
+- RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090 `v0.6.5-qwen38-4090-beta.1` remain
+  the exact v0.7.2 image/package bytes. Model, serving arguments and memory floors are unchanged.
+  Runtime measurements are **carried v0.7.2 evidence, not fresh measurements**. Automatic
+  checkpoints remain best effort; three unsaved predecessor sessions and two root fallbacks
+  among eight continuations/forks remain disclosed limitations. No throughput gain is claimed.
+
+### v0.7.2 historical public release (bounded checkpoint-backed restore reclaim)
 
 - Status: published exact-profile product. Both changed components and their documented routes
   passed acceptance; unchanged client-platform and RTX 3090 qualification are explicitly carried.
