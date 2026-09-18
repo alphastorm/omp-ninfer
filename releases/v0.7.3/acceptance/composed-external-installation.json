@@ -1,0 +1,91 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.7.3",
+  "as_of": "2026-09-18",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Published client-only repin with exact-component documented-route acceptance.",
+  "client": {
+    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+    "source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "source_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "note": "All three published native client binaries passed authenticated typed-tool/result, exact final marker, continuation and fail-closed inference against the exact RTX5090 runtime. Native RTX4090 documented acceptance passed separately."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "1e4576104398b173cf10c8907c479007626d8eca3ff26373867c0b876ea0e0af",
+  "windows_asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+  "windows_binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "3c021fed1f3718d6d18c9bc1e16fe8a9f2f2e3f042d9e7508e0df01cc62f93bd"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "3051f471d324db00cab44cdf68a0a9d6baa048002152be159e2d006c8afea7c5"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "d73b25b463ceae02a71ad394f1f0dace55c96c788ba5f68eb03fea6cc7676bea"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "assets": 7,
+      "anonymous": true
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "context": "Ubuntu WSL2; no new non-WSL OS qualification claim"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": "RTX5090 only; native RTX4090 remains text/tools.",
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": "Carried unchanged from v0.7.2; no model, runtime, serving-floor or performance change.",
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.7.3/acceptance/documented-routes.json",
+      "sha256": "d99f1c0d33db311f635a3f0e80108e2222ceab0afd414251164a3c019f121c05"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.7.3/acceptance/rtx4090-public-install.json",
+      "sha256": "3c01fbefc8e4bf5ca00b89ba3ee79be789ac54a54df2cbb81611f8bd3c511fc6"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-09-18-v073-acceptance-restoration.json",
+      "sha256": "e20f0ae7f15ba773a466ea78f3d0b1920148667a6870cf7c58f7d5ac4a6910fc"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.7.3/qualification/client-components.json",
+      "sha256": "4735ac8c03c31cb2488764f6b06c8ace086e0c499fdf0d40b0d9bc7a29d64e45"
+    }
+  },
+  "limitations": [
+    "RTX3090 omitted pending its own OMP18.2.3 route qualification; its v0.7.2 instructions remain a separate legacy route.",
+    "Client diagnostic blockers are recorded in platform receipts and are not an automatic managed-appliance installation pass.",
+    "All current hardware observations are maintainer-operated; no independent external-user installation or repeat-use outcome is inferred."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

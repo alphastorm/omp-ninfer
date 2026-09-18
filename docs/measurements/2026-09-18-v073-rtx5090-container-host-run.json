@@ -1,0 +1,42 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-container-host",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "77b3f3b101bfb20cb0e148249ddc9dd61003fe6bec4310f0c3405111fd2a3623",
+  "started_utc": "2026-09-18T00:15:28Z",
+  "completed_utc": "2026-09-18T00:16:24Z",
+  "host_os": "Ubuntu 24.04.4 LTS",
+  "clone_commit": "096c8b889eef4bc89ee2dc316694b847bdf8a39d",
+  "steps": [
+    {
+      "position": 1,
+      "slug": "prepare",
+      "heading": "3. Prepare the model and key on the inference host",
+      "index": 0,
+      "block_sha256": "3409b24f6693006d038303f04b3031b639516c9d6d44be7187132378850e832d",
+      "executed_sha256": "3409b24f6693006d038303f04b3031b639516c9d6d44be7187132378850e832d",
+      "status": "passed",
+      "elapsed_seconds": 13.418,
+      "error": null,
+      "substitution": null
+    },
+    {
+      "position": 2,
+      "slug": "start",
+      "heading": "4. Start NInfer on the inference host",
+      "index": 0,
+      "block_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "executed_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "status": "passed",
+      "elapsed_seconds": 42.495,
+      "error": null,
+      "substitution": null
+    }
+  ],
+  "status": "passed",
+  "qualification_environment": {
+    "docker_authentication": "Dedicated empty DOCKER_CONFIG for the anonymous public digest pull.",
+    "limitation": "The default Desktop credential helper failed in the WSL SSH context; that default helper configuration is not claimed passing."
+  }
+}

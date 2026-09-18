@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-5ade242d-07cee80249",
+  "product_release": "v0.7.3",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "as_of": "2026-09-18",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "qualification_commit": "d235a82152cf971468a3ebcd6232694e07c2d376",
+    "semantic_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "generated_lock_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "main_commit": "a7275375a9cd283a78baa1e0d311dc0e264ae829",
+    "main_tree": "35d199190488f0173c8a6403d29eb123e0190188"
+  },
+  "client": {
+    "release_id": "18.2.3-cross-platform-beta-1",
+    "version": "18.2.3",
+    "os": "Ubuntu 24.04 x64 client under WSL2",
+    "architecture": "x64",
+    "archive_sha256": "07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46",
+    "archive_bytes": 88783418,
+    "binary_sha256": "30f29b28d4ca3d849a34fc5c944be45366e997990a0ceb5f78ef11cca0cfbb3f",
+    "binary_bytes": 161440968,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+    "component_release_id": 391118997,
+    "asset_id": 571366439,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-linux-x64.tar.gz"
+  },
+  "hosted_ci": {
+    "run_id": 35204510294,
+    "qualification_receipt_asset_id": 571366440,
+    "qualification_receipt_sha256": "c6acb805fb22e01e874c3c124ca089679c12309e4a0776bcef6b94cf0f759900",
+    "provider_free": true,
+    "hardware_accepted": false
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.2.3",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 31,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_variant": "rtx5090-container",
+    "runtime_identity_bound": true,
+    "profile_runtime_qualified_by_this_receipt": false,
+    "raw_transcript_included": false,
+    "runtime_image_digest": "sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24",
+    "runtime_server_binary_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+    "runtime_configuration_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "method": "isolated provider endpoint temporarily changed from18089 to unavailable18099, then restored"
+    },
+    "execution_context": {
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "wsl_distro_name_present": false,
+      "wsl_interop_present": false,
+      "environment_erased": false,
+      "native_linux_os_qualification_claimed": false
+    }
+  },
+  "diagnostics": {
+    "status": "blocked",
+    "note": "Recorded diagnostic outcome, not a managed-install-ready claim.",
+    "blockers": [
+      "Host has unknown GiB free disk; 64 GiB required",
+      "OMP 18.2.3 live client acceptance pending",
+      "Port 18089 is occupied"
+    ],
+    "profile_supported": false,
+    "profile_installable": false,
+    "authority_sha256": "f2687d242d47e179bc790adda4b9e52abe2c540febf5edbad8a27f998a61f797"
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the client against the exact unchanged RTX 5090 runtime, not new GPU performance or a managed-appliance installation.",
+    "Runtime and serving-profile qualification are carried separately from v0.7.2; no new throughput or broader platform claim is made.",
+    "Live inference used the native Linux binary under WSL2. This is not a new non-WSL Linux OS qualification; the hosted Linux qualification remains provider-free."
+  ]
+}

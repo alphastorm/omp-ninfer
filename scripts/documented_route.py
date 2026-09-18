@@ -58,19 +58,9 @@ LANES: dict[str, tuple[Step, ...]] = {
     # first block clones the tag and changes into it; the runner starts in the parent directory.
     "rtx4090-native": (
         Step("client-install", "Install the exact native Windows client"),
-        Step("clone-and-verify", "Native Windows RTX 4090 and RTX 3090 release lanes", 0),
-        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 1),
-        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 3),
-        Step("operate", "Operate the native lane"),
-        Step("provider", "Point OMP at the native lane"),
-        Step("acceptance", "Native lane acceptance"),
-    ),
-    # RTX 3090 native Windows: identical route, the other variant id.
-    "rtx3090-native": (
-        Step("client-install", "Install the exact native Windows client"),
-        Step("clone-and-verify", "Native Windows RTX 4090 and RTX 3090 release lanes", 0),
-        Step("variant", "Native Windows RTX 4090 and RTX 3090 release lanes", 2),
-        Step("stage-and-install", "Native Windows RTX 4090 and RTX 3090 release lanes", 3),
+        Step("clone-and-verify", "Native Windows RTX 4090 release lane", 0),
+        Step("variant", "Native Windows RTX 4090 release lane", 1),
+        Step("stage-and-install", "Native Windows RTX 4090 release lane", 2),
         Step("operate", "Operate the native lane"),
         Step("provider", "Point OMP at the native lane"),
         Step("acceptance", "Native lane acceptance"),

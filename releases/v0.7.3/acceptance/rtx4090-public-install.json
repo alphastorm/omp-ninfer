@@ -1,0 +1,53 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.3",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-09-18",
+  "status": "passed",
+  "candidate_commit": "096c8b889eef4bc89ee2dc316694b847bdf8a39d",
+  "client": {
+    "version": "omp/18.2.3",
+    "tag": "omp-18.2.3-cross-platform-beta-1",
+    "source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "source_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "archive_bytes": 84845155,
+    "archive_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+    "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf"
+  },
+  "runtime": {
+    "tag": "v0.6.5-qwen38-4090-beta.1",
+    "source_commit": "d125ffffd87ef38d9a221f9830e19dfa274ddd34",
+    "package_bytes": 572702491,
+    "package_sha256": "b26643d735d58eafac33f1595c0588baf0e6682a69af73e8e82f96839f4b7646",
+    "binary_sha256": "e121084557c342398fb57411c088238d5745d0d5bcfc6bea6084786473fe506f",
+    "configuration_sha256": "23ff4447025121ec2b1bba9a9351a5773cec22a759d7b4911ac68950f7668920",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "preparation": "The existing inactive d125 instance referenced a different model path. Exact original state bytes, support files, ACLs and task XML were snapshotted. Same-volume moves preserved only inactive d125 release/secrets/cache and historical staging, temporarily removing its inactive state entry/previous pointer. The literal documented route then performed a fresh canonical installation. This is not an idempotent-reinstall claim. All moved originals were restored; f098 release data was not touched.",
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_response_replay",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 3,
+    "cloud_fallback_observed": false
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-09-18-v073-rtx4090-native-run.json",
+    "sha256": "c43ac50fe7ce598fb21e8a26b669340afb17dbb6fd19a56451e4fa1fbe35acff"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-09-18-v073-acceptance-restoration.json",
+    "sha256": "e20f0ae7f15ba773a466ea78f3d0b1920148667a6870cf7c58f7d5ac4a6910fc"
+  },
+  "limitations": [
+    "Fresh canonical installation after preserved inactive-package preparation; not an idempotent-reinstall qualification.",
+    "Three local reasoning_effort_not_supported responses for high were followed by successful local compatibility retries; no serving-knob change or cloud inference fallback.",
+    "Runtime and performance qualification are carried unchanged from v0.7.2; this receipt proves the new client composition.",
+    "Original child exit code was unavailable to the outer observer; completed route and behavioral/recovery evidence are recorded without inventing an exit code."
+  ]
+}

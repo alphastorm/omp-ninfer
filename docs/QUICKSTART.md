@@ -1,18 +1,17 @@
 # Quickstart
 
-> **Qualified runtime lanes: RTX 5090 · 4090 · 3090; v0.7.3 client candidate pending acceptance**
+> **v0.7.3: RTX 5090 · RTX 4090; four documented routes accepted**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.7.3 is a client candidate, pending every-route acceptance.** It is not yet a public,
-> Latest, or accepted product release. All five documented lanes must pass: RTX 5090 container
-> host, macOS client, Windows client, and the RTX 4090 and RTX 3090 native lanes.
-> v0.7.2 remains the current public release; its
-> [acceptance and recorded substitutions](../releases/v0.7.2/acceptance/documented-routes.json)
-> are historical evidence, not acceptance of this client candidate. The commands below target
-> v0.7.3 for use only after publication and readiness. Do not bypass `--require-ready` or mix
-> one release's manifest with another release's commands.
+> **v0.7.3 has passed its four documented routes (24 steps).**
+> The accepted scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090
+> native Windows. RTX 3090 is deferred and is not a v0.7.3 install lane.
+> The commands below require the published v0.7.3 release and its readiness check.
+> Do not bypass `--require-ready` or mix one release's manifest with another
+> release's commands. See [recorded acceptance](#recorded-v073-acceptance) for the pre-cut
+> substitutions and the distinction between the executed document and this narrowed guide.
 
 ## Choose your lane
 
@@ -21,21 +20,54 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 4090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **v0.7.3 client acceptance pending; runtime unchanged** | [RTX 3090 native lane](#native-windows-rtx-4090-and-rtx-3090-release-lanes) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.7.3 route accepted; runtime unchanged** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.7.3 route accepted; runtime unchanged** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
-Each native lane is installable only through its exact manifest variant. Do not substitute GPU
-family names, package URLs, component tags, or variant IDs between lanes.
+RTX 3090 qualification is **deferred** until its host returns (expected around September 30).
+For that GPU, use only the immutable
+[v0.7.2 legacy RTX 3090 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
+with the v0.7.2 manifest and OMP 18.0.9. Do not combine them with v0.7.3 or OMP 18.2.3.
+
+The current native lane is installable only through its exact qualified manifest variant. Do not
+substitute GPU family names, package URLs, component tags, or variant IDs between releases.
+
+## Recorded v0.7.3 acceptance
+
+The four [accepted routes](../releases/v0.7.3/acceptance/documented-routes.json) total 24 steps:
+RTX 5090 container host **2**, macOS client **10**, Windows client **5**, and RTX 4090 native
+Windows **7**. They ran against frozen candidate
+`096c8b889eef4bc89ee2dc316694b847bdf8a39d`, whose executed QUICKSTART SHA-256 was
+`77b3f3b101bfb20cb0e148249ddc9dd61003fe6bec4310f0c3405111fd2a3623`.
+This guide subsequently narrowed the supported GPUs and changed prose, headings, and block
+addresses; it did not rerun acceptance against that new prose. All 24 retained step bodies
+are byte-for-byte identical to the accepted receipts.
+
+Pre-cut substitutions were recorded, not hidden: the Windows clone/verify steps used the frozen
+candidate commit instead of the not-yet-created product tag and verified **installable**, not
+**ready**. The macOS route used the operator's SSH destination for `USER@RUNTIME_HOST`, kept the
+foreground tunnel alive in the background, and stopped that tunnel before the fail-closed step
+as the prose instructs. The Mac ran with an isolated home; its normal home was untouched. These
+acceptance-only arrangements do not authorize readers to bypass the published readiness gate.
+
+The RTX 4090 run temporarily preserved the inactive prior installation outside its canonical
+paths to exercise a fresh install, then restored the original state, files, ACLs, and task XML.
+It does not establish idempotent reinstallation over an existing inactive package.
+
+The hosts were restored after acceptance: RTX 5090 production returned healthy on its original
+image with `unless-stopped`, its checkpoint mount, key, and checkout restored, and the temporary
+hold removed; pre-existing owner pauses were preserved. RTX 4090 returned to its exact
+pre-window state (scheduled task ready, runtime stopped, no listener or lease, original support
+files/ACLs and holds preserved). These are restoration records, not new performance measurements.
 
 ## Verify the release before setup
 
 The `v0.7.3` candidate composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
-native Linux client profiles share the same compatibility authority; RTX 4090
-and RTX 3090 use separate native Windows packages. Client acceptance for this candidate is pending.
+native Linux client profiles share the same compatibility authority; RTX 4090 uses its exact
+native Windows package. All three OMP 18.2.3 client platforms passed live inference; the four
+documented routes above are the accepted install scope.
 
 The published runtime components are RTX 5090 `v0.6.7-qwen38-5090-beta.1` and RTX 4090
 `v0.6.5-qwen38-4090-beta.1`, both from source `d125ffffd87ef38d9a221f9830e19dfa274ddd34`.
@@ -128,28 +160,17 @@ the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to n
 Windows at `127.0.0.1:18089`. Then use the **Native Windows OMP** provider instructions in
 section 7 and the **Native Windows command forms** at the start of section 8.
 
-## Native Windows RTX 4090 and RTX 3090 release lanes
+## Native Windows RTX 4090 release lane
 
-These are separate native NInfer packages, not substitutions for the RTX 5090 image. Before
-installation, the ready manifest must publish exactly `rtx4090-windows-native` and `rtx3090-windows-native` as
-qualified native lanes.
+This native NInfer package is not a substitution for the RTX 5090 image. Before installation,
+the ready manifest must publish `rtx4090-windows-native` as qualified. The ready product
+manifest remains authoritative for every download URL and hash; no absent or unqualified
+variant may be deployed.
 
-The RTX 3090 package identity is:
-
-- filename: `ninfer-rtx3090-omp-v0.2.5-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`;
-- SHA-256: `dbcd27c498d012d468f2eb757a34c085bacf597fa9ac0871ad61053dc72655e8`;
-- byte count: `573,344,205`; and
-- source commit: `9719ea0995c3100471bd2a21d1dfcc8453dd8e75`.
-
-Its component-release slot is
-[`alphastorm/ninfer@v0.2.5-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.2.5-qwen38-3090-beta.1).
-That URL must resolve at release cut; the ready product manifest remains authoritative for every
-download URL and hash.
-
-Prerequisites: Windows 11 x64, the matching single GPU with a current driver, Git, PowerShell,
+Prerequisites: Windows 11 x64, a single RTX 4090 with a current driver, Git, PowerShell,
 Python 3 from python.org (its `py` launcher; the `python3` name Windows ships is a Microsoft
 Store shortcut, not Python), and at least 40 GiB free. Install the OMP client first with
-**Install the exact native Windows client** above; the lane's own steps follow. RTX 4090 also
+**Install the exact native Windows client** above; the lane's own steps follow. RTX 4090
 requires at least 32768 MiB of runtime-host memory for its unchanged 11264 MiB pinned host-KV
 pool and 24 host-state slots. Start from an
 elevated PowerShell. Windows ships with script execution disabled; the `Set-ExecutionPolicy`
@@ -163,28 +184,23 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
 ```
 
-Each lane has its own installed state root, its own served request model id, and one shared
-loopback port. These values are the lane's, not interchangeable:
+Use this lane's installed state root, served request model id, and loopback endpoint;
+these values are not interchangeable with a historical release's variants:
 
 | Variant id | Installed state root | Request model id | Endpoint |
 | --- | --- | --- | --- |
 | `rtx4090-windows-native` | `%ProgramData%\NInfer\qwen38-4090-native` | `qwen3.8-27b` | `http://127.0.0.1:18082/v1` |
-| `rtx3090-windows-native` | `%ProgramData%\NInfer\qwen38-3090-omp-v0.2` | `q38-ninfer` | `http://127.0.0.1:18082/v1` |
 
-Both native lanes are text and tools only: Vision belongs to the RTX 5090 container profile
-([`docs/FACTS.md`](FACTS.md)). Set `$VariantId` once for the matching GPU:
+The RTX 4090 native lane is text and tools only: Vision belongs to the RTX 5090 container
+profile ([`docs/FACTS.md`](FACTS.md)). Set `$VariantId` once:
 
 ```powershell
 $VariantId = 'rtx4090-windows-native'
 ```
 
-or:
-
-```powershell
-$VariantId = 'rtx3090-windows-native'
-```
-
-Then let the manifest supply every URL and hash:
+Then let the manifest supply every URL and hash. The shared native blocks and provider fragment
+retain historical RTX 3090 identifiers, but those are not a current install route: the manifest
+guard below refuses a missing or unqualified variant before downloading or installing it.
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -285,8 +301,8 @@ $Installer = Join-Path $Stage 'Install-Release.ps1'
 The install prints one JSON receipt and leaves the server running. The package controller binds
 loopback/Tailscale-only listening, mandatory bearer authentication, the external model hash,
 process-restart checkpoints, and active/previous rollback. Do not mix assets across variants or
-infer install authority from GPU-family names. RTX 4090 and RTX 3090 each use their exact
-MTP3 profile. Structured JSON-schema output remains unsupported and fails closed.
+infer install authority from GPU-family names. RTX 4090 uses its exact MTP3 profile.
+Structured JSON-schema output remains unsupported and fails closed.
 
 ### Operate the native lane
 
