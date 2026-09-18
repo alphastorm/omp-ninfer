@@ -4,21 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer — durable local inference for coding agents</title>
-<meta name="description" content="The qualified local inference appliance for Oh My Pi: Qwen3.8 27B on one RTX 5090, 4090, or 3090 with restart-resumable OpenAI Responses state.">
+<meta name="description" content="Resume long local Qwen coding sessions from saved model state after an inference-server restart. Exact v0.7.2 Windows runtime routes for RTX 5090, 4090, and 3090.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/">
 <link rel="stylesheet" href="site.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer — durable local inference for coding agents">
-<meta property="og:description" content="The qualified local inference appliance for Oh My Pi: Qwen3.8 27B on one RTX 5090, 4090, or 3090 with restart-resumable OpenAI Responses state.">
-<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:description" content="Resume long local Qwen coding sessions from saved model state after an inference-server restart. Exact v0.7.2 Windows runtime routes for RTX 5090, 4090, and 3090.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows, Linux",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
  "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
@@ -39,24 +38,37 @@
 </header>
 <main>
 <p class="eyebrow">Durable local inference for coding agents</p>
-<h1>Your coding session should survive the&nbsp;process.</h1>
-<p class="lede"><strong>OMP NInfer</strong> is the qualified local inference appliance for
-<a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> (a coding-agent client). It runs
-Qwen3.8&nbsp;27B through the <a href="https://github.com/alphastorm/ninfer">NInfer engine</a> on one
-NVIDIA RTX&nbsp;5090, 4090, or 3090 and preserves explicit OpenAI Responses continuation state
-across process restarts — a durable primitive, not a lucky prefix-cache hit.</p>
+<h1>Resume long local Qwen coding sessions after an inference-server restart.</h1>
+<p class="lede"><strong>OMP NInfer</strong> resumes from saved model state. Qwen3.8&nbsp;27B
+is the model, <a href="https://github.com/Neroued/ninfer">Neroued’s NInfer</a> is the inference
+engine, and <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> is the coding agent.
+This project packages their integration, explicit continuation, and durable checkpoints into
+exact, qualified releases.</p>
 
 <div class="receipt">
-<strong>RTX 5090 · v0.4.0 qualification:</strong><br>
-<span class="n">109,589</span> tokens restored after a docker restart ·
-<span class="n">0.778&nbsp;s</span> to first token vs <span class="n">47.920&nbsp;s</span> cold ·
-<span class="n">144.80&nbsp;tok/s</span> on the agent-shaped gate.
-<div class="verified">Retained state vs fresh-process cold start · last verified 2026-08-31 ·
-<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">method and receipts</a></div>
+<strong>Before installing — v0.7.2 eligibility</strong>
+<ul>
+<li><strong>RTX 5090:</strong> documented Windows 11 + Docker Desktop/WSL2 runtime route.</li>
+<li><strong>RTX 4090 or RTX 3090:</strong> documented native Windows route.</li>
+<li>Exact pinned client, runtime, model, and profile required; other deployments are not supported
+by implication. Check the guide’s memory, disk, and download prerequisites.</li>
+</ul>
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json">v0.7.2 manifest</a>
 </div>
 
-<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md">Get started</a>
-<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/latest">Download v0.7.2</a>
+<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md">Get started with v0.7.2</a>
+<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/tag/v0.7.2">Download v0.7.2</a>
+
+<h2>What the historical restart receipt measured</h2>
+<p>On one RTX 5090, v0.4.0 served <strong>109,589 retained tokens</strong> after a Docker restart.
+The receipt records <strong>24.8 s end-to-end including first-touch restoration of a 7.95 GB
+checkpoint</strong> and a separately measured <strong>56.6 s model reload</strong>.</p>
+<p><strong>0.778 s is server-side time to first token after restoration</strong>, not restore
+or restart time. A different request pair measured <strong>47.920 s cold wall time vs 1.790 s
+warm follow-up wall time</strong>. These are single-machine samples with different timing
+boundaries, not a restart speedup ratio or a subsecond reboot.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/measurements/2026-08-30-rtx5090-durable-qualification.json">Historical restart receipt</a> ·
+<a href="benchmarks/">method and separate request-pair receipt</a>.</p>
 
 <h2>Checkpoints already leave the machine</h2>
 <p>Export verified session checkpoints, keep replicas on another host or NAS, and import them
@@ -86,7 +98,8 @@ Full detail: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FA
 <p>Oh My Pi owns tools, coding workflow, and subagents.
 <a href="https://github.com/Neroued/ninfer">Neroued's NInfer</a> and its GPU ports supply the
 hardware-tuned engine; this project's runtime adds explicit continuation state and durable
-checkpoints. Engine throughput and avoiding repeated prefill are separate benefits, not a
+checkpoints. Ordinary in-process prefix caching already reuses matching input in other
+runtimes; that is not new here. Engine throughput and avoiding repeated prefill are separate benefits, not a
 blanket speed claim over other backends. See the <a href="compare/">comparison</a> and
 <a href="benchmarks/">measured results</a>.</p>
 </main>

@@ -11,7 +11,8 @@
 
 - [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity, fit, guarantees, measured proof, limitations
 - [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose this vs Ollama, LM Studio, llama.cpp, vLLM
-- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md): lane selection and install
+- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md): supported v0.7.2 lane selection and install; Windows 11 + Docker Desktop/WSL2 for RTX 5090, native Windows for RTX 4090/3090
+- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json): exact client, runtime, model, and profile; no support implied for other deployments
 - [Compatibility](https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md): qualified client/runtime combinations
 - [Benchmarks](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md): method and receipt-bound numbers
 - [Security](https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md): boundaries and support rules

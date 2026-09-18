@@ -25,11 +25,13 @@ are excellent at different jobs; most operators should use one of them.
 
 ## Why NInfer and where OMP fits
 
-[Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports supply the specialized
-single-GPU inference engine. This project's runtime adds explicit continuation state and
+Qwen3.8 27B is the model. [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports
+supply the specialized single-GPU inference engine. This project’s runtime adds explicit continuation state and
 durable checkpoints. Oh My Pi owns the agent workflow: transcript, tools, branches, and
 subagents. Engine throughput and skipping repeated prefill are separate benefits; the
 [measurements](BENCHMARKS.md) are not a matched speed comparison against vLLM or llama.cpp.
+Ordinary in-process prefix caching already avoids repeated prefill of matching input in other
+runtimes; it is not new here. The product focus is explicit continuation and checkpoint recovery.
 
 Checkpoint transport and NAS replication already work, but copying state is not arbitrary
 GPU-to-GPU migration. See the [exact restore boundary and receipts](FACTS.md#checkpoint-transport-and-nas-replication).

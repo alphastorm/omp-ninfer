@@ -1,8 +1,10 @@
 # Demo and launch media
 
-These files are a **real recorded session**, not a mockup, composite, or scripted animation. Every
-frame was produced by the actual released software answering real requests on the maintainer's
-RTX 5090. The task content is synthetic and content-safe by construction.
+These files are a **real historical v0.3.0 coding/follow-up recording**, not a mockup, composite,
+or scripted animation. Every frame was produced by the v0.3.0 released software answering real
+requests on one maintainer RTX 5090. The task content is synthetic and content-safe by construction.
+**No inference-server restart is shown, and this is not proof of the current release.**
+The canonical MP4 is reused unchanged: 15.303371 s, 1224×868, 2,829,121 bytes.
 
 ## Canonical recording (v0.3)
 
@@ -21,8 +23,8 @@ RTX 5090. The task content is synthetic and content-safe by construction.
   below.
 - **Session:** two turns in a scratch project. Turn one: find and fix a real off-by-one wraparound
   bug in `ringbuf.py`, rerun the tests (they pass). Turn two: a stateful follow-up question
-  answered from retained session context. The recording plays in real time; only idle gaps longer
-  than 1.75 s are compressed.
+  answered from retained session context. Idle gaps longer than 1.75 s are compressed; active
+  terminal output retains its captured timing. Playback duration is not task or restart latency.
 
 ## Capture adaptation (disclosed)
 
@@ -103,7 +105,8 @@ Engine bytes, configuration, model, and authentication were unchanged.
 
 ## Receipts
 
-The numbers these recordings illustrate are bound by receipts elsewhere: qualified results in
+Performance and restart claims are established by separate receipts, not timed from this clip:
+qualified results in
 [`../BENCHMARKS.md`](../BENCHMARKS.md), the warm-vs-cold follow-up measurement in
 [`../measurements/2026-08-29-warm-vs-cold-ttft.json`](../measurements/2026-08-29-warm-vs-cold-ttft.json),
 and the RTX 3090 parity receipt in

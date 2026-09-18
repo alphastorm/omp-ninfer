@@ -100,10 +100,8 @@ session against the published serve through the qualified tunnel profile; wall t
 
 ## Qualified `v0.3.0` results
 
-The first public release binds three qualified GPU lanes into one manifest. The shape first —
-every chart is a rendering of the same receipts as the tables, never a separate measurement:
-
-![Warm vs cold time to first token (v0.3.0 runtime, historical): 0.191 s warm versus 36.651 s cold at an 89,022-token session, and 0.126 s versus 9.719 s at 28,535 tokens; roughly 192x and 77x faster first tokens](../assets/chart-warm-cold.png)
+The first public release binds three qualified GPU lanes into one manifest. The charts and
+tables below are historical measurements, not measurements of the current release:
 
 ![RTX 5090 prefill throughput (v0.3.0 runtime, historical) holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
 
@@ -381,18 +379,22 @@ Each lane reran its own qualification with its changed configuration; receipts i
 
 ### RTX 5090 — container, MTP3, durable checkpoints (v0.4.0)
 
-New runtime bytes (source `1ceaeebd`, image digest `8de5efdf…`) qualified live on the owner
-appliance. Receipt:
+Historical runtime bytes (source `1ceaeebd`, image digest `8de5efdf…`) qualified on one
+owner RTX 5090 appliance. Receipt:
 [`2026-08-30-rtx5090-durable-qualification.json`](measurements/2026-08-30-rtx5090-durable-qualification.json).
 
 | Gate | Result | Detail |
 | --- | ---: | --- |
-| Docker-restart continuation | **109,589 tokens restored hot** | rotated server instance; 0.778 s serve-side first token; 7.95 GB automatic checkpoint (io_uring O_DIRECT) at a 109,725-token frontier |
+| Docker-restart continuation | **109,589 retained tokens served** | rotated server instance; **0.778 s server-side TTFT after restoration**; **24.8 s end-to-end including first-touch restore of the 7.95 GB checkpoint**; **56.6 s model reload separately recorded**; automatic checkpoint frontier 109,725 tokens |
 | Decode throughput | **134.80 tok/s** | 2,048 completion tokens, 38.80% MTP3 acceptance on the technical-writing gate at temperature 0, v0.4.1 receipt; the v0.4.0 receipt measured 144.80 tok/s at 44.10% on the same gate and 152.2 tok/s at 83.3% on ledger retrieval |
 | 130,448-token prefill | **2,186.30 tok/s** | exact planted-needle retrieval; 131,072-token ceiling |
-| Warm follow-up, 109,594-token session | **1.790 s** wall | vs **47.920 s** cold build of the same session ([receipt](measurements/2026-08-30-warm-vs-cold-v04.json)) |
+| Separate warm/cold request pair, 109,594-token session | **1.790 s warm wall time** | vs **47.920 s cold wall time**; one sample per point, not restart duration ([receipt](measurements/2026-08-30-warm-vs-cold-v04.json)) |
 | Pinned-client conformance | **passed** | live status and checkpoint documents accepted verbatim by the validator extracted from the released 18.0.9 client |
 | Fail-closed confinement | **passed** | serve boots only under the sha-pinned io_uring seccomp profile; 18.2 GB artifact re-hashed against declared identity at startup |
+
+The 0.778 s TTFT starts after restoration; it excludes checkpoint restore and model reload.
+It is not comparable to the separate 47.920 s cold request wall time. These receipts establish
+retained-state recovery on that machine, not a subsecond reboot or a 61× restart speedup.
 
 The v0.3.0 receipts below remain bound to the previous runtime bytes (image `63c794e2…`) and are
 the rollback lane's numbers, not this release's:
@@ -423,11 +425,12 @@ replay remains the fallback when no checkpoint exists.
 Checkpoint-backed session durability ships on the RTX 4090 and RTX 3090 native Windows lanes
 (DirectStorage, since v0.3.0) and on the RTX 5090 container (io_uring, since v0.4.0): a
 follow-up continues from restored state after a process restart instead
-of rebuilding the session cold — exactly the delta the warm/cold row measures — and each lane's
+of rebuilding the session cold, and each lane’s
 restart gate binds the exact observed
-restoration above. The RTX 5090 container joins them in v0.4.0: an automatic 7.95 GB checkpoint
-at a 109,725-token frontier restored 109,589 tokens hot across a docker restart on a rotated
-server instance (0.778 s serve-side first token). Upstream,
+restoration above. In the historical v0.4.0 single-machine RTX 5090 run, an automatic
+7.95 GB checkpoint at a 109,725-token frontier restored 109,589 retained tokens across a
+Docker restart: 24.8 s end-to-end including first-touch restore, with the 56.6 s model reload
+recorded separately. The 0.778 s server-side TTFT is after restoration, not restart time. Upstream,
 [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) measured its
 DirectStorage cold restore at 10.1 GB/s (1.51 GiB in 150 ms) on its own artifacts — an
 engine-family capability reference, not a product claim.
@@ -514,8 +517,8 @@ from retained state rather than recomputed prefill.
   130,048-token prompt, not a perplexity curve.
 - **Warm turns skip the re-read.** OMP appends to retained GPU state through stateful OpenAI
   Responses (`previous_response_id`). In that v0.1 campaign, the 37,591-token prefix hit is a whole
-  session prefix the GPU did not re-prefill. A stateless provider route would recompute that prefix
-  on every turn.
+  session prefix the GPU did not re-prefill. Stateless APIs can also reuse matching prefixes
+  through an in-process cache; this measurement does not compare against those implementations.
 - **Correctness does not depend on the cache.** OMP commits its transcript before advancing
   provider state; retained GPU state is an acceleration that can be discarded and replayed.
 

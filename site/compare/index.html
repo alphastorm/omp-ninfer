@@ -10,15 +10,14 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison">
 <meta property="og:description" content="A dated, honest decision guide for local inference backends for coding-agent sessions.">
-<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/compare/">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows, Linux",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
  "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
@@ -58,8 +57,10 @@ Capabilities change quickly — reverify before deciding.</p>
 <p>OMP NInfer transport status updated 2026-09-13 from repository receipts. Checkpoint copying
 and NAS replication work now; they do not imply cross-GPU session migration.
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Restore boundary and evidence</a>.</p>
-<p>NInfer and its GPU ports supply the specialized engine; this project's runtime adds explicit
-state and durable checkpoints. Oh My Pi owns tools and agent orchestration.
+<p>Qwen3.8 27B is the model. <a href="https://github.com/Neroued/ninfer">Neroued’s NInfer</a>
+and its GPU ports supply the specialized engine; this project’s runtime adds explicit
+state and durable checkpoints. Oh My Pi owns tools and agent orchestration. Ordinary
+in-process prefix caching already avoids repeated prefill of matching input in other runtimes.
 <a href="../benchmarks/">Engine throughput and retained-state measurements</a> are separate
 results, not a matched head-to-head speed ranking against these backends.</p>
 <h2>The one-sentence answer</h2>
