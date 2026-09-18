@@ -39,13 +39,13 @@
   </div>
   <div class="main">
     <section>
-      <div class="eyebrow">Same session · docker restart between turns</div>
+      <div class="eyebrow">Historical v0.4.0 · RTX 5090 · request wall time</div>
       <div class="comparison">
-        <div class="metric warm"><strong>0.778 s</strong><span>First token after restart, from the durable checkpoint</span></div>
+        <div class="metric warm"><strong>1.79 s</strong><span>Warm follow-up using retained session state</span></div>
         <div class="versus">vs</div>
-        <div class="metric cold"><strong>47.92 s</strong><span>Cold rebuild of the same 109,594-token session</span></div>
+        <div class="metric cold"><strong>47.92 s</strong><span>Cold request at 109,594 tokens; one sample each</span></div>
       </div>
-      <div class="descriptor"><b>Continue from retained state.</b><span>Qualification-bound · receipt linked below.</span></div>
+      <div class="descriptor"><b>Continue from retained state.</b><span>Not a restart-duration comparison.</span></div>
     </section>
     <aside class="secondary">
       <div class="stat"><strong>144.8</strong><div>decode tokens / second<small>RTX 5090 v0.4.0 · agent-shaped MTP3</small></div></div>

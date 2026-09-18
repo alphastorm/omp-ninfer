@@ -1,16 +1,23 @@
-![OMP NInfer](assets/banner.png)
+# OMP NInfer
 
-**Durable local inference for coding agents** — the qualified appliance for
-[Oh My Pi](https://github.com/can1357/oh-my-pi). It runs Qwen3.8 27B through the NInfer engine
-on one NVIDIA RTX 5090, 4090, or 3090 and preserves explicit OpenAI Responses continuation
-state across process restarts — a durable primitive, not a lucky prefix-cache hit. Qualified
-on all three lanes: measured, hash-pinned, fail-closed.
+**Resume long local Qwen coding sessions from saved model state after an inference-server
+restart.** Qwen3.8 27B is the model, [Neroued’s NInfer](https://github.com/Neroued/ninfer)
+is the inference engine, and [Oh My Pi](https://github.com/can1357/oh-my-pi) is the coding
+agent. This project packages their integration, explicit continuation, and durable checkpoints
+into exact, qualified releases for one NVIDIA RTX 5090, 4090, or 3090.
+
+> **Before installing — v0.7.2 eligibility**
+> - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
+> - **RTX 4090 or RTX 3090:** documented native Windows route.
+> - Use the exact pinned client, runtime, model, and profile in the
+>   [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json).
+>   Other deployments are not supported by implication; check the guide’s memory, disk, and download prerequisites.
 
 <div align="center">
 
-**[Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md)** · **[Download v0.7.1](https://github.com/alphastorm/omp-ninfer/releases/latest)**
+**[Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)** · **[Download v0.7.2](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.7.2)**
 
-[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
+[Lanes](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Performance](docs/PERFORMANCE.md) ·
 [Security](docs/SECURITY.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -34,11 +41,11 @@ on all three lanes: measured, hash-pinned, fail-closed.
 <sub><strong>Private by design:</strong> loopback-only endpoints · bearer-authenticated ·
 fail-closed instead of cloud fallback · every byte hash-pinned</sub>
 
-<sub>A real recorded session on the released RTX 5090 runtime — bug found and fixed, tests
-rerun to green, then a follow-up turn continues from retained GPU state instead of
-re-sending the transcript.</sub>
+<sub>Historical v0.3.0 RTX 5090 coding demo: bug fixed, tests rerun to green, then a
+stateful follow-up. Not a restart demonstration or proof of the current release.
+Idle gaps longer than 1.75 s are compressed; the unchanged MP4 is 15.3 s.</sub>
 
-<img src="docs/media/omp-ninfer-demo-v3.gif" alt="Real recorded OMP coding session against the released RTX 5090 runtime: the agent finds and fixes a ring-buffer bug, reruns the tests to green, then a follow-up turn continues from retained GPU session state through stateful OpenAI Responses rather than re-sending the transcript." width="900">
+<img src="docs/media/omp-ninfer-demo-v3.gif" alt="Historical v0.3.0 RTX 5090 recording: OMP fixes a ring-buffer bug, passes the tests, then answers a stateful follow-up. Idle waits compressed; no server restart is shown." width="900">
 
 <sub><a href="docs/media/omp-ninfer-demo-v3.mp4">MP4</a> · <a href="docs/media/omp-ninfer-demo-v3-poster.png">poster</a> · <a href="docs/media/README.md#canonical-files">provenance and checksums</a></sub>
 
@@ -46,16 +53,22 @@ re-sending the transcript.</sub>
 
 | What changes for you | Released evidence |
 | --- | --- |
-| Retained state outlives the turn — and the process | Warm follow-up **1.790 s vs 47.920 s cold** at a 109,594-token session, and **0.778 s first token after a docker restart** from the durable checkpoint — the current measurement receipts |
+| Retained state outlives the turn — and the process | Historical v0.4.0, one RTX 5090: **109,589 retained tokens** served after restart; **24.8 s end-to-end including first-touch checkpoint restore**, plus a separately measured **56.6 s model reload** |
 | Agent branches share the base, not re-prefill it | Four subagent branches from one 67.7K-token base: **148.7 s → 3.84 s** on v0.4.4, **0.40 s** to first token when the anchor is device-resident |
 | Interactive output is fast | **136.03 tok/s** decode on the qualified RTX 5090 profile (41.20% MTP acceptance at temperature 0 on the technical-writing gate) |
 | Long coding sessions fit | Exact retrieval at a **130,048-token** prompt; 131,072-token ceiling |
 | The route does not escape to cloud | Loopback-only, bearer-authenticated, fail-closed; acceptance-tested |
 | Checkpoints don't stall the session | Export runs off the engine lock on v0.4.4: warm follow-up during checkpoint traffic **15.26 s → 0.91 s**, explicit 5.19 GB save **31.6 s → 13.8 s** |
 
-The warm/cold pair is server-side, one sample per point, bound into the released qualification
-chain on the exact published bytes — not a universal latency claim.
-[Method and receipts](docs/BENCHMARKS.md).
+The historical v0.4.0 RTX 5090 receipt records **0.778 s server-side time to first token
+after restoration**, not checkpoint restore or restart time. The **24.8 s** boundary includes
+first-touch restoration of a **7.95 GB** checkpoint; the **56.6 s model reload** is separate.
+A different request pair measured **47.920 s cold wall time vs 1.790 s warm follow-up wall time**
+at a 109,594-token session. These single-machine samples are not a same-boundary comparison
+of 0.778 s with 47.920 s, a restart speedup ratio, or a subsecond reboot.
+[Restart receipt](docs/measurements/2026-08-30-rtx5090-durable-qualification.json) ·
+[Warm/cold receipt](docs/measurements/2026-08-30-warm-vs-cold-v04.json) ·
+[Method and other measurements](docs/BENCHMARKS.md).
 
 **Use OMP NInfer when:** you use OMP, own a qualified card, want Qwen3.8, and care about private,
 long-lived coding sessions.
@@ -89,8 +102,8 @@ its required KV) is checkpointed to disk and restored after process death on **a
 [109,589 tokens restored across a docker restart on the
 5090](docs/measurements/2026-08-30-rtx5090-durable-qualification.json), [102,075 tokens restored
 on the 4090](releases/v0.2.0-beta.1/qualification/rtx4090.json), [310 MB checkpoint restore on
-the 3090](docs/measurements/2026-08-30-rtx3090-parity.json). A prefix cache cannot outlive its
-process; a checkpoint can.
+the 3090](docs/measurements/2026-08-30-rtx3090-parity.json). An in-memory-only cache is lost
+with its process; this project restores explicitly checkpointed continuation state.
 
 **Checkpoints already leave the machine.** The shipped sync tool exports verified generations,
 copies them to another host or NAS, and imports them back to local storage for restore. Recovery
@@ -110,8 +123,7 @@ prefix, that reuse is an implicit longest-prefix guess that dies with the proces
 
 OMP NInfer ships the third option as a small set of qualified lanes — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
-RTX 5090, RTX 4090, or RTX 3090 — with three properties the exact qualified releases do not
-give you together elsewhere:
+RTX 5090, RTX 4090, or RTX 3090 — with three properties qualified together:
 
 1. **Continuation is explicit and durable, not guessed.** OMP drives NInfer through stateful
    OpenAI Responses (`previous_response_id`): continuation is addressed by transactional lineage —
@@ -129,8 +141,6 @@ give you together elsewhere:
 
 ## Measured, not estimated
 
-![Measured evidence: 1.79-second warm follow-up versus 47.92-second cold prefill at 109,594 tokens, 0.778-second first token after a docker restart from the durable checkpoint, 144.8-token-per-second RTX 5090 decode, exact 130,448-token recall, and three qualified durable GPU lanes](assets/benchmarks.png)
-
 Historical v0.6.8 profiles and receipts in
 [`qualification.json`](releases/v0.6.8/qualification.json):
 
@@ -139,7 +149,7 @@ Historical v0.6.8 profiles and receipts in
 | RTX 5090 decode | **139.78 tok/s** server-side over 2,048 tokens at temperature 0 on the lifecycle-started v0.6.4 candidate (134.80 tok/s wall); MTP3, 41.20% acceptance, 2.24 tokens per round |
 | RTX 5090 prefill | **2,178.80 tok/s** at 130,048 tokens, exact retrieval, cold process, on the v0.6.4 candidate (2,177.70 tok/s again on the published image through the documented tunnel) |
 | RTX 5090 fanout | **4/4** sibling forks on the base anchor at 57,853 and 67,681 tokens (medians 1.41 s and 1.82 s), and **4/4 again after a verified restart** (resume 3.45 / 3.65 s, forks ~1.4 s) — a 5.2 GB session restores in 3.6-3.8 s and a flipped payload byte is refused |
-| Warm vs cold follow-up | **1.790 s** vs 47.920 s at a 109,594-token session, and **0.778 s** first token after a process restart — v0.4.0 qualification, server-side, one sample per point |
+| Warm vs cold follow-up | **1.790 s warm wall time vs 47.920 s cold wall time** at a 109,594-token session — historical v0.4.0, one RTX 5090, one sample per point; this request pair does not measure restart duration |
 | RTX 3090 native | **90.66 tok/s** decode, 93.43% MTP3 acceptance, exact 130,048-token retrieval at the 131,072 ceiling, 310 MB durable restart, durable v0.2.5-beta.1 train with origin-authenticated checkpoints, 300.2 W observed peak |
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
@@ -191,19 +201,20 @@ machine and profile, not universal GPU claims.
 Pick your lane: the RTX 5090 container route needs Docker with the NVIDIA runtime on Windows 11 +
 WSL2; the RTX 4090 and RTX 3090 native Windows routes install their exact pinned packages. Every
 route needs one published OMP client and about 40 GiB free disk.
-Use the exact v0.7.1 tagged guide and manifest together; do not mix releases.
+Use the exact v0.7.2 tagged guide and
+[manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
+together; do not mix releases.
 
 ```powershell
-git clone --branch v0.7.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.7.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 python3 scripts/verify_release.py --require-ready
 ```
 
-Then follow the [v0.7.1 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.1/docs/QUICKSTART.md):
-install the checksummed OMP client, fetch the
-hash-pinned model, start the digest-pinned NInfer container, add the provider fragment, and run the
-documented acceptance checks. The same document contains managed macOS SSH, native Linux, and
-native Windows 3090/4090 paths.
+Then follow the [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md):
+install the checksummed OMP 18.0.9 client, fetch the hash-pinned model, start your lane’s
+pinned runtime, add the provider fragment, and run the documented acceptance checks. The guide
+distinguishes the supported Windows runtime routes and their documented client connections.
 
 ## How it works
 
@@ -261,7 +272,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings | Upstream of the qualified native 4090 beta branch |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the released preview and fresh parity candidate |
 
-All three lanes are qualified releases in the v0.7.1 manifest, each bound to its exact package,
+All three lanes are qualified releases in the v0.7.2 manifest, each bound to its exact package,
 receipt, and profile. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard

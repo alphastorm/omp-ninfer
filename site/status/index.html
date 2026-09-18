@@ -10,15 +10,14 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer status — current qualified release and lanes">
 <meta property="og:description" content="Current stable release v0.7.2: bounded restore reclaim, qualified RTX 5090, 4090, and 3090 lanes, and measured durability limits.">
-<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/status/">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows, Linux",
+ "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 and RTX 3090 native)",
  "description": "Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qwen3.8 27B via the NInfer engine on one RTX 5090, 4090, or 3090, with restart-resumable OpenAI Responses state.",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
@@ -48,7 +47,7 @@ components, with pre-cut substitutions recorded. OMP remains 18.0.9; RTX 3090, t
 serving settings and host-memory floors are unchanged.</p>
 <table>
 <tr><th>Lane</th><th>Form</th><th>Context ceiling</th><th>Notes</th></tr>
-<tr><td>RTX 5090</td><td>Linux container (Docker/WSL2)</td><td>131,072</td><td>Durable container; vision available</td></tr>
+<tr><td>RTX 5090</td><td>Windows 11 + Docker Desktop/WSL2 Linux container</td><td>131,072</td><td>Durable container; vision available</td></tr>
 <tr><td>RTX 4090</td><td>Native Windows service</td><td>131,072</td><td>MTP3 profile; DirectStorage checkpoints; text-only</td></tr>
 <tr><td>RTX 3090</td><td>Native Windows service</td><td>131,072</td><td>64K comfortable working class; text-only</td></tr>
 </table>

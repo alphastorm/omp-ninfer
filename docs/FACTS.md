@@ -43,9 +43,9 @@ All of these should be materially true:
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Linux container (Docker/WSL2) | 131,072 | v0.7.1 binds component `v0.6.5-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; the historical two-session restore boundary is recorded below |
-| RTX 4090 | native Windows service | 131,072 | v0.7.1 binds component `v0.6.4-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
-| RTX 3090 | native Windows service | 131,072 | unchanged durable `v0.2.5-qwen38-3090-beta.1` lane (origin-authenticated checkpoints, bound by v0.7.1) |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | v0.7.2 binds component `v0.6.7-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows service | 131,072 | v0.7.2 binds component `v0.6.5-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 3090 | native Windows service | 131,072 | unchanged durable `v0.2.5-qwen38-3090-beta.1` lane (origin-authenticated checkpoints, bound by v0.7.2) |
 
 ## v0.7.2 — bounded restore reclaim
 
@@ -241,19 +241,26 @@ Loopback-only listeners; bearer authentication with a user-only key file; fail-c
 cloud fallback; every byte (model, binary, image, config) hash-pinned by the release manifest;
 remote lanes reached through authenticated SSH local forwards.
 
-## Measured proof (v0.4.0, RTX 5090 lane)
+## Historical measured proof (RTX 5090, single-machine samples)
 
-- 109,589 tokens restored after a docker restart; **0.778 s** to first token from the durable
-  checkpoint vs **47.920 s** fresh-process cold rebuild.
-- **144.80 tok/s** decode on the agent-shaped qualification gate (44.10% MTP acceptance);
+- **v0.4.0 restart receipt:** 109,589 retained tokens served after a Docker restart;
+  **0.778 s server-side time to first token after restoration**, not restore or restart time.
+  **24.8 s end-to-end** includes first-touch restoration of the **7.95 GB** checkpoint;
+  **56.6 s model reload** was recorded separately
+  ([receipt](measurements/2026-08-30-rtx5090-durable-qualification.json)).
+- **Separate v0.4.0 request pair:** **47.920 s cold wall time vs 1.790 s warm follow-up wall time**,
+  at a 109,594-token session ([receipt](measurements/2026-08-30-warm-vs-cold-v04.json)).
+  Comparing the cold wall time to the post-restoration TTFT would mix timing boundaries;
+  neither receipt demonstrates a subsecond reboot or a 61× restart speedup.
+- **v0.4.0: 144.80 tok/s** decode on the agent-shaped qualification gate (44.10% MTP acceptance);
   152.2 tok/s at 83.3% acceptance on the retrieval workload.
 - Exact needle retrieval at a **130,048-token** prompt (2,180.3 tok/s cold on the v0.5.1 runtime, 2,207.10 on v0.4.8;
   the v0.4.0 gate measured 2,186.30 tok/s at 130,448 tokens).
 - **138.16 tok/s** decode at 41.2% MTP acceptance on the v0.5.1 technical-writing gate (136.03 on v0.4.8).
 - Full receipts: [benchmarks](BENCHMARKS.md) · [release manifest](../releases/v0.4.0/manifest.json).
 
-Warm/cold figures are always retained state versus fresh-process cold start — never versus an
-ordinary in-process follow-up.
+The warm/cold request pair compares retained state with a fresh cold build, not restart
+duration or a speed comparison against another runtime’s ordinary in-process prefix cache.
 
 ## Known limitations
 
@@ -272,7 +279,7 @@ ordinary in-process follow-up.
 
 ## Primary evidence
 
-[Public release manifest](../releases/v0.6.10/manifest.json) ·
+[Public release manifest](../releases/v0.7.2/manifest.json) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [Quickstart](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

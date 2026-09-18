@@ -32,29 +32,29 @@
 <body>
 <div class="canvas chart">
   <div class="head">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Benchmarks · time to first token</span></div>
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Historical measurements · distinct timing boundaries</span></div>
     <div class="eyebrow">Lower is better</div>
   </div>
   <div class="main">
-    <div class="title">Session state survives the process now.<span>v0.4.0 durable checkpoints · one 109,594-token session, server-side</span></div>
+    <div class="title">Retained state, with restoration costs disclosed.<span>v0.4.0 · one RTX 5090 · one sample per point</span></div>
     <div class="session">
       <div class="bars">
         <div class="label">Warm follow-up vs cold rebuild</div>
-        <div class="row hot"><div class="bar warm" style="width: 8px;"></div><div class="value">1.79 s<small>warm · previous_response_id</small></div></div>
-        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">47.92 s<small>cold · full rebuild</small></div></div>
+        <div class="row hot"><div class="bar warm" style="width: 3.2%;"></div><div class="value">1.79 s<small>warm request wall time</small></div></div>
+        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">47.92 s<small>cold request wall time</small></div></div>
       </div>
-      <div class="ratio"><strong>~192×</strong><span>faster first token</span></div>
+      <div class="ratio"><strong>109K</strong><span>tokens in this request pair</span></div>
     </div>
     <div class="session">
       <div class="bars">
-        <div class="label">After docker restart</div>
-        <div class="row hot"><div class="bar warm" style="width: 4px;"></div><div class="value">0.778 s<small>first token · restored from checkpoint (7.95 GB)</small></div></div>
-        <div class="row"><div class="bar cold" style="width: 86%;"></div><div class="value">47.92 s<small>cold · rebuild without the checkpoint</small></div></div>
+        <div class="label">Separate restart observation: 109,589 retained tokens</div>
+        <div class="row"><div class="value">24.8 s<small>end-to-end including first-touch checkpoint restore</small></div></div>
+        <div class="row"><div class="value">56.6 s<small>separately recorded model reload</small></div></div>
       </div>
-      <div class="ratio"><strong>~77×</strong><span>faster first token</span></div>
+      <div class="ratio"><strong>0.778 s</strong><span>server TTFT after restoration</span></div>
     </div>
   </div>
-  <div class="foot"><span>Qualification-bound · one sample per point · server-side vantage · RTX 5090</span><strong>docs/BENCHMARKS.md →</strong></div>
+  <div class="foot"><span>Different timing boundaries are not speedup ratios · not a subsecond restart</span><strong>docs/BENCHMARKS.md →</strong></div>
 </div>
 </body>
 </html>
