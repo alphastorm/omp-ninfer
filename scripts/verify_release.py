@@ -643,7 +643,7 @@ REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
 NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
 NINFER_RELEASE_TAG_RE = re.compile(
     r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3|0\.4\.4|0\.4\.5|0\.5\.1|0\.6\.2|0\.6\.3|0\.6\.4"
-    r"|0\.6\.5|0\.6\.6|0\.6\.7)-qwen38-5090-beta\.[1-9][0-9]*$"
+    r"|0\.6\.5|0\.6\.6|0\.6\.7|0\.6\.8)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
 CHECKSUM_REQUIRED_ASSET_FIELDS = (
     "package",

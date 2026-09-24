@@ -1,0 +1,209 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger",
+  "schema_version": 1,
+  "review_sequence_id": "CRS-20260924-ninfer-durable-evict",
+  "subject": "alphastorm/ninfer d125ffffd87ef38d9a221f9830e19dfa274ddd34..c5fe23dbd717c209f2ad47908ffbc423216b8890: retried transient automatic checkpoint refusals, save-before-evict, quota re-save that keeps other sessions' checkpoints, and named export refusal gates (alphastorm/omp-ninfer#45, #46)",
+  "reviews": [
+    {
+      "review_id": "CR-20260924-ninfer-durable-evict-r1",
+      "review_mode": "initial",
+      "review_class": "full-council",
+      "subject_commit": "c5fe23dbd717c209f2ad47908ffbc423216b8890",
+      "reviewers": [
+        {
+          "reviewer": "daybreak-blue",
+          "model_family": "gpt",
+          "authority": "independent_evidence"
+        },
+        {
+          "reviewer": "gemini",
+          "model_family": "gemini",
+          "authority": "supplemental_evidence"
+        },
+        {
+          "reviewer": "grok",
+          "model_family": "grok",
+          "authority": "supplemental_evidence"
+        },
+        {
+          "reviewer": "claude",
+          "model_family": "claude",
+          "authority": "supplemental_evidence"
+        }
+      ],
+      "outcome": "closed for remediation: two in-scope P1s (daybreak-blue R1, R2) and one P2 (R3)"
+    },
+    {
+      "review_id": "CR-20260924-ninfer-durable-evict-r2",
+      "review_mode": "remediation",
+      "review_class": "lead-close",
+      "subject_commit": "a4d26ccb207bd0edb88ee126cde30f76639d93e4",
+      "outcome": "closed; every remediated finding verified red on c5fe23db and green on a4d26ccb (store regression; RTX 5090 publication-barrier tracer, docs/measurements/2026-09-24-publication-barrier.json); no in-scope P0/P1 remains"
+    }
+  ],
+  "release_source": {
+    "commit": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "relation": "a4d26ccb plus one packaging-only commit advancing the RTX 4090 lane specification, server configuration and Windows release notes to v0.6.6-beta.1; no runtime source changed"
+  },
+  "dispositions": [
+    {
+      "id": "daybreak-blue-R1",
+      "severity": "P1",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Once any reclamation in a quota pass has failed, the pass never evicts another session's current checkpoint; it refuses the save (pre-publish) or leaves usage over quota by the stuck bytes (post-publish, already bounded). Two red/green store regressions.",
+      "rationale": "In-scope P1: the #46 over-deletion returns whenever one cleanup fails. Refusing the save keeps the hard cap without destroying the only copy of an evicted session; one-condition change, no new state.",
+      "remediation_commit": "30cfdf83"
+    },
+    {
+      "id": "daybreak-blue-R2",
+      "severity": "P1",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "ResponseStore tracks responses whose record is still being published (begin at submission, end after put or when the handler gives up); the handler reports each victim Settled or Pending; a victim whose publication is pending, or whose save hit a transient gate, stays in memory and is asked for again on a later pass; a response that finished without being stored settles immediately.",
+      "rationale": "In-scope P1 for the newest-turn asset. Waiting on real publication state removes the arbitrary 2 s bound without starving admission on never-stored turns; the waiting request is bounded by its own deadline.",
+      "remediation_commit": "a4d26ccb"
+    },
+    {
+      "id": "daybreak-blue-U1",
+      "severity": "P1",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "C++ reverse destruction order of automatic objects holds on returns and unwinds alike."
+    },
+    {
+      "id": "claude-R1",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with daybreak-blue-R1: same change and regressions (stuck .tombstones entry during an equal-size re-save).",
+      "rationale": "Duplicate root cause; severity taken from the strong critic.",
+      "remediation_commit": "30cfdf83"
+    },
+    {
+      "id": "claude-U1",
+      "severity": "P2",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "The exclusion only ever applies to requests that become the session's indexed owner."
+    },
+    {
+      "id": "claude-U2",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with daybreak-blue-R2.",
+      "rationale": "Same root cause.",
+      "remediation_commit": "a4d26ccb"
+    },
+    {
+      "id": "claude-U3",
+      "severity": "P2",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "Verified against the implementation outside the bound paths; only the stale comment was in the delta and is now accurate."
+    },
+    {
+      "id": "claude-U5",
+      "severity": "P2",
+      "result": "unresolved",
+      "disposition": "defer",
+      "change": "Release qualification on both lanes will force a checkpoint-tagged eviction (more resident long sessions than fit) and record saved-before-eviction, refused 0 and resume.",
+      "rationale": "Device-only integration path; belongs to the exact-byte qualification gate, not the source review."
+    },
+    {
+      "id": "daybreak-blue-R3",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Retry bookkeeping moves into a small AutomaticRetryBudget (serve/checkpoint_policy.h) that every terminal outcome settles, so it only holds sessions with a save still queued; unit test proves it drains to empty.",
+      "rationale": "P2 memory growth under session churn; smallest closure is erase-on-every-terminal-path, made testable.",
+      "remediation_commit": "5c18af62"
+    },
+    {
+      "id": "grok-U1",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with daybreak-blue-R2.",
+      "rationale": "Same root cause.",
+      "remediation_commit": "a4d26ccb"
+    },
+    {
+      "id": "grok-U2",
+      "severity": "P2",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "Duplicate of claude-U3."
+    },
+    {
+      "id": "claude-R2",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Folded into the daybreak-blue-R2 outcome contract: a transient refusal (checkpoint_refusal_is_transient) reports Pending instead of Settled.",
+      "rationale": "Zero extra mechanism once outcomes exist; aligns the saver with its own contract.",
+      "remediation_commit": "a4d26ccb"
+    },
+    {
+      "id": "claude-R3",
+      "severity": "P3",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "Observable exit status for an evicted, unsaved session is unchanged (refused); the only behaviour change is the on-disk skip the packet names."
+    },
+    {
+      "id": "claude-R4",
+      "severity": "P3",
+      "result": "design decision",
+      "disposition": "accept",
+      "change": "none",
+      "rationale": "Availability cost is bounded by the admitted request's footprint (one or two ceiling checkpoints) and the saves complete regardless; recorded as a release limitation."
+    },
+    {
+      "id": "claude-U4",
+      "severity": "P3",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "Duplicate of daybreak-blue-U1."
+    },
+    {
+      "id": "claude-U6",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "defer",
+      "change": "none",
+      "rationale": "P3 bounded delay of other automatic saves; pressure saves do not depend on the automatic queue."
+    },
+    {
+      "id": "gemini-U1",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with daybreak-blue-R2: no fixed publication bound remains.",
+      "rationale": "Same root cause.",
+      "remediation_commit": "a4d26ccb"
+    },
+    {
+      "id": "gemini-U2",
+      "severity": "P3",
+      "result": "design decision",
+      "disposition": "accept",
+      "change": "none",
+      "rationale": "Duplicate of claude-R4; shipped profiles run max_concurrency 1, so no other lane is paused."
+    }
+  ],
+  "residual_risks": [
+    "A request waiting behind a pending victim can time out while victims are saved or while a slow reader finishes publishing a victim's turn; the saves complete and a retry admits.",
+    "Ceiling-class save-before-evict was exercised on the RTX 5090; the RTX 4090 lane runs the same source through its own qualification phases.",
+    "The transient-refusal branch of save-before-evict is not exercised at runtime.",
+    "A never-stored newer engine tag costs up to six automatic requeues."
+  ],
+  "review_records_retained": "The lead's review records, packets and reviewer outputs are retained outside the repository; this ledger records their dispositions."
+}

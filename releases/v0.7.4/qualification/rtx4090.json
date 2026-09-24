@@ -1,0 +1,243 @@
+{
+  "artifact_type": "ninfer_windows_release_qualification",
+  "schema_version": 1,
+  "status": "passed",
+  "qualified_utc": "2026-09-24T13:43:58Z",
+  "release_id": "qwen38-4090-native-v0.6.6-beta.1",
+  "profile": "MTP3",
+  "identity": {
+    "build_type": "Release",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "model_id": "qwen3.8-27b",
+    "target": "qwen3_8_27b",
+    "weights_id": "groupwise-int",
+    "gpu_index": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "source_dirty": false,
+    "binary_sha256": "7a923c21f73f03583ce25a2311d39818aeba82ce5bf7efaf508bfa8b4a1df41a",
+    "build_profile": "native-v0.6.6-beta.1-rtx4090",
+    "config_sha256": "d735b3d6e119c3fb198aa8be143c7c70d01d20935e458d8d98bd3b68e23c8713",
+    "cuda_architecture": "89",
+    "deployment_profile": "qwen38-4090-native-v0.6.6-beta.1",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "patch_stack_sha": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "lineage_base_sha": "d956e6d61174175684d42e73f1a16fad2a3f229c",
+    "source_commit": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "server_binary_sha256": "7a923c21f73f03583ce25a2311d39818aeba82ce5bf7efaf508bfa8b4a1df41a",
+    "configuration_sha256": "d735b3d6e119c3fb198aa8be143c7c70d01d20935e458d8d98bd3b68e23c8713"
+  },
+  "configuration": {
+    "public_model_id": "qwen3.8-27b",
+    "max_context": 131072,
+    "kv_capacity": 131072,
+    "kv_dtype": "int8",
+    "prefill_chunk": 2048,
+    "speculative_backend": "mtp",
+    "speculative_draft_tokens": 3,
+    "concurrency": 1,
+    "device_state_slots": 2,
+    "host_state_slots": 24,
+    "host_kv_mib": 11264,
+    "max_private_continuations": 8,
+    "managed_stop": "stop-event",
+    "graceful_stop_timeout_seconds": 900
+  },
+  "protocol": {
+    "artifact_type": "ninfer_agent_protocol_smoke",
+    "checks": {
+      "anthropic_count_tokens": true,
+      "authenticated_status": true,
+      "duplicate_tool_names_rejected": true,
+      "malformed_identity_rejected": true,
+      "private_cache_session_isolation": true,
+      "responses_continuation": true,
+      "responses_cross_session_isolation": true,
+      "responses_descendant_survival": true,
+      "responses_parent_deletion": true,
+      "responses_stored_route_isolation": true,
+      "responses_streaming_checkpoint": true,
+      "streaming_parity": true,
+      "tool_result_array": true,
+      "typed_tool_arguments": true,
+      "unsupported_structured_output_rejected": true
+    },
+    "identity": {
+      "binary_sha256": "7a923c21f73f03583ce25a2311d39818aeba82ce5bf7efaf508bfa8b4a1df41a",
+      "config_sha256": "d735b3d6e119c3fb198aa8be143c7c70d01d20935e458d8d98bd3b68e23c8713",
+      "deployment_profile": "qwen38-4090-native-v0.6.6-beta.1",
+      "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "protocol_under_pool_pressure": {
+    "artifact_type": "ninfer_agent_protocol_smoke",
+    "why": "The shipped Host StateImage pool hides a class of admission defect that only appears when StateImage capacity binds. The same fifteen checks run against the same installed bytes with the Host pool reduced to a third of the shipped size.",
+    "device_state_slots": 2,
+    "host_state_slots": 8,
+    "checks_passed": 15,
+    "status": "passed"
+  },
+  "long_session": {
+    "prompt_tokens": 130048,
+    "completion_tokens": 17,
+    "elapsed_seconds": 91.11817340005655,
+    "exact_output": "ORCHID=493817; COLOR=COBALT",
+    "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
+  },
+  "persistence": {
+    "managed_stop": {
+      "elapsed_seconds": 2.135,
+      "exit_code": null,
+      "forced": false,
+      "graceful_wait_seconds": 900,
+      "mode": "stop-event",
+      "outcome": "graceful"
+    },
+    "explicit_control": {
+      "cached_input_tokens": 42,
+      "checkpoint_save": "explicit_endpoint",
+      "exact_output": "CHECKPOINT-NATIVE-731942",
+      "frontier_tokens": 42,
+      "generation": "1790257101176-0",
+      "save_bytes": 310213340
+    },
+    "managed_stop_flush": {
+      "cached_input_tokens": 45,
+      "checkpoint_save": "shutdown_flush",
+      "exact_output": "MANAGED-STOP-FLUSH-408137",
+      "state_after_restart": "available",
+      "state_before_stop": "missing"
+    },
+    "checkpoint_files": 10,
+    "checkpoint_bytes": 310213433,
+    "restart_seconds": 74.40478480001912,
+    "process_replaced": true,
+    "restored_cached_input_tokens": 42,
+    "exact_output": "CHECKPOINT-NATIVE-731942",
+    "note": "The exact 1c17c3fa packaged binary replaced its process and restored the explicitly saved 42-token control and the previously unpublished 45-token session: the latter was missing before the managed stop and available after the restart. The stop was graceful and did not force termination. This short-session gate is not a claim of loss-free shutdown for every live process session."
+  },
+  "rollback": {
+    "directions": 2,
+    "intermediate_release": "qwen38-4090-native-v0.6.5-beta.1-f098cc3ef8cd",
+    "active_release_after": "qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf",
+    "stops": [
+      {
+        "exit_code": null,
+        "forced": false,
+        "mode": "stop-event",
+        "outcome": "graceful",
+        "release": "qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf"
+      },
+      {
+        "exit_code": null,
+        "forced": false,
+        "mode": "stop-event",
+        "outcome": "graceful",
+        "release": "qwen38-4090-native-v0.6.5-beta.1-f098cc3ef8cd"
+      }
+    ],
+    "candidate_stop_mode": "stop-event",
+    "predecessor_stop_mode": "stop-event",
+    "note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf and predecessor qwen38-4090-native-v0.6.5-beta.1-f098cc3ef8cd. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
+    "status": "passed"
+  },
+  "state_security": {
+    "artifact_type": "ninfer_windows_state_security_regression",
+    "schema_version": 2,
+    "status": "passed",
+    "root_owner_sid": "S-1-5-32-544",
+    "root_dacl_protected": true,
+    "clean_default_managed_parent_creations": 2,
+    "atomic_race_collision_rejections": 1,
+    "raced_state_recursive_deletions": 0,
+    "null_dacl_rejections": 1,
+    "low_privilege_effective_read_denials": 2,
+    "low_privilege_effective_write_denials": 2,
+    "precreated_root_rejections": 1,
+    "unowned_root_rejections": 1,
+    "root_junction_rejections": 1,
+    "child_junction_rejections": 1,
+    "preplanted_gpu_owner_rejections": 1,
+    "installer_prewrite_root_rejections": 3,
+    "active_interactive_gpu_rejections": 1,
+    "qualified_power_limit_w": 0,
+    "restored_power_limit_w": 450,
+    "gpu_power_evidence_class": "real-trusted-absolute-nvidia-smi",
+    "absolute_nvidia_shim_interceptions": 0,
+    "gpu_power_fixture_calls": 0,
+    "prepared_lease_restore_assertions": 0,
+    "request_jsonl_under_protected_state": true,
+    "request_jsonl_effective_access_denials": 2,
+    "managed_release_acl_state_assertions": 9,
+    "managed_request_log_acl_state_assertions": 9,
+    "managed_rollback_directions": 0,
+    "retained_state_helper_hash_assertions": 0,
+    "populated_root_status_milliseconds": 462,
+    "shipped_test_bypass": false,
+    "shipped_scripts_scanned": 4,
+    "forbidden_hook_patterns_scanned": 10
+  },
+  "golden_equivalent": {
+    "artifact_type": "ninfer_omp_golden_equivalent_receipt",
+    "omp": {
+      "transport": "openai-responses",
+      "version": "omp/18.2.3",
+      "events": 54,
+      "typed_tool_name": "read",
+      "tool_results": 1
+    },
+    "oracles": {
+      "exact_visible_final_answer": "passed",
+      "typed_tool_invocation": "passed",
+      "tool_result_continuation": "passed"
+    },
+    "raw_transcript_included": false,
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "benchmark_c1": {
+    "prompt_tokens": 4541,
+    "completion_tokens": 1024,
+    "prefill_tokens_per_second": 2113.177623957227,
+    "decode_tokens_per_second": 153.43668122931618,
+    "mtp_acceptance_percent": 87.58865248226951,
+    "wall_seconds": 8.846545099979267,
+    "max_memory_used_mib": 22774,
+    "max_power_w": 454.57,
+    "max_temperature_c": 65,
+    "max_gpu_utilization_percent": 100
+  },
+  "deterministic_gates": {
+    "protocol": "passed",
+    "protocol_under_pool_pressure": "passed",
+    "long_session": "passed",
+    "persistence": "passed",
+    "rollback": "passed",
+    "state_security": "passed",
+    "golden_equivalent": "passed",
+    "benchmark_c1": "passed"
+  },
+  "limitations": [
+    "One active request per profile; the lane ships --max-concurrency 1 and no concurrency claim is made.",
+    "Automatic checkpoints remain best effort under live traffic. Transient refusals retry up to six times per completed turn, and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved. The measured restart gate proves the two short target sessions survived, not globally loss-free shutdown.",
+    "Save-before-evict with ceiling-class sessions was exercised on the RTX 5090 only (docs/measurements/2026-09-24-durable-session-eviction.json, docs/measurements/2026-09-24-publication-barrier.json). This lane's window runs the same runtime source through its own phases and did not construct a ceiling-class eviction.",
+    "Restore may reclaim a resident session only when its latest checkpoint is reproducible. Restore and response-store capacity refusal remain possible. The qualified 11264 MiB host-KV pool and 32768 MiB declared host-memory floor are unchanged; no smaller-host profile is qualified.",
+    "The C1 benchmark fixture (28,000 characters of one repeated sentence) is trajectory-sensitive: its acceptance and decode rate move with changes in prefill summation order or fixture length (docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json).",
+    "Measured numbers apply only to this package, this machine, and this profile."
+  ],
+  "beta_qualified": true,
+  "package": {
+    "filename": "ninfer-rtx4090-native-v0.6.6-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "sha256": "cd9ab90f1a030424fcbe1025ad4b6240c7a14760759df873e3a60002232924ac",
+    "bytes": 572698181,
+    "sbom_sha256": "07c22c94d970ef7051aad85fc9fb91e2269e4ef497110814790c01ccec505d44",
+    "installer_sha256": "2b5fb89077aec856cb0df0764ea6619a52ec86dafa73b4f564194eb018e53b67",
+    "controller_sha256": "d3b53b1e9a8b3f9e085f8786c28905289a48890c049f05cac25ba14ae0e69c25",
+    "gpu_owner_controller_sha256": "3921ad65eb500d6879dc160371246aef571bbda36e7d6741860a43af7040feac",
+    "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b"
+  }
+}

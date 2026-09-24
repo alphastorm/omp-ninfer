@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Durable-session runtime (both lanes)
+
+- Rebind RTX 5090 to `v0.6.8-qwen38-5090-beta.1` (image
+  `sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447`) and RTX 4090 to
+  `v0.6.6-qwen38-4090-beta.1` (package `cd9ab90f`), both from source
+  `1c17c3facfbfd1243cf7711a412119302e6dbd74`. The OMP 18.2.3 client, model, serving settings and
+  memory floors are unchanged.
+- Live sessions survive a graceful stop
+  ([#45](https://github.com/alphastorm/omp-ninfer/issues/45),
+  [#46](https://github.com/alphastorm/omp-ninfer/issues/46)): transient automatic checkpoint
+  refusals retry once the engine quiesces; admission saves a session's newest turn before
+  evicting it, waiting while that turn's reply is still being stored; re-saving a session under
+  the disk quota keeps other sessions' only checkpoints, including when a cleanup fails; and a
+  graceful stop counts a session already on disk as nothing to save. On the published RTX 5090
+  image the EXP-050 workload stopped with `saved 1, nothing to save 3, refused 0` and all four
+  stored sessions resumed from their checkpoints
+  ([EXP-050](docs/measurements/2026-09-24-durable-session-eviction.json),
+  [EXP-051](docs/measurements/2026-09-24-publication-barrier.json)).
+- Saving before eviction delays the admitting request, about 6.5 s per 126K-token session on the
+  RTX 5090; automatic checkpoints remain best effort.
+
 ### Added
 
 - `scripts/engine_window_compare.py` records every session's newest stored response, and

@@ -1,0 +1,306 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-09-24T13:25:35Z",
+  "identity": {
+    "binary_sha256": "72aa57dd147ef95ca3574ec4b550fb46676690d704bb9422ba0061d23f1f0ad6",
+    "build_profile": "appliance-local",
+    "build_type": "Release",
+    "config_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.7.0",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131072,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3
+  },
+  "vram_used_mib_idle": null,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 58.15,
+      "tokens_per_second_wall": 2236.4,
+      "vram_used_mib_after": null,
+      "server_prefix_cache_hit_tokens": 0,
+      "server_prefix_reuse_path": "root",
+      "server_computed_prefill_tokens": 130048,
+      "server_prefill_seconds": 58.008622765000005,
+      "cold": true
+    },
+    "decode": {
+      "request_id": "cf71c55313e2defadca17600691f5797e43fd29dad806f16cd4f838ca28db62e",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 14.857,
+      "completion_tokens_per_second_wall": 137.85,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 14.72983299199999,
+      "decode_tokens_per_second": 139.04,
+      "mtp_acceptance_rate": 0.412,
+      "mtp_tokens_per_round": 2.24,
+      "speculative": {
+        "accepted_per_position": [
+          597,
+          340,
+          193
+        ],
+        "accepted_tokens": 1130,
+        "backend": "mtp",
+        "draft_window": 3,
+        "drafted_tokens": 2745,
+        "fallback_steps": 1,
+        "rounds": 916
+      }
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": null,
+  "transient_retries": 0,
+  "release_evidence": {
+    "release": "v0.7.4",
+    "release_tag": "v0.6.8-qwen38-5090-beta.1",
+    "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+    "qualified_source": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "evidence_interpretation": "Every gate and probe here ran the published image by digest, pulled anonymously, with ninfer-serve 72aa57dd verified inside and the shipped qwen38-5090-v0.7.0 serving arguments (configuration 762e6bf4); nothing is carried from v0.7.2. The profile tool's own VRAM command found no nvidia-smi on its PATH and recorded null; the window's identity capture after load read 28144 of 32607 MiB.",
+    "vram_used_mib_after_load": 28144,
+    "additional_probes": {
+      "fanout-57k": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 67681,
+          "cold_prefill_s": 25.299,
+          "checkpoint_save_s": 5.33,
+          "checkpoint_bytes": 5188026327,
+          "hot_fork_median_s": 0.904,
+          "hot_fork_max_s": 1.048,
+          "restart_ready_s": 31.7,
+          "post_restart_resume_s": 3.12,
+          "warm_start_first_fork_s": 0.867,
+          "warm_start_fork_median_s": 0.772,
+          "warm_start_fork_max_s": 0.772
+        },
+        "receipt_sha256": "6f153d7ba84764956559942069020727c51f8e2b1d4275b003bd850435081d62"
+      },
+      "fanout-67k": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 79957,
+          "cold_prefill_s": 31.469,
+          "checkpoint_save_s": 5.51,
+          "checkpoint_bytes": 6044083057,
+          "hot_fork_median_s": 1.051,
+          "hot_fork_max_s": 2.99,
+          "restart_ready_s": 34.5,
+          "post_restart_resume_s": 4.73,
+          "warm_start_first_fork_s": 0.798,
+          "warm_start_fork_median_s": 0.805,
+          "warm_start_fork_max_s": 0.818
+        },
+        "receipt_sha256": "72b4dfd1eb608022f50deb650d26e6e30d41deacd49b380d01d693e330d0b82a"
+      },
+      "warm-arrival": {
+        "exit_code": 0,
+        "summary": [
+          {
+            "order": "resume-first",
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 25.677,
+            "pre_restart_fork": [
+              "private_endpoint",
+              0.866
+            ],
+            "checkpoint_bytes": 5205861705,
+            "post_restart_sequence": [
+              [
+                "endpoint_resume_first",
+                "private_response_replay",
+                67908,
+                3.134
+              ],
+              [
+                "fork_after_resume",
+                "private_long_anchor",
+                67712,
+                0.771
+              ],
+              [
+                "fork_second",
+                "private_long_anchor",
+                67712,
+                0.779
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 4.684
+          },
+          {
+            "order": "fork-first",
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 25.335,
+            "pre_restart_fork": [
+              "private_endpoint",
+              0.726
+            ],
+            "checkpoint_bytes": 5205861741,
+            "post_restart_sequence": [
+              [
+                "fork_first",
+                "private_long_anchor",
+                67712,
+                3.495
+              ],
+              [
+                "endpoint_resume_after_fork",
+                "private_response_replay",
+                67908,
+                0.675
+              ],
+              [
+                "fork_after_resume",
+                "private_long_anchor",
+                67712,
+                0.778
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 4.948
+          }
+        ],
+        "receipt_sha256": "5fa970cee6280822b3be0de85fb9210f2a6df305be566add11600471665333f8"
+      },
+      "restore": {
+        "exit_code": 0,
+        "summary": {
+          "template_input_tokens": 57889,
+          "cold_prefill_s": 20.994,
+          "checkpoint_bytes": 4514771839,
+          "restore_0_wall_s": 3.251,
+          "restore_1_wall_s": 3.109,
+          "control_retrieval_exact": true,
+          "restored_retrieval_exact": true,
+          "tampered_restore_refused": null
+        },
+        "receipt_sha256": "fcf12e12b5f431536cfb69565799a1a944ddbedcb01be8544da821393cdb2072"
+      },
+      "multisession": {
+        "exit_code": 0,
+        "summary": {
+          "continuations_and_forks": 8,
+          "reuse_lost": 2,
+          "exposed": true,
+          "server_errors": [],
+          "server_reuse_paths": [
+            "private_endpoint",
+            "private_long_anchor",
+            "root"
+          ],
+          "server_root_requests_after_bases": 2
+        },
+        "receipt_sha256": "851535f6235485184719e93581858439ab2c3481250ea7e318722dc88a6fda27"
+      }
+    },
+    "durable_sessions": {
+      "workload": "scripts/engine_window_compare.py --wire fork with its defaults, EXP-050's workload: 130,048-token retrieval, decode, two 125.9K-token sessions alternating continuation and fork, a 67.7K-token fanout with four branches and a sibling continuation, the live-sibling agent protocol; no explicit saves; then a graceful stop, a restart on the same checkpoint root, one continuation of every stored session and a second stop.",
+      "workload_errors": 0,
+      "saves_before_eviction": 4,
+      "automatic_saves_deferred": 1,
+      "first_stop": [
+        "shutdown: saved 1, nothing to save 3, refused 0"
+      ],
+      "resumed": 4,
+      "sessions": 4,
+      "restored_from_checkpoint": 4,
+      "resumed_cached_tokens": {
+        "agent": [
+          191,
+          164
+        ],
+        "fanout": [
+          67961,
+          67934
+        ],
+        "session-D1": [
+          126098,
+          126067
+        ],
+        "session-D2": [
+          126099,
+          126068
+        ]
+      },
+      "restore_reclaim_lines": [
+        "checkpoint restore for session a8bb1bfa4b80 saved 1 of 2 resident session(s) to make room",
+        "checkpoint restore for session a8bb1bfa4b80 saved 1 of 1 resident session(s) to make room",
+        "checkpoint restore for session a8bb1bfa4b80 reclaimed 3 checkpoint-backed session(s)"
+      ],
+      "second_stop": [
+        "shutdown: saved 0, nothing to save 4, refused 0"
+      ],
+      "desk_code_checks": "inconclusive by construction, as in EXP-050: the workload's turns end at 24 tokens inside preserved reasoning, and the resumed turns stop after 27-28 tokens of reasoning; restoration is shown by the cached-token counts and by the barrier's exact answer below.",
+      "receipts_sha256": {
+        "workload": "a507c948bb6e6b3c75523e2ea5a3ee175d14d3739b573582f87e66bbdde28766",
+        "resume": "df39079c67f8eeac7c2e69d84cc8b65f19126f68b83a2732321ec2ef798b7842"
+      }
+    },
+    "publication_barrier": {
+      "method": "EXP-051's tracer against this image: one reply held out of the response store for 6 s by a non-stop gdb breakpoint while another 126K-token session's admission had to evict its session.",
+      "log_after_barrier_hit": [
+        "+1.22s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session f934c76bec25)",
+        "+16.25s [info] ninfer-serve: session checkpoint saved before eviction (session f934c76bec25)"
+      ],
+      "first_stop": [
+        "shutdown: saved 0, nothing to save 2, refused 0"
+      ],
+      "resume_from_held_turn": {
+        "http_status": 200,
+        "answer": "V-9241",
+        "exact": true
+      },
+      "receipts_sha256": {
+        "workload": "cc6b6731a35aa8d8352fc74c5acdbf3f4fa8fd71eb9a4704abc9f2e4c542b699",
+        "resume": "cef988017ab9bea41eab97db72e0d7f7ee8f1128d52af09c5f6ed834e8ea59ed"
+      }
+    },
+    "production_restored": true,
+    "published_route_acceptance": "pending"
+  }
+}

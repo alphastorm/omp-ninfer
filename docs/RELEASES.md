@@ -26,6 +26,29 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.7.4 candidate — live sessions survive a graceful stop
+
+- Status: candidate; documented-route acceptance on the published components is pending.
+  [Manifest](../releases/v0.7.4/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.7.4/qualification.json).
+- Runtime rebind on both lanes to source `1c17c3facfbfd1243cf7711a412119302e6dbd74`: runtime
+  `a4d26ccb` plus a packaging-only RTX 4090 lane version bump. Transient automatic checkpoint
+  refusals retry, admission saves a session's newest turn before evicting it (waiting while its
+  reply is still being stored), and quota re-saves keep other sessions' checkpoints
+  ([#45](https://github.com/alphastorm/omp-ninfer/issues/45),
+  [#46](https://github.com/alphastorm/omp-ninfer/issues/46)). An independent four-model council
+  and a remediation epoch reviewed the runtime delta
+  ([dispositions](../releases/v0.7.4/review/runtime-ledger.json)).
+- RTX 5090 `v0.6.8-qwen38-5090-beta.1` (image `f193b746`, server `72aa57dd`) passed its profile
+  gates, the EXP-050 durability workload (stop `saved 1, nothing to save 3, refused 0`; all four
+  stored sessions restored after a restart), EXP-051's publication barrier, and the fanout,
+  warm-arrival, restore and multisession probes, all on the anonymously pulled published image.
+  RTX 4090 `v0.6.6-qwen38-4090-beta.1` (package `cd9ab90f`, server `7a923c21`) passed all 15
+  canonical native phases with the OMP 18.2.3 client.
+- OMP 18.2.3 client, model, serving arguments and memory floors are unchanged from v0.7.3.
+  Automatic checkpoints remain best effort; saving before eviction delays the admitting request;
+  the multisession control recorded two root fallbacks among eight continuations/forks.
+
 ### v0.7.3 public release — OMP 18.2.3 client repin
 
 - Status: published exact-profile product. [Manifest](../releases/v0.7.3/manifest.json) ·
