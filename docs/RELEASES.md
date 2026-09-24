@@ -781,6 +781,15 @@ failure, including a source tag created before a release-creation failure, inspe
 effects before preparing a bounded recovery command. Existing
 tag/release slots are refused rather than overwritten.
 
+RTX 4090 native runtime components use `scripts/hosts/cut-ninfer-4090-component.sh` after the
+lane's canonical native qualification (`tools/qualification/qualify_native.py` in the runtime
+fork). The default mode checks that the outer `SHA256SUMS` closes and verifies the asset
+directory, that the package build receipt and the lane specification at the commit name the same
+release and source, that the source archive's tar stream is byte-identical to `git archive` of
+the commit, and that neither the tag nor the release exists. `--publish` is founder-only: it
+pushes the component tag and creates one prerelease with the closed set; binding it into a
+product release stays `scripts/bind_native_variant.py`.
+
 At cut time, move the applicable human-readable entries from `[Unreleased]` in
 [`CHANGELOG.md`](../CHANGELOG.md) into the exact version heading, using the actual ISO 8601
 release date, and add comparison/tag links as defined by
