@@ -68,11 +68,76 @@ CLIENT_CAPABILITIES = (
 # release's client requires is release-specific, so the ready verifier binds that one against
 # the acceptance receipt that observed it.
 REQUIRED_CLIENT_CAPABILITIES = frozenset({"tools", "reasoning", "stateful-responses"})
+UPSTREAM_OMP_REPOSITORY = "https://github.com/can1357/oh-my-pi"
+UPSTREAM_OMP_TAG_RE = re.compile(
+    r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
+    r"(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+    r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+)
+OMP_PROFILE_PLATFORMS = {
+    "darwin-remote-ssh": "darwin-arm64",
+    "windows-docker-local": "windows-x64",
+    "linux-docker-local": "linux-x64",
+}
+OMP_FORK_FIELDS = frozenset({
+    "component_repository", "component_release_tag", "component_release_id",
+    "source_repository", "source_commit", "qualification_commit", "main_commit",
+    "source_tree", "release_tag", "archive_bytes", "archive_sha256",
+    "qualification_receipt_url", "qualification_receipt_sha256",
+})
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def validate_upstream_omp_identity(value: dict[str, Any], label: str) -> None:
+    """Shared provenance of a stock binary, whether a manifest or a client row."""
+    require(value.get("distribution_kind") == "upstream-release",
+            f"{label}.distribution_kind must be upstream-release")
+    for key in sorted(OMP_FORK_FIELDS.intersection(value)):
+        require(False, f"{label}.{key} is a fork-only field forbidden for upstream-release")
+    require(value.get("upstream_repository") == UPSTREAM_OMP_REPOSITORY,
+            f"{label}.upstream_repository must be {UPSTREAM_OMP_REPOSITORY}")
+    tag = value.get("upstream_tag")
+    require(isinstance(tag, str) and UPSTREAM_OMP_TAG_RE.fullmatch(tag) is not None,
+            f"{label}.upstream_tag must be a v-prefixed semantic version")
+    commit = value.get("upstream_commit")
+    require(isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None,
+            f"{label}.upstream_commit must be a lower-case 40-character Git commit")
+
+
+def upstream_omp_asset_name(platform: str) -> str:
+    return f"omp-{platform}" + (".exe" if platform.startswith("windows-") else "")
+
+
+def validate_client_distribution(client: dict[str, Any], label: str, platform: str) -> None:
+    # No discriminator is the historical fork contract; do not tighten old authorities.
+    if "distribution_kind" not in client:
+        return
+    validate_upstream_omp_identity(client, label)
+    require(isinstance(client.get("os"), str) and bool(client["os"].strip()),
+            f"{label}.os must be non-empty")
+    require(client.get("architecture") == platform.rsplit("-", 1)[1],
+            f"{label}.architecture must match {platform}")
+    require(client.get("asset_name") == upstream_omp_asset_name(platform),
+            f"{label}.asset_name must match {platform}'s upstream binary")
+    for key in ("release_id", "asset_id", "asset_bytes"):
+        require(type(client.get(key)) is int and client[key] > 0,
+                f"{label}.{key} must be a positive integer")
+    require(client.get("published") is True, f"{label}.published must be true")
+    for key in ("asset_sha256", "binary_sha256"):
+        require(isinstance(client.get(key), str)
+                and re.fullmatch(r"[0-9a-f]{64}", client[key]) is not None,
+                f"{label}.{key} must be a lower-case SHA-256")
+    require(client.get("binary_sha256") == client.get("asset_sha256"),
+            f"{label}.binary_sha256 must equal asset_sha256 for an upstream raw binary")
+    require(client.get("asset_url") == (
+        f"{UPSTREAM_OMP_REPOSITORY}/releases/download/"
+        f"{client['upstream_tag']}/{client['asset_name']}"
+    ), f"{label}.asset_url must bind the upstream tag and asset name")
 
 
 def load_authority(path: Path) -> dict[str, Any]:
@@ -108,6 +173,9 @@ def load_authority(path: Path) -> dict[str, Any]:
         require(set(commands) <= COMMANDS, f"{profile_id} contains an unknown command")
         require(isinstance(profile.get("client_distribution"), dict),
                 f"{profile_id} client distribution is absent")
+        validate_client_distribution(profile["client_distribution"],
+                                     f"{profile_id} client_distribution",
+                                     OMP_PROFILE_PLATFORMS[profile_id])
         require(isinstance(profile.get("runtime"), dict), f"{profile_id} runtime is absent")
         capabilities = profile["runtime"].get("capabilities")
         require(isinstance(capabilities, list) and all(
@@ -280,6 +348,13 @@ def render(authority: dict[str, Any]) -> str:
     ]
     for profile in authority["profiles"]:
         client = profile["client_distribution"]
+        client_text = f"{client['os']} {client['architecture']}"
+        if client.get("distribution_kind") == "upstream-release":
+            client_text += (
+                f" — upstream `{client['upstream_tag']}` "
+                f"[`{client['asset_name']}`]({client['asset_url']}) "
+                f"(sha256 `{client['asset_sha256'][:12]}`)"
+            )
         gpu = profile["gpu_qualification"]
         runtime_text = f"`{gpu['profile']}`"
         if gpu.get("status") != "qualified":
@@ -289,11 +364,10 @@ def render(authority: dict[str, Any]) -> str:
             f"[receipt]({acceptance['url']})" if acceptance else "pending"
         )
         lines.append(
-            "| `{id}` | {os} {arch} | {gpu} | `{transport}` | `{adapter}` | "
+            "| `{id}` | {client} | {gpu} | `{transport}` | `{adapter}` | "
             "**{status}** | {installable} | {acceptance} |".format(
                 id=profile["id"],
-                os=client["os"],
-                arch=client["architecture"],
+                client=client_text,
                 gpu=runtime_text,
                 transport=profile["transport"],
                 adapter=profile["adapter"],

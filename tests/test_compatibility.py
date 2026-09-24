@@ -18,6 +18,68 @@ SPEC.loader.exec_module(MODULE)
 
 
 class CompatibilityAuthorityTests(unittest.TestCase):
+    def upstream_authority(self) -> dict:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        descriptor = json.loads(
+            (ROOT / "tests" / "fixtures" / "upstream-omp-component.json").read_text(encoding="utf-8")
+        )
+        for profile in authority["profiles"]:
+            platform = MODULE.OMP_PROFILE_PLATFORMS[profile["id"]]
+            profile["client_distribution"] = descriptor["platforms"][platform]
+        return authority
+
+    def test_upstream_raw_binaries_render_download_and_digest(self) -> None:
+        authority = MODULE.load_authority(self._write(self.upstream_authority()))
+        rendered = MODULE.render(authority)
+        for profile in authority["profiles"]:
+            client = profile["client_distribution"]
+            self.assertIn(
+                f"upstream `{client['upstream_tag']}` "
+                f"[`{client['asset_name']}`]({client['asset_url']}) "
+                f"(sha256 `{client['asset_sha256'][:12]}`)", rendered,
+            )
+
+    def test_upstream_profile_rejects_invalid_artifact_identity(self) -> None:
+        cases = (
+            ("upstream_repository", "https://github.com/alphastorm/oh-my-pi",
+             "upstream_repository must be https://github.com/can1357/oh-my-pi"),
+            ("source_commit", "a" * 40,
+             "source_commit is a fork-only field forbidden for upstream-release"),
+            ("qualification_receipt_url", "https://github.com/alphastorm/homebrew-omp/receipt.json",
+             "qualification_receipt_url is a fork-only field forbidden for upstream-release"),
+            ("binary_sha256", "a" * 64,
+             "binary_sha256 must equal asset_sha256 for an upstream raw binary"),
+            ("asset_url", "https://github.com/can1357/oh-my-pi/releases/download/v18.2.3/omp-darwin-arm64",
+             "asset_url must bind the upstream tag and asset name"),
+            ("asset_id", None, "asset_id must be a positive integer"),
+            ("release_id", True, "release_id must be a positive integer"),
+            ("asset_bytes", 0, "asset_bytes must be a positive integer"),
+            ("asset_sha256", "A" * 64, "asset_sha256 must be a lower-case SHA-256"),
+            ("published", False, "published must be true"),
+            ("upstream_tag", "v18.03.0", "upstream_tag must be a v-prefixed semantic version"),
+            ("upstream_commit", "a" * 39, "upstream_commit must be a lower-case 40-character Git commit"),
+            ("asset_name", "omp-linux-x64", "asset_name must match darwin-arm64's upstream binary"),
+        )
+        for key, value, error in cases:
+            with self.subTest(field=key):
+                authority = self.upstream_authority()
+                client = authority["profiles"][0]["client_distribution"]
+                if value is None:
+                    client.pop(key)
+                else:
+                    client[key] = value
+                with self.assertRaises(ValueError) as raised:
+                    MODULE.load_authority(self._write(authority))
+                self.assertEqual(str(raised.exception), f"darwin-remote-ssh client_distribution.{error}")
+
+    def test_fork_profile_cannot_declare_a_distribution_kind(self) -> None:
+        for kind in (None, "fork", "unsupported"):
+            with self.subTest(kind=kind):
+                authority = MODULE.load_authority(ROOT / "compatibility.json")
+                authority["profiles"][0]["client_distribution"]["distribution_kind"] = kind
+                with self.assertRaisesRegex(ValueError, "distribution_kind must be upstream-release"):
+                    MODULE.load_authority(self._write(authority))
+
     def test_authority_renders_the_checked_in_public_matrix(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         self.assertEqual(

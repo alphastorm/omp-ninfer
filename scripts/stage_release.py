@@ -27,6 +27,15 @@ doc prose remain the lead's job. What it owns:
 The cut is `rebind_release.py --pin <commit> --stage lane`, which promotes the
 root authority, profiles, and launcher pins, followed by the acceptance and
 manifest pin stages.
+
+With --omp-component, the JSON object contains an "omp" manifest component and a
+"platforms" map of darwin-arm64/windows-x64/linux-x64 client_distribution rows.
+Raw upstream binary hashes must equal their asset hashes. Client acceptance is
+reset, never inherited. Root profiles are not promoted by staging. The completed
+draft reports surviving predecessor pins as file:line warnings so the lead can
+replace its prose and evidence; --require-clean-client makes those warnings a
+staging failure. Ready verification rejects retired fork tags, source commits
+and asset URLs.
 """
 
 from __future__ import annotations
@@ -38,6 +47,17 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from render_compatibility import OMP_PROFILE_PLATFORMS
+from verify_release import (
+    ContractError,
+    client_identity_pins,
+    client_pin_locations,
+    load_json,
+    validate_upstream_client_bindings,
+    validate_upstream_omp_component,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -81,6 +101,58 @@ def rewrite_text(path: Path, replacements: dict[str, str]) -> int:
     return sum(original.count(old) for old in replacements)
 
 
+def load_omp_component(path: Path) -> dict:
+    """Read {"omp": <components.omp>, "platforms": {<platform>: <client_distribution>}}.
+
+    Platforms are darwin-arm64, windows-x64 and linux-x64. The omp object holds
+    upstream provenance plus the primary raw binary; each platform row holds its
+    own published asset. Compatibility bindings may be omitted: staging retains
+    their provisional predecessor values and rebind recomputes the hash.
+    """
+    descriptor = load_json(path)
+    omp = descriptor.get("omp")
+    platforms = descriptor.get("platforms")
+    if not isinstance(omp, dict):
+        raise ValueError("OMP descriptor.omp must be a components.omp object")
+    if not isinstance(platforms, dict) or set(platforms) != set(OMP_PROFILE_PLATFORMS.values()):
+        raise ValueError("OMP descriptor.platforms must contain darwin-arm64, windows-x64 and linux-x64")
+    if any(not isinstance(client, dict) for client in platforms.values()):
+        raise ValueError("OMP descriptor platform client_distribution rows must be objects")
+    errors: list[str] = []
+    validate_upstream_omp_component(omp, errors)
+    validate_upstream_client_bindings(omp, [
+        {"id": profile_id, "client_distribution": platforms[platform]}
+        for profile_id, platform in OMP_PROFILE_PLATFORMS.items()
+    ], errors)
+    if errors:
+        raise ValueError("; ".join(errors))
+    return descriptor
+
+
+def bind_upstream_client(compatibility: dict, descriptor: dict, release: str) -> None:
+    omp = descriptor["omp"]
+    composition = compatibility["composition"]
+    for key in ("qualification_source_commit", "lifecycle_main_commit", "lifecycle_main_tree",
+                "lifecycle_semantic_tree", "lifecycle_generated_lock_tree", "hosted_ci"):
+        composition.pop(key, None)
+    composition.update({
+        "status": f"{release} upstream OMP {omp['upstream_tag']} client acceptance pending",
+        "lifecycle_repository": omp["upstream_repository"],
+        "lifecycle_source_release": f"{omp['upstream_repository']}/releases/tag/{omp['upstream_tag']}",
+        "lifecycle_source_commit": omp["upstream_commit"],
+        "request_compatibility_source_commit": omp["upstream_commit"],
+        "composed_source_commit": omp["upstream_commit"],
+    })
+    for profile in compatibility["profiles"]:
+        platform = OMP_PROFILE_PLATFORMS[profile["id"]]
+        profile["client_distribution"] = descriptor["platforms"][platform]
+        profile["acceptance_receipt"] = None
+        profile["installable"] = False
+        if profile["status"] == "qualified":
+            profile["status"] = "preview"
+        profile["blockers"] = [f"upstream OMP {omp['upstream_tag']} client acceptance is pending"]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     parser.add_argument("--from", dest="source", required=True, metavar="vX.Y.Z",
@@ -120,7 +192,21 @@ def main() -> int:
                              "releases/<release>/qualification/rtx5090.json before the hash "
                              "chain is computed, so the lane-receipt hash binds the real "
                              "evidence rather than the copied predecessor")
+    parser.add_argument("--omp-component", type=Path, metavar="PATH",
+                        help="upstream client JSON: omp manifest component plus platforms map "
+                             "(darwin-arm64, windows-x64, linux-x64); requires fresh client acceptance")
+    parser.add_argument("--require-clean-client", action="store_true",
+                        help="after writing the draft, fail if any predecessor client pin remains; "
+                             "otherwise report file:line warnings for the lead to resolve")
     args = parser.parse_args()
+    if args.require_clean_client and args.omp_component is None:
+        parser.error("--require-clean-client requires --omp-component")
+    omp_descriptor = None
+    if args.omp_component is not None:
+        try:
+            omp_descriptor = load_omp_component(args.omp_component)
+        except (ContractError, ValueError) as error:
+            parser.error(f"--omp-component: {error}")
     if args.lane_receipt is not None and not args.lane_receipt.is_file():
         parser.error(f"missing lane receipt: {args.lane_receipt}")
 
@@ -153,6 +239,11 @@ def main() -> int:
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     source_manifest = load(src_dir / "manifest.json")
+    old_client_pins = (
+        client_identity_pins(source_manifest["components"]["omp"],
+                             load(src_dir / "compatibility.json"))
+        if omp_descriptor is not None else set()
+    )
     # The previous release may itself have kept an older profile (v0.6.4 shipped
     # qwen38-5090-v0.6.3): a kept profile is the one the source manifest records, not one
     # derived from the source release number.
@@ -175,6 +266,14 @@ def main() -> int:
     manifest_path = dst_dir / "manifest.json"
     manifest = load(manifest_path)
     manifest["release"] = args.release
+    if omp_descriptor is not None:
+        previous_omp = manifest["components"]["omp"]
+        manifest["components"]["omp"] = {
+            **{key: previous_omp[key] for key in (
+                "compatibility_authority", "compatibility_url", "compatibility_sha256"
+            ) if key in previous_omp},
+            **omp_descriptor["omp"],
+        }
     ninfer = manifest["components"]["ninfer"]
     old = {
         "digest": ninfer["oci_manifest_digest"],
@@ -240,6 +339,11 @@ def main() -> int:
     })
 
     # 5. Qualification identity + packaging pins.
+    if omp_descriptor is not None:
+        compatibility = load(compat_path)
+        bind_upstream_client(compatibility, omp_descriptor, args.release)
+        dump(compat_path, compatibility)
+
     qual_path = dst_dir / "qualification.json"
     qualification = load(qual_path)
     qualification["release"] = args.release
@@ -283,6 +387,11 @@ def main() -> int:
         f"external-installation acceptance against the published {args.release_tag} "
         "component and runtime image"
     ]
+    if omp_descriptor is not None:
+        composition.pop("documented_route_acceptance", None)
+        qualification["remaining_release_gates"].append(
+            "fresh upstream OMP platform and documented-route acceptance"
+        )
     dump(qual_path, qualification)
     shutil.rmtree(dst_dir / "acceptance", ignore_errors=True)
 
@@ -293,8 +402,18 @@ def main() -> int:
         cwd=ROOT, check=True,
     )
 
-    # 7. Verify; the only residue a staging may leave is the draft posture and the deliberate
-    #    per-release tag allowlist entry (the URL pins are checked once the tree is ready).
+    # 7. Report client pins for the lead, then verify the staged-draft contract.
+    leftovers = client_pin_locations(dst_dir, old_client_pins) if omp_descriptor else []
+    for location in leftovers:
+        print(f"warning: releases/{args.release}/{location}", file=sys.stderr)
+    draft_residue = set(DRAFT_POSTURE_RESIDUE)
+    if omp_descriptor is not None:
+        # As with runtime pins, root clients deliberately remain on the live release.
+        draft_residue.add("profile: client archive must be the manifest's OMP component")
+        draft_residue.update(
+            f"profiles/{path.name}: client archive must be the manifest's OMP component"
+            for path in (ROOT / "profiles").glob("*.json")
+        )
     verify = subprocess.run(
         [sys.executable, "scripts/verify_release.py",
          "--release", args.release, "--json"],
@@ -302,23 +421,39 @@ def main() -> int:
     )
     report = json.loads(verify.stdout)
     errors = report.get("errors", [])
+    if omp_descriptor is not None:
+        # The lead rewrites copied notes after staging has removed client acceptance.
+        # Only dangling links into this deliberately cleared directory are draft residue.
+        for error in errors:
+            document, separator, target = error.partition(" has missing local link: ")
+            document_path = (ROOT / document).resolve()
+            if separator and document_path.is_relative_to(dst_dir):
+                target_path = (document_path.parent / target).resolve()
+                if target_path.is_relative_to(dst_dir / "acceptance"):
+                    draft_residue.add(error)
+    for warning in report.get("warnings", []):
+        if warning.removeprefix(f"releases/{args.release}/") not in leftovers:
+            print(f"warning: {warning}", file=sys.stderr)
     allowlist_error = "components.ninfer.release_tag is invalid"
     unexpected = [
         error for error in errors
-        if error not in PIN_RESIDUE and error not in DRAFT_POSTURE_RESIDUE
+        if error not in PIN_RESIDUE and error not in draft_residue
         and error != allowlist_error
     ]
     print(f"staged releases/{args.release} from releases/{args.source}")
     for error in errors:
         if error in PIN_RESIDUE:
             marker = "pin-dance"
-        elif error in DRAFT_POSTURE_RESIDUE:
+        elif error in draft_residue:
             marker = "draft-posture"
         elif error == allowlist_error:
             marker = "allowlist"
         else:
             marker = "UNEXPECTED"
         print(f"  [{marker}] {error}")
+    if args.require_clean_client and (leftovers or report.get("warnings")):
+        print("--require-clean-client: staged draft retains predecessor client pins", file=sys.stderr)
+        return 1
     if unexpected:
         print("staging left unexpected verifier errors; fix before committing",
               file=sys.stderr)

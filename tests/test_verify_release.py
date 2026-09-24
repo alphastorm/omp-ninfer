@@ -20,6 +20,161 @@ SPEC.loader.exec_module(VERIFY_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def upstream_candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+        temporary, root = self.public_draft_copy()
+        release_root = root / "releases" / PUBLIC_RELEASE
+        descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")
+        manifest = self.load(release_root / "manifest.json")
+        previous = manifest["components"]["omp"]
+        manifest["components"]["omp"] = {
+            **descriptor["omp"],
+            **{key: previous[key] for key in (
+                "compatibility_authority", "compatibility_url", "compatibility_sha256"
+            )},
+        }
+        manifest["status"] = "candidate"
+        manifest["publication"]["blockers"] = ["Upstream client external-install acceptance pending."]
+        manifest["qualification"]["external_installation_passed"] = False
+        authority = self.load(root / "compatibility.json")
+        composition = authority["composition"]
+        composition["lifecycle_repository"] = descriptor["omp"]["upstream_repository"]
+        composition["lifecycle_source_release"] = (
+            f"{descriptor['omp']['upstream_repository']}/releases/tag/v18.3.0"
+        )
+        for key in ("lifecycle_source_commit", "request_compatibility_source_commit"):
+            composition[key] = descriptor["omp"]["upstream_commit"]
+        for key in ("qualification_source_commit", "lifecycle_main_commit", "lifecycle_main_tree",
+                    "lifecycle_generated_lock_tree"):
+            composition.pop(key, None)
+        for item in authority["profiles"]:
+            platform = VERIFY_RELEASE.OMP_PROFILE_PLATFORMS[item["id"]]
+            item["client_distribution"] = descriptor["platforms"][platform]
+            item["acceptance_receipt"] = None
+            item["status"] = "preview"
+            item["installable"] = False
+        for path in (root / "compatibility.json", release_root / "compatibility.json"):
+            self.save(path, authority)
+        rendered = VERIFY_RELEASE.render_compatibility_matrix(authority)
+        for path in (root / "docs" / "COMPATIBILITY.md", release_root / "COMPATIBILITY.md"):
+            path.write_text(rendered, encoding="utf-8")
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            if "asset_url" in profile.get("client", {}):
+                profile["client"] = descriptor["platforms"]["windows-x64"]
+                self.save(path, profile)
+        qualification_path = release_root / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["external_installation_qualified"] = False
+        qualification["composition"]["external_installation_acceptance"] = {"status": "pending"}
+        self.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(qualification_path)
+        manifest["components"]["omp"]["compatibility_sha256"] = (
+            VERIFY_RELEASE.sha256_file(root / "compatibility.json")
+        )
+        self.save(release_root / "manifest.json", manifest)
+        return temporary, root
+
+    def test_upstream_release_manifest_and_profiles_are_installable(self) -> None:
+        temporary, root = self.upstream_candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
+        self.assertEqual(errors, [])
+
+    def test_upstream_component_rejects_invalid_artifact_identity(self) -> None:
+        cases = (
+            ("upstream_repository", "https://github.com/alphastorm/oh-my-pi",
+             "upstream_repository must be https://github.com/can1357/oh-my-pi"),
+            ("source_commit", "a" * 40,
+             "source_commit is a fork-only field forbidden for upstream-release"),
+            ("binary_sha256", "a" * 64,
+             "binary_sha256 must equal artifact_sha256 for an upstream raw binary"),
+            ("artifact_url", "https://github.com/can1357/oh-my-pi/releases/download/v18.2.3/omp-windows-x64.exe",
+             "artifact_url must bind the upstream tag and artifact name"),
+            ("artifact_asset_id", None, "artifact_asset_id must be a positive integer"),
+            ("release_id", True, "release_id must be a positive integer"),
+            ("artifact_bytes", 0, "artifact_bytes must be a positive integer"),
+            ("artifact_published", False, "artifact_published must be true"),
+            ("upstream_tag", "18.3.0", "upstream_tag must be a v-prefixed semantic version"),
+            ("upstream_tree", "a" * 39, "upstream_tree must be a lower-case 40-character Git commit"),
+            ("artifact_sha256", "A" * 64, "artifact_sha256 must be a lower-case SHA-256"),
+        )
+        for key, value, error in cases:
+            with self.subTest(field=key):
+                temporary, root = self.upstream_candidate_copy()
+                self.addCleanup(temporary.cleanup)
+                path = root / "releases" / PUBLIC_RELEASE / "manifest.json"
+                manifest = self.load(path)
+                if value is None:
+                    manifest["components"]["omp"].pop(key)
+                else:
+                    manifest["components"]["omp"][key] = value
+                self.save(path, manifest)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                self.assertIn(f"components.omp.{error}", errors)
+
+    def test_upstream_component_must_match_every_profile_tag_and_primary_asset(self) -> None:
+        for field, value in (("upstream_tag", "v18.3.1"), ("asset_sha256", "a" * 64)):
+            with self.subTest(field=field):
+                temporary, root = self.upstream_candidate_copy()
+                self.addCleanup(temporary.cleanup)
+                path = root / "releases" / PUBLIC_RELEASE / "compatibility.json"
+                authority = self.load(path)
+                profile = next(item for item in authority["profiles"]
+                               if item["id"] == "windows-docker-local")
+                client = profile["client_distribution"]
+                client[field] = value
+                if field == "upstream_tag":
+                    client["asset_url"] = client["asset_url"].replace("v18.3.0", value)
+                    component_field = "upstream_tag"
+                else:
+                    client["binary_sha256"] = value
+                    component_field = "artifact_sha256"
+                self.save(path, authority)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                self.assertIn(f"compatibility windows-docker-local client_distribution.{field} "
+                              f"must match components.omp.{component_field}", errors)
+
+    def test_upstream_predecessor_pins_warn_in_drafts_and_block_readiness(self) -> None:
+        for mode in ("draft", "require-ready", "ready-status"):
+            with self.subTest(mode=mode):
+                temporary, root = self.upstream_candidate_copy()
+                self.addCleanup(temporary.cleanup)
+                release_root = root / "releases" / PUBLIC_RELEASE
+                historical = self.load(ROOT / "releases" / "v0.7.4" / "manifest.json")["components"]["omp"]
+                pins = [historical["component_release_tag"], historical["source_commit"],
+                        historical["artifact_url"]]
+                (release_root / "predecessor.txt").write_text(
+                    "\n".join([*pins, "A separately qualified, deferred lane retains OMP 18.0.9."]),
+                    encoding="utf-8",
+                )
+                manifest_path = release_root / "manifest.json"
+                manifest = self.load(manifest_path)
+                manifest["status"] = "ready" if mode == "ready-status" else "draft"
+                self.save(manifest_path, manifest)
+                warnings: list[str] = []
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=mode == "require-ready",
+                                                     warnings=warnings)
+                if mode == "draft":
+                    self.assertEqual(errors, [])
+                for line, pin in enumerate(pins, 1):
+                    expected = (f"releases/{PUBLIC_RELEASE}/predecessor.txt:{line}: "
+                                f"retains predecessor OMP identity {pin!r}")
+                    self.assertIn(expected, warnings if mode == "draft" else errors)
+                self.assertFalse(any(f"releases/{PUBLIC_RELEASE}/predecessor.txt:4:" in diagnostic
+                                     for diagnostic in [*warnings, *errors]))
+
+    def test_fork_component_rejects_explicit_distribution_kind(self) -> None:
+        for kind in (None, "alphastorm-fork-component", "unsupported"):
+            with self.subTest(kind=kind):
+                temporary, root = self.candidate_copy()
+                self.addCleanup(temporary.cleanup)
+                path = root / "releases" / "v0.2.0-beta.1" / "manifest.json"
+                manifest = self.load(path)
+                manifest["components"]["omp"]["distribution_kind"] = kind
+                self.save(path, manifest)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                self.assertIn("components.omp.distribution_kind must be absent for a fork component", errors)
+
     def test_omp_component_identity_accepts_preview_and_beta_only(self) -> None:
         self.assertIsNotNone(
             VERIFY_RELEASE.OMP_RELEASE_ID_RE.fullmatch(

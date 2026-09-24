@@ -16,10 +16,15 @@ from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
+    OMP_PROFILE_PLATFORMS,
     RUNTIME_VARIANT_PACKAGE_NAME_RES,
     RUNTIME_VARIANT_RELEASE_TAG_RES,
+    UPSTREAM_OMP_REPOSITORY,
     load_authority,
     render as render_compatibility_matrix,
+    upstream_omp_asset_name,
+    validate_client_distribution,
+    validate_upstream_omp_identity,
 )
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -127,6 +132,120 @@ def require_https(value: Any, label: str, errors: list[str], *, nullable: bool =
         return
     require(isinstance(value, str) and urlparse(value).scheme == "https" and bool(urlparse(value).netloc),
             f"{label} must be an HTTPS URL", errors)
+
+
+def validate_upstream_omp_component(omp: dict[str, Any], errors: list[str]) -> None:
+    label = "components.omp"
+    try:
+        validate_upstream_omp_identity(omp, label)
+    except ValueError as error:
+        errors.append(str(error))
+    require_git_sha(omp.get("upstream_tree"), f"{label}.upstream_tree", errors)
+    tag = omp.get("upstream_tag")
+    require(isinstance(tag, str) and omp.get("distribution_version") == tag.removeprefix("v"),
+            f"{label}.distribution_version must equal upstream_tag without its v prefix", errors)
+    platform = omp.get("platform")
+    require(isinstance(platform, str) and platform in OMP_PROFILE_PLATFORMS.values(),
+            f"{label}.platform must name a supported upstream platform", errors)
+    require(isinstance(platform, str)
+            and omp.get("artifact_name") == upstream_omp_asset_name(platform),
+            f"{label}.artifact_name must match the platform's upstream binary", errors)
+    for key in ("release_id", "artifact_release_id", "artifact_asset_id", "artifact_bytes"):
+        require(type(omp.get(key)) is int and omp[key] > 0,
+                f"{label}.{key} must be a positive integer", errors)
+    require(omp.get("release_id") == omp.get("artifact_release_id"),
+            f"{label}.artifact_release_id must equal release_id", errors)
+    require(omp.get("artifact_published") is True, f"{label}.artifact_published must be true", errors)
+    for key in ("artifact_sha256", "binary_sha256"):
+        require_sha(omp.get(key), f"{label}.{key}", errors)
+    require(omp.get("binary_sha256") == omp.get("artifact_sha256"),
+            f"{label}.binary_sha256 must equal artifact_sha256 for an upstream raw binary", errors)
+    require(omp.get("artifact_url") == (
+        f"{UPSTREAM_OMP_REPOSITORY}/releases/download/{tag}/{omp.get('artifact_name')}"
+    ), f"{label}.artifact_url must bind the upstream tag and artifact name", errors)
+
+
+def validate_upstream_client_bindings(
+    omp: dict[str, Any], profiles: list[dict[str, Any]], errors: list[str]
+) -> None:
+    matched = False
+    for profile in profiles:
+        profile_id = profile.get("id")
+        platform = OMP_PROFILE_PLATFORMS.get(profile_id)
+        label = f"compatibility {profile_id} client_distribution"
+        client = profile.get("client_distribution", {})
+        require(client.get("distribution_kind") == "upstream-release",
+                f"{label}.distribution_kind must match the upstream-release manifest", errors)
+        if platform is not None:
+            try:
+                validate_client_distribution(client, label, platform)
+            except ValueError as error:
+                errors.append(str(error))
+        for key in ("upstream_repository", "upstream_tag", "upstream_commit", "release_id"):
+            require(client.get(key) == omp.get(key),
+                    f"{label}.{key} must match components.omp.{key}", errors)
+        if platform != omp.get("platform"):
+            continue
+        matched = True
+        for key, component_key in (
+            ("asset_name", "artifact_name"), ("asset_url", "artifact_url"),
+            ("asset_id", "artifact_asset_id"), ("asset_bytes", "artifact_bytes"),
+            ("asset_sha256", "artifact_sha256"), ("binary_sha256", "binary_sha256"),
+        ):
+            require(client.get(key) == omp.get(component_key),
+                    f"{label}.{key} must match components.omp.{component_key}", errors)
+    require(matched, "components.omp.platform must have a matching compatibility client row", errors)
+
+
+def client_identity_pins(omp: dict[str, Any], compatibility: dict[str, Any]) -> set[str]:
+    pins = {omp.get(key) for key in (
+        "upstream_tag", "upstream_commit", "source_commit", "component_release_tag",
+        "distribution_version", "artifact_url",
+    )}
+    tag = omp.get("upstream_tag")
+    if isinstance(tag, str):
+        pins.add(tag.removeprefix("v"))
+    for profile in compatibility["profiles"]:
+        client = profile["client_distribution"]
+        pins.update(client.get(key) for key in ("source_commit", "release_tag", "asset_url"))
+    return {pin for pin in pins if isinstance(pin, str) and pin}
+
+
+def client_pin_locations(directory: Path, pins: set[str]) -> list[str]:
+    locations = []
+    encoded = [(pin, pin.encode("utf-8")) for pin in sorted(pins)]
+    for path in sorted(directory.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(directory)
+        for pin, _ in encoded:
+            if pin in str(relative):
+                locations.append(f"{relative}:1: filename retains predecessor OMP identity {pin!r}")
+        for line_number, line in enumerate(path.read_bytes().splitlines(), 1):
+            for pin, needle in encoded:
+                if needle in line:
+                    locations.append(
+                        f"{relative}:{line_number}: retains predecessor OMP identity {pin!r}"
+                    )
+    return locations
+
+
+def historical_fork_client_pins(root: Path, release: str) -> set[str]:
+    """Immutable fork manifests remain the authority for client identities we retired."""
+    pins = set()
+    for path in sorted((root / "releases").glob("*/manifest.json")):
+        if path.parent.name == release:
+            continue
+        omp = load_json(path).get("components", {}).get("omp", {})
+        if "distribution_kind" in omp:
+            continue
+        authority = path.parent / "compatibility.json"
+        pins.update(omp.get(key) for key in ("component_release_tag", "source_commit", "artifact_url"))
+        for profile in load_json(authority)["profiles"]:
+            client = profile["client_distribution"]
+            pins.update(client.get(key) for key in ("release_tag", "source_commit", "asset_url"))
+    # Version-only historical prose is not an artifact pin; exact fork identities are.
+    return {pin for pin in pins if isinstance(pin, str) and pin}
 
 
 def require_product_raw_url(value: Any, label: str, path: str, errors: list[str]) -> None:
@@ -1189,6 +1308,8 @@ def validate(
     require_installable: bool = False,
     product_release: str | None = None,
     check_pins: bool = False,
+    *,
+    warnings: list[str] | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
     selected_release = resolve_product_release(root, product_release)
     manifest_path = root / "releases" / selected_release / "manifest.json"
@@ -1260,6 +1381,7 @@ def validate(
     qualification_pending = pending_allowed and not qualification
     components = manifest.get("components", {})
     omp = components.get("omp", {})
+    upstream_omp = omp.get("distribution_kind") == "upstream-release"
     ninfer = components.get("ninfer", {})
     model = components.get("model", {})
     runtime = manifest.get("runtime_identity", {})
@@ -1300,7 +1422,8 @@ def validate(
         client = candidate.get("client")
         if not isinstance(client, dict) or not any(key in client for key in archive_keys):
             continue
-        require(client.get("component_release_tag") == omp.get("component_release_tag")
+        require((client.get("component_release_tag") == omp.get("component_release_tag")
+                 if not upstream_omp else "component_release_tag" not in client)
                 and client.get("asset_url") == omp.get("artifact_url")
                 and client.get("asset_sha256") == omp.get("artifact_sha256")
                 and client.get("binary_sha256") == omp.get("binary_sha256"),
@@ -1342,12 +1465,13 @@ def validate(
         composition = compatibility.get("composition", {})
         require_git_sha(composition.get("lifecycle_source_commit"),
                         "compatibility composition.lifecycle_source_commit", errors)
-        require_git_sha(composition.get("qualification_source_commit"),
-                        "compatibility composition.qualification_source_commit", errors)
-        require_git_sha(composition.get("lifecycle_main_commit"),
-                        "compatibility composition.lifecycle_main_commit", errors)
-        require_git_sha(composition.get("lifecycle_main_tree"),
-                        "compatibility composition.lifecycle_main_tree", errors)
+        if not upstream_omp:
+            require_git_sha(composition.get("qualification_source_commit"),
+                            "compatibility composition.qualification_source_commit", errors)
+            require_git_sha(composition.get("lifecycle_main_commit"),
+                            "compatibility composition.lifecycle_main_commit", errors)
+            require_git_sha(composition.get("lifecycle_main_tree"),
+                            "compatibility composition.lifecycle_main_tree", errors)
         require_git_sha(composition.get("request_compatibility_source_commit"),
                         "compatibility composition.request_compatibility_source_commit", errors)
         require(compatibility.get("authority_id") == omp.get("compatibility_authority"),
@@ -1366,25 +1490,36 @@ def validate(
                 "compatibility.json",
                 errors,
             )
-        require(composition.get("lifecycle_source_commit") == omp.get("source_commit"),
-                "OMP source commit must match compatibility composition", errors)
-        require(composition.get("qualification_source_commit") == omp.get("qualification_commit"),
-                "OMP qualification commit must match compatibility composition", errors)
-        require(composition.get("lifecycle_main_commit") == omp.get("main_commit"),
-                "OMP main commit must match compatibility composition", errors)
-        require(composition.get("lifecycle_generated_lock_tree") == omp.get("source_tree"),
-                "OMP source tree must match compatibility final tree", errors)
-        primary_client = next(
-            (item.get("client_distribution", {}) for item in compatibility.get("profiles", [])
-             if item.get("id") == "windows-docker-local"),
-            {},
-        )
-        require(primary_client.get("archive_sha256") == omp.get("artifact_sha256"),
-                "OMP Windows artifact must match compatibility authority", errors)
-        require(primary_client.get("binary_sha256") == omp.get("binary_sha256"),
-                "OMP Windows binary must match compatibility authority", errors)
-        require(primary_client.get("asset_url") == omp.get("artifact_url"),
-                "OMP Windows asset URL must match compatibility authority", errors)
+        if upstream_omp:
+            require(composition.get("lifecycle_repository") == UPSTREAM_OMP_REPOSITORY,
+                    "OMP upstream repository must match compatibility composition", errors)
+            require(composition.get("lifecycle_source_release") == (
+                f"{UPSTREAM_OMP_REPOSITORY}/releases/tag/{omp.get('upstream_tag')}"
+            ), "OMP upstream tag must match compatibility composition", errors)
+            for key in ("lifecycle_source_commit", "request_compatibility_source_commit"):
+                require(composition.get(key) == omp.get("upstream_commit"),
+                        f"OMP upstream commit must match compatibility composition.{key}", errors)
+            validate_upstream_client_bindings(omp, compatibility.get("profiles", []), errors)
+        else:
+            require(composition.get("lifecycle_source_commit") == omp.get("source_commit"),
+                    "OMP source commit must match compatibility composition", errors)
+            require(composition.get("qualification_source_commit") == omp.get("qualification_commit"),
+                    "OMP qualification commit must match compatibility composition", errors)
+            require(composition.get("lifecycle_main_commit") == omp.get("main_commit"),
+                    "OMP main commit must match compatibility composition", errors)
+            require(composition.get("lifecycle_generated_lock_tree") == omp.get("source_tree"),
+                    "OMP source tree must match compatibility final tree", errors)
+            primary_client = next(
+                (item.get("client_distribution", {}) for item in compatibility.get("profiles", [])
+                 if item.get("id") == "windows-docker-local"),
+                {},
+            )
+            require(primary_client.get("archive_sha256") == omp.get("artifact_sha256"),
+                    "OMP Windows artifact must match compatibility authority", errors)
+            require(primary_client.get("binary_sha256") == omp.get("binary_sha256"),
+                    "OMP Windows binary must match compatibility authority", errors)
+            require(primary_client.get("asset_url") == omp.get("artifact_url"),
+                    "OMP Windows asset URL must match compatibility authority", errors)
         for profile_item in compatibility.get("profiles", []):
             profile_id = profile_item.get("id", "<unknown>")
             profile_runtime = profile_item.get("runtime", {})
@@ -1399,6 +1534,11 @@ def validate(
             require(profile_runtime.get("server_binary_sha256") == ninfer.get("server_binary_sha256"),
                     f"compatibility {profile_id} server must match the manifest", errors)
             client = profile_item.get("client_distribution", {})
+            if upstream_omp:
+                continue
+            require("distribution_kind" not in client,
+                    f"compatibility {profile_id} client distribution_kind must be absent "
+                    "for a fork manifest", errors)
             require_git_sha(client.get("source_commit"),
                             f"compatibility {profile_id} client source", errors)
             if client.get("archive_sha256") is not None:
@@ -1450,76 +1590,81 @@ def validate(
 
     for key in ("upstream_commit", "source_commit"):
         require_git_sha(ninfer.get(key), f"components.ninfer.{key}", errors)
-    require_git_sha(omp.get("upstream_commit"), "components.omp.upstream_commit", errors)
-    require_git_sha(omp.get("source_commit"), "components.omp.source_commit", errors)
-    require_git_sha(omp.get("qualification_commit"), "components.omp.qualification_commit", errors)
-    require_git_sha(omp.get("main_commit"), "components.omp.main_commit", errors)
-    require_git_sha(omp.get("source_tree"), "components.omp.source_tree", errors)
-    omp_release_id = omp.get("release_id")
-    omp_release_match = (
-        OMP_RELEASE_ID_RE.fullmatch(omp_release_id)
-        if isinstance(omp_release_id, str)
-        else None
-    )
-    require(omp_release_match is not None,
-            "components.omp.release_id must be a cross-platform preview or beta identity",
-            errors)
-    if omp_release_match is not None:
-        omp_version = omp_release_match.group("version")
-        require(omp.get("upstream_tag") == f"v{omp_version}",
-                "OMP release ID version must match upstream_tag", errors)
-        require(omp.get("distribution_version") == omp_release_id,
-                "OMP distribution version must equal release_id", errors)
-        require(omp.get("component_release_tag") == f"omp-{omp_release_id}",
-                "OMP component tag must derive from release_id", errors)
-    omp_platform = omp.get("platform")
-    require(omp_platform == "windows-x64",
-            "ready OMP primary platform must be windows-x64", errors)
-    expected_omp_artifact_name = (
-        f"omp-{omp_release_match.group('version')}-{omp_platform}.tar.gz"
-        if omp_release_match is not None and isinstance(omp_platform, str)
-        else None
-    )
-    require(omp.get("artifact_name") == expected_omp_artifact_name,
-            "OMP artifact name must bind release version and primary platform", errors)
-    require(omp.get("component_repository") == "https://github.com/alphastorm/homebrew-omp",
-            "OMP component repository must be alphastorm/homebrew-omp", errors)
-    require(omp.get("source_repository") == expected_omp_source_repository(release),
-            "OMP source repository must match the release's public-source policy", errors)
-    require(isinstance(omp.get("component_release_id"), int)
-            and omp.get("component_release_id", 0) > 0,
-            "OMP component_release_id must be positive", errors)
-    require(isinstance(omp.get("artifact_release_id"), int)
-            and omp.get("artifact_release_id", 0) > 0,
-            "OMP artifact_release_id must be positive", errors)
-    require(omp.get("component_release_id") == omp.get("artifact_release_id"),
-            "OMP component and artifact release IDs must match", errors)
-    require(isinstance(omp.get("artifact_asset_id"), int)
-            and omp.get("artifact_asset_id", 0) > 0,
-            "OMP artifact_asset_id must be positive", errors)
-    require(isinstance(omp.get("artifact_published"), bool),
-            "OMP artifact_published must be boolean", errors)
-    require_sha(omp.get("artifact_sha256"), "components.omp.artifact_sha256", errors)
-    require_sha(omp.get("binary_sha256"), "components.omp.binary_sha256", errors)
-    require(isinstance(omp.get("artifact_bytes"), int) and omp.get("artifact_bytes", 0) > 0,
-            "OMP artifact_bytes must be positive", errors)
-    omp_artifact_url = omp.get("artifact_url")
-    require_https(omp_artifact_url, "components.omp.artifact_url", errors, nullable=True)
-    if isinstance(omp_artifact_url, str):
-        parsed_omp_url = urlparse(omp_artifact_url)
-        omp_asset_path_match = OMP_ASSET_DOWNLOAD_RE.fullmatch(parsed_omp_url.path)
-        require(
-            parsed_omp_url.scheme == "https"
-            and parsed_omp_url.netloc == "github.com"
-            and omp_asset_path_match is not None
-            and omp_asset_path_match.group("tag") == omp.get("component_release_tag")
-            and omp_asset_path_match.group("name") == omp.get("artifact_name")
-            and parsed_omp_url.params == ""
-            and parsed_omp_url.query == ""
-            and parsed_omp_url.fragment == "",
-            "OMP artifact URL must bind the public component tag and artifact name",
-            errors,
+    if upstream_omp:
+        validate_upstream_omp_component(omp, errors)
+    else:
+        require("distribution_kind" not in omp,
+                "components.omp.distribution_kind must be absent for a fork component", errors)
+        require_git_sha(omp.get("upstream_commit"), "components.omp.upstream_commit", errors)
+        require_git_sha(omp.get("source_commit"), "components.omp.source_commit", errors)
+        require_git_sha(omp.get("qualification_commit"), "components.omp.qualification_commit", errors)
+        require_git_sha(omp.get("main_commit"), "components.omp.main_commit", errors)
+        require_git_sha(omp.get("source_tree"), "components.omp.source_tree", errors)
+        omp_release_id = omp.get("release_id")
+        omp_release_match = (
+            OMP_RELEASE_ID_RE.fullmatch(omp_release_id)
+            if isinstance(omp_release_id, str)
+            else None
         )
+        require(omp_release_match is not None,
+                "components.omp.release_id must be a cross-platform preview or beta identity",
+                errors)
+        if omp_release_match is not None:
+            omp_version = omp_release_match.group("version")
+            require(omp.get("upstream_tag") == f"v{omp_version}",
+                    "OMP release ID version must match upstream_tag", errors)
+            require(omp.get("distribution_version") == omp_release_id,
+                    "OMP distribution version must equal release_id", errors)
+            require(omp.get("component_release_tag") == f"omp-{omp_release_id}",
+                    "OMP component tag must derive from release_id", errors)
+        omp_platform = omp.get("platform")
+        require(omp_platform == "windows-x64",
+                "ready OMP primary platform must be windows-x64", errors)
+        expected_omp_artifact_name = (
+            f"omp-{omp_release_match.group('version')}-{omp_platform}.tar.gz"
+            if omp_release_match is not None and isinstance(omp_platform, str)
+            else None
+        )
+        require(omp.get("artifact_name") == expected_omp_artifact_name,
+                "OMP artifact name must bind release version and primary platform", errors)
+        require(omp.get("component_repository") == "https://github.com/alphastorm/homebrew-omp",
+                "OMP component repository must be alphastorm/homebrew-omp", errors)
+        require(omp.get("source_repository") == expected_omp_source_repository(release),
+                "OMP source repository must match the release's public-source policy", errors)
+        require(isinstance(omp.get("component_release_id"), int)
+                and omp.get("component_release_id", 0) > 0,
+                "OMP component_release_id must be positive", errors)
+        require(isinstance(omp.get("artifact_release_id"), int)
+                and omp.get("artifact_release_id", 0) > 0,
+                "OMP artifact_release_id must be positive", errors)
+        require(omp.get("component_release_id") == omp.get("artifact_release_id"),
+                "OMP component and artifact release IDs must match", errors)
+        require(isinstance(omp.get("artifact_asset_id"), int)
+                and omp.get("artifact_asset_id", 0) > 0,
+                "OMP artifact_asset_id must be positive", errors)
+        require(isinstance(omp.get("artifact_published"), bool),
+                "OMP artifact_published must be boolean", errors)
+        require_sha(omp.get("artifact_sha256"), "components.omp.artifact_sha256", errors)
+        require_sha(omp.get("binary_sha256"), "components.omp.binary_sha256", errors)
+        require(isinstance(omp.get("artifact_bytes"), int) and omp.get("artifact_bytes", 0) > 0,
+                "OMP artifact_bytes must be positive", errors)
+        omp_artifact_url = omp.get("artifact_url")
+        require_https(omp_artifact_url, "components.omp.artifact_url", errors, nullable=True)
+        if isinstance(omp_artifact_url, str):
+            parsed_omp_url = urlparse(omp_artifact_url)
+            omp_asset_path_match = OMP_ASSET_DOWNLOAD_RE.fullmatch(parsed_omp_url.path)
+            require(
+                parsed_omp_url.scheme == "https"
+                and parsed_omp_url.netloc == "github.com"
+                and omp_asset_path_match is not None
+                and omp_asset_path_match.group("tag") == omp.get("component_release_tag")
+                and omp_asset_path_match.group("name") == omp.get("artifact_name")
+                and parsed_omp_url.params == ""
+                and parsed_omp_url.query == ""
+                and parsed_omp_url.fragment == "",
+                "OMP artifact URL must bind the public component tag and artifact name",
+                errors,
+            )
     for key in ("source_archive_sha256", "server_binary_sha256"):
         require_sha(ninfer.get(key), f"components.ninfer.{key}", errors,
                     nullable=pending_allowed)
@@ -1665,7 +1810,8 @@ def validate(
             str(external_acceptance.get("repository_path")),
             errors,
         )
-        require(external_acceptance.get("component_release_tag") == omp.get("component_release_tag"),
+        require(external_acceptance.get("component_release_tag") == omp.get(
+                    "upstream_tag" if upstream_omp else "component_release_tag"),
                 "external acceptance component tag must match manifest", errors)
         require(external_acceptance.get("windows_asset_sha256") == omp.get("artifact_sha256"),
                 "external acceptance Windows archive must match manifest", errors)
@@ -1733,6 +1879,10 @@ def validate(
             "components.ninfer.sbom_url": ninfer.get("sbom_url"),
             "components.ninfer.sbom_sha256": ninfer.get("sbom_sha256"),
         }
+        if upstream_omp:
+            for key in ("source_commit", "qualification_commit", "main_commit", "source_tree",
+                        "component_release_tag", "component_release_id"):
+                del installable_values[f"components.omp.{key}"]
         for label, value in installable_values.items():
             require(value is not None, f"installable release requires {label}", errors)
         require(omp.get("artifact_published") is True,
@@ -1794,6 +1944,15 @@ def validate(
             if check_pins:
                 validate_pinned_evidence(root, manifest, compatibility, qualification, errors)
 
+    if upstream_omp:
+        leftovers = [f"releases/{release}/{location}" for location in client_pin_locations(
+            manifest_path.parent, historical_fork_client_pins(root, selected_release)
+        )]
+        if require_ready or status == "ready":
+            errors.extend(leftovers)
+        elif warnings is not None:
+            warnings.extend(leftovers)
+
     validate_markdown_links(root, errors)
     validate_public_text(root, errors)
 
@@ -1816,6 +1975,7 @@ def main() -> int:
     if args.check_pins and not args.require_ready:
         parser.error("--check-pins requires --require-ready")
 
+    warnings: list[str] = []
     try:
         manifest, errors = validate(
             args.root.resolve(),
@@ -1823,6 +1983,7 @@ def main() -> int:
             args.require_installable,
             args.release,
             check_pins=args.check_pins,
+            warnings=warnings,
         )
     except ContractError as error:
         errors = [str(error)]
@@ -1834,12 +1995,17 @@ def main() -> int:
         "valid": not errors,
         "errors": errors,
     }
+    if warnings:
+        result["warnings"] = warnings
     if args.json:
         print(json.dumps(result, indent=2, sort_keys=True))
-    elif errors:
+    else:
+        for warning in warnings:
+            print(f"warning: {warning}", file=sys.stderr)
+    if not args.json and errors:
         for error in errors:
             print(f"error: {error}", file=sys.stderr)
-    else:
+    elif not args.json:
         print(f"valid {result['release']} manifest ({result['status']})")
     return 0 if not errors else 1
 
