@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--resume-from` continues each of them once after a restart of the same arm, recording whether
   the server restored it from its checkpoint. A desk-code answer cut off by the output limit now
   scores inconclusive instead of wrong.
+- `scripts/hosts/cut-ninfer-4090-component.sh` publishes an RTX 4090 native runtime component
+  after its canonical qualification. It defaults to a no-effect preflight that closes and verifies
+  the asset set against its outer `SHA256SUMS`, matches the package build receipt and the lane
+  specification at the commit, compares the source archive's tar stream byte for byte with
+  `git archive` of the commit, and refuses an existing tag or release; `--publish` is
+  founder-only.
 
 ### Fixed
 
@@ -24,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The upstream watch no longer reports an API-truncated delta as having no path overlap: GitHub's
   compare endpoint lists at most 250 commits and 300 files, and a cut list now scores
   `unknown-truncated` instead of recommending every commit as a pull candidate.
+- The native qualification composer recorded every OMP golden run as `openai-completions`. It now
+  reads the API the run's assistant messages used from the transcript and refuses a transcript
+  that names none or more than one; OMP 18.2.3 reaches NInfer over `openai-responses`.
 
 ## [0.7.3] - 2026-09-18
 
