@@ -43,11 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `git archive` of the commit, and refuses an existing tag or release; `--publish` is
   founder-only.
 - `scripts/hosts/publish-product-release.sh` publishes a product release. Its default no-effect
-  preflight proves the commit is the release pull request's head with every check green and the
-  branch mergeable, that neither the tag nor the GitHub release exists, and that a clean checkout
-  of exactly that commit passes the ready verifier with its immutable pins; `--publish`
-  (founder-only) merges the pull request, tags the commit and creates the release as Latest with
-  the release's own notes.
+  preflight proves the commit is the release pull request's head with every check green, that main
+  fast-forwards to it and the remote would accept the main and tag pushes, that neither the tag nor
+  the GitHub release exists, and that a clean checkout of exactly that commit passes the ready
+  verifier with its immutable pins. `--publish` (founder-only) fast-forwards main to the commit,
+  which merges the pull request without rewriting the commits the evidence pins name, tags it and
+  creates the release as Latest with the release's own notes.
 - `scripts/hosts/accept-rtx5090-routes.py` runs the RTX 5090 documented routes (container host,
   macOS client, Windows client) and the three published clients' structured live acceptance in
   held production windows whose restoration runs in `finally` and under a watchdog, with

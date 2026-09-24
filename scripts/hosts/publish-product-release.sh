@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# Publish one OMP NInfer product release: merge its release pull request, tag the exact verified
-# commit, and create the GitHub release as Latest with the release's own notes.
+# Publish one OMP NInfer product release: fast-forward main to the exact verified commit (which
+# merges its release pull request), tag that commit, and create the GitHub release as Latest with
+# the release's own notes. The repository refuses merge commits, and a squash or rebase merge would
+# rewrite the commits the release's pinned evidence URLs name out of main's history, so main moves
+# only by fast-forward.
 # The default mode is a no-effect preflight: it proves the commit is the pull request's head with
-# every check passed and the branch mergeable, that neither the tag nor the release exists, and
-# that a clean checkout of exactly that commit passes the ready verifier with its immutable pins.
+# every check passed, that main fast-forwards to it and the remote would accept that push, that
+# neither the tag nor the release exists, and that a clean checkout of exactly that commit passes
+# the ready verifier with its immutable pins.
 # Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
 #
 # Usage:
@@ -55,6 +59,13 @@ fi
 if gh release view "$release" --repo "$REPO" >/dev/null 2>&1; then
   echo "GitHub release $release already exists" >&2; exit 1
 fi
+# Every live effect below is checked here first, so --publish can fail only on the effect itself.
+git -C "$ROOT" merge-base --is-ancestor origin/main "$commit" \
+  || { echo "origin/main does not fast-forward to $commit" >&2; exit 1; }
+git -C "$ROOT" push --dry-run -q origin "$commit:refs/heads/main" \
+  || { echo "a fast-forward push of main to $commit would be refused" >&2; exit 1; }
+git -C "$ROOT" push --dry-run -q origin "$commit:refs/tags/$release" \
+  || { echo "pushing tag $release would be refused" >&2; exit 1; }
 
 work=$(mktemp -d)
 trap 'git -C "$ROOT" worktree remove --force "$work/tree" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
@@ -69,13 +80,13 @@ title=$(sed -n '1s/^# //p' "$notes")
 [[ -n $title ]] || { echo "release notes have no title heading" >&2; exit 1; }
 cp "$notes" "$work/notes.md"
 
-echo "preflight passed: $release at $commit, pull request #$pr green and mergeable, title: $title"
+echo "preflight passed: $release at $commit, pull request #$pr green, main fast-forwards, title: $title"
 if ((publish == 0)); then
-  echo "no effect taken; rerun with --publish to merge, tag and publish (founder-only)"
+  echo "no effect taken; rerun with --publish to fast-forward main, tag and publish (founder-only)"
   exit 0
 fi
 
-gh pr merge "$pr" --repo "$REPO" --merge --match-head-commit "$commit"
+git -C "$ROOT" push origin "$commit:refs/heads/main"
 git -C "$ROOT" tag -a "$release" "$commit" -m "$title"
 git -C "$ROOT" push origin "refs/tags/$release"
 gh release create "$release" --repo "$REPO" --verify-tag --latest \
