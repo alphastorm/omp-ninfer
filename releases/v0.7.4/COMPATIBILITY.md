@@ -3,13 +3,13 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.7.4`
-Composition: **v0.7.3 client acceptance passed on RTX5090 and RTX4090**
+Composition: **v0.7.4 client and route acceptance passed on RTX5090 and RTX4090**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 26 arm64 | `qwen38-5090-v0.7.0` | `ssh-loopback` | `darwin-remote-ssh` | **qualified** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/macos-arm64-18.2.3-beta1.json) |
+| `darwin-remote-ssh` | macOS 26 arm64 | `qwen38-5090-v0.7.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/macos-arm64-18.2.3-beta1.json) |
 | `windows-docker-local` | Windows 11 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/windows-x64-18.2.3-beta1.json) |
 | `linux-docker-local` | Ubuntu 24.04 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/linux-x64-18.2.3-beta1.json) |
 
@@ -32,6 +32,7 @@ Package bindings:
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
+- Managed installation from the Mac over SSH is not qualified, so this profile is preview; the documented macOS client route over the manual tunnel is accepted.
 - Managed actions delegate over explicit non-interactive SSH to an exact remote OMP 18.2.3 client and the matching local-loopback profile.
 - OMP installation on the remote account is outside this adapter; no secret, raw log, prompt, or model output crosses the receipt boundary.
 - RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.

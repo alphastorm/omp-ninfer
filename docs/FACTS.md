@@ -1,17 +1,17 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-09-18 · **Current public release: v0.7.3.**
+Updated: 2026-09-24 · **Current public release: v0.7.4.**
 
-The [v0.7.3 manifest](../releases/v0.7.3/manifest.json) binds the client repin and
-two eligible GPU routes. Runtime measurements remain attributed to their historical releases;
-fresh client/route acceptance is separate evidence. The immutable
+The [v0.7.4 manifest](../releases/v0.7.4/manifest.json) binds the durable-session runtime on
+two eligible GPU routes with the unchanged OMP 18.2.3 client. Each lane's runtime was qualified
+on its published component; fresh client/route acceptance is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 retains the historical three-GPU / OMP 18.0.9 combination.
 
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.7.3 scope runs Qwen3.8 27B through the NInfer engine on one
+appliance for Oh My Pi. Its v0.7.4 scope runs Qwen3.8 27B through the NInfer engine on one
 NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
@@ -42,19 +42,48 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.7.3 eligible hardware
+## v0.7.4 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.2.3 with unchanged v0.7.2 component `v0.6.7-qwen38-5090-beta.1`, public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.2.3 with unchanged v0.7.2 component `v0.6.5-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.2.3 with component `v0.6.8-qwen38-5090-beta.1`, unchanged public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.2.3 with component `v0.6.6-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 
-**RTX 3090 is deferred for v0.7.3**, not qualified with OMP 18.2.3. The separately linked
+**RTX 3090 is deferred for v0.7.4**, not qualified with OMP 18.2.3. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
 waits for that host’s return.
 
-## v0.7.3 — client-only OMP 18.2.3 repin
+## v0.7.4 — durable sessions on both lanes
+
+- Both lanes run reviewed source `1c17c3facfbfd1243cf7711a412119302e6dbd74`: RTX 5090 image
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447`
+  and RTX 4090 native package `v0.6.6-qwen38-4090-beta.1`. Closes
+  [#45](https://github.com/alphastorm/omp-ninfer/issues/45) and
+  [#46](https://github.com/alphastorm/omp-ninfer/issues/46).
+- An automatic checkpoint refused at a transient gate retries when the engine quiesces;
+  admission saves a checkpoint-tagged session's newest turn before evicting it, waiting while
+  that turn's reply is still being stored; re-saving a session under the checkpoint quota no
+  longer deletes other sessions' only checkpoints.
+- On the published RTX 5090 image, the graceful-stop workload (two 126K-token sessions, a fanout
+  and the agent protocol) stopped with `saved 1, nothing to save 3, refused 0` and all four
+  stored sessions resumed from their checkpoints after a restart; the v0.7.3 runtime refused two
+  and lost their state. A held reply was saved before eviction and resumed exactly.
+  [Lane receipt](../releases/v0.7.4/qualification/rtx5090.json) ·
+  [EXP-050](measurements/2026-09-24-durable-session-eviction.json) ·
+  [EXP-051](measurements/2026-09-24-publication-barrier.json).
+- Saving before eviction costs the admitting request about **6.5 s per 126K-token session** on
+  the RTX 5090. Automatic checkpoints remain best effort: a crash or an expired graceful wait can
+  still leave unsaved work.
+- The RTX 4090 package passed 15 lane qualification phases on its host. Its workload evicted no
+  checkpoint-tagged session, so save-before-evict is exercised on the RTX 5090 only.
+- Client, model, serving arguments and memory floors are v0.7.3's; no throughput gain is claimed.
+  Fresh route acceptance passed **24 documented steps** (RTX 5090 host 2, macOS client 10,
+  Windows client 5, RTX 4090 native 7) and all three published clients passed live inference
+  against the new RTX 5090 image. [Routes](../releases/v0.7.4/acceptance/documented-routes.json) ·
+  [qualification](../releases/v0.7.4/qualification.json).
+
+## Historical v0.7.3 — client-only OMP 18.2.3 repin
 
 - Exact client component: `omp-18.2.3-cross-platform-beta-1`, public source
   `5ade242de59ac0f4606a1158bf564410c96918d4`. The macOS arm64, Windows x64 and Linux x64
@@ -192,7 +221,7 @@ waits for that host’s return.
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
 18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
-v0.7.3 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
+v0.7.4 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -292,11 +321,11 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 - One model, one active request per lane (max concurrency 1); not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- RTX 3090 is deferred for v0.7.3; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
+- RTX 3090 is deferred for v0.7.4; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
 - Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
-- Automatic checkpoints remain best effort. Carried v0.7.2 evidence includes three unsaved
-  predecessor sessions and two root fallbacks among eight continuations/forks, not universal
-  warm reuse or loss-free shutdown.
+- Automatic checkpoints remain best effort: a crash or an expired graceful wait can still leave
+  unsaved work, and the v0.7.4 multisession control recorded two root fallbacks among eight
+  continuations/forks. Neither universal warm reuse nor loss-free shutdown is claimed.
 
 ## Claims we do not make
 
@@ -307,7 +336,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[v0.7.3 manifest](../releases/v0.7.3/manifest.json) · [release state](RELEASES.md) ·
+[v0.7.4 manifest](../releases/v0.7.4/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.7.3 guide](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.7.4 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

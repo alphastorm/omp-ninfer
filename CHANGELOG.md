@@ -57,6 +57,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/rebind_release.py --stage platform` pins each client profile's platform receipt to the
   commit holding its final bytes and refuses a commit whose bytes differ from the working tree.
 
+### Changed
+
+- The compatibility authority's `darwin-remote-ssh` profile is `preview` instead of `qualified`.
+  It has been qualified but not installable since v0.3.0, and the pinned OMP 18.2.3 client reads a
+  qualified profile as a released, installable one, so it rejects the whole authority: against the
+  published v0.7.3 authority, `omp appliance doctor` fails with `Qualified profile lacks complete
+  acceptance or GPU qualification evidence` for all three profiles. The documented macOS client
+  route over the manual tunnel is unaffected and stays accepted. Release verification now refuses
+  an installable release whose authority the client would reject, and the acceptance composer
+  promotes only installable profiles to `qualified`.
+
 ### Fixed
 
 - The RTX 5090 Windows Docker-local profile (`profiles/qwen38-rtx5090-windows-docker-local.json`)

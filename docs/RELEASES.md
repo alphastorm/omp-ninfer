@@ -7,7 +7,7 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.3`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.4`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
 prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
@@ -26,11 +26,10 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.7.4 candidate — live sessions survive a graceful stop
+### v0.7.4 public release — live sessions survive a graceful stop
 
-- Status: candidate; documented-route acceptance on the published components is pending.
-  [Manifest](../releases/v0.7.4/manifest.json) · [guide](QUICKSTART.md) ·
-  [qualification](../releases/v0.7.4/qualification.json).
+- Status: published exact-profile product. [Manifest](../releases/v0.7.4/manifest.json) ·
+  [guide](QUICKSTART.md) · [qualification](../releases/v0.7.4/qualification.json).
 - Runtime rebind on both lanes to source `1c17c3facfbfd1243cf7711a412119302e6dbd74`: runtime
   `a4d26ccb` plus a packaging-only RTX 4090 lane version bump. Transient automatic checkpoint
   refusals retry, admission saves a session's newest turn before evicting it (waiting while its
@@ -47,12 +46,21 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
   canonical native phases with the OMP 18.2.3 client.
 - OMP 18.2.3 client, model, serving arguments and memory floors are unchanged from v0.7.3.
   Automatic checkpoints remain best effort; saving before eviction delays the admitting request;
-  the multisession control recorded two root fallbacks among eight continuations/forks.
+  the multisession control recorded two root fallbacks among eight continuations/forks. The
+  RTX 4090 workload evicted no checkpoint-tagged session, so save-before-evict is exercised on the
+  RTX 5090 only.
+- The published macOS arm64, Windows x64 and Linux x64 clients passed live inference against the
+  new RTX 5090 image (Linux in **Ubuntu under WSL2**), and RTX 5090 host (2), macOS client (10),
+  Windows client (5) and RTX 4090 native (7) passed **24 documented steps** on the published
+  components, with pre-cut substitutions recorded and all hosts restored.
+  [Documented routes](../releases/v0.7.4/acceptance/documented-routes.json).
+- Eligibility: **RTX 5090 on Windows 11 + Docker Desktop/WSL2** and **RTX 4090 native Windows 11**.
+  **RTX 3090 remains deferred**; its immutable v0.7.2 guide and manifest stay on OMP 18.0.9.
 
-### v0.7.3 public release — OMP 18.2.3 client repin
+### v0.7.3 — OMP 18.2.3 client repin
 
-- Status: published exact-profile product. [Manifest](../releases/v0.7.3/manifest.json) ·
-  [guide](QUICKSTART.md) · [qualification](../releases/v0.7.3/qualification.json).
+- Status: superseded published exact-profile product. [Manifest](../releases/v0.7.3/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/docs/QUICKSTART.md) · [qualification](../releases/v0.7.3/qualification.json).
 - Client-only change from OMP 18.0.9 to `omp-18.2.3-cross-platform-beta-1`, built from public
   source `5ade242de59ac0f4606a1158bf564410c96918d4`. The macOS arm64, Windows x64 and Linux x64
   archives and all three provider-free hosted qualification receipts are public; hosted proof

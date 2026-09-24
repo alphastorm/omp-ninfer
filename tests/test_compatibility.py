@@ -254,17 +254,19 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_qualified_profile_must_keep_the_core_client_capabilities(self) -> None:
         """An allowlist cannot see a removal: a shorter list is still a subset."""
         authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        qualified = next(index for index, profile in enumerate(authority["profiles"])
+                         if profile["status"] == "qualified")
         for capability in sorted(MODULE.REQUIRED_CLIENT_CAPABILITIES):
             with self.subTest(capability=capability):
                 invalid = deepcopy(authority)
-                runtime = invalid["profiles"][0]["runtime"]
+                runtime = invalid["profiles"][qualified]["runtime"]
                 runtime["capabilities"] = [
                     item for item in runtime["capabilities"] if item != capability
                 ]
                 with self.assertRaisesRegex(ValueError, "without required capabilities"):
                     MODULE.load_authority(self._write(invalid))
         duplicated = deepcopy(authority)
-        capabilities = duplicated["profiles"][0]["runtime"]["capabilities"]
+        capabilities = duplicated["profiles"][qualified]["runtime"]["capabilities"]
         capabilities.append(capabilities[0])
         with self.assertRaisesRegex(ValueError, "capabilities are duplicated"):
             MODULE.load_authority(self._write(duplicated))

@@ -323,6 +323,34 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertIn("ready release requires qualification.summary_sha256", errors)
         self.assertIn("ready release requires a passing external installation", errors)
 
+    def test_installable_release_authority_must_parse_in_the_pinned_client(self) -> None:
+        """One profile the OMP client rejects takes appliance commands away from every platform."""
+        cases = (
+            ("qualified", {"installable": False},
+             "compatibility {id} is qualified without acceptance, a qualified GPU runtime and "
+             "installability; the OMP client rejects the authority"),
+            ("blocked", {"installable": True},
+             "compatibility {id} is blocked but installable; the OMP client rejects the authority"),
+        )
+        for status, fields, expected in cases:
+            with self.subTest(status=status, fields=fields):
+                temporary, root = self.public_draft_copy()
+                self.addCleanup(temporary.cleanup)
+                profile_id = ""
+                for authority_path in (
+                    root / "compatibility.json",
+                    root / "releases" / PUBLIC_RELEASE / "compatibility.json",
+                ):
+                    authority = self.load(authority_path)
+                    profile = next(item for item in authority["profiles"]
+                                   if item["status"] == "qualified")
+                    profile_id = profile["id"]
+                    profile["status"] = status
+                    profile.update(fields)
+                    self.save(authority_path, authority)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
+                self.assertIn(expected.format(id=profile_id), errors)
+
     def test_ready_release_requires_the_continuation_capability_it_observed(self) -> None:
         """A receipt that observed a restart continuation pins the capability that provides it."""
         temporary, root = self.public_draft_copy()

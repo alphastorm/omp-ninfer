@@ -11,20 +11,41 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.7.3 — client repin, no new throughput measurement
+## v0.7.4 — durable-session runtime on both lanes (2026-09-24)
 
-v0.7.3 repins the client to OMP 18.2.3 for RTX 5090 (Windows 11 + Docker Desktop/WSL2)
-and RTX 4090 (native Windows 11). RTX 3090 is deferred; its separately preserved
-[v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
-uses OMP 18.0.9 and is not new-client qualification.
+These are runtime qualification measurements on the published components: RTX 5090 image
+`f193b746…` (server `72aa57dd…`, pulled anonymously by digest) and the RTX 4090 native package
+`cd9ab90f…` (server `7a923c21…`), both from source `1c17c3facfbfd1243cf7711a412119302e6dbd74`.
+[Public-route acceptance](../releases/v0.7.4/acceptance/documented-routes.json) is separate
+evidence. Serving arguments and memory floors are unchanged, so the throughput rows are a
+same-profile re-measurement, not a speedup claim.
 
-The exact v0.7.2 runtime image/package, model, serving arguments and floors are unchanged.
-The v0.7.2 performance and durability observations below are **carried evidence, not fresh
-measurements**. Fresh proof is client and route acceptance: all three published client
-platforms passed live inference, and 24 documented steps passed across the RTX 5090
-host/macOS/Windows and RTX 4090 native routes. Linux live proof used Ubuntu under WSL2,
-not a separately qualified non-WSL Linux OS. Provider-free hosted client qualifications are
-also public. [Release state](RELEASES.md) · [qualification](../releases/v0.7.3/qualification.json) ·
+| Observation | RTX 5090 | RTX 4090 native |
+| --- | --- | --- |
+| Graceful stop after the durability workload (two 126K-token sessions, a fanout, the agent protocol) | `saved 1, nothing to save 3, refused 0`; 4 saves before eviction; all 4 stored sessions restored after the restart; a second stop refused nothing | 15 qualification phases passed; its workload evicted no checkpoint-tagged session, so save-before-evict is exercised on the RTX 5090 only |
+| Held reply during another session's eviction | Save deferred while the reply was stored, then saved; resumed exactly after a restart | Not exercised |
+| Long-context gate | Exact **130,048-token** retrieval, 58.2 s cold (2,236 tok/s) | Exact **130,048-token** retrieval, 91.1 s |
+| Decode | **139.0 tok/s** server decode, 41.2% MTP acceptance at temperature 0 | **153.4 tok/s** decode, 2,113 tok/s prefill on its 4,541-token fixture |
+| Checkpoint restore | 57.9K-token session restored in 3.1-3.3 s; 57K/67K fanouts resumed 3.1 s / 4.7 s after a restart | Saved short sessions restored across a managed stop and restart |
+
+The v0.7.3 runtime, on the same workload, stopped with `saved 2, nothing to save 0, refused 2`
+and lost both 126K-token sessions' state
+([EXP-049](measurements/2026-09-24-export-refusal-gates.json)); the fix and its review
+remediation are measured in [EXP-050](measurements/2026-09-24-durable-session-eviction.json) and
+[EXP-051](measurements/2026-09-24-publication-barrier.json). Saving before eviction costs the
+admitting request about **6.5 s per 126K-token session** on the RTX 5090. The multisession control
+again recorded **2 root fallbacks among 8 continuations/forks** without server errors. Automatic
+checkpoints remain best effort: a crash or an expired graceful wait can still leave unsaved work.
+[RTX 5090 lane receipt](../releases/v0.7.4/qualification/rtx5090.json) ·
+[RTX 4090 lane receipt](../releases/v0.7.4/qualification/rtx4090.json).
+
+## Historical v0.7.3 — client repin, no new throughput measurement
+
+v0.7.3 repinned the client to OMP 18.2.3 for RTX 5090 (Windows 11 + Docker Desktop/WSL2)
+and RTX 4090 (native Windows 11) with the v0.7.2 runtime unchanged, so it recorded no new
+throughput. Fresh proof was client and route acceptance: all three published client platforms
+passed live inference, and 24 documented steps passed across the RTX 5090 host/macOS/Windows and
+RTX 4090 native routes. [Qualification](../releases/v0.7.3/qualification.json) ·
 [documented routes](../releases/v0.7.3/acceptance/documented-routes.json).
 
 ## Historical v0.7.2 — final reviewed reclaim measurements (2026-09-17)

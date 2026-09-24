@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-5ade242d-07cee80249-v0.7.4",
+  "product_release": "v0.7.4",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "as_of": "2026-09-24",
+  "source": {
+    "repository": "https://github.com/alphastorm/oh-my-pi",
+    "commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "qualification_commit": "d235a82152cf971468a3ebcd6232694e07c2d376",
+    "semantic_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "generated_lock_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "main_commit": "a7275375a9cd283a78baa1e0d311dc0e264ae829",
+    "main_tree": "35d199190488f0173c8a6403d29eb123e0190188"
+  },
+  "client": {
+    "release_id": "18.2.3-cross-platform-beta-1",
+    "version": "18.2.3",
+    "os": "Ubuntu 24.04 x64 client under WSL2",
+    "architecture": "x64",
+    "archive_sha256": "07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46",
+    "archive_bytes": 88783418,
+    "binary_sha256": "30f29b28d4ca3d849a34fc5c944be45366e997990a0ceb5f78ef11cca0cfbb3f",
+    "binary_bytes": 161440968,
+    "clean_install": true,
+    "clean_home": true,
+    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+    "component_release_id": 391118997,
+    "asset_id": 571366439,
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-linux-x64.tar.gz"
+  },
+  "hosted_ci": {
+    "run_id": 35204510294,
+    "qualification_receipt_asset_id": 571366440,
+    "qualification_receipt_sha256": "c6acb805fb22e01e874c3c124ca089679c12309e4a0776bcef6b94cf0f759900",
+    "provider_free": true,
+    "hardware_accepted": false
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.2.3",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 27,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "72aa57dd147ef95ca3574ec4b550fb46676690d704bb9422ba0061d23f1f0ad6",
+    "runtime_configuration_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "local-max"
+    ],
+    "raw_transcript_included": false,
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "local-max"
+      ],
+      "errors": [
+        "Authenticated NInfer status request failed"
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "runtime_image_digest": "sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false,
+    "execution_context": {
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "wsl_distro_name_present": false,
+      "wsl_interop_present": false,
+      "environment_erased": false,
+      "native_linux_os_qualification_claimed": false
+    }
+  },
+  "diagnostics": {
+    "status": "blocked",
+    "note": "Recorded diagnostic outcome, not a managed-install-ready claim. The candidate authority failed the client's parser (darwin-remote-ssh was qualified but not installable); this outcome is against the corrected authority before its receipt pins, with the shipped profile statuses.",
+    "blockers": [
+      "Host has unknown GiB free disk; 64 GiB required",
+      "Port 18089 is occupied"
+    ],
+    "profile_supported": false,
+    "profile_installable": true,
+    "authority_sha256": "b19d0b52218277c75ea72a7bd2d821cdef8a5250c6f23c6e073fd3dd7712858f",
+    "candidate_authority": {
+      "authority_sha256": "0a67e374550d73c844ae24570eb2d627102e9cd7e406cfa2f6bda6f0d803aa7a",
+      "status": "error",
+      "error": "Qualified profile lacks complete acceptance or GPU qualification evidence"
+    }
+  },
+  "checks": {
+    "new_client_archive_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the unchanged client against the published v0.7.4 RTX 5090 runtime (image f193b746), not GPU performance or a managed-appliance installation.",
+    "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt.",
+    "Live inference used the native Linux binary under WSL2. This is not a new non-WSL Linux OS qualification; the hosted Linux qualification remains provider-free.",
+    "The first continuation returned COBOLT-493817 and the strict check refused it; the corrected probe asked for verbatim copying without restating the nonce and returned COBALT-493817 exactly."
+  ]
+}

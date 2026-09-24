@@ -60,6 +60,21 @@ RTX 3090 is omitted from this release pending access to its physical qualificati
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 and OMP 18.0.9 client remain a separate historical route, not a v0.7.4 qualification claim.
 
+## Documented routes and clients
+
+The four documented routes passed on the published components: RTX 5090 container host (2 steps),
+macOS client (10, including a session that survived a server restart), Windows client (5) and
+RTX 4090 native Windows (7), with pre-cut substitutions recorded and every host restored
+([routes](acceptance/documented-routes.json)). The published macOS arm64, Windows x64 and Linux x64
+OMP 18.2.3 clients each ran a typed tool turn, an exact continuation and a fail-closed request
+against the RTX 5090 image; Linux ran under WSL2, not a separately qualified Linux OS
+([composed acceptance](acceptance/composed-external-installation.json)).
+
+The compatibility authority's `darwin-remote-ssh` profile is now `preview`. It was never
+installable, and the pinned client reads a qualified profile as an installable one, so it rejected
+the whole authority: `omp appliance doctor` failed for every profile against v0.7.3's authority.
+The documented macOS client route does not use that command and stays accepted.
+
 ## Support boundaries
 
 Automatic checkpointing remains best effort under live traffic: a crash or an expired graceful

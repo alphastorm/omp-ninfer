@@ -511,12 +511,13 @@ def validate_continuation_capability(
 ) -> None:
     """A profile whose receipt observed a restart continuation must still advertise it.
 
-    Dropping the capability while keeping the receipt leaves the profile qualified on paper and
+    Dropping the capability while keeping the receipt leaves the continuation on paper and
     silently withdraws the continuation OMP selects the lane for; the allowlist alone cannot see
-    the removal, because a shorter capability list is still a subset of the vocabulary.
+    the removal, because a shorter capability list is still a subset of the vocabulary. A
+    preview profile keeps its receipt too, so the binding does not depend on status.
     """
     for profile_item in compatibility.get("profiles", []):
-        if not isinstance(profile_item, dict) or profile_item.get("status") != "qualified":
+        if not isinstance(profile_item, dict):
             continue
         receipt = profile_item.get("acceptance_receipt")
         url = receipt.get("url") if isinstance(receipt, dict) else None
@@ -537,6 +538,37 @@ def validate_continuation_capability(
             f"restart continuation but does not advertise {CONTINUATION_CAPABILITY}",
             errors,
         )
+
+
+def validate_client_profile_predicates(compatibility: dict[str, Any], errors: list[str]) -> None:
+    """Every profile must pass the lifecycle predicates the pinned OMP client parses it with.
+
+    The client reads the whole authority before any appliance command and rejects the file when
+    one profile breaks them - a qualified profile is a released, installable one with acceptance
+    and a qualified GPU runtime, and a blocked or unsupported one is never installable - so a
+    single mislabelled profile takes the diagnostic and lifecycle commands away from every
+    platform. Historical authorities that break them stay renderable, and the pre-GA beta
+    fixtures keep validating; an installable GA release's may not.
+    """
+    for profile_item in compatibility.get("profiles", []):
+        if not isinstance(profile_item, dict):
+            continue
+        status = profile_item.get("status")
+        installable = profile_item.get("installable") is True
+        gpu_status = profile_item.get("gpu_qualification", {}).get("status")
+        if status == "qualified":
+            require(
+                profile_item.get("acceptance_receipt") is not None
+                and gpu_status == "qualified"
+                and installable,
+                f"compatibility {profile_item.get('id')} is qualified without acceptance, a "
+                "qualified GPU runtime and installability; the OMP client rejects the authority",
+                errors,
+            )
+        if status in {"blocked", "unsupported"}:
+            require(not installable,
+                    f"compatibility {profile_item.get('id')} is {status} but installable; the OMP "
+                    "client rejects the authority", errors)
 
 
 def validate_aggregate_as_of(
@@ -1676,6 +1708,8 @@ def validate(
                 "release manifest is not installable", errors)
 
     if status in {"candidate", "ready"} or require_installable or require_ready:
+        if ga_release(release):
+            validate_client_profile_predicates(compatibility, errors)
         installable_values = {
             "components.omp.distribution_version": omp.get("distribution_version"),
             "components.omp.platform": omp.get("platform"),

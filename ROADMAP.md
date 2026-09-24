@@ -3,7 +3,7 @@
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 release lanes, each
 bound to exact bytes and a receipt, with the RTX 3090 lane deferred until its host returns. The
-`v0.7.3` public release exposes only those exact installable profiles. Work outside that wedge
+`v0.7.4` public release exposes only those exact installable profiles. Work outside that wedge
 needs a new product decision rather than placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,28 +11,21 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.7.3
+## Where this is now — v0.7.4
 
-The `v0.7.3` release repins only the client, from OMP 18.0.9 to
-`omp-18.2.3-cross-platform-beta-1`: the fork's NInfer compat layer rebased onto upstream
-`v18.2.3`, closing the re-pin evaluated in
-[#43](https://github.com/alphastorm/omp-ninfer/issues/43). The published macOS, Windows and Linux
-clients passed live inference and a fresh 24-step documented-route acceptance passed on both
-qualified lanes; the runtime images, model, serving settings and memory floors are `v0.7.2`'s. The
-RTX 3090 lane is deferred until its host returns (expected around 2026-09-30); its
-[v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) stays on
-OMP 18.0.9.
+The `v0.7.4` release rebinds both lanes to the durable-session runtime from reviewed source
+`1c17c3fa`: RTX 5090 `v0.6.8-qwen38-5090-beta.1` and RTX 4090 native `v0.6.6-qwen38-4090-beta.1`.
+A graceful stop now keeps every live session it can save
+([#45](https://github.com/alphastorm/omp-ninfer/issues/45),
+[#46](https://github.com/alphastorm/omp-ninfer/issues/46)). The OMP 18.2.3 client, model, serving
+settings and memory floors are `v0.7.3`'s, and the four documented routes passed again on the
+published components. The RTX 3090 lane is deferred until its host returns (expected around
+2026-09-30); its [v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+stays on OMP 18.0.9.
 
-`v0.7.2` before it closed the restore bound `v0.7.1` named: restore reclaims checkpoint-backed
-resident sessions under host-KV pressure, so both RTX 5090 sessions at the 131,072-token ceiling
-resume after a restart ([#40](https://github.com/alphastorm/omp-ninfer/issues/40)), and on the
-RTX 4090 a pool sized for one ceiling session restored two
-([EXP-047](docs/measurements/2026-09-17-restore-reclaim.json)). Automatic checkpoints stay best
-effort: EXP-047's combined process refused three automatic saves and, holding earlier sessions
-too, three shutdown saves, with a refusal that does not name its gate.
+**How the fix was chosen.** The engine window measured first and deferred the merge
+([EXP-048](docs/measurements/2026-09-24-engine-window-upstream-vs-shipped.json)).
 
-**Next — every live session survives a graceful stop.** The engine window measured first and
-deferred the merge ([EXP-048](docs/measurements/2026-09-24-engine-window-upstream-vs-shipped.json)).
 On the RTX 5090 appliance, with the same weights and serving settings, upstream NInfer head
 (`594930e7`, 202 commits past this fork's base) matches the shipped runtime on prefill (2,269 vs
 2,242 tok/s at 130,048 tokens) and on decode rounds per second (61.2 vs 62.0), and keeps less
@@ -46,7 +39,7 @@ change could move a lane gate
 ([watch report](docs/measurements/2026-09-24-upstream-watch.json), [positions](docs/UPSTREAM.md),
 [#33](https://github.com/alphastorm/omp-ninfer/issues/33)).
 
-The same window reproduced the durability gap on the shipped runtime: a graceful stop with four
+The same window reproduced the durability gap on the `v0.7.3` runtime: a graceful stop with four
 stored sessions reported `saved 2, nothing to save 0, refused 2` and lost two sessions' state, with
 the generic `program refused continuation export`. A diagnostic-only build that names every export
 gate reproduced it and named it
@@ -71,8 +64,29 @@ for 6 s while another session's admission had to evict it, the reviewed candidat
 (404 after a restart) and the remediation saved it first and resumed it exactly
 ([EXP-051](docs/measurements/2026-09-24-publication-barrier.json)). Saving before eviction costs the
 admitting request about 6.5 s per 126K-token session on the RTX 5090, where one such checkpoint is
-8.6 GB. The fixes reach users when a release rebinds both lanes to that runtime. The RTX 3090's
-return is a separate release on the current runtime and OMP 18.2.3.
+8.6 GB. The RTX 4090 workload evicted no checkpoint-tagged session, so save-before-evict is
+exercised on the RTX 5090 only; the published RTX 4090 package passed its 15 lane qualification
+phases.
+
+**Next — the RTX 3090 returns.** Its lane comes back as a separate release on the current runtime
+and OMP 18.2.3 once its host is available again.
+
+## Where this was — v0.7.3
+
+The `v0.7.3` release repinned only the client, from OMP 18.0.9 to
+`omp-18.2.3-cross-platform-beta-1`: the fork's NInfer compat layer rebased onto upstream
+`v18.2.3`, closing the re-pin evaluated in
+[#43](https://github.com/alphastorm/omp-ninfer/issues/43). The published macOS, Windows and Linux
+clients passed live inference and a fresh 24-step documented-route acceptance passed on both
+qualified lanes; the runtime images, model, serving settings and memory floors were `v0.7.2`'s.
+
+`v0.7.2` before it closed the restore bound `v0.7.1` named: restore reclaims checkpoint-backed
+resident sessions under host-KV pressure, so both RTX 5090 sessions at the 131,072-token ceiling
+resume after a restart ([#40](https://github.com/alphastorm/omp-ninfer/issues/40)), and on the
+RTX 4090 a pool sized for one ceiling session restored two
+([EXP-047](docs/measurements/2026-09-17-restore-reclaim.json)). Automatic checkpoints stayed best
+effort: EXP-047's combined process refused three automatic saves and, holding earlier sessions
+too, three shutdown saves, with a refusal that does not name its gate.
 
 ## Where this was — v0.7.1
 
@@ -500,6 +514,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.7.4` | Durable sessions on both mainline lanes (source 1c17c3fa; RTX 5090 v0.6.8, RTX 4090 native v0.6.6): refused automatic saves retry, admission saves a session's newest turn before evicting it, and re-saving under the checkpoint quota no longer deletes other sessions' only checkpoints; the graceful-stop workload went from `refused 2` to `saved 1, nothing to save 3, refused 0` with all four sessions resumed (EXP-050/EXP-051); client, model and settings carried from v0.7.3; RTX 3090 still deferred |
 | `v0.7.3` | Client-only repin to OMP 18.2.3 (`omp-18.2.3-cross-platform-beta-1`) for the RTX 5090 and RTX 4090 lanes: macOS, Windows and Linux clients passed live inference and a fresh 24-step documented-route acceptance; runtime, model and settings carried from v0.7.2; RTX 3090 deferred until its host returns |
 | `v0.7.2` | Bounded restore reclaim on both mainline lanes (source d125ffff): restore saves and reclaims checkpoint-backed resident sessions under host-KV pressure, so both RTX 5090 ceiling sessions resume after a restart, and on the RTX 4090 a pool sized for one ceiling session restored two (EXP-047) |
 | `v0.7.1` | The RTX 4090 native lane can restore its own ceiling-sized sessions (host-KV pool 4096 to 11264 MiB with a declared 32,768 MiB host floor), an export is refused when the configuration could not restore it, and a declined restore names its gate (EXP-043/EXP-044) |

@@ -1,0 +1,67 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.7.4",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-09-24",
+  "status": "passed",
+  "candidate_commit": "82b4abbf8b6c5d459a0ad96c46a71f5603c39311",
+  "client": {
+    "version": "omp/18.2.3",
+    "tag": "omp-18.2.3-cross-platform-beta-1",
+    "source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "source_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "archive_bytes": 84845155,
+    "archive_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+    "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf"
+  },
+  "runtime": {
+    "tag": "v0.6.6-qwen38-4090-beta.1",
+    "source_commit": "1c17c3facfbfd1243cf7711a412119302e6dbd74",
+    "package_bytes": 572698181,
+    "package_sha256": "cd9ab90f1a030424fcbe1025ad4b6240c7a14760759df873e3a60002232924ac",
+    "binary_sha256": "7a923c21f73f03583ce25a2311d39818aeba82ce5bf7efaf508bfa8b4a1df41a",
+    "configuration_sha256": "d735b3d6e119c3fb198aa8be143c7c70d01d20935e458d8d98bd3b68e23c8713",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "preparation": "The qualification-installed active 1c17 instance referenced a different model path, which the installer refuses for the documented one. Exact state bytes, 171 support files, 47 directory SDDLs, the task XML and holds were snapshotted; same-volume moves preserved only the 1c17 release/secrets/cache and historical staging, and state temporarily selected f098 with previous d125. The literal documented route then performed a fresh canonical upgrade installation of the published package. This is not an idempotent-reinstall claim. All moved originals were restored.",
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_response_replay",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 3,
+    "cloud_fallback_observed": false,
+    "graceful_stop": {
+      "outcome": "graceful",
+      "forced": false,
+      "sessions_saved": 2,
+      "sessions_refused": 0
+    },
+    "structured_client": {
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "exact_visible_final_answer": true,
+      "continuation_exact_nonce": true,
+      "fail_closed_without_model_response": true
+    }
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-09-24-v074-rtx4090-native-run.json",
+    "sha256": "edd01feb75dac971db4332d4542073095b38da6ffe2b0b071439309524b59794"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-09-24-v074-acceptance-restoration.json",
+    "sha256": "4aa7f54209298515ac573ae4c2a656a37e2454a22f9cf6f4c4b8d83d7a83e165"
+  },
+  "limitations": [
+    "Fresh canonical upgrade installation after preserving the qualification-installed instance; not an idempotent-reinstall qualification.",
+    "Three local reasoning_effort_not_supported responses for high were followed by successful local compatibility retries; no serving-knob change or cloud inference fallback.",
+    "The documented prompt reported the exact marker in inline code; the structured probe returned the whole visible answer exactly.",
+    "An earlier run of the same seven blocks also passed; its evidence collection failed after the route, so this receipt binds the corrected run.",
+    "Runtime qualification is the RTX 4090 lane receipt; this receipt proves the published package's documented installation and client composition."
+  ]
+}

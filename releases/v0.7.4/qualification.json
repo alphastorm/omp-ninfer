@@ -5,7 +5,7 @@
   "as_of": "2026-09-24",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Runtime rebind for RTX 5090 container and RTX 4090 native Windows: both lanes move to the durable-session runtime 1c17c3fa (council-reviewed a4d26ccb plus a packaging-only lane version bump). The OMP 18.2.3 client, model, serving settings and memory floors are unchanged from v0.7.3. RTX 3090 is omitted pending physical-host access. Every runtime gate below was measured on the published components; nothing is carried from v0.7.2.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,12 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "runs against the published v0.6.8-qwen38-5090-beta.1 image f193b746 and v0.6.6-qwen38-4090-beta.1 package before the cut; the receipt lands at releases/v0.7.4/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.7.4/acceptance/composed-external-installation.json",
+      "sha256": "95ce339f455151351ac8f0f2c726bee6209a282061af8ff604a9f4bb32c831a3",
+      "public_url": null,
+      "as_of": "2026-09-24",
+      "release": "v0.7.4",
+      "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+      "windows_binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "ca6d3ef85504b0391a5ef0b62f8e4fd33390f4463e7d69ba5f10b34c1311e727",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "8172bc345bd5f0c6a40a979bae2ad99bab8682046a016f4127d281675e1113f6"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "8e0c5ffc6f8c928716960b15a57b8aa77881c36260656b6810ac1f6b171122b1"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "9379011f2f4e40321d2b27b0f3581f9c1456e5ebf9488e08d83000501e0c31ed"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published components; runtime qualification is recorded per lane."
     },
     "documented_route_acceptance": {
-      "status": "pending",
-      "note": "the four documented routes run against the published v0.7.4 components before the cut; v0.7.3's accepted receipts cover the v0.7.2 runtime"
+      "status": "passed",
+      "repository_path": "releases/v0.7.4/acceptance/documented-routes.json",
+      "sha256": "bf43676382c56e16654bfebed536de784a9dd6994951702e5a902f2470c7556f"
     }
   },
   "observed_gates": {
@@ -338,9 +368,7 @@
     }
   },
   "interpretation": "Both lanes now keep live sessions through a graceful stop. On the published RTX 5090 image the EXP-050 workload's stop refused nothing and every stored session resumed from its checkpoint; a reply held out of the response store while another session's admission evicted it was saved first and resumed exactly. The RTX 4090 package passed its 15 canonical phases, including the managed-stop flush of an unpublished session and the OMP 18.2.3 tool call. Automatic checkpoints stay best effort, saving before eviction delays the admitting request, and universal warm reuse is not claimed.",
-  "remaining_release_gates": [
-    "documented-route and external-installation acceptance against the published v0.6.8-qwen38-5090-beta.1 image and v0.6.6-qwen38-4090-beta.1 package"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Client-repin route not exercised; omitted from this release by user direction.",

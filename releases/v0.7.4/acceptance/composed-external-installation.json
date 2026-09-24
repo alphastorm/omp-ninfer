@@ -1,0 +1,92 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.7.4",
+  "as_of": "2026-09-24",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Durable-session runtime rebind on both lanes with the unchanged published client; exact-component documented-route acceptance.",
+  "client": {
+    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+    "source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
+    "source_tree": "454d121cf221c1928de9503c71210cf015b048dc",
+    "note": "All three published native client binaries passed authenticated typed-tool/result, exact final marker, continuation and fail-closed inference against the published RTX 5090 image f193b746. Native RTX 4090 documented acceptance passed separately against package cd9ab90f."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "ca6d3ef85504b0391a5ef0b62f8e4fd33390f4463e7d69ba5f10b34c1311e727",
+  "windows_asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+  "windows_binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "8172bc345bd5f0c6a40a979bae2ad99bab8682046a016f4127d281675e1113f6"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "8e0c5ffc6f8c928716960b15a57b8aa77881c36260656b6810ac1f6b171122b1"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "9379011f2f4e40321d2b27b0f3581f9c1456e5ebf9488e08d83000501e0c31ed"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "assets": 3,
+      "anonymous": true
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "context": "Ubuntu WSL2; no new non-WSL OS qualification claim"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": "RTX 5090 only (macOS and Windows clients); native RTX 4090 remains text/tools.",
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": "Both lanes qualified on their published components (RTX 5090 image f193b746, RTX 4090 package cd9ab90f); no model, serving-setting or memory-floor change.",
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.7.4/acceptance/documented-routes.json",
+      "sha256": "bf43676382c56e16654bfebed536de784a9dd6994951702e5a902f2470c7556f"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.7.4/acceptance/rtx4090-public-install.json",
+      "sha256": "43681dc5328e4c2379b171e29951fea8eafd812efbd0af9f312eb482b9476608"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-09-24-v074-acceptance-restoration.json",
+      "sha256": "4aa7f54209298515ac573ae4c2a656a37e2454a22f9cf6f4c4b8d83d7a83e165"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.7.4/qualification/client-components.json",
+      "sha256": "4735ac8c03c31cb2488764f6b06c8ace086e0c499fdf0d40b0d9bc7a29d64e45"
+    }
+  },
+  "limitations": [
+    "RTX 3090 omitted pending its own qualification; its v0.7.2 instructions remain a separate legacy route.",
+    "Client diagnostics are recorded in the platform receipts and are not a managed-appliance installation pass.",
+    "Save-before-evict with ceiling-class sessions is exercised on the RTX 5090 only.",
+    "All hardware observations are maintainer-operated; no independent external-user installation or repeat-use outcome is inferred."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

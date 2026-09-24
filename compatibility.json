@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.7.4",
   "composition": {
-    "status": "v0.7.3 client acceptance passed on RTX5090 and RTX4090",
+    "status": "v0.7.4 client and route acceptance passed on RTX5090 and RTX4090",
     "lifecycle_repository": "https://github.com/alphastorm/oh-my-pi",
     "lifecycle_source_release": "https://github.com/alphastorm/oh-my-pi/releases/tag/omp-v18.2.3-ninfer-beta.1",
     "lifecycle_source_commit": "5ade242de59ac0f4606a1158bf564410c96918d4",
@@ -22,7 +22,7 @@
     {
       "id": "darwin-remote-ssh",
       "adapter": "darwin-remote-ssh",
-      "status": "qualified",
+      "status": "preview",
       "transport": "ssh-loopback",
       "commands": [
         "doctor",
@@ -44,6 +44,7 @@
       "local_port": 18089,
       "container_port": 8080,
       "limitations": [
+        "Managed installation from the Mac over SSH is not qualified, so this profile is preview; the documented macOS client route over the manual tunnel is accepted.",
         "Managed actions delegate over explicit non-interactive SSH to an exact remote OMP 18.2.3 client and the matching local-loopback profile.",
         "OMP installation on the remote account is outside this adapter; no secret, raw log, prompt, or model output crosses the receipt boundary.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
@@ -51,7 +52,7 @@
       "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/macos-arm64-18.2.3-beta1.json",
-        "sha256": "3c021fed1f3718d6d18c9bc1e16fe8a9f2f2e3f042d9e7508e0df01cc62f93bd"
+        "sha256": "8172bc345bd5f0c6a40a979bae2ad99bab8682046a016f4127d281675e1113f6"
       },
       "client_distribution": {
         "os": "macOS 26",
@@ -147,7 +148,7 @@
       "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/windows-x64-18.2.3-beta1.json",
-        "sha256": "3051f471d324db00cab44cdf68a0a9d6baa048002152be159e2d006c8afea7c5"
+        "sha256": "8e0c5ffc6f8c928716960b15a57b8aa77881c36260656b6810ac1f6b171122b1"
       },
       "client_distribution": {
         "os": "Windows 11",
@@ -244,7 +245,7 @@
       "blockers": [],
       "acceptance_receipt": {
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/linux-x64-18.2.3-beta1.json",
-        "sha256": "d73b25b463ceae02a71ad394f1f0dace55c96c788ba5f68eb03fea6cc7676bea"
+        "sha256": "9379011f2f4e40321d2b27b0f3581f9c1456e5ebf9488e08d83000501e0c31ed"
       },
       "client_distribution": {
         "os": "Ubuntu 24.04",
