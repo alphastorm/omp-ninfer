@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-09-24
+
 ### Durable-session runtime (both lanes)
 
 - Rebind RTX 5090 to `v0.6.8-qwen38-5090-beta.1` (image
@@ -1397,7 +1399,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.3...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.4...HEAD
+[0.7.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.0...v0.7.1
