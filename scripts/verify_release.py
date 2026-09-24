@@ -1260,6 +1260,20 @@ def validate(
                                       runtime.get("deployment_profile"), errors)
             profiles.append((f"profiles/{extra_path.name}", extra_profile))
 
+    # A profile that pins a client archive must pin the manifest's. v0.7.3 repinned the client in
+    # the manifest while the primary profile kept v0.7.2's archive URL and hashes, and no check read
+    # the profile's copy. A client named only by package (the macOS cask route) pins nothing here.
+    archive_keys = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
+    for label, candidate in profiles:
+        client = candidate.get("client")
+        if not isinstance(client, dict) or not any(key in client for key in archive_keys):
+            continue
+        require(client.get("component_release_tag") == omp.get("component_release_tag")
+                and client.get("asset_url") == omp.get("artifact_url")
+                and client.get("asset_sha256") == omp.get("artifact_sha256")
+                and client.get("binary_sha256") == omp.get("binary_sha256"),
+                f"{label}: client archive must be the manifest's OMP component", errors)
+
     release_compatibility_path = manifest_path.parent / "compatibility.json"
     compatibility_path = (
         release_compatibility_path

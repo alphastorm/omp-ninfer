@@ -7,10 +7,10 @@
   "client": {
     "os": "Windows 11",
     "architecture": "x64",
-    "component_release_tag": "omp-18.0.9-cross-platform-beta-2",
-    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.0.9-cross-platform-beta-2/omp-18.0.9-windows-x64.tar.gz",
-    "asset_sha256": "0256dc25174766c5cdaca23e4e4361e0b95295cd05a075089a6bbf10de170ef9",
-    "binary_sha256": "cd107c9b89d351d0a6c2243ba9f89a7db97a5e2cbb60213a6f984399bd135a81"
+    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
+    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-windows-x64.tar.gz",
+    "asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
+    "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf"
   },
   "runtime_host": {
     "os": [

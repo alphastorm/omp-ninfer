@@ -47,6 +47,7 @@ class ReleaseContractTest(unittest.TestCase):
         shutil.copy2(historical / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
         historical_manifest = self.load(historical / "manifest.json")
         historical_profile = historical_manifest["runtime_identity"]["deployment_profile"]
+        historical_omp = historical_manifest["components"]["omp"]
         for profile_path in (root / "profiles").glob("*.json"):
             profile = self.load(profile_path)
             profile["release"] = "v0.2.0-beta.1"
@@ -55,6 +56,14 @@ class ReleaseContractTest(unittest.TestCase):
             for index, argument in enumerate(arguments[:-1]):
                 if argument == "--deployment-profile":
                     arguments[index + 1] = historical_profile
+            client = profile.get("client")
+            if isinstance(client, dict) and "component_release_tag" in client:
+                client.update({
+                    "component_release_tag": historical_omp["component_release_tag"],
+                    "asset_url": historical_omp["artifact_url"],
+                    "asset_sha256": historical_omp["artifact_sha256"],
+                    "binary_sha256": historical_omp["binary_sha256"],
+                })
             self.save(profile_path, profile)
         return temporary, root
 
@@ -621,6 +630,20 @@ class ReleaseContractTest(unittest.TestCase):
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("profile and manifest model hashes must match", errors)
+
+    def test_profile_client_archive_must_follow_the_manifest_client(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-windows-docker-local.json"
+        profile = self.load(profile_path)
+        # A client archive other than the one the manifest pins, as v0.7.3's profile kept v0.7.2's
+        # archive after the manifest moved on. The fixture manifest pins 18.0.9; name 18.2.3.
+        profile["client"]["component_release_tag"] = "omp-18.2.3-cross-platform-beta-1"
+        profile["client"]["asset_sha256"] = "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311"
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn("profile: client archive must be the manifest's OMP component", errors)
 
     def test_primary_gpu_receipt_bytes_must_match_compatibility(self) -> None:
         temporary, root = self.candidate_copy()

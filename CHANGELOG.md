@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The RTX 5090 Windows Docker-local profile (`profiles/qwen38-rtx5090-windows-docker-local.json`)
+  still named v0.7.2's client archive (`omp-18.0.9-cross-platform-beta-2`, its URL and hashes) after
+  v0.7.3 repinned the client; it now names the manifest's `omp-18.2.3-cross-platform-beta-1`
+  Windows archive. No documented route read that block, so no installation was affected. Release
+  verification now rejects a profile whose client archive differs from the manifest's client.
+- The upstream watch no longer reports an API-truncated delta as having no path overlap: GitHub's
+  compare endpoint lists at most 250 commits and 300 files, and a cut list now scores
+  `unknown-truncated` instead of recommending every commit as a pull candidate.
+
 ## [0.7.3] - 2026-09-18
 
 ### OMP 18.2.3 client repin
