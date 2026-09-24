@@ -63,7 +63,13 @@ before pressure evicts it. The same workload's stop now reports `saved 1, nothin
 refused 0` on both lanes, all four stored sessions resume after a restart, and a second stop
 refuses nothing. Resuming exposed a third loss, fixed with them
 ([#46](https://github.com/alphastorm/omp-ninfer/issues/46)): re-saving one session under the
-checkpoint quota deleted other sessions' only checkpoints. Saving before eviction costs the
+checkpoint quota deleted other sessions' only checkpoints. An independent review of those fixes
+found two more losses, both fixed: save-before-evict gave a reply still streaming to its client two
+seconds to reach the response store and then evicted the session unsaved, and a quota pass whose
+cleanup failed kept deleting other sessions' only checkpoints. Holding one reply out of the store
+for 6 s while another session's admission had to evict it, the reviewed candidate lost that turn
+(404 after a restart) and the remediation saved it first and resumed it exactly
+([EXP-051](docs/measurements/2026-09-24-publication-barrier.json)). Saving before eviction costs the
 admitting request about 6.5 s per 126K-token session on the RTX 5090, where one such checkpoint is
 8.6 GB. The fixes reach users when a release rebinds both lanes to that runtime. The RTX 3090's
 return is a separate release on the current runtime and OMP 18.2.3.

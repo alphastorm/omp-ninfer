@@ -1,0 +1,136 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-051",
+  "title": "A reply still being stored no longer costs its session the newest turn at eviction",
+  "generated_utc": "2026-09-24T12:57:46Z",
+  "status": "passed",
+  "question": "Council CR-20260924-ninfer-durable-evict-r1 (daybreak-blue R2) found that save-before-evict gave a victim's reply two seconds to reach the response store and then let the engine drop its continuation. A streamed reply is stored only after its last delta reaches the client, so a slow reader loses exactly the newest turn the handler protects. Does it happen on the shipped RTX 5090 profile, and does the remediation close it?",
+  "answer": "Yes, and yes. With the reply held out of the store for 6 s while another ceiling-class session's admission had to evict it, the reviewed candidate c5fe23db gave up after 2 s, evicted the session, refused its automatic save and its graceful-stop save (`saved 0, nothing to save 1, refused 1`, `their state is lost`), and after a restart the held turn answered 404 previous_response_not_found. The remediated a4d26ccb deferred, saved the session as soon as the reply was stored, then evicted it; the stop reported `saved 0, nothing to save 2, refused 0` and after a restart the held turn answered the code it introduced exactly.",
+  "fixes": {
+    "source": "alphastorm/ninfer branch fix/durable-session-eviction, remediation of council CR-20260924-ninfer-durable-evict-r1 on c5fe23db",
+    "commits": {
+      "30cfdf83": "fix(serve): stop evicting other sessions once a quota reclamation fails - a pass whose reclamation failed no longer evicts other sessions' current checkpoints; the save is refused or usage stays over the cap by the stuck bytes (daybreak-blue R1, claude R1)",
+      "5c18af62": "fix(serve): settle automatic retry budgets on every final outcome - the retry table holds a session only while its retry is queued (daybreak-blue R3)",
+      "a4d26ccb": "fix(runtime): keep a pressure victim resident while its reply is being stored - stored Responses turns hold a ResponsePublication until stored or abandoned; the handler reports Settled or Pending per victim and the engine drops only settled ones; transient save refusals are Pending up to six times (daybreak-blue R2, claude R2)"
+    }
+  },
+  "method": {
+    "tracer": "A throwaway tracer, retained with the review evidence (sha256 below): a one-shot gdb breakpoint on ninfer::serve::ResponseStore::put in non-stop mode, from a sidecar container sharing the arm's PID namespace, holds the first thread to reach it for 6 s while every other thread runs, then lets it continue and detaches. It is the reviewer's verification step: barrier the store publication for more than two seconds after the engine catalogues the turn.",
+    "workload": "Shipped RTX 5090 profile (qwen38-5090-v0.7.0 arguments, --binary-sha256 set per arm). EXP-050's prefix: a 130,048-token long-context conversation, then session V's 126,128-token base turn and its automatic checkpoint. With the barrier armed, V's short second turn introduces the code V-9241 and is held at put; as soon as the barrier fires, session W's 126,128-token base turn arrives, whose admission must evict V (as EXP-050's second 126K base evicted the first). Thinking off, greedy. A graceful stop follows, then a restart on the same checkpoint root and one continuation of V from its held turn asking for that code.",
+    "arms": "c5fe23db is the frozen subject the council reviewed; a4d26ccb is its remediation. One run each, production stopped under the lane supervisor hold and restored afterwards."
+  },
+  "identities": {
+    "rtx5090_c5fe23db_parent": {
+      "image": "ninfer-5090:c5fe23db-appliance-local",
+      "image_id": "sha256:ce4fa59d5e80605b6eccd2201f313d7a20ff2606da72bd0f5b614feb9643fff7",
+      "server_binary_sha256": "cb95c3c76c55dbbf9b1f30d4c0369ee5dd59a8a5839c54188a7d9f69ef666ef7",
+      "model_bytes": 18210531328
+    },
+    "rtx5090_a4d26ccb_fix": {
+      "image": "ninfer-5090:a4d26ccb-appliance-local",
+      "image_id": "sha256:fd0d9b03ff5bbca5b3151ac50a19038ac12bebfcd761bb6836e572d03397d2f0",
+      "server_binary_sha256": "fcab191de35c690c203c6cf9b09e2cdeeb048e1f0d4cfbdef4fcdeee72eafde8",
+      "model_bytes": 18210531328
+    }
+  },
+  "results": {
+    "rtx5090_c5fe23db_parent": {
+      "barrier_hold_s": 6.0,
+      "v_base": {
+        "http_status": 200,
+        "prompt_tokens": 126128,
+        "cached_tokens": 0,
+        "finished_after_barrier_hit_s": -15.46
+      },
+      "v_held_turn": {
+        "http_status": 200,
+        "prompt_tokens": 126159,
+        "cached_tokens": 126129,
+        "finished_after_barrier_hit_s": 6.0
+      },
+      "w_base_evicting_v": {
+        "http_status": 200,
+        "prompt_tokens": 126128,
+        "cached_tokens": 0,
+        "finished_after_barrier_hit_s": 58.49
+      },
+      "log_after_barrier_hit": [
+        "+2.17s [warning] ninfer-serve: session checkpoint before eviction skipped: newest turn was never stored (session 90016c7de647)",
+        "+60.50s [warning] ninfer-serve: automatic session checkpoint skipped: program refused continuation export (engine gate: session is not indexed in the engine) (session 90016c7de647) (attempted resp_1c6274611d581572c58d803ea205fa2b)",
+        "+68.98s [info] ninfer-serve: automatic session checkpoint saved"
+      ],
+      "graceful_stop": [
+        "shutdown: saved 0, nothing to save 1, refused 1",
+        "shutdown did not save 1 live session(s); their state is lost"
+      ],
+      "resume_from_held_turn": {
+        "http_status": 404,
+        "answer": "previous_response_not_found",
+        "exact": false
+      },
+      "resume_graceful_stop": [
+        "shutdown: saved 0, nothing to save 0, refused 0"
+      ]
+    },
+    "rtx5090_a4d26ccb_fix": {
+      "barrier_hold_s": 6.0,
+      "v_base": {
+        "http_status": 200,
+        "prompt_tokens": 126128,
+        "cached_tokens": 0,
+        "finished_after_barrier_hit_s": -17.23
+      },
+      "v_held_turn": {
+        "http_status": 200,
+        "prompt_tokens": 126159,
+        "cached_tokens": 126129,
+        "finished_after_barrier_hit_s": 6.0
+      },
+      "w_base_evicting_v": {
+        "http_status": 200,
+        "prompt_tokens": 126128,
+        "cached_tokens": 0,
+        "finished_after_barrier_hit_s": 72.01
+      },
+      "log_after_barrier_hit": [
+        "+1.27s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session d82559db9fbf)",
+        "+15.76s [info] ninfer-serve: session checkpoint saved before eviction (session d82559db9fbf)",
+        "+15.76s [info] ninfer-serve: automatic session checkpoint skipped: already current",
+        "+81.25s [info] ninfer-serve: automatic session checkpoint saved"
+      ],
+      "graceful_stop": [
+        "shutdown: saved 0, nothing to save 2, refused 0"
+      ],
+      "resume_from_held_turn": {
+        "http_status": 200,
+        "answer": "V-9241",
+        "exact": true,
+        "served_from": "prompt=126185 cache=126160 reuse=private_endpoint after the checkpoint restore (container-fix-a4d26ccb-resume.log req 1)"
+      },
+      "resume_graceful_stop": [
+        "shutdown: saved 0, nothing to save 1, refused 0"
+      ]
+    }
+  },
+  "host_tests": "a4d26ccb: Linux sm_120a appliance build 8/8 suites; RTX 4090 native MSVC build 9/9. The failed-reclamation store regression fails 4 checks against c5fe23db's store and passes at a4d26ccb.",
+  "conclusion": "Save-before-evict now waits on the reply's actual publication instead of a fixed guess, so a turn that is still reaching its client is saved before its session is evicted. The waiting request pays for it: W was admitted once the save finished, 15.8 s after the hold began, instead of 2.2 s; its queue deadline bounds that wait.",
+  "limits": [
+    "One run per arm, RTX 5090 only; the RTX 4090 native build passes the same host suites and qualification must still force a checkpoint-tagged eviction there.",
+    "The hold is a debugger barrier, not a slow network client; it isolates the store's lag behind the engine, which a slow reader produces through blocked delta writes.",
+    "A request waiting behind a pending victim can time out if the reply takes longer than its queue deadline to be stored; it is not retried by the server.",
+    "The transient-refusal branch of the same outcome contract was not exercised at runtime."
+  ],
+  "raw_receipts_sha256": {
+    "barrier-red-c5fe23db.json": "436ac42ddeb91d6fd527e89ebeb2e8c0ed194c4e2cf756b22569364f6274b46e",
+    "barrier-red-c5fe23db-resume.json": "e16f21c36b0499c7be1b4695ca8707beaee2713511496df173afc929f783acc9",
+    "barrier-fix-a4d26ccb.json": "0983fb8b3a1a9662c7c71ee653a6718c5e51600a2998247903fbe6114c7f0acb",
+    "barrier-fix-a4d26ccb-resume.json": "9eb83bb8900bc5821a28c62654ca9fe559d301feceda248fb96bdce5f61582b4",
+    "container-red-c5fe23db.log": "6d898ace6caa7c1e55f92021e5d274ab120ba3acfd8734d5c02e6254cecd0c78",
+    "container-red-c5fe23db-resume.log": "2137ddd518a81b7e03790121ecfa5bca4991520527062abf2de7c4a9aa4a399f",
+    "container-fix-a4d26ccb.log": "ceeaf6c26d6652b7dbd2165f874ae733e65a280436c935c230d14f684a9eb314",
+    "container-fix-a4d26ccb-resume.log": "c59883b44780ddbc2e75b5c302ac59b16a1c1870f1cd753fab9c29026c97d993",
+    "publication_barrier.py": "76d0ffd1667254b5542ab93f9e333b4c46333ee40dc2494a17e41b4083339963"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}
