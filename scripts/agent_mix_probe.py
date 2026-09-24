@@ -127,7 +127,7 @@ def build_plan(args):
     def add(phase, cycle, agent_type, kind, session, message_count):
         plan.append({"index": len(plan) + 1, "phase": phase, "cycle": cycle,
                      "agent_type": agent_type, "kind": kind, "session": session,
-                     "message_count": message_count, "tool_count": 12 + "ABC".index(agent_type),
+                     "message_count": message_count, "tool_count": 0,
                      "identity_mode": args.identity})
 
     for agent_type in "ABC":
