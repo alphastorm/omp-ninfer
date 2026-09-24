@@ -72,7 +72,7 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(f"error: {message}")
 
 
-def omp_event_count(events_path: Path) -> int:
+def omp_event_lines(events_path: Path) -> list[str]:
     raw = events_path.read_bytes()
     for encoding in ("utf-8-sig", "utf-16"):
         try:
@@ -82,7 +82,24 @@ def omp_event_count(events_path: Path) -> int:
             continue
     else:
         raise SystemExit(f"error: {events_path} is not UTF-8 or UTF-16")
-    return sum(1 for line in text.splitlines() if line.strip())
+    return [line for line in text.splitlines() if line.strip()]
+
+
+def omp_event_count(events_path: Path) -> int:
+    return len(omp_event_lines(events_path))
+
+
+def omp_transport(events_path: Path) -> str:
+    """The one API every assistant message of the golden run went through, as OMP recorded it."""
+    apis = set()
+    for line in omp_event_lines(events_path):
+        event = json.loads(line)
+        message = event.get("message") if event.get("type") == "message_end" else None
+        if isinstance(message, dict) and message.get("role") == "assistant":
+            apis.add(message.get("api"))
+    require(len(apis) == 1 and isinstance(next(iter(apis)), str),
+            f"{events_path}: assistant messages must name exactly one API, found {sorted(map(str, apis))}")
+    return next(iter(apis))
 
 
 def parse_checksums(path: Path) -> dict[str, str]:
@@ -224,7 +241,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
     golden_equivalent = {
         "artifact_type": "ninfer_omp_golden_equivalent_receipt",
         "omp": {
-            "transport": "openai-completions",
+            "transport": omp_transport(evidence_dir / "omp-events.jsonl"),
             "version": args.omp_version,
             "events": omp["events"],
             "typed_tool_name": omp["typed_tool_name"],
