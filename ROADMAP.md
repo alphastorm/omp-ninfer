@@ -56,9 +56,10 @@ engine`), and while they were resident every automatic save hit a transient gate
 `catalogued checkpoint tag mismatch` 1 ms after the turn finished, before its continuation was
 catalogued, then `resource transaction in progress` while the next request ran. The exporter itself
 works when it gets a quiescent continuation (a 5.2 GB session saved in 4.3 s). The fix is in this
-fork, not upstream: retry transient automatic refusals when the engine quiesces, and save a
-continuation whose checkpoint is behind before evicting it, as restore reclaim already does. The RTX
-3090's return is a separate release on the current runtime and OMP 18.2.3.
+fork, not upstream ([#45](https://github.com/alphastorm/omp-ninfer/issues/45)): retry transient
+automatic refusals when the engine quiesces, and save a continuation whose checkpoint is behind
+before evicting it, as restore reclaim already does. The RTX 3090's return is a separate release
+on the current runtime and OMP 18.2.3.
 
 ## Where this was — v0.7.1
 
