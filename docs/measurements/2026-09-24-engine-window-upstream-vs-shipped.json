@@ -1,0 +1,800 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-048",
+  "title": "Engine window step 1: upstream NInfer head against the shipped runtime on the RTX 5090 lane",
+  "generated_utc": "2026-09-24T05:50:00Z",
+  "status": "passed",
+  "question": "Before merging 202 upstream commits into the fork both mainline lanes build from, does upstream head improve the RTX 5090 lane on the gates that need no durable layer, and does the generic export refusal EXP-047 left unexplained depend on upstream at all?",
+  "answer": "No on both counts. On the same appliance, weights and serving arguments, upstream head matches the shipped runtime within noise on prefill and on decode rounds per second, and its decode rate moves only with MTP acceptance on content its newer chat template renders differently. It keeps less prefix reuse on this product's workloads: 0 of 4 fanout branches reuse the base (4 of 4 shipped) and 4 of 8 two-session continuations re-prefill from root (2 of 8 shipped). The export refusal lives in the fork: its own store overwrites the engine's named skip reason with the generic one, and upstream has no durable export to compare. The shipped arm reproduced the refusal at shutdown in this window: saved 2, refused 2, state lost.",
+  "decision": {
+    "merge": "deferred",
+    "reason": "The merge buys no measured lane gain and costs a re-architecture port: 111 unmerged paths (27 take upstream, 44 hunk merges, 40 ports into upstream's restructured model, context-cache and serve layers), clean-merge semantic breaks, native-Windows blockers upstream reintroduced, the v3 artifact and a new chat template with its own quality screen, and a new checkpoint format.",
+    "next": "Name every export-refusal gate on the shipped source with a diagnostic-only build, reproduce this window's shutdown refusal, then fix the gate so a graceful stop saves every live session.",
+    "revisit_when": "An upstream change moves a lane gate when measured with scripts/engine_window_compare.py on the appliance, or the product needs a v3-only artifact or model. A trial merge is reproducible from the two recorded commits (fork d125ffffd87ef38d9a221f9830e19dfa274ddd34, upstream 594930e7b609efa4bcea3ae4f24cd9d66b5f224f)."
+  },
+  "method": {
+    "appliance": "RTX 5090 container lane host (Windows 11, Docker Desktop, WSL2 Ubuntu 24.04)",
+    "probe": "scripts/engine_window_compare.py",
+    "long_fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+    "same_weights": "The upstream arm serves the pinned v2 artifact upgraded offline with upstream's tools/upgrade_ninfer_v2_to_v3.py, which copies every weight byte and appends the maintained chat template; only the container and template differ.",
+    "same_serving_arguments": "Both arms run the shipped profile qwen38-5090-v0.7.0 settings: 131,072 context, bf16 KV, MTP draft 3, 16384 MiB host KV, 4 device-state and 24 host-state slots, 8 private continuations. Upstream rejects the fork-only identity and checkpoint flags, so its arm omits them.",
+    "wire": "The shipped arm receives the authenticated session header and body field; the upstream arm receives neither, because upstream rejects unknown body fields.",
+    "window": "Production was stopped for the window with the lane supervisor hold taken, and restored through its relaunch script: ninfer-5090-v070p running with unless-stopped, /health 200 on its own port, hold released, candidate containers removed. Downtime 05:24:48Z to 05:46:20Z.",
+    "upstream_build": {
+      "source": "Neroued/ninfer 594930e7b609efa4bcea3ae4f24cd9d66b5f224f",
+      "cuda": "13.1.2",
+      "architecture": "sm_120a",
+      "build_seconds": 263,
+      "server_binary_sha256": "58f7904a6a1eb5836466d219c28f6bae3478d5b6f7fdc0350c20c6701b654e3a"
+    }
+  },
+  "arms": {
+    "shipped-v067": {
+      "identity": {
+        "arm": "shipped-v067",
+        "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24",
+        "image_id": "sha256:74667e7334e51bb8d5eca99c6ae5994fef8b9e727885c89eef0812cd2bb15c24",
+        "server_binary_sha256": "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+        "model_bytes": 18210531328,
+        "server_arguments": [
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8080",
+          "--model-id",
+          "q38-ninfer",
+          "--binary-sha256",
+          "83547bc6118478a0813b4259605709645584cbf2fae816ee1a474ede11c004f0",
+          "--artifact-sha256",
+          "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+          "--config-sha256",
+          "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+          "--deployment-profile",
+          "qwen38-5090-v0.7.0",
+          "--max-context",
+          "131072",
+          "--kv-capacity",
+          "auto",
+          "--prefill-chunk",
+          "1024",
+          "--kv-dtype",
+          "bf16",
+          "--max-concurrency",
+          "1",
+          "--spec",
+          "mtp",
+          "--draft-tokens",
+          "3",
+          "--lm-head-draft",
+          "--vision",
+          "--preserve-thinking",
+          "--session-checkpoint-dir",
+          "/checkpoints",
+          "--session-checkpoint-quota-mib",
+          "24576",
+          "--session-checkpoint-staging-mib",
+          "256",
+          "--max-private-continuations",
+          "8",
+          "--device-state-slots",
+          "4",
+          "--host-state-slots",
+          "24",
+          "--host-kv-mib",
+          "16384"
+        ],
+        "vram_used_total_mib_after_load": "28144, 32607",
+        "model_file": "qwen3_8_27b.ninfer",
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+      },
+      "wire": "fork",
+      "long_context": {
+        "exact": true,
+        "prompt_tokens": 130048,
+        "wall_s": 58.151,
+        "server_prefill_tok_s": 2242.2
+      },
+      "decode_responses_gate_prompt": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 138.32,
+        "mtp_acceptance": 0.41,
+        "mtp_tokens_per_round": 2.23,
+        "decode_rounds_per_s": 62.03,
+        "repetitions_identical": true,
+        "repetitions": 3
+      },
+      "decode_chat_thinking_off": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 181.73,
+        "mtp_acceptance": 0.648,
+        "mtp_tokens_per_round": 2.95,
+        "decode_rounds_per_s": 61.6,
+        "repetitions_identical": true,
+        "repetitions": 3
+      },
+      "two_session_continuations_losing_reuse": 2,
+      "two_session_continuations": 8,
+      "fanout_branches_reusing_base": 4,
+      "fanout_branches": 4,
+      "agent_protocol": {
+        "live_sibling_continue": "ok",
+        "delete_status": 200,
+        "deleted_continue_status": 404,
+        "deleted_continue_code": "previous_response_not_found",
+        "survivor_continue": "ok"
+      },
+      "request_errors": 0,
+      "steps": [
+        {
+          "step": "long_context",
+          "wall_s": 58.151,
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "cached_tokens": null,
+          "reuse": "root",
+          "server_prefill_tok_s": 2242.2
+        },
+        {
+          "step": "decode_responses_1",
+          "wall_s": 14.815,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 167.6
+        },
+        {
+          "step": "decode_responses_2",
+          "wall_s": 14.815,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 167.6
+        },
+        {
+          "step": "decode_responses_3",
+          "wall_s": 14.844,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 167.6
+        },
+        {
+          "step": "decode_chat_no_thinking_1",
+          "wall_s": 11.351,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 221.5
+        },
+        {
+          "step": "decode_chat_no_thinking_2",
+          "wall_s": 11.294,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 221.5
+        },
+        {
+          "step": "decode_chat_no_thinking_3",
+          "wall_s": 11.311,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 221.5
+        },
+        {
+          "step": "session_base_D1",
+          "wall_s": 56.954,
+          "prompt_tokens": 125891,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2226.5
+        },
+        {
+          "step": "session_base_D2",
+          "wall_s": 56.79,
+          "prompt_tokens": 125892,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2226.3
+        },
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 57.198,
+          "prompt_tokens": 125937,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2213.1
+        },
+        {
+          "step": "r1_fork_D1",
+          "wall_s": 0.428,
+          "prompt_tokens": 125990,
+          "completion_tokens": 24,
+          "cached_tokens": 125960,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 129.9
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 57.341,
+          "prompt_tokens": 125938,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2213.1
+        },
+        {
+          "step": "r1_fork_D2",
+          "wall_s": 0.458,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125961,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 148.1
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 1.233,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125912,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 148.1
+        },
+        {
+          "step": "r2_fork_D1",
+          "wall_s": 0.419,
+          "prompt_tokens": 126044,
+          "completion_tokens": 24,
+          "cached_tokens": 126014,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 129.7
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 1.311,
+          "prompt_tokens": 125992,
+          "completion_tokens": 24,
+          "cached_tokens": 125913,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 148.2
+        },
+        {
+          "step": "r2_fork_D2",
+          "wall_s": 0.43,
+          "prompt_tokens": 126045,
+          "completion_tokens": 24,
+          "cached_tokens": 126015,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 129.7
+        },
+        {
+          "step": "fanout_base",
+          "wall_s": 26.341,
+          "prompt_tokens": 67681,
+          "completion_tokens": 40,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2643.6
+        },
+        {
+          "step": "fanout_warm_edit",
+          "wall_s": 0.839,
+          "prompt_tokens": 67746,
+          "completion_tokens": 80,
+          "cached_tokens": 67720,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 155.2
+        },
+        {
+          "step": "fanout_branch_0",
+          "wall_s": 1.06,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 252.8
+        },
+        {
+          "step": "fanout_branch_1",
+          "wall_s": 1.043,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 252.8
+        },
+        {
+          "step": "fanout_branch_2",
+          "wall_s": 1.106,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 252.8
+        },
+        {
+          "step": "fanout_branch_3",
+          "wall_s": 1.105,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 252.8
+        },
+        {
+          "step": "fanout_continue_sibling",
+          "wall_s": 26.928,
+          "prompt_tokens": 67855,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2599.0
+        },
+        {
+          "step": "agent_base",
+          "wall_s": 0.174,
+          "prompt_tokens": 65,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 674.4
+        },
+        {
+          "step": "agent_fork_a",
+          "wall_s": 0.18,
+          "prompt_tokens": 107,
+          "completion_tokens": 16,
+          "cached_tokens": 80,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 293.4
+        },
+        {
+          "step": "agent_fork_b",
+          "wall_s": 0.285,
+          "prompt_tokens": 108,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 567.0
+        },
+        {
+          "step": "agent_live_sibling_continue",
+          "wall_s": 0.163,
+          "prompt_tokens": 150,
+          "completion_tokens": 16,
+          "cached_tokens": 123,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 295.6
+        },
+        {
+          "step": "agent_survivor_continue",
+          "wall_s": 0.244,
+          "prompt_tokens": 149,
+          "completion_tokens": 16,
+          "cached_tokens": 86,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 394.6
+        }
+      ]
+    },
+    "upstream-594930e7": {
+      "identity": {
+        "arm": "upstream-594930e7",
+        "image": "ninfer-upstream:594930e7",
+        "image_id": "sha256:4fa9ed2305e96c44f978bbb1645d7e009110efd7f71e36a0754ca33857de030c",
+        "server_binary_sha256": "58f7904a6a1eb5836466d219c28f6bae3478d5b6f7fdc0350c20c6701b654e3a",
+        "model_bytes": 18210749936,
+        "server_arguments": [
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8080",
+          "--model-id",
+          "q38-ninfer",
+          "--max-context",
+          "131072",
+          "--kv-capacity",
+          "auto",
+          "--prefill-chunk",
+          "1024",
+          "--kv-dtype",
+          "bf16",
+          "--max-concurrency",
+          "1",
+          "--spec",
+          "mtp",
+          "--draft-tokens",
+          "3",
+          "--lm-head-draft",
+          "--vision",
+          "--preserve-thinking",
+          "--max-private-continuations",
+          "8",
+          "--device-state-slots",
+          "4",
+          "--host-state-slots",
+          "24",
+          "--host-kv-mib",
+          "16384"
+        ],
+        "vram_used_total_mib_after_load": "28144, 32607",
+        "model_file": "qwen3_8_27b.v3-upgraded-594930e7.ninfer",
+        "model_sha256": "06ecbf821081cfa6c64ba089b7f9c8daf44e220ffd60e04dadef457ce6fabcbc"
+      },
+      "wire": "upstream",
+      "long_context": {
+        "exact": true,
+        "prompt_tokens": 130048,
+        "wall_s": 57.592,
+        "server_prefill_tok_s": 2269.1
+      },
+      "decode_responses_gate_prompt": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 144.96,
+        "mtp_acceptance": 0.4568,
+        "mtp_tokens_per_round": 2.37,
+        "decode_rounds_per_s": 61.16,
+        "repetitions_identical": true,
+        "repetitions": 3
+      },
+      "decode_chat_thinking_off": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 169.34,
+        "mtp_acceptance": 0.592,
+        "mtp_tokens_per_round": 2.78,
+        "decode_rounds_per_s": 60.91,
+        "repetitions_identical": true,
+        "repetitions": 3
+      },
+      "two_session_continuations_losing_reuse": 4,
+      "two_session_continuations": 8,
+      "fanout_branches_reusing_base": 0,
+      "fanout_branches": 4,
+      "agent_protocol": {
+        "live_sibling_continue": "ok",
+        "delete_status": 200,
+        "deleted_continue_status": 404,
+        "deleted_continue_code": "response_not_found",
+        "survivor_continue": "ok"
+      },
+      "request_errors": 0,
+      "steps": [
+        {
+          "step": "long_context",
+          "wall_s": 57.592,
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2269.1
+        },
+        {
+          "step": "decode_responses_1",
+          "wall_s": 14.202,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.7
+        },
+        {
+          "step": "decode_responses_2",
+          "wall_s": 14.129,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.7
+        },
+        {
+          "step": "decode_responses_3",
+          "wall_s": 14.173,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.7
+        },
+        {
+          "step": "decode_chat_no_thinking_1",
+          "wall_s": 12.188,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 223.5
+        },
+        {
+          "step": "decode_chat_no_thinking_2",
+          "wall_s": 12.153,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 71,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 223.5
+        },
+        {
+          "step": "decode_chat_no_thinking_3",
+          "wall_s": 12.144,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 71,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 223.5
+        },
+        {
+          "step": "session_base_D1",
+          "wall_s": 56.159,
+          "prompt_tokens": 125891,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2261.3
+        },
+        {
+          "step": "session_base_D2",
+          "wall_s": 55.954,
+          "prompt_tokens": 125892,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2262.0
+        },
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 56.199,
+          "prompt_tokens": 125937,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2251.0
+        },
+        {
+          "step": "r1_fork_D1",
+          "wall_s": 0.489,
+          "prompt_tokens": 125990,
+          "completion_tokens": 24,
+          "cached_tokens": 125960,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 138.9
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 56.218,
+          "prompt_tokens": 125938,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2251.1
+        },
+        {
+          "step": "r1_fork_D2",
+          "wall_s": 0.463,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125961,
+          "reuse": "root",
+          "server_prefill_tok_s": 2242.3
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 56.463,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2242.3
+        },
+        {
+          "step": "r2_fork_D1",
+          "wall_s": 0.448,
+          "prompt_tokens": 126044,
+          "completion_tokens": 24,
+          "cached_tokens": 126014,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 138.7
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 56.474,
+          "prompt_tokens": 125992,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2242.7
+        },
+        {
+          "step": "r2_fork_D2",
+          "wall_s": 0.443,
+          "prompt_tokens": 126045,
+          "completion_tokens": 24,
+          "cached_tokens": 126015,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 139.1
+        },
+        {
+          "step": "fanout_base",
+          "wall_s": 25.603,
+          "prompt_tokens": 67681,
+          "completion_tokens": 40,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2688.9
+        },
+        {
+          "step": "fanout_warm_edit",
+          "wall_s": 0.663,
+          "prompt_tokens": 67746,
+          "completion_tokens": 80,
+          "cached_tokens": 67720,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 173.8
+        },
+        {
+          "step": "fanout_branch_0",
+          "wall_s": 25.902,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2664.6
+        },
+        {
+          "step": "fanout_branch_1",
+          "wall_s": 25.992,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2664.6
+        },
+        {
+          "step": "fanout_branch_2",
+          "wall_s": 26.051,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2664.6
+        },
+        {
+          "step": "fanout_branch_3",
+          "wall_s": 26.043,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2664.6
+        },
+        {
+          "step": "fanout_continue_sibling",
+          "wall_s": 26.171,
+          "prompt_tokens": 67855,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2644.5
+        },
+        {
+          "step": "agent_base",
+          "wall_s": 0.17,
+          "prompt_tokens": 65,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 868.6
+        },
+        {
+          "step": "agent_fork_a",
+          "wall_s": 0.166,
+          "prompt_tokens": 107,
+          "completion_tokens": 16,
+          "cached_tokens": 80,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 355.3
+        },
+        {
+          "step": "agent_fork_b",
+          "wall_s": 0.265,
+          "prompt_tokens": 108,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 703.5
+        },
+        {
+          "step": "agent_live_sibling_continue",
+          "wall_s": 0.169,
+          "prompt_tokens": 150,
+          "completion_tokens": 16,
+          "cached_tokens": 123,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 353.8
+        },
+        {
+          "step": "agent_survivor_continue",
+          "wall_s": 0.329,
+          "prompt_tokens": 149,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 636.3
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "prefill_130048_tok_s": [
+      2242.2,
+      2269.1
+    ],
+    "decode_rounds_per_s_gate_prompt": [
+      62.03,
+      61.16
+    ],
+    "decode_rounds_per_s_thinking_off": [
+      61.6,
+      60.91
+    ],
+    "decode_tok_s_gate_prompt": [
+      138.32,
+      144.96
+    ],
+    "decode_tok_s_thinking_off": [
+      181.73,
+      169.34
+    ],
+    "fanout_branches_reusing_base": [
+      4,
+      0
+    ],
+    "two_session_continuations_losing_reuse": [
+      2,
+      4
+    ],
+    "order": [
+      "shipped-v067",
+      "upstream-594930e7"
+    ]
+  },
+  "shipped_arm_shutdown": {
+    "observed": "shutdown: saved 2, nothing to save 0, refused 2; shutdown did not save 2 live session(s); their state is lost",
+    "refusal_text": "program refused continuation export (twice)",
+    "note": "The probe used six session identities, four of them with stored Responses (two 126K-token sessions, the fanout session and the agent-protocol session); shutdown saved two and refused two. Which two cannot be attributed from this log, because the store replaces the engine gate with the generic reason."
+  },
+  "static_analysis": {
+    "merge_sizing": {
+      "fork_commits_over_base": 176,
+      "upstream_cherry_pick_trailers": 24,
+      "upstream_commits": 202,
+      "upstream_files_changed": 1387,
+      "unmerged_paths": 111,
+      "resolution_classes": {
+        "take_upstream": 27,
+        "hunk_merge": 44,
+        "port": 40,
+        "keep_ours": 0
+      }
+    },
+    "export_refusal": "src/serve/session_checkpoint_store.cpp:1311-1316 at d125ffff assigns the generic program refusal whenever the exporter returns no statistics, overwriting the named engine gate (session not indexed, transaction busy, catalog identity drift, tag mismatch, cache disabled, empty tag) set by the resource manager; the program exporter has 18 grouped precondition operands and further state, capacity, staging and write gates behind one null return. Upstream 594930e7 has no durable export or import."
+  },
+  "limits": [
+    "One run per arm; the three repetitions of each decode request were bit-identical at temperature 0, so they measure determinism, not variance.",
+    "The decode prompts render through different chat templates on the two arms, so generated content and MTP acceptance differ; rounds per second is the content-independent comparison.",
+    "The upstream arm lacks the fork session identity, durable store and fanout anchors by construction; its reuse numbers are what upstream alone does, not what a merged tree would do.",
+    "The published v3 artifact with DFlash2 companion weights was downloaded and hash-verified but not measured."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

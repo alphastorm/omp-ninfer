@@ -31,33 +31,28 @@ RTX 4090 a pool sized for one ceiling session restored two
 effort: EXP-047's combined process refused three automatic saves and, holding earlier sessions
 too, three shutdown saves, with a refusal that does not name its gate.
 
-**Next — the engine window ([#33](https://github.com/alphastorm/omp-ninfer/issues/33)).** Both
-mainline lanes build from one fork of upstream NInfer that is 202 upstream commits behind (base
-`6e8b2e2a`, upstream head `594930e7` on 2026-09-23), and selective backporting was measured
-closed on 2026-09-17 (EXP-045, below). The next runtime release merges upstream head into the fork
-once. Sized on 2026-09-24: 176 fork commits (24 of them upstream cherry-picks) against 202
-upstream commits over 1,387 files; a trial merge leaves 111 paths to resolve, 31 of them in files
-upstream moved or replaced - the target runtime into `src/models/qwen3_5`, the resource manager
-into `context_cache/`, and new serve schemas and tool-call parser - and the model moves to
-upstream's v3 artifact format
-([watch report](docs/measurements/2026-09-24-upstream-watch.json), [positions](docs/UPSTREAM.md)).
-The window runs in this order:
+**Next — every live session survives a graceful stop.** The engine window measured first and
+deferred the merge ([EXP-048](docs/measurements/2026-09-24-engine-window-upstream-vs-shipped.json)).
+On the RTX 5090 appliance, with the same weights and serving settings, upstream NInfer head
+(`594930e7`, 202 commits past this fork's base) matches the shipped runtime on prefill (2,269 vs
+2,242 tok/s at 130,048 tokens) and on decode rounds per second (61.2 vs 62.0), and keeps less
+prefix reuse on this product's workloads: 0 of 4 fanout branches reuse their base (4 of 4 shipped)
+and 4 of 8 two-session continuations re-prefill from root (2 of 8 shipped). Merging it means a
+re-architecture port - 111 unmerged paths, 40 of them fork features re-expressed in upstream's
+restructured model, context-cache and serve layers, plus the v3 artifact, a new chat template and a
+new checkpoint format - for no measured lane gain. The same comparison
+([`scripts/engine_window_compare.py`](scripts/engine_window_compare.py)) is rerun when an upstream
+change could move a lane gate
+([watch report](docs/measurements/2026-09-24-upstream-watch.json), [positions](docs/UPSTREAM.md),
+[#33](https://github.com/alphastorm/omp-ninfer/issues/33)).
 
-1. measure upstream head against the shipped runtime on the same appliance, on the lane gates
-   that do not need the durable layer, before committing to the port;
-2. name the gate behind the generic `program refused continuation export` that EXP-047 left
-   unexplained, and check it against upstream's pressure and materialization fixes;
-3. port the durable-continuation stack onto upstream head and requalify the RTX 5090 container
-   lane;
-4. build the merged runtime for the RTX 4090 native lane - upstream targets the RTX 5090 on Linux
-   only, so `sm_89` and MSVC portability stay this fork's - folding in the 4090 port's cache and
-   residency fixes; and
-5. cut a release with every documented route re-run.
-
-Speed is not the premise: upstream's own Qwen3.8 measurements put its DFlash2 decoder behind MTP3
-on code for the `groupwise-int` artifact this product ships, so any throughput change is
-measured, not assumed. The RTX 3090's return is a separate release on the current runtime and OMP
-18.2.3, not held for the engine window.
+The same window reproduced the durability gap on the shipped runtime: a graceful stop with four
+stored sessions reported `saved 2, nothing to save 0, refused 2` and lost two sessions' state, with
+the generic `program refused continuation export`. That refusal is this fork's, not upstream's: the
+checkpoint store replaces the engine's named skip reason with the generic one, and upstream has no
+durable export at all. The next runtime work names every export gate with a diagnostic-only build,
+reproduces this shutdown, and fixes the gate so a graceful stop saves every live session. The RTX
+3090's return is a separate release on the current runtime and OMP 18.2.3.
 
 ## Where this was — v0.7.1
 
@@ -106,8 +101,8 @@ fix this lane wants - chunked KV snapshot staging, the MTP restore stride, publi
 snapshot saves, WDDM residency, the D3D12 fence, the admission-shortfall and `/health` fixes -
 conflicts in files this fork changed. Selective backporting is therefore closed on the 5090 and the
 4090 item becomes a scoped rebase, read against `v0.7.1`'s durability work
-([EXP-045](docs/measurements/2026-09-17-upstream-applicability-triage.json)). Superseded on
-2026-09-24 by the engine window above: the runtime moves by merging upstream head, not by picks.
+([EXP-045](docs/measurements/2026-09-17-upstream-applicability-triage.json)). Followed on
+2026-09-24 by EXP-048 above, which measured upstream head itself and deferred the merge.
 
 **EXP-041's two follow-ups, both since closed:**
 
