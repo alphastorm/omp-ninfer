@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.7.4",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -37,7 +37,7 @@
       "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e29658225de3ece72192ead5a967bac8c666e48e/compatibility.json",
-      "compatibility_sha256": "ffc2bf62ebd869e31517ffb8141ef1b21398912e84fcf074d84f6cc02468648b"
+      "compatibility_sha256": "0a67e374550d73c844ae24570eb2d627102e9cd7e406cfa2f6bda6f0d803aa7a"
     },
     "ninfer": {
       "repository": "https://github.com/alphastorm/ninfer",
@@ -147,7 +147,7 @@
       "NInfer RTX4090 v0.6.6-qwen38-4090-beta.1 (published)"
     ],
     "blockers": [
-      "documented-route acceptance has not run against the published v0.6.8-qwen38-5090-beta.1 image f193b746 and v0.6.6-qwen38-4090-beta.1 package; the composed acceptance receipt is absent until it does"
+      "external-install and documented-route acceptance have not run against the published v0.6.8-qwen38-5090-beta.1 image f193b746 and v0.6.6-qwen38-4090-beta.1 package; the composed acceptance receipt is absent until they do"
     ],
     "external_installation_qualified": false
   }
