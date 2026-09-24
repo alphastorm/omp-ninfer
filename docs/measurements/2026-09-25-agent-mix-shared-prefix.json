@@ -1,0 +1,552 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-052",
+  "title": "Shared-prefix capacity for alternating agent types on the RTX 5090 lane",
+  "generated_utc": "2026-09-24T18:45:38Z",
+  "status": "passed",
+  "question": "At max_concurrency 1 the shared-prefix catalog holds one prefix. When fresh agent sessions of different types alternate, does each one re-prefill its system-and-tool prefix, and does raising the capacity to 4 restore reuse without costing a live session's continuations?",
+  "answer": "Yes to both. With three agent types alternating, capacity 1 re-prefilled the prefix for every measured fresh session (24 of 24 root, server TTFT 3.78-4.52 s at 11,887-14,199 prompt tokens). Capacity 4 on the published image, and the candidate runtime by default with its sessions named by prompt_cache_key, reused the shared prefix for all 24 (25-token prefill, 0.092-0.100 s). The long-lived session's 24 continuations stayed on private_endpoint in all three arms (0.086-0.096 s). On production, capacity 1 sent 28 of 135 fresh sessions (20.7%) through a root prefill at TTFT p50 8.33 s, against 0.35 s for the 106 that reused a prefix.",
+  "decision": {
+    "shared_prefix_capacity": "Ship the candidate default: max(max_concurrency, max_cache_markers_per_request), 4 on both mainline profiles (upstream NInfer a140e7ae made the same change). Both lanes inherit it through the pinned runtime binary, which reports shared=4 at startup; no lane configuration names the value.",
+    "not_measured_here": "Pressure between four resident shared prefixes and several long private sessions near the 131,072-token ceiling; the lane qualification's durability workload runs on the published components with this default."
+  },
+  "method": {
+    "appliance": "RTX 5090 container lane host (Windows 11, Docker Desktop, WSL2 Ubuntu 24.04)",
+    "window": "Production (ninfer-5090-v070p) stopped under the lane supervisor hold, one arm at a time on 127.0.0.1:18099, production restored through its relaunch script with health 200 and the hold released (2026-09-24T18:30Z-18:37Z).",
+    "probe": "scripts/agent_mix_probe.py (requests as committed in 89ae8b2; server-log join as fixed in cfdd54d, re-run offline over each arm's own request log)",
+    "workload": "Three agent types, each with a distinct system message carrying its tool JSON (the server renders no tool definitions under tool_choice none): 3 warm-up fresh sessions, then 8 cycles of fresh A, C and B sessions, each followed by one turn of the long-lived warm-up A session; 51 chat-completions requests, thinking off, temperature 0, max_tokens 16.",
+    "serving_arguments": "The shipped qwen38-5090 profile in every arm (131,072 context, bf16 KV, MTP 3, 16,384 MiB host KV, 4 device-state and 24 host-state slots, 8 private continuations); only the shared-prefix capacity differs.",
+    "identity": "Published arms send no session identity (the published runtime refuses prompt_cache_key); the candidate arm sends a fresh random prompt_cache_key per session, as stock OMP does."
+  },
+  "production_baseline": {
+    "runtime": "qwen38-5090-v0.7.0 (production ninfer-5090-v070p), shared-prefix capacity 1",
+    "span_utc": [
+      "2026-09-18T00:49:28Z",
+      "2026-09-24T04:12:42Z"
+    ],
+    "completed_requests": 445,
+    "fresh_sessions": 135,
+    "fresh_by_path": {
+      "root": {
+        "count": 28,
+        "ttft_p50_s": 8.331,
+        "ttft_p90_s": 9.515,
+        "prompt_tokens_p50": 25286
+      },
+      "shared_stable_prefix": {
+        "count": 106,
+        "ttft_p50_s": 0.348,
+        "ttft_p90_s": 0.406,
+        "prompt_tokens_p50": 23828
+      },
+      "private_response_replay": {
+        "count": 1
+      }
+    },
+    "definition": "A fresh session is a completed request with two messages; paths and TTFT are the server's own request-log fields."
+  },
+  "arms": {
+    "pub-v068-msp1": {
+      "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+      "image_id": "sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+      "server_binary_sha256": "72aa57dd147ef95ca3574ec4b550fb46676690d704bb9422ba0061d23f1f0ad6",
+      "capacity_setting": "--max-shared-prefixes 1 (the shipped default at max_concurrency 1)",
+      "reported_shared_prefix_capacity": 1,
+      "identity_mode": "none",
+      "requests": 51,
+      "summary": {
+        "warm-up": {
+          "fresh": {
+            "A": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 3.7916461209824774,
+              "client_ttft_p90_s": 3.7916461209824774,
+              "server_ttft_median_s": 3.777627668,
+              "server_ttft_p90_s": 3.777627668,
+              "computed_prefill_tokens_median": 11887,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 11887
+            },
+            "B": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.077252467977814,
+              "client_ttft_p90_s": 4.077252467977814,
+              "server_ttft_median_s": 4.075236239,
+              "server_ttft_p90_s": 4.075236239,
+              "computed_prefill_tokens_median": 13211,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 13211
+            },
+            "C": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.399400337017141,
+              "client_ttft_p90_s": 4.399400337017141,
+              "server_ttft_median_s": 4.397169614999999,
+              "server_ttft_p90_s": 4.397169614999999,
+              "computed_prefill_tokens_median": 14199,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 14199
+            }
+          },
+          "continuation": {
+            "request_count": 0,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 0,
+            "root_count": null,
+            "root_rate": null,
+            "reuse_path_distribution": {},
+            "client_ttft_median_s": null,
+            "client_ttft_p90_s": null,
+            "server_ttft_median_s": null,
+            "server_ttft_p90_s": null,
+            "computed_prefill_tokens_median": null,
+            "prefix_cache_hit_tokens_median": null,
+            "prompt_tokens_median": null
+          }
+        },
+        "measured": {
+          "fresh": {
+            "A": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 8,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 8
+              },
+              "client_ttft_median_s": 3.7843422849982744,
+              "client_ttft_p90_s": 3.8153265499859117,
+              "server_ttft_median_s": 3.782334722,
+              "server_ttft_p90_s": 3.813444815,
+              "computed_prefill_tokens_median": 11887.0,
+              "prefix_cache_hit_tokens_median": 0.0,
+              "prompt_tokens_median": 11887.0
+            },
+            "B": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 8,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 8
+              },
+              "client_ttft_median_s": 4.225691703017219,
+              "client_ttft_p90_s": 4.246142585994676,
+              "server_ttft_median_s": 4.2237973045,
+              "server_ttft_p90_s": 4.244031977,
+              "computed_prefill_tokens_median": 13211.0,
+              "prefix_cache_hit_tokens_median": 0.0,
+              "prompt_tokens_median": 13211.0
+            },
+            "C": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 8,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 8
+              },
+              "client_ttft_median_s": 4.521728038991569,
+              "client_ttft_p90_s": 4.554765859007603,
+              "server_ttft_median_s": 4.519454309,
+              "server_ttft_p90_s": 4.552869886,
+              "computed_prefill_tokens_median": 14199.0,
+              "prefix_cache_hit_tokens_median": 0.0,
+              "prompt_tokens_median": 14199.0
+            }
+          },
+          "continuation": {
+            "request_count": 24,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 24,
+            "root_count": 0,
+            "root_rate": 0.0,
+            "reuse_path_distribution": {
+              "private_endpoint": 24
+            },
+            "client_ttft_median_s": 0.08860308698785957,
+            "client_ttft_p90_s": 0.1025678500009235,
+            "server_ttft_median_s": 0.086616869,
+            "server_ttft_p90_s": 0.100279913,
+            "computed_prefill_tokens_median": 27.0,
+            "prefix_cache_hit_tokens_median": 12210.0,
+            "prompt_tokens_median": 12237.0
+          }
+        }
+      },
+      "receipt_sha256": "0ab6a36a719d596eae87fd29989e14c0c487c2576353deef02f68f97b49e9df2"
+    },
+    "pub-v068-msp4": {
+      "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+      "image_id": "sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447",
+      "server_binary_sha256": "72aa57dd147ef95ca3574ec4b550fb46676690d704bb9422ba0061d23f1f0ad6",
+      "capacity_setting": "--max-shared-prefixes 4",
+      "reported_shared_prefix_capacity": 4,
+      "identity_mode": "none",
+      "requests": 51,
+      "summary": {
+        "warm-up": {
+          "fresh": {
+            "A": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 3.8711110039730556,
+              "client_ttft_p90_s": 3.8711110039730556,
+              "server_ttft_median_s": 3.853690687,
+              "server_ttft_p90_s": 3.853690687,
+              "computed_prefill_tokens_median": 11887,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 11887
+            },
+            "B": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.105690589000005,
+              "client_ttft_p90_s": 4.105690589000005,
+              "server_ttft_median_s": 4.103420278,
+              "server_ttft_p90_s": 4.103420278,
+              "computed_prefill_tokens_median": 13211,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 13211
+            },
+            "C": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.427851485001156,
+              "client_ttft_p90_s": 4.427851485001156,
+              "server_ttft_median_s": 4.425397009,
+              "server_ttft_p90_s": 4.425397009,
+              "computed_prefill_tokens_median": 14199,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 14199
+            }
+          },
+          "continuation": {
+            "request_count": 0,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 0,
+            "root_count": null,
+            "root_rate": null,
+            "reuse_path_distribution": {},
+            "client_ttft_median_s": null,
+            "client_ttft_p90_s": null,
+            "server_ttft_median_s": null,
+            "server_ttft_p90_s": null,
+            "computed_prefill_tokens_median": null,
+            "prefix_cache_hit_tokens_median": null,
+            "prompt_tokens_median": null
+          }
+        },
+        "measured": {
+          "fresh": {
+            "A": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.09482132001721766,
+              "client_ttft_p90_s": 0.09768626297591254,
+              "server_ttft_median_s": 0.09273574899999999,
+              "server_ttft_p90_s": 0.095541168,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 11862.0,
+              "prompt_tokens_median": 11887.0
+            },
+            "B": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.0953191290027462,
+              "client_ttft_p90_s": 0.09860813099658117,
+              "server_ttft_median_s": 0.0933023825,
+              "server_ttft_p90_s": 0.09674554,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 13186.0,
+              "prompt_tokens_median": 13211.0
+            },
+            "C": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.10181533748982474,
+              "client_ttft_p90_s": 0.10468271799618378,
+              "server_ttft_median_s": 0.0998055085,
+              "server_ttft_p90_s": 0.102226615,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 14174.0,
+              "prompt_tokens_median": 14199.0
+            }
+          },
+          "continuation": {
+            "request_count": 24,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 24,
+            "root_count": 0,
+            "root_rate": 0.0,
+            "reuse_path_distribution": {
+              "private_endpoint": 24
+            },
+            "client_ttft_median_s": 0.09746355201059487,
+            "client_ttft_p90_s": 0.1010419389931485,
+            "server_ttft_median_s": 0.095505163,
+            "server_ttft_p90_s": 0.098823609,
+            "computed_prefill_tokens_median": 27.0,
+            "prefix_cache_hit_tokens_median": 12210.0,
+            "prompt_tokens_median": 12237.0
+          }
+        }
+      },
+      "receipt_sha256": "715c87bf70376efffbaea20aec30f9e0be412ef7f56e97bdcf1f0ed510ac44ff"
+    },
+    "fix-71ac4e15": {
+      "image": "ninfer-5090:71ac4e15-appliance-local",
+      "image_id": "sha256:bca76edb90cc4dcc5465ceb61ec270f15076f31a9b08032a2fc02db0f81ace01",
+      "server_binary_sha256": "ea666e8733e6dd4dec6a5c5eebd02efb48987852f84f87e5941d292ffe727d6d",
+      "capacity_setting": "no flag: the candidate default max(max_concurrency, markers per request) = 4",
+      "reported_shared_prefix_capacity": 4,
+      "identity_mode": "prompt_cache_key",
+      "requests": 51,
+      "summary": {
+        "warm-up": {
+          "fresh": {
+            "A": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 3.6639189750130754,
+              "client_ttft_p90_s": 3.6639189750130754,
+              "server_ttft_median_s": 3.65062498,
+              "server_ttft_p90_s": 3.65062498,
+              "computed_prefill_tokens_median": 11887,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 11887
+            },
+            "B": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.098936016001971,
+              "client_ttft_p90_s": 4.098936016001971,
+              "server_ttft_median_s": 4.096672743,
+              "server_ttft_p90_s": 4.096672743,
+              "computed_prefill_tokens_median": 13211,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 13211
+            },
+            "C": {
+              "request_count": 1,
+              "error_count": 0,
+              "fresh_session_count": 1,
+              "server_observed_count": 1,
+              "root_count": 1,
+              "root_rate": 1.0,
+              "reuse_path_distribution": {
+                "root": 1
+              },
+              "client_ttft_median_s": 4.418291459995089,
+              "client_ttft_p90_s": 4.418291459995089,
+              "server_ttft_median_s": 4.415969403999999,
+              "server_ttft_p90_s": 4.415969403999999,
+              "computed_prefill_tokens_median": 14199,
+              "prefix_cache_hit_tokens_median": 0,
+              "prompt_tokens_median": 14199
+            }
+          },
+          "continuation": {
+            "request_count": 0,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 0,
+            "root_count": null,
+            "root_rate": null,
+            "reuse_path_distribution": {},
+            "client_ttft_median_s": null,
+            "client_ttft_p90_s": null,
+            "server_ttft_median_s": null,
+            "server_ttft_p90_s": null,
+            "computed_prefill_tokens_median": null,
+            "prefix_cache_hit_tokens_median": null,
+            "prompt_tokens_median": null
+          }
+        },
+        "measured": {
+          "fresh": {
+            "A": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.09402097499696538,
+              "client_ttft_p90_s": 0.09706193400779739,
+              "server_ttft_median_s": 0.09210638700000001,
+              "server_ttft_p90_s": 0.09500998399999999,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 11862.0,
+              "prompt_tokens_median": 11887.0
+            },
+            "B": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.0987731814966537,
+              "client_ttft_p90_s": 0.10195787600241601,
+              "server_ttft_median_s": 0.096891989,
+              "server_ttft_p90_s": 0.10004350899999999,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 13186.0,
+              "prompt_tokens_median": 13211.0
+            },
+            "C": {
+              "request_count": 8,
+              "error_count": 0,
+              "fresh_session_count": 8,
+              "server_observed_count": 8,
+              "root_count": 0,
+              "root_rate": 0.0,
+              "reuse_path_distribution": {
+                "shared_stable_prefix": 8
+              },
+              "client_ttft_median_s": 0.10130541351099964,
+              "client_ttft_p90_s": 0.10545890001230873,
+              "server_ttft_median_s": 0.0992939485,
+              "server_ttft_p90_s": 0.10319136500000001,
+              "computed_prefill_tokens_median": 25.0,
+              "prefix_cache_hit_tokens_median": 14174.0,
+              "prompt_tokens_median": 14199.0
+            }
+          },
+          "continuation": {
+            "request_count": 24,
+            "error_count": 0,
+            "fresh_session_count": 0,
+            "server_observed_count": 24,
+            "root_count": 0,
+            "root_rate": 0.0,
+            "reuse_path_distribution": {
+              "private_endpoint": 24
+            },
+            "client_ttft_median_s": 0.08753330699983053,
+            "client_ttft_p90_s": 0.1009919079951942,
+            "server_ttft_median_s": 0.08560131400000001,
+            "server_ttft_p90_s": 0.099081422,
+            "computed_prefill_tokens_median": 27.0,
+            "prefix_cache_hit_tokens_median": 12210.0,
+            "prompt_tokens_median": 12237.0
+          }
+        }
+      },
+      "receipt_sha256": "ec9fdf15da001b36e515f5ccedf3fe8f7e60d65b6d1aa4b3bf16c3e866117a4a"
+    }
+  },
+  "stock_client_identity": {
+    "request": "POST /v1/responses with prompt_cache_key, store false, max_output_tokens 16",
+    "published_image": "400 parameter_not_supported",
+    "candidate": "200 (status incomplete at the 16-token cap)"
+  },
+  "small_prefix_run": {
+    "window": "2026-09-24T18:19Z-18:23Z, same arms and appliance",
+    "note": "An earlier revision of the probe sent the tool JSON as tools with tool_choice none, which the server does not render, so each prefix was only the 1,106-1,297-token system text. Capacity 1: 24 of 24 fresh sessions root at 0.43-0.47 s; capacity 4 and the candidate: 0 of 24 root, shared_stable_prefix at 0.076-0.082 s; continuations private_endpoint in every arm."
+  },
+  "limits": [
+    "The probe's prefixes were 11,887-14,199 tokens, about half of production's 22-28K; the probe's 3.6 characters-per-token estimate runs high for its synthetic vocabulary. Production TTFT by path comes from the production request log above.",
+    "One run per arm at max_concurrency 1 with one long-lived continuation session.",
+    "Synthetic prompts; no production prompt or output is included."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
