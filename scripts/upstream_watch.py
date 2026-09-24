@@ -55,7 +55,17 @@ def gh_api(path: str) -> Any:
     return json.loads(result.stdout)
 
 
+# GitHub's compare and commit endpoints list at most 300 changed files, and compare lists at
+# most 250 commits. A larger delta is cut without an error, and an overlap score computed on
+# the cut list reads "no-direct-path-overlap" for an upstream whose later paths are exactly the
+# ones we changed - which turned every commit of a 1,387-file upstream delta into a
+# "pull-candidate". A cut list therefore scores as unknown, never as no overlap.
+API_FILE_LIMIT = 300
+
+
 def overlap_class(files: list[str], overlap_paths: list[str]) -> str:
+    if len(files) >= API_FILE_LIMIT:
+        return "unknown-truncated"
     hits = sum(1 for name in files if any(name.startswith(p) for p in overlap_paths))
     if hits == 0:
         return "no-direct-path-overlap"
@@ -124,6 +134,7 @@ def watch_one(entry: dict[str, Any], per_commit_files: bool) -> dict[str, Any]:
             record["overlap"] = aggregate_overlap
             record["recommendation"] = recommend(record["class"], aggregate_overlap)
 
+    ahead_by = compare.get("ahead_by", len(commits))
     return {
         "id": entry["id"],
         "upstream": upstream,
@@ -131,8 +142,12 @@ def watch_one(entry: dict[str, Any], per_commit_files: bool) -> dict[str, Any]:
         "upstream_head": head_sha,
         "upstream_head_date": head_date,
         "fork_point": fork_point,
-        "ahead_by": compare.get("ahead_by", len(commits)),
+        "ahead_by": ahead_by,
         "aggregate_overlap": aggregate_overlap,
+        "commits_listed": len(commits),
+        "commits_truncated": len(commits) < ahead_by,
+        "files_listed": len(files),
+        "files_truncated": len(files) >= API_FILE_LIMIT,
         "commits": commits,
     }
 
@@ -184,6 +199,11 @@ def main() -> int:
             print(f"   head {result['upstream_head'][:12]} ({result['upstream_head_date'][:10]}), "
                   f"{result['ahead_by']} commits past fork point, "
                   f"aggregate overlap: {result['aggregate_overlap']}")
+            if result["commits_truncated"]:
+                print(f"   commit list cut by the API: {result['commits_listed']} of "
+                      f"{result['ahead_by']} commits listed")
+            if result["files_truncated"]:
+                print(f"   file list cut by the API at {result['files_listed']}: overlap unknown")
             counts: dict[str, int] = {}
             for commit in result["commits"]:
                 counts[commit["recommendation"]] = counts.get(commit["recommendation"], 0) + 1
