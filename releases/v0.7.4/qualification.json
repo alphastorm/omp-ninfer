@@ -59,7 +59,7 @@
       "status": "passed",
       "repository_path": "releases/v0.7.4/acceptance/composed-external-installation.json",
       "sha256": "892a603f2360804f1e95e23412c12845331e7144bf72464de06bf9c537759f40",
-      "public_url": null,
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/65490cbb2db7412740ec6fc080be5b3d00b1a7c7/releases/v0.7.4/acceptance/composed-external-installation.json",
       "as_of": "2026-09-24",
       "release": "v0.7.4",
       "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
