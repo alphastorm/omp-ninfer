@@ -8,10 +8,12 @@ compatibility hash; the qualification summary rebinds the composed acceptance; a
 rebinds the qualification summary and compatibility.
 
 URL pinning is a separate, later step (``--pin <commit>``) because immutable raw URLs can only
-reference a commit that already contains the final bytes. The dance is three pins, each after a
+reference a commit that already contains the final bytes. The dance is four pins, each after a
 commit: ``--stage lane`` is the cut (commit contains the final lane receipts; promotes the
 release's compatibility copy to the root authority, rewrites the root profiles and launcher
 examples from the manifest, pins the authority's receipt URLs, and reruns the chain),
+``--stage platform`` (commit contains the final client platform acceptance receipts; pins each
+compatibility profile's receipt URL and hash to those committed bytes and reruns the chain),
 ``--stage acceptance`` (commit contains the final composed acceptance), ``--stage manifest``
 (commit contains the final qualification, compatibility, and variant receipts; runs the ready
 verifier with --check-pins). ``--draft`` rebinds the release tree only and leaves the root
@@ -164,15 +166,36 @@ def pin_lane_urls(compatibility_path: Path, manifest_path: Path, release: str, r
     save(compatibility_path, compatibility)
 
 
+def pin_platform_receipts(compatibility_path: Path, release: str, raw: str, commit: str) -> None:
+    """Point every client profile at its platform receipt in the commit that holds its final
+    bytes, refusing a commit whose bytes differ from the working tree's."""
+    compatibility = load(compatibility_path)
+    for profile in compatibility.get("profiles", []):
+        receipt = profile.get("acceptance_receipt")
+        if receipt is None:
+            continue
+        path = f"releases/{release}/acceptance/{receipt['url'].rsplit('/', 1)[-1]}"
+        committed = subprocess.run(["git", "show", f"{commit}:{path}"], cwd=ROOT,
+                                   capture_output=True, check=True).stdout
+        if committed != (ROOT / path).read_bytes():
+            raise SystemExit(f"{path} at {commit} differs from the working tree")
+        receipt["url"] = f"{raw}/{path}"
+        receipt["sha256"] = hashlib.sha256(committed).hexdigest()
+    save(compatibility_path, compatibility)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--release", required=True, help="release directory name, e.g. v0.3.0")
     parser.add_argument("--pin", metavar="COMMIT",
                         help="pin evidence URLs to this 40-hex commit, then rebind as the stage requires")
-    parser.add_argument("--stage", choices=("lane", "acceptance", "manifest"), default="acceptance",
+    parser.add_argument("--stage", choices=("lane", "platform", "acceptance", "manifest"),
+                        default="acceptance",
                         help="pin stage: 'lane' rewrites the compatibility authority's lane-receipt "
                              "URLs and reruns the hash chain (commit must contain the final lane "
-                             "receipts); 'acceptance' rewrites the qualification's acceptance URL "
+                             "receipts); 'platform' pins each client profile's platform receipt "
+                             "URL and hash (commit must contain those receipts) and reruns the "
+                             "chain; 'acceptance' rewrites the qualification's acceptance URL "
                              "(commit must contain the final acceptance bytes); 'manifest' rewrites "
                              "the manifest's qualification, compatibility, and variant receipt URLs "
                              "(commit must contain the final qualification, compatibility, and "
@@ -199,6 +222,12 @@ def main() -> int:
             pin_lane_urls(authority_path, manifest_path, args.release, raw)
             print(f"promoted the root authority to {args.release} and pinned lane receipt "
                   f"URLs to {args.pin}; rebinding the chain")
+        elif args.stage == "platform":
+            if args.draft:
+                raise SystemExit("--stage platform binds the root authority; it cannot keep the "
+                                 "draft posture")
+            pin_platform_receipts(authority_path, args.release, raw, args.pin)
+            print(f"pinned client platform receipts to {args.pin}; rebinding the chain")
         elif args.stage == "acceptance":
             if acceptance_path.is_file():
                 qualification = load(qualification_path)

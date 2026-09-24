@@ -40,6 +40,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   specification at the commit, compares the source archive's tar stream byte for byte with
   `git archive` of the commit, and refuses an existing tag or release; `--publish` is
   founder-only.
+- `scripts/hosts/accept-rtx5090-routes.py` runs the RTX 5090 documented routes (container host,
+  macOS client, Windows client) and the three published clients' structured live acceptance in
+  held production windows whose restoration runs in `finally` and under a watchdog, with
+  `accept-rtx5090-host.py`, `accept-windows-client.ps1` and `omp-client-probe.py` on the hosts.
+  `scripts/hosts/accept-rtx4090-route.py` with `accept-rtx4090-route.ps1` runs the native RTX 4090
+  route in a child process and restores the lane's exact state bytes, task, support files and
+  ACLs. Every action has a no-effect dry run, and no acceptance step retries automatically.
+- `scripts/compose_route_acceptance.py` composes a release's route acceptance from the four
+  documented-route runner receipts and the published clients' live evidence: the runner receipts
+  byte for byte, one platform receipt per client profile, the RTX 4090 public-install receipt, the
+  documented-route and composed external-installation receipts, and the ready posture. It refuses
+  a route with a failed or missing step, a block executed with other bytes than bundled, a run from
+  another commit, a live run against another runtime identity or without its tool, continuation or
+  fail-closed observations, and a client binary other than the published one.
+- `scripts/rebind_release.py --stage platform` pins each client profile's platform receipt to the
+  commit holding its final bytes and refuses a commit whose bytes differ from the working tree.
 
 ### Fixed
 
