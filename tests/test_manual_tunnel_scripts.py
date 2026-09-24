@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -14,20 +15,40 @@ EXAMPLES = ROOT / "examples" / "manual-tunnel"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
-    def test_native_fragment_matches_each_lane_served_identity(self) -> None:
-        fragment = (
-            ROOT / "examples" / "windows-native" / "models.fragment.yml"
-        ).read_text(encoding="utf-8")
-        for provider, request_model in (("ninfer-native-4090", "qwen3.8-27b"),):
-            self.assertIn(f"  {provider}:", fragment)
-            self.assertIn(f"requestModelId: {request_model}", fragment)
-        # The deferred RTX 3090 lane shares this port and key name, so a leftover provider block
-        # would offer an unqualified lane that answers from whatever serves 18082.
-        self.assertNotIn("3090", fragment)
-        self.assertIn("baseUrl: http://127.0.0.1:18082/v1", fragment)
-        self.assertIn("apiKey: NINFER_NATIVE_API_KEY", fragment)
-        # Native lanes are text and tools only; a vision input would advertise an absent route.
-        self.assertNotIn("image", fragment)
+    def test_fragments_match_each_lane_served_identity(self) -> None:
+        cases = (
+            ("manual-tunnel", "ninfer-beta", "q38-ninfer", 18089,
+             "'!cat \"$HOME/.omp/agent/ninfer-beta.key\"'", ["text", "image"]),
+            ("windows-docker-local", "ninfer-beta", "q38-ninfer", 18089,
+             "NINFER_BETA_API_KEY", ["text", "image"]),
+            ("windows-native", "ninfer-native-4090", "qwen3.8-27b", 18082,
+             "NINFER_NATIVE_API_KEY", ["text"]),
+        )
+        for directory, provider, model, port, key, inputs in cases:
+            with self.subTest(route=directory):
+                fragment = (
+                    ROOT / "examples" / directory / "models.fragment.yml"
+                ).read_text(encoding="utf-8")
+                self.assertEqual(re.findall(r"^  ([\w-]+):$", fragment, re.M), [provider])
+                self.assertEqual(re.findall(r"^      - id: (\S+)$", fragment, re.M), [model])
+                self.assertIn(f"    baseUrl: http://127.0.0.1:{port}/v1\n", fragment)
+                self.assertIn(f"    apiKey: {key}\n", fragment)
+                self.assertIn("    api: openai-responses\n", fragment)
+                self.assertIn("    authHeader: true\n", fragment)
+                self.assertIn(
+                    "        thinking:\n          mode: effort\n          efforts: [low, medium, xhigh]\n",
+                    fragment,
+                )
+                self.assertIn(
+                    "        compat:\n          includeEncryptedReasoning: false\n          supportsReasoningSummary: false\n",
+                    fragment,
+                )
+                for forbidden in ("requestModelId", "ninferStatefulResponses"):
+                    self.assertNotIn(forbidden, fragment)
+                # The deferred RTX 3090 shares the native port; no provider may advertise it.
+                self.assertNotIn("3090", fragment)
+                # Only the RTX 5090 container lane supports image input.
+                self.assertEqual(re.findall(r"^          - (\w+)$", fragment, re.M), inputs)
 
     @staticmethod
     def copy_contract_tree(root: Path) -> None:

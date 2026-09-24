@@ -4,14 +4,14 @@ providers:
     api: openai-responses
     apiKey: NINFER_NATIVE_API_KEY
     authHeader: true
-    compat:
-      ninferStatefulResponses: true
     models:
-      - id: local-max
-        requestModelId: qwen3.8-27b
+      - id: qwen3.8-27b
         name: Qwen3.8 27B NInfer RTX 4090 native
         api: openai-responses
         reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, xhigh]
         input:
           - text
         supportsTools: true
@@ -23,4 +23,5 @@ providers:
         contextWindow: 131072
         maxTokens: 32768
         compat:
-          ninferStatefulResponses: true
+          includeEncryptedReasoning: false
+          supportsReasoningSummary: false

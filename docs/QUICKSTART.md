@@ -26,7 +26,7 @@ from GPU-runtime qualification.
 RTX 3090 qualification is **deferred** until its host returns (expected around September 30).
 For that GPU, use only the immutable
 [v0.7.2 legacy RTX 3090 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
-with the v0.7.2 manifest and OMP 18.0.9. Do not combine them with v0.7.4 or OMP 18.2.3.
+with the v0.7.2 manifest and OMP 18.0.9. Do not combine them with v0.7.4 or OMP 18.3.0.
 
 The current native lane is installable only through its exact qualified manifest variant. Do not
 substitute GPU family names, package URLs, component tags, or variant IDs between releases.
@@ -35,8 +35,8 @@ substitute GPU family names, package URLs, component tags, or variant IDs betwee
 
 The four documented routes - RTX 5090 container host, macOS client, Windows client, and RTX 4090
 native Windows - passed against the published v0.7.4 components before the release was cut
-([accepted receipts](../releases/v0.7.4/acceptance/documented-routes.json)). Each block below is
-byte-identical to the block those runs executed.
+([accepted receipts](../releases/v0.7.4/acceptance/documented-routes.json)). Those recorded runs
+precede the upstream client installation and configuration changes below.
 
 ## Verify the release before setup
 
@@ -44,7 +44,7 @@ The `v0.7.4` release composes native Windows OMP over authenticated local loopba
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2. Managed macOS SSH and
 native Linux client profiles share the same compatibility authority; RTX 4090 uses its exact
-native Windows package. The OMP 18.2.3 client is unchanged from v0.7.3.
+native Windows package. Client commands below use unmodified upstream OMP 18.3.0.
 
 The published runtime components are RTX 5090 `v0.6.8-qwen38-5090-beta.1` and RTX 4090
 `v0.6.6-qwen38-4090-beta.1`, both from source `1c17c3facfbfd1243cf7711a412119302e6dbd74`.
@@ -70,17 +70,16 @@ host-state slots, and its 32768 MiB host floor; its release identity advances to
 `qwen38-4090-native-v0.6.6-beta.1`. Qualification scratch settings do not replace either public
 profile.
 
-The OMP 18.2.3 client comes from source tag `omp-v18.2.3-ninfer-beta.1`
-(commit `5ade242de59ac0f4606a1158bf564410c96918d4`) and published component release
-[`omp-18.2.3-cross-platform-beta-1`](https://github.com/alphastorm/homebrew-omp/releases/tag/omp-18.2.3-cross-platform-beta-1).
-Component publication does not establish product readiness or every-route acceptance. The exact
-native archive identities are:
+The client is an unmodified executable from the upstream
+[Oh My Pi v18.3.0 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), not an archive
+or installer. Component publication does not establish product readiness or every-route acceptance.
+The exact binary identities are:
 
-| Client archive | SHA-256 |
+| Client binary | SHA-256 |
 | --- | --- |
-| `omp-18.2.3-windows-x64.tar.gz` | `4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311` |
-| `omp-18.2.3-linux-x64.tar.gz` | `07cee8024986aff185421461d90c152e2e710e3e7d020d8bbeac53fae50d6e46` |
-| `omp-18.2.3-macos-arm64.tar.gz` | `00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f` |
+| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe) | `9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527` |
+| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64) | `d2fdaa29affe96e596eb9c78d42f548f1f291df28608631bcc00750a84b94bc3` |
+| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64) | `d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc` |
 
 Start only from the product tag and require its ready contract:
 
@@ -88,11 +87,11 @@ Start only from the product tag and require its ready contract:
 python3 scripts/verify_release.py --require-ready
 ```
 
-That gate binds the Windows client archive and binary, compatibility authority, NInfer image/SBOM,
+That gate binds the Windows client binary, compatibility authority, NInfer image/SBOM,
 model, configuration, qualification summary, and clean-install acceptance receipt.
 
 > [!WARNING]
-> Stay on the exact OMP 18.2.3 beta archive pinned by this release. The config every route below
+> Stay on the exact upstream OMP 18.3.0 binary pinned by this release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
@@ -124,17 +123,21 @@ py -3 scripts\verify_release.py --require-ready
 ### Install the exact native Windows client
 
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$Url = 'https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-windows-x64.tar.gz'
-$Expected = '4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311'
-Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-18.2.3-windows-x64.tar.gz
-if ((Get-FileHash omp-18.2.3-windows-x64.tar.gz -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP archive checksum mismatch' }
-tar -xzf omp-18.2.3-windows-x64.tar.gz
-& .\omp-18.2.3-windows-x64\install.ps1
-& "$env:LOCALAPPDATA\OMP\omp.cmd" --version
+$ErrorActionPreference = 'Stop'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe'
+$Expected = '9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527'
+Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
+if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
+New-Item -ItemType Directory -Force -Path (Split-Path $Launcher) | Out-Null
+Copy-Item .\omp-windows-x64.exe $Launcher -Force
+$env:PI_OPENAI_STATEFUL = '1'
+& $Launcher --version
+if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The version must be `omp/18.2.3`. The installer retains the previous client pointer when one exists.
+The version must be `omp/18.3.0`. To roll back, re-download the previous pinned binary and verify
+its checksum before replacing `omp.exe`.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
 the macOS tunnel sections: Docker Desktop exposes the WSL2 loopback service to native
@@ -324,11 +327,19 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
+$env:PI_OPENAI_STATEFUL = '1'
 ```
+
+Stock OMP names each session with `prompt_cache_key`. With API authentication configured, the
+server hashes that key into the session identity without storing the raw key; this enables
+automatic checkpoints and restore. `PI_OPENAI_STATEFUL=1` makes OMP chain turns with
+`previous_response_id`. Encrypted reasoning and reasoning summaries are disabled because the
+server refuses fields it does not implement. The fragment's effort list keeps OMP within the
+template's `low`, `medium`, and `xhigh` levels (`off` clamps to `low`, `high` to `medium`).
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
 the key itself in YAML, command arguments, shell history, or support bundles. In that process,
-`& "$env:LOCALAPPDATA\OMP\omp.cmd" --model "$Provider/local-max"` opens an interactive session on
+`& "$env:LOCALAPPDATA\OMP\omp.exe" --model "$Provider/qwen3.8-27b"` opens an interactive session on
 the lane; run the acceptance below first, it uses the same process without opening one.
 
 ### Native lane acceptance
@@ -336,18 +347,18 @@ the lane; run the acceptance below first, it uses the same process without openi
 Run these in the same PowerShell process that loaded `NINFER_NATIVE_API_KEY`:
 
 ```powershell
-$Launcher = "$env:LOCALAPPDATA\OMP\omp.cmd"
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
 $Smoke = Join-Path $env:TEMP ("omp-ninfer-native-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
 Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
 Push-Location $Smoke
 try {
-  & $Launcher -p --no-session --auto-approve --model "$Provider/local-max" `
+  & $Launcher -p --no-session --auto-approve --model "$Provider/qwen3.8-27b" `
     'Use a file-reading tool to read marker.txt, then report its exact single line.'
   if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
 
   $Session = Join-Path $Smoke 'sessions'
-  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/local-max" `
+  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/qwen3.8-27b" `
     'Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly.'
   if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
   & $Launcher -p --auto-approve --session-dir $Session --continue `
@@ -357,7 +368,7 @@ try {
 
 & $Controller -Action Stop -StateRoot $StateRoot | Out-Null
 & $Launcher -p --no-session --auto-approve --max-time 20s `
-  --model "$Provider/local-max" 'Return LOCAL_ONLY.'
+  --model "$Provider/qwen3.8-27b" 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 & $Controller -Action Start -StateRoot $StateRoot | Out-Null
 ```
@@ -374,8 +385,8 @@ text and tools only. Report the outcome with the
 
 **Mac**
 
-- Apple silicon macOS supported by the pinned native beta archive;
-- OpenSSH, curl, tar, and Python 3; and
+- Apple silicon macOS supported by the pinned upstream binary;
+- OpenSSH, curl, and Python 3; and
 - at least 1 GiB free for OMP and local state.
 
 **Inference host**
@@ -423,21 +434,22 @@ Do not install from moving `main`, an untagged archive, or a manifest whose stat
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-macos-arm64.tar.gz'
-EXPECTED='00b869e943994f4111978e38d67097865020cc977a9c5936c4d369877861670f'
-curl --fail --location --output omp-18.2.3-macos-arm64.tar.gz "$URL"
-test "$(shasum -a 256 omp-18.2.3-macos-arm64.tar.gz | cut -d ' ' -f 1)" = "$EXPECTED"
-tar -xzf omp-18.2.3-macos-arm64.tar.gz
-./omp-18.2.3-macos-arm64/install.sh
-"${XDG_BIN_HOME:-$HOME/.local/bin}/omp" --version
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64'
+EXPECTED='d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc'
+curl --fail --location --output omp-darwin-arm64 "$URL"
+test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
+mkdir -p "$HOME/.local/bin"
+cp omp-darwin-arm64 "$HOME/.local/bin/omp"
+chmod 0755 "$HOME/.local/bin/omp"
+export PI_OPENAI_STATEFUL=1
+"$HOME/.local/bin/omp" --version
 )
 ```
 
-The version must be `omp/18.2.3`. This native beta package uses the same current/previous client
-pointer contract as Windows and Linux; it does not change the stable Homebrew cask. The installer
-places the launcher in `${XDG_BIN_HOME:-$HOME/.local/bin}`; every later step in this guide calls
-bare `omp`, so put that directory on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your
-shell profile if you want it to persist) before continuing.
+The version must be `omp/18.3.0`. To roll back, re-download the previous pinned binary and verify
+its checksum before replacing `~/.local/bin/omp`. Every later step calls bare `omp`, so put
+`$HOME/.local/bin` on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your shell profile
+if you want it to persist) before continuing.
 
 ## 3. Prepare the model and key on the inference host
 
@@ -563,14 +575,23 @@ tunnel. Do not paste the key into YAML, shell history, an issue, or a support bu
 
 ## 7. Add the OMP provider
 
-If `~/.omp/agent/models.yml` does not exist:
+In every shell that launches OMP, export `PI_OPENAI_STATEFUL=1`. If
+`~/.omp/agent/models.yml` does not exist, install the fragment:
 
 ```sh
+export PI_OPENAI_STATEFUL=1
 install -m 600 examples/manual-tunnel/models.fragment.yml \
   "$HOME/.omp/agent/models.yml"
 ```
 
-If it already exists, merge only the `providers.ninfer-beta` mapping from
+Stock OMP names each session with `prompt_cache_key`. With API authentication configured, the
+server hashes that key into the session identity without storing the raw key; this enables
+automatic checkpoints and restore. `PI_OPENAI_STATEFUL=1` makes OMP chain turns with
+`previous_response_id`. Encrypted reasoning and reasoning summaries are disabled because the
+server refuses fields it does not implement. The fragment's effort list keeps OMP within the
+template's `low`, `medium`, and `xhigh` levels (`off` clamps to `low`, `high` to `medium`).
+
+If the file already exists, run the export above and merge only the `providers.ninfer-beta` mapping from
 [`models.fragment.yml`](../examples/manual-tunnel/models.fragment.yml). Do not overwrite existing
 providers or model definitions. The key remains an executable secret reference:
 
@@ -611,18 +632,18 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
+$env:PI_OPENAI_STATEFUL = '1'
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
 the key itself in YAML, command arguments, shell history, or support bundles. The block refuses to
 overwrite an existing OMP configuration; merge only `providers.ninfer-beta` and the `retry` mapping
 when those files already exist. In that process,
-`& "$env:LOCALAPPDATA\OMP\omp.cmd" --model ninfer-beta/local-max` opens an interactive session;
+`& "$env:LOCALAPPDATA\OMP\omp.exe" --model ninfer-beta/q38-ninfer` opens an interactive session;
 the **Native Windows command forms** in section 8 use the same process without opening one.
 
-The sealed launcher owns config selection and deliberately rejects `--config`; the default config plus
-the explicit provider/model disable model fallback. A tunnel or runtime failure must be an error, not a
-switch to a cloud model.
+The default config disables retries and model fallback. Select the explicit provider/model on
+every new session: a tunnel or runtime failure must be an error, not a switch to a cloud model.
 
 ## 8. Acceptance
 
@@ -635,24 +656,24 @@ Run from the tagged product clone in the same PowerShell process that loaded
 `NINFER_BETA_API_KEY`:
 
 ```powershell
-$Launcher = "$env:LOCALAPPDATA\OMP\omp.cmd"
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
 $Smoke = Join-Path $env:TEMP ("omp-ninfer-acceptance-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
 Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
 Push-Location $Smoke
 try {
-  & $Launcher -p --no-session --auto-approve --model ninfer-beta/local-max `
+  & $Launcher -p --no-session --auto-approve --model ninfer-beta/q38-ninfer `
     'Use a file-reading tool to read marker.txt, then report its exact single line.'
   if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
 } finally { Pop-Location }
 
 $Image = (Resolve-Path .\assets\icon-512.png).Path
-& $Launcher -p --no-session --auto-approve --model ninfer-beta/local-max `
+& $Launcher -p --no-session --auto-approve --model ninfer-beta/q38-ninfer `
   ("@" + $Image) 'Describe the visible image in one sentence.'
 if ($LASTEXITCODE -ne 0) { throw 'Vision acceptance failed' }
 
 $Session = Join-Path $Smoke 'sessions'
-& $Launcher -p --auto-approve --session-dir $Session --model ninfer-beta/local-max `
+& $Launcher -p --auto-approve --session-dir $Session --model ninfer-beta/q38-ninfer `
   'Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly.'
 if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
 & $Launcher -p --auto-approve --session-dir $Session --continue `
@@ -666,7 +687,7 @@ native Windows request:
 ```powershell
 wsl.exe -d Ubuntu-24.04 -- bash -lc 'cd ~/omp-ninfer && ./examples/manual-tunnel/stop-ninfer.sh'
 & $Launcher -p --no-session --auto-approve --max-time 20s `
-  --model ninfer-beta/local-max 'Return LOCAL_ONLY.'
+  --model ninfer-beta/q38-ninfer 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 ```
 
@@ -675,9 +696,9 @@ request is a release failure. Restart NInfer with section 4 only after observing
 
 ### macOS/Linux command forms
 
-Run these in one terminal on the Mac, with the tunnel from section 5 open in another. Every check
-is a `-p` (print) turn, so it exits on its own; the shell tests the outcome, and `set -e` stops
-the sequence at the first failure.
+Run these in the terminal that exported `PI_OPENAI_STATEFUL=1` in section 7, with the tunnel
+from section 5 open in another. Every check is a `-p` (print) turn, so it exits on its own; the
+shell tests the outcome, and `set -e` stops the sequence at the first failure.
 
 ### Text and tool turn
 
@@ -686,7 +707,7 @@ set -e
 SMOKE=$(mktemp -d)
 printf 'OMP_NINFER_TOOL_OK\n' > "$SMOKE/marker.txt"
 cd "$SMOKE"
-omp -p --no-session --auto-approve --model ninfer-beta/local-max \
+omp -p --no-session --auto-approve --model ninfer-beta/q38-ninfer \
   "Use a file-reading tool to read marker.txt, then report its exact single line." \
   | tee "$SMOKE/tool.txt"
 grep -q OMP_NINFER_TOOL_OK "$SMOKE/tool.txt"
@@ -700,7 +721,7 @@ not the model's wording around it.
 The release clone ships a non-sensitive image; adjust the path to your clone:
 
 ```sh
-omp -p --no-session --auto-approve --model ninfer-beta/local-max \
+omp -p --no-session --auto-approve --model ninfer-beta/q38-ninfer \
   @"$HOME/omp-ninfer/assets/icon-512.png" "Describe the visible image in one sentence." \
   | tee "$SMOKE/vision.txt"
 test -s "$SMOKE/vision.txt"
@@ -712,7 +733,7 @@ RTX 5090 container lane only. Do not use private screenshots in an issue.
 ### Stateful follow-up and OMP resume
 
 ```sh
-omp -p --auto-approve --session-dir "$SMOKE/sessions" --model ninfer-beta/local-max \
+omp -p --auto-approve --session-dir "$SMOKE/sessions" --model ninfer-beta/q38-ninfer \
   "Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly."
 omp -p --auto-approve --session-dir "$SMOKE/sessions" --continue \
   "Return only the nonce from the prior turn." | tee "$SMOKE/resume.txt"
@@ -725,16 +746,16 @@ Responses while the server process stays up; the next check takes it down.
 ### Session survives the server process
 
 A session is written to the durable store automatically once it passes 32,768 frontier tokens,
-or on an explicit `POST /v1/ninfer/checkpoints` for its session digest. OMP derives that digest
-from its own session identity, so this check uses the automatic path: it seeds a session past
-the gate with the release's own documentation, restarts the server container on the inference
-host, and continues.
+or on an explicit `POST /v1/ninfer/checkpoints` for its session digest. The authenticated server
+derives that digest from OMP's `prompt_cache_key`, so this check uses the automatic path: it
+seeds a session past the gate with the release's own documentation, restarts the server
+container on the inference host, and continues.
 
 ```sh
 cat "$HOME/omp-ninfer/docs/BENCHMARKS.md" "$HOME/omp-ninfer/README.md" \
     "$HOME/omp-ninfer/docs/ARCHITECTURE.md" "$HOME/omp-ninfer/docs/PERFORMANCE.md" \
     "$HOME/omp-ninfer/CHANGELOG.md" > "$SMOKE/context.md"
-omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/local-max \
+omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/q38-ninfer \
   @"$SMOKE/context.md" "Hold this material in context. Remember the nonce COBALT-493817. Reply OK only."
 ssh USER@RUNTIME_HOST docker restart --timeout 60 omp-ninfer-beta
 until curl -sf -m 3 -o /dev/null http://127.0.0.1:18089/health; do sleep 3; done
@@ -756,7 +777,7 @@ written.
 Stop the tunnel with `Ctrl-C` in its terminal, then run:
 
 ```sh
-if omp -p --no-session --max-time 20s --model ninfer-beta/local-max "Return LOCAL_ONLY."; then
+if omp -p --no-session --max-time 20s --model ninfer-beta/q38-ninfer "Return LOCAL_ONLY."; then
   echo 'outage request unexpectedly succeeded' >&2; false
 fi
 ```
@@ -768,14 +789,18 @@ the failure.
 ## Fleet: the two qualified lanes in one OMP configuration
 
 If you own both qualified lanes, [`examples/fleet/`](../examples/fleet/) binds them into
-one configuration with explicit roles: `ninfer-main/local-main` (RTX 5090) for the interactive
-lead session and `ninfer-heavy/local-heavy` (RTX 4090) for long-context background workers.
+one configuration with explicit roles: `ninfer-main/q38-ninfer` (RTX 5090) for the interactive
+lead session and `ninfer-heavy/qwen3.8-27b` (RTX 4090) for long-context background workers.
 Every lane stays loopback-only on its own machine and serves one active request. The fleet's
 RTX 3090 scout role is deferred with its GPU: it is not a v0.7.4 install lane, so neither the
 fragment nor this recipe declares it. Its three-lane form stays at the immutable v0.7.2 tag with
 the legacy OMP 18.0.9 instructions for that lane.
 
+Export `PI_OPENAI_STATEFUL=1` in every shell that launches a fleet agent; the fragment uses the
+same session identity, thinking efforts, and reasoning compatibility settings as section 7.
+
 ```sh
+export PI_OPENAI_STATEFUL=1
 # two authenticated forwards; pass - to skip a lane you do not own
 ./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST
 install -m 600 examples/fleet/models.fragment.yml ~/.omp/agent/models.fleet.yml   # merge by hand

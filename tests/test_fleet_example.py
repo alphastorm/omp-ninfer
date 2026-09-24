@@ -23,15 +23,31 @@ class FleetExampleTests(unittest.TestCase):
 
     def test_fragment_binds_each_lane_to_its_published_model_and_port(self) -> None:
         fragment = (FLEET / "models.fragment.yml").read_text(encoding="utf-8")
-        providers = dict(re.findall(r"^  (ninfer-\w+):\n    baseUrl: http://127\.0\.0\.1:(\d+)/v1", fragment, re.M))
-        self.assertEqual(providers, {"ninfer-main": "18191", "ninfer-heavy": "18192"})
-        request_ids = re.findall(r"requestModelId: (\S+)", fragment)
-        self.assertEqual(request_ids, ["q38-ninfer", "qwen3.8-27b"])
-        self.assertEqual(re.findall(r"- id: (local-\w+)", fragment), ["local-main", "local-heavy"])
-        self.assertEqual(fragment.count("ninferStatefulResponses: true"), 4)
+        providers = dict(re.findall(r"^  (ninfer-\w+):\n((?:    .*\n)+)", fragment, re.M))
+        expected = {
+            "ninfer-main": ("q38-ninfer", "18191", "ninfer-5090.key"),
+            "ninfer-heavy": ("qwen3.8-27b", "18192", "ninfer-4090.key"),
+        }
+        self.assertEqual(set(providers), set(expected))
+        for provider, (model, port, key) in expected.items():
+            with self.subTest(provider=provider):
+                body = providers[provider]
+                self.assertIn(f"    baseUrl: http://127.0.0.1:{port}/v1\n", body)
+                self.assertEqual(re.findall(r"^      - id: (\S+)$", body, re.M), [model])
+                self.assertIn("    api: openai-responses\n", body)
+                self.assertIn("    authHeader: true\n", body)
+                self.assertIn(f'!cat "$HOME/.omp/agent/{key}"', body)
+                self.assertIn(
+                    "        thinking:\n          mode: effort\n          efforts: [low, medium, xhigh]\n",
+                    body,
+                )
+                self.assertIn(
+                    "        compat:\n          includeEncryptedReasoning: false\n          supportsReasoningSummary: false\n",
+                    body,
+                )
+        for forbidden in ("requestModelId", "ninferStatefulResponses"):
+            self.assertNotIn(forbidden, fragment)
         self.assertNotIn("apiKey: sk", fragment)
-        for key in ("ninfer-5090.key", "ninfer-4090.key"):
-            self.assertIn(f'!cat "$HOME/.omp/agent/{key}"', fragment)
 
     def test_deferred_lane_declares_no_installable_provider(self) -> None:
         """A deferred GPU must not reach an operator as a mergeable provider. The fragment is
@@ -44,7 +60,10 @@ class FleetExampleTests(unittest.TestCase):
 
     def test_agents_use_the_role_models(self) -> None:
         heavy = (FLEET / "agents" / "fleet-heavy.md").read_text(encoding="utf-8")
-        self.assertIn("model: ninfer-heavy/local-heavy:medium", heavy)
+        self.assertEqual(
+            re.findall(r"^model: (\S+)$", heavy, re.M),
+            ["ninfer-heavy/qwen3.8-27b:medium"],
+        )
         self.assertEqual(
             sorted(path.name for path in (FLEET / "agents").glob("*.md")),
             ["fleet-heavy.md"],

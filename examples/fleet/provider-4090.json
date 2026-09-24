@@ -1,5 +1,5 @@
 {
-  "provider": "ninfer/local-max",
+  "provider": "ninfer-heavy/qwen3.8-27b",
   "protocol": "openai-responses",
   "base_url": "http://127.0.0.1:<local-forward-port-4090>",
   "api_key_file": "<path-to-this-lane's-api-key-file>",
