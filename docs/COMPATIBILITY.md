@@ -9,9 +9,9 @@ Client status is independent from each GPU runtime qualification. `preview` is n
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 26 arm64 | `qwen38-5090-v0.7.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/macos-arm64-18.2.3-beta1.json) |
-| `windows-docker-local` | Windows 11 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/windows-x64-18.2.3-beta1.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f8b2e3d94ca60405908eb90466c366f4c9191fc8/releases/v0.7.4/acceptance/linux-x64-18.2.3-beta1.json) |
+| `darwin-remote-ssh` | macOS 26 arm64 | `qwen38-5090-v0.7.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/e376846055c8880a40550210194e2ba5ee8a41d4/releases/v0.7.4/acceptance/macos-arm64-18.2.3-beta1.json) |
+| `windows-docker-local` | Windows 11 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/e376846055c8880a40550210194e2ba5ee8a41d4/releases/v0.7.4/acceptance/windows-x64-18.2.3-beta1.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 | `qwen38-5090-v0.7.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/e376846055c8880a40550210194e2ba5ee8a41d4/releases/v0.7.4/acceptance/linux-x64-18.2.3-beta1.json) |
 
 ## Native runtime variants
 
