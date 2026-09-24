@@ -1,0 +1,243 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-050",
+  "title": "Live sessions survive graceful stops and restarts on both mainline lanes",
+  "generated_utc": "2026-09-24T10:30:50Z",
+  "status": "passed",
+  "question": "With automatic saves retried (#45), sessions saved before pressure evicts them (#45), and the checkpoint quota no longer evicting other sessions for a re-save transient (#46), does a graceful stop after the EXP-049 workload lose any live session, and does every session resume after a restart and survive a second stop?",
+  "answer": "No session was lost. On the RTX 5090 the EXP-049 workload's stop reported `saved 1, nothing to save 3, refused 0` (shipped and diagnostic runtimes: `saved 2, nothing to save 0, refused 2`); after a restart all four stored sessions resumed from their checkpoints, and the second stop reported `saved 0, nothing to save 4, refused 0`. On the RTX 4090 native lane both stops reported `saved 1, nothing to save 3, refused 0` and all four sessions resumed. Saving before eviction costs the admitting request 6.2-6.9 s per 126K-token session on the RTX 5090, where one such checkpoint is 8.6 GB.",
+  "fixes": {
+    "source": "alphastorm/ninfer branch fix/durable-session-eviction on ed773f18 (EXP-049's diagnostic commit)",
+    "commits": {
+      "6d41fc13": "fix(serve): retry transient automatic checkpoint refusals - tag mismatch before the newest turn is catalogued, or a transaction in progress, requeue up to six times per completed turn; a graceful stop counts a session whose newest response is already on disk as nothing to save",
+      "a3590638": "fix(runtime): save a live session before pressure evicts it - the resource manager names the indexed, checkpoint-tagged sessions a choice would evict or strip of checkpoints; with the serve handler installed, the engine drops that choice before claiming anything, saves the victims on its worker outside the execution lock, and plans again. A refusal retrying cannot fix is logged and the eviction proceeds.",
+      "c9c54356": "fix(serve): keep other sessions' checkpoints when one re-saves under quota (#46) - the quota pass honours the tolerated publish transient instead of deleting another session's only checkpoint"
+    },
+    "builds": {
+      "rtx5090": {
+        "commit": "c9c54356019b55af565cacb7c5b51938275bb7af",
+        "toolchain": "nvidia/cuda:13.1.2-devel-ubuntu24.04, sm_120a",
+        "build_seconds": 228,
+        "host_tests_passed": 7,
+        "server_binary_sha256": "8327af160cbc23d63fcf24180758c1c852db0e9539132bf2b7a60533215edf5d"
+      },
+      "rtx4090": {
+        "commit": "c9c54356019b55af565cacb7c5b51938275bb7af",
+        "toolchain": "MSVC 19.44, CUDA 13.3, sm_89, build profile native-v0.6.5-beta.1-rtx4090",
+        "host_tests_passed": 9,
+        "server_binary_sha256": "4c8b2c8882aa3b209d5a4378f1107f9c468a52ae4a7fdd8c453dfd38203808ba"
+      }
+    }
+  },
+  "method": {
+    "workload": "scripts/engine_window_compare.py --wire fork, unchanged from EXP-049 except that the receipt now names each session's newest stored response: long-context retrieval, decode, two 126K-token sessions alternating continuation and fork, a 67.7K-token fanout with four branches and a sibling continuation, the live-sibling agent protocol; no explicit saves. A graceful stop follows.",
+    "resume": "The same arm restarted on the same checkpoint root; engine_window_compare.py --resume-from continues each stored session once from its newest response (1024-token budget, thinking on), then a second graceful stop. client_wall_s includes the checkpoint restore; ttft_s is the server-side time after the restored request was submitted.",
+    "rtx5090": "Engine window on the appliance: production stopped under the lane supervisor hold, the arm on 127.0.0.1:18099 with the shipped v0.7.3 profile (binary identity set to the arm's server), production restored through its relaunch script afterwards (health 200, restart=unless-stopped, hold released).",
+    "rtx4090": "The candidate server from the build tree beside the installed lane's DLLs, launched with the installed lane's exact serving configuration (host KV 11,264 MiB, INT8 KV, MTP 3, quota 24,576 MiB) but an isolated key, port 18092 and checkpoint root; stopped through its stop event. The installed lane stayed stopped and untouched; power limit 450 W as found."
+  },
+  "identities": {
+    "rtx5090_c9c54356": {
+      "image": "ninfer-5090:c9c54356-appliance-local",
+      "image_id": "sha256:2ca98b9dbc751745ef65dd9f73cd33aad9518adde91ee14b21a0a3cb3221e4a6",
+      "server_binary_sha256": "8327af160cbc23d63fcf24180758c1c852db0e9539132bf2b7a60533215edf5d",
+      "model_bytes": 18210531328
+    },
+    "rtx5090_a3590638": {
+      "image": "ninfer-5090:a3590638-appliance-local",
+      "image_id": "sha256:2aa172171cfcbeb13b1bb8d56d181608d11ed65f266e0fe2fad60044974a8501",
+      "server_binary_sha256": "1174a9ba6b6e9cf04c3fcde32da4e0f594d8cdd56c3508299fad1897ae0f297e"
+    },
+    "rtx4090_c9c54356": {
+      "gpu": "NVIDIA GeForce RTX 4090, 610.88, 450.00 W, 24564 MiB",
+      "server_binary_sha256": "4c8b2c8882aa3b209d5a4378f1107f9c468a52ae4a7fdd8c453dfd38203808ba",
+      "lane_release_config": "qwen38-4090-native-v0.6.5-beta.1-f098cc3ef8cd"
+    }
+  },
+  "results": {
+    "rtx5090": {
+      "workload_stop": "shutdown: saved 1, nothing to save 3, refused 0",
+      "resume_stop": "shutdown: saved 0, nothing to save 4, refused 0",
+      "resumed_sessions": {
+        "agent": {
+          "http_status": 200,
+          "prompt_tokens": 191,
+          "cached_tokens": 164,
+          "ttft_s": 0.096,
+          "client_wall_s": 0.598
+        },
+        "fanout": {
+          "http_status": 200,
+          "prompt_tokens": 67961,
+          "cached_tokens": 67934,
+          "ttft_s": 0.316,
+          "client_wall_s": 2.993
+        },
+        "session-D1": {
+          "http_status": 200,
+          "prompt_tokens": 126098,
+          "cached_tokens": 126067,
+          "ttft_s": 4.222,
+          "desk_code_exact": false,
+          "client_wall_s": 8.77
+        },
+        "session-D2": {
+          "http_status": 200,
+          "prompt_tokens": 126099,
+          "cached_tokens": 126068,
+          "ttft_s": 0.701,
+          "desk_code_exact": false,
+          "client_wall_s": 16.445
+        }
+      },
+      "saved_before_eviction": [
+        {
+          "request": 9,
+          "step": "session_base_D2",
+          "victim": "D1",
+          "save_s": 6.9,
+          "ttft_s": 63.336,
+          "ttft_s_without_fix": 56.613
+        },
+        {
+          "request": 10,
+          "step": "r1_continue_D1",
+          "victim": "D2",
+          "save_s": 6.5,
+          "ttft_s": 63.28,
+          "ttft_s_without_fix": 56.972
+        },
+        {
+          "request": 24,
+          "step": "fanout_continue_sibling",
+          "victims": [
+            "D1",
+            "D2"
+          ],
+          "save_s": [
+            6.5,
+            6.2
+          ],
+          "ttft_s": 39.046,
+          "ttft_s_without_fix": 26.427
+        }
+      ],
+      "checkpoint_bytes_126k_session": 9244217528,
+      "workload_gates": {
+        "long_context_exact": true,
+        "fanout_branch_cached_tokens": [
+          67676,
+          67676,
+          67676,
+          67676
+        ],
+        "session_continuations_losing_reuse": 2,
+        "agent_protocol": "live sibling ok, DELETE 200, deleted continuation 404 previous_response_not_found, survivor ok",
+        "errors": 0
+      }
+    },
+    "rtx5090_before_quota_fix": {
+      "build": "a3590638 (save-before-evict without the quota fix)",
+      "workload_stop": "shutdown: saved 1, nothing to save 3, refused 0",
+      "resume_stop": "shutdown: saved 0, nothing to save 1, refused 3",
+      "finding": "After the resumed turns, the restore of D2 re-saved stale residents and D2's own resumed turn was saved; each save's pre-publish quota pass evicted other sessions' current generations to make room for the saving session's superseded generation, so D1, fanout and agent had no checkpoint left and the checkpoint root held two 8.6 GB generations of D2 (alphastorm/omp-ninfer#46).",
+      "resumed_sessions": {
+        "agent": {
+          "http_status": 200,
+          "prompt_tokens": 191,
+          "cached_tokens": 164,
+          "ttft_s": 0.138,
+          "client_wall_s": 0.628
+        },
+        "fanout": {
+          "http_status": 200,
+          "prompt_tokens": 67961,
+          "cached_tokens": 67934,
+          "ttft_s": 0.294,
+          "client_wall_s": 2.798
+        },
+        "session-D1": {
+          "http_status": 200,
+          "prompt_tokens": 126098,
+          "cached_tokens": 126067,
+          "ttft_s": 3.673,
+          "desk_code_exact": false,
+          "client_wall_s": 7.836
+        },
+        "session-D2": {
+          "http_status": 200,
+          "prompt_tokens": 126099,
+          "cached_tokens": 126068,
+          "ttft_s": 0.701,
+          "desk_code_exact": false,
+          "client_wall_s": 15.02
+        }
+      }
+    },
+    "rtx4090": {
+      "workload_stop": "shutdown: saved 1, nothing to save 3, refused 0",
+      "resume_stop": "shutdown: saved 1, nothing to save 3, refused 0",
+      "resumed_sessions": {
+        "agent": {
+          "http_status": 200,
+          "prompt_tokens": 191,
+          "cached_tokens": 164,
+          "ttft_s": 0.141,
+          "client_wall_s": 1.302
+        },
+        "fanout": {
+          "http_status": 200,
+          "prompt_tokens": 67961,
+          "cached_tokens": 67934,
+          "ttft_s": 0.502,
+          "client_wall_s": 3.869
+        },
+        "session-D1": {
+          "http_status": 200,
+          "prompt_tokens": 126098,
+          "cached_tokens": 126067,
+          "ttft_s": 1.578,
+          "desk_code_exact": false,
+          "client_wall_s": 6.633
+        },
+        "session-D2": {
+          "http_status": 200,
+          "prompt_tokens": 126099,
+          "cached_tokens": 126068,
+          "ttft_s": 2.811,
+          "desk_code_exact": true,
+          "client_wall_s": 8.69
+        }
+      },
+      "saved_before_eviction": [],
+      "workload_gates": {
+        "long_context_exact": true,
+        "fanout_branch_cached_tokens": [
+          67676,
+          67676,
+          67676,
+          67676
+        ],
+        "session_continuations_losing_reuse": 0,
+        "errors": 0
+      },
+      "note": "Device and host KV together held D1, D2 and the fanout, so no checkpoint-tagged session was evicted; transient automatic refusals were deferred and retried (5 deferrals logged) before the stop."
+    }
+  },
+  "conclusion": "A graceful stop no longer loses a live session on this workload on either lane, and restored sessions survive a second stop. On the RTX 5090, where the two 126K-token sessions and the long-context continuation do not fit together, every eviction of a checkpoint-tagged session was preceded by a save, which the admitting request pays for: about 6.5 s per 8.6 GB checkpoint.",
+  "limits": [
+    "One run per arm on a back-to-back workload; interactive use has idle gaps in which retried automatic saves usually finish before any eviction.",
+    "The RTX 4090 workload did not evict a checkpoint-tagged session, so save-before-evict was exercised on the RTX 5090 only; the RTX 4090 build passes the same host tests.",
+    "Desk-code checks are inconclusive by construction: every workload turn ends at the probe's 24-token limit inside reasoning, which preserved thinking keeps in history, and resumed turns that imitate that cut and stop score false. The RTX 4090's D2 finished its reasoning after restore and answered D2-12030 exactly.",
+    "Within a live process, a continuation of an evicted session still prefills from the root (57-64 s for 126K tokens, EXP-049's `losing reuse 2`) although a current checkpoint now exists; restore is attempted only when the response store lacks the previous response, i.e. after a restart."
+  ],
+  "raw_receipts_sha256": {
+    "rtx5090 c9c54356 workload": "d0a201c8023b5c6cab68fd89ad12c2e6acf364eb5c33f5c9e833b190248e2d11",
+    "rtx5090 c9c54356 resume": "4af79cf853e2c193f2f30ac99e1dc77c27543bedc74a098f187be5104e9768c0",
+    "rtx5090 a3590638 workload": "82a78f594e48be53f2ad77d1ccf2cd9447d983486831d6c90852ef7bfeaf64b2",
+    "rtx5090 a3590638 resume": "10eaebd0d2ba81232dbe9306b0b7928d28d3a26a43afd6c00242059c95c57b26",
+    "rtx4090 c9c54356 workload": "785378f435ccfcac4176e6a38ec1b1cad396a7e39b77ff76188a0550c31c0e91",
+    "rtx4090 c9c54356 resume": "d080eaa6bd573b1fce82fb11d6a2b53c368b1805253346cd4ed07fb4e211a90d"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

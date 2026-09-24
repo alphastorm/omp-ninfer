@@ -56,10 +56,17 @@ engine`), and while they were resident every automatic save hit a transient gate
 `catalogued checkpoint tag mismatch` 1 ms after the turn finished, before its continuation was
 catalogued, then `resource transaction in progress` while the next request ran. The exporter itself
 works when it gets a quiescent continuation (a 5.2 GB session saved in 4.3 s). The fix is in this
-fork, not upstream ([#45](https://github.com/alphastorm/omp-ninfer/issues/45)): retry transient
-automatic refusals when the engine quiesces, and save a continuation whose checkpoint is behind
-before evicting it, as restore reclaim already does. The RTX 3090's return is a separate release
-on the current runtime and OMP 18.2.3.
+fork, not upstream ([#45](https://github.com/alphastorm/omp-ninfer/issues/45)), and is measured on
+both lanes ([EXP-050](docs/measurements/2026-09-24-durable-session-eviction.json)): transient
+automatic refusals retry when the engine quiesces, and admission saves a checkpoint-tagged session
+before pressure evicts it. The same workload's stop now reports `saved 1, nothing to save 3,
+refused 0` on both lanes, all four stored sessions resume after a restart, and a second stop
+refuses nothing. Resuming exposed a third loss, fixed with them
+([#46](https://github.com/alphastorm/omp-ninfer/issues/46)): re-saving one session under the
+checkpoint quota deleted other sessions' only checkpoints. Saving before eviction costs the
+admitting request about 6.5 s per 126K-token session on the RTX 5090, where one such checkpoint is
+8.6 GB. The fixes reach users when a release rebinds both lanes to that runtime. The RTX 3090's
+return is a separate release on the current runtime and OMP 18.2.3.
 
 ## Where this was — v0.7.1
 

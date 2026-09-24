@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/engine_window_compare.py` records every session's newest stored response, and
+  `--resume-from` continues each of them once after a restart of the same arm, recording whether
+  the server restored it from its checkpoint. A desk-code answer cut off by the output limit now
+  scores inconclusive instead of wrong.
+
 ### Fixed
 
 - The RTX 5090 Windows Docker-local profile (`profiles/qwen38-rtx5090-windows-docker-local.json`)

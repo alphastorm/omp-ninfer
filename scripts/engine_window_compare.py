@@ -11,6 +11,10 @@ and ``ninfer_session`` body field). ``--wire upstream`` sends neither: upstream 
 unknown body fields and has no session identity, so the arms differ only where the runtimes do.
 Timings come from each runtime's own request-log JSONL, which both write in the same shape.
 
+The receipt names every session's newest stored response. After a graceful stop and a restart of
+the same arm, ``--resume-from`` continues each of those sessions once from that response and
+records whether the server restored it from its checkpoint instead of prefilling it again.
+
 Example (on the appliance, against a window container on 127.0.0.1:18099):
   python3 engine_window_compare.py --arm upstream-594930e7 --wire upstream \
     --base-url http://127.0.0.1:18099 --api-key-file ~/services/ninfer-5090/secrets/api_key \
@@ -39,6 +43,7 @@ DECODE_PROMPT = (
     "modes of each stage, with concrete pseudocode for every component. Be exhaustive."
 )
 FILLER = "Operations ledger entry %d for desk %s: throughput nominal, cache warm, retrieval verified. "
+RESUME_OUTPUT_TOKENS = 1024
 
 
 def now() -> float:
@@ -52,6 +57,7 @@ class Client:
         self.model = model
         self.wire = wire
         self.session = session
+        self.newest: str | None = None
 
     def request(self, path: str, payload: dict[str, Any] | None, timeout: float = 1800.0,
                 method: str | None = None) -> Any:
@@ -80,6 +86,8 @@ class Client:
             payload["previous_response_id"] = previous
         started = now()
         document = self.request("/v1/responses", payload)
+        if store:
+            self.newest = document.get("id")
         return document, now() - started
 
     def chat(self, messages: list[dict[str, Any]], max_tokens: int) -> tuple[dict[str, Any], float]:
@@ -149,6 +157,80 @@ def server_view(records: list[dict[str, Any]], prompt: int | None, completion: i
     return {}
 
 
+def code_check(document: dict[str, Any], code: str) -> bool | None:
+    """Whether the answer names the code; None when the output limit cut the answer off first."""
+    if code in output_text(document):
+        return True
+    return None if document.get("status") == "incomplete" else False
+
+
+def desk_code(label: str) -> str | None:
+    """The code the two-session workload asked session-D<n> to remember, or None."""
+    if not label.startswith("session-D"):
+        return None
+    index = int(label.removeprefix("session-D")) - 1
+    return f"D{index + 1}-{index * 7919 + 4111}"
+
+
+def resume(args: argparse.Namespace, api_key: str) -> int:
+    """Continue every session a workload receipt recorded, once, from its newest stored response."""
+    source = json.loads(args.resume_from.read_text(encoding="utf-8"))
+    started_ms = int(time.time() * 1000)
+    results: list[dict[str, Any]] = []
+    for label, session in sorted(source["sessions"].items()):
+        lane = Client(args.base_url, api_key, args.model, args.wire, session["session_sha256"])
+        code = desk_code(label)
+        prompt = (f"Return only the desk code you were asked to remember for desk {code.split('-')[0]}."
+                  if code else "Continue: reply with the single word RESUMED.")
+        outcome: dict[str, Any] = {"session": label, "session_sha256_prefix": session["session_sha256"][:12]}
+        try:
+            # Thinking stays on as in the workload, so the budget must cover the reasoning that
+            # precedes the answer; the workload's 24-token continuations end inside it.
+            document, wall = lane.respond(prompt, session["newest_response_id"], RESUME_OUTPUT_TOKENS)
+        except urllib.error.HTTPError as error:
+            outcome.update({"http_status": error.code, "body": error.read().decode("utf-8", "replace")[:300]})
+        else:
+            prompt_tokens, completion, cached = usage_of(document)
+            outcome.update({"http_status": 200, "wall_s": round(wall, 3), "prompt_tokens": prompt_tokens,
+                            "completion_tokens": completion, "cached_tokens": cached})
+            outcome["output"] = output_text(document)[-200:]
+            if code:
+                outcome["code_exact"] = code_check(document, code)
+        print(f"{'resume_' + label:>30}: {json.dumps(outcome)}", flush=True)
+        results.append(outcome)
+
+    time.sleep(2.0)
+    records = request_log(args.log_cmd, started_ms)
+    for outcome in results:
+        if outcome["http_status"] == 200:
+            outcome["server"] = server_view(records, outcome["prompt_tokens"], outcome["completion_tokens"])
+    resumed = [outcome for outcome in results if outcome["http_status"] == 200]
+    # A restarted server holds no cache, so reusing most of the prompt means it restored the checkpoint.
+    restored = [outcome for outcome in resumed
+                if (outcome["cached_tokens"] or 0) * 2 > (outcome["prompt_tokens"] or 0)]
+    receipt = {
+        "artifact_type": "omp_ninfer_engine_window_resume",
+        "schema_version": 1,
+        "arm": args.arm,
+        "wire": args.wire,
+        "generated_utc": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "identity": json.loads(args.identity_json.read_text(encoding="utf-8")) if args.identity_json else None,
+        "resumed_from_sha256": hashlib.sha256(args.resume_from.read_bytes()).hexdigest(),
+        "summary": {
+            "sessions": len(results),
+            "resumed": len(resumed),
+            "restored_from_checkpoint": len(restored),
+            "desk_codes_exact": {outcome["session"]: outcome.get("code_exact")
+                                 for outcome in results if desk_code(outcome["session"])},
+        },
+        "sessions": results,
+    }
+    args.receipt.parent.mkdir(parents=True, exist_ok=True)
+    args.receipt.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+    print(f"receipt written: {args.receipt} restored={len(restored)}/{len(results)}")
+    return 0 if len(restored) == len(results) else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--arm", required=True, help="receipt label for this runtime arm")
@@ -156,7 +238,7 @@ def main() -> int:
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True, type=Path)
     parser.add_argument("--model", default="q38-ninfer")
-    parser.add_argument("--long-fixture", required=True, type=Path)
+    parser.add_argument("--long-fixture", type=Path, help="required unless --resume-from")
     parser.add_argument("--log-cmd", required=True, help="shell command printing the arm's request JSONL")
     parser.add_argument("--identity-json", type=Path, help="operator-recorded identity of the arm")
     parser.add_argument("--decode-reps", type=int, default=3)
@@ -165,10 +247,16 @@ def main() -> int:
     parser.add_argument("--fanout-branches", type=int, default=4)
     parser.add_argument("--explicit-saves", action="store_true",
                         help="fork wire only: after the gates, POST an explicit checkpoint for every session")
+    parser.add_argument("--resume-from", type=Path,
+                        help="a receipt of this arm: continue each of its sessions once after a restart")
     parser.add_argument("--receipt", required=True, type=Path)
     args = parser.parse_args()
+    if args.resume_from is None and args.long_fixture is None:
+        parser.error("--long-fixture is required unless --resume-from is given")
 
     api_key = args.api_key_file.read_text(encoding="utf-8").strip()
+    if args.resume_from is not None:
+        return resume(args, api_key)
     started_ms = int(time.time() * 1000)
     errors: list[dict[str, Any]] = []
     calls: list[tuple[str, dict[str, Any], float]] = []
@@ -227,7 +315,7 @@ def main() -> int:
                        session["head"], 24)
             if doc:
                 session["head"] = doc["id"]
-                session.setdefault("exact", []).append(session["code"] in output_text(doc))
+                session.setdefault("exact", []).append(code_check(doc, session["code"]))
             call(f"r{round_index + 1}_fork_{session['desk']}", session["lane"].respond,
                  f"Fork: restate the desk code for desk {session['desk']} only.", session["head"], 24)
 
@@ -340,6 +428,9 @@ def main() -> int:
             "errors": errors,
         },
         "steps": steps,
+        # What --resume-from continues after a restart: each session's newest stored response.
+        "sessions": {label: {"session_sha256": lane.session, "newest_response_id": lane.newest}
+                     for label, lane in clients.items() if lane.newest},
     }
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
