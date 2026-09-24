@@ -1,0 +1,5272 @@
+{
+  "artifact_type": "omp_ninfer_upstream_watch_report",
+  "schema_version": 1,
+  "generated_utc": "2026-09-24T04:57:33Z",
+  "manifest": "./upstream-watch.json",
+  "upstreams": [
+    {
+      "id": "ninfer-5090",
+      "upstream": "Neroued/ninfer",
+      "verdict": "upgrade-available",
+      "upstream_head": "594930e7b609efa4bcea3ae4f24cd9d66b5f224f",
+      "upstream_head_date": "2026-09-23T13:56:54Z",
+      "fork_point": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "ahead_by": 202,
+      "aggregate_overlap": "unknown-truncated",
+      "commits_listed": 202,
+      "commits_truncated": false,
+      "files_listed": 300,
+      "files_truncated": true,
+      "commits": [
+        {
+          "sha": "8d343527d1ff",
+          "date": "2026-08-28",
+          "subject": "perf(ops): widen moe prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92bb06eb7c33",
+          "date": "2026-08-28",
+          "subject": "feat(ops): write the gdn prefill convolution straight into q/k/v",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "70434721b1ae",
+          "date": "2026-08-28",
+          "subject": "fix(engine): close tool output and sampling contracts",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "09212c89a209",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): reject invalid media enum values",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eda402422126",
+          "date": "2026-08-28",
+          "subject": "feat(serve): align protocol adapters with engine capabilities",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "65f620a7f34e",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete anthropic messages semantics",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "821915529931",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete responses api adapter",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5c957c608944",
+          "date": "2026-08-28",
+          "subject": "refactor(serve): clarify protocol adapter boundaries",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6d0a6f1b4854",
+          "date": "2026-08-28",
+          "subject": "fix(serve): validate thinking signatures and expose request ids",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4cece118b93d",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): repair malformed generated utf-8",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c02e53a6893",
+          "date": "2026-08-28",
+          "subject": "fix(serve): reject constrained decoding extensions",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "412b11f3e58c",
+          "date": "2026-08-28",
+          "subject": "feat(serve): close OpenAI compatibility gaps",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3a61ef3f8ad5",
+          "date": "2026-08-28",
+          "subject": "fix(ops): separate sparse moe gather index lifetimes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bf9dbb016c15",
+          "date": "2026-08-29",
+          "subject": "fix(serve): coalesce responses assistant history",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fd48e2fae270",
+          "date": "2026-08-29",
+          "subject": "test(cache): fix host restore output oracle",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f8fc0f5098d7",
+          "date": "2026-08-29",
+          "subject": "fix(serve): accept neutral tool message names",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1fc1cb765425",
+          "date": "2026-08-29",
+          "subject": "perf(linear): add fp8 w8a16 vocabulary gemm",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ce09aee5ab8a",
+          "date": "2026-08-29",
+          "subject": "fix(serve): cancel abandoned streaming requests",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "11e76d8d3e9d",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add fixed evaluation corpus",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0b5b7c9aab4a",
+          "date": "2026-08-29",
+          "subject": "feat(ops): add target logprob reduction",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f6b3ba93d491",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add causal scoring evaluator",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "93cdc264d6f1",
+          "date": "2026-08-29",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "00369f631073",
+          "date": "2026-08-29",
+          "subject": "perf(nvfp4): register the fused TMA SwiGLU for every width its block accepts",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c2a81e6b4ee8",
+          "date": "2026-08-29",
+          "subject": "chore: ignore local workspace artifacts",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "89e297e1d6c5",
+          "date": "2026-08-29",
+          "subject": "feat(profiling): instrument engine execution with nvtx",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5327d676bd61",
+          "date": "2026-08-29",
+          "subject": "test(nvfp4): cover a width the fused SwiGLU route newly reaches",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "099d9032fdbc",
+          "date": "2026-08-29",
+          "subject": "feat(runtime): add value-aware shared prefix scheduling",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4ce08e341f24",
+          "date": "2026-08-29",
+          "subject": "bench(ttft): cover shared prefix value scheduling",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6b94b8c5721f",
+          "date": "2026-08-29",
+          "subject": "fix(runtime): preserve reusable checkpoints under pressure",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "953a7b2fcb1d",
+          "date": "2026-08-29",
+          "subject": "docs(architecture): record artifact decoupling decisions",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "af0bd2d08883",
+          "date": "2026-08-30",
+          "subject": "chore(tools): remove python inference reference stack",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6143271fd2d6",
+          "date": "2026-08-30",
+          "subject": "chore(artifact): remove v1 migration path",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "68324a9799e2",
+          "date": "2026-08-30",
+          "subject": "chore(bench): remove obsolete tuning benchmarks",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d9dbe1ce4d1a",
+          "date": "2026-08-30",
+          "subject": "chore(repo): clean obsolete peripheral tooling",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ec8b6a259ce9",
+          "date": "2026-08-31",
+          "subject": "bench(eval): add qwen3.8 gpqa budget campaign",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5e4bf313cb2f",
+          "date": "2026-08-31",
+          "subject": "fix(runtime): bound shared capture target expansion",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "36f23d79265f",
+          "date": "2026-08-31",
+          "subject": "docs(performance): publish qwen3.8 groupwise benchmarks",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bd99ce4efd68",
+          "date": "2026-08-31",
+          "subject": "bench(ttft): cover long-session host rotation",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3d9fda2229eb",
+          "date": "2026-08-31",
+          "subject": "fix(runtime): preserve reuse under bounded pressure search",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "da49c0d60f47",
+          "date": "2026-09-01",
+          "subject": "fix(runtime): exclude materialization sources from pressure",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "138d76aea3c2",
+          "date": "2026-09-01",
+          "subject": "refactor(runtime): clarify resource scheduling ownership",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "57b033af061c",
+          "date": "2026-09-01",
+          "subject": "bench(ttft): cover two-cohort stream pressure",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4a1a21884687",
+          "date": "2026-09-01",
+          "subject": "build(logging): add spdlog foundation",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "28b5f15bacca",
+          "date": "2026-09-01",
+          "subject": "docs(agents): remove obsolete qus reference",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5438b743daac",
+          "date": "2026-09-01",
+          "subject": "refactor(logging): unify product operational logs",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4ac73c471bcd",
+          "date": "2026-09-01",
+          "subject": "feat(kv-cache): add nvfp4 and k8v4 modes",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "21a0e85f8819",
+          "date": "2026-09-01",
+          "subject": "feat(kv-cache): use fp16 V storage and PV compute",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a2761ec1e676",
+          "date": "2026-09-02",
+          "subject": "refactor(kv-cache): centralize format contracts",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0a204aee3e8f",
+          "date": "2026-09-02",
+          "subject": "perf(ops): stage the routed MoE gate/up tile from x instead of a gathered copy",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9954867aa7ae",
+          "date": "2026-09-02",
+          "subject": "perf(rmsnorm): read the weight before the reduction, and compile that out where it costs occupancy",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3b50962bab5b",
+          "date": "2026-09-02",
+          "subject": "fix(frontend): normalize qwen tool argument parsing",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c5d570c3a39",
+          "date": "2026-09-02",
+          "subject": "fix(frontend): preserve embedded qwen tool markup",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "abf820a4e9f9",
+          "date": "2026-09-02",
+          "subject": "fix(media): correct benchmark address range",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e51b585cb193",
+          "date": "2026-09-02",
+          "subject": "fix(gdn): respect cooperative launch capacity",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f0eb3ac71ccd",
+          "date": "2026-09-02",
+          "subject": "fix(serve): upgrade cpp-httplib to 0.54.1",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5f6d44e4e11d",
+          "date": "2026-09-02",
+          "subject": "fix(serve): report engine readiness from health",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5973313d7f1e",
+          "date": "2026-09-02",
+          "subject": "test(frontend): make fixtures self-contained",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "550d0ac3a50c",
+          "date": "2026-09-02",
+          "subject": "feat(serve): add llama.cpp timing and prompt progress",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6e2786c5e5a5",
+          "date": "2026-09-02",
+          "subject": "fix(logging): restore readable operational logs",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "719d56ef93f7",
+          "date": "2026-09-03",
+          "subject": "fix(frontend): preserve structured tool call intent",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e3aeaf8c0b6f",
+          "date": "2026-09-03",
+          "subject": "fix(serve): preserve anthropic thinking across restarts",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a140e7ae82a1",
+          "date": "2026-09-03",
+          "subject": "fix(engine): preserve exact agent prefix reuse",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b87867513f65",
+          "date": "2026-09-04",
+          "subject": "fix(runtime): correct aliased state ownership",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "863aa8a5f1e8",
+          "date": "2026-09-04",
+          "subject": "fix(dflash): allow vision prompts",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ad0f3d384b5c",
+          "date": "2026-09-04",
+          "subject": "chore: add project funding information",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4df5e0b42bf4",
+          "date": "2026-09-06",
+          "subject": "feat(converter): add qwen3.8 dflash2 weights",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "917d4c89ecea",
+          "date": "2026-09-06",
+          "subject": "docs(maintainer): record architecture and dflash2 plans",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "377f71a11bed",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 feature projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "426d129fe6ad",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 selector projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "efd012fd4270",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 tail rmsnorm",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5499799dc512",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add fused linear top-k",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0af0b79a56ca",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dynamic grouped conv prepare",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "221baf55836b",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 attention projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "95037fe4d2b7",
+          "date": "2026-09-06",
+          "subject": "perf(ops): add dflash2 w8 linear swiglu",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3ba9d4a6cb01",
+          "date": "2026-09-06",
+          "subject": "feat(ops): support 2048 cyclic kv append",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d51a07f3a69e",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add fused dflash2 rmsnorm rope",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "67a90a5c51f3",
+          "date": "2026-09-06",
+          "subject": "perf(ops): tune k5120 linear pair routes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "45f9b4d05480",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 context kv materialization",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9f61a0ca37d8",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add 2048 sliding window attention",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d01e6a09cf7a",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 speculative acceptance",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1efaa84679c9",
+          "date": "2026-09-06",
+          "subject": "docs(maintainer): consolidate dflash2 op progress",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "050b21382783",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 dynamic grouped conv finish",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3447146d2ff2",
+          "date": "2026-09-06",
+          "subject": "feat(ops): add dflash2 candidate selector",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6d1da9cef7d3",
+          "date": "2026-09-06",
+          "subject": "perf(ops): remove q5 linear add aggregate cliff",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4b0eb36ccd29",
+          "date": "2026-09-06",
+          "subject": "perf(ops): route h24 verify attention through small t",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1c8f8acc7f31",
+          "date": "2026-09-06",
+          "subject": "perf(ops): fuse nvfp4 swiglu through t96",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "aa429f28b4de",
+          "date": "2026-09-06",
+          "subject": "perf(ops): route gdn input t16 through grouped mma",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "22d8a1d3600b",
+          "date": "2026-09-06",
+          "subject": "perf(ops): optimize w8 vocabulary t64 route",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3b77ea12d424",
+          "date": "2026-09-06",
+          "subject": "feat(qwen3.8): bind optional dflash2 weights",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3be58d8ac1c7",
+          "date": "2026-09-06",
+          "subject": "docs(dflash2): correct draft width contract and replace op checklist",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "96a83127b06a",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width dynamic conv prepare",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "99627b307dbe",
+          "date": "2026-09-06",
+          "subject": "perf(ops): extend and tune variable-width dynamic conv add",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b1dbbcfe5b25",
+          "date": "2026-09-06",
+          "subject": "perf(ops): widen rmsnorm rope and parallelize head groups",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "844333eae531",
+          "date": "2026-09-06",
+          "subject": "fix(ops): support variable-width rmsnorm tail packing",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ea360239d893",
+          "date": "2026-09-06",
+          "subject": "docs(agents): streamline guidance and consolidate project contracts",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e4e81015cbf9",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-column projection top-k",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "17e48a443c09",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-length candidate selector paths",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "07b9f20aa290",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width context kv materialization",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5bde5ed53921",
+          "date": "2026-09-06",
+          "subject": "docs(architecture): define model weight and execution contracts",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5323fad5b24f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize variable-length sparse draft acceptance",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "74f83878cdff",
+          "date": "2026-09-06",
+          "subject": "perf(ops): tune variable-column dflash2 feature projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fd72759a8dbc",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize variable-column selector projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1539a6e0ba1a",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune variable-column draft qkv projection",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b3316bad471f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and retune variable-column draft swiglu",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "47f9d1216a48",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune variable-width sliding attention",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eef7467d85f1",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and parallelize cyclic prefix append",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0ded3d6e06bf",
+          "date": "2026-09-06",
+          "subject": "docs(ops): close dflash2 linear pair dependency review",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "113b9a4939fd",
+          "date": "2026-09-06",
+          "subject": "perf(ops): parallelize ragged feature prefix preparation",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "55ca1d777c90",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and vectorize dflash2 embedding gathers",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a84a066fec83",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tune dflash2 rmsnorm row geometries",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8e20a5a25d06",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify and tile batched feature capture",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f6a658ef2e8f",
+          "date": "2026-09-06",
+          "subject": "perf(ops): retune variable-width target attention projections",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a7818988a56d",
+          "date": "2026-09-06",
+          "subject": "perf(ops): qualify variable-width causal cache attention",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "02be37cbc739",
+          "date": "2026-09-06",
+          "subject": "perf(ops): fuse and qualify variable-width gdn norm control",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8b3fefbc0647",
+          "date": "2026-09-06",
+          "subject": "docs(ops): define contract-specific dflash2 acceptance and cleanup",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "99b6084e0d59",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket dynamic conv prepare widths",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "012d5be28b9a",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): replace dynamic conv exact-token projections with tiles",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "00f020554a99",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket feature projection live columns",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "647c9c9095e9",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): use one target head rmsnorm row layout",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "edb2aabf163d",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket draft swiglu columns and mask pair outputs",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a1b9396c902c",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bound draft qkv specialization to the latency regime",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f5ae87909b15",
+          "date": "2026-09-06",
+          "subject": "docs(ops): close context materialization route review",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a20789e7ebd2",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket top-k producer columns across head formats",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d5aaa202f5d7",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): bucket target fp8 attention projection columns",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a5dbfb6c47e",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): share sliding attention kernels across window sizes",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c71795e1fd5c",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): consolidate causal attention prompt thresholds",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d139d3388c35",
+          "date": "2026-09-06",
+          "subject": "fix(ops): preserve gdn record snapshot bits and batch fp8 projection",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a07a901783d4",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify gdn replay records across draft widths",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c29c9583cd3b",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target gated rmsnorm through 128 columns",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0f0899c9c2e8",
+          "date": "2026-09-06",
+          "subject": "perf(ops): extend fused target swiglu and bound q4 column templates",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "73e5732d9aab",
+          "date": "2026-09-06",
+          "subject": "refactor(ops): simplify fp8 residual schedules and qualify target widths",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "37242d3a70f2",
+          "date": "2026-09-06",
+          "subject": "perf(ops): bound vocabulary templates and use c96 for target head",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5a6a54d9d9ba",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target argmax masking and replay",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "898603fd43f5",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target partial rope across speculative lanes",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5c6dad35ed0d",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify target sigmoid gating through 128 columns",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d1d28c67334d",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify per-lane position offsets and graph updates",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e81b0924349b",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify dflash2 masked blocks with ragged lanes",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "fb8cea32aa03",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify verify input preparation for every draft prefix",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "81b2d050f803",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify committed hidden selection for each prefix",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f2faab70a247",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify continuation gather and scatter composition",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f9a3b1e799b4",
+          "date": "2026-09-06",
+          "subject": "test(ops): qualify replay fold against full-block snapshots",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "385b30ce1757",
+          "date": "2026-09-06",
+          "subject": "feat(engine): integrate dflash2 with configurable draft counts",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d4253222aa69",
+          "date": "2026-09-06",
+          "subject": "feat(bench): add dflash2 corpus measurement and artifact release metadata",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "03177b910e70",
+          "date": "2026-09-06",
+          "subject": "fix(runtime): preserve kv coverage during speculative terminal settlement",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ce7dee504925",
+          "date": "2026-09-06",
+          "subject": "docs(perf): record dflash2 single-request serving results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "47bb19a5f715",
+          "date": "2026-09-06",
+          "subject": "fix(bench): allow unaligned artifact sizes in ttft staging",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "699adfcebab4",
+          "date": "2026-09-06",
+          "subject": "docs: remove dflash2 op checklist",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "487f89773f07",
+          "date": "2026-09-06",
+          "subject": "perf(sparse_moe): one CTA per token in small-T S2, and a warp merge in place of eight dependent rounds",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a16b64428566",
+          "date": "2026-09-07",
+          "subject": "docs: organize performance reports and update 35b results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "641ef3e7af08",
+          "date": "2026-09-08",
+          "subject": "perf(text): skip NFC normalisation when the text is already pure ASCII",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b158afe294a2",
+          "date": "2026-09-08",
+          "subject": "perf(frontend): store the BPE merge rules in a flat open-addressed table",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ee9d519230d5",
+          "date": "2026-09-08",
+          "subject": "perf(nvfp4): rasterise the W4A4 TMA CTAs token-fastest, and fetch each activation-scale box once",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "437e9f980a76",
+          "date": "2026-09-08",
+          "subject": "perf(moe): choose the routed gate/up pipeline depth by route, size the grid by work",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ce95491874e1",
+          "date": "2026-09-08",
+          "subject": "perf(ops): prefetch the shared-expert down weights from the D1 tail",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7f14d963e17d",
+          "date": "2026-09-08",
+          "subject": "perf(ops): warm L2 for the next projection from the MoE down tail, issuing the hint before the block barrier",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b88c0f6fc7e9",
+          "date": "2026-09-08",
+          "subject": "fix(core): complete host uploads before returning",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9f0575bb2fa9",
+          "date": "2026-09-10",
+          "subject": "fix(build): include bf16 definitions in q4 topk kernel",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d49296868dcc",
+          "date": "2026-09-10",
+          "subject": "perf(runtime): improve materialization search and adapt planning budgets",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "99f08f00c816",
+          "date": "2026-09-13",
+          "subject": "docs(architecture): define model and weight decoupling contracts",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "168fdd81a237",
+          "date": "2026-09-13",
+          "subject": "refactor(converter): switch artifact production to v3",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4cde7ad04e1b",
+          "date": "2026-09-14",
+          "subject": "refactor(loader): switch C++ weight loading to v3",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "04350ba94c20",
+          "date": "2026-09-14",
+          "subject": "refactor(engine): run v3 models from bound instance parameters",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9b884034469e",
+          "date": "2026-09-14",
+          "subject": "docs: consolidate references for the v3 architecture",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "469f014c68ba",
+          "date": "2026-09-14",
+          "subject": "fix(artifact): guide v2 users to the offline upgrade tool",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1cf237f85c86",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): unify q8 linear shape dispatch and capacity kernels",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ad36f438d2e1",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): isolate q5 linear shape selection",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7d50a0eb3a34",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): consolidate q6 linear shape routes",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "40d7744bc3de",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): use shape-owned q4 capacity dispatch",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5f38ce81535e",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): select bf16 capacity schedules per shape",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "278e13e836aa",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): centralize fp8 routes in shape implementations",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c491cd15e430",
+          "date": "2026-09-14",
+          "subject": "refactor(ops): organize nvfp4 execution by matrix shape",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c82038671da1",
+          "date": "2026-09-15",
+          "subject": "docs: define linear tuning priorities and workload anchors",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "61535c6cf60e",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune q4 6144x5120 linear and document performance",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fb0035bc6c71",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune q4 1024x5120 and add 5120x6144 linear",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "abbeea0a3641",
+          "date": "2026-09-15",
+          "subject": "perf(ops): tune nvfp4 34816x5120 linear routes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0972949aebf5",
+          "date": "2026-09-15",
+          "subject": "feat(ops): add q4 and q8 dense linear-add shapes",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cde57e48fa78",
+          "date": "2026-09-15",
+          "subject": "docs: add concise v3 artifact upgrade instructions",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "fa5f41a8c5db",
+          "date": "2026-09-15",
+          "subject": "docs: add pull request template and verification guidance",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e360c4c06773",
+          "date": "2026-09-15",
+          "subject": "build: organize explicit cmake sources by component",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a2b7ed11cae3",
+          "date": "2026-09-15",
+          "subject": "fix(logging): simplify user-facing model summaries",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b9219f3f0b4b",
+          "date": "2026-09-15",
+          "subject": "build: import llama.cpp jinja source base",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "98dada0e03cb",
+          "date": "2026-09-15",
+          "subject": "feat(frontend): execute custom jinja chat templates",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6cc95cc5023b",
+          "date": "2026-09-15",
+          "subject": "docs(models): update artifacts with maintained chat templates",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8eaed5381e84",
+          "date": "2026-09-16",
+          "subject": "fix(frontend): preserve literal content in chat templates",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bb844c43cc59",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 4096x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1d8587bcfe85",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): read W4A4 activation scales one tile per TMA request",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "beedffa05280",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 7168x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d3c125ed433c",
+          "date": "2026-09-16",
+          "subject": "perf(ops): tune q4 34816x5120 linear dispatch",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "05507ab06608",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): approximate silu in the fused SwiGLU TMA epilogue",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5f5fccab2afd",
+          "date": "2026-09-16",
+          "subject": "perf(nvfp4): let the W4A4 TMA route take a partial last M tile",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "028eb61e4976",
+          "date": "2026-09-16",
+          "subject": "perf(ops): choose the predicated Q8 GEMM cache policy instead of inheriting it",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dc58675fed7f",
+          "date": "2026-09-16",
+          "subject": "perf(sparse_moe): widen the Q5 routed-down Rows2 window to its measured crossover",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f9c4a04bd123",
+          "date": "2026-09-16",
+          "subject": "bench: add state cache working-set scenarios",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5b4303c0ea0e",
+          "date": "2026-09-16",
+          "subject": "perf(ops): retune the Q4 34816x5120 LinearSwiGLu dispatch around the #261 linear routes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cb30e0707439",
+          "date": "2026-09-17",
+          "subject": "bench(ops): time the public q5 a16 linear_add op through graphs and CSV",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a9a0d10a9337",
+          "date": "2026-09-17",
+          "subject": "perf(ops): retune the q5 a16 linear_add routes at one token and above 512 columns",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b39de4d5e8b3",
+          "date": "2026-09-17",
+          "subject": "perf(ops): route the q5 a16 narrow-column linear shapes to narrow tiles",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f76e19c0fbd0",
+          "date": "2026-09-17",
+          "subject": "test(ops): close the q5 a16 route coverage gaps found in review",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9e163eee4b8a",
+          "date": "2026-09-18",
+          "subject": "perf(ops): route the q4/q5 a16 input projections by column band",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c4ae8a9c60f9",
+          "date": "2026-09-23",
+          "subject": "fix(ops): restore accurate silu in nvfp4 swiglu",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4c0fe48abb15",
+          "date": "2026-09-23",
+          "subject": "perf(core): block on CUDA synchronization instead of spin-waiting",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "594930e7b609",
+          "date": "2026-09-23",
+          "subject": "perf(ops): one split4 Q5 parent for the q4/q5 small-column input projections",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        }
+      ]
+    },
+    {
+      "id": "ninfer-4090",
+      "upstream": "UDPSendToFailed/ninfer-4090",
+      "verdict": "upgrade-available",
+      "upstream_head": "5c60b7c9b455231795c09da21a9fbb6aa53f08e5",
+      "upstream_head_date": "2026-09-09T22:24:14Z",
+      "fork_point": "11aae2d6342d1fbdc7ef2b9ee17096858be44271",
+      "ahead_by": 57,
+      "aggregate_overlap": "high-review-overlap",
+      "commits_listed": 57,
+      "commits_truncated": false,
+      "files_listed": 238,
+      "files_truncated": false,
+      "commits": [
+        {
+          "sha": "ef4605a8cd01",
+          "date": "2026-08-25",
+          "subject": "perf(spec): expand linear MTP draft capacity to K=15 and optimize GQA decode kernels",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4b66c8824653",
+          "date": "2026-08-25",
+          "subject": "perf(build): enable fast-math device flags and compiler warning guards in CMake",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0978ac0928a6",
+          "date": "2026-08-25",
+          "subject": "fix(gqa): synchronize cached attention routing and update MTP test boundary",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a25294c36098",
+          "date": "2026-08-25",
+          "subject": "chore(release): prepare v1.1.0 release",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c15e0e9e7f71",
+          "date": "2026-08-26",
+          "subject": "fix(cache): chunk KV snapshot staging to bounded page batches",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92c360fbced1",
+          "date": "2026-08-26",
+          "subject": "fix(core,runtime): make WDDM residency budgeting opt-in on desktop-shared GPUs",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "72e931b2db2b",
+          "date": "2026-08-26",
+          "subject": "fix(core): verify the D3D12 residency arena round-trips before using it",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d083f9d3eed3",
+          "date": "2026-08-27",
+          "subject": "Merge pull request #6 from eyedark/feat/rtx-4090-sm89-native",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5e76d11add02",
+          "date": "2026-08-27",
+          "subject": "fix(cache): correct MTP restore stride and streamline chunked save staging",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "378e0ad8d904",
+          "date": "2026-08-27",
+          "subject": "feat(serve): scale default max tokens to context size and support unconstrained generation",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "80c8fc26b3eb",
+          "date": "2026-08-27",
+          "subject": "feat(build): auto-sync WebUI release tag and bump to b10655",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dabae909db17",
+          "date": "2026-08-27",
+          "subject": "chore(ops): yeet NVFP4 into the trash",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "387affc061d5",
+          "date": "2026-08-29",
+          "subject": "Merge pull request #7 from keylimesoda/fix/d3d12-residency-fence",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dfe932b8a062",
+          "date": "2026-08-29",
+          "subject": "feat(core,cli): promote WDDM evictable budgeting to explicit CLI toggle",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8bba5eb45c75",
+          "date": "2026-08-29",
+          "subject": "fix(frontend): repair malformed generated utf-8 in streaming decoder",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8dbff7e3bdd8",
+          "date": "2026-08-30",
+          "subject": "fix(arena): drain WDDM touch-fill before arena pointers are published",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "33d5e71a8f8c",
+          "date": "2026-09-01",
+          "subject": "Merge pull request #9 from Suffice/fix/wddm-touchfill-sync-followup",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6e9b5511a455",
+          "date": "2026-09-01",
+          "subject": "perf(build): compile whole-program and report ptxas usage everywhere",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "45a5ae57a230",
+          "date": "2026-09-01",
+          "subject": "perf(ops): size CTA waves from the target SM count, not an RTX 5090",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3bd39ddb90c3",
+          "date": "2026-09-01",
+          "subject": "perf(ops): cut decode spills and instruction footprint",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e9f196e8f007",
+          "date": "2026-09-01",
+          "subject": "perf(ops): retune prefill GEMM warp tiles and CTA rasterization",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "696d85476d89",
+          "date": "2026-09-01",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d6e1ff9b7ea3",
+          "date": "2026-09-01",
+          "subject": "perf(runtime): keep the MTP prefill alignment token on device",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9d8f74e22d2d",
+          "date": "2026-09-01",
+          "subject": "perf(ops): widen dense Q4/Q5/Q6 prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2107bb4abe51",
+          "date": "2026-09-01",
+          "subject": "perf(ops): remove the dominated causal conv sequence route",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "022da67ad870",
+          "date": "2026-09-01",
+          "subject": "perf(gdn): plan the gating projection for this card's SM count and occupancy",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e2556b508972",
+          "date": "2026-09-01",
+          "subject": "fix(serve): render mid-conversation system turns in place to preserve prefix reuse",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "64af80ff55cd",
+          "date": "2026-09-01",
+          "subject": "docs(cli): describe --lm-head-draft as what it does",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b7052a888cb5",
+          "date": "2026-09-01",
+          "subject": "perf(gdn): keep the value_z projection on split4 across the whole SIMT band",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4a4d8c9bda94",
+          "date": "2026-09-01",
+          "subject": "perf(ops): stop starving the wide Q5 SIMT column tiles of registers",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "796b379d7df2",
+          "date": "2026-09-01",
+          "subject": "perf(attn): keep the attention gate/value projection on split4 across the SIMT band",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b1114a4f43b4",
+          "date": "2026-09-01",
+          "subject": "docs(ops): correct the Q5 split2 slab-schedule table after the occupancy retune",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a13153824c7",
+          "date": "2026-09-01",
+          "subject": "perf(ops): share the widened activation across two rows in the Q5 split2 decode GEMM",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "67320ddb2ddd",
+          "date": "2026-09-01",
+          "subject": "perf(ops): share the widened activation across two rows in the Q5 split4 decode GEMMs",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c85b44f1a20c",
+          "date": "2026-09-01",
+          "subject": "perf(ops): extend the shared-activation split2 to the 6144 output projection",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8488278c4133",
+          "date": "2026-09-01",
+          "subject": "fix(cache): publish snapshot saves whose write already finished",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "05a8871222a6",
+          "date": "2026-09-01",
+          "subject": "fix(engine): stop a transient admission shortfall from bricking the executor",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dd5206f05d48",
+          "date": "2026-09-01",
+          "subject": "fix(serve): make /health report the executor's actual state",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7368aacdfbe9",
+          "date": "2026-09-01",
+          "subject": "perf(build): parallelize nvcc compiler optimizations across all cpu cores",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "717479febe8d",
+          "date": "2026-09-01",
+          "subject": "docs: streamline AGENTS.md for rtx-4090 sm89 and purge obsolete upstream prose",
+          "class": "docs",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "bdfb828735e5",
+          "date": "2026-09-01",
+          "subject": "perf(ops/q4): double-buffer q4 small-t mma software pipeline",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "718fae7e1da1",
+          "date": "2026-09-01",
+          "subject": "perf(ops/q5): tensorize small-t linear projections and fused residual add",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c8fa0dd8b68",
+          "date": "2026-09-01",
+          "subject": "perf(ops): route small-t attention and gdn input projections to tensor cores",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d011700d6dc7",
+          "date": "2026-09-01",
+          "subject": "perf(ops/w8): bound unroll and stage scales in smem to eliminate register choke",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e4ca72a5218",
+          "date": "2026-09-01",
+          "subject": "perf(ops/gqa): align decode grid to 1 resident wave and cap register budget",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3d11fd64089d",
+          "date": "2026-09-01",
+          "subject": "perf(ops/gdn): bridge mma column layout to causal conv via in-cta staging",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cc113c714724",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 2.5-wave quantization tax in Q5 residual MMA via Split-K = 2",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "18ee68515483",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 3.5-wave quantization tax in attention input via stream fork-join",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d6c0da754231",
+          "date": "2026-09-02",
+          "subject": "perf(ops): eliminate 2.5-wave quantization tax in W8 MTP small-T projections",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "39a6f20ca982",
+          "date": "2026-09-02",
+          "subject": "perf(ops): route T=1 draft head projections to double-buffered Ada MMA",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "25c3099f15b7",
+          "date": "2026-09-08",
+          "subject": "feat(serve): enforce structured JSON generation",
+          "class": "feature",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f34c33588c63",
+          "date": "2026-09-08",
+          "subject": "perf(serve): preserve MTP for structured output",
+          "class": "perf",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f589d6846530",
+          "date": "2026-09-08",
+          "subject": "fix(serve): scope grammar mask to first MTP position",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e8b920982a20",
+          "date": "2026-09-09",
+          "subject": "Merge pull request #12 from diodiogod/feat/structured-json",
+          "class": "other",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2323def8d984",
+          "date": "2026-09-09",
+          "subject": "fix(core,tests): make WDDM residency fallback crash-safe and guard physical VRAM",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "912cbb56fb60",
+          "date": "2026-09-09",
+          "subject": "fix(load): stub validate-only dflash2 weights for qwen3.8 compatibility",
+          "class": "fix",
+          "overlap": "high-review-overlap",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5c60b7c9b455",
+          "date": "2026-09-09",
+          "subject": "chore(release): prepare v1.2.0 release",
+          "class": "chore",
+          "overlap": "high-review-overlap",
+          "recommendation": "ignore"
+        }
+      ]
+    },
+    {
+      "id": "ninfer-3090",
+      "upstream": "Don-Chad/ninfer-3090",
+      "verdict": "upgrade-available",
+      "upstream_head": "75d94eab17619bf3723a8d66e1881a6673bc25ee",
+      "upstream_head_date": "2026-08-31T20:30:35Z",
+      "fork_point": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
+      "ahead_by": 141,
+      "aggregate_overlap": "unknown-truncated",
+      "commits_listed": 141,
+      "commits_truncated": false,
+      "files_listed": 300,
+      "files_truncated": true,
+      "commits": [
+        {
+          "sha": "6065a6b3aefa",
+          "date": "2026-08-15",
+          "subject": "fix(serving): preserve ordered instruction turns",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "604bdc5fec9c",
+          "date": "2026-08-15",
+          "subject": "perf(runtime): optimize thinking-preserving prefix reuse",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c94153b79d8",
+          "date": "2026-08-16",
+          "subject": "fix(serving): unify multimodal context admission",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ca457dc58a97",
+          "date": "2026-08-16",
+          "subject": "feat(artifact): register row-scaled fp8 weights",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1874224fa540",
+          "date": "2026-08-16",
+          "subject": "docs(agents): use unrestricted build parallelism",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9a6b63fb01d9",
+          "date": "2026-08-16",
+          "subject": "docs(artifact): define qwen3.8 nvfp4 contract",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "651d77965798",
+          "date": "2026-08-16",
+          "subject": "feat(artifact): add qwen3.8 nvfp4 converter",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5b5cbea4047e",
+          "date": "2026-08-16",
+          "subject": "docs(ops): add qwen3.8 nvfp4 op checklist",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5a7b2fd83079",
+          "date": "2026-08-16",
+          "subject": "docs(ops): define route tuning methodology",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c8ca80b51f31",
+          "date": "2026-08-16",
+          "subject": "feat(ops): add fp8 t1 projection routes",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1f08f7c17314",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 linear routes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c5a8b24ecc01",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 attention input projection",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "47dbfa10e71f",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 gdn input projection",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cdd0fa8c48bb",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 mlp projection",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9f7277266976",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 projection routes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "935c44a5b47e",
+          "date": "2026-08-16",
+          "subject": "perf(ops): qualify fp8 gdn snapshot and record",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9cd7bcd8b1e6",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 output head",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "34052d8a8f0c",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fp8 token embedding",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c31b9dc297db",
+          "date": "2026-08-16",
+          "subject": "feat(ops): support fused qwen3.8 gdn control parent",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5d2c1f5590b8",
+          "date": "2026-08-17",
+          "subject": "feat(qwen3.8): integrate nvfp4 artifact runtime",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1bb7d0c127fc",
+          "date": "2026-08-17",
+          "subject": "test(cli): add Jacobian counterexample reasoning prompt",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "32c9881b6783",
+          "date": "2026-08-17",
+          "subject": "docs(qwen3.8): publish nvfp4 artifact card",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7dea757771fe",
+          "date": "2026-08-17",
+          "subject": "docs(performance): publish qwen3.8 nvfp4 serving results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "cf5010d0271e",
+          "date": "2026-08-17",
+          "subject": "fix(docs): integrate qwen3.8 concurrency summary",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "87422a82d0e7",
+          "date": "2026-08-17",
+          "subject": "docs(performance): report qwen3.8 decode saturation",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f08597d6eaaf",
+          "date": "2026-08-17",
+          "subject": "fix(qwen3.8): isolate gdn snapshot workspace",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "312b9b1e1868",
+          "date": "2026-08-17",
+          "subject": "docs(performance): publish qwen3.8 mtp0 results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5f45a26f81b6",
+          "date": "2026-08-17",
+          "subject": "fix(vision): admit media by resource budget",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3b6075456e7b",
+          "date": "2026-08-17",
+          "subject": "perf(vision): streamline multimodal preparation",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b2b96bae4dd8",
+          "date": "2026-08-17",
+          "subject": "fix(media): align swscale destination buffers",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a05746aad764",
+          "date": "2026-08-18",
+          "subject": "docs(eval): publish qwen3.8 nvfp4 gpqa result",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b3ac5be9d1c4",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add ifbench, erqa, and real_world_qa datasets",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "69a36d5a12b3",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add qwen3.8 nvfp4 reasoning suite",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d1c4a0ddaa5d",
+          "date": "2026-08-19",
+          "subject": "docs(eval): publish qwen3.8 nvfp4 reasoning results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a99407c63fc5",
+          "date": "2026-08-19",
+          "subject": "docs(eval): add official qwen3.8 bf16 comparison to model card",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "17b494ccfb0a",
+          "date": "2026-08-19",
+          "subject": "feat(eval): add qwen3.8 groupwise-int reasoning suite",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "feaf4dd0983f",
+          "date": "2026-08-19",
+          "subject": "docs(eval): publish qwen3.8 groupwise-int results",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d6af046a5f27",
+          "date": "2026-08-20",
+          "subject": "refactor(engine): close execution ownership boundaries",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "383e1c159b85",
+          "date": "2026-08-20",
+          "subject": "docs(engine): consolidate architecture reference",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e9c7046faae1",
+          "date": "2026-08-20",
+          "subject": "refactor(gdn): unify recurrent kernel semantics",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "72a940bfa44b",
+          "date": "2026-08-21",
+          "subject": "docs(architecture): consolidate context cache design",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a58a946cba4b",
+          "date": "2026-08-21",
+          "subject": "refactor(ops): consolidate softmax attention ownership",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "17a7275fcc6e",
+          "date": "2026-08-21",
+          "subject": "feat(attention): add int8 kv hadamard rotation",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6183c9be0662",
+          "date": "2026-08-21",
+          "subject": "feat(attention): add fp8 kv cache support",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c648a13211d5",
+          "date": "2026-08-21",
+          "subject": "feat(runtime): add state image physical containers",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9d4cc6f9ffdf",
+          "date": "2026-08-21",
+          "subject": "feat(runtime): add paged kv physical containers",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "26fe86ddf486",
+          "date": "2026-08-22",
+          "subject": "feat(runtime): close device continuation lifecycle",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f7bcd2ba2478",
+          "date": "2026-08-23",
+          "subject": "feat(engine): implement prefix caching resource scheduling",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3a011c70c952",
+          "date": "2026-08-23",
+          "subject": "feat(engine): provision default host context cache",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "18e813a02470",
+          "date": "2026-08-23",
+          "subject": "fix(engine): preserve valid context replicas under pressure",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "670319602001",
+          "date": "2026-08-23",
+          "subject": "fix(engine): compare complete pressure closures",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ab6ab5a8cbf7",
+          "date": "2026-08-23",
+          "subject": "fix(engine): restore agent prefix cache reuse",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "dda31c75491b",
+          "date": "2026-08-24",
+          "subject": "feat(runtime): add measured context cost scheduling",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a87d1fc635f2",
+          "date": "2026-08-24",
+          "subject": "feat(engine): add qwen thinking budget control",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fdf05a33c4fb",
+          "date": "2026-08-24",
+          "subject": "docs(engine): plan host work governance",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "94d0ef499607",
+          "date": "2026-08-24",
+          "subject": "feat(engine): expose host work timing",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2fb1a504b1ad",
+          "date": "2026-08-24",
+          "subject": "fix(frontend): reject oversized prompts during tokenization",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8f0aea6f89b4",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): commit only changed kv frontier pages",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8e85e94f5746",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): advance continuation rebuild work",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e3cba1f4f10d",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): invalidate replica policy on state changes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a82382d9e369",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): append forced tokens without history copy",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c047b1fb5c64",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): reuse decoded token records",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7b780a95a9fd",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): skip aggregate output notifications",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1965308a9118",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): prepare speculative gdn fold",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "268409bffd65",
+          "date": "2026-08-24",
+          "subject": "perf(kv-cache): batch page allocation and mapping",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "669bc14ad9d4",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): linearize protected resource checks",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8554dfa02289",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): partition host kv extents by run",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0e6d4f4567ef",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): index prefix checkpoints by content",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92b1a7211bde",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): linearize bpe merge scheduling",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "189a0a12ebaf",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): resolve prompt boundaries in one encode",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8ba4bfd08cfe",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): expand media placeholders in one pass",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ddc8d9ed205b",
+          "date": "2026-08-24",
+          "subject": "perf(vision): advance prefill use cursors",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eb0e17ab476f",
+          "date": "2026-08-24",
+          "subject": "perf(vision): materialize only unreused media control",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e45f27dc12a",
+          "date": "2026-08-24",
+          "subject": "perf(vision): use uniform segment attention",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "609d881d1bf6",
+          "date": "2026-08-24",
+          "subject": "fix(engine): retain host timing exposure snapshots",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "114a075fd817",
+          "date": "2026-08-24",
+          "subject": "build(bench): remove persistent host timing benchmark",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "500dbb427f0f",
+          "date": "2026-08-24",
+          "subject": "fix(build): restore complete target compilation",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "02bd904e164c",
+          "date": "2026-08-24",
+          "subject": "perf(runtime): keep mtp prefill token on device",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ae9d1a4d81c7",
+          "date": "2026-08-24",
+          "subject": "perf(serve): account response contexts incrementally",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1fc69e221d1b",
+          "date": "2026-08-24",
+          "subject": "perf(serve): stream tool-call whitespace linearly",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ceba8d4094f8",
+          "date": "2026-08-24",
+          "subject": "perf(serve): avoid duplicate stream readiness probes",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e4e6f897ca5e",
+          "date": "2026-08-24",
+          "subject": "perf(serve): move response history ownership",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3218d67f8274",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): inspect media geometry for token counts",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e196f09f0920",
+          "date": "2026-08-24",
+          "subject": "perf(frontend): resize decoded media in place",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "04dabcb600f3",
+          "date": "2026-08-24",
+          "subject": "fix(engine): preserve terminal result timing semantics",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9fb04ac57892",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): retain prompt-frontier rebuild splits",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bf791dbbc4cf",
+          "date": "2026-08-24",
+          "subject": "fix(frontend): honor control after media tokenization",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c80b2bf2a10f",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): make failed timing observation optional",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fc5c48349959",
+          "date": "2026-08-24",
+          "subject": "perf(vision): reclaim transient workspace memory",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e0829866ed51",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): restore anonymous prefix reuse",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4eef14a7560d",
+          "date": "2026-08-24",
+          "subject": "fix(runtime): transfer ownership after alias eviction",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "020ca8853ab8",
+          "date": "2026-08-25",
+          "subject": "refactor(runtime): make program the resource authority",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "baaeeb09e991",
+          "date": "2026-08-25",
+          "subject": "bench(ttft): add managed serve latency campaign",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "123bf1a11cd1",
+          "date": "2026-08-25",
+          "subject": "fix(serve): keep warmup out of context cache",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "59febed27ca2",
+          "date": "2026-08-26",
+          "subject": "fix(cache): retain prefixes across rewritten suffixes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3e903b704ce4",
+          "date": "2026-08-26",
+          "subject": "feat(runtime): plan materialization under pressure",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "55222c546a1b",
+          "date": "2026-08-27",
+          "subject": "docs: refresh serving and scheduling architecture",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "081c6039f91d",
+          "date": "2026-08-27",
+          "subject": "docs(maintainer): remove obsolete host-work plan",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "1d13c21336f6",
+          "date": "2026-08-27",
+          "subject": "fix(engine): bind cuda device across engine lifecycle",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fbd04729c835",
+          "date": "2026-08-27",
+          "subject": "fix(sparse-moe): synchronize prefill scan reuse",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ab82f8860356",
+          "date": "2026-08-27",
+          "subject": "fix(serve): gate readiness on successful warmup",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "79c292bc07e5",
+          "date": "2026-08-27",
+          "subject": "fix(serve): accept text-part tool results",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0e4cdf84f04d",
+          "date": "2026-08-27",
+          "subject": "fix(serve): type tool arguments by schema",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "780d57679177",
+          "date": "2026-08-27",
+          "subject": "fix(frontend): preserve literal control token provenance",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9dbc074005a1",
+          "date": "2026-08-27",
+          "subject": "fix(runtime): publish valid long anchor slots",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2190c4a1ab14",
+          "date": "2026-08-27",
+          "subject": "bench(ttft): cover bidirectional host kv swaps",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a77910ce2268",
+          "date": "2026-08-27",
+          "subject": "docs: define issue-first contribution workflow",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6e8b2e2ad5d5",
+          "date": "2026-08-27",
+          "subject": "docs: target contributions at master",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8d343527d1ff",
+          "date": "2026-08-28",
+          "subject": "perf(ops): widen moe prefill weight staging to eight codes per thread",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "92bb06eb7c33",
+          "date": "2026-08-28",
+          "subject": "feat(ops): write the gdn prefill convolution straight into q/k/v",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "70434721b1ae",
+          "date": "2026-08-28",
+          "subject": "fix(engine): close tool output and sampling contracts",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "09212c89a209",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): reject invalid media enum values",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eda402422126",
+          "date": "2026-08-28",
+          "subject": "feat(serve): align protocol adapters with engine capabilities",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "65f620a7f34e",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete anthropic messages semantics",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "821915529931",
+          "date": "2026-08-28",
+          "subject": "feat(serve): complete responses api adapter",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5c957c608944",
+          "date": "2026-08-28",
+          "subject": "refactor(serve): clarify protocol adapter boundaries",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6d0a6f1b4854",
+          "date": "2026-08-28",
+          "subject": "fix(serve): validate thinking signatures and expose request ids",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4cece118b93d",
+          "date": "2026-08-28",
+          "subject": "fix(frontend): repair malformed generated utf-8",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c02e53a6893",
+          "date": "2026-08-28",
+          "subject": "fix(serve): reject constrained decoding extensions",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "412b11f3e58c",
+          "date": "2026-08-28",
+          "subject": "feat(serve): close OpenAI compatibility gaps",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3a61ef3f8ad5",
+          "date": "2026-08-28",
+          "subject": "fix(ops): separate sparse moe gather index lifetimes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bf9dbb016c15",
+          "date": "2026-08-29",
+          "subject": "fix(serve): coalesce responses assistant history",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fd48e2fae270",
+          "date": "2026-08-29",
+          "subject": "test(cache): fix host restore output oracle",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f8fc0f5098d7",
+          "date": "2026-08-29",
+          "subject": "fix(serve): accept neutral tool message names",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1fc1cb765425",
+          "date": "2026-08-29",
+          "subject": "perf(linear): add fp8 w8a16 vocabulary gemm",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ce09aee5ab8a",
+          "date": "2026-08-29",
+          "subject": "fix(serve): cancel abandoned streaming requests",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "11e76d8d3e9d",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add fixed evaluation corpus",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0b5b7c9aab4a",
+          "date": "2026-08-29",
+          "subject": "feat(ops): add target logprob reduction",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f6b3ba93d491",
+          "date": "2026-08-29",
+          "subject": "feat(perplexity): add causal scoring evaluator",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "93cdc264d6f1",
+          "date": "2026-08-29",
+          "subject": "perf(ops): widen w8 rowsplit weight decode to eight codes per thread",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7be837831528",
+          "date": "2026-08-29",
+          "subject": "Merge upstream Neroued/ninfer master into ninfer-3090",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "096c30c6d7b6",
+          "date": "2026-08-29",
+          "subject": "chore(bench): note that the rk8v4 harness is blocked on the RotorQuant port",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "093f0d8bd001",
+          "date": "2026-08-29",
+          "subject": "fix(portability): build the new upstream runtime code on MSVC",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4a4cdd9fb8e7",
+          "date": "2026-08-29",
+          "subject": "fix(portability): reach <cstdlib> before nvtx3 in core/nvtx.h",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eeec57f55917",
+          "date": "2026-08-29",
+          "subject": "fix(portability): reach <cstdlib> before nvtx3 in core/nvtx_range.h too",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9880c24e11e0",
+          "date": "2026-08-29",
+          "subject": "fix: repair a bad auto-merge and finish the MSVC portability pass",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7a8c3b108f1a",
+          "date": "2026-08-29",
+          "subject": "build(win): link every target through NINFER_CUDART_TARGET",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ee620a32a398",
+          "date": "2026-08-29",
+          "subject": "test: let the sm_86 build run the FP8/NVFP4 and official-resource suites",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "899a9c21632c",
+          "date": "2026-08-29",
+          "subject": "build(win): report the real __cplusplus so constexpr dim3 compiles on MSVC",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5820660db9ba",
+          "date": "2026-08-29",
+          "subject": "fix(gdn): sum the unsplit gating projection's K reduction pairwise",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "75d94eab1761",
+          "date": "2026-08-31",
+          "subject": "Merge pull request #15 from ashalliants/merge/upstream-catchup-20260829",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        }
+      ]
+    },
+    {
+      "id": "oh-my-pi-client",
+      "upstream": "can1357/oh-my-pi",
+      "verdict": "upgrade-available",
+      "upstream_head": "62bc57be1b03ef0802a33cf7f5f530e534527531",
+      "upstream_head_date": "2026-09-24T01:59:45Z",
+      "fork_point": "a2d83061c5d673bf3ee495d7652b63ee5a0ceb14",
+      "ahead_by": 681,
+      "aggregate_overlap": "unknown-truncated",
+      "commits_listed": 250,
+      "commits_truncated": true,
+      "files_listed": 300,
+      "files_truncated": true,
+      "commits": [
+        {
+          "sha": "b1622ec3c597",
+          "date": "2026-09-22",
+          "subject": "feat(extensions): expose bounded ephemeral turns",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "eca061587a96",
+          "date": "2026-09-22",
+          "subject": "fix(extensions): abort provider hooks for side turns",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e1b9be40f0e",
+          "date": "2026-09-22",
+          "subject": "docs(extensions): clarify ephemeral turn contracts",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4c25f77b4126",
+          "date": "2026-09-22",
+          "subject": "test(compat): address review follow-ups",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ef1418be4c74",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12856: fix(extensions): bind ExtensionAPI methods (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f76625037c01",
+          "date": "2026-09-22",
+          "subject": "fix(extensions): bound every ExtensionAPI prototype method structurally",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "068489512613",
+          "date": "2026-09-22",
+          "subject": "test(agent): covered shared siblings in the steering-callback rejection regression",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "30cf205bb67d",
+          "date": "2026-09-22",
+          "subject": "chore: rewrite changelogs",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "0a4dfe1a4faf",
+          "date": "2026-09-22",
+          "subject": "chore: opus 5.5 support",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d7383cf637e1",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12865: fix(bedrock): hoist images out of error toolResults (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a9fc2d6c60d6",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12847: fix(lsp): prefer formatter servers for formatOnWrite (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bef387b399c8",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12850: fix(ai): drop Gemini-unsupported minP/repetitionPenalty from google transports (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "146979d2fd25",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12863: test(coding-agent): flush the deferred prewarm tick before restoring mocks (@andrebrait)",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b225424d80f0",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12523: fix(ai): preserve required nested nulls in tool argument unions (@cswenor)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2088948f7f62",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12845: fix(coding-agent): preserve provider transport on custom models (@joshrzemien)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7eb681ab25de",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12849: fix(extensions): exempt omp-origin marketplace plugins from dashboard opt-in gate (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "df3aa7ce4a7f",
+          "date": "2026-09-22",
+          "subject": "Merge PR #12841: fix(catalog): curate xiaomi mimo v2.6 metadata (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "da359efe2858",
+          "date": "2026-09-22",
+          "subject": "docs(changelog): add unreleased entries for merged fixes",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a2e4e7a2294a",
+          "date": "2026-09-22",
+          "subject": "chore: cleanup tests",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4d5285961ac0",
+          "date": "2026-09-22",
+          "subject": "chore: bump version to 18.2.9",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9a7b3f042453",
+          "date": "2026-09-22",
+          "subject": "test(catalog): removed legacy umans-provider test suite",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "228222665589",
+          "date": "2026-09-22",
+          "subject": "feat: implemented Claude Code dynamic versioning and fallback retries",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "652c9ef6e3e4",
+          "date": "2026-09-22",
+          "subject": "fix(natives): added wayland xkb test fixtures to bazel compile_data",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "06f834ef7734",
+          "date": "2026-09-22",
+          "subject": "test(catalog): dropped zenmux default-model literal assertions",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7fcbfb6a9cec",
+          "date": "2026-09-22",
+          "subject": "fix(natives): satisfied clippy-strict in wayland xkb and libei",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d6137f37a50e",
+          "date": "2026-09-22",
+          "subject": "fix(agent): stopped background completions from cascading auto-backgrounding",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8cdf508c9d8b",
+          "date": "2026-09-22",
+          "subject": "test(coding-agent): resolved anthropic default from descriptors in fallback test",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f143800edc61",
+          "date": "2026-09-22",
+          "subject": "fix(usage): showed Alibaba Token Plan monthly quotas",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3d4d32300996",
+          "date": "2026-09-22",
+          "subject": "feat: implemented anthropic claude usage reset support and automated redemption",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "65a90e6174cc",
+          "date": "2026-09-22",
+          "subject": "feat(rpc): correct getAvailableThinkingLevels JSDoc for off-inclusive discovery",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8cd6f8c619e8",
+          "date": "2026-09-22",
+          "subject": "test(coding-agent): updated /usage reset metadata expectation",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b8e85dab6931",
+          "date": "2026-09-22",
+          "subject": "fix(codex): update client version for GPT-6 models",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e45b49c0d432",
+          "date": "2026-09-22",
+          "subject": "fix(ai): probed claude resets when usage lists null program blocks",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "519e46024579",
+          "date": "2026-09-22",
+          "subject": "docs(changelog): note Codex client update",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "a3ee64de6e65",
+          "date": "2026-09-22",
+          "subject": "fix(catalog): add Codex Sol and Luna pricing",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "617c2cb62b27",
+          "date": "2026-09-22",
+          "subject": "merge: resolve main conflicts in Codex pricing rules",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3bb803acb86a",
+          "date": "2026-09-22",
+          "subject": "chore: add latest gpt models & auto update version",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6e568e998106",
+          "date": "2026-09-22",
+          "subject": "Merge remote-tracking branch 'origin/farm/a6b86987/fix-claude-reset-null-program-probe'",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "28bc2df935ed",
+          "date": "2026-09-22",
+          "subject": "merge: resolve main conflicts in Codex updates",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b52e1f521397",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent): added live judgment batch progress UI and performance optimizations",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "093383ef7db1",
+          "date": "2026-09-22",
+          "subject": "test(compat): settle unexpected payload captures",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ce095027519c",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent/stream): implemented session recording and local playback",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "abc3c18d2ea1",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent): add before_subagent_spawn extension event",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "040dc740ee75",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent): enhanced bench CLI with live table comparison and per-kind metrics",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e6d56ef9eac3",
+          "date": "2026-09-22",
+          "subject": "fix(lsp): deferred provisional cold diagnostics",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "775834acd1ad",
+          "date": "2026-09-22",
+          "subject": "perf(coding-agent): pin whole-buffer TTSR lookaheads",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "711346091546",
+          "date": "2026-09-22",
+          "subject": "docs(changelog): attribute TTSR scan fix",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d9d7c0956c19",
+          "date": "2026-09-22",
+          "subject": "fix(natives): drop the stale minimizer filter generator from pi-natives",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0dd6b1424d16",
+          "date": "2026-09-22",
+          "subject": "fix(coding-agent): preserve lazy lookahead semantics",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "55dc2d7e3de4",
+          "date": "2026-09-22",
+          "subject": "fix(coding-agent/tools): kept native JSON Schema roots out of JTD conversion",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "869b42e99c5a",
+          "date": "2026-09-22",
+          "subject": "docs: documented OTLP exporter request header env variables",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e19460c5d03b",
+          "date": "2026-09-22",
+          "subject": "fix(browser): drove tab.fill and frame actions off puppeteer locator",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "46a277cd2ec4",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent): added clip command to upload recordings to live.omp.sh",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "525b080f7e43",
+          "date": "2026-09-22",
+          "subject": "feat(utils): made file-lock acquisition cancellable via abort signal",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7d8085c53353",
+          "date": "2026-09-22",
+          "subject": "feat(find): defaulted find.enabled to auto when judge is native",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f654c8934689",
+          "date": "2026-09-22",
+          "subject": "feat(eval): reported accumulated judge_batch cost",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "78df03269833",
+          "date": "2026-09-22",
+          "subject": "refactor(git-tui): judged ai-stage units in a single scored wave",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "23e15f018f79",
+          "date": "2026-09-22",
+          "subject": "test(bench): updated expectations for chat default profile",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b84f082e5b40",
+          "date": "2026-09-22",
+          "subject": "test(eval): awaited tool.read in python shadow-plan tests",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ee6758ea5c31",
+          "date": "2026-09-22",
+          "subject": "fix(coding-agent): explain model fallback causes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "89c59c54f18f",
+          "date": "2026-09-22",
+          "subject": "fix(browser): tolerate missing Puppeteer callsites",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6481f6f5803e",
+          "date": "2026-09-22",
+          "subject": "fix(tui): preserve distinguishing usage quota labels",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "43801aa51700",
+          "date": "2026-09-22",
+          "subject": "fix(eval): kept async-cell js function closures bound to retained globals",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5a060ff5a4c0",
+          "date": "2026-09-22",
+          "subject": "fix(eval): escaped line terminators in js sourceURL pragma",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ff74eac0cb57",
+          "date": "2026-09-22",
+          "subject": "feat(eval): added %load scripts and package installs to eval cells",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "37a6dadf7002",
+          "date": "2026-09-22",
+          "subject": "feat(coding-agent): improved AI-assisted git staging verification",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e9430f612969",
+          "date": "2026-09-22",
+          "subject": "test(coding-agent): removed obsolete model registry tests",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b5d692e5f2c7",
+          "date": "2026-09-22",
+          "subject": "chore: prune useless tests",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "07dbb460acf7",
+          "date": "2026-09-22",
+          "subject": "chore: bump version to 18.2.10",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "474890bbd646",
+          "date": "2026-09-22",
+          "subject": "fix(catalog): routed copilot grok 4.x through the responses api",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a51ea5500006",
+          "date": "2026-09-22",
+          "subject": "fix(tui): make startup changelog scrollable after welcome animation",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f8b00a21123b",
+          "date": "2026-09-22",
+          "subject": "docs(tui): attribute startup scroll fix to PR #12906",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "78962a69e171",
+          "date": "2026-09-22",
+          "subject": "fix(tui): align and bound usage quota labels",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "77b85339e80c",
+          "date": "2026-09-22",
+          "subject": "test(browser): cover shallow Puppeteer callsites",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "402fc168a40c",
+          "date": "2026-09-22",
+          "subject": "docs: changelog entry for before_subagent_spawn (#12907)",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c2a98845bde7",
+          "date": "2026-09-22",
+          "subject": "perf(coding-agent): cache CommonJS syntax detection in the extension parse cache",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "571e7a60ec69",
+          "date": "2026-09-22",
+          "subject": "perf(natives): warm the syntax highlighter off the render thread",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "af1fd77b50bd",
+          "date": "2026-09-22",
+          "subject": "Merge branch 'main' into feat/before-subagent-spawn",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "25c18c6b0613",
+          "date": "2026-09-22",
+          "subject": "fix(coding-agent): address fallback explanation review",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "68ddf7538fcd",
+          "date": "2026-09-22",
+          "subject": "fix(ci): dropped test-less wire package from workspace test bucket",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "019a47d68584",
+          "date": "2026-09-22",
+          "subject": "test(coding-agent): asserted managed install target in js package test",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "2299bf9f628b",
+          "date": "2026-09-22",
+          "subject": "perf(coding-agent): resolve extension requires against the untagged source",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fc1dec015763",
+          "date": "2026-09-22",
+          "subject": "docs: add changelog entries for #12908",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "096eea89d6ff",
+          "date": "2026-09-22",
+          "subject": "test(coding-agent): removed host-dependent js package install test",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c7dffa2cd9f4",
+          "date": "2026-09-22",
+          "subject": "fix(coding-agent): fire before_subagent_spawn once per child, propagate cancellation, render route on async rows",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "20f18f86164e",
+          "date": "2026-09-22",
+          "subject": "fix(ai): send per-message effort when an Anthropic session starts on the API default",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "abc214339d5b",
+          "date": "2026-09-22",
+          "subject": "docs(ai): add changelog entry for #12909",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "cf6635ca4db8",
+          "date": "2026-09-22",
+          "subject": "Merge pull request #12908 from H4vC/perf/extension-load-highlight-warm",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "da58b16f4242",
+          "date": "2026-09-22",
+          "subject": "Merge pull request #12909 from can1357/fix/ai-opus-5-5-omitted-effort-default",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "59168e321075",
+          "date": "2026-09-23",
+          "subject": "Merge remote-tracking branch 'upstream/main' into fix/codex-0155-model-discovery",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0c5ee94af826",
+          "date": "2026-09-23",
+          "subject": "test(catalog): cover Codex GPT-6 discovery pricing",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4d0952ec4883",
+          "date": "2026-09-23",
+          "subject": "chore: drop superseded Codex version note",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "df94d3e3553e",
+          "date": "2026-09-23",
+          "subject": "fix(todo): refresh tracker after nested eval updates",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "31e8efac0bfd",
+          "date": "2026-09-23",
+          "subject": "ci: cut PR and main CI wall time",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "beb814bbdb90",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): report tokens freed by /shake thinking",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f827806355ee",
+          "date": "2026-09-23",
+          "subject": "ci: add release_dry_run dispatch mode that builds release binaries without publishing",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5d43f3909115",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): implemented skillshare registry for skill distribution and management",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ef6d8b2d0c2a",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): added judged time-traveling stream rules",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c48b5b010f5e",
+          "date": "2026-09-23",
+          "subject": "feat(catalog): added StepFun provider with live model discovery",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0cc1abe5f759",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): add unreleased entry for the StepFun provider",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "2a25cef18863",
+          "date": "2026-09-23",
+          "subject": "fix(catalog): honor StepFun discovery contracts in the model manager",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "bbadeb583ea1",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): add coding-agent unreleased entry for the StepFun provider",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9fb909f51fe3",
+          "date": "2026-09-23",
+          "subject": "ci: save shared caches only on main so tag/branch runs stop evicting main's darwin archives",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5c53a8116534",
+          "date": "2026-09-23",
+          "subject": "chore(catalog): refresh generated catalog after rebase onto main",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d91e9d99e232",
+          "date": "2026-09-23",
+          "subject": "Revert \"ci: add release_dry_run dispatch mode that builds release binaries without publishing\"",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4dbeff2b3773",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): configure extended context for custom models",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "052b61ca09e2",
+          "date": "2026-09-23",
+          "subject": "feat(tui): enable OSC 8 hyperlinks on rio",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "892f1b1c568b",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): preserve trusted extended-context ceilings",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d4b36e4e3107",
+          "date": "2026-09-23",
+          "subject": "fix(todo): keep nested Eval panel current without persisting snapshots",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9c6c9c4ea2f3",
+          "date": "2026-09-23",
+          "subject": "fix(todo): preserve completed checklist dismissal after nested views",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "63c7c8b2189b",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12874: fix(agent): stopped background completions from cascading auto-backgrounding (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c5b83e9c2c51",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12897: docs: documented OTLP exporter request header env variables (@roboomp)",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0a54b154e700",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12906: fix(tui): make startup changelog scrollable after welcome animation (@michaelr)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ec98fc726ce8",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12903: fix(tui): preserve distinguishing usage quota labels (@lockwo)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "03332b3fed6b",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12896: fix(coding-agent/tools): keep native JSON Schema roots out of JTD conversion (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "053e40b455d0",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12902: fix(browser): tolerate missing Puppeteer callsites (@Dante-dan)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cfb054d70620",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12891: fix(natives): drop the stale minimizer filter generator from pi-natives (@STRML)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0efa92efdc70",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12887: perf(coding-agent): avoid repeated whole-buffer TTSR scans (@Dante-dan)",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ace4fccd2e91",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12877: fix(usage): show Alibaba Token Plan monthly quotas (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "1b44054bf9f7",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12885: fix(codex): update client version for GPT-6 models (@itsddvn)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3c30586c102a",
+          "date": "2026-09-23",
+          "subject": "docs(catalog): corrected Codex pricing release note",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "84cedaeffd81",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12905: fix(catalog): route Copilot Grok 4.x through the Responses API (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7f1ccc38d0e6",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12916: fix(coding-agent): report tokens freed by /shake thinking (@Gablinas)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "457060f9bd52",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): aligned shake savings with context accounting",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0bc4272d5a9c",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12898: fix(browser): drive tab.fill and frame actions off puppeteer Locator (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "737fc47faaf9",
+          "date": "2026-09-23",
+          "subject": "fix(browser): corrected frame clicks and editable fills",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6e53f37c5e55",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12890: fix(lsp): deferred provisional cold diagnostics (@roboomp)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e8ea01bbf3e8",
+          "date": "2026-09-23",
+          "subject": "test(lsp): verified cold-server regression",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ffd051b1170b",
+          "date": "2026-09-23",
+          "subject": "style(coding-agent): formatted shake savings test",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "628c6f9d0674",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12921: fix(todo): refresh tracker after nested eval updates (@tommymorgan)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fc29d14fd027",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): credited nested eval todo tracker fix",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ad80dc639868",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): recorded merged fixes under unreleased",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "4b2f29272e75",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12922: feat(tui): enable OSC 8 hyperlinks on rio (@abcfy2)",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "970a15e5aff5",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12923: feat(coding-agent): configure extended context for custom providers (@LingLambda)",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "82720f2ca485",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12907: feat(coding-agent): expose before_subagent_spawn hook for extensions (@aloyzzz)",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9f921ba5da27",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12904: fix(coding-agent): explain model fallback causes (@lockwo)",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b408e84b1f9f",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12918: feat(catalog): added StepFun provider with live model discovery (@ArpitMishra17)",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6f2233877756",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12900: Add Pi-compatible RPC primitives get_entries(since), get_tree, get_available_thinking_levels to RPC protocol (@44madfire)",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9e99f249c5c0",
+          "date": "2026-09-23",
+          "subject": "docs(catalog): described stepfun discovery as authoritative",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "adfbccaee133",
+          "date": "2026-09-23",
+          "subject": "docs(rpc): removed stale issue reference from command discovery notes",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "7b3e9f3b7aec",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): merged duplicate unreleased headings",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8761110a781c",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): recorded merged features under unreleased",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d58593a30902",
+          "date": "2026-09-23",
+          "subject": "chore: rewrite changelogs + remove useless test",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e4151593ace2",
+          "date": "2026-09-23",
+          "subject": "chore: bump version to 18.2.11",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "07f23b6dcce7",
+          "date": "2026-09-23",
+          "subject": "feat(auth): add per-account routing policies",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "47f623a4e311",
+          "date": "2026-09-23",
+          "subject": "docs(changelog): add account routing policy",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f503355e3d93",
+          "date": "2026-09-23",
+          "subject": "fix(auth): honor effective account policy settings",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8abf3a5c4c57",
+          "date": "2026-09-23",
+          "subject": "fix(auth): require measured reserve before pin eviction",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "259c03609e57",
+          "date": "2026-09-23",
+          "subject": "fix(auth): apply overlays across routing diagnostics",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "aa0a91939eca",
+          "date": "2026-09-23",
+          "subject": "fix(auth): resolved account policies from effective settings centrally",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "49280e9f340f",
+          "date": "2026-09-23",
+          "subject": "fix(mcp): waited for configured servers before headless print turns",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4b4405a86dd7",
+          "date": "2026-09-23",
+          "subject": "fix(auth-broker): treated an empty config.yml as no configuration",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "48d7cff7dac4",
+          "date": "2026-09-23",
+          "subject": "fix(auth): kept resumed session pins automatic so stale resumes re-rank",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c397de90dadf",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12243: feat(auth): add per-account routing policies (@schickling-assistant)",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8aec057d857e",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): enabled native-only fallback and usage reporting for failed judgments",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9013268ba10a",
+          "date": "2026-09-23",
+          "subject": "feat: refactored auth storage into namespaced modules and implement affinity",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7ae76f8e4dac",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): added terminal login command for model providers",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3eafa3bb47c0",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): add /changelog last [N]",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "99cd62978efa",
+          "date": "2026-09-23",
+          "subject": "test(coding-agent): cover /changelog last [N]",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "901a65e711d5",
+          "date": "2026-09-23",
+          "subject": "feat(tui): pick the shortest fitting mermaid layout",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5fcb288978a5",
+          "date": "2026-09-23",
+          "subject": "ci: address review on CI uplifts",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "ca70d793b81b",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): address /changelog review notes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "27671a68b5b9",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): report write sizes in UTF-8 bytes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "83ee5cd66db3",
+          "date": "2026-09-23",
+          "subject": "fix(tui): pin bare numbers in comma read selectors",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "87ee2ac70716",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): count write progress in UTF-8 bytes",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7510e1f94abf",
+          "date": "2026-09-23",
+          "subject": "fix(tui): skip mermaid reflow for diagrams that ignore direction",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7e836899cb8e",
+          "date": "2026-09-23",
+          "subject": "test(task): stop git background maintenance racing the commit fixture copy",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "eeaff20e2f66",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12919 from can1357/CI-uplifts",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5726e517b2ef",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): add native annotate command",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "9873f46ef5d4",
+          "date": "2026-09-23",
+          "subject": "feat(tui): edit saved plan review annotations",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0a3ad378ff9a",
+          "date": "2026-09-23",
+          "subject": "docs: attribute annotation changes to PR #12601",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "c66af9133050",
+          "date": "2026-09-23",
+          "subject": "refactor(annotate): extract tmux file opening from annotation PR",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "b7acedbc9142",
+          "date": "2026-09-23",
+          "subject": "feat(annotate): support file and literal prompt sources",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c5b8d8f62782",
+          "date": "2026-09-23",
+          "subject": "feat(annotate): suggest source modes and file paths",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f22ff64ba0d6",
+          "date": "2026-09-23",
+          "subject": "fix(tui): recovered AltGr text dropped by Windows console kitty encoding",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b51afdf26351",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): committed clipboard-pasted images to session artifacts",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7352e8fcbeee",
+          "date": "2026-09-23",
+          "subject": "test(browser): wait for the highlight overlay instead of sampling once",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "05090f91ef66",
+          "date": "2026-09-23",
+          "subject": "test(config-value): assert the descendant is dead instead of racing its write",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "6e1baeb0f44f",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): allowed /export and /usage in focused subagent views",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5b108c5cc5b3",
+          "date": "2026-09-23",
+          "subject": "docs: added changelog attribution for #12985",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "602a225c8444",
+          "date": "2026-09-23",
+          "subject": "docs: added changelog attribution for #12984",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "e1d72cc4107e",
+          "date": "2026-09-23",
+          "subject": "docs: added changelog attribution for #12986",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "d2f85dcc148b",
+          "date": "2026-09-23",
+          "subject": "fix(annotate): address review feedback",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a624873bf1ad",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): referenced pasted images by relocation-safe local:// URLs",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "007cedf787fe",
+          "date": "2026-09-23",
+          "subject": "fix(tui): normalized AltGr base-key case and latched Right Alt across stdin batches",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0ef1f27919f2",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): limited focused-view /usage to read-only forms and aligned dispatch with main view",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "679599540003",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12601 from anatoli-tsinovoy/feat/annotate-command",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f5328d73f211",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12984 from H4vC/fix/tui-windows-altgr",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "78b1d55b960c",
+          "date": "2026-09-23",
+          "subject": "Merge branch 'main' into feat/persist-pasted-images",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ddb9edfffcf6",
+          "date": "2026-09-23",
+          "subject": "Merge branch 'main' into feat/focused-subagent-export-usage",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "21659c1feb01",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12985 from H4vC/feat/persist-pasted-images",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "c9fdcc7e131f",
+          "date": "2026-09-23",
+          "subject": "Merge branch 'main' into feat/focused-subagent-export-usage",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0898ccda8d70",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12986 from H4vC/feat/focused-subagent-export-usage",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2bd63ee729a6",
+          "date": "2026-09-23",
+          "subject": "perf(tui): skip mermaid forced render matching authored flowchart direction",
+          "class": "perf",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8b2650811233",
+          "date": "2026-09-23",
+          "subject": "fix(tui): pin bare list lines in the chunk parser and document :19,59",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b2d30a53432c",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12965 from radkawar/feat/changelog-last-n",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "f1eb8301337f",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12969 from radkawar/fix/write-utf8-byte-count",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "2fda931a704a",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12968 from radkawar/feat/mermaid-fit-shortest",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7009abc5cc57",
+          "date": "2026-09-23",
+          "subject": "Merge branch 'main' into fix/read-comma-line-selectors",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e3df2af0a9fe",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #12970 from radkawar/fix/read-comma-line-selectors",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "73a11421fe34",
+          "date": "2026-09-23",
+          "subject": "feat: implemented per-account codex cyber access program routing and discovery",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cbc3ce1f027f",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): strip inline data URI images from reader-mode fetch output",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "e61ac38d7b2b",
+          "date": "2026-09-23",
+          "subject": "test(config-value): assert the SIGTERM-ignoring descendant is dead instead of racing its write",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8bc86f24a774",
+          "date": "2026-09-23",
+          "subject": "test(task): stop git background maintenance racing the remaining fixture copies",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "63fb0c7fc7f2",
+          "date": "2026-09-23",
+          "subject": "fix(coding-agent): match uppercase and titled data URI images in fetch output",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "607a45491393",
+          "date": "2026-09-23",
+          "subject": "fix(extensions): scope ephemeral turn recursion guards",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ba68319005ea",
+          "date": "2026-09-23",
+          "subject": "Merge pull request #13006 from can1357/fix/fetch-strip-data-uri-images",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "73e928035170",
+          "date": "2026-09-23",
+          "subject": "docs(extensions): keep side turn release notes scoped",
+          "class": "docs",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "5c20520c0df9",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): implemented automatic title retry for ambiguous first messages",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "63850a20a8d3",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent/session): added persistent idle recap journal and GC cleanup of recaps",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "42b540017769",
+          "date": "2026-09-23",
+          "subject": "feat: added native Apple Foundation Models integration",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0f9a9786bbd0",
+          "date": "2026-09-23",
+          "subject": "feat(commands): added toks command for token counting across offline encodings",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8a383b953501",
+          "date": "2026-09-23",
+          "subject": "feat: refactored edit syntax and added insertion capability",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "0bc53be1f113",
+          "date": "2026-09-23",
+          "subject": "feat(tui/status-line): included tool examples in status line context usage estimation",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "ed91e5a27c97",
+          "date": "2026-09-23",
+          "subject": "feat: added Jev native tokenizer support for offline token counting",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3e61d590d46e",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12971: test(task): stop git background maintenance racing the commit fixture copy (@andrebrait)",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "2b9fad5c7bd1",
+          "date": "2026-09-23",
+          "subject": "test(config-value): update ESCAPE_TIMEOUT_MS docblock for all four oracles",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f79556aa9447",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12972: test(browser): wait for the highlight overlay instead of sampling once (@andrebrait)",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "01cc999f2d6d",
+          "date": "2026-09-23",
+          "subject": "Merge PR #12973: test(config-value): assert the descendant is dead instead of racing its write (@andrebrait)",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "f89a6db15e9d",
+          "date": "2026-09-23",
+          "subject": "feat: deprecated hub tool in favor of wait and protocol-based interfaces",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3d3ec7e907ac",
+          "date": "2026-09-23",
+          "subject": "feat(pi-edit): added handling for trailing End Patch in sloppy mode",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "cdd36caad634",
+          "date": "2026-09-23",
+          "subject": "feat(pi-natives): updated Jev token data and constants",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "a1b3b83a7fb8",
+          "date": "2026-09-23",
+          "subject": "feat(coding-agent): reduced judged TTSR rule content truncation to fit Jev token limits",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "278ede4dff6f",
+          "date": "2026-09-23",
+          "subject": "fix(extensions): fail closed on aborted context hooks and scope side-turn recursion guard",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "72cb86e54980",
+          "date": "2026-09-23",
+          "subject": "test(ai): require a Converse request shape in the Bedrock payload guard",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "984600fdab71",
+          "date": "2026-09-23",
+          "subject": "Merge remote-tracking branch 'origin/main' into pr-11657",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "63ab280965b8",
+          "date": "2026-09-23",
+          "subject": "test(coding-agent): match current AuthStorage shape in side-turn registry stub",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "9e7bde225c0a",
+          "date": "2026-09-24",
+          "subject": "Merge PR #12867: test(compat): address capability policy review follow-ups",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "09aa753fd263",
+          "date": "2026-09-24",
+          "subject": "Merge PR #11657: Expose ephemeral turns to extensions with a tool opt-out",
+          "class": "other",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6e2eb2ef8878",
+          "date": "2026-09-24",
+          "subject": "feat(agent): adjusted interrupt handling to respect wait mode and enable interrupts",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d35a9067233a",
+          "date": "2026-09-24",
+          "subject": "chore: branding",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "37926b38cbcf",
+          "date": "2026-09-24",
+          "subject": "feat: refined background job management and wait tool coordination",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "8b15532a7b36",
+          "date": "2026-09-24",
+          "subject": "fix(builtins): skipped rg output file during searches",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "618332b75684",
+          "date": "2026-09-24",
+          "subject": "fix(utils): canonicalized runtime resolver path comparisons",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "b889334481ed",
+          "date": "2026-09-24",
+          "subject": "fix(ai): kept anthropic control baselines stable across a session",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6a527ba064c0",
+          "date": "2026-09-24",
+          "subject": "fix(ai): split anthropic control baselines into two-tier lru",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "5f72b6758b60",
+          "date": "2026-09-24",
+          "subject": "fix(config): routed discovered non-chat rows to their runner kind",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "6647b0bf145c",
+          "date": "2026-09-24",
+          "subject": "chore: branding",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "8b09734d9319",
+          "date": "2026-09-24",
+          "subject": "feat(tools): adjusted browser screenshot pixel comparison to ignore rasterizer noise",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7106a00f6122",
+          "date": "2026-09-24",
+          "subject": "feat: implemented anthropic on-demand compaction and credential-aware auth",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "4eeef6864d80",
+          "date": "2026-09-24",
+          "subject": "feat(tools): enforced explicit proc cancellation via proc://<id>/kill",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7d5e994e59e4",
+          "date": "2026-09-24",
+          "subject": "feat: refined anthropic tool state tracking and auth resolution",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "d0d43027d535",
+          "date": "2026-09-24",
+          "subject": "feat: added message index to Anthropic request controls",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "fa37f057c006",
+          "date": "2026-09-24",
+          "subject": "fix(builtins): repaired pi-builtins test targets on windows",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "51d91333cd25",
+          "date": "2026-09-24",
+          "subject": "feat(ai): added deprecated compatibility methods to AuthStorage",
+          "class": "feature",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "3642216898e4",
+          "date": "2026-09-24",
+          "subject": "chore: rewrite changelogs",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "dacdef24a37f",
+          "date": "2026-09-24",
+          "subject": "chore: bump version to 18.3.0",
+          "class": "chore",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "3a7b07284455",
+          "date": "2026-09-24",
+          "subject": "fix(natives): silenced platform-only clippy lints in applefm stubs",
+          "class": "fix",
+          "overlap": "unknown-truncated",
+          "recommendation": "next-release"
+        },
+        {
+          "sha": "7e7479538a44",
+          "date": "2026-09-24",
+          "subject": "test(catalog): asserted clinepass reference isolation via the rule",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        },
+        {
+          "sha": "62bc57be1b03",
+          "date": "2026-09-24",
+          "subject": "test(coding-agent): mocked credential resolution at the resolver seam",
+          "class": "test",
+          "overlap": "unknown-truncated",
+          "recommendation": "ignore"
+        }
+      ]
+    }
+  ]
+}

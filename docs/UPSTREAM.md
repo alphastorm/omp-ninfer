@@ -20,22 +20,31 @@ are `up-to-date`, `upgrade-available`, or `error`; every upstream commit gets a 
 (`pull-candidate`, `next-release`, `review-now`, `ignore`). Recommendations are triage, not
 decisions - a human owns every pull.
 
-## Tracked upstreams and current position (2026-09-13, v0.6.9)
+GitHub's compare endpoint lists at most 250 commits and 300 changed files and cuts a larger delta
+without an error. The report records `commits_truncated` and `files_truncated`, and a cut file
+list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` - before
+2026-09-24 a cut list read as no overlap and marked every commit of a 1,387-file engine delta a
+`pull-candidate`. For a delta that large, measure applicability against the fork itself (a
+scratch cherry-pick or trial merge) instead of reading the overlap score.
+
+## Tracked upstreams and current position (2026-09-24, v0.7.3)
+
+[Report](measurements/2026-09-24-upstream-watch.json).
 
 | Upstream | Fork point | Delta | Position |
 |---|---|---|---|
-| `Neroued/ninfer` (5090 engine) | `6e8b2e2a` (mainline base) | 158 commits at `d4929686`; 18 taken in `v0.6.7`, on both mainline lanes from `v0.6.8` | **First tranche shipped in v0.6.7, on the RTX 4090 lane in v0.6.8** (runtime `v0.6.3-qwen38-5090-beta.1`): 18 commits taken with reasons - MoE/GDN/vocabulary kernel work, sparse-MoE and GDN record fixes, host-upload completion, frontend perf, cpp-httplib 0.54.1 - every lane gate within noise of v0.6.2 ([ledger](measurements/2026-09-12-upstream-backport-ledger.json), [EXP-035](measurements/2026-09-13-upstream-backport-qualification.json)). **Deferred engine family:** the runtime materialization/pressure fix family including upstream #229 (this product's fanout workload), unreachable without `099d9032` value-aware shared prefix scheduling, which pulls the serve-adapter campaign - a dedicated rebase with the `pressure_protocol` and fanout phases as arbiter. The GDN cooperative-capacity adaptation and its review remediation shipped in v0.6.8; the Qwen tool-parser semantics ship independently in v0.6.9 without that campaign (see below). Excluded as product decisions: dflash2, nvfp4/k8v4 kv-cache formats, spdlog. |
-| `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 15 commits | Fold into the durable-4090 roadmap campaign: MTP draft capacity K=15 + GQA decode kernels (feeds the MTP ablation), chunked KV snapshot staging + MTP restore stride fix (durability correctness), WDDM evictable-budgeting CLI toggle (desktop-shared GPUs - exactly our 4090 host), D3D12 residency fence fixes, streaming UTF-8 repair. Upstream also removed its NVFP4 path entirely (`dabae909`), consistent with our finding that nvfp4 is not a VRAM reduction (omp-ninfer #28). |
-| `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits (was 0 on 2026-08-30) | Upstream resumed; triage rides the 3090 mainline candidate's window on host return (~21 Sept). |
-| `can1357/oh-my-pi` (client) | `cc14e04f` (v18.0.9 tag) | 222 commits | Stay pinned. The NInfer provider, status validators, and checkpoint endpoints are downstream patches; upstream movement since 18.0.9 is client UX (18.0.10/18.0.11: autocomplete acceptance, status timer, composer/gallery filters). Re-pin evaluation rides the next client cycle together with the update-banner suppression (omp-ninfer #18). |
+| `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | 202 commits at `594930e7` (2026-09-23) | **Selective backport closed.** 18 commits were taken in v0.6.7 ([ledger](measurements/2026-09-12-upstream-backport-ledger.json), [EXP-035](measurements/2026-09-13-upstream-backport-qualification.json)); on 2026-09-17 11 of 129 remaining candidates applied cleanly and none changed a shipped profile ([EXP-045](measurements/2026-09-17-upstream-applicability-triage.json)). The next runtime release merges upstream head into the fork once. Sized on 2026-09-24: 176 fork commits over the base (24 of them upstream cherry-picks) against 202 upstream commits over 1,387 files; a trial merge leaves 111 paths to resolve, 31 of them in files upstream moved or replaced (`src/targets/qwen3_6*` into `src/models/qwen3_5`, the resource manager into `context_cache/`, the serve schemas and tool-call parser). Upstream also switched artifact production to v3. Tracked in omp-ninfer #33. |
+| `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed, and are read against v0.7.1's durability work when the merged runtime is built for the RTX 4090. Upstream removed its NVFP4 path (`dabae909`). |
+| `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | Triage rides the RTX 3090 window when its host returns, expected around 2026-09-30. |
+| `can1357/oh-my-pi` (client) | `a2d83061` (v18.2.3 tag) | 681 commits at `62bc57be` (v18.3.0, 2026-09-24) | Pinned client `omp-18.2.3-cross-platform-beta-1` (source `5ade242d`, v0.7.3) carries 36 downstream commits on the tag, including the NInfer provider and the appliance lifecycle. The upstream binary carries no NInfer provider, so a re-pin is a rebase plus every documented route, not an adoption ([EXP-046](measurements/2026-09-17-client-repin-evaluation.json)). Next client cycle. |
 
 ### v0.6.9: parser semantics without the serve-adapter rebase
 
-The dated delta counts above and the
-[2026-09-12 backport ledger](measurements/2026-09-12-upstream-backport-ledger.json) are
-historical evidence, not a new watch run. The ledger deferred `3b50962b` and `0c5d570c` because
-their extracted parser files do not exist on this tree. The v0.6.9 release instead implements
-their semantics independently in the downstream parser: supported scalar unions, case-insensitive
+The [2026-09-12 backport ledger](measurements/2026-09-12-upstream-backport-ledger.json) and the
+2026-09-13 delta counts it was read against are historical evidence for this release. The ledger
+deferred `3b50962b` and `0c5d570c` because their extracted parser files do not exist on this
+tree. The v0.6.9 release instead implements their semantics independently in the downstream
+parser: supported scalar unions, case-insensitive
 booleans, precise numeric lexemes, mathematically integral values, duplicate parameters, and
 balanced embedded markup. It does not import the wholesale serve-adapter rebase or change the
 fork point; custom raw input, history, opaque IDs, and stream ownership are preserved.

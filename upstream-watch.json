@@ -46,8 +46,8 @@
       "upstream": "can1357/oh-my-pi",
       "upstream_ref": "main",
       "fork_repo": "alphastorm/oh-my-pi",
-      "fork_point": "cc14e04f075de82c5c0c0ccd2f9dfbce6f03fe9e",
-      "fork_point_meaning": "upstream v18.0.9 tag commit; the pinned patched client rebases downstream patches on this",
+      "fork_point": "a2d83061c5d673bf3ee495d7652b63ee5a0ceb14",
+      "fork_point_meaning": "upstream v18.2.3 tag commit; the pinned patched client omp-18.2.3-cross-platform-beta-1 (public source 5ade242d, product v0.7.3) carries its downstream patches on this. Supersedes the v18.0.9 point cc14e04f the v0.2-v0.7.2 client rebased onto.",
       "overlap_paths": [
         "packages/ai/",
         "packages/core/"
