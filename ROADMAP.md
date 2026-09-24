@@ -48,10 +48,16 @@ change could move a lane gate
 
 The same window reproduced the durability gap on the shipped runtime: a graceful stop with four
 stored sessions reported `saved 2, nothing to save 0, refused 2` and lost two sessions' state, with
-the generic `program refused continuation export`. That refusal is this fork's, not upstream's: the
-checkpoint store replaces the engine's named skip reason with the generic one, and upstream has no
-durable export at all. The next runtime work names every export gate with a diagnostic-only build,
-reproduces this shutdown, and fixes the gate so a graceful stop saves every live session. The RTX
+the generic `program refused continuation export`. A diagnostic-only build that names every export
+gate reproduced it and named it
+([EXP-049](docs/measurements/2026-09-24-export-refusal-gates.json)): the two 126K-token sessions had
+been evicted from the engine by the time anything tried to save them (`session is not indexed in the
+engine`), and while they were resident every automatic save hit a transient gate and was dropped -
+`catalogued checkpoint tag mismatch` 1 ms after the turn finished, before its continuation was
+catalogued, then `resource transaction in progress` while the next request ran. The exporter itself
+works when it gets a quiescent continuation (a 5.2 GB session saved in 4.3 s). The fix is in this
+fork, not upstream: retry transient automatic refusals when the engine quiesces, and save a
+continuation whose checkpoint is behind before evicting it, as restore reclaim already does. The RTX
 3090's return is a separate release on the current runtime and OMP 18.2.3.
 
 ## Where this was — v0.7.1

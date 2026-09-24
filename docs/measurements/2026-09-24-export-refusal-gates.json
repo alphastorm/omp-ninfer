@@ -1,0 +1,216 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-049",
+  "title": "The gate behind the generic export refusal, named on the shipped runtime",
+  "generated_utc": "2026-09-24T08:40:00Z",
+  "status": "passed",
+  "question": "EXP-047 and EXP-048 recorded graceful stops that refused to save live sessions with the generic `program refused continuation export`. Which gate refuses, and why?",
+  "answer": "The two refused sessions were the two 126K-token sessions, and their engine continuations had already been evicted: every save at the end - explicit, automatic and shutdown - stopped at the engine gate `session is not indexed in the engine`. While they were resident, each automatic save attempt hit a transient gate and was dropped, not retried: `catalogued checkpoint tag mismatch` 1 ms after a turn completed (the save ran before the new continuation was catalogued), then `resource transaction in progress` while the next request ran. The 67.7K-token fanout session that arrived next evicted both. The store had been overwriting each of these named engine gates with the generic program refusal.",
+  "diagnostic_build": {
+    "source": "alphastorm/ninfer ed773f184d7af49ef28ab7ed33228fd89466ff97 (branch diag/export-refusal-gates, one commit on d125ffff)",
+    "change": "Names every export refusal gate (outer engine gates preserved instead of overwritten by the store; the exporter's grouped preconditions split in their original order; state, capacity, staging, write and exception stages labelled) through one allocation-free log formatter. Exports, HTTP bodies, shutdown accounting and exit status are unchanged.",
+    "build": "appliance, nvidia/cuda:13.1.2-devel-ubuntu24.04, nvcc 13.1.115, sm_120a, 224 s",
+    "host_tests_passed": [
+      "ninfer_resource_manager_test",
+      "ninfer_automatic_checkpoint_queue_test",
+      "ninfer_checkpoint_io_contract_test",
+      "ninfer_session_checkpoint_store_test",
+      "ninfer_http_error_handler_test",
+      "ninfer_http_server_stop_test"
+    ],
+    "server_binary_sha256": "691fcfe28e9b2eb3625224e6ccaf01150f0e5ea01fd8fd08a2b75479386fec6e"
+  },
+  "identity": {
+    "arm": "diag-ed773f18",
+    "image": "ninfer-5090:ed773f18-appliance-local",
+    "image_id": "sha256:26e5ed8d5b94faeb685bf5bdd5378fc63ffa679b84159bfcf6a0e45d298ea759",
+    "server_binary_sha256": "691fcfe28e9b2eb3625224e6ccaf01150f0e5ea01fd8fd08a2b75479386fec6e",
+    "model_bytes": 18210531328,
+    "server_arguments": [
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8080",
+      "--model-id",
+      "q38-ninfer",
+      "--binary-sha256",
+      "691fcfe28e9b2eb3625224e6ccaf01150f0e5ea01fd8fd08a2b75479386fec6e",
+      "--artifact-sha256",
+      "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "--config-sha256",
+      "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+      "--deployment-profile",
+      "qwen38-5090-v0.7.0",
+      "--max-context",
+      "131072",
+      "--kv-capacity",
+      "auto",
+      "--prefill-chunk",
+      "1024",
+      "--kv-dtype",
+      "bf16",
+      "--max-concurrency",
+      "1",
+      "--spec",
+      "mtp",
+      "--draft-tokens",
+      "3",
+      "--lm-head-draft",
+      "--vision",
+      "--preserve-thinking",
+      "--session-checkpoint-dir",
+      "/checkpoints",
+      "--session-checkpoint-quota-mib",
+      "24576",
+      "--session-checkpoint-staging-mib",
+      "256",
+      "--max-private-continuations",
+      "8",
+      "--device-state-slots",
+      "4",
+      "--host-state-slots",
+      "24",
+      "--host-kv-mib",
+      "16384"
+    ],
+    "vram_used_total_mib_after_load": "28144, 32607",
+    "model_file": "qwen3_8_27b.ninfer",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "method": {
+    "workload": "scripts/engine_window_compare.py --wire fork --explicit-saves: the EXP-048 gates (long-context retrieval, decode, two 126K-token sessions alternating continuation and fork, a 67.7K-token fanout with four branches and a sibling continuation, the live-sibling agent protocol), then one explicit save per session, then a graceful stop.",
+    "serving_arguments": "the shipped v0.7.3 RTX 5090 profile, with --binary-sha256 set to the diagnostic binary",
+    "window": "Production stopped with the lane supervisor hold taken and restored through its relaunch script: ninfer-5090-v070p running with unless-stopped, /health 200 on its own port, hold released, window container removed. Downtime 08:22:24Z to 08:31:35Z."
+  },
+  "behavior_neutral_check": {
+    "two_session_continuations_losing_reuse": 2,
+    "fanout_branch_cached_tokens": [
+      67676,
+      67676,
+      67676,
+      67676
+    ],
+    "shutdown": "saved 2, nothing to save 0, refused 2",
+    "note": "Identical to the shipped arm of EXP-048 on the same workload."
+  },
+  "named_refusals": [
+    {
+      "at": "08:28:14.091",
+      "path": "automatic",
+      "session": "D1 (3cb7fc3cc8d8)",
+      "gate": "engine: catalogued checkpoint tag mismatch",
+      "context": "fired 1 ms after the turn completed; the catalog still held the previous response's continuation"
+    },
+    {
+      "at": "08:29:14.307",
+      "path": "automatic",
+      "session": "D2 (f7d400d5c7bf)",
+      "gate": "engine: resource transaction in progress",
+      "context": "the next request was already running"
+    },
+    {
+      "at": "08:30:14.328",
+      "path": "automatic",
+      "session": "D1 (3cb7fc3cc8d8)",
+      "gate": "engine: resource transaction in progress",
+      "context": "agent-protocol requests running"
+    },
+    {
+      "at": "08:30:15.024",
+      "path": "explicit POST",
+      "session": "D1 (3cb7fc3cc8d8)",
+      "gate": "engine: session is not indexed in the engine",
+      "context": "HTTP 409 checkpoint_unavailable, unchanged wire body"
+    },
+    {
+      "at": "08:30:15.032",
+      "path": "explicit POST",
+      "session": "D2 (f7d400d5c7bf)",
+      "gate": "engine: session is not indexed in the engine",
+      "context": "HTTP 409 checkpoint_unavailable, unchanged wire body"
+    },
+    {
+      "at": "08:30:19.355",
+      "path": "automatic",
+      "session": "D2 (f7d400d5c7bf)",
+      "gate": "engine: session is not indexed in the engine",
+      "context": ""
+    },
+    {
+      "at": "08:30:22.285",
+      "path": "shutdown",
+      "session": "D1 (3cb7fc3cc8d8)",
+      "gate": "engine: session is not indexed in the engine",
+      "context": ""
+    },
+    {
+      "at": "08:30:27.443",
+      "path": "shutdown",
+      "session": "D2 (f7d400d5c7bf)",
+      "gate": "engine: session is not indexed in the engine",
+      "context": ""
+    }
+  ],
+  "explicit_saves": [
+    {
+      "http_status": 409,
+      "error_code": "checkpoint_unavailable",
+      "session": "long",
+      "session_sha256_prefix": "5371fb056e9b",
+      "wall_s": 0.001
+    },
+    {
+      "http_status": 409,
+      "error_code": "checkpoint_unavailable",
+      "session": "decode",
+      "session_sha256_prefix": "912aad13d6c1",
+      "wall_s": 0.001
+    },
+    {
+      "http_status": 409,
+      "error_code": "checkpoint_unavailable",
+      "session": "session-D1",
+      "session_sha256_prefix": "3cb7fc3cc8d8",
+      "wall_s": 0.009
+    },
+    {
+      "http_status": 409,
+      "error_code": "checkpoint_unavailable",
+      "session": "session-D2",
+      "session_sha256_prefix": "f7d400d5c7bf",
+      "wall_s": 0.008
+    },
+    {
+      "http_status": 200,
+      "generation": "1790238615034-5",
+      "bytes": 5196954143,
+      "frontier_tokens": 67934,
+      "session": "fanout",
+      "session_sha256_prefix": "9bc6e02cc8a9",
+      "wall_s": 4.316
+    },
+    {
+      "http_status": 200,
+      "generation": "1790238619355-7",
+      "bytes": 475248176,
+      "frontier_tokens": 164,
+      "session": "agent",
+      "session_sha256_prefix": "da5c2282b499",
+      "wall_s": 0.701
+    }
+  ],
+  "timeline": [
+    "req 8-9 (08:25-08:27): D1 and D2 bases, 125,891 and 125,892 tokens, prefilled from root",
+    "req 10-17 (08:27-08:29:15): alternating continuations and forks; D1 and D2 resident; no idle gap between requests",
+    "req 18 (08:29:15-08:29:41): 67,681-token fanout base prefilled from root; afterwards neither D1 nor D2 is indexed",
+    "req 19-29 (08:29:42-08:30:15): fanout warm edit, four branches reusing 67,676 tokens, sibling continuation, agent protocol"
+  ],
+  "conclusion": "Nothing is wrong with the exporter itself: when a continuation is resident and quiescent it exports (5.2 GB fanout session in 4.3 s, agent session in 0.7 s). Sessions are lost because the automatic save drops transient refusals instead of retrying them, and eviction under host-KV pressure then removes the only exportable copy. Two fixes follow: retry transient automatic refusals (tag mismatch before catalog publication, transaction in progress) when the engine quiesces; and save a continuation whose checkpoint is behind before it is evicted, as restore reclaim already saves a stale resident before reclaiming it.",
+  "limits": [
+    "One reproduction on the RTX 5090 lane with a back-to-back workload that leaves no idle gap between turns; interactive use has gaps in which a retried automatic save would run.",
+    "Successful automatic saves are not logged, so this receipt cannot show whether D1 or D2 had an earlier generation on disk; the shutdown reported both as unsaved at their latest response.",
+    "The RTX 4090 native lane builds from the same source and was not reproduced here."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

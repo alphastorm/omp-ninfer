@@ -163,6 +163,8 @@ def main() -> int:
     parser.add_argument("--session-base-tokens", type=int, default=100000)
     parser.add_argument("--fanout-base-tokens", type=int, default=56000)
     parser.add_argument("--fanout-branches", type=int, default=4)
+    parser.add_argument("--explicit-saves", action="store_true",
+                        help="fork wire only: after the gates, POST an explicit checkpoint for every session")
     parser.add_argument("--receipt", required=True, type=Path)
     args = parser.parse_args()
 
@@ -171,8 +173,11 @@ def main() -> int:
     errors: list[dict[str, Any]] = []
     calls: list[tuple[str, dict[str, Any], float]] = []
 
+    clients: dict[str, Client] = {}
+
     def client(label: str) -> Client:
-        return Client(args.base_url, api_key, args.model, args.wire, session_digest(label))
+        clients[label] = Client(args.base_url, api_key, args.model, args.wire, session_digest(label))
+        return clients[label]
 
     def call(step: str, fn, *fn_args, **fn_kwargs) -> dict[str, Any] | None:
         try:
@@ -275,6 +280,28 @@ def main() -> int:
                             fork_b["id"], 16)
             protocol["survivor_continue"] = "ok" if survivor else "error"
 
+    # Explicit saves, one per session, so a refusal logged by the server is attributable to a session.
+    explicit_saves: list[dict[str, Any]] = []
+    if args.explicit_saves and args.wire == "fork":
+        for label, lane in clients.items():
+            started = now()
+            try:
+                document = lane.request("/v1/ninfer/checkpoints", {"session_sha256": lane.session}, 900.0)
+                outcome: dict[str, Any] = {"http_status": 200, "generation": document.get("generation"),
+                                           "bytes": document.get("bytes"),
+                                           "frontier_tokens": document.get("frontier_tokens")}
+            except urllib.error.HTTPError as error:
+                body = error.read().decode("utf-8", "replace")[:300]
+                try:
+                    code = json.loads(body).get("error", {}).get("code")
+                except json.JSONDecodeError:
+                    code = None
+                outcome = {"http_status": error.code, "error_code": code}
+            outcome.update({"session": label, "session_sha256_prefix": lane.session[:12],
+                            "wall_s": round(now() - started, 3)})
+            explicit_saves.append(outcome)
+            print(f"{'explicit_save_' + label:>30}: {json.dumps(outcome)}", flush=True)
+
     time.sleep(2.0)
     records = request_log(args.log_cmd, started_ms)
     steps = []
@@ -309,6 +336,7 @@ def main() -> int:
             "session_codes_exact": {s["desk"]: s.get("exact") for s in sessions},
             "fanout_branch_cached_tokens": [s["cached_tokens"] for s in pick("fanout_branch")],
             "agent_protocol": protocol,
+            "explicit_saves": explicit_saves,
             "errors": errors,
         },
         "steps": steps,
