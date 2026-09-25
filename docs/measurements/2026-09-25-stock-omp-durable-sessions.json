@@ -3,7 +3,7 @@
   "schema_version": 1,
   "experiment": "EXP-053",
   "title": "Unmodified upstream OMP 18.3.0 keeps durable NInfer sessions on both published lanes",
-  "generated_utc": "2026-09-25T03:27:48Z",
+  "generated_utc": "2026-09-25T09:42:07Z",
   "status": "passed",
   "question": "Does the unmodified upstream Oh My Pi 18.3.0 release binary, configured only by the documented provider fragments, keep one NInfer session across graceful server restarts on the published RTX 5090 image and the published RTX 4090 native package, including when a new OMP process resumes after both it and the server restarted?",
   "answer": "Yes on both lanes. In all three scenarios - one OMP process across a restart, a new process with the server up, and a new process after a restart - OMP recalled both seeded facts under one OMP session id, and every graceful stop saved the live session and refused nothing. After the second restart the new OMP process's first request named no previous response; each lane logged that it restored the session's checkpoint on its first request without a response id.",
@@ -14,9 +14,9 @@
   },
   "lanes": {
     "rtx5090": {
-      "component": "v0.6.9-qwen38-5090-beta.1",
-      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
-      "server_binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+      "component": "v0.6.9-qwen38-5090-beta.2",
+      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:049dc788f6e5353b159edaece53afbabb219bc6e49f1e8ce8675338fada521a6",
+      "server_binary_sha256": "d90079e887752aa3266a6c2d17ad0e029a35cfc12b6091d9851dde69c3100054",
       "route": "The published image by digest with the shipped qwen38-5090-v0.7.0 serving arguments, as an arm on the production host during a held window, over an SSH forward on the documented macOS route's tunnel port 18089, with that route's provider fragment and fail-closed config verbatim (examples/manual-tunnel/models.fragment.yml, fail-closed.yml). Each restart is a graceful stop and a start on the same checkpoint root.",
       "omp": {
         "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
@@ -33,7 +33,7 @@
         "one_session": true
       },
       "omp_session_ids": [
-        "01a0d601-040a-7238-8949-683cb97d316f"
+        "01a0d7cf-3a96-713b-979a-03318178b296"
       ],
       "restarts": [
         0,
@@ -45,12 +45,12 @@
         "shutdown: saved 1, nothing to save 0, refused 0"
       ],
       "first_request_restore": [
-        "checkpoint restored for session b5dc5d70aac1 on its first request without a response id"
+        "checkpoint restored for session f3706d9cdfe4 on its first request without a response id"
       ],
       "receipt": {
         "artifact_type": "omp_ninfer_stock_session_proof",
         "schema_version": 1,
-        "started_utc": "2026-09-25T00:39:44Z",
+        "started_utc": "2026-09-25T09:04:35Z",
         "omp": {
           "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
           "version": "omp/18.3.0"
@@ -69,10 +69,10 @@
               {
                 "turn": {
                   "prompt": "For this session: the release we are preparing is called Juniper and its build number is 5521. Acknowledge in one short sentence.",
-                  "answer": "Understood — release Juniper, build 5521.",
+                  "answer": "Acknowledged: release Juniper, build 5521.",
                   "stop": "stop",
-                  "seconds": 3.48,
-                  "events": 28
+                  "seconds": 3.37,
+                  "events": 27
                 }
               },
               {
@@ -80,29 +80,29 @@
                   "prompt": "What build number did I mention? Reply with just the number.",
                   "answer": "5521",
                   "stop": "stop",
-                  "seconds": 0.61,
-                  "events": 21
+                  "seconds": 0.65,
+                  "events": 25
                 }
               },
               {
                 "restart": {
                   "exit_code": 0,
-                  "seconds": 39.6,
-                  "output_tail": "[00:40:29Z] healthy after ~18 s\n"
+                  "seconds": 39.7,
+                  "output_tail": "[09:05:20Z] healthy after ~18 s\n"
                 }
               },
               {
                 "turn": {
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
-                  "answer": "JUNIPER 5521",
+                  "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 1.53,
-                  "events": 23
+                  "seconds": 1.57,
+                  "events": 22
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "session_id": "01a0d7cf-3a96-713b-979a-03318178b296",
               "message_count": 6
             }
           },
@@ -113,15 +113,15 @@
               {
                 "turn": {
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
-                  "answer": "JUNIPER 5521",
+                  "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 1.24,
-                  "events": 32
+                  "seconds": 1.05,
+                  "events": 20
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "session_id": "01a0d7cf-3a96-713b-979a-03318178b296",
               "message_count": 8
             }
           },
@@ -132,22 +132,22 @@
               {
                 "restart": {
                   "exit_code": 0,
-                  "seconds": 38.3,
-                  "output_tail": "[00:41:10Z] healthy after ~15 s\n"
+                  "seconds": 40.3,
+                  "output_tail": "[09:06:04Z] healthy after ~18 s\n"
                 }
               },
               {
                 "turn": {
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
-                  "answer": "JUNIPER 5521",
+                  "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 1.55,
-                  "events": 29
+                  "seconds": 1.41,
+                  "events": 18
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "session_id": "01a0d7cf-3a96-713b-979a-03318178b296",
               "message_count": 10
             }
           }
@@ -162,14 +162,14 @@
         },
         "error": null,
         "passed": true,
-        "finished_utc": "2026-09-25T00:41:13Z"
+        "finished_utc": "2026-09-25T09:06:06Z"
       }
     },
     "rtx4090": {
-      "component": "v0.6.7-qwen38-4090-beta.1",
-      "package_sha256": "1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c",
-      "server_binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
-      "route": "The installed lane (C:\\ProgramData\\NInfer\\qwen38-4090-native, release qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5) over an SSH forward on its loopback port 18082, with the documented native fragment and fail-closed config verbatim (examples/windows-native/models.fragment.yml, examples/manual-tunnel/fail-closed.yml) and the lane's key in NINFER_NATIVE_API_KEY. Each restart is the lane's own Control-Release.ps1 -Action Restart: a graceful managed stop, then a start.",
+      "component": "v0.6.7-qwen38-4090-beta.2",
+      "package_sha256": "888a5859fb11d88cc374a944c680a5678d0a0a51b6562d4fce20f9934718fa0c",
+      "server_binary_sha256": "e4688dda2307c5171ddb97fe7954e822deac837a56de40ca64ba0bfaa55ca244",
+      "route": "The installed lane (C:\\ProgramData\\NInfer\\qwen38-4090-native, release qwen38-4090-native-v0.6.7-beta.2-b0e8c2fa732e) over an SSH forward on its loopback port 18082, with the documented native fragment and fail-closed config verbatim (examples/windows-native/models.fragment.yml, examples/manual-tunnel/fail-closed.yml) and the lane's key in NINFER_NATIVE_API_KEY. Each restart is the lane's own Control-Release.ps1 -Action Restart: a graceful managed stop, then a start.",
       "omp": {
         "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
         "version": "omp/18.3.0"
@@ -185,14 +185,14 @@
         "one_session": true
       },
       "omp_session_ids": [
-        "01a0d691-6d21-76ac-8845-5161506adb58"
+        "01a0d7c5-ed37-7262-86a6-905e82c0173a"
       ],
       "restarts": [
         0,
         0
       ],
       "last_start_first_request_restore": [
-        "checkpoint restored for session 9dcceb1001cf on its first request without a response id"
+        "checkpoint restored for session 83b0947f2960 on its first request without a response id"
       ],
       "last_start_stop": [
         "shutdown: saved 1, nothing to save 0, refused 0"
@@ -200,7 +200,7 @@
       "receipt": {
         "artifact_type": "omp_ninfer_stock_session_proof",
         "schema_version": 1,
-        "started_utc": "2026-09-25T03:17:28Z",
+        "started_utc": "2026-09-25T08:54:25Z",
         "omp": {
           "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
           "version": "omp/18.3.0"
@@ -219,10 +219,10 @@
               {
                 "turn": {
                   "prompt": "For this session: the release we are preparing is called Juniper and its build number is 5521. Acknowledge in one short sentence.",
-                  "answer": "Acknowledged — preparing release Juniper, build 5521.",
+                  "answer": "Acknowledged: release Juniper, build 5521.",
                   "stop": "stop",
-                  "seconds": 4.93,
-                  "events": 32
+                  "seconds": 5.04,
+                  "events": 23
                 }
               },
               {
@@ -230,15 +230,15 @@
                   "prompt": "What build number did I mention? Reply with just the number.",
                   "answer": "5521",
                   "stop": "stop",
-                  "seconds": 1.11,
-                  "events": 21
+                  "seconds": 1.79,
+                  "events": 51
                 }
               },
               {
                 "restart": {
                   "exit_code": 0,
-                  "seconds": 93.9,
-                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T03:17:57.7557428Z\",\n                      \"elapsed_seconds\":  17.484\n                  }\n}\n"
+                  "seconds": 90.5,
+                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T08:54:41.9752245Z\",\n                      \"elapsed_seconds\":  2.632\n                  }\n}\n"
                 }
               },
               {
@@ -246,13 +246,13 @@
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
                   "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 2.24,
-                  "events": 26
+                  "seconds": 2.51,
+                  "events": 30
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "session_id": "01a0d7c5-ed37-7262-86a6-905e82c0173a",
               "message_count": 6
             }
           },
@@ -265,13 +265,13 @@
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
                   "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 1.3,
-                  "events": 25
+                  "seconds": 1.13,
+                  "events": 24
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "session_id": "01a0d7c5-ed37-7262-86a6-905e82c0173a",
               "message_count": 8
             }
           },
@@ -282,8 +282,8 @@
               {
                 "restart": {
                   "exit_code": 0,
-                  "seconds": 75.7,
-                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T03:19:21.0832938Z\",\n                      \"elapsed_seconds\":  2.767\n                  }\n}\n"
+                  "seconds": 93.9,
+                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T08:56:17.0390990Z\",\n                      \"elapsed_seconds\":  2.821\n                  }\n}\n"
                 }
               },
               {
@@ -291,13 +291,13 @@
                   "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
                   "answer": "Juniper 5521",
                   "stop": "stop",
-                  "seconds": 2.05,
-                  "events": 21
+                  "seconds": 2.2,
+                  "events": 22
                 }
               }
             ],
             "state": {
-              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "session_id": "01a0d7c5-ed37-7262-86a6-905e82c0173a",
               "message_count": 10
             }
           }
@@ -312,7 +312,7 @@
         },
         "error": null,
         "passed": true,
-        "finished_utc": "2026-09-25T03:20:32Z"
+        "finished_utc": "2026-09-25T08:57:46Z"
       }
     }
   },

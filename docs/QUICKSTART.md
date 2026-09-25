@@ -48,13 +48,13 @@ the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS a
 routes reach the same image. RTX 4090 uses its exact native Windows package. Every route runs the
 unmodified upstream OMP 18.3.0 client.
 
-The published runtime components are RTX 5090 `v0.6.9-qwen38-5090-beta.1` from source
-`8f0098da8570ea788768a9c453045e90839413cd` and RTX 4090 `v0.6.7-qwen38-4090-beta.1` from
-source `a54f1109f3c55607ace786061d26035031db3e0b`, the same runtime without a Windows-only
-pinning retry. Stock OMP names each session with `prompt_cache_key`, which the runtime hashes
-into the session identity under API authentication. On both published lanes, stock OMP kept one
-session across graceful server restarts, including a new OMP process resuming after a restart,
-whose first request the runtime restored from the session's checkpoint
+The published runtime components are RTX 5090 `v0.6.9-qwen38-5090-beta.2` from source
+`86733c0e93fceccf9af3fa345ca9c8b6754f7abb` and RTX 4090 `v0.6.7-qwen38-4090-beta.2` from
+source `b0e8c2fa732e3a84eeb356c5e586879f3563c70c`, the same runtime plus a Windows-only commit
+margin before pinned host allocations. Stock OMP names each session with `prompt_cache_key`,
+which the runtime hashes into the session identity under API authentication. On both published
+lanes, stock OMP kept one session across graceful server restarts, including a new OMP process
+resuming after a restart, whose first request the runtime restored from the session's checkpoint
 ([EXP-053](measurements/2026-09-25-stock-omp-durable-sessions.json)). New sessions start from the
 shared prefix: on the published RTX 5090 image no measured fresh agent session fell back to a
 full prefill, and their median time to first token was 0.095-0.102 s
@@ -74,9 +74,11 @@ Model, serving settings and memory floors are unchanged from v0.7.4. The public 
 deployment profile remains `qwen38-5090-v0.7.0` / configuration `762e6bf4`, with 16384 MiB host
 KV and a 28672 MiB runtime-host floor. The native RTX 4090 keeps 11264 MiB host KV, 24
 host-state slots, and its 32768 MiB host floor; its release identity advances to
-`qwen38-4090-native-v0.6.7-beta.1`. A managed RTX 4090 start can fail intermittently while
-Windows holds most memory as standby file cache
-([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); starting the lane again recovers it.
+`qwen38-4090-native-v0.6.7-beta.2`. A managed RTX 4090 start could fail when the driver refused to
+pin the host-KV pool ([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); the beta.2
+package commits each pinned allocation's size plus 1/64 before pinning it and passed its first
+managed start after a fresh install in qualification. A refusal that still occurs names the
+commit limit and available commit, and #48 stays open until field confirmation.
 Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream

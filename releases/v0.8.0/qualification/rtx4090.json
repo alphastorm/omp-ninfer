@@ -2,8 +2,8 @@
   "artifact_type": "ninfer_windows_release_qualification",
   "schema_version": 1,
   "status": "passed",
-  "qualified_utc": "2026-09-25T01:11:45Z",
-  "release_id": "qwen38-4090-native-v0.6.7-beta.1",
+  "qualified_utc": "2026-09-25T08:48:10Z",
+  "release_id": "qwen38-4090-native-v0.6.7-beta.2",
   "profile": "MTP3",
   "identity": {
     "build_type": "Release",
@@ -16,18 +16,18 @@
     "gpu_index": 0,
     "gpu_name": "NVIDIA GeForce RTX 4090",
     "source_dirty": false,
-    "binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
-    "build_profile": "native-v0.6.7-beta.1-rtx4090",
-    "config_sha256": "3eefaa95ca729ec04a4596b40dba66f53cefb833f770c137f9fd6253e9a1d3af",
+    "binary_sha256": "e4688dda2307c5171ddb97fe7954e822deac837a56de40ca64ba0bfaa55ca244",
+    "build_profile": "native-v0.6.7-beta.2-rtx4090",
+    "config_sha256": "7b833570abd9703cecb54385e80c4e0845034361dbd692bd3cf98278f6250977",
     "cuda_architecture": "89",
-    "deployment_profile": "qwen38-4090-native-v0.6.7-beta.1",
+    "deployment_profile": "qwen38-4090-native-v0.6.7-beta.2",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-    "patch_stack_sha": "a54f1109f3c55607ace786061d26035031db3e0b",
+    "patch_stack_sha": "b0e8c2fa732e3a84eeb356c5e586879f3563c70c",
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
     "lineage_base_sha": "d956e6d61174175684d42e73f1a16fad2a3f229c",
-    "source_commit": "a54f1109f3c55607ace786061d26035031db3e0b",
-    "server_binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
-    "configuration_sha256": "3eefaa95ca729ec04a4596b40dba66f53cefb833f770c137f9fd6253e9a1d3af"
+    "source_commit": "b0e8c2fa732e3a84eeb356c5e586879f3563c70c",
+    "server_binary_sha256": "e4688dda2307c5171ddb97fe7954e822deac837a56de40ca64ba0bfaa55ca244",
+    "configuration_sha256": "7b833570abd9703cecb54385e80c4e0845034361dbd692bd3cf98278f6250977"
   },
   "configuration": {
     "public_model_id": "qwen3.8-27b",
@@ -65,9 +65,9 @@
       "unsupported_structured_output_rejected": true
     },
     "identity": {
-      "binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
-      "config_sha256": "3eefaa95ca729ec04a4596b40dba66f53cefb833f770c137f9fd6253e9a1d3af",
-      "deployment_profile": "qwen38-4090-native-v0.6.7-beta.1",
+      "binary_sha256": "e4688dda2307c5171ddb97fe7954e822deac837a56de40ca64ba0bfaa55ca244",
+      "config_sha256": "7b833570abd9703cecb54385e80c4e0845034361dbd692bd3cf98278f6250977",
+      "deployment_profile": "qwen38-4090-native-v0.6.7-beta.2",
       "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
     },
     "schema_version": 1,
@@ -84,13 +84,13 @@
   "long_session": {
     "prompt_tokens": 130048,
     "completion_tokens": 17,
-    "elapsed_seconds": 91.22873950004578,
+    "elapsed_seconds": 91.06625959998928,
     "exact_output": "ORCHID=493817; COLOR=COBALT",
     "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
   },
   "persistence": {
     "managed_stop": {
-      "elapsed_seconds": 2.101,
+      "elapsed_seconds": 4.7,
       "exit_code": null,
       "forced": false,
       "graceful_wait_seconds": 900,
@@ -102,8 +102,8 @@
       "checkpoint_save": "explicit_endpoint",
       "exact_output": "CHECKPOINT-NATIVE-731942",
       "frontier_tokens": 42,
-      "generation": "1790298372090-0",
-      "save_bytes": 310213340
+      "generation": "1790325699409-0",
+      "save_bytes": 310216695
     },
     "managed_stop_flush": {
       "cached_input_tokens": 45,
@@ -113,36 +113,36 @@
       "state_before_stop": "missing"
     },
     "checkpoint_files": 10,
-    "checkpoint_bytes": 310213433,
-    "restart_seconds": 73.65969740005676,
+    "checkpoint_bytes": 310216792,
+    "restart_seconds": 87.00063590006903,
     "process_replaced": true,
     "restored_cached_input_tokens": 42,
     "exact_output": "CHECKPOINT-NATIVE-731942",
-    "note": "The exact a54f1109 packaged binary replaced its process and restored the explicitly saved 42-token control and the previously unpublished 45-token session: the latter was missing before the managed stop and available after the restart. The stop was graceful and did not force termination. This short-session gate is not a claim of loss-free shutdown for every live process session."
+    "note": "The exact b0e8c2fa packaged binary replaced its process and restored the explicitly saved 42-token control and the previously unpublished 45-token session: the latter was missing before the managed stop and available after the restart. The stop was graceful and did not force termination. This short-session gate is not a claim of loss-free shutdown for every live process session."
   },
   "rollback": {
     "directions": 2,
-    "intermediate_release": "qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf",
-    "active_release_after": "qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5",
+    "intermediate_release": "qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5",
+    "active_release_after": "qwen38-4090-native-v0.6.7-beta.2-b0e8c2fa732e",
     "stops": [
       {
         "exit_code": null,
         "forced": false,
         "mode": "stop-event",
         "outcome": "graceful",
-        "release": "qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5"
+        "release": "qwen38-4090-native-v0.6.7-beta.2-b0e8c2fa732e"
       },
       {
         "exit_code": null,
         "forced": false,
         "mode": "stop-event",
         "outcome": "graceful",
-        "release": "qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf"
+        "release": "qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5"
       }
     ],
     "candidate_stop_mode": "stop-event",
     "predecessor_stop_mode": "stop-event",
-    "note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5 and predecessor qwen38-4090-native-v0.6.6-beta.1-1c17c3facfbf. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
+    "note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.7-beta.2-b0e8c2fa732e and predecessor qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
     "status": "passed"
   },
   "state_security": {
@@ -172,11 +172,11 @@
     "prepared_lease_restore_assertions": 0,
     "request_jsonl_under_protected_state": true,
     "request_jsonl_effective_access_denials": 2,
-    "managed_release_acl_state_assertions": 11,
-    "managed_request_log_acl_state_assertions": 11,
+    "managed_release_acl_state_assertions": 13,
+    "managed_request_log_acl_state_assertions": 13,
     "managed_rollback_directions": 0,
     "retained_state_helper_hash_assertions": 0,
-    "populated_root_status_milliseconds": 584,
+    "populated_root_status_milliseconds": 607,
     "shipped_test_bypass": false,
     "shipped_scripts_scanned": 4,
     "forbidden_hook_patterns_scanned": 10
@@ -186,7 +186,7 @@
     "omp": {
       "transport": "openai-responses",
       "version": "omp/18.3.0",
-      "events": 54,
+      "events": 46,
       "typed_tool_name": "read",
       "tool_results": 1
     },
@@ -202,13 +202,13 @@
   "benchmark_c1": {
     "prompt_tokens": 4541,
     "completion_tokens": 1024,
-    "prefill_tokens_per_second": 2112.926499052952,
-    "decode_tokens_per_second": 153.33472861946743,
+    "prefill_tokens_per_second": 2118.7126699950813,
+    "decode_tokens_per_second": 153.5434062036245,
     "mtp_acceptance_percent": 87.58865248226951,
-    "wall_seconds": 8.85103669995442,
+    "wall_seconds": 8.835340399993584,
     "max_memory_used_mib": 22774,
-    "max_power_w": 451.97,
-    "max_temperature_c": 65,
+    "max_power_w": 452.3,
+    "max_temperature_c": 63,
     "max_gpu_utilization_percent": 100
   },
   "deterministic_gates": {
@@ -224,18 +224,18 @@
   "limitations": [
     "One active request per profile; the lane ships --max-concurrency 1 and no concurrency claim is made.",
     "Automatic checkpoints remain best effort under live traffic. Transient refusals retry up to six times per completed turn, and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved. The measured restart gate proves the two short target sessions survived, not globally loss-free shutdown.",
-    "Save-before-evict with ceiling-class sessions was exercised on the RTX 5090 only (releases/v0.8.0/qualification/rtx5090.json, docs/measurements/2026-09-24-durable-session-eviction.json, docs/measurements/2026-09-24-publication-barrier.json). This lane's source a54f1109 differs from the RTX 5090's 8f0098da only by removing a Windows-only pinning retry; its window runs its own phases and did not construct a ceiling-class eviction.",
+    "Save-before-evict with ceiling-class sessions was exercised on the RTX 5090 only (releases/v0.8.0/qualification/rtx5090.json, docs/measurements/2026-09-24-durable-session-eviction.json, docs/measurements/2026-09-24-publication-barrier.json). This lane's source b0e8c2fa differs from the RTX 5090's 86733c0e only by the Windows-only commit precharge margin before pinned host allocations; its window runs its own phases and did not construct a ceiling-class eviction.",
     "Restore may reclaim a resident session only when its latest checkpoint is reproducible. Restore and response-store capacity refusal remain possible. The qualified 11264 MiB host-KV pool and 32768 MiB declared host-memory floor are unchanged; no smaller-host profile is qualified.",
-    "A managed start can fail intermittently when Windows refuses to pin the 11264 MiB host-KV pool while most available memory is standby file cache (alphastorm/omp-ninfer#48). During this lane's qualification of the 8f0098da build one managed start failed this way and that build's in-process retry then failed with cudaErrorAlreadyMapped; a54f1109 removes the retry, and the next start pinned the pool.",
+    "A managed start could fail when the driver refused to pin the 11264 MiB host-KV pool (alphastorm/omp-ninfer#48): the pin charges its size and then a page-lock remainder, and a start whose free commit covered only the size raced the system-managed pagefile extension. The v0.6.7-beta.2 candidate 86733c0e was refused this way on its first managed start after a fresh install. b0e8c2fa commits and releases each pinned allocation's size plus 1/64 first, and this lane's canonical qualification passed that first start. The refusal was never reproduced on demand, so the issue stays open until field confirmation; a recurrence reports the commit limit, available commit and available memory.",
     "The C1 benchmark fixture (28,000 characters of one repeated sentence) is trajectory-sensitive: its acceptance and decode rate move with changes in prefill summation order or fixture length (docs/measurements/2026-09-13-rtx4090-c1-fixture-sensitivity.json).",
     "Measured numbers apply only to this package, this machine, and this profile."
   ],
   "beta_qualified": true,
   "package": {
-    "filename": "ninfer-rtx4090-native-v0.6.7-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-    "sha256": "1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c",
-    "bytes": 572682605,
-    "sbom_sha256": "975852b6299fafbf65b3d1ca25bdd545575603e47421f79064642153b9be3691",
+    "filename": "ninfer-rtx4090-native-v0.6.7-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "sha256": "888a5859fb11d88cc374a944c680a5678d0a0a51b6562d4fce20f9934718fa0c",
+    "bytes": 572708542,
+    "sbom_sha256": "5c8a5153a8344d01c45563bea66ed398f192cd99625b66d7d416b5351f6788e0",
     "installer_sha256": "2b5fb89077aec856cb0df0764ea6619a52ec86dafa73b4f564194eb018e53b67",
     "controller_sha256": "d3b53b1e9a8b3f9e085f8786c28905289a48890c049f05cac25ba14ae0e69c25",
     "gpu_owner_controller_sha256": "3921ad65eb500d6879dc160371246aef571bbda36e7d6741860a43af7040feac",

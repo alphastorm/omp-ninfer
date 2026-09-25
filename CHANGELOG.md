@@ -15,29 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fork build, archive or installer. The provider fragments keep thinking within the template's
   `low`, `medium` and `xhigh` efforts and turn off encrypted reasoning and reasoning summaries,
   and every route exports `PI_OPENAI_STATEFUL=1`.
-- Rebind RTX 5090 to `v0.6.9-qwen38-5090-beta.1` (image
-  `sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd`, source
-  `8f0098da8570ea788768a9c453045e90839413cd`) and RTX 4090 to `v0.6.7-qwen38-4090-beta.1` (source
-  `a54f1109f3c55607ace786061d26035031db3e0b`, the same runtime without the Windows-only pinning
-  retry below). The model, serving settings and memory floors are unchanged.
+- Rebind RTX 5090 to `v0.6.9-qwen38-5090-beta.2` (image
+  `sha256:049dc788f6e5353b159edaece53afbabb219bc6e49f1e8ce8675338fada521a6`, source
+  `86733c0e93fceccf9af3fa345ca9c8b6754f7abb`) and RTX 4090 to `v0.6.7-qwen38-4090-beta.2` (source
+  `b0e8c2fa732e3a84eeb356c5e586879f3563c70c`, the same runtime plus the Windows-only commit margin
+  below). The model, serving settings and memory floors are unchanged.
 - Stock clients get durable sessions. With API authentication the runtime hashes a request's
   `prompt_cache_key` into the session identity, never storing the raw key, and refuses it together
   with `ninfer_session` or `X-NInfer-Session`; a returning session's checkpoint is restored on its
   first request after a restart. On both published lanes, unmodified OMP 18.3.0 kept one session
   across graceful restarts, including a new OMP process resuming after a restart
   ([EXP-053](docs/measurements/2026-09-25-stock-omp-durable-sessions.json)). The runtime diff passed
-  an independent four-model council and two remediation epochs (council
+  an independent four-model council and four remediation epochs (council
   `CR-20260925-ninfer-stock-client`).
+- Responses tool outputs may be content parts. Stock OMP returns an image read as an `input_text`
+  and `input_image` array; the RTX 5090 passes the image to the model inside the tool turn, and
+  the text-only RTX 4090 refuses the image as `vision_disabled` instead of rejecting the request as
+  malformed.
 - New sessions start faster: the shared-prefix catalog holds one owner per active request or per
   cache marker, whichever is larger (four at one active request). With 11.9-14.2K-token agent
   prefixes on the RTX 5090, fresh sessions that fell back to a full prefill dropped from 24 of 24
   to 0 of 24, and time to first token from 3.78-4.52 s to 0.092-0.100 s
   ([EXP-052](docs/measurements/2026-09-25-agent-mix-shared-prefix.json)).
-- RTX 4090: a start can still fail intermittently when Windows refuses to pin a host pool while
-  most available memory is standby file cache
-  ([#48](https://github.com/alphastorm/omp-ninfer/issues/48) stays open). A retry inside the same
-  process was built and removed: when the refusal occurred during qualification, the retried
-  allocation failed with `cudaErrorAlreadyMapped`. The next start pinned the pool.
+- RTX 4090: a start could fail when the driver refused to pin the host-KV pool
+  ([#48](https://github.com/alphastorm/omp-ninfer/issues/48)). The server now commits and releases
+  each pinned allocation's size plus 1/64 before pinning it, so the pin no longer races the
+  system-managed pagefile extension; the qualified package passed its first managed start after a
+  fresh install, where the candidate without that margin was refused. #48 stays open until field
+  confirmation.
 - Sessions saved under the fork client's `ninfer_session` names are not reachable from stock OMP:
   each takes one cold first turn after the upgrade, and the old checkpoints age out under the
   checkpoint quota.

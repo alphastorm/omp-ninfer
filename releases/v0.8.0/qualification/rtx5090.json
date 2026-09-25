@@ -1,9 +1,9 @@
 {
   "artifact_type": "omp_ninfer_rtx5090_profile_gates",
   "schema_version": 1,
-  "generated_utc": "2026-09-25T00:36:46Z",
+  "generated_utc": "2026-09-25T09:01:39Z",
   "identity": {
-    "binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+    "binary_sha256": "d90079e887752aa3266a6c2d17ad0e029a35cfc12b6091d9851dde69c3100054",
     "build_profile": "appliance-local",
     "build_type": "Release",
     "config_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
@@ -14,7 +14,7 @@
     "deployment_profile": "qwen38-5090-v0.7.0",
     "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
     "model_id": "qwen3.8-27b",
-    "patch_stack_sha": "8f0098da8570ea788768a9c453045e90839413cd",
+    "patch_stack_sha": "86733c0e93fceccf9af3fa345ca9c8b6754f7abb",
     "source_dirty": false,
     "target": "qwen3_8_27b",
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -39,24 +39,24 @@
       "completion_tokens": 17,
       "exact_output": true,
       "output": "ORCHID=493817; COLOR=COBALT",
-      "wall_s": 58.136,
-      "tokens_per_second_wall": 2237.0,
+      "wall_s": 58.261,
+      "tokens_per_second_wall": 2232.2,
       "vram_used_mib_after": 28144,
       "server_prefix_cache_hit_tokens": 0,
       "server_prefix_reuse_path": "root",
       "server_computed_prefill_tokens": 130048,
-      "server_prefill_seconds": 57.995996938,
+      "server_prefill_seconds": 58.121902670000026,
       "cold": true
     },
     "decode": {
-      "request_id": "ce4ca9bc268882f8e4c145033783b2fd3007b46f0cafdca7a714ca7ca853c26f",
+      "request_id": "7063e5a49f99f47d3dd18fa282b07426178e0eba52a56ad9541db80aedd663cb",
       "prompt_tokens": 118,
       "completion_tokens": 2048,
-      "wall_s": 14.84,
-      "completion_tokens_per_second_wall": 138.01,
+      "wall_s": 14.837,
+      "completion_tokens_per_second_wall": 138.03,
       "server_completion_tokens": 2048,
-      "server_decode_seconds": 14.712040982000003,
-      "decode_tokens_per_second": 139.21,
+      "server_decode_seconds": 14.709627288999998,
+      "decode_tokens_per_second": 139.23,
       "mtp_acceptance_rate": 0.412,
       "mtp_tokens_per_round": 2.24,
       "speculative": {
@@ -93,45 +93,45 @@
   "transient_retries": 0,
   "release_evidence": {
     "release": "v0.8.0",
-    "release_tag": "v0.6.9-qwen38-5090-beta.1",
-    "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
-    "qualified_source": "8f0098da8570ea788768a9c453045e90839413cd",
-    "evidence_interpretation": "Every gate and probe here ran the published image by digest, pulled anonymously, with ninfer-serve ba48a722 verified inside and the shipped qwen38-5090-v0.7.0 serving arguments (configuration 762e6bf4); nothing is carried from v0.7.4. The shared-prefix capacity of four is the binary's default at max_concurrency 1; no serving argument names it.",
+    "release_tag": "v0.6.9-qwen38-5090-beta.2",
+    "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:049dc788f6e5353b159edaece53afbabb219bc6e49f1e8ce8675338fada521a6",
+    "qualified_source": "86733c0e93fceccf9af3fa345ca9c8b6754f7abb",
+    "evidence_interpretation": "Every gate and probe here ran the published image by digest, pulled anonymously, with ninfer-serve d90079e8 verified inside and the shipped qwen38-5090-v0.7.0 serving arguments (configuration 762e6bf4); nothing is carried from v0.7.4 or from the beta.1 image's windows. The shared-prefix capacity of four is the binary's default at max_concurrency 1; no serving argument names it.",
     "vram_used_mib_after_load": 28144,
     "additional_probes": {
       "fanout-57k": {
         "exit_code": 0,
         "summary": {
           "template_input_tokens": 67681,
-          "cold_prefill_s": 25.444,
-          "checkpoint_save_s": 5.694,
+          "cold_prefill_s": 25.433,
+          "checkpoint_save_s": 7.184,
           "checkpoint_bytes": 5188026327,
-          "hot_fork_median_s": 0.907,
-          "hot_fork_max_s": 1.028,
-          "restart_ready_s": 31.04,
-          "post_restart_resume_s": 3.093,
-          "warm_start_first_fork_s": 0.868,
+          "hot_fork_median_s": 0.903,
+          "hot_fork_max_s": 1.153,
+          "restart_ready_s": 33.4,
+          "post_restart_resume_s": 3.27,
+          "warm_start_first_fork_s": 0.866,
           "warm_start_fork_median_s": 0.772,
-          "warm_start_fork_max_s": 0.773
+          "warm_start_fork_max_s": 0.772
         },
-        "receipt_sha256": "46418731371e8fb9d830ddbcdbc087fac265259031fb0188e12121b2253e91c4"
+        "receipt_sha256": "a3edf62ea5a6548405380d7804d3a1b30c607989c7f8614768aa28160b91ddaa"
       },
       "fanout-67k": {
         "exit_code": 0,
         "summary": {
           "template_input_tokens": 79957,
-          "cold_prefill_s": 31.468,
-          "checkpoint_save_s": 5.442,
+          "cold_prefill_s": 31.443,
+          "checkpoint_save_s": 4.287,
           "checkpoint_bytes": 6044083057,
-          "hot_fork_median_s": 1.025,
-          "hot_fork_max_s": 1.054,
-          "restart_ready_s": 32.02,
-          "post_restart_resume_s": 3.472,
-          "warm_start_first_fork_s": 0.798,
+          "hot_fork_median_s": 1.035,
+          "hot_fork_max_s": 1.063,
+          "restart_ready_s": 32.57,
+          "post_restart_resume_s": 3.44,
+          "warm_start_first_fork_s": 0.797,
           "warm_start_fork_median_s": 0.805,
-          "warm_start_fork_max_s": 0.816
+          "warm_start_fork_max_s": 0.817
         },
-        "receipt_sha256": "26bce074dda6617ba4eee1a810e88cb6b66e222606c0a15bd6b79dc0e36c5cca"
+        "receipt_sha256": "469eab26c95d92c7e77eace0a91a9f4e3455717f1c544bd5f9c71c6716f47a97"
       },
       "warm-arrival": {
         "exit_code": 0,
@@ -140,61 +140,27 @@
             "order": "resume-first",
             "control_retrieval_exact": true,
             "template_input_tokens": 67717,
-            "cold_prefill_s": 25.381,
+            "cold_prefill_s": 25.702,
             "pre_restart_fork": [
               "private_endpoint",
-              0.655
+              0.854
             ],
-            "checkpoint_bytes": 5201403134,
+            "checkpoint_bytes": 5205861685,
             "post_restart_sequence": [
               [
                 "endpoint_resume_first",
                 "private_response_replay",
                 67908,
-                3.814
+                3.459
               ],
               [
                 "fork_after_resume",
                 "private_long_anchor",
                 67712,
-                0.809
+                0.79
               ],
               [
                 "fork_second",
-                "private_long_anchor",
-                67712,
-                0.78
-              ]
-            ],
-            "every_post_restart_fork_hot": true,
-            "restored_retrieval_exact": true,
-            "restore_plus_sequence_s": 5.403
-          },
-          {
-            "order": "fork-first",
-            "control_retrieval_exact": true,
-            "template_input_tokens": 67717,
-            "cold_prefill_s": 25.328,
-            "pre_restart_fork": [
-              "private_endpoint",
-              0.726
-            ],
-            "checkpoint_bytes": 5205861708,
-            "post_restart_sequence": [
-              [
-                "fork_first",
-                "private_long_anchor",
-                67712,
-                3.39
-              ],
-              [
-                "endpoint_resume_after_fork",
-                "private_response_replay",
-                67908,
-                0.675
-              ],
-              [
-                "fork_after_resume",
                 "private_long_anchor",
                 67712,
                 0.779
@@ -202,24 +168,58 @@
             ],
             "every_post_restart_fork_hot": true,
             "restored_retrieval_exact": true,
-            "restore_plus_sequence_s": 4.844
+            "restore_plus_sequence_s": 5.028
+          },
+          {
+            "order": "fork-first",
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 25.349,
+            "pre_restart_fork": [
+              "private_endpoint",
+              0.747
+            ],
+            "checkpoint_bytes": 5205861705,
+            "post_restart_sequence": [
+              [
+                "fork_first",
+                "private_long_anchor",
+                67712,
+                3.346
+              ],
+              [
+                "endpoint_resume_after_fork",
+                "private_response_replay",
+                67908,
+                0.639
+              ],
+              [
+                "fork_after_resume",
+                "private_long_anchor",
+                67712,
+                0.78
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 4.765
           }
         ],
-        "receipt_sha256": "35b9d031e646feadb61a263a94892e92c7782635b88ddc16a0a97aa5265e7080"
+        "receipt_sha256": "d79be6ccb315668a05504b60a524986d2d1332f40b3d6461aaa9e6448158eaa6"
       },
       "restore": {
         "exit_code": 0,
         "summary": {
           "template_input_tokens": 57889,
-          "cold_prefill_s": 21.127,
-          "checkpoint_bytes": 4514771839,
-          "restore_0_wall_s": 2.873,
-          "restore_1_wall_s": 2.801,
+          "cold_prefill_s": 21.126,
+          "checkpoint_bytes": 4514771878,
+          "restore_0_wall_s": 3.356,
+          "restore_1_wall_s": 2.837,
           "control_retrieval_exact": true,
           "restored_retrieval_exact": true,
           "tampered_restore_refused": null
         },
-        "receipt_sha256": "adceef630afb18d97c417b9fdc623b4004a137b01f505f9eaa78947335585adc"
+        "receipt_sha256": "053a22d8a8ff2f7756b392ad4e6cd0b955cc6b5931ee7b626a2f837379010a22"
       },
       "multisession": {
         "exit_code": 0,
@@ -235,7 +235,7 @@
           ],
           "server_root_requests_after_bases": 2
         },
-        "receipt_sha256": "c82a46200f7cbf1846c75dc9f265b13eb1c1417d2318af472d1e23589adcab32"
+        "receipt_sha256": "cc4163cbb2c70c42f8d27a35021b806a6e8fda71a05657d4b613f6dbd17a4bb4"
       }
     },
     "durable_sessions": {
@@ -268,24 +268,24 @@
         ]
       },
       "restore_reclaim_lines": [
-        "checkpoint restore for session 4ef19473c17f saved 1 of 2 resident session(s) to make room",
-        "checkpoint restore for session 4ef19473c17f saved 1 of 1 resident session(s) to make room",
-        "checkpoint restore for session 4ef19473c17f reclaimed 3 checkpoint-backed session(s)"
+        "checkpoint restore for session 0c07a1147f64 saved 1 of 2 resident session(s) to make room",
+        "checkpoint restore for session 0c07a1147f64 saved 1 of 1 resident session(s) to make room",
+        "checkpoint restore for session 0c07a1147f64 reclaimed 3 checkpoint-backed session(s)"
       ],
       "second_stop": [
         "shutdown: saved 0, nothing to save 4, refused 0"
       ],
       "desk_code_checks": "inconclusive by construction, as in EXP-050 and v0.7.4: the workload's turns end at 24 tokens inside preserved reasoning, and the resumed turns stop after 27-28 tokens of reasoning; restoration is shown by the cached-token counts and by the barrier's exact answer below.",
       "receipts_sha256": {
-        "workload": "f0770df233d43c11cf1d16c758c1d68d9d0314ffc48f0ec21dd1b3c459fd4405",
-        "resume": "3171b40718443087a7f19659176b0122ce64e065333dfdf16722dd5d681b3bca"
+        "workload": "256d9f7d8773e4fb7dad369f5e8e26552e8d9892a4ed55bdfd8ee9a43c79b910",
+        "resume": "a8d7fc84e3e44e12a5636948bf4a2a79fc37dc3224bab85b888f27d511e5de78"
       }
     },
     "publication_barrier": {
       "method": "EXP-051's tracer against this image: one reply held out of the response store for 6 s by a non-stop gdb breakpoint while another 126K-token session's admission had to evict its session.",
       "log_after_barrier_hit": [
-        "+1.23s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session fbef781b82ff)",
-        "+13.10s [info] ninfer-serve: session checkpoint saved before eviction (session fbef781b82ff)"
+        "+1.17s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session 385ad6fa57e4)",
+        "+13.39s [info] ninfer-serve: session checkpoint saved before eviction (session 385ad6fa57e4)"
       ],
       "first_stop": [
         "shutdown: saved 0, nothing to save 2, refused 0"
@@ -296,8 +296,8 @@
         "exact": true
       },
       "receipts_sha256": {
-        "workload": "a370958df17bd96a9b7d23f4f753c238071040af4ce0c81dedf2c57592490d20",
-        "resume": "88f131e6e7a18458eaeb2489b36ac71a66e600f3ecfd89ef7d552912f2b84dec"
+        "workload": "5a1bd4ca6af6b3ee15276985f14707ac2b7b373d5ae23eabb8a79837bcff4c77",
+        "resume": "794833da1603b32095d7de5ac41031b470900a307350bca25852ef921694f8b6"
       }
     },
     "stock_client_sessions": {
@@ -317,7 +317,7 @@
         "one_session": true
       },
       "omp_session_ids": [
-        "01a0d601-040a-7238-8949-683cb97d316f"
+        "01a0d7cf-3a96-713b-979a-03318178b296"
       ],
       "restarts": [
         0,
@@ -329,9 +329,9 @@
         "shutdown: saved 1, nothing to save 0, refused 0"
       ],
       "first_request_restore": [
-        "checkpoint restored for session b5dc5d70aac1 on its first request without a response id"
+        "checkpoint restored for session f3706d9cdfe4 on its first request without a response id"
       ],
-      "receipt_sha256": "b43f62a33a973f25dd647554f6330e58c6aa87cf3d2487451c9ef30b08bf437e"
+      "receipt_sha256": "41bb5f9fc414e97e70532108a65286e068adcad561beb3d0489f1c0327397a99"
     },
     "shared_prefix_capacity": {
       "method": "scripts/agent_mix_probe.py with EXP-052's workload on this image's default capacity and no session identity: three agent types whose system messages carry their tool JSON (11.9-14.2K-token prefixes), three warm-up fresh sessions, then 8 cycles of fresh A, C and B sessions, each followed by one turn of the long-lived warm-up session.",
@@ -347,8 +347,8 @@
         "C": 0.102
       },
       "measured_fresh_client_ttft_p90_s": {
-        "A": 0.098,
-        "B": 0.1,
+        "A": 0.097,
+        "B": 0.099,
         "C": 0.105
       },
       "measured_fresh_prompt_tokens_median": {
@@ -357,11 +357,11 @@
         "C": 14199
       },
       "warm_up_fresh_client_ttft_s": {
-        "A": 3.788,
-        "B": 4.104,
-        "C": 4.428
+        "A": 3.813,
+        "B": 4.103,
+        "C": 4.418
       },
-      "receipt_sha256": "5715da70930bf4c26bf2d228969c602c53969c86c5c85a323c128c61b4aee9e5"
+      "receipt_sha256": "c8be37d4436ee3e2dd3d361c40114e8d582e9b502941e7cca7940422c95a1b02"
     },
     "production_restored": true,
     "published_route_acceptance": "pending"

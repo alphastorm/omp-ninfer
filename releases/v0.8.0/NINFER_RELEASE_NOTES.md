@@ -39,6 +39,11 @@ server restarted replays its transcript without naming a previous response; the 
 restores that session's checkpoint on its first request, and the engine's exact prefix match
 decides how much it reuses.
 
+A tool result may be content parts instead of a string. Stock OMP returns an image read as a
+`function_call_output` whose output is an `input_text` and `input_image` array: the RTX 5090 passes
+the image to the model inside the tool turn, and the text-only RTX 4090 refuses the image as
+`vision_disabled` instead of rejecting the request as malformed.
+
 New sessions start from the shared prefix. The shared-prefix catalog holds one owner per active
 request or per cache marker a request may place, whichever is larger - four at one active
 request - so each agent type's system and tool prefix keeps its own owner. On the published
@@ -46,23 +51,25 @@ RTX 5090 image, with three alternating agent types whose prefixes were 11,887-14
 first session of each type prefilled its prefix in 3.8-4.4 s; none of the 24 later fresh sessions
 fell back to a full prefill, and their median time to first token was 0.095-0.102 s.
 
-Both components come from one runtime reviewed by an independent four-model council and two
+Both components come from one runtime reviewed by an independent four-model council and four
 remediation epochs ([dispositions](review/runtime-ledger.json)). The first epoch refused
 `prompt_cache_key` together with `X-NInfer-Session` on chat completions, tightened the restore
 pre-filter, and made concurrent first requests of one session restore it once; the second removed
-a Windows pinning retry after the RTX 4090 qualification showed it could not recover (see
-[Support boundaries](#support-boundaries)). RTX 5090 ships source
-`8f0098da8570ea788768a9c453045e90839413cd`; RTX 4090 ships
-`a54f1109f3c55607ace786061d26035031db3e0b`, the same runtime without that retry.
+a Windows pinning retry after the RTX 4090 qualification showed it could not recover. Route
+acceptance on the first published components prompted the third, which accepts content-part tool
+outputs and charges the RTX 4090 host pool's commit before pinning it; the fourth added the margin
+that start still needed (see [Support boundaries](#support-boundaries)). RTX 5090 ships source
+`86733c0e93fceccf9af3fa345ca9c8b6754f7abb`; RTX 4090 ships
+`b0e8c2fa732e3a84eeb356c5e586879f3563c70c`, which adds only that Windows-only margin.
 
 ## Two qualified GPU routes
 
-- RTX 5090: `v0.6.9-qwen38-5090-beta.1`, image
-  `sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd`, server
-  `ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146`.
-- RTX 4090: `v0.6.7-qwen38-4090-beta.1`, package
-  `1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c`, server
-  `1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f`.
+- RTX 5090: `v0.6.9-qwen38-5090-beta.2`, image
+  `sha256:049dc788f6e5353b159edaece53afbabb219bc6e49f1e8ce8675338fada521a6`, server
+  `d90079e887752aa3266a6c2d17ad0e029a35cfc12b6091d9851dde69c3100054`.
+- RTX 4090: `v0.6.7-qwen38-4090-beta.2`, package
+  `888a5859fb11d88cc374a944c680a5678d0a0a51b6562d4fce20f9934718fa0c`, server
+  `e4688dda2307c5171ddb97fe7954e822deac837a56de40ca64ba0bfaa55ca244`.
 - Unchanged model artifact:
   `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`.
 
@@ -73,9 +80,9 @@ stop with `saved 1, nothing to save 3, refused 0`, all four stored sessions rest
 checkpoints after a restart, and a second stop refusing nothing - EXP-051's publication barrier,
 and the fanout, warm-arrival, restore and multisession probes
 ([lane receipt](qualification/rtx5090.json)). The RTX 4090 package passed all 15 canonical native
-phases, including 130,048-token retrieval, the managed-stop flush of an unpublished session,
-rollback in both directions, protected state, and the OMP 18.3.0 tool call
-([lane receipt](qualification/rtx4090.json)).
+phases, including its first managed start after a fresh install, 130,048-token retrieval, the
+managed-stop flush of an unpublished session, rollback in both directions, protected state, and
+the OMP 18.3.0 tool call ([lane receipt](qualification/rtx4090.json)).
 
 On both lanes, unmodified OMP 18.3.0 configured only by the documented fragment kept one session
 across graceful server restarts: one OMP process across a restart, a new process with the server
@@ -102,11 +109,14 @@ upgrade, and those checkpoints age out under the checkpoint quota.
 
 ## Support boundaries
 
-A managed RTX 4090 start can fail intermittently when Windows refuses to pin the host-KV pool while
-most available memory is standby file cache
-([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); a new start recovers it. A retry
-inside the same process was built and removed: when the refusal occurred during qualification,
-the retried allocation failed with `cudaErrorAlreadyMapped`.
+An RTX 4090 start could fail when the driver refused to pin the host-KV pool
+([#48](https://github.com/alphastorm/omp-ninfer/issues/48)). The lane's server commits about 39 GiB
+on its 32 GiB host, so a start extends the system-managed pagefile, and a pin whose free commit
+covered only its size raced that extension. The server now commits and releases each pinned
+allocation's size plus 1/64 before pinning it; the qualified package passed its first managed
+start after a fresh install, where the candidate without that margin was refused. The issue stays
+open until field confirmation, and a refusal that still occurs reports the commit limit, available
+commit and available memory.
 
 Automatic checkpointing remains best effort under live traffic: a crash or an expired graceful
 wait can still leave unpublished work unsaved. Saving before eviction delays the admitting
