@@ -11,7 +11,38 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.7.4 — durable-session runtime on both lanes (2026-09-24)
+## v0.8.0 — stock-client durability and shared-prefix reuse (2026-09-25)
+
+These are measurements on the published beta.2 components: RTX 5090 image `049dc788…`
+(server `d90079e8…`, source `86733c0e`) and RTX 4090 package `888a5859…`
+(server `e4688dda…`, source `b0e8c2fa`). The model, serving settings and memory floors are
+unchanged from v0.7.4. [Public-route acceptance](../releases/v0.8.0/acceptance/documented-routes.json)
+is separate evidence; these measurements do not claim a general throughput speedup.
+
+| Observation | RTX 5090 | RTX 4090 native |
+| --- | --- | --- |
+| Stock OMP 18.3.0 session durability | One OMP process across a restart, a new process with the server up, and a new process after a restart all recalled seeded facts under one session id; the resuming process's first request restored its checkpoint | The same three restart/resume cases passed |
+| Long-context gate | Exact **130,048-token** retrieval | Exact **130,048-token** retrieval in **91.1 s** |
+| Decode | **139.23 tok/s** | **153.5 tok/s** on C1 |
+| Durability workload | Four saves before eviction; stop `saved 1, nothing to save 3, refused 0`; all four stored sessions restored; second stop refused nothing; held publication-barrier turn resumed exactly | All 15 native phases passed, including first managed start after fresh install, unpublished-session stop flush, rollback both ways, protected state and OMP typed tool call |
+| Additional probes | Fanout (57K, 67K), warm-arrival, restore and multisession probes exited 0; root fallback on 2 of 8 continuations/forks without server errors | Ceiling-class save-before-evict was not exercised on this lane |
+
+On the published RTX 5090 image, each of three alternating agent types first prefilled its
+11,887-14,199-token prefix in **3.8-4.4 s**. None of the **24 later fresh sessions** fell back
+to a full prefill; median time to first token was **0.095-0.102 s**. The earlier EXP-052
+before/after comparison measured full-prefill fallbacks falling from **24 of 24 to 0 of 24**
+and time to first token from **3.78-4.52 s to 0.092-0.100 s** with 11.9-14.2K-token prefixes.
+These are shared-prefix/new-session measurements, not checkpoint-restore or reboot timings.
+
+Saving before eviction costs the admitting request about **6.5 s per 126K-token session** on
+RTX 5090. Automatic checkpoints remain best effort: crashes and expired graceful waits may
+leave unpublished work unsaved; universal warm reuse is not claimed.
+[EXP-052](measurements/2026-09-25-agent-mix-shared-prefix.json) ·
+[EXP-053](measurements/2026-09-25-stock-omp-durable-sessions.json) ·
+[RTX 5090 receipt](../releases/v0.8.0/qualification/rtx5090.json) ·
+[RTX 4090 receipt](../releases/v0.8.0/qualification/rtx4090.json).
+
+## Historical v0.7.4 — durable-session runtime on both lanes (2026-09-24)
 
 These are runtime qualification measurements on the published components: RTX 5090 image
 `f193b746…` (server `72aa57dd…`, pulled anonymously by digest) and the RTX 4090 native package

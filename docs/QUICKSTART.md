@@ -5,12 +5,12 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.8.0 is a candidate until its four documented routes pass on the published components.**
-> The scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090 native
-> Windows. RTX 3090 is deferred and is not a v0.8.0 install lane.
+> **v0.8.0 has passed its four documented routes (24 steps) on the published components.**
+> The accepted scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090
+> native Windows. RTX 3090 is deferred and is not a v0.8.0 install lane.
 > The commands below require the published v0.8.0 release and its readiness check.
 > Do not bypass `--require-ready` or mix one release's manifest with another
-> release's commands. See [route acceptance](#v080-route-acceptance) for its status.
+> release's commands. See [route acceptance](#v080-route-acceptance) for the recorded runs.
 
 ## Choose your lane
 
@@ -19,8 +19,8 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.0 candidate; route acceptance pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.8.0 candidate; route acceptance pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.0 route accepted; stock OMP 18.3.0** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.8.0 route accepted; stock OMP 18.3.0** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 RTX 3090 qualification is **deferred** until its host returns (expected around September 30).
@@ -34,15 +34,14 @@ substitute GPU family names, package URLs, component tags, or variant IDs betwee
 ## v0.8.0 route acceptance
 
 The four documented routes - RTX 5090 container host, macOS client, Windows client, and RTX 4090
-native Windows - run against the published v0.8.0 components and the upstream OMP 18.3.0 client
-before the release is cut. Until they pass, the release stays a candidate and `--require-ready`
-refuses it. The v0.7.4 routes'
-[accepted receipts](../releases/v0.7.4/acceptance/documented-routes.json) cover the fork OMP
-18.2.3 client and the v0.7.4 runtime, not these components.
+native Windows - passed against the published v0.8.0 components and the upstream OMP 18.3.0
+client before the release was cut
+([accepted receipts](../releases/v0.8.0/acceptance/documented-routes.json)). Each block below is
+byte-identical to the block those runs executed.
 
 ## Verify the release before setup
 
-The `v0.8.0` candidate composes native Windows OMP over authenticated local loopback
+The `v0.8.0` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 uses its exact native Windows package. Every route runs the
@@ -77,14 +76,13 @@ host-state slots, and its 32768 MiB host floor; its release identity advances to
 `qwen38-4090-native-v0.6.7-beta.2`. A managed RTX 4090 start could fail when the driver refused to
 pin the host-KV pool ([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); the beta.2
 package commits each pinned allocation's size plus 1/64 before pinning it and passed its first
-managed start after a fresh install in qualification. A refusal that still occurs names the
-commit limit and available commit, and #48 stays open until field confirmation.
+managed start after a fresh install during canonical qualification. A refusal that still occurs
+names the commit limit and available commit, and #48 stays open until field confirmation.
 Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream
 [Oh My Pi v18.3.0 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), not an archive
-or installer. Component publication does not establish product readiness or every-route acceptance.
-The exact binary identities are:
+or installer. The exact binary identities are:
 
 | Client binary | SHA-256 |
 | --- | --- |

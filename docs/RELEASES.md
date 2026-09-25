@@ -7,10 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.7.4`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.0`, GitHub `Latest` |
 
-Prereleases never take GitHub `Latest`; `Latest` always points at the current public release. The
-prerelease `omp-beta` Homebrew cask remains separate from the stable `omp` cask.
+Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
+The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
+v0.7.4. v0.8.0 pins upstream OMP binaries and uses no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -26,10 +27,55 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.7.4 public release — live sessions survive a graceful stop
+### v0.8.0 public release — bring your own OMP
 
-- Status: published exact-profile product. [Manifest](../releases/v0.7.4/manifest.json) ·
-  [guide](QUICKSTART.md) · [qualification](../releases/v0.7.4/qualification.json).
+- Status: published exact-profile product. [Manifest](../releases/v0.8.0/manifest.json) ·
+  [guide](QUICKSTART.md) · [qualification](../releases/v0.8.0/qualification.json).
+- Client: unmodified upstream [OMP 18.3.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0)
+  binaries, checked against their SHA-256. No fork build, archive, installer or cask. Provider
+  fragments keep thinking within `low`, `medium` and `xhigh`, disable encrypted reasoning
+  and summaries, and every route exports `PI_OPENAI_STATEFUL=1`. Stock OMP has no
+  `omp appliance` commands; lifecycle follows the documented routes.
+- Stock clients get durable sessions: with API authentication, `prompt_cache_key` becomes a
+  hashed session identity, refused together with `ninfer_session` or `X-NInfer-Session`;
+  a returning session's checkpoint is restored on its first request after a restart. Both
+  lanes passed stock OMP restart/resume proof ([EXP-053](measurements/2026-09-25-stock-omp-durable-sessions.json)).
+  The runtime passed an independent four-model council and four remediation epochs
+  ([dispositions](../releases/v0.8.0/review/runtime-ledger.json)).
+- RTX 5090 `v0.6.9-qwen38-5090-beta.2` (image `049dc788`, server `d90079e8`, source
+  `86733c0e`) passed profile gates, EXP-050 durability (four saves before eviction, stop
+  `saved 1, nothing to save 3, refused 0`, all four stored sessions restored), EXP-051's
+  publication barrier, and fanout, warm-arrival, restore and multisession probes on the
+  anonymously pulled published image. RTX 4090 `v0.6.7-qwen38-4090-beta.2` (package `888a5859`,
+  server `e4688dda`, source `b0e8c2fa`) passed all 15 native phases, including the first
+  managed start after a fresh install and the OMP 18.3.0 typed tool call.
+- New-session shared-prefix reuse on the published RTX 5090 image: three agent types first
+  prefilled their 11,887-14,199-token prefixes in 3.8-4.4 s; none of the 24 later fresh
+  sessions fell back to a full prefill, and median time to first token was 0.095-0.102 s.
+  Content-part image tool outputs reach the model on RTX 5090; text-only RTX 4090 refuses
+  the image as `vision_disabled`. The RTX 4090 pinning fix commits and releases each pinned
+  allocation's size plus 1/64 before pinning; [#48](https://github.com/alphastorm/omp-ninfer/issues/48)
+  remains open for field confirmation.
+- Model, serving settings and memory floors are unchanged from v0.7.4. Automatic checkpoints
+  remain best effort; saving before eviction costs about 6.5 s per 126K-token session on the
+  RTX 5090. The multisession control recorded two root fallbacks among eight continuations/forks;
+  universal warm reuse is not claimed. Ceiling-class save-before-evict was exercised on RTX 5090 only.
+- The macOS arm64, Windows x64 and Linux x64 upstream binaries passed live inference against
+  the published RTX 5090 image (Linux in **Ubuntu under WSL2**). All four documented routes
+  passed: RTX 5090 host 2 blocks, macOS client 10, Windows client 5 and RTX 4090 native 7;
+  both hosts were restored. [Documented routes](../releases/v0.8.0/acceptance/documented-routes.json) ·
+  [composed acceptance](../releases/v0.8.0/acceptance/composed-external-installation.json).
+- Eligibility: **RTX 5090 Windows 11 + Docker Desktop/WSL2 container route** and **RTX 4090
+  native Windows**. **RTX 3090 remains deferred**; its historical v0.7.2 route stays on OMP
+  18.0.9. Upgrade by installing the upstream binary and replacing the provider fragment.
+  Fork-client `ninfer_session` checkpoints are not reachable from stock OMP: each session takes
+  one cold first turn, and old checkpoints age out under the quota.
+
+### v0.7.4 historical public release — live sessions survive a graceful stop
+
+- Status: superseded published exact-profile product. [Manifest](../releases/v0.7.4/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.4/docs/QUICKSTART.md) ·
+  [qualification](../releases/v0.7.4/qualification.json).
 - Runtime rebind on both lanes to source `1c17c3facfbfd1243cf7711a412119302e6dbd74`: runtime
   `a4d26ccb` plus a packaging-only RTX 4090 lane version bump. Transient automatic checkpoint
   refusals retry, admission saves a session's newest turn before evicting it (waiting while its
@@ -684,14 +730,14 @@ Each `releases/<version>/manifest.json` has three valid states:
 - incomplete external artifact fields may be null;
 - `publication.blockers` must be non-empty;
 - installation scripts validate the static contract but refuse to start a release; and
-- no README or cask may describe it as installable.
+- no README may describe it as installable.
 
 ### `candidate`
 
-- every OMP, Homebrew, NInfer OCI/SBOM, model, binary, source, and configuration identity required
+- every upstream OMP binary, NInfer OCI/SBOM, model, source, and configuration identity required
   for installation is immutable and published;
-- `components.omp.artifact_published` is true only after the cask verifier passes without
-  `--allow-draft` against the exact release asset;
+- the upstream OMP release provenance and per-platform binary hashes are verified by
+  `scripts/verify_release.py`;
 - `publication.blockers` remains non-empty and the qualification still records that external
   installation has not passed;
 - `python3 scripts/verify_release.py --require-installable` passes; and
@@ -700,7 +746,7 @@ Each `releases/<version>/manifest.json` has three valid states:
 
 ### `ready`
 
-- exact OMP distribution version, source commit, artifact URL/size/hash, and Homebrew cask revision;
+- exact upstream OMP release version, source commit, and per-platform binary URL/size/hash;
 - digest-pinned NInfer OCI reference, manifest digest, SBOM URL/hash, source, and binary hash;
 - exact Qwen artifact URL/revision/size/hash;
 - qualification summary URL/hash matching checked-in bytes;
@@ -716,16 +762,15 @@ Authorization for those external effects remains separate and bounded.
 
 Before the final external-install smoke, freeze these bytes together:
 
-1. OMP Windows x64 archive and binary;
+1. upstream OMP release binaries for Windows x64, Linux x64 and macOS arm64;
 2. NInfer OCI manifest and every referenced platform blob;
 3. NInfer SBOM;
 4. Qwen artifact revision;
 5. profile JSON and fail-closed/provider fragments;
 6. product qualification summary;
-7. Homebrew beta cask; and
-8. every declared native runtime package, source archive, SBOM, installer/controller, and
+7. every declared native runtime package, source archive, SBOM, installer/controller, and
    qualification receipt; and
-9. product manifest.
+8. product manifest.
 
 Changing executable code, the model, server arguments, OMP state semantics, transport, security
 boundary, or support claim invalidates dependent evidence and requires a new candidate. Editing a

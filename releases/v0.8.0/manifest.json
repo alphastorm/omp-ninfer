@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.8.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/96e4b05a1bd7981a66cf9661149bef2115b5eae3/compatibility.json",
-      "compatibility_sha256": "f5430e18677377ae9283e7c0ff170c1ef1f7a345559e9e1b4c13c2e8c4fbfcea",
+      "compatibility_sha256": "eead60640ccfb88df36833b03b4c851da241dae4eca2d5a206e1bdd6243b0581",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.3.0",
@@ -112,10 +112,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "8145139ea0458c88e993f900ededca9397885dd992b2dac891e6a72a0236ea28",
+    "summary_sha256": "c5d2afb4de23624912ac80d3ffa5d9c730f7c2205e375a9ab6546d45bc01e031",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/96e4b05a1bd7981a66cf9661149bef2115b5eae3/releases/v0.8.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -131,7 +131,7 @@
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
     "Checkpoints are bound to the exact runtime fingerprint; older incompatible checkpoints replay from the OMP transcript.",
     "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
-    "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). v0.6.7-beta.2 commits and releases each pinned allocation's size plus 1/64 before pinning it and passed its first managed start after a fresh install in qualification; the issue stays open until field confirmation, and a recurrence reports the commit limit, available commit and available memory.",
+    "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). v0.6.7-beta.2 commits and releases each pinned allocation's size plus 1/64 before pinning it and passed its first managed start after a fresh install during canonical qualification; the issue stays open until field confirmation, and a recurrence reports the commit limit, available commit and available memory.",
     "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
     "Measured throughput and latency apply only to the recorded package, machine, and profile."
   ],
@@ -143,9 +143,7 @@
       "NInfer RTX5090 v0.6.9-qwen38-5090-beta.2 (published)",
       "NInfer RTX4090 v0.6.7-qwen38-4090-beta.2 (published)"
     ],
-    "blockers": [
-      "external-install and documented-route acceptance have not run against the published v0.6.9-qwen38-5090-beta.2 image 049dc788 and v0.6.7-qwen38-4090-beta.2 package with the upstream OMP 18.3.0 client; the composed acceptance receipt is absent until they do"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

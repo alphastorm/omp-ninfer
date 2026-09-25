@@ -5,7 +5,7 @@
   "as_of": "2026-09-25",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Bring your own OMP: the documented client is the unmodified upstream Oh My Pi v18.3.0 release binary for Windows x64, Linux x64 and macOS arm64, and both lanes move to the stock-client runtime - RTX 5090 container to 86733c0e and RTX 4090 native Windows to b0e8c2fa, which differs only by a Windows-only commit margin before pinned host allocations. The runtime diff passed a four-model council and four remediation epochs. Model, serving settings and memory floors are unchanged from v0.7.4. RTX 3090 is omitted pending physical-host access. Every runtime gate below was measured on the published components; nothing is carried from v0.7.4.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,8 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.9-qwen38-5090-beta.2 component (image 049dc788) before the cut; the receipt lands at releases/v0.8.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.8.0/acceptance/composed-external-installation.json",
+      "sha256": "c5621d77fcbd2046d7bd1b2d923fe1f5cd311a55d2d2763feca94ac651ec894f",
+      "public_url": null,
+      "as_of": "2026-09-25",
+      "release": "v0.8.0",
+      "component_release_tag": "v18.3.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "windows_binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "eead60640ccfb88df36833b03b4c851da241dae4eca2d5a206e1bdd6243b0581",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "2df360d5caef6066090d535ba175dc2c533704cd478e90501d71d7d32473517a"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "41b0f871c839232c53584a9d48c01836e63921d9a1b1be9ea9e27e406a4a5ab0"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "1276b5f789c0e2743e837c0eeba09d3ffb73396e69af5f9d7be1aab00855d01e"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published beta.2 components; runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.8.0/acceptance/documented-routes.json",
+      "sha256": "09b59d071afe70401bddbec2ab406821a3e601ca99740396c8a3b2a90a396068"
     }
   },
   "observed_gates": {
@@ -417,9 +451,7 @@
     }
   },
   "interpretation": "An unmodified upstream OMP client now keeps durable sessions on both lanes: on the published RTX 5090 image and the installed RTX 4090 package, stock OMP 18.3.0 with only the documented fragments recalled its session across graceful restarts, including a new OMP process whose first request named no previous response and was restored from the session's checkpoint. New sessions start from the shared prefix: on the published image no measured fresh agent session fell back to a full prefill. The RTX 5090 durability workload, publication barrier and probe set match v0.7.4's results, and the RTX 4090 package passed its 15 canonical phases with the OMP 18.3.0 tool call, including its first managed start after a fresh install, where the beta.2 candidate without the commit margin was refused (alphastorm/omp-ninfer#48 stays open until field confirmation). Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.9-qwen38-5090-beta.2 component and runtime image"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Client-repin route not exercised; omitted from this release by user direction.",

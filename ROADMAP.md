@@ -3,7 +3,7 @@
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 release lanes, each
 bound to exact bytes and a receipt, with the RTX 3090 lane deferred until its host returns. The
-`v0.7.4` public release exposes only those exact installable profiles. Work outside that wedge
+`v0.8.0` public release exposes only those exact installable profiles. Work outside that wedge
 needs a new product decision rather than placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,15 +11,44 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.7.4
+## Where this is now — v0.8.0
 
-The `v0.7.4` release rebinds both lanes to the durable-session runtime from reviewed source
+The `v0.8.0` release uses the unmodified upstream
+[OMP 18.3.0 release binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), not a
+fork build, archive, installer or cask. Install and operate the RTX 5090 Windows 11 + Docker
+Desktop/WSL2 container route or the RTX 4090 native Windows package through the
+[quickstart](docs/QUICKSTART.md); stock OMP has no `omp appliance` commands. RTX 5090 ships
+`v0.6.9-qwen38-5090-beta.2` and RTX 4090 ships `v0.6.7-qwen38-4090-beta.2`, with the model,
+serving settings and memory floors unchanged from v0.7.4.
+
+Authenticated stock clients get durable sessions through `prompt_cache_key`, with a returning
+session's checkpoint restored on its first request after a restart. On both published lanes,
+unmodified OMP 18.3.0 kept one session across graceful restarts, including a new process resuming
+after a restart ([EXP-053](docs/measurements/2026-09-25-stock-omp-durable-sessions.json)). On the
+published RTX 5090 image, none of 24 later fresh sessions fell back to a full prefill after each
+of three agent types had prefilled its 11,887-14,199-token prefix; median time to first token was
+0.095-0.102 s. The four documented routes passed on the published beta.2 components with the
+stock client; both hosts were restored.
+[Release notes](releases/v0.8.0/NINFER_RELEASE_NOTES.md) ·
+[Documented routes](releases/v0.8.0/acceptance/documented-routes.json).
+
+**Next — the RTX 3090 returns.** Its lane comes back as a separate release once its
+qualification host is available again (expected around 2026-09-30).
+Its [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+stays on OMP 18.0.9, not a v0.8.0 qualification claim. Rebasing the runtime onto upstream NInfer,
+which the engine window deferred
+([EXP-048](docs/measurements/2026-09-24-engine-window-upstream-vs-shipped.json)), remains future
+work; v0.8.0 does not include it.
+
+## Where this was — v0.7.4
+
+The `v0.7.4` release rebound both lanes to the durable-session runtime from reviewed source
 `1c17c3fa`: RTX 5090 `v0.6.8-qwen38-5090-beta.1` and RTX 4090 native `v0.6.6-qwen38-4090-beta.1`.
-A graceful stop now keeps every live session it can save
+A graceful stop then kept every live session it could save
 ([#45](https://github.com/alphastorm/omp-ninfer/issues/45),
 [#46](https://github.com/alphastorm/omp-ninfer/issues/46)). The OMP 18.2.3 client, model, serving
-settings and memory floors are `v0.7.3`'s, and the four documented routes passed again on the
-published components. The RTX 3090 lane is deferred until its host returns (expected around
+settings and memory floors were `v0.7.3`'s, and the four documented routes passed again on the
+published components. The RTX 3090 lane was deferred until its host returned (expected around
 2026-09-30); its [v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 stays on OMP 18.0.9.
 
@@ -68,8 +97,8 @@ admitting request about 6.5 s per 126K-token session on the RTX 5090, where one 
 exercised on the RTX 5090 only; the published RTX 4090 package passed its 15 lane qualification
 phases.
 
-**Next — the RTX 3090 returns.** Its lane comes back as a separate release on the current runtime
-and OMP 18.2.3 once its host is available again.
+**The next step at v0.7.4** was the RTX 3090's return as a separate release on that runtime
+and OMP 18.2.3 once its host was available again.
 
 ## Where this was — v0.7.3
 
@@ -514,6 +543,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.8.0` | Unmodified upstream OMP 18.3.0; durable stock-client sessions across graceful restarts (EXP-053); shared-prefix reuse for new sessions; RTX 5090 v0.6.9-beta.2 and RTX 4090 native v0.6.7-beta.2 qualified and accepted through the documented routes; model and settings unchanged; RTX 3090 deferred |
 | `v0.7.4` | Durable sessions on both mainline lanes (source 1c17c3fa; RTX 5090 v0.6.8, RTX 4090 native v0.6.6): refused automatic saves retry, admission saves a session's newest turn before evicting it, and re-saving under the checkpoint quota no longer deletes other sessions' only checkpoints; the graceful-stop workload went from `refused 2` to `saved 1, nothing to save 3, refused 0` with all four sessions resumed (EXP-050/EXP-051); client, model and settings carried from v0.7.3; RTX 3090 still deferred |
 | `v0.7.3` | Client-only repin to OMP 18.2.3 (`omp-18.2.3-cross-platform-beta-1`) for the RTX 5090 and RTX 4090 lanes: macOS, Windows and Linux clients passed live inference and a fresh 24-step documented-route acceptance; runtime, model and settings carried from v0.7.2; RTX 3090 deferred until its host returns |
 | `v0.7.2` | Bounded restore reclaim on both mainline lanes (source d125ffff): restore saves and reclaims checkpoint-backed resident sessions under host-KV pressure, so both RTX 5090 ceiling sessions resume after a restart, and on the RTX 4090 a pool sized for one ceiling session restored two (EXP-047) |
@@ -568,11 +598,12 @@ The remaining expensive-to-add-later items stay explicit rather than hidden rele
 
 ## Upstreaming to Oh My Pi
 
-The pinned OMP client carries the NInfer stateful-Responses provider integration; running a fork
-was the fastest way to ship one exact qualified combination. The exact accepted source is public
-at [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi). The standing intent remains to
-upstream the reusable provider semantics, stateful transaction, and appliance plumbing to
-[can1357/oh-my-pi](https://github.com/can1357/oh-my-pi).
+Through v0.7.4, the pinned client carried the NInfer stateful-Responses provider integration
+in the public [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi) fork; the intent was
+to upstream reusable provider semantics and appliance plumbing. v0.8.0 instead uses the
+unmodified [upstream OMP 18.3.0 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0).
+This product no longer builds or publishes a client. Stock OMP has no `omp appliance` commands;
+the documented container and native Windows routes own lifecycle.
 
 ## Continuous — performance program
 

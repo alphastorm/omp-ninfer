@@ -1,7 +1,7 @@
 # Upstream watch
 
-The product ships from forks. This page names every upstream we track, the exact fork points,
-how the watch runs, and the current pull-in position. The machine-readable manifest is
+The runtime ships from forks; v0.8.0 uses an unmodified upstream OMP client. This page names
+the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
 [`docs/measurements/`](measurements/).
@@ -27,16 +27,30 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position (2026-09-24, v0.7.4)
+## Tracked upstreams and current position — v0.8.0
 
-[Report](measurements/2026-09-24-upstream-watch.json).
+Runtime positions below retain the [2026-09-24 report](measurements/2026-09-24-upstream-watch.json);
+they are not new upstream delta measurements. The upstream NInfer rebase remains future work.
+The client changed to the unmodified upstream OMP 18.3.0 release binary at `62bc57be`, checked
+against its SHA-256. All three client binaries passed live inference on the published RTX 5090
+image (Linux under Ubuntu/WSL2), and the four documented routes passed on the beta.2 components.
+[Release notes](../releases/v0.8.0/NINFER_RELEASE_NOTES.md) ·
+[Documented routes](../releases/v0.8.0/acceptance/documented-routes.json).
 
 | Upstream | Fork point | Delta | Position |
 |---|---|---|---|
 | `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | 202 commits at `594930e7` (2026-09-23) | **Merge deferred on measurement.** 18 commits were taken in v0.6.7 ([ledger](measurements/2026-09-12-upstream-backport-ledger.json), [EXP-035](measurements/2026-09-13-upstream-backport-qualification.json)); on 2026-09-17 11 of 129 remaining candidates applied cleanly and none changed a shipped profile ([EXP-045](measurements/2026-09-17-upstream-applicability-triage.json)). On 2026-09-24 upstream head itself ran the RTX 5090 lane gates on the same appliance, weights and settings as the shipped runtime: prefill and decode rounds per second within noise, and less prefix reuse on this product's workloads (0 of 4 fanout branches, 4 of 8 two-session continuations re-prefilled) ([EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). A merge is a re-architecture port - a trial merge leaves 111 paths to resolve, 40 of them fork features to re-express in upstream's restructured `src/models/qwen3_5`, `context_cache/` and serve layers - plus the v3 artifact and a new chat template, for no measured lane gain. Rerun `scripts/engine_window_compare.py` when an upstream change could move a lane gate. Tracked in omp-ninfer #33. |
 | `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed and are read against v0.7.1's durability work when taken. Upstream removed its NVFP4 path (`dabae909`). |
 | `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | Triage rides the RTX 3090 window when its host returns, expected around 2026-09-30. |
-| `can1357/oh-my-pi` (client) | `a2d83061` (v18.2.3 tag) | 681 commits at `62bc57be` (v18.3.0, 2026-09-24) | Pinned client `omp-18.2.3-cross-platform-beta-1` (source `5ade242d`, since v0.7.3) carries 36 downstream commits on the tag, including the NInfer provider and the appliance lifecycle. The upstream binary carries no NInfer provider, so a re-pin is a rebase plus every documented route, not an adoption ([EXP-046](measurements/2026-09-17-client-repin-evaluation.json)). Next client cycle. |
+| `can1357/oh-my-pi` (client) | Upstream `62bc57be` (v18.3.0) | Unmodified upstream release binary | Adopted in v0.8.0; no fork build, archive, installer or cask. Provider fragments and `PI_OPENAI_STATEFUL=1` configure the client; stock OMP has no `omp appliance` commands. |
+
+**Historical client position through v0.7.4.** `omp-18.2.3-cross-platform-beta-1` (source
+`5ade242d`, since v0.7.3) carried 36 downstream commits on upstream `a2d83061` (v18.2.3),
+including the NInfer provider and appliance lifecycle. The 2026-09-24 watch counted 681 upstream
+commits to `62bc57be` (v18.3.0). At that time, the client plan was a rebase plus documented-route
+acceptance rather than direct adoption
+([EXP-046](measurements/2026-09-17-client-repin-evaluation.json)); v0.8.0 instead uses the stock
+binary with the stock-client runtime.
 
 ### v0.6.9: parser semantics without the serve-adapter rebase
 
@@ -70,5 +84,6 @@ product needs that planner rebase.
   was the lineage's base before v0.6.2 and made the delta read 17 commits larger than it is.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
-- The client fork point is the upstream tag commit of the pinned release; downstream patches
-  rebase onto it (see the omp-monorepo patch-stack lane for the mechanics this watch borrows).
+- Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
+  patches rebased. v0.8.0 no longer builds or publishes an OMP client; it pins the upstream
+  release binary instead.

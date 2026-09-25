@@ -89,6 +89,11 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_bound_acceptance_receipts_match_immutable_public_files(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
+        omp = json.loads(
+            (
+                ROOT / "releases" / authority["product_release"] / "manifest.json"
+            ).read_text(encoding="utf-8")
+        )["components"]["omp"]
         for profile in authority["profiles"]:
             receipt = profile["acceptance_receipt"]
             if receipt is None:
@@ -108,26 +113,22 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             self.assertEqual(subject["product_release"], receipt_release)
             self.assertEqual(subject["profile"], profile["id"])
             self.assertEqual(subject["status"], "passed")
+            distribution = profile["client_distribution"]
             self.assertEqual(
-                subject["source"]["commit"], authority["composition"]["composed_source_commit"]
+                subject["source"],
+                {
+                    "repository": omp["upstream_repository"],
+                    "tag": omp["upstream_tag"],
+                    "commit": authority["composition"]["composed_source_commit"],
+                    "tree": omp["upstream_tree"],
+                },
             )
-            self.assertEqual(
-                subject["source"]["main_commit"], authority["composition"]["lifecycle_main_commit"]
-            )
-            self.assertEqual(
-                subject["source"]["main_tree"], authority["composition"]["lifecycle_main_tree"]
-            )
+            self.assertEqual(subject["source"]["commit"], distribution["upstream_commit"])
             self.assertFalse(subject["safety"]["cloud_fallback_observed"])
             self.assertFalse(subject["safety"]["production_omp_activation_performed"])
             self.assertTrue(subject["safety"]["runtime_incumbent_restored"])
-            distribution = profile["client_distribution"]
             self.assertTrue(distribution["published"])
-            self.assertEqual(subject["client"]["archive_sha256"], distribution["archive_sha256"])
-            self.assertEqual(subject["client"]["binary_sha256"], distribution["binary_sha256"])
-            self.assertEqual(subject["client"]["component_release_tag"], distribution["release_tag"])
-            self.assertEqual(subject["client"]["component_release_id"], distribution["release_id"])
-            self.assertEqual(subject["client"]["asset_id"], distribution["asset_id"])
-            self.assertEqual(subject["client"]["asset_url"], distribution["asset_url"])
+            self.assertEqual(subject["client"], distribution)
             self.assertTrue(
                 receipt["url"].endswith(
                     f"/releases/{receipt_release}/acceptance/{filename}"

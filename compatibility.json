@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.8.0",
   "composition": {
-    "status": "v0.8.0 upstream OMP v18.3.0 client acceptance pending",
+    "status": "v0.8.0 upstream OMP v18.3.0 client and route acceptance passed on RTX5090 and RTX4090",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0",
     "lifecycle_source_commit": "62bc57be1b03ef0802a33cf7f5f530e534527531",
@@ -42,10 +42,11 @@
         "No secret, raw log, prompt, or model output crosses the receipt boundary.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [
-        "upstream OMP v18.3.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ce6255402bd92850eec0c503a37b7e3657b38a1a/releases/v0.8.0/acceptance/darwin-arm64-18.3.0.json",
+        "sha256": "2df360d5caef6066090d535ba175dc2c533704cd478e90501d71d7d32473517a"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -112,7 +113,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -125,7 +126,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.8.0",
       "aliases": [
@@ -138,10 +139,11 @@
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [
-        "upstream OMP v18.3.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ce6255402bd92850eec0c503a37b7e3657b38a1a/releases/v0.8.0/acceptance/windows-x64-18.3.0.json",
+        "sha256": "41b0f871c839232c53584a9d48c01836e63921d9a1b1be9ea9e27e406a4a5ab0"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -208,7 +210,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -221,7 +223,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.8.0",
       "aliases": [
@@ -235,10 +237,11 @@
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification."
       ],
-      "blockers": [
-        "upstream OMP v18.3.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ce6255402bd92850eec0c503a37b7e3657b38a1a/releases/v0.8.0/acceptance/linux-x64-18.3.0.json",
+        "sha256": "1276b5f789c0e2743e837c0eeba09d3ffb73396e69af5f9d7be1aab00855d01e"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

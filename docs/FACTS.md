@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-09-24 · **Current public release: v0.7.4.**
+Updated: 2026-09-25 · **Current public release: v0.8.0.**
 
-The [v0.7.4 manifest](../releases/v0.7.4/manifest.json) binds the durable-session runtime on
-two eligible GPU routes with the unchanged OMP 18.2.3 client. Each lane's runtime was qualified
+The [v0.8.0 manifest](../releases/v0.8.0/manifest.json) binds the stock-client runtime on
+two eligible GPU routes with unmodified upstream OMP 18.3.0. Each lane's runtime was qualified
 on its published component; fresh client/route acceptance is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 retains the historical three-GPU / OMP 18.0.9 combination.
@@ -11,7 +11,7 @@ retains the historical three-GPU / OMP 18.0.9 combination.
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.7.4 scope runs Qwen3.8 27B through the NInfer engine on one
+appliance for Oh My Pi. Its v0.8.0 scope runs Qwen3.8 27B through the NInfer engine on one
 NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
@@ -42,19 +42,60 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.7.4 eligible hardware
+## v0.8.0 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.2.3 with component `v0.6.8-qwen38-5090-beta.1`, unchanged public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.2.3 with component `v0.6.6-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.3.0 with component `v0.6.9-qwen38-5090-beta.2`, unchanged public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.3.0 with component `v0.6.7-qwen38-4090-beta.2` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 
-**RTX 3090 is deferred for v0.7.4**, not qualified with OMP 18.2.3. The separately linked
+**RTX 3090 is deferred for v0.8.0**, not qualified with OMP 18.3.0. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
 waits for that host’s return.
 
-## v0.7.4 — durable sessions on both lanes
+## v0.8.0 — bring your own OMP
+
+- The client is the unmodified upstream
+  [OMP 18.3.0 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), checked against
+  its SHA-256. No fork build, archive, installer or cask; stock OMP has no `omp appliance`
+  commands. Install and operate each lane through the [quickstart](QUICKSTART.md).
+- Provider fragments keep thinking within `low`, `medium` and `xhigh`, disable encrypted
+  reasoning and reasoning summaries, and every route exports `PI_OPENAI_STATEFUL=1`.
+- RTX 5090 ships `v0.6.9-qwen38-5090-beta.2` (image `049dc788…`, server `d90079e8…`,
+  source `86733c0e`); RTX 4090 ships `v0.6.7-qwen38-4090-beta.2` (package `888a5859…`,
+  server `e4688dda…`, source `b0e8c2fa`, the same runtime plus a Windows-only commit margin).
+  The model, serving settings and memory floors are unchanged from v0.7.4.
+- With API authentication, `prompt_cache_key` becomes the session identity, hashed in its own
+  domain and never stored raw; it is refused together with `ninfer_session` or
+  `X-NInfer-Session`. A returning session's checkpoint is restored on its first request after
+  a restart. On both published lanes, unmodified OMP 18.3.0 kept one session across graceful
+  restarts, including a new process resuming after a restart
+  ([EXP-053](measurements/2026-09-25-stock-omp-durable-sessions.json)).
+- On the published RTX 5090 image, each of three agent types first prefilled its
+  11,887-14,199-token prefix in 3.8-4.4 s; none of the 24 later fresh sessions fell back to a
+  full prefill, and median time to first token was 0.095-0.102 s.
+- Responses tool outputs accept content-part arrays: image tool results reach the model on
+  RTX 5090, while the text-only RTX 4090 refuses them as `vision_disabled`.
+- The RTX 4090 server commits and releases each pinned allocation's size plus 1/64 before
+  pinning it. The published package passed its first managed start after a fresh install;
+  [#48](https://github.com/alphastorm/omp-ninfer/issues/48) remains open for field confirmation.
+- RTX 5090 passed its profile gates, EXP-050 durability workload, EXP-051 publication barrier,
+  fanout, warm-arrival, restore and multisession probes on the published image. RTX 4090 passed
+  all 15 canonical native phases. Save-before-evict with ceiling-class sessions was exercised
+  on RTX 5090 only. [5090 receipt](../releases/v0.8.0/qualification/rtx5090.json) ·
+  [4090 receipt](../releases/v0.8.0/qualification/rtx4090.json).
+- The upstream macOS arm64, Windows x64 and Linux x64 binaries passed live inference against
+  the published RTX 5090 image; Linux ran in Ubuntu under WSL2, not a separately qualified
+  non-WSL OS. Windows and Linux client profiles are qualified; macOS remains preview, not a
+  support claim, because stock OMP has no managed installation or appliance lifecycle.
+  All four documented routes passed (host 2 blocks, macOS 10, Windows 5, RTX 4090 native 7),
+  with both hosts restored. [Routes](../releases/v0.8.0/acceptance/documented-routes.json).
+- Upgrading replaces the provider fragment and client. Fork-client `ninfer_session`
+  checkpoints are not reachable from stock OMP: each session takes one cold first turn, and
+  the old checkpoints age out under the quota. [Release notes](../releases/v0.8.0/NINFER_RELEASE_NOTES.md).
+
+## Historical v0.7.4 — durable sessions on both lanes
 
 - Both lanes run reviewed source `1c17c3facfbfd1243cf7711a412119302e6dbd74`: RTX 5090 image
   `ghcr.io/alphastorm/ninfer-runtime@sha256:f193b7469d062fc923b93ba72dbb4f8bb871912b505b529a062db50f65de2447`
@@ -221,7 +262,7 @@ waits for that host’s return.
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
 18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
-v0.7.4 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
+v0.8.0 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -321,10 +362,10 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 - One model, one active request per lane (max concurrency 1); not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- RTX 3090 is deferred for v0.7.4; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
+- RTX 3090 is deferred for v0.8.0; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
 - Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
 - Automatic checkpoints remain best effort: a crash or an expired graceful wait can still leave
-  unsaved work, and the v0.7.4 multisession control recorded two root fallbacks among eight
+  unsaved work, and the v0.8.0 multisession control recorded two root fallbacks among eight
   continuations/forks. Neither universal warm reuse nor loss-free shutdown is claimed.
 
 ## Claims we do not make
@@ -336,7 +377,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[v0.7.4 manifest](../releases/v0.7.4/manifest.json) · [release state](RELEASES.md) ·
+[v0.8.0 manifest](../releases/v0.8.0/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.7.4 guide](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.8.0 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

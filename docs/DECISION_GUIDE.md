@@ -9,9 +9,10 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — one private, long-lived Oh My Pi session on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
-The v0.7.4 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
-Windows 11**, with the pinned OMP 18.2.3 client. [Release state and manifest](RELEASES.md).
-RTX 3090 is deferred for v0.7.4; its [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
+The v0.8.0 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
+Windows 11**, with the checksummed, unmodified upstream OMP 18.3.0 binary.
+[Release state and manifest](RELEASES.md).
+RTX 3090 is deferred for v0.8.0; its [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 remains on OMP 18.0.9, not qualified with the new client.
 
 ## The map

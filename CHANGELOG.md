@@ -46,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sessions saved under the fork client's `ninfer_session` names are not reachable from stock OMP:
   each takes one cold first turn after the upgrade, and the old checkpoints age out under the
   checkpoint quota.
+- The four documented routes passed on the published components with the unmodified OMP 18.3.0
+  client: RTX 5090 container host (2 steps), macOS client (10), Windows client (5) and RTX 4090
+  native Windows (7), with both hosts restored; the upstream macOS arm64, Windows x64 and Linux x64
+  binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+  the RTX 5090 image ([composed acceptance](releases/v0.8.0/acceptance/composed-external-installation.json)).
+  The macOS profile stays `preview`: the upstream client has no managed installation.
 
 ### Added
 
@@ -64,6 +70,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   checks the installed binary against each profile's pinned upstream binary, binds the expected
   client version to the tested release manifest, and launches OMP with `PI_OPENAI_STATEFUL=1`.
   The composer builds client identity from the current release's upstream component only.
+- The RTX 5090 Windows route's acceptance summary requires the documented tool marker as a token,
+  as the macOS route and RTX 4090 harness do, and records whether it was a bare line; it refused a
+  passing route whose model reported the marker inside a sentence. The structured probe still
+  requires its whole answer exactly.
 
 ### Removed
 
