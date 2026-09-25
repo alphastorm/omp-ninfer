@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/aec707a8437bdbbc70a59242dda29c0d921ec00c/compatibility.json",
-      "compatibility_sha256": "5addaf2dfec77c95a1d32677d5383748e280d4b8dbf8ab401983a523339084de",
+      "compatibility_sha256": "46d817e4dc0f0c3dbb0cd74c6a4ab14ca79cecbcbe6c6c83458a6cf1b0fe298a",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.3.0",
@@ -112,7 +112,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "1ee390782a6285b4f1b452503244e434c29e65c77378fa795e2ddf0503839716",
+    "summary_sha256": "d300573451aea0e60273a33ae2e3e90d75371deb32a0b4f498be274f5217089d",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/aec707a8437bdbbc70a59242dda29c0d921ec00c/releases/v0.8.1/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true

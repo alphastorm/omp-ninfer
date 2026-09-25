@@ -15,7 +15,7 @@
     "note": "All three unmodified upstream client binaries passed authenticated typed-tool/result, exact final marker, continuation and fail-closed inference against the published RTX 5090 image 5ca6e416. Native RTX 4090 documented acceptance passed separately against package 46aa4110."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "5addaf2dfec77c95a1d32677d5383748e280d4b8dbf8ab401983a523339084de",
+  "compatibility_sha256": "46d817e4dc0f0c3dbb0cd74c6a4ab14ca79cecbcbe6c6c83458a6cf1b0fe298a",
   "windows_asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
   "windows_binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
   "platform_receipts": [
