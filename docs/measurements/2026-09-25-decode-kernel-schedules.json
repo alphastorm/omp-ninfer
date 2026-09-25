@@ -1,0 +1,1813 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-055",
+ "title": "Row-blocked small-T projections and a conflict-free Q4 gate/up MMA shorten the MTP3 decode round",
+ "generated_utc": "2026-09-25T16:10:00Z",
+ "status": "passed",
+ "question": "Can the verify-pass kernels EXP-054 ranked recover a material share of the MTP3 decode round without changing any output bit, and does the change hold on both shipped lanes?",
+ "answer": "Yes on the RTX 5090: row-blocking the small-T Q4/Q5 SIMT projections and padding and double-buffering the Q4 gate/up MMA staging cut a 26K-context verify round from 17.75 to 16.08 ms in an A/B/B/A of the packaged release build (+10.3% to +11.0% decode tok/s from a seed context to 31K), with output bytes identical at all 32 kernel/extent points, the 89-case role corpus identical and 130,048-token retrieval exact. On the RTX 4090 the Q5 split2 row pair was slower (MLP down +19% at T=4), so the first candidate decoded 2.7% slower in the lane's C1 benchmark; keeping one row per warp for split2 on the native lanes turned that into +2.8% (157.89 vs 153.54 tok/s).",
+ "decision": "Ship RTX 5090 runtime v0.6.10-qwen38-5090-beta.1 from 8cc0810a and RTX 4090 runtime v0.6.8-qwen38-4090-beta.1 from 5a774841 (alphastorm/ninfer#44), each qualified on its packaged bytes; publication is the founder's. At 90% of the floor 1.40 ms (8.7%) of the round remains recoverable, led by MLP down, GDN query/key and attention decode.",
+ "method": {
+  "candidate_window": "2026-09-25 13:50-14:11Z on the owner RTX 5090 with production held and stopped: a private-launcher sweep of the final vs 86733c0e kernels (cold L2, output byte comparison), 8 oracle tests, public op benches, ninfer_bench A/B/B/A, a 26K nsys graph-node trace, then a candidate server on production arguments for the role corpus and profile gates",
+  "release_window": "2026-09-25 14:35-15:31Z, stock OMP proof rerun 15:32-15:36Z: the packaged 8cc0810a binaries layered on the runtime-image base as arm pkg-8cc0810a with production's serving arguments: oracle tests, public op benches, A/B/B/A, role corpus, then window 7's lane evidence set",
+  "bench": "ninfer_bench --kv-dtype bf16 --prefill-chunk 1024 --mtp-draft-tokens 3 --lm-head-draft -n 256 -pg '1024,256;26000,256;31000,256' -r 3 --warmup 1; A/B/B/A = baseline, change, change, baseline",
+  "rtx4090": "the owner RTX 4090 host, MSVC/vcpkg sm_89 builds in the lane's tree: oracle tests and public op benches; tools/qualification/qualify_native.py's 15 phases, which build, package and install the candidate and include 130,048-token retrieval, restart, rollback, security, the stock OMP client and the C1 benchmark"
+ },
+ "sources": {
+  "baseline": "alphastorm/ninfer 86733c0e93fceccf9af3fa345ca9c8b6754f7abb (production v0.6.9-qwen38-5090-beta.2)",
+  "candidate": "alphastorm/ninfer f306ddd4e81c6a4da90a26ed3898fd9a90f8681a (development build, kernels only)",
+  "release_rtx5090": "alphastorm/ninfer 8cc0810acc296bac482187da171afddd93df7fb9 (e8b55690 kernels with the split2 row-pair seam at T<=5, plus the RTX 4090 lane advance); packaged ninfer-serve 5b2f24719625c4746443dc92a50a3c6152120196ef46056f14feb4cb035ccd15",
+  "release_rtx4090": "alphastorm/ninfer 5a774841c29bdf2ee6b7efba135aed0a47e80447 (8cc0810a with one-row Q5 split2 on the native lanes)",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+ },
+ "kernel_sweep_cold_l2": [
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 2,
+   "original_us": 75.84,
+   "final_us": 72.06,
+   "change_pct": -5.0,
+   "original_floor_pct": 74.6,
+   "final_floor_pct": 78.5,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 3,
+   "original_us": 76.93,
+   "final_us": 72.93,
+   "change_pct": -5.2,
+   "original_floor_pct": 73.5,
+   "final_floor_pct": 77.5,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 4,
+   "original_us": 77.02,
+   "final_us": 72.96,
+   "change_pct": -5.3,
+   "original_floor_pct": 73.4,
+   "final_floor_pct": 77.5,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 5,
+   "original_us": 79.01,
+   "final_us": 74.88,
+   "change_pct": -5.2,
+   "original_floor_pct": 71.6,
+   "final_floor_pct": 75.5,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 8,
+   "original_us": 79.87,
+   "final_us": 77.06,
+   "change_pct": -3.5,
+   "original_floor_pct": 70.8,
+   "final_floor_pct": 73.4,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 16,
+   "original_us": 103.68,
+   "final_us": 97.34,
+   "change_pct": -6.1,
+   "original_floor_pct": 54.5,
+   "final_floor_pct": 58.1,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gateup.q4.mma",
+   "T": 32,
+   "original_us": 204.61,
+   "final_us": 199.84,
+   "change_pct": -2.3,
+   "original_floor_pct": 27.6,
+   "final_floor_pct": 28.3,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.value_z.q5.split4",
+   "T": 3,
+   "original_us": 36.03,
+   "final_us": 34.05,
+   "change_pct": -5.5,
+   "original_floor_pct": 68.4,
+   "final_floor_pct": 72.4,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.value_z.q5.split4",
+   "T": 4,
+   "original_us": 39.65,
+   "final_us": 33.98,
+   "change_pct": -14.3,
+   "original_floor_pct": 62.2,
+   "final_floor_pct": 72.6,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.value_z.q5.split4",
+   "T": 5,
+   "original_us": 44.29,
+   "final_us": 38.11,
+   "change_pct": -14.0,
+   "original_floor_pct": 55.7,
+   "final_floor_pct": 64.7,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.value_z.q5.split4",
+   "T": 6,
+   "original_us": 48.35,
+   "final_us": 46.3,
+   "change_pct": -4.2,
+   "original_floor_pct": 51.0,
+   "final_floor_pct": 53.2,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.qk.q4.simt",
+   "T": 2,
+   "original_us": 25.86,
+   "final_us": 13.54,
+   "change_pct": -47.6,
+   "original_floor_pct": 25.7,
+   "final_floor_pct": 49.2,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.qk.q4.simt",
+   "T": 3,
+   "original_us": 27.26,
+   "final_us": 15.62,
+   "change_pct": -42.7,
+   "original_floor_pct": 24.4,
+   "final_floor_pct": 42.6,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.qk.q4.simt",
+   "T": 4,
+   "original_us": 21.76,
+   "final_us": 17.66,
+   "change_pct": -18.8,
+   "original_floor_pct": 30.6,
+   "final_floor_pct": 37.7,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "gdn.input.pair",
+   "T": 4,
+   "original_us": 53.6,
+   "final_us": 46.43,
+   "change_pct": -13.4,
+   "original_floor_pct": 58.4,
+   "final_floor_pct": 67.4,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.gate_value.q5.split4",
+   "T": 3,
+   "original_us": 25.12,
+   "final_us": 23.78,
+   "change_pct": -5.3,
+   "original_floor_pct": 57.3,
+   "final_floor_pct": 60.5,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.gate_value.q5.split4",
+   "T": 4,
+   "original_us": 27.87,
+   "final_us": 22.85,
+   "change_pct": -18.0,
+   "original_floor_pct": 51.6,
+   "final_floor_pct": 63.0,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.gate_value.q5.split4",
+   "T": 5,
+   "original_us": 31.9,
+   "final_us": 26.66,
+   "change_pct": -16.4,
+   "original_floor_pct": 45.1,
+   "final_floor_pct": 54.0,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.gate_value.q5.split4",
+   "T": 6,
+   "original_us": 34.02,
+   "final_us": 34.02,
+   "change_pct": 0.0,
+   "original_floor_pct": 42.3,
+   "final_floor_pct": 42.3,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.qk.q4.simt",
+   "T": 2,
+   "original_us": 31.26,
+   "final_us": 18.37,
+   "change_pct": -41.2,
+   "original_floor_pct": 37.2,
+   "final_floor_pct": 63.4,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.qk.q4.simt",
+   "T": 3,
+   "original_us": 31.94,
+   "final_us": 21.73,
+   "change_pct": -32.0,
+   "original_floor_pct": 36.5,
+   "final_floor_pct": 53.6,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "attn.qk.q4.simt",
+   "T": 4,
+   "original_us": 27.87,
+   "final_us": 24.83,
+   "change_pct": -10.9,
+   "original_floor_pct": 41.8,
+   "final_floor_pct": 46.9,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mlp.down.q5.split2",
+   "T": 2,
+   "original_us": 46.91,
+   "final_us": 44.77,
+   "change_pct": -4.6,
+   "original_floor_pct": 74.5,
+   "final_floor_pct": 78.0,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mlp.down.q5.split2",
+   "T": 3,
+   "original_us": 50.43,
+   "final_us": 49.63,
+   "change_pct": -1.6,
+   "original_floor_pct": 69.3,
+   "final_floor_pct": 70.4,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mlp.down.q5.split2",
+   "T": 4,
+   "original_us": 60.58,
+   "final_us": 51.14,
+   "change_pct": -15.6,
+   "original_floor_pct": 57.7,
+   "final_floor_pct": 68.3,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mlp.down.q5.split2",
+   "T": 5,
+   "original_us": 66.78,
+   "final_us": 64.74,
+   "change_pct": -3.1,
+   "original_floor_pct": 52.3,
+   "final_floor_pct": 54.0,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mlp.down.q5.split2",
+   "T": 6,
+   "original_us": 72.9,
+   "final_us": 74.98,
+   "change_pct": 2.9,
+   "original_floor_pct": 47.9,
+   "final_floor_pct": 46.6,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mixer.out.q5.split2",
+   "T": 2,
+   "original_us": 21.73,
+   "final_us": 18.18,
+   "change_pct": -16.3,
+   "original_floor_pct": 56.7,
+   "final_floor_pct": 67.8,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mixer.out.q5.split2",
+   "T": 3,
+   "original_us": 22.75,
+   "final_us": 20.83,
+   "change_pct": -8.4,
+   "original_floor_pct": 54.2,
+   "final_floor_pct": 59.2,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mixer.out.q5.split2",
+   "T": 4,
+   "original_us": 25.82,
+   "final_us": 21.7,
+   "change_pct": -16.0,
+   "original_floor_pct": 47.7,
+   "final_floor_pct": 56.8,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mixer.out.q5.split2",
+   "T": 5,
+   "original_us": 28.42,
+   "final_us": 25.79,
+   "change_pct": -9.3,
+   "original_floor_pct": 43.4,
+   "final_floor_pct": 47.8,
+   "output_bytes": "identical"
+  },
+  {
+   "kernel": "mixer.out.q5.split2",
+   "T": 6,
+   "original_us": 31.97,
+   "final_us": 32.13,
+   "change_pct": 0.5,
+   "original_floor_pct": 38.6,
+   "final_floor_pct": 38.4,
+   "output_bytes": "identical"
+  }
+ ],
+ "public_op_curves_release_vs_baseline": [
+  {
+   "op": "MLP down (linear_add Q5, K=17408)",
+   "points": [
+    {
+     "T": 1,
+     "baseline_us": 60.672,
+     "release_us": 60.704,
+     "delta_pct": 0.1,
+     "route": "gemv"
+    },
+    {
+     "T": 2,
+     "baseline_us": 46.304,
+     "release_us": 44.288,
+     "delta_pct": -4.4,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 3,
+     "baseline_us": 48.352,
+     "release_us": 48.864,
+     "delta_pct": 1.1,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 58.816,
+     "release_us": 52.288,
+     "delta_pct": -11.1,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 5,
+     "baseline_us": 66.816,
+     "release_us": 64.736,
+     "delta_pct": -3.1,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 72.928,
+     "release_us": 72.928,
+     "delta_pct": 0.0,
+     "route": "Q5 split2 one row"
+    },
+    {
+     "T": 8,
+     "baseline_us": 87.328,
+     "release_us": 87.328,
+     "delta_pct": 0.0,
+     "route": "Q5 split2 one row"
+    }
+   ],
+   "seams": [
+    "T=1->2",
+    "T=5->6"
+   ],
+   "largest_adjacent_increase": {
+    "from": 6,
+    "to": 8,
+    "us": 14.4
+   }
+  },
+  {
+   "op": "mixer output (linear_add Q5, K=6144)",
+   "points": [
+    {
+     "T": 1,
+     "baseline_us": 19.712,
+     "release_us": 19.712,
+     "delta_pct": 0.0,
+     "route": "gemv"
+    },
+    {
+     "T": 2,
+     "baseline_us": 21.76,
+     "release_us": 19.616,
+     "delta_pct": -9.9,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 3,
+     "baseline_us": 22.848,
+     "release_us": 21.664,
+     "delta_pct": -5.2,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 25.856,
+     "release_us": 21.728,
+     "delta_pct": -16.0,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 5,
+     "baseline_us": 29.92,
+     "release_us": 25.792,
+     "delta_pct": -13.8,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 32.0,
+     "release_us": 31.968,
+     "delta_pct": -0.1,
+     "route": "Q5 split2 one row"
+    },
+    {
+     "T": 8,
+     "baseline_us": 40.224,
+     "release_us": 40.192,
+     "delta_pct": -0.1,
+     "route": "Q5 split2 one row"
+    }
+   ],
+   "seams": [
+    "T=1->2",
+    "T=5->6"
+   ],
+   "largest_adjacent_increase": {
+    "from": 6,
+    "to": 8,
+    "us": 8.224
+   }
+  },
+  {
+   "op": "GDN input (Q4 q/k + Q5 value/z)",
+   "points": [
+    {
+     "T": 1,
+     "baseline_us": 44.736,
+     "release_us": 44.256,
+     "delta_pct": -1.1,
+     "route": "Q4 + Q5 gemv"
+    },
+    {
+     "T": 2,
+     "baseline_us": 54.56,
+     "release_us": 44.128,
+     "delta_pct": -19.1,
+     "route": "Q4 rows x1 + Q5 split4 one row"
+    },
+    {
+     "T": 3,
+     "baseline_us": 60.672,
+     "release_us": 46.304,
+     "delta_pct": -23.7,
+     "route": "Q4 rows x1 + Q5 split4 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 54.336,
+     "release_us": 48.384,
+     "delta_pct": -11.0,
+     "route": "PDL pair: Q5 split4 row pair + Q4 rows x1"
+    },
+    {
+     "T": 5,
+     "baseline_us": 72.96,
+     "release_us": 70.816,
+     "delta_pct": -2.9,
+     "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 78.656,
+     "release_us": 79.008,
+     "delta_pct": 0.4,
+     "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+    },
+    {
+     "T": 8,
+     "baseline_us": 109.76,
+     "release_us": 109.824,
+     "delta_pct": 0.1,
+     "route": "Q4 + Q5 SIMT R8C8"
+    }
+   ],
+   "seams": [
+    "T=1->2",
+    "T=2->3",
+    "T=3->4",
+    "T=4->5",
+    "T=6->8"
+   ],
+   "largest_adjacent_increase": {
+    "from": 6,
+    "to": 8,
+    "us": 30.816
+   }
+  },
+  {
+   "op": "attention input (Q4 q/k + Q5 gate/value)",
+   "points": [
+    {
+     "T": 1,
+     "baseline_us": 38.112,
+     "release_us": 38.112,
+     "delta_pct": 0.0,
+     "route": "Q4 + Q5 gemv"
+    },
+    {
+     "T": 2,
+     "baseline_us": 50.368,
+     "release_us": 37.088,
+     "delta_pct": -26.4,
+     "route": "Q4 rows x2 + Q5 split4 one row"
+    },
+    {
+     "T": 3,
+     "baseline_us": 52.48,
+     "release_us": 42.24,
+     "delta_pct": -19.5,
+     "route": "Q4 rows x2 + Q5 split4 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 50.4,
+     "release_us": 47.168,
+     "delta_pct": -6.4,
+     "route": "Q4 rows x2 + Q5 split4 row pair"
+    },
+    {
+     "T": 5,
+     "baseline_us": 68.768,
+     "release_us": 66.816,
+     "delta_pct": -2.8,
+     "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 72.576,
+     "release_us": 70.88,
+     "delta_pct": -2.3,
+     "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+    },
+    {
+     "T": 8,
+     "baseline_us": 77.056,
+     "release_us": 77.024,
+     "delta_pct": -0.0,
+     "route": "Q4 SIMT R8C8 + Q5 SIMT C4"
+    }
+   ],
+   "seams": [
+    "T=1->2",
+    "T=2->3",
+    "T=4->5",
+    "T=6->8"
+   ],
+   "largest_adjacent_increase": {
+    "from": 4,
+    "to": 5,
+    "us": 19.648
+   }
+  },
+  {
+   "op": "MLP gate/up (Q4 SwiGLU, public route)",
+   "points": [
+    {
+     "T": 1,
+     "baseline_us": 69.664,
+     "release_us": 69.472,
+     "delta_pct": -0.3,
+     "route": "gemv"
+    },
+    {
+     "T": 2,
+     "baseline_us": 75.104,
+     "release_us": 72.064,
+     "delta_pct": -4.0,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 3,
+     "baseline_us": 75.2,
+     "release_us": 72.8,
+     "delta_pct": -3.2,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 4,
+     "baseline_us": 76.992,
+     "release_us": 72.96,
+     "delta_pct": -5.2,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 5,
+     "baseline_us": 78.56,
+     "release_us": 74.944,
+     "delta_pct": -4.6,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 8,
+     "baseline_us": 79.136,
+     "release_us": 77.024,
+     "delta_pct": -2.7,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 16,
+     "baseline_us": 102.528,
+     "release_us": 97.504,
+     "delta_pct": -4.9,
+     "route": "Q4 small-T MMA"
+    },
+    {
+     "T": 32,
+     "baseline_us": 199.552,
+     "release_us": 197.888,
+     "delta_pct": -0.8,
+     "route": "Q4 small-T MMA"
+    }
+   ],
+   "seams": [
+    "T=1->2"
+   ],
+   "largest_adjacent_increase": {
+    "from": 16,
+    "to": 32,
+    "us": 100.384
+   }
+  }
+ ],
+ "in_graph_attribution_context_26000": {
+  "exp054_summary": {
+   "unprofiled_ms_per_round": 17.23,
+   "profiled_busy_fraction": 0.992,
+   "mapped_ms_per_round": 15.335,
+   "mapped_floor_ms_per_round": 11.696,
+   "recoverable_at_90pct_ms_per_round": 2.6,
+   "recoverable_fraction_of_round": 0.1509
+  },
+  "candidate_summary": {
+   "unprofiled_ms_per_round": 16.07,
+   "profiled_busy_fraction": 0.9828,
+   "mapped_ms_per_round": 14.041,
+   "mapped_floor_ms_per_round": 11.696,
+   "recoverable_at_90pct_ms_per_round": 1.402,
+   "recoverable_fraction_of_round": 0.0872
+  },
+  "components": [
+   {
+    "component": "verify MLP gate/up Q4 [34816x5120]",
+    "calls_per_round": 64.0,
+    "exp054_ms_per_round": 4.3871,
+    "candidate_ms_per_round": 3.9081,
+    "exp054_floor_fraction": 0.825,
+    "candidate_floor_fraction": 0.926
+   },
+   {
+    "component": "verify GDN value/z Q5 [12288x5120]",
+    "calls_per_round": 48.0,
+    "exp054_ms_per_round": 1.7877,
+    "candidate_ms_per_round": 1.4674,
+    "exp054_floor_fraction": 0.662,
+    "candidate_floor_fraction": 0.807
+   },
+   {
+    "component": "verify mixer output Q5 [5120x6144]",
+    "calls_per_round": 64.0,
+    "exp054_ms_per_round": 1.1604,
+    "candidate_ms_per_round": 1.0192,
+    "exp054_floor_fraction": 0.68,
+    "candidate_floor_fraction": 0.774
+   },
+   {
+    "component": "verify attention query/key Q4 [7168x5120]",
+    "calls_per_round": 16.0,
+    "exp054_ms_per_round": 0.3906,
+    "candidate_ms_per_round": 0.2673,
+    "exp054_floor_fraction": 0.477,
+    "candidate_floor_fraction": 0.697
+   },
+   {
+    "component": "verify GDN query/key Q4 [4096x5120]",
+    "calls_per_round": 48.0,
+    "exp054_ms_per_round": 0.8047,
+    "candidate_ms_per_round": 0.682,
+    "exp054_floor_fraction": 0.397,
+    "candidate_floor_fraction": 0.468
+   },
+   {
+    "component": "verify MLP down Q5 [5120x17408]",
+    "calls_per_round": 64.0,
+    "exp054_ms_per_round": 2.9481,
+    "candidate_ms_per_round": 2.8602,
+    "exp054_floor_fraction": 0.758,
+    "candidate_floor_fraction": 0.782
+   },
+   {
+    "component": "verify attention gate/value Q5 [7168x5120]",
+    "calls_per_round": 16.0,
+    "exp054_ms_per_round": 0.3511,
+    "candidate_ms_per_round": 0.296,
+    "exp054_floor_fraction": 0.655,
+    "candidate_floor_fraction": 0.777
+   },
+   {
+    "component": "MTP qkgv W8 [14336x5120]",
+    "calls_per_round": 3.0,
+    "exp054_ms_per_round": 0.144,
+    "candidate_ms_per_round": 0.1451,
+    "exp054_floor_fraction": 0.971,
+    "candidate_floor_fraction": 0.963
+   },
+   {
+    "component": "MTP gate/up W8 [34816x5120]",
+    "calls_per_round": 3.0,
+    "exp054_ms_per_round": 0.3343,
+    "candidate_ms_per_round": 0.3364,
+    "exp054_floor_fraction": 1.015,
+    "candidate_floor_fraction": 1.009
+   },
+   {
+    "component": "verify LM head W8 [248320x5120]",
+    "calls_per_round": 1.0,
+    "exp054_ms_per_round": 0.779,
+    "candidate_ms_per_round": 0.7834,
+    "exp054_floor_fraction": 1.036,
+    "candidate_floor_fraction": 1.03
+   },
+   {
+    "component": "draft head Q4 [131072x5120]",
+    "calls_per_round": 3.0,
+    "exp054_ms_per_round": 0.6201,
+    "candidate_ms_per_round": 0.6294,
+    "exp054_floor_fraction": 1.03,
+    "candidate_floor_fraction": 1.015
+   },
+   {
+    "component": "attention decode partial (4x65x1)",
+    "calls_per_round": 19.0,
+    "exp054_ms_per_round": 1.6281,
+    "candidate_ms_per_round": 1.6463,
+    "exp054_floor_fraction": 0.742,
+    "candidate_floor_fraction": 0.734
+   }
+  ],
+  "mapped_components_saved_ms_per_round": 1.294
+ },
+ "end_to_end_candidate_window": {
+  "tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 149.77,
+     "ms_per_round": 15.974
+    },
+    "candidate-1": {
+     "decode_tok_s": 164.39,
+     "ms_per_round": 14.554
+    },
+    "candidate-2": {
+     "decode_tok_s": 163.9,
+     "ms_per_round": 14.598
+    },
+    "baseline-2": {
+     "decode_tok_s": 146.34,
+     "ms_per_round": 16.349
+    }
+   },
+   "mtp_acceptance_rate": 0.46105919,
+   "rounds_per_repetition": 107.0,
+   "decode_tok_s_change_pct": 10.87,
+   "ms_per_round_change_pct": -9.81
+  },
+  "pp1024+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 124.7,
+     "ms_per_round": 16.038
+    },
+    "candidate-1": {
+     "decode_tok_s": 137.26,
+     "ms_per_round": 14.571
+    },
+    "candidate-2": {
+     "decode_tok_s": 136.87,
+     "ms_per_round": 14.612
+    },
+    "baseline-2": {
+     "decode_tok_s": 122.03,
+     "ms_per_round": 16.39
+    }
+   },
+   "mtp_acceptance_rate": 0.3342036554,
+   "rounds_per_repetition": 128.0,
+   "decode_tok_s_change_pct": 11.11,
+   "ms_per_round_change_pct": -10.01
+  },
+  "pp26000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 223.36,
+     "ms_per_round": 17.633
+    },
+    "candidate-1": {
+     "decode_tok_s": 245.26,
+     "ms_per_round": 16.058
+    },
+    "candidate-2": {
+     "decode_tok_s": 244.89,
+     "ms_per_round": 16.083
+    },
+    "baseline-2": {
+     "decode_tok_s": 220.38,
+     "ms_per_round": 17.871
+    }
+   },
+   "mtp_acceptance_rate": 0.9845360825,
+   "rounds_per_repetition": 65.0,
+   "decode_tok_s_change_pct": 10.46,
+   "ms_per_round_change_pct": -9.47
+  },
+  "pp31000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 215.81,
+     "ms_per_round": 17.974
+    },
+    "candidate-1": {
+     "decode_tok_s": 238.28,
+     "ms_per_round": 16.278
+    },
+    "candidate-2": {
+     "decode_tok_s": 238.14,
+     "ms_per_round": 16.288
+    },
+    "baseline-2": {
+     "decode_tok_s": 214.49,
+     "ms_per_round": 18.084
+    }
+   },
+   "mtp_acceptance_rate": 0.9693877551,
+   "rounds_per_repetition": 66.0,
+   "decode_tok_s_change_pct": 10.72,
+   "ms_per_round_change_pct": -9.68
+  }
+ },
+ "end_to_end_release_window": {
+  "tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 150.05,
+     "ms_per_round": 15.945
+    },
+    "release-1": {
+     "decode_tok_s": 164.36,
+     "ms_per_round": 14.556
+    },
+    "release-2": {
+     "decode_tok_s": 163.8,
+     "ms_per_round": 14.606
+    },
+    "baseline-2": {
+     "decode_tok_s": 146.24,
+     "ms_per_round": 16.36
+    }
+   },
+   "mtp_acceptance_rate": 0.46105919,
+   "rounds_per_repetition": 107.0,
+   "decode_tok_s_change_pct": 10.76,
+   "ms_per_round_change_pct": -9.73
+  },
+  "pp1024+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 124.97,
+     "ms_per_round": 16.004
+    },
+    "release-1": {
+     "decode_tok_s": 137.21,
+     "ms_per_round": 14.576
+    },
+    "release-2": {
+     "decode_tok_s": 136.84,
+     "ms_per_round": 14.616
+    },
+    "baseline-2": {
+     "decode_tok_s": 122.04,
+     "ms_per_round": 16.389
+    }
+   },
+   "mtp_acceptance_rate": 0.3342036554,
+   "rounds_per_repetition": 128.0,
+   "decode_tok_s_change_pct": 10.95,
+   "ms_per_round_change_pct": -9.88
+  },
+  "pp26000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 223.53,
+     "ms_per_round": 17.619
+    },
+    "release-1": {
+     "decode_tok_s": 245.07,
+     "ms_per_round": 16.071
+    },
+    "release-2": {
+     "decode_tok_s": 244.65,
+     "ms_per_round": 16.098
+    },
+    "baseline-2": {
+     "decode_tok_s": 220.29,
+     "ms_per_round": 17.878
+    }
+   },
+   "mtp_acceptance_rate": 0.9845360825,
+   "rounds_per_repetition": 65.0,
+   "decode_tok_s_change_pct": 10.34,
+   "ms_per_round_change_pct": -9.38
+  },
+  "pp31000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 215.89,
+     "ms_per_round": 17.967
+    },
+    "release-1": {
+     "decode_tok_s": 238.12,
+     "ms_per_round": 16.289
+    },
+    "release-2": {
+     "decode_tok_s": 238.07,
+     "ms_per_round": 16.293
+    },
+    "baseline-2": {
+     "decode_tok_s": 214.38,
+     "ms_per_round": 18.093
+    }
+   },
+   "mtp_acceptance_rate": 0.9693877551,
+   "rounds_per_repetition": 66.0,
+   "decode_tok_s_change_pct": 10.67,
+   "ms_per_round_change_pct": -9.65
+  }
+ },
+ "numerics": {
+  "role_corpus_candidate": [
+   "v080p-gw-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+   "v0610-bf16-published: 89/89 cases identical; 0 differ; 0 missing"
+  ],
+  "role_corpus_release": [
+   "v080p-gw-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+   "v0610-bf16-published: 89/89 cases identical; 0 differ; 0 missing",
+   "exp055-f306ddd4-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+  ],
+  "profile_gates_candidate": {
+   "status": "passed",
+   "long_context": {
+    "prompt_tokens": 130048,
+    "exact_output": true,
+    "wall_s": 60.472
+   },
+   "decode_2048": {
+    "completion_tokens": 2048,
+    "completion_tokens_per_second_wall": 150.23
+   },
+   "agent_protocol": "passed"
+  },
+  "profile_gates_release": {
+   "status": "passed",
+   "long_context": {
+    "prompt_tokens": 130048,
+    "exact_output": true,
+    "wall_s": 59.756
+   },
+   "decode_2048": {
+    "completion_tokens": 2048,
+    "completion_tokens_per_second_wall": 150.66
+   },
+   "agent_protocol": "passed"
+  },
+  "oracle_tests_rtx5090_release": [
+   [
+    "ninfer_linear_add_q5_a16_test",
+    "0"
+   ],
+   [
+    "ninfer_gdn_input_proj_test",
+    "0"
+   ],
+   [
+    "ninfer_gdn_input_proj_conv_snapshot_test",
+    "0"
+   ],
+   [
+    "ninfer_gdn_input_proj_conv_record_test",
+    "0"
+   ],
+   [
+    "ninfer_attn_input_proj_test",
+    "0"
+   ],
+   [
+    "ninfer_linear_swiglu_q4_a16_test",
+    "0"
+   ],
+   [
+    "ninfer_linear_q4_a16_test",
+    "0"
+   ],
+   [
+    "ninfer_linear_q5_a16_test",
+    "0"
+   ]
+  ]
+ },
+ "rtx5090_lane_evidence_release": {
+  "profile": "0",
+  "workload": "0",
+  "workload resume": "0",
+  "fanout-57k": "0",
+  "fanout-67k": "0",
+  "warm-arrival": "0",
+  "restore": "0",
+  "multisession": "0",
+  "agentmix": "0",
+  "stock OMP proof": "0",
+  "stock OMP proof first attempt": "exit 2 before OMP started: the window gave it a fresh HOME without the documented route's models.yml; rerun at 15:32Z on a HOME holding only that route's models.yml, config.yml and key file",
+  "barrier held turn exact": true
+ },
+ "rtx4090": {
+  "c1_decode_history_same_decode_kernels_tok_s": {
+   "1c17c3fa": 153.43668122931618,
+   "68a0722f": 153.43526269585405,
+   "696e78c7": 153.46413743181108,
+   "a54f1109": 153.33472861946743,
+   "b0e8c2fa": 153.5434062036245,
+   "e962f98c": 153.56190743324225
+  },
+  "first_candidate_8cc0810a": {
+   "qualification": {
+    "release_id": "qwen38-4090-native-v0.6.8-beta.1",
+    "source_commit": "8cc0810acc296bac482187da171afddd93df7fb9",
+    "status": "passed",
+    "phases": {
+     "benchmark_c1": "passed",
+     "context_128k": "passed",
+     "neutral_build": "passed",
+     "omp": "passed",
+     "package": "passed",
+     "preflight": "passed",
+     "pressure_protocol": "passed",
+     "private_path_scan": "passed",
+     "protocol": "passed",
+     "receipt": "passed",
+     "restart": "passed",
+     "restore": "passed",
+     "rollback": "passed",
+     "security": "passed",
+     "transfer_install": "passed"
+    }
+   },
+   "benchmark_c1": {
+    "prompt_tokens": 4541,
+    "completion_tokens": 1024,
+    "decode_tokens_per_second": 149.38211312873744,
+    "mtp_acceptance_percent": 87.58865248226951,
+    "prefill_tokens_per_second": 2111.9255426488276
+   },
+   "oracle_tests_sm89": "8/8 passed"
+  },
+  "diagnosis_public_op_curves_8cc0810a_vs_b0e8c2fa": [
+   {
+    "op": "MLP down (linear_add Q5, K=17408)",
+    "points": [
+     {
+      "T": 1,
+      "baseline_us": 96.256,
+      "release_us": 96.256,
+      "delta_pct": 0.0,
+      "route": "gemv"
+     },
+     {
+      "T": 2,
+      "baseline_us": 93.184,
+      "release_us": 102.4,
+      "delta_pct": 9.9,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 3,
+      "baseline_us": 95.232,
+      "release_us": 115.712,
+      "delta_pct": 21.5,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 4,
+      "baseline_us": 101.312,
+      "release_us": 120.832,
+      "delta_pct": 19.3,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 5,
+      "baseline_us": 112.64,
+      "release_us": 130.944,
+      "delta_pct": 16.2,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 6,
+      "baseline_us": 116.736,
+      "release_us": 116.736,
+      "delta_pct": 0.0,
+      "route": "Q5 split2 one row"
+     },
+     {
+      "T": 8,
+      "baseline_us": 136.192,
+      "release_us": 136.192,
+      "delta_pct": 0.0,
+      "route": "Q5 split2 one row"
+     }
+    ],
+    "seams": [
+     "T=1->2",
+     "T=5->6"
+    ],
+    "largest_adjacent_increase": {
+     "from": 6,
+     "to": 8,
+     "us": 19.456
+    }
+   },
+   {
+    "op": "mixer output (linear_add Q5, K=6144)",
+    "points": [
+     {
+      "T": 1,
+      "baseline_us": 40.0,
+      "release_us": 40.96,
+      "delta_pct": 2.4,
+      "route": "gemv"
+     },
+     {
+      "T": 2,
+      "baseline_us": 37.888,
+      "release_us": 40.96,
+      "delta_pct": 8.1,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 3,
+      "baseline_us": 38.912,
+      "release_us": 43.008,
+      "delta_pct": 10.5,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 4,
+      "baseline_us": 41.984,
+      "release_us": 43.008,
+      "delta_pct": 2.4,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 5,
+      "baseline_us": 45.056,
+      "release_us": 47.104,
+      "delta_pct": 4.5,
+      "route": "Q5 split2 row pair"
+     },
+     {
+      "T": 6,
+      "baseline_us": 46.08,
+      "release_us": 47.104,
+      "delta_pct": 2.2,
+      "route": "Q5 split2 one row"
+     },
+     {
+      "T": 8,
+      "baseline_us": 56.16,
+      "release_us": 56.32,
+      "delta_pct": 0.3,
+      "route": "Q5 split2 one row"
+     }
+    ],
+    "seams": [
+     "T=1->2",
+     "T=5->6"
+    ],
+    "largest_adjacent_increase": {
+     "from": 6,
+     "to": 8,
+     "us": 9.216
+    }
+   },
+   {
+    "op": "GDN input (Q4 q/k + Q5 value/z)",
+    "points": [
+     {
+      "T": 1,
+      "baseline_us": 88.064,
+      "release_us": 88.064,
+      "delta_pct": 0.0,
+      "route": "Q4 + Q5 gemv"
+     },
+     {
+      "T": 2,
+      "baseline_us": 97.28,
+      "release_us": 86.016,
+      "delta_pct": -11.6,
+      "route": "Q4 rows x1 + Q5 split4 one row"
+     },
+     {
+      "T": 3,
+      "baseline_us": 103.424,
+      "release_us": 88.064,
+      "delta_pct": -14.9,
+      "route": "Q4 rows x1 + Q5 split4 row pair"
+     },
+     {
+      "T": 4,
+      "baseline_us": 91.136,
+      "release_us": 88.064,
+      "delta_pct": -3.4,
+      "route": "PDL pair: Q5 split4 row pair + Q4 rows x1"
+     },
+     {
+      "T": 5,
+      "baseline_us": 105.472,
+      "release_us": 107.648,
+      "delta_pct": 2.1,
+      "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+     },
+     {
+      "T": 6,
+      "baseline_us": 112.64,
+      "release_us": 112.64,
+      "delta_pct": 0.0,
+      "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+     },
+     {
+      "T": 8,
+      "baseline_us": 133.12,
+      "release_us": 137.216,
+      "delta_pct": 3.1,
+      "route": "Q4 + Q5 SIMT R8C8"
+     }
+    ],
+    "seams": [
+     "T=1->2",
+     "T=2->3",
+     "T=3->4",
+     "T=4->5",
+     "T=6->8"
+    ],
+    "largest_adjacent_increase": {
+     "from": 6,
+     "to": 8,
+     "us": 24.576
+    }
+   },
+   {
+    "op": "attention input (Q4 q/k + Q5 gate/value)",
+    "points": [
+     {
+      "T": 1,
+      "baseline_us": 77.824,
+      "release_us": 77.824,
+      "delta_pct": 0.0,
+      "route": "Q4 + Q5 gemv"
+     },
+     {
+      "T": 2,
+      "baseline_us": 83.968,
+      "release_us": 73.536,
+      "delta_pct": -12.4,
+      "route": "Q4 rows x2 + Q5 split4 one row"
+     },
+     {
+      "T": 3,
+      "baseline_us": 84.16,
+      "release_us": 74.752,
+      "delta_pct": -11.2,
+      "route": "Q4 rows x2 + Q5 split4 row pair"
+     },
+     {
+      "T": 4,
+      "baseline_us": 78.848,
+      "release_us": 74.752,
+      "delta_pct": -5.2,
+      "route": "Q4 rows x2 + Q5 split4 row pair"
+     },
+     {
+      "T": 5,
+      "baseline_us": 109.568,
+      "release_us": 110.592,
+      "delta_pct": 0.9,
+      "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+     },
+     {
+      "T": 6,
+      "baseline_us": 116.736,
+      "release_us": 114.688,
+      "delta_pct": -1.8,
+      "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+     },
+     {
+      "T": 8,
+      "baseline_us": 108.544,
+      "release_us": 108.544,
+      "delta_pct": 0.0,
+      "route": "Q4 SIMT R8C8 + Q5 SIMT C4"
+     }
+    ],
+    "seams": [
+     "T=1->2",
+     "T=2->3",
+     "T=4->5",
+     "T=6->8"
+    ],
+    "largest_adjacent_increase": {
+     "from": 4,
+     "to": 5,
+     "us": 35.84
+    }
+   },
+   {
+    "op": "MLP gate/up (Q4 SwiGLU, public route)",
+    "points": [
+     {
+      "T": 1,
+      "baseline_us": 145.408,
+      "release_us": 144.448,
+      "delta_pct": -0.7,
+      "route": "gemv"
+     },
+     {
+      "T": 2,
+      "baseline_us": 147.36,
+      "release_us": 144.384,
+      "delta_pct": -2.0,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 3,
+      "baseline_us": 147.456,
+      "release_us": 145.312,
+      "delta_pct": -1.5,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 4,
+      "baseline_us": 147.456,
+      "release_us": 145.408,
+      "delta_pct": -1.4,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 5,
+      "baseline_us": 148.48,
+      "release_us": 145.408,
+      "delta_pct": -2.1,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 8,
+      "baseline_us": 149.504,
+      "release_us": 148.48,
+      "delta_pct": -0.7,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 16,
+      "baseline_us": 195.584,
+      "release_us": 195.584,
+      "delta_pct": 0.0,
+      "route": "Q4 small-T MMA"
+     },
+     {
+      "T": 32,
+      "baseline_us": 284.672,
+      "release_us": 285.696,
+      "delta_pct": 0.4,
+      "route": "Q4 small-T MMA"
+     }
+    ],
+    "seams": [
+     "T=1->2"
+    ],
+    "largest_adjacent_increase": {
+     "from": 16,
+     "to": 32,
+     "us": 90.112
+    }
+   }
+  ],
+  "final_5a774841": {
+   "change": "the native Windows lanes keep one-row Q5 split2 (MLP down, mixer output) at every width",
+   "public_op_curves_vs_b0e8c2fa": [
+    {
+     "op": "MLP down (linear_add Q5, K=17408)",
+     "points": [
+      {
+       "T": 1,
+       "baseline_us": 96.256,
+       "release_us": 97.28,
+       "delta_pct": 1.1,
+       "route": "gemv"
+      },
+      {
+       "T": 2,
+       "baseline_us": 93.184,
+       "release_us": 93.184,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 3,
+       "baseline_us": 95.232,
+       "release_us": 95.232,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 4,
+       "baseline_us": 101.312,
+       "release_us": 101.376,
+       "delta_pct": 0.1,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 5,
+       "baseline_us": 112.64,
+       "release_us": 112.64,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 6,
+       "baseline_us": 116.736,
+       "release_us": 116.736,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 8,
+       "baseline_us": 136.192,
+       "release_us": 135.168,
+       "delta_pct": -0.8,
+       "route": "Q5 split2 one row"
+      }
+     ],
+     "seams": [
+      "T=1->2"
+     ],
+     "largest_adjacent_increase": {
+      "from": 6,
+      "to": 8,
+      "us": 18.432
+     }
+    },
+    {
+     "op": "mixer output (linear_add Q5, K=6144)",
+     "points": [
+      {
+       "T": 1,
+       "baseline_us": 40.0,
+       "release_us": 39.936,
+       "delta_pct": -0.2,
+       "route": "gemv"
+      },
+      {
+       "T": 2,
+       "baseline_us": 37.888,
+       "release_us": 37.888,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 3,
+       "baseline_us": 38.912,
+       "release_us": 37.984,
+       "delta_pct": -2.4,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 4,
+       "baseline_us": 41.984,
+       "release_us": 40.992,
+       "delta_pct": -2.4,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 5,
+       "baseline_us": 45.056,
+       "release_us": 44.032,
+       "delta_pct": -2.3,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 6,
+       "baseline_us": 46.08,
+       "release_us": 46.08,
+       "delta_pct": 0.0,
+       "route": "Q5 split2 one row"
+      },
+      {
+       "T": 8,
+       "baseline_us": 56.16,
+       "release_us": 55.296,
+       "delta_pct": -1.5,
+       "route": "Q5 split2 one row"
+      }
+     ],
+     "seams": [
+      "T=1->2"
+     ],
+     "largest_adjacent_increase": {
+      "from": 6,
+      "to": 8,
+      "us": 9.216
+     }
+    },
+    {
+     "op": "GDN input (Q4 q/k + Q5 value/z)",
+     "points": [
+      {
+       "T": 1,
+       "baseline_us": 88.064,
+       "release_us": 88.064,
+       "delta_pct": 0.0,
+       "route": "Q4 + Q5 gemv"
+      },
+      {
+       "T": 2,
+       "baseline_us": 97.28,
+       "release_us": 86.016,
+       "delta_pct": -11.6,
+       "route": "Q4 rows x1 + Q5 split4 one row"
+      },
+      {
+       "T": 3,
+       "baseline_us": 103.424,
+       "release_us": 87.04,
+       "delta_pct": -15.8,
+       "route": "Q4 rows x1 + Q5 split4 row pair"
+      },
+      {
+       "T": 4,
+       "baseline_us": 91.136,
+       "release_us": 87.04,
+       "delta_pct": -4.5,
+       "route": "PDL pair: Q5 split4 row pair + Q4 rows x1"
+      },
+      {
+       "T": 5,
+       "baseline_us": 105.472,
+       "release_us": 105.472,
+       "delta_pct": 0.0,
+       "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+      },
+      {
+       "T": 6,
+       "baseline_us": 112.64,
+       "release_us": 110.592,
+       "delta_pct": -1.8,
+       "route": "Q4 SIMT R8C8 + Q5 split4 row pair"
+      },
+      {
+       "T": 8,
+       "baseline_us": 133.12,
+       "release_us": 130.048,
+       "delta_pct": -2.3,
+       "route": "Q4 + Q5 SIMT R8C8"
+      }
+     ],
+     "seams": [
+      "T=1->2",
+      "T=2->3",
+      "T=3->4",
+      "T=4->5",
+      "T=6->8"
+     ],
+     "largest_adjacent_increase": {
+      "from": 6,
+      "to": 8,
+      "us": 19.456
+     }
+    },
+    {
+     "op": "attention input (Q4 q/k + Q5 gate/value)",
+     "points": [
+      {
+       "T": 1,
+       "baseline_us": 77.824,
+       "release_us": 78.848,
+       "delta_pct": 1.3,
+       "route": "Q4 + Q5 gemv"
+      },
+      {
+       "T": 2,
+       "baseline_us": 83.968,
+       "release_us": 73.728,
+       "delta_pct": -12.2,
+       "route": "Q4 rows x2 + Q5 split4 one row"
+      },
+      {
+       "T": 3,
+       "baseline_us": 84.16,
+       "release_us": 74.752,
+       "delta_pct": -11.2,
+       "route": "Q4 rows x2 + Q5 split4 row pair"
+      },
+      {
+       "T": 4,
+       "baseline_us": 78.848,
+       "release_us": 75.776,
+       "delta_pct": -3.9,
+       "route": "Q4 rows x2 + Q5 split4 row pair"
+      },
+      {
+       "T": 5,
+       "baseline_us": 109.568,
+       "release_us": 114.688,
+       "delta_pct": 4.7,
+       "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+      },
+      {
+       "T": 6,
+       "baseline_us": 116.736,
+       "release_us": 118.944,
+       "delta_pct": 1.9,
+       "route": "Q4 SIMT R8C4 + Q5 split4 row pair"
+      },
+      {
+       "T": 8,
+       "baseline_us": 108.544,
+       "release_us": 113.728,
+       "delta_pct": 4.8,
+       "route": "Q4 SIMT R8C8 + Q5 SIMT C4"
+      }
+     ],
+     "seams": [
+      "T=1->2",
+      "T=2->3",
+      "T=4->5",
+      "T=6->8"
+     ],
+     "largest_adjacent_increase": {
+      "from": 4,
+      "to": 5,
+      "us": 38.912
+     }
+    },
+    {
+     "op": "MLP gate/up (Q4 SwiGLU, public route)",
+     "points": [
+      {
+       "T": 1,
+       "baseline_us": 145.408,
+       "release_us": 145.408,
+       "delta_pct": 0.0,
+       "route": "gemv"
+      },
+      {
+       "T": 2,
+       "baseline_us": 147.36,
+       "release_us": 145.408,
+       "delta_pct": -1.3,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 3,
+       "baseline_us": 147.456,
+       "release_us": 145.408,
+       "delta_pct": -1.4,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 4,
+       "baseline_us": 147.456,
+       "release_us": 146.432,
+       "delta_pct": -0.7,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 5,
+       "baseline_us": 148.48,
+       "release_us": 146.432,
+       "delta_pct": -1.4,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 8,
+       "baseline_us": 149.504,
+       "release_us": 148.48,
+       "delta_pct": -0.7,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 16,
+       "baseline_us": 195.584,
+       "release_us": 208.832,
+       "delta_pct": 6.8,
+       "route": "Q4 small-T MMA"
+      },
+      {
+       "T": 32,
+       "baseline_us": 284.672,
+       "release_us": 307.2,
+       "delta_pct": 7.9,
+       "route": "Q4 small-T MMA"
+      }
+     ],
+     "seams": [
+      "T=1->2"
+     ],
+     "largest_adjacent_increase": {
+      "from": 16,
+      "to": 32,
+      "us": 98.368
+     }
+    }
+   ],
+   "oracle_tests_sm89": {
+    "passed": 8,
+    "total": 8
+   },
+   "qualification": {
+    "release_id": "qwen38-4090-native-v0.6.8-beta.1",
+    "source_commit": "5a774841c29bdf2ee6b7efba135aed0a47e80447",
+    "status": "passed",
+    "phases": {
+     "benchmark_c1": "passed",
+     "context_128k": "passed",
+     "neutral_build": "passed",
+     "omp": "passed",
+     "package": "passed",
+     "preflight": "passed",
+     "pressure_protocol": "passed",
+     "private_path_scan": "passed",
+     "protocol": "passed",
+     "receipt": "passed",
+     "restart": "passed",
+     "restore": "passed",
+     "rollback": "passed",
+     "security": "passed",
+     "transfer_install": "passed"
+    }
+   },
+   "benchmark_c1": {
+    "prompt_tokens": 4541,
+    "completion_tokens": 1024,
+    "decode_tokens_per_second": 157.89278265922772,
+    "mtp_acceptance_percent": 87.58865248226951,
+    "prefill_tokens_per_second": 2119.6891016845348
+   },
+   "decode_change_vs_b0e8c2fa_pct": 2.83
+  }
+ },
+ "limits": [
+  "The in-graph attribution is from the development build f306ddd4, whose T=4 kernels are the release's; the release build was measured end to end.",
+  "RTX 4090 op-bench points move up to about 8% between runs where the code did not change; its C1 benchmark is one run per candidate, against six earlier runs at 153.33-153.56 tok/s.",
+  "Output bit-identity against the old kernels is proven on the RTX 5090 only; on the RTX 4090 the oracle tests and the qualification's exact long-context retrieval passed.",
+  "The attention input T=4->5 route seam was not examined: the Q4 query/key row kernel was swept at T=2-4 only.",
+  "The deferred RTX 3090 lane (sm_86) inherits the native-lane split2 choice without measurement."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
