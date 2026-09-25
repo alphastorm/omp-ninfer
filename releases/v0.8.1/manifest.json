@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.8.1",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/aec707a8437bdbbc70a59242dda29c0d921ec00c/compatibility.json",
-      "compatibility_sha256": "36e56bdf777da544ddf0fc5a19e7438dac803185a6b3f01dc44b65e10f4d5e48",
+      "compatibility_sha256": "bf177188659b3fc39419712c0eeb0de470312b6c6fd0823be0c0588d13f743fb",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.3.0",
@@ -144,7 +144,7 @@
       "NInfer RTX4090 v0.6.8-qwen38-4090-beta.1 (published)"
     ],
     "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.10-qwen38-5090-beta.1 component and runtime image 5ca6e416; the composed acceptance receipt is absent until it is"
+      "external-install and documented-route acceptance have not run against the published v0.6.10-qwen38-5090-beta.1 image 5ca6e416 and v0.6.8-qwen38-4090-beta.1 package with the upstream OMP 18.3.0 client; the composed acceptance receipt is absent until they do"
     ],
     "external_installation_qualified": true
   }
