@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 from pathlib import Path, PureWindowsPath
+import re
 import shlex
 import shutil
 import socket
@@ -33,6 +34,23 @@ def sha(path):
         for data in iter(lambda: f.read(8 * 1024 * 1024), b''):
             h.update(data)
     return h.hexdigest()
+
+
+MARKER = 'OMP_NINFER_TOOL_OK'
+NONCE = 'COBALT-493817'
+MARKER_TOKEN = re.compile(r'(?<![A-Z0-9_])' + MARKER + r'(?![A-Z0-9_])')
+
+
+def windows_route_answers(lines):
+    """What the documented Windows commands visibly returned. The tool prompt asks the model to
+    report the file's line, which it may quote or format, so only the marker token is required,
+    as on the other routes; the structured probe separately requires its whole answer exactly.
+    The resume prompt asks for the nonce alone, so that line must be exact."""
+    assert any(MARKER_TOKEN.search(line) for line in lines), 'Windows route did not visibly return the tool marker'
+    assert any(line.strip() == NONCE for line in lines), 'Windows route did not visibly return exact nonce'
+    return {'tool_marker_observed': True,
+            'plain_stdout_exact_marker': any(line.strip() == MARKER for line in lines),
+            'exact_nonce_line': True}
 
 
 def main():
@@ -239,16 +257,13 @@ def main():
         assert len(smoke) == 1 and smoke[0].read_text().strip() == 'COBALT-493817', 'documented restart did not return exact nonce'
         assert (smoke[0].parent / 'resume.txt').read_text().strip() == 'COBALT-493817'
         tool_output = (smoke[0].parent / 'tool.txt').read_text().strip()
-        assert 'OMP_NINFER_TOOL_OK' in tool_output, 'documented tool marker absent'
+        assert MARKER_TOKEN.search(tool_output), 'documented tool marker absent'
         result['routes']['mac']['tool_marker_observed'] = True
         result['routes']['mac']['plain_stdout_exact_marker'] = tool_output == 'OMP_NINFER_TOOL_OK'
         result['routes']['mac']['smoke_artifact_directory'] = str(smoke[0].parent)
         result['routes']['mac']['exact_restart_nonce'] = True
         result['clients']['mac']['live_acceptance']['documented_server_restart_nonce_returned'] = True
-        lines = (root / 'windows-route.log').read_text().splitlines()
-        assert any(line.strip() == 'OMP_NINFER_TOOL_OK' for line in lines), 'Windows route did not visibly return exact marker'
-        assert any(line.strip() == 'COBALT-493817' for line in lines), 'Windows route did not visibly return exact nonce'
-        result['routes']['windows']['exact_marker_and_nonce_lines'] = True
+        result['routes']['windows'].update(windows_route_answers((root / 'windows-route.log').read_text().splitlines()))
         result['private_root'] = str(root)
         save('final-summary.json', result)
         return result

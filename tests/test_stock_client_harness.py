@@ -140,5 +140,33 @@ class LinuxClientInstallationTests(unittest.TestCase):
         self.assertFalse(self.launcher.exists())
 
 
+class WindowsRouteAnswerTests(unittest.TestCase):
+    """The documented Windows commands' visible answers, as the route log records them."""
+
+    def setUp(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "rtx5090_routes", ROOT / "scripts" / "hosts" / "accept-rtx5090-routes.py")
+        assert spec and spec.loader
+        self.routes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.routes)
+
+    def test_a_reported_marker_passes_and_records_whether_it_was_a_bare_line(self) -> None:
+        for answer, bare in ((["Exact single line: `OMP_NINFER_TOOL_OK`"], False),
+                             (["The exact single line in marker.txt is:", "```", "OMP_NINFER_TOOL_OK", "```"], True)):
+            with self.subTest(answer=answer):
+                observed = self.routes.windows_route_answers(
+                    ["Working...", *answer, "Working...", "Got it - COBALT-493817.", "COBALT-493817"])
+                self.assertEqual(observed, {"tool_marker_observed": True, "plain_stdout_exact_marker": bare,
+                                            "exact_nonce_line": True})
+
+    def test_a_missing_marker_or_an_inexact_nonce_is_refused(self) -> None:
+        for lines, message in ((["OMP_NINFER_TOOL_OKAY", "COBALT-493817"], "tool marker"),
+                               (["MY_OMP_NINFER_TOOL_OK", "COBALT-493817"], "tool marker"),
+                               (["`OMP_NINFER_TOOL_OK`", "The nonce was COBALT-493817."], "exact nonce")):
+            with self.subTest(lines=lines), self.assertRaisesRegex(AssertionError, message):
+                self.routes.windows_route_answers(lines)
+
+
+
 if __name__ == "__main__":
     unittest.main()
