@@ -117,6 +117,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
 | EXP-054 | RTX 5090 MTP3 decode round attribution | The verify pass's Q4/Q5 projections, not launch overhead, hold the round above the bandwidth floor | 26K-context round 17.23 ms (production 17.1 ms), GPU busy 99.2%; W8 LM head, MTP layer and Q4 draft head at 97–104% of 1,674.5 GB/s; Q4 gate/up 82.5%, Q5 down 75.8%, Q5 mixer outputs 68.0%, GDN value/z 66.2%, GDN query/key 39.7%; 2.6 ms (15.1%) recoverable at 90% | kept |
 | EXP-055 | RTX 5090 and RTX 4090 MTP3 decode kernels | Row-blocking the small-T Q4/Q5 projections and removing the Q4 gate/up bank conflicts recover a material share of the round with bit-identical outputs | RTX 5090 packaged `v0.6.10`: 26K-context round 17.75 → 16.08 ms and decode +10.3% to +11.0% from a seed context to 31K (A/B/B/A); 32/32 kernel points byte-identical, 89/89 role-corpus cases identical, 130,048-token retrieval exact; Q4 gate/up 82.5% → 92.6% of the floor. RTX 4090: the split2 row pair ran 19% slower at T=4 and C1 decode fell 2.7%; with one-row split2 on the native lanes, 157.89 tok/s (+2.8%) | kept |
+| EXP-056 | RTX 5090 and RTX 4090 MTP3 decode remainder | Warp, register, prefetch and L2 hand-off schedules that keep every output byte recover part of the round EXP-055 left above 90% of the floor | 1,631 (RTX 5090) and 449 (RTX 4090) private-launcher rows per pass byte-identical; no T=4 projection or GDN record/fold schedule beats production beyond noise, and an L2 hand-off prefetch only speeds a cold consumer (the mixer takes 16.4 µs with its whole weight in L2 and 16.6 µs in the production graph). Two-warp BF16 attention above the 16K split tier: in-graph attention partial −6.1% at 26K, decode +0.28% to +0.91% from 26K to 60K, public op 3.7–5.4% slower at 16,387–20,000 keys. Exclusive-time remainder 1.15 ms (7.2%) | rejected — no `v0.8.2` |
 
 Entry detail:
 
@@ -589,6 +590,32 @@ Entry detail:
   split2; requalified, the RTX 4090 decodes at **157.89 tok/s (+2.8%)**. At 90% of the floor,
   1.40 ms (8.7%) of the RTX 5090 round remains recoverable, led by MLP down, GDN query/key and
   attention decode. Receipt: [kernel schedules](measurements/2026-09-25-decode-kernel-schedules.json).
+- **EXP-056 — the rest of the decode round (2026-09-25).** EXP-055 left 1.40 ms (8.7%) of the
+  26K RTX 5090 round above 90% of the bandwidth floor. Nsight Compute put the attention partial
+  at 255 registers per thread and 10.8% achieved occupancy on 0.76 waves, and the recurrent
+  record on 0.32 waves. Private launchers of the production kernels then swept register
+  double-buffering, L2 prefetch, exact dequantization and relaxed launch bounds for every T=4
+  projection, warp splits and prefetch for the GDN record and fold, the attention CTA's warp
+  count, and an L2 hand-off prefetch between kernels. All 1,631 rows per pass matched
+  production's bytes. No projection or GDN record/fold schedule beat production at the
+  production extent by more than its own run-to-run spread, and the hand-off prefetch only speeds
+  a cold consumer: with its whole weight resident in L2 the mixer still takes 16.4 µs, and in the
+  production graph it already runs in 16.6 µs, so the projections are issue-bound and prefetch
+  has nothing left to hide. The attention CTA's warp count survived: two warps for the 27B's BF16
+  attention at T=2–4 above the 16K split tier ran 6.2% faster in isolation at 26K. It failed
+  requalification. The in-graph partial fell 6.1%, but decode moved only +0.3% to +0.9% from 26K
+  to 60K, and the public op ran 3.7–5.4% slower between 16,387 and 20,000 keys, a band the decode
+  graph routes with the envelope of its 16,385–32,762 bucket. Exclusive time also corrects the
+  remainder: PDL lets GDN query/key overlap value/z by 4.4 µs per call, so the projections'
+  recoverable share is **1.15 ms (7.2%)**, led by MLP down (0.36 ms), attention decode (0.30 ms),
+  GDN value/z (0.15 ms) and the mixer (0.14 ms). Closing it needs a different accumulation order
+  (a Q5 small-T tensor-core route), which changes output bits. Outside the projections, the traced
+  round spends 0.47 ms in 297 small normalization and gating kernels, 0.17 ms in 815
+  kernel-boundary gaps and 0.34 ms in host round trips around the verify result (profiled); those
+  keep every byte but are fusion and serving-loop work. The harnesses ported to `sm_89` on the
+  RTX 4090 (449 rows per pass, all byte-identical) found only one- and two-tick leads at the
+  1.024 µs timer resolution, and reconfirmed that the split2 row pair slows MLP down 13.9% at T=4.
+  Nothing ships. Receipt: [decode remainder](measurements/2026-09-25-decode-round-remainder.json).
 
 ## Current order
 
@@ -614,7 +641,7 @@ hypothesis and method before writing code.
 
 | Idea | Why it should work | Status |
 | --- | --- | --- |
-| Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes | open |
+| Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | Shipped in v0.4.0: transactional generational store + io_uring O_DIRECT restore; 109,589 tokens restored hot across a docker restart ([qualification](../docs/measurements/2026-08-30-rtx5090-durable-qualification.json)) | shipped v0.4.0 |
 | Checkpoint replication to shared storage | Delivered 2026-09-05 (EXP-018): `scripts/checkpoint_sync.py` copies verified published generations out and back; origin authentication on every lane; same-profile-pair portability only | completed |
