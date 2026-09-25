@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-09-25
+
 ### Faster decode (both lanes)
 
 - Rebind RTX 5090 to `v0.6.10-qwen38-5090-beta.1` (image
@@ -1510,7 +1512,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.4...v0.8.0
 [0.7.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.2...v0.7.3
