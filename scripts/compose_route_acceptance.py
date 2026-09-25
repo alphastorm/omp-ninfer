@@ -12,12 +12,12 @@ evidence record per client profile. This turns them into the release's acceptanc
   releases/<release>/acceptance/documented-routes.json
   releases/<release>/acceptance/composed-external-installation.json
 
-and moves the manifest, qualification and compatibility authority to the ready posture. Client
-source, distribution and hosted-CI identity carry from the previous release's platform receipts
-when the client is unchanged, and the composer refuses a client binary that differs from them.
+and moves the manifest, qualification and compatibility authority to the ready posture. Stock
+client identity comes from this release's upstream manifest and compatibility profiles, never
+from a previous fork's receipts. Installed binaries must match the published upstream assets.
 
-    python3 scripts/compose_route_acceptance.py --release v0.7.4 --previous-release v0.7.3 \\
-        --candidate <40-hex> --as-of 2026-09-24 --measurement-prefix 2026-09-24-v074 \\
+    python3 scripts/compose_route_acceptance.py --release v0.8.0 \\
+        --candidate <40-hex> --as-of 2026-09-25 --measurement-prefix 2026-09-25-v080 \\
         --evidence /private/evidence.json \\
         --route rtx5090-container-host=/private/host.json --route ...
 
@@ -38,6 +38,11 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from verify_release import (  # pyright: ignore[reportMissingImports]
+    OMP_PROFILE_PLATFORMS, validate_upstream_client_bindings, validate_upstream_omp_component,
+)
+
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
          "rtx4090-native")
@@ -132,34 +137,35 @@ def check_live(profile: str, live: dict, manifest: dict) -> None:
             f"{profile}: fail-closed request reached a model or another provider")
 
 
-def platform_receipt(release: str, as_of: str, profile: dict, previous: dict, evidence: dict,
+def platform_receipt(release: str, as_of: str, profile: dict, evidence: dict,
                      manifest: dict) -> dict:
     distribution = profile["client_distribution"]
-    client = dict(previous["client"])
-    for key in ("archive_sha256", "binary_sha256", "asset_url"):
-        require(client[key] == distribution[key],
-                f"{profile['id']}: previous receipt {key} differs from the authority; the client "
-                "changed, so its identity cannot carry")
+    omp = manifest["components"]["omp"]
+    errors: list[str] = []
+    validate_upstream_omp_component(omp, errors)
+    require(not errors, "; ".join(errors))
+    require(distribution.get("distribution_kind") == "upstream-release",
+            f"{profile['id']}: stock upstream client required")
     require(evidence.get("binary_sha256") == distribution["binary_sha256"],
             f"{profile['id']}: installed binary {evidence.get('binary_sha256')!r} is not the "
             "published client")
     check_live(profile["id"], evidence["live_acceptance"], manifest)
-    source = previous["source"]
+    require(evidence["live_acceptance"].get("omp_version") == f"omp/{omp['distribution_version']}",
+            f"{profile['id']}: observed client version differs from the manifest")
     return {
         "schema_version": 1,
         "kind": "omp-ninfer-platform-acceptance-receipt",
-        "receipt_id": f"{profile['id']}-{source['commit'][:8]}-{distribution['archive_sha256'][:10]}-{release}",
+        "receipt_id": f"{profile['id']}-{omp['upstream_commit'][:8]}-{distribution['asset_sha256'][:10]}-{release}",
         "product_release": release,
         "profile": profile["id"],
         "status": "passed",
         "as_of": as_of,
-        "source": source,
-        "client": client,
-        "hosted_ci": previous["hosted_ci"],
+        "source": {"repository": omp["upstream_repository"], "tag": omp["upstream_tag"],
+                   "commit": omp["upstream_commit"], "tree": omp["upstream_tree"]},
+        "client": dict(distribution),
         "live_acceptance": evidence["live_acceptance"],
-        "diagnostics": evidence["diagnostics"],
         "checks": {
-            "new_client_archive_and_binary_identity": "passed",
+            "new_client_asset_and_binary_identity": "passed",
             "new_client_clean_install": "passed",
             "new_client_version": "passed",
             "live_authenticated_tool_and_continuation": "passed",
@@ -178,8 +184,6 @@ def platform_receipt(release: str, as_of: str, profile: dict, previous: dict, ev
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--release", required=True)
-    parser.add_argument("--previous-release", required=True,
-                        help="release whose platform receipts carry the unchanged client identity")
     parser.add_argument("--candidate", required=True, help="40-hex commit every route ran from")
     parser.add_argument("--as-of", required=True, help="ISO date of the acceptance")
     parser.add_argument("--measurement-prefix", required=True,
@@ -202,7 +206,6 @@ def main() -> int:
 
     release_root = ROOT / "releases" / args.release
     acceptance_root = release_root / "acceptance"
-    previous_acceptance = ROOT / "releases" / args.previous_release / "acceptance"
     measurements = ROOT / "docs" / "measurements"
     manifest_path = release_root / "manifest.json"
     qualification_path = release_root / "qualification.json"
@@ -212,6 +215,11 @@ def main() -> int:
     authority = load(authority_path)
     require(authority.get("product_release") == args.release,
             "the root compatibility authority is not this release; run the lane cut first")
+    omp = manifest["components"]["omp"]
+    errors: list[str] = []
+    validate_upstream_omp_component(omp, errors)
+    validate_upstream_client_bindings(omp, authority["profiles"], errors)
+    require(not errors, "; ".join(errors))
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
@@ -260,15 +268,12 @@ def main() -> int:
     platform_rows = []
     for profile in authority["profiles"]:
         filename = profile["acceptance_receipt"]["url"].rsplit("/", 1)[-1]
-        previous = load(previous_acceptance / filename)
-        require(previous.get("profile") == profile["id"], f"{filename} belongs to {previous.get('profile')}")
-        receipt = platform_receipt(args.release, args.as_of, profile, previous,
+        receipt = platform_receipt(args.release, args.as_of, profile,
                                    evidence["platforms"][profile["id"]], manifest)
         save(acceptance_root / filename, receipt)
         digest = sha256((acceptance_root / filename).read_bytes())
-        # The OMP client reads a qualified profile as a released, installable one, so live
-        # acceptance promotes only an installable profile; any other keeps its status and the
-        # blockers that say why it is not installable.
+        # This is product qualification metadata; stock OMP does not read the authority.
+        # Non-installable profiles retain their status and blockers.
         if profile.get("installable") is True:
             profile["status"] = "qualified"
             profile["blockers"] = []
@@ -276,9 +281,8 @@ def main() -> int:
         platform_rows.append({"profile": profile["id"], "sha256": digest})
 
     # 4. The native lane's public-install receipt.
-    omp = manifest["components"]["omp"]
     windows = next(p for p in authority["profiles"]
-                   if p["client_distribution"]["archive_sha256"] == omp["artifact_sha256"])
+                   if p["id"] == "windows-docker-local")
     variant = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == NATIVE_VARIANT)
     native = evidence["rtx4090"]
     native_path = acceptance_root / "rtx4090-public-install.json"
@@ -291,13 +295,8 @@ def main() -> int:
         "status": "passed",
         "candidate_commit": args.candidate,
         "client": {
-            "version": f"omp/{omp['upstream_tag'].lstrip('v')}",
-            "tag": omp["component_release_tag"],
-            "source_commit": omp["source_commit"],
-            "source_tree": omp["source_tree"],
-            "archive_bytes": windows["client_distribution"]["archive_bytes"],
-            "archive_sha256": windows["client_distribution"]["archive_sha256"],
-            "binary_sha256": windows["client_distribution"]["binary_sha256"],
+            **windows["client_distribution"],
+            "version": f"omp/{omp['distribution_version']}",
         },
         "runtime": {
             "tag": variant["release_tag"],
@@ -349,11 +348,36 @@ def main() -> int:
 
     # 6. The composed external-installation acceptance.
     composed = evidence["composed"]
-    compatibility_sha = sha256((release_root / "compatibility.json").read_bytes())
+    # Hash the promoted authority, not the draft snapshot that predates these receipts.
+    authority["composition"]["status"] = composed["authority_status"]
+    authority["composition"]["blockers"] = []
+    save(authority_path, authority)
+    shutil.copy(authority_path, release_root / "compatibility.json")
+    compatibility_sha = sha256(authority_path.read_bytes())
+    omp["compatibility_sha256"] = compatibility_sha
     client_components = release_root / "qualification" / "client-components.json"
+    save(client_components, {
+        "artifact_type": "omp_ninfer_upstream_client_components",
+        "schema_version": 1,
+        "release": args.release,
+        "omp": {key: value for key, value in omp.items()
+                if key not in ("compatibility_authority", "compatibility_sha256")},
+        "platforms": {OMP_PROFILE_PLATFORMS[profile["id"]]: profile["client_distribution"]
+                      for profile in authority["profiles"]},
+    })
+    downloads = composed["public_client_downloads"]
+    require(downloads.get("status") == "passed" and downloads.get("anonymous") is True,
+            "public client downloads must pass without authentication")
+    public_client_downloads = {
+        "status": "passed", "anonymous": True, "assets": len(authority["profiles"]),
+        "downloads": [{"profile": profile["id"],
+                       "url": profile["client_distribution"]["asset_url"],
+                       "sha256": profile["client_distribution"]["asset_sha256"]}
+                      for profile in authority["profiles"]],
+    }
     composed_path = acceptance_root / "composed-external-installation.json"
     steps = {lane: {"status": "passed", "blocks": len(route_rows[lane]["steps"])} for lane in LANES}
-    steps = {"public_client_downloads": composed["public_client_downloads"], **steps,
+    steps = {"public_client_downloads": public_client_downloads, **steps,
              "linux_live_client": composed["linux_live_client"]}
     save(composed_path, {
         "artifact_type": "omp_ninfer_composed_external_installation",
@@ -364,9 +388,11 @@ def main() -> int:
         "operator_class": "owner-operated tester-equivalent",
         "mode": composed["mode"],
         "client": {
-            "component_release_tag": omp["component_release_tag"],
-            "source_commit": omp["source_commit"],
-            "source_tree": omp["source_tree"],
+            "distribution_kind": omp["distribution_kind"],
+            "component_release_tag": omp["upstream_tag"],
+            "upstream_repository": omp["upstream_repository"],
+            "upstream_commit": omp["upstream_commit"],
+            "upstream_tree": omp["upstream_tree"],
             "note": composed["client_note"],
         },
         "compatibility_authority": omp["compatibility_authority"],
@@ -396,10 +422,6 @@ def main() -> int:
     })
 
     # 7. Ready posture: the authority, the qualification composition and the manifest.
-    authority["composition"]["status"] = composed["authority_status"]
-    authority["composition"]["blockers"] = []
-    save(authority_path, authority)
-    shutil.copy(authority_path, release_root / "compatibility.json")
     composition = qualification["composition"]
     composition["external_installation_acceptance"] = {
         "status": "passed",
@@ -408,7 +430,7 @@ def main() -> int:
         "public_url": composition["external_installation_acceptance"].get("public_url"),
         "as_of": args.as_of,
         "release": args.release,
-        "component_release_tag": omp["component_release_tag"],
+        "component_release_tag": omp["upstream_tag"],
         "tools": True,
         "vision": True,
         "stateful_resume": True,
@@ -430,6 +452,7 @@ def main() -> int:
     qualification["external_installation_qualified"] = True
     qualification["remaining_release_gates"] = []
     save(qualification_path, qualification)
+    manifest["qualification"]["summary_sha256"] = sha256(qualification_path.read_bytes())
     manifest["status"] = "ready"
     manifest["publication"]["blockers"] = []
     manifest["publication"]["external_installation_qualified"] = True

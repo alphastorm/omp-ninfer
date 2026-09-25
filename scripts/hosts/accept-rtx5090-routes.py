@@ -53,6 +53,8 @@ def main():
     if a.dry_run:
         phases = ['hold', 'stop production', 'published launcher setup (not a route run)', 'Windows structured live and outage', 'independent restoration', 'collect'] if a.action == 'windows-live-only' else ['preflight', 'hold', 'stop production', 'host route', 'Linux live/outage', 'Mac route/live/outage', 'Windows live/route/outage', 'independent restoration', 'collect']
         print(json.dumps({'status': 'dry-run', 'release': a.release, 'candidate': a.candidate, 'action': a.action, 'effects': 'none',
+                          'client_install': {'lane': 'rtx5090-macos-client', 'step': 'client-install',
+                                             'launcher': '$HOME/.local/bin/omp', 'distribution_kind': 'upstream-release'},
                           'phases': phases, 'downtime_cap_seconds': 3600}))
         return
     root = Path(a.workspace).resolve()
@@ -66,14 +68,14 @@ def main():
     timings = json.loads((root / 'timings.json').read_text()) if (root / 'timings.json').exists() else []
     def save(name, value):
         (root / name).write_text(json.dumps(value, indent=2) + '\n')
-    def run(argv, label, timeout=120, env=None, capture=False):
+    def run(argv, label, timeout=120, env=None, capture=False, cwd=None):
         start = time.monotonic()
         started = now()
         if capture:
-            r = subprocess.run([str(x) for x in argv], capture_output=True, text=True, timeout=timeout, env=env)
+            r = subprocess.run([str(x) for x in argv], capture_output=True, text=True, timeout=timeout, env=env, cwd=cwd)
         else:
             with (root / (label + '.log')).open('w') as log:
-                r = subprocess.run([str(x) for x in argv], stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env)
+                r = subprocess.run([str(x) for x in argv], stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env, cwd=cwd)
         timings.append({'phase': label, 'started_utc': started, 'seconds': round(time.monotonic() - start, 3), 'exit': r.returncode})
         save('timings.json', timings)
         if r.returncode:
@@ -183,7 +185,7 @@ def main():
                             if isinstance(node.get('model'), str):
                                 models.add(node['model'])
                             stack.extend(node.values())
-                assert providers == {'ninfer-beta'} and models and models <= {'local-max', 'q38-ninfer'}, label + '/' + phase + ': unexpected provider/model record'
+                assert providers == {'ninfer-beta'} and models and models <= {'q38-ninfer'}, label + '/' + phase + ': unexpected provider/model record'
                 stream_audit[phase] = {'providers': sorted(providers), 'models': sorted(models), 'input_image_records': images, 'only_selected_provider_and_model': True, 'decode_encoding': encoding, 'transcript_sha256': hashlib.sha256(raw).hexdigest()}
             receipt['full_stream_audit'] = stream_audit
             result['clients'][label] = receipt
@@ -197,9 +199,6 @@ def main():
             receipt['live_acceptance'].update({'runtime_image_digest': runtime['configured_image'].split('@', 1)[1], 'runtime_variant': 'rtx5090-container', 'profile_runtime_qualified_by_this_receipt': False})
             if label == 'linux':
                 receipt['live_acceptance']['execution_context'] = receipt['execution_context']
-            diagnostic = receipt['diagnostics']['observed']
-            receipt['diagnostics'].update({k: diagnostic[k] for k in ('status', 'blockers', 'error', 'profile_supported', 'profile_installable') if k in diagnostic})
-            receipt['diagnostics']['note'] = 'Recorded diagnostic outcome, not a managed-install-ready claim.'
         result['restoration'] = json.loads((root / 'restoration.json').read_text())
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
         for field in ('markers', 'tasks'):
@@ -270,19 +269,17 @@ def main():
             run(['git', '-C', macclone, 'checkout', '-q', a.candidate], 'mac-checkout')
         comp = json.loads((clone / 'compatibility.json').read_text())
         dist = next(v['client_distribution'] for v in comp['profiles'] if v['id'] == 'darwin-remote-ssh')
-        archive = root / dist['asset_url'].rsplit('/', 1)[-1]
-        if not archive.exists():
-            run(['curl', '--fail', '--location', '--silent', '--show-error', '--output', archive, dist['asset_url']], 'mac-download', 300)
-        assert sha(archive) == dist['archive_sha256'] and archive.stat().st_size == dist['archive_bytes']
-        package = root / archive.name.removesuffix('.tar.gz')
-        if not package.exists():
-            run(['tar', '-xzf', archive, '-C', root], 'mac-extract')
+        assert dist['distribution_kind'] == 'upstream-release', 'stock upstream client required'
+        bundle = root / 'mac-bundle'
+        install = next(step for step in json.loads((bundle / 'manifest.json').read_text())['steps'] if step['slug'] == 'client-install')
+        assert sha(bundle / install['file']) == install['sha256'], 'client-install block differs from bundle'
         prehome = root / 'mac-preflight-home'
         prehome.mkdir(exist_ok=True)
-        if not (prehome / '.local/bin/omp').exists():
-            run(['sh', package / 'install.sh'], 'mac-install-preflight', env=isolated(prehome))
-        binaries = list((prehome / '.local/share/omp/releases').glob('*/omp'))
-        assert len(binaries) == 1 and sha(binaries[0]) == dist['binary_sha256']
+        run(['bash', bundle / install['file']], 'mac-install-preflight', 300, env=isolated(prehome), cwd=prehome)
+        asset = prehome / dist['asset_name']
+        binary = prehome / '.local/bin/omp'
+        assert sha(asset) == dist['asset_sha256'], 'published client asset checksum mismatch'
+        assert sha(binary) == dist['binary_sha256'], 'installed client binary checksum mismatch'
         assert shutil.which('sha256sum') and shutil.which('ssh')
         freeport()
         macprobe('preflight', prehome)
@@ -298,7 +295,7 @@ def main():
         host('restore', dry=True)
         win('Release', dry=True)
         save('preflight.json', {'status': 'passed', 'release': a.release, 'candidate': a.candidate, 'completed_utc': now(),
-             'mac_archive_sha256': sha(archive), 'mac_binary_sha256': sha(binaries[0]), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
+             'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha(asset), 'mac_binary_sha256': sha(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
     elif a.action == 'windows-live-only':
         assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed'
         assert a.prior_workspace, 'completion requires the restored route evidence root'

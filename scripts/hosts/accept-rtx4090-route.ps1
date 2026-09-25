@@ -52,7 +52,7 @@ function Probe {
     $holdPaths=@("$HostState\container-host-paused","$HostState\lane-container-paused","$realClient\local-4090-supervisor\paused")
     if(Test-Path $HostState){$holdPaths+=@(Get-ChildItem $HostState -File|Where-Object Name -Match 'paused|hold'|ForEach-Object FullName)}
     $holds=@($holdPaths|Sort-Object -Unique|ForEach-Object {Describe $_})
-    $pointers=@('current.txt','previous.txt','omp.cmd')|ForEach-Object {Describe (Join-Path $realClient $_)}
+    $clientFiles=@(if(Test-Path $realClient){Get-ChildItem $realClient -File -Force|Sort-Object Name|ForEach-Object {Describe $_.FullName}})
     [ordered]@{
         utc=[DateTime]::UtcNow.ToString('o');state_sha256=(Hash "$StateRoot\state.json")
         state_sddl=(Get-Acl "$StateRoot\state.json").Sddl;root_sddl=(Get-Acl $StateRoot).Sddl
@@ -63,7 +63,7 @@ function Probe {
         lease_present=(Test-Path "$StateRoot\gpu-owner-state\lease.json")
         lease_entries=@(Get-ChildItem "$StateRoot\gpu-owner-state" -Force|ForEach-Object Name)
         power_limit_w=[double]((& nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits|Out-String).Trim())
-        holds=$holds;client_pointers=@($pointers)
+        holds=$holds;client_files=$clientFiles
     }
 }
 function AssertBaseline($p) {
@@ -176,7 +176,7 @@ function Audit($b) {
         power_identical=($after.power_limit_w -eq $b.observable.power_limit_w)
         pointers_identical=($after.active_release -ceq $b.observable.active_release -and $after.previous_release -ceq $b.observable.previous_release -and $null -eq $after.prepared_release)
         holds_identical=(($after.holds|ConvertTo-Json -Depth 8 -Compress) -ceq ($b.observable.holds|ConvertTo-Json -Depth 8 -Compress))
-        client_pointers_identical=(($after.client_pointers|ConvertTo-Json -Depth 8 -Compress) -ceq ($b.observable.client_pointers|ConvertTo-Json -Depth 8 -Compress))
+        client_files_identical=(($after.client_files|ConvertTo-Json -Depth 8 -Compress) -ceq ($b.observable.client_files|ConvertTo-Json -Depth 8 -Compress))
         support_identical=$true;support_inventory_identical=$true;directory_acls_identical=$true;pending_preserved_moves=(@(Get-ChildItem "$Workspace\preserved" -Force -ErrorAction SilentlyContinue).Count -eq 0)
     }
     foreach($f in $b.files){$p=Join-Path $StateRoot $f.relative;if((Hash $p) -cne $f.sha256 -or (Get-Acl $p).Sddl -cne $f.sddl){$checks.support_identical=$false}}
@@ -237,10 +237,10 @@ if($Mode -eq 'Route') {
 }
 if($Mode -in @('Live','Offline')) {
     SetIsolation 'route';$env:NINFER_NATIVE_API_KEY=[IO.File]::ReadAllText($KeyFile).Trim()
-    $binary=@(Get-ChildItem "$env:LOCALAPPDATA\OMP" -Filter omp.exe -File -Recurse)
-    if($binary.Count -ne 1){throw 'isolated installed client binary ambiguous'}
+    $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
+    if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated installed client binary missing'}
     $phase=if($Mode -eq 'Live'){'live'}else{'outage'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary[0].FullName --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/local-max --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
     exit $LASTEXITCODE
 }
 if($Mode -eq 'DryRun') {
@@ -268,6 +268,7 @@ if($Mode -eq 'Preflight') {
     }
     if((& git -C $Clone rev-parse HEAD|Out-String).Trim() -cne $Candidate -or (& git -C $Clone status --porcelain|Out-String).Trim()){throw 'candidate clone is not clean and exact'}
     $manifest=ReadJson "$Clone\releases\$Release\manifest.json"
+    if($manifest.components.omp.distribution_kind -cne 'upstream-release'){throw 'stock upstream client required'}
     $variant=@($manifest.components.ninfer_variants|Where-Object id -CEQ 'rtx4090-windows-native')[0]
     $bundleManifest=ReadJson "$Bundle\manifest.json"
     if((Hash "$Clone\docs\QUICKSTART.md") -cne $bundleManifest.document_sha256){throw 'bundle document mismatch'}
@@ -283,18 +284,21 @@ if($Mode -eq 'Preflight') {
         $assets+=@{name=$name;url=$url;sha256=$actual;bytes=(Get-Item $path).Length}
     }
     SetIsolation 'preflight';Set-Location "$Workspace\preflight-work"
-    Invoke-Expression ([IO.File]::ReadAllText("$Bundle\01-client-install.ps1"))
+    $install=@($bundleManifest.steps|Where-Object slug -CEQ 'client-install')[0]
+    Invoke-Expression ([IO.File]::ReadAllText((Join-Path $Bundle $install.file)))
     if($LASTEXITCODE -ne 0){throw 'isolated client install failed'}
-    $binary=@(Get-ChildItem "$env:LOCALAPPDATA\OMP" -Filter omp.exe -File -Recurse)
-    if($binary.Count -ne 1 -or (Hash $binary[0].FullName) -cne $manifest.components.omp.binary_sha256){throw 'client binary mismatch'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary[0].FullName --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/local-max --endpoint http://127.0.0.1:18082/v1
+    $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
+    if((Hash $binary) -cne $manifest.components.omp.binary_sha256){throw 'client binary mismatch'}
+    $clientAsset=Join-Path "$Workspace\preflight-work" $manifest.components.omp.artifact_name
+    if((Hash $clientAsset) -cne $manifest.components.omp.artifact_sha256){throw 'client asset mismatch'}
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1
     if($LASTEXITCODE -ne 0){throw 'structured probe preflight failed'}
-    $version=(& $binary[0].FullName --version|Out-String).Trim()
-    & $binary[0].FullName --help > "$Workspace\client-help.txt"
+    $version=(& $binary --version|Out-String).Trim()
+    & $binary --help > "$Workspace\client-help.txt"
     $agent=Join-Path $HOME '.omp\agent';New-Item -ItemType Directory -Force $agent|Out-Null
     Copy-Item "$Clone\examples\windows-native\models.fragment.yml" "$agent\models.yml"
     Copy-Item "$Clone\examples\manual-tunnel\fail-closed.yml" "$agent\config.yml"
-    & $binary[0].FullName models ninfer-native-4090 --json > "$Workspace\parser-models.json"
+    & $binary models ninfer-native-4090 --json > "$Workspace\parser-models.json"
     if($LASTEXITCODE -ne 0){throw 'provider parser failed'}
     $modelSha=Hash $Model;if($modelSha -cne $manifest.components.model.artifact_sha256 -or (Get-Item $Model).Length -ne $manifest.components.model.artifact_bytes){throw 'documented model identity mismatch'}
     if(-not (Test-Path $KeyFile)){throw 'documented key missing'}
@@ -303,7 +307,7 @@ if($Mode -eq 'Preflight') {
     SetExactAcl $probe $b.observable.state_sddl
     $null=ValidateSnapshot "$Workspace\preflight-snapshot"
     SaveJson "$Workspace\expected-runtime.json" @{server_binary_sha256=$variant.server_binary_sha256;configuration_sha256=$variant.configuration_sha256;model_sha256=$variant.model_artifact_sha256;source_commit=$variant.source_commit;package_sha256=$variant.package_sha256}
-    SaveJson "$Workspace\preflight.json" @{status='passed';started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;candidate=$Candidate;release=$Release;document_sha256=$bundleManifest.document_sha256;block_hashes=@($bundleManifest.steps.sha256);published_assets=$assets;client_version=$version;client_binary_sha256=(Hash $binary[0].FullName);client_archive_sha256=(Hash (Join-Path "$Workspace\preflight-work" $manifest.components.omp.artifact_name));model_sha256=$modelSha;exact_acl_restore_probe=$true;baseline=$b.observable}
+    SaveJson "$Workspace\preflight.json" @{status='passed';started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;candidate=$Candidate;release=$Release;document_sha256=$bundleManifest.document_sha256;block_hashes=@($bundleManifest.steps.sha256);published_assets=$assets;client_version=$version;client_binary_sha256=(Hash $binary);client_asset_sha256=(Hash $clientAsset);model_sha256=$modelSha;exact_acl_restore_probe=$true;baseline=$b.observable}
     Write-Output 'PREFLIGHT_OK';return
 }
 if($Mode -eq 'Restore'){$r=Restore;$r|ConvertTo-Json -Depth 10;if($r.status -ne 'passed'){exit 1};return}

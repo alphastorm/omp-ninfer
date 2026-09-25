@@ -114,7 +114,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
         "four_completed_requests": len(completed) == 4,
         "only_expected_server_model": bool(completed) and all(row["request"]["model"] == "qwen3.8-27b" for row in completed),
         "only_local_client_responses": bool(responses) and all(
-            row.get("provider") == "ninfer-native-4090" and row.get("model") == "local-max" for row in responses),
+            row.get("provider") == "ninfer-native-4090" and row.get("model") == "qwen3.8-27b" for row in responses),
         "offline_failed_without_response": bool(offline) and bool(provider_errors) and all(
             row.get("contentBlocks") == 0 and row.get("hasText") is False and row.get("hasToolCalls") is False for row in offline),
         "only_known_local_compatibility_errors": all(row["error"].get("code") == "reasoning_effort_not_supported" for row in rejected),
@@ -140,7 +140,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
                     "prefix_reuse_path": row["result"].get("prefix_reuse_path")} for row in completed],
                 "local_compatibility_errors": [row["error"] for row in rejected],
                 "offline_provider_errors": [{key: row.get(key) for key in ("provider", "model", "errorMessage")} for row in provider_errors],
-                "live_acceptance": live, "diagnostics": structured["diagnostics"]}
+                "live_acceptance": live}
     (evidence / "behavior-evidence.json").write_text(json.dumps(behavior, indent=2) + "\n")
     return behavior
 
@@ -180,6 +180,9 @@ def main() -> int:
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
             "window_minutes": a.window_minutes,
+            "client_install": {"lane": "rtx4090-native", "step": "client-install",
+                               "launcher": r"$env:LOCALAPPDATA\OMP\omp.exe",
+                               "distribution_kind": "upstream-release"},
             "restoration": "on-host finally plus independent SSH Restore leg",
             "collection_excludes": ["preserved", "qualified-artifacts", "*-home", "*-temp", "assets", "baseline/files"],
             "scripts": [str(orchestrator), str(probe)]}
@@ -254,8 +257,8 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         code = r"""$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$w=WORKSPACE;
 $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $w 'accept-rtx4090-route.ps1'),[ref]$t,[ref]$e)|Out-Null;if($e.Count){throw 'orchestrator parse failed'};
 $h=Join-Path $w 'preflight-home';Set-Variable HOME $h -Scope Global -Force;$env:HOME=$h;$env:USERPROFILE=$h;$env:LOCALAPPDATA=Join-Path $h 'AppData\Local';$env:APPDATA=Join-Path $h 'AppData\Roaming';
-$binary=@(Get-ChildItem (Join-Path $env:LOCALAPPDATA 'OMP') -Filter omp.exe -Recurse -File);if($binary.Count -ne 1){throw 'isolated binary ambiguous'};
-& py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary[0].FullName --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/local-max --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
+$binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated binary missing'};
+& py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
 """.replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate))
         ssh(a.host, code, log=w / "preflight-revalidation.log", timeout=120)
         invoke("DryRun", "restoration-dry-run.json", 120)

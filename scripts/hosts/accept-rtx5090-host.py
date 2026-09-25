@@ -31,6 +31,22 @@ def digest(path):
     return h.hexdigest()
 
 
+def install_linux_client(distribution, asset, home):
+    assert distribution['distribution_kind'] == 'upstream-release', 'stock upstream client required'
+    asset_sha256 = digest(asset)
+    assert asset_sha256 == distribution['asset_sha256'], 'published client asset checksum mismatch'
+    # Linux has no fenced install block: use the guide's pinned raw binary URL and hash.
+    assert asset_sha256 == distribution['binary_sha256'], 'upstream client asset is not the expected binary'
+    launcher = home / '.local/bin/omp'
+    launcher.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(asset, launcher)
+    launcher.chmod(0o755)
+    assert digest(launcher) == distribution['binary_sha256'], 'installed client binary checksum mismatch'
+    return {'method': 'documented-url-and-sha256', 'fenced_block': False,
+            'asset_url': distribution['asset_url'], 'asset_sha256': asset_sha256,
+            'binary_sha256': digest(launcher), 'mode': '0755'}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', required=True, choices=('preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
@@ -42,7 +58,10 @@ def main():
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
     if a.dry_run:
-        print(json.dumps({'status': 'dry-run', 'action': a.action, 'effects': 'none', 'restoration': ['remove beta', 'window.sh restore', 'WSL and Windows health', 'original key and checkout', 'own hold only']}))
+        print(json.dumps({'status': 'dry-run', 'action': a.action, 'effects': 'none',
+                          'client_install': {'profile': 'linux-docker-local', 'method': 'documented-url-and-sha256',
+                                             'fenced_block': False, 'launcher': '$HOME/.local/bin/omp', 'mode': '0755'},
+                          'restoration': ['remove beta', 'window.sh restore', 'WSL and Windows health', 'original key and checkout', 'own hold only']}))
         return
     root = Path(a.workspace).expanduser().resolve()
     home = Path.home()
@@ -165,23 +184,16 @@ def main():
         image = inspect(runtime['image_reference'])
         model = home / '.local/share/omp-ninfer/qwen3_8_27b.ninfer'
         assert model.stat().st_size == runtime['model_bytes'] and digest(model) == runtime['model_sha256']
-        archive = root / dist['asset_url'].rsplit('/', 1)[-1]
-        if not archive.exists():
-            run(['curl', '--fail', '--location', '--silent', '--show-error', '--output', archive, dist['asset_url']], 300)
-        assert digest(archive) == dist['archive_sha256']
-        package = root / archive.name.removesuffix('.tar.gz')
-        if not package.exists():
-            run(['tar', '-xzf', archive, '-C', root], 60)
+        asset = root / dist['asset_url'].rsplit('/', 1)[-1]
+        if not asset.exists():
+            run(['curl', '--fail', '--location', '--silent', '--show-error', '--output', asset, dist['asset_url']], 300)
         linuxhome = root / 'linux-home'
         linuxhome.mkdir(exist_ok=True)
         clientenv = dict(os.environ, HOME=str(linuxhome), XDG_DATA_HOME=str(linuxhome / '.local/share'), XDG_CONFIG_HOME=str(linuxhome / '.config'), XDG_BIN_HOME=str(linuxhome / '.local/bin'))
         launcher = linuxhome / '.local/bin/omp'
-        if not launcher.exists():
-            run(['sh', package / 'install.sh'], 60, clientenv)
-        installed = list((linuxhome / '.local/share/omp/releases').glob('*/omp'))
-        assert len(installed) == 1 and digest(installed[0]) == dist['binary_sha256']
+        installation = install_linux_client(dist, asset, linuxhome)
         logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local'], 90, clientenv)
-        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_archive_sha256': digest(archive), 'client_binary_sha256': digest(installed[0]), 'wsl_environment_preserved': True})
+        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
     elif a.action == 'begin':
         assert not (root / 'baseline.json').exists(), 'window already attempted; no implicit retry'
         assert 0 < a.restore_after_seconds <= 3000

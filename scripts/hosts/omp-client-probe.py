@@ -4,6 +4,8 @@
 Run preflight before opening a runtime window, live while reachable, then outage
 with the same configured route unavailable. --dry-run has no filesystem effects.
 Windows uses PowerShell's native argument dispatch, not a cmd.exe command string.
+Preflight binds --version to the tested release manifest; every client launch enables
+the documented PI_OPENAI_STATEFUL=1 environment for the stock upstream binary.
 """
 import argparse
 import base64
@@ -70,7 +72,23 @@ def launch(argv, cwd, timeout):
         source = ("$ErrorActionPreference='Continue'; [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); "
                   "$a=@(" + arguments + "); & " + quote(argv[0]) + " @a; exit $LASTEXITCODE")
         argv = ["powershell.exe", "-NoProfile", "-EncodedCommand", base64.b64encode(source.encode("utf-16le")).decode()]
-    return subprocess.run(argv, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+    return subprocess.run(argv, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout,
+                          env=dict(os.environ, PI_OPENAI_STATEFUL="1"))
+
+
+def expected_client_version(clone, release):
+    manifest_path = Path(clone) / "releases" / release / "manifest.json"
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise ValueError(f"cannot read client version from {manifest_path}: {error}") from error
+    try:
+        version = manifest["components"]["omp"]["distribution_version"]
+    except (KeyError, TypeError) as error:
+        raise ValueError(f"{manifest_path}: components.omp.distribution_version is missing") from error
+    if not isinstance(version, str) or not version.strip():
+        raise ValueError(f"{manifest_path}: components.omp.distribution_version must be a non-empty string")
+    return "omp/" + version
 
 
 def main():
@@ -79,15 +97,17 @@ def main():
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--phase", choices=("preflight", "live", "outage"), required=True)
     parser.add_argument("--provider", default="ninfer-beta")
-    parser.add_argument("--model", default="ninfer-beta/local-max")
+    parser.add_argument("--model", default="ninfer-beta/q38-ninfer")
     parser.add_argument("--endpoint", default="http://127.0.0.1:18089/v1")
     parser.add_argument("--key-file")
     parser.add_argument("--expected-runtime")
     parser.add_argument("--vision-image")
     parser.add_argument("--dry-run", action="store_true")
     a = parser.parse_args()
+    expected_version = expected_client_version(a.clone, a.release) if a.phase == "preflight" else None
     if a.dry_run:
         print(json.dumps({"status": "dry-run", "phase": a.phase, "platform": a.platform,
+                          "expected_client_version": expected_version, "environment": {"PI_OPENAI_STATEFUL": "1"},
                           "effects": "none", "output": a.output, "checks": ["typed read/result", "exact marker", "exact continuation nonce", "provider/model isolation", "served runtime identity"]}))
         return
     out, clone = Path(a.output), Path(a.clone)
@@ -112,14 +132,14 @@ def main():
         save()
         return summary
     def only_selected(result):
-        return result["providers"] == [a.provider] and all(m in {"local-max", "q38-ninfer", a.model.split("/", 1)[-1]} for m in result["models"]) and bool(result["models"])
+        return result["providers"] == [a.provider] and all(m == a.model.split("/", 1)[-1] for m in result["models"]) and bool(result["models"])
     def live_ok(result):
         assert result["returncode"] == 0 and not result["errors"] and result["agent_end"] and only_selected(result), "exit/events/error/provider/model acceptance failed"
     try:
         if a.phase == "preflight":
             result = launch([a.binary, "--version"], out, 30)
             receipt["omp_version"] = result.stdout.strip()
-            assert result.returncode == 0 and receipt["omp_version"] == "omp/18.2.3", "client version mismatch"
+            assert result.returncode == 0 and receipt["omp_version"] == expected_version, f"client version mismatch: expected {expected_version}, observed {receipt['omp_version']!r}"
             result = launch([a.binary, "--help"], out, 30)
             (out / "help.txt").write_text(result.stdout + result.stderr, encoding="utf-8")
             assert result.returncode == 0 and "--mode" in result.stdout and "--session-dir" in result.stdout, "client help contract unavailable"
@@ -147,13 +167,6 @@ def main():
                 assert identity[actual] == expected[wanted], "served runtime identity mismatch: " + actual
             assert status["status"] == "ok" and identity.get("source_dirty") is False, "runtime not clean/healthy"
             receipt["runtime_identity_observed"] = identity
-            diag = call("diagnostic", ["appliance", "doctor", "--json", "--compatibility", str(comp), "--compatibility-sha256", hashlib.sha256(comp.read_bytes()).hexdigest(), "--profile", a.profile], 60)
-            raw = (out / "diagnostic.jsonl").read_text(encoding="utf-8")
-            try:
-                diagnostic = json.loads(raw)
-            except ValueError:
-                diagnostic = {"status": "explicit_remote_required" if "requires --remote" in (out / "diagnostic.stderr").read_text(encoding="utf-8") else "error", "error": (out / "diagnostic.stderr").read_text(encoding="utf-8").strip()}
-            receipt["diagnostics"] = {"exit_code": diag["returncode"], "authority_sha256": hashlib.sha256(comp.read_bytes()).hexdigest(), "observed": diagnostic}
             (out / "marker.txt").write_text(MARKER + "\n", encoding="utf-8")
             base = ["-p", "--auto-approve", "--mode", "json", "--model", a.model, "--max-time", "180s"]
             tool = call("tool", [*base, "--no-session", "--tools", "read", "Use the read tool to read marker.txt. Return only its exact single line, without quotes or formatting."])

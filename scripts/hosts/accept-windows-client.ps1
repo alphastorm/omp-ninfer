@@ -10,7 +10,7 @@ param(
     [switch]$DryRun
 )
 $ErrorActionPreference='Stop'
-if ($DryRun) { @{status='dry-run';action=$Action;workspace=$Workspace;effects='none'} | ConvertTo-Json -Compress; return }
+if ($DryRun) { @{status='dry-run';action=$Action;workspace=$Workspace;effects='none';client_install=@{lane='rtx5090-windows-client';step='client-install';launcher='$env:LOCALAPPDATA\OMP\omp.exe';distribution_kind='upstream-release'}} | ConvertTo-Json -Depth 3 -Compress; return }
 $RealLocal=$env:LOCALAPPDATA
 $Clone=Join-Path $Workspace 'candidate'
 $Bundle=Join-Path $Workspace 'windows-bundle'
@@ -46,7 +46,7 @@ function Isolate($Name) {
 }
 function Probe($Phase) {
     $args2=@('-3',(Join-Path $Workspace 'omp-client-probe.py'),'--release',$Release,'--candidate',$Candidate,'--phase',$Phase,
-        '--output',(Join-Path $Workspace 'windows-structured'),'--binary',(Join-Path $env:LOCALAPPDATA 'OMP\omp.cmd'),
+        '--output',(Join-Path $Workspace 'windows-structured'),'--binary',(Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'),
         '--clone',$Clone,'--platform','windows-x64','--profile','windows-docker-local','--key-file',(Join-Path $HOME '.omp\agent\ninfer-beta.key'),
         '--vision-image',(Join-Path $Clone 'assets\icon-512.png'))
     & py @args2
@@ -84,20 +84,22 @@ if($Action -eq 'Preflight') {
     Get-ChildItem $Bundle -Filter '*.ps1' | ForEach-Object { [Management.Automation.Language.Parser]::ParseFile($_.FullName,[ref]$Tokens,[ref]$ParseErrors)|Out-Null; if($ParseErrors.Count){throw $ParseErrors} }
     $compat=Get-Content -Raw (Join-Path $Clone 'compatibility.json')|ConvertFrom-Json
     $dist=($compat.profiles|Where-Object {$_.id -eq 'windows-docker-local'}).client_distribution
-    $Archive=Join-Path $Workspace ([IO.Path]::GetFileName($dist.asset_url))
-    if(!(Test-Path $Archive)) { & curl.exe --fail --location --silent --show-error --output $Archive $dist.asset_url; if($LASTEXITCODE -ne 0){throw 'anonymous client download failed'} }
-    $archiveHash=(Get-FileHash $Archive -Algorithm SHA256).Hash.ToLowerInvariant()
-    if($archiveHash -cne $dist.archive_sha256){throw 'published archive checksum mismatch'}
-    $Package=Join-Path $Workspace ([IO.Path]::GetFileName($Archive).Replace('.tar.gz',''))
-    if(!(Test-Path $Package)){& tar.exe -xzf $Archive -C $Workspace;if($LASTEXITCODE -ne 0){throw 'archive extraction failed'}}
+    if($dist.distribution_kind -cne 'upstream-release'){throw 'stock upstream client required'}
+    $bundleManifest=Get-Content -Raw (Join-Path $Bundle 'manifest.json')|ConvertFrom-Json
+    $install=@($bundleManifest.steps|Where-Object {$_.slug -eq 'client-install'})[0]
+    $installPath=Join-Path $Bundle $install.file
+    if((Get-FileHash $installPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $install.sha256){throw 'client-install block differs from bundle'}
     Isolate 'structured-home'
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-    if(!(Test-Path (Join-Path $env:LOCALAPPDATA 'OMP\omp.cmd'))) { & (Join-Path $Package 'install.ps1') }
-    $binary=@(Get-ChildItem (Join-Path $env:LOCALAPPDATA 'OMP\releases') -Recurse -Filter omp.exe)[0]
-    $binaryHash=(Get-FileHash $binary.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    Push-Location $Workspace
+    try { Invoke-Expression ([IO.File]::ReadAllText($installPath)); if($LASTEXITCODE -ne 0){throw 'documented client install failed'} } finally { Pop-Location }
+    $asset=Join-Path $Workspace $dist.asset_name
+    $assetHash=(Get-FileHash $asset -Algorithm SHA256).Hash.ToLowerInvariant()
+    if($assetHash -cne $dist.asset_sha256){throw 'published client asset checksum mismatch'}
+    $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
+    $binaryHash=(Get-FileHash $binary -Algorithm SHA256).Hash.ToLowerInvariant()
     if($binaryHash -cne $dist.binary_sha256){throw 'installed binary checksum mismatch'}
     Probe 'preflight'
-    Save-Json 'windows-preflight.json' @{status='passed';candidate=$Candidate;archive_sha256=$archiveHash;binary_sha256=$binaryHash;source_commit=$dist.source_commit;archive_bytes=(Get-Item $Archive).Length;completed_utc=[DateTime]::UtcNow.ToString('o')}
+    Save-Json 'windows-preflight.json' @{status='passed';candidate=$Candidate;asset_url=$dist.asset_url;asset_sha256=$assetHash;binary_sha256=$binaryHash;upstream_tag=$dist.upstream_tag;asset_bytes=(Get-Item $asset).Length;client_install_block_sha256=$install.sha256;completed_utc=[DateTime]::UtcNow.ToString('o')}
     return
 }
 if($Action -eq 'Route') {
