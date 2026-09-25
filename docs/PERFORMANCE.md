@@ -115,6 +115,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-025 | Native lanes on mainline (4090, 3090) | The mainline runtime - context cache, warm arrival, streamed restore - serves the two native Windows lanes at least as well as their divergent branches | `port/native-lanes-on-mainline` built with MSVC 19.44 for `sm_89` and `sm_86`, 100/100 registered tests on each build on the Ada GPU (94 run; the six real-artifact and external-tokenizer suites skip), and served in candidate windows on both hosts. Same fixture, gates, host, and day as the installed releases: RTX 4090 130,048-token exact retrieval **86.8 s vs 97.5 s** (1,499 vs 1,333 tok/s), 2,048-token decode **103.8 vs 88.4 tok/s** wall; RTX 3090 **208.6 vs 219.5 s** and **60.3 vs 52.8 tok/s**. 67.7K template: four sibling forks hot at 1.8-2.0 s (4090) / 2.5-2.9 s (3090) before a restart and 1.8-1.9 s / 2.5-2.6 s after it, every fork `private_long_anchor`; warm arrival in both orders; a 2.9 GB checkpoint restores in 4.2-5.0 s (4090) and 16.6-17.1 s (3090) with a flipped byte refused and quarantined. Five source defects surfaced only on the hardware (cooperative grids sized for 170 SMs, an INT8 prompt-attention CTA that spilled 200 B/thread on `sm_89`, a serialising DirectStorage read queue that failed every streamed restore, an unlogged restore refusal, an unbounded residency query). The RTX 4090's WDDM budget at 131K INT8 leaves 169 MiB with four device-state slots and the driver pages: decode 47 tok/s and every fork 2.5× slower; two slots (463 MiB free) is the profile, one slot re-prefills the first fork | kept - both lanes' next candidates build from mainline; requalify each through its lifecycle tool before any release |
 | EXP-026 | Native lane release qualification (4090, 3090) | The mainline-built native lanes pass their own lifecycle qualification end to end from a clean state | Five blockers in the release path found, reproduced, and fixed: the mainline bench had no `--version` arm the package's identity binding requires; `transfer_install` relayed the 0.6 GB package through the operator's Mac (0.33 MB/s, 900 s timeout) instead of host to host (**104.7 MB/s**, 16 ranged-HTTP streams); the staging root inherited `BUILTIN\Users` write access on the host whose qualification parent did not exist yet; the managed install splatted its arguments positionally; and mainline applied `X-NInfer-Session` only on the bodyless Responses routes, so the lane probe's identity conflict returned 200. Both lanes now pass preflight through install and reach `protocol`. The RTX 4090 lane's pinned pools are sized from measurement: 24 host state slots with the 8 GiB default Host KV is 13.3 GB pinned and failed `cudaMallocHost` on two managed starts (the controller's 18 GB pre-launch read empties the free list), 4 GiB is 9.2 GB and starts; 8 slots start but fail the protocol contract in 41 s | in flight - one open runtime invariant defect (a catalogued continuation's last state replica is evictable while admission plans reuse from it) and the RTX 3090 host offline |
 | EXP-015 | Lane requalification (all lanes) | The three configuration-only changes hold their measured gains under each lane's own qualification gates | RTX 4090 chunk 2,048: 102,060-token session 68.0 s vs 84.9 s shipped, protocol/persistence/golden unchanged. RTX 3090 131,072 context: exact 130,048-token retrieval in 218 s, 90.2 decode / 890.7 prefill tok/s at 300.4 W, 22,548 MiB peak. RTX 5090 context-cache profile: 130,048-token prefill 2,207 tok/s cold, 136.0 decode tok/s at 41.2% MTP acceptance, 4/4 anchor hits at 57.9K and 67.7K, 4.5 GB save, verified restart; first post-restart fork re-prefills once | kept — `v0.4.8` draft staged; publication blocked on component releases and external acceptance |
+| EXP-054 | RTX 5090 MTP3 decode round attribution | The verify pass's Q4/Q5 projections, not launch overhead, hold the round above the bandwidth floor | 26K-context round 17.23 ms (production 17.1 ms), GPU busy 99.2%; W8 LM head, MTP layer and Q4 draft head at 97–104% of 1,674.5 GB/s; Q4 gate/up 82.5%, Q5 down 75.8%, Q5 mixer outputs 68.0%, GDN value/z 66.2%, GDN query/key 39.7%; 2.6 ms (15.1%) recoverable at 90% | open |
 
 Entry detail:
 
@@ -554,6 +555,22 @@ Entry detail:
   triggered; both lanes carry 24 slots, and only the RTX 4090 lane's pool was halved. The
   RTX 3090 lane is blocked on its host, which went offline mid-window.
   Receipt: [qualification window](measurements/2026-09-09-native-lane-qualification-blockers.json).
+- **EXP-054 — where a decode round goes (2026-09-25).** Production decodes at 58.5 rounds/s,
+  17.1 ms per round, with 99.4% of decode time waiting on the device. A release-configured
+  `ninfer_bench` whose 2,897 device functions are instruction-identical to production's
+  `ninfer-serve` reproduced it: **17.23 ms** per round at a 26,000-token context and 15.62 ms at
+  a seed context, against 18.78 ms eager, so CUDA graph decode already removes 1.55 ms of launch
+  overhead and the GPU is busy 99.2% of a round. Nsight Systems graph-node traces, mapped to each
+  kernel's weight bytes, put the W8 kernels at the floor (LM head, MTP layer and Q4 draft head
+  at 97–104% of 1,674.5 GB/s) and the verify pass's Q4/Q5 projections below it: Q4 gate/up
+  82.5% (4.39 ms per round), Q5 down 75.8% (2.95 ms), Q5 mixer outputs 68.0% (1.16 ms), GDN
+  value/z 66.2% (1.79 ms), and the two small Q4 query/key projections 39.7% (GDN, 0.81 ms) and
+  47.7% (attention). Bringing every mapped kernel to 90% of the floor recovers **2.6 ms per
+  round (15.1%)**. The GDN input projection launches its 4,096-row Q4 query/key and 12,288-row
+  Q5 value/z as two kernels over the same activations; one launch keeps each row's arithmetic
+  and recovers about 0.8 ms at 85%. Tooling: the sm120 profiling image's `nsys` is Nsight
+  Compute's target-only copy with no importer, so the earlier packet never produced a report.
+  Receipt: [attribution](measurements/2026-09-25-decode-roofline-attribution.json).
 
 ## Current order
 
