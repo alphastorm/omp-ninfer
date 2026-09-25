@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Faster decode (both lanes)
+
+- Rebind RTX 5090 to `v0.6.10-qwen38-5090-beta.1` (image
+  `sha256:5ca6e416bf896e73696e04b9324dc279e22104e0c325e0b4d1989d1a41df02e8`, source
+  `8cc0810acc296bac482187da171afddd93df7fb9`) and RTX 4090 to `v0.6.8-qwen38-4090-beta.1` (source
+  `5a774841c29bdf2ee6b7efba135aed0a47e80447`). The model, serving settings, memory floors and the
+  upstream OMP 18.3.0 client are unchanged.
+- MTP3 decode is faster. The verify pass's small-extent Q4 and Q5 projections share each
+  activation load across weight rows, and the Q4 MLP gate/up kernel pads its staged weight rows so
+  its shared-memory reads no longer conflict; every row keeps its arithmetic order. On the RTX
+  5090, decode is 10.3-11.0% faster from a seed context to 31K tokens (a 26K-context decode round
+  takes 16.08 ms instead of 17.75 ms), the 89-case role corpus answers identically at temperature
+  0, and 130,048-token retrieval stays exact. On the RTX 4090 the MLP down and mixer output
+  projections keep one row per warp, because sharing loads made them slower there; its C1
+  benchmark decodes at 157.89 tok/s instead of 153.54
+  ([EXP-055](docs/measurements/2026-09-25-decode-kernel-schedules.json); attribution in
+  [EXP-054](docs/measurements/2026-09-25-decode-roofline-attribution.json)).
+
 ## [0.8.0] - 2026-09-25
 
 ### Bring your own OMP

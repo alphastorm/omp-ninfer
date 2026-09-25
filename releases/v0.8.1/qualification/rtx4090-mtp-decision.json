@@ -1,0 +1,22 @@
+{
+    "artifact_type":  "ninfer_mtp_requalification_decision",
+    "schema_version":  1,
+    "status":  "closed",
+    "decided_utc":  "2026-08-30T16:38:42.2299415Z",
+    "selected_profile":  "MTP3",
+    "promote_mtp3":  true,
+    "release_eligible":  true,
+    "threshold_complete_golden_equivalent_wall_time_percent":  10,
+    "arms":  {
+                 "MTP0":  {
+                              "deterministic_gates_passed":  true,
+                              "complete_golden_equivalent_wall_seconds":  5.663106
+                          },
+                 "MTP3":  {
+                              "deterministic_gates_passed":  true,
+                              "complete_golden_equivalent_wall_seconds":  4.697929
+                          }
+             },
+    "complete_golden_equivalent_wall_time_improvement_percent":  17.043244,
+    "reason":  "MTP3 passed every deterministic, output, persistence, and Golden-equivalent gate and improved complete Golden-equivalent wall time by at least 10%."
+}
