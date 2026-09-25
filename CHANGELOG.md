@@ -7,6 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Bring your own OMP
+
+- The documented client is the unmodified upstream
+  [Oh My Pi v18.3.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0) release binary for
+  Windows x64, Linux x64 and macOS arm64, downloaded and checked against its SHA-256; there is no
+  fork build, archive or installer. The provider fragments keep thinking within the template's
+  `low`, `medium` and `xhigh` efforts and turn off encrypted reasoning and reasoning summaries,
+  and every route exports `PI_OPENAI_STATEFUL=1`.
+- Rebind RTX 5090 to `v0.6.9-qwen38-5090-beta.1` (image
+  `sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd`, source
+  `8f0098da8570ea788768a9c453045e90839413cd`) and RTX 4090 to `v0.6.7-qwen38-4090-beta.1` (source
+  `a54f1109f3c55607ace786061d26035031db3e0b`, the same runtime without the Windows-only pinning
+  retry below). The model, serving settings and memory floors are unchanged.
+- Stock clients get durable sessions. With API authentication the runtime hashes a request's
+  `prompt_cache_key` into the session identity, never storing the raw key, and refuses it together
+  with `ninfer_session` or `X-NInfer-Session`; a returning session's checkpoint is restored on its
+  first request after a restart. On both published lanes, unmodified OMP 18.3.0 kept one session
+  across graceful restarts, including a new OMP process resuming after a restart
+  ([EXP-053](docs/measurements/2026-09-25-stock-omp-durable-sessions.json)). The runtime diff passed
+  an independent four-model council and two remediation epochs (council
+  `CR-20260925-ninfer-stock-client`).
+- New sessions start faster: the shared-prefix catalog holds one owner per active request or per
+  cache marker, whichever is larger (four at one active request). With 11.9-14.2K-token agent
+  prefixes on the RTX 5090, fresh sessions that fell back to a full prefill dropped from 24 of 24
+  to 0 of 24, and time to first token from 3.78-4.52 s to 0.092-0.100 s
+  ([EXP-052](docs/measurements/2026-09-25-agent-mix-shared-prefix.json)).
+- RTX 4090: a start can still fail intermittently when Windows refuses to pin a host pool while
+  most available memory is standby file cache
+  ([#48](https://github.com/alphastorm/omp-ninfer/issues/48) stays open). A retry inside the same
+  process was built and removed: when the refusal occurred during qualification, the retried
+  allocation failed with `cudaErrorAlreadyMapped`. The next start pinned the pool.
+- Sessions saved under the fork client's `ninfer_session` names are not reachable from stock OMP:
+  each takes one cold first turn after the upgrade, and the old checkpoints age out under the
+  checkpoint quota.
+
+### Added
+
+- `scripts/stock_omp_session_proof.py` proves that an unmodified upstream OMP binary keeps one
+  NInfer session across graceful server restarts: one process across a restart, a new process
+  with the server up, and a new process after a restart must all recall the seeded facts under one
+  OMP session id.
+- `scripts/agent_mix_probe.py` measures shared-prefix reuse for a three-agent mix, one capacity
+  arm at a time, joining every request to the server's request log.
+- `scripts/stage_release.py --omp-component` stages an upstream-release client, and
+  `scripts/verify_release.py` validates its provenance, per-platform binaries and bindings.
+
+### Changed
+
+- The documented-route acceptance harness installs the stock client the way the quickstart does,
+  checks the installed binary against each profile's pinned upstream binary, binds the expected
+  client version to the tested release manifest, and launches OMP with `PI_OPENAI_STATEFUL=1`.
+  The composer builds client identity from the current release's upstream component only.
+
+### Removed
+
+- The product no longer builds or publishes an OMP client:
+  `scripts/hosts/cut-omp-client-component.sh` is gone, and the documented routes no longer use the
+  fork's `omp appliance` commands, which stock OMP does not have.
+
 ## [0.7.4] - 2026-09-24
 
 ### Durable-session runtime (both lanes)

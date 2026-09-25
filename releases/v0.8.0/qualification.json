@@ -1,0 +1,432 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.8.0",
+  "as_of": "2026-09-25",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Bring your own OMP: the documented client is the unmodified upstream Oh My Pi v18.3.0 release binary for Windows x64, Linux x64 and macOS arm64, and both lanes move to the stock-client runtime - RTX 5090 container to 8f0098da and RTX 4090 native Windows to a54f1109, which differs only by removing a Windows-only pinning retry. The runtime diff passed a four-model council and two remediation epochs. Model, serving settings and memory floors are unchanged from v0.7.4. RTX 3090 is omitted pending physical-host access. Every runtime gate below was measured on the published components; nothing is carried from v0.7.4.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "8f0098da8570ea788768a9c453045e90839413cd",
+    "release_source_commit": "8f0098da8570ea788768a9c453045e90839413cd",
+    "release_source_archive_sha256": "372ac65ea5109b371329204d8026776e57d43d7e1871676c3a544485e4f25f58",
+    "release_server_binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.7.0"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.8.0/qualification/rtx5090.json",
+      "sha256": "5b0380abb648c0da133eb86dde9ae0c48a86275c2b752b78c8930558e9c4cd81",
+      "status": "passed",
+      "source_commit": "8f0098da8570ea788768a9c453045e90839413cd",
+      "server_binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "8f0098da8570ea788768a9c453045e90839413cd",
+      "release_server_binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
+      "oci_manifest_digest": "sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
+      "binary_package_sha256": "56314581a32ce16bad734afe65ef153ddf32aa932dcaf6decf16147647a3fad6",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.9-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.9-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "dd4697150a6d08845cdb1cbd6b40c239d32726b180576d0f2de382f54e82d242",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.9-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "Appliance-local build of 8f0098da, CUDA 13.1, with 8 host suites passing. Publication workflow 36077119148 binds binary archive 56314581 to image 8b8405b1 on base a19e00c5. The anonymous image pull verified ninfer-serve ba48a722 and ninfer d4fc053a inside; every anonymously downloaded published asset matched its SHA256SUMS and the cut's local bytes."
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.8.0/qualification/rtx4090.json",
+        "sha256": "7472b541c477688fe0c7a8550bb91e97d65bfb669b3701023a947a828047cfee",
+        "release_tag": "v0.6.7-qwen38-4090-beta.1",
+        "package_sha256": "1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.9-qwen38-5090-beta.1 component (image 8b8405b1) before the cut; the receipt lands at releases/v0.8.0/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "release_tag": "v0.6.9-qwen38-5090-beta.1",
+      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
+      "source_commit": "8f0098da8570ea788768a9c453045e90839413cd",
+      "configuration_sha256": "762e6bf448b389cd6a8d08871a3df2c74080c5b1fbd7bbb95146030f1990eea8",
+      "measured_on": "2026-09-25T00:36:46Z",
+      "profile_gates": {
+        "prefill_curve": {
+          "status": "passed",
+          "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "exact_output": true,
+          "output": "ORCHID=493817; COLOR=COBALT",
+          "wall_s": 58.136,
+          "tokens_per_second_wall": 2237.0,
+          "vram_used_mib_after": 28144,
+          "server_prefix_cache_hit_tokens": 0,
+          "server_prefix_reuse_path": "root",
+          "server_computed_prefill_tokens": 130048,
+          "server_prefill_seconds": 57.995996938,
+          "cold": true
+        },
+        "decode": {
+          "request_id": "ce4ca9bc268882f8e4c145033783b2fd3007b46f0cafdca7a714ca7ca853c26f",
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "wall_s": 14.84,
+          "completion_tokens_per_second_wall": 138.01,
+          "server_completion_tokens": 2048,
+          "server_decode_seconds": 14.712040982000003,
+          "decode_tokens_per_second": 139.21,
+          "mtp_acceptance_rate": 0.412,
+          "mtp_tokens_per_round": 2.24,
+          "speculative": {
+            "accepted_per_position": [
+              597,
+              340,
+              193
+            ],
+            "accepted_tokens": 1130,
+            "backend": "mtp",
+            "draft_window": 3,
+            "drafted_tokens": 2745,
+            "fallback_steps": 1,
+            "rounds": 916
+          }
+        },
+        "agent_protocol": {
+          "status": "passed",
+          "authenticated_session_identity": true,
+          "stateful_continuation": true,
+          "forks": 2,
+          "parent_delete_status": 200,
+          "deleted_continuation_status": 404,
+          "deleted_continuation_error_code": "previous_response_not_found",
+          "post_restart_deleted_continuation_status": 404,
+          "no_resurrection": true,
+          "surviving_descendant_continued": true,
+          "live_sibling_continuation_status": 200,
+          "live_sibling_continuation_error_code": null
+        }
+      },
+      "durable_sessions": {
+        "workload_errors": 0,
+        "saves_before_eviction": 4,
+        "automatic_saves_deferred": 1,
+        "first_stop": [
+          "shutdown: saved 1, nothing to save 3, refused 0"
+        ],
+        "resumed": 4,
+        "sessions": 4,
+        "restored_from_checkpoint": 4,
+        "restore_reclaim_lines": [
+          "checkpoint restore for session 4ef19473c17f saved 1 of 2 resident session(s) to make room",
+          "checkpoint restore for session 4ef19473c17f saved 1 of 1 resident session(s) to make room",
+          "checkpoint restore for session 4ef19473c17f reclaimed 3 checkpoint-backed session(s)"
+        ],
+        "second_stop": [
+          "shutdown: saved 0, nothing to save 4, refused 0"
+        ]
+      },
+      "publication_barrier": {
+        "log_after_barrier_hit": [
+          "+1.23s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session fbef781b82ff)",
+          "+13.10s [info] ninfer-serve: session checkpoint saved before eviction (session fbef781b82ff)"
+        ],
+        "first_stop": [
+          "shutdown: saved 0, nothing to save 2, refused 0"
+        ],
+        "resume_from_held_turn": {
+          "http_status": 200,
+          "answer": "V-9241",
+          "exact": true
+        }
+      },
+      "stock_client_sessions": {
+        "omp": {
+          "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+          "version": "omp/18.3.0"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0d601-040a-7238-8949-683cb97d316f"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 1, nothing to save 0, refused 0",
+          "shutdown: saved 1, nothing to save 0, refused 0",
+          "shutdown: saved 1, nothing to save 0, refused 0"
+        ],
+        "first_request_restore": [
+          "checkpoint restored for session b5dc5d70aac1 on its first request without a response id"
+        ]
+      },
+      "shared_prefix_capacity": {
+        "reported_max_shared_prefixes": 4,
+        "measured_fresh_sessions": 24,
+        "measured_fresh_root": 0,
+        "measured_fresh_client_ttft_median_s": {
+          "A": 0.095,
+          "B": 0.096,
+          "C": 0.102
+        },
+        "measured_fresh_client_ttft_p90_s": {
+          "A": 0.098,
+          "B": 0.1,
+          "C": 0.105
+        },
+        "measured_fresh_prompt_tokens_median": {
+          "A": 11887,
+          "B": 13211,
+          "C": 14199
+        },
+        "warm_up_fresh_client_ttft_s": {
+          "A": 3.788,
+          "B": 4.104,
+          "C": 4.428
+        }
+      },
+      "additional_probes": {
+        "fanout-57k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 67681,
+            "cold_prefill_s": 25.444,
+            "checkpoint_save_s": 5.694,
+            "checkpoint_bytes": 5188026327,
+            "hot_fork_median_s": 0.907,
+            "hot_fork_max_s": 1.028,
+            "restart_ready_s": 31.04,
+            "post_restart_resume_s": 3.093,
+            "warm_start_first_fork_s": 0.868,
+            "warm_start_fork_median_s": 0.772,
+            "warm_start_fork_max_s": 0.773
+          },
+          "receipt_sha256": "46418731371e8fb9d830ddbcdbc087fac265259031fb0188e12121b2253e91c4"
+        },
+        "fanout-67k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 79957,
+            "cold_prefill_s": 31.468,
+            "checkpoint_save_s": 5.442,
+            "checkpoint_bytes": 6044083057,
+            "hot_fork_median_s": 1.025,
+            "hot_fork_max_s": 1.054,
+            "restart_ready_s": 32.02,
+            "post_restart_resume_s": 3.472,
+            "warm_start_first_fork_s": 0.798,
+            "warm_start_fork_median_s": 0.805,
+            "warm_start_fork_max_s": 0.816
+          },
+          "receipt_sha256": "26bce074dda6617ba4eee1a810e88cb6b66e222606c0a15bd6b79dc0e36c5cca"
+        },
+        "warm-arrival": {
+          "exit_code": 0,
+          "summary": [
+            {
+              "order": "resume-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.381,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.655
+              ],
+              "checkpoint_bytes": 5201403134,
+              "post_restart_sequence": [
+                [
+                  "endpoint_resume_first",
+                  "private_response_replay",
+                  67908,
+                  3.814
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.809
+                ],
+                [
+                  "fork_second",
+                  "private_long_anchor",
+                  67712,
+                  0.78
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 5.403
+            },
+            {
+              "order": "fork-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.328,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.726
+              ],
+              "checkpoint_bytes": 5205861708,
+              "post_restart_sequence": [
+                [
+                  "fork_first",
+                  "private_long_anchor",
+                  67712,
+                  3.39
+                ],
+                [
+                  "endpoint_resume_after_fork",
+                  "private_response_replay",
+                  67908,
+                  0.675
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.779
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 4.844
+            }
+          ],
+          "receipt_sha256": "35b9d031e646feadb61a263a94892e92c7782635b88ddc16a0a97aa5265e7080"
+        },
+        "restore": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 57889,
+            "cold_prefill_s": 21.127,
+            "checkpoint_bytes": 4514771839,
+            "restore_0_wall_s": 2.873,
+            "restore_1_wall_s": 2.801,
+            "control_retrieval_exact": true,
+            "restored_retrieval_exact": true,
+            "tampered_restore_refused": null
+          },
+          "receipt_sha256": "adceef630afb18d97c417b9fdc623b4004a137b01f505f9eaa78947335585adc"
+        },
+        "multisession": {
+          "exit_code": 0,
+          "summary": {
+            "continuations_and_forks": 8,
+            "reuse_lost": 2,
+            "exposed": true,
+            "server_errors": [],
+            "server_reuse_paths": [
+              "private_endpoint",
+              "private_long_anchor",
+              "root"
+            ],
+            "server_root_requests_after_bases": 2
+          },
+          "receipt_sha256": "c82a46200f7cbf1846c75dc9f265b13eb1c1417d2318af472d1e23589adcab32"
+        }
+      },
+      "tampered_restore_refused": "not exercised; no current tamper-test claim",
+      "evidence": "releases/v0.8.0/qualification/rtx5090.json; stock-client sessions on both lanes in docs/measurements/2026-09-25-stock-omp-durable-sessions.json; shared-prefix capacity in docs/measurements/2026-09-25-agent-mix-shared-prefix.json; durability defect reproduction and remediation proof in docs/measurements/2026-09-24-durable-session-eviction.json and docs/measurements/2026-09-24-publication-barrier.json"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.7-qwen38-4090-beta.1",
+      "source_commit": "a54f1109f3c55607ace786061d26035031db3e0b",
+      "server_binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
+      "configuration_sha256": "3eefaa95ca729ec04a4596b40dba66f53cefb833f770c137f9fd6253e9a1d3af",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 153.33472861946743,
+      "c1_max_memory_used_mib": 22774,
+      "c1_max_power_w": 451.97,
+      "c1_mtp_acceptance_percent": 87.58865248226951,
+      "c1_prefill_tokens_per_second": 2112.926499052952,
+      "context_elapsed_seconds": 91.22873950004578,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "stop-event",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.3.0",
+      "omp_transport": "openai-responses",
+      "registered_tests": "The native build at a54f1109 passed its 11 focused suites; the canonical orchestrator build receipt names its own. No full native suite claimed.",
+      "stock_client_sessions": {
+        "omp": {
+          "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+          "version": "omp/18.3.0"
+        },
+        "model": "ninfer-native-4090/qwen3.8-27b",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0d691-6d21-76ac-8845-5161506adb58"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "last_start_first_request_restore": [
+          "checkpoint restored for session 9dcceb1001cf on its first request without a response id"
+        ],
+        "last_start_stop": [
+          "shutdown: saved 1, nothing to save 0, refused 0"
+        ]
+      }
+    }
+  },
+  "interpretation": "An unmodified upstream OMP client now keeps durable sessions on both lanes: on the published RTX 5090 image and the installed RTX 4090 package, stock OMP 18.3.0 with only the documented fragments recalled its session across graceful restarts, including a new OMP process whose first request named no previous response and was restored from the session's checkpoint. New sessions start from the shared prefix: on the published image no measured fresh agent session fell back to a full prefill. The RTX 5090 durability workload, publication barrier and probe set match v0.7.4's results, and the RTX 4090 package passed its 15 canonical phases with the OMP 18.3.0 tool call. A managed RTX 4090 start can still fail intermittently while Windows holds most memory as standby cache (alphastorm/omp-ninfer#48). Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.6.9-qwen38-5090-beta.1 component and runtime image",
+    "fresh upstream OMP platform and documented-route acceptance"
+  ],
+  "deferred_scope": {
+    "rtx3090-windows-native": {
+      "reason": "Client-repin route not exercised; omitted from this release by user direction.",
+      "legacy_release": "v0.7.2",
+      "legacy_client": "18.0.9-cross-platform-beta-2",
+      "future_condition": "Qualify when the physical RTX 3090 host is available again, expected around 2026-09-30."
+    }
+  }
+}

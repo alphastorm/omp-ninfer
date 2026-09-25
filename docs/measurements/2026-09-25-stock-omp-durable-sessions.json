@@ -1,0 +1,325 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-053",
+  "title": "Unmodified upstream OMP 18.3.0 keeps durable NInfer sessions on both published lanes",
+  "generated_utc": "2026-09-25T03:27:48Z",
+  "status": "passed",
+  "question": "Does the unmodified upstream Oh My Pi 18.3.0 release binary, configured only by the documented provider fragments, keep one NInfer session across graceful server restarts on the published RTX 5090 image and the published RTX 4090 native package, including when a new OMP process resumes after both it and the server restarted?",
+  "answer": "Yes on both lanes. In all three scenarios - one OMP process across a restart, a new process with the server up, and a new process after a restart - OMP recalled both seeded facts under one OMP session id, and every graceful stop saved the live session and refused nothing. After the second restart the new OMP process's first request named no previous response; each lane logged that it restored the session's checkpoint on its first request without a response id.",
+  "method": {
+    "tool": "scripts/stock_omp_session_proof.py (926a50d): OMP in RPC mode with PI_OPENAI_STATEFUL=1 and an isolated HOME holding only the documented models.yml and config.yml; s1 seeds two facts, recalls one, restarts the server and recalls both in one process; s2 continues the session from a new process with the server up; s3 restarts the server, then continues from a new process. A recall passes only when the answer names both facts.",
+    "client": "omp-darwin-arm64 from https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0, sha256 d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc, unmodified.",
+    "session_identity": "Stock OMP names its session with prompt_cache_key; the runtime hashes it into the session identity under API authentication."
+  },
+  "lanes": {
+    "rtx5090": {
+      "component": "v0.6.9-qwen38-5090-beta.1",
+      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:8b8405b11dddbe48faccbba2a25aa224df16aa429ea11d72781e72ced83abfbd",
+      "server_binary_sha256": "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+      "route": "The published image by digest with the shipped qwen38-5090-v0.7.0 serving arguments, as an arm on the production host during a held window, over an SSH forward on the documented macOS route's tunnel port 18089, with that route's provider fragment and fail-closed config verbatim (examples/manual-tunnel/models.fragment.yml, fail-closed.yml). Each restart is a graceful stop and a start on the same checkpoint root.",
+      "omp": {
+        "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+        "version": "omp/18.3.0"
+      },
+      "model": "ninfer-beta/q38-ninfer",
+      "thinking": "low",
+      "checks": {
+        "s1_seed_completed": true,
+        "s1_recall_before_restart": true,
+        "s1_recall_after_restart": true,
+        "s2_recall_new_process": true,
+        "s3_recall_after_restart_new_process": true,
+        "one_session": true
+      },
+      "omp_session_ids": [
+        "01a0d601-040a-7238-8949-683cb97d316f"
+      ],
+      "restarts": [
+        0,
+        0
+      ],
+      "server_stops": [
+        "shutdown: saved 1, nothing to save 0, refused 0",
+        "shutdown: saved 1, nothing to save 0, refused 0",
+        "shutdown: saved 1, nothing to save 0, refused 0"
+      ],
+      "first_request_restore": [
+        "checkpoint restored for session b5dc5d70aac1 on its first request without a response id"
+      ],
+      "receipt": {
+        "artifact_type": "omp_ninfer_stock_session_proof",
+        "schema_version": 1,
+        "started_utc": "2026-09-25T00:39:44Z",
+        "omp": {
+          "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+          "version": "omp/18.3.0"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "environment": {
+          "PI_OPENAI_STATEFUL": "1"
+        },
+        "synthetic_prompts_only": true,
+        "scenarios": [
+          {
+            "id": "s1-one-process-across-restart",
+            "continue": false,
+            "steps": [
+              {
+                "turn": {
+                  "prompt": "For this session: the release we are preparing is called Juniper and its build number is 5521. Acknowledge in one short sentence.",
+                  "answer": "Understood — release Juniper, build 5521.",
+                  "stop": "stop",
+                  "seconds": 3.48,
+                  "events": 28
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What build number did I mention? Reply with just the number.",
+                  "answer": "5521",
+                  "stop": "stop",
+                  "seconds": 0.61,
+                  "events": 21
+                }
+              },
+              {
+                "restart": {
+                  "exit_code": 0,
+                  "seconds": 39.6,
+                  "output_tail": "[00:40:29Z] healthy after ~18 s\n"
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "JUNIPER 5521",
+                  "stop": "stop",
+                  "seconds": 1.53,
+                  "events": 23
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "message_count": 6
+            }
+          },
+          {
+            "id": "s2-new-process-server-up",
+            "continue": true,
+            "steps": [
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "JUNIPER 5521",
+                  "stop": "stop",
+                  "seconds": 1.24,
+                  "events": 32
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "message_count": 8
+            }
+          },
+          {
+            "id": "s3-new-process-after-restart",
+            "continue": true,
+            "steps": [
+              {
+                "restart": {
+                  "exit_code": 0,
+                  "seconds": 38.3,
+                  "output_tail": "[00:41:10Z] healthy after ~15 s\n"
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "JUNIPER 5521",
+                  "stop": "stop",
+                  "seconds": 1.55,
+                  "events": 29
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d601-040a-7238-8949-683cb97d316f",
+              "message_count": 10
+            }
+          }
+        ],
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "error": null,
+        "passed": true,
+        "finished_utc": "2026-09-25T00:41:13Z"
+      }
+    },
+    "rtx4090": {
+      "component": "v0.6.7-qwen38-4090-beta.1",
+      "package_sha256": "1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c",
+      "server_binary_sha256": "1a701931e533510c961903e44950472624ba9f673d6e4a12563cca3ee85a357f",
+      "route": "The installed lane (C:\\ProgramData\\NInfer\\qwen38-4090-native, release qwen38-4090-native-v0.6.7-beta.1-a54f1109f3c5) over an SSH forward on its loopback port 18082, with the documented native fragment and fail-closed config verbatim (examples/windows-native/models.fragment.yml, examples/manual-tunnel/fail-closed.yml) and the lane's key in NINFER_NATIVE_API_KEY. Each restart is the lane's own Control-Release.ps1 -Action Restart: a graceful managed stop, then a start.",
+      "omp": {
+        "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+        "version": "omp/18.3.0"
+      },
+      "model": "ninfer-native-4090/qwen3.8-27b",
+      "thinking": "low",
+      "checks": {
+        "s1_seed_completed": true,
+        "s1_recall_before_restart": true,
+        "s1_recall_after_restart": true,
+        "s2_recall_new_process": true,
+        "s3_recall_after_restart_new_process": true,
+        "one_session": true
+      },
+      "omp_session_ids": [
+        "01a0d691-6d21-76ac-8845-5161506adb58"
+      ],
+      "restarts": [
+        0,
+        0
+      ],
+      "last_start_first_request_restore": [
+        "checkpoint restored for session 9dcceb1001cf on its first request without a response id"
+      ],
+      "last_start_stop": [
+        "shutdown: saved 1, nothing to save 0, refused 0"
+      ],
+      "receipt": {
+        "artifact_type": "omp_ninfer_stock_session_proof",
+        "schema_version": 1,
+        "started_utc": "2026-09-25T03:17:28Z",
+        "omp": {
+          "sha256": "d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc",
+          "version": "omp/18.3.0"
+        },
+        "model": "ninfer-native-4090/qwen3.8-27b",
+        "thinking": "low",
+        "environment": {
+          "PI_OPENAI_STATEFUL": "1"
+        },
+        "synthetic_prompts_only": true,
+        "scenarios": [
+          {
+            "id": "s1-one-process-across-restart",
+            "continue": false,
+            "steps": [
+              {
+                "turn": {
+                  "prompt": "For this session: the release we are preparing is called Juniper and its build number is 5521. Acknowledge in one short sentence.",
+                  "answer": "Acknowledged — preparing release Juniper, build 5521.",
+                  "stop": "stop",
+                  "seconds": 4.93,
+                  "events": 32
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What build number did I mention? Reply with just the number.",
+                  "answer": "5521",
+                  "stop": "stop",
+                  "seconds": 1.11,
+                  "events": 21
+                }
+              },
+              {
+                "restart": {
+                  "exit_code": 0,
+                  "seconds": 93.9,
+                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T03:17:57.7557428Z\",\n                      \"elapsed_seconds\":  17.484\n                  }\n}\n"
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "Juniper 5521",
+                  "stop": "stop",
+                  "seconds": 2.24,
+                  "events": 26
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "message_count": 6
+            }
+          },
+          {
+            "id": "s2-new-process-server-up",
+            "continue": true,
+            "steps": [
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "Juniper 5521",
+                  "stop": "stop",
+                  "seconds": 1.3,
+                  "events": 25
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "message_count": 8
+            }
+          },
+          {
+            "id": "s3-new-process-after-restart",
+            "continue": true,
+            "steps": [
+              {
+                "restart": {
+                  "exit_code": 0,
+                  "seconds": 75.7,
+                  "output_tail": "                      \"completed_utc\":  \"2026-09-25T03:19:21.0832938Z\",\n                      \"elapsed_seconds\":  2.767\n                  }\n}\n"
+                }
+              },
+              {
+                "turn": {
+                  "prompt": "What is the release called and what is its build number? Reply in the form NAME BUILD.",
+                  "answer": "Juniper 5521",
+                  "stop": "stop",
+                  "seconds": 2.05,
+                  "events": 21
+                }
+              }
+            ],
+            "state": {
+              "session_id": "01a0d691-6d21-76ac-8845-5161506adb58",
+              "message_count": 10
+            }
+          }
+        ],
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "error": null,
+        "passed": true,
+        "finished_utc": "2026-09-25T03:20:32Z"
+      }
+    }
+  },
+  "limits": [
+    "One run per lane; the prompts are the proof's fixed synthetic facts.",
+    "Both runs drove OMP from macOS arm64. The native Windows client's typed tool call on the RTX 4090 is in that lane's canonical qualification, and the documented routes are accepted separately.",
+    "Graceful stops only: a crash or an expired graceful wait can still leave unpublished work unsaved."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
