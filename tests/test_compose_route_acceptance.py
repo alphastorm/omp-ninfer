@@ -20,6 +20,16 @@ assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
+STAGE_SPEC = importlib.util.spec_from_file_location("stage_release", ROOT / "scripts" / "stage_release.py")
+assert STAGE_SPEC and STAGE_SPEC.loader
+STAGE = importlib.util.module_from_spec(STAGE_SPEC)
+sys.modules[STAGE_SPEC.name] = STAGE
+STAGE_SPEC.loader.exec_module(STAGE)
+from verify_release import validate_client_profile_predicates  # noqa: E402  # pyright: ignore[reportMissingImports]
+
+# v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
+ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
+            "linux-docker-local": "qualified"}
 
 CANDIDATE = "1" * 40
 UPSTREAM = {"distribution_kind": "upstream-release",
@@ -202,18 +212,24 @@ class UpstreamCompositionTests(unittest.TestCase):
         MODULE.save(self.release_root / "qualification.json", {
             "as_of": "2026-01-01", "composition": {"external_installation_acceptance": {
                 "public_url": "https://example.invalid/acceptance.json"}}})
-        self.profiles = [{
-            "id": profile, "client_distribution": client_distribution(platform, digest * 64),
-            "installable": profile != "linux-docker-local", "status": "candidate",
-            "blockers": ["pending"], "acceptance_receipt": {
-                "url": f"https://example.invalid/{profile}.json", "sha256": "0" * 64}}
-            for (profile, platform), digest in zip(MODULE.OMP_PROFILE_PLATFORMS.items(), ("7", "8", "9"))]
-        authority = {"product_release": self.release, "profiles": self.profiles,
-                     "composition": {"status": "candidate", "blockers": ["pending"]}}
+        # The authority exactly as upstream staging leaves it: the predecessor's accepted profiles
+        # reset to pending, without receipts or installability.
+        authority = {"product_release": self.release, "composition": {"status": "v9.9.8", "blockers": []},
+                     "profiles": [{
+                         "id": profile, "status": ACCEPTED[profile], "installable": ACCEPTED[profile] == "qualified",
+                         "blockers": [], "gpu_qualification": {"status": "qualified"},
+                         "acceptance_receipt": {"url": f"https://example.invalid/{profile}.json", "sha256": "0" * 64}}
+                         for profile in MODULE.OMP_PROFILE_PLATFORMS]}
+        platforms = {platform: client_distribution(platform, digest * 64)
+                     for platform, digest in zip(MODULE.OMP_PROFILE_PLATFORMS.values(), ("7", "8", "9"))}
+        STAGE.bind_upstream_client(authority, {"omp": manifest["components"]["omp"], "platforms": platforms},
+                                   self.release)
+        self.profiles = authority["profiles"]
         MODULE.save(self.root / "compatibility.json", authority)
         MODULE.save(self.release_root / "compatibility.json", authority)
         evidence = {
             "platforms": {profile["id"]: {
+                "status": ACCEPTED[profile["id"]],
                 "binary_sha256": profile["client_distribution"]["binary_sha256"],
                 "live_acceptance": deepcopy(LIVE), "limitations": []} for profile in self.profiles},
             "rtx4090": {"preparation": {}, "observations": {}, "limitations": []},
@@ -271,16 +287,35 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertEqual(set(components["platforms"]), {"darwin-arm64", "windows-x64", "linux-x64"})
         self.assertEqual(components["platforms"]["windows-x64"]["asset_sha256"], omp["artifact_sha256"])
         self.assertEqual(MODULE.load(acceptance / "rtx4090-public-install.json")["client"]["asset_url"], omp["artifact_url"])
-        for row in external["platform_receipts"]:
-            path = acceptance / f"{row['profile']}.json"
-            self.assertEqual(row["sha256"], MODULE.sha256(path.read_bytes()))
-            self.assertNotIn("diagnostics", MODULE.load(path))
         authority = MODULE.load(self.root / "compatibility.json")
+        rows = {row["profile"]: row["sha256"] for row in external["platform_receipts"]}
+        for profile in authority["profiles"]:
+            filename = f"{MODULE.OMP_PROFILE_PLATFORMS[profile['id']]}-18.3.0.json"
+            path = acceptance / filename
+            self.assertEqual((profile["status"], profile["installable"], profile["blockers"]),
+                             (ACCEPTED[profile["id"]], ACCEPTED[profile["id"]] == "qualified", []))
+            self.assertEqual(profile["acceptance_receipt"], {
+                "url": f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{CANDIDATE}"
+                       f"/releases/{self.release}/acceptance/{filename}",
+                "sha256": MODULE.sha256(path.read_bytes())})
+            self.assertEqual(rows[profile["id"]], profile["acceptance_receipt"]["sha256"])
+            self.assertNotIn("diagnostics", MODULE.load(path))
         errors = []
         MODULE.validate_upstream_omp_component(omp, errors)
         MODULE.validate_upstream_client_bindings(omp, authority["profiles"], errors)
+        validate_client_profile_predicates(authority, errors)
         self.assertEqual(errors, [])
         self.assertEqual(manifest["status"], "ready")
+
+    def test_qualified_status_without_a_qualified_gpu_runtime_is_refused_before_writing(self) -> None:
+        authority = MODULE.load(self.root / "compatibility.json")
+        windows = next(p for p in authority["profiles"] if p["id"] == "windows-docker-local")
+        windows["gpu_qualification"]["status"] = "in qualification"
+        MODULE.save(self.root / "compatibility.json", authority)
+        with self.assertRaisesRegex(SystemExit, "qualified without a qualified GPU runtime"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+        self.assertEqual(list((self.root / "docs" / "measurements").iterdir()), [])
 
     def test_client_from_another_upstream_release_is_refused_before_writing_receipts(self) -> None:
         authority = MODULE.load(self.root / "compatibility.json")

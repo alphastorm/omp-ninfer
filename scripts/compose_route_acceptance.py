@@ -7,7 +7,7 @@ evidence record per client profile. This turns them into the release's acceptanc
 
   docs/measurements/<prefix>-<lane>-run.json              the runner receipts, byte for byte
   docs/measurements/<prefix>-acceptance-restoration.json
-  releases/<release>/acceptance/<client receipt>.json     one per compatibility profile
+  releases/<release>/acceptance/<platform>-<version>.json  one per compatibility profile
   releases/<release>/acceptance/rtx4090-public-install.json
   releases/<release>/acceptance/documented-routes.json
   releases/<release>/acceptance/composed-external-installation.json
@@ -22,8 +22,10 @@ from a previous fork's receipts. Installed binaries must match the published ups
         --route rtx5090-container-host=/private/host.json --route ...
 
 The evidence file is private (it names no secrets, but it is the operator's working record);
-its schema is the EVIDENCE_KEYS below. The immutable URL pins that follow are
-scripts/rebind_release.py's: commit these files, then --stage platform, acceptance, manifest.
+its schema is the EVIDENCE_KEYS below, and each platforms entry names the status (qualified or
+preview) its profile takes: upstream staging leaves every profile pending, so this is where the
+accepted posture is decided. The immutable URL pins that follow are scripts/rebind_release.py's:
+commit these files, then --stage platform, acceptance, manifest.
 """
 from __future__ import annotations
 
@@ -42,6 +44,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, validate_upstream_client_bindings, validate_upstream_omp_component,
 )
+from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
@@ -54,6 +57,7 @@ EVIDENCE_KEYS = ("platforms", "rtx4090", "restoration", "documented_routes", "co
 LIVE_TRUE = ("typed_read_tool_calls", "linked_tool_results", "tool_result_marker",
              "exact_visible_final_answer", "agent_end", "continuation_exact_nonce",
              "runtime_identity_bound")
+ACCEPTED_STATUSES = ("qualified", "preview")
 
 _spec = importlib.util.spec_from_file_location("documented_route", ROOT / "scripts" / "documented_route.py")
 assert _spec and _spec.loader
@@ -220,6 +224,15 @@ def main() -> int:
     validate_upstream_omp_component(omp, errors)
     validate_upstream_client_bindings(omp, authority["profiles"], errors)
     require(not errors, "; ".join(errors))
+    # Upstream staging leaves every profile pending, without a receipt or installability, so the
+    # evidence decides each accepted status; check them all before anything is written.
+    for profile in authority["profiles"]:
+        status = evidence["platforms"].get(profile["id"], {}).get("status")
+        require(status in ACCEPTED_STATUSES,
+                f"{profile['id']}: evidence must name status qualified or preview")
+        require(status != "qualified"
+                or profile.get("gpu_qualification", {}).get("status") == "qualified",
+                f"{profile['id']}: qualified without a qualified GPU runtime")
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
@@ -264,20 +277,22 @@ def main() -> int:
     restoration_ref = {"repository_path": relative(restoration_path),
                        "sha256": sha256(restoration_path.read_bytes())}
 
-    # 3. One platform receipt per client profile, at the filename the authority already names.
+    # 3. One platform receipt per client profile, named for its platform and the client version.
     platform_rows = []
     for profile in authority["profiles"]:
-        filename = profile["acceptance_receipt"]["url"].rsplit("/", 1)[-1]
-        receipt = platform_receipt(args.release, args.as_of, profile,
-                                   evidence["platforms"][profile["id"]], manifest)
+        platform_evidence = evidence["platforms"][profile["id"]]
+        filename = f"{OMP_PROFILE_PLATFORMS[profile['id']]}-{omp['distribution_version']}.json"
+        receipt = platform_receipt(args.release, args.as_of, profile, platform_evidence, manifest)
         save(acceptance_root / filename, receipt)
         digest = sha256((acceptance_root / filename).read_bytes())
-        # This is product qualification metadata; stock OMP does not read the authority.
-        # Non-installable profiles retain their status and blockers.
-        if profile.get("installable") is True:
-            profile["status"] = "qualified"
-            profile["blockers"] = []
-        profile["acceptance_receipt"]["sha256"] = digest
+        # This is product qualification metadata; stock OMP does not read the authority. The URL
+        # names the candidate until rebind_release.py --stage platform pins the receipt's commit.
+        status = platform_evidence["status"]
+        profile.update(status=status, installable=status == "qualified", blockers=[])
+        profile["acceptance_receipt"] = {
+            "url": f"{RAW}/{args.candidate}/releases/{args.release}/acceptance/{filename}",
+            "sha256": digest,
+        }
         platform_rows.append({"profile": profile["id"], "sha256": digest})
 
     # 4. The native lane's public-install receipt.
