@@ -9,7 +9,7 @@ local forwards (the managed route), never by exposing a listener.
 | `main` | RTX 5090 container | `ninfer-main/q38-ninfer` | 131,072-token ceiling; durable checkpoints as of v0.4.0 |
 | `heavy` | RTX 4090 native Windows | `ninfer-heavy/qwen3.8-27b` | MTP3 profile (v0.3.1); durable DirectStorage checkpoints |
 
-The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.7.4 lane, so no scout
+The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.8.0 lane, so no scout
 fragment ships here. Its three-lane form and the legacy OMP 18.0.9 instructions for that lane
 stay at the immutable v0.7.2 tag.
 

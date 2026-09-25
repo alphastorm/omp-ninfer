@@ -1,16 +1,15 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.7.4",
+  "release": "v0.8.0",
   "status": "public",
   "installation_mode": "native-windows-docker-local",
   "client": {
     "os": "Windows 11",
     "architecture": "x64",
-    "component_release_tag": "omp-18.2.3-cross-platform-beta-1",
-    "asset_url": "https://github.com/alphastorm/homebrew-omp/releases/download/omp-18.2.3-cross-platform-beta-1/omp-18.2.3-windows-x64.tar.gz",
-    "asset_sha256": "4fca02603e83ecb4f15598818c215da4e17fefd075a5450d502333349a59a311",
-    "binary_sha256": "fc98e0018bcfd8694e8860ade44f3c068f7caceca81ccdf4767865a8612b1ddf"
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe",
+    "asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+    "binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527"
   },
   "runtime_host": {
     "os": [
@@ -51,7 +50,7 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "72aa57dd147ef95ca3574ec4b550fb46676690d704bb9422ba0061d23f1f0ad6",
+      "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",
@@ -99,11 +98,16 @@
   },
   "omp_provider": {
     "id": "ninfer-beta",
-    "model_alias": "local-max",
+    "model_id": "q38-ninfer",
     "request_model_id": "q38-ninfer",
     "base_url": "http://127.0.0.1:18089/v1",
     "api": "openai-responses",
     "reasoning": true,
+    "thinking_efforts": [
+      "low",
+      "medium",
+      "xhigh"
+    ],
     "input": [
       "text",
       "image"
@@ -111,7 +115,11 @@
     "supports_tools": true,
     "context_window": 131072,
     "maximum_output_tokens": 32768,
-    "ninfer_stateful_responses": true,
+    "include_encrypted_reasoning": false,
+    "supports_reasoning_summary": false,
+    "stateful_responses_environment": {
+      "PI_OPENAI_STATEFUL": "1"
+    },
     "cost": {
       "input": 0,
       "output": 0,

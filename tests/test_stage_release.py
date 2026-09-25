@@ -11,7 +11,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTOR = ROOT / "tests" / "fixtures" / "upstream-omp-component.json"
 SOURCE = "v0.7.4"
-TARGET = "v0.8.0"
+# A release that is never checked in, so the staged tree cannot collide with a real one.
+TARGET = "v0.99.0"
+# The checked-in public release, whose client the root profiles describe.
+CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
 
 
 class StageReleaseTests(unittest.TestCase):
@@ -23,7 +26,7 @@ class StageReleaseTests(unittest.TestCase):
     def save(path: Path, value: dict) -> None:
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
-    def staging_copy(self, *, prepare_client_evidence: bool = True) -> Path:
+    def staging_copy(self, *, prepare_client_evidence: bool = True, source_release: str = SOURCE) -> Path:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -34,7 +37,7 @@ class StageReleaseTests(unittest.TestCase):
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
         for document in ("QUICKSTART.md", "SECURITY.md"):
             (root / "docs" / document).write_text("# Staging fixture\n", encoding="utf-8")
-        source = root / "releases" / SOURCE
+        source = root / "releases" / source_release
         if not prepare_client_evidence:
             return root
         manifest = self.load(source / "manifest.json")
@@ -70,11 +73,12 @@ class StageReleaseTests(unittest.TestCase):
         return root
 
     def stage(self, root: Path, descriptor: Path | None = DESCRIPTOR,
-              *, require_clean_client: bool = False) -> subprocess.CompletedProcess:
-        ninfer = self.load(root / "releases" / SOURCE / "manifest.json")["components"]["ninfer"]
+              *, require_clean_client: bool = False,
+              source_release: str = SOURCE) -> subprocess.CompletedProcess:
+        ninfer = self.load(root / "releases" / source_release / "manifest.json")["components"]["ninfer"]
         command = [
             sys.executable, str(root / "scripts" / "stage_release.py"),
-            "--from", SOURCE, "--release", TARGET,
+            "--from", source_release, "--release", TARGET,
             "--release-tag", ninfer["release_tag"],
             "--source-tag", ninfer["source_archive_url"].split("/")[-2],
             "--source-commit", ninfer["source_commit"],
@@ -164,12 +168,13 @@ class StageReleaseTests(unittest.TestCase):
                       result.stderr)
         self.assertFalse((root / "releases" / TARGET).exists())
 
-    def test_staging_without_descriptor_preserves_fork_identity(self) -> None:
-        root = self.staging_copy()
-        source = root / "releases" / SOURCE
+    def test_staging_without_descriptor_preserves_the_source_client(self) -> None:
+        """Without a descriptor the staged client is the source release's, whatever its kind."""
+        root = self.staging_copy(source_release=CURRENT)
+        source = root / "releases" / CURRENT
         previous = self.load(source / "manifest.json")["components"]["omp"]
         clients = [row["client_distribution"] for row in self.load(source / "compatibility.json")["profiles"]]
-        result = self.stage(root, None)
+        result = self.stage(root, None, source_release=CURRENT)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         staged = root / "releases" / TARGET
         current = self.load(staged / "manifest.json")["components"]["omp"]

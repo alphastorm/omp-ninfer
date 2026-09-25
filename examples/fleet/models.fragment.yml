@@ -1,4 +1,4 @@
-# One OMP configuration spanning the two lanes v0.7.4 qualifies, with explicit per-lane roles.
+# One OMP configuration spanning the two lanes v0.8.0 qualifies, with explicit per-lane roles.
 # Merge into ~/.omp/agent/models.yml (do not overwrite existing providers). Each lane stays
 # loopback-only on its own machine and is reached through an authenticated SSH local forward
 # (examples/fleet/open-tunnels.sh). Model ids are the lanes' exact published ids; provider names
@@ -9,7 +9,7 @@
 #   ninfer-heavy/qwen3.8-27b  RTX 4090 durable v0.2.1: long-context background workers (prefill
 #                            chunk 2,048, 131,072 context, rk2v4-e8 KV). No sibling fanout reuse;
 #                            one active request.
-#   The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.7.4 install lane, so
+#   The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.8.0 install lane, so
 #   this fragment declares no scout provider. Its three-lane form stays available at the
 #   immutable v0.7.2 tag, together with the legacy OMP 18.0.9 instructions for that lane.
 #

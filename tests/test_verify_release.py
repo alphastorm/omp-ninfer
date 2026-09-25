@@ -211,14 +211,19 @@ class ReleaseContractTest(unittest.TestCase):
             for index, argument in enumerate(arguments[:-1]):
                 if argument == "--deployment-profile":
                     arguments[index + 1] = historical_profile
+            # The historical manifest pins the fork client, so a profile that pins a client binary
+            # pins its archive, and the provider carries the fork's stateful compat flag.
             client = profile.get("client")
-            if isinstance(client, dict) and "component_release_tag" in client:
+            if isinstance(client, dict) and "asset_url" in client:
                 client.update({
                     "component_release_tag": historical_omp["component_release_tag"],
                     "asset_url": historical_omp["artifact_url"],
                     "asset_sha256": historical_omp["artifact_sha256"],
                     "binary_sha256": historical_omp["binary_sha256"],
                 })
+            provider = profile.get("omp_provider", {})
+            if provider.pop("stateful_responses_environment", None) is not None:
+                provider["ninfer_stateful_responses"] = True
             self.save(profile_path, profile)
         return temporary, root
 
@@ -1003,6 +1008,25 @@ class ReleaseContractTest(unittest.TestCase):
         )
         self.assertIn(
             "profiles/qwen38-rtx5090-manual-tunnel.json: model hash must match the manifest",
+            errors,
+        )
+
+    def test_upstream_client_profiles_name_the_stock_stateful_environment(self) -> None:
+        """Stock OMP chains Responses turns only with PI_OPENAI_STATEFUL=1; the fork's
+        ninferStatefulResponses flag is inert upstream, so a profile still carrying it describes
+        a client that silently loses stateful continuation."""
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        profile_path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(profile_path)
+        del profile["omp_provider"]["stateful_responses_environment"]
+        profile["omp_provider"]["ninfer_stateful_responses"] = True
+        self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertIn(
+            "profiles/qwen38-rtx5090-manual-tunnel.json: OMP provider must name "
+            "PI_OPENAI_STATEFUL=1, not the fork's stateful compat flag",
             errors,
         )
 
