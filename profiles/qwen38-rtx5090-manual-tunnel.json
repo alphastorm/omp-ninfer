@@ -48,7 +48,7 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "ba48a72264fcf327097e9eae5b5ed25316db7510154391285d4b7312be545146",
+      "d90079e887752aa3266a6c2d17ad0e029a35cfc12b6091d9851dde69c3100054",
       "--artifact-sha256",
       "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
       "--config-sha256",

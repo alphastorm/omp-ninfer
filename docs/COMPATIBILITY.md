@@ -19,11 +19,11 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/57ae7be3415a4cd6235d4a20c558734baa293efc/releases/v0.8.0/qualification/rtx4090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/85f8946adf208f556c87f078e90c458985c246cf/releases/v0.8.0/qualification/rtx4090.json) |
 
 Package bindings:
 
-- `rtx4090-windows-native`: component `v0.6.7-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.7-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.7-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.7-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `1e0dc4d1cef1324fee9a83d3b588f5f7041dfd09b39e6cf37b5920a660cb309c`; 572,682,605 bytes.
+- `rtx4090-windows-native`: component `v0.6.7-qwen38-4090-beta.2`; package [`ninfer-rtx4090-native-v0.6.7-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.7-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.6.7-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `888a5859fb11d88cc374a944c680a5678d0a0a51b6562d4fce20f9934718fa0c`; 572,708,542 bytes.
 
 ## Profile boundaries
 
