@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-09-25 · **Current public release: v0.8.0.**
+Updated: 2026-09-25 · **Current public release: v0.8.1.**
 
-The [v0.8.0 manifest](../releases/v0.8.0/manifest.json) binds the stock-client runtime on
+The [v0.8.1 manifest](../releases/v0.8.1/manifest.json) binds the stock-client runtime on
 two eligible GPU routes with unmodified upstream OMP 18.3.0. Each lane's runtime was qualified
 on its published component; fresh client/route acceptance is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
@@ -11,7 +11,7 @@ retains the historical three-GPU / OMP 18.0.9 combination.
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.8.0 scope runs Qwen3.8 27B through the NInfer engine on one
+appliance for Oh My Pi. Its v0.8.1 scope runs Qwen3.8 27B through the NInfer engine on one
 NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
@@ -42,19 +42,61 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.8.0 eligible hardware
+## v0.8.1 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.3.0 with component `v0.6.9-qwen38-5090-beta.2`, unchanged public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.3.0 with component `v0.6.7-qwen38-4090-beta.2` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.3.0 with component `v0.6.10-qwen38-5090-beta.1`, unchanged public profile `qwen38-5090-v0.7.0`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.3.0 with component `v0.6.8-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 
-**RTX 3090 is deferred for v0.8.0**, not qualified with OMP 18.3.0. The separately linked
+**RTX 3090 is deferred for v0.8.1**, not qualified with OMP 18.3.0. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
 waits for that host’s return.
 
-## v0.8.0 — bring your own OMP
+## v0.8.1 — faster decode
+
+- The unmodified upstream [OMP 18.3.0 binaries](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0)
+  and their SHA-256 pins are unchanged from v0.8.0, as are the model, serving settings and
+  memory floors. Install through the [quickstart](QUICKSTART.md).
+- RTX 5090 ships `v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, server `5b2f2471`, source
+  `8cc0810a`); RTX 4090 ships `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server
+  `32905865`, source `5a774841`).
+- The MTP3 verify pass shares activation loads across weight rows in small-extent Q4/Q5
+  projections, and Q4 gate/up staging avoids shared-memory bank conflicts without changing
+  arithmetic order. RTX 5090 decode is **10.3-11.0% faster** with identical outputs from a
+  seed context to 31K tokens. RTX 4090 keeps one-row split2 kernels for MLP down and mixer
+  output; C1 decode is **157.89 vs 153.54 tok/s**.
+  [EXP-055](measurements/2026-09-25-decode-kernel-schedules.json) ·
+  [EXP-054](measurements/2026-09-25-decode-roofline-attribution.json).
+- Every runtime gate was re-measured on the published bytes, matching v0.8.0's behavior.
+  The anonymously pulled RTX 5090 image passed exact 130,048-token retrieval in **59.1 s**,
+  the 2,048-token decode gate at **151.33 tok/s**, the EXP-050 durability workload,
+  EXP-051 publication barrier, fanout, warm-arrival, restore and multisession probes. All
+  four stored sessions restored after a restart; multisession root fallback remained 2 of 8,
+  with no server errors. None of 24 fresh sessions fell back to a full prefill; median time
+  to first token was **0.094-0.101 s**. The RTX 4090 package passed all 15 canonical native
+  phases, including exact long-context retrieval in **91.0 s** and managed-stop flush of an
+  unpublished session; no start refused. Stock OMP kept one session across restarts on both
+  lanes, with first-request restore logged.
+  [5090 receipt](../releases/v0.8.1/qualification/rtx5090.json) ·
+  [4090 receipt](../releases/v0.8.1/qualification/rtx4090.json).
+- All four documented routes passed **24 steps**: RTX 5090 container host 2, macOS client 10,
+  Windows client 5 and RTX 4090 native 7; both hosts were restored. The upstream macOS arm64,
+  Windows x64 and Linux x64 binaries passed typed tools, exact continuation and fail-closed
+  checks on the published RTX 5090 image. Linux ran in Ubuntu WSL2, not a separately
+  qualified non-WSL OS; macOS remains preview because the upstream client has no managed
+  installation. [Routes](../releases/v0.8.1/acceptance/documented-routes.json) ·
+  [Composed acceptance](../releases/v0.8.1/acceptance/composed-external-installation.json).
+- Checkpoints are bound to the exact server build, including `patch_stack_sha` and
+  `binary_sha256`. v0.8.0 checkpoints report `incompatible` and are not restored on
+  v0.8.1. OMP treats `previous_response_not_found` as a stale chain and resends the full
+  conversation, so each session re-prefills once; old checkpoints age out under the quota.
+  [Release notes](../releases/v0.8.1/NINFER_RELEASE_NOTES.md).
+- Automatic checkpoints remain best effort, and universal warm reuse is not claimed.
+  [#48](https://github.com/alphastorm/omp-ninfer/issues/48) remains open for field confirmation.
+
+## Historical v0.8.0 — bring your own OMP
 
 - The client is the unmodified upstream
   [OMP 18.3.0 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), checked against
@@ -262,7 +304,7 @@ waits for that host’s return.
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
 18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
-v0.8.0 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
+v0.8.1 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -362,10 +404,10 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 - One model, one active request per lane (max concurrency 1); not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- RTX 3090 is deferred for v0.8.0; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
+- RTX 3090 is deferred for v0.8.1; its historical v0.7.2 lane's comfortable working envelope is the 64K class.
 - Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
 - Automatic checkpoints remain best effort: a crash or an expired graceful wait can still leave
-  unsaved work, and the v0.8.0 multisession control recorded two root fallbacks among eight
+  unsaved work, and the v0.8.1 multisession control recorded two root fallbacks among eight
   continuations/forks. Neither universal warm reuse nor loss-free shutdown is claimed.
 
 ## Claims we do not make
@@ -377,7 +419,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[v0.8.0 manifest](../releases/v0.8.0/manifest.json) · [release state](RELEASES.md) ·
+[v0.8.1 manifest](../releases/v0.8.1/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.8.0 guide](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.8.1 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

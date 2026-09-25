@@ -1,0 +1,41 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.8.1",
+  "as_of": "2026-09-25",
+  "status": "passed",
+  "rtx5090": {
+    "original_runtime_healthy": true,
+    "original_image_retained": true,
+    "restart_policy": "unless-stopped",
+    "checkpoint_mount_retained": true,
+    "documented_route_key_restored": true,
+    "original_checkout_restored": true,
+    "route_container_absent": true,
+    "window_hold_removed": true,
+    "preexisting_markers_and_supervisors_unchanged": true,
+    "production_windows": 1,
+    "production_downtime_upper_bound_seconds": 453.933,
+    "completed_utc": "2026-09-25T17:15:20.630319+00:00"
+  },
+  "rtx4090": {
+    "state_bytes_identical": true,
+    "state_sha256": "7ea185bbefdf6fcb7285b6aa7ab93bceff7385cd2375533f84ccdf31027e4a47",
+    "active_release": "qwen38-4090-native-v0.6.8-beta.1-5a774841c29b",
+    "previous_release": "qwen38-4090-native-v0.6.8-beta.1-8cc0810acc29",
+    "prepared_release": null,
+    "task_state": "Ready",
+    "process_count": 0,
+    "listener_count": 0,
+    "lease_present": false,
+    "power_limit_w": 450,
+    "task_xml_identical": true,
+    "support_bytes_and_acl_sddl_identical": true,
+    "preexisting_holds_preserved": true,
+    "real_client_pointers_unchanged": true,
+    "pending_preserved_moves": 0,
+    "completed_utc": "2026-09-25T17:14:48.0318849Z"
+  },
+  "production_upgrade_activated": false,
+  "raw_private_paths_credentials_or_outputs_included": false
+}

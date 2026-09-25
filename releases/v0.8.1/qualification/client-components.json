@@ -1,9 +1,9 @@
 {
   "artifact_type": "omp_ninfer_upstream_client_components",
   "schema_version": 1,
-  "release": "v0.8.0",
+  "release": "v0.8.1",
   "omp": {
-    "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/96e4b05a1bd7981a66cf9661149bef2115b5eae3/compatibility.json",
+    "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/aec707a8437bdbbc70a59242dda29c0d921ec00c/compatibility.json",
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
     "upstream_tag": "v18.3.0",

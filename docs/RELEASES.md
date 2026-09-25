@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.0`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.1`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.0 pins upstream OMP binaries and uses no client cask.
+v0.7.4. v0.8.1 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,10 +27,64 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.0 public release — bring your own OMP
+### v0.8.1 public release — faster decode
 
-- Status: published exact-profile product. [Manifest](../releases/v0.8.0/manifest.json) ·
-  [guide](QUICKSTART.md) · [qualification](../releases/v0.8.0/qualification.json).
+- Status: published exact-profile product. [Manifest](../releases/v0.8.1/manifest.json) ·
+  [guide](QUICKSTART.md) · [qualification](../releases/v0.8.1/qualification.json).
+- Client: unmodified upstream [OMP 18.3.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0)
+  binaries with the same SHA-256 pins as v0.8.0. The model, serving settings and memory
+  floors are unchanged too.
+- Runtime: the MTP3 verify pass's small-extent Q4/Q5 projections share each activation load
+  across weight rows, and the Q4 MLP gate/up kernel pads staged weight rows to avoid
+  shared-memory bank conflicts. Arithmetic order is unchanged. RTX 5090 decode is
+  **10.3-11.0% faster** from a seed context to 31K tokens with identical outputs. Native
+  lanes keep one-row Q5 split2 kernels for MLP down and mixer output, where load sharing
+  measured slower; RTX 4090 C1 decode is **157.89 vs 153.54 tok/s**.
+  [EXP-055](measurements/2026-09-25-decode-kernel-schedules.json) ·
+  [EXP-054 attribution](measurements/2026-09-25-decode-roofline-attribution.json).
+- RTX 5090 `v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, server `5b2f2471`, source
+  `8cc0810a`) passed its profile gates on the anonymously pulled published image: exact
+  130,048-token retrieval in **59.1 s**, 2,048-token decode at **151.33 tok/s**, and the
+  agent protocol across a restart. EXP-050 durability recorded four
+  saves before eviction, stop `saved 1, nothing to save 3, refused 0`, all four stored
+  sessions restored, and second stop `saved 0, nothing to save 4, refused 0`. EXP-051's
+  held publication-barrier turn resumed exactly `V-9241`. Fanout (57K/67K), warm-arrival,
+  restore and multisession probes passed; root fallback remained 2 of 8 with no server errors.
+  None of 24 fresh sessions fell back to a full prefill; median TTFT was **0.094-0.101 s**.
+  [Lane receipt](../releases/v0.8.1/qualification/rtx5090.json).
+- RTX 4090 `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`, source
+  `5a774841`; release identity `qwen38-4090-native-v0.6.8-beta.1`) passed all 15 canonical
+  native phases on the published package, including exact long-context retrieval in
+  **91.0 s**, managed-stop flush of an unpublished session, rollback both directions,
+  security, the OMP 18.3.0 typed tool call and C1 benchmark; no start refused.
+  [Lane receipt](../releases/v0.8.1/qualification/rtx4090.json).
+- Every runtime gate was re-measured on published bytes, matching v0.8.0's behavior. Stock
+  OMP kept one session across restarts on both lanes; both restarts exited 0 and
+  first-request restore was logged. Automatic checkpoints remain best effort; universal warm
+  reuse is not claimed. [#48](https://github.com/alphastorm/omp-ninfer/issues/48) stays open
+  for field confirmation.
+- All four documented routes passed **24 steps**: RTX 5090 container host 2, macOS client 10,
+  Windows client 5 and RTX 4090 native 7. The executed blocks matched the quickstart bytes;
+  both hosts were restored. The upstream macOS arm64, Windows x64 and Linux x64 binaries
+  passed typed tools, exact continuation and fail-closed checks against the published
+  RTX 5090 image. Linux ran in **Ubuntu under WSL2**, not a separate non-WSL OS qualification;
+  macOS remains preview because the upstream client has no managed installation.
+  [Documented routes](../releases/v0.8.1/acceptance/documented-routes.json) ·
+  [composed acceptance](../releases/v0.8.1/acceptance/composed-external-installation.json).
+- Eligibility: **RTX 5090 Windows 11 + Docker Desktop/WSL2 container route** and **RTX 4090
+  native Windows**. **RTX 3090 remains deferred**; its historical v0.7.2 route stays on OMP
+  18.0.9, not a qualification claim for this release.
+- Upgrade: checkpoints bind the exact server build (`patch_stack_sha` and `binary_sha256`
+  are in the runtime fingerprint). v0.8.0 checkpoints report `incompatible` and do not
+  restore on v0.8.1. OMP 18.3.0 treats `previous_response_not_found` as a stale chain and
+  resends the full conversation, so each session re-prefills once. Old checkpoints age out
+  under the quota.
+
+### v0.8.0 historical public release — bring your own OMP
+
+- Status: superseded published exact-profile product. [Manifest](../releases/v0.8.0/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.8.0/docs/QUICKSTART.md) ·
+  [qualification](../releases/v0.8.0/qualification.json).
 - Client: unmodified upstream [OMP 18.3.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0)
   binaries, checked against their SHA-256. No fork build, archive, installer or cask. Provider
   fragments keep thinking within `low`, `medium` and `xhigh`, disable encrypted reasoning

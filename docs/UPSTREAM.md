@@ -1,6 +1,6 @@
 # Upstream watch
 
-The runtime ships from forks; v0.8.0 uses an unmodified upstream OMP client. This page names
+The runtime ships from forks; v0.8.1 uses an unmodified upstream OMP client. This page names
 the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -27,15 +27,27 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.8.0
+## Tracked upstreams and current position — v0.8.1
 
 Runtime positions below retain the [2026-09-24 report](measurements/2026-09-24-upstream-watch.json);
 they are not new upstream delta measurements. The upstream NInfer rebase remains future work.
-The client changed to the unmodified upstream OMP 18.3.0 release binary at `62bc57be`, checked
-against its SHA-256. All three client binaries passed live inference on the published RTX 5090
-image (Linux under Ubuntu/WSL2), and the four documented routes passed on the beta.2 components.
-[Release notes](../releases/v0.8.0/NINFER_RELEASE_NOTES.md) ·
-[Documented routes](../releases/v0.8.0/acceptance/documented-routes.json).
+The client remains the unmodified upstream OMP 18.3.0 release binary with the same SHA-256
+pins as v0.8.0. All three client binaries passed live inference on the published RTX 5090
+image (Linux under Ubuntu/WSL2), and the four documented routes passed all 24 steps on the
+published v0.8.1 components, with both hosts restored.
+
+The runtime change is decode kernels, not the upstream rebase: small-extent Q4/Q5 projections
+share activation loads across weight rows, and Q4 gate/up staging avoids shared-memory bank
+conflicts. RTX 5090 `v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, server `5b2f2471`,
+source `8cc0810a`) decodes 10.3-11.0% faster with identical outputs. RTX 4090
+`v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`, source `5a774841`)
+keeps one-row split2 kernels on native lanes; C1 decode is 157.89 vs 153.54 tok/s. Every
+runtime gate was re-measured on published bytes, matching v0.8.0's behavior; client, model,
+serving settings and floors are unchanged.
+[EXP-055](measurements/2026-09-25-decode-kernel-schedules.json) ·
+[EXP-054](measurements/2026-09-25-decode-roofline-attribution.json) ·
+[Release notes](../releases/v0.8.1/NINFER_RELEASE_NOTES.md) ·
+[Documented routes](../releases/v0.8.1/acceptance/documented-routes.json).
 
 | Upstream | Fork point | Delta | Position |
 |---|---|---|---|
@@ -85,5 +97,5 @@ product needs that planner rebase.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.8.0 no longer builds or publishes an OMP client; it pins the upstream
+  patches rebased. v0.8.1 does not build or publish an OMP client; it keeps the upstream
   release binary instead.

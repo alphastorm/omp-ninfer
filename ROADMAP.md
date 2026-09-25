@@ -3,7 +3,7 @@
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 release lanes, each
 bound to exact bytes and a receipt, with the RTX 3090 lane deferred until its host returns. The
-`v0.8.0` public release exposes only those exact installable profiles. Work outside that wedge
+`v0.8.1` public release exposes only those exact installable profiles. Work outside that wedge
 needs a new product decision rather than placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,14 +11,44 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.8.0
+## Where this is now — v0.8.1
 
-The `v0.8.0` release uses the unmodified upstream
+The `v0.8.1` release makes decode faster on both eligible lanes: RTX 5090
+`v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, source `8cc0810a`) and RTX 4090 native
+`v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, source `5a774841`). The unmodified upstream
+OMP 18.3.0 binaries and their SHA-256 pins, model, serving settings and memory floors are
+unchanged from v0.8.0. Install through the [quickstart](docs/QUICKSTART.md).
+
+The MTP3 verify pass shares activation loads across weight rows in small-extent Q4/Q5
+projections, and the Q4 gate/up kernel avoids shared-memory bank conflicts. RTX 5090 decode
+is **10.3-11.0% faster** with identical outputs. Native lanes retain one-row split2 kernels
+for MLP down and mixer output; RTX 4090 C1 decode is **157.89 vs 153.54 tok/s**
+([EXP-055](docs/measurements/2026-09-25-decode-kernel-schedules.json),
+[EXP-054](docs/measurements/2026-09-25-decode-roofline-attribution.json)).
+
+Every runtime gate was re-measured on the published bytes. The RTX 5090 durability workload,
+publication barrier, fanout, warm-arrival, restore, multisession and shared-prefix probes
+matched v0.8.0's behavior; the RTX 4090 package passed all 15 canonical native phases. Stock
+OMP kept one session across restarts on both lanes. All four documented routes passed their
+24 steps with both hosts restored. [Release notes](releases/v0.8.1/NINFER_RELEASE_NOTES.md) ·
+[Qualification](releases/v0.8.1/qualification.json) ·
+[Documented routes](releases/v0.8.1/acceptance/documented-routes.json).
+
+Upgrading changes the server fingerprint: v0.8.0 checkpoints are incompatible, so OMP resends
+the conversation and each session re-prefills once. Old checkpoints age out under the quota.
+Automatic checkpoints remain best effort; universal warm reuse is not claimed.
+
+**Next — the RTX 3090 returns.** Its lane remains deferred until its qualification host is
+available; the historical v0.7.2 route stays on OMP 18.0.9.
+
+## Where this was — v0.8.0
+
+The `v0.8.0` release used the unmodified upstream
 [OMP 18.3.0 release binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), not a
 fork build, archive, installer or cask. Install and operate the RTX 5090 Windows 11 + Docker
 Desktop/WSL2 container route or the RTX 4090 native Windows package through the
-[quickstart](docs/QUICKSTART.md); stock OMP has no `omp appliance` commands. RTX 5090 ships
-`v0.6.9-qwen38-5090-beta.2` and RTX 4090 ships `v0.6.7-qwen38-4090-beta.2`, with the model,
+[quickstart](docs/QUICKSTART.md); stock OMP has no `omp appliance` commands. RTX 5090 shipped
+`v0.6.9-qwen38-5090-beta.2` and RTX 4090 shipped `v0.6.7-qwen38-4090-beta.2`, with the model,
 serving settings and memory floors unchanged from v0.7.4.
 
 Authenticated stock clients get durable sessions through `prompt_cache_key`, with a returning
@@ -32,8 +62,8 @@ stock client; both hosts were restored.
 [Release notes](releases/v0.8.0/NINFER_RELEASE_NOTES.md) ·
 [Documented routes](releases/v0.8.0/acceptance/documented-routes.json).
 
-**Next — the RTX 3090 returns.** Its lane comes back as a separate release once its
-qualification host is available again (expected around 2026-09-30).
+**The next step at v0.8.0** was the RTX 3090’s return as a separate release once its
+qualification host was available again (expected around 2026-09-30).
 Its [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 stays on OMP 18.0.9, not a v0.8.0 qualification claim. Rebasing the runtime onto upstream NInfer,
 which the engine window deferred
@@ -543,6 +573,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.8.1` | Faster decode: RTX 5090 +10.3-11.0% with identical outputs; RTX 4090 native C1 157.89 vs 153.54 tok/s with one-row split2 kernels retained (EXP-055); every runtime gate re-measured on published components; all four documented routes accepted (24 steps); client, model, settings and floors unchanged; v0.8.0 checkpoints re-prefill once; RTX 3090 deferred |
 | `v0.8.0` | Unmodified upstream OMP 18.3.0; durable stock-client sessions across graceful restarts (EXP-053); shared-prefix reuse for new sessions; RTX 5090 v0.6.9-beta.2 and RTX 4090 native v0.6.7-beta.2 qualified and accepted through the documented routes; model and settings unchanged; RTX 3090 deferred |
 | `v0.7.4` | Durable sessions on both mainline lanes (source 1c17c3fa; RTX 5090 v0.6.8, RTX 4090 native v0.6.6): refused automatic saves retry, admission saves a session's newest turn before evicting it, and re-saving under the checkpoint quota no longer deletes other sessions' only checkpoints; the graceful-stop workload went from `refused 2` to `saved 1, nothing to save 3, refused 0` with all four sessions resumed (EXP-050/EXP-051); client, model and settings carried from v0.7.3; RTX 3090 still deferred |
 | `v0.7.3` | Client-only repin to OMP 18.2.3 (`omp-18.2.3-cross-platform-beta-1`) for the RTX 5090 and RTX 4090 lanes: macOS, Windows and Linux clients passed live inference and a fresh 24-step documented-route acceptance; runtime, model and settings carried from v0.7.2; RTX 3090 deferred until its host returns |

@@ -71,6 +71,18 @@ RTX 3090 is omitted from this release pending access to its physical qualificati
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 and OMP 18.0.9 client remain a separate historical route, not a v0.8.1 qualification claim.
 
+## Documented routes and clients
+
+The four documented routes passed on the published components with the unmodified OMP 18.3.0
+client: RTX 5090 container host (2 steps), macOS client (10, including a session that survived a
+server restart), Windows client (5) and RTX 4090 native Windows (7), with pre-cut substitutions
+recorded and both hosts restored ([routes](acceptance/documented-routes.json)). The upstream
+macOS arm64, Windows x64 and Linux x64 binaries each ran a typed tool turn, an exact continuation
+and a fail-closed request against the RTX 5090 image; Linux ran under WSL2, not a separately
+qualified Linux OS ([composed acceptance](acceptance/composed-external-installation.json)). The
+macOS profile stays `preview`: the upstream client has no managed installation or appliance
+lifecycle. Both lanes passed on their first attempt.
+
 ## Upgrading from v0.8.0
 
 Clone the v0.8.1 tag and follow the quickstart for your lane: RTX 5090 runs the new image digest,

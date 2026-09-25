@@ -24,6 +24,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   benchmark decodes at 157.89 tok/s instead of 153.54
   ([EXP-055](docs/measurements/2026-09-25-decode-kernel-schedules.json); attribution in
   [EXP-054](docs/measurements/2026-09-25-decode-roofline-attribution.json)).
+- Every runtime gate was measured again on the published components: the RTX 5090 image's
+  durability workload, publication barrier, probes, shared-prefix capacity and stock OMP 18.3.0
+  session proof match v0.8.0, and the RTX 4090 package passed its 15 canonical phases. The four
+  documented routes passed with the unmodified OMP 18.3.0 client: RTX 5090 container host (2
+  steps), macOS client (10), Windows client (5) and RTX 4090 native Windows (7), with both hosts
+  restored; the upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool
+  turn, an exact continuation and a fail-closed request against the RTX 5090 image
+  ([composed acceptance](releases/v0.8.1/acceptance/composed-external-installation.json)).
+- Checkpoints are bound to the exact server build, so sessions saved by v0.8.0 are not restored on
+  v0.8.1: OMP resends the full conversation and each session re-prefills once.
 
 ## [0.8.0] - 2026-09-25
 

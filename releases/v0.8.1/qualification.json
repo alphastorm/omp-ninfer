@@ -5,7 +5,7 @@
   "as_of": "2026-09-25",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Faster decode: both lanes move to runtimes whose MTP3 verify-pass Q4/Q5 projections share each activation load across weight rows and whose Q4 gate/up kernel no longer conflicts on shared-memory banks - RTX 5090 container to 8cc0810a and RTX 4090 native Windows to 5a774841, which keeps one-row Q5 split2 kernels on the native lanes because the row pair measured slower there. On the RTX 5090 decode is 10.3-11.0% faster with outputs identical to v0.8.0's kernels; the RTX 4090's C1 decode rises from 153.54 to 157.89 tok/s (docs/measurements/2026-09-25-decode-kernel-schedules.json). The upstream OMP 18.3.0 client, model, serving settings and memory floors are unchanged from v0.8.0. RTX 3090 is omitted pending physical-host access. Every runtime gate below was measured on the published components; nothing is carried from v0.8.0.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,8 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.10-qwen38-5090-beta.1 component (image 5ca6e416) before the cut; the receipt lands at releases/v0.8.1/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.8.1/acceptance/composed-external-installation.json",
+      "sha256": "a406db8276159f3161106b2cd93686afc0ae06582c7a6807168a8b1c8982233c",
+      "public_url": null,
+      "as_of": "2026-09-25",
+      "release": "v0.8.1",
+      "component_release_tag": "v18.3.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "windows_binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "5addaf2dfec77c95a1d32677d5383748e280d4b8dbf8ab401983a523339084de",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "bedb5c72991447ca4f16b6835bc43e8ab5aab1f3de3f599e472716de168e45f6"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "bd5fa18f15a15d236d5bc1177c08c3397ab6f67d66bdc1a656013f29bb7efeef"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "c86689504d6b99e559285e996988b028cb018658e27c8984fa05829ed32cba8e"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published v0.8.1 components; runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.8.1/acceptance/documented-routes.json",
+      "sha256": "7b0ec2fbd7ab4f305f2ef4293539d550128c297033fba3f60d6fc31f12ee419a"
     }
   },
   "observed_gates": {
@@ -416,10 +450,8 @@
       }
     }
   },
-  "interpretation": "Decode is faster on both lanes with unchanged behavior. On the RTX 5090 the release build behind the published image decodes 10.3-11.0% more tokens per second than v0.8.0's kernels from a seed context to 31K tokens, with byte-identical kernel outputs, identical role-corpus answers and exact 130,048-token retrieval. On the published image itself the durability workload, publication barrier, probe set, shared-prefix capacity and stock OMP 18.3.0 session proof reproduce v0.8.0's results. The RTX 4090 package passed its 15 canonical phases with the OMP 18.3.0 tool call and a C1 decode of 157.89 tok/s against 153.54, after a first candidate that shared loads in the Q5 split2 kernels was 2.7% slower; stock OMP kept one session across the installed lane's managed restarts. Automatic checkpoints stay best effort and universal warm reuse is not claimed; alphastorm/omp-ninfer#48 stays open until field confirmation.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.10-qwen38-5090-beta.1 component and runtime image"
-  ],
+  "interpretation": "Decode is faster on both lanes with unchanged behavior. On the RTX 5090 the release build behind the published image decodes 10.3-11.0% more tokens per second than v0.8.0's kernels from a seed context to 31K tokens, with byte-identical kernel outputs, identical role-corpus answers and exact 130,048-token retrieval. On the published image its 2,048-token decode gate ran 151.33 tok/s against 138.03 on v0.8.0's published image, and the durability workload, publication barrier, probe set, shared-prefix capacity and stock OMP 18.3.0 session proof reproduce v0.8.0's results. The RTX 4090 package passed its 15 canonical phases with the OMP 18.3.0 tool call and a C1 decode of 157.89 tok/s against 153.54, after a first candidate that shared loads in the Q5 split2 kernels was 2.7% slower; stock OMP kept one session across the installed lane's managed restarts. Automatic checkpoints stay best effort and universal warm reuse is not claimed; alphastorm/omp-ninfer#48 stays open until field confirmation.",
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Client-repin route not exercised; omitted from this release by user direction.",

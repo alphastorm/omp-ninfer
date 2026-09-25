@@ -11,7 +11,47 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.8.0 — stock-client durability and shared-prefix reuse (2026-09-25)
+## v0.8.1 — faster decode (2026-09-25)
+
+These measurements bind RTX 5090 `v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, server
+`5b2f2471`, source `8cc0810a`) and RTX 4090 `v0.6.8-qwen38-4090-beta.1` (package
+`46aa4110`, server `32905865`, source `5a774841`). The upstream OMP 18.3.0 client, model,
+serving settings and memory floors are unchanged from v0.8.0. Every runtime gate was
+re-measured on the published bytes; behavior matches v0.8.0. The decode comparison is
+lane-specific, not a universal GPU performance claim.
+
+| Observation | RTX 5090 | RTX 4090 native |
+| --- | --- | --- |
+| Decode speed change | **+10.3-11.0%** from a seed context to 31K tokens, release-build `ninfer_bench` A/B/B/A against v0.8.0 kernels, with identical outputs; published-image 2,048-token gate **151.33 vs 138.03 tok/s** | C1 **157.89 vs 153.54 tok/s** after keeping one-row split2 kernels for MLP down and mixer output |
+| Long-context gate | Exact **130,048-token** retrieval in **59.1 s** | Exact **130K** context in **91.0 s** |
+| Durability workload | Four saves before eviction; stop `saved 1, nothing to save 3, refused 0`; all four stored sessions restored; second stop `saved 0, nothing to save 4, refused 0` | All 15 canonical native phases passed, including managed-stop flush of an unpublished session, rollback both ways, security and the OMP 18.3.0 typed tool call; no start refused |
+| Publication barrier | Held turn resumed exactly `V-9241` | — |
+| Additional probes | Fanout (57K, 67K), warm-arrival, restore and multisession passed; root fallback on 2 of 8 continuations/forks, no server errors | — |
+| Shared-prefix reuse | None of 24 fresh sessions fell back to a full prefill; median TTFT **0.094-0.101 s** | — |
+| Stock OMP 18.3.0 session durability | One session across restarts; both restarts exit 0; first-request restore logged | One session across managed restarts; both restarts exit 0; first-request restore logged |
+| Documented-route acceptance (separate from runtime qualification) | Container host 2 steps, macOS client 10, Windows client 5 passed | Native Windows 7 steps passed |
+
+The MTP3 verify pass's small-extent Q4/Q5 projections share activation loads across weight
+rows, and the Q4 gate/up kernel pads staged weight rows to avoid shared-memory bank conflicts.
+Arithmetic order is unchanged. Load sharing slowed the RTX 4090's MLP down and mixer output
+projections, so the native lanes keep one weight row per warp for those two projections.
+[EXP-055](measurements/2026-09-25-decode-kernel-schedules.json) ·
+[EXP-054 attribution](measurements/2026-09-25-decode-roofline-attribution.json).
+
+All four documented routes passed **24 steps** on the published components with both hosts
+restored. Linux client acceptance ran under Ubuntu WSL2, not a separate non-WSL OS
+qualification; macOS remains preview. A dash means no separate result is cited in this summary.
+Shared-prefix timings are not checkpoint-restore or reboot timings. Automatic checkpoints
+remain best effort, and universal warm reuse is not claimed. On upgrade, v0.8.0 checkpoints
+are incompatible:
+OMP resends the conversation, each session re-prefills once, and old checkpoints age out.
+[Qualification](../releases/v0.8.1/qualification.json) ·
+[RTX 5090 receipt](../releases/v0.8.1/qualification/rtx5090.json) ·
+[RTX 4090 receipt](../releases/v0.8.1/qualification/rtx4090.json) ·
+[Documented routes](../releases/v0.8.1/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.1/acceptance/composed-external-installation.json).
+
+## Historical v0.8.0 — stock-client durability and shared-prefix reuse (2026-09-25)
 
 These are measurements on the published beta.2 components: RTX 5090 image `049dc788…`
 (server `d90079e8…`, source `86733c0e`) and RTX 4090 package `888a5859…`

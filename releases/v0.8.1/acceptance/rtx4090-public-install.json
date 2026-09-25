@@ -1,0 +1,72 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.8.1",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-09-25",
+  "status": "passed",
+  "candidate_commit": "43a92d0b0474e791ce55cee655aa5bfce4a1389f",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.3.0",
+    "upstream_commit": "62bc57be1b03ef0802a33cf7f5f530e534527531",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 233652736,
+    "asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+    "binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+    "release_id": 395252356,
+    "asset_id": 584985844,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe",
+    "version": "omp/18.3.0"
+  },
+  "runtime": {
+    "tag": "v0.6.8-qwen38-4090-beta.1",
+    "source_commit": "5a774841c29bdf2ee6b7efba135aed0a47e80447",
+    "package_bytes": 574766663,
+    "package_sha256": "46aa411071901b0b080eafb64062baf78fa3f941e2451f91dc8d5b01e9aceab1",
+    "binary_sha256": "32905865168182296cd8f3a6cfb4d053de95b6464f936b7165873a5f52684833",
+    "configuration_sha256": "8c6fa09ffc0b54bfc3d249747127bb3ac69af18b732fcacf11bbe8baef671e1d",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "preparation": "The qualification-installed active 5a774841 instance was preserved before the documented install: exact state bytes, 219 support files, 59 directory SDDLs, the task XML and holds were snapshotted; same-volume moves preserved only that instance's release, secrets and cache and the documented staging directory, and state temporarily selected 8cc0810acc29 with previous b0e8c2fa732e. The literal documented route then performed a fresh canonical upgrade installation of the published package. This is not an idempotent-reinstall claim. All moved originals were restored.",
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_response_replay",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 0,
+    "cloud_fallback_observed": false,
+    "graceful_stop": {
+      "outcome": "graceful",
+      "forced": false,
+      "sessions_saved": 2,
+      "sessions_refused": 0
+    },
+    "structured_client": {
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "exact_visible_final_answer": true,
+      "continuation_exact_nonce": true,
+      "fail_closed_without_model_response": true
+    }
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-09-25-v081-rtx4090-native-run.json",
+    "sha256": "5e3d4c0c56e257ead544695a7ff51709505876f82e291896efdbd3eb6773082d"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-09-25-v081-acceptance-restoration.json",
+    "sha256": "6994f80da04d6fc1e8151f3f8aa07db1dce6284eaaa248155b4f73dd13bb4efa"
+  },
+  "limitations": [
+    "Fresh canonical upgrade installation after preserving the qualification-installed instance; not an idempotent-reinstall qualification.",
+    "Runtime qualification is the RTX 4090 lane receipt; this receipt proves the published package's documented installation and client composition."
+  ]
+}
