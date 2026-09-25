@@ -801,16 +801,11 @@ the verifier decides what remains:
 
 ## Release notes
 
-Native OMP client components use `scripts/hosts/cut-omp-client-component.sh`. The default mode
-and explicit `--dry-run` check the exact closed archive/receipt set, source commit and tree,
-embedded binary identities, GitHub authentication/repository role, and SSH push negotiation.
-These no-effect checks cannot prove every token restriction or server-side creation rule;
-authorization failures at the intended live effects remain possible. `--publish` is founder-only: it creates
-the source tag and two prereleases, without changing a cask, installed client, product authority,
-or production service. Publication spans two repositories and is not transactional; on a live
-failure, including a source tag created before a release-creation failure, inspect the completed
-effects before preparing a bounded recovery command. Existing
-tag/release slots are refused rather than overwritten.
+The OMP client is not built or published here. From v0.8.0 a release pins an unmodified upstream
+Oh My Pi release binary per platform: `scripts/stage_release.py --omp-component` stages the
+upstream provenance and the darwin-arm64, windows-x64 and linux-x64 binaries, whose raw hashes must
+equal their asset hashes, and `scripts/verify_release.py` checks every binding. Client acceptance
+is never inherited from a predecessor release.
 
 RTX 4090 native runtime components use `scripts/hosts/cut-ninfer-4090-component.sh` after the
 lane's canonical native qualification (`tools/qualification/qualify_native.py` in the runtime
@@ -836,4 +831,4 @@ qualification summary, quickstart, security model, and known limitations. Do not
 - universal GPU performance; or
 - benchmark values not present in the public qualification summary.
 
-Use “OMP NInfer” for the product/repository and `omp appliance ...` only for the command concept.
+Use “OMP NInfer” for the product and repository.
