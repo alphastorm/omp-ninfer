@@ -1,0 +1,533 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-054",
+ "title": "Where an RTX 5090 MTP3 decode round spends its time, against the memory-bandwidth floor",
+ "generated_utc": "2026-09-25T13:10:00Z",
+ "status": "passed",
+ "question": "Production decodes at 58.5 rounds/s (17.1 ms per round, 2.77 accepted tokens per round) with 99.4% of decode time waiting on the device. Which kernels hold the round above the floor that streaming its weights and KV at the measured 1,674.5 GB/s would set, and is a reachable gain of at least 5% of round time there?",
+ "answer": "Yes. At a 26,000-token context the round takes 17.23 ms unprofiled, matching production's 17.1 ms, and the GPU is busy 99.2% of it, so launch overhead is not the gap. The kernels that stream weights at the floor are the W8 ones: the full LM head, the MTP layer and the Q4 draft-head GEMV run at 97-104% of it. The verify pass's Q4/Q5 projections do not: Q4 gate/up at 82.5%, Q5 down at 75.8%, the Q5 mixer outputs at 68.0%, GDN value/z at 66.2%, and the two small Q4 query/key projections at 39.7% (GDN) and 47.7% (attention). Bringing every mapped kernel to 90% of the floor recovers 2.6 ms per round (15.1%).",
+ "decision": "Proceed to kernel work, largest reachable gain first, each change proved per kernel and end to end on the published profile. First: the verify pass's GDN input projection, which launches its Q4 query/key (4,096 rows) and Q5 value/z (12,288 rows) as two kernels over the same activations; one launch keeps each row's arithmetic and so its outputs bit-identical. Then the Q5 SIMT split-2 kernel (128 calls per round), then the attention input projections and attention decode.",
+ "identity": {
+  "runtime_source": "alphastorm/ninfer 86733c0e93fceccf9af3fa345ca9c8b6754f7abb (upstream base 6e8b2e2a)",
+  "production_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:049dc788f6e5353b159edaece53afbabb219bc6e49f1e8ce8675338fada521a6",
+  "production_binary_sha256": "d90079e887752aa3266a6c2d17ad0e029a35cfc12b6091d9851dde69c3100054",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "bench_build": "ninfer_bench from the same source, CMake Release, CUDA architectures 120a, nvcc V13.1.115 (the release compiler), NINFER_BUILD_BENCHMARKS=ON, in ninfer-sm120-profile:nsys2026.1.3-af2c28d (image sha256:6d4d4cf73ac262cb4ba45085054419e56e56bd76d0abd915dae84facfe980f09)",
+  "device_code_identity": "all 2,897 device functions of the bench binary have instruction bodies identical to production ninfer-serve d90079e8 (cuobjdump -sass per function, anonymous-namespace names normalized)",
+  "gpu": "NVIDIA GeForce RTX 5090 on the owner appliance"
+ },
+ "method": {
+  "window": "production held (lane supervisor pause marker) and stopped 2026-09-25T12:30:21Z, restored healthy on its own identity 12:34:57Z",
+  "timing": "ninfer_bench --kv-dtype bf16 --prefill-chunk 1024 --mtp-draft-tokens 3 --lm-head-draft, CUDA graph decode: -n 256 and -pg 1024,256 / 26000,256 / 31000,256, 3 repetitions after 1 warm-up; eager control --no-cuda-graph -pg 26000,256, 2 repetitions",
+  "attribution": "nsys 2026.1.3 --trace=cuda,nvtx --cuda-graph-trace=node around one measured repetition (--profile-measured) of -n 128 and -pg 26000,64; rounds delimited by the once-per-round GDN fold kernel, the first round discarded; each kernel grouped by name and grid, the Q5 split-2 calls split into the MLP down projection (the call that follows the Q4 gate/up kernel) and the mixer output projections; durations scaled by unprofiled/profiled round time (0.961 at 26K, 0.963 at seed)",
+  "bytes": "weights at their artifact formats (Q4G64 0.53125, Q5G64 0.65625, W8G32 1.0625 bytes per element); decode attention reads 4,096 bytes per layer per context token (4 KV heads x 256 x BF16 K and V); the floor is the appliance's measured 1,674.5 GB/s sustained read bandwidth"
+ },
+ "round_times_graph": [
+  {
+   "test": "tg256",
+   "decode_tokens_per_second": 153.17,
+   "ms_per_round": 15.62,
+   "tokens_per_round": 2.4,
+   "draft_acceptance_rate": 0.4611
+  },
+  {
+   "test": "pp1024+tg256",
+   "decode_tokens_per_second": 127.79,
+   "ms_per_round": 15.65,
+   "tokens_per_round": 2.01,
+   "draft_acceptance_rate": 0.3342
+  },
+  {
+   "test": "pp26000+tg256",
+   "decode_tokens_per_second": 228.55,
+   "ms_per_round": 17.23,
+   "tokens_per_round": 3.95,
+   "draft_acceptance_rate": 0.9845
+  },
+  {
+   "test": "pp31000+tg256",
+   "decode_tokens_per_second": 220.81,
+   "ms_per_round": 17.57,
+   "tokens_per_round": 3.89,
+   "draft_acceptance_rate": 0.9694
+  }
+ ],
+ "round_times_eager": [
+  {
+   "test": "pp26000+tg256",
+   "decode_tokens_per_second": 209.68,
+   "ms_per_round": 18.78,
+   "tokens_per_round": 3.95,
+   "draft_acceptance_rate": 0.9845
+  }
+ ],
+ "production_cross_check": "production request logs: 58.5 rounds/s = 17.1 ms per round at 24-31K-token contexts; the bench's 26,000-token round is 17.23 ms",
+ "attribution_context_26000": {
+  "summary": {
+   "rounds": 15,
+   "context_tokens": 26000,
+   "kernels_per_round": 879.2,
+   "profiled_span_ms_per_round": 17.93,
+   "profiled_busy_fraction": 0.992,
+   "unprofiled_ms_per_round": 17.23,
+   "profiler_scale": 0.961,
+   "mapped_ms_per_round": 15.335,
+   "mapped_floor_ms_per_round": 11.696,
+   "recoverable_at_90pct_ms_per_round": 2.6,
+   "unmapped_ms_per_round": 1.758,
+   "recoverable_fraction_of_round": 0.1509
+  },
+  "groups_at_least_0_1_ms": [
+   {
+    "component": "verify MLP gate/up Q4 [34816x5120]",
+    "kernel": "q4_small_t_mma_kernel",
+    "shape": "2176x1x1",
+    "calls_per_round": 64.0,
+    "ms_per_round": 4.3871,
+    "gb_per_round": 6.061,
+    "achieved_gbps": 1381.5,
+    "floor_fraction": 0.825,
+    "floor_ms": 3.6195,
+    "recoverable_at_90pct_ms": 0.3655
+   },
+   {
+    "component": "verify MLP down Q5 [5120x17408]",
+    "kernel": "q5_rowsplit_gemm_simt_split2_kernel",
+    "shape": "down",
+    "calls_per_round": 64.0,
+    "ms_per_round": 2.9481,
+    "gb_per_round": 3.743,
+    "achieved_gbps": 1269.8,
+    "floor_fraction": 0.758,
+    "floor_ms": 2.2355,
+    "recoverable_at_90pct_ms": 0.4642
+   },
+   {
+    "component": "verify GDN value/z Q5 [12288x5120]",
+    "kernel": "q5_rowsplit_gemm_simt_split4_kernel",
+    "shape": "12288x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 1.7877,
+    "gb_per_round": 1.982,
+    "achieved_gbps": 1108.6,
+    "floor_fraction": 0.662,
+    "floor_ms": 1.1835,
+    "recoverable_at_90pct_ms": 0.4727
+   },
+   {
+    "component": "attention decode partial (4x65x1)",
+    "kernel": "causal_attention_small_t_tc_partial_bf16_kernel",
+    "shape": "4x65x1",
+    "calls_per_round": 19.0,
+    "ms_per_round": 1.6281,
+    "gb_per_round": 2.023,
+    "achieved_gbps": 1242.8,
+    "floor_fraction": 0.742,
+    "floor_ms": 1.2084,
+    "recoverable_at_90pct_ms": 0.2855
+   },
+   {
+    "component": "verify mixer output Q5 [5120x6144]",
+    "kernel": "q5_rowsplit_gemm_simt_split2_kernel",
+    "shape": "out",
+    "calls_per_round": 64.0,
+    "ms_per_round": 1.1604,
+    "gb_per_round": 1.321,
+    "achieved_gbps": 1138.6,
+    "floor_fraction": 0.68,
+    "floor_ms": 0.789,
+    "recoverable_at_90pct_ms": 0.2837
+   },
+   {
+    "component": "verify GDN query/key Q4 [4096x5120]",
+    "kernel": "q4_rowsplit_gemm_simt_kernel",
+    "shape": "512x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.8047,
+    "gb_per_round": 0.535,
+    "achieved_gbps": 664.6,
+    "floor_fraction": 0.397,
+    "floor_ms": 0.3194,
+    "recoverable_at_90pct_ms": 0.4498
+   },
+   {
+    "component": "verify LM head W8 [248320x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "15520x1x1",
+    "calls_per_round": 1.0,
+    "ms_per_round": 0.779,
+    "gb_per_round": 1.351,
+    "achieved_gbps": 1734.0,
+    "floor_fraction": 1.036,
+    "floor_ms": 0.8067,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": "draft head Q4 [131072x5120]",
+    "kernel": "q4_rowsplit_gemv_kernel",
+    "shape": "32768x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.6201,
+    "gb_per_round": 1.07,
+    "achieved_gbps": 1724.8,
+    "floor_fraction": 1.03,
+    "floor_ms": 0.6387,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": "verify attention query/key Q4 [7168x5120]",
+    "kernel": "q4_rowsplit_gemm_simt_kernel",
+    "shape": "896x1x1",
+    "calls_per_round": 16.0,
+    "ms_per_round": 0.3906,
+    "gb_per_round": 0.312,
+    "achieved_gbps": 798.6,
+    "floor_fraction": 0.477,
+    "floor_ms": 0.1863,
+    "recoverable_at_90pct_ms": 0.1836
+   },
+   {
+    "component": "verify attention gate/value Q5 [7168x5120]",
+    "kernel": "q5_rowsplit_gemm_simt_split4_kernel",
+    "shape": "7168x1x1",
+    "calls_per_round": 16.0,
+    "ms_per_round": 0.3511,
+    "gb_per_round": 0.385,
+    "achieved_gbps": 1097.6,
+    "floor_fraction": 0.655,
+    "floor_ms": 0.2301,
+    "recoverable_at_90pct_ms": 0.0954
+   },
+   {
+    "component": null,
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "320x1x1",
+    "calls_per_round": 9.0,
+    "ms_per_round": 0.3379
+   },
+   {
+    "component": "MTP gate/up W8 [34816x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "2176x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.3343,
+    "gb_per_round": 0.568,
+    "achieved_gbps": 1699.6,
+    "floor_fraction": 1.015,
+    "floor_ms": 0.3393,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": null,
+    "kernel": "recurrent_record_kernel",
+    "shape": "48x1x8",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.3303
+   },
+   {
+    "component": null,
+    "kernel": "rmsnorm_cta_bf16x2_kernel",
+    "shape": "4x1x1",
+    "calls_per_round": 134.0,
+    "ms_per_round": 0.2273
+   },
+   {
+    "component": null,
+    "kernel": "recurrent_fold_kernel",
+    "shape": "48x1x384",
+    "calls_per_round": 1.0,
+    "ms_per_round": 0.1673
+   },
+   {
+    "component": null,
+    "kernel": "",
+    "shape": "24x10x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.1533
+   },
+   {
+    "component": "MTP qkgv W8 [14336x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "896x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.144,
+    "gb_per_round": 0.234,
+    "achieved_gbps": 1625.2,
+    "floor_fraction": 0.971,
+    "floor_ms": 0.1397,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": null,
+    "kernel": "",
+    "shape": "160x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.1152
+   },
+   {
+    "component": null,
+    "kernel": "causal_attention_small_t_reduce_output_kernel",
+    "shape": "24x4x4",
+    "calls_per_round": 17.0,
+    "ms_per_round": 0.1067
+   }
+  ]
+ },
+ "attribution_seed_context": {
+  "summary": {
+   "rounds": 55,
+   "context_tokens": 64,
+   "kernels_per_round": 879.1,
+   "profiled_span_ms_per_round": 16.215,
+   "profiled_busy_fraction": 0.9888,
+   "unprofiled_ms_per_round": 15.62,
+   "profiler_scale": 0.9633,
+   "mapped_ms_per_round": 13.559,
+   "mapped_floor_ms_per_round": 10.488,
+   "recoverable_at_90pct_ms_per_round": 2.167,
+   "unmapped_ms_per_round": 1.886,
+   "recoverable_fraction_of_round": 0.1387
+  },
+  "groups_at_least_0_1_ms": [
+   {
+    "component": "verify MLP gate/up Q4 [34816x5120]",
+    "kernel": "q4_small_t_mma_kernel",
+    "shape": "2176x1x1",
+    "calls_per_round": 64.0,
+    "ms_per_round": 4.3663,
+    "gb_per_round": 6.061,
+    "achieved_gbps": 1388.1,
+    "floor_fraction": 0.829,
+    "floor_ms": 3.6195,
+    "recoverable_at_90pct_ms": 0.3447
+   },
+   {
+    "component": "verify MLP down Q5 [5120x17408]",
+    "kernel": "q5_rowsplit_gemm_simt_split2_kernel",
+    "shape": "down",
+    "calls_per_round": 64.0,
+    "ms_per_round": 2.8888,
+    "gb_per_round": 3.743,
+    "achieved_gbps": 1295.8,
+    "floor_fraction": 0.774,
+    "floor_ms": 2.2355,
+    "recoverable_at_90pct_ms": 0.4049
+   },
+   {
+    "component": "verify GDN value/z Q5 [12288x5120]",
+    "kernel": "q5_rowsplit_gemm_simt_split4_kernel",
+    "shape": "12288x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 1.7618,
+    "gb_per_round": 1.982,
+    "achieved_gbps": 1124.9,
+    "floor_fraction": 0.672,
+    "floor_ms": 1.1835,
+    "recoverable_at_90pct_ms": 0.4468
+   },
+   {
+    "component": "verify mixer output Q5 [5120x6144]",
+    "kernel": "q5_rowsplit_gemm_simt_split2_kernel",
+    "shape": "out",
+    "calls_per_round": 64.0,
+    "ms_per_round": 1.1472,
+    "gb_per_round": 1.321,
+    "achieved_gbps": 1151.6,
+    "floor_fraction": 0.688,
+    "floor_ms": 0.789,
+    "recoverable_at_90pct_ms": 0.2706
+   },
+   {
+    "component": "verify GDN query/key Q4 [4096x5120]",
+    "kernel": "q4_rowsplit_gemm_simt_kernel",
+    "shape": "512x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.7954,
+    "gb_per_round": 0.535,
+    "achieved_gbps": 672.3,
+    "floor_fraction": 0.402,
+    "floor_ms": 0.3194,
+    "recoverable_at_90pct_ms": 0.4406
+   },
+   {
+    "component": "verify LM head W8 [248320x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "15520x1x1",
+    "calls_per_round": 1.0,
+    "ms_per_round": 0.7808,
+    "gb_per_round": 1.351,
+    "achieved_gbps": 1730.1,
+    "floor_fraction": 1.033,
+    "floor_ms": 0.8067,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": "draft head Q4 [131072x5120]",
+    "kernel": "q4_rowsplit_gemv_kernel",
+    "shape": "32768x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.6194,
+    "gb_per_round": 1.07,
+    "achieved_gbps": 1726.6,
+    "floor_fraction": 1.031,
+    "floor_ms": 0.6387,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": "verify attention query/key Q4 [7168x5120]",
+    "kernel": "q4_rowsplit_gemm_simt_kernel",
+    "shape": "896x1x1",
+    "calls_per_round": 16.0,
+    "ms_per_round": 0.3788,
+    "gb_per_round": 0.312,
+    "achieved_gbps": 823.6,
+    "floor_fraction": 0.492,
+    "floor_ms": 0.1863,
+    "recoverable_at_90pct_ms": 0.1718
+   },
+   {
+    "component": "verify attention gate/value Q5 [7168x5120]",
+    "kernel": "q5_rowsplit_gemm_simt_split4_kernel",
+    "shape": "7168x1x1",
+    "calls_per_round": 16.0,
+    "ms_per_round": 0.3434,
+    "gb_per_round": 0.385,
+    "achieved_gbps": 1122.0,
+    "floor_fraction": 0.67,
+    "floor_ms": 0.2301,
+    "recoverable_at_90pct_ms": 0.0877
+   },
+   {
+    "component": null,
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "320x1x1",
+    "calls_per_round": 9.0,
+    "ms_per_round": 0.3382
+   },
+   {
+    "component": "MTP gate/up W8 [34816x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "2176x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.3331,
+    "gb_per_round": 0.568,
+    "achieved_gbps": 1705.5,
+    "floor_fraction": 1.019,
+    "floor_ms": 0.3393,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": null,
+    "kernel": "recurrent_record_kernel",
+    "shape": "48x1x8",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.3241
+   },
+   {
+    "component": null,
+    "kernel": "rmsnorm_cta_bf16x2_kernel",
+    "shape": "4x1x1",
+    "calls_per_round": 134.0,
+    "ms_per_round": 0.2248
+   },
+   {
+    "component": null,
+    "kernel": "causal_attention_small_t_tc_partial_bf16_kernel",
+    "shape": "4x4x1",
+    "calls_per_round": 19.0,
+    "ms_per_round": 0.213
+   },
+   {
+    "component": null,
+    "kernel": "recurrent_fold_kernel",
+    "shape": "48x1x384",
+    "calls_per_round": 1.0,
+    "ms_per_round": 0.1636
+   },
+   {
+    "component": null,
+    "kernel": "",
+    "shape": "24x10x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.1511
+   },
+   {
+    "component": "MTP qkgv W8 [14336x5120]",
+    "kernel": "w8_small_t_mma_kernel",
+    "shape": "896x1x1",
+    "calls_per_round": 3.0,
+    "ms_per_round": 0.1443,
+    "gb_per_round": 0.234,
+    "achieved_gbps": 1621.0,
+    "floor_fraction": 0.968,
+    "floor_ms": 0.1397,
+    "recoverable_at_90pct_ms": 0.0
+   },
+   {
+    "component": null,
+    "kernel": "",
+    "shape": "160x1x1",
+    "calls_per_round": 48.0,
+    "ms_per_round": 0.1131
+   }
+  ]
+ },
+ "opportunities": [
+  {
+   "components": [
+    "verify GDN query/key Q4 [4096x5120]",
+    "verify GDN value/z Q5 [12288x5120]"
+   ],
+   "ms_per_round": 2.592,
+   "floor_ms": 1.503,
+   "recoverable_at_85pct_ms": 0.824
+  },
+  {
+   "components": [
+    "verify MLP down Q5 [5120x17408]",
+    "verify mixer output Q5 [5120x6144]"
+   ],
+   "ms_per_round": 4.109,
+   "floor_ms": 3.025,
+   "recoverable_at_85pct_ms": 0.55
+  },
+  {
+   "components": [
+    "verify MLP gate/up Q4 [34816x5120]"
+   ],
+   "ms_per_round": 4.3871,
+   "floor_fraction": 0.825,
+   "recoverable_at_90pct_ms": 0.3655
+  },
+  {
+   "components": [
+    "verify attention query/key Q4 [7168x5120]",
+    "verify attention gate/value Q5 [7168x5120]"
+   ],
+   "ms_per_round": 0.742,
+   "floor_ms": 0.416,
+   "recoverable_at_85pct_ms": 0.252
+  },
+  {
+   "components": [
+    "attention decode partial"
+   ],
+   "ms_per_round": 1.6281,
+   "floor_fraction": 0.742,
+   "note": "scales with context: 26,000 tokens here"
+  }
+ ],
+ "limits": [
+  "Bytes are analytic weight and KV volumes; scales, activations and state reads are not counted, so a floor fraction slightly overstates headroom for small kernels.",
+  "The 90% (and 85% for fused launches) targets are assumptions; the evidence that they are reachable on this card is the W8 small-T MMA kernels and the Q4 draft-head GEMV at 97-104% of the measured floor.",
+  "Nsight Systems graph-node tracing inflates a round by about 4%; shares are scaled back to unprofiled round times.",
+  "Draft acceptance differs by corpus position (46.1% for the seed test, 98.5% after the 26,000-token prefix, against production's 59.6%); the attribution is per round, which does not depend on acceptance."
+ ],
+ "tooling_findings": [
+  "The runtime repository's sm120 profiling image ships Nsight Compute's target-only nsys without a QdstrmImporter, so the 2026-08-27 packet produced a .qdstrm and no report; this window used a derived image with nsight-systems-2026.1.3.",
+  "That packet's Nsight Systems capture also omitted --cuda-graph-trace=node, which per-kernel attribution of a graph-launched decode round needs.",
+  "The guarded profiling lease still restores production through the v0.4-era ninfer-production-control.sh and container name ninfer-5090; production is ninfer-5090-v070p restored by relaunch-lane.sh."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
