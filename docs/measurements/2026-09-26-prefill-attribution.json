@@ -1,0 +1,1305 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-059",
+ "title": "RTX 5090 prefill attribution: cold prefill at 74% of its BF16 floor; warm turns split into six passes that each pay a full-context attention scan or a weight pass",
+ "generated_utc": "2026-09-26T09:15:00Z",
+ "status": "passed",
+ "question": "Where does RTX 5090 prefill time go on production's agent traffic, how close is each part to its hardware floor, and which levers could shorten it without changing an output byte?",
+ "answer": "Prefill is 37.8% of agent GPU time (446 v0.7.0 agent requests), in two regimes. Cold starts (27 requests of 16K+ computed tokens) take 64% of it and run at 74% of their dense BF16 FLOP floor (209.5 TFLOPS, FP32 accumulate), in a 26K trace and in production's served 28.9K request alike: projection GEMMs at 76-82% of peak, prompt attention at 70%, and only the attention input projection low (51%, 6.4% of busy time). Warm turns (411 requests, median 421 computed tokens on a 24.8K context, TTFT 0.273 s) take 32%. A production-shaped warm turn at 29K context spent 283-307 ms of GPU on about 400 computed tokens in six separate full-model passes, because the chat template marks rewrite-execution boundaries after each assistant opener and think line so that resumed and root execution split identically. Four 2-3-token fragments on the small-T routes took 59-60 ms. Prompt attention took about 27 ms in each of the two larger passes whatever their width: every 64-row query tile scans the whole context on one SM at 91-95% of that SM's rated peak, and a small pass fills only 24-144 of 170 SMs. Projections took 155-178 ms against an 89-94 ms FLOP floor, the 33-66-token reasoning-block pass at 20-25% of peak.",
+ "decision": "Open, measure only: nothing built or shipped; production stays on v0.8.1. No large prefill lever keeps output bytes. Cold prefill is at 74% of its floor, and its one lagging family, the attention input's 32x64 tiles, is worth about 2-3% of it. For warm turns the byte-keeping candidate is an engine change that runs one request's consecutive fragments through each layer together, keeping every fragment's projection route and GDN decomposition but merging their prompt attention into one launch; keys are tiled from absolute position 0, so each row's arithmetic stays the same, which a byte comparison must confirm. It is worth about 27 ms per extra prompt-route pass at 29K (9% of a two-pass replay turn), plus any L2 reuse of a layer's weights across the fragments' kernels (unmeasured). The large warm lever changes bytes: fewer passes per turn (six to two between captures, an estimated 115-130 ms off a 307 ms replay turn). It needs per-row arithmetic that does not depend on pass width, in the projection routes and in GDN chunking, because the boundaries exist to keep resumed and cold execution bit-identical and no projection route promises that today. Smaller byte-changing levers: the chunked small-T attention route for 7-16-token passes (enabled only for 16-head geometry; about 27 ms to a few ms per such pass) and better small-width projection routes (up to 40 ms per reasoning-block pass). FP8 or NVFP4 projections remain the only large cold lever (EXP-008: 2.22x prefill for an NVFP4 artifact, which forced INT8 KV on this card). The shared-stable-prefix warm turns (26%, 0.314 s median for 140 computed tokens) were not traced.",
+ "method": {
+  "traffic": "production v0.7.0 request logs on the RTX 5090, requests with 11 or more tools (446): prompt, computed prefill and cache-hit tokens, prefill/decode/TTFT seconds, reuse path and prefill units.",
+  "cold_prefill": "the 26,000-token prefill inside the EXP-058 slice-2 window's baseline Nsight Systems trace (alphastorm/ninfer f306ddd4, whose sm_120 kernels are production's), 1,024-token chunks as in production; FLOPs from the projection shapes (48.65 GFLOP per token) and the causal attention triangle. Cross-checked against the cold request of each warm-turn window, served by production's binary: same kernel families and grids.",
+  "warm_turn_windows": "2026-09-26 08:29-08:31Z and 08:36-08:38Z, RTX 5090: production held and stopped, production's image and binary (5b2f2471) served on a side port with production's arguments under Nsight Systems 2026.1.3 (CLI mounted from the profile image, seccomp unconfined), one cold ~28.9K-token request of public omp-ninfer documentation, then three warm continuations (the second window returns each full assistant message, as an agent client does), then production restored healthy. Each program.submit NVTX range of a warm request is one prefill pass; its kernels are found through CUPTI correlation IDs, and its token width is the grid of the per-layer CTA RMSNorm (one CTA per token, 132 launches per pass). The widths sum exactly to each request's logged computed tokens.",
+  "floors": "FLOP counts at the 209.5 TFLOPS dense BF16 peak: projections at 48.65 GFLOP per token, prompt attention at 4 x 256 x 24 heads x 16 layers FLOPs per (query, visible key) pair. A pass's per-SM attention rate is the last query tile's FLOPs times its waves over the per-layer launch time, against one SM's share of the peak at the rated boost clock.",
+  "source_reading": "route and boundary rules read from the runtime source at production's commit (unchanged on the EXP-058 branch): the chat template's rewrite-execution boundaries (src/targets/qwen3_6/impl/frontend/chat_template.cpp) and their stated purpose, the same GDN decomposition for resumed and root execution (prepared_prompt.h); GDN's 64-token chunks counted from each pass's first token (gated_delta_net.cpp); prompt attention's key tiles from absolute position 0 (prompt_bf16.cuh); the attention route table, small-T for widths 1-6 and chunked small-T only for 16 query heads (causal_softmax_attention.cpp); the static width tables of the Q4 SwiGLU and Q5 projection routes; and the op contract, which does not promise bitwise equality across tiles or routes (docs/maintainer/op-development.md)."
+ },
+ "sources": {
+  "production": "v0.8.1 runtime (image 5ca6e416, binary 5b2f2471, source 8cc0810a); traffic from its v0.7.0 predecessor's agent requests",
+  "cold_trace": "alphastorm/ninfer f306ddd4 development build (sm_120 kernels are 8cc0810a's)",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "peak": "RTX 5090 dense BF16 tensor peak with FP32 accumulate, 209.5 TFLOPS (NVIDIA RTX Blackwell GPU architecture whitepaper, table 3)"
+ },
+ "production_agent_traffic": {
+  "requests": 446,
+  "prefill_s": 349.6,
+  "decode_s": 574.6,
+  "prefill_share": 0.378,
+  "prefix_cache_hit_share": 0.923,
+  "context_tokens_median": 24755,
+  "warm_turns": {
+   "requests": 411,
+   "computed_median": 421,
+   "prefill_s_median": 0.2562,
+   "ttft_s_median": 0.2732,
+   "prefill_s_total": 111.6,
+   "by_reuse_path": {
+    "private_response_replay": {
+     "requests": 305,
+     "computed_median": 441,
+     "prefill_s_median": 0.248,
+     "prefill_units": {
+      "2": 304,
+      "1": 1
+     }
+    },
+    "shared_stable_prefix": {
+     "requests": 106,
+     "computed_median": 140,
+     "prefill_s_median": 0.3142,
+     "prefill_units": {
+      "2": 106
+     }
+    }
+   }
+  },
+  "cold_starts_16k_plus": {
+   "requests": 27,
+   "computed_tokens": 692743,
+   "prefill_s_total": 225.0
+  }
+ },
+ "cold_prefill_context_26000": {
+  "prompt_tokens": 26000,
+  "prefill_chunk": 1024,
+  "span_s": 9.023,
+  "tokens_per_s": 2881,
+  "gpu_busy_share": 0.992,
+  "projection_and_attention_flop_floor_s": 6.673,
+  "span_share_of_flop_floor": 0.739,
+  "families": [
+   {
+    "family": "MLP gate/up (Q4 SwiGLU MMA)",
+    "calls": 1664,
+    "seconds": 3.48,
+    "share_of_busy": 0.389,
+    "tflops": 171.2,
+    "share_of_bf16_peak": 0.817
+   },
+   {
+    "family": "MLP down + mixer output (Q5 GEMM MMA)",
+    "calls": 3328,
+    "seconds": 2.365,
+    "share_of_busy": 0.264,
+    "tflops": 170.4,
+    "share_of_bf16_peak": 0.814
+   },
+   {
+    "family": "GDN input q/k + value/z (grouped MMA, 64x128 tiles)",
+    "calls": 1248,
+    "seconds": 1.316,
+    "share_of_busy": 0.147,
+    "tflops": 159.8,
+    "share_of_bf16_peak": 0.763
+   },
+   {
+    "family": "prefill attention (BF16 KV)",
+    "calls": 416,
+    "seconds": 0.906,
+    "share_of_busy": 0.101,
+    "tflops": 146.7,
+    "share_of_bf16_peak": 0.7
+   },
+   {
+    "family": "attention input, per group (grouped MMA, 32x64 tiles)",
+    "calls": 832,
+    "seconds": 0.568,
+    "share_of_busy": 0.064,
+    "tflops": 107.6,
+    "share_of_bf16_peak": 0.514
+   }
+  ]
+ },
+ "cold_prefill_served_cross_check": {
+  "short_turns": {
+   "prompt_tokens": 28882,
+   "prefill_units": 32,
+   "gpu_span_s": 10.062,
+   "tokens_per_s": 2870,
+   "span_share_of_flop_floor": 0.744,
+   "top_kernels_s": {
+    "q4_linear_swiglu_mma_split_half_pair_kernel": 3.704,
+    "q5_rowsplit_gemm_mma_kernel": 2.634,
+    "rowsplit_grouped_mma_kernel": 2.055,
+    "causal_attention_prompt_bf16_kernel": 1.116
+   }
+  },
+  "replay_turns": {
+   "prompt_tokens": 28882,
+   "prefill_units": 32,
+   "gpu_span_s": 10.032,
+   "tokens_per_s": 2879,
+   "span_share_of_flop_floor": 0.747,
+   "top_kernels_s": {
+    "q4_linear_swiglu_mma_split_half_pair_kernel": 3.696,
+    "q5_rowsplit_gemm_mma_kernel": 2.619,
+    "rowsplit_grouped_mma_kernel": 2.05,
+    "causal_attention_prompt_bf16_kernel": 1.113
+   }
+  }
+ },
+ "warm_turn_probes": {
+  "short_turns": {
+   "cold_request": {
+    "prompt_tokens": 28882,
+    "computed_prefill_tokens": 28882,
+    "prefix_cache_hit_tokens": 0,
+    "completion_tokens": 8,
+    "prefill_s": 10.066206195,
+    "ttft_s": 10.076940972000001,
+    "prefill_units": 31,
+    "prefix_reuse_path": "root"
+   },
+   "warm_turns": [
+    {
+     "request": {
+      "prompt_tokens": 29078,
+      "computed_prefill_tokens": 201,
+      "prefix_cache_hit_tokens": 28877,
+      "completion_tokens": 8,
+      "prefill_s": 0.18610758000000002,
+      "ttft_s": 0.195048736,
+      "prefill_units": 2,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 184.5,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.29,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 4,
+       "gpu_span_ms": 14.71,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 189,
+       "gpu_span_ms": 124.14,
+       "kernels": 990
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.24,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.86,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 28877,
+       "gpu_span_ms": 14.3,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 4,
+       "context_before": 28880,
+       "gpu_span_ms": 14.7,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 29073,
+       "gpu_span_ms": 14.2,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29076,
+       "gpu_span_ms": 16.9,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 189,
+       "context_before": 28884,
+       "gpu_span_ms": 124.1,
+       "gpu_kernel_busy_ms": 121.4,
+       "projections": {
+        "ms": 89.97,
+        "floor_ms_at_bf16_peak": 43.89,
+        "share_of_bf16_peak": 0.488
+       },
+       "prompt_attention": {
+        "ms": 26.91,
+        "floor_ms_at_bf16_peak": 10.28,
+        "query_tiles": 3,
+        "ctas": 72,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.424,
+        "per_layer_ms": 1.682,
+        "last_cta_share_of_sm_bf16_peak": 0.921
+       },
+       "gdn_scan_and_conv_ms": 3.45,
+       "other_ms": 0.52,
+       "families": {
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 38.61,
+         "calls": 128,
+         "share_of_bf16_peak": 0.361
+        },
+        "mlp_gate_up_q4_mma": {
+         "ms": 33.78,
+         "calls": 64,
+         "share_of_bf16_peak": 0.609
+        },
+        "prompt_attention": {
+         "ms": 26.91,
+         "calls": 16,
+         "share_of_bf16_peak": 0.382
+        },
+        "gdn_input_mma": {
+         "ms": 10.32,
+         "calls": 48,
+         "share_of_bf16_peak": 0.704
+        },
+        "attention_input_mma": {
+         "ms": 6.88,
+         "calls": 32,
+         "share_of_bf16_peak": 0.308
+        },
+        "gdn_scan_and_conv": {
+         "ms": 3.45,
+         "calls": 240
+        },
+        "other": {
+         "ms": 0.52,
+         "calls": 213
+        },
+        "small_t_projections": {
+         "ms": 0.38,
+         "calls": 48
+        }
+       }
+      }
+     ]
+    },
+    {
+     "request": {
+      "prompt_tokens": 29572,
+      "computed_prefill_tokens": 499,
+      "prefix_cache_hit_tokens": 29073,
+      "completion_tokens": 8,
+      "prefill_s": 0.27402501199999996,
+      "ttft_s": 0.28215142,
+      "prefill_units": 2,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 272.6,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.2,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 4,
+       "gpu_span_ms": 14.7,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 487,
+       "gpu_span_ms": 212.09,
+       "kernels": 990
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.3,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.86,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 29073,
+       "gpu_span_ms": 14.2,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 4,
+       "context_before": 29076,
+       "gpu_span_ms": 14.7,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 29567,
+       "gpu_span_ms": 14.3,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29570,
+       "gpu_span_ms": 16.9,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 487,
+       "context_before": 29080,
+       "gpu_span_ms": 212.1,
+       "gpu_kernel_busy_ms": 209.5,
+       "projections": {
+        "ms": 149.71,
+        "floor_ms_at_bf16_peak": 113.1,
+        "share_of_bf16_peak": 0.755
+       },
+       "prompt_attention": {
+        "ms": 53.32,
+        "floor_ms_at_bf16_peak": 26.8,
+        "query_tiles": 8,
+        "ctas": 192,
+        "waves_on_170_sms": 2,
+        "sm_fill": 0.565,
+        "per_layer_ms": 3.333,
+        "last_cta_share_of_sm_bf16_peak": 0.944
+       },
+       "gdn_scan_and_conv_ms": 4.91,
+       "other_ms": 0.82,
+       "families": {
+        "mlp_gate_up_q4_mma": {
+         "ms": 65.45,
+         "calls": 64,
+         "share_of_bf16_peak": 0.81
+        },
+        "prompt_attention": {
+         "ms": 53.32,
+         "calls": 16,
+         "share_of_bf16_peak": 0.503
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 45.23,
+         "calls": 128,
+         "share_of_bf16_peak": 0.793
+        },
+        "gdn_input_mma": {
+         "ms": 23.16,
+         "calls": 48,
+         "share_of_bf16_peak": 0.808
+        },
+        "attention_input_mma": {
+         "ms": 15.44,
+         "calls": 32,
+         "share_of_bf16_peak": 0.354
+        },
+        "gdn_scan_and_conv": {
+         "ms": 4.91,
+         "calls": 240
+        },
+        "other": {
+         "ms": 0.82,
+         "calls": 213
+        },
+        "small_t_projections": {
+         "ms": 0.42,
+         "calls": 48
+        }
+       }
+      }
+     ]
+    },
+    {
+     "request": {
+      "prompt_tokens": 30603,
+      "computed_prefill_tokens": 1036,
+      "prefix_cache_hit_tokens": 29567,
+      "completion_tokens": 8,
+      "prefill_s": 0.509498148,
+      "ttft_s": 0.517933798,
+      "prefill_units": 3,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 507.9,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.18,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 4,
+       "gpu_span_ms": 14.77,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 1017,
+       "gpu_span_ms": 397.09,
+       "kernels": 990
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 7,
+       "gpu_span_ms": 49.93,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.47,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.78,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 29567,
+       "gpu_span_ms": 14.2,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 4,
+       "context_before": 29570,
+       "gpu_span_ms": 14.8,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 30598,
+       "gpu_span_ms": 14.5,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 30601,
+       "gpu_span_ms": 16.8,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 1017,
+       "context_before": 29574,
+       "gpu_span_ms": 397.1,
+       "gpu_kernel_busy_ms": 394.2,
+       "projections": {
+        "ms": 298.88,
+        "floor_ms_at_bf16_peak": 236.19,
+        "share_of_bf16_peak": 0.79
+       },
+       "prompt_attention": {
+        "ms": 82.47,
+        "floor_ms_at_bf16_peak": 57.42,
+        "query_tiles": 16,
+        "ctas": 384,
+        "waves_on_170_sms": 3,
+        "sm_fill": 0.753,
+        "per_layer_ms": 5.154,
+        "last_cta_share_of_sm_bf16_peak": 0.947
+       },
+       "gdn_scan_and_conv_ms": 9.85,
+       "other_ms": 1.57,
+       "families": {
+        "mlp_gate_up_q4_mma": {
+         "ms": 132.53,
+         "calls": 64,
+         "share_of_bf16_peak": 0.836
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 93.44,
+         "calls": 128,
+         "share_of_bf16_peak": 0.802
+        },
+        "prompt_attention": {
+         "ms": 82.47,
+         "calls": 16,
+         "share_of_bf16_peak": 0.696
+        },
+        "gdn_input_mma": {
+         "ms": 43.33,
+         "calls": 48,
+         "share_of_bf16_peak": 0.902
+        },
+        "attention_input_mma": {
+         "ms": 28.89,
+         "calls": 32,
+         "share_of_bf16_peak": 0.395
+        },
+        "gdn_scan_and_conv": {
+         "ms": 9.85,
+         "calls": 240
+        },
+        "other": {
+         "ms": 1.57,
+         "calls": 213
+        },
+        "small_t_projections": {
+         "ms": 0.69,
+         "calls": 48
+        }
+       }
+      },
+      {
+       "tokens": 7,
+       "context_before": 30591,
+       "gpu_span_ms": 49.9,
+       "gpu_kernel_busy_ms": 46.8,
+       "projections": {
+        "ms": 17.39,
+        "floor_ms_at_bf16_peak": 1.63,
+        "share_of_bf16_peak": 0.093
+       },
+       "prompt_attention": {
+        "ms": 28.47,
+        "floor_ms_at_bf16_peak": 0.4,
+        "query_tiles": 1,
+        "ctas": 24,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.141,
+        "per_layer_ms": 1.78,
+        "last_cta_share_of_sm_bf16_peak": 0.916
+       },
+       "gdn_scan_and_conv_ms": 0.47,
+       "other_ms": 0.36,
+       "families": {
+        "prompt_attention": {
+         "ms": 28.47,
+         "calls": 16,
+         "share_of_bf16_peak": 0.014
+        },
+        "small_t_projections": {
+         "ms": 17.39,
+         "calls": 416
+        },
+        "gdn_scan_and_conv": {
+         "ms": 0.47,
+         "calls": 96
+        },
+        "other": {
+         "ms": 0.36,
+         "calls": 230
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "replay_turns": {
+   "cold_request": {
+    "prompt_tokens": 28882,
+    "computed_prefill_tokens": 28882,
+    "prefix_cache_hit_tokens": 0,
+    "completion_tokens": 68,
+    "prefill_s": 10.032262115000002,
+    "ttft_s": 10.042270668,
+    "prefill_units": 31,
+    "prefix_reuse_path": "root"
+   },
+   "warm_turns": [
+    {
+     "request": {
+      "prompt_tokens": 29293,
+      "computed_prefill_tokens": 416,
+      "prefix_cache_hit_tokens": 28877,
+      "completion_tokens": 35,
+      "prefill_s": 0.308598283,
+      "ttft_s": 0.31685933699999996,
+      "prefill_units": 2,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 306.9,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.21,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 14.06,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 66,
+       "gpu_span_ms": 94.06,
+       "kernels": 1054
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 340,
+       "gpu_span_ms": 152.78,
+       "kernels": 1054
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.38,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.8,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 28877,
+       "gpu_span_ms": 14.2,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 28880,
+       "gpu_span_ms": 14.1,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 29288,
+       "gpu_span_ms": 14.4,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29291,
+       "gpu_span_ms": 16.8,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 66,
+       "context_before": 28882,
+       "gpu_span_ms": 94.1,
+       "gpu_kernel_busy_ms": 91.4,
+       "projections": {
+        "ms": 62.12,
+        "floor_ms_at_bf16_peak": 15.33,
+        "share_of_bf16_peak": 0.247
+       },
+       "prompt_attention": {
+        "ms": 26.56,
+        "floor_ms_at_bf16_peak": 3.58,
+        "query_tiles": 2,
+        "ctas": 48,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.282,
+        "per_layer_ms": 1.66,
+        "last_cta_share_of_sm_bf16_peak": 0.929
+       },
+       "gdn_scan_and_conv_ms": 1.62,
+       "other_ms": 0.48,
+       "families": {
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 34.3,
+         "calls": 128,
+         "share_of_bf16_peak": 0.142
+        },
+        "prompt_attention": {
+         "ms": 26.56,
+         "calls": 16,
+         "share_of_bf16_peak": 0.135
+        },
+        "mlp_gate_up_q4_mma": {
+         "ms": 16.96,
+         "calls": 64,
+         "share_of_bf16_peak": 0.424
+        },
+        "gdn_input_mma": {
+         "ms": 6.19,
+         "calls": 48,
+         "share_of_bf16_peak": 0.41
+        },
+        "attention_input_mma": {
+         "ms": 4.12,
+         "calls": 32,
+         "share_of_bf16_peak": 0.179
+        },
+        "gdn_scan_and_conv": {
+         "ms": 1.62,
+         "calls": 192
+        },
+        "small_t_projections": {
+         "ms": 0.54,
+         "calls": 49
+        },
+        "other": {
+         "ms": 0.48,
+         "calls": 196
+        }
+       }
+      },
+      {
+       "tokens": 340,
+       "context_before": 28948,
+       "gpu_span_ms": 152.8,
+       "gpu_kernel_busy_ms": 149.9,
+       "projections": {
+        "ms": 116.21,
+        "floor_ms_at_bf16_peak": 78.96,
+        "share_of_bf16_peak": 0.679
+       },
+       "prompt_attention": {
+        "ms": 27.39,
+        "floor_ms_at_bf16_peak": 18.58,
+        "query_tiles": 6,
+        "ctas": 144,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.847,
+        "per_layer_ms": 1.712,
+        "last_cta_share_of_sm_bf16_peak": 0.911
+       },
+       "gdn_scan_and_conv_ms": 3.69,
+       "other_ms": 1.63,
+       "families": {
+        "mlp_gate_up_q4_mma": {
+         "ms": 45.75,
+         "calls": 64,
+         "share_of_bf16_peak": 0.809
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 42.18,
+         "calls": 128,
+         "share_of_bf16_peak": 0.594
+        },
+        "prompt_attention": {
+         "ms": 27.39,
+         "calls": 16,
+         "share_of_bf16_peak": 0.678
+        },
+        "gdn_input_mma": {
+         "ms": 16.74,
+         "calls": 48,
+         "share_of_bf16_peak": 0.781
+        },
+        "attention_input_mma": {
+         "ms": 11.16,
+         "calls": 32,
+         "share_of_bf16_peak": 0.342
+        },
+        "gdn_scan_and_conv": {
+         "ms": 3.69,
+         "calls": 240
+        },
+        "other": {
+         "ms": 1.63,
+         "calls": 196
+        },
+        "small_t_projections": {
+         "ms": 0.39,
+         "calls": 48
+        }
+       }
+      }
+     ]
+    },
+    {
+     "request": {
+      "prompt_tokens": 29682,
+      "computed_prefill_tokens": 394,
+      "prefix_cache_hit_tokens": 29288,
+      "completion_tokens": 12,
+      "prefill_s": 0.284721962,
+      "ttft_s": 0.292828822,
+      "prefill_units": 2,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 283.1,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.18,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 13.99,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 33,
+       "gpu_span_ms": 68.83,
+       "kernels": 751
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 351,
+       "gpu_span_ms": 154.53,
+       "kernels": 1054
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.35,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.86,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 29288,
+       "gpu_span_ms": 14.2,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29291,
+       "gpu_span_ms": 14.0,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 29677,
+       "gpu_span_ms": 14.3,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29680,
+       "gpu_span_ms": 16.9,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 33,
+       "context_before": 29293,
+       "gpu_span_ms": 68.8,
+       "gpu_kernel_busy_ms": 66.5,
+       "projections": {
+        "ms": 37.89,
+        "floor_ms_at_bf16_peak": 7.66,
+        "share_of_bf16_peak": 0.202
+       },
+       "prompt_attention": {
+        "ms": 26.96,
+        "floor_ms_at_bf16_peak": 1.82,
+        "query_tiles": 1,
+        "ctas": 24,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.141,
+        "per_layer_ms": 1.685,
+        "last_cta_share_of_sm_bf16_peak": 0.927
+       },
+       "gdn_scan_and_conv_ms": 1.33,
+       "other_ms": 0.29,
+       "families": {
+        "prompt_attention": {
+         "ms": 26.96,
+         "calls": 16,
+         "share_of_bf16_peak": 0.067
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 15.33,
+         "calls": 128,
+         "share_of_bf16_peak": 0.159
+        },
+        "mlp_gate_up_q4_mma": {
+         "ms": 13.48,
+         "calls": 64,
+         "share_of_bf16_peak": 0.267
+        },
+        "gdn_input_mma": {
+         "ms": 5.15,
+         "calls": 48,
+         "share_of_bf16_peak": 0.246
+        },
+        "attention_input_mma": {
+         "ms": 3.43,
+         "calls": 32,
+         "share_of_bf16_peak": 0.108
+        },
+        "gdn_scan_and_conv": {
+         "ms": 1.33,
+         "calls": 144
+        },
+        "small_t_projections": {
+         "ms": 0.49,
+         "calls": 51
+        },
+        "other": {
+         "ms": 0.29,
+         "calls": 213
+        }
+       }
+      },
+      {
+       "tokens": 351,
+       "context_before": 29326,
+       "gpu_span_ms": 154.5,
+       "gpu_kernel_busy_ms": 151.7,
+       "projections": {
+        "ms": 117.15,
+        "floor_ms_at_bf16_peak": 81.52,
+        "share_of_bf16_peak": 0.696
+       },
+       "prompt_attention": {
+        "ms": 27.85,
+        "floor_ms_at_bf16_peak": 19.44,
+        "query_tiles": 6,
+        "ctas": 144,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.847,
+        "per_layer_ms": 1.741,
+        "last_cta_share_of_sm_bf16_peak": 0.907
+       },
+       "gdn_scan_and_conv_ms": 3.98,
+       "other_ms": 1.68,
+       "families": {
+        "mlp_gate_up_q4_mma": {
+         "ms": 46.1,
+         "calls": 64,
+         "share_of_bf16_peak": 0.829
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 42.53,
+         "calls": 128,
+         "share_of_bf16_peak": 0.608
+        },
+        "prompt_attention": {
+         "ms": 27.85,
+         "calls": 16,
+         "share_of_bf16_peak": 0.698
+        },
+        "gdn_input_mma": {
+         "ms": 16.88,
+         "calls": 48,
+         "share_of_bf16_peak": 0.799
+        },
+        "attention_input_mma": {
+         "ms": 11.26,
+         "calls": 32,
+         "share_of_bf16_peak": 0.35
+        },
+        "gdn_scan_and_conv": {
+         "ms": 3.98,
+         "calls": 240
+        },
+        "other": {
+         "ms": 1.68,
+         "calls": 196
+        },
+        "small_t_projections": {
+         "ms": 0.39,
+         "calls": 48
+        }
+       }
+      }
+     ]
+    },
+    {
+     "request": {
+      "prompt_tokens": 30724,
+      "computed_prefill_tokens": 1047,
+      "prefix_cache_hit_tokens": 29677,
+      "completion_tokens": 20,
+      "prefill_s": 0.571487708,
+      "ttft_s": 0.57968685,
+      "prefill_units": 3,
+      "prefix_reuse_path": "private_response_replay"
+     },
+     "gpu_prefill_ms": 569.9,
+     "passes": [
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.28,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 14.02,
+       "kernels": 799
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 10,
+       "gpu_span_ms": 55.76,
+       "kernels": 751
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 1009,
+       "gpu_span_ms": 391.44,
+       "kernels": 990
+      },
+      {
+       "pass": "prompt_route",
+       "tokens": 18,
+       "gpu_span_ms": 62.85,
+       "kernels": 703
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 3,
+       "gpu_span_ms": 14.22,
+       "kernels": 799
+      },
+      {
+       "pass": "small_t_route",
+       "tokens": 2,
+       "gpu_span_ms": 16.76,
+       "kernels": 877
+      }
+     ],
+     "small_t_fragments": [
+      {
+       "tokens": 3,
+       "context_before": 29677,
+       "gpu_span_ms": 14.3,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 29680,
+       "gpu_span_ms": 14.0,
+       "position": "before_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 3,
+       "context_before": 30719,
+       "gpu_span_ms": 14.2,
+       "position": "after_prompt_units",
+       "samples_first_token": false
+      },
+      {
+       "tokens": 2,
+       "context_before": 30722,
+       "gpu_span_ms": 16.8,
+       "position": "after_prompt_units",
+       "samples_first_token": true
+      }
+     ],
+     "prompt_route_passes": [
+      {
+       "tokens": 10,
+       "context_before": 29682,
+       "gpu_span_ms": 55.8,
+       "gpu_kernel_busy_ms": 52.8,
+       "projections": {
+        "ms": 24.6,
+        "floor_ms_at_bf16_peak": 2.32,
+        "share_of_bf16_peak": 0.094
+       },
+       "prompt_attention": {
+        "ms": 27.25,
+        "floor_ms_at_bf16_peak": 0.56,
+        "query_tiles": 1,
+        "ctas": 24,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.141,
+        "per_layer_ms": 1.703,
+        "last_cta_share_of_sm_bf16_peak": 0.927
+       },
+       "gdn_scan_and_conv_ms": 0.54,
+       "other_ms": 0.35,
+       "families": {
+        "prompt_attention": {
+         "ms": 27.25,
+         "calls": 16,
+         "share_of_bf16_peak": 0.02
+        },
+        "small_t_projections": {
+         "ms": 24.6,
+         "calls": 369
+        },
+        "gdn_scan_and_conv": {
+         "ms": 0.54,
+         "calls": 96
+        },
+        "other": {
+         "ms": 0.35,
+         "calls": 230
+        }
+       }
+      },
+      {
+       "tokens": 1009,
+       "context_before": 29692,
+       "gpu_span_ms": 391.4,
+       "gpu_kernel_busy_ms": 388.6,
+       "projections": {
+        "ms": 293.78,
+        "floor_ms_at_bf16_peak": 234.33,
+        "share_of_bf16_peak": 0.798
+       },
+       "prompt_attention": {
+        "ms": 82.26,
+        "floor_ms_at_bf16_peak": 57.19,
+        "query_tiles": 16,
+        "ctas": 384,
+        "waves_on_170_sms": 3,
+        "sm_fill": 0.753,
+        "per_layer_ms": 5.141,
+        "last_cta_share_of_sm_bf16_peak": 0.953
+       },
+       "gdn_scan_and_conv_ms": 9.61,
+       "other_ms": 1.53,
+       "families": {
+        "mlp_gate_up_q4_mma": {
+         "ms": 129.93,
+         "calls": 64,
+         "share_of_bf16_peak": 0.846
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 92.16,
+         "calls": 128,
+         "share_of_bf16_peak": 0.807
+        },
+        "prompt_attention": {
+         "ms": 82.26,
+         "calls": 16,
+         "share_of_bf16_peak": 0.695
+        },
+        "gdn_input_mma": {
+         "ms": 42.6,
+         "calls": 48,
+         "share_of_bf16_peak": 0.91
+        },
+        "attention_input_mma": {
+         "ms": 28.4,
+         "calls": 32,
+         "share_of_bf16_peak": 0.398
+        },
+        "gdn_scan_and_conv": {
+         "ms": 9.61,
+         "calls": 240
+        },
+        "other": {
+         "ms": 1.53,
+         "calls": 213
+        },
+        "small_t_projections": {
+         "ms": 0.69,
+         "calls": 48
+        }
+       }
+      },
+      {
+       "tokens": 18,
+       "context_before": 30701,
+       "gpu_span_ms": 62.8,
+       "gpu_kernel_busy_ms": 60.5,
+       "projections": {
+        "ms": 30.98,
+        "floor_ms_at_bf16_peak": 4.18,
+        "share_of_bf16_peak": 0.135
+       },
+       "prompt_attention": {
+        "ms": 28.36,
+        "floor_ms_at_bf16_peak": 1.04,
+        "query_tiles": 1,
+        "ctas": 24,
+        "waves_on_170_sms": 1,
+        "sm_fill": 0.141,
+        "per_layer_ms": 1.773,
+        "last_cta_share_of_sm_bf16_peak": 0.922
+       },
+       "gdn_scan_and_conv_ms": 0.79,
+       "other_ms": 0.33,
+       "families": {
+        "prompt_attention": {
+         "ms": 28.36,
+         "calls": 16,
+         "share_of_bf16_peak": 0.037
+        },
+        "mlp_down_and_mixer_out_q5_mma": {
+         "ms": 14.27,
+         "calls": 128,
+         "share_of_bf16_peak": 0.093
+        },
+        "small_t_projections": {
+         "ms": 11.67,
+         "calls": 147
+        },
+        "gdn_input_mma": {
+         "ms": 5.04,
+         "calls": 48,
+         "share_of_bf16_peak": 0.137
+        },
+        "gdn_scan_and_conv": {
+         "ms": 0.79,
+         "calls": 96
+        },
+        "other": {
+         "ms": 0.33,
+         "calls": 230
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "limits": [
+  "The first warm-turn window (08:07-08:26Z) produced no data: under docker's default seccomp profile the server's io_uring checkpoint backend failed to start (io_uring_setup EPERM, reproduced without a GPU); the counted windows ran seccomp unconfined, which production's own hardening profile does not.",
+  "Warm-turn probes used public documentation text and short answers; production's previous responses are longer (median 142 completion tokens), so its reasoning-block and body passes are larger than the probes'.",
+  "Attention time per pass scales with context length; the probes ran at about 29K tokens against production's 24.8K median.",
+  "Tensor efficiencies are FLOP counts over measured kernel time against the whitepaper dense BF16 peak at the rated boost clock, not Nsight Compute pipe utilization; a faster running clock lowers them.",
+  "The shared-stable-prefix warm turns (106 of 411) were not traced; their pass structure is unmeasured.",
+  "The candidate levers' ceilings are estimates from this attribution; none was implemented or measured, and the byte-keeping claim for merged attention is an inference from the kernel's tiling, not a comparison."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}

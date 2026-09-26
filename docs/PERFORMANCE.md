@@ -120,6 +120,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-056 | RTX 5090 and RTX 4090 MTP3 decode remainder | Warp, register, prefetch and L2 hand-off schedules that keep every output byte recover part of the round EXP-055 left above 90% of the floor | 1,631 (RTX 5090) and 449 (RTX 4090) private-launcher rows per pass byte-identical; no T=4 projection or GDN record/fold schedule beats production beyond noise, and an L2 hand-off prefetch only speeds a cold consumer (the mixer takes 16.4 µs with its whole weight in L2 and 16.6 µs in the production graph). Two-warp BF16 attention above the 16K split tier: in-graph attention partial −6.1% at 26K, decode +0.28% to +0.91% from 26K to 60K, public op 3.7–5.4% slower at 16,387–20,000 keys. Exclusive-time remainder 1.15 ms (7.2%) | rejected — no `v0.8.2` |
 | EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact. Paired redaction screen (8 controls × 8 whitespace variants on fresh servers): pass 30/56 vs 32/56 (Fisher p = 0.42), synthetic-secret leaks 69 vs 61 | rejected — more leaks; no `v0.8.2` |
 | EXP-058 | RTX 5090 MTP3 decode draft source and launch chain | Changing where drafts come from (the full LM-head proposal head, prompt-lookup drafts), or chaining the round's kernels with programmatic dependent launch, speeds decode without changing an output byte | Full LM-head proposal head: 89/89 role-corpus cases identical to `v0.8.1`, 3.397 against 3.336 tokens per round, decode 9.2% slower. Prompt lookup (simulated, three-token window): 3.086 against MTP's 3.206 tokens per round on the role corpus, +2.6% on agent sessions. PDL chain: decode −4.7% to −6.2% (MLP down 46.1 → 62.2 µs behind the draining gate/up projection); early release from single-wave kernels only: +0.13% to +0.45% (A/B/B/A), inside drift, 24/24 oracle tests, identical speculative statistics. Round boundary: 476–494 µs per 26K round, 174 µs of it the replay fold and 235–239 µs `cudaGraphLaunch` CPU time | rejected — no `v0.8.2` |
+| EXP-059 | RTX 5090 prefill attribution on agent traffic | Part of production's prefill runs far from its hardware floor, and a change that keeps output bytes could shorten it | Prefill is 37.8% of agent GPU time (446 v0.7.0 requests). Cold starts (27 requests, 64% of prefill) run at 74% of the dense BF16 FLOP floor: projection GEMMs at 76–82% of the 209.5 TFLOPS peak, attention 70%, attention input 51%. A production-shaped warm turn (about 400 computed tokens at 29K context) took 283–307 ms of GPU in six passes split at chat-template boundaries: four 2–3-token fragments 59–60 ms, prompt attention about 27 ms per larger pass (91–95% of one SM's peak on 24–144 of 170 SMs), projections 155–178 ms against an 89–94 ms floor. Byte-keeping ceiling about 27 ms per extra prompt pass; fewer passes (an estimated 115–130 ms) and FP8/NVFP4 change bytes | open — measure only |
 
 Entry detail:
 
@@ -677,6 +678,35 @@ Entry detail:
   transfer stream with no compute-stream fence of its own, so that is an engine contract change.
   EXP-058 is rejected: no `v0.8.2`, and production stays on `v0.8.1`. Receipt: [draft source and
   launch chain](measurements/2026-09-26-decode-draft-source-and-launch-chain.json).
+- **EXP-059 — where prefill time goes (2026-09-26).** Prefill is 37.8% of agent GPU time on the
+  RTX 5090 (446 v0.7.0 agent requests), in two regimes. Cold starts of 16K or more computed tokens
+  are 27 requests but 64% of it. They run at 74% of their dense BF16 FLOP floor (209.5 TFLOPS with
+  FP32 accumulate, the only BF16 MMA mode on this card), both in a 26K production-kernel trace and
+  in production's served 28.9K request: the MLP gate/up and Q5 down/mixer GEMMs at 81–82% of peak,
+  the GDN input at 76%, attention at 70%, and only the attention input projection lower, at 51% on
+  32x64 tiles (6.4% of busy time). Warm turns are 411 requests with a median of 421 computed
+  tokens on a 24.8K-token context and a 0.273 s TTFT. Two probe windows served production's image
+  and binary under Nsight Systems and replayed agent-shaped turns on a 29K context. A turn that
+  returns the full previous assistant message, as an agent client does, took 283–307 ms of GPU for
+  about 400 computed tokens in six separate full-model passes: the chat template marks
+  rewrite-execution boundaries after each assistant opener and think line so that resumed and root
+  execution split the same way, and each boundary ends a pass. The four 2–3-token fragments ran on
+  the small-T routes in 59–60 ms. The reasoning block (33–66 tokens) and the body plus new
+  messages (340–351 tokens) each paid about 27 ms of prompt attention: every 64-row query tile
+  scans the whole context on one SM at 91–95% of that SM's rated peak, and a pass this small fills
+  24–144 of 170 SMs. Their projections took 155–178 ms against an 89–94 ms FLOP floor, the
+  reasoning-block pass at 20–25% of peak. No large lever keeps output bytes. Running one request's
+  consecutive fragments through each layer together, each with its own projection route and GDN
+  decomposition, would merge their prompt attention into one launch and save about 27 ms per extra
+  prompt pass; keys are tiled from absolute position 0, so each row's arithmetic should not
+  change, which is unproven. Folding the passes (six to two between captures, an estimated 115–130
+  ms of a 307 ms turn) changes bytes: the boundaries keep resumed and cold execution
+  bit-identical, and no projection route promises rows that do not depend on pass width. The
+  chunked small-T attention route, which would take a 7–16-token pass from about 27 ms of
+  attention to a few, is enabled only for 16-head geometry. FP8 or NVFP4 projections remain the
+  only large cold lever. The shared-stable-prefix turns (26% of warm turns, 0.314 s median for 140
+  computed tokens) were not traced. EXP-059 is open and changed nothing. Receipt: [prefill
+  attribution](measurements/2026-09-26-prefill-attribution.json).
 
 ## Current order
 
@@ -704,6 +734,8 @@ hypothesis and method before writing code.
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold | open |
+| Run a request's consecutive prefill fragments through each layer together | A production-shaped warm turn runs six full-model passes split at chat-template boundaries; merging the fragments' prompt attention into one launch per layer saves about 27 ms per extra prompt pass at 29K context while each fragment keeps its projection route and GDN decomposition (EXP-059) | open |
+| Fold warm-turn template fragments into fewer passes | Four 2–3-token fragments cost 59–60 ms of a 283–307 ms warm turn and the reasoning-block pass runs its projections at 20–25% of peak; six passes to two would take an estimated 115–130 ms off, but needs per-row arithmetic that does not depend on pass width so resumed and cold execution stay bit-identical (EXP-059) | open |
 | Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | Shipped in v0.4.0: transactional generational store + io_uring O_DIRECT restore; 109,589 tokens restored hot across a docker restart ([qualification](../docs/measurements/2026-08-30-rtx5090-durable-qualification.json)) | shipped v0.4.0 |
 | Checkpoint replication to shared storage | Delivered 2026-09-05 (EXP-018): `scripts/checkpoint_sync.py` copies verified published generations out and back; origin authentication on every lane; same-profile-pair portability only | completed |
