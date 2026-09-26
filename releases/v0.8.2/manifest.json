@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "release": "v0.8.2",
+  "status": "draft",
+  "channel": "public",
+  "audience": "public",
+  "product": {
+    "name": "OMP NInfer",
+    "tagline": "Stateful local Qwen for long OMP coding sessions.",
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "profile": "../../profiles/qwen38-rtx5090-windows-docker-local.json",
+    "primary_profile_id": "qwen38-rtx5090-windows-docker-local"
+  },
+  "components": {
+    "omp": {
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf49132d75883c0eb548d3313213a57bf6ce10a4/compatibility.json",
+      "compatibility_sha256": "7de643d653a2f560d5cd16cdcc125382ee36c7fedfab4b1f40b66268560ef73e",
+      "distribution_kind": "upstream-release",
+      "upstream_repository": "https://github.com/can1357/oh-my-pi",
+      "upstream_tag": "v18.3.0",
+      "upstream_commit": "62bc57be1b03ef0802a33cf7f5f530e534527531",
+      "upstream_tree": "b36226cce6a225a4c0d2c2162da223d61d7123da",
+      "release_id": 395252356,
+      "distribution_version": "18.3.0",
+      "platform": "windows-x64",
+      "artifact_name": "omp-windows-x64.exe",
+      "artifact_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe",
+      "artifact_release_id": 395252356,
+      "artifact_asset_id": 584985844,
+      "artifact_published": true,
+      "artifact_bytes": 233652736,
+      "artifact_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527"
+    },
+    "ninfer": {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "release_tag": "v0.6.11-qwen38-5090-beta.1",
+      "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "source_commit": "32c21f73a7605f76480a6139de0488a14ed1aa48",
+      "source_archive_sha256": "2a1dd05488f2033981a6c3d1dbec9fd78bde3a523aeaa9f268ed1c03d993fffa",
+      "server_binary_sha256": "0d7e042bca2956bbbe9bd68e8d1dcfaeea2666e326acdcea2d34d9b75d7c31d8",
+      "binary_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.11-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.11-linux-x86_64-cuda13.1.tar.gz",
+      "binary_archive_sha256": "5758f7a86090d7c6b2b132203eecc620fafbb8cf9c99a5f4c0ad26071c8651c2",
+      "oci_repository": "ghcr.io/alphastorm/ninfer-runtime",
+      "oci_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:26813f5661e9bab7093349a216543d9391d310c08a207fee4d389d763dd36930",
+      "oci_manifest_digest": "sha256:26813f5661e9bab7093349a216543d9391d310c08a207fee4d389d763dd36930",
+      "runtime_receipt_release": "v0.6.11-qwen38-5090-runtime-beta.1",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.11-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.11-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "734bedd051368abc876d841c8b101e4f88107facf6fbf40d1044ca6c946a05c7",
+      "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.11-qwen38-5090-source.1/runtime-source-32c21f73.tar.gz"
+    },
+    "model": {
+      "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
+      "revision": "18dfc887423fa5aabf3cb56fac41490e462b3fab",
+      "artifact_name": "qwen3_8_27b.ninfer",
+      "artifact_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+      "artifact_bytes": 18210531328,
+      "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    "ninfer_variants": [
+      {
+        "id": "rtx4090-windows-native",
+        "status": "qualified",
+        "installable": true,
+        "repository": "https://github.com/alphastorm/ninfer",
+        "release_tag": "v0.6.8-qwen38-4090-beta.1",
+        "source_commit": "5a774841c29bdf2ee6b7efba135aed0a47e80447",
+        "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.8-beta.1-source.tar.gz",
+        "source_archive_sha256": "24f16e1de3f8a85f9a2d4a74e96c193bae8bea95a23d89c90ec690f3ed1cbc3c",
+        "package_name": "ninfer-rtx4090-native-v0.6.8-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+        "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.8-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+        "package_sha256": "46aa411071901b0b080eafb64062baf78fa3f941e2451f91dc8d5b01e9aceab1",
+        "package_bytes": 574766663,
+        "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.8-beta.1-windows-x86_64-cuda13.3-rtx4090.spdx.json",
+        "sbom_sha256": "2d984cb6439c71e8924ca75e6d51f994bf68f1b513d1a66c6606ab1825fa011e",
+        "installer_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/Install-Release.ps1",
+        "installer_sha256": "2b5fb89077aec856cb0df0764ea6619a52ec86dafa73b4f564194eb018e53b67",
+        "controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/Control-Release.ps1",
+        "controller_sha256": "d3b53b1e9a8b3f9e085f8786c28905289a48890c049f05cac25ba14ae0e69c25",
+        "gpu_owner_controller_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/Control-GpuOwner.ps1",
+        "gpu_owner_controller_sha256": "3921ad65eb500d6879dc160371246aef571bbda36e7d6741860a43af7040feac",
+        "state_protection_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/Protect-StateRoot.ps1",
+        "state_protection_sha256": "e6e72f2f12787e7d849a4828e41f9e709e479eae40485aa062b4e2aeaaf91f4b",
+        "server_binary_sha256": "32905865168182296cd8f3a6cfb4d053de95b6464f936b7165873a5f52684833",
+        "configuration_sha256": "8c6fa09ffc0b54bfc3d249747127bb3ac69af18b732fcacf11bbe8baef671e1d",
+        "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "maximum_context_tokens": 131072,
+        "speculative_backend": "mtp",
+        "speculative_draft_tokens": 3,
+        "qualification": {
+          "summary": "releases/v0.8.2/qualification/rtx4090.json",
+          "sha256": "e3d840c4653e8d62869d2528889e1b6c2fe89b853f0b0741c7ac0b125cfba336",
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf49132d75883c0eb548d3313213a57bf6ce10a4/releases/v0.8.2/qualification/rtx4090.json"
+        },
+        "checksums_sha256": "9455c107887f8b50a4525ffa7fba40f74512c3e8c653b1a4b770df1158443be8",
+        "checksums_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.8-qwen38-4090-beta.1/SHA256SUMS"
+      }
+    ]
+  },
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.8.2",
+    "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 1,
+    "speculative_backend": "mtp",
+    "draft_tokens": 3,
+    "vision": true,
+    "preserve_thinking": true
+  },
+  "qualification": {
+    "summary": "qualification.json",
+    "summary_sha256": "e5a17f1075ac611db3bebcaed2c9b6b8a1969eda04a6138b39c228c17bd7b38e",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf49132d75883c0eb548d3313213a57bf6ce10a4/releases/v0.8.2/qualification.json",
+    "runtime_release_eligible": true,
+    "external_installation_passed": false
+  },
+  "installation": {
+    "mode": "native-windows-docker-local",
+    "quickstart": "../../docs/QUICKSTART.md",
+    "managed_appliance_install": true,
+    "silent_cloud_fallback": false
+  },
+  "limitations": [
+    "This release qualifies the RTX 5090 container and RTX 4090 native Windows routes only. RTX 3090 is deferred; its separately qualified v0.7.2 route retains OMP 18.0.9 and is not qualified with the upstream OMP 18.3.0 client.",
+    "The client is the unmodified upstream OMP binary, which has no appliance commands: installation and lifecycle follow the documented routes, and no client reads the compatibility authority.",
+    "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
+    "Saving before eviction delays the admitting request, about 6.5 s per 126K-token session on the RTX 5090, and that request waits while a victim's reply is still being stored, bounded by its own queue deadline. Ceiling-class save-before-evict was exercised on the RTX 5090; the RTX 4090 lane runs the same serving runtime through its own qualification phases.",
+    "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
+    "Checkpoints are bound to the exact runtime fingerprint, which includes the server build: checkpoints saved by v0.8.0 are incompatible with this runtime, and those sessions replay from the OMP transcript once.",
+    "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
+    "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). Since v0.6.7-beta.2 the runtime commits and releases each pinned allocation's size plus 1/64 before pinning it, and every managed start in the v0.6.8-beta.1 package's canonical qualification pinned the pool; the issue stays open until field confirmation, and a recurrence reports the commit limit, available commit and available memory.",
+    "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
+    "Measured throughput and latency apply only to the recorded package, machine, and profile."
+  ],
+  "publication": {
+    "authorized": false,
+    "targets": [
+      "GitHub public release v0.8.1",
+      "OMP client: unmodified upstream Oh My Pi v18.3.0 release binaries (published upstream; this release publishes no client)",
+      "NInfer RTX5090 v0.6.10-qwen38-5090-beta.1 (published)",
+      "NInfer RTX4090 v0.6.8-qwen38-4090-beta.1 (published)"
+    ],
+    "blockers": [
+      "external-installation acceptance has not been rerun against the published v0.6.11-qwen38-5090-beta.1 component and runtime image 26813f56; the composed acceptance receipt is absent until it is"
+    ],
+    "external_installation_qualified": true
+  }
+}

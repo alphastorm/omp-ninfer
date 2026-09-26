@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-09-26
+
+### GPU keep-warm (RTX 5090)
+
+- Rebind RTX 5090 to `v0.6.11-qwen38-5090-beta.1` (image
+  `sha256:26813f5661e9bab7093349a216543d9391d310c08a207fee4d389d763dd36930`, source
+  `32c21f73a7605f76480a6139de0488a14ed1aa48`). RTX 4090 stays on `v0.6.8-qwen38-4090-beta.1`, and
+  the model, memory floors and the upstream OMP 18.3.0 client are unchanged.
+- New RTX 5090 sessions that arrive after idle start at back-to-back speed. After its last work the
+  card steps down to its lowest idle clocks within about 9 s, and the first prefill after that ran
+  up to 2.3x slower
+  ([EXP-060](docs/measurements/2026-09-26-idle-gpu-new-sessions.json)). The runtime's new
+  `--gpu-keep-warm-ms N` (off by default) spins a single-warp kernel that touches no memory for
+  3.5 ms of every 10 ms on its own stream for N ms after the server goes idle, and stops when a
+  request is admitted. The RTX 5090 profile sets 60000, so its deployment profile advances to
+  `qwen38-5090-v0.8.2` (configuration `56878aed`). New sessions after 12-58 s of idle prefilled in
+  0.155-0.157 s instead of 0.253-0.304 s (time to first token 0.173-0.181 s instead of
+  0.316-0.366 s), and the 89-case role corpus stayed byte-identical. Requests that arrived 1-5 ms
+  after the previous one, while a spin could still run, changed time to first token by a median of
+  -0.1 ms (worst +4.4 ms). The hold draws about 71 W above idle while it runs; over production's
+  recorded agent traffic a 60 s grace would have covered 84 of the 138 requests that arrived after
+  5 s or more of idle, at about 2.3 W on average
+  ([EXP-062](docs/measurements/2026-09-26-engine-keep-warm.json)).
+- Checkpoints are bound to the exact server build, so sessions saved by v0.8.1 are not restored on
+  v0.8.2: OMP resends the full conversation and each session re-prefills once.
+
 ## [0.8.1] - 2026-09-25
 
 ### Faster decode (both lanes)
