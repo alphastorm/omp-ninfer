@@ -11,7 +11,65 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.8.1 — faster decode (2026-09-25)
+## v0.8.2 — GPU keep-warm (2026-09-26)
+
+RTX 5090 advances to `v0.6.11-qwen38-5090-beta.1` (image `26813f56`, server `0d7e042b`,
+source `32c21f73`); RTX 4090 keeps `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`,
+server `32905865`, source `5a774841`) and carries its v0.8.1 lane receipt. The unmodified
+upstream OMP 18.3.0 client and model artifact are unchanged. The RTX 5090 profile advances to
+`qwen38-5090-v0.8.2` with `--gpu-keep-warm-ms 60000`; host KV stays 16384 MiB and the
+host floor stays 28672 MiB. The option is off by default in the runtime.
+
+After work, the RTX 5090 reached P3 at about 2 s, P5 at about 7 s and its lowest idle state at
+about 9 s; the next prefill ran up to 2.3x slower. Of 106 new sessions in logged v0.7.0 agent
+traffic, 103 arrived at least 5 s after the previous request finished
+([EXP-060](measurements/2026-09-26-idle-gpu-new-sessions.json)). Keep-warm runs a single-warp
+kernel that touches no memory for 3.5 ms of every 10 ms on its own stream, after work and while
+idle, for the configured grace. It skips a launch while the previous spin runs and stops when
+a request is pending. A 30% duty held the top P-state where 25% did not
+([EXP-061](measurements/2026-09-26-keep-warm-load.json)).
+
+[EXP-062](measurements/2026-09-26-engine-keep-warm.json) records the keep-warm comparison:
+
+| Observation | Keep-warm measurement |
+| --- | --- |
+| New sessions after 12-58 s idle | Prefill **0.155-0.157 s**, TTFT **0.173-0.181 s**, the same as back to back; without keep-warm **0.253-0.304 s** prefill, **0.316-0.366 s** TTFT |
+| Role corpus | 89 cases byte-identical to v0.8.1 with keep-warm on and off |
+| Requests arriving 1-5 ms after the previous one | TTFT change median **-0.1 ms**, worst **+4.4 ms** |
+| Board power | **99.5-102.7 W** while held versus **29.3-29.8 W** idle, about **71 W** extra while held |
+| 60 s grace over 62 h of logged v0.7.0 traffic | Would cover **84 of 138** requests after at least 5 s idle (**74 of 103** new sessions), at about **2.3 W average** |
+| 30 s grace on the same traffic | Would cover only **11** requests; median wait **52.7 s** |
+
+The v0.8.2 lane receipt separately records these results on the published RTX 5090 image;
+these numbers do not establish a cause for differences from v0.8.1:
+
+| Gate | RTX 5090 result |
+| --- | --- |
+| Long-context retrieval | Exact **130,048 tokens** in **56.4 s** |
+| Decode | **160.07 tok/s**, MTP acceptance **0.412**, **2.24 tokens per round** |
+| Durability | Four saves before eviction; stop `saved 1, nothing to save 3, refused 0`; all four sessions restored after restart; second stop `saved 0, nothing to save 4, refused 0` |
+| Other probes | Publication barrier, fanout, warm-arrival, restore and multisession passed |
+| Agent mix | None of 24 fresh sessions fell back to a full prefill; median TTFT **0.090-0.098 s** |
+| Stock OMP 18.3.0 | One session kept across restarts |
+| Role corpus | **89/89** identical to production v0.8.1 |
+
+The unchanged RTX 4090 package carries its v0.8.1 receipt: 15 canonical native phases and
+130,048-token retrieval in **91.0 s**. Shared-prefix timings are not checkpoint-restore timings.
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.2 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+Checkpoints bind the exact server build: sessions saved by v0.8.1 do not restore on the new
+RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-prefills once.
+[Qualification](../releases/v0.8.2/qualification.json) ·
+[RTX 5090 receipt](../releases/v0.8.2/qualification/rtx5090.json) ·
+[RTX 4090 receipt](../releases/v0.8.2/qualification/rtx4090.json) ·
+[Documented routes](../releases/v0.8.2/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.2/acceptance/composed-external-installation.json).
+
+## Historical v0.8.1 — faster decode (2026-09-25)
 
 These measurements bind RTX 5090 `v0.6.10-qwen38-5090-beta.1` (image `5ca6e416`, server
 `5b2f2471`, source `8cc0810a`) and RTX 4090 `v0.6.8-qwen38-4090-beta.1` (package

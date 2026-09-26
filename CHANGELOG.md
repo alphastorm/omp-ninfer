@@ -30,6 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   recorded agent traffic a 60 s grace would have covered 84 of the 138 requests that arrived after
   5 s or more of idle, at about 2.3 W on average
   ([EXP-062](docs/measurements/2026-09-26-engine-keep-warm.json)).
+- Every RTX 5090 runtime gate was measured again on the published image: profile gates
+  (130,048-token exact retrieval in 56.4 s, decode 160.07 tok/s), the durability workload with
+  both stops, the publication barrier, the probes, the agent mix (none of 24 fresh sessions fell
+  back to a full prefill; median time to first token 0.090-0.098 s) and the stock OMP 18.3.0
+  session proof; the unchanged RTX 4090 package carries its v0.8.1 lane receipt. The four
+  documented routes passed with the unmodified OMP 18.3.0 client: RTX 5090 container host (2
+  steps), macOS client (10), Windows client (5) and RTX 4090 native Windows (7), with both hosts
+  restored; the upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool
+  turn, an exact continuation and a fail-closed request against the RTX 5090 image
+  ([composed acceptance](releases/v0.8.2/acceptance/composed-external-installation.json)).
 - Checkpoints are bound to the exact server build, so sessions saved by v0.8.1 are not restored on
   v0.8.2: OMP resends the full conversation and each session re-prefills once.
 

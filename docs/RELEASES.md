@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.1`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.2`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.1 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
+v0.7.4. v0.8.2 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,10 +27,65 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.1 public release — faster decode
+### v0.8.2 public release — GPU keep-warm
 
-- Status: published exact-profile product. [Manifest](../releases/v0.8.1/manifest.json) ·
-  [guide](QUICKSTART.md) · [qualification](../releases/v0.8.1/qualification.json).
+- Status: published exact-profile product, 2026-09-26.
+  [Manifest](../releases/v0.8.2/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.8.2/qualification.json).
+- Client and model: unmodified upstream OMP 18.3.0 and the model artifact are unchanged from
+  v0.8.1. Eligibility remains one RTX 5090 or RTX 4090; RTX 3090 is deferred.
+- RTX 5090: `v0.6.11-qwen38-5090-beta.1`, image
+  `sha256:26813f5661e9bab7093349a216543d9391d310c08a207fee4d389d763dd36930`, server
+  `0d7e042bca2956bbbe9bd68e8d1dcfaeea2666e326acdcea2d34d9b75d7c31d8`, source
+  `32c21f73a7605f76480a6139de0488a14ed1aa48`. The profile advances to
+  `qwen38-5090-v0.8.2`, configuration
+  `56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98`, adding
+  `--gpu-keep-warm-ms 60000`. Host KV stays 16384 MiB and the host floor stays 28672 MiB.
+- Runtime: `ninfer-serve --gpu-keep-warm-ms N` is off by default. After work and while idle,
+  a single-warp kernel that touches no memory spins 3.5 ms of every 10 ms on its own stream
+  for N ms, skips a launch while the previous spin runs, and stops when a request is pending.
+  Idle clock step-down and up to 2.3x slower first prefill were measured in
+  [EXP-060](measurements/2026-09-26-idle-gpu-new-sessions.json); a 30% duty held the top
+  P-state where 25% did not in [EXP-061](measurements/2026-09-26-keep-warm-load.json).
+- Measured effect and cost: new sessions after 12-58 s idle prefilled in **0.155-0.157 s**
+  (TTFT **0.173-0.181 s**), the same as back to back, versus **0.253-0.304 s**
+  (TTFT **0.316-0.366 s**) without it. The 89-case role corpus was byte-identical to v0.8.1
+  on and off. Requests arriving 1-5 ms after the previous one changed TTFT by a median
+  **-0.1 ms**, worst **+4.4 ms**. Holding clocks drew **99.5-102.7 W** versus **29.3-29.8 W**
+  idle (about **71 W** extra); a 60 s grace replayed over 62 h of logged v0.7.0 traffic
+  would cover 84 of 138 requests after at least 5 s idle (74 of 103 new sessions) at about
+  **2.3 W average**. A 30 s grace would cover only 11 requests (median wait 52.7 s).
+  [EXP-062](measurements/2026-09-26-engine-keep-warm.json).
+- RTX 5090 lane receipt on the published image: 130,048-token exact retrieval in **56.4 s**,
+  decode **160.07 tok/s** (MTP acceptance 0.412, 2.24 tokens per round), four saves before
+  eviction, stop `saved 1, nothing to save 3, refused 0`, all four sessions restored after
+  restart, and second stop `saved 0, nothing to save 4, refused 0`. Publication-barrier,
+  fanout, warm-arrival, restore and multisession probes passed. None of 24 fresh sessions
+  fell back to a full prefill; median TTFT was **0.090-0.098 s**. Stock OMP 18.3.0 kept one
+  session across restarts on the RTX 5090; the role corpus was 89/89 identical to production
+  v0.8.1. [Lane receipt](../releases/v0.8.2/qualification/rtx5090.json).
+- RTX 4090: unchanged `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`,
+  source `5a774841`), carrying its v0.8.1 lane receipt: 15 canonical native phases and
+  130,048-token retrieval in **91.0 s**.
+  [Lane receipt](../releases/v0.8.2/qualification/rtx4090.json).
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.2 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+[Documented routes](../releases/v0.8.2/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.2/acceptance/composed-external-installation.json).
+
+Checkpoints bind the exact server build: sessions saved by v0.8.1 do not restore on the new
+RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-prefills once.
+[Release notes](../releases/v0.8.2/NINFER_RELEASE_NOTES.md).
+
+### v0.8.1 historical public release — faster decode
+
+- Status: superseded published exact-profile product. [Manifest](../releases/v0.8.1/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.8.1/docs/QUICKSTART.md) ·
+  [qualification](../releases/v0.8.1/qualification.json).
 - Client: unmodified upstream [OMP 18.3.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0)
   binaries with the same SHA-256 pins as v0.8.0. The model, serving settings and memory
   floors are unchanged too.

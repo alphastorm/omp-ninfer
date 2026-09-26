@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.8.2",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf49132d75883c0eb548d3313213a57bf6ce10a4/compatibility.json",
-      "compatibility_sha256": "7b00115f98f884e29d5092f118b53b6762ef72c69cc643aabde26350575fb639",
+      "compatibility_sha256": "6363081d19dd8ed4827df9a32e135f15b615ff03b6e6cd5eece3eea2620bc410",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.3.0",
@@ -112,10 +112,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "e5a17f1075ac611db3bebcaed2c9b6b8a1969eda04a6138b39c228c17bd7b38e",
+    "summary_sha256": "bf294fa44d3ef5eadebe868bdc7990ab633f604852ed35d333ccbf24835cc8a5",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf49132d75883c0eb548d3313213a57bf6ce10a4/releases/v0.8.2/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -129,7 +129,7 @@
     "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
     "Saving before eviction delays the admitting request, about 6.5 s per 126K-token session on the RTX 5090, and that request waits while a victim's reply is still being stored, bounded by its own queue deadline. Ceiling-class save-before-evict was exercised on the RTX 5090; the RTX 4090 lane runs the same serving runtime through its own qualification phases.",
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
-    "Checkpoints are bound to the exact runtime fingerprint, which includes the server build: checkpoints saved by v0.8.0 are incompatible with this runtime, and those sessions replay from the OMP transcript once.",
+    "Checkpoints are bound to the exact runtime fingerprint, which includes the server build: checkpoints saved by v0.8.1 are incompatible with this runtime, and those sessions replay from the OMP transcript once.",
     "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
     "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). Since v0.6.7-beta.2 the runtime commits and releases each pinned allocation's size plus 1/64 before pinning it, and every managed start in the v0.6.8-beta.1 package's canonical qualification pinned the pool; the issue stays open until field confirmation, and a recurrence reports the commit limit, available commit and available memory.",
     "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
@@ -138,14 +138,12 @@
   "publication": {
     "authorized": false,
     "targets": [
-      "GitHub public release v0.8.1",
+      "GitHub public release v0.8.2",
       "OMP client: unmodified upstream Oh My Pi v18.3.0 release binaries (published upstream; this release publishes no client)",
-      "NInfer RTX5090 v0.6.10-qwen38-5090-beta.1 (published)",
+      "NInfer RTX5090 v0.6.11-qwen38-5090-beta.1 (published)",
       "NInfer RTX4090 v0.6.8-qwen38-4090-beta.1 (published)"
     ],
-    "blockers": [
-      "external-install and documented-route acceptance have not run against the published v0.6.11-qwen38-5090-beta.1 image 26813f56 and v0.6.8-qwen38-4090-beta.1 package with the upstream OMP 18.3.0 client; the composed acceptance receipt is absent until they do"
-    ],
+    "blockers": [],
     "external_installation_qualified": true
   }
 }

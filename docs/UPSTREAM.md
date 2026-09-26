@@ -1,6 +1,6 @@
 # Upstream watch
 
-The runtime ships from forks; v0.8.1 uses an unmodified upstream OMP client. This page names
+The runtime ships from forks; v0.8.2 uses an unmodified upstream OMP client. This page names
 the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -27,7 +27,45 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.8.1
+## Tracked upstreams and current position — v0.8.2
+
+The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.1.
+RTX 5090 advances to `v0.6.11-qwen38-5090-beta.1` (image `26813f56`, server `0d7e042b`,
+source `32c21f73`). RTX 4090 remains `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`,
+server `32905865`, source `5a774841`), carrying its v0.8.1 lane receipt: 15 canonical
+native phases and 130,048-token retrieval in **91.0 s**. RTX 3090 remains deferred.
+
+The runtime adds `ninfer-serve --gpu-keep-warm-ms N`, off by default. After work and while
+idle, a single-warp kernel touches no memory and spins 3.5 ms of every 10 ms on its own stream
+for N ms, skips a launch while the previous spin runs, and stops when a request is pending.
+RTX 5090 profile `qwen38-5090-v0.8.2` adds `--gpu-keep-warm-ms 60000`; host KV stays
+16384 MiB and the host floor stays 28672 MiB. After 12-58 s idle, new sessions prefilled in
+**0.155-0.157 s** (TTFT **0.173-0.181 s**), versus **0.253-0.304 s** (TTFT **0.316-0.366 s**)
+without keep-warm. The 89-case role corpus was byte-identical to v0.8.1 on and off. Holding
+clocks costs about **71 W**; a 60 s grace replayed over 62 h of logged v0.7.0 traffic would
+cost about **2.3 W average**. [EXP-062](measurements/2026-09-26-engine-keep-warm.json).
+
+The published RTX 5090 image recorded 130,048-token exact retrieval in **56.4 s**, decode at
+**160.07 tok/s**, four sessions restored after restart, and passed publication-barrier,
+fanout, warm-arrival, restore and multisession probes. None of 24 fresh sessions fell back to
+a full prefill; median TTFT was **0.090-0.098 s**. Stock OMP 18.3.0 kept one session across
+restarts on the RTX 5090. [Lane receipt](../releases/v0.8.2/qualification/rtx5090.json).
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.2 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+[Documented routes](../releases/v0.8.2/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.2/acceptance/composed-external-installation.json).
+
+Checkpoints bind the exact server build: sessions saved by v0.8.1 do not restore on the new
+RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-prefills once.
+[Release notes](../releases/v0.8.2/NINFER_RELEASE_NOTES.md).
+
+The upstream delta measurements below remain historical; keep-warm is not an upstream rebase.
+
+## Historical position — v0.8.1
 
 Runtime positions below retain the [2026-09-24 report](measurements/2026-09-24-upstream-watch.json);
 they are not new upstream delta measurements. The upstream NInfer rebase remains future work.
@@ -97,5 +135,5 @@ product needs that planner rebase.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.8.1 does not build or publish an OMP client; it keeps the upstream
+  patches rebased. v0.8.2 does not build or publish an OMP client; it keeps the upstream
   release binary instead.

@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-62bc57be-d2fdaa29af-v0.8.2",
+  "product_release": "v0.8.2",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "as_of": "2026-09-26",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.3.0",
+    "commit": "62bc57be1b03ef0802a33cf7f5f530e534527531",
+    "tree": "b36226cce6a225a4c0d2c2162da223d61d7123da"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.3.0",
+    "upstream_commit": "62bc57be1b03ef0802a33cf7f5f530e534527531",
+    "os": "Ubuntu 24.04",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-linux-x64",
+    "asset_bytes": 275801568,
+    "asset_sha256": "d2fdaa29affe96e596eb9c78d42f548f1f291df28608631bcc00750a84b94bc3",
+    "binary_sha256": "d2fdaa29affe96e596eb9c78d42f548f1f291df28608631bcc00750a84b94bc3",
+    "release_id": 395252356,
+    "asset_id": 584985845,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64"
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.3.0",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 23,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "0d7e042bca2956bbbe9bd68e8d1dcfaeea2666e326acdcea2d34d9b75d7c31d8",
+    "runtime_configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "q38-ninfer"
+    ],
+    "raw_transcript_included": false,
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "errors": [
+        "Unable to connect. Is the computer able to access the url?"
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "runtime_image_digest": "sha256:26813f5661e9bab7093349a216543d9391d310c08a207fee4d389d763dd36930",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false,
+    "execution_context": {
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "wsl_distro_name_present": false,
+      "wsl_interop_present": false,
+      "environment_erased": false,
+      "native_linux_os_qualification_claimed": false
+    }
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the unmodified upstream client against the published v0.8.2 RTX 5090 runtime (image 26813f56), not GPU performance or a managed-appliance installation.",
+    "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt.",
+    "Live inference used the native Linux binary under WSL2. This is not a new non-WSL Linux OS qualification; the hosted Linux qualification remains provider-free."
+  ]
+}
