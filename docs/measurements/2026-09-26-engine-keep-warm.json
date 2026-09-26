@@ -1,0 +1,633 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-062",
+ "title": "RTX 5090 engine keep-warm: --gpu-keep-warm-ms holds P1 at about 100 W, new sessions after 12-58 s idle start at back-to-back speed, and outputs stay byte-identical",
+ "generated_utc": "2026-09-26T14:48:11Z",
+ "status": "passed",
+ "question": "Built into ninfer-serve, does a grace-period keep-warm hold the RTX 5090 in P1 after requests, bring new sessions after idle back to back-to-back latency, keep every output byte, and cost nothing on requests that arrive while it runs? What grace does production's traffic need, at what power?",
+ "answer": "Yes. With ninfer-serve --gpu-keep-warm-ms N (off by default), the Engine worker keeps the GPU warm once it has run work and gone idle: a single-warp kernel spins 3.5 ms of every 10 ms on its own stream until a request is pending, the Engine stops, or N ms pass. With production's arguments on the RTX 5090 it held P1 (SM 2,670-2,700 MHz, memory 13,801 MHz, 35% utilization) at 99.5-102.7 W. Idle in P8 draws 29.3-29.8 W, so the hold costs about 71 W. New sessions after 12, 25, 38, 53 and 58 s of idle prefilled in 0.155-0.157 s (TTFT 0.173-0.181 s), the same as back to back (0.156-0.160 s). With it off they took 0.253-0.304 s (TTFT 0.316-0.366 s). Holds up to 58 s did not slow the next session, as EXP-061's side-process load had after 60 s. When the 30 s grace ended the card reached P8 2.9 s later, and the session at 45 s was cold again (0.352 s). All 89 role-corpus cases were byte-identical to production v0.8.1 with it on and with it off. 80 corpus requests arrived 1-5 ms after the previous response, while the spin launched at idle could still be running. They lost nothing measurable: paired TTFT median -0.1 ms, worst +4.4 ms. In production's v0.7.0 traffic, agent requests that arrived after 5 s or more of idle had waited a median 52.7 s. A 30 s grace would have caught 11 of 138 of them. 60 s would have caught 84 (74 of 103 new sessions), holding the card for 3.2% of the logged 62 h, about 2.29 W on average.",
+ "decision": "Open, prototype only. The change is on a local runtime branch and nothing is released. It was measured at c6bd1674; head 0e996b3d adds a one-spin-in-flight guard, which was built and host-tested but not run on the GPU. Production stays on v0.8.1. Adopting it takes a runtime release with the flag and a deployment argument. Production's idle times point to a 60 s grace: it covers 84 of 138 idle arrivals and adds about 2.3 W on average. That call is the founder's.",
+ "method": {
+  "change": "ninfer-serve --gpu-keep-warm-ms N sets EngineOptions::gpu_keep_warm_ms, and server_start records it. The Engine worker waits for work once nothing is pending, materializing or active. If it has run work since it last went idle, it calls GpuKeepWarm::launch() every 10 ms. Each call starts one single-warp %globaltimer spin of 3.5 ms on a non-blocking stream owned by the worker thread. It stops when a request is pending, the Engine stops, or N ms pass, then waits without a timeout. Nothing on the request path synchronizes with that stream. The default is 0 (off).",
+  "build": "Release, sm_120a, GNU 13.3.0 and nvcc 13.1.115 (production's toolchain). The serve-options and request-log host tests pass. The binary is mounted into production's v0.8.1 image in place of its ninfer-serve.",
+  "window_1": "2026-09-26 14:09-14:31Z: production held and stopped. The candidate served on a side port with production's arguments and seccomp profile, first with --gpu-keep-warm-ms 30000 and then with 0. Each arm sent one cold request whose ~30K-token system message and 12 tool definitions form the stable prefix, then six new two-message sessions after 0, 12, 0, 25, 0 and 45 s. nvidia-smi sampled P-state, clocks, power and utilization every 50 ms. Each arm then ran the 89-case role corpus (84 requests), compared byte for byte with production v0.8.1's run. Production was restored healthy.",
+  "window_2": "14:37-14:42Z: the same with --gpu-keep-warm-ms 60000 only and no corpus. Sessions came after 0, 38, 0, 53, 0 and 58 s: production's first quartile and median idle before an idle arrival, then the end of the grace. Production was restored healthy.",
+  "analysis": "Per idle gap: the P-state at send and the first appearance of each P-state after the previous response. P-state counts, median power and median clocks are taken from 2 s after the response to the end of the grace, or to 0.1 s before the next request if sooner; after the grace, from 10 s past its end. Corpus requests are paired in order between arms; all 84 pairs have the same prompt, computed and completion tokens. The idle before a request is its server start less the previous request's finish.",
+  "coverage": "Production's v0.7.0 request logs (EXP-060's source): for each grace G, the agent requests that arrived after 5 s or more of idle but within G, and min(gap, G) summed over every idle gap. The energy uses the measured power above idle."
+ },
+ "sources": {
+  "production": "v0.8.1 runtime (image 5ca6e416, binary 5b2f2471, source 8cc0810a)",
+  "candidate_measured": {
+   "source": "c6bd1674 (alphastorm/ninfer, local branch feat/gpu-keep-warm on 8cc0810a)",
+   "binary_sha256": "e1794eb15f91019076b00db85615b5560d673e117ed24b53897f546d43d0ec41"
+  },
+  "candidate_head": {
+   "source": "0e996b3d (c6bd1674 plus a guard that skips a launch while the previous spin still runs)",
+   "binary_sha256": "fabdffb2607cd17ddfc2726297c179eb791387270dd725d97ac61e612c2b0bc6"
+  },
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "gpu": "RTX 5090, Windows driver 610.88, CUDA through WSL2 and Docker Desktop",
+  "predecessor": "EXP-061 (docs/measurements/2026-09-26-keep-warm-load.json)"
+ },
+ "output_identity": {
+  "on": "v081p-gw-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+  "off": "v081p-gw-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+ },
+ "power": {
+  "held_p1_power_w_medians": [
+   102.7,
+   100.0,
+   99.5,
+   101.8,
+   100.5,
+   99.5
+  ],
+  "idle_p8_power_w_medians": [
+   29.8,
+   29.3
+  ],
+  "above_idle_w": 71.1
+ },
+ "window_1_grace_30s_against_off": {
+  "on": [
+   {
+    "session": "session-1",
+    "idle_s": 0.0,
+    "prefill_s": 0.1557,
+    "ttft_s": 0.1657,
+    "computed_tokens": 165,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2865,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-2",
+    "idle_s": 12.0,
+    "prefill_s": 0.1552,
+    "ttft_s": 0.1736,
+    "computed_tokens": 167,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2677,
+    "mem_mhz_at_send": 13801,
+    "first_seen_after_response_s": {
+     "P1": 0.03
+    },
+    "grace_span": {
+     "seconds": 9.9,
+     "samples": 194,
+     "pstates": {
+      "P1": 194
+     },
+     "power_w_median": 102.7,
+     "power_w_mean": 103.9,
+     "sm_mhz_median": 2700.0,
+     "mem_mhz_median": 13801.0,
+     "util_median": 35.0
+    },
+    "after_grace_span": null
+   },
+   {
+    "session": "session-3",
+    "idle_s": 0.0,
+    "prefill_s": 0.1566,
+    "ttft_s": 0.1772,
+    "computed_tokens": 193,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2677,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-4",
+    "idle_s": 25.0,
+    "prefill_s": 0.1546,
+    "ttft_s": 0.1759,
+    "computed_tokens": 159,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2670,
+    "mem_mhz_at_send": 13801,
+    "first_seen_after_response_s": {
+     "P1": 0.01
+    },
+    "grace_span": {
+     "seconds": 22.9,
+     "samples": 448,
+     "pstates": {
+      "P1": 448
+     },
+     "power_w_median": 100.0,
+     "power_w_mean": 101.2,
+     "sm_mhz_median": 2677.0,
+     "mem_mhz_median": 13801.0,
+     "util_median": 35.0
+    },
+    "after_grace_span": null
+   },
+   {
+    "session": "session-5",
+    "idle_s": 0.0,
+    "prefill_s": 0.1599,
+    "ttft_s": 0.1855,
+    "computed_tokens": 230,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2812,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-6",
+    "idle_s": 45.0,
+    "prefill_s": 0.3521,
+    "ttft_s": 0.4161,
+    "computed_tokens": 187,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 270,
+    "mem_mhz_at_send": 405,
+    "first_seen_after_response_s": {
+     "P1": 0.0,
+     "P3": 30.91,
+     "P5": 31.32,
+     "P8": 32.92
+    },
+    "grace_span": {
+     "seconds": 27.9,
+     "samples": 546,
+     "pstates": {
+      "P1": 546
+     },
+     "power_w_median": 99.5,
+     "power_w_mean": 100.5,
+     "sm_mhz_median": 2677.0,
+     "mem_mhz_median": 13801.0,
+     "util_median": 35.0
+    },
+    "after_grace_span": {
+     "seconds": 4.9,
+     "samples": 95,
+     "pstates": {
+      "P8": 95
+     },
+     "power_w_median": 29.8,
+     "power_w_mean": 29.8,
+     "sm_mhz_median": 270,
+     "mem_mhz_median": 405,
+     "util_median": 0
+    }
+   }
+  ],
+  "off": [
+   {
+    "session": "session-1",
+    "idle_s": 0.0,
+    "prefill_s": 0.1561,
+    "ttft_s": 0.1661,
+    "computed_tokens": 165,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2797,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-2",
+    "idle_s": 12.0,
+    "prefill_s": 0.2776,
+    "ttft_s": 0.3366,
+    "computed_tokens": 167,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 270,
+    "mem_mhz_at_send": 405,
+    "first_seen_after_response_s": {
+     "P1": 0.04,
+     "P3": 2.19,
+     "P5": 5.82,
+     "P8": 7.62
+    },
+    "grace_span": {
+     "seconds": 9.9,
+     "samples": 193,
+     "pstates": {
+      "P1": 3,
+      "P3": 71,
+      "P5": 35,
+      "P8": 84
+     },
+     "power_w_median": 52.0,
+     "power_w_mean": 49.3,
+     "sm_mhz_median": 270,
+     "mem_mhz_median": 810,
+     "util_median": 0
+    },
+    "after_grace_span": null
+   },
+   {
+    "session": "session-3",
+    "idle_s": 0.0,
+    "prefill_s": 0.1566,
+    "ttft_s": 0.1762,
+    "computed_tokens": 193,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 1657,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-4",
+    "idle_s": 25.0,
+    "prefill_s": 0.3035,
+    "ttft_s": 0.3658,
+    "computed_tokens": 159,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 270,
+    "mem_mhz_at_send": 405,
+    "first_seen_after_response_s": {
+     "P1": 0.03,
+     "P3": 2.23,
+     "P5": 5.87,
+     "P8": 7.06
+    },
+    "grace_span": {
+     "seconds": 22.9,
+     "samples": 445,
+     "pstates": {
+      "P1": 4,
+      "P3": 71,
+      "P5": 23,
+      "P8": 347
+     },
+     "power_w_median": 34.9,
+     "power_w_mean": 39.3,
+     "sm_mhz_median": 270,
+     "mem_mhz_median": 405,
+     "util_median": 0
+    },
+    "after_grace_span": null
+   },
+   {
+    "session": "session-5",
+    "idle_s": 0.0,
+    "prefill_s": 0.159,
+    "ttft_s": 0.1825,
+    "computed_tokens": 230,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2865,
+    "mem_mhz_at_send": 13801
+   },
+   {
+    "session": "session-6",
+    "idle_s": 45.0,
+    "prefill_s": 0.2528,
+    "ttft_s": 0.3163,
+    "computed_tokens": 187,
+    "path": "shared_stable_prefix",
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 270,
+    "mem_mhz_at_send": 405,
+    "first_seen_after_response_s": {
+     "P1": 0.03,
+     "P3": 2.38,
+     "P5": 4.18,
+     "P8": 5.98
+    },
+    "grace_span": {
+     "seconds": 27.9,
+     "samples": 542,
+     "pstates": {
+      "P1": 7,
+      "P3": 35,
+      "P5": 35,
+      "P8": 465
+     },
+     "power_w_median": 31.6,
+     "power_w_mean": 34.7,
+     "sm_mhz_median": 270.0,
+     "mem_mhz_median": 405.0,
+     "util_median": 0.0
+    },
+    "after_grace_span": {
+     "seconds": 4.9,
+     "samples": 95,
+     "pstates": {
+      "P8": 95
+     },
+     "power_w_median": 29.3,
+     "power_w_mean": 29.3,
+     "sm_mhz_median": 270,
+     "mem_mhz_median": 405,
+     "util_median": 0
+    }
+   }
+  ]
+ },
+ "window_1_role_corpus_paired": {
+  "requests_on": 84,
+  "requests_off": 84,
+  "pairs_same_tokens": 84,
+  "all_pairs": {
+   "prefill": {
+    "sum_on_s": 62.788,
+    "sum_off_s": 63.317,
+    "median_paired_diff_ms": -0.3,
+    "mean_paired_diff_ms": -6.3,
+    "min_paired_diff_ms": -179.1,
+    "max_paired_diff_ms": 3.8,
+    "on_slower_pairs": 17
+   },
+   "ttft": {
+    "sum_on_s": 64.249,
+    "sum_off_s": 64.79,
+    "median_paired_diff_ms": -0.2,
+    "mean_paired_diff_ms": -6.44,
+    "min_paired_diff_ms": -179.4,
+    "max_paired_diff_ms": 4.4,
+    "on_slower_pairs": 30
+   },
+   "decode": {
+    "sum_on_s": 359.227,
+    "sum_off_s": 359.613,
+    "median_paired_diff_ms": -1.75,
+    "mean_paired_diff_ms": -4.6,
+    "min_paired_diff_ms": -38.1,
+    "max_paired_diff_ms": 8.1,
+    "on_slower_pairs": 22
+   },
+   "total": {
+    "sum_on_s": 424.034,
+    "sum_off_s": 424.952,
+    "median_paired_diff_ms": -1.95,
+    "mean_paired_diff_ms": -10.93,
+    "min_paired_diff_ms": -179.3,
+    "max_paired_diff_ms": 5.5,
+    "on_slower_pairs": 18
+   }
+  },
+  "back_to_back": {
+   "pairs": 80,
+   "idle_before_s_max": 0.005,
+   "idle_before_s_median_on": 0.002,
+   "prefill": {
+    "sum_on_s": 59.468,
+    "sum_off_s": 59.587,
+    "median_paired_diff_ms": -0.3,
+    "mean_paired_diff_ms": -1.47,
+    "min_paired_diff_ms": -12.9,
+    "max_paired_diff_ms": 3.8,
+    "on_slower_pairs": 17
+   },
+   "ttft": {
+    "sum_on_s": 60.86,
+    "sum_off_s": 60.973,
+    "median_paired_diff_ms": -0.1,
+    "mean_paired_diff_ms": -1.4,
+    "min_paired_diff_ms": -13.3,
+    "max_paired_diff_ms": 4.4,
+    "on_slower_pairs": 30
+   }
+  },
+  "after_idle": [
+   {
+    "idle_on_s": 5.836,
+    "idle_off_s": 7.791,
+    "computed_tokens": 5725,
+    "prefill_on": 1.7819,
+    "prefill_off": 1.8947,
+    "ttft_on": 1.7995,
+    "ttft_off": 1.9304
+   },
+   {
+    "idle_on_s": 6.007,
+    "idle_off_s": 6.007,
+    "computed_tokens": 1114,
+    "prefill_on": 0.4054,
+    "prefill_off": 0.4109,
+    "ttft_on": 0.4228,
+    "ttft_off": 0.4277
+   },
+   {
+    "idle_on_s": 12.012,
+    "idle_off_s": 12.009,
+    "computed_tokens": 1737,
+    "prefill_on": 0.5843,
+    "prefill_off": 0.7634,
+    "ttft_on": 0.6014,
+    "ttft_off": 0.7808
+   },
+   {
+    "idle_on_s": 12.01,
+    "idle_off_s": 12.013,
+    "computed_tokens": 1521,
+    "prefill_on": 0.548,
+    "prefill_off": 0.6619,
+    "ttft_on": 0.5653,
+    "ttft_off": 0.6786
+   }
+  ],
+  "start_up_ramp": {
+   "first_10_after_start_up_ttft_diff_ms": [
+    -13.3,
+    -5.2
+   ],
+   "remaining_ttft_diff_ms": [
+    -3.5,
+    4.4
+   ],
+   "remaining_pairs": 70
+  }
+ },
+ "window_2_grace_60s": [
+  {
+   "session": "session-1",
+   "idle_s": 0.0,
+   "prefill_s": 0.1556,
+   "ttft_s": 0.1656,
+   "computed_tokens": 165,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2662,
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-2",
+   "idle_s": 38.0,
+   "prefill_s": 0.1549,
+   "ttft_s": 0.1726,
+   "computed_tokens": 167,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2677,
+   "mem_mhz_at_send": 13801,
+   "first_seen_after_response_s": {
+    "P1": 0.05
+   },
+   "grace_span": {
+    "seconds": 35.9,
+    "samples": 702,
+    "pstates": {
+     "P1": 702
+    },
+    "power_w_median": 101.8,
+    "power_w_mean": 102.7,
+    "sm_mhz_median": 2670.0,
+    "mem_mhz_median": 13801.0,
+    "util_median": 35.0
+   },
+   "after_grace_span": null
+  },
+  {
+   "session": "session-3",
+   "idle_s": 0.0,
+   "prefill_s": 0.1565,
+   "ttft_s": 0.1761,
+   "computed_tokens": 193,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2670,
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-4",
+   "idle_s": 53.0,
+   "prefill_s": 0.1565,
+   "ttft_s": 0.1811,
+   "computed_tokens": 159,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2685,
+   "mem_mhz_at_send": 13801,
+   "first_seen_after_response_s": {
+    "P1": 0.03
+   },
+   "grace_span": {
+    "seconds": 50.9,
+    "samples": 994,
+    "pstates": {
+     "P1": 994
+    },
+    "power_w_median": 100.5,
+    "power_w_mean": 101.1,
+    "sm_mhz_median": 2677.0,
+    "mem_mhz_median": 13801.0,
+    "util_median": 35.0
+   },
+   "after_grace_span": null
+  },
+  {
+   "session": "session-5",
+   "idle_s": 0.0,
+   "prefill_s": 0.1585,
+   "ttft_s": 0.1846,
+   "computed_tokens": 230,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2677,
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-6",
+   "idle_s": 58.0,
+   "prefill_s": 0.1557,
+   "ttft_s": 0.1795,
+   "computed_tokens": 187,
+   "path": "shared_stable_prefix",
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2677,
+   "mem_mhz_at_send": 13801,
+   "first_seen_after_response_s": {
+    "P1": 0.04
+   },
+   "grace_span": {
+    "seconds": 55.9,
+    "samples": 1093,
+    "pstates": {
+     "P1": 1093
+    },
+    "power_w_median": 99.5,
+    "power_w_mean": 100.0,
+    "sm_mhz_median": 2677,
+    "mem_mhz_median": 13801,
+    "util_median": 35
+   },
+   "after_grace_span": null
+  }
+ ],
+ "production_grace_coverage": {
+  "agent_requests": 446,
+  "agent_requests_after_5s_idle": 138,
+  "new_sessions_after_5s_idle": 103,
+  "idle_gaps_all_requests": 457,
+  "logged_span_hours": 61.99,
+  "idle_before_agent_arrival_quantiles_s": {
+   "p25": 37.8,
+   "p50": 52.7,
+   "p75": 178.0,
+   "p90": 918.0
+  },
+  "by_grace_s": {
+   "10": {
+    "agent_requests_covered": 2,
+    "new_sessions_covered": 2,
+    "keep_warm_seconds": 1731,
+    "keep_warm_share_of_span": 0.008,
+    "keep_warm_energy_wh": 34.2,
+    "average_added_power_w": 0.55
+   },
+   "15": {
+    "agent_requests_covered": 5,
+    "new_sessions_covered": 2,
+    "keep_warm_seconds": 2429,
+    "keep_warm_share_of_span": 0.011,
+    "keep_warm_energy_wh": 48.0,
+    "average_added_power_w": 0.77
+   },
+   "30": {
+    "agent_requests_covered": 11,
+    "new_sessions_covered": 7,
+    "keep_warm_seconds": 4460,
+    "keep_warm_share_of_span": 0.02,
+    "keep_warm_energy_wh": 88.1,
+    "average_added_power_w": 1.42
+   },
+   "60": {
+    "agent_requests_covered": 84,
+    "new_sessions_covered": 74,
+    "keep_warm_seconds": 7182,
+    "keep_warm_share_of_span": 0.032,
+    "keep_warm_energy_wh": 141.8,
+    "average_added_power_w": 2.29
+   },
+   "120": {
+    "agent_requests_covered": 95,
+    "new_sessions_covered": 81,
+    "keep_warm_seconds": 10233,
+    "keep_warm_share_of_span": 0.046,
+    "keep_warm_energy_wh": 202.1,
+    "average_added_power_w": 3.26
+   },
+   "300": {
+    "agent_requests_covered": 109,
+    "new_sessions_covered": 87,
+    "keep_warm_seconds": 17044,
+    "keep_warm_share_of_span": 0.076,
+    "keep_warm_energy_wh": 336.6,
+    "average_added_power_w": 5.43
+   }
+  }
+ },
+ "limits": [
+  "One card and driver (610.88) over two windows, with one new session per gap length per arm.",
+  "The engine ran one load shape only: 3.5 ms of every 10 ms. EXP-061 measured the holding threshold (30% holds, 25% does not) at a 100 ms period.",
+  "Head 0e996b3d adds a guard: a launch is skipped while the previous spin still runs, and cudaErrorNotReady is cleared from the thread's last error, as PyTorch's CUDAStream::query does. The Engine checks the last error after its own launches. The guard was built and host-tested but not run on the GPU. On a GPU that the Engine has to itself, each 3.5 ms spin ends 6.5 ms before the next launch, so the guard should never skip there (inferred, not observed).",
+  "The first ten back-to-back corpus requests after the runner's start-up (7.8 s idle with it off) were 5.2-13.3 ms faster with it on. The other 70 differ by -3.5 to +4.4 ms. The clock ramp after idle may outlast one request; this was not traced.",
+  "Power is the board sensor as nvidia-smi reports it, sampled every 50 ms. The average-power estimate multiplies the held seconds by the measured power above idle and ignores the 1-3 s step-down after each grace.",
+  "Coverage uses v0.7.0 traffic and assumes the grace restarts after every request. It counts arrivals, not seconds saved. EXP-060 put production's new sessions after idle at 0.361 s TTFT, against 0.199 s near back to back.",
+  "The RTX 4090 and RTX 3090 lanes were not built or measured, and their idle P-states are unmeasured. Concurrency above 1 was not measured; the idle condition (nothing pending, materializing or active) is the same."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
