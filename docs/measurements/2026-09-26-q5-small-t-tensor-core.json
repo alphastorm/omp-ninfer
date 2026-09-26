@@ -1,0 +1,1254 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-057",
+ "title": "A small-T tensor-core route for the T=4 Q5 verify projections shortens the RTX 5090 MTP3 round 4.4-5.4% and changes output bits",
+ "generated_utc": "2026-09-26T01:44:45Z",
+ "status": "passed",
+ "question": "Can a small-T tensor-core route for the T=4 Q5 verify projections (GDN value/z, attention gate/value, mixer/attention output and MLP down) recover the projection remainder EXP-056 left to a different accumulation order, and how far do its outputs move from production's?",
+ "answer": "Partly, and the output bits move. With the eight-warp, three-stage MMA on all four projections the RTX 5090 MTP3 round is 4.4-5.4% shorter at every measured context (A/B/B/A: 14.47 -> 13.69 ms with no prompt, 16.01 -> 15.24 ms at 26K, 17.57 -> 16.79 ms at 60K), which is decode +5.05% at 26K and +4.64% at 60K, where MTP acceptance is unchanged, and +6.73% at 1,024. MLP down carries most of it: 0.40 ms of a 26K round in graph (-13.5% per call), with the attention gate/value 5.8% faster in isolation and the GDN value/z and mixer within 2% of production there. In isolation 27 of 118,784 T=4 outputs (0.023%) differ from production's, each by one bf16 ulp, and the MMA outputs sit closer to an FP64 reference (max 0.50-0.60 ulp against production's 0.50-1.21). That is enough to change generated text: 58 of 89 role-corpus cases differ from production v0.8.1, and a 16-warp, two-stage control of the same route differs from production in 54 and from the candidate in 59. Both samples' quality aggregates stay within the range of production and four earlier runs at other weight or KV precisions, with three exceptions: the candidate fails two more redaction controls than production (pass rate 0.500 against the range's 0.625 floor, 10 secret leaks against at most 9), each a control that also fails under FP8 KV or INT8 KV; the control has one log-triage case that reasoned 3,957 tokens without answering (schema validity 0.933 against 0.944, six failures against five); and the candidate's evidence precision (0.994) is above the 0.979 ceiling. The candidate passed exact 130,048-token retrieval, decode_2048 and the agent protocol.",
+ "decision": "Open. Adopting the route means accepting output bits that differ from production's, which is the owner's decision. Nothing ships: production stays on v0.8.1 (v0.6.10-qwen38-5090-beta.1), the runtime commits stay unpublished and the RTX 4090 lane is untouched. Accepted, the route goes to a runtime pull request and a full RTX 5090 requalification; declined, the bit-identical kernels stay.",
+ "method": {
+  "harness_window": "2026-09-26 00:46-00:47Z, RTX 5090 with production held and stopped: a private cold-L2 harness of production's T=4 Q5 kernels and four MMA schedules (8 warps x 2, 3 and 4 stages; 16 warps x 2 stages) at production shapes on synthetic codes, scales and activations, two passes of 40 repetitions, every output compared with an FP64 host reference and with production's bits",
+  "kernels_window": "2026-09-26 00:55-01:10Z: the candidate's five public op tests, the four public op benches A/B/B/A (graph, cold L2) at T=2-6, ninfer_bench A/B/B/A and 26K Nsight Systems graph-node traces of both builds",
+  "server_window": "2026-09-26 01:12-01:23Z: the candidate serving with v0.8.1's image, arguments and model, its binary mounted and an empty session store; the 89-case role corpus (concurrency 1, low reasoning, BF16 KV, prefill chunk 1,024, MTP3) scored and compared with production v0.8.1's run, then the RTX 5090 profile gates",
+  "control_window": "2026-09-26 01:30-01:40Z: the same route as 16 warps x 2 stages, role corpus only",
+  "bench": "ninfer_bench --kv-dtype bf16 --prefill-chunk 1024 --mtp-draft-tokens 3 --lm-head-draft -n 256 -pg '1024,256;26000,256;60000,256' -r 3 --warmup 1",
+  "numeric_variants": "earlier role-corpus runs on the same corpus, concurrency and reasoning level with INT8 KV, the v0.6.10 FP8 KV pool, and NVFP4 weights with INT8 KV at prefill chunks 1,024 and 2,048"
+ },
+ "sources": {
+  "baseline": "alphastorm/ninfer f306ddd4 development build, whose sm_120 kernels are 8cc0810a's (production v0.6.10-qwen38-5090-beta.1)",
+  "candidate": "alphastorm/ninfer 1e6b4a5b measurement commit on 5a774841 (Q5 small-T MMA, 8 warps x 3 stages, at T=4 for GDN value/z, attention gate/value, mixer/attention output and MLP down on sm_120; not published, not for merge)",
+  "control": "alphastorm/ninfer 1cc79029 measurement commit on 1e6b4a5b (the same route as 16 warps x 2 stages)",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+ },
+ "isolated_harness_cold_l2": [
+  {
+   "projection": "gdn_value_z",
+   "candidate": "production",
+   "median_us_passes": [
+    33.92,
+    34.048
+   ],
+   "floor_pct_passes": [
+    72.7,
+    72.4
+   ],
+   "correctly_rounded_pct": 99.982,
+   "max_ulp_vs_fp64": 0.73,
+   "mean_ulp_vs_fp64": 0.2494,
+   "outputs_differing_from_production": 0,
+   "outputs": 49152,
+   "max_ulp_vs_production": 0,
+   "stable": true
+  },
+  {
+   "projection": "gdn_value_z",
+   "candidate": "mma.w8.s2",
+   "median_us_passes": [
+    37.088,
+    37.44
+   ],
+   "floor_pct_passes": [
+    66.5,
+    65.9
+   ],
+   "correctly_rounded_pct": 99.992,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2493,
+   "outputs_differing_from_production": 7,
+   "outputs": 49152,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "gdn_value_z",
+   "candidate": "mma.w8.s3",
+   "median_us_passes": [
+    34.08,
+    34.24
+   ],
+   "floor_pct_passes": [
+    72.3,
+    72.0
+   ],
+   "correctly_rounded_pct": 99.992,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2493,
+   "outputs_differing_from_production": 7,
+   "outputs": 49152,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "gdn_value_z",
+   "candidate": "mma.w8.s4",
+   "median_us_passes": [
+    36.096,
+    36.096
+   ],
+   "floor_pct_passes": [
+    68.3,
+    68.3
+   ],
+   "correctly_rounded_pct": 99.992,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2493,
+   "outputs_differing_from_production": 7,
+   "outputs": 49152,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "gdn_value_z",
+   "candidate": "mma.w16.s2",
+   "median_us_passes": [
+    36.064,
+    36.064
+   ],
+   "floor_pct_passes": [
+    68.4,
+    68.4
+   ],
+   "correctly_rounded_pct": 99.992,
+   "max_ulp_vs_fp64": 0.55,
+   "mean_ulp_vs_fp64": 0.2493,
+   "outputs_differing_from_production": 9,
+   "outputs": 49152,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "attn_gate_value",
+   "candidate": "production",
+   "median_us_passes": [
+    23.168,
+    22.976
+   ],
+   "floor_pct_passes": [
+    62.1,
+    62.6
+   ],
+   "correctly_rounded_pct": 99.983,
+   "max_ulp_vs_fp64": 0.85,
+   "mean_ulp_vs_fp64": 0.2479,
+   "outputs_differing_from_production": 0,
+   "outputs": 28672,
+   "max_ulp_vs_production": 0,
+   "stable": true
+  },
+  {
+   "projection": "attn_gate_value",
+   "candidate": "mma.w8.s2",
+   "median_us_passes": [
+    21.536,
+    21.6
+   ],
+   "floor_pct_passes": [
+    66.8,
+    66.6
+   ],
+   "correctly_rounded_pct": 99.983,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2479,
+   "outputs_differing_from_production": 10,
+   "outputs": 28672,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "attn_gate_value",
+   "candidate": "mma.w8.s3",
+   "median_us_passes": [
+    21.728,
+    21.728
+   ],
+   "floor_pct_passes": [
+    66.2,
+    66.2
+   ],
+   "correctly_rounded_pct": 99.983,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2479,
+   "outputs_differing_from_production": 10,
+   "outputs": 28672,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "attn_gate_value",
+   "candidate": "mma.w8.s4",
+   "median_us_passes": [
+    23.744,
+    23.68
+   ],
+   "floor_pct_passes": [
+    60.6,
+    60.7
+   ],
+   "correctly_rounded_pct": 99.983,
+   "max_ulp_vs_fp64": 0.6,
+   "mean_ulp_vs_fp64": 0.2479,
+   "outputs_differing_from_production": 10,
+   "outputs": 28672,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "attn_gate_value",
+   "candidate": "mma.w16.s2",
+   "median_us_passes": [
+    23.552,
+    23.456
+   ],
+   "floor_pct_passes": [
+    61.1,
+    61.3
+   ],
+   "correctly_rounded_pct": 99.983,
+   "max_ulp_vs_fp64": 1.15,
+   "mean_ulp_vs_fp64": 0.2479,
+   "outputs_differing_from_production": 5,
+   "outputs": 28672,
+   "max_ulp_vs_production": 2,
+   "stable": true
+  },
+  {
+   "projection": "mixer_out",
+   "candidate": "production",
+   "median_us_passes": [
+    21.184,
+    20.768
+   ],
+   "floor_pct_passes": [
+    58.2,
+    59.4
+   ],
+   "correctly_rounded_pct": 99.99,
+   "max_ulp_vs_fp64": 0.5,
+   "mean_ulp_vs_fp64": 0.249,
+   "outputs_differing_from_production": 0,
+   "outputs": 20480,
+   "max_ulp_vs_production": 0,
+   "stable": true
+  },
+  {
+   "projection": "mixer_out",
+   "candidate": "mma.w8.s2",
+   "median_us_passes": [
+    21.504,
+    21.44
+   ],
+   "floor_pct_passes": [
+    57.3,
+    57.5
+   ],
+   "correctly_rounded_pct": 100.0,
+   "max_ulp_vs_fp64": 0.5,
+   "mean_ulp_vs_fp64": 0.249,
+   "outputs_differing_from_production": 2,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mixer_out",
+   "candidate": "mma.w8.s3",
+   "median_us_passes": [
+    21.312,
+    21.344
+   ],
+   "floor_pct_passes": [
+    57.8,
+    57.8
+   ],
+   "correctly_rounded_pct": 100.0,
+   "max_ulp_vs_fp64": 0.5,
+   "mean_ulp_vs_fp64": 0.249,
+   "outputs_differing_from_production": 2,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mixer_out",
+   "candidate": "mma.w8.s4",
+   "median_us_passes": [
+    21.376,
+    21.216
+   ],
+   "floor_pct_passes": [
+    57.7,
+    58.1
+   ],
+   "correctly_rounded_pct": 100.0,
+   "max_ulp_vs_fp64": 0.5,
+   "mean_ulp_vs_fp64": 0.249,
+   "outputs_differing_from_production": 2,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mixer_out",
+   "candidate": "mma.w16.s2",
+   "median_us_passes": [
+    25.792,
+    25.216
+   ],
+   "floor_pct_passes": [
+    47.8,
+    48.9
+   ],
+   "correctly_rounded_pct": 99.995,
+   "max_ulp_vs_fp64": 0.72,
+   "mean_ulp_vs_fp64": 0.249,
+   "outputs_differing_from_production": 3,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mlp_down",
+   "candidate": "production",
+   "median_us_passes": [
+    53.248,
+    53.856
+   ],
+   "floor_pct_passes": [
+    65.6,
+    64.9
+   ],
+   "correctly_rounded_pct": 99.971,
+   "max_ulp_vs_fp64": 1.21,
+   "mean_ulp_vs_fp64": 0.2501,
+   "outputs_differing_from_production": 0,
+   "outputs": 20480,
+   "max_ulp_vs_production": 0,
+   "stable": true
+  },
+  {
+   "projection": "mlp_down",
+   "candidate": "mma.w8.s2",
+   "median_us_passes": [
+    47.456,
+    48.288
+   ],
+   "floor_pct_passes": [
+    73.6,
+    72.3
+   ],
+   "correctly_rounded_pct": 99.99,
+   "max_ulp_vs_fp64": 0.52,
+   "mean_ulp_vs_fp64": 0.2501,
+   "outputs_differing_from_production": 8,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mlp_down",
+   "candidate": "mma.w8.s3",
+   "median_us_passes": [
+    46.528,
+    46.368
+   ],
+   "floor_pct_passes": [
+    75.1,
+    75.3
+   ],
+   "correctly_rounded_pct": 99.99,
+   "max_ulp_vs_fp64": 0.52,
+   "mean_ulp_vs_fp64": 0.2501,
+   "outputs_differing_from_production": 8,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mlp_down",
+   "candidate": "mma.w8.s4",
+   "median_us_passes": [
+    48.064,
+    47.232
+   ],
+   "floor_pct_passes": [
+    72.7,
+    74.0
+   ],
+   "correctly_rounded_pct": 99.99,
+   "max_ulp_vs_fp64": 0.52,
+   "mean_ulp_vs_fp64": 0.2501,
+   "outputs_differing_from_production": 8,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  },
+  {
+   "projection": "mlp_down",
+   "candidate": "mma.w16.s2",
+   "median_us_passes": [
+    48.896,
+    48.544
+   ],
+   "floor_pct_passes": [
+    71.4,
+    72.0
+   ],
+   "correctly_rounded_pct": 99.995,
+   "max_ulp_vs_fp64": 0.52,
+   "mean_ulp_vs_fp64": 0.2501,
+   "outputs_differing_from_production": 7,
+   "outputs": 20480,
+   "max_ulp_vs_production": 1,
+   "stable": true
+  }
+ ],
+ "op_tests_candidate": {
+  "ninfer_linear_add_q5_a16_test": 0,
+  "ninfer_gdn_input_proj_test": 0,
+  "ninfer_gdn_input_proj_conv_snapshot_test": 0,
+  "ninfer_gdn_input_proj_conv_record_test": 0,
+  "ninfer_attn_input_proj_test": 0
+ },
+ "public_op_curves_abba": [
+  {
+   "op": "MLP down (linear_add Q5, K=17408)",
+   "points": [
+    {
+     "T": 2,
+     "baseline_us": 44.272,
+     "candidate_us": 44.368,
+     "delta_pct": 0.2,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 3,
+     "baseline_us": 49.504,
+     "candidate_us": 48.96,
+     "delta_pct": -1.1,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 50.4,
+     "candidate_us": 46.4,
+     "delta_pct": -7.9,
+     "route": "Q5 small-T MMA"
+    },
+    {
+     "T": 5,
+     "baseline_us": 64.72,
+     "candidate_us": 64.704,
+     "delta_pct": -0.0,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 73.856,
+     "candidate_us": 72.928,
+     "delta_pct": -1.3,
+     "route": "Q5 split2 row pair"
+    }
+   ]
+  },
+  {
+   "op": "mixer output (linear_add Q5, K=6144)",
+   "points": [
+    {
+     "T": 2,
+     "baseline_us": 19.024,
+     "candidate_us": 18.608,
+     "delta_pct": -2.2,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 3,
+     "baseline_us": 21.696,
+     "candidate_us": 21.664,
+     "delta_pct": -0.1,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 21.728,
+     "candidate_us": 21.376,
+     "delta_pct": -1.6,
+     "route": "Q5 small-T MMA"
+    },
+    {
+     "T": 5,
+     "baseline_us": 25.808,
+     "candidate_us": 25.856,
+     "delta_pct": 0.2,
+     "route": "Q5 split2 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 31.984,
+     "candidate_us": 31.856,
+     "delta_pct": -0.4,
+     "route": "Q5 split2 row pair"
+    }
+   ]
+  },
+  {
+   "op": "GDN input (Q4 q/k + Q5 value/z)",
+   "points": [
+    {
+     "T": 2,
+     "baseline_us": 44.24,
+     "candidate_us": 44.176,
+     "delta_pct": -0.1,
+     "route": "Q5 split4 row pair + Q4 rows"
+    },
+    {
+     "T": 3,
+     "baseline_us": 46.448,
+     "candidate_us": 46.608,
+     "delta_pct": 0.3,
+     "route": "Q5 split4 row pair + Q4 rows"
+    },
+    {
+     "T": 4,
+     "baseline_us": 48.352,
+     "candidate_us": 48.56,
+     "delta_pct": 0.4,
+     "route": "Q5 small-T MMA"
+    },
+    {
+     "T": 5,
+     "baseline_us": 70.512,
+     "candidate_us": 70.144,
+     "delta_pct": -0.5,
+     "route": "Q5 split4 row pair + Q4 rows"
+    },
+    {
+     "T": 6,
+     "baseline_us": 78.848,
+     "candidate_us": 78.704,
+     "delta_pct": -0.2,
+     "route": "Q5 split4 row pair + Q4 rows"
+    }
+   ]
+  },
+  {
+   "op": "attention input (Q4 q/k + Q5 gate/value)",
+   "points": [
+    {
+     "T": 2,
+     "baseline_us": 36.816,
+     "candidate_us": 37.04,
+     "delta_pct": 0.6,
+     "route": "Q4 rows + Q5 split4 row pair"
+    },
+    {
+     "T": 3,
+     "baseline_us": 42.944,
+     "candidate_us": 43.072,
+     "delta_pct": 0.3,
+     "route": "Q4 rows + Q5 split4 row pair"
+    },
+    {
+     "T": 4,
+     "baseline_us": 46.96,
+     "candidate_us": 46.88,
+     "delta_pct": -0.2,
+     "route": "Q5 small-T MMA"
+    },
+    {
+     "T": 5,
+     "baseline_us": 66.992,
+     "candidate_us": 67.136,
+     "delta_pct": 0.2,
+     "route": "Q4 rows + Q5 split4 row pair"
+    },
+    {
+     "T": 6,
+     "baseline_us": 70.528,
+     "candidate_us": 70.816,
+     "delta_pct": 0.4,
+     "route": "Q4 rows + Q5 split4 row pair"
+    }
+   ]
+  }
+ ],
+ "end_to_end_abba": {
+  "tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 166.74,
+     "ms_per_round": 14.349,
+     "mtp_acceptance_rate": 0.4611,
+     "rounds_per_repetition": 107.0
+    },
+    "candidate-1": {
+     "decode_tok_s": 165.53,
+     "ms_per_round": 13.686,
+     "mtp_acceptance_rate": 0.4231,
+     "rounds_per_repetition": 113.0
+    },
+    "candidate-2": {
+     "decode_tok_s": 165.49,
+     "ms_per_round": 13.689,
+     "mtp_acceptance_rate": 0.4231,
+     "rounds_per_repetition": 113.0
+    },
+    "baseline-2": {
+     "decode_tok_s": 163.91,
+     "ms_per_round": 14.597,
+     "mtp_acceptance_rate": 0.4611,
+     "rounds_per_repetition": 107.0
+    }
+   },
+   "decode_tok_s_change_pct": 0.11,
+   "ms_per_round_change_pct": -5.43
+  },
+  "pp1024+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 139.28,
+     "ms_per_round": 14.36,
+     "mtp_acceptance_rate": 0.3342,
+     "rounds_per_repetition": 128.0
+    },
+    "candidate-1": {
+     "decode_tok_s": 147.32,
+     "ms_per_round": 13.792,
+     "mtp_acceptance_rate": 0.3457,
+     "rounds_per_repetition": 126.0
+    },
+    "candidate-2": {
+     "decode_tok_s": 147.35,
+     "ms_per_round": 13.789,
+     "mtp_acceptance_rate": 0.3457,
+     "rounds_per_repetition": 126.0
+    },
+    "baseline-2": {
+     "decode_tok_s": 136.81,
+     "ms_per_round": 14.619,
+     "mtp_acceptance_rate": 0.3342,
+     "rounds_per_repetition": 128.0
+    }
+   },
+   "decode_tok_s_change_pct": 6.73,
+   "ms_per_round_change_pct": -4.82
+  },
+  "pp26000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 247.38,
+     "ms_per_round": 15.921,
+     "mtp_acceptance_rate": 0.9845,
+     "rounds_per_repetition": 65.0
+    },
+    "candidate-1": {
+     "decode_tok_s": 258.38,
+     "ms_per_round": 15.243,
+     "mtp_acceptance_rate": 0.9845,
+     "rounds_per_repetition": 65.0
+    },
+    "candidate-2": {
+     "decode_tok_s": 258.51,
+     "ms_per_round": 15.236,
+     "mtp_acceptance_rate": 0.9845,
+     "rounds_per_repetition": 65.0
+    },
+    "baseline-2": {
+     "decode_tok_s": 244.66,
+     "ms_per_round": 16.098,
+     "mtp_acceptance_rate": 0.9845,
+     "rounds_per_repetition": 65.0
+    }
+   },
+   "decode_tok_s_change_pct": 5.05,
+   "ms_per_round_change_pct": -4.81
+  },
+  "pp60000+tg256": {
+   "arms": {
+    "baseline-1": {
+     "decode_tok_s": 228.02,
+     "ms_per_round": 17.542,
+     "mtp_acceptance_rate": 1,
+     "rounds_per_repetition": 64.0
+    },
+    "candidate-1": {
+     "decode_tok_s": 238.21,
+     "ms_per_round": 16.792,
+     "mtp_acceptance_rate": 1,
+     "rounds_per_repetition": 64.0
+    },
+    "candidate-2": {
+     "decode_tok_s": 238.26,
+     "ms_per_round": 16.788,
+     "mtp_acceptance_rate": 1,
+     "rounds_per_repetition": 64.0
+    },
+    "baseline-2": {
+     "decode_tok_s": 227.34,
+     "ms_per_round": 17.595,
+     "mtp_acceptance_rate": 1,
+     "rounds_per_repetition": 64.0
+    }
+   },
+   "decode_tok_s_change_pct": 4.64,
+   "ms_per_round_change_pct": -4.43
+  }
+ },
+ "in_graph_context_26000": {
+  "rounds": {
+   "baseline": 14,
+   "candidate": 14
+  },
+  "profiled_round_us": {
+   "baseline": 16650.5,
+   "candidate": 15552.3
+  },
+  "components": [
+   {
+    "component": "MLP gate/up Q4",
+    "baseline": {
+     "calls_per_round": 64.0,
+     "us_per_round": 4044.4,
+     "exclusive_us_per_round": 4044.4
+    },
+    "candidate": {
+     "calls_per_round": 64.0,
+     "us_per_round": 3932.0,
+     "exclusive_us_per_round": 3932.0
+    },
+    "exclusive_delta_us_per_round": -112.4
+   },
+   {
+    "component": "MLP down Q5",
+    "baseline": {
+     "calls_per_round": 64.0,
+     "us_per_round": 2950.2,
+     "exclusive_us_per_round": 2950.2
+    },
+    "candidate": {
+     "calls_per_round": 64.0,
+     "us_per_round": 2553.3,
+     "exclusive_us_per_round": 2553.3
+    },
+    "exclusive_delta_us_per_round": -396.9
+   },
+   {
+    "component": "GDN value/z Q5",
+    "baseline": {
+     "calls_per_round": 48.0,
+     "us_per_round": 1514.8,
+     "exclusive_us_per_round": 1514.8
+    },
+    "candidate": {
+     "calls_per_round": 48.0,
+     "us_per_round": 1500.4,
+     "exclusive_us_per_round": 1500.4
+    },
+    "exclusive_delta_us_per_round": -14.4
+   },
+   {
+    "component": "mixer/attention output Q5",
+    "baseline": {
+     "calls_per_round": 64.0,
+     "us_per_round": 1049.9,
+     "exclusive_us_per_round": 1049.9
+    },
+    "candidate": {
+     "calls_per_round": 64.0,
+     "us_per_round": 970.4,
+     "exclusive_us_per_round": 970.4
+    },
+    "exclusive_delta_us_per_round": -79.5
+   },
+   {
+    "component": "GDN query/key Q4",
+    "baseline": {
+     "calls_per_round": 48.0,
+     "us_per_round": 699.5,
+     "exclusive_us_per_round": 486.0
+    },
+    "candidate": {
+     "calls_per_round": 48.0,
+     "us_per_round": 859.2,
+     "exclusive_us_per_round": 262.2
+    },
+    "exclusive_delta_us_per_round": -223.8
+   },
+   {
+    "component": "attention gate/value Q5",
+    "baseline": {
+     "calls_per_round": 16.0,
+     "us_per_round": 305.9,
+     "exclusive_us_per_round": 305.9
+    },
+    "candidate": {
+     "calls_per_round": 16.0,
+     "us_per_round": 285.3,
+     "exclusive_us_per_round": 285.3
+    },
+    "exclusive_delta_us_per_round": -20.6
+   },
+   {
+    "component": "attention query/key Q4",
+    "baseline": {
+     "calls_per_round": 16.0,
+     "us_per_round": 271.3,
+     "exclusive_us_per_round": 271.3
+    },
+    "candidate": {
+     "calls_per_round": 16.0,
+     "us_per_round": 248.6,
+     "exclusive_us_per_round": 248.6
+    },
+    "exclusive_delta_us_per_round": -22.7
+   }
+  ]
+ },
+ "role_corpus": {
+  "cases": 89,
+  "output_identity": {
+   "exp057_candidate_w8_s3": "v081p-gw-bf16-c1024-mtp3: 31/89 cases identical; 58 differ; 0 missing",
+   "exp057_control_w16_s2": [
+    "v081p-gw-bf16-c1024-mtp3: 35/89 cases identical; 54 differ; 0 missing",
+    "exp057-1e6b4a5b-bf16-c1024-mtp3: 30/89 cases identical; 59 differ; 0 missing"
+   ]
+  },
+  "aggregate": {
+   "production_v081_bf16_kv": {
+    "required_fact_recall": 0.8866,
+    "evidence_precision": 0.9786,
+    "unsupported_claim_rate": 0.2247,
+    "forbidden_claim_count": 7,
+    "critical_miss_count": 10,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 8,
+    "redaction_control_pass_rate": 0.75,
+    "duplicate_rate": 0.0081,
+    "mean_output_tokens": 954.9643,
+    "decode_tps": 230.1713,
+    "failure_count": 5,
+    "retry_count": 10
+   },
+   "exp057_candidate_w8_s3": {
+    "required_fact_recall": 0.8797,
+    "evidence_precision": 0.9935,
+    "unsupported_claim_rate": 0.236,
+    "forbidden_claim_count": 9,
+    "critical_miss_count": 10,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 10,
+    "redaction_control_pass_rate": 0.5,
+    "duplicate_rate": 0.0,
+    "mean_output_tokens": 967.619,
+    "decode_tps": 246.6808,
+    "failure_count": 5,
+    "retry_count": 10
+   },
+   "exp057_control_w16_s2": {
+    "required_fact_recall": 0.8763,
+    "evidence_precision": 0.9795,
+    "unsupported_claim_rate": 0.236,
+    "forbidden_claim_count": 9,
+    "critical_miss_count": 12,
+    "schema_valid_rate": 0.9326,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 8,
+    "redaction_control_pass_rate": 0.625,
+    "duplicate_rate": 0.0,
+    "mean_output_tokens": 972.8095,
+    "decode_tps": 244.345,
+    "failure_count": 6,
+    "retry_count": 10
+   },
+   "int8_kv": {
+    "required_fact_recall": 0.8694,
+    "evidence_precision": 0.9773,
+    "unsupported_claim_rate": 0.2472,
+    "forbidden_claim_count": 9,
+    "critical_miss_count": 12,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 9,
+    "redaction_control_pass_rate": 0.625,
+    "duplicate_rate": 0.0,
+    "mean_output_tokens": 977.5119,
+    "decode_tps": 203.8594,
+    "failure_count": 5,
+    "retry_count": 10
+   },
+   "fp8_kv_v0610_pool": {
+    "required_fact_recall": 0.866,
+    "evidence_precision": 0.9795,
+    "unsupported_claim_rate": 0.2247,
+    "forbidden_claim_count": 8,
+    "critical_miss_count": 10,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 9,
+    "redaction_control_pass_rate": 0.625,
+    "duplicate_rate": 0.0,
+    "mean_output_tokens": 978.9762,
+    "decode_tps": 212.042,
+    "failure_count": 5,
+    "retry_count": 10
+   },
+   "nvfp4_weights_int8_kv_c1024": {
+    "required_fact_recall": 0.8832,
+    "evidence_precision": 0.9545,
+    "unsupported_claim_rate": 0.2472,
+    "forbidden_claim_count": 6,
+    "critical_miss_count": 9,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 4,
+    "redaction_control_pass_rate": 0.75,
+    "duplicate_rate": 0.0043,
+    "mean_output_tokens": 1005.4643,
+    "decode_tps": 205.2308,
+    "failure_count": 5,
+    "retry_count": 10
+   },
+   "nvfp4_weights_int8_kv_c2048": {
+    "required_fact_recall": 0.8763,
+    "evidence_precision": 0.973,
+    "unsupported_claim_rate": 0.2472,
+    "forbidden_claim_count": 7,
+    "critical_miss_count": 9,
+    "schema_valid_rate": 0.9438,
+    "tool_selection_accuracy": 1.0,
+    "tool_argument_accuracy": 1.0,
+    "secret_leak_count": 7,
+    "redaction_control_pass_rate": 0.625,
+    "duplicate_rate": 0.0,
+    "mean_output_tokens": 969.2619,
+    "decode_tps": 203.609,
+    "failure_count": 5,
+    "retry_count": 10
+   }
+  },
+  "redaction_control_secret_leaks": {
+   "log-023": {
+    "production_v081_bf16_kv": 5,
+    "exp057_candidate_w8_s3": 4,
+    "exp057_control_w16_s2": 4,
+    "int8_kv": 5,
+    "fp8_kv_v0610_pool": 4,
+    "nvfp4_weights_int8_kv_c1024": 2,
+    "nvfp4_weights_int8_kv_c2048": 4
+   },
+   "log-024": {
+    "production_v081_bf16_kv": 3,
+    "exp057_candidate_w8_s3": 3,
+    "exp057_control_w16_s2": 3,
+    "int8_kv": 3,
+    "fp8_kv_v0610_pool": 3,
+    "nvfp4_weights_int8_kv_c1024": 2,
+    "nvfp4_weights_int8_kv_c2048": 2
+   },
+   "repo-029": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 2,
+    "exp057_control_w16_s2": 0,
+    "int8_kv": 0,
+    "fp8_kv_v0610_pool": 2,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 0
+   },
+   "repo-030": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 0,
+    "exp057_control_w16_s2": 0,
+    "int8_kv": 0,
+    "fp8_kv_v0610_pool": 0,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 0
+   },
+   "struct-007": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 0,
+    "exp057_control_w16_s2": 0,
+    "int8_kv": 0,
+    "fp8_kv_v0610_pool": 0,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 0
+   },
+   "worklog-007": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 1,
+    "exp057_control_w16_s2": 1,
+    "int8_kv": 1,
+    "fp8_kv_v0610_pool": 0,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 0
+   },
+   "worklog-008": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 0,
+    "exp057_control_w16_s2": 0,
+    "int8_kv": 0,
+    "fp8_kv_v0610_pool": 0,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 0
+   },
+   "worklog-014": {
+    "production_v081_bf16_kv": 0,
+    "exp057_candidate_w8_s3": 0,
+    "exp057_control_w16_s2": 0,
+    "int8_kv": 0,
+    "fp8_kv_v0610_pool": 0,
+    "nvfp4_weights_int8_kv_c1024": 0,
+    "nvfp4_weights_int8_kv_c2048": 1
+   }
+  },
+  "forbidden_hits": {
+   "production_v081_bf16_kv": {
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 3,
+    "reg-commit-ddee681f": 1
+   },
+   "exp057_candidate_w8_s3": {
+    "log-001": 1,
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 3,
+    "reg-commit-ddee681f": 1,
+    "worklog-007": 1
+   },
+   "exp057_control_w16_s2": {
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 3,
+    "reg-commit-ddee681f": 1,
+    "worklog-007": 1,
+    "worklog-020": 1
+   },
+   "int8_kv": {
+    "log-005": 1,
+    "log-009": 1,
+    "log-023": 2,
+    "log-024": 3,
+    "reg-commit-ddee681f": 1,
+    "worklog-007": 1
+   },
+   "fp8_kv_v0610_pool": {
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 3,
+    "reg-commit-ddee681f": 1,
+    "reg-commit-5933e395": 1
+   },
+   "nvfp4_weights_int8_kv_c1024": {
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 2,
+    "reg-commit-ddee681f": 1
+   },
+   "nvfp4_weights_int8_kv_c2048": {
+    "log-005": 1,
+    "log-023": 2,
+    "log-024": 2,
+    "reg-commit-ddee681f": 1,
+    "worklog-014": 1
+   }
+  },
+  "scored_changes_vs_production": {
+   "exp057_candidate_w8_s3": {
+    "log-001": {
+     "forbidden_hits": [
+      0,
+      1
+     ]
+    },
+    "log-009": {
+     "unsupported_claim": [
+      false,
+      true
+     ]
+    },
+    "log-017": {
+     "unsupported_claim": [
+      true,
+      false
+     ]
+    },
+    "log-018": {
+     "unsupported_claim": [
+      true,
+      false
+     ]
+    },
+    "log-020": {
+     "unsupported_claim": [
+      false,
+      true
+     ]
+    },
+    "log-023": {
+     "unsupported_claim": [
+      false,
+      true
+     ],
+     "secret_leaks": [
+      5,
+      4
+     ]
+    },
+    "repo-029": {
+     "secret_leaks": [
+      0,
+      2
+     ]
+    },
+    "worklog-007": {
+     "forbidden_hits": [
+      0,
+      1
+     ],
+     "secret_leaks": [
+      0,
+      1
+     ]
+    },
+    "worklog-014": {
+     "required_facts_found": [
+      4,
+      3
+     ]
+    },
+    "worklog-019": {
+     "required_facts_found": [
+      6,
+      5
+     ]
+    }
+   },
+   "exp057_control_w16_s2": {
+    "log-009": {
+     "unsupported_claim": [
+      false,
+      true
+     ]
+    },
+    "log-012": {
+     "unsupported_claim": [
+      false,
+      true
+     ]
+    },
+    "log-013": {
+     "unsupported_claim": [
+      true,
+      false
+     ]
+    },
+    "log-014": {
+     "required_facts_found": [
+      2,
+      0
+     ],
+     "schema_valid": [
+      true,
+      false
+     ]
+    },
+    "log-017": {
+     "unsupported_claim": [
+      true,
+      false
+     ]
+    },
+    "log-018": {
+     "unsupported_claim": [
+      true,
+      false
+     ]
+    },
+    "log-020": {
+     "unsupported_claim": [
+      false,
+      true
+     ]
+    },
+    "log-023": {
+     "unsupported_claim": [
+      false,
+      true
+     ],
+     "secret_leaks": [
+      5,
+      4
+     ]
+    },
+    "worklog-007": {
+     "forbidden_hits": [
+      0,
+      1
+     ],
+     "secret_leaks": [
+      0,
+      1
+     ]
+    },
+    "worklog-014": {
+     "required_facts_found": [
+      4,
+      3
+     ]
+    },
+    "worklog-020": {
+     "forbidden_hits": [
+      0,
+      1
+     ]
+    }
+   }
+  }
+ },
+ "profile_gates": {
+  "candidate": {
+   "status": "passed",
+   "long_context": {
+    "prompt_tokens": 130048,
+    "exact_output": true,
+    "wall_s": 60.435
+   },
+   "decode_2048": {
+    "completion_tokens": 2048,
+    "completion_tokens_per_second_wall": 167.68
+   },
+   "agent_protocol": "passed"
+  },
+  "release_v081": {
+   "status": "passed",
+   "long_context": {
+    "prompt_tokens": 130048,
+    "exact_output": true,
+    "wall_s": 59.105
+   },
+   "decode_2048": {
+    "completion_tokens": 2048,
+    "completion_tokens_per_second_wall": 151.33
+   },
+   "agent_protocol": "passed"
+  }
+ },
+ "limits": [
+  "The harness runs synthetic uniform codes, scales and activations; its FP64 comparison measures rounding, not model quality.",
+  "The role corpus has 89 cases and eight redaction controls, so one flipped control moves the pass rate by 0.125. The two samples of the route differ from each other by as much as the earlier precision variants differ from production (redaction pass rate 0.500 and 0.625, critical misses 10 and 12); at this size the corpus cannot separate the route's quality from production's.",
+  "Outputs differ, so decode tok/s mixes the round saving with each build's MTP acceptance on its own text: with no prompt the candidate accepted 0.423 of drafts against 0.461 and needed 113 rounds instead of 107, so decode moved +0.11% while each round was 5.4% shorter. Round time is the controlled metric.",
+  "The profile gates ran once on the candidate. Its decode_2048 rate (167.68 tok/s against v0.8.1's receipted 151.33) is one sample on its own text, and its 130,048-token wall (60.4 s against 59.1 s) runs prefill kernels the route does not change.",
+  "RTX 5090 only: the route is compiled out for sm_86 and sm_89, and the RTX 4090 lane was not measured.",
+  "The profiled 26K round (16.65 -> 15.55 ms) overstates the saving; unprofiled A/B/B/A rounds moved 16.01 -> 15.24 ms. Unchanged Q4 kernels next to the rerouted projections also shortened in graph (GDN query/key -0.22 ms, MLP gate/up -0.11 ms per round)."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
