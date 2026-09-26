@@ -119,6 +119,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-055 | RTX 5090 and RTX 4090 MTP3 decode kernels | Row-blocking the small-T Q4/Q5 projections and removing the Q4 gate/up bank conflicts recover a material share of the round with bit-identical outputs | RTX 5090 packaged `v0.6.10`: 26K-context round 17.75 → 16.08 ms and decode +10.3% to +11.0% from a seed context to 31K (A/B/B/A); 32/32 kernel points byte-identical, 89/89 role-corpus cases identical, 130,048-token retrieval exact; Q4 gate/up 82.5% → 92.6% of the floor. RTX 4090: the split2 row pair ran 19% slower at T=4 and C1 decode fell 2.7%; with one-row split2 on the native lanes, 157.89 tok/s (+2.8%) | kept |
 | EXP-056 | RTX 5090 and RTX 4090 MTP3 decode remainder | Warp, register, prefetch and L2 hand-off schedules that keep every output byte recover part of the round EXP-055 left above 90% of the floor | 1,631 (RTX 5090) and 449 (RTX 4090) private-launcher rows per pass byte-identical; no T=4 projection or GDN record/fold schedule beats production beyond noise, and an L2 hand-off prefetch only speeds a cold consumer (the mixer takes 16.4 µs with its whole weight in L2 and 16.6 µs in the production graph). Two-warp BF16 attention above the 16K split tier: in-graph attention partial −6.1% at 26K, decode +0.28% to +0.91% from 26K to 60K, public op 3.7–5.4% slower at 16,387–20,000 keys. Exclusive-time remainder 1.15 ms (7.2%) | rejected — no `v0.8.2` |
 | EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact. Paired redaction screen (8 controls × 8 whitespace variants on fresh servers): pass 30/56 vs 32/56 (Fisher p = 0.42), synthetic-secret leaks 69 vs 61 | rejected — more leaks; no `v0.8.2` |
+| EXP-058 | RTX 5090 MTP3 decode draft source and launch chain | Changing where drafts come from (the full LM-head proposal head, prompt-lookup drafts), or chaining the round's kernels with programmatic dependent launch, speeds decode without changing an output byte | Full LM-head proposal head: 89/89 role-corpus cases identical to `v0.8.1`, 3.397 against 3.336 tokens per round, decode 9.2% slower. Prompt lookup (simulated, three-token window): 3.086 against MTP's 3.206 tokens per round on the role corpus, +2.6% on agent sessions. PDL chain: decode −4.7% to −6.2% (MLP down 46.1 → 62.2 µs behind the draining gate/up projection); early release from single-wave kernels only: +0.13% to +0.45% (A/B/B/A), inside drift, 24/24 oracle tests, identical speculative statistics. Round boundary: 476–494 µs per 26K round, 174 µs of it the replay fold and 235–239 µs `cudaGraphLaunch` CPU time | rejected — no `v0.8.2` |
 
 Entry detail:
 
@@ -650,6 +651,32 @@ Entry detail:
   rejected: no `v0.8.2`, and production stays on `v0.8.1`. Varied prompts also put production's
   own redaction pass rate at 57% (32 of 56), against 75% in the single corpus run. Receipt:
   [Q5 tensor-core route](measurements/2026-09-26-q5-small-t-tensor-core.json).
+- **EXP-058 — draft source and a launch chain for decode (2026-09-26).** After EXP-057's
+  output-changing route failed the redaction rule, this experiment kept every output byte.
+  Draft-source changes cannot change outputs, because the target verifies every draft: serving the
+  full LM-head proposal head instead of `--lm-head-draft` left all 89 role-corpus cases identical
+  to `v0.8.1` and raised acceptance from 3.336 to 3.397 tokens per round, but its larger GEMV made
+  decode 9.2% slower (392.3 s against 359.3 s over 84 requests). Replayed offline with MTP
+  modelled at production's per-position acceptance, prompt-lookup drafts at the same three-token
+  window trail MTP on the role corpus (3.086 against 3.206 tokens per round) and gain 2.6% on
+  coding-agent session outputs (2.782 against 2.711); longer lookup drafts reach +9.9% only by
+  verifying 6.41 columns a round. Programmatic dependent launch (PDL) was the byte-identical lever
+  left: each kernel waits for its predecessor, then releases the next launch. Chaining RMSNorm,
+  the Q5 split2 projections and the Q4 small-T MMA made decode 4.7–6.2% slower (A/B/B/A), and the
+  MLP down projection alone accounts for it: launched while the multi-wave gate/up projection
+  drained, it ran 46.1 → 62.2 µs after release. Releasing early only from single-wave kernels
+  (norms, gating, conv, recurrent record, RoPE, small-T attention), keeping the projections
+  wait-only and the GDN pair as production, and extending the chain across the round removed the
+  regression and passed 24 oracle tests with identical speculative statistics, but moved decode
+  only +0.13% to +0.45%, inside the window's drift. In the CUDA graph the 815 kernel boundaries
+  per round already cost 0.21 µs each (169.5 µs of a 16.6 ms round). The idle time that remains is
+  the round boundary: 476–494 µs per round from the verify pass's device-to-host copy to the next
+  pass's first kernel, of which 174 µs is the replay fold and 235–239 µs is `cudaGraphLaunch`'s
+  CPU time on this WSL2 appliance. Overlapping the fold with the next launch needs the host to
+  stop waiting for it, but the state-pressure demotion copies continuation state to host on the
+  transfer stream with no compute-stream fence of its own, so that is an engine contract change.
+  EXP-058 is rejected: no `v0.8.2`, and production stays on `v0.8.1`. Receipt: [draft source and
+  launch chain](measurements/2026-09-26-decode-draft-source-and-launch-chain.json).
 
 ## Current order
 
@@ -676,6 +703,7 @@ hypothesis and method before writing code.
 | Idea | Why it should work | Status |
 | --- | --- | --- |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
+| Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold | open |
 | Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | Shipped in v0.4.0: transactional generational store + io_uring O_DIRECT restore; 109,589 tokens restored hot across a docker restart ([qualification](../docs/measurements/2026-08-30-rtx5090-durable-qualification.json)) | shipped v0.4.0 |
 | Checkpoint replication to shared storage | Delivered 2026-09-05 (EXP-018): `scripts/checkpoint_sync.py` copies verified published generations out and back; origin authentication on every lane; same-profile-pair portability only | completed |

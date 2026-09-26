@@ -1,0 +1,773 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-058",
+ "title": "Draft-source changes and a PDL launch chain leave RTX 5090 MTP3 decode unchanged: rejected",
+ "generated_utc": "2026-09-26T07:31:49Z",
+ "status": "passed",
+ "question": "Can the RTX 5090 MTP3 decode round get faster without changing one output byte, by changing where drafts come from (the full LM-head proposal head, prompt-lookup drafts) or by chaining the round's kernels with programmatic dependent launch (PDL)?",
+ "answer": "No lever found here clears the noise without a cost elsewhere. The full LM-head proposal head keeps every output (89/89 role-corpus cases identical to v0.8.1) and accepts 1.8% more tokens per round (3.397 against 3.336), but its larger GEMV makes decode 9.2% slower (392.3 s against 359.3 s over 84 requests). Offline, prompt-lookup drafts at the same three-token window trail MTP on the role corpus (3.086 against 3.206 tokens per round) and gain 2.6% on agent-session outputs (2.782 against 2.711); longer lookup drafts reach +9.9% only by widening verification to 6.41 columns. A PDL chain across the round's kernels (wait, then release the next launch, at every kernel entry) made decode 4.7-6.2% slower: the MLP down projection, placed on the SMs its multi-wave gate/up predecessor was draining, ran 46.1 -> 62.2 us after release. Restricting the early release to single-wave kernels removed the regression but left +0.13% to +0.45% (A/B/B/A), inside the window's drift: in the CUDA graph the 815 kernel boundaries per round already cost only 0.21 us each (169.5 us per 16.6 ms round). The idle time that does matter sits at the round boundary: 476-494 us per round between the verify pass's device-to-host copy and the next pass's first kernel, of which 174 us is the replay fold and 235-239 us is cudaGraphLaunch's CPU time on this WSL2 appliance.",
+ "decision": "Rejected: no v0.8.2. Production stays on v0.8.1 (v0.6.10-qwen38-5090-beta.1), the RTX 4090 lane is untouched, and the measured runtime commits stay local and unpublished. The byte-identical reserve left on this lane is the round boundary, where the GPU idles 302-320 us per round (1.8-1.9% of a 26K round) while the host commits the round, launches the replay fold, waits for it and launches the next verify graph. Overlapping the fold with that launch needs the host to stop waiting for the fold, but progress_materialization_transaction demotes continuation state to host on the transfer stream with no compute-stream fence of its own, relying on every earlier engine step having synchronized; recovering the rest needs the next round launched before the host commits the last. Both are engine contract changes, not kernel changes.",
+ "method": {
+  "probe_window": "2026-09-26 05:50-06:00Z, RTX 5090: production held and stopped, the production binary served with the full LM-head proposal head instead of --lm-head-draft and otherwise production's arguments, the 89-case role corpus (concurrency 1, low reasoning) scored and compared with production v0.8.1's run of the same corpus; acceptance and decode time from the two request logs, paired by completion-token count.",
+  "lookup_simulation": "Offline, CPU only: every role-corpus output and eight coding-agent session transcripts replayed through the Qwen tokenizer; prompt-lookup (longest earlier n-gram match, n>=2 or n>=3) proposes up to three tokens, else MTP, with MTP modelled at production's measured per-position acceptance. The agent-session and longer-draft figures are printed aggregates of that run; the transcripts are not retained here.",
+  "slice_1_window": "2026-09-26 06:30-06:44Z, RTX 5090: candidate op oracle tests, ninfer_bench A/B/B/A (baseline, candidate, candidate, baseline; tg256 and 1,024/26,000/60,000-token prompts), then Nsight Systems graph-node traces of both builds at 26K; production restored healthy.",
+  "slice_2_window": "2026-09-26 07:11-07:26Z, the same procedure for the refined chain; production restored healthy.",
+  "analysis": "In-graph exclusive time is end - max(start, latest earlier end) per kernel, from the second to the last recurrent_fold_kernel; the round boundary is timed from the CUDA runtime API and GPU activity records of the same traces."
+ },
+ "sources": {
+  "baseline": "alphastorm/ninfer f306ddd4 development build, whose sm_120 kernels are 8cc0810a's (production v0.6.10-qwen38-5090-beta.1)",
+  "probe": "production v0.8.1 (image 5ca6e416, binary 5b2f2471, source 8cc0810a) served with the full LM-head proposal head",
+  "slice_1": "alphastorm/ninfer 856fe63f measurement commit on 5a774841 (RMSNorm, Q5 split2 and Q4 small-T MMA launched as programmatic dependents, wait-then-release entry; not published)",
+  "slice_2": "alphastorm/ninfer 997d1f6f measurement commit on 856fe63f (release only from single-wave kernels, projections wait-only, GDN pair as production; the chain extended to the GDN, attention, RoPE, sigmoid-gate and W8 small-T kernels; not published)",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+ },
+ "probe_full_lm_head": {
+  "role_corpus_against_production_v081": "v081p-gw-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+  "acceptance_and_decode": {
+   "aligned_pairs": 84,
+   "optimized_requests": 90,
+   "full_head_requests": 84,
+   "round_structure_differs": 75,
+   "optimized_head": {
+    "requests": 84,
+    "rounds": 24059,
+    "accepted_drafts": 56195,
+    "drafted": 72177,
+    "tokens_per_round": 3.3357,
+    "draft_acceptance": 0.7786,
+    "decode_seconds": 359.33
+   },
+   "full_lm_head": {
+    "requests": 84,
+    "rounds": 23625,
+    "accepted_drafts": 56620,
+    "drafted": 70875,
+    "tokens_per_round": 3.3966,
+    "draft_acceptance": 0.7989,
+    "decode_seconds": 392.27
+   }
+  }
+ },
+ "prompt_lookup_simulation": {
+  "role_corpus": {
+   "requests": 62,
+   "output_tokens": 52284,
+   "tokens_per_round": {
+    "measured_production": 3.227,
+    "mtp_model": 3.206,
+    "lookup_else_mtp": 2.8,
+    "lookup_n3_else_mtp": 3.086,
+    "oracle_best_of_both": 3.401
+   }
+  },
+  "agent_sessions_printed_aggregate": {
+   "sessions": 8,
+   "assistant_turns": 2644,
+   "output_tokens": 665360,
+   "tokens_per_round": {
+    "mtp_model": 2.711,
+    "lookup_else_mtp": 2.537,
+    "lookup_n3_else_mtp": 2.782,
+    "oracle_best_of_both": 3.176
+   }
+  },
+  "longer_lookup_drafts_printed_aggregate": {
+   "four_gram_up_to_3": {
+    "tokens_per_round": 3.353,
+    "gain_pct": 3.9,
+    "mean_verify_columns": 4.0
+   },
+   "four_gram_up_to_7": {
+    "tokens_per_round": 3.397,
+    "gain_pct": 5.3,
+    "mean_verify_columns": 4.94
+   },
+   "four_gram_up_to_15": {
+    "tokens_per_round": 3.547,
+    "gain_pct": 9.9,
+    "mean_verify_columns": 6.41
+   }
+  }
+ },
+ "pdl_chain_slice_1": {
+  "op_tests_candidate": {
+   "ninfer_rmsnorm_test": 0,
+   "ninfer_gated_rmsnorm_test": 0,
+   "ninfer_linear_add_q5_a16_test": 0,
+   "ninfer_linear_swiglu_q4_a16_test": 0,
+   "ninfer_linear_q4_a16_test": 0,
+   "ninfer_linear_q5_a16_test": 0,
+   "ninfer_mtp_round_test": 0,
+   "ninfer_speculative_round_test": 0,
+   "ninfer_gdn_input_proj_test": 0,
+   "ninfer_attn_input_proj_test": 0
+  },
+  "end_to_end_abba": {
+   "tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 166.37,
+      "ms_per_round": 14.38
+     },
+     "candidate-1": {
+      "decode_tok_s": 155.14,
+      "ms_per_round": 15.422
+     },
+     "candidate-2": {
+      "decode_tok_s": 154.79,
+      "ms_per_round": 15.457
+     },
+     "baseline-2": {
+      "decode_tok_s": 163.96,
+      "ms_per_round": 14.592
+     }
+    },
+    "decode_change_pct": -6.18,
+    "round_change_pct": 6.58,
+    "speculative_identical": true
+   },
+   "pp1024+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 139.21,
+      "ms_per_round": 14.367
+     },
+     "candidate-1": {
+      "decode_tok_s": 129.62,
+      "ms_per_round": 15.43
+     },
+     "candidate-2": {
+      "decode_tok_s": 129.37,
+      "ms_per_round": 15.459
+     },
+     "baseline-2": {
+      "decode_tok_s": 136.65,
+      "ms_per_round": 14.636
+     }
+    },
+    "decode_change_pct": -6.12,
+    "round_change_pct": 6.5,
+    "speculative_identical": true
+   },
+   "pp26000+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 246.92,
+      "ms_per_round": 15.951
+     },
+     "candidate-1": {
+      "decode_tok_s": 232.77,
+      "ms_per_round": 16.92
+     },
+     "candidate-2": {
+      "decode_tok_s": 232.48,
+      "ms_per_round": 16.941
+     },
+     "baseline-2": {
+      "decode_tok_s": 244.52,
+      "ms_per_round": 16.107
+     }
+    },
+    "decode_change_pct": -5.33,
+    "round_change_pct": 5.62,
+    "speculative_identical": true
+   },
+   "pp60000+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 227.83,
+      "ms_per_round": 17.557
+     },
+     "candidate-1": {
+      "decode_tok_s": 216.96,
+      "ms_per_round": 18.437
+     },
+     "candidate-2": {
+      "decode_tok_s": 216.75,
+      "ms_per_round": 18.455
+     },
+     "baseline-2": {
+      "decode_tok_s": 227.3,
+      "ms_per_round": 17.598
+     }
+    },
+    "decode_change_pct": -4.71,
+    "round_change_pct": 4.94,
+    "speculative_identical": true
+   }
+  },
+  "in_graph_context_26000": {
+   "rounds": {
+    "baseline": 14,
+    "candidate": 14
+   },
+   "round_span_us": {
+    "baseline": 16637.0,
+    "candidate": 17416.4
+   },
+   "idle_gaps_us_per_round": {
+    "baseline": 546.1,
+    "candidate": 425.7
+   },
+   "exclusive_delta_sum_us_per_round": 899.4,
+   "largest_exclusive_changes": [
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split2_rows_kernel",
+     "grid": "2560x1x1",
+     "calls_per_round": 128.0,
+     "exclusive_us_per_round": {
+      "baseline": 4002.8,
+      "candidate": 5000.9
+     },
+     "exclusive_delta_us_per_round": 998.1,
+     "duration_us_per_call": {
+      "baseline": 31.27,
+      "candidate": 44.22
+     }
+    },
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split4_rows_kernel",
+     "grid": "6144x1x1",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 1514.2,
+      "candidate": 1473.1
+     },
+     "exclusive_delta_us_per_round": -41.1,
+     "duration_us_per_call": {
+      "baseline": 31.55,
+      "candidate": 30.69
+     }
+    },
+    {
+     "kernel": "q4_rowsplit_gemm_simt_rows_kernel",
+     "grid": "1024x1x1",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 486.9,
+      "candidate": 465.2
+     },
+     "exclusive_delta_us_per_round": -21.7,
+     "duration_us_per_call": {
+      "baseline": 14.63,
+      "candidate": 14.19
+     }
+    },
+    {
+     "kernel": "rmsnorm_cta_bf16x2_kernel",
+     "grid": "4x1x1",
+     "calls_per_round": 134.0,
+     "exclusive_us_per_round": {
+      "baseline": 232.2,
+      "candidate": 215.5
+     },
+     "exclusive_delta_us_per_round": -16.7,
+     "duration_us_per_call": {
+      "baseline": 1.73,
+      "candidate": 35.53
+     }
+    },
+    {
+     "kernel": "q4_small_t_mma_kernel",
+     "grid": "2176x1x1",
+     "calls_per_round": 64.0,
+     "exclusive_us_per_round": {
+      "baseline": 4042.1,
+      "candidate": 4055.6
+     },
+     "exclusive_delta_us_per_round": 13.5,
+     "duration_us_per_call": {
+      "baseline": 63.16,
+      "candidate": 64.65
+     }
+    },
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split4_rows_kernel",
+     "grid": "3584x1x1",
+     "calls_per_round": 16.0,
+     "exclusive_us_per_round": {
+      "baseline": 305.8,
+      "candidate": 297.5
+     },
+     "exclusive_delta_us_per_round": -8.3,
+     "duration_us_per_call": {
+      "baseline": 19.11,
+      "candidate": 18.6
+     }
+    },
+    {
+     "kernel": "rmsnorm_warp_bf16x2_kernel",
+     "grid": "12x1x1",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 72.5,
+      "candidate": 80.5
+     },
+     "exclusive_delta_us_per_round": 8.0,
+     "duration_us_per_call": {
+      "baseline": 1.51,
+      "candidate": 1.68
+     }
+    },
+    {
+     "kernel": "causal_attention_small_t_tc_partial_bf16_kernel",
+     "grid": "4x65x1",
+     "calls_per_round": 19.0,
+     "exclusive_us_per_round": {
+      "baseline": 1701.4,
+      "candidate": 1693.5
+     },
+     "exclusive_delta_us_per_round": -7.9,
+     "duration_us_per_call": {
+      "baseline": 89.55,
+      "candidate": 89.13
+     }
+    }
+   ]
+  },
+  "q5_split2_by_predecessor_context_26000": {
+   "baseline": {
+    "rmsnorm_warp_bf16x2_kernel": {
+     "calls": 672,
+     "median_duration_us": 16.64,
+     "median_exclusive_us": 16.64,
+     "median_started_before_predecessor_end_us": -0.22
+    },
+    "q4_small_t_mma_kernel": {
+     "calls": 896,
+     "median_duration_us": 46.08,
+     "median_exclusive_us": 46.08,
+     "median_started_before_predecessor_end_us": -0.19
+    },
+    "sigmoid_gate_mul_bf16x8_kernel": {
+     "calls": 224,
+     "median_duration_us": 15.71,
+     "median_exclusive_us": 15.71,
+     "median_started_before_predecessor_end_us": -0.19
+    }
+   },
+   "candidate": {
+    "rmsnorm_warp_bf16x2_kernel": {
+     "calls": 672,
+     "median_duration_us": 16.9,
+     "median_exclusive_us": 15.84,
+     "median_started_before_predecessor_end_us": 1.09
+    },
+    "q4_small_t_mma_kernel": {
+     "calls": 896,
+     "median_duration_us": 71.69,
+     "median_exclusive_us": 62.18,
+     "median_started_before_predecessor_end_us": 9.51
+    },
+    "sigmoid_gate_mul_bf16x8_kernel": {
+     "calls": 224,
+     "median_duration_us": 15.55,
+     "median_exclusive_us": 15.55,
+     "median_started_before_predecessor_end_us": -0.03
+    }
+   }
+  }
+ },
+ "pdl_chain_slice_2": {
+  "op_tests_candidate": {
+   "ninfer_rmsnorm_test": 0,
+   "ninfer_gated_rmsnorm_test": 0,
+   "ninfer_linear_add_q5_a16_test": 0,
+   "ninfer_linear_swiglu_q4_a16_test": 0,
+   "ninfer_linear_q4_a16_test": 0,
+   "ninfer_linear_q5_a16_test": 0,
+   "ninfer_mtp_round_test": 0,
+   "ninfer_speculative_round_test": 0,
+   "ninfer_gdn_input_proj_test": 0,
+   "ninfer_gdn_input_proj_conv_snapshot_test": 0,
+   "ninfer_gdn_input_proj_conv_record_test": 0,
+   "ninfer_attn_input_proj_test": 0,
+   "ninfer_gdn_gating_proj_test": 0,
+   "ninfer_gated_delta_net_test": 0,
+   "ninfer_gated_delta_net_replay_record_test": 0,
+   "ninfer_gdn_replay_fold_test": 0,
+   "ninfer_gdn_replay_records_test": 0,
+   "ninfer_rope_test": 0,
+   "ninfer_sigmoid_mul_test": 0,
+   "ninfer_softmax_attention_test": 0,
+   "ninfer_linear_w8_a16_test": 0,
+   "ninfer_linear_add_w8_a16_test": 0,
+   "ninfer_linear_swiglu_w8_a16_test": 0,
+   "ninfer_linear_pair_w8_a16_test": 0
+  },
+  "end_to_end_abba": {
+   "tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 166.62,
+      "ms_per_round": 14.359
+     },
+     "candidate-1": {
+      "decode_tok_s": 165.75,
+      "ms_per_round": 14.434
+     },
+     "candidate-2": {
+      "decode_tok_s": 165.57,
+      "ms_per_round": 14.45
+     },
+     "baseline-2": {
+      "decode_tok_s": 163.96,
+      "ms_per_round": 14.593
+     }
+    },
+    "decode_change_pct": 0.22,
+    "round_change_pct": -0.23,
+    "speculative_identical": true
+   },
+   "pp1024+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 139.3,
+      "ms_per_round": 14.358
+     },
+     "candidate-1": {
+      "decode_tok_s": 138.42,
+      "ms_per_round": 14.449
+     },
+     "candidate-2": {
+      "decode_tok_s": 138.13,
+      "ms_per_round": 14.479
+     },
+     "baseline-2": {
+      "decode_tok_s": 136.9,
+      "ms_per_round": 14.609
+     }
+    },
+    "decode_change_pct": 0.13,
+    "round_change_pct": -0.13,
+    "speculative_identical": true
+   },
+   "pp26000+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 247.15,
+      "ms_per_round": 15.935
+     },
+     "candidate-1": {
+      "decode_tok_s": 246.57,
+      "ms_per_round": 15.973
+     },
+     "candidate-2": {
+      "decode_tok_s": 246.08,
+      "ms_per_round": 16.005
+     },
+     "baseline-2": {
+      "decode_tok_s": 244.64,
+      "ms_per_round": 16.099
+     }
+    },
+    "decode_change_pct": 0.17,
+    "round_change_pct": -0.17,
+    "speculative_identical": true
+   },
+   "pp60000+tg256": {
+    "arms": {
+     "baseline-1": {
+      "decode_tok_s": 227.93,
+      "ms_per_round": 17.549
+     },
+     "candidate-1": {
+      "decode_tok_s": 228.76,
+      "ms_per_round": 17.485
+     },
+     "candidate-2": {
+      "decode_tok_s": 228.58,
+      "ms_per_round": 17.499
+     },
+     "baseline-2": {
+      "decode_tok_s": 227.38,
+      "ms_per_round": 17.592
+     }
+    },
+    "decode_change_pct": 0.45,
+    "round_change_pct": -0.45,
+    "speculative_identical": true
+   }
+  },
+  "in_graph_context_26000": {
+   "rounds": {
+    "baseline": 14,
+    "candidate": 14
+   },
+   "round_span_us": {
+    "baseline": 16621.0,
+    "candidate": 16483.7
+   },
+   "idle_gaps_us_per_round": {
+    "baseline": 516.4,
+    "candidate": 362.4
+   },
+   "exclusive_delta_sum_us_per_round": 16.6,
+   "largest_exclusive_changes": [
+    {
+     "kernel": "causal_attention_small_t_reduce_output_kernel",
+     "grid": "24x4x4",
+     "calls_per_round": 17.0,
+     "exclusive_us_per_round": {
+      "baseline": 111.9,
+      "candidate": 142.9
+     },
+     "exclusive_delta_us_per_round": 31.0,
+     "duration_us_per_call": {
+      "baseline": 6.58,
+      "candidate": 100.5
+     }
+    },
+    {
+     "kernel": "rmsnorm_cta_bf16x2_kernel",
+     "grid": "4x1x1",
+     "calls_per_round": 134.0,
+     "exclusive_us_per_round": {
+      "baseline": 232.6,
+      "candidate": 256.6
+     },
+     "exclusive_delta_us_per_round": 24.0,
+     "duration_us_per_call": {
+      "baseline": 1.74,
+      "candidate": 1.92
+     }
+    },
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split2_rows_kernel",
+     "grid": "2560x1x1",
+     "calls_per_round": 128.0,
+     "exclusive_us_per_round": {
+      "baseline": 4008.5,
+      "candidate": 3985.1
+     },
+     "exclusive_delta_us_per_round": -23.4,
+     "duration_us_per_call": {
+      "baseline": 31.32,
+      "candidate": 31.68
+     }
+    },
+    {
+     "kernel": "causal_attention_small_t_tc_partial_bf16_kernel",
+     "grid": "4x65x1",
+     "calls_per_round": 19.0,
+     "exclusive_us_per_round": {
+      "baseline": 1706.5,
+      "candidate": 1719.4
+     },
+     "exclusive_delta_us_per_round": 12.9,
+     "duration_us_per_call": {
+      "baseline": 89.82,
+      "candidate": 92.03
+     }
+    },
+    {
+     "kernel": "q4_small_t_mma_kernel",
+     "grid": "2176x1x1",
+     "calls_per_round": 64.0,
+     "exclusive_us_per_round": {
+      "baseline": 4039.3,
+      "candidate": 4028.1
+     },
+     "exclusive_delta_us_per_round": -11.2,
+     "duration_us_per_call": {
+      "baseline": 63.11,
+      "candidate": 64.29
+     }
+    },
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split4_rows_kernel",
+     "grid": "6144x1x1",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 1514.3,
+      "candidate": 1503.6
+     },
+     "exclusive_delta_us_per_round": -10.7,
+     "duration_us_per_call": {
+      "baseline": 31.55,
+      "candidate": 31.33
+     }
+    },
+    {
+     "kernel": "bf16_gdn_gating_proj_small_t_reduce_kernel",
+     "grid": "2x1x1",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 73.8,
+      "candidate": 66.3
+     },
+     "exclusive_delta_us_per_round": -7.5,
+     "duration_us_per_call": {
+      "baseline": 1.54,
+      "candidate": 3.58
+     }
+    },
+    {
+     "kernel": "q5_rowsplit_gemm_simt_split4_rows_kernel",
+     "grid": "3584x1x1",
+     "calls_per_round": 16.0,
+     "exclusive_us_per_round": {
+      "baseline": 305.4,
+      "candidate": 298.9
+     },
+     "exclusive_delta_us_per_round": -6.5,
+     "duration_us_per_call": {
+      "baseline": 19.09,
+      "candidate": 18.68
+     }
+    },
+    {
+     "kernel": "q4_rowsplit_gemm_simt_rows_kernel",
+     "grid": "896x1x1",
+     "calls_per_round": 16.0,
+     "exclusive_us_per_round": {
+      "baseline": 275.1,
+      "candidate": 280.8
+     },
+     "exclusive_delta_us_per_round": 5.7,
+     "duration_us_per_call": {
+      "baseline": 17.2,
+      "candidate": 19.03
+     }
+    },
+    {
+     "kernel": "recurrent_record_kernel",
+     "grid": "48x1x8",
+     "calls_per_round": 48.0,
+     "exclusive_us_per_round": {
+      "baseline": 340.5,
+      "candidate": 336.9
+     },
+     "exclusive_delta_us_per_round": -3.6,
+     "duration_us_per_call": {
+      "baseline": 7.09,
+      "candidate": 8.93
+     }
+    }
+   ]
+  }
+ },
+ "round_boundary_context_26000": {
+  "slice_1_window": {
+   "baseline": {
+    "rounds": 14,
+    "median_us": {
+     "d2h_to_fold": 83.6,
+     "fold": 174.0,
+     "fold_end_to_prepare": 230.8,
+     "d2h_to_prepare": 493.6,
+     "cuda_graph_launch_cpu": 235.3,
+     "fold_launch_cpu": 27.1
+    },
+    "d2h_to_prepare_us": [
+     542.8,
+     431.8,
+     514.3,
+     456.3,
+     467.5,
+     614.5,
+     665.3,
+     429.8,
+     427.2,
+     484.8,
+     509.1,
+     502.4,
+     506.9,
+     473.6
+    ]
+   },
+   "candidate": {
+    "rounds": 14,
+    "median_us": {
+     "d2h_to_fold": 69.1,
+     "fold": 173.8,
+     "fold_end_to_prepare": 202.4,
+     "d2h_to_prepare": 442.2,
+     "cuda_graph_launch_cpu": 198.8,
+     "fold_launch_cpu": 22.6
+    },
+    "d2h_to_prepare_us": [
+     385.4,
+     375.6,
+     411.0,
+     369.5,
+     499.3,
+     433.0,
+     517.6,
+     444.9,
+     439.5,
+     460.9,
+     573.8,
+     525.3,
+     426.8,
+     577.7
+    ]
+   }
+  },
+  "slice_2_window": {
+   "baseline": {
+    "rounds": 14,
+    "median_us": {
+     "d2h_to_fold": 78.8,
+     "fold": 174.4,
+     "fold_end_to_prepare": 219.2,
+     "d2h_to_prepare": 476.4,
+     "cuda_graph_launch_cpu": 239.4,
+     "fold_launch_cpu": 31.9
+    },
+    "d2h_to_prepare_us": [
+     424.7,
+     350.4,
+     507.4,
+     464.8,
+     481.4,
+     402.3,
+     376.0,
+     359.3,
+     486.1,
+     541.4,
+     551.5,
+     506.0,
+     547.0,
+     471.3
+    ]
+   },
+   "candidate": {
+    "rounds": 14,
+    "median_us": {
+     "d2h_to_fold": 74.0,
+     "fold": 174.4,
+     "fold_end_to_prepare": 197.0,
+     "d2h_to_prepare": 439.2,
+     "cuda_graph_launch_cpu": 204.5,
+     "fold_launch_cpu": 23.5
+    },
+    "d2h_to_prepare_us": [
+     432.8,
+     390.7,
+     409.4,
+     366.0,
+     381.8,
+     421.0,
+     457.4,
+     466.4,
+     710.7,
+     445.6,
+     649.1,
+     416.9,
+     460.5,
+     456.8
+    ]
+   }
+  }
+ },
+ "limits": [
+  "Output identity is by construction for draft-source changes (the target verifies every draft) and was checked end to end only for the full LM-head probe (89/89); the PDL builds were checked by oracle tests and identical speculative statistics in every bench arm, not by a role-corpus run.",
+  "The prompt-lookup gains are simulated with MTP modelled at production's per-position acceptance, not measured on a server.",
+  "Both windows' second baseline arm ran about 1.5% slower than the first (thermal drift); A/B/B/A cancels a linear drift but not the noise it adds, so slice 2's +0.13% to +0.45% is not resolved from zero.",
+  "The round-boundary timings are from ninfer_bench's program loop on WSL2 (Docker Desktop); a native Linux driver would change the launch costs.",
+  "RTX 5090 only; the RTX 4090 lane was not measured."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
