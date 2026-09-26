@@ -121,6 +121,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact. Paired redaction screen (8 controls × 8 whitespace variants on fresh servers): pass 30/56 vs 32/56 (Fisher p = 0.42), synthetic-secret leaks 69 vs 61 | rejected — more leaks; no `v0.8.2` |
 | EXP-058 | RTX 5090 MTP3 decode draft source and launch chain | Changing where drafts come from (the full LM-head proposal head, prompt-lookup drafts), or chaining the round's kernels with programmatic dependent launch, speeds decode without changing an output byte | Full LM-head proposal head: 89/89 role-corpus cases identical to `v0.8.1`, 3.397 against 3.336 tokens per round, decode 9.2% slower. Prompt lookup (simulated, three-token window): 3.086 against MTP's 3.206 tokens per round on the role corpus, +2.6% on agent sessions. PDL chain: decode −4.7% to −6.2% (MLP down 46.1 → 62.2 µs behind the draining gate/up projection); early release from single-wave kernels only: +0.13% to +0.45% (A/B/B/A), inside drift, 24/24 oracle tests, identical speculative statistics. Round boundary: 476–494 µs per 26K round, 174 µs of it the replay fold and 235–239 µs `cudaGraphLaunch` CPU time | rejected — no `v0.8.2` |
 | EXP-059 | RTX 5090 prefill attribution on agent traffic | Part of production's prefill runs far from its hardware floor, and a change that keeps output bytes could shorten it | Prefill is 37.8% of agent GPU time (446 v0.7.0 requests). Cold starts (27 requests, 64% of prefill) run at 74% of the dense BF16 FLOP floor: projection GEMMs at 76–82% of the 209.5 TFLOPS peak, attention 70%, attention input 51%. A production-shaped warm turn (about 400 computed tokens at 29K context) took 283–307 ms of GPU in six passes split at chat-template boundaries: four 2–3-token fragments 59–60 ms, prompt attention about 27 ms per larger pass (91–95% of one SM's peak on 24–144 of 170 SMs), projections 155–178 ms against an 89–94 ms floor. Byte-keeping ceiling about 27 ms per extra prompt pass; fewer passes (an estimated 115–130 ms) and FP8/NVFP4 change bytes | open — measure only |
+| EXP-060 | RTX 5090 new agent sessions after idle | Production's new sessions (the shared-stable-prefix warm turns) are slow for a reason that a change keeping output bytes could remove | 103 of 106 v0.7.0 new sessions (138 of 446 agent requests) arrived 5 s or more after the previous request finished: prefill 0.317 s (TTFT 0.361 s) against 0.171 s (0.199 s) for the three that arrived sooner. After the last response the GPU steps P1 → P3 (about 2.0 s) → P5 (7.4 s) → P8 (9.2 s). Served on production's binary, new sessions after 12–30 s idle took 0.253–0.334 s against 0.156–0.160 s back to back, their prompt pass 205–287 ms against 123–127 ms. A 1 Hz 0.4 ms keep-alive kernel changed nothing | open — measure only |
 
 Entry detail:
 
@@ -707,6 +708,26 @@ Entry detail:
   only large cold lever. The shared-stable-prefix turns (26% of warm turns, 0.314 s median for 140
   computed tokens) were not traced. EXP-059 is open and changed nothing. Receipt: [prefill
   attribution](measurements/2026-09-26-prefill-attribution.json).
+- **EXP-060 — new sessions wait on the GPU's idle state (2026-09-26).** EXP-059 left the
+  shared-stable-prefix warm turns untraced: production's new agent sessions took 0.315 s of
+  prefill for 140 computed tokens. They start on an idle GPU. In the v0.7.0 agent traffic, 103 of
+  106 new sessions and 138 of 446 agent requests arrived 5 s or more after the previous request
+  finished. New sessions arriving that late took 0.317 s of prefill (TTFT 0.361 s); the three that
+  arrived sooner took 0.171 s (TTFT 0.199 s). After the last response the RTX 5090 steps from P1
+  to P3 at about 2.0 s, to P5 at about 7.4 s and to P8 (270 MHz SM, 405 MHz memory) at about 9.2
+  s. Three probe windows served production's image and binary under Nsight Systems with a
+  30.2K-token shared prefix. New sessions of 159–230 computed tokens sent back to back prefilled
+  in 0.156–0.160 s: about 5–15 ms of state bookkeeping, one 123–127 ms prompt pass and two small-T
+  fragments. Sent after 12–30 s idle, the same sessions took 0.253–0.334 s (TTFT 0.317–0.393 s):
+  the prompt pass ran 205–287 ms with every kernel family slower, while the fragments after it ran
+  at normal speed once the clocks had ramped. A side process launching a 0.4 ms kernel every
+  second changed neither the P-state steps nor the slowdown. The lever keeps output bytes, since
+  clock state does not change arithmetic: a GPU held out of its low idle states when a request
+  arrives would bring new-session TTFT from about 0.36 s to about 0.19 s. Neither route was tried:
+  a host clock floor (locked clocks on the Windows host, a global setting with an idle-power cost)
+  or a keep-warm load for a grace period after each request, which needs more than the 1 Hz
+  kernel. EXP-060 is open and changed nothing. Receipt: [idle GPU and new
+  sessions](measurements/2026-09-26-idle-gpu-new-sessions.json).
 
 ## Current order
 
@@ -736,6 +757,7 @@ hypothesis and method before writing code.
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold | open |
 | Run a request's consecutive prefill fragments through each layer together | A production-shaped warm turn runs six full-model passes split at chat-template boundaries; merging the fragments' prompt attention into one launch per layer saves about 27 ms per extra prompt pass at 29K context while each fragment keeps its projection route and GDN decomposition (EXP-059) | open |
 | Fold warm-turn template fragments into fewer passes | Four 2–3-token fragments cost 59–60 ms of a 283–307 ms warm turn and the reasoning-block pass runs its projections at 20–25% of peak; six passes to two would take an estimated 115–130 ms off, but needs per-row arithmetic that does not depend on pass width so resumed and cold execution stay bit-identical (EXP-059) | open |
+| Hold the RTX 5090 out of its idle P-states when agent requests arrive | 138 of 446 agent requests, including 103 of 106 new sessions, arrive 5 s or more after the previous one, when the card has stepped toward P8; their first prefill pass runs 1.6–2.3× slower and new-session TTFT is 0.36 s against about 0.19 s on a busy card. Routes: a host clock floor or a keep-warm load after each request; a 1 Hz 0.4 ms kernel is not enough (EXP-060) | open |
 | Qualify a speculative (MTP) profile on the RTX 4090 lane | Shipped in v0.3.1: MTP3 promoted by the two-arm decision (+17.04% Golden-equivalent wall; 93.2–97.7 tok/s vs 52.330 baseline); exploratory sweep measured draft-3 > 4 > 5 on the fixed workload | shipped v0.3.1 |
 | Durable RTX 5090 container (serve-layer session persistence) | Shipped in v0.4.0: transactional generational store + io_uring O_DIRECT restore; 109,589 tokens restored hot across a docker restart ([qualification](../docs/measurements/2026-08-30-rtx5090-durable-qualification.json)) | shipped v0.4.0 |
 | Checkpoint replication to shared storage | Delivered 2026-09-05 (EXP-018): `scripts/checkpoint_sync.py` copies verified published generations out and back; origin authentication on every lane; same-profile-pair portability only | completed |

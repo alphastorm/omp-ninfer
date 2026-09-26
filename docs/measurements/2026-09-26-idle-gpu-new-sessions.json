@@ -1,0 +1,659 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-060",
+ "title": "RTX 5090 new sessions wait on the GPU's idle P-state: the first prefill pass after 9 s idle runs 1.6-2.3x slower",
+ "generated_utc": "2026-09-26T10:11:13Z",
+ "status": "passed",
+ "question": "Why do production's new agent sessions (the shared-stable-prefix warm turns EXP-059 left untraced) take 0.315 s of prefill for 140 computed tokens, and what would shorten them without changing an output byte?",
+ "answer": "They start on an idle GPU. In production's v0.7.0 agent traffic 103 of 106 new sessions, and 138 of 446 agent requests, arrived 5 s or more after the previous request finished; new sessions arriving that late took 0.317 s of prefill (TTFT 0.361 s), the three that arrived sooner 0.171 s (TTFT 0.199 s), and continuations after 5 s idle 0.347 s for 201 tokens against 0.240 s for 446 on a busy GPU. After the last response the RTX 5090 steps from P1 to P3 at about 2.0 s, P5 at about 7.4 s and P8 (270 MHz SM, 405 MHz memory) at about 9.2 s. On production's binary with a 30.2K-token shared prefix, back-to-back new sessions of 159-230 computed tokens prefilled in 0.156-0.160 s (TTFT 0.167-0.191 s): about 5-15 ms of state bookkeeping, one prompt pass of 123-127 ms and two small-T fragments. After 12-30 s idle the same sessions took 0.253-0.334 s (TTFT 0.317-0.393 s) because their prompt pass ran 205-287 ms with every kernel family slower, while the fragments after it ran at normal speed once the clocks had ramped. A side process launching a 0.4 ms kernel every second changed neither the P-state steps nor the slowdown.",
+ "decision": "Open, measure only: nothing built or shipped; production stays on v0.8.1. The lever keeps output bytes, since clock state does not change arithmetic: a GPU held out of its low idle states when a request arrives would take production's new-session TTFT from about 0.36 s to about 0.19 s and post-idle continuations down by about 0.15 s. Two routes, neither measured yet: a host clock floor (nvidia-smi locked clocks on the Windows host, a global setting with an idle-power cost), or a keep-warm load for a grace period after each request, which needs more than a 1 Hz 0.4 ms kernel; the smallest load that holds P3 and its power are unmeasured.",
+ "method": {
+  "production": "production v0.7.0 request logs on the RTX 5090, agent requests (11 or more tools, 446): idle time before a request is its start (finish time minus total time) minus the previous request's finish, grouped at 5 s; kinds are cold (16K+ computed tokens), middle, and warm by reuse path.",
+  "probe_windows": "2026-09-26, RTX 5090, production held and stopped each time and restored healthy: 09:41-09:43Z (back-to-back), 09:53-09:55Z (idle gaps of 0, 12, 0, 30, 0 and 12 s before sessions 1-6), 10:00-10:03Z (the same gaps with a side container launching a single-warp 1,000,000-cycle spin kernel every second). Each served production's image and binary (5b2f2471) with production's arguments under Nsight Systems 2026.1.3 (seccomp unconfined): one cold request whose system message (~30K tokens of public omp-ninfer documentation) and 12 tool definitions form the automatic stable prefix, then six new two-message sessions with a ~140-token first user message, greedy, 64 output tokens.",
+  "sampling": "nvidia-smi from WSL every 50 ms (about 19 samples per second): P-state, SM and memory clocks; per-pass GPU spans from the program.submit NVTX ranges; per-request host timelines from the engine's admission, context-progress and commit ranges with the copies they launched."
+ },
+ "sources": {
+  "production": "v0.8.1 runtime (image 5ca6e416, binary 5b2f2471, source 8cc0810a); traffic from its v0.7.0 predecessor's agent requests",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "gpu": "RTX 5090, Windows driver 610.88, CUDA through WSL2 and Docker Desktop",
+  "predecessor": "EXP-059 (docs/measurements/2026-09-26-prefill-attribution.json)"
+ },
+ "production_agent_traffic_by_idle_before_arrival": {
+  "agent_requests": 446,
+  "by_idle_before_arrival": {
+   "<5 s": {
+    "requests": 305,
+    "by_kind": {
+     "private_response_replay": 291,
+     "cold_16k_plus": 4,
+     "shared_stable_prefix": 3,
+     "middle": 7
+    },
+    "kinds": {
+     "cold_16k_plus": {
+      "requests": 4,
+      "prefill_s_median": 8.311,
+      "ttft_s_median": 8.3368,
+      "computed_tokens_median": 26081.0
+     },
+     "middle": {
+      "requests": 7,
+      "prefill_s_median": 0.7886,
+      "ttft_s_median": 0.8082,
+      "computed_tokens_median": 1685
+     },
+     "private_response_replay": {
+      "requests": 291,
+      "prefill_s_median": 0.2397,
+      "ttft_s_median": 0.2693,
+      "computed_tokens_median": 446
+     },
+     "shared_stable_prefix": {
+      "requests": 3,
+      "prefill_s_median": 0.1708,
+      "ttft_s_median": 0.1991,
+      "computed_tokens_median": 140
+     }
+    }
+   },
+   ">=5 s": {
+    "requests": 138,
+    "by_kind": {
+     "cold_16k_plus": 20,
+     "private_response_replay": 14,
+     "shared_stable_prefix": 103,
+     "middle": 1
+    },
+    "kinds": {
+     "cold_16k_plus": {
+      "requests": 20,
+      "prefill_s_median": 8.91,
+      "ttft_s_median": 9.0244,
+      "computed_tokens_median": 27533.0
+     },
+     "middle": {
+      "requests": 1,
+      "prefill_s_median": 3.7006,
+      "ttft_s_median": 3.7623,
+      "computed_tokens_median": 11281
+     },
+     "private_response_replay": {
+      "requests": 14,
+      "prefill_s_median": 0.3466,
+      "ttft_s_median": 0.411,
+      "computed_tokens_median": 201.0
+     },
+     "shared_stable_prefix": {
+      "requests": 103,
+      "prefill_s_median": 0.3166,
+      "ttft_s_median": 0.3614,
+      "computed_tokens_median": 140
+     }
+    }
+   },
+   "first in file": {
+    "requests": 3,
+    "by_kind": {
+     "cold_16k_plus": 3
+    },
+    "kinds": {}
+   }
+  }
+ },
+ "pstate_steps_after_last_response": [
+  {
+   "session": "session-2",
+   "idle_s": 12.0,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P3": 2.03,
+    "P5": 7.44,
+    "P8": 9.23
+   },
+   "clocks_on_entry": {
+    "P1": {
+     "sm_mhz": 2715,
+     "memory_mhz": 13801
+    },
+    "P3": {
+     "sm_mhz": 2430,
+     "memory_mhz": 13801
+    },
+    "P5": {
+     "sm_mhz": 270,
+     "memory_mhz": 7001
+    },
+    "P8": {
+     "sm_mhz": 270,
+     "memory_mhz": 810
+    }
+   }
+  },
+  {
+   "session": "session-4",
+   "idle_s": 30.0,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P3": 2.03,
+    "P5": 7.45,
+    "P8": 9.25
+   },
+   "clocks_on_entry": {
+    "P1": {
+     "sm_mhz": 2820,
+     "memory_mhz": 13801
+    },
+    "P3": {
+     "sm_mhz": 2985,
+     "memory_mhz": 13801
+    },
+    "P5": {
+     "sm_mhz": 270,
+     "memory_mhz": 7001
+    },
+    "P8": {
+     "sm_mhz": 270,
+     "memory_mhz": 810
+    }
+   }
+  },
+  {
+   "session": "session-6",
+   "idle_s": 12.0,
+   "first_seen_s": {
+    "P1": 0.04,
+    "P3": 1.99,
+    "P5": 7.41,
+    "P8": 9.2
+   },
+   "clocks_on_entry": {
+    "P1": {
+     "sm_mhz": 2700,
+     "memory_mhz": 13801
+    },
+    "P3": {
+     "sm_mhz": 2985,
+     "memory_mhz": 13801
+    },
+    "P5": {
+     "sm_mhz": 270,
+     "memory_mhz": 7001
+    },
+    "P8": {
+     "sm_mhz": 270,
+     "memory_mhz": 810
+    }
+   }
+  }
+ ],
+ "probe_back_to_back_sessions": [
+  {
+   "label": "session-1",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30357,
+   "computed_tokens": 165,
+   "prefill_s": 0.156,
+   "ttft_s": 0.1699,
+   "admission_to_prompt_pass_ms": 4.803,
+   "state_image_demoted_to_host_mb": 0,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 122.667,
+   "small_t_fragment_kernel_ms": [
+    12.122,
+    14.403
+   ],
+   "capture_state_image_to_host_mb": 0.0
+  },
+  {
+   "label": "session-2",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30359,
+   "computed_tokens": 167,
+   "prefill_s": 0.1556,
+   "ttft_s": 0.1773,
+   "admission_to_prompt_pass_ms": 9.745,
+   "state_image_demoted_to_host_mb": 153.95,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 123.044,
+   "small_t_fragment_kernel_ms": [
+    12.131,
+    14.404
+   ],
+   "capture_state_image_to_host_mb": 153.954
+  },
+  {
+   "label": "session-3",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30385,
+   "computed_tokens": 193,
+   "prefill_s": 0.1586,
+   "ttft_s": 0.1854,
+   "admission_to_prompt_pass_ms": 11.916,
+   "state_image_demoted_to_host_mb": 153.95,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 124.855,
+   "small_t_fragment_kernel_ms": [
+    12.136,
+    14.421
+   ],
+   "capture_state_image_to_host_mb": 153.954
+  },
+  {
+   "label": "session-4",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30351,
+   "computed_tokens": 159,
+   "prefill_s": 0.1556,
+   "ttft_s": 0.1833,
+   "admission_to_prompt_pass_ms": 11.534,
+   "state_image_demoted_to_host_mb": 153.95,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 122.674,
+   "small_t_fragment_kernel_ms": [
+    12.125,
+    14.406
+   ],
+   "capture_state_image_to_host_mb": 153.954
+  },
+  {
+   "label": "session-5",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30422,
+   "computed_tokens": 230,
+   "prefill_s": 0.1604,
+   "ttft_s": 0.1908,
+   "admission_to_prompt_pass_ms": 15.293,
+   "state_image_demoted_to_host_mb": 153.95,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 127.28,
+   "small_t_fragment_kernel_ms": [
+    12.141,
+    14.408
+   ],
+   "capture_state_image_to_host_mb": 153.954
+  },
+  {
+   "label": "session-6",
+   "prefix_reuse_path": "shared_stable_prefix",
+   "prompt_tokens": 30379,
+   "computed_tokens": 187,
+   "prefill_s": 0.1568,
+   "ttft_s": 0.1867,
+   "admission_to_prompt_pass_ms": 14.3,
+   "state_image_demoted_to_host_mb": 153.95,
+   "prefix_tail_page_copy_mb": 4.46,
+   "prompt_pass_gpu_ms": 123.986,
+   "small_t_fragment_kernel_ms": [
+    12.132,
+    14.41
+   ],
+   "capture_state_image_to_host_mb": 153.954
+  }
+ ],
+ "probe_sessions_after_idle": [
+  {
+   "label": "session-1",
+   "idle_before_s": 0.0,
+   "path": "shared_stable_prefix",
+   "computed": 165,
+   "prefill_s": 0.1568,
+   "ttft_s": 0.1667,
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2580,
+   "mem_mhz_at_send": 13801,
+   "prompt_pass_gpu_ms": 123.039,
+   "fragment_gpu_ms": [
+    14.232,
+    16.868
+   ],
+   "prompt_pass_top": {
+    "q5_rowsplit_gemm_mma_kernel": 38.456,
+    "q4_linear_swiglu_mma_split_half_pair_ker": 33.233,
+    "causal_attention_prompt_bf16_kernel": 27.943,
+    "rowsplit_grouped_mma_kernel": 16.884
+   }
+  },
+  {
+   "label": "session-2",
+   "idle_before_s": 12.0,
+   "path": "shared_stable_prefix",
+   "computed": 167,
+   "prefill_s": 0.3234,
+   "ttft_s": 0.3816,
+   "pstate_at_send": "P8",
+   "sm_mhz_at_send": 270,
+   "mem_mhz_at_send": 405,
+   "prompt_pass_gpu_ms": 275.82,
+   "fragment_gpu_ms": [
+    14.27,
+    16.801
+   ],
+   "prompt_pass_top": {
+    "q4_linear_swiglu_mma_split_half_pair_ker": 93.192,
+    "q5_rowsplit_gemm_mma_kernel": 79.296,
+    "rowsplit_grouped_mma_kernel": 49.746,
+    "causal_attention_prompt_bf16_kernel": 43.391
+   }
+  },
+  {
+   "label": "session-3",
+   "idle_before_s": 0.0,
+   "path": "shared_stable_prefix",
+   "computed": 193,
+   "prefill_s": 0.157,
+   "ttft_s": 0.1763,
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 2947,
+   "mem_mhz_at_send": 13801,
+   "prompt_pass_gpu_ms": 124.404,
+   "fragment_gpu_ms": [
+    14.213,
+    16.677
+   ],
+   "prompt_pass_top": {
+    "q5_rowsplit_gemm_mma_kernel": 38.427,
+    "q4_linear_swiglu_mma_split_half_pair_ker": 33.484,
+    "causal_attention_prompt_bf16_kernel": 27.948,
+    "rowsplit_grouped_mma_kernel": 17.056
+   }
+  },
+  {
+   "label": "session-4",
+   "idle_before_s": 30.0,
+   "path": "shared_stable_prefix",
+   "computed": 159,
+   "prefill_s": 0.3011,
+   "ttft_s": 0.3729,
+   "pstate_at_send": "P8",
+   "sm_mhz_at_send": 270,
+   "mem_mhz_at_send": 405,
+   "prompt_pass_gpu_ms": 253.315,
+   "fragment_gpu_ms": [
+    14.248,
+    16.737
+   ],
+   "prompt_pass_top": {
+    "q4_linear_swiglu_mma_split_half_pair_ker": 85.426,
+    "q5_rowsplit_gemm_mma_kernel": 72.417,
+    "causal_attention_prompt_bf16_kernel": 43.444,
+    "rowsplit_grouped_mma_kernel": 43.019
+   }
+  },
+  {
+   "label": "session-5",
+   "idle_before_s": 0.0,
+   "path": "shared_stable_prefix",
+   "computed": 230,
+   "prefill_s": 0.1596,
+   "ttft_s": 0.1858,
+   "pstate_at_send": "P1",
+   "sm_mhz_at_send": 1372,
+   "mem_mhz_at_send": 13801,
+   "prompt_pass_gpu_ms": 126.328,
+   "fragment_gpu_ms": [
+    14.418,
+    16.85
+   ],
+   "prompt_pass_top": {
+    "q5_rowsplit_gemm_mma_kernel": 38.406,
+    "q4_linear_swiglu_mma_split_half_pair_ker": 33.737,
+    "causal_attention_prompt_bf16_kernel": 28.0,
+    "rowsplit_grouped_mma_kernel": 19.009
+   }
+  },
+  {
+   "label": "session-6",
+   "idle_before_s": 12.0,
+   "path": "shared_stable_prefix",
+   "computed": 187,
+   "prefill_s": 0.2526,
+   "ttft_s": 0.3169,
+   "pstate_at_send": "P8",
+   "sm_mhz_at_send": 270,
+   "mem_mhz_at_send": 405,
+   "prompt_pass_gpu_ms": 205.042,
+   "fragment_gpu_ms": [
+    14.302,
+    16.8
+   ],
+   "prompt_pass_top": {
+    "q4_linear_swiglu_mma_split_half_pair_ker": 64.407,
+    "q5_rowsplit_gemm_mma_kernel": 60.639,
+    "causal_attention_prompt_bf16_kernel": 35.688,
+    "rowsplit_grouped_mma_kernel": 35.07
+   }
+  }
+ ],
+ "probe_sessions_after_idle_with_1hz_keepalive": {
+  "keepalive": "single-warp kernel spinning 1,000,000 SM cycles (about 0.4 ms at full clock), launched and synchronized once per second from a separate container",
+  "pstate_steps_after_last_response": [
+   {
+    "session": "session-2",
+    "idle_s": 12.0,
+    "first_seen_s": {
+     "P1": 0.0,
+     "P3": 2.06,
+     "P5": 7.44,
+     "P8": 9.23
+    },
+    "clocks_on_entry": {
+     "P1": {
+      "sm_mhz": 2760,
+      "memory_mhz": 13801
+     },
+     "P3": {
+      "sm_mhz": 2910,
+      "memory_mhz": 13801
+     },
+     "P5": {
+      "sm_mhz": 270,
+      "memory_mhz": 7001
+     },
+     "P8": {
+      "sm_mhz": 285,
+      "memory_mhz": 810
+     }
+    }
+   },
+   {
+    "session": "session-4",
+    "idle_s": 30.0,
+    "first_seen_s": {
+     "P1": 0.02,
+     "P3": 2.02,
+     "P5": 7.45,
+     "P8": 9.25
+    },
+    "clocks_on_entry": {
+     "P1": {
+      "sm_mhz": 2767,
+      "memory_mhz": 13801
+     },
+     "P3": {
+      "sm_mhz": 2985,
+      "memory_mhz": 13801
+     },
+     "P5": {
+      "sm_mhz": 270,
+      "memory_mhz": 7001
+     },
+     "P8": {
+      "sm_mhz": 270,
+      "memory_mhz": 810
+     }
+    }
+   },
+   {
+    "session": "session-6",
+    "idle_s": 12.0,
+    "first_seen_s": {
+     "P1": 0.04,
+     "P3": 1.99,
+     "P5": 6.81,
+     "P8": 8.61
+    },
+    "clocks_on_entry": {
+     "P1": {
+      "sm_mhz": 2737,
+      "memory_mhz": 13801
+     },
+     "P3": {
+      "sm_mhz": 1987,
+      "memory_mhz": 13801
+     },
+     "P5": {
+      "sm_mhz": 285,
+      "memory_mhz": 7001
+     },
+     "P8": {
+      "sm_mhz": 285,
+      "memory_mhz": 810
+     }
+    }
+   }
+  ],
+  "sessions": [
+   {
+    "label": "session-1",
+    "idle_before_s": 0.0,
+    "path": "shared_stable_prefix",
+    "computed": 165,
+    "prefill_s": 0.1564,
+    "ttft_s": 0.1691,
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2790,
+    "mem_mhz_at_send": 13801,
+    "prompt_pass_gpu_ms": 123.022,
+    "fragment_gpu_ms": [
+     14.283,
+     16.804
+    ],
+    "prompt_pass_top": {
+     "q5_rowsplit_gemm_mma_kernel": 38.443,
+     "q4_linear_swiglu_mma_split_half_pair_ker": 33.204,
+     "causal_attention_prompt_bf16_kernel": 27.954,
+     "rowsplit_grouped_mma_kernel": 16.875
+    }
+   },
+   {
+    "label": "session-2",
+    "idle_before_s": 12.0,
+    "path": "shared_stable_prefix",
+    "computed": 167,
+    "prefill_s": 0.3339,
+    "ttft_s": 0.3928,
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 285,
+    "mem_mhz_at_send": 405,
+    "prompt_pass_gpu_ms": 287.336,
+    "fragment_gpu_ms": [
+     14.239,
+     16.728
+    ],
+    "prompt_pass_top": {
+     "q4_linear_swiglu_mma_split_half_pair_ker": 98.683,
+     "q5_rowsplit_gemm_mma_kernel": 83.289,
+     "rowsplit_grouped_mma_kernel": 51.435,
+     "causal_attention_prompt_bf16_kernel": 43.895
+    }
+   },
+   {
+    "label": "session-3",
+    "idle_before_s": 0.0,
+    "path": "shared_stable_prefix",
+    "computed": 193,
+    "prefill_s": 0.1577,
+    "ttft_s": 0.1775,
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2955,
+    "mem_mhz_at_send": 13801,
+    "prompt_pass_gpu_ms": 125.146,
+    "fragment_gpu_ms": [
+     14.18,
+     16.765
+    ],
+    "prompt_pass_top": {
+     "q5_rowsplit_gemm_mma_kernel": 38.682,
+     "q4_linear_swiglu_mma_split_half_pair_ker": 33.503,
+     "causal_attention_prompt_bf16_kernel": 27.984,
+     "rowsplit_grouped_mma_kernel": 17.043
+    }
+   },
+   {
+    "label": "session-4",
+    "idle_before_s": 30.0,
+    "path": "shared_stable_prefix",
+    "computed": 159,
+    "prefill_s": 0.3107,
+    "ttft_s": 0.3718,
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 285,
+    "mem_mhz_at_send": 405,
+    "prompt_pass_gpu_ms": 264.21,
+    "fragment_gpu_ms": [
+     14.165,
+     16.896
+    ],
+    "prompt_pass_top": {
+     "q4_linear_swiglu_mma_split_half_pair_ker": 88.698,
+     "q5_rowsplit_gemm_mma_kernel": 76.36,
+     "rowsplit_grouped_mma_kernel": 46.319,
+     "causal_attention_prompt_bf16_kernel": 43.469
+    }
+   },
+   {
+    "label": "session-5",
+    "idle_before_s": 0.0,
+    "path": "shared_stable_prefix",
+    "computed": 230,
+    "prefill_s": 0.1593,
+    "ttft_s": 0.1827,
+    "pstate_at_send": "P1",
+    "sm_mhz_at_send": 2722,
+    "mem_mhz_at_send": 13801,
+    "prompt_pass_gpu_ms": 126.457,
+    "fragment_gpu_ms": [
+     14.308,
+     16.902
+    ],
+    "prompt_pass_top": {
+     "q5_rowsplit_gemm_mma_kernel": 38.391,
+     "q4_linear_swiglu_mma_split_half_pair_ker": 33.756,
+     "causal_attention_prompt_bf16_kernel": 27.978,
+     "rowsplit_grouped_mma_kernel": 19.035
+    }
+   },
+   {
+    "label": "session-6",
+    "idle_before_s": 12.0,
+    "path": "shared_stable_prefix",
+    "computed": 187,
+    "prefill_s": 0.2607,
+    "ttft_s": 0.3286,
+    "pstate_at_send": "P8",
+    "sm_mhz_at_send": 270,
+    "mem_mhz_at_send": 405,
+    "prompt_pass_gpu_ms": 213.915,
+    "fragment_gpu_ms": [
+     14.242,
+     16.829
+    ],
+    "prompt_pass_top": {
+     "q4_linear_swiglu_mma_split_half_pair_ker": 69.209,
+     "q5_rowsplit_gemm_mma_kernel": 63.434,
+     "rowsplit_grouped_mma_kernel": 36.393,
+     "causal_attention_prompt_bf16_kernel": 35.694
+    }
+   }
+  ]
+ },
+ "limits": [
+  "Production traffic ran v0.7.0 (shared-prefix catalog capacity 1, temperature 1, 32,768 output tokens); the probes ran production's v0.8.1 binary with greedy 64-token requests. The idle slowdown and its size match across both, but the probes' prefixes and questions are synthetic.",
+  "The probes observed arrivals in P1 and P8 only; production's arrivals 0.5-5 s after a response (P1 or P3) prefilled at normal speed, and arrivals during P5 were not probed.",
+  "nvidia-smi reports P-states and clocks with some lag, so they place the ramp but do not time it; the prompt pass's kernel durations are the measure of the slowdown.",
+  "The penalty grows with the GPU work that runs during the ramp and would be a smaller share of a longer prefill; cold starts after idle were not probed.",
+  "Neither mitigation was tried: host locked clocks were not set, and only one keep-alive load (1 Hz, 0.4 ms) was measured."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
