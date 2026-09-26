@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.8.1`
+Product release: `v0.8.2`
 Composition: **v0.8.1 upstream OMP v18.3.0 client and route acceptance passed on RTX5090 and RTX4090**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.3.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64) (sha256 `d61fb411f241`) | `qwen38-5090-v0.7.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.1/acceptance/darwin-arm64-18.3.0.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.3.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe) (sha256 `9be13f13e3c1`) | `qwen38-5090-v0.7.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.1/acceptance/windows-x64-18.3.0.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.3.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64) (sha256 `d2fdaa29affe`) | `qwen38-5090-v0.7.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.1/acceptance/linux-x64-18.3.0.json) |
+| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.3.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64) (sha256 `d61fb411f241`) | `qwen38-5090-v0.8.2` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.2/acceptance/darwin-arm64-18.3.0.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.3.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe) (sha256 `9be13f13e3c1`) | `qwen38-5090-v0.8.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.2/acceptance/windows-x64-18.3.0.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.3.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64) (sha256 `d2fdaa29affe`) | `qwen38-5090-v0.8.2` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/90f5a83cee2523c2cbb9747a7449d142a8b353c0/releases/v0.8.2/acceptance/linux-x64-18.3.0.json) |
 
 ## Native runtime variants
 
@@ -19,7 +19,7 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/8f4348a7f488c953295b9628bcf61c96a765583a/releases/v0.8.1/qualification/rtx4090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2555f99e0d25b9350d0226912b6d9560e75ef2cb/releases/v0.8.2/qualification/rtx4090.json) |
 
 Package bindings:
 
