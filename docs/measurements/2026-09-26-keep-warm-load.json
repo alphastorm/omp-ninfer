@@ -1,0 +1,764 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-061",
+ "title": "RTX 5090 keep-warm load: a single-warp kernel at 30% duty holds P1 at about 90 W, and a grace period brings new sessions after idle back to 0.17-0.20 s TTFT",
+ "generated_utc": "2026-09-26T12:18:13Z",
+ "status": "passed",
+ "question": "What is the lightest GPU load that keeps the RTX 5090 out of its slow idle P-states between agent requests, what does it cost in power, and does running it only while the engine is idle bring new sessions after idle back to the back-to-back latency EXP-060 measured?",
+ "answer": "A single-warp kernel spinning 30 ms of every 100 ms (30% GPU utilization) holds P1 with the memory clock at 13,801 MHz; 25% steps down to P8 after 13.7 s, and the same kernel at 1-20% reaches P8 within 3.4-7.4 s. Neither all-SM spins at 10-20% nor device-to-device copies of 64-256 MiB every 20-100 ms hold the card. Beside production's binary served without Nsight Systems, the 30% load drew 88.8-91.6 W against 29.0 W idle in P8 (87.3 W alone; 40% draws 117-118 W). Run as a grace period, resumed as each response returned and paused 0.1 s before the next request, it held P1 through 12 s and 60 s gaps: new sessions prefilled in 0.155 s and 0.180 s (TTFT 0.173 s and 0.201 s) against 0.155-0.159 s back to back and 0.353 s (TTFT 0.417 s) for the same session after a 30 s gap without it. The control gap confirms EXP-060's step schedule without Nsight Systems: P3 at 1.9 s, P5 at 6.7 s and P8 at 8.5 s after the last response.",
+ "decision": "Open, measure only: nothing built or shipped; production stays on v0.8.1 with every host setting unchanged. The lever keeps output bytes. Its engineering form is an engine-side grace period: after a request completes, ninfer-serve launches a single-warp spin kernel for 30-35 ms of every 100 ms on its own stream until the grace period ends or a request is admitted. Admission stops it immediately (a side process would contend for the GPU while requests run). Cost: about 60 W above idle while held, so about 1 Wh per minute of grace. Benefit: new-session TTFT about 0.2 s instead of about 0.4 s; continuations and cold starts that arrive after idle should gain too (not measured). 138 of 446 agent requests in production's v0.7.0 traffic arrived 5 s or more after the previous one.",
+ "method": {
+  "keepwarm": "keepwarm.cu (scratch): a schedule of segments, each a full-GPU burst, idle, or a periodic unit of work launched and synchronized at the start of every period: a single-warp kernel spinning a given wall time (%globaltimer), an all-SM spin, or a device-to-device copy. SIGUSR1 pauses the periodic work and SIGUSR2 resumes it.",
+  "sweeps": "2026-09-26 11:46-11:51Z and 11:54-12:01Z, RTX 5090: production held and stopped, keepwarm alone in a CUDA 13.1.2 base container, no inference server; every load segment ran 30 s after a 3 s full-GPU burst, so it started from P1 as the card does when a request ends; nvidia-smi sampled P-state, SM and memory clocks, power, utilization and temperature every 50 ms. A load holds if no P5 or P8 sample appears during its segment; power and clocks are medians over its last 10 s.",
+  "grace_windows": "2026-09-26 12:03-12:07Z (production's image and binary 5b2f2471 under Nsight Systems, pause 0.3 s before each request) and 12:12-12:16Z (without Nsight Systems, pause 0.1 s before each request, the 30 s gap left without the load as a control), each with production's arguments on a side port, production held and restored healthy: one cold request whose ~30K-token system message and 12 tool definitions form the stable prefix, then six new two-message sessions after 0, 12, 0, 60, 0 and 30 s; the client resumed the 30% load as each response returned before a nonzero gap."
+ },
+ "sources": {
+  "production": "v0.8.1 runtime (image 5ca6e416, binary 5b2f2471, source 8cc0810a)",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "gpu": "RTX 5090, Windows driver 610.88, CUDA through WSL2 and Docker Desktop",
+  "predecessor": "EXP-060 (docs/measurements/2026-09-26-idle-gpu-new-sessions.json)"
+ },
+ "sweep_1_duty_cycle": [
+  {
+   "label": "idle",
+   "kind": "idle",
+   "load": null,
+   "period_ms": 1,
+   "busy_us": null,
+   "copy_mib": null,
+   "duty": null,
+   "seconds": 14.0,
+   "holds_p3_or_faster": null,
+   "first_seen_s": {
+    "P1": 0.05,
+    "P5": 3.21,
+    "P8": 4.85
+   },
+   "last_10s": {
+    "pstates": [
+     "P5",
+     "P8"
+    ],
+    "power_w_median": 27.9,
+    "sm_mhz_median": 270.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 0.0,
+    "temp_c_median": 37.0
+   }
+  },
+  {
+   "label": "d1p1000",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 1000,
+   "busy_us": 10000,
+   "copy_mib": null,
+   "duty": 0.01,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.05,
+    "P5": 1.84,
+    "P8": 3.44
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 31.9,
+    "sm_mhz_median": 270.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 0.0,
+    "temp_c_median": 35.0
+   }
+  },
+  {
+   "label": "d1p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 1000,
+   "copy_mib": null,
+   "duty": 0.01,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P5": 1.83,
+    "P8": 3.42
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 36.3,
+    "sm_mhz_median": 345.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 1.0,
+    "temp_c_median": 36.0
+   }
+  },
+  {
+   "label": "d2p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 2500,
+   "copy_mib": null,
+   "duty": 0.025,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.02,
+    "P5": 1.81,
+    "P8": 3.45
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 41.3,
+    "sm_mhz_median": 367.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 3.0,
+    "temp_c_median": 37.0
+   }
+  },
+  {
+   "label": "d5p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 5000,
+   "copy_mib": null,
+   "duty": 0.05,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.01,
+    "P5": 1.85,
+    "P8": 3.44
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 44.0,
+    "sm_mhz_median": 420,
+    "mem_mhz_median": 405,
+    "util_median": 5,
+    "temp_c_median": 36
+   }
+  },
+  {
+   "label": "d10p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 10000,
+   "copy_mib": null,
+   "duty": 0.1,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.0,
+    "P5": 1.85,
+    "P8": 3.44
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 49.1,
+    "sm_mhz_median": 592.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 10.0,
+    "temp_c_median": 35.0
+   }
+  },
+  {
+   "label": "d20p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 20000,
+   "copy_mib": null,
+   "duty": 0.2,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P3": 2.59,
+    "P5": 3.82,
+    "P8": 7.41
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 55.8,
+    "sm_mhz_median": 1162,
+    "mem_mhz_median": 405,
+    "util_median": 20,
+    "temp_c_median": 34
+   }
+  },
+  {
+   "label": "d40p100",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 40000,
+   "copy_mib": null,
+   "duty": 0.4,
+   "seconds": 30.0,
+   "holds_p3_or_faster": true,
+   "first_seen_s": {
+    "P1": 0.04
+   },
+   "last_10s": {
+    "pstates": [
+     "P1"
+    ],
+    "power_w_median": 117.4,
+    "sm_mhz_median": 3000,
+    "mem_mhz_median": 13801,
+    "util_median": 40,
+    "temp_c_median": 37
+   }
+  },
+  {
+   "label": "idle-end",
+   "kind": "idle",
+   "load": null,
+   "period_ms": 1,
+   "busy_us": null,
+   "copy_mib": null,
+   "duty": null,
+   "seconds": 20.0,
+   "holds_p3_or_faster": null,
+   "first_seen_s": {
+    "P1": 0.01,
+    "P3": 1.39,
+    "P5": 1.8,
+    "P8": 3.4
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 28.5,
+    "sm_mhz_median": 270.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 0.0,
+    "temp_c_median": 34.0
+   }
+  }
+ ],
+ "sweep_2_threshold_and_load_shape": [
+  {
+   "label": "idle",
+   "kind": "idle",
+   "load": null,
+   "period_ms": 1,
+   "busy_us": null,
+   "copy_mib": null,
+   "duty": null,
+   "seconds": 10.0,
+   "holds_p3_or_faster": null,
+   "first_seen_s": {
+    "P1": 0.02,
+    "P5": 3.78,
+    "P8": 5.32
+   },
+   "last_10s": {
+    "pstates": [
+     "P1",
+     "P5",
+     "P8"
+    ],
+    "power_w_median": 38.2,
+    "sm_mhz_median": 375,
+    "mem_mhz_median": 810,
+    "util_median": 0,
+    "temp_c_median": 36
+   }
+  },
+  {
+   "label": "s40",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 40000,
+   "copy_mib": null,
+   "duty": 0.4,
+   "seconds": 30.0,
+   "holds_p3_or_faster": true,
+   "first_seen_s": {
+    "P1": 0.03
+   },
+   "last_10s": {
+    "pstates": [
+     "P1"
+    ],
+    "power_w_median": 117.8,
+    "sm_mhz_median": 3000,
+    "mem_mhz_median": 13801,
+    "util_median": 40,
+    "temp_c_median": 38
+   }
+  },
+  {
+   "label": "s25",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 25000,
+   "copy_mib": null,
+   "duty": 0.25,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.01,
+    "P3": 4.52,
+    "P5": 7.74,
+    "P8": 13.7
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 58.8,
+    "sm_mhz_median": 1207.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 25.0,
+    "temp_c_median": 35.0
+   }
+  },
+  {
+   "label": "s30",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 30000,
+   "copy_mib": null,
+   "duty": 0.3,
+   "seconds": 30.0,
+   "holds_p3_or_faster": true,
+   "first_seen_s": {
+    "P1": 0.0
+   },
+   "last_10s": {
+    "pstates": [
+     "P1"
+    ],
+    "power_w_median": 87.3,
+    "sm_mhz_median": 1995.0,
+    "mem_mhz_median": 13801.0,
+    "util_median": 30.0,
+    "temp_c_median": 36.0
+   }
+  },
+  {
+   "label": "s35",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 100,
+   "busy_us": 35000,
+   "copy_mib": null,
+   "duty": 0.35,
+   "seconds": 30.0,
+   "holds_p3_or_faster": true,
+   "first_seen_s": {
+    "P1": 0.02
+   },
+   "last_10s": {
+    "pstates": [
+     "P1"
+    ],
+    "power_w_median": 94.0,
+    "sm_mhz_median": 2505,
+    "mem_mhz_median": 13801,
+    "util_median": 35,
+    "temp_c_median": 37
+   }
+  },
+  {
+   "label": "s40p1000",
+   "kind": "load",
+   "load": "single-warp spin",
+   "period_ms": 1000,
+   "busy_us": 400000,
+   "copy_mib": null,
+   "duty": 0.4,
+   "seconds": 30.0,
+   "holds_p3_or_faster": true,
+   "first_seen_s": {
+    "P1": 0.05
+   },
+   "last_10s": {
+    "pstates": [
+     "P1"
+    ],
+    "power_w_median": 117.7,
+    "sm_mhz_median": 3000,
+    "mem_mhz_median": 13801,
+    "util_median": 34,
+    "temp_c_median": 38
+   }
+  },
+  {
+   "label": "f10",
+   "kind": "load",
+   "load": "all-SM spin",
+   "period_ms": 100,
+   "busy_us": 10000,
+   "copy_mib": null,
+   "duty": 0.1,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.05,
+    "P5": 1.9,
+    "P8": 3.7
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 64.5,
+    "sm_mhz_median": 532.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 10.0,
+    "temp_c_median": 36.0
+   }
+  },
+  {
+   "label": "f20",
+   "kind": "load",
+   "load": "all-SM spin",
+   "period_ms": 100,
+   "busy_us": 20000,
+   "copy_mib": null,
+   "duty": 0.2,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.01,
+    "P3": 2.47,
+    "P5": 3.86,
+    "P8": 6.49
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 89.8,
+    "sm_mhz_median": 900,
+    "mem_mhz_median": 405,
+    "util_median": 20,
+    "temp_c_median": 37
+   }
+  },
+  {
+   "label": "m64",
+   "kind": "load",
+   "load": "device-to-device copy",
+   "period_ms": 100,
+   "busy_us": null,
+   "copy_mib": 64,
+   "duty": null,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P5": 1.88,
+    "P8": 3.68
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 36.6,
+    "sm_mhz_median": 382.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 3.0,
+    "temp_c_median": 34.0
+   }
+  },
+  {
+   "label": "m256",
+   "kind": "load",
+   "load": "device-to-device copy",
+   "period_ms": 100,
+   "busy_us": null,
+   "copy_mib": 256,
+   "duty": null,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.01,
+    "P3": 1.9,
+    "P5": 2.46,
+    "P8": 4.26
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 51.0,
+    "sm_mhz_median": 727,
+    "mem_mhz_median": 405,
+    "util_median": 14,
+    "temp_c_median": 34
+   }
+  },
+  {
+   "label": "m256p20",
+   "kind": "load",
+   "load": "device-to-device copy",
+   "period_ms": 20,
+   "busy_us": null,
+   "copy_mib": 256,
+   "duty": null,
+   "seconds": 30.0,
+   "holds_p3_or_faster": false,
+   "first_seen_s": {
+    "P1": 0.03,
+    "P3": 1.88,
+    "P5": 7.26
+   },
+   "last_10s": {
+    "pstates": [
+     "P3",
+     "P5"
+    ],
+    "power_w_median": 58.3,
+    "sm_mhz_median": 817,
+    "mem_mhz_median": 7001,
+    "util_median": 3,
+    "temp_c_median": 34
+   }
+  },
+  {
+   "label": "idle-end",
+   "kind": "idle",
+   "load": null,
+   "period_ms": 1,
+   "busy_us": null,
+   "copy_mib": null,
+   "duty": null,
+   "seconds": 15.0,
+   "holds_p3_or_faster": null,
+   "first_seen_s": {
+    "P3": 0.04,
+    "P5": 0.65,
+    "P8": 1.89
+   },
+   "last_10s": {
+    "pstates": [
+     "P8"
+    ],
+    "power_w_median": 26.9,
+    "sm_mhz_median": 270.0,
+    "mem_mhz_median": 405.0,
+    "util_median": 0.0,
+    "temp_c_median": 33.0
+   }
+  }
+ ],
+ "grace_period_without_nsight_systems": [
+  {
+   "session": "session-1",
+   "idle_s": 0.0,
+   "prefill_s": 0.1554,
+   "ttft_s": 0.1655,
+   "computed_tokens": 165,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-2",
+   "idle_s": 12.0,
+   "prefill_s": 0.1549,
+   "ttft_s": 0.173,
+   "computed_tokens": 167,
+   "path": "shared_stable_prefix",
+   "keepwarm": true,
+   "pstate_samples": {
+    "P1": 194
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.05
+   },
+   "power_w_median": 91.6,
+   "sm_mhz_median": 2175.0,
+   "mem_mhz_median": 13801.0,
+   "util_median": 30.0,
+   "pstate_at_send": "P1",
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-3",
+   "idle_s": 0.0,
+   "prefill_s": 0.1565,
+   "ttft_s": 0.1756,
+   "computed_tokens": 193,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-4",
+   "idle_s": 60.0,
+   "prefill_s": 0.1798,
+   "ttft_s": 0.201,
+   "computed_tokens": 159,
+   "path": "shared_stable_prefix",
+   "keepwarm": true,
+   "pstate_samples": {
+    "P1": 1132
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.04
+   },
+   "power_w_median": 88.8,
+   "sm_mhz_median": 2017.0,
+   "mem_mhz_median": 13801.0,
+   "util_median": 30.0,
+   "pstate_at_send": "P1",
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-5",
+   "idle_s": 0.0,
+   "prefill_s": 0.1586,
+   "ttft_s": 0.1815,
+   "computed_tokens": 230,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-6",
+   "idle_s": 30.0,
+   "prefill_s": 0.3525,
+   "ttft_s": 0.4169,
+   "computed_tokens": 187,
+   "path": "shared_stable_prefix",
+   "keepwarm": false,
+   "pstate_samples": {
+    "P3": 92,
+    "P5": 35,
+    "P8": 416
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.01,
+    "P3": 1.91,
+    "P5": 6.72,
+    "P8": 8.51
+   },
+   "power_w_median": 29.0,
+   "sm_mhz_median": 270,
+   "mem_mhz_median": 405,
+   "util_median": 0,
+   "pstate_at_send": "P8",
+   "mem_mhz_at_send": 405
+  }
+ ],
+ "grace_period_under_nsight_systems": [
+  {
+   "session": "session-1",
+   "idle_s": 0.0,
+   "prefill_s": 0.1558,
+   "ttft_s": 0.1663,
+   "computed_tokens": 165,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-2",
+   "idle_s": 12.0,
+   "prefill_s": 0.167,
+   "ttft_s": 0.1855,
+   "computed_tokens": 167,
+   "path": "shared_stable_prefix",
+   "keepwarm": true,
+   "pstate_samples": {
+    "P1": 190
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.04
+   },
+   "power_w_median": 152.9,
+   "sm_mhz_median": 2175.0,
+   "mem_mhz_median": 13801.0,
+   "util_median": 30.0,
+   "pstate_at_send": "P3",
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-3",
+   "idle_s": 0.0,
+   "prefill_s": 0.1574,
+   "ttft_s": 0.1772,
+   "computed_tokens": 193,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-4",
+   "idle_s": 60.0,
+   "prefill_s": 0.1802,
+   "ttft_s": 0.2019,
+   "computed_tokens": 159,
+   "path": "shared_stable_prefix",
+   "keepwarm": true,
+   "pstate_samples": {
+    "P1": 1128
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.01,
+    "P3": 60.0
+   },
+   "power_w_median": 143.4,
+   "sm_mhz_median": 1987.0,
+   "mem_mhz_median": 13801.0,
+   "util_median": 30.0,
+   "pstate_at_send": "P3",
+   "mem_mhz_at_send": 13801
+  },
+  {
+   "session": "session-5",
+   "idle_s": 0.0,
+   "prefill_s": 0.1594,
+   "ttft_s": 0.1833,
+   "computed_tokens": 230,
+   "path": "shared_stable_prefix"
+  },
+  {
+   "session": "session-6",
+   "idle_s": 30.0,
+   "prefill_s": 0.1815,
+   "ttft_s": 0.2054,
+   "computed_tokens": 187,
+   "path": "shared_stable_prefix",
+   "keepwarm": true,
+   "pstate_samples": {
+    "P1": 542
+   },
+   "first_seen_after_response_s": {
+    "P1": 0.04,
+    "P3": 29.96
+   },
+   "power_w_median": 144.7,
+   "sm_mhz_median": 2010.0,
+   "mem_mhz_median": 13801.0,
+   "util_median": 30.0,
+   "pstate_at_send": "P3",
+   "mem_mhz_at_send": 13801
+  }
+ ],
+ "limits": [
+  "The side-process load contends with the server for GPU time while both run, so the client paused it before each request; an engine-side grace period would stop at admission, with no lead, and could not overlap a request at all.",
+  "The 30% load sits close to the holding threshold (25% fails after 13.7 s); a 35% load (94.0 W alone) leaves margin. The threshold was measured at a 100 ms period only, apart from 40% at 1 s.",
+  "Beside the server under Nsight Systems the same load drew 143-153 W; the production-faithful figure is the no-Nsight window's 88.8-91.6 W. Power is the board sensor as nvidia-smi reports it, sampled every 50 ms.",
+  "After a 60 s hold the first new session prefilled in 0.180 s against 0.155 s after 12 s (both windows show the longer hold slower, by 13-25 ms). The SM clock under the 30% load settles near 2,000 MHz, which may be why; it was not traced.",
+  "Two sweeps and two grace windows on one card and driver (610.88); gaps of 12, 30 and 60 s only."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
