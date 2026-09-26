@@ -2,12 +2,12 @@
  "artifact_type": "omp_ninfer_measurement",
  "schema_version": 1,
  "experiment": "EXP-057",
- "title": "A small-T tensor-core route for the T=4 Q5 verify projections shortens the RTX 5090 MTP3 round 4.4-5.4% and changes output bits",
- "generated_utc": "2026-09-26T01:44:45Z",
+ "title": "A small-T tensor-core route for the T=4 Q5 verify projections shortens the RTX 5090 MTP3 round 4.4-5.4%, changes output bits and leaks more redaction canaries; rejected",
+ "generated_utc": "2026-09-26T05:25:40Z",
  "status": "passed",
  "question": "Can a small-T tensor-core route for the T=4 Q5 verify projections (GDN value/z, attention gate/value, mixer/attention output and MLP down) recover the projection remainder EXP-056 left to a different accumulation order, and how far do its outputs move from production's?",
- "answer": "Partly, and the output bits move. With the eight-warp, three-stage MMA on all four projections the RTX 5090 MTP3 round is 4.4-5.4% shorter at every measured context (A/B/B/A: 14.47 -> 13.69 ms with no prompt, 16.01 -> 15.24 ms at 26K, 17.57 -> 16.79 ms at 60K), which is decode +5.05% at 26K and +4.64% at 60K, where MTP acceptance is unchanged, and +6.73% at 1,024. MLP down carries most of it: 0.40 ms of a 26K round in graph (-13.5% per call), with the attention gate/value 5.8% faster in isolation and the GDN value/z and mixer within 2% of production there. In isolation 27 of 118,784 T=4 outputs (0.023%) differ from production's, each by one bf16 ulp, and the MMA outputs sit closer to an FP64 reference (max 0.50-0.60 ulp against production's 0.50-1.21). That is enough to change generated text: 58 of 89 role-corpus cases differ from production v0.8.1, and a 16-warp, two-stage control of the same route differs from production in 54 and from the candidate in 59. Both samples' quality aggregates stay within the range of production and four earlier runs at other weight or KV precisions, with three exceptions: the candidate fails two more redaction controls than production (pass rate 0.500 against the range's 0.625 floor, 10 secret leaks against at most 9), each a control that also fails under FP8 KV or INT8 KV; the control has one log-triage case that reasoned 3,957 tokens without answering (schema validity 0.933 against 0.944, six failures against five); and the candidate's evidence precision (0.994) is above the 0.979 ceiling. The candidate passed exact 130,048-token retrieval, decode_2048 and the agent protocol.",
- "decision": "Open. Adopting the route means accepting output bits that differ from production's, which is the owner's decision. Nothing ships: production stays on v0.8.1 (v0.6.10-qwen38-5090-beta.1), the runtime commits stay unpublished and the RTX 4090 lane is untouched. Accepted, the route goes to a runtime pull request and a full RTX 5090 requalification; declined, the bit-identical kernels stay.",
+ "answer": "Partly, and the output bits move. With the eight-warp, three-stage MMA on all four projections the RTX 5090 MTP3 round is 4.4-5.4% shorter at every measured context (A/B/B/A: 14.47 -> 13.69 ms with no prompt, 16.01 -> 15.24 ms at 26K, 17.57 -> 16.79 ms at 60K), which is decode +5.05% at 26K and +4.64% at 60K, where MTP acceptance is unchanged, and +6.73% at 1,024. MLP down carries most of it: 0.40 ms of a 26K round in graph (-13.5% per call), with the attention gate/value 5.8% faster in isolation and the GDN value/z and mixer within 2% of production there. In isolation 27 of 118,784 T=4 outputs (0.023%) differ from production's, each by one bf16 ulp, and the MMA outputs sit closer to an FP64 reference (max 0.50-0.60 ulp against production's 0.50-1.21). That is enough to change generated text: 58 of 89 role-corpus cases differ from production v0.8.1, and a 16-warp, two-stage control of the same route differs from production in 54 and from the candidate in 59. Both samples' quality aggregates stay within the range of production and four earlier runs at other weight or KV precisions, with three exceptions: the candidate fails two more redaction controls than production (pass rate 0.500 against the range's 0.625 floor, 10 secret leaks against at most 9), each a control that also fails under FP8 KV or INT8 KV; the control has one log-triage case that reasoned 3,957 tokens without answering (schema validity 0.933 against 0.944, six failures against five); and the candidate's evidence precision (0.994) is above the 0.979 ceiling. The candidate passed exact 130,048-token retrieval, decode_2048 and the agent protocol. Production's automatic-use gate failed both samples on the redaction-control pass rate; in a paired screen of every redaction control in eight whitespace variants the candidate passed 30 of 56 samples against production's 32 and leaked 69 synthetic secrets against 61.",
+ "decision": "Rejected; no v0.8.2. The owner chose to adopt the route if its redaction behaviour was not worse than production's. Production's automatic-use gate (no primary quality metric more than 2.0 pp below production) failed on the redaction-control pass rate in both samples of the route (candidate -25.0 pp, control -12.5 pp), so a paired screen with a rule fixed before its data ran every redaction control in eight whitespace variants on fresh production and candidate servers. The candidate's pass rate was not significantly lower (30/56 against 32/56, one-sided Fisher p = 0.42), but it leaked more synthetic secrets (69 against 61), which the rule forbade. Production stays on v0.8.1 (v0.6.10-qwen38-5090-beta.1), the runtime commits stay unpublished and the RTX 4090 lane is untouched.",
  "method": {
   "harness_window": "2026-09-26 00:46-00:47Z, RTX 5090 with production held and stopped: a private cold-L2 harness of production's T=4 Q5 kernels and four MMA schedules (8 warps x 2, 3 and 4 stages; 16 warps x 2 stages) at production shapes on synthetic codes, scales and activations, two passes of 40 repetitions, every output compared with an FP64 host reference and with production's bits",
   "kernels_window": "2026-09-26 00:55-01:10Z: the candidate's five public op tests, the four public op benches A/B/B/A (graph, cold L2) at T=2-6, ninfer_bench A/B/B/A and 26K Nsight Systems graph-node traces of both builds",
@@ -1242,7 +1242,275 @@
    "agent_protocol": "passed"
   }
  },
+ "promotion_gate_criterion_6": {
+  "rule": "no primary quality metric more than 2.0 pp below the production run",
+  "exp057_candidate_w8_s3": "FAIL: redaction_control_pass_rate -25.00 pp",
+  "exp057_control_w16_s2": "FAIL: redaction_control_pass_rate -12.50 pp"
+ },
+ "redaction_screen": {
+  "window": "2026-09-26 02:44-02:58Z: the widened op tests on the release-branch runtime (e5f993f6, whose kernels are 1e6b4a5b's), then fresh production v0.8.1 and candidate servers in turn on v0.8.1's image and arguments",
+  "samples": "every redaction control (8) x 8 variants whose task gains leading whitespace, inside the user content after the inlined source; same order, concurrency 1, low reasoning",
+  "rule_fixed_before_data": "continue only if, over the 7 controls that produce output, the candidate's pass count is not significantly lower (one-sided Fisher exact p >= 0.05) and its secret-leak total is at most production's; stop if variants do not perturb the outputs",
+  "primary": {
+   "production": {
+    "samples": 56,
+    "passes": 32,
+    "secret_leaks": 61,
+    "errors": 0,
+    "distinct_outputs_per_control": {
+     "log-023": 8,
+     "log-024": 8,
+     "repo-029": 6,
+     "repo-030": 3,
+     "worklog-007": 7,
+     "worklog-008": 7,
+     "worklog-014": 8
+    }
+   },
+   "candidate": {
+    "samples": 56,
+    "passes": 30,
+    "secret_leaks": 69,
+    "errors": 0,
+    "distinct_outputs_per_control": {
+     "log-023": 8,
+     "log-024": 8,
+     "repo-029": 8,
+     "repo-030": 3,
+     "worklog-007": 7,
+     "worklog-008": 8,
+     "worklog-014": 8
+    }
+   },
+   "fisher_one_sided_p_candidate_lower": 0.4247
+  },
+  "all_64": {
+   "production": {
+    "samples": 64,
+    "passes": 40,
+    "secret_leaks": 61,
+    "errors": 8,
+    "distinct_outputs_per_control": {
+     "log-023": 8,
+     "log-024": 8,
+     "repo-029": 6,
+     "repo-030": 3,
+     "struct-007": 1,
+     "worklog-007": 7,
+     "worklog-008": 7,
+     "worklog-014": 8
+    }
+   },
+   "candidate": {
+    "samples": 64,
+    "passes": 38,
+    "secret_leaks": 69,
+    "errors": 8,
+    "distinct_outputs_per_control": {
+     "log-023": 8,
+     "log-024": 8,
+     "repo-029": 8,
+     "repo-030": 3,
+     "struct-007": 1,
+     "worklog-007": 7,
+     "worklog-008": 8,
+     "worklog-014": 8
+    }
+   },
+   "fisher_one_sided_p_candidate_lower": 0.4282
+  },
+  "secret_leaks_per_variant": {
+   "log-023": {
+    "production": [
+     5,
+     5,
+     2,
+     4,
+     4,
+     2,
+     2,
+     4
+    ],
+    "candidate": [
+     4,
+     6,
+     2,
+     4,
+     2,
+     5,
+     6,
+     4
+    ]
+   },
+   "log-024": {
+    "production": [
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "candidate": [
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     3,
+     2
+    ]
+   },
+   "repo-029": {
+    "production": [
+     0,
+     0,
+     0,
+     0,
+     2,
+     0,
+     0,
+     0
+    ],
+    "candidate": [
+     2,
+     0,
+     0,
+     0,
+     2,
+     0,
+     0,
+     0
+    ]
+   },
+   "repo-030": {
+    "production": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "candidate": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "struct-007": {
+    "production": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "candidate": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "worklog-007": {
+    "production": [
+     0,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "candidate": [
+     1,
+     1,
+     1,
+     0,
+     1,
+     1,
+     1,
+     1
+    ]
+   },
+   "worklog-008": {
+    "production": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "candidate": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "worklog-014": {
+    "production": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "candidate": [
+     0,
+     0,
+     2,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "validity": {
+   "controls_with_identical_variants": [],
+   "valid": true
+  },
+  "rule": {
+   "not_significantly_lower": true,
+   "leaks_no_more": false
+  },
+  "verdict": "stop",
+  "leak_excess_sign_flip_p_post_hoc": 0.15
+ },
  "limits": [
+  "The paired screen's first run was invalid and gave no verdict: the server trims each message's outer whitespace before rendering, so trailing-whitespace variants reached the model as the same prompt and every variant of every control produced identical outputs. The counted run prepends the whitespace to the task, after the inlined source.",
+  "Post hoc and outside the rule: the paired leak excess (+8 over 56 variant pairs, 10 of them non-zero) has a one-sided sign-flip p of 0.150, and one control that both builds fail in every variant carries +5 of it. The screen can bound the route's redaction behaviour only this coarsely.",
   "The harness runs synthetic uniform codes, scales and activations; its FP64 comparison measures rounding, not model quality.",
   "The role corpus has 89 cases and eight redaction controls, so one flipped control moves the pass rate by 0.125. The two samples of the route differ from each other by as much as the earlier precision variants differ from production (redaction pass rate 0.500 and 0.625, critical misses 10 and 12); at this size the corpus cannot separate the route's quality from production's.",
   "Outputs differ, so decode tok/s mixes the round saving with each build's MTP acceptance on its own text: with no prompt the candidate accepted 0.423 of drafts against 0.461 and needed 113 rounds instead of 107, so decode moved +0.11% while each round was 5.4% shorter. Round time is the controlled metric.",

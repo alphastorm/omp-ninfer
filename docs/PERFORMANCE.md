@@ -118,7 +118,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-054 | RTX 5090 MTP3 decode round attribution | The verify pass's Q4/Q5 projections, not launch overhead, hold the round above the bandwidth floor | 26K-context round 17.23 ms (production 17.1 ms), GPU busy 99.2%; W8 LM head, MTP layer and Q4 draft head at 97–104% of 1,674.5 GB/s; Q4 gate/up 82.5%, Q5 down 75.8%, Q5 mixer outputs 68.0%, GDN value/z 66.2%, GDN query/key 39.7%; 2.6 ms (15.1%) recoverable at 90% | kept |
 | EXP-055 | RTX 5090 and RTX 4090 MTP3 decode kernels | Row-blocking the small-T Q4/Q5 projections and removing the Q4 gate/up bank conflicts recover a material share of the round with bit-identical outputs | RTX 5090 packaged `v0.6.10`: 26K-context round 17.75 → 16.08 ms and decode +10.3% to +11.0% from a seed context to 31K (A/B/B/A); 32/32 kernel points byte-identical, 89/89 role-corpus cases identical, 130,048-token retrieval exact; Q4 gate/up 82.5% → 92.6% of the floor. RTX 4090: the split2 row pair ran 19% slower at T=4 and C1 decode fell 2.7%; with one-row split2 on the native lanes, 157.89 tok/s (+2.8%) | kept |
 | EXP-056 | RTX 5090 and RTX 4090 MTP3 decode remainder | Warp, register, prefetch and L2 hand-off schedules that keep every output byte recover part of the round EXP-055 left above 90% of the floor | 1,631 (RTX 5090) and 449 (RTX 4090) private-launcher rows per pass byte-identical; no T=4 projection or GDN record/fold schedule beats production beyond noise, and an L2 hand-off prefetch only speeds a cold consumer (the mixer takes 16.4 µs with its whole weight in L2 and 16.6 µs in the production graph). Two-warp BF16 attention above the 16K split tier: in-graph attention partial −6.1% at 26K, decode +0.28% to +0.91% from 26K to 60K, public op 3.7–5.4% slower at 16,387–20,000 keys. Exclusive-time remainder 1.15 ms (7.2%) | rejected — no `v0.8.2` |
-| EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact | open — owner numerics decision |
+| EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact. Paired redaction screen (8 controls × 8 whitespace variants on fresh servers): pass 30/56 vs 32/56 (Fisher p = 0.42), synthetic-secret leaks 69 vs 61 | rejected — more leaks; no `v0.8.2` |
 
 Entry detail:
 
@@ -639,8 +639,17 @@ Entry detail:
   0.625 floor), each one that also fails under FP8 or INT8 KV; the control leaves one log-triage
   case unanswered after 3,957 reasoning tokens; and the candidate's evidence precision (0.994)
   is above the 0.979 ceiling. The candidate passed exact 130,048-token retrieval, decode_2048
-  and the agent protocol. Adopting the route is an output-bit decision for the owner; nothing
-  ships. Receipt: [Q5 tensor-core route](measurements/2026-09-26-q5-small-t-tensor-core.json).
+  and the agent protocol. Production's automatic-use gate then failed both samples of the route
+  on the redaction-control pass rate (more than 2.0 pp below production), so the owner set a
+  rule before a paired screen: adopt the route only if its redaction behaviour was not worse.
+  Every redaction control ran in eight whitespace variants on fresh production and candidate
+  servers. A first run was invalid, because the server trims each message's outer whitespace
+  and every variant rendered the same prompt; the counted run put the whitespace inside the user
+  content. The candidate passed 30 of 56 samples against production's 32 (one-sided Fisher
+  p = 0.42) but leaked 69 synthetic secrets against 61, which the rule forbade. EXP-057 is
+  rejected: no `v0.8.2`, and production stays on `v0.8.1`. Varied prompts also put production's
+  own redaction pass rate at 57% (32 of 56), against 75% in the single corpus run. Receipt:
+  [Q5 tensor-core route](measurements/2026-09-26-q5-small-t-tensor-core.json).
 
 ## Current order
 
