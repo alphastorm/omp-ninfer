@@ -118,6 +118,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-054 | RTX 5090 MTP3 decode round attribution | The verify pass's Q4/Q5 projections, not launch overhead, hold the round above the bandwidth floor | 26K-context round 17.23 ms (production 17.1 ms), GPU busy 99.2%; W8 LM head, MTP layer and Q4 draft head at 97–104% of 1,674.5 GB/s; Q4 gate/up 82.5%, Q5 down 75.8%, Q5 mixer outputs 68.0%, GDN value/z 66.2%, GDN query/key 39.7%; 2.6 ms (15.1%) recoverable at 90% | kept |
 | EXP-055 | RTX 5090 and RTX 4090 MTP3 decode kernels | Row-blocking the small-T Q4/Q5 projections and removing the Q4 gate/up bank conflicts recover a material share of the round with bit-identical outputs | RTX 5090 packaged `v0.6.10`: 26K-context round 17.75 → 16.08 ms and decode +10.3% to +11.0% from a seed context to 31K (A/B/B/A); 32/32 kernel points byte-identical, 89/89 role-corpus cases identical, 130,048-token retrieval exact; Q4 gate/up 82.5% → 92.6% of the floor. RTX 4090: the split2 row pair ran 19% slower at T=4 and C1 decode fell 2.7%; with one-row split2 on the native lanes, 157.89 tok/s (+2.8%) | kept |
 | EXP-056 | RTX 5090 and RTX 4090 MTP3 decode remainder | Warp, register, prefetch and L2 hand-off schedules that keep every output byte recover part of the round EXP-055 left above 90% of the floor | 1,631 (RTX 5090) and 449 (RTX 4090) private-launcher rows per pass byte-identical; no T=4 projection or GDN record/fold schedule beats production beyond noise, and an L2 hand-off prefetch only speeds a cold consumer (the mixer takes 16.4 µs with its whole weight in L2 and 16.6 µs in the production graph). Two-warp BF16 attention above the 16K split tier: in-graph attention partial −6.1% at 26K, decode +0.28% to +0.91% from 26K to 60K, public op 3.7–5.4% slower at 16,387–20,000 keys. Exclusive-time remainder 1.15 ms (7.2%) | rejected — no `v0.8.2` |
+| EXP-057 | RTX 5090 MTP3 Q5 verify projections | A small-T tensor-core route for the T=4 Q5 projections recovers the remainder that byte-identical schedules could not, with output changes the role corpus cannot tell from production's | Round −4.4% to −5.4% at every context and decode +5.05% at 26K, +4.64% at 60K, +6.73% at 1,024 (A/B/B/A); MLP down −13.5% per call in graph. 27 of 118,784 isolated T=4 outputs differ from production's by one bf16 ulp, closer to FP64; 58 of 89 role-corpus cases differ from `v0.8.1` (a 16-warp control: 54). Quality aggregates within the range of production and four earlier precision variants except the candidate's redaction controls (0.500 against a 0.625 floor), its evidence precision (0.994, above the range) and one unanswered control case; 130,048-token retrieval exact | open — owner numerics decision |
 
 Entry detail:
 
@@ -616,6 +617,30 @@ Entry detail:
   RTX 4090 (449 rows per pass, all byte-identical) found only one- and two-tick leads at the
   1.024 µs timer resolution, and reconfirmed that the split2 row pair slows MLP down 13.9% at T=4.
   Nothing ships. Receipt: [decode remainder](measurements/2026-09-25-decode-round-remainder.json).
+- **EXP-057 — a tensor-core route for the Q5 verify projections (2026-09-26).** EXP-056 found
+  no schedule that keeps production's bytes and recovers the T=4 projections' share of the round.
+  A small-T MMA for the Q5 projections, built like the Q4 gate/up MMA (16-row CTAs, per-warp K
+  groups, 5-bit codes widened to exact bf16 integers, fp16 group scales applied in fp32), beat
+  production in a cold-L2 harness at eight warps and three stages: MLP down −13.3%, attention
+  gate/value −5.8%, GDN value/z and the mixer within 2%. Routed at T=4 on `sm_120` for all four
+  projections, it passed the five public op tests and shortened the MTP3 round 4.4–5.4% at every
+  measured context (A/B/B/A: 16.01 → 15.24 ms at 26K, 17.57 → 16.79 ms at 60K); decode rose
+  5.05% at 26K and 4.64% at 60K, where MTP acceptance does not move, and 6.73% at 1,024. MLP
+  down carries 0.40 ms of the 26K round, and the unchanged GDN query/key kernel loses 0.22 ms of
+  exclusive time to overlap with the tensor-core value/z. The output bits move. In isolation 27
+  of 118,784 outputs (0.023%) differ from production's, each by one bf16 ulp, and sit closer to
+  an FP64 reference (max 0.50–0.60 ulp against production's 0.50–1.21). That is enough to change
+  generated text: 58 of 89 role-corpus cases differ from `v0.8.1`, and a 16-warp, two-stage
+  control of the same route differs from production in 54 and from the candidate in 59. With no
+  prompt the candidate accepted fewer drafts on its own text (0.423 against 0.461), so decode
+  there moved +0.1% on a 5.4% shorter round. Both samples' quality aggregates stay within the
+  range of production and four earlier runs at other weight or KV precisions, with three
+  exceptions: the candidate fails two more redaction controls than production (0.500 against a
+  0.625 floor), each one that also fails under FP8 or INT8 KV; the control leaves one log-triage
+  case unanswered after 3,957 reasoning tokens; and the candidate's evidence precision (0.994)
+  is above the 0.979 ceiling. The candidate passed exact 130,048-token retrieval, decode_2048
+  and the agent protocol. Adopting the route is an output-bit decision for the owner; nothing
+  ships. Receipt: [Q5 tensor-core route](measurements/2026-09-26-q5-small-t-tensor-core.json).
 
 ## Current order
 
