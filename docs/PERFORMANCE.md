@@ -124,6 +124,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-060 | RTX 5090 new agent sessions after idle | Production's new sessions (the shared-stable-prefix warm turns) are slow for a reason that a change keeping output bytes could remove | 103 of 106 v0.7.0 new sessions (138 of 446 agent requests) arrived 5 s or more after the previous request finished: prefill 0.317 s (TTFT 0.361 s) against 0.171 s (0.199 s) for the three that arrived sooner. After the last response the GPU steps P1 → P3 (about 2.0 s) → P5 (7.4 s) → P8 (9.2 s). Served on production's binary, new sessions after 12–30 s idle took 0.253–0.334 s against 0.156–0.160 s back to back, their prompt pass 205–287 ms against 123–127 ms. A 1 Hz 0.4 ms keep-alive kernel changed nothing | open — measure only |
 | EXP-061 | RTX 5090 keep-warm load between agent requests | A light GPU load run only while the engine is idle keeps the card out of its slow idle P-states and brings new sessions after idle back to back-to-back latency | A single-warp kernel spinning 30 ms of every 100 ms holds P1 (memory 13,801 MHz); 25% reaches P8 after 13.7 s, 1–20% within 3.4–7.4 s, and all-SM spins at 10–20% and 64–256 MiB copies do not hold. The 30% load drew 88.8–91.6 W beside production's binary against 29.0 W idle. As a grace period it held P1 through 12 s and 60 s gaps: new sessions prefilled in 0.155 and 0.180 s (TTFT 0.173 and 0.201 s) against 0.155–0.159 s back to back and 0.353 s (TTFT 0.417 s) after 30 s without it | open — measure only |
 | EXP-062 | RTX 5090 engine keep-warm grace period | Built into ninfer-serve, a grace-period keep-warm brings new sessions after idle back to back-to-back latency without changing outputs or slowing the requests that arrive while it runs | `--gpu-keep-warm-ms N` (off by default): once the Engine goes idle, a single-warp kernel spins 3.5 ms of every 10 ms on its own stream until a request is pending or N ms pass. It held P1 at 99.5–102.7 W against 29.3–29.8 W idle. New sessions after 12–58 s idle prefilled in 0.155–0.157 s (TTFT 0.173–0.181 s), as back to back, against 0.253–0.304 s (TTFT 0.316–0.366 s) with it off. All 89 role-corpus cases stayed byte-identical with it on and off. The 80 back-to-back corpus requests: paired TTFT median −0.1 ms, worst +4.4 ms. In v0.7.0 traffic a 60 s grace catches 84 of 138 idle arrivals at about 2.3 W average | kept — shipped in v0.8.2 |
+| EXP-063 | RTX 5090 redaction screen for the EXP-057 route | With enough paired samples to tell a worse route from noise, and its rule fixed before any candidate data, the EXP-057 Q5 small-T tensor-core route is not worse than production at redaction | Rebased onto v0.8.2's source, the route reproduced EXP-057's candidate outputs on all 89 role-corpus cases. On 504 paired prompts (7 redaction controls x 72 whitespace variants, fresh servers) it leaked 561 synthetic secrets against production's 582 (ratio 0.964, one-sided 95% upper bound 1.012 against a 1.10 margin) and passed 53.2% of prompts against 52.6% (lower bound −1.2 pp against −5 pp); both arms reproduced their determinism prompts and EXP-057's 64 shared prompts byte for byte. Release builds A/B/B/A: MTP3 round −3.5% to −4.9%, decode +4.4% at 26K, +3.6% at 60K, +6.3% at 1,024 | kept — v0.8.3 candidate |
 
 Entry detail:
 
@@ -773,6 +774,32 @@ Entry detail:
   evidence set and the four documented routes, and production has run it since 2026-09-26.
   Receipt: [engine keep-warm](measurements/2026-09-26-engine-keep-warm.json); release:
   [v0.8.2 lane receipt](../releases/v0.8.2/qualification/rtx5090.json).
+- **EXP-063 — a redaction screen that can say "not worse" (2026-09-27).** EXP-057's route failed
+  the owner's rule on a 56-sample screen whose leak rule was a point estimate: candidate total at
+  most production's, which an equivalent route fails about half the time. EXP-063 keeps the rule
+  and gives it power. [`scripts/redaction_screen.py`](../scripts/redaction_screen.py) writes every
+  redaction control in 72 whitespace variants (v0-v7 are EXP-057's prompts) and decides by a rule
+  committed before any candidate data (`554ac56`, 04:12Z; the candidate arm began 05:24Z): pass
+  only if the one-sided 95% upper bound of the candidate's leak total over production's is below
+  1.10 and the lower bound of the paired pass-rate difference is above −5 pp, both from a paired
+  bootstrap within controls. It is invalid if a counted prompt is missing, errors exceed 1%, fewer
+  than half the controls change output across variants, or either arm's determinism re-run
+  differs. The route was rebased onto v0.8.2's source as `9d1ef748` and built as the v0.6.12
+  release package. Its eight Q4/Q5 op tests passed, and its 89 role-corpus outputs equal EXP-057's
+  candidate's (58 differ from production's). The screen served 576 prompts per arm on fresh
+  servers with production v0.8.2's image and arguments; 504 counted pairs, no errors, all seven
+  counted controls changed output across variants, and both arms reproduced their 14 determinism
+  prompts. The candidate leaked 561 secrets against 582, fewer in four controls and as many in
+  three, and passed 53.2% against 52.6%; the bounds were 1.012 and −1.2 pp. On v0-v7 both arms
+  matched EXP-057's outputs on all 64 prompts, so EXP-057's +8 leak excess sits inside this sample.
+  The candidate then passed the profile gates: exact 130,048-token retrieval in 59.2 s, decode_2048
+  at 168.81 tok/s, and the agent protocol. Release build against release build, A/B/B/A, the MTP3
+  round was 4.2% shorter at 26K and 3.5% at 60K, and decode rose 4.4% and 3.6% there, where MTP
+  acceptance does not move; with no prompt the candidate accepted fewer drafts on its own text
+  (0.423 against 0.461), so decode moved −0.5% on a 4.9% shorter round. Two controls fail in
+  every sample in both arms and carry 465 of production's 582 leaks, and the screen bounds the
+  route on these seven controls, not on redaction in general. Receipt:
+  [powered redaction screen](measurements/2026-09-27-powered-redaction-screen.json).
 
 ## Current order
 
