@@ -1,0 +1,25 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-064",
+ "title": "RTX 4090 idle P-states and the engine keep-warm (pre-registered)",
+ "generated_utc": "2026-09-27T14:55:00Z",
+ "status": "pre-registered",
+ "question": "Does the RTX 4090 native lane slow new sessions that arrive after idle, as the RTX 5090 did (EXP-060), and does ninfer-serve --gpu-keep-warm-ms 60000 (EXP-062, shipped for the RTX 5090 in v0.8.2) bring them back to back-to-back speed on this card with identical outputs?",
+ "exploratory_observation_before_this_rule": {
+  "disclosure": "Observed before the decision rule below was written; it motivated the experiment and is not counted by the rule.",
+  "subject": "published v0.6.8-qwen38-4090-beta.1 (binary 32905865, source 5a774841), managed start on sf-pc, 2026-09-27 14:33-14:37Z",
+  "workload": "one cold request whose system message (synthetic text plus inert tool JSON, 15,167 prompt tokens) forms the stable prefix, then ten new two-message sessions of 99-103 computed tokens after gaps 0,12,0,30,0,12,0,60,0,45 s; greedy, thinking off, 64 output tokens; nvidia-smi every 50 ms",
+  "result": "Back to back: prefill 0.146-0.147 s (TTFT 0.170-0.177 s) in P2. After 12-60 s idle every session started in P8 (210 MHz SM, 405 MHz memory) and prefilled in 0.361-0.460 s (TTFT 0.438-0.486 s). The card stepped P2 -> P3 at about 2.3 s, P5 at 3.3-4.3 s and P8 at 5.3-6.3 s after the last response."
+ },
+ "decision_rule": {
+  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 9d1ef748, launched directly on sf-pc with the RTX 4090 lane's serving arguments: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
+  "workload_per_arm": "One cold request that builds the stable prefix, then 30 new two-message sessions after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times (15 back to back, three at each of five delays); greedy, thinking off, 64 output tokens, identical prompts in both arms; nvidia-smi every 50 ms. Latency is the server's own prefill time from its request log.",
+  "regression": "The OFF arm regresses if, at three or more of the five delays, its median prefill is at least 25% and at least 75 ms above its back-to-back median.",
+  "recovery": "The ON arm recovers if, at every delay, its median prefill is within 10% and within 20 ms of its back-to-back median, and every session after a gap starts in P2.",
+  "safety": "All 31 responses are byte-identical between the arms, no request fails, and the ON arm's back-to-back median prefill is at most 10% above the OFF arm's.",
+  "decision": "If regression, recovery and safety all hold, the RTX 4090 profile ships engine.gpu_keep_warm_ms = 60000; otherwise it ships 0. No other grace is chosen from this data.",
+  "informational": "Power while held (ON arm gaps) against idle (OFF arm gaps); not a gate."
+ },
+ "raw_prompts_outputs_or_secrets_included": false
+}
