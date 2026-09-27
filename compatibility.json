@@ -64,7 +64,7 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.3",
+        "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/edc8c44eba35c9f5986010b74ad2bdbcf796e952/releases/v0.8.3/qualification/rtx5090.json",
@@ -161,7 +161,7 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.3",
+        "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/edc8c44eba35c9f5986010b74ad2bdbcf796e952/releases/v0.8.3/qualification/rtx5090.json",
@@ -259,7 +259,7 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.3",
+        "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/edc8c44eba35c9f5986010b74ad2bdbcf796e952/releases/v0.8.3/qualification/rtx5090.json",

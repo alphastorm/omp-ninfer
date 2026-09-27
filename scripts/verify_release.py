@@ -375,19 +375,19 @@ def validate_pinned_evidence(
         require_pinned_bytes(root, url, expected, label, errors, cache)
 
 
-def validate_ga_evidence_bindings(
-    release: Any,
+def validate_launch_identity(
     manifest: dict[str, Any],
-    compatibility: dict[str, Any],
-    qualification: dict[str, Any],
     profiles: list[tuple[str, dict[str, Any]]],
+    receipt_path: Path,
     errors: list[str],
 ) -> None:
-    """A ready GA release's derived records must name the manifest's exact components.
+    """An installable GA release must launch, and have qualified, the identity it declares.
 
-    Profile launch arguments, the qualification summary's runtime identity, and the native
-    variant rows of the compatibility authority and qualification composition are all copies of
-    manifest identities; a copy that drifts is a stale public claim.
+    The documented launcher refuses a profile whose configuration does not hash to the
+    manifest's identity: v0.8.3 was staged under a new deployment profile name with v0.8.2's
+    identity, which hashes the old name, and its route was refused inside a production window.
+    The RTX 5090 lane receipt records the identity its qualified server reported, so a release
+    declaring another configuration claims a qualification it does not have.
     """
     components = manifest.get("components", {})
     ninfer = components.get("ninfer", {})
@@ -415,6 +415,41 @@ def validate_ga_evidence_bindings(
         require(runtime.get("configuration_sha256") == configuration_identity(profile),
                 f"{label}: runtime_identity.configuration_sha256 must equal the identity of the "
                 "configuration this profile launches", errors)
+
+    identity = load_json(receipt_path).get("identity") if receipt_path.is_file() else None
+    # Receipts before v0.7.2 predate the recorded configuration identity.
+    if isinstance(identity, dict) and "config_sha256" in identity:
+        for key, expected, source in (
+            ("deployment_profile", runtime.get("deployment_profile"),
+             "runtime_identity.deployment_profile"),
+            ("config_sha256", runtime.get("configuration_sha256"),
+             "runtime_identity.configuration_sha256"),
+            ("binary_sha256", ninfer.get("server_binary_sha256"),
+             "components.ninfer.server_binary_sha256"),
+            ("model_artifact_sha256", model.get("artifact_sha256"),
+             "components.model.artifact_sha256"),
+        ):
+            require(identity.get(key) == expected,
+                    f"primary RTX 5090 qualification receipt identity.{key} must equal {source}",
+                    errors)
+
+
+def validate_ga_evidence_bindings(
+    release: Any,
+    manifest: dict[str, Any],
+    compatibility: dict[str, Any],
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """A ready GA release's derived records must name the manifest's exact components.
+
+    The qualification summary's runtime identity and the native variant rows of the
+    compatibility authority and qualification composition are all copies of manifest
+    identities; a copy that drifts is a stale public claim.
+    """
+    components = manifest.get("components", {})
+    ninfer = components.get("ninfer", {})
+    runtime = manifest.get("runtime_identity", {})
 
     identity = qualification.get("runtime_identity", {})
     composition = qualification.get("composition", {})
@@ -1865,6 +1900,9 @@ def validate(
     if status in {"candidate", "ready"} or require_installable or require_ready:
         if ga_release(release):
             validate_client_profile_predicates(compatibility, errors)
+            validate_launch_identity(
+                manifest, profiles, manifest_path.parent / "qualification" / "rtx5090.json", errors
+            )
         installable_values = {
             "components.omp.distribution_version": omp.get("distribution_version"),
             "components.omp.platform": omp.get("platform"),
@@ -1945,7 +1983,7 @@ def validate(
                 manifest, compatibility, qualification, errors
             )
             validate_ga_evidence_bindings(
-                release, manifest, compatibility, qualification, profiles, errors
+                release, manifest, compatibility, qualification, errors
             )
             validate_continuation_capability(root, release, compatibility, errors)
             validate_aggregate_as_of(root, release, compatibility, qualification, errors)

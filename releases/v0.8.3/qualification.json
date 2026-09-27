@@ -18,7 +18,7 @@
     "model_artifact_bytes": 18210531328,
     "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
     "public_model_id": "q38-ninfer",
-    "deployment_profile": "qwen38-5090-v0.8.3"
+    "deployment_profile": "qwen38-5090-v0.8.2"
   },
   "composition": {
     "behavioral_qualification": {

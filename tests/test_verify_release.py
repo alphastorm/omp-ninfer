@@ -961,6 +961,47 @@ class ReleaseContractTest(unittest.TestCase):
             errors,
         )
 
+    def test_installable_candidate_must_launch_the_configuration_it_declares(self) -> None:
+        """v0.8.3 was staged under a new deployment profile name with v0.8.2's configuration
+        identity, which hashes the old name. It passed --require-installable, and the documented
+        route's launcher refused it inside a production window."""
+        temporary, root = self.upstream_candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        manifest_path = root / "releases" / PUBLIC_RELEASE / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["runtime_identity"]["deployment_profile"] = "qwen38-5090-v0.99.0"
+        self.save(manifest_path, manifest)
+        for profile_path in (root / "profiles").glob("qwen38-rtx5090-*.json"):
+            profile = self.load(profile_path)
+            profile["server"]["deployment_profile"] = "qwen38-5090-v0.99.0"
+            arguments = profile["server"]["arguments"]
+            arguments[arguments.index("--deployment-profile") + 1] = "qwen38-5090-v0.99.0"
+            self.save(profile_path, profile)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
+        self.assertIn(
+            "profiles/qwen38-rtx5090-manual-tunnel.json: runtime_identity.configuration_sha256 "
+            "must equal the identity of the configuration this profile launches",
+            errors,
+        )
+
+    def test_installable_candidate_declares_the_configuration_its_lane_qualified(self) -> None:
+        """The RTX 5090 lane receipt records the identity its qualified server reported; a
+        release declaring another configuration claims a qualification it does not have."""
+        temporary, root = self.upstream_candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        receipt_path = root / "releases" / PUBLIC_RELEASE / "qualification" / "rtx5090.json"
+        receipt = self.load(receipt_path)
+        receipt["identity"]["deployment_profile"] = "qwen38-5090-v0.99.0"
+        self.save(receipt_path, receipt)
+
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
+        self.assertIn(
+            "primary RTX 5090 qualification receipt identity.deployment_profile must equal "
+            "runtime_identity.deployment_profile",
+            errors,
+        )
+
     def test_profile_deployment_identity_must_match_manifest(self) -> None:
         temporary, root = self.candidate_copy()
         self.addCleanup(temporary.cleanup)

@@ -74,7 +74,8 @@ class StageReleaseTests(unittest.TestCase):
 
     def stage(self, root: Path, descriptor: Path | None = DESCRIPTOR,
               *, require_clean_client: bool = False,
-              source_release: str = SOURCE) -> subprocess.CompletedProcess:
+              source_release: str = SOURCE,
+              config_sha: str | None = None) -> subprocess.CompletedProcess:
         ninfer = self.load(root / "releases" / source_release / "manifest.json")["components"]["ninfer"]
         command = [
             sys.executable, str(root / "scripts" / "stage_release.py"),
@@ -89,7 +90,7 @@ class StageReleaseTests(unittest.TestCase):
             "--image-digest", ninfer["oci_manifest_digest"],
             "--runtime-receipt-release", ninfer["runtime_receipt_release"],
             "--archive-name", ninfer["binary_archive_url"].rsplit("/", 1)[-1],
-            "--keep-deployment-profile",
+            *(["--config-sha", config_sha] if config_sha else ["--keep-deployment-profile"]),
         ]
         if descriptor is not None:
             command.extend(["--omp-component", str(descriptor)])
@@ -166,6 +167,16 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn("linux-docker-local client_distribution.asset_id must be a positive integer",
                       result.stderr)
+        self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_a_new_profile_cannot_keep_the_source_configuration_identity(self) -> None:
+        """The configuration identity hashes --deployment-profile. v0.8.3 was staged with
+        v0.8.2's identity under a new profile name, and its launcher refused the candidate."""
+        root = self.staging_copy()
+        source = self.load(root / "releases" / SOURCE / "manifest.json")
+        result = self.stage(root, config_sha=source["runtime_identity"]["configuration_sha256"])
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("pass --keep-deployment-profile", result.stderr)
         self.assertFalse((root / "releases" / TARGET).exists())
 
     def test_staging_without_descriptor_preserves_the_source_client(self) -> None:

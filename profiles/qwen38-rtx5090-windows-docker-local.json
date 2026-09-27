@@ -39,7 +39,7 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.8.3",
+    "deployment_profile": "qwen38-5090-v0.8.2",
     "container_network_mode": "bridge",
     "restart_policy": "no",
     "arguments": [
@@ -56,7 +56,7 @@
       "--config-sha256",
       "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
       "--deployment-profile",
-      "qwen38-5090-v0.8.3",
+      "qwen38-5090-v0.8.2",
       "--max-context",
       "131072",
       "--kv-capacity",

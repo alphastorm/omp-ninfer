@@ -258,6 +258,14 @@ def main() -> int:
         source_manifest["runtime_identity"]["configuration_sha256"]
         if args.keep_deployment_profile else args.config_sha
     )
+    # The configuration identity hashes --deployment-profile, so a renamed profile cannot keep
+    # the source's identity: v0.8.3 was staged that way and its launcher refused the candidate.
+    if profile_to != profile_from and (
+        config_sha == source_manifest["runtime_identity"]["configuration_sha256"]
+    ):
+        parser.error(f"--config-sha is {args.source}'s configuration identity, which hashes its "
+                     f"deployment profile {profile_from}; to keep the configuration, pass "
+                     "--keep-deployment-profile")
 
     # 1. Copy the tree.
     shutil.copytree(src_dir, dst_dir)
