@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.8.3",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d948052d4270691a54171fed13c821edff0f2bb7/compatibility.json",
-      "compatibility_sha256": "05e293d67008cba608936ce0180f6dcca72d35219ae2513ded3c68622540de83",
+      "compatibility_sha256": "1722c9e443b40e02f350217c8f9559c079ab89cd74acd43d73825a4fe3f5604f",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.3.0",
@@ -112,10 +112,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "9b80306b35e251556aea065e542476d9ed71f85fc53676406b920fe2ad1ec9c7",
+    "summary_sha256": "e785db43de8cdf88bdd3ba3e95a88778ce8ad74d34b95590b2caf690a9256d27",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d948052d4270691a54171fed13c821edff0f2bb7/releases/v0.8.3/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -143,9 +143,7 @@
       "NInfer RTX5090 v0.6.12-qwen38-5090-beta.1 (published)",
       "NInfer RTX4090 v0.6.8-qwen38-4090-beta.1 (published)"
     ],
-    "blockers": [
-      "external-install and documented-route acceptance have not run against the published v0.6.12-qwen38-5090-beta.1 image cd9e10b1 and v0.6.8-qwen38-4090-beta.1 package with the upstream OMP 18.3.0 client; the composed acceptance receipt is absent until they do"
-    ],
+    "blockers": [],
     "external_installation_qualified": true
   }
 }

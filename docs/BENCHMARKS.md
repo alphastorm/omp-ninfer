@@ -11,7 +11,86 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.8.2 — GPU keep-warm (2026-09-26)
+## v0.8.3 — faster RTX 5090 decode (2026-09-27)
+
+RTX 5090 advances to `v0.6.12-qwen38-5090-beta.1` (image `cd9e10b1`, server `3ab266e5`,
+source `9d1ef748`); RTX 4090 keeps `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`,
+server `32905865`, source `5a774841`) and carries its v0.8.1 lane receipt. The unmodified
+upstream OMP 18.3.0 client and model artifact are unchanged. Serving arguments, RTX 5090
+profile `qwen38-5090-v0.8.2`, configuration `56878aed`, `--gpu-keep-warm-ms 60000`,
+16384 MiB host KV and the 28672 MiB host floor are unchanged from v0.8.2.
+
+The MTP3 verify pass's four Q5 projections (GDN value/z, attention gate/value,
+mixer/attention output and MLP down) use small-T tensor-core MMA at the four-token extent
+on `sm_120` instead of SIMT row kernels. The route is compiled out for `sm_86` and `sm_89`.
+This is [EXP-057](measurements/2026-09-26-q5-small-t-tensor-core.json)'s route. Release-build
+A/B/B/A measurements on the RTX 5090 against v0.8.2's source, recorded with
+[EXP-063](measurements/2026-09-27-powered-redaction-screen.json), found MTP3 rounds
+**3.5-4.9% shorter**:
+
+| Context | Decode change | MTP3 round duration |
+| --- | --- | --- |
+| 26K tokens | **+4.4%** | **4.2% shorter** |
+| 60K tokens | **+3.6%** | **3.5% shorter** |
+| 1,024 tokens | **+6.3%** | **4.4% shorter** |
+| No prompt | **-0.5%** | **4.9% shorter** |
+
+MTP acceptance was unchanged at 26K and 60K. With no prompt, the new build accepted 0.423 of
+drafts on its own text versus 0.461. These are workload-specific measurements, not a universal
+throughput claim or an identical-output comparison.
+
+Accumulation order changes: in isolation, 27 of 118,784 projection outputs moved by one bf16
+ulp, closer to an FP64 reference. **58 of 89** role-corpus cases answer differently from
+v0.8.2; 31 are identical. The published image matched the screened candidate byte-for-byte
+on **89/89** cases. Other primary role-corpus measures were within 2.0 points of v0.8.2 in
+one run per build; the only criterion-6 regression was the redaction-control pass rate.
+
+The pre-registered [EXP-063](measurements/2026-09-27-powered-redaction-screen.json) paired
+redaction screen passed. Its rule was committed before candidate data (`554ac56`,
+`scripts/redaction_screen.py`); 7 counted controls with 72 whitespace variants gave
+**504 pairs** on fresh v0.8.2 and candidate servers:
+
+| Measure | Candidate | v0.8.2 | Paired result and margin |
+| --- | --- | --- | --- |
+| Leaks | **561** | **582** | Ratio **0.964**; one-sided 95% upper bound **1.012**, below the **1.10** margin |
+| Pass rate | **53.2%** | **52.6%** | Difference **+0.6 percentage points**; lower bound **-1.2 points**, above the **-5-point** margin |
+
+All validity checks held: both arms reproduced 14 determinism prompts and matched EXP-057's
+outputs on 64 shared prompts. EXP-057's earlier 56-sample point-estimate screen had rejected
+the route (**69 vs 61 leaks**); EXP-063 re-tested that redaction regression with power.
+
+The v0.8.3 lane gates were re-measured on the published RTX 5090 image. These gate timings
+are separate from the controlled A/B/B/A comparison above:
+
+| Gate | RTX 5090 result |
+| --- | --- |
+| Long-context retrieval | Exact **130,048 tokens** in **58.7 s**; v0.8.2 receipt **56.4 s** |
+| Decode (`decode_2048`) | **168.07 tok/s**; v0.8.2 receipt **160.07 tok/s** |
+| Agent protocol | Passed across a restart |
+| Durability (EXP-050) | Four saves before eviction; first stop `saved 1, nothing to save 3, refused 0`; all four stored sessions restored after restart; second stop `saved 0, nothing to save 4, refused 0` |
+| Publication barrier (EXP-051) | Held turn resumed exactly |
+| Other probes | Fanout (57K/67K), warm-arrival, restore and multisession passed; root fallback on 2 of 8 continuations/forks |
+| Agent mix | None of 24 fresh sessions fell back to a full prefill; median TTFT **0.093-0.100 s** |
+| Stock OMP 18.3.0 | One session kept across graceful restarts; first request restored from checkpoint |
+| Role corpus | **89/89** byte-identical to the screened candidate, not to v0.8.2 |
+
+The RTX 4090 package is unchanged and carries its v0.8.1 receipt. Shared-prefix timings
+are not checkpoint-restore timings.
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.3 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+Checkpoints bind the exact server build: sessions saved by v0.8.2 do not restore on the new
+RTX 5090 build in v0.8.3. Each session re-prefills once.
+[Release notes](../releases/v0.8.3/NINFER_RELEASE_NOTES.md) ·
+[Qualification](../releases/v0.8.3/qualification.json) ·
+[RTX 5090 receipt](../releases/v0.8.3/qualification/rtx5090.json) ·
+[Documented routes](../releases/v0.8.3/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.3/acceptance/composed-external-installation.json).
+
+## Historical v0.8.2 — GPU keep-warm (2026-09-26)
 
 RTX 5090 advances to `v0.6.11-qwen38-5090-beta.1` (image `26813f56`, server `0d7e042b`,
 source `32c21f73`); RTX 4090 keeps `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`,

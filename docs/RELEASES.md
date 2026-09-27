@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.2`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.3`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.2 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
+v0.7.4. v0.8.3 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,10 +27,77 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.2 public release — GPU keep-warm
+### v0.8.3 public release — faster RTX 5090 decode
 
-- Status: published exact-profile product, 2026-09-26.
-  [Manifest](../releases/v0.8.2/manifest.json) · [guide](QUICKSTART.md) ·
+- Status: published exact-profile product, 2026-09-27.
+  [Manifest](../releases/v0.8.3/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.8.3/qualification.json).
+- Client and model: unmodified upstream OMP 18.3.0 and the model artifact (`eec39564`) are
+  unchanged from v0.8.2. Eligibility remains one RTX 5090 or RTX 4090; RTX 3090 is deferred.
+- RTX 5090 ships `v0.6.12-qwen38-5090-beta.1`, image
+  `sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78`, server
+  `3ab266e5cd82398be98c2baee6a41a123ce1a4b0d38bd9ddcda75044dcd5dcb1`, source
+  `9d1ef7485d9c741c2830fa3d55218f3242cec5d7` (v0.8.2's `32c21f73` plus the EXP-057 route).
+  Runtime-image workflow run: `36301090709`. Serving arguments and deployment profile
+  `qwen38-5090-v0.8.2`, configuration
+  `56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98`, are unchanged.
+  The profile keeps `--gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB host floor.
+- The MTP3 verify pass's four Q5 projections (GDN value/z, attention gate/value,
+  mixer/attention output and MLP down) use small-T tensor-core MMA at the four-token extent
+  on `sm_120` instead of SIMT row kernels. The route is compiled out for `sm_86` and `sm_89`.
+  Release-build A/B/B/A measurements show decode **+4.4% at 26K**, **+3.6% at 60K** and
+  **+6.3% at 1,024 tokens**. MTP3 rounds are **4.2%**, **3.5%**, **4.4%** and **4.9%** shorter
+  at 26K, 60K, 1,024 tokens and no prompt respectively (range **3.5-4.9%**). With no prompt,
+  decode is **0.5% slower**; the new build accepted 0.423 of drafts on its own text versus
+  0.461. MTP acceptance was unchanged at 26K and 60K.
+  Route: [EXP-057](measurements/2026-09-26-q5-small-t-tensor-core.json); measurements:
+  [EXP-063](measurements/2026-09-27-powered-redaction-screen.json).
+- Accumulation order changes: in isolation, 27 of 118,784 projection outputs moved by one
+  bf16 ulp, closer to an FP64 reference. Generated text differs from v0.8.2 on **58 of 89**
+  role-corpus cases (31 identical). The published image matched the screened candidate
+  byte-for-byte on **89/89**. Other primary role-corpus measures were within 2.0 points of
+  v0.8.2 in one run per build; the only criterion-6 regression was redaction-control pass rate.
+- The pre-registered EXP-063 paired redaction screen passed. The rule was committed before
+  candidate data (`554ac56`, `scripts/redaction_screen.py`); 7 counted redaction controls
+  with 72 whitespace variants gave **504 pairs** on fresh v0.8.2 and candidate servers.
+  Candidate leaks were **561 vs 582** for v0.8.2 (ratio **0.964**, one-sided 95% upper bound
+  **1.012**, below the **1.10** margin). Pass rates were **53.2% vs 52.6%**: difference
+  **+0.6 percentage points**, lower bound **-1.2 points** against a **-5-point** margin.
+  All validity checks held; both arms reproduced 14 determinism prompts and matched
+  EXP-057's outputs on 64 shared prompts. EXP-057's earlier 56-sample point-estimate screen
+  had rejected the route (**69 vs 61 leaks**); EXP-063 re-tested the redaction regression
+  with power. [EXP-063](measurements/2026-09-27-powered-redaction-screen.json).
+- Gates were re-measured on the published RTX 5090 image: 130,048-token exact retrieval in
+  **58.7 s**, `decode_2048` at **168.07 tok/s**, and the agent protocol across a restart.
+  EXP-050 recorded four saves before eviction, first stop
+  `saved 1, nothing to save 3, refused 0`, all four stored sessions restored after restart,
+  and second stop `saved 0, nothing to save 4, refused 0`. EXP-051's held publication-barrier
+  turn resumed exactly. Fanout (57K/67K), warm-arrival, restore and multisession probes
+  passed; root fallback remained 2 of 8 continuations/forks. None of 24 fresh sessions fell
+  back to a full prefill; median TTFT was **0.093-0.100 s**. Stock OMP 18.3.0 kept one
+  session across graceful restarts; the first request restored from checkpoint.
+  [RTX 5090 receipt](../releases/v0.8.3/qualification/rtx5090.json).
+- RTX 4090 remains `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`,
+  source `5a774841`), unchanged since v0.8.1 and carrying its
+  [v0.8.1 lane receipt](../releases/v0.8.1/qualification/rtx4090.json).
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.3 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+[Documented routes](../releases/v0.8.3/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.3/acceptance/composed-external-installation.json).
+
+Checkpoints bind the exact server build: sessions saved by v0.8.2 do not restore on the new
+RTX 5090 build in v0.8.3. Each session re-prefills once.
+[Release notes](../releases/v0.8.3/NINFER_RELEASE_NOTES.md).
+
+### v0.8.2 historical public release — GPU keep-warm
+
+- Status: superseded published exact-profile product, 2026-09-26.
+  [Manifest](../releases/v0.8.2/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.8.2/docs/QUICKSTART.md) ·
   [qualification](../releases/v0.8.2/qualification.json).
 - Client and model: unmodified upstream OMP 18.3.0 and the model artifact are unchanged from
   v0.8.1. Eligibility remains one RTX 5090 or RTX 4090; RTX 3090 is deferred.

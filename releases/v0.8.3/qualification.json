@@ -5,7 +5,7 @@
   "as_of": "2026-09-27",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Faster RTX 5090 decode: the container moves to runtime 9d1ef748, whose MTP3 verify pass runs its four Q5 projections at the four-token extent on a small-T tensor-core MMA instead of the SIMT row kernels. Release build against release build, the MTP3 round is 3.5-4.9% shorter and decode +4.4% at a 26K context, +3.6% at 60K and +6.3% at 1,024 tokens. The accumulation order changes, so generated text differs from v0.8.2's on 58 of 89 role-corpus cases; a pre-registered paired screen of 504 redaction prompts found the route's redaction behaviour not worse than production's (docs/measurements/2026-09-27-powered-redaction-screen.json, EXP-063). The serving arguments, deployment profile qwen38-5090-v0.8.2 and configuration 56878aed are v0.8.2's. The RTX 4090 native package 5a774841, the upstream OMP 18.3.0 client, the model and the memory floors are unchanged. RTX 3090 is omitted pending physical-host access. Every RTX 5090 gate below was measured on the published image; the RTX 4090 gates are v0.8.1's for the same package.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,13 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.12-qwen38-5090-beta.1 component (image cd9e10b1) before the cut; the receipt lands at releases/v0.8.3/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.8.3/acceptance/composed-external-installation.json",
+      "sha256": "f95a5680af6a24d8642caf42c7f1be394599fa0cccc88098af7bd204f585491f",
+      "public_url": null,
+      "as_of": "2026-09-27",
+      "release": "v0.8.3",
+      "component_release_tag": "v18.3.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "windows_binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "1722c9e443b40e02f350217c8f9559c079ab89cd74acd43d73825a4fe3f5604f",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "ce3902dbfac111ec9ac51e290a29c1c7ece33301c43eda602a597ec6bd87a101"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "212d23da4acdbc4091a9d0eb4cbc5e8914a8bf0613a812e15bdca9f1250b91c4"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "d58f9a7548b6d89bc3db496926d8e2cb27dc29166c9de8bd62ebcde7755fd528"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published v0.8.3 components; runtime qualification is recorded per lane."
     },
     "documented_route_acceptance": {
       "status": "passed",
-      "repository_path": "releases/v0.8.2/acceptance/documented-routes.json",
-      "sha256": "826cc85ee9a5b4695b33be88e6b186c0540682eee543b83eab9e362ab4f88832"
+      "repository_path": "releases/v0.8.3/acceptance/documented-routes.json",
+      "sha256": "6069ec8fbe7769764597b2efdf65fd708bb8371aa69bc4e1fde922aec61b3f0b"
     }
   },
   "observed_gates": {
@@ -422,9 +451,7 @@
     }
   },
   "interpretation": "RTX 5090 decode is faster - +4.4% at a 26K context and +3.6% at 60K, where MTP acceptance does not move - and generated text changes: the Q5 verify projections accumulate in a different order, a few outputs move by one bf16 ulp, and 58 of 89 role-corpus cases answer differently from v0.8.2. Redaction was tested with power before adoption: over 504 paired prompts the route leaked 561 synthetic secrets against production's 582 and passed 53.2% of prompts against 52.6%, inside margins fixed before the data. On the published image the profile gates, durability workload, publication barrier, probe set, shared-prefix capacity and stock OMP 18.3.0 session proof pass as in v0.8.2, and the role corpus answered byte-identically to the screened candidate. The RTX 4090 package is unchanged and carries its v0.8.1 qualification. Automatic checkpoints stay best effort and universal warm reuse is not claimed; alphastorm/omp-ninfer#48 stays open until field confirmation.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.12-qwen38-5090-beta.1 component and runtime image"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Client-repin route not exercised; omitted from this release by user direction.",

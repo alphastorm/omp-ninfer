@@ -1,6 +1,6 @@
 # Upstream watch
 
-The runtime ships from forks; v0.8.2 uses an unmodified upstream OMP client. This page names
+The runtime ships from forks; v0.8.3 uses an unmodified upstream OMP client. This page names
 the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -27,7 +27,60 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.8.2
+## Tracked upstreams and current position — v0.8.3
+
+The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.2.
+RTX 5090 advances to `v0.6.12-qwen38-5090-beta.1` (image `cd9e10b1`, server `3ab266e5`,
+source `9d1ef748`). RTX 4090 remains `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`,
+server `32905865`, source `5a774841`), carrying its v0.8.1 lane receipt. RTX 3090 remains
+deferred. Serving arguments, profile `qwen38-5090-v0.8.2`, configuration `56878aed`,
+`--gpu-keep-warm-ms 60000`, 16384 MiB host KV and the 28672 MiB host floor are unchanged.
+
+The runtime source is v0.8.2's `32c21f73` plus the EXP-057 route: the MTP3 verify pass's
+four Q5 projections (GDN value/z, attention gate/value, mixer/attention output and MLP down)
+use small-T tensor-core MMA at the four-token extent on `sm_120` instead of SIMT row kernels.
+The route is compiled out for `sm_86` and `sm_89`. Release-build A/B/B/A measurements show
+decode **+4.4% at 26K**, **+3.6% at 60K** and **+6.3% at 1,024 tokens**, with MTP3 rounds
+**3.5-4.9% shorter**. With no prompt, decode was **0.5% slower**: the new build accepted
+0.423 of drafts on its own text versus 0.461.
+Route: [EXP-057](measurements/2026-09-26-q5-small-t-tensor-core.json); measurements:
+[EXP-063](measurements/2026-09-27-powered-redaction-screen.json).
+
+Accumulation order changes; **58 of 89** role-corpus cases answer differently from v0.8.2.
+The pre-registered [EXP-063](measurements/2026-09-27-powered-redaction-screen.json)
+redaction screen passed on **504 pairs** (7 controls with 72 whitespace variants).
+Candidate leaks were **561 vs 582** for v0.8.2: ratio **0.964**, one-sided 95% upper bound
+**1.012**, margin **1.10**. Pass rates were **53.2% vs 52.6%**: **+0.6 percentage points**,
+lower bound **-1.2 points**, margin **-5 points**. All validity checks held. The earlier
+EXP-057 56-sample point-estimate screen had rejected the route (**69 vs 61 leaks**);
+EXP-063 re-tested the redaction regression with power. Other primary role-corpus measures
+were within 2.0 points of v0.8.2 in one run per build. The published image matched the
+screened candidate byte-for-byte on **89/89** cases.
+
+Gates were re-measured on the published RTX 5090 image: 130,048-token exact retrieval in
+**58.7 s**, decode at **168.07 tok/s**, and the agent protocol across a restart. Four sessions
+restored after restart; publication-barrier, fanout, warm-arrival, restore and multisession
+probes passed. Root fallback remained 2 of 8 continuations/forks. None of 24 fresh sessions
+fell back to a full prefill; median TTFT was **0.093-0.100 s**. Stock OMP 18.3.0 kept one
+session across graceful restarts; the first request restored from checkpoint.
+[Lane receipt](../releases/v0.8.3/qualification/rtx5090.json) ·
+[Qualification](../releases/v0.8.3/qualification.json).
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.3 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+[Documented routes](../releases/v0.8.3/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.3/acceptance/composed-external-installation.json).
+
+Checkpoints bind the exact server build: sessions saved by v0.8.2 do not restore on the new
+RTX 5090 build in v0.8.3. Each session re-prefills once.
+[Release notes](../releases/v0.8.3/NINFER_RELEASE_NOTES.md).
+
+The upstream delta measurements below remain historical.
+
+## Historical position — v0.8.2
 
 The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.1.
 RTX 5090 advances to `v0.6.11-qwen38-5090-beta.1` (image `26813f56`, server `0d7e042b`,
@@ -135,5 +188,5 @@ product needs that planner rebase.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.8.2 does not build or publish an OMP client; it keeps the upstream
+  patches rebased. v0.8.3 does not build or publish an OMP client; it keeps the upstream
   release binary instead.

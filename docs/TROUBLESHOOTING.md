@@ -237,10 +237,10 @@ omp --model ninfer-beta/local-max
 
 The ready status must identify the qualified profile, and the launch arguments must include
 `--vision`. NInfer rejects media when Vision was omitted at process start; it cannot be enabled by a
-later request. The v0.8.2 RTX 5090 profile also includes `--gpu-keep-warm-ms 60000`; host KV
-stays 16384 MiB and the runtime-host floor stays 28672 MiB. Also check that the image is a
-supported, readable local file and that OMP did not
-block images in another config overlay.
+later request. v0.8.3 retains the RTX 5090 profile `qwen38-5090-v0.8.2`, configuration
+`56878aed` and `--gpu-keep-warm-ms 60000`; host KV stays 16384 MiB and the runtime-host
+floor stays 28672 MiB. Also check that the image is a supported, readable local file and
+that OMP did not block images in another config overlay.
 
 ## Follow-up replay is cold or resume loses the nonce
 

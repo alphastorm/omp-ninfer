@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-09-27
+
 ### Faster decode (RTX 5090)
 
 - Rebind RTX 5090 to `v0.6.12-qwen38-5090-beta.1` (image
@@ -18,14 +20,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The MTP3 verify pass runs its four Q5 projections on a small-T tensor-core MMA
   ([EXP-057](docs/measurements/2026-09-26-q5-small-t-tensor-core.json)). Release build against
   release build, the round is 3.5-4.9% shorter and decode 4.4% faster at a 26K-token context, 3.6%
-  at 60K and 6.3% at 1,024 tokens. Generated text changes: 58 of 89 role-corpus cases answer
-  differently from v0.8.2.
+  at 60K and 6.3% at 1,024 tokens (EXP-063's A/B/B/A). Generated text changes: 58 of 89
+  role-corpus cases answer differently from v0.8.2.
 - A pre-registered paired screen of 504 redaction prompts found the new runtime's redaction
   behaviour not worse than v0.8.2's: 561 synthetic secrets leaked against 582, and 53.2% of prompts
   passed against 52.6% ([EXP-063](docs/measurements/2026-09-27-powered-redaction-screen.json)).
   `scripts/redaction_screen.py` runs the screen and decides it by its fixed rule.
+- Every RTX 5090 runtime gate was measured again on the published image: profile gates
+  (130,048-token exact retrieval in 58.7 s, decode 168.07 tok/s), the durability workload with
+  both stops, the publication barrier, the probes, the agent mix (none of 24 fresh sessions fell
+  back to a full prefill; median time to first token 0.093-0.100 s) and the stock OMP 18.3.0
+  session proof; its role-corpus answers were byte-identical to the screened candidate's. The
+  unchanged RTX 4090 package carries its v0.8.1 lane receipt. The four documented routes passed
+  with the unmodified OMP 18.3.0 client: RTX 5090 container host (2 steps), macOS client (10),
+  Windows client (5) and RTX 4090 native Windows (7), with both hosts restored; the upstream macOS
+  arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact continuation
+  and a fail-closed request against the RTX 5090 image
+  ([composed acceptance](releases/v0.8.3/acceptance/composed-external-installation.json)).
 - Checkpoints are bound to the exact server build, so sessions saved by v0.8.2 are not restored on
   v0.8.3: OMP resends the full conversation and each session re-prefills once.
+
+### Release tooling
+
+- `verify_release.py` checks launch identity for every installable release, not only ready ones.
+  Each profile must hash to the configuration identity it declares, and the RTX 5090 lane
+  receipt's recorded deployment profile, configuration, server and model must equal the
+  manifest's. `stage_release.py` refuses a renamed deployment profile that keeps its source's
+  configuration identity. v0.8.3's first candidate had exactly that mismatch: it passed the old
+  check, and the documented route's launcher refused it.
 
 ## [0.8.2] - 2026-09-26
 
@@ -1568,7 +1590,9 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...HEAD
+[0.8.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.2...v0.8.3
+[0.8.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.4...v0.8.0
 [0.7.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.7.3...v0.7.4

@@ -3,7 +3,7 @@
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090 and RTX 4090 release lanes, each
 bound to exact bytes and a receipt, with the RTX 3090 lane deferred until its host returns. The
-`v0.8.2` public release exposes only those exact installable profiles. Work outside that wedge
+`v0.8.3` public release exposes only those exact installable profiles. Work outside that wedge
 needs a new product decision rather than placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,9 +11,61 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.8.2
+## Where this is now — v0.8.3
 
-The `v0.8.2` release adds GPU keep-warm to RTX 5090 `v0.6.11-qwen38-5090-beta.1`
+The `v0.8.3` release makes RTX 5090 decode faster with `v0.6.12-qwen38-5090-beta.1`
+(image `cd9e10b1`, server `3ab266e5`, source `9d1ef748`). RTX 4090 native stays on
+`v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`, source `5a774841`)
+and carries its v0.8.1 lane receipt. The unmodified OMP 18.3.0 client and model are unchanged.
+Install through the [quickstart](docs/QUICKSTART.md); RTX 3090 remains deferred.
+
+The four Q5 projections in the MTP3 verify pass use small-T tensor-core MMA on `sm_120`
+at the four-token extent instead of SIMT row kernels; the route is compiled out for `sm_86`
+and `sm_89` ([EXP-057](docs/measurements/2026-09-26-q5-small-t-tensor-core.json)).
+Release-build A/B/B/A measurements against v0.8.2's source show decode **+4.4% at 26K**,
+**+3.6% at 60K** and **+6.3% at 1,024 tokens**, with MTP3 rounds **3.5-4.9% shorter**
+([EXP-063](docs/measurements/2026-09-27-powered-redaction-screen.json)). With no prompt, decode
+was **0.5% slower**, with 0.423 of drafts accepted on the new build's own text versus 0.461.
+
+Accumulation order changes; **58 of 89** role-corpus cases answer differently from v0.8.2.
+The pre-registered [EXP-063](docs/measurements/2026-09-27-powered-redaction-screen.json)
+redaction screen passed on **504 pairs**: 7 controls with 72 whitespace variants. Candidate
+leaks were **561 vs 582** for v0.8.2 (ratio **0.964**, one-sided 95% upper bound **1.012**,
+margin **1.10**). Pass rates were **53.2% vs 52.6%** (**+0.6 percentage points**, lower bound
+**-1.2 points**, margin **-5 points**). All validity checks held. EXP-057's earlier 56-sample
+point-estimate screen had rejected the route (**69 vs 61 leaks**); EXP-063 re-tested that
+redaction regression with power. Other primary role-corpus measures were within 2.0 points
+of v0.8.2 in one run per build. The published image matched the screened candidate on **89/89**.
+
+Serving arguments, profile `qwen38-5090-v0.8.2`, configuration `56878aed`,
+`--gpu-keep-warm-ms 60000`, 16384 MiB host KV and the 28672 MiB host floor are unchanged.
+Gates were re-measured on the published RTX 5090 image: exact 130,048-token retrieval in
+**58.7 s**, decode at **168.07 tok/s**, and the agent protocol across a restart. Four stored
+sessions restored after restart; publication-barrier, fanout, warm-arrival, restore and
+multisession probes passed. Root fallback remained 2 of 8 continuations/forks. None of 24
+fresh sessions fell back to a full prefill; median TTFT was **0.093-0.100 s**. Stock OMP
+18.3.0 kept one session across graceful restarts, restoring its checkpoint on the first request.
+
+All four documented routes passed **24 steps** with unmodified OMP 18.3.0 on the published
+v0.8.3 components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090
+native Windows 7; both hosts were restored.
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
+an exact continuation and a fail-closed request against the published RTX 5090 image.
+[Release notes](releases/v0.8.3/NINFER_RELEASE_NOTES.md) ·
+[Qualification](releases/v0.8.3/qualification.json) ·
+[RTX 5090 receipt](releases/v0.8.3/qualification/rtx5090.json) ·
+[Documented routes](releases/v0.8.3/acceptance/documented-routes.json) ·
+[Composed acceptance](releases/v0.8.3/acceptance/composed-external-installation.json).
+
+Checkpoints bind the exact server build: sessions saved by v0.8.2 do not restore on the new
+RTX 5090 build in v0.8.3. Each session re-prefills once.
+
+**Next — the RTX 3090 returns.** Its lane remains deferred until its qualification host is
+available.
+
+## Where this was — v0.8.2
+
+The `v0.8.2` release added GPU keep-warm to RTX 5090 `v0.6.11-qwen38-5090-beta.1`
 (image `26813f56`, server `0d7e042b`, source `32c21f73`). RTX 4090 native stays on
 `v0.6.8-qwen38-4090-beta.1` (package `46aa4110`, server `32905865`, source `5a774841`)
 and carries its v0.8.1 lane receipt. The unmodified OMP 18.3.0 client and model are unchanged.
@@ -52,8 +104,8 @@ an exact continuation and a fail-closed request against the published RTX 5090 i
 Checkpoints bind the exact server build: sessions saved by v0.8.1 do not restore on the new
 RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-prefills once.
 
-**Next — the RTX 3090 returns.** Its lane remains deferred until its qualification host is
-available; the historical v0.7.2 route stays on OMP 18.0.9.
+**The next step at v0.8.2** was the RTX 3090's return; its lane stayed deferred until its
+qualification host was available, and the historical v0.7.2 route stayed on OMP 18.0.9.
 
 ## Where this was — v0.8.1
 
@@ -617,6 +669,7 @@ Each release keeps its immutable manifest and receipts; summaries here, details 
 
 | Release | What landed |
 | --- | --- |
+| `v0.8.3` | Faster RTX 5090 decode: v0.6.12 tensor-core Q5 verify route, +4.4% at 26K / +3.6% at 60K / +6.3% at 1,024 tokens; rounds 3.5-4.9% shorter; 58 of 89 role-corpus outputs differ; EXP-063 paired redaction screen passed (504 pairs); gates re-measured on the published image; RTX 4090, client, model, profile and configuration unchanged; all four documented routes passed (24 steps), both hosts restored; v0.8.2 checkpoints re-prefill once on the new RTX 5090 build; RTX 3090 deferred |
 | `v0.8.2` | GPU keep-warm: RTX 5090 v0.6.11 and profile `qwen38-5090-v0.8.2` add `--gpu-keep-warm-ms 60000`; 0.155-0.157 s prefill after 12-58 s idle versus 0.253-0.304 s without it; about 71 W while held, about 2.3 W average over logged traffic (EXP-062); RTX 4090, client, model and memory floors unchanged; all four documented routes passed (24 steps), both hosts restored; v0.8.1 checkpoints re-prefill once on the new RTX 5090 build; RTX 3090 deferred |
 | `v0.8.1` | Faster decode: RTX 5090 +10.3-11.0% with identical outputs; RTX 4090 native C1 157.89 vs 153.54 tok/s with one-row split2 kernels retained (EXP-055); every runtime gate re-measured on published components; all four documented routes accepted (24 steps); client, model, settings and floors unchanged; v0.8.0 checkpoints re-prefill once; RTX 3090 deferred |
 | `v0.8.0` | Unmodified upstream OMP 18.3.0; durable stock-client sessions across graceful restarts (EXP-053); shared-prefix reuse for new sessions; RTX 5090 v0.6.9-beta.2 and RTX 4090 native v0.6.7-beta.2 qualified and accepted through the documented routes; model and settings unchanged; RTX 3090 deferred |

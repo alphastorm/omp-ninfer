@@ -28,7 +28,8 @@ The route is compiled out for the RTX 4090 and RTX 3090 architectures.
 Release build against release build, alternating A/B/B/A on the RTX 5090, the round was 4.2%
 shorter at a 26K-token context and 3.5% shorter at 60K. Decode rose 4.4% and 3.6% there, where MTP
 acceptance does not move, and 6.3% at 1,024 tokens. With no prompt the round was 4.9% shorter, but
-the new build accepted fewer drafts on its own text (0.423 against 0.461), so decode moved -0.5%.
+the new build accepted fewer drafts on its own text (0.423 against 0.461), so decode moved -0.5%
+([EXP-063](../../docs/measurements/2026-09-27-powered-redaction-screen.json)).
 
 The accumulation order changes. In isolation, 27 of 118,784 projection outputs moved by one bf16
 ulp, and the new outputs sit closer to an FP64 reference. That is enough to change generated text:
@@ -84,6 +85,25 @@ identity, configuration, 11264 MiB host KV, 24 slots and 32768 MiB floor.
 RTX 3090 is omitted from this release pending access to its physical qualification host. Its
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 and OMP 18.0.9 client remain a separate historical route, not a v0.8.3 qualification claim.
+
+## Documented routes and clients
+
+The four documented routes passed on the published components with the unmodified OMP 18.3.0
+client: RTX 5090 container host (2 steps), macOS client (10), Windows client (5) and RTX 4090
+native Windows (7), with pre-cut substitutions recorded and both hosts restored
+([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows x64 and Linux x64
+binaries each ran a typed tool turn, an exact continuation and a fail-closed request against the
+RTX 5090 image; Linux ran under WSL2, not a separately qualified Linux OS
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle.
+
+The first candidate did not reach its routes. It had been staged under a new deployment profile
+name while declaring v0.8.2's configuration identity, which is a hash that includes the profile
+name, so the RTX 5090 route's `start-ninfer.sh` refused it at its start step; production was
+restored after 60 s. The corrected candidate keeps the profile the lane qualified,
+`qwen38-5090-v0.8.2`. It passed the RTX 5090 window's one corrected attempt, and the RTX 4090
+route passed on both candidates. `verify_release.py` now checks launch identity for every
+installable release, so a candidate like the first one fails before any window.
 
 ## Upgrading from v0.8.2
 
