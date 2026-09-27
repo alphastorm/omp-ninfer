@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Faster decode (RTX 5090)
+
+- Rebind RTX 5090 to `v0.6.12-qwen38-5090-beta.1` (image
+  `sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78`, source
+  `9d1ef7485d9c741c2830fa3d55218f3242cec5d7`). Its serving arguments, deployment profile
+  `qwen38-5090-v0.8.2` and configuration `56878aed` are unchanged; RTX 4090 stays on
+  `v0.6.8-qwen38-4090-beta.1`, and the model, memory floors and the upstream OMP 18.3.0 client are
+  unchanged.
+- The MTP3 verify pass runs its four Q5 projections on a small-T tensor-core MMA
+  ([EXP-057](docs/measurements/2026-09-26-q5-small-t-tensor-core.json)). Release build against
+  release build, the round is 3.5-4.9% shorter and decode 4.4% faster at a 26K-token context, 3.6%
+  at 60K and 6.3% at 1,024 tokens. Generated text changes: 58 of 89 role-corpus cases answer
+  differently from v0.8.2.
+- A pre-registered paired screen of 504 redaction prompts found the new runtime's redaction
+  behaviour not worse than v0.8.2's: 561 synthetic secrets leaked against 582, and 53.2% of prompts
+  passed against 52.6% ([EXP-063](docs/measurements/2026-09-27-powered-redaction-screen.json)).
+  `scripts/redaction_screen.py` runs the screen and decides it by its fixed rule.
+- Checkpoints are bound to the exact server build, so sessions saved by v0.8.2 are not restored on
+  v0.8.3: OMP resends the full conversation and each session re-prefills once.
+
 ## [0.8.2] - 2026-09-26
 
 ### GPU keep-warm (RTX 5090)
