@@ -1302,9 +1302,29 @@ def validate_profile_contract(
             f"{label}: model bytes must match the manifest", errors)
 
 
+def repository_files(root: Path, suffixes: tuple[str, ...], under: str = "") -> list[Path]:
+    """Files the repository can publish: tracked or untracked but not git-ignored.
+
+    Ignored local artifacts - a RepoPrompt plan export under prompt-exports/, a scratch note - are
+    never published, so they must not fail a release. Outside a git work tree every file counts.
+    """
+    base = root / under if under else root
+    if not base.is_dir():
+        return []
+    listed = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard",
+         "--", under or "."],
+        capture_output=True,
+    )
+    if listed.returncode != 0:
+        return sorted(path for path in base.rglob("*") if path.suffix in suffixes and path.is_file())
+    paths = {root / name for name in listed.stdout.decode("utf-8").split("\0") if name}
+    return sorted(path for path in paths if path.suffix in suffixes and path.is_file())
+
+
 def validate_markdown_links(root: Path, errors: list[str]) -> None:
     resolved_root = root.resolve()
-    for document in sorted(root.rglob("*.md")):
+    for document in repository_files(root, (".md",)):
         source = document.read_text(encoding="utf-8")
         targets = MARKDOWN_LINK_RE.findall(source) + MARKDOWN_REFERENCE_RE.findall(source)
         for raw_target in targets:
@@ -1324,21 +1344,13 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
 
 
 def validate_public_text(root: Path, errors: list[str]) -> None:
-    assets = root / "assets"
-    documents = set(root.rglob("*.md"))
-    documents.update(assets.glob("*.html"))
-    documents.update(assets.glob("*.svg"))
-    releases_root = root / "releases"
-    if releases_root.is_dir():
-        documents.update(releases_root.rglob("*.json"))
-        documents.update(releases_root.rglob("*.SHA256SUMS"))
-        documents.update(releases_root.rglob("*.jsonl"))
+    documents = set(repository_files(root, (".md",)))
+    documents.update(repository_files(root, (".html", ".svg"), "assets"))
+    documents.update(repository_files(root, (".json", ".SHA256SUMS", ".jsonl"), "releases"))
     # Dated receipts are published alongside the docs that cite them, and they are written from
     # host measurements, so they are the likeliest place for a hostname or a home directory to
     # reach the public repository. Scan them with the same rule as the prose.
-    measurements = root / "docs" / "measurements"
-    if measurements.is_dir():
-        documents.update(measurements.rglob("*.json"))
+    documents.update(repository_files(root, (".json",), "docs/measurements"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
         for marker in PRIVATE_MARKERS:

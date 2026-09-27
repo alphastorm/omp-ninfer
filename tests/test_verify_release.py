@@ -1466,6 +1466,23 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertIn("README.md has missing local link: docs/not-there.md", errors)
 
+    def test_git_ignored_local_artifacts_are_not_published_documents(self) -> None:
+        # A RepoPrompt plan export under the ignored prompt-exports/ once failed staging with a
+        # missing link; ignored files are never published, but an untracked one would be.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            (root / ".gitignore").write_text("prompt-exports/\n", encoding="utf-8")
+            (root / "prompt-exports").mkdir()
+            (root / "prompt-exports" / "plan.md").write_text(
+                "[banner](assets/banner.png) from /Users/someone\n", encoding="utf-8")
+            (root / "notes.md").write_text("[missing](gone.md) from sf-pc\n", encoding="utf-8")
+            errors: list[str] = []
+            VERIFY_RELEASE.validate_markdown_links(root, errors)
+            VERIFY_RELEASE.validate_public_text(root, errors)
+        self.assertEqual(errors, ["notes.md has missing local link: gone.md",
+                                  "notes.md contains private marker 'sf-pc'"])
+
 
 if __name__ == "__main__":
     unittest.main()
