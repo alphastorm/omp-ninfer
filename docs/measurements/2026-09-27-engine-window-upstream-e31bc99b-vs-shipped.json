@@ -1,0 +1,1248 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-065",
+  "title": "Engine-window rerun: upstream e31bc99b versus shipped v0.6.12 on RTX 5090",
+  "generated_utc": "2026-09-27T15:24:52Z",
+  "status": "completed_with_limits",
+  "question": "Per alphastorm/omp-ninfer#33, does upstream e31bc99b, 16 commits past EXP-048 upstream 594930e7, now beat the shipped RTX 5090 runtime on exact 130,048-token retrieval/prefill, decode rounds/s, fanout/two-session reuse, or the live-sibling protocol?",
+  "answer": "Only a small numerical long-context lead, not a newly established material lane win. Both arms retrieve exactly at 130,048 tokens. Upstream takes 57.416 s versus shipped 58.154 s and prefills at 2275.6 versus 2242.0 tok/s (+1.50%); EXP-048 already showed a +1.20% upstream prefill lead, and e31bc99b is only +0.29% above that earlier upstream prefill result. Current upstream decode is 59.20/59.22 rounds/s on the gate/thinking-off prompts versus shipped 72.46/72.44, about 18.3% slower. Upstream still reuses 0/4 fanout branches versus 4/4 shipped and loses reuse on 4/8 two-session continuations versus 2/8 shipped. Both pass the live-sibling/delete/survivor protocol. All requested gates completed with zero request errors. The optional operation benchmark failed before collecting any timing; production was restored immediately.",
+  "decision": {
+    "action": "defer",
+    "merge": "deferred",
+    "backport": "No performance backport justified by these lane measurements.",
+    "reason": "No new material gate gain offsets the roughly 18% decode-round deficit and weaker reuse. The small single-run prefill advantage was already present in EXP-048; no repeated long-context runs establish it as a new improvement. Keep the shipped v0.6.12 runtime and profile unchanged.",
+    "next": "For attribution, first select a Q5 public-Linear shape/T supported by both benchmark registries, or use the matching fused-operation benchmark; the attempted primer was unsupported. Then isolate linear/GDN/synchronization contributions in a separate approved window if needed. No second production window was opened for optional attribution.",
+    "revisit_when": "Rerun the probe when an upstream change could move a lane gate, or when a v3-only artifact/model becomes a product requirement."
+  },
+  "method": {
+    "appliance": "RTX 5090, Docker Desktop on Windows, WSL2 Ubuntu 24.04",
+    "probe": "scripts/engine_window_compare.py",
+    "probe_sha256": "5d7b4792856796f1b41719b5afa688988cb28d3621dfc23d3d2433899b5cda2a",
+    "template_receipt": "docs/measurements/2026-09-24-engine-window-upstream-vs-shipped.json",
+    "long_fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+    "same_weights": "Reused EXP-048 offline-converted v3 artifact only after verifying converter and maintained chat-template identity between 594930e7 and e31bc99b. Rehashed both complete artifacts and compared all 18,210,355,200 original payload bytes; all 1,118 tensor offsets, lengths, and shapes also match.",
+    "artifact_conversion": {
+      "reused_EXP048_converted_artifact": true,
+      "old_and_new_git_blob": "802e3160e21944994dc7cf0c68942f1b644828c4",
+      "sha256": "e110228d7270224f45a7f90102c02bf9e22da7f33ab2eccbea02f0e87b9c8b54",
+      "chat_template_old_and_new_git_blob": "1efba44e69ddfdef3deb5234735587d7575a4768",
+      "v2_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "v3_sha256": "06ecbf821081cfa6c64ba089b7f9c8daf44e220ffd60e04dadef457ce6fabcbc",
+      "v2_bytes": 18210531328,
+      "v3_bytes": 18210749936,
+      "v2_payload_start": 176128,
+      "v3_payload_start": 385024,
+      "payload_bytes_compared": 18210355200,
+      "payload_sha256": "2447064919566ad54c71c9d24b4cb955d06cd920af39a92588e724a6b3c7c368",
+      "all_original_payload_bytes_unchanged": true,
+      "tensor_count": 1118,
+      "tensor_offsets_lengths_shapes_unchanged": true,
+      "verification_seconds": 32.984
+    },
+    "same_serving_arguments": "Shipped arm arguments were extracted from docker inspect of the running production container, not copied from an old profile. Both arms use 131072 context, auto KV capacity, prefill chunk 1024, bf16 KV, max concurrency 1, MTP draft 3, LM-head draft, vision, preserve-thinking, 8 private continuations, 4 device-state slots, 24 host-state slots, and 16384 MiB host KV. Only the request-log filename and isolated checkpoint/log mounts differ from production; upstream additionally uses v3 and omits fork-only flags.",
+    "shipped_profile": "qwen38-5090-v0.8.2",
+    "shipped_configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+    "shipped_gpu_keep_warm_ms": 60000,
+    "upstream_omitted_fork_only_flags": {
+      "--binary-sha256": "3ab266e5cd82398be98c2baee6a41a123ce1a4b0d38bd9ddcda75044dcd5dcb1",
+      "--artifact-sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "--config-sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+      "--deployment-profile": "qwen38-5090-v0.8.2",
+      "--session-checkpoint-dir": "/checkpoints",
+      "--session-checkpoint-quota-mib": "24576",
+      "--session-checkpoint-staging-mib": "256",
+      "--gpu-keep-warm-ms": "60000"
+    },
+    "wire": "Shipped uses --wire fork (authenticated session header and body field); upstream uses --wire upstream (neither session field). The shared API key was read from the existing secret file and is not included.",
+    "arm_order": [
+      "shipped-v0612-exp065",
+      "upstream-e31bc99b-exp065"
+    ],
+    "decode_repetitions": 3,
+    "session_base_tokens_argument": 100000,
+    "fanout_base_tokens_argument": 56000,
+    "fanout_branches_argument": 4,
+    "resume_from": {
+      "run": false,
+      "reason": "EXP-048 did not perform the --resume-from restart step; its retained receipts and measurement contain no resume result. This rerun likewise does not restart either arm for continuation testing."
+    },
+    "window": "One supervised window, shipped first then upstream, with no concurrent serving arms. Supervisor hold taken before stopping production; production restored through its retained relaunch script. Downtime bounds 2026-09-27T15:00:02Z to 2026-09-27T15:19:55Z (1193 s). All compilation, image packaging, payload verification, and argument preparation finished before production stopped.",
+    "window_launcher": "Isolated copy of ~/services/engine-window/window.sh with new arm mappings and operator-hash verification for upstream, which has no --binary-sha256 flag; the shared deployed launcher was not modified.",
+    "upstream_build": {
+      "source": "Neroued/ninfer e31bc99b13f517c8aae70b997b7c4a49b4dcdc5d",
+      "cuda": "13.1.2",
+      "nvcc": "13.1.115",
+      "architecture": "sm_120a",
+      "build_seconds": 287,
+      "benchmark_build_seconds": 4,
+      "memory_limit": "7g",
+      "memory_swap_limit": "7g",
+      "cpu_limit": null,
+      "parallel_jobs": 6,
+      "server_binary_sha256": "a7cc5d6be3e6c546a768263aa5036f45253f3c4b26979b5265105eaabb8c51cd",
+      "build_seconds_scope": "CMake configure plus ninfer/ninfer-serve compilation; excludes source transfer/package installation, the additional 4-second linear-benchmark build, and image packaging.",
+      "runtime_base_image_id": "sha256:4fa9ed2305e96c44f978bbb1645d7e009110efd7f71e36a0754ca33857de030c",
+      "image_publication": "Local appliance-built image only; not pushed."
+    },
+    "decode_aggregation": "EXP-048-style last matching request headlines. Each headline rounds/s is calculated directly from the final chronological request log rounds/decode seconds; three independent timing records and their ranges/means are also included. This avoids treating the probe server_view token-shape matches as three independent measurements."
+  },
+  "arms": {
+    "shipped-v0612-exp065": {
+      "identity": {
+        "arm": "shipped-v0612-exp065",
+        "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+        "image_id": "sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+        "server_binary_sha256": "3ab266e5cd82398be98c2baee6a41a123ce1a4b0d38bd9ddcda75044dcd5dcb1",
+        "model_bytes": 18210531328,
+        "server_arguments": [
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8080",
+          "--model-id",
+          "q38-ninfer",
+          "--binary-sha256",
+          "3ab266e5cd82398be98c2baee6a41a123ce1a4b0d38bd9ddcda75044dcd5dcb1",
+          "--artifact-sha256",
+          "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+          "--config-sha256",
+          "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+          "--deployment-profile",
+          "qwen38-5090-v0.8.2",
+          "--max-context",
+          "131072",
+          "--kv-capacity",
+          "auto",
+          "--prefill-chunk",
+          "1024",
+          "--kv-dtype",
+          "bf16",
+          "--max-concurrency",
+          "1",
+          "--spec",
+          "mtp",
+          "--draft-tokens",
+          "3",
+          "--lm-head-draft",
+          "--vision",
+          "--preserve-thinking",
+          "--session-checkpoint-dir",
+          "/checkpoints",
+          "--session-checkpoint-quota-mib",
+          "24576",
+          "--session-checkpoint-staging-mib",
+          "256",
+          "--max-private-continuations",
+          "8",
+          "--device-state-slots",
+          "4",
+          "--host-state-slots",
+          "24",
+          "--host-kv-mib",
+          "16384",
+          "--gpu-keep-warm-ms",
+          "60000"
+        ],
+        "vram_used_total_mib_after_load": "28144, 32607",
+        "model_file": "qwen3_8_27b.ninfer",
+        "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+        "source_commit": "9d1ef7485d9c741c2830fa3d55218f3242cec5d7",
+        "runtime_version": "v0.6.12-qwen38-5090-beta.1",
+        "image_digest": "sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+        "deployment_profile": "qwen38-5090-v0.8.2",
+        "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+        "gpu_keep_warm_ms": 60000
+      },
+      "wire": "fork",
+      "long_context": {
+        "exact": true,
+        "prompt_tokens": 130048,
+        "wall_s": 58.154,
+        "server_prefill_tok_s": 2242
+      },
+      "decode_responses_gate_prompt": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 169.98,
+        "mtp_acceptance": 0.4484,
+        "mtp_tokens_per_round": 2.35,
+        "decode_rounds_per_s": 72.46,
+        "repetitions_identical": null,
+        "repetitions": 3,
+        "aggregation": "Last chronological request, matching EXP-048 final-matching-request aggregation; rounds/s uses raw rounds divided by decode seconds, not the ratio of rounded token rates.",
+        "rounds_per_s_mean": 72.526,
+        "rounds_per_s_min": 72.28102,
+        "rounds_per_s_max": 72.839373,
+        "log_samples": [
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 12.091694320999983,
+            "rounds": 874,
+            "decode_rounds_per_s": 72.28102,
+            "decode_tok_s": 169.372459,
+            "mtp_tokens_per_round": 2.343249,
+            "mtp_acceptance": 0.447539,
+            "accepted_tokens": 1173,
+            "drafted_tokens": 2621
+          },
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 11.985276079000027,
+            "rounds": 873,
+            "decode_rounds_per_s": 72.839373,
+            "decode_tok_s": 170.876331,
+            "mtp_tokens_per_round": 2.345934,
+            "mtp_acceptance": 0.448434,
+            "accepted_tokens": 1174,
+            "drafted_tokens": 2618
+          },
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 12.048499778000007,
+            "rounds": 873,
+            "decode_rounds_per_s": 72.457154,
+            "decode_tok_s": 169.979669,
+            "mtp_tokens_per_round": 2.345934,
+            "mtp_acceptance": 0.448434,
+            "accepted_tokens": 1174,
+            "drafted_tokens": 2618
+          }
+        ]
+      },
+      "decode_chat_thinking_off": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 218.81,
+        "mtp_acceptance": 0.6737,
+        "mtp_tokens_per_round": 3.02,
+        "decode_rounds_per_s": 72.44,
+        "repetitions_identical": null,
+        "repetitions": 3,
+        "aggregation": "Last chronological request, matching EXP-048 final-matching-request aggregation; rounds/s uses raw rounds divided by decode seconds, not the ratio of rounded token rates.",
+        "rounds_per_s_mean": 72.542,
+        "rounds_per_s_min": 72.110794,
+        "rounds_per_s_max": 73.077215,
+        "log_samples": [
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 9.416066121000002,
+            "rounds": 679,
+            "decode_rounds_per_s": 72.110794,
+            "decode_tok_s": 217.500597,
+            "mtp_tokens_per_round": 3.0162,
+            "mtp_acceptance": 0.672236,
+            "accepted_tokens": 1368,
+            "drafted_tokens": 2035
+          },
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 9.277857696999998,
+            "rounds": 678,
+            "decode_rounds_per_s": 73.077215,
+            "decode_tok_s": 220.740613,
+            "mtp_tokens_per_round": 3.020649,
+            "mtp_acceptance": 0.67372,
+            "accepted_tokens": 1369,
+            "drafted_tokens": 2032
+          },
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 9.359548165000001,
+            "rounds": 678,
+            "decode_rounds_per_s": 72.439394,
+            "decode_tok_s": 218.813982,
+            "mtp_tokens_per_round": 3.020649,
+            "mtp_acceptance": 0.67372,
+            "accepted_tokens": 1369,
+            "drafted_tokens": 2032
+          }
+        ]
+      },
+      "two_session_continuations_losing_reuse": 2,
+      "two_session_continuations": 8,
+      "fanout_branches_reusing_base": 4,
+      "fanout_branches": 4,
+      "fanout_branch_cached_tokens": [
+        67676,
+        67676,
+        67676,
+        67676
+      ],
+      "agent_protocol": {
+        "live_sibling_continue": "ok",
+        "delete_status": 200,
+        "deleted_continue_status": 404,
+        "deleted_continue_code": "previous_response_not_found",
+        "survivor_continue": "ok"
+      },
+      "request_errors": 0,
+      "steps": [
+        {
+          "step": "long_context",
+          "wall_s": 58.154,
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "cached_tokens": null,
+          "reuse": "root",
+          "server_prefill_tok_s": 2242
+        },
+        {
+          "step": "decode_responses_1",
+          "wall_s": 12.218,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 176.5
+        },
+        {
+          "step": "decode_responses_2",
+          "wall_s": 12.023,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 176.5
+        },
+        {
+          "step": "decode_responses_3",
+          "wall_s": 12.084,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 176.5
+        },
+        {
+          "step": "decode_chat_no_thinking_1",
+          "wall_s": 9.548,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 240.6
+        },
+        {
+          "step": "decode_chat_no_thinking_2",
+          "wall_s": 9.316,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 240.6
+        },
+        {
+          "step": "decode_chat_no_thinking_3",
+          "wall_s": 9.398,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": null,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 240.6
+        },
+        {
+          "step": "session_base_D1",
+          "wall_s": 57.071,
+          "prompt_tokens": 125891,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2221.6
+        },
+        {
+          "step": "session_base_D2",
+          "wall_s": 63.86,
+          "prompt_tokens": 125892,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2226.8
+        },
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 64.414,
+          "prompt_tokens": 125937,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2212
+        },
+        {
+          "step": "r1_fork_D1",
+          "wall_s": 0.416,
+          "prompt_tokens": 125990,
+          "completion_tokens": 24,
+          "cached_tokens": 125960,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 130.4
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 57.395,
+          "prompt_tokens": 125938,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2210.7
+        },
+        {
+          "step": "r1_fork_D2",
+          "wall_s": 0.424,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125961,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 147.5
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 1.228,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125912,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 147.5
+        },
+        {
+          "step": "r2_fork_D1",
+          "wall_s": 0.411,
+          "prompt_tokens": 126044,
+          "completion_tokens": 24,
+          "cached_tokens": 126014,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 130.6
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 1.303,
+          "prompt_tokens": 125992,
+          "completion_tokens": 24,
+          "cached_tokens": 125913,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 147.6
+        },
+        {
+          "step": "r2_fork_D2",
+          "wall_s": 0.423,
+          "prompt_tokens": 126045,
+          "completion_tokens": 24,
+          "cached_tokens": 126015,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 130.2
+        },
+        {
+          "step": "fanout_base",
+          "wall_s": 26.35,
+          "prompt_tokens": 67681,
+          "completion_tokens": 40,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2639.8
+        },
+        {
+          "step": "fanout_warm_edit",
+          "wall_s": 0.785,
+          "prompt_tokens": 67746,
+          "completion_tokens": 80,
+          "cached_tokens": 67720,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 156.8
+        },
+        {
+          "step": "fanout_branch_0",
+          "wall_s": 0.93,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 254.2
+        },
+        {
+          "step": "fanout_branch_1",
+          "wall_s": 0.937,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 254.2
+        },
+        {
+          "step": "fanout_branch_2",
+          "wall_s": 0.978,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 254.2
+        },
+        {
+          "step": "fanout_branch_3",
+          "wall_s": 0.982,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 67676,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 254.2
+        },
+        {
+          "step": "fanout_continue_sibling",
+          "wall_s": 40.012,
+          "prompt_tokens": 67855,
+          "completion_tokens": 2,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2599.9
+        },
+        {
+          "step": "agent_base",
+          "wall_s": 0.164,
+          "prompt_tokens": 65,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 691.4
+        },
+        {
+          "step": "agent_fork_a",
+          "wall_s": 0.163,
+          "prompt_tokens": 107,
+          "completion_tokens": 16,
+          "cached_tokens": 80,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 311.8
+        },
+        {
+          "step": "agent_fork_b",
+          "wall_s": 0.287,
+          "prompt_tokens": 108,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 575.3
+        },
+        {
+          "step": "agent_live_sibling_continue",
+          "wall_s": 0.164,
+          "prompt_tokens": 150,
+          "completion_tokens": 16,
+          "cached_tokens": 123,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 311.3
+        },
+        {
+          "step": "agent_survivor_continue",
+          "wall_s": 0.245,
+          "prompt_tokens": 149,
+          "completion_tokens": 16,
+          "cached_tokens": 86,
+          "reuse": "private_long_anchor",
+          "server_prefill_tok_s": 405.4
+        }
+      ],
+      "evidence": {
+        "raw_receipt_sha256": "a6c74341627a16a03f1efa6c2ec483a97fe1861cb8d38516962fc8564d3ca9cd",
+        "request_log_sha256": "948eea2b29a50f0524f7e9d838fc492e2509b5ee817ebf20b62c49588b9b1d6c"
+      }
+    },
+    "upstream-e31bc99b-exp065": {
+      "identity": {
+        "arm": "upstream-e31bc99b-exp065",
+        "image": "ninfer-upstream:e31bc99b-exp065",
+        "image_id": "sha256:89c3022d18539ce2873215b913039e20f1460c6452891023d82fcb88f01b3b84",
+        "server_binary_sha256": "a7cc5d6be3e6c546a768263aa5036f45253f3c4b26979b5265105eaabb8c51cd",
+        "model_bytes": 18210749936,
+        "server_arguments": [
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8080",
+          "--model-id",
+          "q38-ninfer",
+          "--max-context",
+          "131072",
+          "--kv-capacity",
+          "auto",
+          "--prefill-chunk",
+          "1024",
+          "--kv-dtype",
+          "bf16",
+          "--max-concurrency",
+          "1",
+          "--spec",
+          "mtp",
+          "--draft-tokens",
+          "3",
+          "--lm-head-draft",
+          "--vision",
+          "--preserve-thinking",
+          "--max-private-continuations",
+          "8",
+          "--device-state-slots",
+          "4",
+          "--host-state-slots",
+          "24",
+          "--host-kv-mib",
+          "16384"
+        ],
+        "vram_used_total_mib_after_load": "28144, 32607",
+        "model_file": "qwen3_8_27b.v3-upgraded-594930e7.ninfer",
+        "model_sha256": "06ecbf821081cfa6c64ba089b7f9c8daf44e220ffd60e04dadef457ce6fabcbc",
+        "source_commit": "e31bc99b13f517c8aae70b997b7c4a49b4dcdc5d",
+        "runtime_version": "upstream e31bc99b",
+        "image_digest": "sha256:89c3022d18539ce2873215b913039e20f1460c6452891023d82fcb88f01b3b84"
+      },
+      "wire": "upstream",
+      "long_context": {
+        "exact": true,
+        "prompt_tokens": 130048,
+        "wall_s": 57.416,
+        "server_prefill_tok_s": 2275.6
+      },
+      "decode_responses_gate_prompt": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 140.32,
+        "mtp_acceptance": 0.4562,
+        "mtp_tokens_per_round": 2.37,
+        "decode_rounds_per_s": 59.2,
+        "repetitions_identical": null,
+        "repetitions": 3,
+        "aggregation": "Last chronological request, matching EXP-048 final-matching-request aggregation; rounds/s uses raw rounds divided by decode seconds, not the ratio of rounded token rates.",
+        "rounds_per_s_mean": 59.457,
+        "rounds_per_s_min": 59.197273,
+        "rounds_per_s_max": 59.882658,
+        "log_samples": [
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 14.57215328899999,
+            "rounds": 864,
+            "decode_rounds_per_s": 59.291169,
+            "decode_tok_s": 140.54203,
+            "mtp_tokens_per_round": 2.37037,
+            "mtp_acceptance": 0.456195,
+            "accepted_tokens": 1182,
+            "drafted_tokens": 2591
+          },
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 14.428217362999995,
+            "rounds": 864,
+            "decode_rounds_per_s": 59.882658,
+            "decode_tok_s": 141.944077,
+            "mtp_tokens_per_round": 2.37037,
+            "mtp_acceptance": 0.456195,
+            "accepted_tokens": 1182,
+            "drafted_tokens": 2591
+          },
+          {
+            "prompt_tokens": 118,
+            "completion_tokens": 2048,
+            "decode_s": 14.595266941000018,
+            "rounds": 864,
+            "decode_rounds_per_s": 59.197273,
+            "decode_tok_s": 140.319462,
+            "mtp_tokens_per_round": 2.37037,
+            "mtp_acceptance": 0.456195,
+            "accepted_tokens": 1182,
+            "drafted_tokens": 2591
+          }
+        ]
+      },
+      "decode_chat_thinking_off": {
+        "completion_tokens": 2048,
+        "decode_tok_s": 175.78,
+        "mtp_acceptance": 0.6551,
+        "mtp_tokens_per_round": 2.97,
+        "decode_rounds_per_s": 59.22,
+        "repetitions_identical": null,
+        "repetitions": 3,
+        "aggregation": "Last chronological request, matching EXP-048 final-matching-request aggregation; rounds/s uses raw rounds divided by decode seconds, not the ratio of rounded token rates.",
+        "rounds_per_s_mean": 59.414,
+        "rounds_per_s_min": 59.215976,
+        "rounds_per_s_max": 59.803835,
+        "log_samples": [
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 11.537721710999982,
+            "rounds": 690,
+            "decode_rounds_per_s": 59.803835,
+            "decode_tok_s": 177.504715,
+            "mtp_tokens_per_round": 2.968116,
+            "mtp_acceptance": 0.655072,
+            "accepted_tokens": 1356,
+            "drafted_tokens": 2070
+          },
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 11.65226082400002,
+            "rounds": 690,
+            "decode_rounds_per_s": 59.215976,
+            "decode_tok_s": 175.759883,
+            "mtp_tokens_per_round": 2.968116,
+            "mtp_acceptance": 0.655072,
+            "accepted_tokens": 1356,
+            "drafted_tokens": 2070
+          },
+          {
+            "prompt_tokens": 78,
+            "completion_tokens": 2048,
+            "decode_s": 11.650981523,
+            "rounds": 690,
+            "decode_rounds_per_s": 59.222478,
+            "decode_tok_s": 175.779182,
+            "mtp_tokens_per_round": 2.968116,
+            "mtp_acceptance": 0.655072,
+            "accepted_tokens": 1356,
+            "drafted_tokens": 2070
+          }
+        ]
+      },
+      "two_session_continuations_losing_reuse": 4,
+      "two_session_continuations": 8,
+      "fanout_branches_reusing_base": 0,
+      "fanout_branches": 4,
+      "fanout_branch_cached_tokens": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "agent_protocol": {
+        "live_sibling_continue": "ok",
+        "delete_status": 200,
+        "deleted_continue_status": 404,
+        "deleted_continue_code": "response_not_found",
+        "survivor_continue": "ok"
+      },
+      "request_errors": 0,
+      "steps": [
+        {
+          "step": "long_context",
+          "wall_s": 57.416,
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2275.6
+        },
+        {
+          "step": "decode_responses_1",
+          "wall_s": 14.67,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.1
+        },
+        {
+          "step": "decode_responses_2",
+          "wall_s": 14.471,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.1
+        },
+        {
+          "step": "decode_responses_3",
+          "wall_s": 14.637,
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "cached_tokens": 113,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 169.1
+        },
+        {
+          "step": "decode_chat_no_thinking_1",
+          "wall_s": 11.646,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 0,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 220.6
+        },
+        {
+          "step": "decode_chat_no_thinking_2",
+          "wall_s": 11.698,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 71,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 220.6
+        },
+        {
+          "step": "decode_chat_no_thinking_3",
+          "wall_s": 11.698,
+          "prompt_tokens": 78,
+          "completion_tokens": 2048,
+          "cached_tokens": 71,
+          "reuse": "private_response_replay",
+          "server_prefill_tok_s": 220.6
+        },
+        {
+          "step": "session_base_D1",
+          "wall_s": 55.911,
+          "prompt_tokens": 125891,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2270.8
+        },
+        {
+          "step": "session_base_D2",
+          "wall_s": 55.633,
+          "prompt_tokens": 125892,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2273.9
+        },
+        {
+          "step": "r1_continue_D1",
+          "wall_s": 55.919,
+          "prompt_tokens": 125937,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2261.8
+        },
+        {
+          "step": "r1_fork_D1",
+          "wall_s": 0.462,
+          "prompt_tokens": 125990,
+          "completion_tokens": 24,
+          "cached_tokens": 125960,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 146.5
+        },
+        {
+          "step": "r1_continue_D2",
+          "wall_s": 55.879,
+          "prompt_tokens": 125938,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2263.5
+        },
+        {
+          "step": "r1_fork_D2",
+          "wall_s": 0.459,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 125961,
+          "reuse": "root",
+          "server_prefill_tok_s": 2254.3
+        },
+        {
+          "step": "r2_continue_D1",
+          "wall_s": 56.138,
+          "prompt_tokens": 125991,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2254.3
+        },
+        {
+          "step": "r2_fork_D1",
+          "wall_s": 0.435,
+          "prompt_tokens": 126044,
+          "completion_tokens": 24,
+          "cached_tokens": 126014,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 147.1
+        },
+        {
+          "step": "r2_continue_D2",
+          "wall_s": 56.125,
+          "prompt_tokens": 125992,
+          "completion_tokens": 24,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2255.9
+        },
+        {
+          "step": "r2_fork_D2",
+          "wall_s": 0.432,
+          "prompt_tokens": 126045,
+          "completion_tokens": 24,
+          "cached_tokens": 126015,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 147.5
+        },
+        {
+          "step": "fanout_base",
+          "wall_s": 25.425,
+          "prompt_tokens": 67681,
+          "completion_tokens": 40,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2702.6
+        },
+        {
+          "step": "fanout_warm_edit",
+          "wall_s": 0.678,
+          "prompt_tokens": 67746,
+          "completion_tokens": 80,
+          "cached_tokens": 67720,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 188.3
+        },
+        {
+          "step": "fanout_branch_0",
+          "wall_s": 25.831,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2685.7
+        },
+        {
+          "step": "fanout_branch_1",
+          "wall_s": 25.825,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2685.7
+        },
+        {
+          "step": "fanout_branch_2",
+          "wall_s": 25.824,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2685.7
+        },
+        {
+          "step": "fanout_branch_3",
+          "wall_s": 25.818,
+          "prompt_tokens": 67749,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2685.7
+        },
+        {
+          "step": "fanout_continue_sibling",
+          "wall_s": 25.982,
+          "prompt_tokens": 67855,
+          "completion_tokens": 80,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 2666.6
+        },
+        {
+          "step": "agent_base",
+          "wall_s": 0.162,
+          "prompt_tokens": 65,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 987.4
+        },
+        {
+          "step": "agent_fork_a",
+          "wall_s": 0.159,
+          "prompt_tokens": 107,
+          "completion_tokens": 16,
+          "cached_tokens": 80,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 405.5
+        },
+        {
+          "step": "agent_fork_b",
+          "wall_s": 0.221,
+          "prompt_tokens": 108,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 872.9
+        },
+        {
+          "step": "agent_live_sibling_continue",
+          "wall_s": 0.144,
+          "prompt_tokens": 150,
+          "completion_tokens": 16,
+          "cached_tokens": 123,
+          "reuse": "private_endpoint",
+          "server_prefill_tok_s": 403.9
+        },
+        {
+          "step": "agent_survivor_continue",
+          "wall_s": 0.264,
+          "prompt_tokens": 149,
+          "completion_tokens": 16,
+          "cached_tokens": 0,
+          "reuse": "root",
+          "server_prefill_tok_s": 817.2
+        }
+      ],
+      "evidence": {
+        "raw_receipt_sha256": "a0fc9fa84c93185ba1ebc267c9455ddcbaf74e98a43007bb4a1fe2562d104217",
+        "request_log_sha256": "0ee22342cb3ee7c31587025c5fe22e490b0ada314f03e2b4704b9ee88ed60758"
+      }
+    }
+  },
+  "comparison": {
+    "prefill_130048_tok_s": [
+      2242,
+      2275.6
+    ],
+    "retrieval_130048_wall_s": [
+      58.154,
+      57.416
+    ],
+    "decode_rounds_per_s_gate_prompt": [
+      72.46,
+      59.2
+    ],
+    "decode_rounds_per_s_thinking_off": [
+      72.44,
+      59.22
+    ],
+    "decode_tok_s_gate_prompt": [
+      169.98,
+      140.32
+    ],
+    "decode_tok_s_thinking_off": [
+      218.81,
+      175.78
+    ],
+    "fanout_branches_reusing_base": [
+      4,
+      0
+    ],
+    "two_session_continuations_losing_reuse": [
+      2,
+      4
+    ],
+    "order": [
+      "shipped-v0612-exp065",
+      "upstream-e31bc99b-exp065"
+    ],
+    "upstream_change_percent": {
+      "prefill_130048_tok_s": 1.499,
+      "retrieval_130048_wall_s": -1.269,
+      "decode_rounds_per_s_gate_prompt": -18.3,
+      "decode_rounds_per_s_thinking_off": -18.25,
+      "decode_tok_s_gate_prompt": -17.449,
+      "decode_tok_s_thinking_off": -19.665
+    },
+    "exp048_context": {
+      "published_comparison": {
+        "prefill_130048_tok_s": [
+          2242.2,
+          2269.1
+        ],
+        "decode_rounds_per_s_gate_prompt": [
+          62.03,
+          61.16
+        ],
+        "decode_rounds_per_s_thinking_off": [
+          61.6,
+          60.91
+        ],
+        "order": [
+          "shipped-v067",
+          "upstream-594930e7"
+        ]
+      },
+      "historical_decode_log_samples": [
+        {
+          "arm": "shipped-v067",
+          "prompt": "gate_prompt",
+          "rounds_per_s": [
+            62.36389820893532,
+            62.1202762816286,
+            62.0009711063519
+          ],
+          "range_percent_of_mean": 0.5838434499783915
+        },
+        {
+          "arm": "shipped-v067",
+          "prompt": "thinking_off",
+          "rounds_per_s": [
+            61.863388659459744,
+            61.76357694244437,
+            61.66988786577864
+          ],
+          "range_percent_of_mean": 0.31328237375846973
+        },
+        {
+          "arm": "upstream-594930e7",
+          "prompt": "gate_prompt",
+          "rounds_per_s": [
+            61.370172316334845,
+            61.337035275575566,
+            61.15456643515525
+          ],
+          "range_percent_of_mean": 0.35179560676030397
+        },
+        {
+          "arm": "upstream-594930e7",
+          "prompt": "thinking_off",
+          "rounds_per_s": [
+            61.056675202044964,
+            60.890541672412844,
+            60.938573555036335
+          ],
+          "range_percent_of_mean": 0.27252012730234615
+        }
+      ],
+      "largest_three_request_decode_spread_percent": 0.5838434499783915,
+      "upstream_prefill_advantage_percent_then": 1.2,
+      "upstream_prefill_advantage_percent_now": 1.499,
+      "upstream_head_change_from_prior_upstream": {
+        "prefill_percent": 0.286,
+        "gate_rounds_percent": -3.201,
+        "thinking_off_rounds_percent": -2.816
+      },
+      "interpretation": "The decode gap exceeds EXP-048 within-run three-request timing spread; these are not replicated between-window variance bounds. Prefill had only one long request per arm in each experiment. Historical comparisons span different days and a changed shipped binary, so they do not causally isolate the 16 upstream commits."
+    }
+  },
+  "shipped_arm_shutdown": {
+    "observed": "shutdown: saved 1, nothing to save 3, refused 0",
+    "saved": 1,
+    "nothing_to_save": 3,
+    "refused": 0,
+    "earlier_automatic_checkpoint_defer": "One workload-time automatic checkpoint was deferred with the named gate resource transaction in progress; no session/response identifiers or outputs are included.",
+    "note": "Four stored-Response sessions were present. No shutdown refusal was reported. No --resume-from run was performed, so this is a shutdown observation, not a restore/retrieval proof."
+  },
+  "static_analysis": {
+    "upstream_base": "594930e7b609efa4bcea3ae4f24cd9d66b5f224f",
+    "upstream_head": "e31bc99b13f517c8aae70b997b7c4a49b4dcdc5d",
+    "upstream_commits_since_EXP048": 16,
+    "source_changes_considered": [
+      "bace20dc: default spin CUDA synchronization with NINFER_CUDA_SYNC override",
+      "229c1832 / 42614c0e / fc62790a / 502cd9d6: unified Q6/Q4/Q5/Q8 linear templates and sliced-K schedules",
+      "5d08cba8 / fc3993d8 / ecbc3357: FP8/NVFP4/BF16 linear-template work",
+      "0784e76f: GDN two-stage kernels replacing the chunked path"
+    ],
+    "upstream_cuda_sync": "Default spin; NINFER_CUDA_SYNC was not overridden for the arm.",
+    "merge_sizing": "EXP-048 merge sizing was not repeated and its old path/conflict counts are not presented as current.",
+    "scope": "Measurement only: no merge, port, backport, runtime-source edit, profile change, commit, or push."
+  },
+  "operation_attribution": {
+    "status": "not_measured",
+    "attempted": true,
+    "trigger": {
+      "ratios_upstream_over_shipped": {
+        "prefill": 1.014986619090098,
+        "gate_rounds": 0.818542563706924,
+        "thinking_off_rounds": 0.8168697009243602
+      },
+      "trigger_threshold_absolute_fraction": 0.03,
+      "triggered": true
+    },
+    "benchmark": "ninfer_linear_bench",
+    "shipped_benchmark_source": "9d1ef7485d9c741c2830fa3d55218f3242cec5d7",
+    "shipped_benchmark_sha256": "b2070906e2a65665dd29fb50d21980f509cdcdee2684de0784578f3bd745d128",
+    "upstream_benchmark_source": "e31bc99b13f517c8aae70b997b7c4a49b4dcdc5d",
+    "upstream_benchmark_sha256": "bbb04bd5b098c7715ecce6358fdeb1ecde7d425a65d06450b6132c8ec601e3de",
+    "attempted_primer": {
+      "qtype": "Q5",
+      "N": 5120,
+      "K": 17408,
+      "T": 1024,
+      "warmup": 1000,
+      "repeat": 1
+    },
+    "failure": "Shipped benchmark rejected the primer: ninfer_linear_bench: q5 linear: unsupported shape or T.",
+    "timing_rows_collected": 0,
+    "consequence": "The optional attribution subprocess made the window wrapper exit 1 after both gate probes had completed successfully. The EXIT trap restored production before analysis; no unsupported fixture was special-cased and no second outage was taken.",
+    "next_step": "Use a registered common shape/T or the corresponding fused-operation benchmark, then compare Q4/Q5/GDN and synchronization separately. No causal attribution to an individual upstream commit is claimed."
+  },
+  "production_restoration": {
+    "container": "ninfer-5090-v070p",
+    "downtime_start_utc": "2026-09-27T15:00:02Z",
+    "downtime_end_utc": "2026-09-27T15:19:55Z",
+    "downtime_seconds": 1193,
+    "downtime_definition": "Conservative bounds from issuance of the production stop through successful /health on its own port; not a separately sampled first/last failed-health interval.",
+    "relaunch_script": "~/services/ninfer-5090/relaunch-lane.sh",
+    "relaunch_script_sha256": "1a70e4d391f4facc4a76262d732efccbfbeb74144d3b71bc90922e901b062f46",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+    "image_id": "sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+    "state": "running",
+    "restart_policy": "unless-stopped",
+    "health_url": "http://127.0.0.1:18088/health",
+    "health_status": 200,
+    "supervisor_hold_released": true,
+    "window_containers_removed": true,
+    "exact_original_server_arguments_except_log_filename": true,
+    "production_checkpoint_mount_unchanged": true,
+    "docker_ps_line": "ninfer-5090-v070p cd9e10b115bb Up 37 seconds 0.0.0.0:18088->8080/tcp, [::]:18088->8080/tcp",
+    "events": [
+      {
+        "event": "supervisor_hold_taken",
+        "utc": "2026-09-27T15:00:02Z"
+      },
+      {
+        "event": "downtime_start",
+        "utc": "2026-09-27T15:00:02Z"
+      },
+      {
+        "event": "shipped-v0612-exp065-start",
+        "utc": "2026-09-27T15:00:09Z"
+      },
+      {
+        "event": "shipped-v0612-exp065-probe-complete",
+        "utc": "2026-09-27T15:08:00Z"
+      },
+      {
+        "event": "shipped-v0612-exp065-stopped",
+        "utc": "2026-09-27T15:08:12Z"
+      },
+      {
+        "event": "upstream-e31bc99b-exp065-start",
+        "utc": "2026-09-27T15:08:12Z"
+      },
+      {
+        "event": "upstream-e31bc99b-exp065-probe-complete",
+        "utc": "2026-09-27T15:19:09Z"
+      },
+      {
+        "event": "upstream-e31bc99b-exp065-stopped",
+        "utc": "2026-09-27T15:19:13Z"
+      },
+      {
+        "event": "gates_complete",
+        "utc": "2026-09-27T15:19:13Z"
+      },
+      {
+        "event": "production_healthy",
+        "utc": "2026-09-27T15:19:55Z"
+      },
+      {
+        "event": "supervisor_hold_released",
+        "utc": "2026-09-27T15:19:55Z"
+      }
+    ]
+  },
+  "verification": {
+    "requested_gate_probes_completed": 2,
+    "request_errors": 0,
+    "both_exact_130048_token_retrieval": true,
+    "window_process_exit_code": 1,
+    "window_exit_explanation": "Optional operation attribution rejected its unsupported primer after both successful arm probes; production recovery completed.",
+    "receipt_redacted": true
+  },
+  "limits": [
+    "One full run per arm, shipped first, not a randomized or replicated comparison. The small prefill lead cannot be promoted to a statistically established new gain.",
+    "The v2 and v3 chat-template paths differ; this is neither a matched-generated-text nor a quality-screen comparison. Rounds/s separates MTP acceptance from token throughput but does not make all content-dependent work identical.",
+    "Both arms retained the same serving settings except necessary fork-only omissions; shipped retained --gpu-keep-warm-ms 60000. The continuous probe does not qualify idle-arrival performance.",
+    "The unchanged probe matches request logs by token shape and may attach the final matching record to multiple steps. Distinct chronological decode records are therefore included; step-level server rates retain the probe method. No output hashes were collected, so repetition text identity is null, not asserted.",
+    "The upstream arm lacks fork session identity, durable checkpoint storage and fork fanout behavior by construction. Its reuse results do not predict a merged tree with those features ported.",
+    "No --resume-from restart/restore proof, quality screen, native-Windows/other-GPU qualification, or current merge-conflict sizing was performed.",
+    "Optional op-level attribution failed before any timing row because the selected Q5 public-Linear primer was unsupported. Production was restored immediately, and attribution is explicitly left to a compatible fixture in a separately approved window."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

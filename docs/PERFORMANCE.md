@@ -804,6 +804,31 @@ Entry detail:
   production has run it since 2026-09-27. Receipt:
   [powered redaction screen](measurements/2026-09-27-powered-redaction-screen.json); release:
   [v0.8.3 lane receipt](../releases/v0.8.3/qualification/rtx5090.json).
+- **EXP-064 — the RTX 4090 waits on its idle state too (2026-09-27).** The RTX 4090 native lane
+  had never been measured idle. After its last response the card steps P2 → P3 at about 2.3 s, P5
+  at 3.3-4.3 s and P8 (210 MHz SM, 405 MHz memory) at 5.4-6.2 s. A rule committed before either
+  arm ran compared one `sm_89` build of the v0.8.3 source with and without
+  `--gpu-keep-warm-ms 60000`, each serving a 15K-token stable prefix and 30 new sessions of about
+  100 computed tokens after gaps of 0-58 s. Without keep-warm every session after 12-58 s idle
+  started in P8 and prefilled in 0.29-0.47 s against 0.146 s back to back (medians +225 to +288
+  ms). With it the RTX 5090's spin ran, 3.5 ms of every 10 ms at 34.9% measured utilization, but
+  the card still reached P8 about 9.5 s after the last response, and every session after a gap
+  again started in P8. Outputs were byte-identical between the arms, so by the rule the RTX 4090
+  would ship 0. A sweep after the rule decided found that a single-warp spin of 40 ms or more every
+  100 ms held P2 at 73-79 W (4.5 W idle), while spins of 3.5-6 ms every 10 ms never did, even at
+  60% nominal duty: on this card the pattern's period matters, not only its utilization. The same
+  window reproduced #48's memory state (3.5 GiB free, 22.6 GiB standby) and the published v0.6.8
+  package started and pinned its 11 GiB host-KV pool. Receipt:
+  [RTX 4090 keep-warm](measurements/2026-09-27-rtx4090-engine-keep-warm.json).
+- **EXP-066 — a long spin holds the RTX 4090 (2026-09-27).** EXP-064's sweep chose the pattern;
+  a new rule, committed before either arm ran, judged it inside the engine. `7fa2f80a` makes the
+  `sm_89` build spin 50 ms of every 100 ms and leaves every other architecture on the RTX 5090's
+  pattern. With `--gpu-keep-warm-ms 60000` the card held P2 through every gap of up to 58 s at
+  77.5 W, about 72 W above idle, and all 15 sessions after 12-58 s idle prefilled in 0.146-0.148 s
+  (TTFT 0.167-0.178 s), the same as back to back; without it they took 0.26-0.43 s. All 31 outputs
+  matched between the arms and EXP-064's run of the v0.8.3 source. The RTX 4090 lane's
+  `v0.6.9-qwen38-4090-beta.1` from `5ac17674` sets `engine.gpu_keep_warm_ms` to 60000. Receipt:
+  [RTX 4090 long spin](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json).
 
 ## Current order
 

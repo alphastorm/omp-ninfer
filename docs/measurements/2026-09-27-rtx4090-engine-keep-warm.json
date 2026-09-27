@@ -8,12 +8,12 @@
  "question": "Does the RTX 4090 native lane slow new sessions that arrive after idle, as the RTX 5090 did (EXP-060), and does ninfer-serve --gpu-keep-warm-ms 60000 (EXP-062, shipped for the RTX 5090 in v0.8.2) bring them back to back-to-back speed on this card with identical outputs?",
  "exploratory_observation_before_this_rule": {
   "disclosure": "Observed before the decision rule below was written; it motivated the experiment and is not counted by the rule.",
-  "subject": "published v0.6.8-qwen38-4090-beta.1 (binary 32905865, source 5a774841), managed start on sf-pc, 2026-09-27 14:33-14:37Z",
+  "subject": "published v0.6.8-qwen38-4090-beta.1 (binary 32905865, source 5a774841), managed start on the RTX 4090 host, 2026-09-27 14:33-14:37Z",
   "workload": "one cold request whose system message (synthetic text plus inert tool JSON, 15,167 prompt tokens) forms the stable prefix, then ten new two-message sessions of 99-103 computed tokens after gaps 0,12,0,30,0,12,0,60,0,45 s; greedy, thinking off, 64 output tokens; nvidia-smi every 50 ms",
   "result": "Back to back: prefill 0.146-0.147 s (TTFT 0.170-0.177 s) in P2. After 12-60 s idle every session started in P8 (210 MHz SM, 405 MHz memory) and prefilled in 0.361-0.460 s (TTFT 0.438-0.486 s). The card stepped P2 -> P3 at about 2.3 s, P5 at 3.3-4.3 s and P8 at 5.3-6.3 s after the last response."
  },
  "decision_rule": {
-  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 9d1ef748, launched directly on sf-pc with the RTX 4090 lane's serving arguments: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
+  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 9d1ef748, launched directly on the RTX 4090 host with the RTX 4090 lane's serving arguments: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
   "workload_per_arm": "One cold request that builds the stable prefix, then 30 new two-message sessions after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times (15 back to back, three at each of five delays); greedy, thinking off, 64 output tokens, identical prompts in both arms; nvidia-smi every 50 ms. Latency is the server's own prefill time from its request log.",
   "regression": "The OFF arm regresses if, at three or more of the five delays, its median prefill is at least 25% and at least 75 ms above its back-to-back median.",
   "recovery": "The ON arm recovers if, at every delay, its median prefill is within 10% and within 20 ms of its back-to-back median, and every session after a gap starts in P2.",
@@ -31,7 +31,7 @@
  "answer": "The RTX 4090 native lane regresses exactly as the RTX 5090 did, and more: after the last response the card steps P2 -> P3 at about 2.3 s, P5 at 3.3-4.3 s and P8 (210 MHz SM, 405 MHz memory) at 5.4-6.2 s, and every new session after 12-58 s idle started in P8 and prefilled in 0.29-0.47 s against 0.146 s back to back (medians +225 to +288 ms, +153% to +197%). The engine keep-warm that holds the RTX 5090 in P1 does not hold this card: with --gpu-keep-warm-ms 60000 the spin ran (34.9% mean GPU utilization in the gaps) but the card still reached P8, 9.0-10.2 s after the last response instead of 5.4-6.2 s, and every session after a gap again started in P8 (medians 0.355-0.442 s). Outputs were byte-identical between the arms (31 of 31) and back-to-back requests lost nothing (median 0.1463 s against 0.1464 s).",
  "decision": "Rule outcome: regression holds at 5 of 5 delays; recovery fails at every delay; safety holds. Under the pre-registered rule the RTX 4090 profile ships engine.gpu_keep_warm_ms = 0 for this spin pattern. An exploratory duty sweep after the rule decided (not counted by it) found what does hold P2 on this card: a single-warp spin of 40 ms or more every 100 ms, while spins of 3.5-6 ms every 10 ms do not. That pattern is a new candidate with its own pre-registered experiment (EXP-066); this receipt does not choose it.",
  "method": {
-  "host": "sf-pc: NVIDIA GeForce RTX 4090 (VBIOS 95.02.3c.c0.f4, 450 W limit), Windows 11, driver 610.88, CUDA 13.3; the lane's managed release stopped for the window and left stopped afterwards",
+  "host": "NVIDIA GeForce RTX 4090 (VBIOS 95.02.3c.c0.f4, 450 W limit), Windows 11, driver 610.88, CUDA 13.3; the lane's managed release stopped for the window and left stopped afterwards",
   "build": "alphastorm/ninfer 9d1ef748 (the v0.8.3 RTX 5090 source; the RTX 4090 kernels equal v0.6.8's 5a774841, and the Q5 tensor-core route is compiled out for sm_89), Release, sm_89, MSVC 14.44 and nvcc 13.3 through the port-native builder tree; ninfer-serve 493fffea",
   "arms": "The same binary launched directly (outside the managed controller, detached from the SSH session through WMI) with the RTX 4090 lane's v0.6.8 serving arguments on 127.0.0.1:18082: 131,072 context and KV capacity, INT8 KV, prefill chunk 2,048, 2 device-state and 24 host-state slots, 11,264 MiB host KV, 8 private continuations, MTP 3 with the LM-head draft, preserved thinking, a scratch checkpoint root. OFF without --gpu-keep-warm-ms (14:50:59-15:01:47Z), then ON with --gpu-keep-warm-ms 60000 (15:02:04-15:13:00Z).",
   "workload": "Per arm one cold request whose system message (synthetic text plus inert tool JSON from scripts/agent_mix_probe.py, 15,167 prompt tokens) forms the stable prefix, then 30 new two-message sessions of 97-103 computed tokens after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times; greedy, thinking off, 64 output tokens; identical prompts in both arms; client through an SSH tunnel, latency from the server's own request log (prefill and TTFT).",
@@ -402,5 +402,24 @@
   "Workload prompts are synthetic and short (about 100 computed tokens on a 15K-token prefix); production agent turns are larger, so absolute times differ.",
   "The client ran from the Mac through an SSH tunnel; the numbers are the server's own prefill and TTFT, which exclude the tunnel.",
   "The exploratory duty sweep used a standalone program, not ninfer-serve; EXP-066 measures the chosen pattern inside the engine."
- ]
+ ],
+ "issue_48_field_start": {
+  "issue": "alphastorm/omp-ninfer#48",
+  "subject": "published v0.6.8-qwen38-4090-beta.1 (binary 32905865, source 5a774841), the documented managed start (Control-Release.ps1 -Action Start), 2026-09-27 14:30-14:32Z, before this experiment's probes",
+  "memory_state_reproduced": "A 12.6 GiB file written and read back pushed free and zeroed pages from 16.14 to 3.48 GiB and the standby list from 9.98 to 22.61 GiB, the state in which the v0.6.6 package's start was refused (3.9 GiB free, 22.7 GiB standby).",
+  "before_start_gib": {
+   "free_and_zero": 3.48,
+   "standby": 22.61,
+   "committed": 5.62,
+   "commit_limit": 42.7
+  },
+  "after_start_gib": {
+   "free_and_zero": 0.03,
+   "standby": 9.54,
+   "committed": 44.5,
+   "commit_limit": 45.11
+  },
+  "result": "The start succeeded in 106.2 s (model hash pass and load 99.0 s with the artifact not cached) and the server logged host-kv=11.00 GiB pinned. Commit rose to 44.5 of 45.1 GiB as the system-managed pagefile extended from a 42.7 GiB limit, the race the v0.6.7-beta.2 commit precharge addresses; no refusal occurred.",
+  "restored": "The temporary file was deleted and the release was stopped again (graceful, 2.4 s), as it was found."
+ }
 }

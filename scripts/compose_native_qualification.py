@@ -196,6 +196,9 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "managed_stop": spec["lifecycle"]["managed_stop"],
         "graceful_stop_timeout_seconds": spec["lifecycle"]["graceful_stop_timeout_seconds"],
     }
+    if "gpu_keep_warm_ms" in engine:
+        # Packages built since the field existed declare it; older qualification windows omit it.
+        configuration["gpu_keep_warm_ms"] = engine["gpu_keep_warm_ms"]
     pressure = evidence["pressure"]
     pressure_receipt = receipts["pressure_protocol"]
     require(all(pressure["checks"].values()), "pressure protocol carries a failed check")

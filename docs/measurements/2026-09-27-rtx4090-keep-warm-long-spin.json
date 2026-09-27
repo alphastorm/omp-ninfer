@@ -2,13 +2,13 @@
  "artifact_type": "omp_ninfer_measurement",
  "schema_version": 1,
  "experiment": "EXP-066",
- "title": "RTX 4090 engine keep-warm with a long spin (pre-registered)",
- "generated_utc": "2026-09-27T16:12:00Z",
- "status": "pre-registered",
+ "title": "RTX 4090 engine keep-warm with a long spin: new sessions after 12-58 s idle prefill at back-to-back speed, outputs unchanged, about 72 W above idle while held",
+ "generated_utc": "2026-09-27T16:20:00Z",
+ "status": "passed",
  "question": "Built into ninfer-serve for sm_89 (alphastorm/ninfer 7fa2f80a: a single-warp spin of 50 ms every 100 ms instead of 3.5 ms every 10 ms), does --gpu-keep-warm-ms 60000 hold the RTX 4090 in P2 and bring new sessions after idle back to back-to-back speed with identical outputs?",
  "prior_evidence": "EXP-064 rejected the RTX 5090 pattern on this card (every session after a gap started in P8) and, in a sweep run after its rule decided, found that spins of 40 ms or more every 100 ms held P2 while spins of 3.5-6 ms every 10 ms did not. That sweep chose the pattern; it is not counted here.",
  "decision_rule": {
-  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 7fa2f80a, launched directly on sf-pc with the RTX 4090 lane's serving arguments exactly as in EXP-064: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
+  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 7fa2f80a, launched directly on the RTX 4090 host with the RTX 4090 lane's serving arguments exactly as in EXP-064: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
   "workload_per_arm": "EXP-064's: one cold request that builds the stable prefix, then 30 new two-message sessions after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times; greedy, thinking off, 64 output tokens, identical prompts in both arms; nvidia-smi every 50 ms. Latency is the server's own prefill time from its request log.",
   "regression": "The OFF arm regresses if, at three or more of the five delays, its median prefill is at least 25% and at least 75 ms above its back-to-back median.",
   "recovery": "The ON arm recovers if, at every delay, its median prefill is within 10% and within 20 ms of its back-to-back median, and every session after a gap starts in P2.",
@@ -16,5 +16,309 @@
   "decision": "If regression, recovery and safety all hold, the RTX 4090 profile ships engine.gpu_keep_warm_ms = 60000 on a component built from this source; otherwise it ships 0.",
   "informational": "Power while held (ON arm gaps) against idle (OFF arm gaps); not a gate."
  },
- "raw_prompts_outputs_or_secrets_included": false
+ "raw_prompts_outputs_or_secrets_included": false,
+ "pre_registration": {
+  "commit": "f9faca8",
+  "committed_utc": "2026-09-27T15:37:43Z",
+  "first_arm_started_utc": "2026-09-27T15:39:10Z",
+  "note": "The rule was committed and pushed before either arm ran. After the run, the host name in the arms text was replaced by a neutral description because the product verifier forbids private host markers; the rule is otherwise unchanged."
+ },
+ "answer": "Yes. With the sm_89 spin of 50 ms every 100 ms, --gpu-keep-warm-ms 60000 held the RTX 4090 in P2 through every gap of up to 58 s (every one of 9,004 samples in the gaps was P2, at 50% GPU utilization and 77.5 W against about 5 W idle in P8), and every session after 12-58 s idle prefilled in 0.1461-0.1481 s (TTFT 0.167-0.178 s), the same as back to back (median 0.147 s). Without it, sessions after the same gaps started in P8 and prefilled in 0.26-0.43 s (medians 0.336-0.399 s). All 31 outputs were byte-identical between the arms and to EXP-064's OFF arm, which ran the v0.8.3 source.",
+ "decision": "Rule outcome: regression holds at 5 of 5 delays, recovery holds at every delay with every post-gap session starting in P2, and safety holds. The RTX 4090 profile ships engine.gpu_keep_warm_ms = 60000 on a component built from alphastorm/ninfer 7fa2f80a or a packaging-only descendant (v0.6.9-qwen38-4090-beta.1 from 5ac17674).",
+ "method": {
+  "host": "NVIDIA GeForce RTX 4090 (VBIOS 95.02.3c.c0.f4, 450 W limit), Windows 11, driver 610.88, CUDA 13.3; the lane's managed release stopped for the window and left stopped afterwards",
+  "build": "alphastorm/ninfer 7fa2f80a, Release, sm_89, MSVC 14.44 and nvcc 13.3; ninfer-serve 792f1cac. Its keep-warm device test passed on this card: one spin 50.0 ms, and a launch while a spin runs is skipped (two launches 50.0 ms).",
+  "arms": "EXP-064's launcher and serving arguments unchanged: OFF 15:39:10-15:50:28Z, ON with --gpu-keep-warm-ms 60000 15:50:45-16:01:40Z.",
+  "workload": "EXP-064's, prompt for prompt.",
+  "sampling": "nvidia-smi on the host every 50 ms."
+ },
+ "arms": {
+  "off": {
+   "back_to_back": {
+    "n": 15,
+    "median_prefill_s": 0.1466,
+    "min": 0.1461,
+    "max": 0.4055
+   },
+   "delays": {
+    "12": {
+     "prefill_s": [
+      0.2642,
+      0.3575,
+      0.3362
+     ],
+     "ttft_s": [
+      0.3277,
+      0.3822,
+      0.3608
+     ],
+     "median_s": 0.3362,
+     "over_b2b_pct": 129.3,
+     "over_b2b_ms": 189.6,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "25": {
+     "prefill_s": [
+      0.3467,
+      0.3218,
+      0.429
+     ],
+     "ttft_s": [
+      0.4135,
+      0.3444,
+      0.4525
+     ],
+     "median_s": 0.3467,
+     "over_b2b_pct": 136.4,
+     "over_b2b_ms": 200.1,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "38": {
+     "prefill_s": [
+      0.4179,
+      0.3992,
+      0.3972
+     ],
+     "ttft_s": [
+      0.4878,
+      0.4698,
+      0.419
+     ],
+     "median_s": 0.3992,
+     "over_b2b_pct": 172.2,
+     "over_b2b_ms": 252.5,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "53": {
+     "prefill_s": [
+      0.4131,
+      0.3908,
+      0.3604
+     ],
+     "ttft_s": [
+      0.4388,
+      0.416,
+      0.3825
+     ],
+     "median_s": 0.3908,
+     "over_b2b_pct": 166.5,
+     "over_b2b_ms": 244.1,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "58": {
+     "prefill_s": [
+      0.3364,
+      0.4118,
+      0.3134
+     ],
+     "ttft_s": [
+      0.36,
+      0.4355,
+      0.3372
+     ],
+     "median_s": 0.3364,
+     "over_b2b_pct": 129.4,
+     "over_b2b_ms": 189.8,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    }
+   },
+   "gap_windows": {
+    "mean_utilization_pct": 0.8,
+    "mean_power_w": 17.3,
+    "seconds_to_p8": [
+     6.1,
+     5.84,
+     5.91,
+     5.97,
+     5.78,
+     6.0,
+     5.81,
+     6.1,
+     5.84,
+     6.1,
+     6.18,
+     5.49,
+     6.19,
+     5.99,
+     5.77
+    ],
+    "states_seen": {
+     "P2": 478,
+     "P3": 484,
+     "P5": 432,
+     "P8": 7593
+    }
+   }
+  },
+  "on": {
+   "back_to_back": {
+    "n": 15,
+    "median_prefill_s": 0.147,
+    "min": 0.1461,
+    "max": 0.1477
+   },
+   "delays": {
+    "12": {
+     "prefill_s": [
+      0.1463,
+      0.1461,
+      0.1465
+     ],
+     "ttft_s": [
+      0.1689,
+      0.1679,
+      0.1686
+     ],
+     "median_s": 0.1463,
+     "over_b2b_pct": -0.5,
+     "over_b2b_ms": -0.7,
+     "start_pstates": [
+      "P2",
+      "P2",
+      "P2"
+     ]
+    },
+    "25": {
+     "prefill_s": [
+      0.1467,
+      0.1482,
+      0.1463
+     ],
+     "ttft_s": [
+      0.1721,
+      0.1705,
+      0.1668
+     ],
+     "median_s": 0.1467,
+     "over_b2b_pct": -0.2,
+     "over_b2b_ms": -0.4,
+     "start_pstates": [
+      "P2",
+      "P2",
+      "P2"
+     ]
+    },
+    "38": {
+     "prefill_s": [
+      0.1462,
+      0.146,
+      0.1462
+     ],
+     "ttft_s": [
+      0.1727,
+      0.1779,
+      0.1691
+     ],
+     "median_s": 0.1462,
+     "over_b2b_pct": -0.6,
+     "over_b2b_ms": -0.8,
+     "start_pstates": [
+      "P2",
+      "P2",
+      "P2"
+     ]
+    },
+    "53": {
+     "prefill_s": [
+      0.1462,
+      0.1462,
+      0.1462
+     ],
+     "ttft_s": [
+      0.169,
+      0.1684,
+      0.1685
+     ],
+     "median_s": 0.1462,
+     "over_b2b_pct": -0.5,
+     "over_b2b_ms": -0.8,
+     "start_pstates": [
+      "P2",
+      "P2",
+      "P2"
+     ]
+    },
+    "58": {
+     "prefill_s": [
+      0.146,
+      0.1464,
+      0.1461
+     ],
+     "ttft_s": [
+      0.1704,
+      0.1691,
+      0.169
+     ],
+     "median_s": 0.1461,
+     "over_b2b_pct": -0.6,
+     "over_b2b_ms": -0.9,
+     "start_pstates": [
+      "P2",
+      "P2",
+      "P2"
+     ]
+    }
+   },
+   "gap_windows": {
+    "mean_utilization_pct": 50.1,
+    "mean_power_w": 77.5,
+    "seconds_to_p8": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "states_seen": {
+     "P2": 9004
+    }
+   }
+  },
+  "outputs_identical_between_arms": "31 of 31",
+  "outputs_identical_to_exp064_off": "31 of 31",
+  "request_errors": 0
+ },
+ "power": {
+  "p2_held_w": 77.7,
+  "p8_idle_w": 4.9,
+  "held_above_idle_w": 72.8,
+  "note": "P2 samples under 60% utilization in the ON arm against EXP-064's P8 idle; comparable to the RTX 5090's about 71 W (EXP-062). The energy cost over a 60 s grace scales with how often requests arrive after a gap; EXP-062's replay of RTX 5090 production traffic put a 60 s grace at about 2.3 W average there."
+ },
+ "limits": [
+  "One card, one driver, one Windows host.",
+  "Arms ran OFF then ON, not interleaved; the effect (every post-gap session back at back-to-back speed, in P2) is far outside order effects.",
+  "Synthetic short prompts on a 15K-token prefix; production agent turns are larger.",
+  "The worker paces each 100 ms period on a condition variable; the measured 50% utilization shows the period ran as intended on this host.",
+  "Back-to-back sessions arrived while a spin could still run; their median did not move (0.147 s against 0.1466 s), but a request arriving mid-spin can overlap one warp for up to 50 ms."
+ ]
 }
