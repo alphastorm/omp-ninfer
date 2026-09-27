@@ -1,0 +1,20 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-066",
+ "title": "RTX 4090 engine keep-warm with a long spin (pre-registered)",
+ "generated_utc": "2026-09-27T16:12:00Z",
+ "status": "pre-registered",
+ "question": "Built into ninfer-serve for sm_89 (alphastorm/ninfer 7fa2f80a: a single-warp spin of 50 ms every 100 ms instead of 3.5 ms every 10 ms), does --gpu-keep-warm-ms 60000 hold the RTX 4090 in P2 and bring new sessions after idle back to back-to-back speed with identical outputs?",
+ "prior_evidence": "EXP-064 rejected the RTX 5090 pattern on this card (every session after a gap started in P8) and, in a sweep run after its rule decided, found that spins of 40 ms or more every 100 ms held P2 while spins of 3.5-6 ms every 10 ms did not. That sweep chose the pattern; it is not counted here.",
+ "decision_rule": {
+  "arms": "One sm_89 ninfer-serve built from alphastorm/ninfer 7fa2f80a, launched directly on sf-pc with the RTX 4090 lane's serving arguments exactly as in EXP-064: OFF without --gpu-keep-warm-ms, then ON with --gpu-keep-warm-ms 60000.",
+  "workload_per_arm": "EXP-064's: one cold request that builds the stable prefix, then 30 new two-message sessions after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times; greedy, thinking off, 64 output tokens, identical prompts in both arms; nvidia-smi every 50 ms. Latency is the server's own prefill time from its request log.",
+  "regression": "The OFF arm regresses if, at three or more of the five delays, its median prefill is at least 25% and at least 75 ms above its back-to-back median.",
+  "recovery": "The ON arm recovers if, at every delay, its median prefill is within 10% and within 20 ms of its back-to-back median, and every session after a gap starts in P2.",
+  "safety": "All 31 responses are byte-identical between the arms and to EXP-064's OFF arm, no request fails, and the ON arm's back-to-back median prefill is at most 10% above the OFF arm's.",
+  "decision": "If regression, recovery and safety all hold, the RTX 4090 profile ships engine.gpu_keep_warm_ms = 60000 on a component built from this source; otherwise it ships 0.",
+  "informational": "Power while held (ON arm gaps) against idle (OFF arm gaps); not a gate."
+ },
+ "raw_prompts_outputs_or_secrets_included": false
+}

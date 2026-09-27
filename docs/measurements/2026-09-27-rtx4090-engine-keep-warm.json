@@ -2,9 +2,9 @@
  "artifact_type": "omp_ninfer_measurement",
  "schema_version": 1,
  "experiment": "EXP-064",
- "title": "RTX 4090 idle P-states and the engine keep-warm (pre-registered)",
- "generated_utc": "2026-09-27T14:55:00Z",
- "status": "pre-registered",
+ "title": "RTX 4090 idle P-states: new sessions after idle prefill 2.5-3x slower, and the RTX 5090's keep-warm spin (3.5 ms of every 10 ms) does not hold the card in P2",
+ "generated_utc": "2026-09-27T16:05:00Z",
+ "status": "rejected",
  "question": "Does the RTX 4090 native lane slow new sessions that arrive after idle, as the RTX 5090 did (EXP-060), and does ninfer-serve --gpu-keep-warm-ms 60000 (EXP-062, shipped for the RTX 5090 in v0.8.2) bring them back to back-to-back speed on this card with identical outputs?",
  "exploratory_observation_before_this_rule": {
   "disclosure": "Observed before the decision rule below was written; it motivated the experiment and is not counted by the rule.",
@@ -21,5 +21,386 @@
   "decision": "If regression, recovery and safety all hold, the RTX 4090 profile ships engine.gpu_keep_warm_ms = 60000; otherwise it ships 0. No other grace is chosen from this data.",
   "informational": "Power while held (ON arm gaps) against idle (OFF arm gaps); not a gate."
  },
- "raw_prompts_outputs_or_secrets_included": false
+ "raw_prompts_outputs_or_secrets_included": false,
+ "pre_registration": {
+  "commit": "f43e04f",
+  "committed_utc": "2026-09-27T14:47:34Z",
+  "first_arm_started_utc": "2026-09-27T14:50:59Z",
+  "note": "The decision rule below was committed and pushed before either arm ran; the exploratory observation was disclosed with it."
+ },
+ "answer": "The RTX 4090 native lane regresses exactly as the RTX 5090 did, and more: after the last response the card steps P2 -> P3 at about 2.3 s, P5 at 3.3-4.3 s and P8 (210 MHz SM, 405 MHz memory) at 5.4-6.2 s, and every new session after 12-58 s idle started in P8 and prefilled in 0.29-0.47 s against 0.146 s back to back (medians +225 to +288 ms, +153% to +197%). The engine keep-warm that holds the RTX 5090 in P1 does not hold this card: with --gpu-keep-warm-ms 60000 the spin ran (34.9% mean GPU utilization in the gaps) but the card still reached P8, 9.0-10.2 s after the last response instead of 5.4-6.2 s, and every session after a gap again started in P8 (medians 0.355-0.442 s). Outputs were byte-identical between the arms (31 of 31) and back-to-back requests lost nothing (median 0.1463 s against 0.1464 s).",
+ "decision": "Rule outcome: regression holds at 5 of 5 delays; recovery fails at every delay; safety holds. Under the pre-registered rule the RTX 4090 profile ships engine.gpu_keep_warm_ms = 0 for this spin pattern. An exploratory duty sweep after the rule decided (not counted by it) found what does hold P2 on this card: a single-warp spin of 40 ms or more every 100 ms, while spins of 3.5-6 ms every 10 ms do not. That pattern is a new candidate with its own pre-registered experiment (EXP-066); this receipt does not choose it.",
+ "method": {
+  "host": "sf-pc: NVIDIA GeForce RTX 4090 (VBIOS 95.02.3c.c0.f4, 450 W limit), Windows 11, driver 610.88, CUDA 13.3; the lane's managed release stopped for the window and left stopped afterwards",
+  "build": "alphastorm/ninfer 9d1ef748 (the v0.8.3 RTX 5090 source; the RTX 4090 kernels equal v0.6.8's 5a774841, and the Q5 tensor-core route is compiled out for sm_89), Release, sm_89, MSVC 14.44 and nvcc 13.3 through the port-native builder tree; ninfer-serve 493fffea",
+  "arms": "The same binary launched directly (outside the managed controller, detached from the SSH session through WMI) with the RTX 4090 lane's v0.6.8 serving arguments on 127.0.0.1:18082: 131,072 context and KV capacity, INT8 KV, prefill chunk 2,048, 2 device-state and 24 host-state slots, 11,264 MiB host KV, 8 private continuations, MTP 3 with the LM-head draft, preserved thinking, a scratch checkpoint root. OFF without --gpu-keep-warm-ms (14:50:59-15:01:47Z), then ON with --gpu-keep-warm-ms 60000 (15:02:04-15:13:00Z).",
+  "workload": "Per arm one cold request whose system message (synthetic text plus inert tool JSON from scripts/agent_mix_probe.py, 15,167 prompt tokens) forms the stable prefix, then 30 new two-message sessions of 97-103 computed tokens after gaps 0,12,0,25,0,38,0,53,0,58 s repeated three times; greedy, thinking off, 64 output tokens; identical prompts in both arms; client through an SSH tunnel, latency from the server's own request log (prefill and TTFT).",
+  "sampling": "nvidia-smi on the host every 50 ms: P-state, SM and memory clocks, power, utilization."
+ },
+ "arms": {
+  "off": {
+   "back_to_back": {
+    "n": 15,
+    "median_prefill_s": 0.1464,
+    "min": 0.1461,
+    "max": 0.348
+   },
+   "delays": {
+    "12": {
+     "prefill_s": [
+      0.401,
+      0.4694,
+      0.4036
+     ],
+     "median_s": 0.4036,
+     "over_b2b_pct": 175.7,
+     "over_b2b_ms": 257.2,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "25": {
+     "prefill_s": [
+      0.3711,
+      0.403,
+      0.3183
+     ],
+     "median_s": 0.3711,
+     "over_b2b_pct": 153.4,
+     "over_b2b_ms": 224.6,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "38": {
+     "prefill_s": [
+      0.2884,
+      0.4345,
+      0.4644
+     ],
+     "median_s": 0.4345,
+     "over_b2b_pct": 196.7,
+     "over_b2b_ms": 288.0,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "53": {
+     "prefill_s": [
+      0.3573,
+      0.3815,
+      0.4358
+     ],
+     "median_s": 0.3815,
+     "over_b2b_pct": 160.6,
+     "over_b2b_ms": 235.1,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "58": {
+     "prefill_s": [
+      0.3158,
+      0.4594,
+      0.3916
+     ],
+     "median_s": 0.3916,
+     "over_b2b_pct": 167.5,
+     "over_b2b_ms": 245.2,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    }
+   },
+   "gap_windows": {
+    "mean_utilization_pct": 0.4,
+    "mean_power_w": 17.9,
+    "seconds_to_p8": [
+     6.24,
+     5.91,
+     5.78,
+     5.72,
+     5.92,
+     5.73,
+     5.95,
+     5.67,
+     6.16,
+     5.95,
+     5.63,
+     5.89,
+     5.95,
+     5.62,
+     5.39
+    ]
+   }
+  },
+  "on": {
+   "back_to_back": {
+    "n": 15,
+    "median_prefill_s": 0.1463,
+    "min": 0.1459,
+    "max": 0.1639
+   },
+   "delays": {
+    "12": {
+     "prefill_s": [
+      0.3448,
+      0.4041,
+      0.4036
+     ],
+     "median_s": 0.4036,
+     "over_b2b_pct": 175.8,
+     "over_b2b_ms": 257.3,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "25": {
+     "prefill_s": [
+      0.3184,
+      0.4423,
+      0.4429
+     ],
+     "median_s": 0.4423,
+     "over_b2b_pct": 202.3,
+     "over_b2b_ms": 296.0,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "38": {
+     "prefill_s": [
+      0.4114,
+      0.3708,
+      0.4117
+     ],
+     "median_s": 0.4114,
+     "over_b2b_pct": 181.2,
+     "over_b2b_ms": 265.1,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "53": {
+     "prefill_s": [
+      0.294,
+      0.3725,
+      0.3552
+     ],
+     "median_s": 0.3552,
+     "over_b2b_pct": 142.8,
+     "over_b2b_ms": 208.9,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    },
+    "58": {
+     "prefill_s": [
+      0.3653,
+      0.3189,
+      0.439
+     ],
+     "median_s": 0.3653,
+     "over_b2b_pct": 149.6,
+     "over_b2b_ms": 219.0,
+     "start_pstates": [
+      "P8",
+      "P8",
+      "P8"
+     ]
+    }
+   },
+   "gap_windows": {
+    "mean_utilization_pct": 34.9,
+    "mean_power_w": 23.0,
+    "seconds_to_p8": [
+     9.75,
+     9.36,
+     10.13,
+     9.8,
+     9.01,
+     9.66,
+     9.67,
+     9.24,
+     10.02,
+     9.8,
+     9.69,
+     9.46,
+     10.18,
+     9.5,
+     9.89
+    ]
+   }
+  },
+  "outputs_identical_between_arms": "31 of 31",
+  "request_errors": 0
+ },
+ "power": {
+  "p8_idle_w": 4.9,
+  "p8_with_spin_running_w": 10.5,
+  "p5_with_spin_w": 25.1,
+  "p2_with_spin_w": 89.0,
+  "note": "Means of nvidia-smi samples at under 60% utilization in each state; the ON arm's gaps averaged 23.0 W against 17.9 W for OFF because the spin delayed the step-down, not because it held P2."
+ },
+ "exploratory_duty_sweep": {
+  "disclosure": "Run after the rule decided this experiment; not counted by it.",
+  "method": "A standalone sm_89 program (nvcc 13.3) ran a 3 s full-GPU burst, then a single-warp %globaltimer spin of on_ms every period_ms for 30 s, one pattern at a time with 12 s rests, nothing else on the GPU; nvidia-smi every 50 ms; the last 20 s of each pattern summarized. Host sleeps use the Windows timer, so short periods run longer than nominal and their effective duty is lower (see measured utilization).",
+  "period_100_ms": [
+   {
+    "on_ms": 0,
+    "duty_pct": 0.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 5.18,
+    "last20s_mean_util": 0,
+    "last20s_mean_power_w": 4.5
+   },
+   {
+    "on_ms": 30,
+    "duty_pct": 30.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 7.53,
+    "last20s_mean_util": 27.5,
+    "last20s_mean_power_w": 8.2
+   },
+   {
+    "on_ms": 40,
+    "duty_pct": 40.0,
+    "last20s_states": {
+     "P2": 1.0
+    },
+    "first_p8_s": null,
+    "last20s_mean_util": 35.7,
+    "last20s_mean_power_w": 73.4
+   },
+   {
+    "on_ms": 50,
+    "duty_pct": 50.0,
+    "last20s_states": {
+     "P2": 1.0
+    },
+    "first_p8_s": null,
+    "last20s_mean_util": 45.0,
+    "last20s_mean_power_w": 75.0
+   },
+   {
+    "on_ms": 60,
+    "duty_pct": 60.0,
+    "last20s_states": {
+     "P2": 1.0
+    },
+    "first_p8_s": null,
+    "last20s_mean_util": 52.3,
+    "last20s_mean_power_w": 76.7
+   },
+   {
+    "on_ms": 70,
+    "duty_pct": 70.0,
+    "last20s_states": {
+     "P2": 1.0
+    },
+    "first_p8_s": null,
+    "last20s_mean_util": 63.9,
+    "last20s_mean_power_w": 77.5
+   },
+   {
+    "on_ms": 80,
+    "duty_pct": 80.0,
+    "last20s_states": {
+     "P2": 1.0
+    },
+    "first_p8_s": null,
+    "last20s_mean_util": 72.9,
+    "last20s_mean_power_w": 78.6
+   }
+  ],
+  "period_10_or_20_ms": [
+   {
+    "period_ms": 20,
+    "on_ms": 7,
+    "duty_pct": 35.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 7.34,
+    "last20s_mean_util": 23.2,
+    "last20s_mean_power_w": 7.4
+   },
+   {
+    "period_ms": 10,
+    "on_ms": 4,
+    "duty_pct": 40.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 7.96,
+    "last20s_mean_util": 27.6,
+    "last20s_mean_power_w": 8.4
+   },
+   {
+    "period_ms": 10,
+    "on_ms": 5,
+    "duty_pct": 50.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 8.83,
+    "last20s_mean_util": 34.1,
+    "last20s_mean_power_w": 8.7
+   },
+   {
+    "period_ms": 10,
+    "on_ms": 6,
+    "duty_pct": 60.0,
+    "last20s_states": {
+     "P2": 0.01,
+     "P5": 0.303,
+     "P8": 0.688
+    },
+    "first_p8_s": 16.25,
+    "last20s_mean_util": 39.6,
+    "last20s_mean_power_w": 14.5
+   },
+   {
+    "period_ms": 20,
+    "on_ms": 8,
+    "duty_pct": 40.0,
+    "last20s_states": {
+     "P8": 1.0
+    },
+    "first_p8_s": 7.59,
+    "last20s_mean_util": 25.9,
+    "last20s_mean_power_w": 7.3
+   }
+  ],
+  "reading": "Every spin of 40 ms or more every 100 ms held P2 for the whole 30 s at 73-79 W (4.5 W idle in P8); 30 ms every 100 ms did not. Spins of 4-7 ms every 10-20 ms reached P8 even at 60% nominal duty (39.6% measured utilization), so on this card and driver the pattern's period matters, not only its average utilization."
+ },
+ "limits": [
+  "One card, one driver, one Windows host; the RTX 4090's P-state policy may differ under another driver or with a display attached.",
+  "Arms ran OFF then ON, not interleaved; the effect sizes (+225 ms and more at every delay, and no recovery at any) are far outside order effects.",
+  "Workload prompts are synthetic and short (about 100 computed tokens on a 15K-token prefix); production agent turns are larger, so absolute times differ.",
+  "The client ran from the Mac through an SSH tunnel; the numbers are the server's own prefill and TTFT, which exclude the tunnel.",
+  "The exploratory duty sweep used a standalone program, not ninfer-serve; EXP-066 measures the chosen pattern inside the engine."
+ ]
 }
