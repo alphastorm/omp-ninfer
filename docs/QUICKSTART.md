@@ -46,13 +46,22 @@ The `v0.8.5` candidate composes native Windows OMP over authenticated local loop
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 uses its exact native Windows package. Every route runs the
-unmodified upstream OMP 18.4.0 client. It is a client-only change: both lanes keep the exact v0.8.4
-runtime bytes, configurations and qualification receipts.
+unmodified upstream OMP 18.4.0 client. Both lanes keep the exact v0.8.4 runtime bytes,
+configurations and qualification receipts; the RTX 5090 provider fragments gain one `compat` line.
 
 On Windows, OMP 18.3.5 printed a false `ended before completing` line after every finished `omp -p`
 turn and exited 1 after a complete `omp models` listing. OMP 18.4.0 exited 0 with no false line in
 all ten runs of the same commands
 ([EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)).
+
+OMP compacts a 131,072-token session on its own at 111,412 tokens. For a model that accepts
+images, its first method archives earlier turns as images at native resolution, which NInfer
+refuses, so every long RTX 5090 session on stock OMP 18.3.0-18.4.0 failed at its first
+compaction. The RTX 5090 fragments now declare `supportsImageDetailOriginal: false`, so OMP sends
+`detail: "auto"`: the lane served that compacted continuation and returned the exact nonce, and
+refused the native-resolution request in 9 ms
+([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
+model is never compacted into images.
 
 RTX 5090 keeps the published `v0.6.12-qwen38-5090-beta.1` from source
 `9d1ef7485d9c741c2830fa3d55218f3242cec5d7` and its v0.8.3 qualification. RTX 4090 keeps the
@@ -80,7 +89,7 @@ graceful server restarts on both lanes, including a new OMP process resuming aft
 whose first request the runtime restored from the session's checkpoint
 ([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). That one-platform,
 short-session proof is separate from the documented-route and client-platform acceptance above.
-The documented fragments and `PI_OPENAI_STATEFUL=1` are unchanged: live steering is Codex-WebSocket-only and
+The fragments' other fields and `PI_OPENAI_STATEFUL=1` are unchanged: live steering is Codex-WebSocket-only and
 gated on `compat.supportsSteering`, which these providers do not set, and cache warming does not
 warm a model without a declared `promptCache`.
 
@@ -98,7 +107,8 @@ warm reuse is not claimed.
 
 A checkpoint is bound to the exact server build. Neither lane's server build changes from v0.8.4,
 so checkpoints on both lanes carry across the upgrade. Swap the client binary to the checksummed
-OMP 18.4.0 release for your platform; no fragment change is needed.
+OMP 18.4.0 release for your platform, and add `supportsImageDetailOriginal: false` under the RTX
+5090 model's `compat` in `~/.omp/agent/models.yml`, as the updated fragments do.
 
 The model and memory floors are unchanged from v0.8.4. The RTX 5090 deployment profile stays
 `qwen38-5090-v0.8.2` / configuration `56878aed`, with `--gpu-keep-warm-ms 60000`, 16384 MiB host

@@ -1,16 +1,37 @@
 # OMP NInfer v0.8.5 — OMP 18.4.0 client
 
-**Owner-operated, exact-profile 0.x candidate; no SLA.** This is a client-only release: the
-unmodified upstream Oh My Pi client advances from 18.3.5 to 18.4.0. Both GPU lanes keep the exact
-v0.8.4 runtime bytes, configurations and qualification receipts; the model and memory floors are
-unchanged. RTX 3090 and the upstream engine merge remain deferred. Documented-route and
-client-platform acceptance are pending.
+**Owner-operated, exact-profile 0.x candidate; no SLA.** The unmodified upstream Oh My Pi client
+advances from 18.3.5 to 18.4.0, and the RTX 5090 provider fragments now let long sessions survive
+OMP's automatic compaction. Both GPU lanes keep the exact v0.8.4 runtime bytes, configurations
+and qualification receipts; the model and memory floors are unchanged. RTX 3090 and the upstream
+engine merge remain deferred. Documented-route and client-platform acceptance are pending.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
 [Known limitations](#support-boundaries)
 
 ## What changed
+
+### Long RTX 5090 sessions survive OMP's automatic compaction
+
+OMP compacts a 131,072-token session on its own once it passes 111,412 tokens. For a model that
+accepts images, the first method it can use archives earlier turns as PNG images and asks for
+them at `detail: "original"`. NInfer serves only `auto` and refused those requests, so every long
+RTX 5090 session on stock OMP 18.3.0-18.4.0 - every release from v0.8.0 to v0.8.4 - failed at its
+first compaction. v0.8.5's first route candidate hit it: its restart check's seed, the release's
+own documents, grew from 332,331 to 343,205 bytes and crossed the threshold.
+
+The RTX 5090 fragments now declare `supportsImageDetailOriginal: false`, so OMP sends the same
+images at `auto`.
+[EXP-071](../../docs/measurements/2026-09-28-omp-snapcompact-image-detail.json) reproduced the
+refusal with OMP 18.4.0 and 18.3.5 against a mock calibrated to both route observations, and the
+flag turned it into a served continuation. On the RTX 5090 runtime, the compacted request at
+`auto` completed with 26,075 input tokens and returned the exact nonce; at `original` it was
+refused in 9 ms. The RTX 4090 model accepts text only and is never compacted into images. The
+restart check now seeds its session with the first 200,000 ASCII bytes of those documents, about
+64,000 tokens, so it keeps testing a restored checkpoint instead of a compacted prompt.
+
+### Windows one-shot commands end with their real status
 
 On Windows, OMP 18.3.5 decided that a one-shot command had not finished when Bun emitted
 `beforeExit`, which Windows emits while I/O is still in flight. It printed a false
@@ -29,7 +50,7 @@ The RTX 4090 route's acceptance harness no longer tolerates 18.3.5's exit status
 provider-parser check again requires exit 0, together with exactly the documented selector in
 the listing.
 
-The documented provider fragments and `PI_OPENAI_STATEFUL=1` are unchanged. In 18.4.0, as in
+The provider fragments' other fields and `PI_OPENAI_STATEFUL=1` are unchanged. In 18.4.0, as in
 18.3.5, live steering is Codex-WebSocket-only and gated on `compat.supportsSteering`, which these
 providers do not set. Stock OMP 18.3.5 kept one session across graceful restarts on both lanes
 ([EXP-067](../../docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)), and a steer
@@ -77,15 +98,18 @@ pass, `--require-ready` refuses this release.
 ## Upgrading from v0.8.4
 
 Clone the v0.8.5 tag and follow the quickstart for your lane. Replace the OMP executable with
-the checksummed upstream 18.4.0 binary for your platform; provider fragments and
-`PI_OPENAI_STATEFUL=1` are unchanged. Do not use a generic `omp update` to move outside the
-release's pinned bytes. Neither lane's server build changes, so checkpoints on both lanes
-remain valid across this upgrade.
+the checksummed upstream 18.4.0 binary for your platform. For the RTX 5090, add
+`supportsImageDetailOriginal: false` under the model's `compat` in `~/.omp/agent/models.yml`, as
+the updated fragments do; the other fragment fields and `PI_OPENAI_STATEFUL=1` are unchanged. Do
+not use a generic `omp update` to move outside the release's pinned bytes. Neither lane's server
+build changes, so checkpoints on both lanes remain valid across this upgrade.
 
 ## Support boundaries
 
-The client change is measured on Windows x64; the macOS arm64 and Linux x64 binaries were not
-probed for the Windows-only defect. The keep-warm results apply to the owner's RTX 4090 under
+The Windows exit-status change is measured on Windows x64; the macOS arm64 and Linux x64 binaries
+were not probed for that Windows-only defect. The compaction fix was measured with one compacted
+continuation on the RTX 5090; snapcompact's readback beyond that nonce, and repeated compactions
+in one session, were not measured. The keep-warm results apply to the owner's RTX 4090 under
 Windows driver 610.88; other drivers or GPUs may step down on a different schedule. The RTX 5090
 keeps its already-qualified 3.5 ms/10 ms pattern.
 
