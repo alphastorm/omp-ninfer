@@ -298,8 +298,13 @@ if($Mode -eq 'Preflight') {
     $agent=Join-Path $HOME '.omp\agent';New-Item -ItemType Directory -Force $agent|Out-Null
     Copy-Item "$Clone\examples\windows-native\models.fragment.yml" "$agent\models.yml"
     Copy-Item "$Clone\examples\manual-tunnel\fail-closed.yml" "$agent\config.yml"
-    & $binary models ninfer-native-4090 --json > "$Workspace\parser-models.json"
-    if($LASTEXITCODE -ne 0){throw 'provider parser failed'}
+    # Judge the parse by the listing, not by the exit status alone: on Windows, OMP 18.3.5 prints the
+    # complete listing and then exits 1 with a false drained-event-loop diagnostic
+    # (can1357/oh-my-pi#13470, fixed in 18.4.0). Only that release's exact diagnostic is tolerated.
+    $parser=Start-Process -FilePath $binary -ArgumentList 'models','ninfer-native-4090','--json' -WorkingDirectory (Get-Location).ProviderPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Workspace\parser-models.json" -RedirectStandardError "$Workspace\parser-models.stderr"
+    $parserListed=@((ReadJson "$Workspace\parser-models.json").models|ForEach-Object {$_.selector})
+    $parserDrain=$version -ceq 'omp/18.3.5' -and $parser.ExitCode -eq 1 -and [IO.File]::ReadAllText("$Workspace\parser-models.stderr").Trim() -ceq 'omp: `omp models` ended before completing: the event loop drained while it was still pending (rerun with PI_DEBUG_STARTUP=1 to see the last phase reached)'
+    if(($parserListed -join ',') -cne 'ninfer-native-4090/qwen3.8-27b' -or ($parser.ExitCode -ne 0 -and -not $parserDrain)){throw 'provider parser failed'}
     $modelSha=Hash $Model;if($modelSha -cne $manifest.components.model.artifact_sha256 -or (Get-Item $Model).Length -ne $manifest.components.model.artifact_bytes){throw 'documented model identity mismatch'}
     if(-not (Test-Path $KeyFile)){throw 'documented key missing'}
     $b=Snapshot "$Workspace\preflight-snapshot";EnableExactAcl
@@ -307,7 +312,7 @@ if($Mode -eq 'Preflight') {
     SetExactAcl $probe $b.observable.state_sddl
     $null=ValidateSnapshot "$Workspace\preflight-snapshot"
     SaveJson "$Workspace\expected-runtime.json" @{server_binary_sha256=$variant.server_binary_sha256;configuration_sha256=$variant.configuration_sha256;model_sha256=$variant.model_artifact_sha256;source_commit=$variant.source_commit;package_sha256=$variant.package_sha256}
-    SaveJson "$Workspace\preflight.json" @{status='passed';started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;candidate=$Candidate;release=$Release;document_sha256=$bundleManifest.document_sha256;block_hashes=@($bundleManifest.steps.sha256);published_assets=$assets;client_version=$version;client_binary_sha256=(Hash $binary);client_asset_sha256=(Hash $clientAsset);model_sha256=$modelSha;exact_acl_restore_probe=$true;baseline=$b.observable}
+    SaveJson "$Workspace\preflight.json" @{status='passed';started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;candidate=$Candidate;release=$Release;document_sha256=$bundleManifest.document_sha256;block_hashes=@($bundleManifest.steps.sha256);published_assets=$assets;client_version=$version;client_parser=@{listed=$parserListed;exit_code=$parser.ExitCode;known_upstream_drain_accepted=$parserDrain};client_binary_sha256=(Hash $binary);client_asset_sha256=(Hash $clientAsset);model_sha256=$modelSha;exact_acl_restore_probe=$true;baseline=$b.observable}
     Write-Output 'PREFLIGHT_OK';return
 }
 if($Mode -eq 'Restore'){$r=Restore;$r|ConvertTo-Json -Depth 10;if($r.status -ne 'passed'){exit 1};return}
