@@ -56,6 +56,14 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                     "          supportsImageDetailOriginal: false\n" in fragment, "image" in inputs,
                 )
 
+    def test_every_route_config_compacts_inline(self) -> None:
+        # Both lanes admit one request at a time. OMP's async compaction sends its summary
+        # request in the background as a session nears the threshold, so the user's next turn
+        # waits behind it; on the RTX 4090 a 61 s handoff outlasted OMP's resends of that turn
+        # against the runtime's 30 s admission deadline and the turn failed (EXP-072).
+        config = (EXAMPLES / "fail-closed.yml").read_text(encoding="utf-8")
+        self.assertIn("\ncompaction:\n  asyncEnabled: false\n", config)
+
     @staticmethod
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):

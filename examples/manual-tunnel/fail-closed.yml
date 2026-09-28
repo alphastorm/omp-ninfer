@@ -8,3 +8,9 @@ retry:
 # would advertise `omp update`, which replaces it outside the release procedure (issue #18).
 startup:
   checkUpdate: false
+# OMP's async compaction summarizes the session in a background request as it nears the
+# compaction threshold. NInfer admits one request at a time, so the user's next turn waits behind
+# it; each attempt expires at the runtime's 30 s admission deadline, and the turn fails once the
+# summary outlasts OMP's resends (a 61 s RTX 4090 handoff did, EXP-072). Compact inline instead.
+compaction:
+  asyncEnabled: false

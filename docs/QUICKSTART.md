@@ -152,6 +152,12 @@ model, configuration, qualification summary, and clean-install acceptance receip
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
 
+> [!NOTE]
+> The same config makes OMP compact a long session before your next turn rather than in the
+> background. Each lane serves one request at a time, and a background compaction request made
+> the next turn wait behind it and, on the RTX 4090, fail
+> ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
+
 ## Ready route: native Windows and Docker Desktop WSL2
 
 ### Prerequisites

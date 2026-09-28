@@ -263,6 +263,30 @@ it: under the RTX 5090 model's `compat`, add
 next to `supportsReasoningSummary: false`, then continue the session. The RTX 4090 model accepts
 text only, so OMP never compacts its sessions into images.
 
+## A turn fails with `request_queue_timeout` late in a long session
+
+```text
+503 inference request expired while waiting for admission
+```
+
+Each lane serves one request at a time. By default OMP starts its compaction summary in the
+background as a session nears the threshold, and your next turn waits behind it. Every attempt
+expires after the runtime's 30 s admission deadline; OMP resends it, and the turn fails once the
+summary outlasts the resends. On the RTX 4090 each background handoff took 56-61 s; all three
+turns that waited behind one had attempts expire, and one of them failed. The v0.8.6 config turns
+that background start off, so OMP compacts before your turn instead. A `config.yml` merged from an
+earlier release lacks it; add
+
+```yaml
+compaction:
+  asyncEnabled: false
+```
+
+then send the turn again. On the RTX 4090 the turn that compacts now waits for the handoff
+(76-81 s measured) and the turn after it re-prefills the compacted context once. The RTX 5090's
+snapcompact runs on the client in well under a second, so the setting changes nothing there
+([EXP-072](measurements/2026-09-28-omp-long-sessions.json)).
+
 ## Follow-up replay is cold or resume loses the nonce
 
 Separate correctness from acceleration:
