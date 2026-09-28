@@ -5,12 +5,12 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.8.4 is a candidate until its four documented routes pass on the published components.**
-> The scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090 native
-> Windows. RTX 3090 is deferred and is not a v0.8.4 install lane.
+> **v0.8.4 has passed its four documented routes (24 steps) on the published components.**
+> The accepted scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090
+> native Windows. RTX 3090 is deferred and is not a v0.8.4 install lane.
 > The commands below require the published v0.8.4 release and its readiness check.
 > Do not bypass `--require-ready` or mix one release's manifest with another
-> release's commands. See [route acceptance](#v084-route-acceptance) for its status.
+> release's commands. See [route acceptance](#v084-route-acceptance) for the recorded runs.
 
 ## Choose your lane
 
@@ -19,8 +19,8 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.4 candidate; route acceptance pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.8.4 candidate; route acceptance pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.4 route accepted; stock OMP 18.3.5** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.8.4 route accepted; stock OMP 18.3.5** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 RTX 3090 qualification is **deferred** until its host returns (expected around September 30).
@@ -34,16 +34,17 @@ substitute GPU family names, package URLs, component tags, or variant IDs betwee
 ## v0.8.4 route acceptance
 
 The four documented routes - RTX 5090 container host, macOS client, Windows client, and RTX 4090
-native Windows - run against the published v0.8.4 components and upstream OMP 18.3.5 before the
-release is cut. The RTX 4090 component publication and lane stage precede those runs and fresh
-client-platform acceptance. Until they pass, the release stays a candidate and `--require-ready`
-refuses it. The v0.8.3 routes'
-[accepted receipts](../releases/v0.8.3/acceptance/documented-routes.json) cover its RTX 4090
-package and OMP 18.3.0 client, not this combination.
+native Windows - passed all 24 steps on candidate `68302298`, using the published v0.8.4
+components and unmodified upstream OMP 18.3.5, with both hosts restored
+([accepted receipts](../releases/v0.8.4/acceptance/documented-routes.json)). The upstream macOS
+arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against the RTX 5090 image
+([composed acceptance](../releases/v0.8.4/acceptance/composed-external-installation.json)).
+Linux ran under WSL2, not a separately qualified Linux OS.
 
 ## Verify the release before setup
 
-The `v0.8.4` candidate composes native Windows OMP over authenticated local loopback
+The `v0.8.4` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 uses its exact native Windows package. Every route runs the
@@ -52,7 +53,7 @@ unmodified upstream OMP 18.3.5 client.
 RTX 5090 keeps the published `v0.6.12-qwen38-5090-beta.1` from source
 `9d1ef7485d9c741c2830fa3d55218f3242cec5d7` and its v0.8.3 qualification. RTX 4090 advances to
 `v0.6.9-qwen38-4090-beta.1` from source `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`;
-its component publication is pending. The exact [native package](https://github.com/alphastorm/ninfer/releases/download/v0.6.9-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.9-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz) is
+the component is published. The exact [native package](https://github.com/alphastorm/ninfer/releases/download/v0.6.9-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.9-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz) is
 574,751,101 bytes, SHA-256 `6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87`.
 The manifest-driven native steps below download and verify that package, not a substitute.
 
@@ -74,7 +75,8 @@ identity under API authentication. The OMP 18.3.5 macOS arm64 binary kept one se
 graceful server restarts on both lanes, including a new OMP process resuming after a restart,
 whose first request the runtime restored from the session's checkpoint
 ([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). That one-platform,
-short-session proof is not documented-route or client-platform acceptance. The documented
+short-session proof is separate from the passed documented-route and client-platform acceptance
+above. The documented
 fragments and `PI_OPENAI_STATEFUL=1` are unchanged: live steering is Codex-WebSocket-only and
 gated on `compat.supportsSteering`, which these providers do not set, and cache warming does not
 warm a model without a declared `promptCache`.

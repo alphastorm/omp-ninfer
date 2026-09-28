@@ -1,12 +1,12 @@
 # OMP NInfer v0.8.4 — every lane current
 
-**Owner-operated, exact-profile 0.x candidate; no SLA.** RTX 5090 keeps its published runtime
+**Owner-operated, exact-profile 0.x release; no SLA.** RTX 5090 keeps its published runtime
 and carried qualification. RTX 4090 advances to `v0.6.9-qwen38-4090-beta.1`: the same decode
 kernels, with a 60 s GPU keep-warm that brings new sessions after idle back to back-to-back
 prefill speed. The unmodified upstream Oh My Pi client advances from 18.3.0 to 18.3.5. The model
 and memory floors are unchanged. RTX 3090 and the upstream engine merge remain deferred.
-The RTX 4090 component is not yet published; documented-route and client-platform acceptance
-are pending.
+The four documented routes and all three client binaries passed acceptance on the published
+components with unmodified OMP 18.3.5; both hosts were restored.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -48,10 +48,13 @@ config, kept one session across graceful restarts on each lane, including a new 
 resuming after a restart. Each lane restored the session's checkpoint on that process's first
 request without a previous response id
 ([EXP-067](../../docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). This is
-one short session per lane with one client platform, not documented-route or platform acceptance.
+one short session per lane with one client platform, separate from the route and platform
+acceptance below.
 The fragments need no change: 18.3.1-18.3.5 live steering is Codex-WebSocket-only and gated on
 `compat.supportsSteering`, which these custom providers do not set; cache warming does not warm
-models without a declared `promptCache`.
+models without a declared `promptCache`. A steer submitted mid-stream did not abort the response:
+OMP sent it 27 ms after `response.completed` as a new request chained by `previous_response_id`
+([EXP-068](../../docs/measurements/2026-09-28-omp-1835-live-steering.json)).
 
 The RTX 5090 runtime is unchanged. Its
 [lane receipt](qualification/rtx5090.json) is byte-identical to v0.8.3's; the stock OMP 18.3.5
@@ -70,7 +73,7 @@ root fallbacks were 4/8 versus 2/8. The merge stays deferred
 - RTX 4090: `v0.6.9-qwen38-4090-beta.1`, package
   `6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87` (574,751,101 bytes), server
   `65364401fb1adb66e903f96ed6553f8b70042d4a7b2360ec88fb68049afb9aa4`, source
-  `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`; qualified bytes, component publication pending.
+  `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`; published and qualified.
 - Unchanged model artifact:
   `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`.
 
@@ -84,27 +87,41 @@ RTX 5090 keeps deployment profile `qwen38-5090-v0.8.2`, configuration
 RTX 3090 is omitted while its physical host is offline. Its sm_86 runtime advanced to
 `v0.6.2-beta.1` at source `5ac17674` and built on the RTX 4090 host: 99 of 105 registered tests
 passed; six real-engine/frontend suites skipped without the artifact and a matching device.
-That is not RTX 3090 qualification. The component is unpublished and absent from the manifest;
+The [build-preparedness receipt](../../docs/measurements/2026-09-28-rtx3090-v062-build-preparedness.json)
+records the package build and tests, not RTX 3090 qualification. The component is unpublished
+and absent from the manifest;
 one `qualify_native.py` window on the physical RTX 3090 remains before inclusion. Its
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 and OMP 18.0.9 client remain a separate historical route, not a v0.8.4 qualification claim.
 
 ## Documented routes and clients
 
-Acceptance is pending. After the founder publishes the RTX 4090 component and the lane stage
-promotes the v0.8.4 authority, run the four documented routes with unmodified OMP 18.3.5:
-RTX 5090 container host, macOS client, Windows client and RTX 4090 native Windows
-(`acceptance/documented-routes.json`, pending). The upstream macOS arm64, Windows x64 and
-Linux x64 binaries must also pass platform acceptance against the unchanged RTX 5090 image
-(`acceptance/composed-external-installation.json`, pending). Neither
-v0.8.3's acceptance nor EXP-067 substitutes for those runs. Until they pass, v0.8.4 stays a
-candidate and `--require-ready` refuses it. The macOS profile stays `preview`: the upstream
-client has no managed installation or appliance lifecycle. Linux under WSL2 is not a separately
-qualified Linux OS.
+The four documented routes passed on candidate `68302298` with unmodified OMP 18.3.5 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
+and RTX 4090 native Windows (7), with both hosts restored
+([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows x64 and Linux x64
+binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+RTX 5090 image `cd9e10b1`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran in one production window, with downtime at most 421.5 s (7.0 min),
+from a separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, not the
+maintainer's workstation
+([restoration](../../docs/measurements/2026-09-28-v084-acceptance-restoration.json)).
+
+The RTX 4090 route's first candidate, `0315c5d4`, stopped at its no-effect preflight: the
+harness judged the provider-parser check only by `omp models`'s exit status, which OMP 18.3.5
+on Windows reports as 1 after a complete listing
+([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)). The check now judges
+the listing. Candidate `68302298` passed the literal documented blocks with the published
+v0.6.9 package, and original state was restored byte for byte. Upstream 18.4.0, released
+2026-09-28, fixes #13470; v0.8.4 keeps 18.3.5 and a later release repins.
 
 ## Upgrading from v0.8.3
 
-Once v0.8.4 is published and ready, clone its tag and follow the quickstart for your lane.
+Clone the v0.8.4 tag and follow the quickstart for your lane.
 Replace the OMP executable with the checksummed upstream 18.3.5 binary for your platform;
 provider fragments and `PI_OPENAI_STATEFUL=1` are unchanged. Do not use a generic `omp update`
 to move outside the release's pinned bytes.

@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Every lane current (v0.8.4)
+## [0.8.4] - 2026-09-28
+
+### Every lane current
 
 - RTX 4090 advances to `v0.6.9-qwen38-4090-beta.1` (package
   `6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87`, source
-  `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`); component publication is pending. RTX 5090 keeps
+  `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`). RTX 5090 keeps
   `v0.6.12-qwen38-5090-beta.1`, its image, server, serving arguments, deployment profile
   `qwen38-5090-v0.8.2` and carried v0.8.3 lane receipt. The model and memory floors are unchanged.
 - RTX 4090 enables `engine.gpu_keep_warm_ms = 60000` with an sm_89-specific spin of 50 ms every
@@ -34,20 +36,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Repin the unmodified upstream Oh My Pi client to 18.3.5. Its macOS arm64 binary kept one short
   session across graceful restarts on both lanes with the documented fragments unchanged
   ([EXP-067](docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). The four
-  documented routes and 18.3.5 platform acceptance are pending, after RTX 4090 publication and
-  the lane stage; this draft is not a ready release.
+  documented routes passed on candidate `68302298` with the published components: RTX 5090
+  container host (2 steps), macOS client (10), Windows client (5) and RTX 4090 native Windows
+  (7), with both hosts restored. The upstream macOS arm64 (preview), Windows x64 and Linux x64
+  binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+  image `cd9e10b1`; Linux ran under WSL2, not a separately qualified Linux OS
+  ([routes](releases/v0.8.4/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.8.4/acceptance/composed-external-installation.json)).
+  The RTX 5090 ran in one production window, with downtime at most 421.5 s (7.0 min), from a
+  separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, not the maintainer's
+  workstation ([restoration](docs/measurements/2026-09-28-v084-acceptance-restoration.json)).
 - On Windows, OMP 18.3.5 prints a false `ended before completing` line after finished `omp -p`
   turns and exits 1 after a complete `omp models` listing
   ([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470), fixed in 18.4.0).
-  The RTX 4090 route acceptance judges its provider-parser check by the listing and tolerates that
-  exact line only from 18.3.5.
+  The RTX 4090 route's first candidate, `0315c5d4`, stopped at its no-effect preflight because
+  the provider-parser check read only that exit status. The check now judges the listing;
+  candidate `68302298` passed the literal documented blocks on the published v0.6.9 package,
+  with original state restored byte for byte. v0.8.4 keeps 18.3.5; a later release repins.
+  The route tolerates that exact completion line only from 18.3.5.
+  [Route receipt](releases/v0.8.4/acceptance/documented-routes.json).
+- A steer submitted mid-stream does not abort the response: OMP sent it 27 ms after
+  `response.completed` as a new request chained by `previous_response_id`
+  ([EXP-068](docs/measurements/2026-09-28-omp-1835-live-steering.json)).
 - RTX 4090 checkpoints saved by v0.6.8 are incompatible with v0.6.9's changed server build, so
   each session re-prefills once. RTX 5090 keeps its server build and carries v0.8.3 checkpoints.
 - The upstream engine merge stays deferred: e31bc99b's 1.5% single-run prefill lead was already
   present in EXP-048, while decode rounds are about 18% slower and reuse is weaker
-  ([EXP-065](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)). RTX
-  3090's physical host is offline; its unpublished sm_86 v0.6.2-beta.1 build is not in the
-  manifest, and one native qualification window remains when the host returns.
+  ([EXP-065](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)).
+  The RTX 4090 Q5 tensor-core route was rejected by its pre-registered rule: +0.38% at 26K and
+  +0.40% at 60K against required 2.0%/1.0% gains
+  ([EXP-069](docs/measurements/2026-09-28-rtx4090-q5-small-t-mma.json)).
+  RTX 3090's unpublished v0.6.2-beta.1 package built and tested at `5ac17674` is not in the
+  manifest; hardware qualification remains pending
+  ([preparedness](docs/measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
 
 ## [0.8.3] - 2026-09-27
 
@@ -1632,7 +1653,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.4...HEAD
+[0.8.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.0...v0.8.1

@@ -1,6 +1,6 @@
 # Upstream watch
 
-The runtime ships from forks; v0.8.3 uses an unmodified upstream OMP client. This page names
+The runtime ships from forks; v0.8.4 uses an unmodified upstream OMP client. This page names
 the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -27,7 +27,59 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.8.3
+## Tracked upstreams and current position — v0.8.4
+
+RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` (package `6492588e`, server `65364401`,
+source `5ac17674`, configuration `ccecfbe3`). Its `engine.gpu_keep_warm_ms = 60000` uses an
+sm_89-specific 50 ms spin every 100 ms: the RTX 5090's 3.5 ms/10 ms pattern did not hold this
+card in P2. New sessions after 12-58 s idle prefilled in **0.146-0.148 s**, with time to first
+token **0.167-0.178 s**; all 31 outputs were byte-identical. The hold costs about **72 W**
+above idle, and a request arriving mid-spin can overlap one warp for up to 50 ms.
+[EXP-064](measurements/2026-09-27-rtx4090-engine-keep-warm.json) ·
+[EXP-066](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json).
+
+The published package passed all **15 canonical qualification phases**
+([lane receipt](../releases/v0.8.4/qualification/rtx4090.json)); this is not a decode-kernel speedup.
+RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, profile `qwen38-5090-v0.8.2`,
+configuration `56878aed` and its carried v0.8.3 lane receipt. The model and memory floors are
+unchanged. RTX 4090 checkpoints from v0.6.8 re-prefill once on the changed server build;
+RTX 5090 carries its v0.8.3 checkpoints.
+
+The unmodified upstream client advances to **OMP 18.3.5**. Its macOS arm64 binary kept one
+short session across graceful restarts on both lanes with the documented fragments unchanged
+([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). A steer submitted
+mid-stream did not abort: OMP sent it **27 ms** after `response.completed` as a new request
+chained by `previous_response_id`
+([EXP-068](measurements/2026-09-28-omp-1835-live-steering.json)).
+
+All four documented routes passed **24 steps** on candidate `68302298` with unmodified OMP
+18.3.5 and the published v0.8.4 components: RTX 5090 container host 2, macOS client 10, Windows
+client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against RTX 5090 image `cd9e10b1`. Linux ran under WSL2,
+not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.4/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.4/acceptance/composed-external-installation.json).
+
+OMP 18.3.5 on Windows exits 1 after a complete `omp models` listing. That stopped the RTX 4090
+route's first candidate, `0315c5d4`, at its no-effect preflight; the corrected check judges the
+listing and candidate `68302298` passed. Upstream 18.4.0, released 2026-09-28, fixes
+[can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470). v0.8.4 keeps 18.3.5;
+a later release repins.
+
+The upstream engine merge stays deferred: `e31bc99b` has about **18% slower decode** and
+fanout **0/4 versus 4/4**
+([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)). The
+RTX 4090 Q5 tensor-core route was rejected by its pre-registered rule: **+0.38% at 26K** and
+**+0.40% at 60K**, below required **2.0%/1.0%** gains
+([EXP-069](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)). RTX 3090's v0.6.2-beta.1
+package built and tested at `5ac17674` remains unpublished, with hardware qualification pending
+([preparedness](measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
+
+[Release notes](../releases/v0.8.4/NINFER_RELEASE_NOTES.md) ·
+[Qualification](../releases/v0.8.4/qualification.json).
+
+## Historical position — v0.8.3
 
 The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.2.
 RTX 5090 advances to `v0.6.12-qwen38-5090-beta.1` (image `cd9e10b1`, server `3ab266e5`,
@@ -78,7 +130,8 @@ Checkpoints bind the exact server build: sessions saved by v0.8.2 do not restore
 RTX 5090 build in v0.8.3. Each session re-prefills once.
 [Release notes](../releases/v0.8.3/NINFER_RELEASE_NOTES.md).
 
-The upstream delta measurements below remain historical.
+The preceding v0.8.3 measurements are historical; the tracked-upstream table below records the
+current EXP-065 engine decision and the v0.8.4 client pin.
 
 ## Historical position — v0.8.2
 
@@ -140,12 +193,14 @@ serving settings and floors are unchanged.
 [Release notes](../releases/v0.8.1/NINFER_RELEASE_NOTES.md) ·
 [Documented routes](../releases/v0.8.1/acceptance/documented-routes.json).
 
+## Tracked upstream delta — 2026-09-28
+
 | Upstream | Fork point | Delta | Position |
 |---|---|---|---|
-| `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | 202 commits at `594930e7` (2026-09-23) | **Merge deferred on measurement.** 18 commits were taken in v0.6.7 ([ledger](measurements/2026-09-12-upstream-backport-ledger.json), [EXP-035](measurements/2026-09-13-upstream-backport-qualification.json)); on 2026-09-17 11 of 129 remaining candidates applied cleanly and none changed a shipped profile ([EXP-045](measurements/2026-09-17-upstream-applicability-triage.json)). On 2026-09-24 upstream head itself ran the RTX 5090 lane gates on the same appliance, weights and settings as the shipped runtime: prefill and decode rounds per second within noise, and less prefix reuse on this product's workloads (0 of 4 fanout branches, 4 of 8 two-session continuations re-prefilled) ([EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). A merge is a re-architecture port - a trial merge leaves 111 paths to resolve, 40 of them fork features to re-express in upstream's restructured `src/models/qwen3_5`, `context_cache/` and serve layers - plus the v3 artifact and a new chat template, for no measured lane gain. Rerun `scripts/engine_window_compare.py` when an upstream change could move a lane gate. Tracked in omp-ninfer #33. |
+| `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | `e31bc99b`, measured 2026-09-27 | **Merge deferred on measurement.** EXP-065 compared upstream with the shipped RTX 5090 runtime: decode about 18% slower and fanout 0/4 versus 4/4; the 1.5% single-run prefill lead was already present in EXP-048. The new window does not justify merging upstream ([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json), [prior EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). |
 | `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed and are read against v0.7.1's durability work when taken. Upstream removed its NVFP4 path (`dabae909`). |
 | `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | Triage rides the RTX 3090 window when its host returns, expected around 2026-09-30. |
-| `can1357/oh-my-pi` (client) | Upstream `62bc57be` (v18.3.0) | Unmodified upstream release binary | Adopted in v0.8.0; no fork build, archive, installer or cask. Provider fragments and `PI_OPENAI_STATEFUL=1` configure the client; stock OMP has no `omp appliance` commands. |
+| `can1357/oh-my-pi` (client) | Upstream v18.3.5 | Unmodified upstream release binary; 18.4.0 released 2026-09-28 | v0.8.4 pins 18.3.5; all four documented routes passed. Its Windows `omp models` exit-status defect ([#13470](https://github.com/can1357/oh-my-pi/issues/13470)) is fixed in 18.4.0; a later release repins. Provider fragments and `PI_OPENAI_STATEFUL=1` are unchanged; no fork build, archive, installer or cask. |
 
 **Historical client position through v0.7.4.** `omp-18.2.3-cross-platform-beta-1` (source
 `5ade242d`, since v0.7.3) carried 36 downstream commits on upstream `a2d83061` (v18.2.3),
@@ -188,5 +243,5 @@ product needs that planner rebase.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.8.3 does not build or publish an OMP client; it keeps the upstream
+  patches rebased. v0.8.4 does not build or publish an OMP client; it uses the upstream
   release binary instead.

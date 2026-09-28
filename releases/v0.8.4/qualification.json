@@ -2,11 +2,11 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 2,
   "release": "v0.8.4",
-  "as_of": "2026-09-27",
+  "as_of": "2026-09-28",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "Every lane current: RTX 5090 keeps v0.6.12-qwen38-5090-beta.1, its image, server, deployment profile qwen38-5090-v0.8.2 and configuration 56878aed; its lane receipt is carried byte for byte from v0.8.3. RTX 4090 advances to v0.6.9-qwen38-4090-beta.1 from 5ac17674 with the same sm_89 decode kernels as v0.6.8 and engine.gpu_keep_warm_ms 60000. Its sm_89-specific 50 ms spin every 100 ms restores new-session prefill after 12-58 s idle to back-to-back speed with byte-identical outputs (EXP-064 and EXP-066). The native package passed all 15 canonical qualification phases (releases/v0.8.4/qualification/rtx4090.json); component publication remains pending. The client advances from unmodified upstream OMP 18.3.0 to 18.3.5; one-session durability across graceful restarts passed on both lanes with the macOS arm64 binary (EXP-067). The model and memory floors are unchanged. RTX 3090 remains deferred; upstream engine merge remains deferred (EXP-065).",
+  "external_installation_qualified": true,
+  "scope": "Every lane current: RTX 5090 keeps v0.6.12-qwen38-5090-beta.1, its image, server, deployment profile qwen38-5090-v0.8.2 and configuration 56878aed; its lane receipt is carried byte for byte from v0.8.3. RTX 4090 advances to v0.6.9-qwen38-4090-beta.1 from 5ac17674 with the same sm_89 decode kernels as v0.6.8 and engine.gpu_keep_warm_ms 60000. Its sm_89-specific 50 ms spin every 100 ms restores new-session prefill after 12-58 s idle to back-to-back speed with byte-identical outputs (EXP-064 and EXP-066). The native package passed all 15 canonical qualification phases (releases/v0.8.4/qualification/rtx4090.json). The published components passed all four documented routes (24 steps) on candidate 68302298 with unmodified upstream OMP 18.3.5, and both hosts were restored (releases/v0.8.4/acceptance/documented-routes.json). The client advances from unmodified upstream OMP 18.3.0 to 18.3.5; one-session durability across graceful restarts passed on both lanes with the macOS arm64 binary (EXP-067). The model and memory floors are unchanged. RTX 3090 remains deferred; upstream engine merge remains deferred (EXP-065).",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -56,8 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Pending after publication of the RTX 4090 v0.6.9-qwen38-4090-beta.1 component and the lane stage: run the four documented routes and upstream OMP 18.3.5 platform acceptance against that package and the unchanged RTX 5090 v0.6.12-qwen38-5090-beta.1 image. The composed receipt lands at releases/v0.8.4/acceptance/composed-external-installation.json; EXP-067 is stock-session proof, not route or platform acceptance."
+      "status": "passed",
+      "repository_path": "releases/v0.8.4/acceptance/composed-external-installation.json",
+      "sha256": "3e99f1c4a6062ea67ea2906ed3ce60885cb92bf92933cc753bd7ee3a40e8e977",
+      "public_url": null,
+      "as_of": "2026-09-28",
+      "release": "v0.8.4",
+      "component_release_tag": "v18.3.5",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
+      "windows_binary_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "4848121a1094674b31de4fb7258018c868b4fc4371e65a3b8bb4ba9c8b7bb7e6",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "19dfa90ee39eccd96866b0f929c6856056f8adfb3024293cdd8c434078d691ba"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "e86c4bcab960f6a4b37a9a51f68f407719bf03242704b9504e80e5dd3e95692b"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "31f9cabfa63c3fabe7b658a63c84fe33bd750565f47b323d18dfa92dbc9c10eb"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on candidate 68302298 with unmodified OMP 18.3.5 and the published v0.8.4 components; both hosts were restored. macOS arm64 remains preview; Linux x64 ran under WSL2, not a separately qualified Linux OS. Runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.8.4/acceptance/documented-routes.json",
+      "sha256": "f03f8a4b3a107398f395a8bc360d8332ba217e1ec1b5ba02cb429c48612271eb"
     }
   },
   "observed_gates": {
@@ -421,12 +455,8 @@
       }
     }
   },
-  "interpretation": "The RTX 4090 change is idle-to-new-session latency, not a decode-kernel speedup: C1 is 157.90 tok/s at 87.59% MTP acceptance against v0.6.8's 157.89. EXP-064 found 0.29-0.47 s prefill after 12-58 s idle without keep-warm and rejected the RTX 5090's 3.5 ms/10 ms spin on this card. EXP-066's sm_89 50 ms/100 ms spin holds P2: post-idle prefill 0.1461-0.1481 s, TTFT 0.167-0.178 s, all 31 outputs byte-identical, at about 72 W above idle while held. A request arriving mid-spin can overlap one warp for up to 50 ms. The canonical v0.6.9 package passed 130,048-token exact retrieval in 91.0 s, managed-stop flush, both rollback directions versus v0.6.8, security and an OMP 18.3.5 typed tool turn. EXP-064's issue_48_field_start passed from the refusing memory state with the published v0.6.8 package; a recurrence still reports commit limit, available commit and available memory. RTX 5090 runtime qualification is unchanged, and its v0.8.3 checkpoints carry across; RTX 4090 checkpoints from v0.6.8 are incompatible with the changed server build and each session re-prefills once. EXP-067 proves one short stock OMP 18.3.5 session per lane survives graceful restarts, using the macOS arm64 binary only; it is not the pending documented-route or Windows/Linux platform acceptance. EXP-065 keeps the upstream engine merge deferred: e31bc99b has a 1.5% single-run prefill lead, already present in EXP-048, but about 18% slower decode rounds and weaker reuse. Owner-operated exact-profile scope only; no SLA or universal warm-reuse claim.",
-  "remaining_release_gates": [
-    "publication of the RTX 4090 v0.6.9-qwen38-4090-beta.1 component with the qualified package bytes",
-    "lane stage: promote the v0.8.4 compatibility authority and profiles and pin the lane receipts",
-    "upstream OMP 18.3.5 platform acceptance and all four documented routes on the published components; compose external-installation acceptance before the cut"
-  ],
+  "interpretation": "The RTX 4090 change is idle-to-new-session latency, not a decode-kernel speedup: C1 is 157.90 tok/s at 87.59% MTP acceptance against v0.6.8's 157.89. EXP-064 found 0.29-0.47 s prefill after 12-58 s idle without keep-warm and rejected the RTX 5090's 3.5 ms/10 ms spin on this card. EXP-066's sm_89 50 ms/100 ms spin holds P2: post-idle prefill 0.1461-0.1481 s, TTFT 0.167-0.178 s, all 31 outputs byte-identical, at about 72 W above idle while held. A request arriving mid-spin can overlap one warp for up to 50 ms. The canonical v0.6.9 package passed 130,048-token exact retrieval in 91.0 s, managed-stop flush, both rollback directions versus v0.6.8, security and an OMP 18.3.5 typed tool turn. EXP-064's issue_48_field_start passed from the refusing memory state with the published v0.6.8 package; a recurrence still reports commit limit, available commit and available memory. RTX 5090 runtime qualification is unchanged, and its v0.8.3 checkpoints carry across; RTX 4090 checkpoints from v0.6.8 are incompatible with the changed server build and each session re-prefills once. EXP-067 proves one short stock OMP 18.3.5 session per lane survives graceful restarts, using the macOS arm64 binary only; that proof is separate from the passed documented-route and client-platform acceptance. All four routes passed on candidate 68302298, and the upstream macOS arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, exact continuation and fail-closed request against image cd9e10b1 (releases/v0.8.4/acceptance/composed-external-installation.json); Linux ran under WSL2, not a separately qualified Linux OS. Both hosts were restored (docs/measurements/2026-09-28-v084-acceptance-restoration.json). EXP-065 keeps the upstream engine merge deferred: e31bc99b has a 1.5% single-run prefill lead, already present in EXP-048, but about 18% slower decode rounds and weaker reuse. Owner-operated exact-profile scope only; no SLA or universal warm-reuse claim.",
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",

@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-docker-local-ab2dcbd2-34504ca248-v0.8.4",
+  "product_release": "v0.8.4",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "as_of": "2026-09-28",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.3.5",
+    "commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+    "tree": "904a69bb951268dbcd5718cf907d54234990daef"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.3.5",
+    "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 239118848,
+    "asset_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
+    "binary_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
+    "release_id": 397662954,
+    "asset_id": 592995505,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe"
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.3.5",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 29,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "3ab266e5cd82398be98c2baee6a41a123ce1a4b0d38bd9ddcda75044dcd5dcb1",
+    "runtime_configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "q38-ninfer"
+    ],
+    "raw_transcript_included": false,
+    "vision_observed": true,
+    "vision_input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "errors": [
+        "Unable to connect. Is the computer able to access the url?"
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "runtime_image_digest": "sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the unmodified upstream client against the published RTX 5090 runtime carried unchanged into v0.8.4 (image cd9e10b1), not GPU performance or a managed-appliance installation.",
+    "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt.",
+    "The documented route's tool answer reported the marker inside a sentence; the structured probe returned the whole visible answer exactly.",
+    "OMP 18.3.5 on Windows prints a false `omp launch` ended-before-completing line after finished `omp -p` turns (can1357/oh-my-pi#13470); answers and exit statuses were correct."
+  ]
+}

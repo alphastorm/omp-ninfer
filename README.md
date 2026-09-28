@@ -4,22 +4,22 @@
 restart.** Qwen3.8 27B is the model, [Neroued’s NInfer](https://github.com/Neroued/ninfer)
 is the inference engine, and [Oh My Pi](https://github.com/can1357/oh-my-pi) is the coding
 agent. This project packages their integration, explicit continuation, and durable checkpoints
-into exact, qualified releases. The v0.8.3 scope is one NVIDIA RTX 5090 or RTX 4090.
+into exact, qualified releases. The v0.8.4 scope is one NVIDIA RTX 5090 or RTX 4090.
 
-> **Before installing — v0.8.3 eligibility**
+> **Before installing — v0.8.4 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
 > - **RTX 4090:** documented native Windows 11 route.
-> - **RTX 3090 is deferred for v0.8.3.** Its separately linked
+> - **RTX 3090 is deferred for v0.8.4.** Its separately linked
 >   [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 >   stays on OMP 18.0.9; it is not qualified with the new client.
 > - Use the exact pinned client, runtime, model, and profile in the
->   [v0.8.3 manifest](releases/v0.8.3/manifest.json).
+>   [v0.8.4 manifest](releases/v0.8.4/manifest.json).
 >   Other deployments are not supported by implication; check the guide’s memory, disk, and download prerequisites.
 
 <div align="center">
 
-**[Get started with v0.8.3 →](docs/QUICKSTART.md)** ·
-**[Download v0.8.3](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.8.3)**
+**[Get started with v0.8.4 →](docs/QUICKSTART.md)** ·
+**[Download v0.8.4](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.8.4)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -55,7 +55,7 @@ Idle gaps longer than 1.75 s are compressed; the unchanged MP4 is 15.3 s.</sub>
 
 </div>
 
-| What changes for you | Historical released evidence (not new v0.8.3 measurements) |
+| What changes for you | Historical released evidence (not new v0.8.4 measurements) |
 | --- | --- |
 | Retained state outlives the turn — and the process | Historical v0.4.0, one RTX 5090: **109,589 retained tokens** served after restart; **24.8 s end-to-end including first-touch checkpoint restore**, plus a separately measured **56.6 s model reload** |
 | Agent branches share the base, not re-prefill it | Four subagent branches from one 67.7K-token base: **148.7 s → 3.84 s** on v0.4.4, **0.40 s** to first token when the anchor is device-resident |
@@ -81,22 +81,20 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.8.3 is the current public release — faster RTX 5090 decode.**
-> RTX 5090 ships `v0.6.12-qwen38-5090-beta.1` with a tensor-core Q5 verify route: decode is
-> **4.4% faster at 26K**, **3.6% at 60K** and **6.3% at 1,024 tokens**; MTP3 rounds are
-> **3.5-4.9% shorter**. Generated text differs from v0.8.2 on **58 of 89** role-corpus cases.
-> The pre-registered EXP-063 redaction screen passed on **504 pairs**; results are below.
-> RTX 5090 gates were re-measured on the published image. Profile `qwen38-5090-v0.8.2`,
-> configuration `56878aed`, serving settings and memory floors are unchanged, as are the model,
-> unmodified upstream **OMP 18.3.0** and RTX 4090 `v0.6.8-qwen38-4090-beta.1`.
-> The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed a typed tool turn,
-> an exact continuation and a fail-closed request against the published RTX 5090 image; Linux ran
-> in **Ubuntu under WSL2**, not a separately qualified non-WSL OS.
-> [Documented-route acceptance](releases/v0.8.3/acceptance/documented-routes.json) passed all
-> **24 steps** with unmodified OMP 18.3.0 on the published v0.8.3 components: RTX 5090 container
-> host 2, macOS client 10, Windows client 5 and RTX 4090 native Windows 7; both hosts were
-> restored. RTX 3090 remains deferred. Checkpoints saved by v0.8.2 do not restore on the new
-> RTX 5090 server build; each session re-prefills once.
+> **v0.8.4 is the current public release — every lane current.**
+> RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` with a 60 s GPU keep-warm and an sm_89-specific
+> 50 ms/100 ms spin. New sessions after 12-58 s idle prefilled in **0.146-0.148 s**, with
+> byte-identical outputs; the package passed all **15 qualification phases**. RTX 5090 keeps
+> `v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, profile `qwen38-5090-v0.8.2`, configuration
+> `56878aed` and its carried v0.8.3 lane receipt. The model and memory floors are unchanged.
+> The client advances to unmodified upstream **OMP 18.3.5**.
+> [Documented-route acceptance](releases/v0.8.4/acceptance/documented-routes.json) passed all
+> **24 steps** on the published components: RTX 5090 container host 2, macOS client 10, Windows
+> client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+> (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+> continuation and a fail-closed request against the RTX 5090 image; Linux ran under **WSL2**,
+> not a separately qualified Linux OS. RTX 3090 remains deferred. RTX 4090 sessions re-prefill
+> once on the new server build; RTX 5090 keeps its v0.8.3 checkpoints.
 > Details: [release status](docs/RELEASES.md) · [compatibility matrix](docs/COMPATIBILITY.md).
 
 ## What this is — and isn't
@@ -135,7 +133,7 @@ prefix, that reuse is an implicit longest-prefix guess that dies with the proces
 
 OMP NInfer ships the third option as a small set of qualified lanes — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and one pinned Qwen3.8 27B artifact on an
-RTX 5090 or RTX 4090 in v0.8.3 — with three properties qualified together:
+RTX 5090 or RTX 4090 in v0.8.4 — with three properties qualified together:
 
 1. **Continuation is explicit and durable, not guessed.** OMP drives NInfer through stateful
    OpenAI Responses (`previous_response_id`): continuation is addressed by transactional lineage —
@@ -166,7 +164,53 @@ Historical v0.6.8 profiles and receipts in
 | RTX 4090 native | exact 130,048-token retrieval in **91.5 s**; **153.4 tok/s** decode at 87.6% MTP3 acceptance and 2,114.1 tok/s prefill on the C1 gate (a trajectory-sensitive fixture, EXP-037); 15/15 protocol checks at the shipped pool and again at a third of it; a never-published 45-token session and an explicitly saved one both restored across a graceful managed restart; exact OMP Golden-equivalent (mainline runtime v0.6.2-beta.1, sm_89, the same source as the 5090's v0.6.4) |
 | Serving contract | OpenAI, Anthropic, and Responses protocols; tools; authenticated identity |
 
-The **v0.8.3 runtime release** makes RTX 5090 decode faster with a small-T tensor-core Q5
+The **v0.8.4 release — every lane current** updates the RTX 4090 runtime and the client.
+
+RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` (package `6492588e`, server `65364401`,
+source `5ac17674`, configuration `ccecfbe3`). Its `engine.gpu_keep_warm_ms = 60000` uses an
+sm_89-specific 50 ms spin every 100 ms: the RTX 5090's 3.5 ms/10 ms pattern did not hold this
+card in P2. New sessions after 12-58 s idle prefilled in **0.146-0.148 s**, with time to first
+token **0.167-0.178 s**; all 31 outputs were byte-identical. The hold costs about **72 W**
+above idle, and a request arriving mid-spin can overlap one warp for up to 50 ms.
+[EXP-064](docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json) ·
+[EXP-066](docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json).
+
+The published package passed all **15 canonical qualification phases**
+([lane receipt](releases/v0.8.4/qualification/rtx4090.json)); this is not a decode-kernel speedup.
+RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, profile `qwen38-5090-v0.8.2`,
+configuration `56878aed` and its carried v0.8.3 lane receipt. The model and memory floors are
+unchanged. RTX 4090 checkpoints from v0.6.8 re-prefill once on the changed server build;
+RTX 5090 carries its v0.8.3 checkpoints.
+
+The unmodified upstream client advances to **OMP 18.3.5**. Its macOS arm64 binary kept one
+short session across graceful restarts on both lanes with the documented fragments unchanged
+([EXP-067](docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). A steer submitted
+mid-stream did not abort: OMP sent it **27 ms** after `response.completed` as a new request
+chained by `previous_response_id`
+([EXP-068](docs/measurements/2026-09-28-omp-1835-live-steering.json)).
+
+All four documented routes passed **24 steps** on candidate `68302298` with unmodified OMP
+18.3.5 and the published v0.8.4 components: RTX 5090 container host 2, macOS client 10, Windows
+client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against RTX 5090 image `cd9e10b1`. Linux ran under WSL2,
+not a separately qualified Linux OS.
+[Documented routes](releases/v0.8.4/acceptance/documented-routes.json) ·
+[Composed acceptance](releases/v0.8.4/acceptance/composed-external-installation.json).
+
+The upstream engine merge stays deferred: `e31bc99b` has about **18% slower decode** and
+fanout **0/4 versus 4/4**
+([EXP-065](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)). The
+RTX 4090 Q5 tensor-core route was rejected by its pre-registered rule: **+0.38% at 26K** and
+**+0.40% at 60K**, below required **2.0%/1.0%** gains
+([EXP-069](docs/measurements/2026-09-28-rtx4090-q5-small-t-mma.json)). RTX 3090's v0.6.2-beta.1
+package built and tested at `5ac17674` remains unpublished, with hardware qualification pending
+([preparedness](docs/measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
+
+[Release notes](releases/v0.8.4/NINFER_RELEASE_NOTES.md) ·
+[Qualification](releases/v0.8.4/qualification.json).
+
+The **historical v0.8.3 runtime release** makes RTX 5090 decode faster with a small-T tensor-core Q5
 verify route. At the four-token extent, the MTP3 verify pass's GDN value/z, attention
 gate/value, mixer/attention output and MLP down projections use tensor-core MMA on `sm_120`
 instead of SIMT row kernels. The route is compiled out for `sm_86` and `sm_89`.
@@ -312,19 +356,19 @@ machine and profile, not universal GPU claims.
 
 ## Get started
 
-For v0.8.3, choose the RTX 5090 Windows 11 + Docker Desktop/WSL2 container route or the
-RTX 4090 native Windows 11 route. Each needs the checksummed upstream OMP 18.3.0 binary, the
+For v0.8.4, choose the RTX 5090 Windows 11 + Docker Desktop/WSL2 container route or the
+RTX 4090 native Windows 11 route. Each needs the checksummed upstream OMP 18.3.5 binary, the
 exact runtime and model, and about 40 GiB free disk; the guide lists the lane-specific memory
 floors. Install the documented provider fragment and export `PI_OPENAI_STATEFUL=1` in every shell
-that launches OMP. Read the [v0.8.3 guide](docs/QUICKSTART.md) with its
-[manifest](releases/v0.8.3/manifest.json), then follow its release verification and acceptance
+that launches OMP. Read the [v0.8.4 guide](docs/QUICKSTART.md) with its
+[manifest](releases/v0.8.4/manifest.json), then follow its release verification and acceptance
 steps. Do not mix client and runtime authorities from different releases.
 
 Do not bypass the ready gate. The separately preserved
 [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) and
 [manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 remain the historical three-GPU / OMP 18.0.9 route, including RTX 3090. They do not qualify
-RTX 3090 with OMP 18.3.0.
+RTX 3090 with OMP 18.3.5.
 
 ## How it works
 
@@ -357,11 +401,11 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | What it is | A small closed set of qualified OMP + runtime + model + GPU combinations with receipts | General local runtime with a large model library | Desktop app plus headless daemon with a large model catalog | General GGUF serving with the broadest hardware reach | High-throughput general serving engine |
 | Session state across OMP turns | Stateful Responses owned end to end: transcript commits first, GPU-resident baseline advances second; survives OMP exit/resume; forks qualified | Stateless per request; transcript re-sent; in-process prefix reuse avoids recomputing matching prefixes | Stateless per request; chat state lives in the client | Stateless per request; per-slot prefix cache reuses matching prefixes | Stateless core with automatic prefix caching; separate Agentic API gateway adds server-side state |
 | Restart and off-machine checkpoints | Durable restore on eligible lanes; verified historical host/NAS replicas; same-runtime/profile/credentials restore only ([scope](docs/FACTS.md#checkpoint-transport-and-nas-replication)) | Different mechanism/contract; verify current support | Different mechanism/contract; verify current support | Different mechanism/contract; verify current support | Different architecture, including external KV systems |
-| Speculative decoding on the shipped model | Profile-specific: MTP3 on both v0.8.3 lanes | Model/config dependent | Desktop app plus headless daemon with a large model catalog | Optional draft/ngram setups | Optional |
+| Speculative decoding on the shipped model | Profile-specific: MTP3 on both v0.8.4 lanes | Model/config dependent | Desktop app plus headless daemon with a large model catalog | Optional draft/ngram setups | Optional |
 | Vision, tools, thinking | Qualified together in one profile | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | One pinned artifact and two eligible GPU lanes in the v0.8.3 manifest | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| Breadth | One pinned artifact and two eligible GPU lanes in the v0.8.4 manifest | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
 Where each shines: **Ollama** is the easiest way to run many models locally. **LM Studio** is the
 most polished desktop experience for browsing and running them. **llama.cpp** has the broadest
@@ -383,7 +427,7 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the historical native RTX 3090 lane |
 
 The historical v0.7.2 manifest binds all three lanes to their exact package, receipt, and
-profile. v0.8.3 eligibility is RTX 5090 and RTX 4090 only; RTX 3090 is deferred until its
+profile. v0.8.4 eligibility is RTX 5090 and RTX 4090 only; RTX 3090 is deferred until its
 host returns for new-client qualification. What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard
@@ -411,12 +455,12 @@ after the documented acceptance checks pass. Planned measurements we want next a
 Docs, release tooling, and profile contracts belong here; engine work belongs in the runtime
 repositories. The complete routing and evidence rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The v0.8.3 client is the unmodified upstream
-[Oh My Pi v18.3.0 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), checked
+The v0.8.4 client is the unmodified upstream
+[Oh My Pi v18.3.5 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.5), checked
 against its SHA-256. This product no longer builds or publishes an OMP client. The
 [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi) fork and
 [alphastorm/homebrew-omp](https://github.com/alphastorm/homebrew-omp) distributed the client
-through v0.7.4; they are historical, not the v0.8.3 install path. Stock OMP has no
+through v0.7.4; they are historical, not the v0.8.4 install path. Stock OMP has no
 `omp appliance` commands: install and operate each lane through the [quickstart](docs/QUICKSTART.md).
 
 ## Roadmap

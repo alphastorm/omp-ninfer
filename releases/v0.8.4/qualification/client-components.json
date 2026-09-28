@@ -38,22 +38,6 @@
       "asset_id": 592995503,
       "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-darwin-arm64"
     },
-    "linux-x64": {
-      "distribution_kind": "upstream-release",
-      "upstream_repository": "https://github.com/can1357/oh-my-pi",
-      "upstream_tag": "v18.3.5",
-      "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
-      "os": "Ubuntu 24.04",
-      "architecture": "x64",
-      "published": true,
-      "asset_name": "omp-linux-x64",
-      "asset_bytes": 284747232,
-      "asset_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
-      "binary_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
-      "release_id": 397662954,
-      "asset_id": 592995500,
-      "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-linux-x64"
-    },
     "windows-x64": {
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -69,6 +53,22 @@
       "release_id": 397662954,
       "asset_id": 592995505,
       "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe"
+    },
+    "linux-x64": {
+      "distribution_kind": "upstream-release",
+      "upstream_repository": "https://github.com/can1357/oh-my-pi",
+      "upstream_tag": "v18.3.5",
+      "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+      "os": "Ubuntu 24.04",
+      "architecture": "x64",
+      "published": true,
+      "asset_name": "omp-linux-x64",
+      "asset_bytes": 284747232,
+      "asset_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
+      "binary_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
+      "release_id": 397662954,
+      "asset_id": 592995500,
+      "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-linux-x64"
     }
   }
 }

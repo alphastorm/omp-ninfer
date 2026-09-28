@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.3`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.4`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.3 keeps the upstream OMP binaries adopted in v0.8.0 and uses no client cask.
+v0.7.4. v0.8.4 uses upstream OMP 18.3.5 binaries and no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,10 +27,75 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.3 public release — faster RTX 5090 decode
+### v0.8.4 public release — every lane current
 
-- Status: published exact-profile product, 2026-09-27.
-  [Manifest](../releases/v0.8.3/manifest.json) · [guide](QUICKSTART.md) ·
+- Status: accepted exact-profile product, 2026-09-28.
+  [Manifest](../releases/v0.8.4/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.8.4/qualification.json).
+- Client: unmodified upstream OMP 18.3.5. The model and memory floors are unchanged; eligibility
+  remains one RTX 5090 or RTX 4090, with RTX 3090 deferred.
+
+RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` (package `6492588e`, server `65364401`,
+source `5ac17674`, configuration `ccecfbe3`). Its `engine.gpu_keep_warm_ms = 60000` uses an
+sm_89-specific 50 ms spin every 100 ms: the RTX 5090's 3.5 ms/10 ms pattern did not hold this
+card in P2. New sessions after 12-58 s idle prefilled in **0.146-0.148 s**, with time to first
+token **0.167-0.178 s**; all 31 outputs were byte-identical. The hold costs about **72 W**
+above idle, and a request arriving mid-spin can overlap one warp for up to 50 ms.
+[EXP-064](measurements/2026-09-27-rtx4090-engine-keep-warm.json) ·
+[EXP-066](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json).
+
+The published package passed all **15 canonical qualification phases**
+([lane receipt](../releases/v0.8.4/qualification/rtx4090.json)); this is not a decode-kernel speedup.
+RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, profile `qwen38-5090-v0.8.2`,
+configuration `56878aed` and its carried v0.8.3 lane receipt. The model and memory floors are
+unchanged. RTX 4090 checkpoints from v0.6.8 re-prefill once on the changed server build;
+RTX 5090 carries its v0.8.3 checkpoints.
+
+The unmodified upstream client advances to **OMP 18.3.5**. Its macOS arm64 binary kept one
+short session across graceful restarts on both lanes with the documented fragments unchanged
+([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). A steer submitted
+mid-stream did not abort: OMP sent it **27 ms** after `response.completed` as a new request
+chained by `previous_response_id`
+([EXP-068](measurements/2026-09-28-omp-1835-live-steering.json)).
+
+All four documented routes passed **24 steps** on candidate `68302298` with unmodified OMP
+18.3.5 and the published v0.8.4 components: RTX 5090 container host 2, macOS client 10, Windows
+client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against RTX 5090 image `cd9e10b1`. Linux ran under WSL2,
+not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.4/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.4/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in one production window, with downtime at most **421.5 s (7.0 min)**,
+from a separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, not the
+maintainer's workstation
+([restoration](measurements/2026-09-28-v084-acceptance-restoration.json)).
+
+The RTX 4090 route's first candidate, `0315c5d4`, stopped at its no-effect preflight because
+the harness judged the provider-parser check only by `omp models`'s exit status. OMP 18.3.5 on
+Windows exits 1 after a complete listing
+([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)). The check now judges
+the listing; `68302298` passed the literal documented blocks with the published v0.6.9 package
+and original state restored byte for byte. Upstream 18.4.0, released 2026-09-28, fixes #13470;
+v0.8.4 keeps 18.3.5 and a later release repins.
+
+The upstream engine merge stays deferred: `e31bc99b` has about **18% slower decode** and
+fanout **0/4 versus 4/4**
+([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)). The
+RTX 4090 Q5 tensor-core route was rejected by its pre-registered rule: **+0.38% at 26K** and
+**+0.40% at 60K**, below required **2.0%/1.0%** gains
+([EXP-069](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)). RTX 3090's v0.6.2-beta.1
+package built and tested at `5ac17674` remains unpublished, with hardware qualification pending
+([preparedness](measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
+
+[Release notes](../releases/v0.8.4/NINFER_RELEASE_NOTES.md).
+
+### v0.8.3 historical public release — faster RTX 5090 decode
+
+- Status: superseded published exact-profile product, 2026-09-27.
+  [Manifest](../releases/v0.8.3/manifest.json) ·
+  [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.8.3/docs/QUICKSTART.md) ·
   [qualification](../releases/v0.8.3/qualification.json).
 - Client and model: unmodified upstream OMP 18.3.0 and the model artifact (`eec39564`) are
   unchanged from v0.8.2. Eligibility remains one RTX 5090 or RTX 4090; RTX 3090 is deferred.
