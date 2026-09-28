@@ -5,7 +5,8 @@ OMP compacts them. The config every route installs now makes the unmodified upst
 client compact before a turn instead of in the background, and a new proof drives stock OMP
 through repeated automatic compaction on both lanes. The client, the provider fragments, both GPU
 lanes' runtime bytes, configurations and qualification receipts, the model and the memory floors
-are unchanged from v0.8.5. RTX 3090 and the upstream engine merge remain deferred.
+are unchanged from v0.8.5. RTX 3090 and the upstream engine merge remain deferred. All four
+documented routes and all three client platforms passed.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -93,9 +94,28 @@ and OMP 18.0.9 client remain a separate historical route, not a v0.8.6 qualifica
 
 ## Documented routes and clients
 
-The four documented routes - RTX 5090 container host, macOS client, Windows client and RTX 4090
-native Windows - run against this candidate's published components with unmodified OMP 18.4.0
-before the release is cut, with fresh client-platform acceptance.
+The four documented routes passed on candidate `4f49fce7` with unmodified OMP 18.4.0 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
+and RTX 4090 native Windows (7), with both hosts restored
+([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows x64 and Linux x64
+binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+RTX 5090 image `cd9e10b1`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran from a separately hosted Apple silicon Mac mini on macOS 26.6.1 over the
+tailnet, not the maintainer's workstation, in two production windows with downtime at most
+186.9 s and 392.1 s (6.5 min)
+([restoration](../../docs/measurements/2026-09-28-v086-acceptance-restoration.json)).
+
+The first candidate, `be49962c`, was refused by the RTX 4090 route's preflight before it touched
+the lane: the lane stage had left the manifest a draft, and the release tooling now promotes it.
+On `1fa202fd` the RTX 4090 route passed, but the first RTX 5090 window failed at the macOS
+resume step on the restated nonce described above, and production was restored. On `60b5d82d`
+the documented RTX 4090 route passed, but its harness refused the run because the model made two
+tool calls; the harness now accounts each request to a documented turn or a tool call
+([EXP-073](../../docs/measurements/2026-09-28-omp-acceptance-sampling.json)).
 
 ## Upgrading from v0.8.5
 

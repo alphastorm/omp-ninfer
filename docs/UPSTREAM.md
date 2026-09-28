@@ -1,6 +1,6 @@
 # Upstream watch
 
-The runtime ships from forks; v0.8.5 uses an unmodified upstream OMP client. This page names
+The runtime ships from forks; v0.8.6 uses an unmodified upstream OMP client. This page names
 the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
 [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -27,7 +27,80 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.8.5
+## Tracked upstreams and current position — v0.8.6
+
+Long sessions no longer fail a turn while OMP compacts them. The config every documented
+route installs, [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml),
+sets `compaction.asyncEnabled: false`, so unmodified upstream OMP 18.4.0 compacts before
+the turn instead of in the background. Both lanes admit one request at a time. On the RTX 4090,
+the background handoff took 56-61 s; the next turn's attempts expired at the 30 s admission
+deadline, and the third of three compactions ended in `503 request_queue_timeout`.
+
+[EXP-072](measurements/2026-09-28-omp-long-sessions.json), using the new
+[`scripts/omp_long_session_proof.py`](../scripts/omp_long_session_proof.py), measured repeated
+automatic compaction with stock OMP 18.4.0 on both lanes:
+
+- RTX 4090: three inline handoffs took **77.0-83.7 s** each with **no expired admission**.
+  The newest identifier survived every compaction and a graceful restart; all three older
+  identifiers were also recalled. The turn carrying a compaction took **91-101 s**.
+- RTX 5090: two snapcompact compactions took **0.07-0.08 s** on the client. Both identifiers
+  held only inside frames were recalled; `detail: "auto"` reaches the model at native resolution.
+  The bounded archive dropped **76,832 and 192,080 characters** of older middle history.
+- A single-admission mock reproduced the failure behind a 45 s handoff after six expired
+  attempts with the old config; inline compaction expired none. OMP recognizes the runtime's
+  `context_length_exceeded` response on both fragments, compacts and retries.
+
+These are one run per configuration on each lane, with synthetic build-log filler, one seed
+and thinking `low`; the failure rate is not measured. Older-identifier recall is recorded,
+not gated. The RTX 5090 was not restarted after compaction. RTX 4090 handoffs re-prefill the
+whole session because `tool_choice: none` omits the usual tool block; a second full replay
+just below the threshold also re-prefills about 102,600 tokens (68 s). After compaction, its
+first turn after a graceful restart re-prefills about 32,000 tokens (17 s); without compaction
+the restore is hot. On the RTX 5090, one chained turn per run re-prefilled 93,696-105,066 tokens
+from root (40-46 s), with cause unidentified. These remain runtime work, not fixes in this release.
+
+The client, provider fragments, both runtimes, model, memory floors, serving configurations and
+lane receipts are unchanged from v0.8.5. RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image
+`cd9e10b1`; RTX 4090 keeps `v0.6.9-qwen38-4090-beta.1`, package `6492588e`. Checkpoints carry
+across. To upgrade from v0.8.5, merge this into `~/.omp/agent/config.yml`:
+
+```yaml
+compaction:
+  asyncEnabled: false
+```
+
+The OMP binary, `models.yml` and `PI_OPENAI_STATEFUL=1` do not change.
+Documented resume/restart checks now plant with an OK-only reply and recall verbatim.
+RTX 3090 remains deferred.
+
+All four documented routes passed **24 steps** on candidate `4f49fce7`
+(`4f49fce7d52c62422e4f67cf15a3fa3a63dd72d9`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090 native
+Windows 7; both hosts were restored. The upstream macOS arm64 (preview), Windows x64 and
+Linux x64 binaries each passed a typed tool turn, an exact continuation and a fail-closed
+request against image `cd9e10b1`. Linux ran under **WSL2**, not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.6/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.6/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in **two production windows** from a separately hosted Apple silicon
+Mac mini. Downtime was at most **186.9 s (3.1 min)** in the failed window and
+**392.1 s (6.5 min)** in the accepted window;
+total downtime was at most **579.0 s**
+([restoration](measurements/2026-09-28-v086-acceptance-restoration.json)).
+
+Candidate `be49962c` was refused by the RTX 4090 preflight before touching the lane: the lane
+stage had left its manifest a draft; tooling was fixed. On `1fa202fd` the RTX 4090 route passed,
+but the first RTX 5090 window failed at macOS resume: the acknowledgment wrote `COBOLT-493817`
+and recall returned that copy. Production was restored after **186.9 s**; nonce checks were
+hardened. On `60b5d82d` the documented RTX 4090 route passed, but its harness refused two
+tool calls where it required exactly one. The harness now accounts each request to a documented
+turn or tool call. Candidate `4f49fce7` passed the RTX 4090 route and a second RTX 5090 window.
+
+[Release notes](../releases/v0.8.6/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.8.6/manifest.json) ·
+[Qualification](../releases/v0.8.6/qualification.json).
+
+## Historical position — v0.8.5
 
 OMP compacts a 131,072-token session automatically at 111,412 tokens. For an image-capable
 model, its first usable method, snapcompact, archives earlier turns as PNGs at
@@ -38,7 +111,7 @@ so OMP sends `auto`. On the RTX 5090 runtime, one compacted continuation complet
 26,075 input tokens and the exact nonce; `original` was refused in 9 ms
 ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
 model is never compacted into images. Readback beyond that nonce and repeated compactions
-in one session were not measured.
+in one session were not measured in EXP-071; EXP-072 above adds those measurements.
 
 The first v0.8.5 route candidate hit this at the macOS restart step when its seed, the
 release's own documents, grew from 332,331 to 343,205 bytes. That step now seeds the first
@@ -207,7 +280,7 @@ RTX 5090 build in v0.8.3. Each session re-prefills once.
 [Release notes](../releases/v0.8.3/NINFER_RELEASE_NOTES.md).
 
 The preceding v0.8.3 measurements are historical; the tracked-upstream table below records the
-current EXP-065 engine decision and the v0.8.5 client pin.
+current EXP-065 engine decision and the v0.8.6 client pin.
 
 ## Historical position — v0.8.2
 
@@ -276,7 +349,7 @@ serving settings and floors are unchanged.
 | `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | `e31bc99b`, measured 2026-09-27 | **Merge deferred on measurement.** EXP-065 compared upstream with the shipped RTX 5090 runtime: decode about 18% slower and fanout 0/4 versus 4/4; the 1.5% single-run prefill lead was already present in EXP-048. The new window does not justify merging upstream ([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json), [prior EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). |
 | `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed and are read against v0.7.1's durability work when taken. Upstream removed its NVFP4 path (`dabae909`). |
 | `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | Triage rides the RTX 3090 window when its host returns, expected around 2026-09-30. |
-| `can1357/oh-my-pi` (client) | Upstream v18.4.0 (`401778d0cd30020ce0f9198f751b13c68850562f`) | Unmodified upstream release binary; published 2026-09-28T03:33:34Z | v0.8.5 pins 18.4.0; all four documented routes passed. Fix `9d3e0d4975` resolves the Windows completion-status defect ([#13470](https://github.com/can1357/oh-my-pi/issues/13470), [EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)). RTX 5090 fragments now set `compat.supportsImageDetailOriginal: false` for automatic compaction ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)); other fields and `PI_OPENAI_STATEFUL=1` are unchanged; no fork build, archive, installer or cask. |
+| `can1357/oh-my-pi` (client) | Upstream v18.4.0 (`401778d0cd30020ce0f9198f751b13c68850562f`) | Unmodified upstream release binary; published 2026-09-28T03:33:34Z | v0.8.6 pins 18.4.0; all four documented routes passed. Fix `9d3e0d4975` resolves the Windows completion-status defect ([#13470](https://github.com/can1357/oh-my-pi/issues/13470), [EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)). RTX 5090 fragments now set `compat.supportsImageDetailOriginal: false` for automatic compaction ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The route config now sets `compaction.asyncEnabled: false`: three RTX 4090 handoffs took 77.0-83.7 s each with no expired admission; RTX 5090 snapcompact took 0.07-0.08 s ([EXP-072](measurements/2026-09-28-omp-long-sessions.json)); provider fields and `PI_OPENAI_STATEFUL=1` are unchanged; no fork build, archive, installer or cask. |
 
 **Historical client position through v0.7.4.** `omp-18.2.3-cross-platform-beta-1` (source
 `5ade242d`, since v0.7.3) carried 36 downstream commits on upstream `a2d83061` (v18.2.3),
@@ -319,5 +392,5 @@ product needs that planner rebase.
 - The 4090/3090 native Windows lanes vendored their upstreams at the recorded commits and carry
   the durable-checkpoint, security, and packaging work downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.8.5 does not build or publish an OMP client; it uses the upstream
+  patches rebased. v0.8.6 does not build or publish an OMP client; it uses the upstream
   release binary instead.

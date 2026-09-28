@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.5`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.6`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.5 uses upstream OMP 18.4.0 binaries and no client cask.
+v0.7.4. v0.8.6 uses upstream OMP 18.4.0 binaries and no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,9 +27,99 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.5 public release — OMP 18.4.0 and long-session compaction
+### v0.8.6 public release — long sessions compact inline
 
 - Status: accepted exact-profile product, 2026-09-28.
+  [Manifest](../releases/v0.8.6/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.8.6/qualification.json).
+- Eligibility: RTX 5090 on Windows 11 + Docker Desktop/WSL2, or RTX 4090 native Windows 11.
+  RTX 3090 remains deferred. Owner-operated exact profiles only; no SLA or silent cloud fallback.
+
+Long sessions no longer fail a turn while OMP compacts them. The config every documented
+route installs, [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml),
+sets `compaction.asyncEnabled: false`, so unmodified upstream OMP 18.4.0 compacts before
+the turn instead of in the background. Both lanes admit one request at a time. On the RTX 4090,
+the background handoff took 56-61 s; the next turn's attempts expired at the 30 s admission
+deadline, and the third of three compactions ended in `503 request_queue_timeout`.
+
+[EXP-072](measurements/2026-09-28-omp-long-sessions.json), using the new
+[`scripts/omp_long_session_proof.py`](../scripts/omp_long_session_proof.py), measured repeated
+automatic compaction with stock OMP 18.4.0 on both lanes:
+
+- RTX 4090: three inline handoffs took **77.0-83.7 s** each with **no expired admission**.
+  The newest identifier survived every compaction and a graceful restart; all three older
+  identifiers were also recalled. The turn carrying a compaction took **91-101 s**.
+- RTX 5090: two snapcompact compactions took **0.07-0.08 s** on the client. Both identifiers
+  held only inside frames were recalled; `detail: "auto"` reaches the model at native resolution.
+  The bounded archive dropped **76,832 and 192,080 characters** of older middle history.
+- A single-admission mock reproduced the failure behind a 45 s handoff after six expired
+  attempts with the old config; inline compaction expired none. OMP recognizes the runtime's
+  `context_length_exceeded` response on both fragments, compacts and retries.
+
+These are one run per configuration on each lane, with synthetic build-log filler, one seed
+and thinking `low`; the failure rate is not measured. Older-identifier recall is recorded,
+not gated. The RTX 5090 was not restarted after compaction. RTX 4090 handoffs re-prefill the
+whole session because `tool_choice: none` omits the usual tool block; a second full replay
+just below the threshold also re-prefills about 102,600 tokens (68 s). After compaction, its
+first turn after a graceful restart re-prefills about 32,000 tokens (17 s); without compaction
+the restore is hot. On the RTX 5090, one chained turn per run re-prefilled 93,696-105,066 tokens
+from root (40-46 s), with cause unidentified. These remain runtime work, not fixes in this release.
+
+The documented resume and restart checks now plant the nonce with an OK-only reply and ask for
+a verbatim recall. On the RTX 5090 runtime, v0.8.5's plant made the model restate the nonce
+visibly in 87 of 92 trials and v0.8.6's in none
+([EXP-073](measurements/2026-09-28-omp-acceptance-sampling.json)); a restated,
+misspelled copy is what the first RTX 5090 window's recall returned.
+
+The client, provider fragments, both runtimes, model, memory floors, serving configurations and
+lane receipts are unchanged from v0.8.5. RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image
+`cd9e10b1`; RTX 4090 keeps `v0.6.9-qwen38-4090-beta.1`, package `6492588e`. Checkpoints carry
+across. To upgrade from v0.8.5, merge this into `~/.omp/agent/config.yml`:
+
+```yaml
+compaction:
+  asyncEnabled: false
+```
+
+The OMP binary, `models.yml` and `PI_OPENAI_STATEFUL=1` do not change. The documented resume
+and restart checks now plant the nonce with an OK-only reply and ask for a verbatim recall,
+rather than asking the model to restate it in its acknowledgment. RTX 3090 remains deferred.
+
+All four documented routes passed **24 steps** on candidate `4f49fce7`
+(`4f49fce7d52c62422e4f67cf15a3fa3a63dd72d9`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090 native
+Windows 7; both hosts were restored. The upstream macOS arm64 (preview), Windows x64 and
+Linux x64 binaries each passed a typed tool turn, an exact continuation and a fail-closed
+request against image `cd9e10b1`. Linux ran under **WSL2**, not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.6/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.6/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in **two production windows** from a separately hosted Apple silicon
+Mac mini. Downtime was at most **186.9 s (3.1 min)** in the failed window and
+**392.1 s (6.5 min)** in the accepted window;
+total downtime was at most **579.0 s**
+([restoration](measurements/2026-09-28-v086-acceptance-restoration.json)).
+
+Candidate `be49962c` was refused by the RTX 4090 preflight before touching the lane: the lane
+stage had left its manifest a draft; tooling was fixed. On `1fa202fd` the RTX 4090 route passed,
+but the first RTX 5090 window failed at macOS resume: the acknowledgment wrote `COBOLT-493817`
+and recall returned that copy. Production was restored after **186.9 s**; nonce checks were
+hardened. On `60b5d82d` the documented RTX 4090 route passed, but its harness refused two
+tool calls where it required exactly one. The harness now accounts each request to a documented
+turn or tool call. Candidate `4f49fce7` passed the RTX 4090 route and a second RTX 5090 window.
+
+[Release notes](../releases/v0.8.6/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.8.6/manifest.json) ·
+[Qualification](../releases/v0.8.6/qualification.json).
+
+Individual route receipts: [RTX 5090 host](measurements/2026-09-28-v086-rtx5090-container-host-run.json),
+[macOS client](measurements/2026-09-28-v086-rtx5090-macos-client-run.json),
+[Windows client](measurements/2026-09-28-v086-rtx5090-windows-client-run.json), and
+[RTX 4090 native](measurements/2026-09-28-v086-rtx4090-native-run.json).
+
+### v0.8.5 historical public release — OMP 18.4.0 and long-session compaction
+
+- Status: superseded accepted exact-profile product, 2026-09-28.
   [Manifest](../releases/v0.8.5/manifest.json) · [guide](QUICKSTART.md) ·
   [qualification](../releases/v0.8.5/qualification.json).
 - Eligibility: RTX 5090 on Windows 11 + Docker Desktop/WSL2, or RTX 4090 native Windows 11.
@@ -44,7 +134,7 @@ so OMP sends `auto`. On the RTX 5090 runtime, one compacted continuation complet
 26,075 input tokens and the exact nonce; `original` was refused in 9 ms
 ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
 model is never compacted into images. Readback beyond that nonce and repeated compactions
-in one session were not measured.
+in one session were not measured in EXP-071; EXP-072 above adds those measurements.
 
 The first v0.8.5 route candidate hit this at the macOS restart step when its seed, the
 release's own documents, grew from 332,331 to 343,205 bytes. That step now seeds the first

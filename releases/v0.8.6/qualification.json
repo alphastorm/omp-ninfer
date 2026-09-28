@@ -5,7 +5,7 @@
   "as_of": "2026-09-28",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "OMP 18.4.0 client and RTX 5090 fragment release for the RTX 5090 container and RTX 4090 native Windows lanes. RTX 5090 keeps v0.6.12-qwen38-5090-beta.1, its image, server, deployment profile qwen38-5090-v0.8.2 and configuration 56878aed; its lane receipt is carried byte for byte from v0.8.3. RTX 4090 keeps v0.6.9-qwen38-4090-beta.1 (package 6492588e, configuration ccecfbe3); its lane receipt, qualified with OMP 18.3.5, is carried byte for byte from v0.8.4 (releases/v0.8.5/qualification/rtx4090.json). The client repins to unmodified upstream OMP 18.4.0, which on Windows ends `omp models` and `omp -p` with their real exit status (EXP-070). The RTX 5090 fragments declare compat.supportsImageDetailOriginal: false, so OMP's automatic compaction sends images at detail 'auto', which the lane serves, instead of 'original', which it refuses (EXP-071). All four documented routes passed 24 steps on candidate 943063e7 with both hosts restored, and the macOS arm64 (preview), Windows x64 and Linux x64 clients passed a typed tool turn, an exact continuation and a fail-closed request. Runtime, model, configuration and performance evidence is carried unchanged from v0.8.4. RTX 3090 is deferred.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,13 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.12-qwen38-5090-beta.1 component (image cd9e10b1) before the cut; the receipt lands at releases/v0.8.6/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.8.6/acceptance/composed-external-installation.json",
+      "sha256": "91561a223b904fe6391f1fbd1fc11239bd801a2758cfe9ae0d93114e314d371b",
+      "public_url": null,
+      "as_of": "2026-09-28",
+      "release": "v0.8.6",
+      "component_release_tag": "v18.4.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "windows_binary_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "28dbdcc4237b90138ac3cccfa613293219f63a493869e165bc456dd3cb045840",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "9bce6d182e06000616638292bb832f5645904166cf7e8db17579559ac587765e"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "dc0710f00104da93ab9133b2b492d11b1aab6bd27a2b6714fbe04a79ddc5bc11"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "71f21645b7fed3499de46db27a524c35fff726e1b6de860db3315ef24e2c3dc8"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published components carried from v0.8.4; runtime qualification is recorded per lane."
     },
     "documented_route_acceptance": {
       "status": "passed",
-      "repository_path": "releases/v0.8.5/acceptance/documented-routes.json",
-      "sha256": "43db4ebbe410b5e8ad5122eb17806997da3eecf34197201216647fe3614ba173"
+      "repository_path": "releases/v0.8.6/acceptance/documented-routes.json",
+      "sha256": "2f4c8e2a0f28e0be88e74a5688bae6ed67fc36c8222689cc8f725d9017314c16"
     }
   },
   "observed_gates": {
@@ -427,9 +456,7 @@
     }
   },
   "interpretation": "OMP 18.4.0 changes the client, and the RTX 5090 fragment gains one compat line. On Windows, OMP 18.3.5 exited 1 after 5 of 5 complete `omp models` listings and printed a false 'ended before completing' line after 5 of 5 finished `omp -p` turns; 18.4.0 exited 0 with no false line in all ten runs (EXP-070). OMP compacts a 131,072-token session at 111,412 tokens, and for an image-capable model its first available method archives turns as images at 'original', which NInfer refuses: every long RTX 5090 session on stock OMP 18.3.0-18.4.0 failed at its first compaction. With the flag, the lane served the compacted continuation (26,075 input tokens, exact nonce) and refused 'original' in 9 ms (EXP-071). The restart check's seed is bounded to 200,000 ASCII bytes so it keeps testing a restored checkpoint. Runtime performance and the best-effort durability and reuse limitations remain the carried observations; no throughput gain is claimed.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.12-qwen38-5090-beta.1 component and runtime image"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",

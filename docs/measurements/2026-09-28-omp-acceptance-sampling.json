@@ -78,7 +78,8 @@
  "limits": [
   "92 trials per prompt pair: each pair had one failure unrelated to spelling, so the pairs' overall pass rates are not distinguished; the restatement path is shown by the failing transcript and by the restatement counts.",
   "The RTX 5090 trials ran on the lane's production runtime, whose image, configuration and model match the route's, not on the route's container.",
-  "The tool-turn reproduction added --mode json to observe tool calls; the documented turn prints plain text."
+  "The tool-turn reproduction added --mode json to observe tool calls; the documented turn prints plain text.",
+  "Each RTX 5090 trial session left a durable checkpoint of about 930 MiB; the 184 sessions filled the runtime's 24 GiB checkpoint quota and evicted every earlier checkpoint there, so those sessions re-prefill once on their next turn (OMP resends the conversation when the server no longer holds it)."
  ],
  "raw_prompts_outputs_or_secrets_included": false
 }

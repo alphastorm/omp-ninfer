@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.8.6",
   "composition": {
-    "status": "v0.8.5 upstream OMP v18.4.0 client and route acceptance passed on RTX5090 and RTX4090",
+    "status": "v0.8.6 upstream OMP v18.4.0 client and route acceptance passed on RTX5090 and RTX4090",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0",
     "lifecycle_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
@@ -44,8 +44,8 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5648d9c843ed2e62b5ad6e44a7c91044adde438/releases/v0.8.6/acceptance/darwin-arm64-18.4.0.json",
-        "sha256": "d2050ff44c657898860449bb8f89a13164e0358022ee6e70e2322b1d18e03461"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4f49fce7d52c62422e4f67cf15a3fa3a63dd72d9/releases/v0.8.6/acceptance/darwin-arm64-18.4.0.json",
+        "sha256": "9bce6d182e06000616638292bb832f5645904166cf7e8db17579559ac587765e"
       },
       "client_distribution": {
         "distribution_kind": "upstream-release",
@@ -141,8 +141,8 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5648d9c843ed2e62b5ad6e44a7c91044adde438/releases/v0.8.6/acceptance/windows-x64-18.4.0.json",
-        "sha256": "651a989b5b3ca8449e5397315899e3afb0ea529668c4c359ed0a11b9aab8bed4"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4f49fce7d52c62422e4f67cf15a3fa3a63dd72d9/releases/v0.8.6/acceptance/windows-x64-18.4.0.json",
+        "sha256": "dc0710f00104da93ab9133b2b492d11b1aab6bd27a2b6714fbe04a79ddc5bc11"
       },
       "client_distribution": {
         "distribution_kind": "upstream-release",
@@ -239,8 +239,8 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5648d9c843ed2e62b5ad6e44a7c91044adde438/releases/v0.8.6/acceptance/linux-x64-18.4.0.json",
-        "sha256": "0d3b8eee016ad5b3b93e89658e56ffde1f0c5ceddd1debfaf6a92d41d67767cf"
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4f49fce7d52c62422e4f67cf15a3fa3a63dd72d9/releases/v0.8.6/acceptance/linux-x64-18.4.0.json",
+        "sha256": "71f21645b7fed3499de46db27a524c35fff726e1b6de860db3315ef24e2c3dc8"
       },
       "client_distribution": {
         "distribution_kind": "upstream-release",
