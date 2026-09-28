@@ -1,6 +1,6 @@
 {
  "artifact_type": "omp_ninfer_measurement",
- "schema_version": "1",
+ "schema_version": 1,
  "experiment": "EXP-071",
  "title": "OMP's automatic compaction on the RTX 5090 lane: snapcompact's native-resolution images are refused; declaring supportsImageDetailOriginal: false makes the compacted continuation serve",
  "generated_utc": "2026-09-28T13:20:00Z",
@@ -104,5 +104,5 @@
   "One replay per variant of one compacted continuation; snapcompact readback fidelity beyond this nonce, and repeated compactions in one session, were not measured.",
   "The RTX 4090 fragment declares text input only, so snapcompact is not offered there; that lane was not tested."
  ],
- "raw_prompts_outputs_or_secrets_included": "False"
+ "raw_prompts_outputs_or_secrets_included": false
 }

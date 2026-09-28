@@ -1,6 +1,6 @@
 {
  "artifact_type": "omp_ninfer_measurement",
- "schema_version": "1",
+ "schema_version": 1,
  "experiment": "EXP-070",
  "title": "OMP 18.4.0 on Windows ends one-shot commands with their real status; 18.3.5's false drained-event-loop diagnostic is gone",
  "generated_utc": "2026-09-28T07:16:03Z",
@@ -88,5 +88,5 @@
   "A mock endpoint served the turns, so this proves the client's completion status, not lane inference; documented-route acceptance covers the live lanes.",
   "Five runs per command per version on one host."
  ],
- "raw_prompts_outputs_or_secrets_included": "False"
+ "raw_prompts_outputs_or_secrets_included": false
 }

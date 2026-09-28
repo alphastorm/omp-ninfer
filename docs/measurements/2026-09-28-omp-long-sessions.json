@@ -1,6 +1,6 @@
 {
  "artifact_type": "omp_ninfer_measurement",
- "schema_version": "1",
+ "schema_version": 1,
  "experiment": "EXP-072",
  "title": "Stock OMP 18.4.0 long sessions on both lanes: async compaction fails a turn on the single-admission RTX 4090 lane; inline compaction survives three compactions and a restart",
  "generated_utc": "2026-09-28T14:10:00Z",
@@ -1244,5 +1244,5 @@
    "finished_utc": "2026-09-28T13:16:42Z"
   }
  },
- "raw_prompts_outputs_or_secrets_included": "False"
+ "raw_prompts_outputs_or_secrets_included": false
 }
