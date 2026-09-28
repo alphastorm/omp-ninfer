@@ -44,7 +44,8 @@ RECALL_BOTH = "What is the release called and what is its build number? Reply in
 class Omp:
     """One OMP process in RPC mode: newline-delimited JSON commands and events."""
 
-    def __init__(self, args, label, cont):
+    def __init__(self, args, label, cont, observe=None):
+        self.observe = observe
         env = dict(os.environ, HOME=str(args.home), PI_OPENAI_STATEFUL="1", NO_COLOR="1")
         command = [str(args.omp), "--mode", "rpc", "--model", args.model,
                    "--session-dir", str(args.home / "sessions")]
@@ -82,6 +83,8 @@ class Omp:
                 break
             if event.get("type") == "_eof":
                 raise RuntimeError(f"omp exited; last events {seen[-5:]}")
+            if self.observe:
+                self.observe(event)
             seen.append(event.get("type"))
             if predicate(event):
                 return event, seen
