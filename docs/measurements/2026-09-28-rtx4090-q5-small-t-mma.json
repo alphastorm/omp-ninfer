@@ -1,0 +1,19 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-069",
+ "title": "The EXP-057 Q5 small-T tensor-core route on the RTX 4090 (pre-registered)",
+ "generated_utc": "2026-09-28T05:35:00Z",
+ "status": "pre-registered",
+ "question": "The v0.6.12 runtime runs the MTP3 verify pass's four T=4 Q5 projections on a small-T tensor-core MMA on the RTX 5090 only (EXP-057: decode +3.6% to +6.3%); the native sm_86 and sm_89 builds keep the SIMT row kernels. Does the same route speed up RTX 4090 decode enough to justify screening its output change, and is it then not worse at redaction?",
+ "prior_knowledge_before_this_rule": "The route's kernel uses cp.async and bf16 mma.sync (sm_80 and later), and programmatic dependent launch already degrades to a plain launch on sm_86 and sm_89 builds; enabling it is the three call-site guards in the attention-input, GDN-input and Q5 linear-add projections. No candidate has been built or measured.",
+ "decision_rule": {
+  "arms": "Baseline: the qualification neutral build of alphastorm/ninfer 5ac17674 for sm_89 (the published v0.6.9-qwen38-4090-beta.1 kernels). Candidate: the same recipe for 5ac17674 plus one commit that removes sm_89 from the three guards (sm_86 unchanged).",
+  "correctness_gate": "In the candidate build, ninfer_attn_input_proj_test, ninfer_gdn_input_proj_test, ninfer_linear_q5_a16_test and ninfer_linear_add_q5_a16_test pass on the RTX 4090. A failure rejects the candidate.",
+  "speed_gate": "ninfer_bench on the RTX 4090 with the lane's engine settings (--kv-dtype int8 --prefill-chunk 2048 --mtp-draft-tokens 3), -n 256 at 1,024, 26,000 and 60,000 tokens of context, -r 3 --warmup 1, run baseline, candidate, candidate, baseline with the installed lane stopped. It passes only if the mean decode rate of the two candidate runs exceeds that of the two baseline runs by at least 2.0% at 26,000 tokens and at least 1.0% at 60,000 tokens, and each candidate run's 26,000-token decode rate exceeds each baseline run's. Otherwise the RTX 4090 keeps the SIMT kernels and no quality data is collected.",
+  "quality_gate": "Only after the speed gate passes: EXP-063's paired redaction screen and rule unchanged (scripts/redaction_screen.py PREREGISTRATION: seven redaction controls x 72 whitespace variants on fresh baseline and candidate servers with the lane's serving arguments; the candidate passes if the one-sided 95% upper bound of its leak ratio is below 1.10, the lower bound of its pass-rate difference is above -5 percentage points, and both arms reproduce their determinism prompts byte for byte).",
+  "decision": "Adopt only if all three gates pass, and then only through a later RTX 4090 component with its own canonical qualification; the published v0.6.9-qwen38-4090-beta.1 is unaffected either way.",
+  "informational": "The public op benches for the three routed projections at T=1-8 in both arms, MTP acceptance from ninfer_bench, and the 1,024-token decode difference; none is a gate."
+ },
+ "raw_prompts_outputs_or_secrets_included": false
+}
