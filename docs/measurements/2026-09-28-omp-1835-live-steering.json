@@ -1,0 +1,231 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-068",
+ "title": "OMP 18.3.5 live steering over the openai-responses route: no abort, delivered as the next stateful turn",
+ "generated_utc": "2026-09-28T04:43:47Z",
+ "status": "observed",
+ "question": "When an operator steers unmodified OMP 18.3.5 while it streams from the lane over the documented openai-responses provider, does OMP abort the in-flight response, and how does the steer reach the server?",
+ "answer": "It does not abort. The first response streamed to response.completed with its full answer, and 27 ms later OMP sent the steer as a new streamed request whose previous_response_id was that response's id and whose only input item was the steer's user message; the model answered the steer exactly. The lane sees an ordinary stateful continuation, never a cancelled stream.",
+ "method": {
+  "client": {
+   "binary": "omp-darwin-arm64 from https://github.com/can1357/oh-my-pi/releases/tag/v18.3.5 (commit ab2dcbd2abf299139db818330a94777e47d51f68)",
+   "sha256": "3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1",
+   "version": "omp/18.3.5"
+  },
+  "route": "The documented macOS route's provider fragment and fail-closed config verbatim (examples/manual-tunnel/models.fragment.yml, fail-closed.yml) with PI_OPENAI_STATEFUL=1, in an isolated HOME; OMP in RPC mode, thinking low. A recording reverse proxy on the route's port 127.0.0.1:18089 forwarded to an SSH forward of the production RTX 5090 lane and recorded each request's structure and SSE event types, ids and times; no prompt or output text.",
+  "lane": {
+   "component": "v0.6.12-qwen38-5090-beta.1",
+   "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78",
+   "deployment_profile": "qwen38-5090-v0.8.2",
+   "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98"
+  },
+  "drive": "RPC prompt: count from 1 to 400, one number per line. After 40 message_update events, while the answer's text was streaming, RPC {\"type\":\"steer\"}: stop counting and reply with exactly STEERED-4471. Wait for agent_end.",
+  "source_reading": "In 18.3.5, RPC steer calls AgentSession.steer, which queues a user message for the agent loop; mid-stream steering is implemented only for the Codex WebSocket transport, gated on compat.supportsSteering, which custom providers do not set."
+ },
+ "observations": {
+  "steer_sent_s": 14.768,
+  "first_request": {
+   "started_s": 4.947,
+   "finished_s": 18.953,
+   "status": 200,
+   "request": {
+    "stream": true,
+    "previous_response_id": null,
+    "store": true,
+    "prompt_cache_key_present": true,
+    "input_items": [
+     {
+      "type": null,
+      "role": "user"
+     }
+    ]
+   },
+   "client_closed_before_upstream_end": false,
+   "response_id": "resp_35235aa2494eccf3b3c3d51de7a2f0c7",
+   "completed": true,
+   "event_types": {
+    "response.created": {
+     "count": 1,
+     "first_t": 13.991,
+     "last_t": 13.991
+    },
+    "response.in_progress": {
+     "count": 1,
+     "first_t": 14.691,
+     "last_t": 14.691
+    },
+    "response.output_item.added": {
+     "count": 2,
+     "first_t": 14.7,
+     "last_t": 14.74
+    },
+    "response.content_part.added": {
+     "count": 2,
+     "first_t": 14.7,
+     "last_t": 14.74
+    },
+    "response.reasoning_text.delta": {
+     "count": 16,
+     "first_t": 14.7,
+     "last_t": 14.731
+    },
+    "response.reasoning_text.done": {
+     "count": 1,
+     "first_t": 14.731,
+     "last_t": 14.731
+    },
+    "response.content_part.done": {
+     "count": 2,
+     "first_t": 14.731,
+     "last_t": 18.232
+    },
+    "response.output_item.done": {
+     "count": 2,
+     "first_t": 14.731,
+     "last_t": 18.241
+    },
+    "response.output_text.delta": {
+     "count": 374,
+     "first_t": 14.74,
+     "last_t": 17.98
+    },
+    "response.output_text.done": {
+     "count": 1,
+     "first_t": 18.231,
+     "last_t": 18.231
+    },
+    "response.completed": {
+     "count": 1,
+     "first_t": 18.953,
+     "last_t": 18.953
+    }
+   }
+  },
+  "second_request": {
+   "started_s": 18.98,
+   "finished_s": 22.821,
+   "status": 200,
+   "request": {
+    "stream": true,
+    "previous_response_id": "resp_35235aa2494eccf3b3c3d51de7a2f0c7",
+    "store": true,
+    "prompt_cache_key_present": true,
+    "input_items": [
+     {
+      "type": null,
+      "role": "user"
+     }
+    ]
+   },
+   "client_closed_before_upstream_end": false,
+   "response_id": "resp_ad9d683dfd75bceea1ad7387f75c4036",
+   "completed": true,
+   "event_types": {
+    "response.created": {
+     "count": 1,
+     "first_t": 22.071,
+     "last_t": 22.071
+    },
+    "response.in_progress": {
+     "count": 1,
+     "first_t": 22.131,
+     "last_t": 22.131
+    },
+    "response.output_item.added": {
+     "count": 2,
+     "first_t": 22.131,
+     "last_t": 22.15
+    },
+    "response.content_part.added": {
+     "count": 2,
+     "first_t": 22.131,
+     "last_t": 22.15
+    },
+    "response.reasoning_text.delta": {
+     "count": 8,
+     "first_t": 22.131,
+     "last_t": 22.15
+    },
+    "response.reasoning_text.done": {
+     "count": 1,
+     "first_t": 22.15,
+     "last_t": 22.15
+    },
+    "response.content_part.done": {
+     "count": 2,
+     "first_t": 22.15,
+     "last_t": 22.151
+    },
+    "response.output_item.done": {
+     "count": 2,
+     "first_t": 22.15,
+     "last_t": 22.151
+    },
+    "response.output_text.delta": {
+     "count": 2,
+     "first_t": 22.15,
+     "last_t": 22.15
+    },
+    "response.output_text.done": {
+     "count": 1,
+     "first_t": 22.15,
+     "last_t": 22.15
+    },
+    "response.completed": {
+     "count": 1,
+     "first_t": 22.821,
+     "last_t": 22.821
+    }
+   }
+  },
+  "second_request_chains_first_response": true,
+  "gap_from_first_completion_to_second_request_s": 0.027,
+  "first_answer": {
+   "stop_reason": "stop",
+   "lines": 400,
+   "last_line": "400"
+  },
+  "final_answer": "STEERED-4471",
+  "final_answer_exact_marker": true,
+  "rpc_messages": [
+   {
+    "role": "user",
+    "stop_reason": null
+   },
+   {
+    "role": "assistant",
+    "stop_reason": "stop"
+   },
+   {
+    "role": "user",
+    "stop_reason": null
+   },
+   {
+    "role": "assistant",
+    "stop_reason": "stop"
+   }
+  ],
+  "rpc_event_type_counts": {
+   "advisor_cost_changed": 1,
+   "agent_end": 1,
+   "agent_start": 1,
+   "available_commands_update": 1,
+   "extension_ui_request": 2,
+   "message_end": 4,
+   "message_start": 4,
+   "message_update": 408,
+   "ready": 1,
+   "response": 3,
+   "thinking_level_changed": 1,
+   "turn_end": 2,
+   "turn_start": 2
+  }
+ },
+ "limits": [
+  "One run with the macOS arm64 binary on the RTX 5090 lane; the other platforms and the RTX 4090 lane use the same provider type but were not steered.",
+  "Times are seconds from the probe's start and include a long-haul client link; they show ordering, not lane latency.",
+  "The Codex WebSocket steering path and follow-up delivery (follow_up) were not exercised."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
