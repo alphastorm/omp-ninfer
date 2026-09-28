@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.8.3",
+  "release": "v0.8.4",
   "status": "public",
   "installation_mode": "native-windows-docker-local",
   "client": {
     "os": "Windows 11",
     "architecture": "x64",
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe",
-    "asset_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527",
-    "binary_sha256": "9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527"
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe",
+    "asset_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
+    "binary_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb"
   },
   "runtime_host": {
     "os": [

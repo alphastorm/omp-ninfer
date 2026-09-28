@@ -13,7 +13,7 @@ The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.8.0 lane,
 fragment ships here. Its three-lane form and the legacy OMP 18.0.9 instructions for that lane
 stay at the immutable v0.7.2 tag.
 
-Install unmodified upstream OMP 18.3.0 with the checksummed binary from the
+Install unmodified upstream OMP 18.3.5 with the checksummed binary from the
 [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
 `models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not
