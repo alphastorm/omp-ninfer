@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgrade from v0.8.5 by merging `compaction: asyncEnabled: false` into
   `~/.omp/agent/config.yml`. The client, provider fragments, both runtimes, models and serving
   configurations are unchanged, and checkpoints carry across.
+- The documented resume and restart checks no longer ask the model to restate the nonce. Both
+  lanes sample at temperature 1.0, so every copy of the nonce the model writes can change it. In
+  the first v0.8.6 RTX 5090 window, the macOS route's acknowledgment wrote `COBOLT-493817` and the
+  recall returned that copy instead of the planted `COBALT-493817`. v0.7.4's structured probe had
+  failed the same way, and only the probe was corrected then. Every documented check now plants
+  the nonce with an OK-only reply and asks for a verbatim recall, as the probe does, and a test
+  holds the routes and the probe to that.
 
 ### Added
 

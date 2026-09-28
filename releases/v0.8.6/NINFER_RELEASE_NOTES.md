@@ -49,6 +49,14 @@ config. EXP-072 ran it on both lanes with OMP 18.4.0:
 - OMP recognizes the runtime's `context_length_exceeded` refusal as a context overflow on both
   fragments, compacts and retries the turn.
 
+### Resume checks no longer ask the model to restate the nonce
+
+Both lanes sample at temperature 1.0, so every copy of a nonce the model writes can change it.
+The first RTX 5090 window's macOS route asked the model to acknowledge the nonce; the
+acknowledgment wrote `COBOLT-493817`, and the recall returned that copy instead of the planted
+`COBALT-493817`. The documented checks now plant the nonce with an OK-only reply and ask for a
+verbatim recall, as the structured probe has since the same failure in v0.7.4.
+
 ## Two qualified GPU routes
 
 - RTX 5090: `v0.6.12-qwen38-5090-beta.1`, image

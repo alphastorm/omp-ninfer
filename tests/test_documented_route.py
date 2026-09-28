@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
@@ -114,6 +115,37 @@ class ExtractionTests(unittest.TestCase):
                 self.assertRegex(block.text, r'curl --fail[^\n]*\\\n\s*\|\| test "\$\(stat -c %s "\$MODEL"\)" = "\$MODEL_BYTES"')
             else:
                 self.assertIn("$LASTEXITCODE -ne 0 -and (Get-Item $Model", block.text)
+
+    def test_every_nonce_check_plants_without_a_restatement_and_recalls_verbatim(self) -> None:
+        """The lanes sample at temperature 1.0, so every copy of the nonce the model writes may
+        change it, and a restated copy becomes what the recall turn copies. v0.7.4's probe and
+        v0.8.6's macOS route both failed on COBOLT-493817 that way. Every documented route and the
+        structured probe must plant the nonce with an OK-only reply and ask for a verbatim recall."""
+        prompts = []
+        for lane in documented_route.LANES:
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
+                quoted = r'"([^"\n]*)"' if block.language == "sh" else r"'([^'\n]*)'"
+                prompts += [(f"{lane}/{step.slug}", text) for text in re.findall(quoted, block.text)]
+        probe = ast.parse((ROOT / "scripts" / "hosts" / "omp-client-probe.py").read_text(encoding="utf-8"))
+        for node in ast.walk(probe):
+            if (isinstance(node, ast.Call) and getattr(node.func, "id", None) == "call"
+                    and len(node.args) == 2 and isinstance(node.args[1], ast.List)
+                    and isinstance(node.args[1].elts[-1], ast.Constant)):
+                prompts.append(("omp-client-probe", node.args[1].elts[-1].value))
+        planted = recalled = 0
+        for where, text in prompts:
+            if "nonce" not in text.lower():
+                continue
+            if re.search(r"\b[A-Z]+-\d{6}\b", text):
+                planted += 1
+                self.assertTrue(text.endswith("Reply OK only."), f"{where} invites a restatement: {text!r}")
+            else:
+                recalled += 1
+                self.assertIn("verbatim, character for character", text, f"{where}: {text!r}")
+                self.assertTrue(text.endswith("Return nothing else."), f"{where}: {text!r}")
+        # Four documented checks (RTX 4090, Windows, macOS resume and restart) and the probe.
+        self.assertGreaterEqual(planted, 5)
+        self.assertGreaterEqual(recalled, 5)
 
 
 class RunnerTests(unittest.TestCase):
