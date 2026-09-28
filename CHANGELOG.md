@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.6] - 2026-09-28
+
+### Fixed
+
+- A long session no longer fails a turn while OMP compacts it. OMP 18.4.0 starts its compaction
+  summary in the background as a session nears its threshold, and both lanes admit one request at
+  a time, so the user's next turn waited behind that request. Each attempt expired at the
+  runtime's 30 s admission deadline and OMP resent it. On the RTX 4090 the background handoff
+  took 56-61 s, and in the third of three compactions it outlasted the resends and the turn
+  failed with `503 request_queue_timeout`. The config every route installs
+  (`examples/manual-tunnel/fail-closed.yml`) now sets `compaction.asyncEnabled: false`, so OMP
+  compacts before the turn: three consecutive RTX 4090 compactions took 77-84 s each with no
+  expired admission, and the session recalled its newest identifier after each compaction and
+  after a graceful restart
+  ([EXP-072](docs/measurements/2026-09-28-omp-long-sessions.json)). The RTX 5090's snapcompact
+  runs on the client in under 0.1 s and is unaffected.
+- Upgrade from v0.8.5 by merging `compaction: asyncEnabled: false` into
+  `~/.omp/agent/config.yml`. The client, provider fragments, both runtimes, models and serving
+  configurations are unchanged, and checkpoints carry across.
+
+### Added
+
+- `scripts/omp_long_session_proof.py` drives one stock OMP session through repeated automatic
+  compactions, and optionally a server restart after the last, on one lane. It gates on every
+  turn completing, the expected method committing every compaction, the newest identifier
+  surviving each compaction and the restart, and one OMP session id. It records, without gating,
+  whether older identifiers survive: snapcompact drops part of the older middle by design.
+- EXP-072 measured both lanes with it. The RTX 5090 read back both identifiers that existed only
+  inside snapcompact frames, which reach the model at native resolution under `detail: "auto"`.
+  The RTX 4090 kept all three older identifiers through three handoffs.
+
+### Known limitations
+
+- On the RTX 4090 the turn that carries a compaction takes 91-101 s: the handoff re-prefills the
+  whole session, because the runtime renders OMP's `tool_choice: none` summary request without
+  the tool block every other turn starts with, and the compacted context is prefilled once more
+  after it. A turn sent just below the threshold can also re-prefill about 102,600 tokens
+  (68 s): OMP replays the whole session there, and the runtime reuses no cache for the second
+  replay in a row.
+- After a compaction, a graceful restart restores a checkpoint that reuses nothing, so the first
+  turn re-prefills the compacted context once (about 32,000 tokens, 17 s on the RTX 4090).
+  Without compaction the restore is hot. These are runtime items for a later release.
+
 ## [0.8.5] - 2026-09-28
 
 ### Changed
@@ -1721,7 +1764,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.5...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.6...HEAD
+[0.8.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.2...v0.8.3
