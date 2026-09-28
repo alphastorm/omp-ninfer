@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.8.6",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -138,13 +138,13 @@
   "publication": {
     "authorized": false,
     "targets": [
-      "GitHub public release v0.8.5",
+      "GitHub public release v0.8.6",
       "OMP client: unmodified upstream Oh My Pi v18.4.0 release binaries (published upstream; this release publishes no client)",
       "NInfer RTX5090 v0.6.12-qwen38-5090-beta.1 (published)",
       "NInfer RTX4090 v0.6.9-qwen38-4090-beta.1 (published)"
     ],
     "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.12-qwen38-5090-beta.1 component and runtime image cd9e10b1; the composed acceptance receipt is absent until it is"
+      "external-install and documented-route acceptance have not run against the published v0.6.12-qwen38-5090-beta.1 image cd9e10b1 and v0.6.9-qwen38-4090-beta.1 package with the v0.8.6 route config; the composed acceptance receipt is absent until they do"
     ],
     "external_installation_qualified": true
   }
