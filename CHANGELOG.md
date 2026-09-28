@@ -32,7 +32,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   recall returned that copy instead of the planted `COBALT-493817`. v0.7.4's structured probe had
   failed the same way, and only the probe was corrected then. Every documented check now plants
   the nonce with an OK-only reply and asks for a verbatim recall, as the probe does, and a test
-  holds the routes and the probe to that.
+  holds the routes and the probe to that. In 92 alternating trials per prompt pair on the
+  RTX 5090 runtime, v0.8.5's plant restated the nonce visibly in 87 turns and v0.8.6's in none;
+  the one misspelled copy seen (1 in 785) stayed in thinking, and the recall returned the planted
+  nonce ([EXP-073](docs/measurements/2026-09-28-omp-acceptance-sampling.json)).
+- The RTX 4090 route harness no longer refuses a passing documented route because the model made
+  a second tool call. The route's prompt asks for a file-reading tool, and in 1 of 20
+  reproductions the model globbed for `marker.txt` before reading it. v0.8.6's second RTX 4090
+  run made two tool calls and was refused as not exactly one call. The harness now requires the
+  completed requests to equal the three documented turns plus one per tool call, so a hidden
+  retry or a duplicate request still fails (EXP-073).
+- Release tooling: the lane stage turns a staged draft manifest into a candidate, which v0.8.5
+  and v0.8.6 needed by hand (the RTX 4090 route refused the first v0.8.6 candidate as not
+  installable), and staging names the staged release as its GitHub publication target rather
+  than the predecessor's.
+- EXP-070 to EXP-072 declared `schema_version` as `"1"` and
+  `raw_prompts_outputs_or_secrets_included` as the string `"False"`, which a reader testing the
+  flag takes as true. They now use an integer and a boolean like every other measurement record,
+  and a test holds all records to that.
 
 ### Added
 
@@ -44,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - EXP-072 measured both lanes with it. The RTX 5090 read back both identifiers that existed only
   inside snapcompact frames, which reach the model at native resolution under `detail: "auto"`.
   The RTX 4090 kept all three older identifiers through three handoffs.
+- EXP-073 measured the two acceptance checks that failed during v0.8.6's acceptance under the
+  lanes' temperature-1.0 sampling: nonce restatement on the RTX 5090 and the documented tool
+  turn's calls on the RTX 4090.
 
 ### Known limitations
 

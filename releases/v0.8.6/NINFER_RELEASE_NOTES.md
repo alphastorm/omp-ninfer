@@ -55,7 +55,11 @@ Both lanes sample at temperature 1.0, so every copy of a nonce the model writes 
 The first RTX 5090 window's macOS route asked the model to acknowledge the nonce; the
 acknowledgment wrote `COBOLT-493817`, and the recall returned that copy instead of the planted
 `COBALT-493817`. The documented checks now plant the nonce with an OK-only reply and ask for a
-verbatim recall, as the structured probe has since the same failure in v0.7.4.
+verbatim recall, as the structured probe has since the same failure in v0.7.4. In 92 alternating
+trials per prompt pair on the RTX 5090 runtime, the old plant restated the nonce visibly in 87
+turns and the new one in none; the one misspelled copy seen stayed in thinking, and the recall
+returned the planted nonce
+([EXP-073](../../docs/measurements/2026-09-28-omp-acceptance-sampling.json)).
 
 ## Two qualified GPU routes
 

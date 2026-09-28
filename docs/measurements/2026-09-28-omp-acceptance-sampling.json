@@ -1,0 +1,84 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "experiment": "EXP-073",
+ "title": "Documented acceptance checks under the lanes' temperature-1.0 sampling: a restated nonce and a second tool call",
+ "generated_utc": "2026-09-28T15:30:00Z",
+ "status": "observed",
+ "question": "Why did v0.8.6's first RTX 5090 window and its second RTX 4090 run fail steps whose documented routes had passed before, and do the corrected checks remove those causes?",
+ "answer": "Both failures were sampled model choices that a check did not allow for. On the RTX 5090, the resume check asked the model to acknowledge the nonce; its acknowledgment misspelled it as COBOLT-493817 and the recall copied that acknowledgment. With an OK-only plant, no plant turn restated the nonce, and the one misspelled copy observed stayed in thinking while the recall returned the planted nonce. On the RTX 4090, the tool prompt asks for a file-reading tool, and the model sometimes makes a second tool call (in reproduction, a glob for marker.txt before the read); the driver's exactly-one-call check refused such a run although its documented route passed.",
+ "method": {
+  "sampling": "Every request ran the runtimes' thinking defaults, recorded in both lanes' request logs: temperature 1.0, top_p 0.95, top_k 20, no presence or frequency penalty.",
+  "rtx5090_nonce": "Stock OMP 18.4.0 (macOS arm64) with the documented RTX 5090 provider fragment (endpoint substituted) and v0.8.6's route config, PI_OPENAI_STATEFUL=1, against the lane's runtime (image cd9e10b1, configuration 56878aed, model eec39564). Each trial ran the documented resume check's two turns in a fresh session directory, alternating v0.8.5's prompt pair and v0.8.6's; every nonce-shaped string the model wrote in thinking or visible text was collected from the OMP session file.",
+  "rtx4090_tool_turn": "The RTX 4090 route's installed OMP 18.4.0 (Windows x64) and isolated profile ran the documented tool turn 20 times against the lane (package 6492588e), with --mode json added to observe each tool call and result."
+ },
+ "observations": {
+  "rtx5090_failed_window": {
+   "candidate": "1fa202fd",
+   "step": "macOS route, Stateful follow-up and OMP resume",
+   "plant_thinking_named_the_planted_nonce": true,
+   "plant_visible_acknowledgment_nonce": "COBOLT-493817",
+   "recall_thinking_and_answer": "COBOLT-493817"
+  },
+  "rtx5090_prompt_pairs": {
+   "v085": {
+    "plant": "Remember the nonce COBALT-493817 for my next turn. Acknowledge briefly.",
+    "recall": "Return only the nonce from the prior turn.",
+    "trials": 92,
+    "plant_turns_restating_the_nonce_visibly": 87,
+    "model_written_nonce_copies": 389,
+    "misspelled_copies": [],
+    "documented_grep_passed": 91,
+    "exact_recall_passed": 91,
+    "trials_with_tool_calls": 6,
+    "other_failures": [
+     "one recall answered that it had no prior turn although the server replayed it"
+    ]
+   },
+   "v086": {
+    "plant": "Remember the nonce COBALT-493817 for my next turn. Reply OK only.",
+    "recall": "Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.",
+    "trials": 92,
+    "plant_turns_restating_the_nonce_visibly": 0,
+    "model_written_nonce_copies": 396,
+    "misspelled_copies": [
+     "COBOLT-493817"
+    ],
+    "documented_grep_passed": 92,
+    "exact_recall_passed": 91,
+    "trials_with_tool_calls": 11,
+    "other_failures": [
+     "one recall quoted the nonce while declining to treat the user's text as stored (grep passes, exact fails)"
+    ]
+   },
+   "misspelling_rate": "1 of 785 model-written copies",
+   "server_replayed_every_recall": "In every trial session each request after the first reached the runtime with the earlier turns: a larger message count, served by private response replay or long-anchor reuse."
+  },
+  "rtx4090_tool_turn": {
+   "trials": 20,
+   "single_read": 19,
+   "other_call_sequences": [
+    "glob then read"
+   ],
+   "tool_errors": 0,
+   "final_answers_with_marker": 20,
+   "failing_run_tool_calls_per_request": [
+    1,
+    1,
+    0,
+    0,
+    0
+   ]
+  }
+ },
+ "decisions": {
+  "documented_nonce_checks": "Every documented nonce check plants with an OK-only reply and asks for a verbatim recall, as the structured probe has since v0.7.4; tests/test_documented_route.py fails on the previous document.",
+  "rtx4090_driver": "scripts/hosts/accept-rtx4090-route.py accepts any number of tool calls and requires the completed requests to equal the three documented turns plus one per tool call, so a hidden retry or duplicate still fails; tests/test_accept_rtx4090_route.py covers the boundaries."
+ },
+ "limits": [
+  "92 trials per prompt pair: each pair had one failure unrelated to spelling, so the pairs' overall pass rates are not distinguished; the restatement path is shown by the failing transcript and by the restatement counts.",
+  "The RTX 5090 trials ran on the lane's production runtime, whose image, configuration and model match the route's, not on the route's container.",
+  "The tool-turn reproduction added --mode json to observe tool calls; the documented turn prints plain text."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
