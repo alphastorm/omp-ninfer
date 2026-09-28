@@ -49,6 +49,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 self.assertNotIn("3090", fragment)
                 # Only the RTX 5090 container lane supports image input.
                 self.assertEqual(re.findall(r"^          - (\w+)$", fragment, re.M), inputs)
+                # NInfer serves only `detail: "auto"` images. OMP's snapcompact, the first automatic
+                # compaction for image-capable models, asks for "original" unless the model says
+                # otherwise, and the refused request ends a long session at its first compaction.
+                self.assertEqual(
+                    "          supportsImageDetailOriginal: false\n" in fragment, "image" in inputs,
+                )
 
     @staticmethod
     def copy_contract_tree(root: Path) -> None:

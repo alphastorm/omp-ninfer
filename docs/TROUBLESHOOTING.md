@@ -237,10 +237,31 @@ omp --model ninfer-beta/local-max
 
 The ready status must identify the qualified profile, and the launch arguments must include
 `--vision`. NInfer rejects media when Vision was omitted at process start; it cannot be enabled by a
-later request. v0.8.4 retains the RTX 5090 profile `qwen38-5090-v0.8.2`, configuration
+later request. v0.8.5 retains the RTX 5090 profile `qwen38-5090-v0.8.2`, configuration
 `56878aed` and `--gpu-keep-warm-ms 60000`; host KV stays 16384 MiB and the runtime-host
 floor stays 28672 MiB. Also check that the image is a supported, readable local file and
 that OMP did not block images in another config overlay.
+
+## A long RTX 5090 session fails when OMP compacts it
+
+OMP compacts a 131,072-token session on its own at about 111,412 tokens. For a model that
+accepts images, its first method archives earlier turns as images and asks for native resolution,
+and NInfer refuses the request:
+
+```text
+400 only input_image detail 'auto' is supported
+```
+
+The v0.8.5 fragments declare `supportsImageDetailOriginal: false` for the RTX 5090 model, so OMP
+sends `detail: "auto"`, which NInfer serves. A `models.yml` merged from an earlier release lacks
+it: under the RTX 5090 model's `compat`, add
+
+```yaml
+          supportsImageDetailOriginal: false
+```
+
+next to `supportsReasoningSummary: false`, then continue the session. The RTX 4090 model accepts
+text only, so OMP never compacts its sessions into images.
 
 ## Follow-up replay is cold or resume loses the nonce
 

@@ -25,11 +25,11 @@ class FleetExampleTests(unittest.TestCase):
         fragment = (FLEET / "models.fragment.yml").read_text(encoding="utf-8")
         providers = dict(re.findall(r"^  (ninfer-\w+):\n((?:    .*\n)+)", fragment, re.M))
         expected = {
-            "ninfer-main": ("q38-ninfer", "18191", "ninfer-5090.key"),
-            "ninfer-heavy": ("qwen3.8-27b", "18192", "ninfer-4090.key"),
+            "ninfer-main": ("q38-ninfer", "18191", "ninfer-5090.key", True),
+            "ninfer-heavy": ("qwen3.8-27b", "18192", "ninfer-4090.key", False),
         }
         self.assertEqual(set(providers), set(expected))
-        for provider, (model, port, key) in expected.items():
+        for provider, (model, port, key, image_input) in expected.items():
             with self.subTest(provider=provider):
                 body = providers[provider]
                 self.assertIn(f"    baseUrl: http://127.0.0.1:{port}/v1\n", body)
@@ -45,6 +45,11 @@ class FleetExampleTests(unittest.TestCase):
                     "        compat:\n          includeEncryptedReasoning: false\n          supportsReasoningSummary: false\n",
                     body,
                 )
+                # NInfer serves only `detail: "auto"` images; see test_manual_tunnel_scripts.
+                self.assertEqual(
+                    "          supportsImageDetailOriginal: false\n" in body, image_input,
+                )
+                self.assertEqual("          - image\n" in body, image_input)
         for forbidden in ("requestModelId", "ninferStatefulResponses"):
             self.assertNotIn(forbidden, fragment)
         self.assertNotIn("apiKey: sk", fragment)
