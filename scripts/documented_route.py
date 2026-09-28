@@ -19,7 +19,9 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -128,6 +130,24 @@ def extract(doc: Path, heading: str, index: int = 0) -> Block:
         if block.heading == heading and block.index == index:
             return block
     raise KeyError(f"no fenced block {index} under heading {heading!r} in {doc}")
+
+
+RESTART_SEED_HEADING = "Session survives the server process"
+
+
+def restart_seed(doc: Path, clone: Path) -> bytes:
+    """The bytes the survives-restart step seeds its session with, built by running that block's
+    lines before its first OMP turn in a scratch HOME whose omp-ninfer is ``clone``. Harnesses and
+    tests take the seed from here, never from their own copy of the recipe."""
+    lines = extract(doc, RESTART_SEED_HEADING).text.splitlines()
+    seed = "\n".join(lines[: next(i for i, line in enumerate(lines) if line.startswith("omp "))])
+    with tempfile.TemporaryDirectory() as temporary:
+        home = Path(temporary)
+        (home / "omp-ninfer").symlink_to(clone.resolve())
+        (home / "smoke").mkdir()
+        subprocess.run(["bash", "-eo", "pipefail", "-c", seed], check=True, timeout=60,
+                       env={"HOME": str(home), "SMOKE": str(home / "smoke"), "PATH": "/usr/bin:/bin"})
+        return (home / "smoke" / "context.md").read_bytes()
 
 
 def lane_blocks(doc: Path, lane: str) -> list[tuple[Step, Block]]:

@@ -23,6 +23,9 @@ import sys
 import time
 import urllib.request
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import documented_route  # noqa: E402
+
 
 def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -241,12 +244,11 @@ def main():
             smoke = [collected_smoke / 'durable.txt']
         if not smoke:
             # Stock macOS mktemp may choose Darwin's per-user temp root despite TMPDIR.
-            # Match both this route's time interval and exact concatenated candidate context
-            # before moving only the directory this run created into the private evidence root.
+            # Match both this route's time interval and the exact seed the candidate's documented
+            # restart step builds before moving only the directory this run created into the
+            # private evidence root.
             temp_root = Path(subprocess.check_output(['getconf', 'DARWIN_USER_TEMP_DIR'], text=True).strip())
-            context_hash = hashlib.sha256()
-            for relative in ('docs/BENCHMARKS.md', 'README.md', 'docs/ARCHITECTURE.md', 'docs/PERFORMANCE.md', 'CHANGELOG.md'):
-                context_hash.update((macclone / relative).read_bytes())
+            context_hash = hashlib.sha256(documented_route.restart_seed(macclone / 'docs' / 'QUICKSTART.md', macclone))
             route = result['routes']['mac']['receipt']
             start = datetime.datetime.fromisoformat(route['started_utc'].replace('Z', '+00:00')).timestamp()
             end = datetime.datetime.fromisoformat(route['completed_utc'].replace('Z', '+00:00')).timestamp() + 2

@@ -97,16 +97,7 @@ class ExtractionTests(unittest.TestCase):
         checkpoint; v0.8.5's first candidate was refused there once its documents crossed the
         threshold. The bounds allow 2.5-4.5 bytes per token and a 15,000-token system prompt around
         the ~3.1 bytes per token the lane showed for these documents."""
-        block = documented_route.extract(documented_route.DEFAULT_DOC, "Session survives the server process")
-        lines = block.text.splitlines()
-        seed = "\n".join(lines[: next(i for i, line in enumerate(lines) if line.startswith("omp "))])
-        with tempfile.TemporaryDirectory() as temporary:
-            home = Path(temporary)
-            (home / "omp-ninfer").symlink_to(ROOT)
-            (home / "smoke").mkdir()
-            subprocess.run(["bash", "-eo", "pipefail", "-c", seed], check=True, timeout=30,
-                           env={"HOME": str(home), "SMOKE": str(home / "smoke"), "PATH": "/usr/bin:/bin"})
-            size = (home / "smoke" / "context.md").stat().st_size
+        size = len(documented_route.restart_seed(documented_route.DEFAULT_DOC, ROOT))
         self.assertGreater(size, 32_768 * 4.5)
         self.assertLess(size, (111_412 - 15_000) * 2.5)
 
