@@ -1,0 +1,108 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": "1",
+ "experiment": "EXP-071",
+ "title": "OMP's automatic compaction on the RTX 5090 lane: snapcompact's native-resolution images are refused; declaring supportsImageDetailOriginal: false makes the compacted continuation serve",
+ "generated_utc": "2026-09-28T13:20:00Z",
+ "status": "observed",
+ "question": "Why did v0.8.5's first candidate (638fa35f) fail the RTX 5090 macOS route at step 9, 'Session survives the server process', with 400 only input_image detail 'auto' is supported, when v0.8.4's route passed the same step, and what makes a compacted continuation serve?",
+ "answer": "OMP 18.3.0-18.4.0 compacts a 131,072-token session on its own once it passes 131,072 minus 15%, 111,412 tokens. For a model that declares image input, its first available method is snapcompact, which archives earlier turns as PNG images requested at detail 'original'; NInfer serves only 'auto' and refuses the request. Step 9 seeds its session with the release's own documents, which grew from 332,331 bytes at v0.8.4's candidate to 343,205 bytes at 638fa35f and crossed the threshold on the continue turn. A mock that enforces NInfer's image-detail contract, calibrated to both lane observations, reproduced the refusal with OMP 18.4.0 and 18.3.5. With supportsImageDetailOriginal: false in the model's compat, OMP sent the same five images at 'auto'. Replayed on the RTX 5090 runtime, the 'original' request was refused in 9 ms and the 'auto' request completed with 26,075 input tokens and the exact nonce. A seed bounded to 200,000 ASCII bytes did not compact.",
+ "method": {
+  "clients": {
+   "18.3.5": "omp-darwin-arm64 from https://github.com/can1357/oh-my-pi/releases/tag/v18.3.5, SHA-256 3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1",
+   "18.4.0": "omp-darwin-arm64 from https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0, SHA-256 90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709"
+  },
+  "source_reading": "In 18.3.0, 18.3.5 and 18.4.0 the default compaction method order is remote, snapcompact, handoff; remote needs a configured endpoint or provider-native compaction, and snapcompact is offered only when the model's input includes image (packages/coding-agent/src/session/compaction-methods.ts). packages/snapcompact/src/snapcompact.ts sends its frames at detail 'original'; packages/ai/src/providers/openai-shared.ts clampResponsesImageDetail degrades 'original' to 'auto' only when compat.supportsImageDetailOriginal is false. The threshold is contextWindow minus max(15% of contextWindow, 16,384) (packages/agent/src/compaction/compaction.ts).",
+  "reproduction": "Step 9's two OMP commands (seed turn, then --continue), run from the candidate clone's root in an isolated HOME with examples/manual-tunnel/models.fragment.yml (baseUrl pointed at the mock) and fail-closed.yml, on macOS 26.6.1 arm64. The mock streams one text response per request, refuses any input_image whose detail is not 'auto' with NInfer's exact 400 body, and reports input tokens as prompt bytes divided by a fixed ratio plus 1,000 per image. The server restart was not simulated: OMP decides compaction from the reported usage alone.",
+  "calibration": "At 3.1 bytes per token the mock reproduces both lane observations: v0.8.4's 332,331-byte seed did not compact (its accepted route passed step 9) and 638fa35f's 343,205-byte seed compacted into five images at 'original' (its route was refused). At 3.2 and 3.33 neither compacted; at 3.0 and 2.9 both did.",
+  "lane_replay": "The two compacted continuation requests OMP 18.4.0 sent to the mock (with and without the flag) were replayed once each on the RTX 5090 runtime, image ghcr.io/alphastorm/ninfer-runtime@sha256:cd9e10b115bbf38df011b201dfdd37ec3b56613da39b2f1701334c8157236b78, with store false, prompt_cache_key removed, reasoning effort low and max_output_tokens 256, so the runtime kept no session."
+ },
+ "observations": {
+  "mock_matrix_at_3_1_bytes_per_token": [
+   {
+    "client": "18.3.5",
+    "fragment_flag": false,
+    "seed": "v0.8.4 candidate documents, 332,331 bytes",
+    "continue_turn": "full replay, no images",
+    "exit_codes": [
+     0,
+     0
+    ]
+   },
+   {
+    "client": "18.4.0",
+    "fragment_flag": false,
+    "seed": "638fa35f documents, 343,205 bytes",
+    "continue_turn": "snapcompact: 5 images at 'original', 28.5 KB of text",
+    "exit_codes": [
+     0,
+     1
+    ]
+   },
+   {
+    "client": "18.3.5",
+    "fragment_flag": false,
+    "seed": "638fa35f documents, 343,205 bytes",
+    "continue_turn": "snapcompact: 5 images at 'original', 28.5 KB of text",
+    "exit_codes": [
+     0,
+     1
+    ]
+   },
+   {
+    "client": "18.4.0",
+    "fragment_flag": true,
+    "seed": "638fa35f documents, 343,205 bytes",
+    "continue_turn": "snapcompact: 5 images at 'auto', 28.5 KB of text; nonce returned",
+    "exit_codes": [
+     0,
+     0
+    ]
+   },
+   {
+    "client": "18.4.0",
+    "fragment_flag": false,
+    "seed": "first 200,000 ASCII bytes",
+    "continue_turn": "full replay, no images; nonce returned",
+    "exit_codes": [
+     0,
+     0
+    ]
+   },
+   {
+    "client": "18.4.0",
+    "fragment_flag": true,
+    "seed": "first 200,000 ASCII bytes",
+    "continue_turn": "full replay, no images; nonce returned",
+    "exit_codes": [
+     0,
+     0
+    ]
+   }
+  ],
+  "lane_replay": {
+   "original": {
+    "http_status": 400,
+    "error_code": "image_detail_not_supported",
+    "seconds": 0.009
+   },
+   "auto": {
+    "http_status": 200,
+    "terminal_event": "response.completed",
+    "seconds": 9.64,
+    "input_tokens": 26075,
+    "output_tokens": 46,
+    "reasoning_tokens": 34,
+    "answer_is_exact_nonce": true
+   },
+   "health_after": "ok"
+  },
+  "route_failure_matched": "The refused request in the v0.8.5 acceptance carried 5 input_image parts at 'original' after an archived-transcript preamble, with 3 input items and no previous_response_id, the same shape the mock captured."
+ },
+ "limits": [
+  "The compaction decision was reproduced against a mock whose token count is calibrated to two lane observations, not the lane's tokenizer.",
+  "One replay per variant of one compacted continuation; snapcompact readback fidelity beyond this nonce, and repeated compactions in one session, were not measured.",
+  "The RTX 4090 fragment declares text input only, so snapcompact is not offered there; that lane was not tested."
+ ],
+ "raw_prompts_outputs_or_secrets_included": "False"
+}
