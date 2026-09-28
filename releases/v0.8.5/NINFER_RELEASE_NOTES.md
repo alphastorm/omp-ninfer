@@ -1,10 +1,10 @@
 # OMP NInfer v0.8.5 — OMP 18.4.0 client
 
-**Owner-operated, exact-profile 0.x candidate; no SLA.** The unmodified upstream Oh My Pi client
+**Owner-operated, exact-profile 0.x release; no SLA.** The unmodified upstream Oh My Pi client
 advances from 18.3.5 to 18.4.0, and the RTX 5090 provider fragments now let long sessions survive
 OMP's automatic compaction. Both GPU lanes keep the exact v0.8.4 runtime bytes, configurations
 and qualification receipts; the model and memory floors are unchanged. RTX 3090 and the upstream
-engine merge remain deferred. Documented-route and client-platform acceptance are pending.
+engine merge remain deferred. All four documented routes and all three client platforms passed.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -89,11 +89,28 @@ and OMP 18.0.9 client remain a separate historical route, not a v0.8.5 qualifica
 
 ## Documented routes and clients
 
-The four documented routes - RTX 5090 container host (2 steps), macOS client (10), Windows
-client (5) and RTX 4090 native Windows (7) - run on the published components with unmodified
-OMP 18.4.0 before the release is cut, and the upstream macOS arm64, Windows x64 and Linux x64
-binaries each run a typed tool turn, an exact continuation and a fail-closed request. Until they
-pass, `--require-ready` refuses this release.
+The four documented routes passed on candidate `943063e7` with unmodified OMP 18.4.0 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
+and RTX 4090 native Windows (7), with both hosts restored
+([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows x64 and Linux x64
+binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+RTX 5090 image `cd9e10b1`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran in one production window, with downtime at most 381.2 s (6.4 min), from
+a separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, not the maintainer's
+workstation ([restoration](../../docs/measurements/2026-09-28-v085-acceptance-restoration.json)).
+
+Both lanes' first candidate, `638fa35f`, failed. Its RTX 5090 window was refused at the macOS
+route's restart step by the compaction defect above, and production was restored. Its RTX 4090
+install stalled 22.7 minutes in model load, until the route's cap restored the host; 16 earlier
+starts of this lane took 36.6-96.7 s, and a managed start of the same package on the same host
+took 98.3 s afterwards. The window's post-run summary on `943063e7` could not bind the macOS
+smoke directory because the harness hashed its own copy of the old seed recipe, although all ten
+macOS steps passed; the corrected harness rebuilt that summary from the collected evidence with
+no host effect.
 
 ## Upgrading from v0.8.4
 

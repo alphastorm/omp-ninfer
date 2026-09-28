@@ -9,10 +9,36 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — one private, long-lived Oh My Pi session on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
-The v0.8.4 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
-Windows 11**, with the checksummed, unmodified upstream OMP 18.3.5 binary.
-[Release state and manifest](RELEASES.md).
-RTX 3090 is deferred for v0.8.4; its
+The v0.8.5 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
+Windows 11**, with the checksummed, unmodified upstream OMP 18.4.0 binary.
+This release fixes RTX 5090 automatic compaction as well as Windows completion status
+([EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)); runtime bytes,
+configuration and memory floors are unchanged, with no performance gain claimed. Checkpoints
+on both lanes carry across from v0.8.4. [Release state and manifest](RELEASES.md).
+
+OMP compacts a 131,072-token session automatically at 111,412 tokens. For an image-capable
+model, its first usable method, snapcompact, archives earlier turns as PNGs at
+`detail: "original"`. NInfer refuses that with HTTP 400 `image_detail_not_supported`, so
+long RTX 5090 sessions on stock OMP 18.3.0-18.4.0 (releases v0.8.0-v0.8.4) failed at their
+first compaction. The RTX 5090 fragments now declare `compat.supportsImageDetailOriginal: false`,
+so OMP sends `auto`. On the RTX 5090 runtime, one compacted continuation completed with
+26,075 input tokens and the exact nonce; `original` was refused in 9 ms
+([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
+model is never compacted into images. Readback beyond that nonce and repeated compactions
+in one session were not measured.
+
+The first v0.8.5 route candidate hit this at the macOS restart step when its seed, the
+release's own documents, grew from 332,331 to 343,205 bytes. That step now seeds the first
+200,000 ASCII bytes (about 64,000 tokens), keeping checkpoint restoration distinct from
+compacted-prompt acceptance.
+
+To upgrade from v0.8.4, install the checksummed 18.4.0 client binary and add
+`supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` in
+`~/.omp/agent/models.yml`, as the updated fragments do. Other fragment fields and
+`PI_OPENAI_STATEFUL=1` are unchanged. Neither server build changes, so checkpoints on both
+lanes carry across.
+
+RTX 3090 is deferred for v0.8.5; its
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 remains on OMP 18.0.9, not qualified with the new client.
 

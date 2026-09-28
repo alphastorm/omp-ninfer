@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-09-28 · **Current public release: v0.8.4.**
+Updated: 2026-09-28 · **Current public release: v0.8.5.**
 
-The [v0.8.4 manifest](../releases/v0.8.4/manifest.json) binds the stock-client runtime on
-two eligible GPU routes with unmodified upstream OMP 18.3.5. Each lane's runtime was qualified
+The [v0.8.5 manifest](../releases/v0.8.5/manifest.json) binds the stock-client runtime on
+two eligible GPU routes with unmodified upstream OMP 18.4.0. Each lane's runtime was qualified
 on its published component; fresh client/route acceptance is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 retains the historical three-GPU / OMP 18.0.9 combination.
@@ -11,7 +11,7 @@ retains the historical three-GPU / OMP 18.0.9 combination.
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.8.4 scope runs Qwen3.8 27B through the NInfer engine on one
+appliance for Oh My Pi. Its v0.8.5 scope runs Qwen3.8 27B through the NInfer engine on one
 NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
@@ -42,19 +42,95 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.8.4 eligible hardware
+## v0.8.5 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.3.5 with component `v0.6.12-qwen38-5090-beta.1`, unchanged profile `qwen38-5090-v0.8.2` and configuration `56878aed` with `--gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.3.5 with component `v0.6.9-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), configuration `ccecfbe3` with `engine.gpu_keep_warm_ms = 60000`, 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.4.0 with component `v0.6.12-qwen38-5090-beta.1`, unchanged profile `qwen38-5090-v0.8.2` and configuration `56878aed` with `--gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.4.0 with component `v0.6.9-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), configuration `ccecfbe3` with `engine.gpu_keep_warm_ms = 60000`, 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
 
-**RTX 3090 is deferred for v0.8.4**, not qualified with OMP 18.3.5. The separately linked
+**RTX 3090 is deferred for v0.8.5**, not qualified with OMP 18.4.0. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
 waits for that host’s return.
 
-## v0.8.4 — every lane current
+## v0.8.5 — OMP 18.4.0 and long-session compaction
+
+OMP compacts a 131,072-token session automatically at 111,412 tokens. For an image-capable
+model, its first usable method, snapcompact, archives earlier turns as PNGs at
+`detail: "original"`. NInfer refuses that with HTTP 400 `image_detail_not_supported`, so
+long RTX 5090 sessions on stock OMP 18.3.0-18.4.0 (releases v0.8.0-v0.8.4) failed at their
+first compaction. The RTX 5090 fragments now declare `compat.supportsImageDetailOriginal: false`,
+so OMP sends `auto`. On the RTX 5090 runtime, one compacted continuation completed with
+26,075 input tokens and the exact nonce; `original` was refused in 9 ms
+([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
+model is never compacted into images. Readback beyond that nonce and repeated compactions
+in one session were not measured.
+
+The first v0.8.5 route candidate hit this at the macOS restart step when its seed, the
+release's own documents, grew from 332,331 to 343,205 bytes. That step now seeds the first
+200,000 ASCII bytes (about 64,000 tokens), keeping checkpoint restoration distinct from
+compacted-prompt acceptance.
+
+The v0.8.5 release also repins unmodified upstream OMP from 18.3.5 to
+[18.4.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0). On Windows, 18.3.5
+printed a false `ended before completing` line after finished `omp -p` turns and exited 1
+after a complete `omp models` listing. Upstream fix `9d3e0d4975` resolves
+[#13470](https://github.com/can1357/oh-my-pi/issues/13470).
+
+[EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json) compared the
+Windows x64 binaries with the documented RTX 4090 provider fragment against a local mock
+Responses endpoint: 18.3.5 exited 1 after 5/5 complete listings and printed the false line
+after 5/5 completed turns that exited 0; 18.4.0 exited 0 without that line in all 10 runs.
+Both versions retain the existing `Working...` stderr indicator. This is client-status
+proof on Windows x64, not a GPU inference or performance measurement. The RTX 4090 route
+harness again requires exit 0 plus exactly the documented selector; the 18.3.5-only
+exit-status tolerance and false-line troubleshooting entry are removed.
+
+Both lanes carry the exact v0.8.4 runtime bytes. RTX 5090 keeps
+`v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, server `3ab266e5`, source `9d1ef748`,
+profile `qwen38-5090-v0.8.2`, configuration `56878aed` and its carried v0.8.3 lane receipt.
+RTX 4090 keeps `v0.6.9-qwen38-4090-beta.1`, package `6492588e`, server `65364401`, source
+`5ac17674`, configuration `ccecfbe3` and 60000 ms keep-warm with the sm_89 50 ms/100 ms spin.
+Its carried v0.8.4 lane receipt records qualification with OMP 18.3.5, not a new 18.4.0
+runtime qualification. Model and memory floors are unchanged; no performance gain is claimed.
+
+To upgrade from v0.8.4, install the checksummed 18.4.0 client binary and add
+`supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` in
+`~/.omp/agent/models.yml`, as the updated fragments do. Other fragment fields and
+`PI_OPENAI_STATEFUL=1` are unchanged. Neither server build changes, so checkpoints on both
+lanes carry across.
+
+All four documented routes passed **24 steps** on candidate `943063e7` with unmodified
+OMP 18.4.0 and the published components: RTX 5090 container host 2, macOS client 10, Windows
+client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against RTX 5090 image `cd9e10b1`. Linux ran under
+WSL2, not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.5/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.5/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in one production window, with downtime at most
+**381.2 s (6.4 min)**, from a separately hosted Apple silicon Mac mini on
+macOS 26.6.1 over the tailnet, not the maintainer's workstation
+([restoration](measurements/2026-09-28-v085-acceptance-restoration.json)).
+
+[EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json) (durable sessions)
+and [EXP-068](measurements/2026-09-28-omp-1835-live-steering.json) remain OMP 18.3.5
+evidence. In 18.4.0, live steering remains Codex-WebSocket-only in
+`openai-codex-responses.ts`, gated on `compat.supportsSteering`; these providers do not set it.
+The upstream engine merge stays deferred
+([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)); the
+sm_89 Q5 tensor-core route stays rejected
+([EXP-069](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)). RTX 3090 remains deferred:
+its `v0.6.2-beta.1` package is built and tested (99/105 tests) but unpublished; one
+`qualify_native.py` window on its physical host remains
+([preparedness](measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
+
+[Release notes](../releases/v0.8.5/NINFER_RELEASE_NOTES.md) ·
+[Qualification](../releases/v0.8.5/qualification.json).
+
+## Historical v0.8.4 — every lane current
 
 RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` (package `6492588e`, server `65364401`,
 source `5ac17674`, configuration `ccecfbe3`). Its `engine.gpu_keep_warm_ms = 60000` uses an
@@ -72,7 +148,7 @@ configuration `56878aed` and its carried v0.8.3 lane receipt. The model and memo
 unchanged. RTX 4090 checkpoints from v0.6.8 re-prefill once on the changed server build;
 RTX 5090 carries its v0.8.3 checkpoints.
 
-The unmodified upstream client advances to **OMP 18.3.5**. Its macOS arm64 binary kept one
+The v0.8.4 client advanced to unmodified upstream **OMP 18.3.5**. Its macOS arm64 binary kept one
 short session across graceful restarts on both lanes with the documented fragments unchanged
 ([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). A steer submitted
 mid-stream did not abort: OMP sent it **27 ms** after `response.completed` as a new request
@@ -469,7 +545,7 @@ RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
 18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
-v0.8.4 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
+v0.8.5 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -569,7 +645,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 - One model, one active request per lane (max concurrency 1); not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- RTX 3090 is deferred for v0.8.4; its historical v0.7.2 lane's comfortable working envelope
+- RTX 3090 is deferred for v0.8.5; its historical v0.7.2 lane's comfortable working envelope
   is the 64K class.
 - Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
 - Automatic checkpoints remain best effort: a crash or an expired graceful wait can still leave
@@ -585,7 +661,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[v0.8.4 manifest](../releases/v0.8.4/manifest.json) · [release state](RELEASES.md) ·
+[v0.8.5 manifest](../releases/v0.8.5/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.8.4 guide](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.8.5 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

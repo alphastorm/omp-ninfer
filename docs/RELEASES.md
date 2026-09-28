@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.4`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.5`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.4 uses upstream OMP 18.3.5 binaries and no client cask.
+v0.7.4. v0.8.5 uses upstream OMP 18.4.0 binaries and no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,10 +27,106 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.4 public release — every lane current
+### v0.8.5 public release — OMP 18.4.0 and long-session compaction
 
 - Status: accepted exact-profile product, 2026-09-28.
-  [Manifest](../releases/v0.8.4/manifest.json) · [guide](QUICKSTART.md) ·
+  [Manifest](../releases/v0.8.5/manifest.json) · [guide](QUICKSTART.md) ·
+  [qualification](../releases/v0.8.5/qualification.json).
+- Eligibility: RTX 5090 on Windows 11 + Docker Desktop/WSL2, or RTX 4090 native Windows 11.
+  RTX 3090 remains deferred. Owner-operated exact profiles only; no SLA or silent cloud fallback.
+
+OMP compacts a 131,072-token session automatically at 111,412 tokens. For an image-capable
+model, its first usable method, snapcompact, archives earlier turns as PNGs at
+`detail: "original"`. NInfer refuses that with HTTP 400 `image_detail_not_supported`, so
+long RTX 5090 sessions on stock OMP 18.3.0-18.4.0 (releases v0.8.0-v0.8.4) failed at their
+first compaction. The RTX 5090 fragments now declare `compat.supportsImageDetailOriginal: false`,
+so OMP sends `auto`. On the RTX 5090 runtime, one compacted continuation completed with
+26,075 input tokens and the exact nonce; `original` was refused in 9 ms
+([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
+model is never compacted into images. Readback beyond that nonce and repeated compactions
+in one session were not measured.
+
+The first v0.8.5 route candidate hit this at the macOS restart step when its seed, the
+release's own documents, grew from 332,331 to 343,205 bytes. That step now seeds the first
+200,000 ASCII bytes (about 64,000 tokens), keeping checkpoint restoration distinct from
+compacted-prompt acceptance.
+
+The v0.8.5 release also repins unmodified upstream OMP from 18.3.5 to
+[18.4.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0). On Windows, 18.3.5
+printed a false `ended before completing` line after finished `omp -p` turns and exited 1
+after a complete `omp models` listing. Upstream fix `9d3e0d4975` resolves
+[#13470](https://github.com/can1357/oh-my-pi/issues/13470).
+
+[EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json) compared the
+Windows x64 binaries with the documented RTX 4090 provider fragment against a local mock
+Responses endpoint: 18.3.5 exited 1 after 5/5 complete listings and printed the false line
+after 5/5 completed turns that exited 0; 18.4.0 exited 0 without that line in all 10 runs.
+Both versions retain the existing `Working...` stderr indicator. This is client-status
+proof on Windows x64, not a GPU inference or performance measurement. The RTX 4090 route
+harness again requires exit 0 plus exactly the documented selector; the 18.3.5-only
+exit-status tolerance and false-line troubleshooting entry are removed.
+
+Both lanes carry the exact v0.8.4 runtime bytes. RTX 5090 keeps
+`v0.6.12-qwen38-5090-beta.1`, image `cd9e10b1`, server `3ab266e5`, source `9d1ef748`,
+profile `qwen38-5090-v0.8.2`, configuration `56878aed` and its carried v0.8.3 lane receipt.
+RTX 4090 keeps `v0.6.9-qwen38-4090-beta.1`, package `6492588e`, server `65364401`, source
+`5ac17674`, configuration `ccecfbe3` and 60000 ms keep-warm with the sm_89 50 ms/100 ms spin.
+Its carried v0.8.4 lane receipt records qualification with OMP 18.3.5, not a new 18.4.0
+runtime qualification. Model and memory floors are unchanged; no performance gain is claimed.
+
+To upgrade from v0.8.4, install the checksummed 18.4.0 client binary and add
+`supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` in
+`~/.omp/agent/models.yml`, as the updated fragments do. Other fragment fields and
+`PI_OPENAI_STATEFUL=1` are unchanged. Neither server build changes, so checkpoints on both
+lanes carry across.
+
+All four documented routes passed **24 steps** on candidate `943063e7` with unmodified
+OMP 18.4.0 and the published components: RTX 5090 container host 2, macOS client 10, Windows
+client 5 and RTX 4090 native Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against RTX 5090 image `cd9e10b1`. Linux ran under
+WSL2, not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.5/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.5/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in one production window, with downtime at most
+**381.2 s (6.4 min)**, from a separately hosted Apple silicon Mac mini on
+macOS 26.6.1 over the tailnet, not the maintainer's workstation
+([restoration](measurements/2026-09-28-v085-acceptance-restoration.json)).
+
+[EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json) (durable sessions)
+and [EXP-068](measurements/2026-09-28-omp-1835-live-steering.json) remain OMP 18.3.5
+evidence. In 18.4.0, live steering remains Codex-WebSocket-only in
+`openai-codex-responses.ts`, gated on `compat.supportsSteering`; these providers do not set it.
+The upstream engine merge stays deferred
+([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)); the
+sm_89 Q5 tensor-core route stays rejected
+([EXP-069](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)). RTX 3090 remains deferred:
+its `v0.6.2-beta.1` package is built and tested (99/105 tests) but unpublished; one
+`qualify_native.py` window on its physical host remains
+([preparedness](measurements/2026-09-28-rtx3090-v062-build-preparedness.json)).
+
+Upstream tag `v18.4.0` points to `401778d0cd30020ce0f9198f751b13c68850562f` and was
+published 2026-09-28T03:33:34Z. The pinned binaries are:
+
+| Asset | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `omp-windows-x64.exe` | 239,441,408 | `5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe` |
+| `omp-linux-x64` | 285,148,640 | `fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f` |
+| `omp-darwin-arm64` | 214,917,008 | `90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709` |
+
+Individual route receipts: [RTX 5090 host](measurements/2026-09-28-v085-rtx5090-container-host-run.json),
+[macOS client](measurements/2026-09-28-v085-rtx5090-macos-client-run.json),
+[Windows client](measurements/2026-09-28-v085-rtx5090-windows-client-run.json), and
+[RTX 4090 native](measurements/2026-09-28-v085-rtx4090-native-run.json).
+
+[Release notes](../releases/v0.8.5/NINFER_RELEASE_NOTES.md) ·
+[Qualification](../releases/v0.8.5/qualification.json).
+
+### v0.8.4 historical public release — every lane current
+
+- Status: superseded accepted exact-profile product, 2026-09-28.
+  [Manifest](../releases/v0.8.4/manifest.json) · [guide](https://github.com/alphastorm/omp-ninfer/blob/v0.8.4/docs/QUICKSTART.md) ·
   [qualification](../releases/v0.8.4/qualification.json).
 - Client: unmodified upstream OMP 18.3.5. The model and memory floors are unchanged; eligibility
   remains one RTX 5090 or RTX 4090, with RTX 3090 deferred.
@@ -51,7 +147,7 @@ configuration `56878aed` and its carried v0.8.3 lane receipt. The model and memo
 unchanged. RTX 4090 checkpoints from v0.6.8 re-prefill once on the changed server build;
 RTX 5090 carries its v0.8.3 checkpoints.
 
-The unmodified upstream client advances to **OMP 18.3.5**. Its macOS arm64 binary kept one
+The v0.8.4 client advanced to unmodified upstream **OMP 18.3.5**. Its macOS arm64 binary kept one
 short session across graceful restarts on both lanes with the documented fragments unchanged
 ([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). A steer submitted
 mid-stream did not abort: OMP sent it **27 ms** after `response.completed` as a new request
@@ -75,10 +171,10 @@ maintainer's workstation
 The RTX 4090 route's first candidate, `0315c5d4`, stopped at its no-effect preflight because
 the harness judged the provider-parser check only by `omp models`'s exit status. OMP 18.3.5 on
 Windows exits 1 after a complete listing
-([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)). The check now judges
+([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)). That release judged
 the listing; `68302298` passed the literal documented blocks with the published v0.6.9 package
 and original state restored byte for byte. Upstream 18.4.0, released 2026-09-28, fixes #13470;
-v0.8.4 keeps 18.3.5 and a later release repins.
+v0.8.4 pinned 18.3.5; v0.8.5 repins to 18.4.0.
 
 The upstream engine merge stays deferred: `e31bc99b` has about **18% slower decode** and
 fanout **0/4 versus 4/4**

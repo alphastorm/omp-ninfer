@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-09-28
+
+### Changed
+
+- Repin the unmodified upstream Oh My Pi client from 18.3.5 to
+  [18.4.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0), source
+  `401778d0cd30020ce0f9198f751b13c68850562f` (published 2026-09-28T03:33:34Z).
+  The RTX 5090 provider fragments also fix automatic compaction; both lanes retain the
+  exact v0.8.4 runtime bytes, model, serving
+  configurations and memory floors. RTX 5090 keeps `v0.6.12-qwen38-5090-beta.1`, image
+  `cd9e10b1`, server `3ab266e5`, source `9d1ef748`, profile `qwen38-5090-v0.8.2`,
+  configuration `56878aed` and its carried v0.8.3 lane receipt. RTX 4090 keeps
+  `v0.6.9-qwen38-4090-beta.1`, package `6492588e`, server `65364401`, source `5ac17674`,
+  configuration `ccecfbe3` and 60000 ms keep-warm with the sm_89 50 ms/100 ms spin. Its
+  carried v0.8.4 lane receipt records OMP 18.3.5 qualification, not a new 18.4.0 runtime run.
+- Upgrade from v0.8.4 by swapping the client binary and adding
+  `supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` in
+  `~/.omp/agent/models.yml`. Other fragment fields and `PI_OPENAI_STATEFUL=1` are unchanged;
+  neither server build changes, so checkpoints on both lanes carry across. No performance
+  gain is claimed.
+
+### Fixed
+
+- Long RTX 5090 sessions survive OMP's automatic compaction with the corrected provider
+  fragments. OMP compacts at 111,412 tokens of a 131,072-token session; snapcompact archives
+  earlier turns as PNGs at `detail: "original"`, which NInfer refuses with HTTP 400
+  `image_detail_not_supported`. This broke the first compaction on stock OMP 18.3.0-18.4.0
+  (releases v0.8.0-v0.8.4). The fragments now declare
+  `compat.supportsImageDetailOriginal: false`, so OMP sends `auto`. One compacted continuation
+  on the RTX 5090 runtime completed with 26,075 input tokens and the exact nonce; `original`
+  was refused in 9 ms
+  ([EXP-071](docs/measurements/2026-09-28-omp-snapcompact-image-detail.json)). Readback beyond
+  that nonce and repeated compactions were not measured. The text-only RTX 4090 model is
+  never compacted into images. The first v0.8.5 candidate hit the failure at the macOS route
+  restart step as its document seed grew from 332,331 to 343,205 bytes; the step now seeds
+  the first 200,000 ASCII bytes (about 64,000 tokens) to test restoration, not compaction.
+- Windows one-shot completion status through upstream fix `9d3e0d4975`
+  ([#13470](https://github.com/can1357/oh-my-pi/issues/13470)). In
+  [EXP-070](docs/measurements/2026-09-28-omp-1840-windows-completion-status.json), using the
+  documented RTX 4090 provider fragment against a local mock Responses endpoint, OMP 18.3.5
+  exited 1 after 5/5 complete `omp models` listings and printed a false
+  `ended before completing` line after 5/5 completed `omp -p` turns that exited 0. OMP 18.4.0
+  exited 0 without the false line in all 10 runs. Both retain the existing `Working...`
+  stderr indicator. This is Windows x64 client-status evidence, not an inference measurement.
+
+### Removed
+
+- The RTX 4090 route harness's 18.3.5-only exit-status tolerance (`c8824f1`) and the
+  troubleshooting entry for the false completion line. The provider-parser check again
+  requires exit 0 plus exactly the documented selector.
+
+### Added
+
+- Fresh acceptance on candidate `943063e7` with unmodified OMP 18.4.0 and the published
+  components: all four documented routes passed **24 steps** (RTX 5090 container host 2,
+  macOS client 10, Windows client 5 and RTX 4090 native Windows 7); both hosts were restored
+  ([routes](releases/v0.8.5/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.8.5/acceptance/composed-external-installation.json)).
+  The upstream macOS arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed
+  tool turn, an exact continuation and a fail-closed request against image `cd9e10b1`;
+  Linux ran under WSL2, not a separately qualified Linux OS. The RTX 5090 routes ran in one
+  production window, with downtime at most **381.2 s (6.4 min)**, from a
+  separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, not the
+  maintainer's workstation
+  ([restoration](docs/measurements/2026-09-28-v085-acceptance-restoration.json)).
+  [Qualification](releases/v0.8.5/qualification.json) ·
+  [Release notes](releases/v0.8.5/NINFER_RELEASE_NOTES.md).
+
 ## [0.8.4] - 2026-09-28
 
 ### Every lane current
@@ -50,10 +118,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   turns and exits 1 after a complete `omp models` listing
   ([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470), fixed in 18.4.0).
   The RTX 4090 route's first candidate, `0315c5d4`, stopped at its no-effect preflight because
-  the provider-parser check read only that exit status. The check now judges the listing;
+  the provider-parser check read only that exit status. That release changed the check to judge the listing;
   candidate `68302298` passed the literal documented blocks on the published v0.6.9 package,
-  with original state restored byte for byte. v0.8.4 keeps 18.3.5; a later release repins.
-  The route tolerates that exact completion line only from 18.3.5.
+  with original state restored byte for byte. v0.8.4 pinned 18.3.5; v0.8.5 repins to 18.4.0.
+  The v0.8.4 route tolerated that exact completion line only from 18.3.5.
   [Route receipt](releases/v0.8.4/acceptance/documented-routes.json).
 - A steer submitted mid-stream does not abort the response: OMP sent it 27 ms after
   `response.completed` as a new request chained by `previous_response_id`
@@ -1653,7 +1721,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.4...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.5...HEAD
+[0.8.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...v0.8.4
 [0.8.3]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.1...v0.8.2
