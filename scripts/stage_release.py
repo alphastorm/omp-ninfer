@@ -317,6 +317,10 @@ def main() -> int:
         f"{args.release_tag} component and runtime image {args.image_digest[7:15]}; the "
         "composed acceptance receipt is absent until it is",
     ]
+    manifest["publication"]["targets"] = [
+        f"GitHub public release {args.release}" if target.startswith("GitHub public release ")
+        else target for target in manifest["publication"].get("targets", [])
+    ]
     # 3. Release-relative evidence paths move with the tree; the commit part of every public
     #    URL is provisional until the pin dance.
     for variant in manifest["components"].get("ninfer_variants", []):

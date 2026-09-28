@@ -124,11 +124,15 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
 
 
 def promote_root(release: str, manifest_path: Path) -> None:
-    """The cut: the release's compatibility copy becomes the root authority, and the root
-    profiles and launcher examples take the manifest's identities."""
+    """The cut: the release's compatibility copy becomes the root authority, the root profiles
+    and launcher examples take the manifest's identities, and a draft manifest becomes a
+    candidate that route acceptance can install."""
     release_root = ROOT / "releases" / release
     shutil.copy(release_root / "compatibility.json", ROOT / "compatibility.json")
     manifest = load(manifest_path)
+    if manifest["status"] == "draft":
+        manifest["status"] = "candidate"
+        save(manifest_path, manifest)
     omp = manifest["components"]["omp"]
     for profile_path in sorted((ROOT / "profiles").glob("*.json")):
         profile = load(profile_path)

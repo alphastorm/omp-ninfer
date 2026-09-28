@@ -197,6 +197,15 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual([row["client_distribution"]
                           for row in self.load(staged / "compatibility.json")["profiles"]], clients)
 
+    def test_staged_manifest_publishes_as_the_staged_release(self) -> None:
+        """v0.8.5 and v0.8.6 were staged still targeting their predecessor's GitHub release."""
+        root = self.staging_copy(source_release=CURRENT)
+        result = self.stage(root, None, source_release=CURRENT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        targets = self.load(root / "releases" / TARGET / "manifest.json")["publication"]["targets"]
+        releases = [target for target in targets if target.startswith("GitHub public release ")]
+        self.assertEqual(releases, [f"GitHub public release {TARGET}"])
+
 
 if __name__ == "__main__":
     unittest.main()

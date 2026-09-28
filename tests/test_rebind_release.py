@@ -80,6 +80,22 @@ class PromoteRootTests(unittest.TestCase):
                     self.assertEqual(current, expected, path.name)
                 self.assertGreater(pinned, 0, "no root profile pins a client archive")
 
+    def test_lane_stage_makes_a_draft_manifest_a_candidate_and_keeps_later_states(self) -> None:
+        """The cut must leave a manifest that route acceptance can install. v0.8.5's and
+        v0.8.6's cuts left the draft status in place, and the RTX 4090 route's preflight
+        refused the v0.8.6 candidate as not installable."""
+        for before, after in (("draft", "candidate"), ("candidate", "candidate"), ("ready", "ready")):
+            with self.subTest(status=before):
+                root, module = self.promotion_copy()
+                manifest_path = root / "releases" / CURRENT / "manifest.json"
+                manifest = self.load(manifest_path)
+                manifest["status"] = before
+                manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+                module.promote_root(CURRENT, manifest_path)
+
+                self.assertEqual(self.load(manifest_path)["status"], after)
+
 
 if __name__ == "__main__":
     unittest.main()
