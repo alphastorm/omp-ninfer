@@ -112,7 +112,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "7aeefc677e43a9dbc7075b774e1ccfd158a628f45493a94cf1e4c3ae3907e8c1",
+    "summary_sha256": "58f1b23ea6e8054fcd6f5cf825c5fcc1ae0cccd830c2fba866b221002213bed5",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3e717de6b9c09fe079d1af8c86395ffbf31b2e73/releases/v0.8.4/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
