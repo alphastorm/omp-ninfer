@@ -123,6 +123,12 @@ or GPUs may step down on a different schedule. The RTX 5090 keeps its already-qu
 only while running. The C1 fixture is trajectory-sensitive, so its matching result is not a
 claim of a general decode speedup.
 
+On Windows, OMP 18.3.5 prints a false `` `omp launch` ended before completing`` line after a
+finished `omp -p` turn; its answer and zero exit status are correct. `omp models` exits 1 after
+printing its complete listing. The documented routes never run `omp models`, and their `omp -p`
+exit checks held when the RTX 4090 route's acceptance block ran against the lane. Upstream's fix
+is in 18.4.0 ([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)).
+
 Since v0.8.0 the RTX 4090 server commits and releases each pinned allocation's size plus 1/64
 before pinning it. The refusing memory state's field start passed, and every managed start in
 the new package's canonical qualification pinned the pool

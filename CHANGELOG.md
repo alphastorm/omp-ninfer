@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([EXP-067](docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). The four
   documented routes and 18.3.5 platform acceptance are pending, after RTX 4090 publication and
   the lane stage; this draft is not a ready release.
+- On Windows, OMP 18.3.5 prints a false `ended before completing` line after finished `omp -p`
+  turns and exits 1 after a complete `omp models` listing
+  ([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470), fixed in 18.4.0).
+  The RTX 4090 route acceptance judges its provider-parser check by the listing and tolerates that
+  exact line only from 18.3.5.
 - RTX 4090 checkpoints saved by v0.6.8 are incompatible with v0.6.9's changed server build, so
   each session re-prefills once. RTX 5090 keeps its server build and carries v0.8.3 checkpoints.
 - The upstream engine merge stays deferred: e31bc99b's 1.5% single-run prefill lead was already

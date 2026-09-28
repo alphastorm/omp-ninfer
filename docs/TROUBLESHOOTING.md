@@ -233,6 +233,20 @@ install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.y
 omp --model ninfer-beta/local-max
 ```
 
+## Windows OMP reports `ended before completing` after a finished command
+
+On Windows, OMP 18.3.5 can print this line after an `omp -p` turn that finished:
+
+```text
+omp: `omp launch` ended before completing: the event loop drained while it was still pending (rerun with PI_DEBUG_STARTUP=1 to see the last phase reached)
+```
+
+The answer is complete and the exit status is 0; the line is false. `omp models` prints its full
+listing and then exits 1 with the same line naming `omp models`, so judge that listing by its
+contents. This is an upstream defect
+([can1357/oh-my-pi#13470](https://github.com/can1357/oh-my-pi/issues/13470)); upstream's fix is
+in OMP 18.4.0, which this release does not pin.
+
 ## Text works but image input fails
 
 The ready status must identify the qualified profile, and the launch arguments must include
