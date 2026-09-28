@@ -1,16 +1,16 @@
 # Quickstart
 
-> **v0.8.3: RTX 5090 · RTX 4090; faster RTX 5090 decode**
+> **v0.8.4: RTX 5090 · RTX 4090; every lane current**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.8.3 has passed its four documented routes (24 steps) on the published components.**
-> The accepted scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090
-> native Windows. RTX 3090 is deferred and is not a v0.8.3 install lane.
-> The commands below require the published v0.8.3 release and its readiness check.
+> **v0.8.4 is a candidate until its four documented routes pass on the published components.**
+> The scope is RTX 5090 container host, macOS client, Windows client, and RTX 4090 native
+> Windows. RTX 3090 is deferred and is not a v0.8.4 install lane.
+> The commands below require the published v0.8.4 release and its readiness check.
 > Do not bypass `--require-ready` or mix one release's manifest with another
-> release's commands. See [route acceptance](#v083-route-acceptance) for the recorded runs.
+> release's commands. See [route acceptance](#v084-route-acceptance) for its status.
 
 ## Choose your lane
 
@@ -19,86 +19,107 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.3 route accepted; stock OMP 18.3.0** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.8.3 route accepted; stock OMP 18.3.0** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.8.4 candidate; route acceptance pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.8.4 candidate; route acceptance pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 RTX 3090 qualification is **deferred** until its host returns (expected around September 30).
 For that GPU, use only the immutable
 [v0.7.2 legacy RTX 3090 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
-with the v0.7.2 manifest and OMP 18.0.9. Do not combine them with v0.8.3 or OMP 18.3.0.
+with the v0.7.2 manifest and OMP 18.0.9. Do not combine them with v0.8.4 or OMP 18.3.5.
 
 The current native lane is installable only through its exact qualified manifest variant. Do not
 substitute GPU family names, package URLs, component tags, or variant IDs between releases.
 
-## v0.8.3 route acceptance
+## v0.8.4 route acceptance
 
 The four documented routes - RTX 5090 container host, macOS client, Windows client, and RTX 4090
-native Windows - passed against the published v0.8.3 components and the upstream OMP 18.3.0
-client before the release was cut
-([accepted receipts](../releases/v0.8.3/acceptance/documented-routes.json)). Each block below is
-byte-identical to the block those runs executed.
+native Windows - run against the published v0.8.4 components and upstream OMP 18.3.5 before the
+release is cut. The RTX 4090 component publication and lane stage precede those runs and fresh
+client-platform acceptance. Until they pass, the release stays a candidate and `--require-ready`
+refuses it. The v0.8.3 routes'
+[accepted receipts](../releases/v0.8.3/acceptance/documented-routes.json) cover its RTX 4090
+package and OMP 18.3.0 client, not this combination.
 
 ## Verify the release before setup
 
-The `v0.8.3` release composes native Windows OMP over authenticated local loopback
+The `v0.8.4` candidate composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 uses its exact native Windows package. Every route runs the
-unmodified upstream OMP 18.3.0 client.
+unmodified upstream OMP 18.3.5 client.
 
-The published runtime components are RTX 5090 `v0.6.12-qwen38-5090-beta.1` from source
-`9d1ef7485d9c741c2830fa3d55218f3242cec5d7` and RTX 4090 `v0.6.8-qwen38-4090-beta.1` from source
-`5a774841c29bdf2ee6b7efba135aed0a47e80447`, unchanged since v0.8.1. The RTX 5090 runtime runs
-the four Q5 projections of each MTP3 verify pass on the tensor cores instead of SIMT row kernels,
-so its decoding round is 3.5-4.9% shorter and decode is 4.4% faster at a 26K-token context and
-3.6% faster at 60K. The accumulation order changes, so generated text differs from v0.8.2 on 58 of
-89 role-corpus cases; a pre-registered paired screen of 504 redaction prompts found the new
-runtime's redaction behaviour not worse than v0.8.2's
-([EXP-063](measurements/2026-09-27-powered-redaction-screen.json)). The 60 s GPU keep-warm of
-v0.8.2 is unchanged ([EXP-062](measurements/2026-09-26-engine-keep-warm.json)).
+RTX 5090 keeps the published `v0.6.12-qwen38-5090-beta.1` from source
+`9d1ef7485d9c741c2830fa3d55218f3242cec5d7` and its v0.8.3 qualification. RTX 4090 advances to
+`v0.6.9-qwen38-4090-beta.1` from source `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`;
+its component publication is pending. The exact [native package](https://github.com/alphastorm/ninfer/releases/download/v0.6.9-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.9-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz) is
+574,751,101 bytes, SHA-256 `6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87`.
+The manifest-driven native steps below download and verify that package, not a substitute.
+
+The RTX 4090's sm_89 decode kernels are unchanged. Its new `engine.gpu_keep_warm_ms = 60000`
+uses a single-warp spin of 50 ms every 100 ms: the RTX 5090's 3.5 ms/10 ms pattern did not hold
+this card in P2 ([EXP-064](measurements/2026-09-27-rtx4090-engine-keep-warm.json)). New sessions
+after 12-58 s idle prefilled in 0.146-0.148 s (time to first token 0.167-0.178 s), with all 31
+outputs byte-identical and about 72 W above idle while held
+([EXP-066](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json)). A request arriving mid-spin
+can overlap one warp for up to 50 ms. The package passed all 15 canonical qualification phases,
+including 130,048-token exact retrieval in 91.0 s, C1 decode at 157.90 tok/s and 87.59% MTP
+acceptance (v0.6.8: 157.89 tok/s), managed-stop flush, security, both rollback directions and an
+OMP 18.3.5 typed tool call ([lane receipt](../releases/v0.8.4/qualification/rtx4090.json)). The
+controller passes `--gpu-keep-warm-ms` only when the release's own packaged configuration declares
+a positive value, so rollback does not pass the new flag to older servers.
 
 Stock OMP names each session with `prompt_cache_key`, which the runtime hashes into the session
-identity under API authentication. On both published lanes, stock OMP kept one session across
-graceful server restarts, including a new OMP process resuming after a restart, whose first
-request the runtime restored from the session's checkpoint
-([method](measurements/2026-09-25-stock-omp-durable-sessions.json)). New sessions start from the
-shared prefix: on the published RTX 5090 image no measured fresh agent session fell back to a
-full prefill, and their median time to first token was 0.093-0.100 s
-([lane receipt](../releases/v0.8.3/qualification/rtx5090.json)).
+identity under API authentication. The OMP 18.3.5 macOS arm64 binary kept one session across
+graceful server restarts on both lanes, including a new OMP process resuming after a restart,
+whose first request the runtime restored from the session's checkpoint
+([EXP-067](measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). That one-platform,
+short-session proof is not documented-route or client-platform acceptance. The documented
+fragments and `PI_OPENAI_STATEFUL=1` are unchanged: live steering is Codex-WebSocket-only and
+gated on `compat.supportsSteering`, which these providers do not set, and cache warming does not
+warm a model without a declared `promptCache`.
 
-The durability behavior of v0.7.4 is unchanged and was measured again on the published image: a
-workload with two 126K-token sessions, a fanout and the agent protocol stopped with
-`saved 1, nothing to save 3, refused 0`, and all four stored sessions resumed from their
-checkpoints after a restart. Saving before eviction costs the admitting request about 6.5 s per
-126K-token session on the RTX 5090, and that request waits while a victim's reply is still
-reaching its client, bounded by its own queue deadline. Automatic checkpoints remain best effort
-under traffic: a crash or an expired graceful wait can still leave unpublished work unsaved. The
-multisession control again recorded root fallback on 2 of 8 continuations/forks without server
-errors; universal warm reuse is not claimed. A checkpoint is bound to the exact server build, so
-sessions saved by v0.8.2 are not restored after the upgrade: OMP resends the full conversation and
-each session re-prefills once.
+The unchanged RTX 5090 carries its v0.8.3 measurements: none of 24 fresh agent sessions fell back
+to a full prefill, and median time to first token was 0.093-0.100 s
+([lane receipt](../releases/v0.8.4/qualification/rtx5090.json)). Its durability workload with two
+126K-token sessions, a fanout and the agent protocol stopped with
+`saved 1, nothing to save 3, refused 0`, and all four stored sessions resumed from checkpoints.
+Saving before eviction costs the admitting request about 6.5 s per 126K-token session on the
+RTX 5090, and that request waits while a victim's reply is still reaching its client, bounded
+by its own queue deadline. Automatic checkpoints remain best effort under traffic: a crash or
+an expired graceful wait can still leave unpublished work unsaved. The carried multisession
+control recorded root fallback on 2 of 8 continuations/forks without server errors; universal
+warm reuse is not claimed.
 
-The model, serving arguments and memory floors are unchanged from v0.8.2. The RTX 5090 deployment
-profile stays `qwen38-5090-v0.8.2` / configuration `56878aed`, with `--gpu-keep-warm-ms 60000`,
-16384 MiB host KV and a 28672 MiB runtime-host floor. The native RTX 4090 keeps 11264 MiB host
-KV, 24 host-state slots, its 32768 MiB host floor and its release identity
-`qwen38-4090-native-v0.6.8-beta.1`. A managed RTX 4090 start could fail when the driver
-refused to pin the host-KV pool ([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); since
-v0.8.0 the package commits each pinned allocation's size plus 1/64 before pinning it, and every
-managed start in this package's canonical qualification pinned the pool. A refusal that still
-occurs names the commit limit and available commit, and #48 stays open until field confirmation.
+A checkpoint is bound to the exact server build. RTX 4090 checkpoints saved by v0.6.8 are not
+restored on v0.6.9: OMP resends the full conversation and each session re-prefills once. RTX 5090
+keeps the same server build, so its v0.8.3 checkpoints carry across the upgrade. Swap the client
+binary to the checksummed OMP 18.3.5 release for your platform; no fragment change is needed.
+
+The model and memory floors are unchanged from v0.8.3. The RTX 5090 deployment profile stays
+`qwen38-5090-v0.8.2` / configuration `56878aed`, with `--gpu-keep-warm-ms 60000`, 16384 MiB host
+KV and a 28672 MiB runtime-host floor. The native RTX 4090 uses release identity
+`qwen38-4090-native-v0.6.9-beta.1` / configuration `ccecfbe3` and keeps
+11264 MiB host KV, 24 host-state slots and its 32768 MiB host floor.
+
+A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool
+([#48](https://github.com/alphastorm/omp-ninfer/issues/48)); since v0.8.0 the runtime commits and
+releases each pinned allocation's size plus 1/64 before pinning it. The field start from the
+refusing memory state passed with the published v0.6.8 package (3.5 GiB free, 22.6 GiB standby;
+[EXP-064, `issue_48_field_start`](measurements/2026-09-27-rtx4090-engine-keep-warm.json)), and every
+managed start in the new package's canonical qualification pinned the pool. A refusal that still
+occurs reports the commit limit, available commit and available memory.
 Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream
-[Oh My Pi v18.3.0 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0), not an archive
+[Oh My Pi v18.3.5 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.3.5), not an archive
 or installer. The exact binary identities are:
 
-| Client binary | SHA-256 |
-| --- | --- |
-| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe) | `9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527` |
-| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-linux-x64) | `d2fdaa29affe96e596eb9c78d42f548f1f291df28608631bcc00750a84b94bc3` |
-| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64) | `d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc` |
+| Client binary | Bytes | SHA-256 |
+| --- | --- | --- |
+| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe) | 239,118,848 | `34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb` |
+| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-linux-x64) | 284,747,232 | `2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb` |
+| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-darwin-arm64) | 214,586,768 | `3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1` |
 
 Start only from the product tag and require its ready contract:
 
@@ -110,7 +131,7 @@ That gate binds the Windows client binary, compatibility authority, NInfer image
 model, configuration, qualification summary, and clean-install acceptance receipt.
 
 > [!WARNING]
-> Stay on the exact upstream OMP 18.3.0 binary pinned by this release. The config every route below
+> Stay on the exact upstream OMP 18.3.5 binary pinned by this release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
@@ -133,7 +154,7 @@ execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pi
 this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.8.3 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.8.4 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -143,8 +164,8 @@ py -3 scripts\verify_release.py --require-ready
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-windows-x64.exe'
-$Expected = '9be13f13e3c11dcba25dfccfad0f8c508f66fd8bc2f95a0f06f2964be8d8f527'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe'
+$Expected = '34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
 if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
 $Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
@@ -155,7 +176,7 @@ $env:PI_OPENAI_STATEFUL = '1'
 if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The version must be `omp/18.3.0`. To roll back, re-download the previous pinned binary and verify
+The version must be `omp/18.3.5`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `omp.exe`.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
@@ -181,7 +202,7 @@ line enables the release's hash-pinned scripts for this window only and changes 
 machine - repeat it in any new window that runs one:
 
 ```powershell
-git clone --branch v0.8.3 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.8.4 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -208,7 +229,7 @@ guard below refuses a missing or unqualified variant before downloading or insta
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.8.3\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.8.4\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -436,10 +457,10 @@ owner.
 
 ## 1. Clone the exact release on both machines
 
-Once v0.8.3 is published and ready, run this on the Mac and inference host:
+Once v0.8.4 is published and ready, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.8.3 --depth 1 \
+git clone --branch v0.8.4 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -453,8 +474,8 @@ Do not install from moving `main`, an untagged archive, or a manifest whose stat
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/can1357/oh-my-pi/releases/download/v18.3.0/omp-darwin-arm64'
-EXPECTED='d61fb411f24146bed48dd901b13b5912a297d899ee691dda69c4b5b7ab8c35dc'
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-darwin-arm64'
+EXPECTED='3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1'
 curl --fail --location --output omp-darwin-arm64 "$URL"
 test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
 mkdir -p "$HOME/.local/bin"
@@ -465,7 +486,7 @@ export PI_OPENAI_STATEFUL=1
 )
 ```
 
-The version must be `omp/18.3.0`. To roll back, re-download the previous pinned binary and verify
+The version must be `omp/18.3.5`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `~/.local/bin/omp`. Every later step calls bare `omp`, so put
 `$HOME/.local/bin` on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your shell profile
 if you want it to persist) before continuing.
@@ -482,11 +503,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.8.3/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.8.4/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.8.3/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.8.4/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.8.3/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.8.4/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
@@ -811,7 +832,7 @@ If you own both qualified lanes, [`examples/fleet/`](../examples/fleet/) binds t
 one configuration with explicit roles: `ninfer-main/q38-ninfer` (RTX 5090) for the interactive
 lead session and `ninfer-heavy/qwen3.8-27b` (RTX 4090) for long-context background workers.
 Every lane stays loopback-only on its own machine and serves one active request. The fleet's
-RTX 3090 scout role is deferred with its GPU: it is not a v0.8.3 install lane, so neither the
+RTX 3090 scout role is deferred with its GPU: it is not a v0.8.4 install lane, so neither the
 fragment nor this recipe declares it. Its three-lane form stays at the immutable v0.7.2 tag with
 the legacy OMP 18.0.9 instructions for that lane.
 

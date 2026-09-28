@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Every lane current (v0.8.4)
+
+- RTX 4090 advances to `v0.6.9-qwen38-4090-beta.1` (package
+  `6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87`, source
+  `5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4`); component publication is pending. RTX 5090 keeps
+  `v0.6.12-qwen38-5090-beta.1`, its image, server, serving arguments, deployment profile
+  `qwen38-5090-v0.8.2` and carried v0.8.3 lane receipt. The model and memory floors are unchanged.
+- RTX 4090 enables `engine.gpu_keep_warm_ms = 60000` with an sm_89-specific spin of 50 ms every
+  100 ms. The RTX 5090's 3.5 ms/10 ms pattern did not hold this card in P2
+  ([EXP-064](docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json)). New sessions after
+  12-58 s idle prefilled in 0.146-0.148 s (time to first token 0.167-0.178 s); all 31 outputs were
+  byte-identical, at about 72 W above idle while held. A request arriving mid-spin can overlap
+  one warp for up to 50 ms
+  ([EXP-066](docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json)).
+- The RTX 4090 package passed all 15 canonical qualification phases: 130,048-token exact
+  retrieval in 91.0 s, C1 decode 157.90 tok/s at 87.59% MTP acceptance (v0.6.8: 157.89), managed
+  stop, security, an OMP 18.3.5 typed tool turn and rollback in both directions versus v0.6.8
+  ([lane receipt](releases/v0.8.4/qualification/rtx4090.json)). Its decode kernels are unchanged.
+  The controller passes the keep-warm flag only when the release's own packaged config declares
+  a positive value, so older servers still start on rollback.
+- The field start from the memory state that refused v0.6.6 passed with the published v0.6.8
+  package (3.5 GiB free, 22.6 GiB standby; EXP-064's `issue_48_field_start`). A recurrence still
+  reports the commit limit, available commit and available memory
+  ([#48](https://github.com/alphastorm/omp-ninfer/issues/48)).
+- Repin the unmodified upstream Oh My Pi client to 18.3.5. Its macOS arm64 binary kept one short
+  session across graceful restarts on both lanes with the documented fragments unchanged
+  ([EXP-067](docs/measurements/2026-09-27-stock-omp-1835-durable-sessions.json)). The four
+  documented routes and 18.3.5 platform acceptance are pending, after RTX 4090 publication and
+  the lane stage; this draft is not a ready release.
+- RTX 4090 checkpoints saved by v0.6.8 are incompatible with v0.6.9's changed server build, so
+  each session re-prefills once. RTX 5090 keeps its server build and carries v0.8.3 checkpoints.
+- The upstream engine merge stays deferred: e31bc99b's 1.5% single-run prefill lead was already
+  present in EXP-048, while decode rounds are about 18% slower and reuse is weaker
+  ([EXP-065](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)). RTX
+  3090's physical host is offline; its unpublished sm_86 v0.6.2-beta.1 build is not in the
+  manifest, and one native qualification window remains when the host returns.
+
 ## [0.8.3] - 2026-09-27
 
 ### Faster decode (RTX 5090)

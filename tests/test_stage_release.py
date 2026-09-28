@@ -143,7 +143,8 @@ class StageReleaseTests(unittest.TestCase):
         for line, pin in enumerate(pins, 1):
             self.assertIn(f"operator-pins.txt:{line}: retains predecessor OMP identity {pin!r}", result.stderr)
         staged = self.load(root / "releases" / TARGET / "manifest.json")
-        self.assertEqual(staged["components"]["omp"]["upstream_tag"], "v18.3.0")
+        self.assertEqual(staged["components"]["omp"]["upstream_tag"],
+                         self.load(DESCRIPTOR)["omp"]["upstream_tag"])
 
     def test_require_clean_client_rejects_pins_after_writing_the_draft(self) -> None:
         root = self.staging_copy()
@@ -155,7 +156,8 @@ class StageReleaseTests(unittest.TestCase):
         self.assertIn("operator-pin.txt:1: retains predecessor OMP identity", result.stderr)
         self.assertIn("--require-clean-client: staged draft retains predecessor client pins", result.stderr)
         staged = self.load(root / "releases" / TARGET / "manifest.json")
-        self.assertEqual(staged["components"]["omp"]["upstream_tag"], "v18.3.0")
+        self.assertEqual(staged["components"]["omp"]["upstream_tag"],
+                         self.load(DESCRIPTOR)["omp"]["upstream_tag"])
 
     def test_invalid_descriptor_fails_before_creating_release(self) -> None:
         root = self.staging_copy()

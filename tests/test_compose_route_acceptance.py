@@ -31,24 +31,29 @@ from verify_release import validate_client_profile_predicates  # noqa: E402  # p
 ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
             "linux-docker-local": "qualified"}
 
+DESCRIPTOR = json.loads(
+    (ROOT / "tests" / "fixtures" / "upstream-omp-component.json").read_text(encoding="utf-8")
+)
 CANDIDATE = "1" * 40
 UPSTREAM = {"distribution_kind": "upstream-release",
             "upstream_repository": "https://github.com/can1357/oh-my-pi",
-            "upstream_tag": "v18.3.0", "upstream_commit": "5" * 40, "release_id": 42}
+            "upstream_tag": DESCRIPTOR["omp"]["upstream_tag"],
+            "upstream_commit": "5" * 40, "release_id": 42}
 
 
 def client_distribution(platform: str, digest: str = "8" * 64) -> dict:
     asset = f"omp-{platform}" + (".exe" if platform == "windows-x64" else "")
     return {**UPSTREAM, "os": platform.split("-")[0], "architecture": platform.rsplit("-", 1)[1],
             "published": True, "asset_name": asset, "asset_bytes": 123, "asset_id": 43,
-            "asset_url": f"{UPSTREAM['upstream_repository']}/releases/download/v18.3.0/{asset}",
+            "asset_url": f"{UPSTREAM['upstream_repository']}/releases/download/{UPSTREAM['upstream_tag']}/{asset}",
             "asset_sha256": digest, "binary_sha256": digest}
 
 
 WINDOWS = client_distribution("windows-x64")
 MANIFEST = {
     "components": {
-        "omp": {**UPSTREAM, "upstream_tree": "6" * 40, "distribution_version": "18.3.0",
+        "omp": {**UPSTREAM, "upstream_tree": "6" * 40,
+                "distribution_version": DESCRIPTOR["omp"]["distribution_version"],
                 "platform": "windows-x64", "artifact_name": WINDOWS["asset_name"],
                 "artifact_url": WINDOWS["asset_url"], "artifact_bytes": WINDOWS["asset_bytes"],
                 "artifact_release_id": 42, "artifact_asset_id": 43, "artifact_published": True,
@@ -60,7 +65,7 @@ MANIFEST = {
     "runtime_identity": {"configuration_sha256": "d" * 64},
 }
 LIVE = {
-    "omp_version": "omp/18.3.0",
+    "omp_version": f"omp/{DESCRIPTOR['omp']['distribution_version']}",
     "event_counts": {"tool_execution_start": 1, "tool_execution_end": 1},
     "typed_read_tool_calls": 1,
     "linked_tool_results": 1,
@@ -269,8 +274,8 @@ class UpstreamCompositionTests(unittest.TestCase):
         digest = MODULE.sha256((self.root / "compatibility.json").read_bytes())
         self.assertEqual((self.root / "compatibility.json").read_bytes(),
                          (self.release_root / "compatibility.json").read_bytes())
-        self.assertEqual(summary["component_release_tag"], "v18.3.0")
-        self.assertEqual(external["client"]["component_release_tag"], "v18.3.0")
+        self.assertEqual(summary["component_release_tag"], DESCRIPTOR["omp"]["upstream_tag"])
+        self.assertEqual(external["client"]["component_release_tag"], DESCRIPTOR["omp"]["upstream_tag"])
         for receipt in (summary, external):
             self.assertEqual(receipt["windows_asset_sha256"], omp["artifact_sha256"])
             self.assertEqual(receipt["windows_binary_sha256"], omp["binary_sha256"])
@@ -290,7 +295,8 @@ class UpstreamCompositionTests(unittest.TestCase):
         authority = MODULE.load(self.root / "compatibility.json")
         rows = {row["profile"]: row["sha256"] for row in external["platform_receipts"]}
         for profile in authority["profiles"]:
-            filename = f"{MODULE.OMP_PROFILE_PLATFORMS[profile['id']]}-18.3.0.json"
+            filename = (f"{MODULE.OMP_PROFILE_PLATFORMS[profile['id']]}-"
+                        f"{DESCRIPTOR['omp']['distribution_version']}.json")
             path = acceptance / filename
             self.assertEqual((profile["status"], profile["installable"], profile["blockers"]),
                              (ACCEPTED[profile["id"]], ACCEPTED[profile["id"]] == "qualified", []))

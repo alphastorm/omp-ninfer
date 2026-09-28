@@ -39,7 +39,7 @@ class ReleaseContractTest(unittest.TestCase):
         composition = authority["composition"]
         composition["lifecycle_repository"] = descriptor["omp"]["upstream_repository"]
         composition["lifecycle_source_release"] = (
-            f"{descriptor['omp']['upstream_repository']}/releases/tag/v18.3.0"
+            f"{descriptor['omp']['upstream_repository']}/releases/tag/{descriptor['omp']['upstream_tag']}"
         )
         for key in ("lifecycle_source_commit", "request_compatibility_source_commit"):
             composition[key] = descriptor["omp"]["upstream_commit"]
@@ -81,6 +81,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_upstream_component_rejects_invalid_artifact_identity(self) -> None:
+        descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")
         cases = (
             ("upstream_repository", "https://github.com/alphastorm/oh-my-pi",
              "upstream_repository must be https://github.com/can1357/oh-my-pi"),
@@ -94,7 +95,8 @@ class ReleaseContractTest(unittest.TestCase):
             ("release_id", True, "release_id must be a positive integer"),
             ("artifact_bytes", 0, "artifact_bytes must be a positive integer"),
             ("artifact_published", False, "artifact_published must be true"),
-            ("upstream_tag", "18.3.0", "upstream_tag must be a v-prefixed semantic version"),
+            ("upstream_tag", descriptor["omp"]["distribution_version"],
+             "upstream_tag must be a v-prefixed semantic version"),
             ("upstream_tree", "a" * 39, "upstream_tree must be a lower-case 40-character Git commit"),
             ("artifact_sha256", "A" * 64, "artifact_sha256 must be a lower-case SHA-256"),
         )
@@ -122,9 +124,10 @@ class ReleaseContractTest(unittest.TestCase):
                 profile = next(item for item in authority["profiles"]
                                if item["id"] == "windows-docker-local")
                 client = profile["client_distribution"]
+                previous_tag = client["upstream_tag"]
                 client[field] = value
                 if field == "upstream_tag":
-                    client["asset_url"] = client["asset_url"].replace("v18.3.0", value)
+                    client["asset_url"] = client["asset_url"].replace(previous_tag, value)
                     component_field = "upstream_tag"
                 else:
                     client["binary_sha256"] = value
