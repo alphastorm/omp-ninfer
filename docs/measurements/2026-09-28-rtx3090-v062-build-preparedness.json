@@ -1,0 +1,66 @@
+{
+ "artifact_type": "omp_ninfer_measurement",
+ "schema_version": 1,
+ "title": "RTX 3090 native lane v0.6.2-beta.1: package built and tested from the v0.8.4 runtime source, hardware pending",
+ "generated_utc": "2026-09-28T05:20:00Z",
+ "status": "build-tested-hardware-pending",
+ "question": "Does the RTX 3090 native lane build, test and package from the same runtime source as the v0.8.4 RTX 4090 component, so that one qualification window on the RTX 3090 host is all that remains?",
+ "answer": "Yes, short of hardware. At 5ac17674 the sm_86 build passed every registered test that can run without an RTX 3090 or the Qwen3.6 artifacts, and the lane's release package built twice byte-identically in the qualification's neutral builder with no private markers. It is not published, not in any manifest and not qualified: qualify_native.py requires the lane's own GPU, and the RTX 3090 host was unreachable.",
+ "source": {
+  "repository": "https://github.com/alphastorm/ninfer",
+  "commit": "5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4",
+  "lane": "rtx3090",
+  "release_id": "qwen38-3090-native-v0.6.2-beta.1",
+  "deployment_profile": "qwen38-3090-native-v0.6.2-beta.1",
+  "build_profile": "native-v0.6.2-beta.1-rtx3090",
+  "cuda_architecture": "sm_86",
+  "engine_gpu_keep_warm_ms": 0,
+  "keep_warm_note": "Off: the RTX 3090's idle P-state schedule has not been measured, and EXP-064 showed the RTX 5090's spin does not transfer between cards."
+ },
+ "full_test_suite": {
+  "build": "Release sm_86 build of every test target at 5ac17674 on the RTX 4090 qualification builder (CUDA 13.3, MSVC 19.44)",
+  "registered": 105,
+  "passed": 99,
+  "skipped": 6,
+  "failed": 0,
+  "skipped_tests": [
+   "ninfer_qwen3_6_frontend_test",
+   "ninfer_qwen3_6_27b_prefix_real_test",
+   "ninfer_qwen3_6_27b_load_plan_test",
+   "ninfer_qwen3_6_35b_a3b_real_test",
+   "ninfer_qwen3_6_35b_a3b_dflash_real_test",
+   "ninfer_qwen3_6_35b_a3b_dflash_load_plan_test"
+  ],
+  "device_note": "The tests ran on the builder's RTX 4090: sm_86 kernels execute on sm_89 through CUDA binary compatibility, so the kernel oracle tests exercised the sm_86 code. The engine refuses a device whose compute capability differs from the compiled one, so the real-model Qwen3.6 27B prefix test skipped here (it passes in the sm_89 build); the other five skip without the Qwen3.6 frontend and 35B artifacts on both architectures."
+ },
+ "package": {
+  "method": "qualify_native.py's builder phases, driven directly because its preflight requires the target GPU: neutral_build (clean root, deterministic compiler flags, the seven focused host suites), private_path_scan, and package (two builds that must be byte-identical, then an archive scan).",
+  "focused_host_tests": "passed",
+  "filename": "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+  "sha256": "92343aece2effa45728c7d0defe907f9c0eecdccdcf5265bfa5860064bb6ee31",
+  "bytes": 595660225,
+  "deterministic_rebuild": true,
+  "binaries": {
+   "ninfer_sha256": "ebb60772ba71002514c2557b9df0d0ae2713940f8dd1ea8abebeae6e3d73e5ac",
+   "server_sha256": "87757a023dea1feab02c5bb1469318cd0643e094fa871967c3dc6a7ebf67c5bd",
+   "benchmark_sha256": "5f24f1d949aa45428b385750791382aae2d38c52d3a8980baaf4f3d7dba5c448"
+  },
+  "configuration_sha256": "0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2",
+  "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+  "private_marker_scans": {
+   "neutral_binaries": {
+    "bytes": 621796440,
+    "files": 12,
+    "findings": 0
+   },
+   "tracked_source_files": 1275,
+   "tracked_findings": 0,
+   "archive": "no findings"
+  }
+ },
+ "remaining": [
+  "One qualify_native.py window on the physical RTX 3090 (all 15 lifecycle phases, its own C1 benchmark and 130,048-token retrieval), which builds its own neutral package from the same source.",
+  "A component release and a product release that includes the lane, with its documented route accepted."
+ ],
+ "raw_prompts_outputs_or_secrets_included": false
+}
