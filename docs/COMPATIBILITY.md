@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.8.4`
-Composition: **v0.8.4 upstream OMP v18.3.5 client and route acceptance passed on RTX5090 and RTX4090**
+Product release: `v0.8.5`
+Composition: **v0.8.5 upstream OMP v18.4.0 client acceptance pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.3.5` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-darwin-arm64) (sha256 `3ad34e91a474`) | `qwen38-5090-v0.8.2` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/darwin-arm64-18.3.5.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.3.5` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe) (sha256 `34504ca248c0`) | `qwen38-5090-v0.8.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/windows-x64-18.3.5.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.3.5` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-linux-x64) (sha256 `2221e3806ffb`) | `qwen38-5090-v0.8.2` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/linux-x64-18.3.5.json) |
+| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.4.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64) (sha256 `90111c710fb8`) | `qwen38-5090-v0.8.2` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.4.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe) (sha256 `5e8637d7f0e8`) | `qwen38-5090-v0.8.2` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.4.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64) (sha256 `fbcdb8f5033c`) | `qwen38-5090-v0.8.2` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
 
 ## Native runtime variants
 
@@ -19,7 +19,7 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/5ee4ad8ff2665746bb88bf8d36a17cce3cb19b55/releases/v0.8.4/qualification/rtx4090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/89ad497d2fa9e1c7fe754c3757f060bb30366ce2/releases/v0.8.5/qualification/rtx4090.json) |
 
 Package bindings:
 
@@ -37,6 +37,7 @@ Limitations:
 - RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.
 
 Blockers:
+- upstream OMP v18.4.0 client acceptance is pending
 
 ### `windows-docker-local`
 
@@ -48,6 +49,7 @@ Limitations:
 - RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.
 
 Blockers:
+- upstream OMP v18.4.0 client acceptance is pending
 
 ### `linux-docker-local`
 
@@ -60,6 +62,7 @@ Limitations:
 - Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.
 
 Blockers:
+- upstream OMP v18.4.0 client acceptance is pending
 
 ## Composition blockers
 

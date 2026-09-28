@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
-  "product_release": "v0.8.4",
+  "product_release": "v0.8.5",
   "composition": {
-    "status": "v0.8.4 upstream OMP v18.3.5 client and route acceptance passed on RTX5090 and RTX4090",
+    "status": "v0.8.5 upstream OMP v18.4.0 client acceptance pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
-    "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.3.5",
-    "lifecycle_source_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+    "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0",
+    "lifecycle_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
     "ninfer_lifecycle_source_commit": "6efa06505da0a439fd046dc8e2ed04554f286bf2",
-    "request_compatibility_source_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+    "request_compatibility_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
     "blockers": [],
-    "composed_source_commit": "ab2dcbd2abf299139db818330a94777e47d51f68"
+    "composed_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f"
   },
   "profiles": [
     {
@@ -31,7 +31,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.4",
+      "product_release": "v0.8.5",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -42,32 +42,31 @@
         "No secret, raw log, prompt, or model output crosses the receipt boundary.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/darwin-arm64-18.3.5.json",
-        "sha256": "19dfa90ee39eccd96866b0f929c6856056f8adfb3024293cdd8c434078d691ba"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.3.5",
-        "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+        "upstream_tag": "v18.4.0",
+        "upstream_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
         "os": "macOS 26",
         "architecture": "arm64",
         "published": true,
         "asset_name": "omp-darwin-arm64",
-        "asset_bytes": 214586768,
-        "asset_sha256": "3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1",
-        "binary_sha256": "3ad34e91a474ea239674b593a5ff1544727a22f7afd3c8a8729260128a5febd1",
-        "release_id": 397662954,
-        "asset_id": 592995503,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-darwin-arm64"
+        "asset_bytes": 214917008,
+        "asset_sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+        "binary_sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+        "release_id": 397931853,
+        "asset_id": 594395358,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5ee4ad8ff2665746bb88bf8d36a17cce3cb19b55/releases/v0.8.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/89ad497d2fa9e1c7fe754c3757f060bb30366ce2/releases/v0.8.5/qualification/rtx5090.json",
           "sha256": "b7ab6c2f5147ab0457b53f76c4752e8f998c7354bba762489964212f68725f3e"
         }
       },
@@ -113,7 +112,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -126,9 +125,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.4",
+      "product_release": "v0.8.5",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -139,32 +138,31 @@
         "One active request, one trusted owner, and no silent cloud fallback are qualified.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/windows-x64-18.3.5.json",
-        "sha256": "e86c4bcab960f6a4b37a9a51f68f407719bf03242704b9504e80e5dd3e95692b"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.3.5",
-        "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+        "upstream_tag": "v18.4.0",
+        "upstream_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
         "os": "Windows 11",
         "architecture": "x64",
         "published": true,
         "asset_name": "omp-windows-x64.exe",
-        "asset_bytes": 239118848,
-        "asset_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
-        "binary_sha256": "34504ca248c04efe1e74f0414ee52e0997f66edf5f17d6d35e84c3b39f0f8beb",
-        "release_id": 397662954,
-        "asset_id": 592995505,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-windows-x64.exe"
+        "asset_bytes": 239441408,
+        "asset_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+        "binary_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+        "release_id": 397931853,
+        "asset_id": 594395361,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5ee4ad8ff2665746bb88bf8d36a17cce3cb19b55/releases/v0.8.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/89ad497d2fa9e1c7fe754c3757f060bb30366ce2/releases/v0.8.5/qualification/rtx5090.json",
           "sha256": "b7ab6c2f5147ab0457b53f76c4752e8f998c7354bba762489964212f68725f3e"
         }
       },
@@ -210,7 +208,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -223,9 +221,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.4",
+      "product_release": "v0.8.5",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -237,32 +235,31 @@
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2870a430c27e2c9b1fd8a705591186a5ee724952/releases/v0.8.4/acceptance/linux-x64-18.3.5.json",
-        "sha256": "31f9cabfa63c3fabe7b658a63c84fe33bd750565f47b323d18dfa92dbc9c10eb"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.3.5",
-        "upstream_commit": "ab2dcbd2abf299139db818330a94777e47d51f68",
+        "upstream_tag": "v18.4.0",
+        "upstream_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
         "os": "Ubuntu 24.04",
         "architecture": "x64",
         "published": true,
         "asset_name": "omp-linux-x64",
-        "asset_bytes": 284747232,
-        "asset_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
-        "binary_sha256": "2221e3806ffbabeda62b0c505a06db187c2649d00c1f7b5cf0d09187264bf6eb",
-        "release_id": 397662954,
-        "asset_id": 592995500,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.5/omp-linux-x64"
+        "asset_bytes": 285148640,
+        "asset_sha256": "fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f",
+        "binary_sha256": "fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f",
+        "release_id": 397931853,
+        "asset_id": 594395360,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.8.2",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5ee4ad8ff2665746bb88bf8d36a17cce3cb19b55/releases/v0.8.4/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/89ad497d2fa9e1c7fe754c3757f060bb30366ce2/releases/v0.8.5/qualification/rtx5090.json",
           "sha256": "b7ab6c2f5147ab0457b53f76c4752e8f998c7354bba762489964212f68725f3e"
         }
       },
@@ -324,8 +321,8 @@
       "package_sha256": "6492588ea9b62a02a5b83434c653c61ea709c7d1609eb9de9d1c0eaf7ae23e87",
       "package_bytes": 574751101,
       "qualification_receipt": {
-        "path": "releases/v0.8.4/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5ee4ad8ff2665746bb88bf8d36a17cce3cb19b55/releases/v0.8.4/qualification/rtx4090.json",
+        "path": "releases/v0.8.5/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/89ad497d2fa9e1c7fe754c3757f060bb30366ce2/releases/v0.8.5/qualification/rtx4090.json",
         "sha256": "673d147b2fcd93e268500f75eeff035eebfba71ea7b9f27e465da6232b739968"
       }
     }
