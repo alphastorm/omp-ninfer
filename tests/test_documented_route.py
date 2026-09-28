@@ -89,6 +89,27 @@ class ExtractionTests(unittest.TestCase):
             if step.slug == "fail-closed":
                 self.assertIn("unexpectedly succeeded", block.text)
 
+    def test_restart_seed_stays_between_the_checkpoint_gate_and_client_compaction(self) -> None:
+        """The survives-restart step seeds its session from the release's own documents, which grow
+        every release. The seed must pass the runtime's 32,768-token checkpoint gate and stay below
+        OMP's automatic compaction of a 131,072-token window (131,072 minus 15%: 111,412 tokens). A
+        compacted continuation replays a different prefix, so the step would stop testing a restored
+        checkpoint; v0.8.5's first candidate was refused there once its documents crossed the
+        threshold. The bounds allow 2.5-4.5 bytes per token and a 15,000-token system prompt around
+        the ~3.1 bytes per token the lane showed for these documents."""
+        block = documented_route.extract(documented_route.DEFAULT_DOC, "Session survives the server process")
+        lines = block.text.splitlines()
+        seed = "\n".join(lines[: next(i for i, line in enumerate(lines) if line.startswith("omp "))])
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            (home / "omp-ninfer").symlink_to(ROOT)
+            (home / "smoke").mkdir()
+            subprocess.run(["bash", "-eo", "pipefail", "-c", seed], check=True, timeout=30,
+                           env={"HOME": str(home), "SMOKE": str(home / "smoke"), "PATH": "/usr/bin:/bin"})
+            size = (home / "smoke" / "context.md").stat().st_size
+        self.assertGreater(size, 32_768 * 4.5)
+        self.assertLess(size, (111_412 - 15_000) * 2.5)
+
     def test_model_download_blocks_survive_a_rerun_with_a_complete_file(self) -> None:
         """curl 8.5 with --fail turns the CDN's HTTP 416 for a complete-file resume into exit 22,
         so a reader who reruns the prepare block after any later failure was stopped there

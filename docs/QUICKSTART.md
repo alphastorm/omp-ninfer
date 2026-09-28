@@ -792,13 +792,17 @@ Responses while the server process stays up; the next check takes it down.
 A session is written to the durable store automatically once it passes 32,768 frontier tokens,
 or on an explicit `POST /v1/ninfer/checkpoints` for its session digest. The authenticated server
 derives that digest from OMP's `prompt_cache_key`, so this check uses the automatic path: it
-seeds a session past the gate with the release's own documentation, restarts the server
-container on the inference host, and continues.
+seeds a session past the gate with the first 200,000 ASCII bytes of the release's own
+documentation, restarts the server container on the inference host, and continues. The seed is
+about 64,000 tokens: past the gate, and well below the 111,412 tokens at which OMP compacts a
+131,072-token session on its own. A compacted continuation sends a different prompt, so the
+runtime could not restore the saved session.
 
 ```sh
 cat "$HOME/omp-ninfer/docs/BENCHMARKS.md" "$HOME/omp-ninfer/README.md" \
     "$HOME/omp-ninfer/docs/ARCHITECTURE.md" "$HOME/omp-ninfer/docs/PERFORMANCE.md" \
-    "$HOME/omp-ninfer/CHANGELOG.md" > "$SMOKE/context.md"
+    "$HOME/omp-ninfer/CHANGELOG.md" | LC_ALL=C tr -cd '\11\12\40-\176' > "$SMOKE/docs.txt"
+head -c 200000 "$SMOKE/docs.txt" > "$SMOKE/context.md"
 omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/q38-ninfer \
   @"$SMOKE/context.md" "Hold this material in context. Remember the nonce COBALT-493817. Reply OK only."
 ssh USER@RUNTIME_HOST docker restart --timeout 60 omp-ninfer-beta
