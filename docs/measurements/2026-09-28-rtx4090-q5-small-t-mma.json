@@ -3,8 +3,8 @@
  "schema_version": 1,
  "experiment": "EXP-069",
  "title": "The EXP-057 Q5 small-T tensor-core route on the RTX 4090 (pre-registered)",
- "generated_utc": "2026-09-28T05:35:00Z",
- "status": "pre-registered",
+ "generated_utc": "2026-09-28T06:00:00Z",
+ "status": "rejected",
  "question": "The v0.6.12 runtime runs the MTP3 verify pass's four T=4 Q5 projections on a small-T tensor-core MMA on the RTX 5090 only (EXP-057: decode +3.6% to +6.3%); the native sm_86 and sm_89 builds keep the SIMT row kernels. Does the same route speed up RTX 4090 decode enough to justify screening its output change, and is it then not worse at redaction?",
  "prior_knowledge_before_this_rule": "The route's kernel uses cp.async and bf16 mma.sync (sm_80 and later), and programmatic dependent launch already degrades to a plain launch on sm_86 and sm_89 builds; enabling it is the three call-site guards in the attention-input, GDN-input and Q5 linear-add projections. No candidate has been built or measured.",
  "decision_rule": {
@@ -15,5 +15,103 @@
   "decision": "Adopt only if all three gates pass, and then only through a later RTX 4090 component with its own canonical qualification; the published v0.6.9-qwen38-4090-beta.1 is unaffected either way.",
   "informational": "The public op benches for the three routed projections at T=1-8 in both arms, MTP acceptance from ninfer_bench, and the 1,024-token decode difference; none is a gate."
  },
- "raw_prompts_outputs_or_secrets_included": false
+ "raw_prompts_outputs_or_secrets_included": false,
+ "answer": "No. The route is correct on the RTX 4090 (all four Q5 oracle tests pass) but decode is only 0.38% faster at 26,000 tokens and 0.40% at 60,000, against the rule's 2.0% and 1.0%. The speed gate fails, so the RTX 4090 keeps the SIMT row kernels and no quality data was collected.",
+ "result": {
+  "arms": {
+   "baseline": {
+    "source_commit": "5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4",
+    "ninfer_bench_sha256": "0fd1e8a20d7cd6b8150166de7f4513795a9597b07db60d285c8e070ec4693957",
+    "ninfer_serve_sha256": "65364401fb1adb66e903f96ed6553f8b70042d4a7b2360ec88fb68049afb9aa4",
+    "note": "The v0.6.9-qwen38-4090-beta.1 qualification's neutral build; its server is the published package's."
+   },
+   "candidate": {
+    "source": "5ac17674 plus one commit that changes the three guards `#if !defined(NINFER_SM86) && !defined(NINFER_SM89)` to `#if !defined(NINFER_SM86)` in src/ops/attn_input_proj/q4_q5/q4_q5_attn_input_small_t.cu, src/ops/gdn_input_proj/q4_q5/q4_q5_gdn_input_independent.cu and src/ops/linear_add/q5/q5_linear_add_gemm_simt.cu (local commit 3d7bbb8a, not published)",
+    "ninfer_bench_sha256": "6e72d7844a46551844e332bb531f35b8d946946b43e43e1cae8f39f7d4226bb8",
+    "ninfer_serve_sha256": "b1f2bdc6c0cce6ebedaf1141720de1703e2269c735571131ca10e2ea17bbdbf1",
+    "build": "qualify_native.py's neutral_build recipe on the RTX 4090 builder (sm_89, CUDA 13.3, MSVC 19.44)"
+   }
+  },
+  "correctness_gate": {
+   "passed": true,
+   "tests": [
+    "ninfer_linear_q5_a16_test",
+    "ninfer_attn_input_proj_test",
+    "ninfer_gdn_input_proj_test",
+    "ninfer_linear_add_q5_a16_test"
+   ],
+   "baseline_also_passed": true
+  },
+  "speed_gate": {
+   "passed": false,
+   "method": "ninfer_bench --kv-dtype int8 --prefill-chunk 2048 --mtp-draft-tokens 3 -n 256 -pg '1024,256;26000,256;60000,256' -r 3 --warmup 1, order baseline, candidate, candidate, baseline, lane stopped; every arm ran in P2 at 2,700 MHz SM / 10,251 MHz memory.",
+   "decode_tokens_per_second": {
+    "26000": {
+     "baseline": [
+      146.921,
+      146.895
+     ],
+     "candidate": [
+      147.429,
+      147.492
+     ],
+     "gain_percent": 0.376,
+     "rule_percent": 2.0,
+     "each_candidate_run_above_each_baseline_run": true
+    },
+    "60000": {
+     "baseline": [
+      135.045,
+      134.979
+     ],
+     "candidate": [
+      135.562,
+      135.531
+     ],
+     "gain_percent": 0.396,
+     "rule_percent": 1.0,
+     "each_candidate_run_above_each_baseline_run": true
+    }
+   },
+   "mtp_acceptance_at_26000_and_60000": "1.0 in every run of both arms, so these differences are round time alone"
+  },
+  "informational": {
+   "decode_at_1024_tokens": {
+    "baseline": [
+     77.493,
+     77.452
+    ],
+    "candidate": [
+     83.601,
+     83.621
+    ],
+    "gain_percent": 7.924,
+    "mtp_acceptance": {
+     "baseline": 0.336,
+     "candidate": 0.3859
+    },
+    "note": "The candidate's outputs differ from the baseline's, as EXP-057's did on the RTX 5090, and on this text its drafts were accepted more often; the gain is mostly that trajectory change, not the kernels."
+   },
+   "t4_public_op_medians_us": {
+    "q5_linear_add_k17408": {
+     "baseline": 100.352,
+     "candidate": 96.256
+    },
+    "q5_linear_add_k6144": {
+     "baseline": 41.984,
+     "candidate": 39.936
+    },
+    "attn_input_proj_q4q5": {
+     "baseline": 74.752,
+     "candidate": 77.824
+    },
+    "gdn_input_proj_q4q5": {
+     "baseline": 88.064,
+     "candidate": 88.064
+    }
+   },
+   "reading": "On the RTX 4090 the tensor-core route shortens the Q5 linear-add projections by 4-5% but lengthens the attention input projection by 4%, and the GDN input bench does not move; on the RTX 5090 the same route shortened the round by 3.5-4.9% (EXP-057, EXP-063)."
+  },
+  "decision": "Rejected by the pre-registered rule. The RTX 4090 keeps the SIMT row kernels; v0.6.9-qwen38-4090-beta.1 is unaffected. No redaction screen was run."
+ }
 }
