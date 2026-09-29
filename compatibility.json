@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
-  "product_release": "v0.8.7",
+  "product_release": "v0.9.0",
   "composition": {
-    "status": "v0.8.7 upstream OMP v18.4.0 client and route acceptance passed on RTX5090 and RTX4090",
+    "status": "v0.9.0 upstream OMP v18.4.0 client; route acceptance on the v0.9.0 runtimes pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0",
     "lifecycle_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
@@ -31,7 +31,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.7",
+      "product_release": "v0.9.0",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -44,7 +44,7 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.8.7/acceptance/darwin-arm64-18.4.0.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.9.0/acceptance/darwin-arm64-18.4.0.json",
         "sha256": "a2533c250e3f6f29c37f493e1bd62f21d3f9f1d46dd12554a6de5310d447a1f9"
       },
       "client_distribution": {
@@ -64,27 +64,27 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.2",
+        "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.8.7/qualification/rtx5090.json",
-          "sha256": "0285cdf5731195483762524b72949481345b605bbc710b8f3ee9e8fd35646277"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
-        "image_digest": "sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+        "image_digest": "sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
-        "server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3",
+        "configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+        "server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
         "maximum_output_tokens": 32768,
-        "maximum_concurrency": 1,
+        "maximum_concurrency": 2,
         "kv_dtype": "bf16",
         "speculative_backend": "mtp",
         "draft_tokens": 3,
@@ -128,7 +128,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.7",
+      "product_release": "v0.9.0",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -136,12 +136,12 @@
       "container_port": 8080,
       "limitations": [
         "The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.",
-        "One active request, one trusted owner, and no silent cloud fallback are qualified.",
+        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.8.7/acceptance/windows-x64-18.4.0.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.9.0/acceptance/windows-x64-18.4.0.json",
         "sha256": "dfbe7dcefcc220ed6dc69bdfff162d2d1d9b77d633377e00ede593da3b1e6480"
       },
       "client_distribution": {
@@ -161,27 +161,27 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.2",
+        "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.8.7/qualification/rtx5090.json",
-          "sha256": "0285cdf5731195483762524b72949481345b605bbc710b8f3ee9e8fd35646277"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
-        "image_digest": "sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+        "image_digest": "sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
-        "server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3",
+        "configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+        "server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
         "maximum_output_tokens": 32768,
-        "maximum_concurrency": 1,
+        "maximum_concurrency": 2,
         "kv_dtype": "bf16",
         "speculative_backend": "mtp",
         "draft_tokens": 3,
@@ -225,7 +225,7 @@
       "silent_cloud_fallback": false,
       "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.8.7",
+      "product_release": "v0.9.0",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -233,13 +233,13 @@
       "container_port": 8080,
       "limitations": [
         "The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
-        "One active request, one trusted owner, and no silent cloud fallback are qualified.",
+        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification."
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.8.7/acceptance/linux-x64-18.4.0.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cae74cd98b15d8bdfd11be9ed11bb46773bc43d5/releases/v0.9.0/acceptance/linux-x64-18.4.0.json",
         "sha256": "362da6c257fa4a324bf114cf274d5ef7efde92bd12c95b3c7e8c2e9fea8f59de"
       },
       "client_distribution": {
@@ -259,27 +259,27 @@
         "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64"
       },
       "gpu_qualification": {
-        "profile": "qwen38-5090-v0.8.2",
+        "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.8.7/qualification/rtx5090.json",
-          "sha256": "0285cdf5731195483762524b72949481345b605bbc710b8f3ee9e8fd35646277"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
-        "image_digest": "sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+        "image_digest": "sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
         "model_bytes": 18210531328,
         "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-        "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
-        "server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3",
+        "configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+        "server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
         "maximum_context_tokens": 131072,
         "maximum_output_tokens": 32768,
-        "maximum_concurrency": 1,
+        "maximum_concurrency": 2,
         "kv_dtype": "bf16",
         "speculative_backend": "mtp",
         "draft_tokens": 3,
@@ -324,8 +324,8 @@
       "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b",
       "package_bytes": 574717115,
       "qualification_receipt": {
-        "path": "releases/v0.8.7/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.8.7/qualification/rtx4090.json",
+        "path": "releases/v0.9.0/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx4090.json",
         "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14"
       }
     }

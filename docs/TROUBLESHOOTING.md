@@ -269,31 +269,36 @@ text only, so OMP never compacts its sessions into images.
 503 inference request expired while waiting for admission
 ```
 
-Each lane serves one request at a time and expires a waiting one after 30 s. By default OMP writes
-its compaction summary in a background request as a session nears the threshold. Without a limit
-your next turn queued behind it at the server: every attempt expired, OMP resent it, and the turn
-failed once the summary outlasted the resends. On the RTX 4090 each background handoff took
-56-61 s; all three turns that waited behind one had attempts expire, and one of them failed
-([EXP-072](measurements/2026-09-28-omp-long-sessions.json)). The v0.8.7 config gives every NInfer
-provider one request in flight, so OMP holds the turn until the summary finishes, and that wait
-has no deadline. A `config.yml` merged from an earlier release lacks it; add
+The RTX 4090 serves one request at a time and the RTX 5090 two; a request beyond that waits at
+the server and expires after the lane's pending timeout, 30 s on the RTX 4090 and 180 s on the
+RTX 5090 since v0.9.0. By default OMP writes its compaction summary in a background request as a
+session nears the threshold. Without a limit your next turn queued behind it at the server: every
+attempt expired, OMP resent it, and the turn failed once the summary outlasted the resends. On the
+RTX 4090 each background handoff took 56-61 s; all three turns that waited behind one had
+attempts expire, and one of them failed
+([EXP-072](measurements/2026-09-28-omp-long-sessions.json)). Since v0.8.7 the route config limits
+every NInfer provider to its lane's concurrency, so OMP holds a request beyond it until one
+finishes, and that wait has no deadline. A `config.yml` merged from an earlier release lacks it;
+add
 
 ```yaml
 providers:
   maxInFlightRequests:
-    ninfer-beta: 1
+    ninfer-beta: 2
     ninfer-native-4090: 1
 ```
 
-with the id of every provider you route to a lane (the fleet's `ninfer-main` and `ninfer-heavy`
-too; OMP leaves a provider missing from the map unlimited), then send the turn again. On the RTX
-4090 the three turns that met a running handoff took 34.2-56.3 s, waiting in OMP rather than at
-the server, and no admission expired. Against a mock lane, limiting only `ninfer-beta` left the
-RTX 4090 route's turn failing as before
-([EXP-074](measurements/2026-09-29-long-session-cache.json)). The v0.8.6 config's
-`compaction: asyncEnabled: false` also prevents the failure, by compacting before your turn.
-Remove it once the limit is set: the summary then runs while you read or type, and a turn you send
-after it finishes does not wait at all.
+with the id of every provider you route to a lane (the fleet's `ninfer-main` at 2 and
+`ninfer-heavy` at 1 too; OMP leaves a provider missing from the map unlimited), then send the turn
+again. Use `ninfer-beta: 1` while the RTX 5090 server is older than v0.9.0: a limit of 2 against a
+one-at-a-time server queues the second request at the server, where it expires after 30 s
+([EXP-077](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)). On the RTX 4090 the
+three turns that met a running handoff took 34.2-56.3 s, waiting in OMP rather than at the server,
+and no admission expired. Against a mock lane, limiting only `ninfer-beta` left the RTX 4090
+route's turn failing as before ([EXP-074](measurements/2026-09-29-long-session-cache.json)). The
+v0.8.6 config's `compaction: asyncEnabled: false` also prevents the failure, by compacting before
+your turn. Remove it once the limit is set: the summary then runs while you read or type, and a
+turn you send after it finishes does not wait at all.
 
 ## Follow-up replay is cold or resume loses the nonce
 

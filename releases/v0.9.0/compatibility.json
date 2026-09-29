@@ -67,7 +67,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -164,7 +164,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -262,7 +262,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -325,7 +325,7 @@
       "package_bytes": 574717115,
       "qualification_receipt": {
         "path": "releases/v0.9.0/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/15b7c6cf27289211bb40a62a167d544afa4e3f00/releases/v0.9.0/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx4090.json",
         "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14"
       }
     }
