@@ -161,9 +161,9 @@ model, configuration, qualification summary, and clean-install acceptance receip
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
 
 > [!NOTE]
-> The same config makes OMP compact a long session before your next turn rather than in the
-> background. Each lane serves one request at a time, and a background compaction request made
-> the next turn wait behind it and, on the RTX 4090, fail
+> The same config lets OMP send each NInfer lane one request at a time. Each lane serves one
+> request at a time, and OMP writes a long session's compaction summary in the background, so a
+> turn you send meanwhile waits in OMP for it instead of expiring at the server
 > ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
 
 ## Ready route: native Windows and Docker Desktop WSL2

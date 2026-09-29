@@ -56,13 +56,27 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                     "          supportsImageDetailOriginal: false\n" in fragment, "image" in inputs,
                 )
 
-    def test_every_route_config_compacts_inline(self) -> None:
-        # Both lanes admit one request at a time. OMP's async compaction sends its summary
-        # request in the background as a session nears the threshold, so the user's next turn
-        # waits behind it; on the RTX 4090 a 61 s handoff outlasted OMP's resends of that turn
-        # against the runtime's 30 s admission deadline and the turn failed (EXP-072).
+    def test_every_documented_provider_admits_one_request_at_a_time(self) -> None:
+        # Every lane admits one request at a time and expires a waiting one after 30 s. OMP's async
+        # compaction sends its summary in the background as a session nears the threshold, and a
+        # turn queued behind it at the server failed once the summary outlasted OMP's resends
+        # (EXP-072). OMP waits for its own in-flight slot without a deadline, but leaves a provider
+        # missing from the limits unlimited, so every provider a shipped fragment declares needs
+        # one - and the background summary stays on, so the wait usually overlaps think time.
         config = (EXAMPLES / "fail-closed.yml").read_text(encoding="utf-8")
-        self.assertIn("\ncompaction:\n  asyncEnabled: false\n", config)
+        block = re.search(r"^providers:\n  maxInFlightRequests:\n((?:    [\w-]+: \d+\n)+)",
+                          config, re.M)
+        self.assertIsNotNone(block)
+        limits = {name: int(value) for name, value in re.findall(r"^    ([\w-]+): (\d+)$",
+                                                                  block.group(1), re.M)}
+        declared = {
+            provider
+            for fragment in (ROOT / "examples").glob("*/models.fragment.yml")
+            for provider in re.findall(r"^  ([\w-]+):$", fragment.read_text(encoding="utf-8"), re.M)
+        }
+        self.assertTrue({"ninfer-beta", "ninfer-native-4090"} <= declared)
+        self.assertEqual(limits, dict.fromkeys(declared, 1))
+        self.assertNotIn("asyncEnabled", config)
 
     @staticmethod
     def copy_contract_tree(root: Path) -> None:

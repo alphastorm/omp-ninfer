@@ -269,23 +269,27 @@ text only, so OMP never compacts its sessions into images.
 503 inference request expired while waiting for admission
 ```
 
-Each lane serves one request at a time. By default OMP starts its compaction summary in the
-background as a session nears the threshold, and your next turn waits behind it. Every attempt
-expires after the runtime's 30 s admission deadline; OMP resends it, and the turn fails once the
-summary outlasts the resends. On the RTX 4090 each background handoff took 56-61 s; all three
-turns that waited behind one had attempts expire, and one of them failed. The v0.8.6 config turns
-that background start off, so OMP compacts before your turn instead. A `config.yml` merged from an
-earlier release lacks it; add
+Each lane serves one request at a time and expires a waiting one after 30 s. By default OMP writes
+its compaction summary in a background request as a session nears the threshold. Without a limit
+your next turn queued behind it at the server: every attempt expired, OMP resent it, and the turn
+failed once the summary outlasted the resends. On the RTX 4090 each background handoff took
+56-61 s; all three turns that waited behind one had attempts expire, and one of them failed
+([EXP-072](measurements/2026-09-28-omp-long-sessions.json)). The v0.8.7 config gives every NInfer
+provider one request in flight, so OMP holds the turn until the summary finishes, and that wait
+has no deadline. A `config.yml` merged from an earlier release lacks it; add
 
 ```yaml
-compaction:
-  asyncEnabled: false
+providers:
+  maxInFlightRequests:
+    ninfer-beta: 1
+    ninfer-native-4090: 1
 ```
 
-then send the turn again. On the RTX 4090 the turn that compacts now waits for the handoff
-(76-81 s measured) and the turn after it re-prefills the compacted context once. The RTX 5090's
-snapcompact runs on the client in well under a second, so the setting changes nothing there
-([EXP-072](measurements/2026-09-28-omp-long-sessions.json)).
+with the id of every provider you route to a lane (the fleet's `ninfer-main` and `ninfer-heavy`
+too; OMP leaves a provider missing from the map unlimited), then send the turn again. The
+v0.8.6 config's `compaction: asyncEnabled: false` also prevents the failure, by compacting before
+your turn. Remove it once the limit is set: the summary then runs while you read or type, and a
+turn you send after it finishes does not wait at all.
 
 ## Follow-up replay is cold or resume loses the nonce
 

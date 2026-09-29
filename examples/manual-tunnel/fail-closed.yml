@@ -8,9 +8,16 @@ retry:
 # would advertise `omp update`, which replaces it outside the release procedure (issue #18).
 startup:
   checkUpdate: false
-# OMP's async compaction summarizes the session in a background request as it nears the
-# compaction threshold. NInfer admits one request at a time, so the user's next turn waits behind
-# it; each attempt expires at the runtime's 30 s admission deadline, and the turn fails once the
-# summary outlasts OMP's resends (a 61 s RTX 4090 handoff did, EXP-072). Compact inline instead.
-compaction:
-  asyncEnabled: false
+# NInfer admits one request at a time and expires a waiting one after 30 s. OMP's async compaction
+# writes the session's summary in a background request as it nears the compaction threshold, and
+# without a limit the user's next turn queued behind it at the server: every attempt expired, and
+# the turn failed once the summary outlasted OMP's resends (a 61 s RTX 4090 handoff did, EXP-072).
+# With one request in flight per NInfer provider, that turn waits in OMP instead, which has no
+# deadline, and the summary still runs while you read or type. Every provider id a documented
+# route or the fleet declares is listed: OMP leaves a provider missing here unlimited.
+providers:
+  maxInFlightRequests:
+    ninfer-beta: 1
+    ninfer-native-4090: 1
+    ninfer-main: 1
+    ninfer-heavy: 1
