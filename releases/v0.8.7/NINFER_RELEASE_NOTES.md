@@ -124,9 +124,28 @@ and OMP 18.0.9 client remain a separate historical route, not a v0.8.7 qualifica
 
 ## Documented routes and clients
 
-The four documented routes - RTX 5090 container host, macOS client, Windows client and RTX 4090
-native Windows - run against this candidate's published components with unmodified OMP 18.4.0
-before the release is cut, with fresh client-platform acceptance.
+The four documented routes passed on candidate `a1e51a70` with unmodified OMP 18.4.0 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
+and RTX 4090 native Windows (7), with both hosts restored
+([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows x64 and Linux x64
+binaries each passed a typed tool turn, an exact continuation and a fail-closed request against
+RTX 5090 image `d71e34c3`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran from a separately hosted Apple silicon Mac mini on macOS 26.6.1 over the
+tailnet, not the maintainer's workstation, in two production windows with downtime at most
+264.5 s and 384.1 s (6.4 min)
+([restoration](../../docs/measurements/2026-09-29-v087-acceptance-restoration.json)).
+
+The first candidate, `9474326f`, passed the RTX 4090 route, but its RTX 5090 window failed at the
+macOS restart step and production was restored. That step seeds its session with the release's
+own documents, which quoted the misspelled nonce copy from v0.8.6's first window; after a hot
+restore (71,791 of 71,839 tokens reused) the model returned that quoted copy. The seed now drops
+every line holding the nonce's digits. On the RTX 4090 the recall returned the quoted copy in 4
+of 30 trials with the old seed and in none of 30 with the new one
+([EXP-076](../../docs/measurements/2026-09-29-restart-seed-decoy.json)).
 
 ## Upgrading from v0.8.6
 

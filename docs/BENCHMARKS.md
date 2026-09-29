@@ -11,7 +11,87 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.8.6 — long sessions compact inline (2026-09-28)
+## v0.8.7 — long sessions keep their cache (2026-09-29)
+
+Long sessions no longer re-prefill from root at compaction handoffs, near-capacity turns, crashes
+after a compaction, or when short sessions fill the checkpoint store. Both lanes move to runtimes
+with the same fixes: RTX 5090 `v0.6.13-qwen38-5090-beta.1` (image `d71e34c3`, server `b8ae62ae`)
+and RTX 4090 `v0.6.10-qwen38-4090-beta.1` (package `a0ea4c81`, server `e0498fad`). The config every
+documented route installs, [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml),
+limits each NInfer provider to one request in flight and leaves compaction at OMP's default, so OMP
+compacts in the background again and the turn that meets a running summary waits in OMP instead of
+expiring at the server ([EXP-074](measurements/2026-09-29-long-session-cache.json)):
+
+- RTX 4090 compaction handoffs reused **78.0-79.9K cached tokens** and reached the first token in
+  **0.58-0.70 s**; v0.6.9 prefilled 97.4-97.5K tokens from root in 63.8-66.3 s.
+- Near-capacity turns whose planner search runs out of time keep their continuation. In three
+  stock OMP sessions on the RTX 5090, the three fallback turns reused **78.0-80.5K cached tokens**
+  (12.4-12.5 s to the first token) and **no turn prefilled more than 60K tokens from root**;
+  v0.6.12 production's log holds four such turns of 93.7-105.1K tokens, each prefilled from root.
+- After a hard kill following a compaction, the next RTX 4090 turn reused **32,167 cached tokens
+  in 2.9 s**; v0.6.9 prefilled 32,173 tokens from root in 29.2 s.
+- With 35 short sessions filling the RTX 5090's 24 GiB checkpoint store, a 60,026-token session
+  kept its checkpoint and after a crash reused **60,057 cached tokens in 2.9 s** (3.1 s on the
+  RTX 4090); v0.6.9 had reclaimed that checkpoint first and failed the turn with
+  `previous_response_not_found`.
+- With the provider limit, three RTX 4090 handoff compactions and a restart ran **55 requests with
+  none expired**, and 22 turns took **365.4 s** where v0.8.6's inline compaction took 678.2 s for
+  24. The limit must name the route's own provider id: OMP leaves an unlisted provider unlimited.
+
+The kernels are unchanged. The RTX 5090 candidate and published image answered the 89-case role
+corpus byte-identically to v0.6.12, and the published image prefilled **130,048 tokens exactly in
+58.3 s** and decoded **170.36 tok/s**. The RTX 4090 package passed all 15 canonical phases with
+OMP 18.4.0: 130,048-token retrieval in 91.2 s and C1 decode at **157.91 tok/s** with 87.59% MTP
+acceptance. Stock OMP 18.4.0 kept one session across graceful restarts on both runtimes, and every
+turn after the seed reused its cache
+([EXP-075](measurements/2026-09-29-stock-omp-1840-durable-sessions.json)).
+
+These are one run per configuration, with synthetic build-log filler, one seed and thinking
+`low`. A restart of the OMP process still costs one prefill of a resumed session's context:
+OMP 18.4.0's first request after resuming omits the session's reasoning (56,174 tokens from root,
+32.0 s, in EXP-074). A server restart alone restores hot, so v0.8.6's stale-checkpoint account of
+that cold turn was wrong. Both server builds change, so each saved session re-prefills once after
+the upgrade. To upgrade from v0.8.6, follow the quickstart for your lane, remove
+`compaction.asyncEnabled: false` from `~/.omp/agent/config.yml` and merge:
+
+```yaml
+providers:
+  maxInFlightRequests:
+    ninfer-beta: 1
+    ninfer-native-4090: 1
+    ninfer-main: 1
+    ninfer-heavy: 1
+```
+
+The OMP binary, `models.yml` and `PI_OPENAI_STATEFUL=1` do not change. RTX 3090 remains deferred.
+
+All four documented routes passed **24 steps** on candidate `a1e51a70`
+(`a1e51a7064a1b0a5e862f9b77ae8815f8144012d`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090 native
+Windows 7; both hosts were restored. The upstream macOS arm64 (preview), Windows x64 and
+Linux x64 binaries each passed a typed tool turn, an exact continuation and a fail-closed
+request against image `d71e34c3`. Linux ran under **WSL2**, not a separately qualified Linux OS.
+[Documented routes](../releases/v0.8.7/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.8.7/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in **two production windows** from a separately hosted Apple silicon
+Mac mini. Downtime was at most **264.5 s (4.4 min)** in the failed window and
+**384.1 s (6.4 min)** in the accepted window; total downtime was at most
+**648.6 s** ([restoration](measurements/2026-09-29-v087-acceptance-restoration.json)).
+
+Candidate `9474326f` passed the RTX 4090 route, but its RTX 5090 window failed at the macOS
+restart step. That step seeds its session with the release's own documents, which quoted the
+misspelled nonce copy from v0.8.6's first window, and after a hot restore (71,791 of 71,839
+tokens reused) the model returned that quoted copy. The seed now drops every line holding the
+nonce's digits: the RTX 4090 recall returned the quoted copy in 4 of 30 trials with the old seed
+and in none of 30 with the new one ([EXP-076](measurements/2026-09-29-restart-seed-decoy.json)). Candidate
+`a1e51a70` passed the RTX 4090 route and a second RTX 5090 window.
+
+[Release notes](../releases/v0.8.7/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.8.7/manifest.json) ·
+[Qualification](../releases/v0.8.7/qualification.json).
+
+## Historical v0.8.6 — long sessions compact inline (2026-09-28)
 
 Long sessions no longer fail a turn while OMP compacts them. The config every documented
 route installs, [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml),

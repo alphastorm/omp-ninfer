@@ -9,38 +9,50 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — one private, long-lived Oh My Pi session on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
-The v0.8.6 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
+The v0.8.7 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
 Windows 11**, with the checksummed, unmodified upstream OMP 18.4.0 binary.
-The config every route installs now sets `compaction.asyncEnabled: false`: OMP compacts before
-the turn rather than in the background, so a turn no longer times out behind the RTX 4090's
-handoff. [EXP-072](measurements/2026-09-28-omp-long-sessions.json), measured with the new
-[long-session proof](../scripts/omp_long_session_proof.py), recorded three inline handoffs at
-**77.0-83.7 s** each with no expired admission and exact newest-identifier recall after each
-compaction and a graceful restart. The turn carrying compaction takes **91-101 s**. RTX 5090
-snapcompact took **0.07-0.08 s** on the client and recalled both identifiers held only in frames;
-its bounded archive dropped **76,832 and 192,080 characters** of older middle history.
+Both lanes move to runtimes that keep a long session's cache
+([EXP-074](measurements/2026-09-29-long-session-cache.json)). RTX 4090 compaction handoffs
+reused **78.0-79.9K cached tokens** and started in **0.58-0.70 s** instead of prefilling
+97.4-97.5K tokens in 63.8-66.3 s. RTX 5090 near-capacity turns kept their continuation
+(**78.0-80.5K cached tokens**; no turn prefilled more than 60K tokens from root). A crash after a
+compaction restores the compacted session, and short sessions filling the 24 GiB checkpoint
+store no longer delete a long session's checkpoint. The config every route installs limits each
+NInfer provider to one request in flight, so OMP compacts in the background again: three RTX 4090
+handoff compactions ran 55 requests with none expired.
 
-This is one run per configuration on each lane with synthetic filler, one seed and thinking
-`low`, not a measured failure rate. Older-identifier recall is recorded, not gated. RTX 5090
-post-compaction restart was not measured. RTX 4090's first turn after a post-compaction restart
-re-prefills about 32,000 tokens (17 s), rather than restoring hot state. See the other
-[long-session limits](BENCHMARKS.md#v086--long-sessions-compact-inline-2026-09-28).
+This is one run per configuration with synthetic filler, one seed and thinking `low`, not a
+measured rate. Restarting the OMP process still costs one prefill of a resumed session's
+context, because OMP 18.4.0's first request after resuming omits the session's reasoning. See
+the other [long-session limits](BENCHMARKS.md#v087--long-sessions-keep-their-cache-2026-09-29).
 
-Upgrade from v0.8.5 by merging this into `~/.omp/agent/config.yml`:
+Upgrade from v0.8.6 by following the quickstart for your lane, removing
+`compaction.asyncEnabled: false` from `~/.omp/agent/config.yml` and merging:
 
 ```yaml
-compaction:
-  asyncEnabled: false
+providers:
+  maxInFlightRequests:
+    ninfer-beta: 1
+    ninfer-native-4090: 1
+    ninfer-main: 1
+    ninfer-heavy: 1
 ```
 
-The client, provider fragments, runtimes, model, serving configurations, memory floors and lane
-receipts are unchanged from v0.8.5; checkpoints carry across. RTX 5090 keeps image `cd9e10b1`
-(`v0.6.12-qwen38-5090-beta.1`); RTX 4090 keeps package `6492588e`
-(`v0.6.9-qwen38-4090-beta.1`). Documented resume/restart checks now plant with an OK-only
-reply and recall verbatim. All four routes passed **24 steps** on `4f49fce7` with unmodified
-OMP 18.4.0 and published components: RTX 5090 host 2, macOS 10, Windows 5 and RTX 4090 native
-Windows 7; both hosts were restored. [Release state and manifest](RELEASES.md) ·
-[documented routes](../releases/v0.8.6/acceptance/documented-routes.json).
+RTX 5090 moves to image `d71e34c3` (`v0.6.13-qwen38-5090-beta.1`) with the same serving
+arguments and profile; RTX 4090 moves to package `a0ea4c81` (`v0.6.10-qwen38-4090-beta.1`). The
+client, provider fragments, model and memory floors are unchanged; both server builds change, so
+each saved session re-prefills once. All four routes passed **24 steps** on `a1e51a70` with
+unmodified OMP 18.4.0 and published components: RTX 5090 host 2, macOS 10, Windows 5 and
+RTX 4090 native Windows 7; both hosts were restored. [Release state and manifest](RELEASES.md) ·
+[documented routes](../releases/v0.8.7/acceptance/documented-routes.json).
+
+**Historical v0.8.6 — long sessions compact inline.** That release set
+`compaction.asyncEnabled: false` so OMP compacted before the turn: a background RTX 4090 handoff
+had held the lane while the next turn's attempts expired
+([EXP-072](measurements/2026-09-28-omp-long-sessions.json)). Its documented resume and restart
+checks began planting the nonce with an OK-only reply
+([EXP-073](measurements/2026-09-28-omp-acceptance-sampling.json)). Runtimes and checkpoints
+carried across from v0.8.5.
 
 **Historical v0.8.5 — OMP 18.4.0 and long-session compaction.** That release fixed RTX 5090
 automatic compaction as well as Windows completion status
@@ -70,7 +82,7 @@ To upgrade from v0.8.4, install the checksummed 18.4.0 client binary and add
 `PI_OPENAI_STATEFUL=1` are unchanged. Neither server build changes, so checkpoints on both
 lanes carry across.
 
-RTX 3090 is deferred for v0.8.6; its
+RTX 3090 is deferred for v0.8.7; its
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 remains on OMP 18.0.9, not qualified with the new client.
 

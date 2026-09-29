@@ -75,6 +75,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   runtime. EXP-075 reran the stock OMP 18.4.0 durable-session proof on both new runtimes: one
   session across graceful restarts, and every turn after the seed cached
   ([EXP-075](docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json)).
+- Fresh acceptance on candidate `a1e51a70` with unmodified OMP 18.4.0 and the published
+  components: all four documented routes passed **24 steps** (RTX 5090 container host 2,
+  macOS client 10, Windows client 5 and RTX 4090 native Windows 7); both hosts were restored
+  ([routes](releases/v0.8.7/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.8.7/acceptance/composed-external-installation.json)).
+  The upstream macOS arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed
+  tool turn, an exact continuation and a fail-closed request against image `d71e34c3`;
+  Linux ran under WSL2, not a separately qualified Linux OS. The RTX 5090 routes ran from a
+  separately hosted Apple silicon Mac mini on macOS 26.6.1 over the tailnet, in two production
+  windows with downtime at most **264.5 s** and **384.1 s (6.4 min)**
+  ([restoration](docs/measurements/2026-09-29-v087-acceptance-restoration.json)). The first
+  window, on candidate `9474326f`, failed at the macOS restart step on the seeded quote above.
   [Qualification](releases/v0.8.7/qualification.json) ·
   [Release notes](releases/v0.8.7/NINFER_RELEASE_NOTES.md).
 

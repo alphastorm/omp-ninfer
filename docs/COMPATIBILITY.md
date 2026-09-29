@@ -3,15 +3,15 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.8.7`
-Composition: **v0.8.7 upstream OMP v18.4.0 client; route acceptance on the v0.8.7 runtimes pending**
+Composition: **v0.8.7 upstream OMP v18.4.0 client and route acceptance passed on RTX5090 and RTX4090**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.4.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64) (sha256 `90111c710fb8`) | `qwen38-5090-v0.8.2` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/47e357f2c28dd1d34510161f41698e57104a5fbc/releases/v0.8.7/acceptance/darwin-arm64-18.4.0.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.4.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe) (sha256 `5e8637d7f0e8`) | `qwen38-5090-v0.8.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/47e357f2c28dd1d34510161f41698e57104a5fbc/releases/v0.8.7/acceptance/windows-x64-18.4.0.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.4.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64) (sha256 `fbcdb8f5033c`) | `qwen38-5090-v0.8.2` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/47e357f2c28dd1d34510161f41698e57104a5fbc/releases/v0.8.7/acceptance/linux-x64-18.4.0.json) |
+| `darwin-remote-ssh` | macOS 26 arm64 — upstream `v18.4.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64) (sha256 `90111c710fb8`) | `qwen38-5090-v0.8.2` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a1e51a7064a1b0a5e862f9b77ae8815f8144012d/releases/v0.8.7/acceptance/darwin-arm64-18.4.0.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.4.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe) (sha256 `5e8637d7f0e8`) | `qwen38-5090-v0.8.2` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a1e51a7064a1b0a5e862f9b77ae8815f8144012d/releases/v0.8.7/acceptance/windows-x64-18.4.0.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.4.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64) (sha256 `fbcdb8f5033c`) | `qwen38-5090-v0.8.2` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a1e51a7064a1b0a5e862f9b77ae8815f8144012d/releases/v0.8.7/acceptance/linux-x64-18.4.0.json) |
 
 ## Native runtime variants
 
