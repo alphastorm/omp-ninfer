@@ -3,10 +3,10 @@
   "schema_version": 1,
   "experiment": "EXP-077",
   "title": "Two requests in flight on the RTX 5090: eight-token verify rounds left the Q5 tensor-core route, and running them on it takes two decoding requests from 1.14x to 1.69x of one at a time with byte-identical outputs",
-  "generated_utc": "2026-09-29T17:45:00Z",
+  "generated_utc": "2026-09-29T23:30:00Z",
   "status": "observed",
   "question": "Can the RTX 5090 lane serve two requests at once (--max-concurrency 2, OMP maxInFlightRequests 2 for its providers) with more aggregate decode, the same outputs, and no loss of prefix reuse, durable sessions, 130,048-token retrieval or stock OMP's subagents and compaction? What limits it, and what does a second request cost the one already running?",
-  "answer": "Yes for decode throughput, outputs, reuse and the durability paths measured so far; the v0.8.7 lane set on the final profile is incomplete. The published v0.6.13 image fits two requests (KV 160,256 tokens, 30,244 MiB of 32,607) but two decoding requests reached only 190.0-191.1 tok/s together against 166.7-167.1 one at a time: with two requests the MTP3 verify round carries eight tokens, and the Q5 projections left the four-token tensor-core route for SIMT kernels (12.8 ms of a 23.9 ms round, against 5.2 ms). Runtime e20060b6 runs them on that route at eight tokens: two decoding requests reach 282.0-282.8 tok/s together (146.0-151.3 each), one request alone is unchanged, and all 89 role-corpus cases run two at a time, like every probe request whose prompt and reuse path matched its one-at-a-time counterpart, are byte-identical to one request at a time. A request that does not fit beside the running one waits at the server, and at the default 30 s it expired; --pending-timeout-ms 180000 lets it wait while the wait plus the longest root prefill (130,048 tokens in 58.6 s) stays inside OMP 18.4.0's 300 s stream watchdog. On that profile the role corpus, profile gates, stock OMP durable sessions, EXP-072's long sessions, checkpoint reclamation and the EXP-050 workload passed. Stock OMP at limit 2 finished a parent's two scout subagents 22.8% sooner, and two short sessions started together 12.9% later: their simultaneous first turns each took about 3.4 s against 0.9 and 1.8 s one at a time. A decode beside another request's long prefill still slows to about 30 tok/s, and a request arriving while a prefill is staged waits for it. The third window ended when the appliance's C: drive filled and the WSL distro went read-only; the workload resume, barrier, fanout/restore probes and agent mix did not run on the final profile.",
+  "answer": "Yes for decode throughput, outputs, reuse and durability. The published v0.6.13 image fits two requests (KV 160,256 tokens, 30,244 MiB of 32,607) but two decoding requests reached only 190.0-191.1 tok/s together against 166.7-167.1 one at a time: with two requests the MTP3 verify round carries eight tokens, and the Q5 projections left the four-token tensor-core route for SIMT kernels (12.8 ms of a 23.9 ms round, against 5.2 ms). Runtime v0.6.14 (e20060b6) runs them on that route at eight tokens: two decoding requests reached 282.0-282.8 tok/s together in the candidate window and 281.1-283.0 on the final profile, and every role-corpus case and every probe request whose prompt and reuse path matched its one-at-a-time counterpart is byte-identical to one request at a time. A request that does not fit beside the running one waits at the server; at the default 30 s it expired, and --pending-timeout-ms 180000 lets it wait while the wait plus the longest root prefill (130,048 tokens in 58.6 s) stays inside OMP 18.4.0's 300 s stream watchdog. On that profile the v0.8.7 lane set passed: role corpus, profile gates, stock OMP durable sessions, EXP-072's long sessions, checkpoint reclamation, EXP-050's workload and resume, EXP-051's barrier (whose deferred save did not arise at two requests), the fanout, warm-arrival, restore and multisession probes and the agent mix; the published image then passed the role corpus and profile gates. What stock OMP gains is less settled than aggregate decode: a parent's two subagents took 25.2 and 23.9 s at limit 2 against 32.7 and 22.6 s at limit 1, and two short sessions started together finished later at limit 2 in both windows. A decode beside another request's long prefill slows to about 30 tok/s, and a request arriving while a prefill is staged waits for it.",
   "method": {
     "lane": "RTX 5090 (32,607 MiB) on the production appliance, one engine-window arm at a time on port 18099 with a scratch checkpoint root. Each window took the supervisor hold, stopped production (ninfer-5090-v070p), armed an appliance-side dead-man restore, ran its arms, restored production and released the hold.",
     "arms": {
@@ -14,7 +14,8 @@
       "c2-v0613b1": "the same image and arguments with --max-concurrency 2 (deployment qwen38-5090-v0.9.0, configuration 205ef6f8)",
       "c1pkg-e20060b6": "candidate runtime e20060b6 (server f62a570e, packaged locally as ninfer-5090:e20060b6-package-local) with v0.8.7's arguments",
       "c2pkg-e20060b6": "the candidate with --max-concurrency 2 --pending-timeout-ms 240000 (configuration e54d22d3)",
-      "v090-e20060b6": "the candidate with the v0.9.0 profile: --max-concurrency 2 --pending-timeout-ms 180000 (configuration cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32)"
+      "v090-e20060b6": "the candidate with the v0.9.0 profile: --max-concurrency 2 --pending-timeout-ms 180000 (configuration cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32)",
+      "pub-v0614b1": "the published v0.6.14 image (ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c, server f62a570e) with the v0.9.0 profile's arguments (configuration cf1de114)"
     },
     "tools": {
       "concurrency_probe": "scripts/concurrency_probe.py at 458f6eb, two repetitions of solo, decode_pair, prefill_during_decode (71,641-token prefill beside a 1,024-token decode), decode_during_prefill, two_sessions (two ~62.4K-token stored sessions, two continuations each), fanout (82K base, four branches, two at a time) and near_capacity (two 125,879-token requests); restart: two stored sessions, a graceful `docker restart --time 90` once both stream 32 deltas, then both resumed",
@@ -63,12 +64,20 @@
       "long_sessions": "EXP-072's three runs at limit 2: plant-after 2 and 1 passed; plant-after 3 stopped at the harness precondition 'OMP compacted before both identifiers were planted', as it did on v0.8.7's candidate at the same turns; 41 requests, no maximal fallback and no root prefill over 60K tokens. Both compactions per run were snapcompact (0.05-0.07 s): on this image-capable fragment OMP compacts without a model request",
       "short_sessions": "35 sessions of about 11.9K tokens (1.14 GB checkpoints) filled the 24 GiB store; the 60,026-token session kept its checkpoint and after a crash reused 60,057 cached tokens in 2.99 s",
       "workload": "EXP-050's workload passed: 130,048-token context exact, 8 of 8 session continuations kept reuse, 4 fanout branches reused 67,676 tokens each, agent protocol ok; the graceful stop saved 1, refused 0",
-      "not_run": "the workload resume (interrupted mid-run), EXP-051 barrier, fanout/warm-arrival/restore/multisession probes, agent mix, and the concurrency probe, restart-with-two-in-flight and stock OMP parallel proofs on this configuration (the last three ran on c2pkg-e20060b6, which differs only in its 240 s pending timeout)"
+      "fourth_window": "v090-e20060b6 again, for the steps the third window did not reach: EXP-050's workload and resume passed (8 of 8 session continuations kept reuse; two saves before eviction; the stop saved 1 and refused 0; all 4 stored sessions resumed from their checkpoints, the two 126.1K-token sessions with 126,067-126,068 cached tokens); EXP-051's barrier held one reply out of the response store for 6 s and the held turn resumed exactly after a restart (V-9241)",
+      "barrier_at_two_requests": "the barrier's second 126,128-token session was admitted and prefilled while the held reply was being stored, without evicting the held session, so no save before eviction was deferred (v0.8.7's barrier logged that deferral; here 0 such lines); the held turn was saved automatically after publication",
+      "probes": "fanout-57k, fanout-67k, warm-arrival, restore and multisession passed; multisession lost reuse on 2 of 8 continuations/forks, as v0.8.7's control did",
+      "agent_mix": "24 fresh agent sessions, 0 on the root path; median client time to first token 0.092-0.100 s",
+      "concurrency_probe": "two decoding requests 281.1-283.0 tok/s together (143.5-152.8 each, output-event gap p50 15.7 ms) against 164.6-164.7 tok/s alone; a decode beside the 71,641-token prefill 30.4-30.6 tok/s (gap p99 478-480 ms); a request arriving during a staged prefill reached its first output at 26.6 s; the two-session repetitions re-prefilled 2 and 1 of 4 continuations from root; every fanout branch reused 82,022-82,066 tokens; the second of two 125,879-token requests waited and reached its first output after 114.2-135.7 s",
+      "restart_with_two_in_flight": "a graceful restart while two stored ~62.4K-token sessions decoded ended both streams response.incomplete; both continuations then reused 62,404 cached tokens (first output 5.00-5.46 s)",
+      "shutdown_after_probe": "after the probe's evictions, the graceful stop refused 7 sessions whose newest turn was no longer resident ('engine gate: session is not indexed in the engine'); the same probe at one request (c1pkg-e20060b6) refused 5"
     },
     "stock_omp_two_in_flight": {
       "subagents": "a parent turn fanning out two scout subagents: 32.7 s at OMP's limit 1, 25.2 s at limit 2 (22.8% less), 17.7 s of the run with two requests in flight",
       "sessions": "two OMP sessions started together, three barrier-aligned turns each, every recall exact: 6.5 s at limit 1, 7.3 s at limit 2 (12.9% more). Their first turns took 3.38 and 3.33 s against 0.89 and 1.76 s one at a time; both reused the shared 7,155-token prefix, and the server reached their first outputs after 1.27 and 2.51 s (0.64 s for the comparable turn one at a time)",
-      "arm": "c2pkg-e20060b6 (240 s pending timeout) in the second window"
+      "arm": "c2pkg-e20060b6 (240 s pending timeout) in the second window",
+      "final_profile": "subagents: 22.6 s at limit 1 (10 requests, 1,549 generated tokens) and 23.9 s at limit 2 (9 requests, 1,932 tokens, 15.7 s with two in flight); sessions: 5.6 s at limit 1 and 8.2 s at limit 2, whose simultaneous first turns took 5.2 and 5.8 s",
+      "reading": "one run per limit in each of two windows: the subagent fan-out took 25.2 and 23.9 s at limit 2 against 32.7 and 22.6 s at limit 1, because what the subagents generate varies from run to run more than overlap saves; neither window shows two sessions started together finishing sooner"
     },
     "host_incident": {
       "what": "At 17:17:53Z, during the final-profile window's workload resume, the appliance's Windows C: drive filled (NTFS event 141: 3.45 GB free, all of it reserve). The Ubuntu WSL distro's dynamically expanding ext4.vhdx (932 GiB) lives on C:, so VHDMP failed a write with 0xC000007F and unsurfaced the disk; ext4 went emergency read-only and the distro's binaries returned I/O errors.",
@@ -82,7 +91,14 @@
       "attribution": "15:35:59-15:37:46Z (1.8 min)",
       "window_2": "16:03:33-16:40:54Z (37.4 min)",
       "window_3": "16:43:38-17:32:00Z (48.4 min), of which 14.1 min after the host failure at 17:17:53Z",
-      "total": "112.9 min"
+      "window_4": "21:36:14-22:25:44Z (49.5 min)",
+      "window_5": "22:27:54-22:39:49Z (11.9 min), the published image",
+      "total": "174.3 min"
+    },
+    "published_image_window": {
+      "arm": "pub-v0614b1: the published image ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c (ninfer-serve f62a570e verified inside) with the v0.9.0 profile's serving arguments (configuration cf1de114)",
+      "role_corpus": "v090-v090-e20060b6-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing; v087-pub-v0613b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+      "profile_gates": "passed: 130,048-token retrieval exact in 58.4 s (server prefill 58.29 s, root); decode 169.79 tok/s over 2,048 tokens; agent protocol across a restart; 30,242 MiB"
     }
   },
   "decisions": {
@@ -91,15 +107,17 @@
     "pending_timeout": "180 s, not 240 s: a waiting request emits nothing after response.created, and 240 s plus a 58.6 s root prefill would reach OMP's 300 s stream watchdog",
     "invariants": "tests/test_manual_tunnel_scripts.py binds each provider's limit to its lane's --max-concurrency and bounds a two-request lane's pending timeout inside OMP's watchdog",
     "rtx4090": "unchanged at one request",
-    "gate": "publication waits for the remaining lane steps on the final profile, which need at least 64 GiB free on the appliance's C: drive"
+    "gate": "passed: the final profile's lane set and the published image's corpus and profile gates; v0.9.0 is staged on v0.6.14-qwen38-5090-beta.1, and documented-route acceptance on the published components comes next"
   },
   "limits": [
     "One run per configuration and two repetitions per probe scenario, on synthetic prompts at thinking low.",
     "Two requests share the KV pool only while both prompts plus their output reservations fit in 160,256 tokens (the reservation is prompt plus max_output_tokens minus one, request_plan_impl.h). OMP sends max_output_tokens 32768, so by that rule two OMP sessions above about 47K tokens each take turns [inference from the admission code; not measured with OMP].",
     "Two alternating 62.4K-token sessions re-prefilled 2 of their 4 continuations from root at C2, as at C1; C2 does not raise how many long sessions keep their cache.",
     "A decode beside another request's 71,641-token prefill ran at 30.4-30.5 tok/s with 479-481 ms output gaps, and a request arriving while a prefill is staged waits for it (26.7 s).",
-    "The concurrency probe, restart-with-two-in-flight and stock OMP parallel proofs ran with a 240 s pending timeout, not the final 180 s; the final profile's lane set is incomplete (see final_profile_window.not_run).",
-    "Stock OMP's compaction on the RTX 5090 fragment is snapcompact, with no model request, so these runs do not exercise a background summary overlapping a turn on this lane."
+    "Stock OMP's compaction on the RTX 5090 fragment is snapcompact, with no model request, so these runs do not exercise a background summary overlapping a turn on this lane.",
+    "The concurrency probe, restart and stock OMP parallel proofs ran on both the candidate's 240 s pending timeout (second window) and the final 180 s (fourth window).",
+    "Stock OMP wall times are one run per limit per window; run-to-run variation in what the model generates exceeds the overlap two requests buy in these short scenarios.",
+    "EXP-051's deferred save before eviction did not arise at two requests: the evicting session was admitted beside the held one. The deferral path is unchanged runtime code from v0.6.13, where the barrier exercised it."
   ],
   "raw_prompts_outputs_or_secrets_included": false
 }

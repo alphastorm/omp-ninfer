@@ -129,7 +129,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-065 | Upstream engine window against the shipped RTX 5090 runtime | Upstream e31bc99b improves the shipped lane enough to justify merging | Decode about 18% slower, fanout 0/4 versus 4/4; its 1.5% single-run prefill lead was already present in EXP-048 ([receipt](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json)) | rejected — merge deferred |
 | EXP-066 | RTX 4090 long-spin engine keep-warm | An sm_89-specific 50 ms/100 ms spin restores post-idle prefill to back-to-back speed | With a 60 s grace, new sessions after 12-58 s idle prefilled in 0.146-0.148 s (TTFT 0.167-0.178 s); all 31 outputs byte-identical, about 72 W above idle while held. A request arriving mid-spin can overlap one warp for up to 50 ms ([receipt](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json)) | kept — shipped in v0.8.4 RTX 4090 v0.6.9 |
 | EXP-069 | RTX 4090 Q5 small-T tensor-core route | The sm_89 route clears the pre-registered decode-gain thresholds of 2.0% at 26K and 1.0% at 60K | Measured +0.38% at 26K and +0.40% at 60K; rejected by the fixed rule, so the published v0.6.9 package keeps its decode kernels ([receipt](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)) | rejected |
-| EXP-077 | RTX 5090 two requests in flight | With `--max-concurrency 2` and OMP's limit at 2, the lane serves two requests with more aggregate decode and without losing outputs, reuse or durability | The shipped v0.6.13 image paired two decodes at 190.0-191.1 tok/s against 166.7-167.1 one at a time (1.14×): eight-token verify rounds left the Q5 tensor-core route, 12.8 ms of a 23.9 ms round. Runtime `e20060b6` runs them on it: **282.0-282.8 tok/s (1.69×)**, 146.0-151.3 each, one request alone unchanged, 89/89 role-corpus cases run two at a time byte-identical to one at a time. A request that does not fit waits at the server; `--pending-timeout-ms 180000` replaces the 30 s default that expired it. A decode beside a 71,641-token prefill still slows to about 30 tok/s ([receipt](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)) | open — v0.9.0 candidate; four lane steps remain |
+| EXP-077 | RTX 5090 two requests in flight | With `--max-concurrency 2` and OMP's limit at 2, the lane serves two requests with more aggregate decode and without losing outputs, reuse or durability | The shipped v0.6.13 image paired two decodes at 190.0-191.1 tok/s against 166.7-167.1 one at a time (1.14×): eight-token verify rounds left the Q5 tensor-core route, 12.8 ms of a 23.9 ms round. Runtime v0.6.14 (`e20060b6`) runs them on it: **281.1-283.0 tok/s (1.68-1.70×)**, 143.5-152.8 each, 89/89 role-corpus cases byte-identical to one at a time on the candidate and the published image. A request that does not fit waits at the server; `--pending-timeout-ms 180000` replaces the 30 s default that expired it. The v0.8.7 lane set passed on the final profile. A decode beside a 71,641-token prefill still slows to about 30 tok/s, and stock OMP's wall time at limit 2 followed what its subagents generated rather than the overlap ([receipt](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)) | kept — v0.9.0 |
 
 Entry detail:
 
@@ -850,14 +850,18 @@ Entry detail:
   together reached only 1.14× one at a time. Nsight Systems placed the gap in the verify pass: with
   two requests it carries eight tokens, and the Q5 projections fell off the four-token small-T MMA
   onto SIMT kernels (12.8 ms of a 23.9 ms round, against 5.2 ms). `e20060b6` templates that MMA on
-  eight tokens: the pair decodes at 282.0-282.8 tok/s, and outputs match one-at-a-time wherever
+  eight tokens: the pair decodes at 281.1-283.0 tok/s, and outputs match one-at-a-time wherever
   the prompt and reuse path match. The server's default 30 s pending timeout expired a request
   queued behind a running one; 180 s keeps the wait plus the longest root prefill inside OMP
-  18.4.0's 300 s stream watchdog. Stock OMP at limit 2 ran a parent's two scout subagents 22.8%
-  faster and two short sessions started together 12.9% slower. The final-profile window passed the
-  role corpus, profile gates, stock OMP durable sessions, long sessions, reclamation and the
-  workload, then ended when the appliance's C: drive filled and its WSL disk went read-only; the
-  resume, barrier, probes and agent mix remain to run. Receipt:
+  18.4.0's 300 s stream watchdog. Stock OMP at limit 2 overlapped a parent's two scout subagents
+  for 15.7-17.7 s, but the turn took 25.2 and 23.9 s against 32.7 and 22.6 s at limit 1 in two
+  windows, following what the subagents generated, and two short sessions started together
+  finished later at limit 2 both times. On the final profile the v0.8.7 lane set passed: role
+  corpus, profile gates, stock OMP durable sessions, long sessions, reclamation, workload and
+  resume, barrier (whose deferred save did not arise at two requests), probes and agent mix; the
+  third window's run ended when the appliance's C: drive filled and its WSL disk went read-only,
+  and a fourth finished it. The published v0.6.14 image then passed the role corpus and profile
+  gates (130,048 tokens exact in 58.4 s, 169.79 tok/s). Receipt:
   [two requests in flight](measurements/2026-09-29-rtx5090-two-requests-in-flight.json).
 
 ## Current order

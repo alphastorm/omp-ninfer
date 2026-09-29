@@ -1,0 +1,1288 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.9.0",
+  "as_of": "2026-09-29",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Two requests in flight on the RTX 5090. RTX 5090 moves to v0.6.14-qwen38-5090-beta.1 (image 4c816b0c, server f62a570e, source e20060b6): v0.6.13's source plus the RTX 4090 v0.6.10 Windows packaging fix and one kernel change. With two requests, the MTP3 verify round carries eight tokens, and the Q5 projections now take the tensor-core route at eight tokens as they did at four. The RTX 5090 profile qwen38-5090-v0.9.0 (configuration cf1de114) adds --max-concurrency 2 and --pending-timeout-ms 180000 to v0.8.7's serving arguments, and the route config lets OMP send two requests to each RTX 5090 provider (ninfer-beta and ninfer-main). RTX 4090 native Windows stays on v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93), its serving configuration 7a69481f and one request at a time. The model, the memory floors and the unmodified upstream OMP 18.4.0 client are unchanged. RTX 3090 is omitted pending physical-host access. The RTX 5090 profile gates and role corpus below were measured on the published image, and its two-request, long-session, reclamation, durability, barrier, stock-client, agent-mix and probe evidence on the candidate image of the same binary and serving arguments; the RTX 4090 gates are the canonical qualification of the published package, carried from v0.8.7.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "e20060b6a152a11fd72450549592527e126b035e",
+    "release_source_commit": "e20060b6a152a11fd72450549592527e126b035e",
+    "release_source_archive_sha256": "fb3039dfcedc2b8f4f712cf096772ea2fd05f2ef9cb84352273b5765fd4f90b5",
+    "release_server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.9.0"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.9.0/qualification/rtx5090.json",
+      "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113",
+      "status": "passed",
+      "source_commit": "e20060b6a152a11fd72450549592527e126b035e",
+      "server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "e20060b6a152a11fd72450549592527e126b035e",
+      "release_server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+      "oci_manifest_digest": "sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+      "binary_package_sha256": "386f684984d27eadda3ed185a88a60192f8a7350ec2841f3643450344d89eda2",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.14-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.14-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "b10d8f051548418a23c5b0c975f4d46083c26cd31b585a2debfcef3d5c549ed0",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.14-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "Appliance-local release build of e20060b6 in the CUDA 13.1.2 devel image (nvcc 13.1.115) with v0.6.13's build flags. The four Q5 op oracle tests (ninfer_linear_q5_a16_test, ninfer_linear_add_q5_a16_test, ninfer_gdn_input_proj_test, ninfer_attn_input_proj_test), including the new eight- and nine-token cases, passed on the RTX 5090 from the release build tree. Publication workflow 36635266542 binds binary archive 386f6849 to image 4c816b0c. The image pull by digest with an empty Docker config verified ninfer-serve f62a570e inside, and every lane-window arm checks that its declared binary identity is the image's."
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.9.0/qualification/rtx4090.json",
+        "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14",
+        "release_tag": "v0.6.10-qwen38-4090-beta.1",
+        "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.14-qwen38-5090-beta.1 component (image 4c816b0c) before the cut; the receipt lands at releases/v0.9.0/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "release_tag": "v0.6.14-qwen38-5090-beta.1",
+      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+      "source_commit": "e20060b6a152a11fd72450549592527e126b035e",
+      "configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+      "measured_on": "2026-09-29T22:37:11Z",
+      "profile_gates": {
+        "prefill_curve": {
+          "status": "passed",
+          "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "exact_output": true,
+          "output": "ORCHID=493817; COLOR=COBALT",
+          "wall_s": 58.424,
+          "tokens_per_second_wall": 2225.9,
+          "vram_used_mib_after": 30244,
+          "server_prefix_cache_hit_tokens": 0,
+          "server_prefix_reuse_path": "root",
+          "server_computed_prefill_tokens": 130048,
+          "server_prefill_seconds": 58.28941810400001,
+          "cold": true
+        },
+        "decode": {
+          "request_id": "0b1b3dba61425423a7d38571b3f7657aa0ee9004410445f808f1dd8671ed5c1b",
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "wall_s": 12.171,
+          "completion_tokens_per_second_wall": 168.27,
+          "server_completion_tokens": 2048,
+          "server_decode_seconds": 12.062277974,
+          "decode_tokens_per_second": 169.79,
+          "mtp_acceptance_rate": 0.448,
+          "mtp_tokens_per_round": 2.34,
+          "speculative": {
+            "accepted_per_position": [
+              593,
+              369,
+              211
+            ],
+            "accepted_tokens": 1173,
+            "backend": "mtp",
+            "draft_window": 3,
+            "drafted_tokens": 2621,
+            "fallback_steps": 0,
+            "rounds": 874
+          }
+        },
+        "agent_protocol": {
+          "status": "passed",
+          "authenticated_session_identity": true,
+          "stateful_continuation": true,
+          "forks": 2,
+          "parent_delete_status": 200,
+          "deleted_continuation_status": 404,
+          "deleted_continuation_error_code": "previous_response_not_found",
+          "post_restart_deleted_continuation_status": 404,
+          "no_resurrection": true,
+          "surviving_descendant_continued": true,
+          "live_sibling_continuation_status": 200,
+          "live_sibling_continuation_error_code": null
+        }
+      },
+      "two_requests_in_flight": {
+        "method": "scripts/concurrency_probe.py on the final profile, two repetitions of solo, decode_pair, prefill_during_decode (a 71,641-token prefill beside a 1,024-token decode), decode_during_prefill, two_sessions (two ~62.4K-token stored sessions, two continuations each), fanout (four branches of an 82K-token base, two at a time) and near_capacity (two 125,879-token requests); restart: two stored sessions, a graceful docker restart --time 90 while both stream, then both resumed; scripts/omp_parallel_proof.py: the unmodified OMP 18.4.0 macOS arm64 binary over the route's tunnel, a parent turn fanning out two scout subagents and two OMP sessions started together, at OMP's limit 1 and then 2.",
+        "server_max_concurrency": 2,
+        "pending_timeout_ms": 180000,
+        "probe": {
+          "solo": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 162.0,
+              "makespan_s": 6.32,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "solo",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.1,
+                  "decode_tok_s": 164.7,
+                  "output_gap_p50_ms": 13.7,
+                  "output_gap_max_ms": 14.2
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 162.0,
+              "makespan_s": 6.32,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "solo",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.1,
+                  "decode_tok_s": 164.6,
+                  "output_gap_p50_ms": 13.8,
+                  "output_gap_max_ms": 17.3
+                }
+              ]
+            }
+          ],
+          "decode_pair": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 283.0,
+              "makespan_s": 7.24,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.1,
+                  "decode_tok_s": 143.5,
+                  "output_gap_p50_ms": 15.7,
+                  "output_gap_max_ms": 85.7
+                },
+                {
+                  "label": "decode-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 94,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.24,
+                  "decode_tok_s": 152.8,
+                  "output_gap_p50_ms": 15.7,
+                  "output_gap_max_ms": 16.1
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 281.1,
+              "makespan_s": 7.29,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.25,
+                  "decode_tok_s": 145.5,
+                  "output_gap_p50_ms": 15.7,
+                  "output_gap_max_ms": 16.1
+                },
+                {
+                  "label": "decode-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 94,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.1,
+                  "decode_tok_s": 150.4,
+                  "output_gap_p50_ms": 15.7,
+                  "output_gap_max_ms": 87.6
+                }
+              ]
+            }
+          ],
+          "prefill_during_decode": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 31.5,
+              "makespan_s": 33.57,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.11,
+                  "decode_tok_s": 30.6,
+                  "output_gap_p50_ms": 13.8,
+                  "output_gap_max_ms": 506.7
+                },
+                {
+                  "label": "prefill-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 71641,
+                  "cached_tokens": 0,
+                  "ttft_s": 28.18,
+                  "decode_tok_s": 165.9,
+                  "output_gap_p50_ms": 19.3,
+                  "output_gap_max_ms": 19.5
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 31.3,
+              "makespan_s": 33.78,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 0.11,
+                  "decode_tok_s": 30.4,
+                  "output_gap_p50_ms": 13.9,
+                  "output_gap_max_ms": 507.4
+                },
+                {
+                  "label": "prefill-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 71641,
+                  "cached_tokens": 0,
+                  "ttft_s": 28.36,
+                  "decode_tok_s": 166.2,
+                  "output_gap_p50_ms": 19.2,
+                  "output_gap_max_ms": 19.4
+                }
+              ]
+            }
+          ],
+          "decode_during_prefill": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 9.9,
+              "makespan_s": 29.0,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "prefill-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 71641,
+                  "cached_tokens": 0,
+                  "ttft_s": 27.47,
+                  "decode_tok_s": 107.9,
+                  "output_gap_p50_ms": 19.2,
+                  "output_gap_max_ms": 98.2
+                },
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 26.62,
+                  "decode_tok_s": 185.1,
+                  "output_gap_p50_ms": 13.8,
+                  "output_gap_max_ms": 19.3
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 9.9,
+              "makespan_s": 29.03,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "prefill-B",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 71641,
+                  "cached_tokens": 0,
+                  "ttft_s": 27.5,
+                  "decode_tok_s": 108.2,
+                  "output_gap_p50_ms": 19.1,
+                  "output_gap_max_ms": 98.9
+                },
+                {
+                  "label": "decode-A",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 118,
+                  "cached_tokens": 0,
+                  "ttft_s": 26.65,
+                  "decode_tok_s": 185.4,
+                  "output_gap_p50_ms": 13.8,
+                  "output_gap_max_ms": 19.2
+                }
+              ]
+            }
+          ],
+          "two_sessions": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 11.0,
+              "makespan_s": 99.31,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "seed-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62409,
+                  "cached_tokens": 0,
+                  "ttft_s": 46.82,
+                  "decode_tok_s": 188.8,
+                  "output_gap_p50_ms": 16.9,
+                  "output_gap_max_ms": 17.1
+                },
+                {
+                  "label": "seed-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62409,
+                  "cached_tokens": 0,
+                  "ttft_s": 23.29,
+                  "decode_tok_s": 10.5,
+                  "output_gap_p50_ms": 339.0,
+                  "output_gap_max_ms": 357.5
+                },
+                {
+                  "label": "turn-1-session-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62482,
+                  "cached_tokens": 62404,
+                  "ttft_s": 23.91,
+                  "decode_tok_s": 140.3,
+                  "output_gap_p50_ms": 21.9,
+                  "output_gap_max_ms": 22.2
+                },
+                {
+                  "label": "turn-1-session-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62485,
+                  "cached_tokens": 0,
+                  "ttft_s": 23.54,
+                  "decode_tok_s": 127.5,
+                  "output_gap_p50_ms": 22.0,
+                  "output_gap_max_ms": 190.0
+                },
+                {
+                  "label": "turn-2-session-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62937,
+                  "cached_tokens": 62477,
+                  "ttft_s": 24.45,
+                  "decode_tok_s": 152.7,
+                  "output_gap_p50_ms": 21.8,
+                  "output_gap_max_ms": 22.2
+                },
+                {
+                  "label": "turn-2-session-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62857,
+                  "cached_tokens": 0,
+                  "ttft_s": 23.91,
+                  "decode_tok_s": 86.5,
+                  "output_gap_p50_ms": 22.0,
+                  "output_gap_max_ms": 351.4
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 12.9,
+              "makespan_s": 84.87,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "seed-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62409,
+                  "cached_tokens": 0,
+                  "ttft_s": 55.46,
+                  "decode_tok_s": 189.0,
+                  "output_gap_p50_ms": 16.9,
+                  "output_gap_max_ms": 17.0
+                },
+                {
+                  "label": "seed-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62409,
+                  "cached_tokens": 0,
+                  "ttft_s": 27.46,
+                  "decode_tok_s": 5.8,
+                  "output_gap_p50_ms": 335.4,
+                  "output_gap_max_ms": 4911.9
+                },
+                {
+                  "label": "turn-1-session-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62482,
+                  "cached_tokens": 62404,
+                  "ttft_s": 0.31,
+                  "decode_tok_s": 16.4,
+                  "output_gap_p50_ms": 22.1,
+                  "output_gap_max_ms": 641.3
+                },
+                {
+                  "label": "turn-1-session-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62485,
+                  "cached_tokens": 0,
+                  "ttft_s": 24.87,
+                  "decode_tok_s": 149.5,
+                  "output_gap_p50_ms": 21.9,
+                  "output_gap_max_ms": 22.2
+                },
+                {
+                  "label": "turn-2-session-D1",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62937,
+                  "cached_tokens": 62404,
+                  "ttft_s": 0.72,
+                  "decode_tok_s": 95.3,
+                  "output_gap_p50_ms": 22.0,
+                  "output_gap_max_ms": 321.6
+                },
+                {
+                  "label": "turn-2-session-D2",
+                  "finish_status": "completed",
+                  "http_status": 200,
+                  "prompt_tokens": 62857,
+                  "cached_tokens": 62480,
+                  "ttft_s": 1.22,
+                  "decode_tok_s": 152.0,
+                  "output_gap_p50_ms": 22.0,
+                  "output_gap_max_ms": 22.2
+                }
+              ]
+            }
+          ],
+          "fanout": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 8.9,
+              "makespan_s": 40.66,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "fanout-base",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82027,
+                  "cached_tokens": 0,
+                  "ttft_s": 37.62,
+                  "decode_tok_s": 173.4,
+                  "output_gap_p50_ms": 17.8,
+                  "output_gap_max_ms": 18.0
+                },
+                {
+                  "label": "branch-0",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82066,
+                  "ttft_s": 0.2,
+                  "decode_tok_s": 165.5,
+                  "output_gap_p50_ms": 17.9,
+                  "output_gap_max_ms": 20.3
+                },
+                {
+                  "label": "branch-1",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 1.02,
+                  "decode_tok_s": 172.4,
+                  "output_gap_p50_ms": 17.9,
+                  "output_gap_max_ms": 18.1
+                },
+                {
+                  "label": "branch-2",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 0.78,
+                  "decode_tok_s": 149.0,
+                  "output_gap_p50_ms": 23.6,
+                  "output_gap_max_ms": 23.9
+                },
+                {
+                  "label": "branch-3",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 0.35,
+                  "decode_tok_s": 91.7,
+                  "output_gap_p50_ms": 23.6,
+                  "output_gap_max_ms": 189.6
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 7.8,
+              "makespan_s": 46.31,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "fanout-base",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82027,
+                  "cached_tokens": 0,
+                  "ttft_s": 43.08,
+                  "decode_tok_s": 174.8,
+                  "output_gap_p50_ms": 17.7,
+                  "output_gap_max_ms": 17.9
+                },
+                {
+                  "label": "branch-0",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 0.98,
+                  "decode_tok_s": 166.2,
+                  "output_gap_p50_ms": 17.9,
+                  "output_gap_max_ms": 18.1
+                },
+                {
+                  "label": "branch-1",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82066,
+                  "ttft_s": 0.2,
+                  "decode_tok_s": 171.7,
+                  "output_gap_p50_ms": 17.9,
+                  "output_gap_max_ms": 19.5
+                },
+                {
+                  "label": "branch-2",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 0.34,
+                  "decode_tok_s": 186.4,
+                  "output_gap_p50_ms": 17.8,
+                  "output_gap_max_ms": 20.6
+                },
+                {
+                  "label": "branch-3",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 82095,
+                  "cached_tokens": 82022,
+                  "ttft_s": 1.1,
+                  "decode_tok_s": 187.6,
+                  "output_gap_p50_ms": 17.8,
+                  "output_gap_max_ms": 18.1
+                }
+              ]
+            }
+          ],
+          "near_capacity": [
+            {
+              "repeat": 1,
+              "ok": true,
+              "aggregate_tok_s": 1.1,
+              "makespan_s": 114.62,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "capacity-D1",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 125879,
+                  "cached_tokens": 0,
+                  "ttft_s": 114.16,
+                  "decode_tok_s": 140.1,
+                  "output_gap_p50_ms": 19.9,
+                  "output_gap_max_ms": 20.1
+                },
+                {
+                  "label": "capacity-D2",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 125879,
+                  "cached_tokens": 0,
+                  "ttft_s": 56.76,
+                  "decode_tok_s": 138.6,
+                  "output_gap_p50_ms": 19.9,
+                  "output_gap_max_ms": 25.2
+                }
+              ]
+            },
+            {
+              "repeat": 2,
+              "ok": true,
+              "aggregate_tok_s": 0.9,
+              "makespan_s": 136.13,
+              "vram_peak_mib": 30244.0,
+              "requests": [
+                {
+                  "label": "capacity-D1",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 125879,
+                  "cached_tokens": 0,
+                  "ttft_s": 65.13,
+                  "decode_tok_s": 137.5,
+                  "output_gap_p50_ms": 20.0,
+                  "output_gap_max_ms": 28.1
+                },
+                {
+                  "label": "capacity-D2",
+                  "finish_status": "incomplete",
+                  "http_status": 200,
+                  "prompt_tokens": 125879,
+                  "cached_tokens": 0,
+                  "ttft_s": 135.67,
+                  "decode_tok_s": 140.2,
+                  "output_gap_p50_ms": 19.9,
+                  "output_gap_max_ms": 20.1
+                }
+              ]
+            }
+          ]
+        },
+        "restart": {
+          "ok": true,
+          "requests": [
+            {
+              "label": "seed-D1",
+              "finish_status": "completed",
+              "http_status": 200,
+              "prompt_tokens": 62409,
+              "cached_tokens": 0,
+              "ttft_s": 22.65,
+              "decode_tok_s": 10.1,
+              "output_gap_p50_ms": 332.8,
+              "output_gap_max_ms": 351.6
+            },
+            {
+              "label": "seed-D2",
+              "finish_status": "completed",
+              "http_status": 200,
+              "prompt_tokens": 62409,
+              "cached_tokens": 0,
+              "ttft_s": 45.86,
+              "decode_tok_s": 199.6,
+              "output_gap_p50_ms": 16.9,
+              "output_gap_max_ms": 17.1
+            },
+            {
+              "label": "interrupted-session-D1",
+              "finish_status": "incomplete",
+              "http_status": 200,
+              "prompt_tokens": 62537,
+              "cached_tokens": 62404,
+              "ttft_s": 0.35,
+              "decode_tok_s": 31.7,
+              "output_gap_p50_ms": 22.0,
+              "output_gap_max_ms": 639.7
+            },
+            {
+              "label": "interrupted-session-D2",
+              "finish_status": "incomplete",
+              "http_status": 200,
+              "prompt_tokens": 62540,
+              "cached_tokens": 0,
+              "ttft_s": 24.86,
+              "decode_tok_s": 114.7,
+              "output_gap_p50_ms": 22.0,
+              "output_gap_max_ms": 22.3
+            },
+            {
+              "label": "resume-session-D1",
+              "finish_status": "completed",
+              "http_status": 200,
+              "prompt_tokens": 62482,
+              "cached_tokens": 62404,
+              "ttft_s": 5.46,
+              "decode_tok_s": 132.6,
+              "output_gap_p50_ms": 21.8,
+              "output_gap_max_ms": 22.6
+            },
+            {
+              "label": "resume-session-D2",
+              "finish_status": "completed",
+              "http_status": 200,
+              "prompt_tokens": 62485,
+              "cached_tokens": 62404,
+              "ttft_s": 5.0,
+              "decode_tok_s": 131.5,
+              "output_gap_p50_ms": 21.7,
+              "output_gap_max_ms": 187.3
+            }
+          ],
+          "health_after_restart": 200,
+          "server_stops": [
+            "shutdown: saved 0, nothing to save 2, refused 0",
+            "shutdown: saved 0, nothing to save 2, refused 0"
+          ]
+        },
+        "omp_parallel": {
+          "limit_1": [
+            {
+              "scenario": "subagents",
+              "wall_seconds": 22.64,
+              "overlap_seconds": 0.0,
+              "checks": {
+                "parent_completed": true,
+                "codes_exact": true,
+                "one_two_item_task_batch": true,
+                "both_subagents_completed": true,
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            },
+            {
+              "scenario": "sessions",
+              "wall_seconds": 5.64,
+              "overlap_seconds": 0.0,
+              "checks": {
+                "alpha_three_turns_completed": true,
+                "alpha_both_recalls_exact": true,
+                "beta_three_turns_completed": true,
+                "beta_both_recalls_exact": true,
+                "separate_sessions": true,
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            }
+          ],
+          "limit_2": [
+            {
+              "scenario": "subagents",
+              "wall_seconds": 23.94,
+              "overlap_seconds": 15.74,
+              "checks": {
+                "parent_completed": true,
+                "codes_exact": true,
+                "one_two_item_task_batch": true,
+                "both_subagents_completed": true,
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            },
+            {
+              "scenario": "sessions",
+              "wall_seconds": 8.23,
+              "overlap_seconds": 5.882,
+              "checks": {
+                "alpha_three_turns_completed": true,
+                "alpha_both_recalls_exact": true,
+                "beta_three_turns_completed": true,
+                "beta_both_recalls_exact": true,
+                "separate_sessions": true,
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            }
+          ],
+          "comparison": [
+            {
+              "scenario": "subagents",
+              "baseline_wall_seconds": 22.643541,
+              "wall_seconds_saved": -1.294592,
+              "speedup": 0.945919,
+              "percent_saved": -5.717
+            },
+            {
+              "scenario": "sessions",
+              "baseline_wall_seconds": 5.643521,
+              "wall_seconds_saved": -2.59136,
+              "speedup": 0.685319,
+              "percent_saved": -45.917
+            }
+          ],
+          "qualifies_c2": true
+        },
+        "receipts_sha256": {
+          "probe": "318fd97e7d4d54332ceaeb5743339e6b0328a9875c8314f0acb9a75c8db3294c",
+          "restart": "62312b4cf7adb294d5800ea23f33a728d1479bdc55e60b9f0a875f4b447606a4",
+          "omp_limit_1": "3a03f32b00469bd10750616ad23a4211a8d32af1be8f4a709407ff37e04be9a6",
+          "omp_limit_2": "83da57e037779d0029688ec6f472e32ba9d9349dc78ab901cac791c11e78bb41"
+        }
+      },
+      "long_session_cache": {
+        "server_start_gpu_keep_warm_ms": 60000,
+        "role_corpus_candidate_against_published_v0613": [
+          "v087-pub-v0613b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+          "v087-pub-v0613b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+        ],
+        "role_corpus_published_against_candidate": [
+          "v090-v090-e20060b6-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+          "v087-pub-v0613b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+        ],
+        "long_sessions": {
+          "method": "scripts/omp_long_session_proof.py three times (EXP-072's runs: seed 20260928, 40,000-byte filler turns, two snapcompact compactions each, durable identifier after 2, 3 and 1 filler turns) with unmodified OMP 18.4.0 and this release's config through the route's tunnel; the gate is the server's request log: no chained turn prefills more than 60K tokens from root.",
+          "runs": {
+            "plant_after_2": {
+              "passed": true,
+              "error": null,
+              "receipt_sha256": "1a817dbac4f2b9bd6c805ea5065551018aca40df21f8ee02668179a49be06457",
+              "compactions": [
+                101636,
+                104322
+              ]
+            },
+            "plant_after_3": {
+              "passed": false,
+              "error": "RuntimeError: epoch 2: OMP compacted before both identifiers were planted",
+              "receipt_sha256": "7deaa0efd45bab2bd95be568d8781190e6db105485a14a6cb2a3018ea4193106",
+              "compactions": [
+                101642,
+                104122
+              ]
+            },
+            "plant_after_1": {
+              "passed": true,
+              "error": null,
+              "receipt_sha256": "e1b23f6af9ea3cd099504b0d7967b7fcf043cf98bd1f9ba526f78412d49497dc",
+              "compactions": [
+                101671,
+                104350
+              ]
+            }
+          },
+          "requests": 41,
+          "maximal_fallbacks": [],
+          "root_prefills_over_60k_tokens": [],
+          "plant_after_3_note": "the proof's own planting precondition, as on v0.8.7: OMP compacted in epoch 2 before the durable identifier could be planted; its requests are in the gate above."
+        },
+        "quota_reclamation": {
+          "method": "one 60,026-token stored session, then stored sessions of about 11.9K tokens under one prompt_cache_key each until the checkpoint store had reclaimed; then the server killed without its stop's save and started again on the same checkpoint root, and the long session continued by previous_response_id.",
+          "short_sessions": 35,
+          "short_session_tokens": [
+            11864,
+            11910
+          ],
+          "short_checkpoint_bytes": [
+            1137149826,
+            1141606997
+          ],
+          "long_checkpoint_bytes": [
+            4494214203
+          ],
+          "store_bytes_after": 25038678151,
+          "sessions_on_disk_after": 19,
+          "long_on_disk_before_crash": true,
+          "long_continue_after_crash": {
+            "status": "completed",
+            "seconds": 2.99,
+            "input_tokens": 60079,
+            "cached_tokens": 60057
+          },
+          "receipt_sha256": "b717955d442b0c15c4d52682c6b46c093f73c9c4b670bfca2db17f8d1a6a773c"
+        }
+      },
+      "durable_sessions": {
+        "workload": "scripts/engine_window_compare.py --wire fork with its defaults, EXP-050's workload: 130,048-token retrieval, decode, two 125.9K-token sessions alternating continuation and fork, a 67.7K-token fanout with four branches and a sibling continuation, the live-sibling agent protocol; no explicit saves; then a graceful stop, a restart on the same checkpoint root, one continuation of every stored session and a second stop.",
+        "workload_errors": 0,
+        "saves_before_eviction": 2,
+        "automatic_saves_deferred": 2,
+        "first_stop": [
+          "shutdown: saved 1, nothing to save 3, refused 0"
+        ],
+        "resumed": 4,
+        "sessions": 4,
+        "restored_from_checkpoint": 4,
+        "resumed_cached_tokens": {
+          "agent": [
+            191,
+            164
+          ],
+          "fanout": [
+            67882,
+            67856
+          ],
+          "session-D1": [
+            126098,
+            126067
+          ],
+          "session-D2": [
+            126099,
+            126068
+          ]
+        },
+        "restore_reclaim_lines": [
+          "checkpoint restore for session 8993d06eb9f6 saved 1 of 1 resident session(s) to make room",
+          "checkpoint restore for session 8993d06eb9f6 reclaimed 3 checkpoint-backed session(s)"
+        ],
+        "second_stop": [
+          "shutdown: saved 0, nothing to save 4, refused 0"
+        ],
+        "receipts_sha256": {
+          "workload": "68dd6f6576a9e482840078ddc4b9d4a2271a8c42557c3f1a809756f6df58b823",
+          "resume": "7233c125a96c9a1020ca1ee007c44e8b38c9e3db894ed2ed549f00a8d798520f"
+        }
+      },
+      "publication_barrier": {
+        "method": "EXP-051's tracer: one reply held out of the response store for 6 s by a non-stop gdb breakpoint while another 126K-token session's admission had to evict its session.",
+        "log_after_barrier_hit": [],
+        "first_stop": [
+          "shutdown: saved 0, nothing to save 2, refused 0"
+        ],
+        "resume_from_held_turn": {
+          "http_status": 200,
+          "answer": "V-9241",
+          "exact": true
+        },
+        "receipts_sha256": {
+          "workload": "b184769e9020a1f39bdf0e6cb7a047e1cfb759f8ec04d20f81cfb8eabed830f3",
+          "resume": "5afd4c17147484e349a3bcdae1c5e5aa98acb9bc960586d253dca04d91267e5a"
+        }
+      },
+      "stock_client_sessions": {
+        "method": "scripts/stock_omp_session_proof.py: the unmodified upstream Oh My Pi 18.4.0 macOS arm64 binary in RPC mode with PI_OPENAI_STATEFUL=1, using the documented macOS route's provider fragment and this release's fail-closed config verbatim (examples/manual-tunnel/models.fragment.yml and fail-closed.yml: async compaction on, two requests in flight per RTX 5090 provider) over an SSH forward on the route's tunnel port 18089. s1: one OMP process seeds two facts, recalls one, the server restarts, and it recalls both; s2: a new OMP process continues the session with the server up; s3: the server restarts, then a new OMP process continues it. Each restart is a graceful stop and a start on the same checkpoint root.",
+        "omp": {
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+          "version": "omp/18.4.0"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0ee17-bd22-76e9-8e1a-c46e1a1c9d29"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 1, nothing to save 0, refused 0",
+          "shutdown: saved 0, nothing to save 1, refused 0",
+          "shutdown: saved 0, nothing to save 1, refused 0"
+        ],
+        "receipt_sha256": "b45d361190b911c405bc49d0c7e78e7aadef8f53e0dad9389a634a429404f962",
+        "evidence": "releases/v0.9.0/qualification/rtx5090.json (release_evidence.stock_client_sessions)"
+      },
+      "shared_prefix_capacity": {
+        "method": "scripts/agent_mix_probe.py with EXP-052's workload on the default capacity and no session identity: three agent types whose system messages carry their tool JSON (11.9-14.2K-token prefixes), three warm-up fresh sessions, then 8 cycles of fresh A, C and B sessions, each followed by one turn of the long-lived warm-up session.",
+        "reported_max_shared_prefixes": 4,
+        "measured_fresh_sessions": 24,
+        "measured_fresh_root": 0,
+        "measured_fresh_reuse_paths": [
+          "shared_stable_prefix"
+        ],
+        "measured_fresh_client_ttft_median_s": {
+          "A": 0.092,
+          "B": 0.094,
+          "C": 0.1
+        },
+        "measured_fresh_client_ttft_p90_s": {
+          "A": 0.096,
+          "B": 0.098,
+          "C": 0.105
+        },
+        "receipt_sha256": "fb04a731bf7ad48483b6d158625d4b2b26e9fcddea94a39dbf3ceb4c132c37fb"
+      },
+      "additional_probes": {
+        "fanout-57k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 67681,
+            "cold_prefill_s": 25.275,
+            "checkpoint_save_s": 5.367,
+            "checkpoint_bytes": 5188026237,
+            "hot_fork_median_s": 0.769,
+            "hot_fork_max_s": 0.784,
+            "restart_ready_s": 35.1,
+            "post_restart_resume_s": 3.187,
+            "warm_start_first_fork_s": 0.716,
+            "warm_start_fork_median_s": 0.737,
+            "warm_start_fork_max_s": 0.739
+          },
+          "receipt_sha256": "6c743dc0c2b1960f907a9ace0ff4d0224a475e49e4b80eda714fdfbdb17a1276"
+        },
+        "fanout-67k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 79957,
+            "cold_prefill_s": 31.042,
+            "checkpoint_save_s": 5.143,
+            "checkpoint_bytes": 6044083061,
+            "hot_fork_median_s": 0.851,
+            "hot_fork_max_s": 0.855,
+            "restart_ready_s": 38.94,
+            "post_restart_resume_s": 3.768,
+            "warm_start_first_fork_s": 0.76,
+            "warm_start_fork_median_s": 0.765,
+            "warm_start_fork_max_s": 0.784
+          },
+          "receipt_sha256": "4e2c48b0f3e0e3c7bb4914eb3ee909e50a6b106456a704f1f60c2554424c3de0"
+        },
+        "warm-arrival": {
+          "exit_code": 0,
+          "summary": [
+            {
+              "order": "resume-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.277,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.613
+              ],
+              "checkpoint_bytes": 5205861753,
+              "post_restart_sequence": [
+                [
+                  "endpoint_resume_first",
+                  "private_response_replay",
+                  67908,
+                  4.176
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.731
+                ],
+                [
+                  "fork_second",
+                  "private_long_anchor",
+                  67712,
+                  0.737
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 5.644
+            },
+            {
+              "order": "fork-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.273,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.616
+              ],
+              "checkpoint_bytes": 5205861716,
+              "post_restart_sequence": [
+                [
+                  "fork_first",
+                  "private_long_anchor",
+                  67712,
+                  3.476
+                ],
+                [
+                  "endpoint_resume_after_fork",
+                  "private_response_replay",
+                  67908,
+                  0.66
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.734
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 4.87
+            }
+          ],
+          "receipt_sha256": "2fcea07103d5408d3ca3b7a7f443b3441c24a5a00893ca05e8ee86c2fc7501ad"
+        },
+        "restore": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 57889,
+            "cold_prefill_s": 20.933,
+            "checkpoint_bytes": 4514771839,
+            "restore_0_wall_s": 3.032,
+            "restore_1_wall_s": 3.112,
+            "control_retrieval_exact": true,
+            "restored_retrieval_exact": true,
+            "tampered_restore_refused": null
+          },
+          "receipt_sha256": "c35ad37b6f0218a2d8fab1d566809fa44ee43b03ce17c8662456e485ec01c04f"
+        },
+        "multisession": {
+          "exit_code": 0,
+          "summary": {
+            "continuations_and_forks": 8,
+            "reuse_lost": 2,
+            "exposed": true,
+            "server_errors": [],
+            "server_reuse_paths": [
+              "private_endpoint",
+              "private_long_anchor",
+              "root"
+            ],
+            "server_root_requests_after_bases": 2
+          },
+          "receipt_sha256": "f6407e86ea53dd348e48d2e7cbeb06a3c6b21b6d673b8109b487aaeb2a83fd15"
+        }
+      },
+      "tampered_restore_refused": "not exercised; no current tamper-test claim",
+      "evidence": "releases/v0.9.0/qualification/rtx5090.json (release_evidence: two requests in flight on the final profile, role corpus against the published v0.6.13 image and between the candidate and the published image, three stock OMP long sessions with two compactions each, quota reclamation under short sessions and a crash); docs/measurements/2026-09-29-rtx5090-two-requests-in-flight.json (EXP-077: v0.6.13 at two requests, the verify-round attribution and the tensor-core route); docs/measurements/2026-09-29-long-session-cache.json (EXP-074); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075, stock OMP 18.4.0 durable sessions); shared-prefix capacity method in docs/measurements/2026-09-25-agent-mix-shared-prefix.json; durability defect reproduction and remediation proof in docs/measurements/2026-09-24-durable-session-eviction.json and docs/measurements/2026-09-24-publication-barrier.json"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.10-qwen38-4090-beta.1",
+      "source_commit": "cba7eb932724c99a4faffd6b7b47256015c9b969",
+      "server_binary_sha256": "e0498fad39bcb69d21bf7a6124c900be7229e2542c8c7ca72e19b32c606a51d3",
+      "configuration_sha256": "7a69481f205c3f211d9dab13347d16589eb22ce3c404b1d555d788c39f72a7d4",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 157.91175764529982,
+      "c1_max_memory_used_mib": 22774,
+      "c1_max_power_w": 460.9,
+      "c1_mtp_acceptance_percent": 87.58865248226951,
+      "c1_prefill_tokens_per_second": 2116.5252239608553,
+      "context_elapsed_seconds": 91.23760920017958,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "stop-event",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.4.0",
+      "omp_transport": "openai-responses",
+      "gpu_keep_warm_ms": 60000,
+      "rollback_note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.10-beta.1-cba7eb932724 and predecessor qwen38-4090-native-v0.6.9-beta.1-5ac17674e8e0, the published v0.6.9-beta.1 package. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
+      "evidence": "releases/v0.8.7/qualification/rtx4090.json; docs/measurements/2026-09-29-long-session-cache.json (EXP-074: handoff cache, planner fallback, crash after compaction, quota reclamation, the provider limit); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075); docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json (EXP-064, including issue_48_field_start); docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json (EXP-066)",
+      "stock_client_sessions": {
+        "evidence": "docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json",
+        "omp": {
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+          "version": "omp/18.4.0"
+        },
+        "model": "ninfer-native-4090/qwen3.8-27b",
+        "thinking": "low",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0eb9e-45bd-70bc-a432-47bed47d4ad6"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 0, nothing to save 1, refused 0 (second restart)",
+          "shutdown: saved 0, nothing to save 1, refused 0 (stop after the proof)"
+        ],
+        "first_request_restore": [
+          "checkpoint restored for session 72e9696e017e on its first request without a response id"
+        ],
+        "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
+      }
+    }
+  },
+  "interpretation": "Two requests in flight on the RTX 5090. With two requests the MTP3 verify round carries eight tokens, and v0.6.13 ran their Q5 projections on SIMT kernels (12.8 ms of a 23.9 ms round), so two decoding requests reached only 190.0-191.1 tokens/s together against 166.7-167.1 one at a time (EXP-077). v0.6.14 keeps them on the tensor cores: on the final profile two decoding requests reached 281.1-283.0 tokens/s together (143.5-152.8 each) against 164.6-164.7 for one alone. Outputs are unchanged: the candidate answered the 89-case role corpus byte-identically to v0.6.13, two cases at a time and one at a time, and the published image answered it byte-identically to the candidate. A second request is not free: a decode beside a 71,641-token prefill ran at 30.4-30.6 tokens/s, a request that arrives while a prefill is staged waits for it, and two requests run together only while both prompts and output reservations fit the 160,256-token KV pool; a request that does not fit waits up to 180 s, which with the longest root prefill stays inside OMP 18.4.0's 300 s stream watchdog. Stock OMP 18.4.0 at its limit of 2 kept two requests in flight for 15.7 s of a parent turn fanning out two scout subagents, but that turn took 23.9 s against 22.6 s at its limit of 1 (25.2 against 32.7 s in the candidate window): what the subagents generate varies between runs more than the overlap saves. Two short sessions started together took 8.2 s against 5.6 s. With two requests streaming, a graceful restart ended both streams as incomplete and both continuations resumed from their checkpoints. The v0.8.7 lane evidence holds at two requests: no stock OMP long-session turn prefilled more than 60K tokens from root, a 60,026-token session kept its checkpoint through 35 short sessions and a crash (60,057 cached tokens in 2.99 s), the durability workload and barrier passed, and stock OMP kept one session across graceful restarts. The published image prefilled 130,048 tokens exactly in 58.3 s and decoded 169.79 tokens/s. The RTX 4090 lane and its one request at a time are unchanged. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
+  "remaining_release_gates": [
+    "documented-route acceptance of all four routes on the published v0.6.14 and v0.6.10 components with unmodified OMP 18.4.0",
+    "external-installation acceptance against the published v0.6.14-qwen38-5090-beta.1 component and runtime image"
+  ],
+  "deferred_scope": {
+    "rtx3090-windows-native": {
+      "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",
+      "legacy_release": "v0.7.2",
+      "legacy_client": "18.0.9-cross-platform-beta-2",
+      "future_condition": "Run one scripts/qualify_native.py qualification window on the physical RTX 3090 when its host returns, expected around 2026-09-30, before publication or inclusion in the product manifest."
+    }
+  }
+}

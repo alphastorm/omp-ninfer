@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-29
+
 ### Added
 
 - `scripts/concurrency_probe.py` measures one RTX 5090 engine-window arm with one or two
@@ -18,6 +20,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   requests in flight: a parent turn that fans out two scout subagents, and two OMP sessions
   started together. It records the requests' overlap from the server's request log and each
   scenario's wall time against the one-in-flight baseline.
+- Two invariants in `tests/test_manual_tunnel_scripts.py` keep each provider's limit equal to
+  its lane's concurrency and require a two-request lane's pending timeout to exceed 30 s while
+  leaving 60 s under OMP's 300 s stream-idle watchdog.
+
+### Changed
+
+- RTX 5090 serves two requests at once with runtime `v0.6.14-qwen38-5090-beta.1` (published image
+  `4c816b0c`, source `e20060b6`), deployment profile `qwen38-5090-v0.9.0` / configuration
+  `cf1de114`. The profile adds `--max-concurrency 2 --pending-timeout-ms 180000`. KV capacity
+  auto-resolves to 160,256 tokens, and VRAM after load is 30,244 MiB of 32,607 MiB, against
+  28,144 MiB with one request. The 28672 MiB host floor, model, OMP 18.4.0 client and RTX 4090
+  runtime and profile are unchanged.
+- The eight-token MTP3 verify round uses tensor cores instead of SIMT Q5 projections. Two
+  decoding requests reached 281.1-283.0 tok/s together against 166.7-167.1 one at a time
+  (1.68-1.70x), up from v0.6.13's 190.0-191.1 tok/s with two requests. The candidate answered the
+  89-case role corpus byte-identically to v0.6.13, two cases at a time and one at a time, and
+  the published image answered it byte-identically to the candidate; every measured decode pair
+  and fanout branch matched one request at a time
+  ([EXP-077](docs/measurements/2026-09-29-rtx5090-two-requests-in-flight.json)).
+- The RTX 5090 pending timeout is 180 s. A request that does not fit beside the running one
+  waits at the server; the 30 s default expired with `request_queue_timeout`. The new deadline
+  plus the longest root prefill (130,048 tokens in 58.4 s on the published image) stays inside
+  OMP's 300 s stream-idle watchdog, so the server ends a too-long wait and OMP resends.
+- `examples/manual-tunnel/fail-closed.yml` sets `providers.maxInFlightRequests` to 2 for
+  `ninfer-beta` and `ninfer-main` (RTX 5090), and keeps `ninfer-native-4090` and `ninfer-heavy`
+  at 1 (RTX 4090). Upgrade the RTX 5090 server before merging these limits into OMP's config;
+  two requests against the old one-at-a-time server can expire at its 30 s deadline. RTX 5090
+  sessions saved by v0.8.7 re-prefill once after the build change; RTX 4090 checkpoints carry
+  over. The four documented routes and client-platform acceptance remain pending: v0.9.0 is
+  a candidate ([qualification](releases/v0.9.0/qualification.json),
+  [release notes](releases/v0.9.0/NINFER_RELEASE_NOTES.md)).
 
 ## [0.8.7] - 2026-09-29
 
