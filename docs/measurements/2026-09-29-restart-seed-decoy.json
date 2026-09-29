@@ -1,0 +1,47 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-076",
+  "title": "The documented restart check seeded a misspelled copy of its own nonce, and the model returned it",
+  "generated_utc": "2026-09-29T06:25:00Z",
+  "status": "observed",
+  "question": "v0.8.7's first RTX 5090 route window failed at the macOS route's survives-restart step: after the server restart the recall returned a misspelled nonce. Did the v0.8.7 runtime restore the session wrongly, or did the check's own seed carry the misspelling?",
+  "answer": "The seed carried it. The step seeds its session with the first 200,000 bytes of the release's own documents, and since v0.8.6's acceptance those documents quote the misspelled copy that v0.8.6's first window wrote, twice within the seed. The runtime restored the session hot: the recall reused 71,791 of 71,839 tokens and reached the first token in 0.29 s. On the RTX 4090 with stock OMP 18.4.0 and the step's own prompts, the recall returned the quoted misspelling in 4 of 30 trials with that seed and in 0 of 30 once every line containing the nonce's digits was dropped from it.",
+  "method": {
+    "failing_request": "The RTX 5090 route window's own server request log for the step's recall: previous-response continuation of the planted session after a graceful container restart.",
+    "seed": "The survives-restart block's seed recipe (BENCHMARKS.md, README.md, ARCHITECTURE.md, PERFORMANCE.md, CHANGELOG.md, ASCII-filtered, first 200,000 bytes) at candidate 9474326f916cf694d48446e9b8b6985ba9dd4d3a; the green seed applies the same recipe after dropping every line that contains 493817.",
+    "trials": "The installed RTX 4090 lane (package a0ea4c81, the same model artifact as the RTX 5090) with the unmodified OMP 18.4.0 macOS arm64 binary, the documented native fragment and this release's fail-closed config. Each arm plants once with the block's own plant prompt and seed, then runs 30 recalls with the block's own recall prompt, each in a new OMP process from a fresh copy of the planted session directory. The server is not restarted between plant and recall; a restore reproduces the saved bytes.",
+    "sampling": "The lanes' defaults: temperature 1.0, top_k 20; thinking at OMP's default."
+  },
+  "observations": {
+    "rtx5090_window": {
+      "candidate": "9474326f916cf694d48446e9b8b6985ba9dd4d3a",
+      "recall_prompt_tokens": 71839,
+      "recall_cached_tokens": 71791,
+      "recall_ttft_seconds": 0.29,
+      "recall_completion_tokens": 428,
+      "answer": "the misspelled copy quoted in the seed",
+      "production_downtime_seconds": 264.466
+    },
+    "seed_lines_with_nonce_digits": {
+      "candidate_seed": 10,
+      "exact_misspelled_copies": 2,
+      "long_context_fixture_needles": 8,
+      "filtered_seed": 0
+    },
+    "rtx4090_recalls": {
+      "candidate_seed": {"trials": 30, "exact": 26, "quoted_misspelling": 4, "other": 0},
+      "filtered_seed": {"trials": 30, "exact": 30, "quoted_misspelling": 0, "other": 0}
+    },
+    "origin": "The quotes entered docs/BENCHMARKS.md and README.md in v0.8.6's acceptance commit (47e357f). At v0.8.6's accepted candidate (4f49fce7) neither file held one, so v0.8.7's candidate was the first whose seed did."
+  },
+  "decisions": {
+    "shipped": "The survives-restart block drops every line containing the nonce's digits from its seed, and tests/test_documented_route.py requires the seed that block builds never to contain the planted nonce's digits.",
+    "not_changed": "The plant and recall prompts, the nonce and the runtime. The runtime restored the session as designed."
+  },
+  "limits": [
+    "The trials ran on the RTX 4090, not the RTX 5090: the same model artifact on a different GPU build, because bulk trials do not run on the RTX 5090 production lane.",
+    "Thirty trials per arm: with the candidate seed's rate of 4 in 30, thirty clean recalls would occur by chance with probability about 0.014."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
