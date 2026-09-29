@@ -89,6 +89,25 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                                   for provider in declared})
         self.assertNotIn("asyncEnabled", config)
 
+    def test_a_lane_admitting_two_requests_holds_a_waiting_one_inside_omps_stream_watchdog(self) -> None:
+        # With two requests in flight, one whose prompt and output reservation do not fit beside
+        # the running request's waits at the server. At the default 30 s --pending-timeout-ms it
+        # expired while OMP had nothing else to wait for (EXP-072, EXP-077). OMP 18.4.0 aborts a
+        # stream after 300 s without a progress event, and a waiting request sends none until its
+        # first token: the wait plus the longest root prefill (130,048 tokens in 58.3 s on the
+        # RTX 5090, v0.8.7) must stay inside that watchdog, so the server's own timeout ends the
+        # wait first and OMP resends the request.
+        omp_stream_idle_ms, longest_prefill_ms = 300_000, 60_000
+        for path in (ROOT / "profiles").glob("qwen38-rtx5090-*.json"):
+            arguments = json.loads(path.read_text(encoding="utf-8"))["server"]["arguments"]
+            if int(arguments[arguments.index("--max-concurrency") + 1]) == 1:
+                continue
+            with self.subTest(profile=path.name):
+                self.assertIn("--pending-timeout-ms", arguments)
+                pending = int(arguments[arguments.index("--pending-timeout-ms") + 1])
+                self.assertGreater(pending, 30_000)
+                self.assertLess(pending + longest_prefill_ms, omp_stream_idle_ms)
+
     @staticmethod
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):
