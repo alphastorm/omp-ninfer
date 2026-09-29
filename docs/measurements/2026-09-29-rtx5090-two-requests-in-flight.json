@@ -1,0 +1,105 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-077",
+  "title": "Two requests in flight on the RTX 5090: eight-token verify rounds left the Q5 tensor-core route, and running them on it takes two decoding requests from 1.14x to 1.69x of one at a time with byte-identical outputs",
+  "generated_utc": "2026-09-29T17:45:00Z",
+  "status": "observed",
+  "question": "Can the RTX 5090 lane serve two requests at once (--max-concurrency 2, OMP maxInFlightRequests 2 for its providers) with more aggregate decode, the same outputs, and no loss of prefix reuse, durable sessions, 130,048-token retrieval or stock OMP's subagents and compaction? What limits it, and what does a second request cost the one already running?",
+  "answer": "Yes for decode throughput, outputs, reuse and the durability paths measured so far; the v0.8.7 lane set on the final profile is incomplete. The published v0.6.13 image fits two requests (KV 160,256 tokens, 30,244 MiB of 32,607) but two decoding requests reached only 190.0-191.1 tok/s together against 166.7-167.1 one at a time: with two requests the MTP3 verify round carries eight tokens, and the Q5 projections left the four-token tensor-core route for SIMT kernels (12.8 ms of a 23.9 ms round, against 5.2 ms). Runtime e20060b6 runs them on that route at eight tokens: two decoding requests reach 282.0-282.8 tok/s together (146.0-151.3 each), one request alone is unchanged, and all 89 role-corpus cases run two at a time, like every probe request whose prompt and reuse path matched its one-at-a-time counterpart, are byte-identical to one request at a time. A request that does not fit beside the running one waits at the server, and at the default 30 s it expired; --pending-timeout-ms 180000 lets it wait while the wait plus the longest root prefill (130,048 tokens in 58.6 s) stays inside OMP 18.4.0's 300 s stream watchdog. On that profile the role corpus, profile gates, stock OMP durable sessions, EXP-072's long sessions, checkpoint reclamation and the EXP-050 workload passed. Stock OMP at limit 2 finished a parent's two scout subagents 22.8% sooner, and two short sessions started together 12.9% later: their simultaneous first turns each took about 3.4 s against 0.9 and 1.8 s one at a time. A decode beside another request's long prefill still slows to about 30 tok/s, and a request arriving while a prefill is staged waits for it. The third window ended when the appliance's C: drive filled and the WSL distro went read-only; the workload resume, barrier, fanout/restore probes and agent mix did not run on the final profile.",
+  "method": {
+    "lane": "RTX 5090 (32,607 MiB) on the production appliance, one engine-window arm at a time on port 18099 with a scratch checkpoint root. Each window took the supervisor hold, stopped production (ninfer-5090-v070p), armed an appliance-side dead-man restore, ran its arms, restored production and released the hold.",
+    "arms": {
+      "c1-v0613b1": "the published v0.6.13 image (d71e34c3, server b8ae62ae) with v0.8.7's exact arguments: --max-concurrency 1, deployment qwen38-5090-v0.8.2, configuration 56878aed",
+      "c2-v0613b1": "the same image and arguments with --max-concurrency 2 (deployment qwen38-5090-v0.9.0, configuration 205ef6f8)",
+      "c1pkg-e20060b6": "candidate runtime e20060b6 (server f62a570e, packaged locally as ninfer-5090:e20060b6-package-local) with v0.8.7's arguments",
+      "c2pkg-e20060b6": "the candidate with --max-concurrency 2 --pending-timeout-ms 240000 (configuration e54d22d3)",
+      "v090-e20060b6": "the candidate with the v0.9.0 profile: --max-concurrency 2 --pending-timeout-ms 180000 (configuration cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32)"
+    },
+    "tools": {
+      "concurrency_probe": "scripts/concurrency_probe.py at 458f6eb, two repetitions of solo, decode_pair, prefill_during_decode (71,641-token prefill beside a 1,024-token decode), decode_during_prefill, two_sessions (two ~62.4K-token stored sessions, two continuations each), fanout (82K base, four branches, two at a time) and near_capacity (two 125,879-token requests); restart: two stored sessions, a graceful `docker restart --time 90` once both stream 32 deltas, then both resumed",
+      "omp_parallel_proof": "scripts/omp_parallel_proof.py at 458f6eb with the unmodified OMP 18.4.0 darwin-arm64 binary (sha256 90111c71...) over the macOS route's tunnel: a parent turn fanning out two scout subagents, and two OMP sessions started together, at OMP's limit 1 and then 2",
+      "attribution": "Nsight Systems 2026.1.3 on c2-v0613b1 (solo x2, decode pair x2, 512 tokens); rounds aligned on speculative_sampling_group_finalize_kernel",
+      "lane_set": "the v0.8.7 RTX 5090 lane evidence set on v090-e20060b6 with this release's route config (ninfer-beta: 2): 89-case role corpus, profile gates with restart, stock OMP durable-session proof, EXP-072's three long sessions, short sessions past the 24 GiB quota, EXP-050 workload and resume, EXP-051 barrier, fanout/warm-arrival/restore/multisession probes and the agent mix"
+    },
+    "client_watchdog": "OMP 18.4.0 packages/ai/src/utils/idle-iterator.ts: stream first-event and idle timeouts default to 300,000 ms; response.created counts as progress, and nothing else arrives from a queued request until its first output"
+  },
+  "observations": {
+    "shipped_image_at_c2": {
+      "capacity": "--max-concurrency 2 on the published v0.6.13 image: KV capacity auto-resolved to 160,256 tokens (2,504 of 4,096 pages; 131,072 at C1), 1.15 GiB free after startup against 3.20 GiB, graph allowance 164 MiB against 82 MiB; 30,244 MiB used against 28,144 MiB, 2,363 MiB below the card's 32,607 MiB",
+      "solo": "one request alone: 165.2-165.5 tok/s decode in both arms and the same reasoning digest; the C2 KV pool changes nothing a single request produces",
+      "decode_pair": "two 1,024-token decodes submitted together: 190.0-191.1 tok/s aggregate at C2 against 166.7-167.1 at C1 (1.14x), 97.2-100.8 tok/s per request, output-event gap p50 23.0-23.2 ms against 13.7 ms alone, fairness 0.97; both outputs differed from the C1 outputs of the same prompts",
+      "prefill_during_decode": "a 71,641-token prefill admitted beside a running 1,024-token decode: the decode slowed to 30.3 tok/s with output-event gap p99 479 ms, one decode round alternating with each 1,024-token prefill chunk",
+      "decode_during_prefill": "a short request arriving while the long prefill was staged reached its first output at 26.7 s in both arms: the scheduler does not attempt admission while a prefill is staged",
+      "queueing": "a request that did not fit beside the running one waited at the server and expired at the default 30 s pending timeout (503 request_queue_timeout) in both arms: the second of two concurrently seeded 62.4K-token sessions in one repetition, and the second of two 125,879-token requests in both",
+      "fanout": "4 of 4 branches reused the 82K-token base in both arms and both repetitions",
+      "restart_with_two_in_flight": "C2: a graceful restart while two stored ~62.4K-token sessions decoded ended both streams response.incomplete; after the restart both continuations reused 62,404 cached tokens (first output 4.49 and 4.95 s); shutdown reported saved 0, nothing to save 2, refused 0"
+    },
+    "attribution": {
+      "round": "MTP3 round wall 13.88 ms with one request (398 rounds) and 23.93 ms with two (392 rounds)",
+      "cause": "with two requests the verify pass carries eight tokens, and the Q5 projections leave the four-token tensor-core route: q5_rowsplit_gemm_simt_split2_kernel 7.83 ms plus q5_rowsplit_gemm_simt_kernel 4.97 ms per round replace q5_small_t_mma_kernel's 5.21 ms; the Q4 projections add a net 1.1 ms (q4_rowsplit_gemm_simt_kernel 1.78 ms)",
+      "restoration": "production down 15:35:59-15:37:46Z (107 s)"
+    },
+    "candidate_route": {
+      "change": "runtime e20060b6 (alphastorm/ninfer perf/c2-q5-t8-mma, from cba7eb93) templates q5_small_t_mma_kernel on 4 or 8 tokens and routes eight-token Q5 linear-add, attention-input and GDN-input projections to it; every other token count keeps its route",
+      "operator_benchmarks": "median us at T=4 / 7 / 8 / 9: linear-add K=17,408 46.3 / 79.1 / 50.4 / 95.5; K=6,144 21.7 / 34.0 / 23.7 / 40.2; GDN input 48.2 / 118.9 / 62.8 / 193.7; attention input 46.3 / 85.2 / 60.6 / 110.8",
+      "oracle_tests": "ninfer_linear_add_q5_a16_test, ninfer_gdn_input_proj_test, ninfer_attn_input_proj_test and ninfer_linear_q5_a16_test passed on the RTX 5090 from the release build tree, including the new eight- and nine-token cases",
+      "review": "two independent reviews found no correctness defect; both note that a single request's eight-token passes (prefill tails, forced appends) now also take the tensor-core route"
+    },
+    "candidate_window": {
+      "c1_unchanged": "c1pkg-e20060b6: every probe output byte-identical to v0.6.13 C1 (solo, decode pair, prefill beside decode, decode during prefill, fanout) at 165.4-165.6 tok/s alone and 166.9-167.0 tok/s for the serial pair",
+      "decode_pair": "c2pkg-e20060b6: 282.0-282.8 tok/s aggregate (1.69x one at a time, 1.48x the shipped image at C2), 146.0-151.3 tok/s per request, output-event gap p50 15.6 ms, fairness 0.97",
+      "outputs": "31 of the 35 probe requests that completed in both c1pkg and c2pkg produced byte-identical outputs, including both requests of each decode pair, the decode beside a prefill and every fanout branch; the shipped image's C2 pair outputs differed. The 4 that differed are two-session continuations that took a different reuse path (a root re-prefill in one arm, the replayed continuation in the other) or carried a different previous turn; the same prompt on the same path gave the same output in both arms. The 89-case role corpus run two cases at a time answered all 89 byte-identically to the published v0.6.13 image one at a time",
+      "unchanged_costs": "the decode beside a 71,641-token prefill still slowed to 30.4-30.5 tok/s (gap p99 479-481 ms), and the request arriving during a staged prefill still waited 26.7 s for its first output",
+      "queueing": "with --pending-timeout-ms 240000, the request that did not fit waited instead of expiring: both two-session repetitions completed, and the second 125,879-token request reached its first output after 114.3 and 134.5 s, once the first had finished",
+      "restart_with_two_in_flight": "both continuations reused 62,404 cached tokens after the restart (first output 5.53 and 5.07 s); shutdown refused 0",
+      "restoration": "production down 16:03:33-16:40:54Z (37.4 min)"
+    },
+    "final_profile_window": {
+      "arm": "v090-e20060b6: the candidate with --max-concurrency 2 --pending-timeout-ms 180000, deployment qwen38-5090-v0.9.0, configuration cf1de114; the route config with ninfer-beta: 2",
+      "role_corpus": "89 of 89 cases byte-identical to the published v0.6.13 image, one at a time",
+      "profile_gates": "passed: 130,048-token retrieval exact in 58.6 s (server prefill 58.48 s, root); decode 170.27 tok/s over 2,048 tokens (v0.8.7 candidate 170.31) with the same 874 rounds and 1,173 of 2,621 drafts accepted; agent protocol across a restart; 30,242-30,244 MiB",
+      "stock_omp_durable_sessions": "passed every check: seed, recall before and after a graceful restart, recall from new OMP processes, one session throughout",
+      "long_sessions": "EXP-072's three runs at limit 2: plant-after 2 and 1 passed; plant-after 3 stopped at the harness precondition 'OMP compacted before both identifiers were planted', as it did on v0.8.7's candidate at the same turns; 41 requests, no maximal fallback and no root prefill over 60K tokens. Both compactions per run were snapcompact (0.05-0.07 s): on this image-capable fragment OMP compacts without a model request",
+      "short_sessions": "35 sessions of about 11.9K tokens (1.14 GB checkpoints) filled the 24 GiB store; the 60,026-token session kept its checkpoint and after a crash reused 60,057 cached tokens in 2.99 s",
+      "workload": "EXP-050's workload passed: 130,048-token context exact, 8 of 8 session continuations kept reuse, 4 fanout branches reused 67,676 tokens each, agent protocol ok; the graceful stop saved 1, refused 0",
+      "not_run": "the workload resume (interrupted mid-run), EXP-051 barrier, fanout/warm-arrival/restore/multisession probes, agent mix, and the concurrency probe, restart-with-two-in-flight and stock OMP parallel proofs on this configuration (the last three ran on c2pkg-e20060b6, which differs only in its 240 s pending timeout)"
+    },
+    "stock_omp_two_in_flight": {
+      "subagents": "a parent turn fanning out two scout subagents: 32.7 s at OMP's limit 1, 25.2 s at limit 2 (22.8% less), 17.7 s of the run with two requests in flight",
+      "sessions": "two OMP sessions started together, three barrier-aligned turns each, every recall exact: 6.5 s at limit 1, 7.3 s at limit 2 (12.9% more). Their first turns took 3.38 and 3.33 s against 0.89 and 1.76 s one at a time; both reused the shared 7,155-token prefix, and the server reached their first outputs after 1.27 and 2.51 s (0.64 s for the comparable turn one at a time)",
+      "arm": "c2pkg-e20060b6 (240 s pending timeout) in the second window"
+    },
+    "host_incident": {
+      "what": "At 17:17:53Z, during the final-profile window's workload resume, the appliance's Windows C: drive filled (NTFS event 141: 3.45 GB free, all of it reserve). The Ubuntu WSL distro's dynamically expanding ext4.vhdx (932 GiB) lives on C:, so VHDMP failed a write with 0xC000007F and unsurfaced the disk; ext4 went emergency read-only and the distro's binaries returned I/O errors.",
+      "cause": "Inside the distro ext4 reported 122 GB free, but C: backed only a few tens of GB of growth. This campaign's window arms left about 88 GB of checkpoint roots in the distro, and the reclamation step alone writes about 40 GB of checkpoints.",
+      "effect": "SSH to the distro, the window's own restore and its dead-man (which runs in the same distro) all failed; production stayed down.",
+      "recovery": "wsl --terminate left the distro unstartable (Wsl/Service/CreateInstance/E_UNEXPECTED); wsl --shutdown restarted the VM, ext4 recovered its journal (13 orphan inodes), Docker Desktop recovered by itself, the campaign's arm checkpoint roots were deleted (ext4 free 33 to 120 GB; C: free 29 GiB, since the vhdx does not shrink), and window.sh restore recreated production, healthy at 17:32:00Z.",
+      "closure": "window.sh start now refuses an arm unless C: has 64 GiB free, the window scripts check the same before stopping production, and each window deletes its arms' checkpoint roots on exit"
+    },
+    "restoration": {
+      "window_1": "production down 15:08:05-15:33:24Z (25.3 min)",
+      "attribution": "15:35:59-15:37:46Z (1.8 min)",
+      "window_2": "16:03:33-16:40:54Z (37.4 min)",
+      "window_3": "16:43:38-17:32:00Z (48.4 min), of which 14.1 min after the host failure at 17:17:53Z",
+      "total": "112.9 min"
+    }
+  },
+  "decisions": {
+    "runtime": "RTX 5090 runtime candidate v0.6.14 from e20060b6 (alphastorm/ninfer perf/c2-q5-t8-mma): the Q5 small-T tensor-core route at eight tokens",
+    "profile": "the v0.9.0 RTX 5090 profile adds --max-concurrency 2 --pending-timeout-ms 180000 (configuration cf1de114, deployment qwen38-5090-v0.9.0); the route config sets ninfer-beta and ninfer-main to 2 and keeps the RTX 4090 providers at 1",
+    "pending_timeout": "180 s, not 240 s: a waiting request emits nothing after response.created, and 240 s plus a 58.6 s root prefill would reach OMP's 300 s stream watchdog",
+    "invariants": "tests/test_manual_tunnel_scripts.py binds each provider's limit to its lane's --max-concurrency and bounds a two-request lane's pending timeout inside OMP's watchdog",
+    "rtx4090": "unchanged at one request",
+    "gate": "publication waits for the remaining lane steps on the final profile, which need at least 64 GiB free on the appliance's C: drive"
+  },
+  "limits": [
+    "One run per configuration and two repetitions per probe scenario, on synthetic prompts at thinking low.",
+    "Two requests share the KV pool only while both prompts plus their output reservations fit in 160,256 tokens (the reservation is prompt plus max_output_tokens minus one, request_plan_impl.h). OMP sends max_output_tokens 32768, so by that rule two OMP sessions above about 47K tokens each take turns [inference from the admission code; not measured with OMP].",
+    "Two alternating 62.4K-token sessions re-prefilled 2 of their 4 continuations from root at C2, as at C1; C2 does not raise how many long sessions keep their cache.",
+    "A decode beside another request's 71,641-token prefill ran at 30.4-30.5 tok/s with 479-481 ms output gaps, and a request arriving while a prefill is staged waits for it (26.7 s).",
+    "The concurrency probe, restart-with-two-in-flight and stock OMP parallel proofs ran with a 240 s pending timeout, not the final 180 s; the final profile's lane set is incomplete (see final_profile_window.not_run).",
+    "Stock OMP's compaction on the RTX 5090 fragment is snapcompact, with no model request, so these runs do not exercise a background summary overlapping a turn on this lane."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
