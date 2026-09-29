@@ -102,6 +102,17 @@ class ExtractionTests(unittest.TestCase):
         self.assertGreater(size, 32_768 * 4.5)
         self.assertLess(size, (111_412 - 15_000) * 2.5)
 
+    def test_restart_seed_never_contains_the_planted_nonce(self) -> None:
+        """The seed is the release's own prose, which quotes earlier runs of this check. v0.8.7's
+        first RTX 5090 window seeded the misspelled copy v0.8.6's notes quote, and after a hot
+        restore the model returned that copy instead of the planted nonce. The planted nonce must be
+        the only copy of its digits the session holds, whatever the documents say."""
+        block = documented_route.extract(documented_route.DEFAULT_DOC, documented_route.RESTART_SEED_HEADING)
+        digits = set(re.findall(r"\b[A-Z]+-(\d{6})\b", block.text))
+        self.assertEqual(len(digits), 1, block.text)
+        seed = documented_route.restart_seed(documented_route.DEFAULT_DOC, ROOT)
+        self.assertNotIn(digits.pop().encode(), seed)
+
     def test_model_download_blocks_survive_a_rerun_with_a_complete_file(self) -> None:
         """curl 8.5 with --fail turns the CDN's HTTP 416 for a complete-file resume into exit 22,
         so a reader who reruns the prepare block after any later failure was stopped there

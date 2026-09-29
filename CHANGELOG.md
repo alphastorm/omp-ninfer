@@ -42,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v0.8.6 attributed the cold first turn after a graceful restart to a stale checkpoint. A graceful
   server restart restores hot on both runtimes; the cold turn comes from restarting the OMP
   process, listed under Known limitations (EXP-074).
+- The documented restart check no longer seeds its session with a misspelled copy of its own
+  nonce. The check seeds from the release's own documents, and v0.8.6's notes quote the
+  misspelled copy its first window wrote. In v0.8.7's first RTX 5090 window the session restored
+  hot (71,791 of 71,839 tokens reused) and the model returned that quoted copy instead of the
+  planted nonce. The seed now drops every line that contains the nonce's digits, and a test holds
+  the documented seed to that. On the RTX 4090 the recall returned the quoted copy in 4 of 30
+  trials with the old seed and in none of 30 with the new one
+  ([EXP-076](docs/measurements/2026-09-29-restart-seed-decoy.json)).
 
 ### Changed
 
