@@ -1,0 +1,77 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-074",
+  "title": "Long sessions keep their cache: one request in flight per NInfer provider replaces inline compaction, and the RTX 4090 runtime keeps handoffs, near-capacity turns and crash restores off the root path and long sessions' checkpoints through short sessions that fill the store",
+  "generated_utc": "2026-09-29T02:10:00Z",
+  "status": "observed",
+  "question": "Does unmodified OMP 18.4.0 keep working through automatic compaction with async compaction back on and each NInfer provider limited to one request in flight, instead of v0.8.6's inline compaction? On the RTX 4090, do the v0.6.10 runtime changes make a compaction handoff reuse the session's cache, keep a near-capacity turn off root when the planner's search runs out of time, restore a crashed session hot after a compaction, and keep a long session's checkpoint when short sessions fill the checkpoint quota?",
+  "answer": "Yes to all five, with one exception outside the runtime. With the provider limit, the turn that meets a background handoff waits in OMP instead of expiring at the server: the RTX 4090 lane ran three handoff compactions and a restart with no expired admission, and a mock lane shows the limit must name the route's own provider id. On the runtime, handoffs reused 78.0-79.9K cached tokens and started in 0.58-0.70 s where the previous runtime prefilled 97.4-97.5K tokens from root in 63.8-66.3 s; three budget-exhausted planner fallbacks kept the session's continuation; after a hard kill following a compaction the next turn reused 32,167 tokens in 2.9 s where the previous runtime prefilled 32,173 from root in 29.2 s; and when short sessions filled the 24 GiB checkpoint quota the store reclaimed them instead of a 60,026-token session, whose next turn after a crash reused 60,057 cached tokens in 3.1 s where the previous runtime had reclaimed its checkpoint first and failed the turn with previous_response_not_found. The exception: when the OMP process itself restarts, OMP 18.4.0's first request leaves out every earlier reasoning item, so that one request cannot extend the restored checkpoint and prefills from root. This, not a stale checkpoint, explains EXP-072's cold first request after its restarts.",
+  "method": {
+    "client": {
+      "binary": "omp-darwin-arm64 from https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0 (commit 401778d0cd30020ce0f9198f751b13c68850562f)",
+      "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+      "version": "omp/18.4.0"
+    },
+    "configs": {
+      "v0.8.7": "examples/manual-tunnel/fail-closed.yml of this release: compaction left at OMP's default (async on), providers.maxInFlightRequests 1 for ninfer-beta, ninfer-native-4090, ninfer-main and ninfer-heavy",
+      "v0.8.6": "the same file at v0.8.6: compaction.asyncEnabled false, no provider limit",
+      "literal": "the v0.8.7 file with only ninfer-beta limited"
+    },
+    "tools": {
+      "long_session_proof": "scripts/omp_long_session_proof.py: OMP in RPC mode with PI_OPENAI_STATEFUL=1 and an isolated HOME holding the route's models.yml and config.yml verbatim (baseUrl substituted with the forward in use); thinking low; seed 20260928; 40,000-byte synthetic build-log filler per turn (about 23,600 runtime tokens); the durable identifier after one filler turn",
+      "server_restart_probe": "a driver built on the same proof's Session class: one OMP process compacts its session once, then only the server restarts - gracefully through its stop event, or killed without it - while that OMP process keeps running, and the same process asks for the control identifier",
+      "short_session_probe": "one 60,026-token stored session, then stored sessions of 11,864-11,917 tokens under one prompt_cache_key each until the store had reclaimed (the checkpoint store listed every five sessions, plus ten more); then the server killed without its stop's save and started again on the same checkpoint root, and the long session continued by previous_response_id",
+      "wire_capture": "a loopback proxy between OMP and the lane that recorded every request body unchanged",
+      "restart_flush_probe": "qualify_native's restart phase in miniature against the supervised server, with its request bodies, markers and session digests: one session published by explicit save and one never saved, both far below the automatic minimum; a graceful restart through the stop event; both resume by previous_response_id and must return their exact marker with cached tokens"
+    },
+    "lane": "RTX 4090, one supervised ninfer-serve with the lane's exact installed server configuration (context 131,072, INT8 KV, prefill chunk 2,048, device-state 2, host-state 24, host KV 11,264 MiB, 8 private continuations, checkpoint quota 24,576 MiB, MTP 3, keep-warm 60,000 ms) on its loopback port while the managed lane stayed stopped, fresh scratch state per run, at the card's default 450 W limit. Candidate: builds of the ninfer lane branch at tree 215695cc (binary 97bd337b; runs 1-3) and tree 3fce81ca (binary 5988d632, adds the graceful-stop floor; runs 6-8), which also carried save floors this release dropped (see short_sessions.save_floors_rejected); tree cc22920c (binary fe623c13; runs 10-11) holds the runtime code of both components this release ships, RTX 4090 v0.6.10-beta.1 from cba7eb93 and RTX 5090 v0.6.13 from 423f5b1d; the commits after that tree change only docs, packaging scripts and their tests. The first release build, e2b6c76c (binary 5cf4b292, with both floors), ran run 11's red arm. Previous runtime: the installed v0.6.9-beta.1 binary 65364401 from 5ac17674 under the same supervisor (runs 4, 5, 7, 9).",
+    "mock": "the EXP-072 scripted Responses endpoint admitting one request at a time with a 3 s admission deadline and a 45 s handoff, on the RTX 4090 fragment"
+  },
+  "observations": {
+    "mock_provider_limit": {
+      "literal_config": "the turn behind the background handoff failed after 6 expired attempts (503 request_queue_timeout, 33.6 s): the RTX 4090 route's provider is ninfer-native-4090, which OMP left unlimited",
+      "v0.8.7_config": "no expired attempt; the turn waited 45.0 s in OMP for the handoff's slot and completed, and the handoff committed",
+      "note": "the proof's own planting gate tripped in the mock run: OMP counts the mock's synthetic text differently from the mock's usage, so it compacted a turn earlier than the proof predicted. The gated question here is admission, which the mock's capture records."
+    },
+    "rtx4090_v087_config": {
+      "passed": true,
+      "compactions": "3 handoffs committed, each spliced in 0.0 s from the background run; summaries 3,235-5,241 bytes; all three durable identifiers recalled after the restart",
+      "admissions": "55 requests started and completed, none expired or failed",
+      "waits": "the three turns that met a running handoff took 36.2, 56.3 and 34.2 s against 15.7-17.8 s for the other filler turns; OMP held each in its own queue",
+      "turn_time": "365.4 s over 22 turns, against 678.2 s over 24 turns in EXP-072's inline run",
+      "compacted_turns": "32.5-35.3 s, each prefilling the 55.5-56.4K-token compacted context; the background run keeps the turn after it began, so the kept tail is larger than inline compaction's 24.7-32.2K and costs no blocking handoff (EXP-072: 91.0-101.1 s for the turn carrying each compaction)"
+    },
+    "handoff_cache": {
+      "candidate": "handoffs of 78,433, 79,710 and 80,398 tokens reused 78,047, 79,241 and 79,899 cached tokens and reached the first token in 0.58, 0.64 and 0.70 s, generating 1,509, 3,647 and 1,814 tokens",
+      "previous_runtime": "same harness, v0.8.6 config: handoffs of 97,498 and 97,398 tokens prefilled from root, 66.26 and 63.82 s to the first token"
+    },
+    "planner_fallback": {
+      "candidate": "three turns of 101,654-103,501 tokens stopped the search at its time budget and selected the maximal fallback; each reused its session's continuation (101,584, 79,241 and 79,899 cached tokens)",
+      "red": "EXP-072 on the RTX 4090: the second replay in a row re-prefilled about 102,600 tokens from root (68.1-68.4 s); the RTX 5090 production log under v0.8.3 holds four such chained turns of 93,696-105,066 tokens, each with a time-budget stop and the maximal fallback, planned at 58-69 s. The fallback's only seed was the root candidate's maximal target, which evicts the admitting session's own continuation."
+    },
+    "crash_after_compaction": {
+      "previous_runtime": "v0.8.6 config: the compacted turns (32,002 and 32,102 tokens) were below the 32,768-token automatic-save minimum and never saved; after a hard kill the server restored the pre-compaction generation, and the next turn prefilled 32,173 tokens from root (17.17 s to the first token, 29.2 s for the turn)",
+      "candidate": "the same run: the next turn reused 32,167 cached tokens and sent 79 new ones, 2.9 s for the turn",
+      "graceful_restart": "a graceful server restart restored hot on both runtimes (previous runtime 32,263 and 55,412 cached tokens; candidate 55,356), because a graceful stop saves every session that has not been saved"
+    },
+    "short_sessions": {
+      "previous_runtime": "v0.6.9 (binary 65364401): the long session's 2.30 GiB checkpoint was reclaimed first, once 40 short sessions' 702-704 MiB checkpoints brought the store to its quota; after the kill and restart its continuation returned previous_response_not_found (55 short sessions in all)",
+      "candidate": "binary fe623c13: the store reached its quota at the same point and reclaimed short sessions instead, holding 32 sessions from then on; the long session's checkpoint stayed, and after the kill and restart its continuation reused 60,057 of 60,079 tokens in 3.06 s (50 short sessions in all)",
+      "red": "the RTX 5090 production checkpoint store under v0.8.3: about 26 short OMP sessions of about 930 MiB each filled the 24 GiB quota, whose oldest-first reclamation deleted every long session's checkpoint",
+      "save_floors_rejected": "the first release build (e2b6c76c) instead skipped saving sessions below the 32,768-token automatic minimum before eviction and at a graceful stop. qualify_native's restart phase failed on it: a short session nothing had saved was not written at the managed stop, and its previous_response_id returned 404 after the restart. The restart probe reproduced that on binary 5cf4b292 (shutdown 'saved 0, skipped 2'; previous_response_not_found) and passes on fe623c13 (shutdown 'saved 1, skipped 2'; both markers resumed, with 42 and 45 cached tokens). Saving every session keeps each stored response resumable across a restart; the reclamation order alone keeps the long sessions' checkpoints."
+    },
+    "omp_process_restart": {
+      "observation": "after the OMP process restarted, its first request after the resumed session carried no reasoning item for any earlier assistant turn, while the previous process's replays and the new process's second request carried all of them with the same text; the runtime preserves thinking, so that request rendered about 400 tokens shorter than the session it continued and prefilled 56,174 tokens from root (32.0 s to the first token) though the server had restored a current checkpoint",
+      "source": "OMP 18.4.0 packages/ai/src/providers/openai-responses.ts replays native reasoning only once a provider session is warmed (nativeHistoryReplayWarmed starts false and is set by the first replayable response)",
+      "correction": "EXP-072 attributed its cold first request after each restart (32,261 and 32,215 tokens) to a stale checkpoint; that run restarted the OMP process too, and this request shape alone makes it cold"
+    }
+  },
+  "decisions": {
+    "shipped": [
+      "The route config limits each NInfer provider to one request in flight and leaves async compaction on (v0.8.7).",
+      "RTX 4090 runtime v0.6.10-beta.1: tools render for tool_choice none with a stop at the tool-call token; the planner's budget fallback seeds from every candidate that keeps its source; unstored Responses turns leave the session's lineage; a session with a checkpoint on disk keeps it current at any size; quota reclamation takes checkpoints below the automatic-save minimum before longer ones."
+    ],
+    "upstream": "OMP could treat a resumed session's own reasoning as replayable on its first request; until then, a restart of the OMP process costs one prefill of the session's context on either lane."
+  }
+}

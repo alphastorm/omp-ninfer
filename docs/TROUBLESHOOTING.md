@@ -286,10 +286,14 @@ providers:
 ```
 
 with the id of every provider you route to a lane (the fleet's `ninfer-main` and `ninfer-heavy`
-too; OMP leaves a provider missing from the map unlimited), then send the turn again. The
-v0.8.6 config's `compaction: asyncEnabled: false` also prevents the failure, by compacting before
-your turn. Remove it once the limit is set: the summary then runs while you read or type, and a
-turn you send after it finishes does not wait at all.
+too; OMP leaves a provider missing from the map unlimited), then send the turn again. On the RTX
+4090 the three turns that met a running handoff took 34.2-56.3 s, waiting in OMP rather than at
+the server, and no admission expired. Against a mock lane, limiting only `ninfer-beta` left the
+RTX 4090 route's turn failing as before
+([EXP-074](measurements/2026-09-29-long-session-cache.json)). The v0.8.6 config's
+`compaction: asyncEnabled: false` also prevents the failure, by compacting before your turn.
+Remove it once the limit is set: the summary then runs while you read or type, and a turn you send
+after it finishes does not wait at all.
 
 ## Follow-up replay is cold or resume loses the nonce
 
