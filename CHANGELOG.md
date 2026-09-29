@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/concurrency_probe.py` measures one RTX 5090 engine-window arm with one or two
+  requests in flight: solo and paired decode, a long prefill beside a decode, two stored sessions,
+  sibling fanout, near-capacity admission, and a graceful restart while two stored sessions
+  decode. Its receipt records each request's time to first output, output-event gaps, VRAM, and
+  the prefix-reuse path the server logged, without prompt, output or credential text.
+- `scripts/omp_parallel_proof.py` runs stock OMP 18.4.0 against one lane with one and then two
+  requests in flight: a parent turn that fans out two scout subagents, and two OMP sessions
+  started together. It records the requests' overlap from the server's request log and each
+  scenario's wall time against the one-in-flight baseline.
+
 ## [0.8.7] - 2026-09-29
 
 ### Fixed
