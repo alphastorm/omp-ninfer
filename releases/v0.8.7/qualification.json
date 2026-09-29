@@ -1,0 +1,559 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.8.7",
+  "as_of": "2026-09-29",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Faster long sessions on both GPU lanes. RTX 5090 moves to v0.6.13-qwen38-5090-beta.1 (image d71e34c3, server b8ae62ae, source 423f5b1d) and RTX 4090 native Windows to v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93); both add the same runtime changes to v0.6.12 and v0.6.9. When the materialization planner's search runs out of time near capacity, its fallback keeps the session's own continuation. A session with a checkpoint on disk keeps it current at any size, and an unstored Responses turn leaves the session's lineage alone, so a crash after a compaction restores the compacted session. Quota reclamation takes checkpoints below --session-checkpoint-min-tokens before longer ones. tool_choice none renders the declared tools and stops at a tool call, so an RTX 4090 compaction handoff reuses the session's cache. The route config limits each NInfer provider to one request in flight in place of v0.8.6's inline compaction (EXP-074). Kernels, serving arguments, the RTX 5090 deployment profile qwen38-5090-v0.8.2 and configuration 56878aed, the RTX 4090 serving configuration (7a69481f under the v0.6.10 profile name), the model, the memory floors and the unmodified upstream OMP 18.4.0 client are unchanged. RTX 3090 is omitted pending physical-host access. The RTX 5090 profile gates and role corpus below were measured on the published image, and its long-session, reclamation, durability, barrier, stock-client, agent-mix and probe evidence on the candidate image of the same binary; the RTX 4090 gates are the canonical qualification of the published package.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "423f5b1dd9cbe0c6b0e14df0cfa33719d205e667",
+    "release_source_commit": "423f5b1dd9cbe0c6b0e14df0cfa33719d205e667",
+    "release_source_archive_sha256": "2ead8c139701e5d34205d70eefc35f7b2a9d39a8c46040203f4fac9dd51f182b",
+    "release_server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3",
+    "model_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "model_artifact_bytes": 18210531328,
+    "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.8.2"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.8.7/qualification/rtx5090.json",
+      "sha256": "0285cdf5731195483762524b72949481345b605bbc710b8f3ee9e8fd35646277",
+      "status": "passed",
+      "source_commit": "423f5b1dd9cbe0c6b0e14df0cfa33719d205e667",
+      "server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "423f5b1dd9cbe0c6b0e14df0cfa33719d205e667",
+      "release_server_binary_sha256": "b8ae62ae2454e4df1df5a84950cdd30b3ffb7ffd60d7299761eaf3f653479ec3",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+      "oci_manifest_digest": "sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+      "binary_package_sha256": "da93ca51c8f41a0c337c2ddb4fea795c41bca62137742bd1953829987583c7ba",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.13-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.13-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "3cecb5338cb3d63a47cf952e9751f6f259c0c516bf11cfb51db6f697da0575d9",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.13-qwen38-5090-beta.1",
+      "anonymous_pull_verified": true,
+      "anonymous_assets_verified": true,
+      "checksums_verified": true,
+      "build_route_note": "Appliance-local release build of 423f5b1d in the CUDA 13.1.2 devel image (nvcc 13.1.115) with v0.6.12's build flags; the change is host code, whose full test suite passed at the same commit on the RTX 4090 host (105 tests, 4 skipped). Publication workflow 36523968428 binds binary archive da93ca51 to image d71e34c3. The image pull by digest with an empty Docker config verified ninfer-serve b8ae62ae inside, and every lane-window arm checks that its declared binary identity is the image's."
+    },
+    "native_runtime_variants": {
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.8.7/qualification/rtx4090.json",
+        "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14",
+        "release_tag": "v0.6.10-qwen38-4090-beta.1",
+        "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.13-qwen38-5090-beta.1 component (image d71e34c3) before the cut; the receipt lands at releases/v0.8.7/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "release_tag": "v0.6.13-qwen38-5090-beta.1",
+      "runtime_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:d71e34c30b0f9f6d5037ab5d524977d45da2e576d954a6c59407c2332769fbf6",
+      "source_commit": "423f5b1dd9cbe0c6b0e14df0cfa33719d205e667",
+      "configuration_sha256": "56878aed92e8f3fb4101884fa889c98d1da75914573ebd167305ca0b4aa83e98",
+      "measured_on": "2026-09-29T05:13:31Z",
+      "profile_gates": {
+        "prefill_curve": {
+          "status": "passed",
+          "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "exact_output": true,
+          "output": "ORCHID=493817; COLOR=COBALT",
+          "wall_s": 58.462,
+          "tokens_per_second_wall": 2224.5,
+          "vram_used_mib_after": 28144,
+          "server_prefix_cache_hit_tokens": 0,
+          "server_prefix_reuse_path": "root",
+          "server_computed_prefill_tokens": 130048,
+          "server_prefill_seconds": 58.32880140499999,
+          "cold": true
+        },
+        "decode": {
+          "request_id": "319b2a4f6d67d705fb823d6ee07d45a0bd287f0e487fc81676ca37acf9cccc18",
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "wall_s": 12.147,
+          "completion_tokens_per_second_wall": 168.6,
+          "server_completion_tokens": 2048,
+          "server_decode_seconds": 12.021310220000009,
+          "decode_tokens_per_second": 170.36,
+          "mtp_acceptance_rate": 0.448,
+          "mtp_tokens_per_round": 2.34,
+          "speculative": {
+            "accepted_per_position": [
+              593,
+              369,
+              211
+            ],
+            "accepted_tokens": 1173,
+            "backend": "mtp",
+            "draft_window": 3,
+            "drafted_tokens": 2621,
+            "fallback_steps": 0,
+            "rounds": 874
+          }
+        },
+        "agent_protocol": {
+          "status": "passed",
+          "authenticated_session_identity": true,
+          "stateful_continuation": true,
+          "forks": 2,
+          "parent_delete_status": 200,
+          "deleted_continuation_status": 404,
+          "deleted_continuation_error_code": "previous_response_not_found",
+          "post_restart_deleted_continuation_status": 404,
+          "no_resurrection": true,
+          "surviving_descendant_continued": true,
+          "live_sibling_continuation_status": 200,
+          "live_sibling_continuation_error_code": null
+        }
+      },
+      "long_session_cache": {
+        "server_start_gpu_keep_warm_ms": 60000,
+        "role_corpus_candidate_against_published_v0612": [
+          "v083-pub-v0612b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+          "v083-pub-v0612b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+        ],
+        "role_corpus_published_against_candidate": [
+          "v087-pkg-423f5b1d-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing",
+          "v083-pub-v0612b1-kw60000-bf16-c1024-mtp3: 89/89 cases identical; 0 differ; 0 missing"
+        ],
+        "long_sessions": {
+          "method": "scripts/omp_long_session_proof.py three times (EXP-072's runs: seed 20260928, 40,000-byte filler turns, two snapcompact compactions each, durable identifier after 2, 3 and 1 filler turns) with unmodified OMP 18.4.0 and this release's config through the route's tunnel; the gate is the server's request log: no chained turn prefills more than 60K tokens from root.",
+          "runs": {
+            "plant_after_2": {
+              "passed": true,
+              "error": null,
+              "receipt_sha256": "ccce104bbb85eaa1192889a00a28b492f2eebabd8b8fb05c4a78d93b2ce6b128",
+              "compactions": [
+                101626,
+                104290
+              ]
+            },
+            "plant_after_3": {
+              "passed": false,
+              "error": "RuntimeError: epoch 2: OMP compacted before both identifiers were planted",
+              "receipt_sha256": "932ccabb5fa11a6e47ea044dea55010bf3f5e553131364b9bdf7f808ff257ebc",
+              "compactions": [
+                101647,
+                104116
+              ]
+            },
+            "plant_after_1": {
+              "passed": true,
+              "error": null,
+              "receipt_sha256": "77a14f66d0e2d0183be9d540a22572837527a3aa552fc7017358ddae95a8bf7a",
+              "compactions": [
+                101643,
+                104334
+              ]
+            }
+          },
+          "requests": 41,
+          "maximal_fallbacks": [
+            {
+              "prompt_tokens": 104120,
+              "cached_tokens": 80504,
+              "reuse_path": "private_response_replay",
+              "stop": "time_budget",
+              "ttft_s": 12.52
+            },
+            {
+              "prompt_tokens": 101549,
+              "cached_tokens": 77986,
+              "reuse_path": "private_response_replay",
+              "stop": "time_budget",
+              "ttft_s": 12.37
+            },
+            {
+              "prompt_tokens": 101538,
+              "cached_tokens": 77985,
+              "reuse_path": "private_response_replay",
+              "stop": "time_budget",
+              "ttft_s": 12.46
+            }
+          ],
+          "root_prefills_over_60k_tokens": [],
+          "plant_after_3_note": "the proof's own planting precondition: with async compaction the kept tail is about 57K tokens, so epoch 2 met OMP's threshold after two 23.6K-token filler turns, before the durable identifier could be planted; its requests are in the gate above."
+        },
+        "quota_reclamation": {
+          "method": "one 60,026-token stored session, then stored sessions of about 11.9K tokens under one prompt_cache_key each until the checkpoint store had reclaimed; then the server killed without its stop's save and started again on the same checkpoint root, and the long session continued by previous_response_id.",
+          "short_sessions": 35,
+          "short_session_tokens": [
+            11864,
+            11910
+          ],
+          "short_checkpoint_bytes": [
+            1137149798,
+            1141607310
+          ],
+          "long_checkpoint_bytes": [
+            4494214193
+          ],
+          "store_bytes_after": 25038678828,
+          "sessions_on_disk_after": 19,
+          "long_on_disk_before_crash": true,
+          "long_continue_after_crash": {
+            "status": "completed",
+            "seconds": 2.89,
+            "input_tokens": 60079,
+            "cached_tokens": 60057
+          },
+          "receipt_sha256": "2f97e9f6a0170c276796c07c9c2b0ea5e3b4607b736e11d737203559559bcd2d"
+        }
+      },
+      "durable_sessions": {
+        "workload": "scripts/engine_window_compare.py --wire fork with its defaults, EXP-050's workload: 130,048-token retrieval, decode, two 125.9K-token sessions alternating continuation and fork, a 67.7K-token fanout with four branches and a sibling continuation, the live-sibling agent protocol; no explicit saves; then a graceful stop, a restart on the same checkpoint root, one continuation of every stored session and a second stop.",
+        "workload_errors": 0,
+        "saves_before_eviction": 1,
+        "automatic_saves_deferred": 1,
+        "first_stop": [
+          "shutdown: saved 1, nothing to save 3, refused 0"
+        ],
+        "resumed": 4,
+        "sessions": 4,
+        "restored_from_checkpoint": 4,
+        "resumed_cached_tokens": {
+          "agent": [
+            191,
+            164
+          ],
+          "fanout": [
+            67882,
+            67856
+          ],
+          "session-D1": [
+            126098,
+            126067
+          ],
+          "session-D2": [
+            126099,
+            126068
+          ]
+        },
+        "restore_reclaim_lines": [
+          "checkpoint restore for session c07c8b1e7217 saved 1 of 2 resident session(s) to make room",
+          "checkpoint restore for session c07c8b1e7217 saved 1 of 1 resident session(s) to make room",
+          "checkpoint restore for session c07c8b1e7217 reclaimed 3 checkpoint-backed session(s)"
+        ],
+        "second_stop": [
+          "shutdown: saved 0, nothing to save 4, refused 0"
+        ],
+        "receipts_sha256": {
+          "workload": "3c61c74e155ffb36beb8cb684683d289c0f3633ff3451ed27b11f092a18de196",
+          "resume": "b346b329a1fc2407a8737ac06483898ca970c4f733a3d50df916e6bc4fac2f69"
+        }
+      },
+      "publication_barrier": {
+        "method": "EXP-051's tracer: one reply held out of the response store for 6 s by a non-stop gdb breakpoint while another 126K-token session's admission had to evict its session.",
+        "log_after_barrier_hit": [
+          "+1.26s [info] ninfer-serve: session checkpoint before eviction deferred: newest turn is still being stored (session 823a70efca77)",
+          "+13.33s [info] ninfer-serve: session checkpoint saved before eviction (session 823a70efca77)"
+        ],
+        "first_stop": [
+          "shutdown: saved 0, nothing to save 2, refused 0"
+        ],
+        "resume_from_held_turn": {
+          "http_status": 200,
+          "answer": "V-9241",
+          "exact": true
+        },
+        "receipts_sha256": {
+          "workload": "0359b067f0d64505fc48bd2431d7371b93af89dca970abec69ea061dada00777",
+          "resume": "4101aa5db96ee5e8d28030898909b746ecb4e12e79f2ab10557a6cf86af6f97b"
+        }
+      },
+      "stock_client_sessions": {
+        "method": "scripts/stock_omp_session_proof.py: the unmodified upstream Oh My Pi 18.4.0 macOS arm64 binary in RPC mode with PI_OPENAI_STATEFUL=1, using the documented macOS route's provider fragment and this release's fail-closed config verbatim (examples/manual-tunnel/models.fragment.yml and fail-closed.yml: async compaction on, one request in flight per NInfer provider) over an SSH forward on the route's tunnel port 18089. s1: one OMP process seeds two facts, recalls one, the server restarts, and it recalls both; s2: a new OMP process continues the session with the server up; s3: the server restarts, then a new OMP process continues it. Each restart is a graceful stop and a start on the same checkpoint root.",
+        "omp": {
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+          "version": "omp/18.4.0"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0eb44-34fe-7246-871e-eb4f8b0aae9a"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 1, nothing to save 0, refused 0",
+          "shutdown: saved 0, nothing to save 1, refused 0",
+          "shutdown: saved 0, nothing to save 1, refused 0"
+        ],
+        "receipt_sha256": "f546187cdb7040f9de33996e846b5c7eb6d35d90e5a8f9e2cbb1837274d53ba5",
+        "evidence": "docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json",
+        "first_request_restore": [
+          "checkpoint restored for session b78ddb61067e on its first request without a response id"
+        ]
+      },
+      "shared_prefix_capacity": {
+        "method": "scripts/agent_mix_probe.py with EXP-052's workload on the default capacity and no session identity: three agent types whose system messages carry their tool JSON (11.9-14.2K-token prefixes), three warm-up fresh sessions, then 8 cycles of fresh A, C and B sessions, each followed by one turn of the long-lived warm-up session.",
+        "reported_max_shared_prefixes": 4,
+        "measured_fresh_sessions": 24,
+        "measured_fresh_root": 0,
+        "measured_fresh_reuse_paths": [
+          "shared_stable_prefix"
+        ],
+        "measured_fresh_client_ttft_median_s": {
+          "A": 0.094,
+          "B": 0.094,
+          "C": 0.101
+        },
+        "measured_fresh_client_ttft_p90_s": {
+          "A": 0.096,
+          "B": 0.098,
+          "C": 0.103
+        },
+        "receipt_sha256": "13ec360a09c9b3299b50a2f970b92204c0359755a8b134330d58537712cc27d5"
+      },
+      "additional_probes": {
+        "fanout-57k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 67681,
+            "cold_prefill_s": 25.281,
+            "checkpoint_save_s": 3.682,
+            "checkpoint_bytes": 5188026237,
+            "hot_fork_median_s": 0.772,
+            "hot_fork_max_s": 0.78,
+            "restart_ready_s": 29.29,
+            "post_restart_resume_s": 2.966,
+            "warm_start_first_fork_s": 0.715,
+            "warm_start_fork_median_s": 0.737,
+            "warm_start_fork_max_s": 0.739
+          },
+          "receipt_sha256": "a753376933e3f187847bac4416fadfa2a959f97b43f2596ac02e634086d88f30"
+        },
+        "fanout-67k": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 79957,
+            "cold_prefill_s": 31.25,
+            "checkpoint_save_s": 4.42,
+            "checkpoint_bytes": 6044083061,
+            "hot_fork_median_s": 0.991,
+            "hot_fork_max_s": 0.995,
+            "restart_ready_s": 29.63,
+            "post_restart_resume_s": 3.331,
+            "warm_start_first_fork_s": 0.758,
+            "warm_start_fork_median_s": 0.78,
+            "warm_start_fork_max_s": 0.784
+          },
+          "receipt_sha256": "d8b88b9459871ff7f0979a95b1cc2218ea0b86bfa2ccdffb4fabd5fcf9e77825"
+        },
+        "warm-arrival": {
+          "exit_code": 0,
+          "summary": [
+            {
+              "order": "resume-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.518,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.814
+              ],
+              "checkpoint_bytes": 5210318673,
+              "post_restart_sequence": [
+                [
+                  "endpoint_resume_first",
+                  "private_response_replay",
+                  67908,
+                  3.025
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.747
+                ],
+                [
+                  "fork_second",
+                  "private_long_anchor",
+                  67712,
+                  0.736
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 4.508
+            },
+            {
+              "order": "fork-first",
+              "control_retrieval_exact": true,
+              "template_input_tokens": 67717,
+              "cold_prefill_s": 25.348,
+              "pre_restart_fork": [
+                "private_endpoint",
+                0.7
+              ],
+              "checkpoint_bytes": 5205861692,
+              "post_restart_sequence": [
+                [
+                  "fork_first",
+                  "private_long_anchor",
+                  67712,
+                  3.121
+                ],
+                [
+                  "endpoint_resume_after_fork",
+                  "private_response_replay",
+                  67908,
+                  0.656
+                ],
+                [
+                  "fork_after_resume",
+                  "private_long_anchor",
+                  67712,
+                  0.736
+                ]
+              ],
+              "every_post_restart_fork_hot": true,
+              "restored_retrieval_exact": true,
+              "restore_plus_sequence_s": 4.513
+            }
+          ],
+          "receipt_sha256": "e8cb50a837a115175879b368d29e4b2fc327cfeed45db1d8045a34fff5fa7319"
+        },
+        "restore": {
+          "exit_code": 0,
+          "summary": {
+            "template_input_tokens": 57889,
+            "cold_prefill_s": 20.987,
+            "checkpoint_bytes": 4514771839,
+            "restore_0_wall_s": 2.731,
+            "restore_1_wall_s": 2.585,
+            "control_retrieval_exact": true,
+            "restored_retrieval_exact": true,
+            "tampered_restore_refused": null
+          },
+          "receipt_sha256": "465a8620eba8656a8f32f6c59377e704c894aa5e751d26cb568f9fbb270d0e8b"
+        },
+        "multisession": {
+          "exit_code": 0,
+          "summary": {
+            "continuations_and_forks": 8,
+            "reuse_lost": 2,
+            "exposed": true,
+            "server_errors": [],
+            "server_reuse_paths": [
+              "private_endpoint",
+              "private_long_anchor",
+              "root"
+            ],
+            "server_root_requests_after_bases": 2
+          },
+          "receipt_sha256": "edb707ce2e31cb32a2425502711c05a1253198ae3008b4755921e7eada9a453e"
+        }
+      },
+      "tampered_restore_refused": "not exercised; no current tamper-test claim",
+      "evidence": "releases/v0.8.7/qualification/rtx5090.json (release_evidence.long_session_cache: role corpus against the published v0.6.12 image, three stock OMP long sessions with two compactions each, quota reclamation under short sessions and a crash); docs/measurements/2026-09-29-long-session-cache.json (EXP-074: the runtime changes and v0.6.12 production's root re-prefills); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075, stock OMP 18.4.0 durable sessions); shared-prefix capacity method in docs/measurements/2026-09-25-agent-mix-shared-prefix.json; durability defect reproduction and remediation proof in docs/measurements/2026-09-24-durable-session-eviction.json and docs/measurements/2026-09-24-publication-barrier.json"
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.10-qwen38-4090-beta.1",
+      "source_commit": "cba7eb932724c99a4faffd6b7b47256015c9b969",
+      "server_binary_sha256": "e0498fad39bcb69d21bf7a6124c900be7229e2542c8c7ca72e19b32c606a51d3",
+      "configuration_sha256": "7a69481f205c3f211d9dab13347d16589eb22ce3c404b1d555d788c39f72a7d4",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 157.91175764529982,
+      "c1_max_memory_used_mib": 22774,
+      "c1_max_power_w": 460.9,
+      "c1_mtp_acceptance_percent": 87.58865248226951,
+      "c1_prefill_tokens_per_second": 2116.5252239608553,
+      "context_elapsed_seconds": 91.23760920017958,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "stop-event",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.4.0",
+      "omp_transport": "openai-responses",
+      "gpu_keep_warm_ms": 60000,
+      "rollback_note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.10-beta.1-cba7eb932724 and predecessor qwen38-4090-native-v0.6.9-beta.1-5ac17674e8e0, the published v0.6.9-beta.1 package. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
+      "evidence": "releases/v0.8.7/qualification/rtx4090.json; docs/measurements/2026-09-29-long-session-cache.json (EXP-074: handoff cache, planner fallback, crash after compaction, quota reclamation, the provider limit); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075); docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json (EXP-064, including issue_48_field_start); docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json (EXP-066)",
+      "stock_client_sessions": {
+        "evidence": "docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json",
+        "omp": {
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+          "version": "omp/18.4.0"
+        },
+        "model": "ninfer-native-4090/qwen3.8-27b",
+        "thinking": "low",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0eb9e-45bd-70bc-a432-47bed47d4ad6"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 0, nothing to save 1, refused 0 (second restart)",
+          "shutdown: saved 0, nothing to save 1, refused 0 (stop after the proof)"
+        ],
+        "first_request_restore": [
+          "checkpoint restored for session 72e9696e017e on its first request without a response id"
+        ],
+        "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
+      }
+    }
+  },
+  "interpretation": "Long sessions keep their cache on both lanes. On the RTX 5090, in three stock OMP 18.4.0 sessions with two compactions each, the three turns whose planner search ran out of time reused 77,985-80,504 cached tokens and reached the first token in 12.37-12.52 s, and no turn prefilled more than 60K tokens from root; v0.6.12 production's log holds four such turns of 93.7-105.1K tokens, each prefilled from root. With 35 short sessions filling the 24 GiB checkpoint store, a 60,026-token session kept its checkpoint and after a crash reused 60,057 cached tokens in 2.89 s. On the RTX 4090, compaction handoffs reused 78.0-79.9K cached tokens and reached the first token in 0.58-0.70 s where v0.6.9 prefilled 97.4-97.5K tokens from root in 63.8-66.3 s, and a crash after a compaction restored the compacted session (32,167 cached tokens, 2.9 s, against 32,173 from root in 29.2 s). The provider limit makes the turn that meets a background handoff wait in OMP: the RTX 4090 ran three handoff compactions and a restart with no expired admission (EXP-074). The kernels are unchanged: the RTX 5090 candidate and the published image answered the 89-case role corpus byte-identically to v0.6.12, the published image prefilled 130,048 tokens exactly in 58.3 s and decoded 170.36 tokens/s, and the RTX 4090 decoded 157.91 tokens/s at 87.59% MTP acceptance, as v0.6.9 did. Stock OMP 18.4.0 kept one session across graceful restarts on both runtimes (EXP-075). A restart of the OMP process still costs one prefill of the session's context: OMP's first request after resuming omits the session's reasoning, so it cannot match the restored checkpoint. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
+  "remaining_release_gates": [
+    "documented-route acceptance of all four routes on the published v0.6.13 and v0.6.10 components with unmodified OMP 18.4.0",
+    "external-installation acceptance against the published v0.6.13-qwen38-5090-beta.1 component and runtime image"
+  ],
+  "deferred_scope": {
+    "rtx3090-windows-native": {
+      "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",
+      "legacy_release": "v0.7.2",
+      "legacy_client": "18.0.9-cross-platform-beta-2",
+      "future_condition": "Run one scripts/qualify_native.py qualification window on the physical RTX 3090 when its host returns, expected around 2026-09-30, before publication or inclusion in the product manifest."
+    }
+  }
+}

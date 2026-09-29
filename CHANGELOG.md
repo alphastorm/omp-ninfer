@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.7] - 2026-09-29
+
+### Fixed
+
+- An RTX 4090 compaction handoff no longer re-prefills the whole session. OMP asks for the
+  summary with `tool_choice: none`, and the runtime rendered that request without the tool block
+  every other turn starts with. Runtimes `v0.6.10-qwen38-4090-beta.1` and
+  `v0.6.13-qwen38-5090-beta.1` render the declared tools and end the turn at the template's
+  tool-call token: handoffs of 78.4-80.4K tokens reused 78.0-79.9K cached tokens and reached the
+  first token in 0.58-0.70 s, where v0.6.9 prefilled 97.4-97.5K tokens from root in 63.8-66.3 s
+  ([EXP-074](docs/measurements/2026-09-29-long-session-cache.json)).
+- A near-capacity turn whose planner search runs out of time keeps its session's continuation.
+  The maximal fallback seeded only from the root candidate, which evicts the admitting session's
+  own continuation: the RTX 4090 re-prefilled about 102,600 tokens (68 s), and this was the
+  RTX 5090 chained turn of 93.7-105.1K tokens that v0.8.6 listed with an unidentified cause. The
+  fallback now seeds from every candidate that keeps its source. In three stock OMP sessions on
+  the RTX 5090 the three fallback turns reused 78.0-80.5K cached tokens (12.4-12.5 s to the first
+  token), and no turn prefilled more than 60K tokens from root.
+- A crash after a compaction restores the compacted session. Automatic saves start at 32,768
+  tokens, so the shorter, compacted lineage stayed unsaved and a crash restored the
+  pre-compaction checkpoint. A session with a checkpoint on disk now keeps it current at any
+  size, and an unstored Responses turn leaves its lineage alone: after a hard kill the next
+  RTX 4090 turn reused 32,167 cached tokens in 2.9 s, where v0.6.9 prefilled 32,173 tokens from
+  root (29.2 s).
+- Short sessions no longer delete long sessions' checkpoints. Oldest-first reclamation let about
+  26 short OMP sessions fill the RTX 5090's 24 GiB checkpoint store and delete every long
+  session's checkpoint. Reclamation now takes checkpoints below `--session-checkpoint-min-tokens`
+  first. With 35 short sessions filling the store, a 60,026-token session kept its checkpoint and
+  after a crash reused 60,057 cached tokens (2.9 s on the RTX 5090, 3.1 s on the RTX 4090), where
+  v0.6.9 failed the turn with `previous_response_not_found`.
+- The RTX 4090 controller no longer fails an action when the server writes a checkpoint while the
+  controller walks the state tree.
+- v0.8.6 attributed the cold first turn after a graceful restart to a stale checkpoint. A graceful
+  server restart restores hot on both runtimes; the cold turn comes from restarting the OMP
+  process, listed under Known limitations (EXP-074).
+
+### Changed
+
+- `examples/manual-tunnel/fail-closed.yml` limits each NInfer provider to one request in flight
+  (`providers.maxInFlightRequests`) and leaves compaction at OMP's default, replacing v0.8.6's
+  `compaction.asyncEnabled: false`. OMP compacts in the background again, and the turn that meets
+  a running summary waits in OMP, which has no deadline, instead of expiring at the runtime's 30 s
+  admission deadline. On the RTX 4090, three handoff compactions and a restart ran 55 requests
+  with none expired, and 22 turns took 365.4 s where inline compaction took 678.2 s for 24. The
+  limit names every provider id a documented route or the fleet declares: OMP leaves an unlisted
+  provider unlimited, and on a mock endpoint with only `ninfer-beta` limited the RTX 4090 route's
+  turn failed after six expired attempts.
+- Upgrade from v0.8.6 by following the quickstart for your lane: RTX 5090 runs the new image
+  digest with the same arguments and profile, and RTX 4090 installs the new native package. In
+  `~/.omp/agent/config.yml`, remove `compaction.asyncEnabled: false` and merge
+  `providers.maxInFlightRequests`. Both server builds change, so each saved session re-prefills
+  once.
+
+### Added
+
+- EXP-074 measured the provider limit and the runtime changes on the RTX 4090, with the RTX 5090
+  production log as the red case; the RTX 5090 lane receipt records the same changes on its
+  runtime. EXP-075 reran the stock OMP 18.4.0 durable-session proof on both new runtimes: one
+  session across graceful restarts, and every turn after the seed cached
+  ([EXP-075](docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json)).
+  [Qualification](releases/v0.8.7/qualification.json) ·
+  [Release notes](releases/v0.8.7/NINFER_RELEASE_NOTES.md).
+
+### Known limitations
+
+- A restart of the OMP process costs one prefill of a resumed session's context on either lane:
+  OMP 18.4.0's first request after resuming omits the session's reasoning, so it cannot match
+  the restored checkpoint (56,174 tokens from root, 32.0 s to the first token, in EXP-074). The
+  next request caches again. This is an upstream OMP item.
+
 ## [0.8.6] - 2026-09-28
 
 ### Fixed
