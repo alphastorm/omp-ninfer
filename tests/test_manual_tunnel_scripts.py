@@ -56,13 +56,14 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                     "          supportsImageDetailOriginal: false\n" in fragment, "image" in inputs,
                 )
 
-    def test_every_documented_provider_admits_one_request_at_a_time(self) -> None:
-        # Every lane admits one request at a time and expires a waiting one after 30 s. OMP's async
-        # compaction sends its summary in the background as a session nears the threshold, and a
-        # turn queued behind it at the server failed once the summary outlasted OMP's resends
-        # (EXP-072). OMP waits for its own in-flight slot without a deadline, but leaves a provider
-        # missing from the limits unlimited, so every provider a shipped fragment declares needs
-        # one - and the background summary stays on, so the wait usually overlaps think time.
+    def test_every_documented_provider_admits_as_many_requests_as_its_lane(self) -> None:
+        # A request past its lane's --max-concurrency waits at the server, which expires it after
+        # --pending-timeout-ms. OMP's async compaction sends its summary in the background as a
+        # session nears the threshold, and a turn queued behind it at the server failed once the
+        # summary outlasted OMP's resends (EXP-072). OMP waits for its own in-flight slot without a
+        # deadline, but leaves a provider missing from the limits unlimited, so every provider a
+        # shipped fragment declares needs one, equal to its lane's concurrency: the RTX 5090
+        # providers take the root profiles' value and the RTX 4090 providers admit one.
         config = (EXAMPLES / "fail-closed.yml").read_text(encoding="utf-8")
         block = re.search(r"^providers:\n  maxInFlightRequests:\n((?:    [\w-]+: \d+\n)+)",
                           config, re.M)
@@ -75,7 +76,17 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             for provider in re.findall(r"^  ([\w-]+):$", fragment.read_text(encoding="utf-8"), re.M)
         }
         self.assertTrue({"ninfer-beta", "ninfer-native-4090"} <= declared)
-        self.assertEqual(limits, dict.fromkeys(declared, 1))
+        rtx5090_providers = {"ninfer-main"}
+        rtx5090_concurrency = set()
+        for path in (ROOT / "profiles").glob("qwen38-rtx5090-*.json"):
+            profile = json.loads(path.read_text(encoding="utf-8"))
+            arguments = profile["server"]["arguments"]
+            rtx5090_concurrency.add(int(arguments[arguments.index("--max-concurrency") + 1]))
+            rtx5090_providers.add(profile["omp_provider"]["id"])
+        self.assertEqual(len(rtx5090_concurrency), 1, "the RTX 5090 routes run one configuration")
+        (rtx5090,) = rtx5090_concurrency
+        self.assertEqual(limits, {provider: rtx5090 if provider in rtx5090_providers else 1
+                                  for provider in declared})
         self.assertNotIn("asyncEnabled", config)
 
     @staticmethod
