@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scripts/speculative_decode_probe.py` measures decode rate and draft acceptance for one code
+  answer behind 0 to about 120K tokens of context, a continuation that reuses its prefix, and an
+  optional pair of requests decoding together. It sends plain Chat Completions, which the shipped
+  runtime and upstream NInfer both accept, and reads timings from the server's request log.
+  EXP-078 used it with the role corpus: on upstream `d44ab584`, DFlash2 K=7 decoded the corpus
+  28.2% faster than MTP3 at one request, for 1.65 GiB more weights
+  ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)).
+
 ## [0.9.0] - 2026-09-30
 
 ### Fixed

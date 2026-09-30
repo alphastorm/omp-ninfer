@@ -1150,6 +1150,13 @@ include prefill, decode, MTP acceptance and verification cost, Vision, KV storag
 and long-session continuation. No optimization result becomes part of a release until its exact
 binary and profile are rebound through a new qualification receipt.
 
+Next engine campaign: DFlash2 on the RTX 5090. Upstream NInfer's DFlash2 backend decoded the role
+corpus 28.2% faster than MTP3 on the same binary at one request, with prefill unchanged, for 1.65
+GiB of weights ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)). Porting it onto
+the durable runtime must carry its context ring through checkpoints, fanout and restore; it
+changes outputs, so it needs its own quality screen; and at two requests it leaves 131,520 KV
+tokens where v0.9.0 has 160,256.
+
 ## How to help right now
 
 - **Run OMP with subagents against a lane?** That fanout path is exactly what v0.4.3 changed —

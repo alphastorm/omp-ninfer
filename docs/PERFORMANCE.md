@@ -130,6 +130,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-066 | RTX 4090 long-spin engine keep-warm | An sm_89-specific 50 ms/100 ms spin restores post-idle prefill to back-to-back speed | With a 60 s grace, new sessions after 12-58 s idle prefilled in 0.146-0.148 s (TTFT 0.167-0.178 s); all 31 outputs byte-identical, about 72 W above idle while held. A request arriving mid-spin can overlap one warp for up to 50 ms ([receipt](measurements/2026-09-27-rtx4090-keep-warm-long-spin.json)) | kept — shipped in v0.8.4 RTX 4090 v0.6.9 |
 | EXP-069 | RTX 4090 Q5 small-T tensor-core route | The sm_89 route clears the pre-registered decode-gain thresholds of 2.0% at 26K and 1.0% at 60K | Measured +0.38% at 26K and +0.40% at 60K; rejected by the fixed rule, so the published v0.6.9 package keeps its decode kernels ([receipt](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)) | rejected |
 | EXP-077 | RTX 5090 two requests in flight | With `--max-concurrency 2` and OMP's limit at 2, the lane serves two requests with more aggregate decode and without losing outputs, reuse or durability | The shipped v0.6.13 image paired two decodes at 190.0-191.1 tok/s against 166.7-167.1 one at a time (1.14×): eight-token verify rounds left the Q5 tensor-core route, 12.8 ms of a 23.9 ms round. Runtime v0.6.14 (`e20060b6`) runs them on it: **281.1-283.0 tok/s (1.68-1.70×)**, 143.5-152.8 each, 89/89 role-corpus cases byte-identical to one at a time on the candidate and the published image. A request that does not fit waits at the server; `--pending-timeout-ms 180000` replaces the 30 s default that expired it. The v0.8.7 lane set passed on the final profile. A decode beside a 71,641-token prefill still slows to about 30 tok/s, and stock OMP's wall time at limit 2 followed what its subagents generated rather than the overlap ([receipt](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)) | kept — v0.9.0 |
+| EXP-078 | RTX 5090 DFlash2 speculative backend | DFlash2 K=7 (Z-Lab's five-layer block drafter) decodes this lane's workload faster than MTP3 at the shipped BF16 KV, 131,072-token and 1,024-chunk settings | Upstream `d44ab584` on the published v3 artifact, one request: role corpus **253.63 vs 197.80 tok/s (+28.2%)**, 4.631 vs 3.332 tokens per round, all 84 cases faster; a code answer +27.0%/+20.8%/+56.4% behind 32K/64K/120K tokens; prefill unchanged. Costs 1.65 GiB of weights; two requests need two fewer device state slots and leave 131,520 KV tokens against MTP3's 160,256, pair 453.95 vs 374.94 tok/s. Upstream with DFlash2 decoded the corpus 6.9% faster than shipped v0.9.0 ([receipt](measurements/2026-09-30-dflash2-rtx5090.json)) | open: port campaign |
 
 Entry detail:
 
@@ -863,6 +864,20 @@ Entry detail:
   and a fourth finished it. The published v0.6.14 image then passed the role corpus and profile
   gates (130,048 tokens exact in 58.4 s, 169.79 tok/s). Receipt:
   [two requests in flight](measurements/2026-09-29-rtx5090-two-requests-in-flight.json).
+- **EXP-078 — DFlash2 earns a port (2026-09-30).** Upstream `d44ab584` served the published v3
+  artifact, whose DFlash2 companion is Z-Lab's five-layer block drafter, in two arms that differ
+  only in the speculative backend: MTP3, and DFlash2 drafting seven tokens in one masked-block
+  pass, both at one request with BF16 KV and 131,072-token context. DFlash2 decoded the 84
+  runnable role-corpus cases at 253.63 against 197.80 tok/s (+28.2%, every case faster): 4.631
+  against 3.332 tokens per round, with rounds 8.4% longer. A 2,048-token code answer gained
+  27.0%, 20.8% and 56.4% behind 32K, 64K and 120K tokens of unrelated context, and 45.9% on a
+  continuation that reused 64,222 cached tokens; prefill did not move. It costs 1.65 GiB of
+  weights. At two requests the four extra device state slots no longer fit (343 MiB short); two
+  slots leave 131,520 KV tokens for both requests against MTP3's 160,256, and a pair reached
+  453.95 against 374.94 tok/s. Outputs change (34 of 84 answers identical between the arms), so
+  adoption needs its own quality screen. The pre-registered rule said go: the next engine
+  campaign ports DFlash2 onto the fork's durable runtime. Receipt:
+  [DFlash2 on the RTX 5090](measurements/2026-09-30-dflash2-rtx5090.json).
 
 ## Current order
 
@@ -900,7 +915,8 @@ hypothesis and method before writing code.
 | Paged host-to-device KV prefetch beyond 262K tokens | Extends usable context past resident KV capacity without a quality change | open |
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
-| DFlash-style deeper drafting (k=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
+| Deeper MTP drafting (K=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
+| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests | open: port campaign |
 | RTX 5090 `nvfp4` artifact swap | Measured on 2026-09-04: 2.22× prefill and −3.5% decode with INT8 KV, refuses to start with BF16 KV at 131,072 context; two-case grounding shift on the private screen | rejected for v0.4; v0.5 candidate with INT8 KV |
 | RTX 4090 prefill chunk 2,048 | Measured on 2026-09-04: +22.8% prefill, +2.0% decode, +270 MiB peak, session time +5.5% to +12.8% against the shipped 512; 4,096 regresses decode | kept; requalify |
 | RTX 3090 131,072-token context | Measured on 2026-09-04: automatic KV capacity 131,072 at 22,465 MiB peak with unchanged throughput on the shipped INT8 profile | kept; qualify |

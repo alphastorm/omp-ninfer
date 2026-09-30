@@ -1,0 +1,122 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-078",
+  "title": "DFlash2 K=7 against MTP3 on the RTX 5090: +28% role-corpus decode on the same upstream binary",
+  "generated_utc": "2026-09-30T08:55:00Z",
+  "status": "completed_with_limits",
+  "question": "Does upstream NInfer's DFlash2 speculative backend (K=7, the published Qwen3.8-27B companion weights) decode this product's workload faster than MTP3 on the RTX 5090 at the shipped serving settings (BF16 KV, 131,072 context, 1,024-token prefill chunks), and what does it cost in memory, prefill and two requests in flight?",
+  "answer": "Yes at one request. On one upstream binary and artifact, DFlash2 K=7 decoded the 84 runnable role-corpus cases at 253.63 tok/s against MTP3's 197.80 (+28.2%): 4.631 tokens per round against 3.332, with rounds 8.4% longer; every one of the 84 cases decoded faster (median x1.40, p10-p90 x1.12-x1.60). Behind an unrelated document, a 2,048-token code answer decoded +27.0% at 32K tokens, +20.8% at 64K and +56.4% at 120K, and +45.9% on a 64K continuation that reused 64,222 cached tokens. Prefill was unchanged (-0.1% to -0.3%). DFlash2 adds 1.65 GiB of weights and 1,450 MiB of VRAM after load at one request; at two requests the shipped four extra device state slots no longer fit (343 MiB short), while two slots start with 131,520 KV tokens (160,256 for MTP3) and a two-request pair reached 453.95 tok/s against MTP3's 374.94. Upstream with DFlash2 already decoded the corpus 6.9% faster than the shipped v0.9.0 runtime measured the day before, although the shipped runtime completes MTP3 rounds 19.7% faster than upstream (71.03 against 59.36 rounds/s).",
+  "decision": {
+    "action": "go",
+    "rule": "Pre-registered before the window: go (open a DFlash2 port campaign) if role-corpus decode gains >= +15%, the 64K and 120K probe decodes gain >= +10%, DFlash2 KV capacity at one request is >= 131,072 tokens and no request errors; no-go if the corpus gain is < +5%, KV capacity at one request < 131,072 or a DFlash2 request error; otherwise inconclusive.",
+    "rule_outcome": {
+      "role_corpus_decode_gain": 0.2823,
+      "probe_64k_decode_gain": 0.2076,
+      "probe_120k_decode_gain": 0.5638,
+      "dflash2_kv_capacity_one_request": 131072,
+      "dflash2_request_errors": 0
+    },
+    "reason": "DFlash2 is the largest one-request decode lever measured on this lane: the previous largest, EXP-055's verify-kernel work, gained 10.3-11.0%, and DFlash2 moves the corpus 28% on the same binary with no prefill cost.",
+    "not_decided_here": "Which port route, whether the RTX 5090 profile keeps two requests in flight (DFlash2 needs two fewer device state slots, or no Vision, and leaves 131,520-141,440 KV tokens for both requests), and output quality: DFlash2 changes outputs, so adoption needs its own pre-registered screen.",
+    "next": "Scope the port: the fork already carries DFlash (v1) runtime files for the 35B-A3B target at upstream's pre-v3 layout, while upstream's DFlash2 now lives in its v3 model layer; the durable checkpoint, fanout and restore paths must carry DFlash2's 40 MiB context ring per state image."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04, driver 610.88; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "windows": {
+      "main": "supervisor hold taken 08:00:17Z, production stopped 08:00:31Z, restored healthy 08:28:58Z, hold released (1,707 s down)",
+      "follow_up": "the DFlash2 two-request arm exited at startup; a second window captured its error and ran two variants: production stopped 08:31:11Z, restored healthy 08:34:38Z (207 s down)",
+      "driver_incident": "The Mac-side driver was killed 5 min into the main window by its tool's 300 s deadline, without running its exit trap. The first arm's corpus runner kept running on the appliance; a resume driver launched outside the tool's process group waited for it, scored it, ran the remaining steps and restored production. The appliance-side dead-man was armed throughout."
+    },
+    "runtime": {
+      "upstream": "Neroued/ninfer d44ab58408aa389728cd8b1ee50179527e1f3e0d (2026-09-29), which includes 4201b5d2 (DFlash prefill controls bound per chunk)",
+      "build": "nvidia/cuda:13.1.2-devel-ubuntu24.04, CMAKE_CUDA_ARCHITECTURES=120a, Release, 247 s",
+      "server_binary_sha256": "af53e34ecf3933468a29042f824ec5563dba62705ba7b5b367855ace5bd0ac77",
+      "image": "ninfer-upstream:d44ab584-exp078 (sha256:6072db07ee42fde86f2cfe35ee06e69002edf7965366478a867669eec84c36f9), EXP-048's runtime base with the new binaries"
+    },
+    "artifact": {
+      "file": "published v3 qwen3_8_27b.ninfer, Hugging Face revision 1cbd84e7",
+      "sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "bytes": 20437521664,
+      "matches_upstream_manifest": true,
+      "components": ["text", "vision", "mtp", "dflash2"],
+      "dflash2_source": "z-lab/Qwen3.8-27B-DFlash2 @ 50307d4c4cde6860d4eee73e2547cd786fe8e8a4 (five draft layers with a candidate selector)"
+    },
+    "arms": {
+      "up-d44ab584-mtp3": "EXP-065's upstream arguments: --max-context 131072 --kv-capacity auto --prefill-chunk 1024 --kv-dtype bf16 --max-concurrency 1 --spec mtp --draft-tokens 3 --lm-head-draft --vision --preserve-thinking --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 --host-kv-mib 16384",
+      "up-d44ab584-df2k7": "the same with --spec dflash2 --draft-tokens 7",
+      "up-d44ab584-mtp3-c2": "the MTP3 arm with --max-concurrency 2",
+      "up-d44ab584-df2k7-c2": "the DFlash2 arm with --max-concurrency 2 (did not start)",
+      "up-d44ab584-df2k7-c2-ds2": "the DFlash2 two-request arm with --device-state-slots 2",
+      "up-d44ab584-df2k7-c2-nov": "the DFlash2 two-request arm without --vision",
+      "pub-v0614b1": "reference: the published v0.6.14 image (sha256:4c816b0c, server f62a570e) with the v0.9.0 profile (configuration cf1de114, two requests) on the pinned v2 artifact eec39564"
+    },
+    "steps": {
+      "role_corpus": "the frozen 89-case role corpus (corpus sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, on a fresh process per arm; the 5 json_schema cases are rejected by both runtimes, leaving 84; decode seconds, rounds and drafts from the server request log",
+      "context_probe": "scripts/speculative_decode_probe.py (sha256 a16600f9): one 2,048-token code-writing request behind ~0/32K/64K/120K tokens of the EXP-048 long fixture's essays, each prompt with its own nonce, temperature 0, thinking off; a 1,024-token continuation of the 64K request; on the two-request arms one solo request and two 1,024-token requests submitted together",
+      "shipped_reference": "the shipped runtime's role corpus is EXP-077's run of the same published image and profile on 2026-09-29; its context probe ran in this window"
+    }
+  },
+  "observations": {
+    "memory": {
+      "mtp3_one_request": {"vram_after_load_mib": 28144, "weights_bytes": 18197517824, "kv_capacity": 131072, "available_after_startup_bytes": 3440377856, "cuda_graph_allowance_bytes": 85983232},
+      "dflash2_one_request": {"vram_after_load_mib": 29594, "weights_bytes": 19973043200, "kv_capacity": 131072, "available_after_startup_bytes": 1919942656, "cuda_graph_allowance_bytes": 503316480},
+      "mtp3_two_requests": {"vram_after_load_mib": 30242, "kv_capacity": 160256, "available_after_startup_bytes": 1238368256},
+      "dflash2_two_requests_four_state_slots": "exited at startup: minimum Engine runtime reservation requires 11,741,580,801 bytes in addition to 1,073,741,824 bytes of automatic headroom, but only 12,456,034,304 bytes are available after weights (343 MiB short)",
+      "dflash2_two_requests_two_state_slots": {"vram_after_load_mib": 29468, "kv_capacity": 131520, "available_after_startup_bytes": 2049966080, "cuda_graph_allowance_bytes": 1006632960},
+      "dflash2_two_requests_no_vision": {"vram_after_load_mib": 29470, "kv_capacity": 141440, "available_after_startup_bytes": 2047868928, "cuda_graph_allowance_bytes": 1006632960}
+    },
+    "role_corpus": {
+      "up-d44ab584-mtp3": {"cases": 84, "completion_tokens": 80581, "decode_s": 407.4, "decode_tok_s": 197.8, "tokens_per_round": 3.332, "draft_acceptance": 0.7777, "rounds_per_s": 59.36, "prefill_s": 62.92},
+      "up-d44ab584-df2k7": {"cases": 84, "completion_tokens": 78952, "decode_s": 311.29, "decode_tok_s": 253.63, "tokens_per_round": 4.631, "draft_acceptance": 0.5186, "rounds_per_s": 54.77, "prefill_s": 63.5},
+      "pub-v0614b1_2026-09-29": {"cases": 84, "completion_tokens": 81280, "decode_s": 342.42, "decode_tok_s": 237.37, "tokens_per_round": 3.342, "draft_acceptance": 0.7811, "rounds_per_s": 71.03, "prefill_s": 61.65},
+      "dflash2_over_mtp3": {"aggregate": 0.2823, "per_case_median_ratio": 1.4038, "per_case_p10_p90_ratio": [1.1247, 1.5959], "cases_slower": 0, "cases": 84},
+      "dflash2_over_mtp3_by_class": {"log-triage (24)": 0.1717, "regression-contract (8)": 0.3107, "repository-evidence (30)": 0.4908, "structured-output (2)": 0.3184, "work-log-extraction (20)": 0.4582},
+      "upstream_dflash2_over_shipped": 0.0685,
+      "shipped_over_upstream_mtp3": 0.2001
+    },
+    "context_probe_decode_tok_s": {
+      "columns": ["up-d44ab584-mtp3", "up-d44ab584-df2k7", "pub-v0614b1"],
+      "context_0": [215.26, 321.06, 250.71],
+      "context_32k": [189.98, 241.27, 229.84],
+      "context_64k": [174.98, 211.31, 212.09],
+      "continuation_64k_1024_tokens": [186.71, 272.42, 225.94],
+      "context_120k": [156.61, 244.9, 180.11],
+      "tokens_per_round_0_32k_64k_cont_120k": {"up-d44ab584-mtp3": [3.507, 3.408, 3.402, 3.644, 3.436], "up-d44ab584-df2k7": [5.673, 4.676, 4.385, 5.657, 5.626], "pub-v0614b1": [3.436, 3.543, 3.599, 3.85, 3.543]},
+      "rounds_per_s_0_32k_64k_120k": {"up-d44ab584-mtp3": [61.38, 55.75, 51.43, 45.57], "up-d44ab584-df2k7": [56.59, 51.6, 48.18, 43.53], "pub-v0614b1": [72.96, 64.87, 58.93, 50.83]},
+      "prefill_tok_s_32k_64k_120k": {"up-d44ab584-mtp3": [3126.5, 2777.7, 2347.3], "up-d44ab584-df2k7": [3122.3, 2770.3, 2340.8], "pub-v0614b1": [3052.8, 2701.4, 2270.0]},
+      "continuation_reuse": "both upstream arms private_response_replay with 64,224 (MTP3) and 64,222 (DFlash2) cached tokens; DFlash2 kept 5.657 tokens per round on the reused context"
+    },
+    "two_requests": {
+      "columns": ["solo_decode_tok_s", "pair_client_aggregate_tok_s", "pair_over_solo"],
+      "up-d44ab584-mtp3-c2": [217.92, 374.94, 1.721],
+      "up-d44ab584-df2k7-c2-ds2": [323.07, 453.95, 1.405],
+      "up-d44ab584-df2k7-c2-nov": [330.29, 448.29, 1.357],
+      "pub-v0614b1": [250.71, 388.42, 1.549],
+      "note": "Pairs are two short-context 1,024-token code answers submitted together; the aggregate spans first submission to last completion."
+    },
+    "outputs": {
+      "role_corpus_identical_between_upstream_arms": "34 of 84 answered cases byte-identical (39 of 89 with the 5 identical rejections)",
+      "context_probe_identical_between_upstream_arms": "0 of 5",
+      "role_corpus_scores": {
+        "columns": ["up-d44ab584-mtp3", "up-d44ab584-df2k7", "pub-v0614b1_2026-09-29"],
+        "required_fact_recall": [0.8694, 0.8729, 0.8797],
+        "evidence_precision": [0.971, 0.993, 0.9935],
+        "unsupported_claim_rate": [0.2472, 0.2247, 0.236],
+        "critical_miss_count": [11, 12, 10],
+        "secret_leak_count": [7, 10, 10],
+        "redaction_control_pass_rate": [0.625, 0.5, 0.5]
+      },
+      "note": "Temperature-0 speculative decoding keeps the target's argmax only up to arithmetic: DFlash2's eight-token verify rounds change accumulation order, so near-tied tokens flip and answers diverge from there. One run per arm; these scores are not a powered screen."
+    }
+  },
+  "projection": "[INFERENCE] If a fork-native DFlash2 kept upstream's round cost ratio (DFlash2 rounds 8.4% longer than MTP3) on the shipped runtime's faster rounds (71.03 against 59.36 rounds/s on the corpus), the corpus would decode at about 303 tok/s, +28% over the shipped v0.9.0 runtime. Not measured.",
+  "limits": [
+    "One run per arm; the context probe has one request per context length, and DFlash2 acceptance depends on content that differs between arms once outputs diverge (64K ran at 4.385 tokens per round, 120K at 5.626).",
+    "Both upstream arms run upstream NInfer without the fork's session identity, durable checkpoints or fanout anchors; they measure the speculative backends, not a merged tree.",
+    "The shipped reference runs the pinned v2 artifact with its own chat template; the upstream arms run the published v3 artifact with the maintained template. Corpus prompts differ by 2 tokens in total, but answers are not comparable across the two runtimes.",
+    "The shipped runtime's role corpus comes from EXP-077's window on 2026-09-29, not this window.",
+    "RTX 5090 only, under WSL2 and Docker Desktop; the RTX 4090 lane (sm_89) was not measured, and upstream's DFlash2 kernels are built for sm_120a."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
