@@ -97,13 +97,15 @@ def main():
     def save(name, value):
         (root / name).write_text(json.dumps(value, indent=2) + '\n')
     def run(argv, timeout=60, env=None):
-        r = subprocess.run([str(s) for s in argv], capture_output=True, text=True, timeout=timeout, env=env)
+        # Children never read this script's stdin: run over ssh, it is the operator's terminal,
+        # which never ends, and a client that inherits it waits for it before it starts.
+        r = subprocess.run([str(s) for s in argv], stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=env)
         if r.returncode:
             raise RuntimeError('command failed: ' + str(argv[0]) + ' (exit ' + str(r.returncode) + '): ' + r.stderr[-1200:])
         return r.stdout.strip()
     def logged(name, argv, timeout, env=None):
         with (root / name).open('w') as log:
-            r = subprocess.run([str(s) for s in argv], stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env)
+            r = subprocess.run([str(s) for s in argv], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env)
         assert r.returncode == 0, name + ' failed: exit ' + str(r.returncode)
     def inspect(name):
         return json.loads(run(['docker', 'inspect', '--format', '{{json .}}', name]))

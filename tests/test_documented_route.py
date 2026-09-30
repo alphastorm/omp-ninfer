@@ -6,6 +6,7 @@ import ast
 import hashlib
 import json
 import re
+import os
 import socket
 import subprocess
 import sys
@@ -192,10 +193,12 @@ class RunnerTests(unittest.TestCase):
         listener.write_text(body if body is not None else self.HEALTH_LISTENER)
         listener.chmod(0o755)
 
-    def run_bundle(self, root: Path, bundle: Path) -> tuple[int, dict]:
+    def run_bundle(self, root: Path, bundle: Path, stdin: int | None = None,
+                   timeout: float | None = None) -> tuple[int, dict]:
         receipt = root / "receipt.json"
         completed = subprocess.run(["bash", str(RUNNER), str(bundle), str(root / "clone"), str(receipt)],
-                                   capture_output=True, text=True, check=False)
+                                   stdin=stdin, capture_output=True, text=True, check=False,
+                                   timeout=timeout)
         return completed.returncode, json.loads(receipt.read_text())
 
     def test_blocks_share_one_shell_and_the_first_failure_ends_the_run(self) -> None:
@@ -226,6 +229,23 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(code, 0, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["passed", "passed"])
             self.assertTrue((root / "after.txt").exists())
+
+    def test_a_block_never_waits_on_the_runners_stdin(self) -> None:
+        """OMP 18.4.0's print mode reads piped stdin to EOF before its first request. Run over
+        ssh from a terminal that never closes, the runner's stdin never ends, and a client that
+        inherited it never sent a request (v0.9.0's second RTX 5090 window). A block reads
+        nothing from the runner."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("reads-piped-input", "cat >/dev/null\n")])
+            read_end, write_end = os.pipe()  # never written, open until the run ends
+            try:
+                code, receipt = self.run_bundle(root, bundle, stdin=read_end, timeout=30)
+            finally:
+                os.close(write_end)
+                os.close(read_end)
+            self.assertEqual(code, 0, receipt)
+            self.assertEqual([s["status"] for s in receipt["steps"]], ["passed"])
 
     def test_the_tunnel_block_is_stopped_for_real_before_fail_closed(self) -> None:
         """The tunnel block execs ssh inside the runner's wrapper; stopping only the wrapper

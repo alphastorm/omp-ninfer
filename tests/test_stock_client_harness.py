@@ -30,6 +30,9 @@ class ClientPreflightTests(unittest.TestCase):
             "import os, sys\n"
             "if os.environ.get('PI_OPENAI_STATEFUL') != '1':\n"
             "    sys.exit('stateful environment absent')\n"
+            "# OMP 18.4.0 reads piped stdin to EOF before it starts (startup phase readPipedInput).\n"
+            "if sys.stdin is not None and not sys.stdin.isatty():\n"
+            "    sys.stdin.read()\n"
             "if sys.argv[1:] == ['--version']:\n"
             "    print('omp/31.4.5')\n"
             "elif sys.argv[1:] == ['--help']:\n"
@@ -40,12 +43,12 @@ class ClientPreflightTests(unittest.TestCase):
         self.binary.chmod(0o755)
         self.output = self.root / "receipt"
 
-    def run_probe(self, *extra: str) -> subprocess.CompletedProcess[str]:
+    def run_probe(self, *extra: str, stdin: int | None = None) -> subprocess.CompletedProcess[str]:
         return subprocess.run([
             sys.executable, str(PROBE), "--release", "v9.9.9", "--candidate", "1" * 40,
             "--output", str(self.output), "--binary", str(self.binary), "--clone", str(self.root),
             "--platform", "local-fixture", "--profile", "darwin-remote-ssh", "--phase", "preflight", *extra,
-        ], capture_output=True, text=True, timeout=30, env=dict(os.environ, PI_OPENAI_STATEFUL="0"))
+        ], stdin=stdin, capture_output=True, text=True, timeout=30, env=dict(os.environ, PI_OPENAI_STATEFUL="0"))
 
     def test_preflight_accepts_manifest_version_and_enables_stateful_environment(self) -> None:
         result = self.run_probe()
@@ -55,6 +58,20 @@ class ClientPreflightTests(unittest.TestCase):
         self.assertEqual(receipt["preflight"]["version"], "omp/31.4.5")
         self.assertTrue(receipt["preflight"]["argv_exact"])
         self.assertNotIn("diagnostics", receipt)
+
+    def test_a_client_never_waits_on_the_probes_stdin(self) -> None:
+        """v0.9.0's second RTX 5090 window ran the probe over ssh from a terminal that never
+        closes. The Linux client inherited that stdin, waited in readPipedInput for an EOF that
+        never came, and sent no request before the probe's 210 s limit."""
+        read_end, write_end = os.pipe()  # never written, open until the probe ends
+        try:
+            result = self.run_probe(stdin=read_end)
+        finally:
+            os.close(write_end)
+            os.close(read_end)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = json.loads((self.output / "receipt.json").read_text())
+        self.assertEqual(receipt["preflight"]["version"], "omp/31.4.5")
 
     def test_mismatched_version_fails_and_records_expected_and_observed_versions(self) -> None:
         self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "32.0.0"}}}))

@@ -167,8 +167,10 @@ for line in "${STEP_LINES[@]}"; do
     substitution="${substitution:+$substitution; }foreground tunnel started in the background and kept open"
   else
     # Evaluate in this shell: the block's variables persist to the next block, and the ERR trap
-    # above turns its first failing command into the recorded failure.
-    eval "$text"
+    # above turns its first failing command into the recorded failure. A block reads nothing from
+    # the runner's stdin: OMP's print mode reads piped stdin to EOF before its first request, and
+    # over ssh from a terminal that never closes that EOF never comes.
+    eval "$text" </dev/null
   fi
   record "$position" "$slug" "$heading" "$index" "$sha" "$actual" passed "$(elapsed)" "" "$substitution"
   write_receipt

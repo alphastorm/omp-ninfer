@@ -90,13 +90,15 @@ def main():
     def save(name, value):
         (root / name).write_text(json.dumps(value, indent=2) + '\n')
     def run(argv, label, timeout=120, env=None, capture=False, cwd=None):
+        # No child reads the operator's stdin: forwarded over ssh from a terminal that never
+        # closes, it never ends, and a client that inherits it waits for it before it starts.
         start = time.monotonic()
         started = now()
         if capture:
-            r = subprocess.run([str(x) for x in argv], capture_output=True, text=True, timeout=timeout, env=env, cwd=cwd)
+            r = subprocess.run([str(x) for x in argv], stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=env, cwd=cwd)
         else:
             with (root / (label + '.log')).open('w') as log:
-                r = subprocess.run([str(x) for x in argv], stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env, cwd=cwd)
+                r = subprocess.run([str(x) for x in argv], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env, cwd=cwd)
         timings.append({'phase': label, 'started_utc': started, 'seconds': round(time.monotonic() - start, 3), 'exit': r.returncode})
         save('timings.json', timings)
         if r.returncode:
@@ -398,7 +400,7 @@ def main():
             # The runner closed its documented forward. Prove the structured client fail-closed there.
             macprobe('outage')
             tunnel_log = (root / 'structured-tunnel.log').open('w')
-            tunnel = subprocess.Popen(['ssh', '-N', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes', '-o', 'ServerAliveInterval=10', '-L', '127.0.0.1:18089:127.0.0.1:18089', a.route_ssh_destination], stdout=tunnel_log, stderr=tunnel_log)
+            tunnel = subprocess.Popen(['ssh', '-N', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes', '-o', 'ServerAliveInterval=10', '-L', '127.0.0.1:18089:127.0.0.1:18089', a.route_ssh_destination], stdin=subprocess.DEVNULL, stdout=tunnel_log, stderr=tunnel_log)
             for _ in range(30):
                 if tunnel.poll() is not None:
                     raise RuntimeError('structured tunnel failed')

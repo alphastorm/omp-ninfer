@@ -33,12 +33,15 @@ def sha(path: Path) -> str:
 
 def run(argv: list[str], *, cwd: Path | None = None, timeout: int = 120,
         log: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
+    # No child reads the operator's stdin: forwarded over ssh from a terminal that never closes,
+    # it never ends, and a client that inherits it waits for it before it starts.
     if log:
         with log.open("w", encoding="utf-8") as output:
-            result = subprocess.run(argv, cwd=cwd, stdout=output, stderr=subprocess.STDOUT,
-                                    text=True, timeout=timeout)
+            result = subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=output,
+                                    stderr=subprocess.STDOUT, text=True, timeout=timeout)
     else:
-        result = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True,
+                                text=True, timeout=timeout)
     if check and result.returncode:
         raise RuntimeError(f"{argv[0]} failed ({result.returncode}); inspect {log or 'private command output'}")
     return result

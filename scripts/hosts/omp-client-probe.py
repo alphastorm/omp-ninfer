@@ -72,8 +72,11 @@ def launch(argv, cwd, timeout):
         source = ("$ErrorActionPreference='Continue'; [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); "
                   "$a=@(" + arguments + "); & " + quote(argv[0]) + " @a; exit $LASTEXITCODE")
         argv = ["powershell.exe", "-NoProfile", "-EncodedCommand", base64.b64encode(source.encode("utf-16le")).decode()]
-    return subprocess.run(argv, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout,
-                          env=dict(os.environ, PI_OPENAI_STATEFUL="1"))
+    # A client never reads the probe's stdin. OMP 18.4.0's print mode reads piped stdin to EOF
+    # before its first request, and a probe run over ssh from a terminal that never closes has a
+    # stdin that never ends: v0.9.0's second RTX 5090 window hung there.
+    return subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
+                          errors="replace", timeout=timeout, env=dict(os.environ, PI_OPENAI_STATEFUL="1"))
 
 
 def expected_client_version(clone, release):
