@@ -187,6 +187,14 @@ if computed != manifest_config_sha or declared != manifest_config_sha:
 seccomp = Path(root) / server["checkpoint_seccomp_profile"]
 if verify_release.sha256_file(seccomp) != server["checkpoint_seccomp_sha256"]:
     raise SystemExit(f"error: checkpoint seccomp profile identity changed: {seccomp}")
+# The served status must report the serving values this profile launches with, not constants:
+# v0.9.0 moved the RTX 5090 to two requests at once, and a launcher that still expected one
+# refused its own server.
+flags = ("--max-concurrency", "--max-context", "--kv-dtype")
+served = dict((flag, verify_release.argument_value(server["arguments"], flag)) for flag in flags)
+missing = [flag for flag, value in served.items() if value is None]
+if missing:
+    raise SystemExit(f"error: profile declares no {', '.join(missing)}")
 for value in (
     profile["profile_id"],
     server["container_network_mode"],
@@ -199,6 +207,9 @@ for value in (
     # 0 when the profile declares no runtime-host memory floor; the long-session profile does,
     # because its Host KV pool holds two sessions at the context ceiling instead of one.
     str(profile.get("runtime_host", {}).get("minimum_runtime_memory_mib", 0)),
+    served["--max-concurrency"],
+    served["--max-context"],
+    served["--kv-dtype"],
     *server["arguments"],
 ):
     print(value, end="\0")
@@ -213,7 +224,10 @@ CONTAINER_PORT=${PROFILE_VALUES[5]}
 CHECKPOINT_MOUNT_TARGET=${PROFILE_VALUES[6]}
 SECCOMP_PROFILE=${PROFILE_VALUES[7]}
 MINIMUM_RUNTIME_MEMORY_MIB=${PROFILE_VALUES[8]}
-PROFILE_ARGS=("${PROFILE_VALUES[@]:9}")
+EXPECTED_MAX_CONCURRENCY=${PROFILE_VALUES[9]}
+EXPECTED_MAX_CONTEXT=${PROFILE_VALUES[10]}
+EXPECTED_KV_CACHE=${PROFILE_VALUES[11]}
+PROFILE_ARGS=("${PROFILE_VALUES[@]:12}")
 
 if [[ ! -f "$MODEL_PATH" ]]; then
   printf 'error: model is not a regular file: %s\n' "$MODEL_PATH" >&2
@@ -381,6 +395,9 @@ python3 - \
   "$EXPECTED_MODEL_SHA256" \
   "$EXPECTED_CONFIG_SHA256" \
   "$EXPECTED_DEPLOYMENT_PROFILE" \
+  "$EXPECTED_MAX_CONCURRENCY" \
+  "$EXPECTED_MAX_CONTEXT" \
+  "$EXPECTED_KV_CACHE" \
   "http://$PUBLISHED_BIND_HOST:$PUBLISHED_PORT/v1/ninfer/status" <<'PY'
 import json
 import sys
@@ -390,7 +407,7 @@ import urllib.request
 from pathlib import Path
 
 (key_path, upstream, source, binary_sha, model_sha, config_sha, deployment_profile,
- status_url) = sys.argv[1:]
+ max_concurrency, max_context, kv_cache, status_url) = sys.argv[1:]
 api_key = Path(key_path).read_text(encoding="utf-8").strip()
 request = urllib.request.Request(
     status_url,
@@ -424,9 +441,9 @@ expected = {
     "model_artifact_sha256": (identity.get("model_artifact_sha256"), model_sha),
     "config_sha256": (identity.get("config_sha256"), config_sha),
     "public_model_id": (runtime.get("public_model_id"), "q38-ninfer"),
-    "max_context": (runtime.get("max_context"), 131072),
-    "kv_cache": (runtime.get("kv_cache"), "bf16"),
-    "max_concurrency": (scheduler.get("max_concurrency"), 1),
+    "max_context": (runtime.get("max_context"), int(max_context)),
+    "kv_cache": (runtime.get("kv_cache"), kv_cache),
+    "max_concurrency": (scheduler.get("max_concurrency"), int(max_concurrency)),
 }
 mismatches = [
     f"{name}: expected {wanted!r}, got {actual!r}"

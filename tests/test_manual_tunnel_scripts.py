@@ -379,6 +379,86 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             self.assertIn("memory=32GB", result.stderr)
             self.assertFalse(capture.exists(), "the launcher must refuse before the server runs")
 
+    SERVING_DOCKER = CAPTURING_DOCKER.replace(
+        "  printf '%s\\n' \"$@\" > \"$DOCKER_ARGUMENT_CAPTURE\"\n  exit 42\n",
+        "  printf 'container-under-test\\n'\n  exit 0\n",
+    )
+
+    def test_start_verifies_the_server_against_the_concurrency_its_profile_declares(self) -> None:
+        """v0.9.0's first RTX 5090 route window refused its own server: the RTX 5090 profile moved
+        to --max-concurrency 2, and the launcher still required the served scheduler to report 1.
+        The launcher now expects what the profile it launched declares, and still refuses a
+        server that reports anything else."""
+        import http.server
+        import sys
+        import threading
+
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import verify_release  # noqa: PLC0415
+
+        for served_offset, accepted in ((0, True), (-1, False)):
+            with self.subTest(served_offset=served_offset), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                state: dict = {}
+
+                class Status(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self) -> None:  # noqa: N802
+                        manifest = json.loads(state["manifest"].read_text(encoding="utf-8"))
+                        profile = json.loads(state["profile"].read_text(encoding="utf-8"))
+                        arguments = profile["server"]["arguments"]
+                        declared = int(verify_release.argument_value(arguments, "--max-concurrency"))
+                        body = json.dumps({
+                            "artifact_type": "ninfer_server_status",
+                            "schema_version": 1,
+                            "status": "ok",
+                            "identity": {
+                                "upstream_base_sha": manifest["components"]["ninfer"]["upstream_commit"],
+                                "patch_stack_sha": manifest["components"]["ninfer"]["source_commit"],
+                                "source_dirty": False,
+                                "deployment_profile": profile["server"]["deployment_profile"],
+                                "binary_sha256": manifest["components"]["ninfer"]["server_binary_sha256"],
+                                "model_artifact_sha256": manifest["components"]["model"]["artifact_sha256"],
+                                "config_sha256": manifest["runtime_identity"]["configuration_sha256"],
+                            },
+                            "runtime": {
+                                "public_model_id": "q38-ninfer",
+                                "max_context": int(verify_release.argument_value(arguments, "--max-context")),
+                                "kv_cache": verify_release.argument_value(arguments, "--kv-dtype"),
+                            },
+                            "scheduler": {"max_concurrency": declared + served_offset},
+                        }).encode("utf-8")
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/json")
+                        self.send_header("Content-Length", str(len(body)))
+                        self.end_headers()
+                        self.wfile.write(body)
+
+                    def log_message(self, *_: object) -> None:
+                        pass
+
+                server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Status)
+                threading.Thread(target=server.serve_forever, daemon=True).start()
+                self.addCleanup(server.server_close)
+                self.addCleanup(server.shutdown)
+
+                def serve_on_test_port(profile: dict) -> None:
+                    profile["server"]["published_port"] = server.server_address[1]
+                    arguments = profile["server"]["arguments"]
+                    arguments[arguments.index("--config-sha256") + 1] = verify_release.configuration_identity(profile)
+
+                release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+                state["manifest"] = root / "releases" / release / "manifest.json"
+                state["profile"] = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+                result, _, _ = self.launch_with_fakes(root, self.SERVING_DOCKER, serve_on_test_port)
+
+                if accepted:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertIn('"status": "ok"', result.stdout)
+                else:
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn("authenticated NInfer identity mismatch", result.stderr)
+                    self.assertIn("max_concurrency", result.stderr)
+
     @staticmethod
     def write_common_fakes(fake_bin: Path) -> None:
         (fake_bin / "nvidia-smi").write_text(
