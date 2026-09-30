@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.0] - 2026-09-29
+## [0.9.0] - 2026-09-30
+
+### Fixed
+
+- The RTX 5090 launcher checks its server against the concurrency its profile declares.
+  `examples/manual-tunnel/start-ninfer.sh` still required the served scheduler to report one
+  request in flight after the profile moved to two, so v0.9.0's first RTX 5090 route window
+  refused its own server at the container-host route's start step
+  (`max_concurrency: expected 1, got 2`). The launcher now takes the expected concurrency,
+  context and KV type from the profile it launches, and a test serves it both the declared value
+  and another one.
+- The RTX 5090 acceptance window releases its Windows hold through a live WSL interop relay. A
+  distro started by a boot-time scheduled task keeps a root relay that cannot start Windows
+  processes ([microsoft/WSL#8643](https://github.com/microsoft/WSL/issues/8643)), and the
+  window's WSL-side restore runs outside every `wsl.exe` session. In the first window it
+  restored production and then failed to release the hold, which stayed up 10 min longer.
+  `scripts/hosts/accept-rtx5090-host.py` now uses the first relay that starts a Windows process.
+- Acceptance tooling never lends a client the operator's terminal. OMP 18.4.0's print mode reads
+  piped stdin to EOF before its first request (startup phase `readPipedInput`). The second RTX
+  5090 window ran its drivers from a terminal that never closes, and `ssh` forwarded that stdin
+  to the Linux client probe: the client sent no request in 210 s. The client probe
+  (`scripts/hosts/omp-client-probe.py`), the documented-route runner's blocks and every child
+  of the route drivers now read `/dev/null`, and two tests run the probe and the runner with a
+  stdin that never ends.
 
 ### Added
 
@@ -23,6 +46,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Two invariants in `tests/test_manual_tunnel_scripts.py` keep each provider's limit equal to
   its lane's concurrency and require a two-request lane's pending timeout to exceed 30 s while
   leaving 60 s under OMP's 300 s stream-idle watchdog.
+- Fresh acceptance on candidate `0d2a7468` with unmodified OMP 18.4.0 and the published
+  components: all four documented routes passed **24 steps** (RTX 5090 container host 2,
+  macOS client 10, Windows client 5 and RTX 4090
+  native Windows 7); both hosts were restored
+  ([routes](releases/v0.9.0/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.9.0/acceptance/composed-external-installation.json)).
+  The upstream macOS arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed
+  tool turn, an exact continuation and a fail-closed request against image `4c816b0c`;
+  Linux ran under WSL2, not a separately qualified Linux OS. The RTX 5090 routes ran from the
+  maintainer's Apple silicon workstation over the tailnet, in three production windows with
+  downtime at most **101.5 s**, **324.3 s** and **499.3 s (8.3 min)**
+  ([restoration](docs/measurements/2026-09-30-v090-acceptance-restoration.json)). The first
+  window, on candidate `54f1402e`, failed at the container-host start step fixed above, and the
+  second, on candidate `9eca7bae`, at the Linux client's stdin, also fixed above.
 
 ### Changed
 
@@ -48,8 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   at 1 (RTX 4090). Upgrade the RTX 5090 server before merging these limits into OMP's config;
   two requests against the old one-at-a-time server can expire at its 30 s deadline. RTX 5090
   sessions saved by v0.8.7 re-prefill once after the build change; RTX 4090 checkpoints carry
-  over. The four documented routes and client-platform acceptance remain pending: v0.9.0 is
-  a candidate ([qualification](releases/v0.9.0/qualification.json),
+  over ([qualification](releases/v0.9.0/qualification.json),
   [release notes](releases/v0.9.0/NINFER_RELEASE_NOTES.md)).
 
 ## [0.8.7] - 2026-09-29

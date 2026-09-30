@@ -1,11 +1,11 @@
 # OMP NInfer v0.9.0 — Two requests in flight on the RTX 5090
 
-**Owner-operated, exact-profile 0.x candidate; no SLA.** The RTX 5090 serves two requests at
+**Owner-operated, exact-profile 0.x release; no SLA.** The RTX 5090 serves two requests at
 once, so subagents or a second session can run beside the first. The eight-token MTP3 verify
 round uses tensor cores, and the profile gives a request that cannot fit 180 s to wait. The
 RTX 4090 runtime, client, provider fragments, model and memory floors are unchanged from
-v0.8.7. The four documented routes must pass on the published components before v0.9.0 is a
-release. RTX 3090 and the upstream engine merge remain deferred.
+v0.8.7. The four documented routes are accepted on the published components; receipts are
+linked below. RTX 3090 and the upstream engine merge remain deferred.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -119,18 +119,30 @@ and OMP 18.0.9 client remain a separate historical route, not a v0.9.0 qualifica
 
 ## Documented routes and clients
 
-Route acceptance is pending. The four documented routes - RTX 5090 container host, macOS
-client, Windows client and RTX 4090 native Windows - must run on the published v0.6.14
-RTX 5090 image `4c816b0c` and the unchanged v0.6.10 RTX 4090 package with upstream OMP 18.4.0.
-Fresh client-platform acceptance is also pending. Until those runs pass, v0.9.0 stays a
-candidate and `--require-ready` refuses it. v0.8.7's accepted routes cover the previous
-RTX 5090 runtime and config, not these. The macOS profile stays `preview`: the upstream client
-has no managed installation or appliance lifecycle. Prior Linux acceptance ran under WSL2,
-not a separately qualified Linux OS.
+The four documented routes passed on candidate `0d2a7468` with unmodified OMP 18.4.0 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
+and RTX 4090 native Windows (7), with both
+hosts restored ([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows
+x64 and Linux x64 binaries each passed a typed tool turn, an exact continuation and a
+fail-closed request against RTX 5090 image `4c816b0c`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran from the maintainer's Apple silicon workstation over the tailnet, in
+three production windows with downtime at most 101.5 s, 324.3 s and 499.3 s (8.3 min)
+([restoration](../../docs/measurements/2026-09-30-v090-acceptance-restoration.json)). The first
+window, on candidate `54f1402e`, failed at the container-host route's start step: the launcher
+still required the server to report one request in flight. Its Windows hold stayed up 10 min
+after production was back, because the WSL-side release went through an interop relay that
+cannot start Windows processes. The second, on candidate `9eca7bae`, failed at the Linux client
+probe: OMP 18.4.0's print mode reads piped stdin to EOF before its first request, and the
+window's drivers forwarded a terminal that never closes. All three are fixed (see the
+changelog).
 
 ## Upgrading from v0.8.7
 
-Once v0.9.0 is published and ready, clone its tag and follow the quickstart. Upgrade the
+Clone the v0.9.0 tag and follow the quickstart. Upgrade the
 RTX 5090 server to the new image and profile first. Only then merge these values into
 `~/.omp/agent/config.yml`:
 

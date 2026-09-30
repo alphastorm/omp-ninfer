@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.8.6`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.9.0`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.8.6 uses upstream OMP 18.4.0 binaries and no client cask.
+v0.7.4. v0.9.0 uses upstream OMP 18.4.0 binaries and no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,7 +27,108 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.8.7 public release — long sessions keep their cache
+### v0.9.0 public release — two requests in flight on the RTX 5090
+
+The RTX 5090 serves **two requests at once** with `v0.6.14-qwen38-5090-beta.1`
+(image `4c816b0c`, server `f62a570e`), deployment profile `qwen38-5090-v0.9.0` and
+configuration `cf1de114`. The eight-token MTP3 verify round now uses the Q5 tensor-core route
+instead of SIMT kernels. Two decoding requests reached **281.1-283.0 tok/s together**, against
+166.7-167.1 one at a time (**1.68-1.70x**), up from v0.6.13's 190.0-191.1 with two requests.
+The candidate answered the role corpus byte-identically to v0.6.13, two cases at a time and one
+at a time (**89/89**); the published image matched both the candidate and v0.6.13 (**89/89**)
+([EXP-077](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)).
+
+The profile adds `--max-concurrency 2 --pending-timeout-ms 180000`. A request that cannot fit
+beside the running one can wait **180 s**: the wait plus the longest root prefill, **130,048
+tokens in 58.4 s** on the published image, stays inside OMP's **300 s** stream-idle watchdog.
+The server ends a too-long wait and OMP resends. KV capacity auto-resolves to **160,256 tokens**;
+VRAM after load is **30,242-30,244 MiB** of 32,607 MiB, against 28,144 MiB with one request.
+Keep-warm, 16384 MiB host KV, the 24 GiB checkpoint quota, BF16 KV, MTP3, 131,072-token context
+and the 28672 MiB runtime-host floor are unchanged.
+
+The config every documented route installs,
+[`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml), sets the RTX 5090
+providers to two requests in flight and keeps the RTX 4090 providers at one:
+
+```yaml
+providers:
+  maxInFlightRequests:
+    ninfer-beta: 2
+    ninfer-native-4090: 1
+    ninfer-main: 2
+    ninfer-heavy: 1
+```
+
+**Upgrade the RTX 5090 server first**, then merge these limits into `~/.omp/agent/config.yml`,
+including any other NInfer provider id you declare. A limit of 2 against the old one-at-a-time
+server queues requests at its 30 s deadline, where they can expire. RTX 5090 checkpoints saved
+by v0.8.7 re-prefill once after the build change. RTX 4090 stays on
+`v0.6.10-qwen38-4090-beta.1` (package `a0ea4c81`, server `e0498fad`, configuration
+`7a69481f`), one request at a time with a 30 s pending timeout; its checkpoints carry over.
+The unmodified OMP 18.4.0 binary, `models.yml`, `PI_OPENAI_STATEFUL=1` and model are unchanged.
+
+The [final-profile lane evidence](../releases/v0.9.0/qualification/rtx5090.json) was collected on the
+candidate image with the same server binary and arguments as the published image:
+
+- Stock OMP durable sessions passed. EXP-072 long sessions at limit 2 had no root prefill over
+  60K tokens; the third planting run stopped at the same harness precondition as v0.8.7.
+- With 35 short sessions filling the 24 GiB store, a 60,026-token session reused **60,057 cached
+  tokens after a crash in 2.99 s**.
+- EXP-050's workload and resume restored **4/4 stored sessions** from checkpoints; stop saved 1
+  and refused 0. EXP-051's held turn resumed exactly, but deferred save before eviction did not
+  arise at two requests: the evicting session was admitted beside the held one.
+- Fanout, warm-arrival, restore and multisession probes passed; **2 of 8** multisession
+  continuations/forks lost reuse, as in v0.8.7. None of **24 fresh agent sessions** fell back to
+  root, with median time to first token **0.092-0.100 s**.
+- Restarting with two requests in flight ended both streams with `response.incomplete`; both
+  continuations reused **62,404 cached tokens**, with first output in **5.07-5.53 s** and no
+  refused shutdown saves.
+
+On the published image, **130,048-token retrieval was exact in 58.4 s**, decode reached
+**169.79 tok/s over 2,048 tokens**, the agent protocol passed across a restart, and VRAM after
+load was **30,242 MiB**. Lane qualification and documented-route acceptance are separate evidence.
+
+The costs remain visible: decode beside a 71,641-token prefill ran at **30.4-30.6 tok/s**, and a
+request arriving during a staged prefill waited **26.6-26.7 s**. Two sessions above about **47K
+tokens each take turns** (inferred from the admission rule; not measured with OMP). Two
+alternating 62.4K-token sessions re-prefilled some continuations from root at both limits.
+Stock OMP wall time followed generated tokens, with one run per limit per window: **no claim
+that OMP work finishes sooner**. The robust gain is aggregate decode. Checkpoints remain best
+effort; after the concurrency probe's evictions, stop refused 7 saves at two requests and 5
+at one because the newest turns were no longer resident.
+
+All four documented routes passed **24 steps** on candidate `0d2a7468`
+(`0d2a746814aaddca328af7bf2582e48dbf6ce950`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5 and RTX 4090 native
+Windows 7; both hosts were restored. The upstream macOS arm64
+(preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against image `4c816b0c`. Linux ran under **WSL2**, not
+a separately qualified Linux OS.
+[Documented routes](../releases/v0.9.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.9.0/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in **three production windows** from the maintainer's Apple silicon
+workstation over the tailnet. Downtime was at most **101.5 s (1.7 min)** and **324.3 s
+(5.4 min)** in the two failed windows and **499.3 s (8.3 min)** in the accepted window; total
+downtime was at most **925.0 s (15.4 min)**
+([restoration](measurements/2026-09-30-v090-acceptance-restoration.json)).
+
+Candidate `54f1402e` passed the RTX 4090 route, but its RTX 5090 window failed at the
+container-host route's start step: the launcher still required the server to report one request
+in flight, and the v0.9.0 profile serves two. The launcher now checks the concurrency, context
+and KV type its profile declares. Production was back within 101.5 s, but the window's Windows
+hold stayed up 10 min longer, because its WSL-side release went through an interop relay that
+cannot start Windows processes; the host script now picks a live relay. Candidate `9eca7bae`
+passed the RTX 4090 route and the container-host route, but in its RTX 5090 window the Linux
+client sent no request in 210 s: OMP 18.4.0's print mode reads piped stdin to EOF before it
+starts, and the window's drivers had forwarded a terminal that never closes. Every acceptance
+client now reads an empty stdin. Candidate `0d2a7468` passed the RTX 4090 route and a third
+RTX 5090 window.
+
+RTX 3090 remains deferred. [Release notes](../releases/v0.9.0/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.9.0/manifest.json) · [Qualification](../releases/v0.9.0/qualification.json).
+
+### v0.8.7 historical public release — long sessions keep their cache
 
 Long sessions no longer re-prefill from root at compaction handoffs, near-capacity turns, crashes
 after a compaction, or when short sessions fill the checkpoint store. Both lanes move to runtimes

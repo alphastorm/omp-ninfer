@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-401778d0-fbcdb8f503-v0.9.0",
+  "product_release": "v0.9.0",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "as_of": "2026-09-30",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.4.0",
+    "commit": "401778d0cd30020ce0f9198f751b13c68850562f",
+    "tree": "30e2b236f45d65dd484d3e2eb08c65296761f78b"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.4.0",
+    "upstream_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
+    "os": "Ubuntu 24.04",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-linux-x64",
+    "asset_bytes": 285148640,
+    "asset_sha256": "fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f",
+    "binary_sha256": "fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f",
+    "release_id": 397931853,
+    "asset_id": 594395360,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64"
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.4.0",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 41,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
+    "runtime_configuration_sha256": "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "q38-ninfer"
+    ],
+    "raw_transcript_included": false,
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "errors": [
+        "Unable to connect. Is the computer able to access the url?"
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "runtime_image_digest": "sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false,
+    "execution_context": {
+      "kernel": "6.18.33.2-microsoft-standard-WSL2",
+      "wsl_distro_name_present": false,
+      "wsl_interop_present": false,
+      "environment_erased": false,
+      "native_linux_os_qualification_claimed": false
+    }
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "This receipt qualifies the unmodified upstream client against the published RTX 5090 runtime v0.6.14-qwen38-5090-beta.1 (image 4c816b0c), not GPU performance or a managed-appliance installation.",
+    "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt.",
+    "Live inference used the native Linux binary under WSL2. This is not a new non-WSL Linux OS qualification; the hosted Linux qualification remains provider-free."
+  ]
+}

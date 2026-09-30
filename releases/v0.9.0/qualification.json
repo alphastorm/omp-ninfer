@@ -2,10 +2,10 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 2,
   "release": "v0.9.0",
-  "as_of": "2026-09-29",
+  "as_of": "2026-09-30",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Two requests in flight on the RTX 5090. RTX 5090 moves to v0.6.14-qwen38-5090-beta.1 (image 4c816b0c, server f62a570e, source e20060b6): v0.6.13's source plus the RTX 4090 v0.6.10 Windows packaging fix and one kernel change. With two requests, the MTP3 verify round carries eight tokens, and the Q5 projections now take the tensor-core route at eight tokens as they did at four. The RTX 5090 profile qwen38-5090-v0.9.0 (configuration cf1de114) adds --max-concurrency 2 and --pending-timeout-ms 180000 to v0.8.7's serving arguments, and the route config lets OMP send two requests to each RTX 5090 provider (ninfer-beta and ninfer-main). RTX 4090 native Windows stays on v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93), its serving configuration 7a69481f and one request at a time. The model, the memory floors and the unmodified upstream OMP 18.4.0 client are unchanged. RTX 3090 is omitted pending physical-host access. The RTX 5090 profile gates and role corpus below were measured on the published image, and its two-request, long-session, reclamation, durability, barrier, stock-client, agent-mix and probe evidence on the candidate image of the same binary and serving arguments; the RTX 4090 gates are the canonical qualification of the published package, carried from v0.8.7.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -56,8 +56,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.14-qwen38-5090-beta.1 component (image 4c816b0c) before the cut; the receipt lands at releases/v0.9.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.9.0/acceptance/composed-external-installation.json",
+      "sha256": "1c4bfb4bb671a57397296881613177d5993d26ed30f399b63d047ebcd232cf0e",
+      "public_url": null,
+      "as_of": "2026-09-30",
+      "release": "v0.9.0",
+      "component_release_tag": "v18.4.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "windows_binary_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "1c2b7e9959e90464ad5acecc18f0de2eff852bfd47199c44db3ce9eafdda2222",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "780dc2b5c8ebdfa18e3c750ffe4868fd7aee7a3fdfba078af5f06c53eb7bfede"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "7f5e2604db0a17b8f46e3d83fe8b7002a3b63434c1e905cf3a666c9baaf255ad"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "4aca9d1cfba5a7808e3042629b8a6007c2df89dea4b4e03eee1293af512e8d18"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all four documented routes on the published v0.9.0 components; runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.9.0/acceptance/documented-routes.json",
+      "sha256": "ec98aedde3626282c01ae4d4724ba87f4abe03d80b9218b26e8f538f1fe99837"
     }
   },
   "observed_gates": {
@@ -1273,10 +1307,7 @@
     }
   },
   "interpretation": "Two requests in flight on the RTX 5090. With two requests the MTP3 verify round carries eight tokens, and v0.6.13 ran their Q5 projections on SIMT kernels (12.8 ms of a 23.9 ms round), so two decoding requests reached only 190.0-191.1 tokens/s together against 166.7-167.1 one at a time (EXP-077). v0.6.14 keeps them on the tensor cores: on the final profile two decoding requests reached 281.1-283.0 tokens/s together (143.5-152.8 each) against 164.6-164.7 for one alone. Outputs are unchanged: the candidate answered the 89-case role corpus byte-identically to v0.6.13, two cases at a time and one at a time, and the published image answered it byte-identically to the candidate. A second request is not free: a decode beside a 71,641-token prefill ran at 30.4-30.6 tokens/s, a request that arrives while a prefill is staged waits for it, and two requests run together only while both prompts and output reservations fit the 160,256-token KV pool; a request that does not fit waits up to 180 s, which with the longest root prefill stays inside OMP 18.4.0's 300 s stream watchdog. Stock OMP 18.4.0 at its limit of 2 kept two requests in flight for 15.7 s of a parent turn fanning out two scout subagents, but that turn took 23.9 s against 22.6 s at its limit of 1 (25.2 against 32.7 s in the candidate window): what the subagents generate varies between runs more than the overlap saves. Two short sessions started together took 8.2 s against 5.6 s. With two requests streaming, a graceful restart ended both streams as incomplete and both continuations resumed from their checkpoints. The v0.8.7 lane evidence holds at two requests: no stock OMP long-session turn prefilled more than 60K tokens from root, a 60,026-token session kept its checkpoint through 35 short sessions and a crash (60,057 cached tokens in 2.99 s), the durability workload and barrier passed, and stock OMP kept one session across graceful restarts. The published image prefilled 130,048 tokens exactly in 58.3 s and decoded 169.79 tokens/s. The RTX 4090 lane and its one request at a time are unchanged. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
-  "remaining_release_gates": [
-    "documented-route acceptance of all four routes on the published v0.6.14 and v0.6.10 components with unmodified OMP 18.4.0",
-    "external-installation acceptance against the published v0.6.14-qwen38-5090-beta.1 component and runtime image"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {
     "rtx3090-windows-native": {
       "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",

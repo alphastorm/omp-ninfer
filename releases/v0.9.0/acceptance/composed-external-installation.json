@@ -1,0 +1,110 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.9.0",
+  "as_of": "2026-09-30",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Runtime release: the RTX 5090 moves to the published v0.6.14 runtime, which serves two requests at once (--max-concurrency 2, --pending-timeout-ms 180000), and the route configuration every documented route installs lets OMP send two requests to each RTX 5090 provider (EXP-077); the RTX 4090 v0.6.10 runtime and the unmodified upstream OMP 18.4.0 client are unchanged; exact-component documented-route acceptance.",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "component_release_tag": "v18.4.0",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
+    "upstream_tree": "30e2b236f45d65dd484d3e2eb08c65296761f78b",
+    "note": "All three unmodified upstream client binaries passed authenticated typed-tool/result, exact final marker, continuation and fail-closed inference against the published RTX 5090 image 4c816b0c. Native RTX 4090 documented acceptance passed separately against package a0ea4c81."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "1c2b7e9959e90464ad5acecc18f0de2eff852bfd47199c44db3ce9eafdda2222",
+  "windows_asset_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+  "windows_binary_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "780dc2b5c8ebdfa18e3c750ffe4868fd7aee7a3fdfba078af5f06c53eb7bfede"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "7f5e2604db0a17b8f46e3d83fe8b7002a3b63434c1e905cf3a666c9baaf255ad"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "4aca9d1cfba5a7808e3042629b8a6007c2df89dea4b4e03eee1293af512e8d18"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "anonymous": true,
+      "assets": 3,
+      "downloads": [
+        {
+          "profile": "darwin-remote-ssh",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-darwin-arm64",
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709"
+        },
+        {
+          "profile": "windows-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-windows-x64.exe",
+          "sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe"
+        },
+        {
+          "profile": "linux-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.0/omp-linux-x64",
+          "sha256": "fbcdb8f5033c9bf81435f5803d8f0493c53d524a638658d2b8811474a332200f"
+        }
+      ]
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "context": "Ubuntu WSL2; no new non-WSL OS qualification claim"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": "RTX 5090 only (macOS and Windows clients); native RTX 4090 remains text/tools.",
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": "RTX 5090 image 4c816b0c (v0.6.14, server f62a570e) with its v0.9.0 lane receipt; RTX 4090 package a0ea4c81 (v0.6.10, 60 s keep-warm) with its carried lane receipt; no model or memory-floor change.",
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.9.0/acceptance/documented-routes.json",
+      "sha256": "ec98aedde3626282c01ae4d4724ba87f4abe03d80b9218b26e8f538f1fe99837"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.9.0/acceptance/rtx4090-public-install.json",
+      "sha256": "74d69da0badc30c79e7c4d6bd9c83f6468945265f49572c46371516f67028fec"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-09-30-v090-acceptance-restoration.json",
+      "sha256": "a245ef98293c9a666e6fb2296cde5f2e3b6b078e7ab60fd52550d20b211af2e0"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.9.0/qualification/client-components.json",
+      "sha256": "aebd02cf6ce8cfebe91e9e72001081f0eb205119584f38ac0d0ae9085318a510"
+    }
+  },
+  "limitations": [
+    "RTX 3090 omitted pending its own qualification; its v0.7.2 instructions remain a separate legacy route.",
+    "Save-before-evict with ceiling-class sessions is exercised on the RTX 5090 only.",
+    "All hardware observations are maintainer-operated; no independent external-user installation or repeat-use outcome is inferred."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
