@@ -47,6 +47,29 @@ def install_linux_client(distribution, asset, home):
             'binary_sha256': digest(launcher), 'mode': '0755'}
 
 
+def windows_environment(probe, runtime=Path('/run/WSL')):
+    """Environment that starts Windows processes through a live WSL interop relay.
+
+    A distro first started by a boot-time S4U task keeps a root relay that cannot start Windows
+    processes (microsoft/WSL#8643; on nyc-pc the supervisors start it that way after every boot),
+    and a process outside every wsl.exe session - an sshd child, the detached watchdog - falls
+    back to that relay: each call fails "Invalid argument". v0.9.0's first RTX 5090 window
+    restored production and then lost its hold release to it. Use this process's own relay when
+    it is live, else the newest session relay that starts the probe."""
+    own = os.environ.get('WSL_INTEROP')
+    relays = sorted(runtime.glob('*_interop'), key=lambda path: path.lstat().st_mtime, reverse=True)
+    candidates = ([own] if own else []) + [str(path) for path in relays if str(path) != own]
+    for relay in candidates:
+        environment = dict(os.environ, WSL_INTEROP=relay)
+        try:
+            probed = subprocess.run([str(probe), '/c', 'exit 0'], env=environment, capture_output=True, timeout=30)
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if probed.returncode == 0:
+            return environment
+    raise RuntimeError('no WSL interop relay starts a Windows process; tried: ' + (', '.join(candidates) or 'none'))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', required=True, choices=('preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
@@ -91,7 +114,8 @@ def main():
     def ps(action):
         quote = lambda s: "'" + str(s).replace("'", "''") + "'"
         text = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(a.windows_workspace + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + quote(a.windows_workspace) + " -Release " + quote(a.release) + " -Candidate " + quote(a.candidate)
-        return run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64.b64encode(text.encode('utf-16le')).decode()], 90)
+        environment = windows_environment('/mnt/c/Windows/System32/cmd.exe')
+        return run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64.b64encode(text.encode('utf-16le')).decode()], 90, environment)
     def baseline():
         d = inspect(a.production)
         assert d['Config']['Image'] == a.production_image and d['State']['Running'] and d['HostConfig']['RestartPolicy']['Name'] == 'unless-stopped', 'production baseline changed'

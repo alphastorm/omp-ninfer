@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBE = ROOT / "scripts" / "hosts" / "omp-client-probe.py"
@@ -138,6 +139,63 @@ class LinuxClientInstallationTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "stock upstream client required"):
             self.host.install_linux_client(self.distribution, self.asset, self.home)
         self.assertFalse(self.launcher.exists())
+
+
+@unittest.skipIf(os.name == "nt", "local executable fixtures use POSIX launchers")
+class WindowsInteropRelayTests(unittest.TestCase):
+    """The WSL-side window releases its Windows hold from sshd children and a detached watchdog,
+    outside every wsl.exe session; on a distro an S4U boot task started, their default relay
+    cannot start a Windows process."""
+
+    def setUp(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "interop_host", ROOT / "scripts" / "hosts" / "accept-rtx5090-host.py")
+        assert spec and spec.loader
+        self.host = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.host)
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.runtime = Path(temporary.name) / "run-wsl"
+        self.runtime.mkdir()
+        # Only the named relay can start this "Windows" process; any other fails the way a dead
+        # relay does.
+        self.probe = Path(temporary.name) / "cmd.exe"
+        self.probe.write_text(
+            '#!/bin/sh\n[ "$WSL_INTEROP" = "$LIVE_RELAY" ] && exit 0\n'
+            'echo "$0: Invalid argument" >&2\nexit 1\n')
+        self.probe.chmod(0o755)
+        environment = {key: value for key, value in os.environ.items() if key != "WSL_INTEROP"}
+        patcher = unittest.mock.patch.dict(os.environ, environment, clear=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def relay(self, name: str, age_seconds: int) -> str:
+        path = self.runtime / name
+        path.touch()
+        stamp = 1_790_000_000 - age_seconds
+        os.utime(path, (stamp, stamp))
+        return str(path)
+
+    def test_an_sshd_child_passes_the_dead_root_relay_for_a_live_session(self) -> None:
+        self.relay("1_interop", 3600)
+        self.relay("2_interop", 3600)
+        live = self.relay("3346_interop", 60)
+        self.relay("9400_interop", 5)
+        os.environ["LIVE_RELAY"] = live
+        environment = self.host.windows_environment(self.probe, self.runtime)
+        self.assertEqual(environment["WSL_INTEROP"], live)
+        released = subprocess.run([str(self.probe)], env=environment, capture_output=True)
+        self.assertEqual(released.returncode, 0)
+
+    def test_no_live_relay_refuses_and_names_every_relay_tried(self) -> None:
+        root = self.relay("2_interop", 3600)
+        own = str(self.runtime / "7777_interop")
+        os.environ.update(WSL_INTEROP=own, LIVE_RELAY="/run/WSL/none")
+        with self.assertRaisesRegex(RuntimeError, "no WSL interop relay") as refused:
+            self.host.windows_environment(self.probe, self.runtime)
+        self.assertIn(own, str(refused.exception))
+        self.assertIn(root, str(refused.exception))
+
 
 
 class WindowsRouteAnswerTests(unittest.TestCase):
