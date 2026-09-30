@@ -1,0 +1,117 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-080",
+  "title": "NVFP4 and K8V4 KV cache under DFlash2 on the RTX 5090: four state slots and 262,144 KV tokens at two requests, speed and screened quality held",
+  "generated_utc": "2026-09-30T12:40:00Z",
+  "status": "completed_with_limits",
+  "issue": "https://github.com/alphastorm/omp-ninfer/issues/71",
+  "question": "With DFlash2 K=7 on upstream d44ab584 and the published v3 artifact, does --kv-dtype nvfp4 or --kv-dtype k8v4 buy capacity this lane can use (two requests with the shipped four extra device state slots and at least v0.9.0's 160,256 KV tokens) without costing speed or quality against BF16 KV?",
+  "answer": "Yes for NVFP4. K8V4 missed one speed bound by 0.55 points. Both formats started two requests with the four device state slots that BF16 cannot fit beside DFlash2 (EXP-078: 343 MiB short), and both resolved 262,144 KV tokens: two full 131,072-token contexts, against 131,520 for BF16 with two slots and 160,256 for shipped v0.9.0. At one request KV payload fell from 8.00 to 2.25 GiB (NVFP4) and 3.14 GiB (K8V4), and VRAM after load from 29,594 to 23,706 and 24,618 MiB. Role-corpus decode was unchanged: 256.48 and 253.12 tok/s against 253.63. Decode rounds were shorter at long context, 21.2 and 20.4 ms against 23.0 ms behind 120K tokens. NVFP4 prefill was within 1.5% and K8V4 prefill was faster behind long context (+15.3% at 120K). The single role-corpus screen stayed inside the pre-registered quality bounds for both: evidence precision 0.979 against 0.993, unsupported claims 0.225 and 0.214 against 0.225, secret leaks 9 and 7 against 10. K8V4's answer behind 120K tokens decoded at 236.21 against 244.90 tok/s (-3.55%, bound -3%): its rounds were faster, but that different output drafted 4.82 tokens per round against 5.63.",
+  "decision": {
+    "action": "nvfp4: keep as a profile candidate; k8v4: inconclusive",
+    "rule": "Pre-registered before the window (KV-PLAN): keep as a profile candidate (its own powered quality screen before any release) if two requests start with four device state slots and at least 160,256 KV tokens, corpus decode and 64K/120K probe decode are no more than 3% below BF16, evidence precision is no lower than BF16 - 2.5 pp, the unsupported-claim rate no higher than BF16 + 2.5 pp and secret leaks no more than BF16 + 2; reject if any quality bound breaks or there is no capacity gain over BF16 at two requests; otherwise inconclusive.",
+    "rule_outcome": {
+      "nvfp4": {"four_slots_two_requests": true, "kv_capacity_two_requests": 262144, "corpus_decode_change": 0.0112, "probe_64k_decode_change": 0.1928, "probe_120k_decode_change": -0.0074, "evidence_precision_pp": -1.38, "unsupported_claim_pp": 0.0, "secret_leak_delta": -1},
+      "k8v4": {"four_slots_two_requests": true, "kv_capacity_two_requests": 262144, "corpus_decode_change": -0.0020, "probe_64k_decode_change": 0.4188, "probe_120k_decode_change": -0.0355, "evidence_precision_pp": -1.38, "unsupported_claim_pp": -1.12, "secret_leak_delta": -3}
+    },
+    "reason": "DFlash2's weights cost the two-request profile two device state slots and 28,736 KV tokens at BF16. A 4-bit KV payload returns the slots and doubles KV capacity, and this screen shows no speed or quality cost on either measure. #71 expected the upside to be small, but it assumed MTP3's memory budget; under DFlash2 the KV format is what fits the shipped two-request profile.",
+    "not_decided_here": "Adoption. The fork does not carry either format: the 2026-09-12 backport ledger excluded them because durable checkpoints store raw KV pages, so a KV format change is a profile advance with its own checkpoint compatibility and quality screen. The screen here is one unpowered run per mode on the 84-case corpus, and with lossy KV the outputs diverge early (12 of 89 NVFP4 answers identical to BF16, 19 of 89 K8V4), so each change in counts is a few cases.",
+    "next": "Take NVFP4 KV, with K8V4 as the alternative, into the DFlash2 port campaign as its two-request capacity plan. After EXP-079's long-context round cost is fixed, measure the port with nvfp4 KV at two requests and four slots, then run a powered quality screen against the BF16 incumbent before any profile change."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "supervisor hold taken and dead-man armed 11:56:11Z, production stopped 11:56:27Z, restored healthy 12:21:32Z (1,505 s down), hold released, the arms' checkpoint roots removed. It followed EXP-079's window; production was back for 38 s in between.",
+    "runtime": "upstream Neroued/ninfer d44ab58408aa389728cd8b1ee50179527e1f3e0d, EXP-078's image ninfer-upstream:d44ab584-exp078 (server af53e34e), which accepts --kv-dtype bf16|int8|fp8|nvfp4|k8v4",
+    "artifact": "published v3 qwen3_8_27b.ninfer, Hugging Face revision 1cbd84e7, sha256 81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "arms": {
+      "up-d44ab584-df2k7-kv-nvfp4": "EXP-078's up-d44ab584-df2k7 arguments with --kv-dtype nvfp4: --max-context 131072 --kv-capacity auto --prefill-chunk 1024 --max-concurrency 1 --spec dflash2 --draft-tokens 7 --lm-head-draft --vision --preserve-thinking --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 --host-kv-mib 16384",
+      "up-d44ab584-df2k7-kv-k8v4": "the same with --kv-dtype k8v4",
+      "up-d44ab584-df2k7-c2-nvfp4": "the NVFP4 arm with --max-concurrency 2 and --device-state-slots 4 (started; the two-slot fallback was not needed)",
+      "up-d44ab584-df2k7-c2-k8v4": "the K8V4 arm with --max-concurrency 2 and --device-state-slots 4 (started)",
+      "bf16_incumbent": "EXP-078 on the same binary, artifact, corpus and gate: up-d44ab584-df2k7 (role corpus, context probe) and up-d44ab584-df2k7-c2-ds2 (two requests, two slots; four did not start)"
+    },
+    "steps": {
+      "role_corpus": "the frozen 89-case role corpus (corpus sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process per arm, scored by score_qualification.py; the 5 json_schema cases are rejected by every runtime, leaving 84",
+      "context_probe": "scripts/speculative_decode_probe.py (sha256 a16600f9): a 2,048-token code answer behind ~0/32K/64K/120K tokens, a 1,024-token continuation of the 64K request, and on the two-request arms one solo request and a pair of 1,024-token requests",
+      "analysis": "analyze-window.py exp080 over the kept request logs, corpus runs and probe receipts"
+    }
+  },
+  "observations": {
+    "memory": {
+      "columns": ["bf16", "nvfp4", "k8v4"],
+      "one_request_kv_payload_bytes": [8589934592, 2415919104, 3372220416],
+      "one_request_available_after_startup_bytes": [1919942656, 8091860992, 7135559680],
+      "one_request_vram_mib": [29594, 23706, 24618],
+      "two_requests_device_state_slots": [2, 4, 4],
+      "two_requests_kv_capacity": [131520, 262144, 262144],
+      "two_requests_kv_payload_bytes": [8619294720, 4831838208, 6744440832],
+      "two_requests_available_after_startup_bytes": [2049966080, 5445255168, 3532652544],
+      "two_requests_vram_mib": [29468, 26230, 28054],
+      "note": "VRAM is nvidia-smi memory.used after load; it read the same after each probe. 262,144 is two full 131,072-token contexts, the most --max-context allows at two requests. BF16 at two requests is the two-slot arm; four slots did not start (EXP-078)."
+    },
+    "role_corpus": {
+      "columns": ["bf16", "nvfp4", "k8v4"],
+      "decode_tok_s": [253.63, 256.48, 253.12],
+      "tokens_per_round": [4.631, 4.661, 4.591],
+      "summed_request_seconds": [376.06, 375.21, 382.50],
+      "prefill_tok_s": [3144.1, 3143.7, 3158.6],
+      "per_case_ratio_vs_bf16": {"nvfp4": {"median": 0.9917, "p10": 0.9279, "p90": 1.0754}, "k8v4": {"median": 0.9938, "p10": 0.9394, "p90": 1.0728}},
+      "identical_to_bf16": {"nvfp4": "12/89 (7 answered cases plus the 5 rejections)", "k8v4": "19/89 (14 plus the 5 rejections)"},
+      "scores": {
+        "required_fact_recall": [0.8729, 0.8832, 0.8729],
+        "evidence_precision": [0.9930, 0.9792, 0.9792],
+        "unsupported_claim_rate": [0.2247, 0.2247, 0.2135],
+        "critical_miss_count": [12, 9, 11],
+        "secret_leak_count": [10, 9, 7],
+        "redaction_control_pass_rate": [0.5, 0.625, 0.75]
+      }
+    },
+    "context_probe": {
+      "columns": ["bf16", "nvfp4", "k8v4"],
+      "decode_tok_s": {
+        "context_0": [321.06, 318.13, 306.37],
+        "context_32k": [241.27, 257.22, 280.54],
+        "context_64k": [211.31, 252.06, 299.80],
+        "continuation_64k": [272.42, 293.62, 309.80],
+        "context_120k": [244.90, 243.08, 236.21]
+      },
+      "tokens_per_round": {
+        "context_0": [5.673, 5.657, 5.432],
+        "context_32k": [4.676, 4.819, 5.211],
+        "context_64k": [4.385, 4.959, 5.785],
+        "continuation_64k": [5.657, 5.818, 5.988],
+        "context_120k": [5.626, 5.146, 4.819]
+      },
+      "ms_per_round": {
+        "context_0": [17.67, 17.78, 17.73],
+        "context_32k": [19.38, 18.73, 18.57],
+        "context_64k": [20.75, 19.67, 19.30],
+        "continuation_64k": [20.77, 19.81, 19.33],
+        "context_120k": [22.97, 21.17, 20.40]
+      },
+      "prefill_tok_s": {
+        "context_32k": [3122.3, 3109.9, 3249.2],
+        "context_64k": [2770.3, 2748.0, 3006.9],
+        "context_120k": [2340.8, 2307.3, 2699.5]
+      },
+      "continuation_reused_tokens": [64222, 64226, 64225],
+      "note": "Decode tok/s is rounds per second times tokens per round, and with lossy KV each answer is different text that drafts differently. The round time isolates the KV format's cost. It falls as context grows [INFERENCE: because attention reads fewer KV bytes; the payloads are 28% (NVFP4) and 39% (K8V4) of BF16's]."
+    },
+    "two_requests": {
+      "columns": ["bf16 (two slots, EXP-078)", "nvfp4 (four slots)", "k8v4 (four slots)"],
+      "pair_aggregate_tok_s": [453.95, 425.36, 446.90],
+      "pair_per_request_decode_tok_s": [[237.14, 250.89], [230.61, 225.56], [233.47, 237.72]],
+      "solo_context_0_decode_tok_s": [323.07, 322.53, 324.36],
+      "shipped_mtp3_pair_for_reference": "388.42 tok/s (v0.9.0 profile, EXP-078 window)"
+    },
+    "spike_kv_append_rerun": "At the end of this window the DFlash2 fork spike's ninfer_kv_cache_append_test, rebuilt with finite V fixtures (spike commit 139903c4, binary cf53115e), passed on the GPU (EXP-079)."
+  },
+  "limits": [
+    "One role-corpus run per mode, unpowered: with outputs diverging early under lossy KV, each change in the counts is a few cases.",
+    "Measured on upstream d44ab584 with DFlash2, not on the shipped runtime: the fork carries neither KV format, and its durable checkpoints would need a format change to store them.",
+    "Decode tok/s mixes the KV format's round cost with the drafting of different outputs; the per-round times are the cleaner speed evidence.",
+    "The BF16 incumbent is EXP-078's run of the same binary and arguments in the preceding window, not a rerun in this one."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

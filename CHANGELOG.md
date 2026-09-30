@@ -15,7 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   runtime and upstream NInfer both accept, and reads timings from the server's request log.
   EXP-078 used it with the role corpus: on upstream `d44ab584`, DFlash2 K=7 decoded the corpus
   28.2% faster than MTP3 at one request, for 1.65 GiB more weights
-  ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)).
+  ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)). On a first port of DFlash2 onto
+  the fork's runtime it showed the port's decode round growing with context: 355.15 tok/s with no
+  context, 44.54 behind 120K tokens against shipped 180.11
+  ([EXP-079](docs/measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)). Under DFlash2 it
+  measured NVFP4 and K8V4 KV against BF16: both start two requests with four device state slots
+  and 262,144 KV tokens, with role-corpus decode within 1.1% of BF16
+  ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)).
 
 ## [0.9.0] - 2026-09-30
 

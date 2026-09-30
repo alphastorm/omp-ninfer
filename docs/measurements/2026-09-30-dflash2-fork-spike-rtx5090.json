@@ -1,0 +1,118 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-079",
+  "title": "Fork-native DFlash2 spike on the RTX 5090: fastest at short context, but its round cost grows with context; no-go by rule",
+  "generated_utc": "2026-09-30T12:15:00Z",
+  "status": "completed_with_limits",
+  "question": "With upstream's pre-v3 DFlash2 program ported onto the shipped runtime's source (fork e20060b6, v0.6.14), does DFlash2 K=7 decode the role corpus materially faster than the shipped v0.9.0 runtime, while the port leaves MTP3 outputs byte-identical?",
+  "answer": "No, not as ported. MTP3 on the spike binary answered all 89 role-corpus cases byte-identically to the shipped runtime (238.41 against 237.37 tok/s). DFlash2 K=7 decoded the corpus at 228.90 tok/s, 3.6% slower than shipped. It decoded 61 of 84 cases faster (median x1.24), and the long-prompt cases lost more than that gained. It drafts as well as upstream's DFlash2 (4.596 against 4.631 tokens per round on the corpus), but its round cost grows with context. Behind 0/32K/64K/120K tokens a code answer decoded at 355.15/126.78/83.74/44.54 tok/s, against shipped 250.71/229.84/212.09/180.11 (+41.7%, -44.8%, -60.5%, -75.3%). Its rounds took 16.2/45.6/75.0/126.3 ms with 5.6-6.3 tokens each, about 16 ms plus 0.92 ms per 1,000 tokens of context. Upstream's DFlash2 rounds rose only from 17.7 to 23.0 ms. Prefill was unchanged.",
+  "decision": {
+    "action": "no-go",
+    "rule": "Pre-registered before the window (SPIKE-PLAN): go (durable DFlash2 integration, two-request profile and quality screen) if spk-df2k7-c1 role-corpus decode is >= +15% over shipped (>= 273.0 tok/s against 237.37), spk-mtp3-c1 answers 89/89 byte-identically to the shipped run and there are no DFlash2 request errors; no-go if corpus decode is < +5% over shipped or the port breaks MTP3 identity; otherwise inconclusive.",
+    "rule_outcome": {
+      "role_corpus_decode_gain_vs_shipped": -0.0357,
+      "mtp3_identical_to_shipped": "89/89 against v0.9.0 (pub-v0614b1) and 89/89 against v0.8.7 (pub-v0613b1)",
+      "dflash2_request_errors": 0
+    },
+    "reason": "The port is correct enough to measure: MTP3 is unchanged and DFlash2 drafts as well as upstream. A context-dependent cost in its decode round erases the gain on this corpus and loses heavily on long agent prompts.",
+    "not_decided_here": "Where the context-dependent cost lives. Two candidates fit the observations and neither was measured. First, the fork's target attention for an 8-token verify of one request: MTP3 verifies 4 tokens, and EXP-077's 8-row rounds were two 4-token requests, so this shape had never run at long context on the fork. Second, a draft-side operation that scales with the prefix instead of the 2,048-token draft window.",
+    "next": "Profile one DFlash2 round at 64K on the spike binary (kernel-level timeline) to locate the per-round cost that grows 0.92 ms per 1,000 context tokens; fix it on spike/dflash2-5090 and rerun the context probe and role corpus against this receipt's numbers. At short context the port already decodes 10.6% faster than upstream's DFlash2 and 41.7% faster than shipped."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "supervisor hold taken and dead-man armed 11:27:23Z, production stopped 11:27:38Z, restored healthy 11:55:49Z (1,691 s down), hold released, the arms' checkpoint roots removed",
+    "runtime": {
+      "source": "spike/dflash2-5090 in the fork (local, unpushed), built at 905101229dac18c3eabeba115d32873e7c24196f: 51 of 79 upstream commits in 863aa8a5^..385b30ce cherry-picked onto e20060b6, plus hand ports; SPIKE-DFLASH2.md on the branch lists them",
+      "build": "nvidia/cuda:13.1.2-devel-ubuntu24.04, CMAKE_CUDA_ARCHITECTURES=120a, Release, profile dflash2-spike-5090, from a git archive (source_dirty=true)",
+      "server_binary_sha256": "0ed2a0485474574a400ac45b99f5ccab7ea9990aea9359696ee374994bfea5d5",
+      "image": "ninfer-5090:90510122-dflash2-spike (sha256:4ad7cf3a870bf6968b34c8af1dbe2b1d50f3228f1ca764fe8aaa4b46b610f04f): the published v0.6.14 runtime image with the spike's ninfer and ninfer-serve"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "bytes": 20437336576,
+      "relation_to_shipped": "all 1,118 tensors and the 6 frontend resources of the pinned eec39564 byte-identical, plus 66 dflash2/* tensors (2,226,792,960 bytes)"
+    },
+    "arms": {
+      "spk-mtp3-c1": "v0.8.7's one-request arguments with the durable store on: --max-context 131072 --kv-capacity auto --prefill-chunk 1024 --kv-dtype bf16 --max-concurrency 1 --spec mtp --draft-tokens 3 --lm-head-draft --vision --preserve-thinking --session-checkpoint-dir /checkpoints --session-checkpoint-quota-mib 24576 --session-checkpoint-staging-mib 256 --max-private-continuations 8 --device-state-slots 4 --host-state-slots 24 --host-kv-mib 16384 --gpu-keep-warm-ms 60000",
+      "spk-df2k7-c1": "the same with --spec dflash2 --draft-tokens 7 and no checkpoint flags (the spike refuses a durable store with DFlash2)",
+      "spk-df2k7-c2ds2": "the DFlash2 arm with --max-concurrency 2 --pending-timeout-ms 180000 --device-state-slots 2 (EXP-078: four slots do not fit beside DFlash2 at two requests)",
+      "pub-v0614b1": "reference: the published v0.6.14 image (server f62a570e) with the v0.9.0 profile on the pinned eec39564; its role corpus is EXP-077's run (2026-09-29), its context probe EXP-078's"
+    },
+    "steps": {
+      "gpu_tests": "the spike's 13 op tests and the DFlash2 real-model test (K=7, CUDA graph, B=1, BF16 KV, full and optimized LM head) in a CUDA 13.1.2 devel container with the GPU and real driver libraries",
+      "role_corpus": "the frozen 89-case role corpus (corpus sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process per arm; the 5 json_schema cases are rejected by every runtime, leaving 84; decode seconds, rounds and drafts from the server request log",
+      "context_probe": "scripts/speculative_decode_probe.py (sha256 a16600f9), as in EXP-078: a 2,048-token code answer behind ~0/32K/64K/120K tokens, a 1,024-token continuation of the 64K request, and on the two-request arm one solo request and a pair of 1,024-token requests",
+      "analysis": "analyze-window.py exp079 over the kept request logs, corpus runs and probe receipts"
+    }
+  },
+  "observations": {
+    "gpu_tests": {
+      "dflash2_real_model": "K=7 B=1 graph=1: accepted 20/20 with the full LM head and 20/20 with the optimized head",
+      "op_tests_passed": ["candidate_selector", "context_kv_materialize", "dynamic_grouped_conv_prepare", "linear_dynamic_grouped_conv_add", "linear_topk", "prepare_ragged_prefix", "rmsnorm_pack_tail", "rmsnorm_rope", "scatter_bf16_batch", "sliding_window_attention", "speculative_round", "qwen3_6_context_store"],
+      "kv_cache_append": "failed 12 cyclic cases, each on an exact FP16 V mismatch. The fixtures fed V from patterned_bits, whose BF16 NaN patterns the device converts to canonical 0x7fff while the host oracle keeps the sign (0x7e00). Upstream feeds finite_patterned_bf16_bits to all five V fixtures; the spike's hand port 90510122 applied it to one. Fixed on the branch in 139903c4 (all V fixtures finite, as upstream); the rebuilt test (binary cf53115e) passed on the GPU at the end of the EXP-080 window, 12:20:54Z."
+    },
+    "memory": {
+      "dflash2_one_request": {"vram_after_load_mib": 29594, "kv_capacity": 131072, "available_after_startup_gib": 1.786},
+      "dflash2_two_requests_two_slots": {"vram_after_load_mib": 29468, "kv_capacity": 131520},
+      "mtp3_one_request_on_the_spike": {"kv_capacity": 131072, "available_after_startup_gib": 3.202},
+      "shipped_two_requests": {"vram_after_load_mib": 30242, "kv_capacity": 160256}
+    },
+    "role_corpus": {
+      "columns": ["spk-mtp3-c1", "spk-df2k7-c1", "pub-v0614b1_2026-09-29"],
+      "decode_tok_s": [238.41, 228.90, 237.37],
+      "tokens_per_round": [3.342, 4.596, 3.342],
+      "ms_per_round": [14.02, 20.08, 14.08],
+      "summed_request_seconds": [404.13, 421.95, 405.76],
+      "prefill_tok_s": [3245.1, 3246.3, 3238.3],
+      "dflash2_per_case_ratio_vs_shipped": {"median": 1.2423, "p10": 0.8001, "p90": 1.4428, "cases_faster": 61, "cases_compared": 84},
+      "upstream_dflash2_for_comparison": "EXP-078 up-d44ab584-df2k7: 253.63 tok/s, 4.631 tokens per round, 18.26 ms per round"
+    },
+    "context_probe": {
+      "columns": ["spk-df2k7-c1", "up-d44ab584-df2k7 (EXP-078)", "pub-v0614b1 (EXP-078)"],
+      "prompt_tokens": [108, 32127, 64234, 120196],
+      "decode_tok_s": {
+        "context_0": [355.15, 321.06, 250.71],
+        "context_32k": [126.78, 241.27, 229.84],
+        "context_64k": [83.74, 211.31, 212.09],
+        "continuation_64k": [81.16, 272.42, 225.94],
+        "context_120k": [44.54, 244.90, 180.11]
+      },
+      "ms_per_round": {
+        "context_0": [16.2, 17.7, 13.7],
+        "context_32k": [45.6, 19.4, 15.4],
+        "context_64k": [75.0, 20.8, 17.0],
+        "context_120k": [126.3, 23.0, 19.7]
+      },
+      "spike_tokens_per_round": [5.737, 5.785, 6.282, 5.626],
+      "spike_round_fit": "16.1 ms + 0.917 ms per 1,000 prompt tokens (least squares over the four context steps)",
+      "prefill_tok_s_32k_64k_120k": {"spk-df2k7-c1": [3029.1, 2695.3, 2274.9], "pub-v0614b1": [3052.8, 2701.4, 2270.0]}
+    },
+    "two_requests": {
+      "spk-df2k7-c2ds2_pair": {"aggregate_tok_s": 276.53, "per_request_decode_tok_s": [143.05, 142.72]},
+      "shipped_pair": {"aggregate_tok_s": 388.42, "per_request_decode_tok_s": [210.98, 207.09]},
+      "upstream_dflash2_two_slots_pair": {"aggregate_tok_s": 453.95, "per_request_decode_tok_s": [237.14, 250.89]}
+    },
+    "outputs": {
+      "mtp3_identity": "spk-mtp3-c1: 89/89 byte-identical to v090-pub-v0614b1 and to v087-pub-v0613b1",
+      "dflash2_identity": "spk-df2k7-c1: 41/89 identical to shipped (36 answered cases plus the 5 rejections)",
+      "role_corpus_scores": {
+        "columns": ["spk-mtp3-c1", "spk-df2k7-c1", "pub-v0614b1_2026-09-29"],
+        "required_fact_recall": [0.8797, 0.8832, 0.8797],
+        "evidence_precision": [0.9935, 0.9779, 0.9935],
+        "unsupported_claim_rate": [0.236, 0.2584, 0.236],
+        "critical_miss_count": [10, 10, 10],
+        "secret_leak_count": [10, 8, 10],
+        "redaction_control_pass_rate": [0.5, 0.625, 0.5]
+      }
+    }
+  },
+  "limits": [
+    "One run per arm; the DFlash2 quality scores are a single unpowered run and decide nothing.",
+    "The mechanism behind the context-dependent round cost is inferred, not profiled.",
+    "The spike binary is an archive build (source_dirty=true) of an unpushed branch, not a release candidate.",
+    "The shipped references are EXP-077's role corpus and EXP-078's probe on the same appliance, not reruns in this window."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

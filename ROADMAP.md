@@ -1152,10 +1152,16 @@ binary and profile are rebound through a new qualification receipt.
 
 Next engine campaign: DFlash2 on the RTX 5090. Upstream NInfer's DFlash2 backend decoded the role
 corpus 28.2% faster than MTP3 on the same binary at one request, with prefill unchanged, for 1.65
-GiB of weights ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)). Porting it onto
-the durable runtime must carry its context ring through checkpoints, fanout and restore; it
-changes outputs, so it needs its own quality screen; and at two requests it leaves 131,520 KV
-tokens where v0.9.0 has 160,256.
+GiB of weights ([EXP-078](docs/measurements/2026-09-30-dflash2-rtx5090.json)). A first port onto
+the fork's runtime keeps MTP3 byte-identical and drafts as well as upstream, but its decode round
+grows with context, so it decoded the corpus 3.6% below shipped v0.9.0
+([EXP-079](docs/measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)); locating that cost
+comes first. The port must also carry DFlash2's context ring through checkpoints, fanout and
+restore, and DFlash2 changes outputs, so it needs its own quality screen. At two requests with BF16
+KV it leaves 131,520 KV tokens and two device state slots where v0.9.0 has 160,256 and four; NVFP4
+KV restores all four slots with 262,144 tokens at no measured speed cost, within a single quality
+screen's bounds ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)), and becomes
+the port's capacity plan once a powered quality screen passes.
 
 ## How to help right now
 

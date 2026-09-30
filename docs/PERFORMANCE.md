@@ -131,6 +131,8 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-069 | RTX 4090 Q5 small-T tensor-core route | The sm_89 route clears the pre-registered decode-gain thresholds of 2.0% at 26K and 1.0% at 60K | Measured +0.38% at 26K and +0.40% at 60K; rejected by the fixed rule, so the published v0.6.9 package keeps its decode kernels ([receipt](measurements/2026-09-28-rtx4090-q5-small-t-mma.json)) | rejected |
 | EXP-077 | RTX 5090 two requests in flight | With `--max-concurrency 2` and OMP's limit at 2, the lane serves two requests with more aggregate decode and without losing outputs, reuse or durability | The shipped v0.6.13 image paired two decodes at 190.0-191.1 tok/s against 166.7-167.1 one at a time (1.14×): eight-token verify rounds left the Q5 tensor-core route, 12.8 ms of a 23.9 ms round. Runtime v0.6.14 (`e20060b6`) runs them on it: **281.1-283.0 tok/s (1.68-1.70×)**, 143.5-152.8 each, 89/89 role-corpus cases byte-identical to one at a time on the candidate and the published image. A request that does not fit waits at the server; `--pending-timeout-ms 180000` replaces the 30 s default that expired it. The v0.8.7 lane set passed on the final profile. A decode beside a 71,641-token prefill still slows to about 30 tok/s, and stock OMP's wall time at limit 2 followed what its subagents generated rather than the overlap ([receipt](measurements/2026-09-29-rtx5090-two-requests-in-flight.json)) | kept — v0.9.0 |
 | EXP-078 | RTX 5090 DFlash2 speculative backend | DFlash2 K=7 (Z-Lab's five-layer block drafter) decodes this lane's workload faster than MTP3 at the shipped BF16 KV, 131,072-token and 1,024-chunk settings | Upstream `d44ab584` on the published v3 artifact, one request: role corpus **253.63 vs 197.80 tok/s (+28.2%)**, 4.631 vs 3.332 tokens per round, all 84 cases faster; a code answer +27.0%/+20.8%/+56.4% behind 32K/64K/120K tokens; prefill unchanged. Costs 1.65 GiB of weights; two requests need two fewer device state slots and leave 131,520 KV tokens against MTP3's 160,256, pair 453.95 vs 374.94 tok/s. Upstream with DFlash2 decoded the corpus 6.9% faster than shipped v0.9.0 ([receipt](measurements/2026-09-30-dflash2-rtx5090.json)) | open: port campaign |
+| EXP-079 | RTX 5090 DFlash2 ported onto the fork | Upstream's DFlash2, ported onto the shipped runtime's source (`e20060b6`), decodes the role corpus at least 15% faster than shipped v0.9.0 and leaves MTP3 byte-identical | MTP3 on the spike binary: 89/89 byte-identical to shipped, 238.41 vs 237.37 tok/s. DFlash2 K=7: role corpus **228.90 tok/s (-3.6%)**, 61 of 84 cases faster (median x1.24), 4.596 tokens per round against upstream's 4.631. Its round cost grows with context: a code answer at 355.15/126.78/83.74/44.54 tok/s behind 0/32K/64K/120K tokens against shipped 250.71/229.84/212.09/180.11, rounds 16.2 to 126.3 ms (about 16 ms plus 0.92 ms per 1K tokens of context) where upstream's DFlash2 rounds go 17.7 to 23.0 ms; prefill unchanged ([receipt](measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)) | rejected by rule: profile the long-context round |
+| EXP-080 | RTX 5090 NVFP4 and K8V4 KV under DFlash2 ([#71](https://github.com/alphastorm/omp-ninfer/issues/71)) | A 4-bit KV payload returns the capacity DFlash2's weights take from the two-request profile without costing speed or screened quality | Upstream `d44ab584`, DFlash2 K=7: both formats start two requests with four device state slots and **262,144 KV tokens** (BF16: two slots, 131,520; shipped v0.9.0: 160,256). One request: KV payload 8.00 → 2.25/3.14 GiB, VRAM 29,594 → 23,706/24,618 MiB, role corpus 253.63 → 256.48/253.12 tok/s, rounds behind 120K tokens 23.0 → 21.2/20.4 ms, K8V4 prefill +15.3% at 120K. Evidence precision 0.993 → 0.979 for both, unsupported claims 0.225 → 0.225/0.214, leaks 10 → 9/7 (one unpowered run each). K8V4's 120K answer decoded 3.55% slower through fewer tokens per round, past the 3% bound ([receipt](measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)) | NVFP4 kept as a profile candidate; K8V4 inconclusive |
 
 Entry detail:
 
@@ -878,6 +880,47 @@ Entry detail:
   adoption needs its own quality screen. The pre-registered rule said go: the next engine
   campaign ports DFlash2 onto the fork's durable runtime. Receipt:
   [DFlash2 on the RTX 5090](measurements/2026-09-30-dflash2-rtx5090.json).
+- **EXP-079 — the fork port drafts like upstream but slows with context (2026-09-30).** A spike
+  branch cherry-picked 51 of upstream's 79 DFlash2 commits onto the shipped runtime's source
+  (`e20060b6`), hand-ported the pieces that would have changed the target path (FP16 V only in
+  the draft's cyclic cache; target V stays BF16), and served the v2 DFlash2 artifact: the pinned
+  `eec39564` tensors plus 66 `dflash2/*` ones. MTP3 on that binary answered all 89 role-corpus
+  cases byte-identically to shipped v0.9.0 and v0.8.7. DFlash2 K=7 drafted as well as upstream's
+  (4.596 tokens per round on the corpus against 4.631) and decoded a code answer with no context
+  at 355.15 tok/s, 10.6% above upstream's DFlash2 and 41.7% above shipped. Its round cost grows
+  with context, though: 16.2, 45.6, 75.0 and 126.3 ms behind 0, 32K, 64K and 120K tokens (about
+  16 ms plus 0.92 ms per thousand tokens), against 17.7 to 23.0 ms on upstream. Behind 120K tokens
+  the answer decoded at 44.54 tok/s against shipped 180.11, and the corpus came out 3.6% below
+  shipped (228.90 tok/s): its long-prompt cases lost more than its 61 faster cases gained. The
+  pre-registered rule said no-go. Two candidates fit, neither measured: the fork's target
+  attention for one request's 8-token verify, a shape the fork had not run at long context (MTP3
+  verifies 4 tokens; EXP-077's 8-row rounds were two 4-token requests), or a draft-side operation
+  that scales with the prefix instead of the 2,048-token draft window. A kernel timeline of one
+  round at 64K comes next. The port's GPU tests passed except `kv_cache_append`, whose cyclic
+  fixtures fed BF16 NaN patterns that the host oracle and the device convert differently; the
+  branch now feeds finite values, as upstream does. Receipt:
+  [DFlash2 fork spike](measurements/2026-09-30-dflash2-fork-spike-rtx5090.json).
+- **EXP-080 — under DFlash2, the KV format is the capacity lever (2026-09-30, #71).** Asked
+  whether NVFP4 KV had been tried, #71 expected little: BF16 KV already fits 131,072 tokens, and
+  NVFP4 KV stores 4-bit values without making attention 4-bit. That holds under MTP3. Under
+  DFlash2, 1.65 GiB of drafter weights cost the two-request profile two device state slots and
+  28,736 KV tokens (EXP-078). On the same upstream binary and artifact, `--kv-dtype nvfp4` and
+  `--kv-dtype k8v4` both started two requests with all four slots and resolved 262,144 KV tokens:
+  two full 131,072-token contexts, against 160,256 on shipped v0.9.0. At one request the KV
+  payload shrank from 8.00 GiB to 2.25 (NVFP4) and 3.14 (K8V4), and the formats cost nothing
+  measurable. Role-corpus decode was 256.48 and 253.12 against 253.63 tok/s, and decode rounds
+  were shorter behind long context (21.2 and 20.4 ms against 23.0 ms at 120K). NVFP4 prefill was
+  within 1.5%, and K8V4 prefill ran 15.3% faster at 120K. The one role-corpus screen per format
+  kept both inside the pre-registered bounds: evidence precision 0.979 against 0.993, unsupported
+  claims 0.225 and 0.214 against 0.225, secret leaks 9 and 7 against 10. Outputs diverge early
+  under lossy KV (12 and 19 of 89 identical), so those counts rest on a few cases each. By rule,
+  NVFP4 is kept as a profile candidate. K8V4 is inconclusive: its answer behind 120K tokens drafted
+  4.82 tokens per round against 5.63 and decoded 3.55% slower, past the 3% bound, although its
+  rounds were faster. Neither format exists on the fork, whose durable checkpoints store raw KV
+  pages, so adopting one is a profile advance with its own checkpoint format. NVFP4 therefore joins
+  the DFlash2 port campaign as its two-request capacity plan, gated on a powered quality screen.
+  Receipt:
+  [KV formats under DFlash2](measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json).
 
 ## Current order
 
