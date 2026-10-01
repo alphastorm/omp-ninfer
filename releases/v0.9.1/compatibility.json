@@ -305,6 +305,28 @@
   ],
   "runtime_variants": [
     {
+      "id": "rtx3090-windows-native",
+      "status": "qualified",
+      "platform": "Windows 11 x64",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "cuda_architecture": "sm_86",
+      "installation_mode": "native-windows-package",
+      "installable": true,
+      "silent_cloud_fallback": false,
+      "release_tag": "v0.6.2-qwen38-3090-beta.1",
+      "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
+      "package_name": "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.2-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3",
+      "package_bytes": 595676373,
+      "maximum_context_tokens": 131072,
+      "qualification_receipt": {
+        "path": "releases/v0.9.1/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/8d62bbecb3eb626ec168e29389b32a722e1f708c/releases/v0.9.1/qualification/rtx3090.json",
+        "sha256": "474311a6d91e6747b3f0a34c5f562b752b1c8bea208ffeb16a245fa9516b7ef4"
+      }
+    },
+    {
       "id": "rtx4090-windows-native",
       "status": "qualified",
       "platform": "Windows 11 x64",

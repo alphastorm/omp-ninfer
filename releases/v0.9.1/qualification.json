@@ -45,6 +45,15 @@
       "build_route_note": "Appliance-local release build of e20060b6 in the CUDA 13.1.2 devel image (nvcc 13.1.115) with v0.6.13's build flags. The four Q5 op oracle tests (ninfer_linear_q5_a16_test, ninfer_linear_add_q5_a16_test, ninfer_gdn_input_proj_test, ninfer_attn_input_proj_test), including the new eight- and nine-token cases, passed on the RTX 5090 from the release build tree. Publication workflow 36635266542 binds binary archive 386f6849 to image 4c816b0c. The image pull by digest with an empty Docker config verified ninfer-serve f62a570e inside, and every lane-window arm checks that its declared binary identity is the image's."
     },
     "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.9.1/qualification/rtx3090.json",
+        "sha256": "474311a6d91e6747b3f0a34c5f562b752b1c8bea208ffeb16a245fa9516b7ef4",
+        "release_tag": "v0.6.2-qwen38-3090-beta.1",
+        "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3"
+      },
       "rtx4090-windows-native": {
         "status": "passed",
         "beta_qualified": true,
