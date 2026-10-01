@@ -1,0 +1,138 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-081",
+  "title": "DFlash2 fork spike with upstream's 24-head verify attention route on the RTX 5090: the context cost was that route; +21.4% role-corpus decode over shipped, go by rule",
+  "generated_utc": "2026-10-01T01:00:00Z",
+  "status": "completed_with_limits",
+  "question": "EXP-079's port of DFlash2 onto the fork decoded the role corpus 3.6% below shipped v0.9.0 because its decode round grew 0.917 ms per 1,000 context tokens. Is that cost the target attention route for one request's 8-token verify, and with upstream's route in its place, does DFlash2 K=7 on the fork decode the role corpus materially faster than shipped while MTP3 stays byte-identical?",
+  "answer": "Yes. The 27B target's full attention has 24 query and 4 KV heads. The fork resolved one request's 7- or 8-column call on that geometry to the Prompt kernel, which gives each query head one CTA per 64 query rows and does not split the KV sequence, so all 16 full-attention layers paid a cost that grew with context. Upstream sends that call to ChunkedSmallT above 320 visible keys (4b0eb36c), a commit the spike had skipped as 35B retuning; 24 query heads is the 27B's geometry, the 35B-A3B has 16. With only that commit added (spike 28a1abe6), the round's context slope fell from 0.917 to 0.085 ms per 1,000 tokens (upstream's DFlash2: 0.044). DFlash2 K=7 decoded the role corpus at 288.09 tok/s: +21.4% over shipped v0.9.0 (237.37), +25.9% over EXP-079's port and +13.6% over upstream's DFlash2 (EXP-078: 253.63), with 83 of 84 cases faster than shipped (median x1.315). Behind 0/32K/64K/120K tokens a code answer decoded at 367.67/303.18/290.63/222.95 tok/s, +46.7/+31.9/+37.0/+23.8% over shipped. Prefill was unchanged. MTP3 on the same binary answered 89/89 byte-identically to shipped, and DFlash2 answered 86 of 89 byte-identically to shipped MTP3 (EXP-079's port: 41). Two requests in flight are unchanged: a pair decoded 269.17 tok/s together against shipped 388.42 and upstream DFlash2's 453.95, in 37.1 ms rounds against upstream's 22.0-22.4 ms.",
+  "decision": {
+    "action": "go",
+    "rule": "Pre-registered before the window (PLAN.md; EXP-079's rule unchanged): go (durable DFlash2 integration: context ring through checkpoints, fanout and restore; the two-request profile; a powered quality screen) if spk2-df2k7-c1 role-corpus decode is >= +15% over shipped (>= 273.0 tok/s against 237.37), spk2-mtp3-c1 answers 89/89 byte-identically to the shipped run and there are no DFlash2 request errors; no-go if corpus decode is < +5% over shipped or MTP3 identity is broken; otherwise inconclusive. Reported beside the rule: the mechanism is located if the DFlash2 round's fit over the probe's four context steps grows <= 0.20 ms per 1,000 context tokens.",
+    "rule_outcome": {
+      "role_corpus_decode_gain_vs_shipped": 0.2137,
+      "mtp3_identical_to_shipped": "89/89 against v0.9.0 (pub-v0614b1) and 89/89 against v0.8.7 (pub-v0613b1)",
+      "dflash2_request_errors": 0,
+      "round_context_slope_ms_per_1000_tokens": 0.0849
+    },
+    "reason": "One route change removed 91% of the port's context slope. On the fork, DFlash2 now decodes the corpus faster than both shipped MTP3 and upstream's DFlash2 at one request, without moving an MTP3 output byte.",
+    "not_decided_here": "Adoption. Go opens the integration campaign and changes no profile. The shipped RTX 5090 profile serves two requests, and three things stand between this result and it. Two requests in flight: the pair's rounds are as slow as EXP-079's (37.1 against 36.5 ms) and 65-68% longer than upstream's, a cost this route cannot reach because two-request attention already took ChunkedSmallT. Durability: the spike still refuses a session checkpoint directory with DFlash2. Capacity and quality: BF16 KV leaves two device state slots at two requests (EXP-078), NVFP4 KV was measured on upstream only (EXP-080), and one unpowered corpus run is not a quality screen.",
+    "next": "Bring two requests' rounds to upstream's. At two requests the target verifies 16 columns per round, and the fork's Q5 tensor-core route accepts only 4 and 8 (q5_small_t_mma_tokens). Read from source, not measured: at 16 columns the 64 MLP-down, 48 GDN value/z and 16 attention gate/value projections per round fall back to SIMT, where upstream d44ab584 has 16-column routes (aa429f28 GDN input; f6a658ef with 9e163eee attention input; fc62790a Q5 linear-add). Port those for 16 columns, measure the pair against this receipt, and recheck MTP3 identity, since prefill pieces of 16 tokens share those routes. Then carry DFlash2's context ring through checkpoints, fanout and restore."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken at about 20:10Z. The driver (exp081-window.sh) ran detached on the appliance itself, so the operator's in-flight link could drop without killing a step: dead-man armed 20:10:03Z, production stopped 20:10:07Z, restored healthy 20:30:10Z (1,203 s down), dead-man cancelled, the arms' checkpoint roots removed. The hold was released at about 20:38Z after the driver's exit marker, with production /health 200 from WSL and from Windows.",
+    "runtime": {
+      "source": "spike/dflash2-5090 at 28a1abe65f17d8790c26750669ec0014e34e9860: EXP-079's build source 90510122, its test fix 139903c4, and 28a1abe6, a cherry-pick of upstream 4b0eb36c (route h24 verify attention through small t). Against EXP-079's build the executable source differs in one function, causal_attention_resolve_route: one-request calls on 24 query heads of width 7 or 8 take ChunkedSmallT above 320 visible keys.",
+      "build": "incremental rebuild of ninfer-serve, ninfer and two test targets in EXP-079's build tree (container ninfer-dflash2-spike-build: nvidia/cuda:13.1.2-devel-ubuntu24.04, CMAKE_CUDA_ARCHITECTURES=120a, Release, profile dflash2-spike-5090), archive source (source_dirty=true)",
+      "server_binary_sha256": "d9fbae3714511de7b685993ef9f77bd5807c5404da5ec696345e0940b94ccd64",
+      "image": "ninfer-5090:28a1abe6-dflash2-spike (sha256:c0f3db62a44dcb7b47ec53f2734e453395395e2ae72849d92a8397ddfcefecd9): EXP-079's image with ninfer-serve and ninfer replaced"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6 (EXP-079's)",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "bytes": 20437336576
+    },
+    "arms": {
+      "spk2-mtp3-c1": "EXP-079's spk-mtp3-c1 arguments with the new binary: v0.8.7's one request with the durable store on, --spec mtp --draft-tokens 3",
+      "spk2-df2k7-c1": "EXP-079's spk-df2k7-c1 arguments: --spec dflash2 --draft-tokens 7 and no checkpoint flags",
+      "spk2-df2k7-c2ds2": "EXP-079's spk-df2k7-c2ds2 arguments: the DFlash2 arm with --max-concurrency 2 --pending-timeout-ms 180000 --device-state-slots 2",
+      "references": "spk-df2k7-c1 (EXP-079, server 0ed2a048, the Prompt route); pub-v0614b1 (shipped v0.9.0: EXP-077's role corpus, EXP-078's probe); up-d44ab584-df2k7 and its two-slot pair (EXP-078)"
+    },
+    "steps": {
+      "order": "GPU tests, DFlash2 context probe, DFlash2 role corpus, MTP3 role corpus, DFlash2 pair",
+      "gpu_tests": "ninfer_softmax_attention_test, whose 24-head width-7 cases at 512 visible keys now take ChunkedSmallT, and the DFlash2 real-model test (K=7, CUDA graph, B=1, BF16 KV, full and optimized LM head) in EXP-079's test image",
+      "context_probe": "scripts/speculative_decode_probe.py (sha256 a16600f9) on spk2-df2k7-c1, as in EXP-078 and EXP-079",
+      "role_corpus": "the frozen 89-case role corpus (sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process per arm; the 5 json_schema cases are rejected by every runtime, leaving 84; decode seconds, rounds and drafts from the server request log",
+      "two_requests": "the probe's solo step and pair on spk2-df2k7-c2ds2",
+      "analysis": "analyze-window.py exp081 over the kept request logs, corpus runs and probe receipts"
+    }
+  },
+  "observations": {
+    "gpu_tests": {
+      "softmax_attention": "ninfer_softmax_attention_test passed (exit 0): causal cached, packed and context attention",
+      "dflash2_real_model": "K=7 B=1 graph=1: accepted 20/20 with the full LM head and 20/20 with the optimized head"
+    },
+    "memory": {
+      "dflash2_one_request": {"vram_after_load_mib": 29594, "kv_capacity": 131072, "available_after_startup_gib": 1.786},
+      "dflash2_two_requests_two_slots": {"vram_after_load_mib": 29468, "kv_capacity": 131520},
+      "mtp3_one_request": {"vram_after_load_mib": 28144, "kv_capacity": 131072, "available_after_startup_gib": 3.202}
+    },
+    "role_corpus": {
+      "columns": ["spk2-mtp3-c1", "spk2-df2k7-c1", "spk-df2k7-c1 (EXP-079)", "pub-v0614b1_2026-09-29"],
+      "decode_tok_s": [238.17, 288.09, 228.90, 237.37],
+      "tokens_per_round": [3.342, 4.679, 4.596, 3.342],
+      "ms_per_round": [14.03, 16.24, 20.08, 14.08],
+      "draft_acceptance": [0.7811, 0.5254, 0.5136, 0.7811],
+      "summed_request_seconds": [404.9, 345.29, 421.95, 405.76],
+      "prefill_tok_s": [3222.6, 3221.2, 3246.3, 3238.3],
+      "dflash2_per_case_ratio_vs_shipped": {"median": 1.315, "p10": 1.0775, "p90": 1.5055, "cases_faster": 83, "cases_compared": 84},
+      "decode_tok_s_by_class": {
+        "columns": ["spk2-df2k7-c1", "pub-v0614b1_2026-09-29"],
+        "log-triage": [247.95, 223.16],
+        "regression-contract": [287.51, 230.65],
+        "repository-evidence": [365.18, 258.88],
+        "structured-output": [354.76, 268.57],
+        "work-log-extraction": [355.73, 256.95]
+      },
+      "upstream_dflash2_for_comparison": "EXP-078 up-d44ab584-df2k7: 253.63 tok/s, 4.631 tokens per round, 18.26 ms per round"
+    },
+    "context_probe": {
+      "columns": ["spk2-df2k7-c1", "spk-df2k7-c1 (EXP-079)", "up-d44ab584-df2k7 (EXP-078)", "pub-v0614b1 (EXP-078)"],
+      "prompt_tokens": [109, 32129, 64233, 120191],
+      "decode_tok_s": {
+        "context_0": [367.67, 355.15, 321.06, 250.71],
+        "context_32k": [303.18, 126.78, 241.27, 229.84],
+        "context_64k": [290.63, 83.74, 211.31, 212.09],
+        "continuation_64k": [288.75, 81.16, 272.42, 225.94],
+        "context_120k": [222.95, 44.54, 244.90, 180.11]
+      },
+      "ms_per_round": {
+        "context_0": [15.6, 16.2, 17.7, 13.7],
+        "context_32k": [18.6, 45.6, 19.4, 15.4],
+        "context_64k": [21.3, 75.0, 20.8, 17.0],
+        "context_120k": [25.8, 126.3, 23.0, 19.7]
+      },
+      "spk2_tokens_per_round": [5.721, 5.626, 6.187, 5.753],
+      "round_fit": {
+        "method": "least squares of ms per round on prompt tokens over the four context steps",
+        "spk2-df2k7-c1": "15.70 ms + 0.085 ms per 1,000 tokens",
+        "spk-df2k7-c1": "16.12 ms + 0.917 ms per 1,000 tokens",
+        "up-d44ab584-df2k7": "17.83 ms + 0.044 ms per 1,000 tokens",
+        "pub-v0614b1": "13.76 ms + 0.050 ms per 1,000 tokens"
+      },
+      "remaining_slope": "Twice upstream's. ChunkedSmallT attends the 8 columns as chunks of 6 and 2 and reads each layer's KV once per chunk; upstream's later causal-cache work (a7818988, c71795e1, both skipped by the spike) attends up to 8 columns of one request in one SmallT pass. Inferred from source, not measured.",
+      "prefill_tok_s_32k_64k_120k": {"spk2-df2k7-c1": [3072.1, 2714.9, 2267.1], "pub-v0614b1": [3052.8, 2701.4, 2270.0]}
+    },
+    "two_requests": {
+      "spk2-df2k7-c2ds2_pair": {"aggregate_tok_s": 269.17, "per_request_decode_tok_s": [138.79, 138.83], "tokens_per_round": [5.146, 5.146], "ms_per_round": [37.1, 37.1]},
+      "spk2-df2k7-c2ds2_solo": {"decode_tok_s": 355.11, "ms_per_round": 15.7},
+      "spk-df2k7-c2ds2_pair_exp079": {"aggregate_tok_s": 276.53, "per_request_decode_tok_s": [143.05, 142.72], "ms_per_round": [36.5, 36.4]},
+      "upstream_dflash2_two_slots_pair_exp078": {"aggregate_tok_s": 453.95, "per_request_decode_tok_s": [237.14, 250.89], "ms_per_round": [22.0, 22.4]},
+      "shipped_pair_exp078": {"aggregate_tok_s": 388.42, "per_request_decode_tok_s": [210.98, 207.09]}
+    },
+    "outputs": {
+      "mtp3_identity": "spk2-mtp3-c1: 89/89 byte-identical to v090-pub-v0614b1 and to v087-pub-v0613b1",
+      "dflash2_identity": "spk2-df2k7-c1: 86/89 identical to shipped (81 answered cases plus the 5 rejections); EXP-079's port: 41/89. The 3 that differ are log-triage answers. Only the attention route changed between the two ports, so most of EXP-079's divergence came from the Prompt route's arithmetic: at temperature 0 a speculative backend emits the target's greedy tokens as computed by its verify pass.",
+      "role_corpus_scores": {
+        "columns": ["spk2-mtp3-c1", "spk2-df2k7-c1", "spk-df2k7-c1 (EXP-079)", "pub-v0614b1_2026-09-29"],
+        "required_fact_recall": [0.8797, 0.8797, 0.8832, 0.8797],
+        "evidence_precision": [0.9935, 0.987, 0.9779, 0.9935],
+        "unsupported_claim_rate": [0.236, 0.2247, 0.2584, 0.236],
+        "critical_miss_count": [10, 10, 10, 10],
+        "secret_leak_count": [10, 10, 8, 10],
+        "redaction_control_pass_rate": [0.5, 0.5, 0.625, 0.5]
+      }
+    }
+  },
+  "limits": [
+    "One run per arm; DFlash2's quality scores are one unpowered run and decide nothing.",
+    "The mechanism is located by what one route change did to the round's context slope, not by a kernel timeline.",
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate, and it still refuses durable checkpoints with DFlash2.",
+    "The shipped references are EXP-077's role corpus and EXP-078's probe, and the upstream references are EXP-078's, all on this appliance and not rerun in this window.",
+    "MTP3 identity is shown on the corpus only. The route also applies to one-request prefill pieces of exactly 7 or 8 tokens beyond 320 keys, which capture and rewrite frontiers can cut; whether any corpus request cut such a piece is not recorded.",
+    "The two-request diagnosis in next is a source reading; no two-request round was profiled."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

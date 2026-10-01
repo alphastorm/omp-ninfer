@@ -21,7 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([EXP-079](docs/measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)). Under DFlash2 it
   measured NVFP4 and K8V4 KV against BF16: both start two requests with four device state slots
   and 262,144 KV tokens, with role-corpus decode within 1.1% of BF16
-  ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)).
+  ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)). With upstream's attention
+  route for the port's 8-token verify on the 27B's 24 query heads, it measured 222.95 tok/s behind
+  120K tokens, and the port decoded the corpus 21.4% faster than shipped with MTP3 byte-identical
+  ([EXP-081](docs/measurements/2026-09-30-dflash2-verify-route-rtx5090.json)).
 
 ## [0.9.0] - 2026-09-30
 
