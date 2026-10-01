@@ -8,6 +8,7 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 PROFILE_IDS = (
     "darwin-remote-ssh",
@@ -257,6 +258,15 @@ def load_authority(path: Path) -> dict[str, Any]:
     require(len(variant_ids) == len(set(variant_ids)), "runtime variants are duplicated")
     for variant in variants:
         variant_id = variant["id"]
+        if any(key in variant for key in ("model_url", "model_bytes", "model_sha256")):
+            model_url = variant.get("model_url")
+            require(isinstance(model_url, str) and urlparse(model_url).scheme == "https"
+                    and bool(urlparse(model_url).netloc), f"{variant_id} model URL is invalid")
+            require(type(variant.get("model_bytes")) is int and variant["model_bytes"] > 0,
+                    f"{variant_id} model bytes must be a positive integer")
+            require(isinstance(variant.get("model_sha256"), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", variant["model_sha256"]) is not None,
+                    f"{variant_id} model SHA-256 is invalid")
         require(variant.get("status") in STATUSES, f"{variant_id} status is invalid")
         require(variant.get("silent_cloud_fallback") is False,
                 f"{variant_id} must disable silent cloud fallback")
@@ -420,6 +430,12 @@ def render(authority: dict[str, Any]) -> str:
                     f"- `{variant['id']}`: component `{variant['release_tag']}`; "
                     f"package {package}; SHA-256 `{variant['package_sha256']}`; "
                     f"{variant['package_bytes']:,} bytes."
+                )
+        for variant in variants:
+            if "model_sha256" in variant:
+                lines.append(
+                    f"- `{variant['id']}` model: [artifact]({variant['model_url']}); "
+                    f"SHA-256 `{variant['model_sha256']}`; {variant['model_bytes']:,} bytes."
                 )
     lines.extend(["", "## Profile boundaries", ""])
     for profile in authority["profiles"]:

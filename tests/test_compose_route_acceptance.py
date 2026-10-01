@@ -263,6 +263,25 @@ class UpstreamCompositionTests(unittest.TestCase):
                 patch.object(sys, "argv", self.argv), redirect_stdout(io.StringIO()):
             return MODULE.main()
 
+    def test_split_model_keeps_live_clients_primary_and_native_receipts_native(self) -> None:
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        manifest["components"]["native_model"] = {"artifact_sha256": "e" * 64}
+        manifest["components"]["ninfer_variants"][0]["model_artifact_sha256"] = "e" * 64
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        self.assertEqual(self.compose(), 0)
+        native = MODULE.load(self.release_root / "acceptance/rtx4090-public-install.json")
+        self.assertEqual(native["runtime"]["model_sha256"], "e" * 64)
+        for path in (self.release_root / "acceptance").glob("*-" + DESCRIPTOR["omp"]["distribution_version"] + ".json"):
+            self.assertEqual(MODULE.load(path)["live_acceptance"]["model_sha256"], "c" * 64)
+
+    def test_native_receipt_cannot_accept_the_primary_model_in_a_split_release(self) -> None:
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        manifest["components"]["native_model"] = {"artifact_sha256": "e" * 64}
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        with self.assertRaisesRegex(SystemExit, "native model"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
     def test_full_stock_composition_binds_current_assets_and_final_authority(self) -> None:
         self.assertEqual(self.compose(), 0)
         acceptance = self.release_root / "acceptance"

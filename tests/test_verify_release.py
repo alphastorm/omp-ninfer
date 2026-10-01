@@ -20,6 +20,148 @@ SPEC.loader.exec_module(VERIFY_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_historical_manifests_keep_their_native_model_contract(self) -> None:
+        for path in sorted((ROOT / "releases").glob("*/manifest.json")):
+            with self.subTest(release=path.parent.name):
+                manifest = self.load(path)
+                if "native_model" in manifest["components"]:
+                    continue  # Only manifests using the historical implicit binding.
+                model = VERIFY_RELEASE.effective_native_model(manifest)
+                errors = []
+                VERIFY_RELEASE.validate_model_component(model, "components.model", errors)
+                authority_path = path.parent / "compatibility.json"
+                authority = self.load(authority_path) if authority_path.exists() else {}
+                VERIFY_RELEASE.validate_ninfer_variants(
+                    ROOT, manifest["release"], manifest["components"].get("ninfer_variants", []),
+                    authority, model["artifact_sha256"], errors,
+                    allow_pending=manifest["status"] == "draft")
+                self.assertEqual(errors, [])
+
+    def split_model_copy(self) -> tuple[Path, dict]:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases" / PUBLIC_RELEASE
+        manifest = self.load(release / "manifest.json")
+        manifest["status"] = "candidate"
+        manifest["qualification"]["external_installation_passed"] = False
+        manifest["publication"]["blockers"] = ["external-install acceptance pending"]
+        components = manifest["components"]
+        components["native_model"] = components["model"]
+        components["model"] = self.load(ROOT / "tests/fixtures/dflash2-model.json")
+        model = components["model"]
+        lane_path = release / "qualification/rtx5090.json"
+        lane = self.load(lane_path)
+        lane["identity"]["model_artifact_sha256"] = model["artifact_sha256"]
+        self.save(lane_path, lane)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["model"].update(artifact_sha256=model["artifact_sha256"],
+                                    artifact_bytes=model["artifact_bytes"])
+            arguments = profile["server"]["arguments"]
+            arguments[arguments.index("--artifact-sha256") + 1] = model["artifact_sha256"]
+            self.save(path, profile)
+        authority = self.load(release / "compatibility.json")
+        for profile in authority["profiles"]:
+            profile["gpu_qualification"]["receipt"]["sha256"] = VERIFY_RELEASE.sha256_file(lane_path)
+            profile["runtime"].update(model_url=model["artifact_url"],
+                                      model_bytes=model["artifact_bytes"],
+                                      model_sha256=model["artifact_sha256"])
+        native = components["native_model"]
+        for variant in authority["runtime_variants"]:
+            variant.update(model_url=native["artifact_url"], model_bytes=native["artifact_bytes"],
+                           model_sha256=native["artifact_sha256"])
+        for path in (root / "compatibility.json", release / "compatibility.json"):
+            self.save(path, authority)
+        for path in (root / "docs/COMPATIBILITY.md", release / "COMPATIBILITY.md"):
+            path.write_text(VERIFY_RELEASE.render_compatibility_matrix(authority), encoding="utf-8")
+        qualification_path = release / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["runtime_identity"]["model_artifact_sha256"] = model["artifact_sha256"]
+        qualification["external_installation_qualified"] = False
+        qualification["composition"]["external_installation_acceptance"] = {"status": "pending"}
+        qualification["composition"]["behavioral_qualification"]["sha256"] = VERIFY_RELEASE.sha256_file(lane_path)
+        self.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(qualification_path)
+        components["omp"]["compatibility_sha256"] = VERIFY_RELEASE.sha256_file(release / "compatibility.json")
+        self.save(release / "manifest.json", manifest)
+        return root, manifest
+
+    def test_split_model_manifest_verifies_without_rebinding_native_packages(self) -> None:
+        root, manifest = self.split_model_copy()
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertEqual(errors, [])
+        original = self.load(ROOT / "releases" / PUBLIC_RELEASE / "manifest.json")
+        self.assertEqual(manifest["components"]["ninfer_variants"],
+                         original["components"]["ninfer_variants"])
+
+    def test_native_variant_cannot_bind_the_primary_model_in_a_split_release(self) -> None:
+        root, manifest = self.split_model_copy()
+        for variant in manifest["components"]["ninfer_variants"]:
+            variant["model_artifact_sha256"] = manifest["components"]["model"]["artifact_sha256"]
+        self.save(root / "releases" / PUBLIC_RELEASE / "manifest.json", manifest)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        for variant in manifest["components"]["ninfer_variants"]:
+            self.assertTrue(any(variant["id"] in error and "effective native model" in error
+                                for error in errors), errors)
+
+    def test_redundant_native_model_is_rejected(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        path = root / "releases" / PUBLIC_RELEASE / "manifest.json"
+        manifest = self.load(path)
+        manifest["components"]["native_model"] = manifest["components"]["model"]
+        self.save(path, manifest)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(any("native_model" in error and "omitted" in error for error in errors), errors)
+
+    def test_native_model_identity_is_validated_like_the_primary(self) -> None:
+        cases = {"repository": "http://example.invalid/model", "revision": "a" * 39,
+                 "artifact_url": "https://example.invalid/wrong.ninfer",
+                 "artifact_bytes": 0, "artifact_sha256": "a" * 63,
+                 "artifact_name": "wrong.ninfer"}
+        for field, value in cases.items():
+            with self.subTest(field=field):
+                root, manifest = self.split_model_copy()
+                manifest["components"]["native_model"][field] = value
+                self.save(root / "releases" / PUBLIC_RELEASE / "manifest.json", manifest)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                self.assertTrue(any("native_model" in error and field in error
+                                    for error in errors), errors)
+
+    def test_malformed_native_override_never_falls_back_to_primary(self) -> None:
+        for override in (None, [], {}, {"artifact_bytes": True}):
+            with self.subTest(override=override):
+                root, manifest = self.split_model_copy()
+                manifest["components"]["native_model"] = override
+                self.save(root / "releases" / PUBLIC_RELEASE / "manifest.json", manifest)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                self.assertTrue(any("components.native_model" in error for error in errors), errors)
+
+    def test_split_model_requires_explicit_native_authority_binding(self) -> None:
+        root, _ = self.split_model_copy()
+        path = root / "releases" / PUBLIC_RELEASE / "compatibility.json"
+        authority = self.load(path)
+        for variant in authority["runtime_variants"]:
+            for field in ("model_url", "model_bytes", "model_sha256"):
+                del variant[field]
+        self.save(path, authority)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(any("effective native model" in error for error in errors), errors)
+
+    def test_native_authority_cannot_render_a_primary_model_binding(self) -> None:
+        root, manifest = self.split_model_copy()
+        path = root / "releases" / PUBLIC_RELEASE / "compatibility.json"
+        authority = self.load(path)
+        model = manifest["components"]["model"]
+        for variant in authority["runtime_variants"]:
+            variant.update(model_url=model["artifact_url"], model_bytes=model["artifact_bytes"],
+                           model_sha256=model["artifact_sha256"])
+        self.save(path, authority)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        for variant in authority["runtime_variants"]:
+            self.assertTrue(any(variant["id"] in error and "effective native model" in error
+                                for error in errors), errors)
+
     def upstream_candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary, root = self.public_draft_copy()
         release_root = root / "releases" / PUBLIC_RELEASE
@@ -1085,7 +1227,7 @@ class ReleaseContractTest(unittest.TestCase):
         self.save(manifest_path, manifest)
 
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
-        self.assertIn("model artifact URL must bind repository, revision, and name", errors)
+        self.assertTrue(any("components.model.artifact_url" in error for error in errors), errors)
 
     def test_omp_distribution_version_must_equal_release_id(self) -> None:
         temporary, root = self.candidate_copy()

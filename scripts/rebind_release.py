@@ -31,6 +31,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from verify_release import effective_native_model
+
 ROOT = Path(__file__).resolve().parents[1]
 RAW = "https://raw.githubusercontent.com/alphastorm/omp-ninfer"
 PRIMARY_RECEIPT = "qualification/rtx5090.json"
@@ -77,6 +80,7 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
     manifest = load(manifest_path)
     ninfer = manifest["components"]["ninfer"]
     model = manifest["components"]["model"]
+    native_model = effective_native_model(manifest)
     runtime = manifest["runtime_identity"]
     compatibility = load(compatibility_path)
     compatibility["product_release"] = release
@@ -99,6 +103,9 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
         source = variants[variant["id"]]
         for key in VARIANT_ROW_KEYS:
             variant[key] = source[key]
+        variant.update(model_url=native_model["artifact_url"],
+                       model_bytes=native_model["artifact_bytes"],
+                       model_sha256=native_model["artifact_sha256"])
         summary = source["qualification"]["summary"]
         receipt = variant["qualification_receipt"]
         receipt["path"] = summary
@@ -137,6 +144,9 @@ def promote_root(release: str, manifest_path: Path) -> None:
     for profile_path in sorted((ROOT / "profiles").glob("*.json")):
         profile = load(profile_path)
         profile["release"] = release
+        model = manifest["components"]["model"]
+        profile["model"].update(artifact_sha256=model["artifact_sha256"],
+                                artifact_bytes=model["artifact_bytes"])
         profile["server"]["deployment_profile"] = manifest["runtime_identity"]["deployment_profile"]
         arguments = profile["server"]["arguments"]
         for flag, keys in PROFILE_ARGUMENTS:

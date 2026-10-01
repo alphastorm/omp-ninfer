@@ -27,8 +27,7 @@ class PromoteRootTests(unittest.TestCase):
         shutil.copytree(ROOT / "profiles", root / "profiles")
         shutil.copytree(ROOT / "examples" / "manual-tunnel", root / "examples" / "manual-tunnel")
         shutil.copytree(ROOT / "releases" / CURRENT, root / "releases" / CURRENT)
-        (root / "scripts").mkdir()
-        shutil.copy2(ROOT / "scripts" / "rebind_release.py", root / "scripts" / "rebind_release.py")
+        shutil.copytree(ROOT / "scripts", root / "scripts")
         # Loaded from the copy, so the module's ROOT is the temporary tree.
         spec = importlib.util.spec_from_file_location("rebind_release_copy",
                                                       root / "scripts" / "rebind_release.py")
@@ -36,6 +35,35 @@ class PromoteRootTests(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return root, module
+
+    def test_split_model_rebind_keeps_primary_profiles_and_native_rows_separate(self) -> None:
+        root, module = self.promotion_copy()
+        release = root / "releases" / CURRENT
+        manifest_path = release / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["components"]["native_model"] = manifest["components"]["model"]
+        model = self.load(ROOT / "tests/fixtures/dflash2-model.json")
+        manifest["components"]["model"] = model
+        module.save(manifest_path, manifest)
+        module.bind_lane_receipts(CURRENT, release / "compatibility.json", manifest_path,
+                                  release / "qualification.json")
+        authority = self.load(release / "compatibility.json")
+        for profile in authority["profiles"]:
+            self.assertEqual(profile["runtime"]["model_sha256"], model["artifact_sha256"])
+            self.assertEqual(profile["runtime"]["model_bytes"], model["artifact_bytes"])
+            self.assertEqual(profile["runtime"]["model_url"], model["artifact_url"])
+        native = manifest["components"]["native_model"]
+        for variant in authority["runtime_variants"]:
+            self.assertEqual(variant["model_sha256"], native["artifact_sha256"])
+            self.assertEqual(variant["model_bytes"], native["artifact_bytes"])
+            self.assertEqual(variant["model_url"], native["artifact_url"])
+        module.promote_root(CURRENT, manifest_path)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            self.assertEqual(profile["model"]["artifact_sha256"], model["artifact_sha256"])
+            self.assertEqual(profile["model"]["artifact_bytes"], model["artifact_bytes"])
+            arguments = profile["server"]["arguments"]
+            self.assertEqual(arguments[arguments.index("--artifact-sha256") + 1], model["artifact_sha256"])
 
     def test_lane_stage_repins_profile_client_archives_to_the_manifest_client(self) -> None:
         """v0.8.4 moved the client from OMP 18.3.0 to 18.3.5; the lane stage promoted the

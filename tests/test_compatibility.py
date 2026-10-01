@@ -18,6 +18,29 @@ SPEC.loader.exec_module(MODULE)
 
 
 class CompatibilityAuthorityTests(unittest.TestCase):
+    def test_native_model_rows_reject_incomplete_or_invalid_bindings(self) -> None:
+        for fields in ({"model_sha256": "a" * 64},
+                       {"model_url": "http://example.invalid/model", "model_sha256": "a" * 64, "model_bytes": 10},
+                       {"model_url": "https://example.invalid/model", "model_sha256": "A" * 64, "model_bytes": 10},
+                       {"model_url": "https://example.invalid/model", "model_sha256": "a" * 64, "model_bytes": True}):
+            with self.subTest(fields=fields):
+                authority = MODULE.load_authority(ROOT / "compatibility.json")
+                authority["runtime_variants"][0].update(fields)
+                with self.assertRaises(ValueError):
+                    MODULE.load_authority(self._write(authority))
+
+    def test_native_rows_render_their_own_model_binding(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        manifest = json.loads((ROOT / "releases" / authority["product_release"] / "manifest.json").read_text())
+        model = manifest["components"]["model"]
+        for variant in authority["runtime_variants"]:
+            variant.update(model_url=model["artifact_url"], model_bytes=model["artifact_bytes"],
+                           model_sha256=model["artifact_sha256"])
+        native = MODULE.render(authority).split("## Native runtime variants", 1)[1]
+        self.assertIn(model["artifact_url"], native)
+        self.assertIn(model["artifact_sha256"], native)
+        self.assertIn(f"{model['artifact_bytes']:,}", native)
+
     def test_3090_native_v062_admission_remains_closed(self) -> None:
         # Built from the RTX 4090 row whether or not the root authority already admits the RTX 3090.
         authority = MODULE.load_authority(ROOT / "compatibility.json")

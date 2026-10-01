@@ -68,6 +68,7 @@ class BindNativeVariantTest(unittest.TestCase):
         self.addCleanup(setattr, BINDER, "ROOT", ROOT)
         self.manifest = {
             "components": {
+                "model": {"artifact_sha256": digest("model")},
                 "ninfer_variants": [
                     {"id": "rtx3090-windows-native", "package_sha256": digest("other")},
                     {"id": "rtx4090-windows-native", "release_tag": "v0.2.3-qwen38-4090-durable.1"},
@@ -89,6 +90,21 @@ class BindNativeVariantTest(unittest.TestCase):
         return BINDER.bind(
             self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.8"
         )
+
+    def test_split_model_binds_a_new_lane_to_the_native_artifact(self) -> None:
+        self.prepare_3090()
+        self.manifest["components"]["native_model"] = self.manifest["components"]["model"]
+        self.manifest["components"]["model"] = {"artifact_sha256": digest("5090-model")}
+        variant = self.add_3090(add=True)
+        self.assertEqual(variant["model_artifact_sha256"], digest("model"))
+
+    def test_existing_lane_refuses_a_package_built_for_the_primary_model(self) -> None:
+        self.manifest["components"]["native_model"] = {"artifact_sha256": digest("native-model")}
+        before = deepcopy(self.manifest)
+        with self.assertRaisesRegex(BINDER.BindError, "native model"):
+            self.bind()
+        self.assertEqual(self.manifest, before)
+        self.assertFalse((self.release_root / "rtx4090-windows-native.SHA256SUMS").exists())
 
     def test_binds_every_published_asset_from_the_distribution_set(self) -> None:
         variant = self.bind()

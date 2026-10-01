@@ -28,9 +28,14 @@ function Finish([string]$Status) {
 }
 try {
     $manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $nativeModel = if ($manifest.components.PSObject.Properties.Name -contains 'native_model') { $manifest.components.native_model } else { $manifest.components.model }
     $variant = @($manifest.components.ninfer_variants | Where-Object { $_.id -ceq "$Lane-windows-native" })
     if ($variant.Count -ne 1) { throw 'variant is absent or duplicated in the manifest' }
     $v = $variant[0]
+    if ([string]$v.model_artifact_sha256 -cne [string]$nativeModel.artifact_sha256) { throw 'variant model must match the effective native model' }
+    if ($ModelArtifactPath) {
+        if ((Sha $ModelArtifactPath) -cne [string]$nativeModel.artifact_sha256 -or (Get-Item -LiteralPath $ModelArtifactPath).Length -ne [int64]$nativeModel.artifact_bytes) { throw 'documented native model identity mismatch' }
+    }
     New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
     $baseUrl = ([string]$v.package_url).Substring(0, ([string]$v.package_url).LastIndexOf('/'))
     $receipt.source = [ordered]@{ release_tag=[string]$v.release_tag; base_url=$baseUrl; product_release=[string]$manifest.release }
@@ -119,7 +124,7 @@ try {
     $sw = [Diagnostics.Stopwatch]::StartNew()
     $st = Invoke-RestMethod -Method Get -Uri "$base/v1/ninfer/status" -Headers $headers -TimeoutSec 30 -UseBasicParsing
     $statusMs = $sw.Elapsed.TotalMilliseconds
-    $identityOk = ([string]$st.identity.binary_sha256 -ceq $installedBinary) -and ([string]$st.identity.config_sha256 -ceq $installedConfig)
+    $identityOk = ([string]$st.identity.binary_sha256 -ceq $installedBinary) -and ([string]$st.identity.config_sha256 -ceq $installedConfig) -and ([string]$st.identity.model_artifact_sha256 -ceq [string]$nativeModel.artifact_sha256)
     if (-not $identityOk) { throw 'served identity does not match the installed release' }
     $anon = 0
     try { Invoke-WebRequest -Method Get -Uri "$base/v1/ninfer/status" -TimeoutSec 30 -UseBasicParsing | Out-Null; $anon = 200 } catch { $anon = [int]$_.Exception.Response.StatusCode }

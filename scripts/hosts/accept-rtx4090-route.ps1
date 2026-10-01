@@ -281,6 +281,7 @@ if($Mode -eq 'Preflight') {
     }
     if((& git -C $Clone rev-parse HEAD|Out-String).Trim() -cne $Candidate -or (& git -C $Clone status --porcelain|Out-String).Trim()){throw 'candidate clone is not clean and exact'}
     $manifest=ReadJson "$Clone\releases\$Release\manifest.json"
+    $nativeModel=if($manifest.components.PSObject.Properties.Name -contains 'native_model'){$manifest.components.native_model}else{$manifest.components.model}
     if($manifest.components.omp.distribution_kind -cne 'upstream-release'){throw 'stock upstream client required'}
     $variant=@($manifest.components.ninfer_variants|Where-Object id -CEQ "$Lane-windows-native")[0]
     $bundleManifest=ReadJson "$Bundle\manifest.json"
@@ -317,7 +318,7 @@ if($Mode -eq 'Preflight') {
     $parser=Start-Process -FilePath $binary -ArgumentList 'models',$provider,'--json' -WorkingDirectory (Get-Location).ProviderPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Workspace\parser-models.json" -RedirectStandardError "$Workspace\parser-models.stderr"
     $parserListed=@((ReadJson "$Workspace\parser-models.json").models|ForEach-Object {$_.selector})
     if(($parserListed -join ',') -cne $selector -or $parser.ExitCode -ne 0){throw 'provider parser failed'}
-    $modelSha=Hash $Model;if($modelSha -cne $manifest.components.model.artifact_sha256 -or (Get-Item $Model).Length -ne $manifest.components.model.artifact_bytes){throw 'documented model identity mismatch'}
+    $modelSha=Hash $Model;if($modelSha -cne $nativeModel.artifact_sha256 -or (Get-Item $Model).Length -ne $nativeModel.artifact_bytes -or $variant.model_artifact_sha256 -cne $nativeModel.artifact_sha256){throw 'documented native model identity mismatch'}
     if(-not (Test-Path $KeyFile)){throw 'documented key missing'}
     $b=Snapshot "$Workspace\preflight-snapshot";EnableExactAcl
     $probe="$Workspace\acl-probe.txt";[IO.File]::WriteAllText($probe,'private ACL proof',$utf8)

@@ -35,7 +35,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from render_compatibility import RUNTIME_VARIANT_IDS
-from verify_release import validate_ninfer_variants
+from verify_release import effective_native_model, validate_ninfer_variants
 DOWNLOAD = "https://github.com/alphastorm/ninfer/releases/download"
 LANE_VARIANTS = {"rtx4090": "rtx4090-windows-native", "rtx3090": "rtx3090-windows-native"}
 # Every manifest field that names a distribution asset, and the role it plays in the set.
@@ -103,6 +103,9 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         raise BindError("receipt is not a native package build receipt")
     if receipt.get("lane") != lane:
         raise BindError(f"receipt lane {receipt.get('lane')!r} is not {lane!r}")
+    native_model = effective_native_model(manifest)
+    if receipt.get("model_sha256") != native_model.get("artifact_sha256"):
+        raise BindError("build receipt model must match the effective native model")
     package = receipt["package"]
     package_name = package["filename"]
     if require(entries, package_name) != package["sha256"]:
@@ -156,7 +159,7 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         errors: list[str] = []
         validate_ninfer_variants(
             ROOT, release, [variant], {"runtime_variants": [variant]},
-            manifest["components"]["model"]["artifact_sha256"], errors,
+            native_model.get("artifact_sha256"), errors,
         )
         if errors:
             raise BindError("; ".join(errors))

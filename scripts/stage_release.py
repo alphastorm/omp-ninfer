@@ -36,6 +36,11 @@ draft reports surviving predecessor pins as file:line warnings so the lead can
 replace its prose and evidence; --require-clean-client makes those warnings a
 staging failure. Ready verification rejects retired fork tags, source commits
 and asset URLs.
+
+An explicit --model-revision/--model-sha256/--model-bytes tuple changes the RTX 5090
+model (repository and artifact name are retained; the URL is derived). Carried
+native variants retain their effective predecessor model in components.native_model,
+omitted when it equals the new primary model. Native package/model hashes never change.
 """
 
 from __future__ import annotations
@@ -54,7 +59,9 @@ from verify_release import (
     ContractError,
     client_identity_pins,
     client_pin_locations,
+    effective_native_model,
     load_json,
+    validate_model_component,
     validate_upstream_client_bindings,
     validate_upstream_omp_component,
 )
@@ -187,6 +194,12 @@ def main() -> int:
     parser.add_argument("--upstream-commit", default=None, metavar="SHA40",
                         help="new upstream base of the runtime fork; default keeps the source "
                              "release's")
+    parser.add_argument("--model-revision", metavar="SHA40",
+                        help="new RTX 5090 model revision; requires --model-sha256 and --model-bytes")
+    parser.add_argument("--model-sha256", metavar="SHA256",
+                        help="new RTX 5090 model artifact SHA-256")
+    parser.add_argument("--model-bytes", type=int, metavar="BYTES",
+                        help="new RTX 5090 model artifact size in bytes")
     parser.add_argument("--lane-receipt", type=Path, default=None, metavar="PATH",
                         help="the new release's RTX 5090 qualification receipt; installed as "
                              "releases/<release>/qualification/rtx5090.json before the hash "
@@ -239,6 +252,21 @@ def main() -> int:
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     source_manifest = load(src_dir / "manifest.json")
+    model = source_manifest["components"]["model"]
+    model_inputs = (args.model_revision, args.model_sha256, args.model_bytes)
+    if any(value is not None for value in model_inputs):
+        if any(value is None for value in model_inputs):
+            parser.error("--model-revision, --model-sha256 and --model-bytes must be supplied together")
+        model = dict(model, revision=args.model_revision, artifact_sha256=args.model_sha256,
+                     artifact_bytes=args.model_bytes)
+        model["artifact_url"] = (
+            f"{model['repository']}/resolve/{model['revision']}/{model['artifact_name']}"
+        )
+        model_errors: list[str] = []
+        validate_model_component(model, "components.model", model_errors)
+        if model_errors:
+            parser.error("; ".join(model_errors))
+    model_changed = model != source_manifest["components"]["model"]
     old_client_pins = (
         client_identity_pins(source_manifest["components"]["omp"],
                              load(src_dir / "compatibility.json"))
@@ -274,6 +302,15 @@ def main() -> int:
     manifest_path = dst_dir / "manifest.json"
     manifest = load(manifest_path)
     manifest["release"] = args.release
+    if model_changed:
+        components = manifest["components"]
+        native_model = effective_native_model(source_manifest)
+        components["model"] = model
+        if components.get("ninfer_variants") or "native_model" in components:
+            if native_model == model:
+                components.pop("native_model", None)
+            else:
+                components["native_model"] = native_model
     if omp_descriptor is not None:
         previous_omp = manifest["components"]["omp"]
         manifest["components"]["omp"] = {
@@ -362,6 +399,7 @@ def main() -> int:
     identity = qualification["runtime_identity"]
     identity.update({
         "upstream_commit": ninfer["upstream_commit"],
+        "model_artifact_sha256": model["artifact_sha256"],
         "behavioral_source_commit": args.source_commit,
         "release_source_commit": args.source_commit,
         "release_source_archive_sha256": args.source_archive_sha,
@@ -419,6 +457,14 @@ def main() -> int:
     for location in leftovers:
         print(f"warning: releases/{args.release}/{location}", file=sys.stderr)
     draft_residue = set(DRAFT_POSTURE_RESIDUE)
+    if model_changed:
+        # Only root profiles intentionally remain on the live model. The staged
+        # authority and qualification must already bind the new primary model.
+        draft_residue.add("profile and manifest model hashes must match")
+        for label in ("profile", *(f"profiles/{path.name}"
+                                    for path in (ROOT / "profiles").glob("*.json"))):
+            for field in ("hash", "bytes"):
+                draft_residue.add(f"{label}: model {field} must match the manifest")
     if omp_descriptor is not None:
         # As with runtime pins, root clients deliberately remain on the live release.
         draft_residue.add("profile: client archive must be the manifest's OMP component")

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Validate the OMP NInfer release manifest and its bound profile/qualification."""
+"""Validate the OMP NInfer release manifest and its bound profile/qualification.
+
+components.model always binds RTX 5090 profiles, routes and qualification. Optional
+components.native_model has the same pinned artifact shape and binds every native
+variant; omit it when identical to model. Historical manifests without it retain
+their shared model binding. Native variants must match the effective model hash,
+and split-model compatibility rows must publish its URL, byte length and SHA-256.
+"""
 
 from __future__ import annotations
 
@@ -132,6 +139,36 @@ def require_https(value: Any, label: str, errors: list[str], *, nullable: bool =
         return
     require(isinstance(value, str) and urlparse(value).scheme == "https" and bool(urlparse(value).netloc),
             f"{label} must be an HTTPS URL", errors)
+
+
+def effective_native_model(manifest: dict[str, Any]) -> dict[str, Any]:
+    """Native variants bind native_model when present, otherwise the historical model.
+
+    A malformed explicit override never falls back to the RTX 5090 model; component
+    validation reports it, and native identity checks fail closed.
+    """
+    components = manifest.get("components", {})
+    model = components.get("native_model", components.get("model", {}))
+    return model if isinstance(model, dict) else {}
+
+
+def validate_model_component(model: Any, label: str, errors: list[str]) -> None:
+    require(isinstance(model, dict), f"{label} must be an object", errors)
+    if not isinstance(model, dict):
+        return
+    require_sha(model.get("artifact_sha256"), f"{label}.artifact_sha256", errors)
+    require_https(model.get("repository"), f"{label}.repository", errors)
+    require_git_sha(model.get("revision"), f"{label}.revision", errors)
+    require_https(model.get("artifact_url"), f"{label}.artifact_url", errors)
+    require(model.get("artifact_name") == "qwen3_8_27b.ninfer",
+            f"{label}.artifact_name must be qwen3_8_27b.ninfer", errors)
+    expected_url = (
+        f"{model.get('repository')}/resolve/{model.get('revision')}/{model.get('artifact_name')}"
+    )
+    require(model.get("artifact_url") == expected_url,
+            f"{label}.artifact_url must bind repository, revision, and name", errors)
+    require(type(model.get("artifact_bytes")) is int and model["artifact_bytes"] > 0,
+            f"{label}.artifact_bytes must be a positive integer", errors)
 
 
 def validate_upstream_omp_component(omp: dict[str, Any], errors: list[str]) -> None:
@@ -1001,7 +1038,7 @@ def validate_ninfer_variants(
         require_sha(item.get("model_artifact_sha256"),
                     f"{prefix}.model_artifact_sha256", errors)
         require(item.get("model_artifact_sha256") == model_sha256,
-                f"{prefix}.model_artifact_sha256 must match the product model", errors)
+                f"{prefix}.model_artifact_sha256 must match the effective native model", errors)
         require(isinstance(item.get("package_bytes"), int) and item["package_bytes"] > 0,
                 f"{prefix}.package_bytes must be positive", errors)
         require(isinstance(item.get("maximum_context_tokens"), int)
@@ -1444,6 +1481,14 @@ def validate(
     model = components.get("model", {})
     runtime = manifest.get("runtime_identity", {})
     manifest_qualification = manifest.get("qualification", {})
+    validate_model_component(model, "components.model", errors)
+    if not isinstance(model, dict):
+        model = {}
+    if "native_model" in components:
+        validate_model_component(components["native_model"], "components.native_model", errors)
+        require(components["native_model"] != model,
+                "components.native_model must be omitted when it equals components.model", errors)
+    native_model = effective_native_model(manifest)
 
     expected_profile_id = product.get("primary_profile_id") if isinstance(product, dict) else None
     installation_mode = manifest.get("installation", {}).get("mode")
@@ -1641,10 +1686,20 @@ def validate(
         release,
         components.get("ninfer_variants", []),
         compatibility,
-        model.get("artifact_sha256"),
+        native_model.get("artifact_sha256"),
         errors,
         allow_pending=pending_allowed,
     )
+    for variant in compatibility.get("runtime_variants", []):
+        # Historical authorities predate explicit model rows. Split-model releases
+        # must publish them, and any row that includes them must bind all three.
+        fields = {"model_url": "artifact_url", "model_bytes": "artifact_bytes",
+                  "model_sha256": "artifact_sha256"}
+        if "native_model" in components or any(key in variant for key in fields):
+            for key, component_key in fields.items():
+                require(variant.get(key) == native_model.get(component_key),
+                        f"compatibility {variant['id']} {key} must match the effective native model",
+                        errors)
 
     for key in ("upstream_commit", "source_commit"):
         require_git_sha(ninfer.get(key), f"components.ninfer.{key}", errors)
@@ -1729,22 +1784,9 @@ def validate(
     require(isinstance(ninfer.get("release_tag"), str)
             and NINFER_RELEASE_TAG_RE.fullmatch(ninfer["release_tag"]) is not None,
             "components.ninfer.release_tag is invalid", errors)
-    require_sha(model.get("artifact_sha256"), "components.model.artifact_sha256", errors)
     require_sha(runtime.get("configuration_sha256"),
                 "runtime_identity.configuration_sha256", errors,
                 nullable=pending_allowed)
-    require_https(model.get("repository"), "components.model.repository", errors)
-    require_git_sha(model.get("revision"), "components.model.revision", errors)
-    require_https(model.get("artifact_url"), "components.model.artifact_url", errors)
-    require(model.get("artifact_name") == "qwen3_8_27b.ninfer",
-            "model artifact name must be qwen3_8_27b.ninfer", errors)
-    expected_model_url = (
-        f"{model.get('repository')}/resolve/{model.get('revision')}/{model.get('artifact_name')}"
-    )
-    require(model.get("artifact_url") == expected_model_url,
-            "model artifact URL must bind repository, revision, and name", errors)
-    require(model.get("artifact_bytes") == 18210531328,
-            "model artifact size must be 18210531328 bytes", errors)
 
     require(model.get("artifact_sha256") == profile.get("model", {}).get("artifact_sha256"),
             "profile and manifest model hashes must match", errors)

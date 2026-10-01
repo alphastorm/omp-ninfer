@@ -42,7 +42,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
-    OMP_PROFILE_PLATFORMS, validate_upstream_client_bindings, validate_upstream_omp_component,
+    OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
+    validate_upstream_omp_component,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 
@@ -242,6 +243,10 @@ def main() -> int:
         require(status != "qualified"
                 or profile.get("gpu_qualification", {}).get("status") == "qualified",
                 f"{profile['id']}: qualified without a qualified GPU runtime")
+    native_model = effective_native_model(manifest)
+    for variant in manifest["components"].get("ninfer_variants", []):
+        require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
+                f"{variant['id']}: runtime model must match the effective native model")
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
@@ -334,7 +339,7 @@ def main() -> int:
                 "package_sha256": variant["package_sha256"],
                 "binary_sha256": variant["server_binary_sha256"],
                 "configuration_sha256": variant["configuration_sha256"],
-                "model_sha256": variant["model_artifact_sha256"],
+                "model_sha256": native_model["artifact_sha256"],
             },
             "preparation": native["preparation"],
             "observations": native["observations"],
