@@ -1483,9 +1483,11 @@ This is a future operator handoff, not a staged or published v0.9.1 release. Obt
 composed receipt from the unchanged `scripts/compose_native_qualification.py`, the package
 build receipt and the packager's complete ten-file `package-a` directory. No package hash or
 hardware result is inferred here. The component uses source
-`e20060b6a152a11fd72450549592527e126b035e`, tag `v0.6.2-qwen38-3090-beta.1` and package
+`f08309da3cc1d4226d127b7c9ce22267d12070cc` (v0.9.0's RTX 5090 source `e20060b6` plus the
+controller fix that lets a rollback launch a predecessor whose config predates
+`context_cache.host_kv_mib`), tag `v0.6.2-qwen38-3090-beta.1` and package
 `ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`.
-On its build host the assets are `C:/b/ninfer-rtx3090-e20060b6/package-a`; when cutting from
+On its build host the assets are `C:/b/ninfer-rtx3090-f08309da/package-a`; when cutting from
 another machine, `ASSETS` must name a verified local copy of that complete directory.
 
 ```sh
@@ -1493,7 +1495,7 @@ export NINFER_RUNTIME_DIR=/path/to/ninfer-checkout
 export ASSETS=/path/to/verified-package-a NOTES=/path/to/component-notes.txt
 SUMS_SHA=$(shasum -a 256 "$ASSETS/SHA256SUMS" | cut -d' ' -f1)
 bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 \
-  --commit e20060b6a152a11fd72450549592527e126b035e --assets "$ASSETS" \
+  --commit f08309da3cc1d4226d127b7c9ce22267d12070cc --assets "$ASSETS" \
   --checksums-sha "$SUMS_SHA" --notes-file "$NOTES" --dry-run
 # FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.
 ```
