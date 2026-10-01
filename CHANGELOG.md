@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stays byte-identical. One unpowered role-corpus run decoded 24.0% faster than MTP3 with
   evidence precision 0.951 against 0.994, which a powered quality screen now tests
   ([EXP-084](docs/measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)).
+- `scripts/quality_screen.py`: a paired role-corpus quality screen for runtime candidates that
+  change output bits. It extends EXP-063's redaction screen to every primary metric of the
+  automatic-use gate: every counted case runs in eight whitespace variants of its task, and every
+  redaction control in EXP-063's 72, on fresh production and candidate servers. The arms pair
+  prompt by prompt, and the tool decides by one-sided 95% bounds of a paired bootstrap against
+  margins fixed before any candidate data (EXP-085).
 
 ## [0.9.1] - 2026-10-01
 
