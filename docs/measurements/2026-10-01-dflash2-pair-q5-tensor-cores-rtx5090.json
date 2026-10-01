@@ -1,0 +1,86 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-082",
+  "title": "Two requests' DFlash2 verify on the Q5 tensor-core route on the RTX 5090: pair rounds 37.1 to 22.7 ms, 420.86 tok/s against shipped 388.42; kept by rule",
+  "generated_utc": "2026-10-01T01:45:00Z",
+  "status": "completed_with_limits",
+  "question": "EXP-081's fork DFlash2 decodes one request faster than shipped and upstream, but a pair of requests ran 37.1 ms rounds (269.17 tok/s together) against upstream DFlash2's 22.0-22.4 ms (453.95 tok/s) and shipped MTP3's pair at 388.42 tok/s. Is the excess the 16-column verify leaving the fork's Q5 tensor-core route, and with 16 columns on it, how much of the gap closes while MTP3 stays byte-identical?",
+  "answer": "Almost all of it. Two requests' K=7 verify is 16 columns, and the fork's Q5 small-T tensor-core route (EXP-057, EXP-077) accepted only 4 and 8, so the MLP-down, GDN value/z and attention gate/value Q5 projections ran on SIMT row kernels in a two-request round while a one-request round kept them on the tensor cores. With the route extended to 16 columns (spike 7e4d120a: a second m16n8k16 MMA per k16 step, two pipeline stages), a pair decoded 420.86 tok/s together (223.86 and 220.97 each) in 22.7 ms rounds: 8.4% above shipped MTP3's pair and 56.4% above EXP-079/081's port, 7.3% below upstream DFlash2's pair, whose rounds took 22.0-22.4 ms. That closes 97% of the round gap to upstream; the rest of upstream's lead is tokens per round on different outputs (5.02-5.10 against 5.22-5.63). A lone request on the same server decoded 369.64 tok/s. MTP3 on the binary answered 89/89 role-corpus cases byte-identically to shipped, and every op test and the DFlash2 real-model test at one and two requests passed.",
+  "decision": {
+    "action": "keep",
+    "rule": "Pre-registered before the window (PLAN.md): keep the route if every GPU test passes, spk3-mtp3-c1 answers 89/89 byte-identically to the shipped run, there are no DFlash2 request errors and the pair's mean round is <= 33.0 ms (at least a quarter of EXP-081's 14.9 ms gap to upstream closed); reject on a test failure, broken MTP3 identity, a request error or a pair round > 33.0 ms. Reported beside the rule: the share of the gap closed, the pair against shipped 388.42 and upstream 453.95 tok/s, and the remaining round attributed by kernel from the trace.",
+    "rule_outcome": {
+      "gpu_tests": "9/9 passed",
+      "mtp3_identical_to_shipped": "89/89 against v0.9.0 (pub-v0614b1) and 89/89 against v0.8.7 (pub-v0613b1)",
+      "dflash2_request_errors": 0,
+      "pair_mean_round_ms": 22.74,
+      "round_gap_to_upstream_closed": 0.966
+    },
+    "reason": "The fork's own tensor-core route, extended by one MMA tile, brings two-request DFlash2 rounds to upstream's and the pair past shipped MTP3's, without moving an MTP3 output byte.",
+    "not_decided_here": "Adoption, as in EXP-081: the spike still refuses durable checkpoints with DFlash2, BF16 KV leaves two device state slots at two requests (NVFP4 KV, EXP-080, was measured on upstream only), and DFlash2's outputs have had one unpowered screen. The trace was captured but not attributed: the remaining 0.3-0.7 ms per round against upstream is smaller than the outputs' tokens-per-round difference.",
+    "next": "Carry DFlash2's context ring through checkpoints, fanout and restore on the spike, so a DFlash2 profile can keep the durable store; then measure the two-request profile with NVFP4 KV and four device state slots, and run a powered quality screen against the shipped MTP3 profile."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken at about 01:09Z; the driver (exp082-window.sh) ran detached on the appliance: dead-man armed 01:09:11Z, production stopped 01:09:16Z, restored healthy 01:21:38Z (742 s down), dead-man cancelled, the arms' checkpoint roots removed, the trace exported after the restore; the hold was released at about 01:23Z with production /health 200 from WSL and from Windows. Production had served no request since EXP-081's window.",
+    "runtime": {
+      "source": "spike/dflash2-5090 at 7e4d120a025eac2a5898acb0d3a4006801e5fd1c: EXP-081's 28a1abe6, its ledger 2338f5cc, and 7e4d120a, which lets the Q5 small-T tensor-core kernel take 16 columns and routes 16 columns to it in the Q5 linear-add row split (MLP down at K=17408), the GDN value/z projection and the attention gate/value projection. Per-column arithmetic is unchanged, so column j of a 16-column pass equals column j mod 8 of an 8-column pass over the same tokens.",
+      "build": "incremental rebuild in EXP-079's build tree (container ninfer-dflash2-spike-build: nvidia/cuda:13.1.2-devel-ubuntu24.04, CMAKE_CUDA_ARCHITECTURES=120a, Release, profile dflash2-spike-5090), archive source (source_dirty=true)",
+      "server_binary_sha256": "4a559dda11618f96670666517aab1f9603b42265b6bb2a7d489d20b74790ce42",
+      "image": "ninfer-5090:7e4d120a-dflash2-spike (sha256:06ac429f5933bd192fabafec1530dd74f41eb0fed7e4e2e87c6508cf0ef3acb6): EXP-079's image with ninfer-serve and ninfer replaced"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6 (EXP-079's)",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "bytes": 20437336576
+    },
+    "arms": {
+      "spk3-df2k7-c2ds2": "EXP-081's spk2-df2k7-c2ds2 arguments with the new binary: --spec dflash2 --draft-tokens 7 --max-concurrency 2 --pending-timeout-ms 180000 --device-state-slots 2, no checkpoint flags",
+      "spk3-mtp3-c1": "EXP-081's spk2-mtp3-c1 arguments with the new binary: v0.8.7's one request with the durable store on, --spec mtp --draft-tokens 3",
+      "spk3-df2k7-c2ds2-nsys": "the pair arm's arguments under Nsight Systems 2026.1.3 (CUDA and NVTX trace, CUDA graph nodes) on 127.0.0.1:18090",
+      "references": "spk2-df2k7-c2ds2 (EXP-081, server d9fbae37); up-d44ab584-df2k7-c2-ds2 and pub-v0614b1's pair (EXP-078); pub-v0614b1's role corpus (EXP-077)"
+    },
+    "steps": {
+      "order": "GPU tests, DFlash2 pair probe, MTP3 role corpus, DFlash2 pair under Nsight Systems",
+      "gpu_tests": "ninfer_linear_add_q5_a16_test (16 registered as the start of the K=17408 tensor-core region), ninfer_gdn_input_proj_test, ninfer_gdn_input_proj_conv_record_test, ninfer_gdn_input_proj_conv_snapshot_test, ninfer_attn_input_proj_test (all with 16-column cases), ninfer_softmax_attention_test, and the DFlash2 real-model test at K=7 with CUDA graphs: full and optimized LM head at maximum batch 1, full head at maximum batch 2",
+      "pair_probe": "scripts/speculative_decode_probe.py (sha256 a16600f9) --contexts 0 --continuation-context -1 --pair, as in EXP-079 and EXP-081",
+      "role_corpus": "the frozen 89-case role corpus (sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process",
+      "trace": "concurrency_probe.py solo and decode_pair scenarios, two repeats of 512 tokens, under nsys; trace kept on the appliance (25.8 MB report), not attributed",
+      "analysis": "analyze-window.py exp082 over the kept request logs, corpus run and probe receipts"
+    }
+  },
+  "observations": {
+    "gpu_tests": {
+      "op_tests": "6/6 passed (exit 0): linear_add_q5_a16, gdn_input_proj, gdn_input_proj_conv_record, gdn_input_proj_conv_snapshot, attn_input_proj, softmax_attention",
+      "dflash2_real_model": "K=7 graph=1: passed with the full and the optimized head at maximum batch 1 and with the full head at maximum batch 2"
+    },
+    "two_requests": {
+      "columns": ["spk3-df2k7-c2ds2", "spk2-df2k7-c2ds2 (EXP-081)", "up-d44ab584-df2k7-c2-ds2 (EXP-078)", "pub-v0614b1 (EXP-078)"],
+      "pair_aggregate_tok_s": [420.86, 269.17, 453.95, 388.42],
+      "pair_per_request_decode_tok_s": [[223.86, 220.97], [138.79, 138.83], [237.14, 250.89], [210.98, 207.09]],
+      "pair_ms_per_round": [[22.76, 22.72], [37.08, 37.07], [22.03, 22.43], [15.71, 15.70]],
+      "pair_tokens_per_round": [[5.095, 5.02], [5.146, 5.146], [5.224, 5.626], [3.314, 3.251]],
+      "solo_on_the_pair_server": {"decode_tok_s": [369.64, 355.11, 323.07, 250.71], "ms_per_round": [15.56, 15.71, 17.56, 13.71]},
+      "kv_capacity": [131520, 131520, 131520, 160256],
+      "vram_after_load_mib": [29468, 29468, 29468, 30242]
+    },
+    "mtp3": {
+      "decode_tok_s": [238.38, 237.37],
+      "columns": ["spk3-mtp3-c1", "pub-v0614b1_2026-09-29"],
+      "tokens_per_round": [3.342, 3.342],
+      "prefill_tok_s": [3241.6, 3238.3],
+      "identity": "89/89 byte-identical to v090-pub-v0614b1 and to v087-pub-v0613b1; role-corpus scores identical",
+      "kv_capacity": 131072,
+      "available_after_startup_gib": 3.202
+    }
+  },
+  "limits": [
+    "One pair run per arm; the pair's tokens per round depend on its two outputs, so aggregate rates mix route cost with drafting.",
+    "The upstream and shipped pairs are EXP-078's runs on this appliance, not reruns in this window.",
+    "The trace was captured but not attributed, so the remaining per-round difference to upstream is unexplained by kernel.",
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate, and still refuses durable checkpoints with DFlash2.",
+    "MTP3 identity is shown on the corpus only. The route also applies to prefill pieces of exactly 16 tokens, which capture and rewrite frontiers can cut; whether any corpus request cut such a piece is not recorded."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
