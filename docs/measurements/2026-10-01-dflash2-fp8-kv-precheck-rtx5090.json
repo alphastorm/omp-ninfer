@@ -1,0 +1,70 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-087",
+  "title": "FP8 KV under DFlash2 on the RTX 5090: two requests start with four device state slots and 249,216 KV tokens, long-context rounds are 7-18% shorter than BF16's, 130,048-token retrieval stays exact, and FP8 earns a powered quality screen",
+  "generated_utc": "2026-10-01T14:05:00Z",
+  "status": "completed",
+  "question": "EXP-085 passed DFlash2 with BF16 KV (two device state slots, 131,520 KV tokens) and failed NVFP4 KV on unsupported claims and secret leaks. Does the fork's existing FP8 E4M3 row-256 KV give the two-request DFlash2 profile four slots and at least shipped v0.9.0's 160,256 KV tokens, at no more than 3% round cost, with exact long-context retrieval and an error-free corpus run, so that it earns the powered screen's candidate arm?",
+  "answer": "Yes on every pre-registered criterion. With --kv-dtype fp8 and --device-state-slots 4 the profile resolved 249,216 KV tokens (3,894 of 4,096 pages) in 7.66 GiB of KV, against BF16's 131,520 in 8.03 GiB with two slots, and the same 1.91 GiB stayed free after startup. Rounds matched BF16 at short context and in the pair (FP8/BF16 0.996, 0.982 and 1.004) and were 7%, 12% and 18% shorter behind 32K, 64K and 120K tokens (21.35 against 25.90 ms at 120K). The 130,048-token retrieval returned the exact keys (57.0 s), the agent protocol passed including no resurrection after a restart, and decode_2048 ran at 172.3 tok/s. The role corpus had only the five vacuous json_schema transport errors; 27 of 89 outputs matched shipped v0.9.0 and BF16 DFlash2, and its single-run aggregates sat at or better than MTP3's (evidence precision 0.993 against 0.994, unsupported claims 0.236 against 0.236, leaks 7 against 10), unpowered.",
+  "decision": {
+    "action": "FP8 KV earns the powered screen: EXP-088 runs its candidate arm against EXP-085's production arm under EXP-085's rule",
+    "rule": "Pre-registered before the window (PLAN.md, 13:25Z): FP8 earns the screen only if (a) it starts at two requests with --device-state-slots 4 and at least 160,256 KV tokens; (b) on every decode-probe step its ms per round is at most 1.03 x the BF16 arm's in this window; (c) the profile gates pass (exact 130,048-token retrieval, the agent protocol including no resurrection after a restart); (d) the role corpus has no errors beyond the five vacuous json_schema cases.",
+    "rule_outcome": {
+      "a_capacity": "pass: 249,216 KV tokens with four device state slots (\"device-state=4-cache+2-active\")",
+      "b_round_cost": "pass: FP8/BF16 ms per round 0.996 (context 0), 0.927 (32K), 0.882 (64K), 0.824 (120K), 0.982 and 1.004 (pair); maximum 1.004",
+      "c_profile_gates": "pass: exact output in 57.0 s, agent protocol passed, deleted continuation 404 after the restart",
+      "d_corpus_errors": "pass: struct-001, -003, -004, -006 and -007 only (HTTP 400 at transport, as in every corpus run)"
+    },
+    "next": "EXP-088: FP8 candidate arm of the powered screen (1,120 prompts and the 80-prompt determinism subset) against EXP-085's production runs, under the unchanged rule, registered in omp-ninfer b4a6262c before its data."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken; driver exp087-window.sh ran detached with a 60-minute dead-man; production stopped 13:18:21Z, restored healthy 13:33:24Z (903 s down), dead-man cancelled, the arms' checkpoint roots removed, hold released with production /health 200 from Windows.",
+    "runtime": "EXP-084's spike binary unchanged: image ninfer-5090:008a7781-dflash2-nvfp4, server c260dde972b89176219b86b9b89e8606a227eb4b0899df60560b81b728020598, artifact v2 0634abb0. FP8 E4M3 row-256 KV is the fork's existing path (codes plus an FP16 scale per 256-element row), which EXP-084 left byte-identical.",
+    "arms": {
+      "spk5-df2k7-c2ds2": "BF16 KV, two device state slots (EXP-082's arguments): this window's speed reference",
+      "spk5-df2k7-c2ds4-fp8-ckpt": "EXP-084's NVFP4 arguments with --kv-dtype fp8 (config label ce67e783): DFlash2 K=7, two requests, four device state slots, durable store on"
+    },
+    "steps": "speculative_decode_probe.py (sha256 a16600f9) on both arms at contexts 0, 32K, 64K and 120K plus a pair; on fresh FP8 servers, qualify_rtx5090_profile.py (sha256 2038f695: long_niah_128k.json, decode_2048, agent protocol with docker restart --time 90) and the 89-case role corpus (run_qualification.py at reasoning low, concurrency 1)"
+  },
+  "observations": {
+    "capacity_and_memory": {
+      "columns": ["spk5-df2k7-c2ds2 (BF16)", "spk5-df2k7-c2ds4-fp8-ckpt"],
+      "device_state_slots": [2, 4],
+      "kv_capacity_tokens": [131520, 249216],
+      "kv_pages": ["2,055 of 4,096", "3,894 of 4,096"],
+      "kv_payload_bytes": [8619294720, 8230109184],
+      "kv_payload_bytes_per_token": [65536, 33024],
+      "available_after_startup_bytes": [2049966080, 2047868928],
+      "vram_after_probe_mib": [29470, 29472],
+      "compare": "NVFP4 (EXP-084): 262,144 tokens in 4.50 GiB with 5.07 GiB free; shipped v0.9.0: 160,256 tokens, four slots"
+    },
+    "decode_probe": {
+      "columns": ["spk5-df2k7-c2ds2 (BF16)", "spk5-df2k7-c2ds4-fp8-ckpt"],
+      "ms_per_round": {"context-0": [15.617, 15.552], "context-32000": [18.688, 17.323], "context-64000": [21.435, 18.904], "context-120000": [25.895, 21.349], "pair-1": [23.269, 22.839], "pair-2": [23.224, 23.311]},
+      "ratio_fp8_over_bf16": {"context-0": 0.9958, "context-32000": 0.927, "context-64000": 0.8819, "context-120000": 0.8244, "pair-1": 0.9815, "pair-2": 1.0037},
+      "pair_client_aggregate_tok_s": [419.66, 434.08],
+      "note": "Every probe prompt carries a random nonce, so the arms decoded different texts; ms per round is the comparable measure. EXP-084's NVFP4 rounds at 120K were 18.82 ms against its BF16 arm's 25.89."
+    },
+    "profile_gates": {
+      "prefill_curve": {"prompt_tokens": 130048, "exact_output": true, "wall_s": 57.004, "vram_used_mib_after": 29472},
+      "decode_tokens_per_second": 172.29,
+      "agent_protocol": "passed; no_resurrection true",
+      "shipped_v090": "exact in 58.424 s; decode 169.79 tok/s (MTP3); agent protocol passed"
+    },
+    "role_corpus": {
+      "identity": "27/89 identical to shipped v0.9.0 and 27/89 to EXP-081's BF16 DFlash2 run (62 differ)",
+      "errors": "the five vacuous json_schema cases only",
+      "request_log": {"decode_tok_s": 289.77, "tokens_per_round": 4.65, "ms_per_round": 16.05, "summed_request_seconds": 341.1, "requests": 84},
+      "scorer_aggregates": {"required_fact_recall": 0.8832, "evidence_precision": 0.9929, "unsupported_claim_rate": 0.236, "secret_leak_count": 7, "redaction_control_pass_rate": 0.75, "critical_miss_count": 10, "forbidden_claim_count": 10},
+      "shipped_mtp3_same_corpus": {"required_fact_recall": 0.8797, "evidence_precision": 0.9935, "unsupported_claim_rate": 0.236, "secret_leak_count": 10, "redaction_control_pass_rate": 0.5, "critical_miss_count": 10, "forbidden_claim_count": 9, "decode_tok_s": 238.16}
+    }
+  },
+  "limits": [
+    "A pre-check, not a quality verdict: the role-corpus figures are one unpowered run, and EXP-084's single NVFP4 run looked worse than EXP-085's powered screen found while NVFP4 still failed it.",
+    "One run per arm and probe in one window; the decode probe's nonces give each arm different texts.",
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

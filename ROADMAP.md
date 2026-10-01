@@ -1270,10 +1270,14 @@ BF16 KV DFlash2 left 131,520 KV tokens and two device state slots where v0.9.0 h
 four. Upstream's NVFP4 KV, ported with every BF16 path unchanged, gives the two-request DFlash2
 profile four slots and 262,144 KV tokens, rounds 12-27% shorter behind 32K-120K tokens, hot
 restores from 1.66 GB checkpoints and shipped's reuse, with MTP3 byte-identical
-([EXP-084](docs/measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)). One step remains before
-the shipped two-request profile: its outputs differ from shipped's in 79 of 89 role-corpus cases,
-and one run's evidence precision was 0.951 against 0.994, so a powered quality screen against
-shipped MTP3 decides.
+([EXP-084](docs/measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)). A pre-registered,
+powered quality screen (1,120 paired prompts per arm against shipped MTP3) then passed DFlash2
+with BF16 KV, whose outputs were 1,091 of 1,120 byte-identical to shipped's, and failed NVFP4 KV
+on unsupported claims and secret leaks
+([EXP-085](docs/measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json)). The fork's
+existing FP8 KV gives the profile four slots and 249,216 KV tokens with long-context rounds 7-18%
+shorter and exact 130K retrieval, so it is running the same screen
+([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)).
 
 ## How to help right now
 

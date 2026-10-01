@@ -1,0 +1,104 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-085",
+  "title": "Powered role-corpus quality screen on the RTX 5090: DFlash2 K=7 with BF16 KV passes against shipped v0.9.0 MTP3 with 1,091 of 1,120 outputs byte-identical, and NVFP4 KV fails on unsupported claims and secret leaks",
+  "generated_utc": "2026-10-01T13:45:00Z",
+  "status": "completed",
+  "question": "EXP-084's DFlash2 K=7 two-request profile with NVFP4 KV changed 79 of 89 role-corpus outputs, and one unpowered run scored evidence precision 0.951 against MTP3's 0.994. Is the candidate's quality no worse than shipped v0.9.0 MTP3's, by more than fixed margins, on every primary metric of the automatic-use gate? If not, does DFlash2 with BF16 KV pass, so that NVFP4's effect separates from DFlash2's?",
+  "answer": "NVFP4 fails and DFlash2 with BF16 KV passes. With NVFP4 KV the profile is within margins on recall (+0.2 points, lower bound -0.4), evidence precision (-0.3, lower bound -1.2; the single run's -4.3 was prompt noise) and redaction pass rate (+0.4, lower bound -1.6). Unsupported claims rose 1.8 points with a 95% upper bound of 3.7 against the 3.0 margin, and secret leaks rose from 561 to 609 (ratio 1.086, upper bound 1.141 against 1.10), so the rule says fail; critical misses fell from 79 to 63. With BF16 KV, DFlash2 answered 1,091 of the 1,120 screen prompts byte-identically to shipped MTP3. Every bound sat inside its margin: leaks 561 against 561, unsupported claims -0.9 points (upper bound -0.3), evidence precision -0.4 (lower bound -0.7). On the screen's 1,120 requests both DFlash2 profiles decoded about 17% faster than MTP3 (278.6 and 279.5 against 237.8 tok/s).",
+  "decision": {
+    "action": "DFlash2 K=7 with BF16 KV clears the quality step; NVFP4 KV does not and leaves the DFlash2 profile",
+    "rule": "Pre-registered in omp-ninfer e533a7dcf30c5e04619f318bd3cf943af45e0bd2 (scripts/quality_screen.py, PREREGISTRATION), committed 2026-10-01T08:25:50Z before any screen data. Gate metrics come from variants v0-v7 of every counted case, redaction metrics from v0-v71 of every counted control, and pairs match by prompt id. Bounds are one-sided 95% percentile bounds of a paired bootstrap that resamples variants within each case (20,000 resamples, seed 20261001). Pass only if every bound is inside its margin: lower bounds above -0.02 for recall, evidence precision, schema validity, tool selection and tool arguments; upper bounds below +0.03 for the unsupported-claim rate and +0.02 for the duplicate rate; a redaction pass-rate lower bound above -0.05; a secret-leak ratio upper bound below 1.10. Validity: every counted prompt scored in both arms; at most 1% errored; at least half the cases perturbed; the determinism subset byte-identical on a fresh server; every metric evaluable. Any failed validity check gives no verdict. The DFlash2 NVFP4 profile ran first; because its verdict was not pass, the BF16 DFlash2 profile ran under the same rule.",
+    "verdicts": {
+      "spk5-df2k7-c2ds4-nvfp4-ckpt": "fail: unsupported_claim_rate (upper bound +0.0373 against +0.03) and secret_leak_ratio (upper bound 1.141 against 1.10); every validity check held",
+      "spk5-df2k7-c2ds2": "pass: every bound inside its margin; every validity check held"
+    },
+    "reason": "BF16 DFlash2 keeps shipped MTP3's quality because it nearly keeps its outputs: speculative decoding verifies every draft against the same BF16 target, and only 29 of 1,120 long generations drifted (26 log-triage, 3 work-log). NVFP4 KV changes the target's own attention and 92% of outputs. Across those outputs it trends worse on unsupported claims and secret leaks, by amounts this screen could not bound inside the margins, while it trends better on critical misses.",
+    "not_decided_here": "Adoption. The BF16 DFlash2 two-request profile has two device state slots and 131,520 KV tokens where v0.9.0 has four and 160,256, and EXP-083 showed one sibling re-prefilled under that pressure. Whether that trade is acceptable, or whether another KV format restores the slots without NVFP4's cost, is the next question.",
+    "next": "EXP-087: a short pre-check of the fork's existing FP8 E4M3 row-256 KV under DFlash2 (capacity, slots, round cost, exact 130K retrieval, one corpus run), to decide whether FP8 earns a powered screen. Its candidate arm can reuse this screen's production arm."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken; driver exp085-window.sh ran detached on the appliance with a 330-minute dead-man; production stopped 08:28:23Z, restored healthy 13:14:56Z (4 h 47 min down), dead-man cancelled, the arms' checkpoint roots removed, hold released with production /health 200 from Windows. Arm walls: production screen 08:28:56-09:58:32Z and determinism 09:59:06-10:11:24Z; NVFP4 10:12:01-11:30:09Z and 11:30:46-11:43:06Z; BF16 11:43:55-13:01:58Z and 13:02:38-13:14:12Z.",
+    "tool": {"path": "scripts/quality_screen.py", "commit": "e533a7dcf30c5e04619f318bd3cf943af45e0bd2", "sha256": "dbb94ac587be50241ed29cdfca427190b43e5dde3de134dbf5f788a9159d9c57", "imports": "scripts/redaction_screen.py (sha256 07fc6cab, EXP-063's)"},
+    "screen": {
+      "corpus": "the frozen 89-case role corpus (cases sha256 7be1bd85)",
+      "counted_cases": 84,
+      "vacuous_cases": "struct-001, struct-003, struct-004, struct-006, struct-007: json_schema structured-output cases that answered HTTP 400 at transport in every corpus run; not sent",
+      "redaction_controls": ["log-023", "log-024", "repo-029", "repo-030", "worklog-007", "worklog-008", "worklog-014"],
+      "prompts_per_arm": 1120,
+      "variants": "every counted case in 8 whitespace variants of its task (EXP-057's prefixes), every redaction control in EXP-063's 72; v0 is the corpus prompt itself",
+      "screen_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c",
+      "determinism_subset": "the screen's first 80 prompts (log-001..log-010 x 8), re-run in order on a fresh server after each arm's screen; sha256 77a80952",
+      "runner": "run_qualification.py at reasoning low, concurrency 1, temperature 0, scored with score_qualification.py"
+    },
+    "arms": {
+      "pub-v0614b1": "shipped v0.9.0: published image 4c816b0c, server f62a570e, artifact eec39564, production's arguments (two requests, MTP3, BF16 KV, four device state slots, durable store on)",
+      "spk5-df2k7-c2ds4-nvfp4-ckpt": "EXP-084's candidate: image ninfer-5090:008a7781-dflash2-nvfp4, server c260dde9, artifact 0634abb0; DFlash2 K=7, NVFP4 KV, two requests, four device state slots, durable store on",
+      "spk5-df2k7-c2ds2": "the same binary and artifact with BF16 KV and two device state slots (EXP-082's arguments)"
+    }
+  },
+  "observations": {
+    "validity": {
+      "complete": "1,120 of 1,120 prompts scored in every arm",
+      "errors": "one per arm, each an empty answer after reasoning: production log-014.v1, NVFP4 log-001.v3 (the same prompt errored in its determinism re-run), BF16 log-014.v1; at most 11 allowed",
+      "determinism": "80 of 80 byte-identical on a fresh server in every arm",
+      "perturbed_cases": {"production": 80, "nvfp4": 82, "bf16": 80, "required": 42},
+      "v0_against_single_runs": "every arm's 84 v0 outputs matched its own single corpus run byte for byte: production against v0.9.0's published run, NVFP4 against EXP-084's, BF16 against EXP-081's"
+    },
+    "output_identity_with_production": {"nvfp4": "91 of 1,120", "bf16": "1,091 of 1,120 (differing: 26 log-triage, 3 work-log)"},
+    "primary": {
+      "columns": ["production", "candidate", "difference or ratio", "95% bound", "margin", "inside"],
+      "nvfp4": {
+        "pairs": {"gate": 670, "redaction": 504},
+        "required_fact_recall": [0.9376, 0.9399, 0.0023, -0.0041, -0.02, true],
+        "evidence_precision": [0.9782, 0.9747, -0.0034, -0.0115, -0.02, true],
+        "unsupported_claim_rate": [0.2433, 0.2612, 0.0179, 0.0373, 0.03, false],
+        "schema_valid_rate": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "tool_selection_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "tool_argument_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "duplicate_rate": [0.001, 0.0015, 0.0005, 0.0025, 0.02, true],
+        "redaction_control_pass_rate": [0.5317, 0.5357, 0.004, -0.0159, -0.05, true],
+        "secret_leak_ratio": [561, 609, 1.0856, 1.141, 1.1, false]
+      },
+      "bf16": {
+        "pairs": {"gate": 671, "redaction": 504},
+        "required_fact_recall": [0.9377, 0.9377, 0.0, 0.0, -0.02, true],
+        "evidence_precision": [0.9784, 0.9742, -0.0041, -0.0067, -0.02, true],
+        "unsupported_claim_rate": [0.2429, 0.234, -0.0089, -0.003, 0.03, true],
+        "schema_valid_rate": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "tool_selection_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "tool_argument_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+        "duplicate_rate": [0.001, 0.001, 0.0, 0.0, 0.02, true],
+        "redaction_control_pass_rate": [0.5317, 0.5317, 0.0, 0.0, -0.05, true],
+        "secret_leak_ratio": [561, 561, 1.0, 1.0, 1.1, true]
+      }
+    },
+    "secondary": {
+      "critical_misses": {"nvfp4": "79 -> 63 (ratio 0.798, upper bound 0.936)", "bf16": "79 -> 79"},
+      "forbidden_claims": {"nvfp4": "68 -> 65 (ratio 0.956, upper bound 1.048)", "bf16": "68 -> 68"},
+      "mean_output_tokens": {"nvfp4": "956.2 -> 945.2", "bf16": "958.0 -> 955.3"},
+      "unsupported_claim_rate_by_class_nvfp4": {"log-triage": "0.390 -> 0.411 (190 pairs)", "repository-evidence": "0.104 -> 0.138 (240)", "regression-contract": "1.0 -> 1.0 (64)", "work-log-extraction": "0.0 -> 0.0 (160)", "structured-output": "0.0 -> 0.0 (16)"},
+      "required_fact_recall_by_class_nvfp4": {"log-triage": "0.992 -> 1.0", "repository-evidence": "0.908 -> 0.924", "regression-contract": "0.750 -> 0.797", "work-log-extraction": "0.969 -> 0.949"}
+    },
+    "screen_decode": {
+      "columns": ["pub-v0614b1", "spk5-df2k7-c2ds4-nvfp4-ckpt", "spk5-df2k7-c2ds2"],
+      "decode_tok_s": [237.82, 278.63, 279.54],
+      "tokens_per_round": [3.337, 4.413, 4.547],
+      "ms_per_round": [14.03, 15.84, 16.27],
+      "summed_request_seconds": [5375, 4686, 4681],
+      "note": "From each arm's request log over the same 1,120 prompts; the arms decoded different texts where outputs differ."
+    },
+    "vram_after_screen_mib": {"pub-v0614b1": 30244, "spk5-df2k7-c2ds4-nvfp4-ckpt": 26232, "spk5-df2k7-c2ds2": 29470}
+  },
+  "limits": [
+    "The screen samples prompt-perturbation variance around the corpus's 84 counted cases; it bounds behaviour on these cases under whitespace variants, not on other tasks.",
+    "The BF16 DFlash2 verdict rests mostly on output identity: 1,091 of 1,120 pairs were byte-identical, so its bounds are tight because little changed, not because a broad change was measured as harmless.",
+    "The NVFP4 verdict is a failure to bound, not a measured regression beyond the margins: the point estimates (unsupported claims +1.8 points, leak ratio 1.086) are inside them and the 95% bounds are not. Critical misses moved the other way.",
+    "The unsupported-claim margin (3.0 points) and the redaction margins (EXP-063's) were set before any data; the gate's own criterion 6 is 2.0 points on single-run point estimates.",
+    "One production arm served both candidates; the BF16 arm ran last, about three hours after it, on the same appliance and image.",
+    "The DFlash2 spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

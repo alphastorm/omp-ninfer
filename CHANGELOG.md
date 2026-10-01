@@ -31,6 +31,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   redaction control in EXP-063's 72, on fresh production and candidate servers. The arms pair
   prompt by prompt, and the tool decides by one-sided 95% bounds of a paired bootstrap against
   margins fixed before any candidate data (EXP-085).
+- EXP-085 receipt: the powered quality screen against shipped v0.9.0 MTP3 passes DFlash2 K=7 with
+  BF16 KV, whose outputs were 1,091 of 1,120 byte-identical to shipped's. It fails NVFP4 KV:
+  evidence precision held (-0.3 points, lower bound -1.2), but unsupported claims rose 1.8
+  points (upper bound 3.7 against 3.0) and secret leaks went from 561 to 609 (ratio upper bound
+  1.141 against 1.10)
+  ([EXP-085](docs/measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json)).
+- EXP-087 receipt: the fork's existing FP8 KV gives the two-request DFlash2 profile four device
+  state slots and 249,216 KV tokens, with long-context rounds 7-18% shorter than BF16's and
+  exact 130,048-token retrieval, so it earns the powered screen
+  ([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)).
 
 ## [0.9.1] - 2026-10-01
 
