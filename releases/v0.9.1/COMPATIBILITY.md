@@ -19,8 +19,8 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/8d62bbecb3eb626ec168e29389b32a722e1f708c/releases/v0.9.1/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.1/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx4090.json) |
 
 Package bindings:
 

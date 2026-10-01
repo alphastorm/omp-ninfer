@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
-  "product_release": "v0.9.0",
+  "product_release": "v0.9.1",
   "composition": {
-    "status": "v0.9.0 upstream OMP v18.4.0 client and route acceptance passed on RTX5090 and RTX4090",
+    "status": "v0.9.1 upstream OMP v18.4.0 client acceptance pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0",
     "lifecycle_source_commit": "401778d0cd30020ce0f9198f751b13c68850562f",
@@ -31,7 +31,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.9.0",
+      "product_release": "v0.9.1",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -42,11 +42,10 @@
         "No secret, raw log, prompt, or model output crosses the receipt boundary.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b179f7b1dd5ec883210332ce479a74adeddd2136/releases/v0.9.0/acceptance/darwin-arm64-18.4.0.json",
-        "sha256": "780dc2b5c8ebdfa18e3c750ffe4868fd7aee7a3fdfba078af5f06c53eb7bfede"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -67,7 +66,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -113,7 +112,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -126,9 +125,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.9.0",
+      "product_release": "v0.9.1",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -139,11 +138,10 @@
         "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b179f7b1dd5ec883210332ce479a74adeddd2136/releases/v0.9.0/acceptance/windows-x64-18.4.0.json",
-        "sha256": "7f5e2604db0a17b8f46e3d83fe8b7002a3b63434c1e905cf3a666c9baaf255ad"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -164,7 +162,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -210,7 +208,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -223,9 +221,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.9.0",
+      "product_release": "v0.9.1",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -237,11 +235,10 @@
         "RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b179f7b1dd5ec883210332ce479a74adeddd2136/releases/v0.9.0/acceptance/linux-x64-18.4.0.json",
-        "sha256": "4aca9d1cfba5a7808e3042629b8a6007c2df89dea4b4e03eee1293af512e8d18"
-      },
+      "blockers": [
+        "upstream OMP v18.4.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -262,7 +259,7 @@
         "profile": "qwen38-5090-v0.9.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx5090.json",
           "sha256": "89b55eea0e11aef15fb78180905d9b8acdafe30dc4d161b82af3888ab2389113"
         }
       },
@@ -308,6 +305,28 @@
   ],
   "runtime_variants": [
     {
+      "id": "rtx3090-windows-native",
+      "status": "qualified",
+      "platform": "Windows 11 x64",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "cuda_architecture": "sm_86",
+      "installation_mode": "native-windows-package",
+      "installable": true,
+      "silent_cloud_fallback": false,
+      "release_tag": "v0.6.2-qwen38-3090-beta.1",
+      "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
+      "package_name": "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.2-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3",
+      "package_bytes": 595676373,
+      "maximum_context_tokens": 131072,
+      "qualification_receipt": {
+        "path": "releases/v0.9.1/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx3090.json",
+        "sha256": "474311a6d91e6747b3f0a34c5f562b752b1c8bea208ffeb16a245fa9516b7ef4"
+      }
+    },
+    {
       "id": "rtx4090-windows-native",
       "status": "qualified",
       "platform": "Windows 11 x64",
@@ -324,8 +343,8 @@
       "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b",
       "package_bytes": 574717115,
       "qualification_receipt": {
-        "path": "releases/v0.9.0/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/92e8188e7b0a587db5ed5b24ea950a34056fb85e/releases/v0.9.0/qualification/rtx4090.json",
+        "path": "releases/v0.9.1/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/e6a2d2221213db5687273ec5d57b7545f870f823/releases/v0.9.1/qualification/rtx4090.json",
         "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14"
       }
     }

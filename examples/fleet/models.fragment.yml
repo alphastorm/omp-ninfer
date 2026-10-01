@@ -9,9 +9,10 @@
 #   ninfer-heavy/qwen3.8-27b  RTX 4090 durable v0.2.1: long-context background workers (prefill
 #                            chunk 2,048, 131,072 context, rk2v4-e8 KV). No sibling fanout reuse;
 #                            one active request.
-#   The RTX 3090 scout role is deferred with its GPU: RTX 3090 is not a v0.8.0 install lane, so
-#   this fragment declares no scout provider. Its three-lane form stays available at the
-#   immutable v0.7.2 tag, together with the legacy OMP 18.0.9 instructions for that lane.
+#   The RTX 3090 scout role stays deferred: v0.9.1 qualifies the RTX 3090 as a standalone native
+#   lane, not as an unattended fleet role, so this fragment declares no scout provider. Its
+#   three-lane form stays available at the immutable v0.7.2 tag, together with the legacy OMP
+#   18.0.9 instructions for that lane.
 #
 # The RTX 5090 serves two requests at once (v0.9.0) and the RTX 4090 one; the fleet's
 # completed-work boundary is the measured receipt in docs/measurements/ (see docs/PERFORMANCE.md,

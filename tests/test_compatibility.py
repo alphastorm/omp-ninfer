@@ -19,8 +19,12 @@ SPEC.loader.exec_module(MODULE)
 
 class CompatibilityAuthorityTests(unittest.TestCase):
     def test_3090_native_v062_admission_remains_closed(self) -> None:
+        # Built from the RTX 4090 row whether or not the root authority already admits the RTX 3090.
         authority = MODULE.load_authority(ROOT / "compatibility.json")
-        variant = deepcopy(authority["runtime_variants"][0])
+        authority["runtime_variants"] = [item for item in authority["runtime_variants"]
+                                         if item["id"] != "rtx3090-windows-native"]
+        variant = deepcopy(next(item for item in authority["runtime_variants"]
+                                if item["id"] == "rtx4090-windows-native"))
         tag = "v0.6.2-qwen38-3090-beta.1"
         package = "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz"
         variant.update(id="rtx3090-windows-native", gpu="NVIDIA GeForce RTX 3090",
