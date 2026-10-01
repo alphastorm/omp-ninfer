@@ -142,6 +142,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-088 | RTX 5090 powered quality screen for DFlash2 with FP8 KV | Under EXP-085's unchanged rule, against its shipped v0.9.0 MTP3 runs, the DFlash2 K=7 FP8 KV two-request profile is no worse than shipped on every primary gate metric | 1,120 paired prompts, 924 outputs changed. Recall -0.05 points, evidence precision +0.02, unsupported claims +1.2 (upper bound **2.8** against 3.0), redaction pass rate +0.8: all inside. Secret leaks 561 → 604, ratio 1.077 with upper bound **1.135** against 1.10: outside. Every validity check held ([receipt](measurements/2026-10-01-dflash2-fp8-kv-quality-screen-rtx5090.json)) | fails on secret leaks |
 | EXP-086 | RTX 5090 pre-acceptance probes on the adopted DFlash2 BF16 profile | The DFlash2 K=7 BF16 two-request profile with the durable store passes v0.9.0's profile gates, two-requests-in-flight matrix and restart, fanout, warm-arrival and agent-mix probes | Every probe passed: 130,048-token retrieval exact in 58.4 s, agent protocol across a restart, near-capacity pair taking turns, fanout and warm arrival at or above v0.9.0, 0 of 24 fresh sessions at root. The written refused-0 clause failed: the matrix's stop refused 6 saves, where v0.9.0's refused 7. Free-form reasoning decoded **2-5% slower solo and 21-27% slower in pairs** (207.5-222.1 against 281.1-283.0 tok/s): 2.5 tokens per round against MTP3's 2.3, in 23.1 against 15.6 ms pair rounds. One of two sessions resumed from root after a restart (27.0 s against 5.5 s) ([receipt](measurements/2026-10-01-dflash2-pre-acceptance-probes-rtx5090.json)) | fails the written rule on a clause v0.9.0 also fails; costs reported |
 | EXP-089 | DFlash2 on the RTX 4090 and RTX 3090 native lanes | The fork's DFlash2 port, built for sm_89 and sm_86, starts at the lanes' 131,072-token INT8 profile and decodes the role corpus at least 10% faster than MTP3 | Both builds fail at device link: three DFlash2 W8 kernels hold 49,664-50,176 bytes of static shared memory against sm_89's and sm_86's 49,152 (sm_120a links them). No window ran; both lanes unchanged. The RTX 4090's MTP3 profile leaves 5.82 GiB after weights for a 5.22 GiB runtime, and the drafter adds 1.65 GiB, so about 85K tokens would fit [inference] ([receipt](measurements/2026-10-01-dflash2-native-lanes-feasibility.json)) | no-go as ported; native lanes stay on MTP3 |
+| EXP-090 | RTX 5090 DFlash2 under stock OMP's sampling | Under OMP's sampling (temperature 1.0, top_k 20, top_p 0.95), DFlash2 K=7's role-corpus quality is not grossly worse than MTP3's on the same binary, and stock OMP's two-subagent proof at OMP's limit 1 fails no more often on DFlash2 | One sampled corpus run per arm: recall -0.3 points (95% interval -3.6 to +3.2), unsupported claims +2.2 (-4.5 to +9.0), evidence precision +1.8 (0.0 to +4.3), schema validity equal. Same-seed outputs diverge by design: the verifier accepts a draft with probability p(d) and otherwise samples the residual. Proof: **2 of 10 failed on DFlash2, 3 of 10 on MTP3**. Three (one DFlash2, two MTP3) were the proof's code reader, which missed exact codes after an escaped newline in a scout's JSON result (fixed); one MTP3 parent's first task call was refused by OMP and reissued; one DFlash2 run saw two requests at limit 1 because a cancelled background request stayed open 0.83 s into the next one, its cancel registered in the same millisecond as a pre-eviction checkpoint save ([receipt](measurements/2026-10-01-dflash2-sampled-behavior-rtx5090.json)) | no gross degradation; no DFlash2-specific proof effect |
 
 Entry detail:
 
@@ -1075,6 +1076,21 @@ Entry detail:
   a 5.22 GiB runtime at 131,072 INT8 tokens. The drafter's 1.65 GiB would leave about 85K tokens
   [inference], and 131,072 would then need a smaller KV format or a smaller drafter. Receipt:
   [native lanes](measurements/2026-10-01-dflash2-native-lanes-feasibility.json).
+- **EXP-090 — DFlash2 behaves like MTP3 under OMP's sampling; the proof misread codes
+  (2026-10-01).** The second v0.10.0 candidate failed stock OMP's two-subagent proof at OMP's
+  limit 1 in two of two runs, so both arms of the candidate binary ran the role corpus once at
+  OMP's sampling and the proof ten times, recording every task tool outcome. A same-seed identity
+  test was dropped before the window: the verifier accepts a draft with probability p(d) and
+  otherwise samples the residual, which preserves the target distribution but ties each sampled
+  token to the draft, so lossless arms still diverge. The corpus showed no gross change. The
+  proof failed 2 of 10 runs on DFlash2 and 3 of 10 on MTP3. Three failures were the proof's code
+  reader: scouts returned the exact code as JSON text after an escaped newline, whose `n` the
+  code pattern's lookbehind read as a word character. One MTP3 parent's first task call named read
+  and grep as eval tools, OMP refused it, and the parent reissued it. One DFlash2 run counted two
+  requests at limit 1: OMP cancelled a background request, and the engine registered the cancel
+  0.98 s after the request began, in the same millisecond it logged a stored session's checkpoint
+  save before eviction.
+  Receipt: [sampled behavior](measurements/2026-10-01-dflash2-sampled-behavior-rtx5090.json).
 
 ## Current order
 

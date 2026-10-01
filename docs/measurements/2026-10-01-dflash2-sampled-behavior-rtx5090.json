@@ -1,0 +1,64 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-090",
+  "title": "DFlash2 K=7 under stock OMP's sampling on the RTX 5090: no gross role-corpus quality change against MTP3 on the same binary, and no DFlash2-specific failures of stock OMP's two-subagent proof. Three of the five proof failures, on both arms, were the proof's own code reader missing codes the scouts had returned",
+  "generated_utc": "2026-10-01T21:54:00Z",
+  "status": "completed",
+  "question": "EXP-085's quality screen decoded greedily, but stock OMP samples at temperature 1.0, top_k 20 and top_p 0.95 with a fresh seed per request. Under that sampling, (1) is DFlash2 K=7's role-corpus quality grossly worse than MTP3's on the same binary, and (2) does stock OMP's two-subagent proof at OMP's limit 1, which the second v0.10.0 candidate failed in two of two runs, fail more often on DFlash2 than on MTP3, and by what mechanism?",
+  "answer": "(1) No gross degradation detected: with one sample per case, every gate rate's DFlash2-minus-MTP3 bootstrap interval includes zero or favors DFlash2 (required-fact recall -0.3 points, 95% interval -3.6 to +3.2; unsupported claims +2.2, -4.5 to +9.0; evidence precision +1.8, 0.0 to +4.3; schema validity equal). (2) The proof failed 2 of 10 runs on DFlash2 and 3 of 10 on MTP3: no DFlash2-specific effect under the registered rule. Three failures (one DFlash2, two MTP3) were the proof's code reader: each scout returned the exact code line inside JSON text, after an escaped newline whose `n` the code pattern's lookbehind read as a word character. One MTP3 run's parent issued a first task call that OMP refused before starting any subagent (it named read and grep as eval tools) and then issued the correct one. One DFlash2 run's server saw two requests at OMP's limit 1: a background request OMP cancelled stayed open for 0.83 s while the engine saved a stored session's checkpoint before evicting it; without cancelled requests that run had one request in flight and no overlap.",
+  "decision": {
+    "action": "Fix the proof's code reader and record each subagent's outcome, task calls that return no subagent results, and cancelled requests in its receipt; keep criterion 14 for the next v0.10.0 candidate",
+    "rule": "Pre-registered in ~/.cache/omp-ninfer-v080-scratch/exp090/PLAN.md at about 20:55Z and amended at 21:04Z, before the window started at 21:05Z: the amendment replaced a same-seed output-identity test, which cannot test losslessness under the verifier's rejection rule, with the paired quality comparison, and raised the proof runs from five to ten per arm with every task tool outcome recorded. Quality: gross degradation if a 95% interval lies entirely below -0.05 for fact recall or schema validity, or entirely above +0.05 for unsupported claims. Proof: a DFlash2 effect if DFlash2 fails at least five of ten and MTP3 at most one; no DFlash2-specific effect if DFlash2's failures are at most MTP3's plus two.",
+    "verdict": "no gross degradation detected; no DFlash2-specific effect on the subagent proof",
+    "reason": "Both failure kinds the second candidate's runs are consistent with occur on the MTP3 control too, and the more frequent is a defect in the proof, now fixed: re-reading the twenty runs' recorded scout results with the corrected reader finds both exact codes in every run. The remaining kinds, a refused first task call and a cancelled request's server-side tail, are recorded in the receipt rather than redefined away.",
+    "not_decided_here": "Whether stock OMP's background request cancellation or the engine's synchronous pre-eviction checkpoint save should change."
+  },
+  "method": {
+    "window": "2026-10-01 21:05:14Z-21:32:26Z, production stopped under the lane hold and restored healthy afterwards.",
+    "arms": {
+      "dflash2": "the second v0.10.0 candidate: runtime 6cad4075 (source clean), server binary sha256 099f3e32ffa4..., deployment profile qwen38-5090-v0.10.0, configuration 8b2f495992c8..., DFlash2 K=7, BF16 KV, two device state slots, model artifact 0634abb0",
+      "mtp3": "the same binary and artifact with v0.9.0's MTP3 arguments: deployment profile qwen38-5090-v0.9.0, configuration cf1de114d4ce..."
+    },
+    "corpus": "The 89-case role corpus on each fresh arm, reasoning low, concurrency 1, temperature 1.0, top_p 0.95, seed 20261001 on every request, and the server preset's top_k; the arms' request logs show temp=1.00 top_p=0.95 top_k=20 and no presence penalty, the sampling of stock OMP's own requests. Scored by the qualification scorer and compared with scripts/quality_screen.py's reader and rates: a paired case bootstrap, 10,000 resamples, seed 90.",
+    "proof": "scripts/omp_parallel_proof.py as of b428a69, the version the second candidate's window ran (its code reader is fixed in 664048d), scenario subagents, OMP's limit 1, ten runs per arm in sequence on the same server, the pinned unmodified OMP 18.4.0 client, through a wrapper that also wrote every tool event the parent client streamed: task call arguments and each subagent's exit code, abort flag, error and result."
+  },
+  "observations": {
+    "corpus_rates": {
+      "columns": ["metric", "mtp3", "dflash2", "difference", "bootstrap_95"],
+      "rows": [
+        ["required_fact_recall", 0.89, 0.8866, -0.0034, [-0.0361, 0.0321]],
+        ["evidence_precision", 0.9818, 1.0, 0.0182, [0.0, 0.0432]],
+        ["unsupported_claim_rate", 0.236, 0.2584, 0.0225, [-0.0449, 0.0899]],
+        ["schema_valid_rate", 0.9438, 0.9438, 0.0, [0.0, 0.0]],
+        ["tool_selection_accuracy", 1.0, 1.0, 0.0, [0.0, 0.0]],
+        ["tool_argument_accuracy", 1.0, 1.0, 0.0, [0.0, 0.0]],
+        ["duplicate_rate", 0.0077, 0.008, 0.0003, [-0.0025, 0.0036]]
+      ],
+      "cases_paired": 89,
+      "errored_cases_per_arm": 5,
+      "identical_outputs": 5
+    },
+    "proof_runs": {
+      "dflash2": {"failed": 2, "of": 10, "failures": {"4": "code reader: Alpha's result carried the exact code after an escaped newline", "5": "two requests in flight at limit 1: a cancelled background request's server-side tail"}, "wall_seconds_median": 25.8},
+      "mtp3": {"failed": 3, "of": 10, "failures": {"5": "code reader: Alpha's result carried the exact code after an escaped newline", "7": "first task call refused by OMP (read and grep named as eval tools), then reissued: task batches [2, 2]", "8": "code reader: Beta's result carried the exact code after an escaped newline"}, "wall_seconds_median": 25.3},
+      "corrected_reader": "Re-reading every run's recorded scout results with the fixed reader finds both exact codes in all twenty runs."
+    },
+    "cancelled_request_tail": {
+      "run": "dflash2 run 5",
+      "sequence": "One scout's turn finished; OMP sent a 326-token background request with no tools; 0.15 s later it sent the other scout's next turn. The engine logged 'session checkpoint saved before eviction' for that other scout's session 0.98 s after the background request started, and the background request's cancellation in the same millisecond, with no token generated.",
+      "overlap_seconds": 0.833,
+      "without_cancelled": {"max_in_flight": 1, "overlap_seconds": 0.0},
+      "inference": "[INFERENCE] OMP's limiter holds a lease per request, so at limit 1 it released the background request's lease (cancelling it) before sending the next turn; the server-side tail is the time until the engine handled the cancel."
+    },
+    "second_candidate_failures": "The second candidate's two failed runs were not recorded at this level. Its full run's first task call returned in 0.11 s and the parent issued a second two-item call, consistent with the refused-call kind; its rerun had one two-item call, both scouts finished with a tool call and the parent returned both exact codes, consistent with the code-reader kind.",
+    "stop_saves": "At stop, the DFlash2 arm saved 2 sessions and refused 12, the MTP3 arm saved 1 and refused 10, after the corpus and ten proof runs each."
+  },
+  "limits": [
+    "One sample per case bounds only large quality effects; this is not an equivalence claim.",
+    "Same-seed outputs of the two arms diverge by design: the verifier accepts a draft d with probability p(d) and otherwise samples the residual, which keeps the target distribution but ties the realized token to the draft; only 5 of 89 outputs matched, all errored cases.",
+    "Ten proof runs per arm detect only a large difference in failure rate.",
+    "The second candidate's two failures are attributed by their server-side request patterns, not by recorded tool events."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

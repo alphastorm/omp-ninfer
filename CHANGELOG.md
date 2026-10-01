@@ -53,6 +53,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   three W8 kernels exceed the 48 KiB static shared-memory limit. The 24 GB lanes would not fit it
   at 131,072 tokens either, so both stay on MTP3
   ([EXP-089](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)).
+- EXP-090 receipt: under stock OMP's sampling, one role-corpus run per arm found no gross quality
+  change from MTP3 to DFlash2 K=7 on the same binary (recall -0.3 points, interval -3.6 to +3.2),
+  and stock OMP's two-subagent proof failed 2 of 10 runs on DFlash2 against 3 of 10 on MTP3.
+  Three of those failures were the proof's code reader, now fixed
+  ([EXP-090](docs/measurements/2026-10-01-dflash2-sampled-behavior-rtx5090.json)).
 - Release manifests can bind the native Windows lanes to their own model artifact. An optional
   `components.native_model` names the native lanes' model while `components.model` names the
   RTX 5090's; without it both read `components.model`, as before. `verify_release.py`,
