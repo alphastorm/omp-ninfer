@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import importlib.util
+import json
 from pathlib import Path
 import unittest
 
@@ -87,6 +88,43 @@ class OverlapTests(unittest.TestCase):
                      [request("request_start", 1, 7), request("request_done", 1, 5)]):
             with self.subTest(rows=rows), self.assertRaises(ValueError):
                 proof.analyze_requests(rows, 0, 10, "q38-ninfer")
+
+    def test_cancelled_requests_are_counted_and_their_overlap_is_reported_apart(self):
+        rows = [request("request_start", 1, 1), request("request_done", 1, 4),
+                request("request_start", 2, 2), request("request_done", 2, 3),
+                request("request_start", 3, 5), request("request_done", 3, 6)]
+        rows[3]["result"] = {"finish_reason": "cancelled", "completion_tokens": 0}
+        result = proof.analyze_requests(rows, 0, 10, "q38-ninfer")
+        self.assertEqual((result["max_in_flight"], result["overlap_seconds"]), (2, 1))
+        self.assertEqual(result["cancelled_requests"], 1)
+        self.assertEqual(result["without_cancelled"], {"max_in_flight": 1, "overlap_seconds": 0.0})
+
+
+class SubagentResultTests(unittest.TestCase):
+    def test_codes_after_escaped_newlines_in_structured_results_count(self):
+        # EXP-090: scouts returned JSON text whose report ended "verbatim:\n\nALPHA-CODE=...".
+        output = json.dumps({"summary": "Read alpha.txt.", "files": [{"path": "alpha.txt"}],
+                             "report": "The exact line, verbatim:\n\nALPHA-CODE=201123"}, indent=2)
+        self.assertEqual(proof.result_codes(output), ["ALPHA-CODE=201123"])
+        self.assertEqual(proof.result_codes({"report": ["x", "BETA-CODE=313027"]}), ["BETA-CODE=313027"])
+        self.assertEqual(proof.result_codes("plain BETA-CODE=313027."), ["BETA-CODE=313027"])
+        self.assertEqual(proof.result_codes('{"report": "XALPHA-CODE=201123 ALPHA-CODE=2011234"}'), [])
+
+    def test_observer_records_calls_without_results_and_each_subagent(self):
+        observer = proof.TaskObserver()
+        two = {"type": "tool_execution_start", "toolName": "task", "args": {"tasks": [{}, {}]}}
+        results = [{"exitCode": 0, "output": json.dumps({"report": "line:\nALPHA-CODE=201123"})},
+                   {"exitCode": 1, "aborted": False, "output": "BETA-CODE=313027"}]
+        for event in (two, {"type": "tool_execution_end", "toolName": "task",
+                            "result": {"content": [{"type": "text", "text": "Task execution failed"}]}},
+                      {"type": "tool_execution_start", "toolName": "read", "args": {}},
+                      two, {"type": "tool_execution_end", "toolName": "task",
+                            "result": {"details": {"results": results}}}):
+            observer(event)
+        self.assertEqual(observer.batches, [2, 2])
+        self.assertEqual(observer.without_results, 1)
+        self.assertEqual(observer.completed, [{"ok": True, "codes": ["ALPHA-CODE=201123"]},
+                                              {"ok": False, "codes": ["BETA-CODE=313027"]}])
 
 
 class ConfigRewriteTests(unittest.TestCase):

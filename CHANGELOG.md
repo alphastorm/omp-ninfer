@@ -63,6 +63,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   predecessor's model in `components.native_model`, so a release can ship DFlash2's artifact on
   the RTX 5090 while the native lanes keep MTP3's.
 
+### Fixed
+
+- `scripts/omp_parallel_proof.py` failed subagent runs whose scout returned the exact code line:
+  a structured result arrives as JSON text, and the escaped newline before a code read as a word
+  character, so the code went unseen. Codes are now read from each decoded string value. Three of
+  EXP-090's twenty runs, on both arms, had failed this way. The receipt also records each
+  subagent's outcome, task calls that returned no subagent results, and client-cancelled
+  requests with the overlap measured without them.
+
 ## [0.9.1] - 2026-10-01
 
 ### Fixed

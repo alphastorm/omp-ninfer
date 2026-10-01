@@ -9,6 +9,9 @@ stock_omp_session_proof.Omp driver enables RPC and PI_OPENAI_STATEFUL=1.
 
 subagents: one parent must call task once with two scout items, each reading its
 own ~20 KB file and returning a random code. The parent must return both codes.
+The receipt records each subagent's outcome and the codes in its result (searched
+value by value when the result is JSON text), and task calls that returned no
+subagent results.
 sessions: two processes start together; each gets a different fact, then recalls
 it twice (three turns per process). A barrier aligns each pair of turns.
 
@@ -28,6 +31,9 @@ start record is absent, use the DONE record's timings_seconds.total, never TTFT,
 decode, queue wait, or throughput duration. Overlap is wall time with >=2 active
 requests (not a sum of pairwise intersections). Times have millisecond precision;
 this is HTTP/request lifetime overlap, not proof of simultaneous GPU execution.
+A request the client cancelled lasts until the engine handles the cancel; the
+receipt counts them and also reports the overlap without them, while the checks
+use every request.
 
 A --max-in-flight 1 run passes when serial; a run at >=2 requires overlap. Use the
 same --seed for both runs. --baseline compares against a passing limit-1 receipt
@@ -151,7 +157,7 @@ def analyze_requests(records, window_start, window_end, model):
             raise ValueError("conflicting duplicate request record")
         target[key] = record
 
-    intervals, sources, ends, instances = [], set(), set(), set()
+    intervals, cancelled, sources, ends, instances = [], [], set(), set(), set()
     for key, done in dones.items():
         end = finite_number(done["timestamp_unix_ms"]) / 1000
         if end < window_start:
@@ -170,12 +176,17 @@ def analyze_requests(records, window_start, window_end, model):
         if start < window_start or start >= window_end:
             continue
         intervals.append((start, end))
+        cancelled.append((done.get("result") or {}).get("finish_reason") == "cancelled")
         sources.add(source)
         ends.add(f"{done['event']}.timestamp_unix_ms")
         instances.add(key[0])
     unmatched = sum(window_start <= finite_number(row["timestamp_unix_ms"]) / 1000 < window_end
                     and key not in dones for key, row in starts.items())
+    # A request the client cancels ends when the engine handles the cancel, which can follow the
+    # client's next request (EXP-090); report its overlap apart rather than hide it.
+    kept = [interval for interval, flag in zip(intervals, cancelled) if not flag]
     return {**compute_overlap(intervals), "request_count": len(intervals),
+            "cancelled_requests": sum(cancelled), "without_cancelled": compute_overlap(kept),
             "unmatched_starts": unmatched, "server_instance_ids": sorted(instances),
             "timestamp_fields": {"start": sorted(sources), "end": sorted(ends),
                                  "unit": "milliseconds; converted to seconds"},
@@ -282,6 +293,49 @@ def turn_record(turn, label, index, expected=None):
     return record
 
 
+def result_codes(output):
+    """Codes in one subagent result. A structured result arrives as JSON text whose strings escape
+    newlines, and the `n` of an escaped newline before a code reads as a word character (EXP-090),
+    so search each decoded string value."""
+    value = output
+    if isinstance(output, str):
+        try:
+            value = json.loads(output)
+        except ValueError:
+            value = output
+    found, pending = set(), [value]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, str):
+            found.update(CODE.findall(node))
+        elif isinstance(node, dict):
+            pending.extend(node.values())
+        elif isinstance(node, list):
+            pending.extend(node)
+    return sorted(found)
+
+
+class TaskObserver:
+    """The parent's task calls: items per call, calls that returned no subagent results, and each
+    subagent's outcome with the codes its result carries."""
+
+    def __init__(self):
+        self.batches, self.completed, self.without_results = [], [], 0
+
+    def __call__(self, event):
+        if event.get("toolName") != "task":
+            return
+        if event.get("type") == "tool_execution_start":
+            self.batches.append(len((event.get("args") or {}).get("tasks") or []))
+        elif event.get("type") == "tool_execution_end":
+            results = ((event.get("result") or {}).get("details") or {}).get("results") or []
+            self.without_results += not results
+            self.completed.extend({"ok": item.get("exitCode") == 0 and not item.get("aborted")
+                                   and not item.get("error"), "codes": result_codes(item.get("output", ""))}
+                                  for item in results)
+
+
+
 def run_subagents(args, root, shared, codes, record):
     subargs = client_args(args, root, shared, "subagents")
     rng = random.Random(args.seed)
@@ -290,20 +344,7 @@ def run_subagents(args, root, shared, codes, record):
                   for n in range(360)]
         filler.insert(rng.randrange(100, 260), code + "\n")
         (subargs.home / "work" / f"{label}.txt").write_text("".join(filler), encoding="utf-8")
-    batches, completed = [], []
-
-    def observe(event):
-        if event.get("toolName") != "task":
-            return
-        if event.get("type") == "tool_execution_start":
-            tasks = (event.get("args") or {}).get("tasks") or []
-            batches.append(len(tasks))
-        elif event.get("type") == "tool_execution_end":
-            results = ((event.get("result") or {}).get("details") or {}).get("results") or []
-            completed.extend({"ok": item.get("exitCode") == 0 and not item.get("aborted")
-                              and not item.get("error"),
-                              "codes": sorted(set(CODE.findall(str(item.get("output", ""))))) }
-                             for item in results)
+    observer = TaskObserver()
 
     prompt = ("This is a parallel file-reading proof. Do not read the files yourself. Your FIRST "
               "action must be ONE task call with context and exactly TWO items in tasks. Use "
@@ -315,16 +356,19 @@ def run_subagents(args, root, shared, codes, record):
               "code in their final result. These two independent tasks MUST be in the SAME call, "
               "not sequential calls. Wait for both results, then answer with only the two exact "
               "code lines. Do not invent codes.")
-    with client(subargs, "parent", observe) as omp:
+    with client(subargs, "parent", observer) as omp:
         turn = omp.prompt(prompt, args.turn_timeout)
         record["turns"].append(turn_record(turn, "parent", 1))
         returned = sorted(set(CODE.findall(turn["answer"])))
+        completed = observer.completed
         record["checks"].update(
             parent_completed=turn["stop"] == "stop", codes_exact=returned == sorted(codes),
-            one_two_item_task_batch=batches == [2],
+            one_two_item_task_batch=observer.batches == [2],
             both_subagents_completed=len(completed) == 2 and all(item["ok"] for item in completed)
             and sorted(code for item in completed for code in item["codes"]) == sorted(codes))
-        record["task_batch_sizes"] = batches
+        record["task_batch_sizes"] = observer.batches
+        record["task_calls_without_results"] = observer.without_results
+        record["subagent_results"] = completed
 
 
 def run_sessions(args, root, shared, codes, record):
