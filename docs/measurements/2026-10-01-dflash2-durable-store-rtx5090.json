@@ -1,0 +1,122 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-083",
+  "title": "DFlash2 sessions on the durable store on the RTX 5090: a restored session decodes its next turn exactly as the exporting engine does, restarts restore 58K-token DFlash2 sessions hot, and reuse matches shipped v0.9.0 except one sibling under device-state pressure",
+  "generated_utc": "2026-10-01T06:07:00Z",
+  "status": "completed_with_limits",
+  "question": "EXP-082's fork DFlash2 still refused --session-checkpoint-dir, so a DFlash2 profile could not keep the durable session store every shipped RTX 5090 profile has had since v0.4.0. With the draft context ring carried through checkpoints, does a DFlash2 session survive export, restart and restore exactly, and do sibling fanout and multi-session pressure keep their reuse, with MTP3 unchanged?",
+  "answer": "Yes for durability. Each DFlash2 StateImage already held the five-layer, 2,048-position draft ring (40 MiB), so spike 03212c9d only had to stop treating 'speculation enabled' as 'a paged backend-KV file exists' and refuse an export whose ring lags its frontier. A session exported from one engine and restored into a fresh one decoded its next turn with the same 96 tokens, 13 rounds, 82 of 89 drafts accepted per position and 3,407 reused tokens; zeroing the ring in the export changed the drafting (14 rounds, 81 of 95) but not the tokens, so the test sees a lost ring. Over two verified container restarts a 57,889-token DFlash2 session restored hot (52 and 260 tokens computed of 58,284 and 58,539) and quoted all three planted keys, drafting 5.47 and 6.67 tokens per round against 5.10 in process. Its 4,406,508,551-byte checkpoint saved in 3.29 s, 108 MB smaller than shipped MTP3's checkpoint of the same template (no MTP-layer KV file, 40 MiB more per StateImage). No export was refused and no request failed; MTP3 on the binary stayed 89/89 byte-identical to shipped. On the identical probe sequence, shipped v0.9.0 lost reuse on the same two of twelve multi-session continuations; DFlash2's two-slot profile additionally re-prefilled one 140-token sibling that shipped's four slots served from a 61-token anchor.",
+  "decision": {
+    "action": "keep the durable ring; the pre-registered rule as written said reject on criterion (c)",
+    "rule": "Pre-registered before the first window (PLAN.md): keep if (a) the checkpoint real test passes and both DFlash2 real tests pass; (b) restore_probe exits 0 and each restored continuation is restored, not re-prefilled (computed_prefill_tokens <= 1,024 against a ~48K-token prompt); (c) sibling_continue_probe exits 0 and multisession_probe exits 0 with reuse_lost == 0; (d) no export is refused with 'DFlash2 draft context frontier differs' and no request returns a server error; (e) spk4-mtp3-c1 answers 89/89 byte-identically to shipped v0.9.0 and v0.8.7. Reject on any failure.",
+    "rule_outcome": {
+      "a_gpu_tests": "3/3 passed: checkpoint round trip identical (tokens, rounds, per-position acceptance, reused prefix, no backend-KV file); DFlash2 real test at K=7 optimized head maximum batch 1 and full head maximum batch 2",
+      "b_restore": "pass: restore_probe exit 0, control and both restored continuations quoted all three keys; restored requests computed 52 and 260 prompt tokens",
+      "c_reuse": "fail as written: both probes exited 0 with no server error, but multisession lost reuse on 2 of 12 continuations and forks against a bar of 0",
+      "d_refusals_and_errors": "pass: 0 frontier refusals, 0 request errors",
+      "e_mtp3_identity": "pass: 89/89 against v0.9.0 (pub-v0614b1) and 89/89 against v0.8.7 (pub-v0613b1)"
+    },
+    "addendum": "Registered after the first window and before the second (PLAN.md addendum): the reuse_lost == 0 bar had been set without the incumbent's value on this probe (shipped MTP3 receipts of the same probe lost 2 of 8 and 4 of 12). Corrected comparison (c'): DFlash2 keeps parity if its multisession reuse_lost is at most shipped v0.9.0's on the identical restore, sibling and multisession sequence and its sibling probe reuses on the same steps as shipped's. Power check: the checkpoint test's flow with every exported StateImage's DFlash2 ring zeroed must draft differently from the live engine.",
+    "addendum_outcome": {
+      "multisession": "parity: shipped v0.9.0 lost the same two steps (r2_continue_D2, r2_continue_D3 to root after four saves before eviction), 2 of 12 on both arms; the r2_continue_D1 stall was 15.27 s shipped and 15.68 s DFlash2",
+      "sibling": "one divergence: DFlash2 re-prefilled sibling_2 (140 tokens, root, ttft 0.275 s) where shipped reused a 61-token private long anchor (ttft 0.218 s); DFlash2's planner was under device-state pressure (84 targets, 1 degradation unit, 60.8 ms predicted future loss, stop model_optimal) with two extra device state slots, shipped's had none with four. (c') as written fails on this clause.",
+      "power_check": "the ring-zeroed restore decoded the same 96 tokens in 14 rounds with 81 of 95 drafts accepted, against 13 rounds and 82 of 89 live: the permanent test's drafting check detects a lost ring"
+    },
+    "reason": "Every durability check held: exact engine-level round trip with demonstrated power, hot restores across real restarts, no refused export, shutdown saves clean, MTP3 untouched. Both reuse findings are planning outcomes of the BF16 two-slot profile under the probes' pressure, not checkpoint results: the multisession losses match shipped step for step, and the sibling divergence is the planner choosing root under device-state pressure that shipped's four slots do not have. Any DFlash2 profile needs the durable store, so the ring is kept and the deviation from the written rule is recorded here.",
+    "not_decided_here": "Adoption. The two-request DFlash2 profile still has two device state slots and 131,520 KV tokens with BF16 KV (shipped: four and 160,256); NVFP4 KV, measured on upstream only (EXP-080), is the plan for both; DFlash2's outputs have had no powered quality screen.",
+    "next": "Port upstream's NVFP4 paged KV onto the spike with every BF16 path unchanged (production slices 4ac73c47, a7818988's masked-width validation, 1192ad76, 1737ca11's shared helpers, d44ab584's planner), measure the two-request DFlash2 profile with NVFP4 KV and four device state slots including this receipt's restore, sibling and multisession sequence, then run a powered quality screen against shipped MTP3."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "windows": [
+      "First: Windows lane hold taken; driver exp083-window.sh ran detached on the appliance; dead-man armed 05:39:36Z, production stopped 05:39:40Z, restored healthy 05:54:29Z (889 s down), dead-man cancelled, the arms' checkpoint roots removed, hold released with production /health 200 from Windows.",
+      "Second (addendum): driver exp083b-window.sh; production stopped 05:58:22Z, restored healthy 06:04:18Z (356 s down); same hold, dead-man and cleanup."
+    ],
+    "runtime": {
+      "source": "spike/dflash2-5090 at 03212c9dc15403d98deaa5b2dc9bbedb79b120f7: EXP-082's 7e4d120a and its ledger 76151790, plus 03212c9d. Export and import key engine/backend-kv.bin on the paged backend cache (MTP and DFlash have one; DFlash2 has none), a DFlash2 export is refused (DFlash2ContextFrontierMismatch) unless dflash_context_frontier equals the execution frontier, a DFlash2 import is refused unless its metadata has no MTP state and the ring frontier equals the execution frontier, and serve accepts --spec dflash2 with --session-checkpoint-dir. No decode, prefill or kernel path changed. The commit adds ninfer_qwen3_8_27b_dflash2_checkpoint_real_test.",
+      "build": "incremental rebuild in EXP-079's build tree (container ninfer-dflash2-spike-build: nvidia/cuda:13.1.2-devel-ubuntu24.04, CMAKE_CUDA_ARCHITECTURES=120a, Release, profile dflash2-spike-5090), archive source (source_dirty=true); all 1,353 tracked files hash-identical to 03212c9d; 10 CPU tests passed (serve options, checkpoint I/O contract, runtime mechanisms, StateImage layout, session checkpoint store, resource manager, checkpoint policy, CLI options, artifact reader, HTTP error handler)",
+      "server_binary_sha256": "017f40fb1d3394c910eec9a30b0fbb02a36a57d7031cc5d969e6d3d3efaeb2f4",
+      "image": "ninfer-5090:03212c9d-dflash2-spike (sha256:4ab712665c1dbbfaff8808f203f0453cef31c3cace1e34defdafd414622e0120): EXP-079's image with ninfer-serve and ninfer replaced"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6 (EXP-079's)",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "bytes": 20437336576
+    },
+    "arms": {
+      "spk4-df2k7-c2ds2-ckpt": "EXP-082's spk3-df2k7-c2ds2 arguments with the new binary plus --config-sha256 e018eaba (a label identity), --session-checkpoint-dir /checkpoints --session-checkpoint-quota-mib 24576 --session-checkpoint-staging-mib 256: --spec dflash2 --draft-tokens 7 --lm-head-draft --max-concurrency 2 --device-state-slots 2 --host-state-slots 24 --host-kv-mib 16384",
+      "spk4-mtp3-c1": "EXP-082's spk3-mtp3-c1 arguments with the new binary: v0.8.7's one request with the durable store on, --spec mtp --draft-tokens 3",
+      "pub-v0614b1": "shipped v0.9.0: published image 4c816b0c, server f62a570e, artifact eec39564, production's arguments (--max-concurrency 2 --device-state-slots 4, durable store on)"
+    },
+    "steps": {
+      "gpu_tests": "ninfer_qwen3_8_27b_dflash2_checkpoint_real_test 7 1: one engine (max context 8,192, two requests, host KV 1 GiB, four host state slots) decodes a 3.3K-token ledger session's first turn through DFlash2, exports it in memory with the session checkpoint API and decodes the next turn; the engine is destroyed, a fresh engine restores the export and decodes the same next turn; tokens, rounds, per-position acceptance, reused tokens and reuse path must match, and the export must hold no backend-KV file. The DFlash2 real test at K=7 with the optimized head at maximum batch 1 and the full head at maximum batch 2.",
+      "durable_sequence": "on spk4-df2k7-c2ds2-ckpt (first window) and pub-v0614b1 (second): restore_probe.py (sha256 3b76b037; --base-tokens 48000, three planted keys, control retrieval, explicit save, two verified `docker restart --time 90` each followed by a restored continuation and a settle save), sibling_continue_probe.py (sha256 928cb51d; base, branch point, two siblings, continue the second), multisession_probe.py (sha256 b610e865; 3 sessions x 50K-token bases, 2 rounds of continuation plus one fork each); request and container logs kept",
+      "role_corpus": "the frozen 89-case role corpus (sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process, compared with the shipped v0.9.0 and v0.8.7 runs",
+      "power_check": "a throwaway copy of the checkpoint test (not committed) that zeroes the last 41,943,040 bytes of every exported StateImage (the DFlash2 local K and V regions, which plan_host_state_image places last) before the restore, and reports instead of asserting"
+    }
+  },
+  "observations": {
+    "gpu_tests": {
+      "checkpoint_round_trip": "exported 3,522 tokens in 626,763,978 bytes (two StateImages, text KV, metadata; no backend-KV file); live next turn: 96 tokens, 13 rounds, 82 of 89 drafts accepted, 3,407 reused tokens through the turn-closure path; restored: identical in every field",
+      "dflash2_real": "K=7 graph: passed with the optimized head at maximum batch 1 and the full head at maximum batch 2",
+      "power_check": "2 StateImages zeroed; restored next turn: the same 96 tokens, 14 rounds, 81 of 95 drafts accepted, 3,407 reused tokens"
+    },
+    "restore_probe": {
+      "columns": ["spk4-df2k7-c2ds2-ckpt", "pub-v0614b1"],
+      "template_input_tokens": [57889, 57889],
+      "cold_prefill_s": [20.927, 20.858],
+      "checkpoint_bytes": [4406508551, 4514771878],
+      "checkpoint_frontier_tokens": [58232, 58147],
+      "explicit_save_s": [3.294, 3.258],
+      "restart_ready_after_s": [[30.13, 30.48], [29.03, 29.03]],
+      "restored_requests": [
+        [{"prompt_tokens": 58284, "computed_prefill_tokens": 52, "reuse_path": "private_endpoint", "ttft_s": 0.25, "tokens_per_round": 5.474},
+         {"prompt_tokens": 58539, "computed_prefill_tokens": 260, "reuse_path": "private_response_replay", "ttft_s": 0.49, "tokens_per_round": 6.667}],
+        [{"prompt_tokens": 58195, "computed_prefill_tokens": 223, "reuse_path": "private_response_replay", "ttft_s": 0.491, "tokens_per_round": 2.733},
+         {"prompt_tokens": 58284, "computed_prefill_tokens": 94, "reuse_path": "private_response_replay", "ttft_s": 0.43, "tokens_per_round": 3.7}]
+      ],
+      "in_process_control_tokens_per_round": [5.1, 3.696],
+      "planted_keys_quoted": "all three in the control and both restores, on both arms",
+      "note": "The two arms' restored continuations answered differently and took different reuse paths, so their walls and TTFTs are not a like-for-like restore cost; both restored the template rather than re-prefilling it."
+    },
+    "sibling_probe": {
+      "steps": ["base", "depth_1", "sibling_1", "sibling_2", "continue_sibling_2"],
+      "cached_tokens_dflash2": [0, 81, 116, 0, 155],
+      "cached_tokens_shipped": [0, 81, 116, 61, 155],
+      "sibling_2_dflash2": "root, 140 computed, ttft 0.275 s; planner stop model_optimal after 84 targets with 1 degradation unit and 60.8 ms predicted future loss",
+      "sibling_2_shipped": "private_long_anchor, 61 reused, ttft 0.218 s; no pressure, 2 targets",
+      "server_errors": [0, 0]
+    },
+    "multisession_probe": {
+      "continuations_and_forks": [12, 12],
+      "reuse_lost": [2, 2],
+      "lost_steps": "r2_continue_D2 and r2_continue_D3 on both arms (continuations of a turn older than the session's newest, evicted under catalog pressure)",
+      "r2_continue_D1_ttft_s": [15.68, 15.27],
+      "server_errors": [0, 0],
+      "saves_before_eviction_dflash2": 4
+    },
+    "durable_store": {
+      "frontier_refusals": 0,
+      "request_errors": 0,
+      "shutdown_lines": ["spk4-df2k7-c2ds2-ckpt: saved 0, nothing to save 5, refused 0", "pub-v0614b1: saved 0, nothing to save 5, refused 0", "spk4-mtp3-c1: saved 0, nothing to save 0, refused 0"]
+    },
+    "mtp3": {
+      "decode_tok_s": [238.29, 238.38],
+      "columns": ["spk4-mtp3-c1", "spk3-mtp3-c1 (EXP-082)"],
+      "tokens_per_round": [3.343, 3.343],
+      "identity": "89/89 byte-identical to v090-pub-v0614b1 and to v087-pub-v0613b1"
+    },
+    "vram_after_load_mib": {"spk4-df2k7-c2ds2-ckpt": 29468, "spk4-mtp3-c1": 28144, "pub-v0614b1": 30242},
+    "kv_capacity_tokens": {"spk4-df2k7-c2ds2-ckpt": 131520, "spk4-mtp3-c1": 131072, "pub-v0614b1": 160256}
+  },
+  "limits": [
+    "The pre-registered rule as written says reject (criterion (c)); the keep decision rests on the addendum's comparison, registered after the first window.",
+    "One run per arm and probe; the shipped baseline ran in the second window on the same appliance, not interleaved with the DFlash2 arm.",
+    "The engine-level round trip runs in one process through the in-memory session checkpoint API, not the store's files; the store's files and real restarts are covered by the restore probe, whose restored prompts differ from its control, so serve-level restores are shown by planted-key retrieval, hot reuse and drafting rate rather than byte equality.",
+    "The power check is a throwaway binary that locates the ring by its position in the host StateImage layout; it is not part of the committed test.",
+    "Reuse outcomes in the sibling and multisession probes depend on the planner's cost model and pressure at the moment of each request.",
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

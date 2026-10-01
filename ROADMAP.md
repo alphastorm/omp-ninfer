@@ -1261,13 +1261,17 @@ without that route the first port slowed with context
 ([EXP-079](docs/measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)). With two requests'
 16-column verify on the fork's Q5 tensor-core route, a pair decodes 420.86 tok/s together in
 22.7 ms rounds, 8.4% above shipped's pair
-([EXP-082](docs/measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json)). Before it
-can reach the shipped two-request profile, DFlash2's context ring must ride checkpoints, fanout
-and restore, and its outputs need their own quality screen. At two requests with BF16 KV it
-leaves 131,520 KV tokens and two device state slots where v0.9.0 has 160,256 and four; NVFP4 KV
-restores all four slots with 262,144 tokens at no measured speed cost, within a single quality
-screen's bounds ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)), and becomes
-the port's capacity plan once a powered quality screen passes.
+([EXP-082](docs/measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json)). DFlash2
+sessions keep the durable store: the draft context ring rides every checkpoint, a restored
+session decodes its next turn exactly as the exporting engine does, and 58K-token sessions
+restore hot across restarts with MTP3 byte-identical
+([EXP-083](docs/measurements/2026-10-01-dflash2-durable-store-rtx5090.json)). Two steps remain
+before the shipped two-request profile. At two requests with BF16 KV DFlash2 leaves 131,520 KV
+tokens and two device state slots where v0.9.0 has 160,256 and four, and under that device-state
+pressure it re-prefilled one short sibling that shipped served from an anchor; NVFP4 KV restores
+all four slots with 262,144 tokens at no measured speed cost on upstream, within a single quality
+screen's bounds ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)), and is the
+next port. Then the outputs need a powered quality screen against shipped MTP3.
 
 ## How to help right now
 

@@ -135,6 +135,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-080 | RTX 5090 NVFP4 and K8V4 KV under DFlash2 ([#71](https://github.com/alphastorm/omp-ninfer/issues/71)) | A 4-bit KV payload returns the capacity DFlash2's weights take from the two-request profile without costing speed or screened quality | Upstream `d44ab584`, DFlash2 K=7: both formats start two requests with four device state slots and **262,144 KV tokens** (BF16: two slots, 131,520; shipped v0.9.0: 160,256). One request: KV payload 8.00 → 2.25/3.14 GiB, VRAM 29,594 → 23,706/24,618 MiB, role corpus 253.63 → 256.48/253.12 tok/s, rounds behind 120K tokens 23.0 → 21.2/20.4 ms, K8V4 prefill +15.3% at 120K. Evidence precision 0.993 → 0.979 for both, unsupported claims 0.225 → 0.225/0.214, leaks 10 → 9/7 (one unpowered run each). K8V4's 120K answer decoded 3.55% slower through fewer tokens per round, past the 3% bound ([receipt](measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)) | NVFP4 kept as a profile candidate; K8V4 inconclusive |
 | EXP-081 | RTX 5090 DFlash2 fork port with upstream's 24-head verify route | The port's context-dependent round cost is the target attention route of one request's 8-token verify; with upstream's route the port decodes the role corpus at least 15% faster than shipped v0.9.0 and leaves MTP3 byte-identical | One cherry-pick (upstream `4b0eb36c`, which EXP-079's port skipped as 35B retuning) sends one request's 7-8-column verify on the 27B's 24 query heads to ChunkedSmallT above 320 keys instead of the Prompt kernel, which does not split the KV sequence. Round slope 0.917 → **0.085 ms per 1K tokens** (upstream 0.044). Role corpus **288.09 tok/s (+21.4% over shipped)**, +13.6% over upstream's DFlash2, 83 of 84 cases faster; a code answer +46.7%/+31.9%/+37.0%/+23.8% over shipped behind 0/32K/64K/120K tokens; prefill unchanged. MTP3 89/89 byte-identical; DFlash2 86/89 identical to shipped (EXP-079: 41). Two requests unchanged: pair 269.17 vs shipped 388.42 and upstream 453.95 tok/s, rounds 37.1 vs 22.0-22.4 ms ([receipt](measurements/2026-09-30-dflash2-verify-route-rtx5090.json)) | go by rule: integration campaign, two-request rounds first |
 | EXP-082 | RTX 5090 two requests' DFlash2 verify on the Q5 tensor-core route | Two requests' K=7 verify is 16 columns and leaves the fork's Q5 tensor-core route, which accepted only 4 and 8; with 16 columns on it, a pair closes most of its round gap to upstream with MTP3 byte-identical | The kernel takes 16 columns with a second m16n8k16 MMA per k16 step; MLP down, GDN value/z and attention gate/value route 16 columns to it (spike `7e4d120a`), per-column arithmetic unchanged. Pair rounds **37.1 → 22.7 ms** (upstream 22.0-22.4, 97% of the gap closed); pair **420.86 tok/s** against shipped 388.42 (+8.4%) and upstream DFlash2 453.95 (-7.3%, its outputs drafted 5.22-5.63 tokens per round against 5.02-5.10); solo 369.64. MTP3 89/89 byte-identical; 6/6 op tests and the DFlash2 real-model test at one and two requests passed ([receipt](measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json)) | kept by rule |
+| EXP-083 | RTX 5090 DFlash2 sessions on the durable store | With the draft context ring carried through checkpoints, a DFlash2 session survives export, restart and restore exactly, and sibling fanout and multi-session pressure keep their reuse, with MTP3 unchanged | The ring already lived in every StateImage; spike `03212c9d` keys the backend-KV file on the paged backend cache DFlash2 lacks and refuses an export whose ring lags its frontier. Engine round trip: the restored next turn matched in tokens, 13 rounds and per-position acceptance (82 of 89 drafts); a ring-zeroed restore drafted 14 rounds, 81 of 95. Two container restarts restored a 57,889-token session hot (52 and 260 tokens computed), keys exact, **5.47/6.67 tokens per round** against 5.10 in process; checkpoint 4.41 GB in 3.29 s (shipped MTP3 4.51 GB). Multisession reuse lost 2 of 12, the same two steps as shipped v0.9.0; one 140-token sibling re-prefilled under two-slot device-state pressure where shipped reused a 61-token anchor. MTP3 89/89 byte-identical ([receipt](measurements/2026-10-01-dflash2-durable-store-rtx5090.json)) | ring kept; the rule as written said reject on reuse, a bar set without the incumbent's value |
 
 Entry detail:
 
@@ -962,6 +963,31 @@ Entry detail:
   passed. The pre-registered rule said keep. Durability, NVFP4 KV capacity and a powered quality
   screen remain before a profile. Receipt:
   [DFlash2 pair on the tensor cores](measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json).
+- **EXP-083 — DFlash2 sessions keep the durable store (2026-10-01).** Every shipped RTX 5090
+  profile since v0.4.0 keeps sessions across restarts, and the DFlash2 spike refused
+  `--session-checkpoint-dir`. The draft context ring turned out to need no new payload: each
+  DFlash2 StateImage already held the five-layer, 2,048-position draft K/V (40 MiB), and every
+  path that moves StateImages copies whole images. What blocked it was the export and import
+  treating "speculation enabled" as "a paged backend-KV file exists", which DFlash2 has none of.
+  Spike `03212c9d` keys that file on the paged backend cache, refuses an export whose ring lags
+  the continuation's frontier, and accepts DFlash2 import metadata only with the ring at the
+  frontier. A new real-model test exports a 3.3K-token session from one engine, restores it into
+  a fresh one and requires the next turn to match the exporting engine's: it did, in 96 tokens,
+  13 rounds and per-position acceptance (82 of 89 drafts), and a throwaway copy that zeroed the
+  ring before the restore drafted 14 rounds with 81 of 95 accepted, so the test sees a lost ring.
+  At serve level, a 57,889-token session restored hot after each of two container restarts
+  (52 and 260 tokens computed), quoted three planted keys exactly and drafted 5.47 and 6.67
+  tokens per round against 5.10 in process; its checkpoint was 4.41 GB, saved in 3.29 s, against
+  4.51 GB for shipped MTP3's checkpoint of the same template. No export was refused, no request
+  failed, and MTP3 on the binary stayed 89/89 byte-identical to shipped. The pre-registered rule
+  said reject on one criterion: the multi-session probe lost reuse on 2 of 12 continuations
+  against a bar of zero that had been set without the incumbent's value. On the identical
+  sequence shipped v0.9.0 lost the same two steps, continuations of an older turn evicted under
+  catalog pressure; the one difference was a 140-token sibling that DFlash2 re-prefilled while
+  its planner was under device-state pressure with two extra slots, where shipped's four served
+  it from a 61-token anchor. The ring is kept; the two-slot pressure joins the NVFP4 step, which
+  restores four slots. Receipt:
+  [DFlash2 durable store](measurements/2026-10-01-dflash2-durable-store-rtx5090.json).
 
 ## Current order
 
@@ -1000,7 +1026,7 @@ hypothesis and method before writing code.
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
 | Deeper MTP drafting (K=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
-| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081) and a two-request pair 8.4% above shipped's (EXP-082), MTP3 byte-identical | open: port campaign (durable context ring, NVFP4 KV, quality screen) |
+| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081), a two-request pair 8.4% above shipped's (EXP-082), and sessions on the durable store with exact restores (EXP-083), MTP3 byte-identical | open: port campaign (NVFP4 KV for four device state slots, quality screen) |
 | RTX 5090 `nvfp4` artifact swap | Measured on 2026-09-04: 2.22× prefill and −3.5% decode with INT8 KV, refuses to start with BF16 KV at 131,072 context; two-case grounding shift on the private screen | rejected for v0.4; v0.5 candidate with INT8 KV |
 | RTX 4090 prefill chunk 2,048 | Measured on 2026-09-04: +22.8% prefill, +2.0% decode, +270 MiB peak, session time +5.5% to +12.8% against the shipped 512; 4,096 regresses decode | kept; requalify |
 | RTX 3090 131,072-token context | Measured on 2026-09-04: automatic KV capacity 131,072 at 22,465 MiB peak with unchanged throughput on the shipped INT8 profile | kept; qualify |

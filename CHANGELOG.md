@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- EXP-083 receipt: on the fork's DFlash2 spike, sessions keep the durable store. The draft
+  context ring already rode every StateImage; runtime `03212c9d` stops requiring a backend-KV
+  file DFlash2 does not have and refuses an export whose ring lags its frontier. A session
+  restored into a fresh engine decoded its next turn exactly as the exporting engine did, and a
+  57,889-token session restored hot across two container restarts with MTP3 byte-identical. On
+  the same probe sequence shipped v0.9.0 lost the same multi-session reuse; DFlash2's two-slot
+  profile re-prefilled one short sibling under device-state pressure
+  ([EXP-083](docs/measurements/2026-10-01-dflash2-durable-store-rtx5090.json)).
+
 ## [0.9.1] - 2026-10-01
 
 ### Fixed
