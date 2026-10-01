@@ -1276,8 +1276,12 @@ with BF16 KV, whose outputs were 1,091 of 1,120 byte-identical to shipped's, and
 on unsupported claims and secret leaks
 ([EXP-085](docs/measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json)). The fork's
 existing FP8 KV gives the profile four slots and 249,216 KV tokens with long-context rounds 7-18%
-shorter and exact 130K retrieval, so it is running the same screen
-([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)).
+shorter and exact 130K retrieval
+([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)), but it failed the
+same screen on secret leaks, 604 against 561
+([EXP-088](docs/measurements/2026-10-01-dflash2-fp8-kv-quality-screen-rtx5090.json)). The
+quality-cleared DFlash2 profile is BF16 KV at two device state slots and 131,520 KV tokens;
+adopting it is a release decision.
 
 ## How to help right now
 

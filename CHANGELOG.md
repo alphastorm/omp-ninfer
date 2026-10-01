@@ -41,6 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   state slots and 249,216 KV tokens, with long-context rounds 7-18% shorter than BF16's and
   exact 130,048-token retrieval, so it earns the powered screen
   ([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)).
+- EXP-088 receipt: under EXP-085's unchanged rule, DFlash2 with FP8 KV held every gate metric
+  inside its margin except secret leaks, 604 against shipped's 561 (ratio upper bound 1.135
+  against 1.10), so FP8 KV fails as NVFP4 did and BF16 DFlash2 remains the quality-cleared
+  profile ([EXP-088](docs/measurements/2026-10-01-dflash2-fp8-kv-quality-screen-rtx5090.json)).
 
 ## [0.9.1] - 2026-10-01
 

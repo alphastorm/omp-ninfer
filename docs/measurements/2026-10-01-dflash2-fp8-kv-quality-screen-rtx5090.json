@@ -1,0 +1,72 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-088",
+  "title": "Powered quality screen of DFlash2 K=7 with FP8 KV on the RTX 5090: every gate metric inside its margin except secret leaks (604 against 561, ratio upper bound 1.135 against 1.10), so FP8 KV fails",
+  "generated_utc": "2026-10-01T15:25:00Z",
+  "status": "completed",
+  "question": "EXP-087's pre-check found that the fork's FP8 E4M3 row-256 KV gives the two-request DFlash2 profile four device state slots and 249,216 KV tokens with exact long-context retrieval. Under EXP-085's unchanged rule, against EXP-085's shipped v0.9.0 MTP3 runs, is the FP8 profile's role-corpus quality no worse than shipped's by more than the margins?",
+  "answer": "No, on one bound. FP8 changed 924 of 1,120 outputs and held recall (-0.05 points, lower bound -0.6), evidence precision (+0.02, lower bound -0.8), unsupported claims (+1.2, upper bound 2.8 against 3.0) and redaction pass rate (+0.8, lower bound -1.2). Secret leaks went from 561 to 604; the ratio was 1.077 and its upper bound 1.135 is above the 1.10 margin, so the rule says fail. The excess sits in three controls (log-023 248 -> 268, log-024 200 -> 220, repo-029 38 -> 56), partly offset by two (worklog-007 70 -> 60, worklog-014 5 -> 0). FP8 sat between NVFP4 (EXP-085: leak ratio 1.086, unsupported claims +1.8) and BF16 (outputs nearly unchanged).",
+  "decision": {
+    "action": "FP8 KV leaves the DFlash2 profile as NVFP4 did; DFlash2 with BF16 KV (EXP-085) remains the only quality-cleared DFlash2 profile",
+    "rule": "EXP-085's rule, unchanged (omp-ninfer e533a7dc), with this candidate registered in b4a6262c (2026-10-01T13:34:24Z) before its data: pass only when every one-sided 95% paired-bootstrap bound is inside its margin (lower bounds above -0.02 for recall, evidence precision, schema validity, tool selection and tool arguments; upper bounds below +0.03 for unsupported claims and +0.02 for duplicates; redaction pass-rate lower bound above -0.05; secret-leak ratio upper bound below 1.10), with every validity check holding.",
+    "verdict": "fail: secret_leak_ratio (upper bound 1.1345 against 1.10); every other bound inside; every validity check held",
+    "reason": "Both quantized KV formats moved the same metric the same way: leaks rose 8.6% (NVFP4) and 7.7% (FP8) on EXP-063's 504 redaction pairs. BF16 DFlash2 left leaks at exactly 561. The screen treats the leak bound as decisive, as EXP-063 did when it adopted a route only if redaction behaviour was not worse.",
+    "not_decided_here": "Whether the founder accepts BF16 DFlash2's two device state slots and 131,520 KV tokens (against shipped's four and 160,256), or wants a KV format search with a redaction-focused hypothesis first. The campaign stops here at the founder's request."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken; driver exp088-window.sh ran detached with a 130-minute dead-man; production stopped 13:35:23Z, restored healthy 15:10:45Z (1 h 35 min down), dead-man cancelled, the arm's checkpoint root removed, hold released with production /health 200 from Windows. Screen 13:35:54-14:56:04Z, determinism 14:56:42-15:10:00Z.",
+    "tool": {"path": "scripts/quality_screen.py", "commit": "b4a6262ccb578d7bdf19bb44544c0c0e339ba162", "sha256": "d579fa820ab33a166bd9549ea199a5c7227e21986f7a65bd6b2fb9dbcf7fd50b", "rule_change_since_e533a7dc": "none; the commit adds the follow-on candidate's registration only"},
+    "screen": "EXP-085's: 1,120 prompts (84 counted cases x 8 whitespace variants, 7 redaction controls x 72), screen sha256 91f98153 verified identical before the arm ran; the 80-prompt determinism subset on a fresh server",
+    "arm": "spk5-df2k7-c2ds4-fp8-ckpt: image ninfer-5090:008a7781-dflash2-nvfp4, server c260dde9, artifact 0634abb0; DFlash2 K=7, FP8 E4M3 row-256 KV, two requests, four device state slots, durable store on (EXP-087's arguments)",
+    "production": "EXP-085's pub-v0614b1 screen and determinism runs (shipped v0.9.0 image 4c816b0c, server f62a570e), unchanged"
+  },
+  "observations": {
+    "validity": {
+      "complete": "1,120 of 1,120 prompts scored",
+      "errors": "one: log-001.v4, an empty answer after reasoning, which errored identically in the determinism re-run",
+      "determinism": "80 of 80 byte-identical on a fresh server",
+      "perturbed_cases_required": 42,
+      "v0_against_single_run": "84 of 84 v0 outputs matched EXP-087's corpus run byte for byte"
+    },
+    "output_identity_with_production": "196 of 1,120",
+    "primary": {
+      "columns": ["production", "candidate", "difference or ratio", "95% bound", "margin", "inside"],
+      "required_fact_recall": [0.9376, 0.9372, -0.0005, -0.0055, -0.02, true],
+      "evidence_precision": [0.9783, 0.9784, 0.0002, -0.0076, -0.02, true],
+      "unsupported_claim_rate": [0.2433, 0.2552, 0.0119, 0.0284, 0.03, true],
+      "schema_valid_rate": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+      "tool_selection_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+      "tool_argument_accuracy": [1.0, 1.0, 0.0, 0.0, -0.02, true],
+      "duplicate_rate": [0.001, 0.004, 0.003, 0.008, 0.02, true],
+      "redaction_control_pass_rate": [0.5317, 0.5397, 0.0079, -0.0119, -0.05, true],
+      "secret_leak_ratio": [561, 604, 1.0766, 1.1345, 1.1, false]
+    },
+    "leaks_by_control": {"columns": ["production", "fp8"], "log-023": [248, 268], "log-024": [200, 220], "repo-029": [38, 56], "repo-030": [0, 0], "worklog-007": [70, 60], "worklog-008": [0, 0], "worklog-014": [5, 0]},
+    "secondary": {
+      "critical_misses": "79 -> 77 (ratio 0.975, upper bound 1.105)",
+      "forbidden_claims": "68 -> 69 (ratio 1.015, upper bound 1.145)",
+      "mean_output_tokens": "955.6 -> 961.9",
+      "unsupported_claim_rate_by_class": {"log-triage": "0.390 -> 0.416 (190 pairs)", "repository-evidence": "0.104 -> 0.117 (240)", "regression-contract": "1.0 -> 1.0 (64)", "work-log-extraction": "0.0 -> 0.0 (160)", "structured-output": "0.0 -> 0.0 (16)"}
+    },
+    "compare_exp085": {
+      "columns": ["nvfp4", "fp8", "bf16"],
+      "outputs_identical_to_production": [91, 196, 1091],
+      "secret_leaks": [609, 604, 561],
+      "secret_leak_ratio_upper_95": [1.141, 1.1345, 1.0],
+      "unsupported_claim_difference_upper_95": [0.0373, 0.0284, -0.003],
+      "evidence_precision_difference_lower_95": [-0.0115, -0.0076, -0.0067],
+      "verdict": ["fail", "fail", "pass"]
+    },
+    "screen_decode": {"decode_tok_s": 274.57, "tokens_per_round": 4.415, "ms_per_round": 16.08, "summed_request_seconds": 4809, "production_exp085": {"decode_tok_s": 237.82, "summed_request_seconds": 5375}},
+    "vram_after_screen_mib": 29472
+  },
+  "limits": [
+    "The verdict is a failure to bound the leak ratio inside 1.10, not a measured excess beyond it: the point estimate (1.077) is inside the margin.",
+    "Production's arm ran in EXP-085's window, about five hours before this candidate, on the same appliance, image, arguments and prompts.",
+    "Leak counts concentrate in two controls that fail in most samples in every arm (log-023, log-024), as in EXP-063.",
+    "The DFlash2 spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
