@@ -77,6 +77,12 @@ PREREGISTRATION: dict[str, Any] = {
         "profile with BF16 KV and two slots (spk5-df2k7-c2ds2) runs next under the same rule, to separate NVFP4's "
         "effect from DFlash2's"
     ),
+    "follow_on_candidates": {
+        "EXP-088": ("registered 2026-10-01 after EXP-085's verdicts and EXP-087's pre-check, before its data: the "
+                    "same DFlash2 K=7 two-request profile with the fork's FP8 E4M3 row-256 KV and four device "
+                    "state slots (spk5-df2k7-c2ds4-fp8-ckpt, server c260dde9), against EXP-085's production screen "
+                    "and determinism runs, under this rule unchanged"),
+    },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
         "required_fact_recall": {"direction": "higher", "margin": -0.02,
