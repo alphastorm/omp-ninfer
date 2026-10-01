@@ -1,0 +1,153 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-084",
+  "title": "NVFP4 paged KV on the fork's DFlash2 port on the RTX 5090: two requests start with four device state slots and 262,144 KV tokens, rounds are 12-27% shorter behind 32K-120K tokens and unchanged at short context, the durable store keeps exact restores and shipped v0.9.0's reuse, and MTP3 stays byte-identical",
+  "generated_utc": "2026-10-01T08:40:00Z",
+  "status": "completed_with_limits",
+  "question": "EXP-080 measured upstream's NVFP4 KV under DFlash2: two requests start with four device state slots and 262,144 KV tokens at no measured speed cost. EXP-083 showed the fork's BF16 two-slot DFlash2 profile keeps the durable store but re-prefills a sibling under device-state pressure that shipped's four slots serve from an anchor. Ported onto the fork with every BF16, INT8 and FP8 path unchanged, does NVFP4 KV give the fork's DFlash2 profile four slots and at least 262,144 KV tokens, at no more than 3% round cost, with the durable store intact and MTP3 byte-identical?",
+  "answer": "Yes. With NVFP4 KV the two-request DFlash2 profile started with --device-state-slots 4 and resolved 262,144 KV tokens (BF16 on the same binary: 131,520; shipped v0.9.0: 160,256). The KV payload fell from 8.03 GiB to 4.50 GiB while doubling capacity, VRAM in use after the decode probe from 29,470 to 26,232 MiB, and 5.07 GiB stayed free after startup against 1.91 GiB. Rounds matched BF16 at short context (15.55 vs 15.57 ms) and in the pair (23.0-23.2 vs 23.0-23.3 ms) and were 12%, 19% and 27% shorter behind 32K, 64K and 120K tokens (18.82 vs 25.89 ms at 120K). The durable sequence passed with shipped's reuse pattern: a 57,889-token session restored hot after two restarts (214 and 236 tokens computed) from a 1.66 GB checkpoint saved in 1.56 s (BF16 DFlash2: 4.41 GB, 3.29 s), the sibling probe reused on the same four steps as shipped v0.9.0 (EXP-083's two-slot profile had re-prefilled sibling_2), and the multi-session probe lost no reuse (shipped: 2 of 12). MTP3 on the binary stayed 89/89 byte-identical to v0.9.0 and v0.8.7. One unpowered role-corpus run of the NVFP4 profile decoded 24.0% faster than MTP3 in the same window, and its evidence precision was 0.951 against MTP3's 0.994, a gap larger than the automatic-use gate's 2.0 points.",
+  "decision": {
+    "action": "keep NVFP4 as the DFlash2 port's KV format; next, a powered quality screen of the DFlash2 NVFP4 profile against shipped MTP3",
+    "rule": "Pre-registered before the window (PLAN.md): keep if (a) every listed GPU test passes; (b) the NVFP4 arm starts at two requests with --device-state-slots 4 and resolves at least 262,144 KV tokens; (c) on each probe step (contexts 0, 32K, 64K, 120K and the pair) the NVFP4 arm's mean ms per round is at most 1.03 x the BF16 arm's in this window; (d) on the NVFP4 arm restore_probe exits 0 with both restored continuations restored (computed_prefill_tokens <= 1,024), multisession reuse_lost <= 2 (shipped v0.9.0's on the identical sequence, EXP-083), the sibling probe reuses on shipped's steps (cached tokens > 0 on depth_1, sibling_1, sibling_2 and continue_sibling_2), no server error and no refused export; (e) spk5-mtp3-c1 answers 89/89 byte-identically to shipped v0.9.0 and v0.8.7. Reject on any failure; diagnose the failing stage and rerun it.",
+    "rule_outcome": {
+      "a_gpu_tests": "pass after one rerun: in the first window 7 of 9 invocations passed and both attention invocations aborted on a test defect (see gpu_tests); after a test-only fix the second window ran both attention invocations and both passed, including every legacy BF16, INT8 and FP8 attention case",
+      "b_capacity": "pass: 262,144 KV tokens (4,096 of 4,096 pages) with --max-concurrency 2 and --device-state-slots 4",
+      "c_round_cost": "pass: NVFP4/BF16 ms per round 0.999 at context 0, 0.881 at 32K, 0.809 at 64K, 0.727 at 120K, 1.010 and 0.988 for the pair; maximum 1.010 against the 1.03 bound",
+      "d_durable": "pass: restore_probe exit 0, restored continuations computed 214 and 236 tokens; sibling cached tokens 81, 116, 61 and 155 on the four steps (shipped: 81, 116, 61, 155); multisession reuse_lost 0 of 12; 0 server errors, 0 request errors, 0 frontier refusals, every shutdown 'refused 0'",
+      "e_mtp3_identity": "pass: 89/89 against v0.9.0 (pub-v0614b1) and 89/89 against v0.8.7 (pub-v0613b1)"
+    },
+    "reason": "Every criterion held. NVFP4 returns the capacity DFlash2's weights took from the two-request profile and more (262,144 tokens with four slots against shipped's 160,256 with four), costs nothing at short context and in the pair, and shortens long-context rounds because each verify reads 3.6 times fewer KV bytes. With four slots the planner served the sibling EXP-083's two-slot profile re-prefilled, and the multi-session probe kept every reuse.",
+    "not_decided_here": "Adoption. The NVFP4 profile's outputs differ from shipped's in 79 of 89 role-corpus cases, and its single run's evidence precision (0.951 against 0.994) is outside the automatic-use gate's 2.0-point criterion. One run per arm cannot tell that from prompt-level noise; EXP-080's upstream NVFP4 run measured 0.979 against its BF16 run's 0.993.",
+    "next": "EXP-085: a pre-registered, powered paired quality screen of the role corpus under non-semantic prompt variants (EXP-063's method extended to every primary gate metric): shipped v0.9.0 MTP3 against the DFlash2 K=7 NVFP4 two-request profile, with the BF16 DFlash2 profile as a second candidate to separate NVFP4's effect from DFlash2's."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "windows": [
+      "First: Windows lane hold taken; driver exp084-window.sh ran detached on the appliance; dead-man armed 07:23:17Z, production stopped 07:23:21Z, restored healthy 07:49:45Z (1,584 s down), dead-man cancelled, the arms' checkpoint roots removed, hold released with production /health 200 from Windows.",
+      "Second (attention tests only, after the test fix): driver exp084b-window.sh; production stopped 07:54:58Z, restored healthy 08:06:46Z (708 s down); same hold, dead-man and cleanup."
+    ],
+    "runtime": {
+      "source": "spike/dflash2-nvfp4-5090 at 008a77810b83475c924273759bbd68a45163164f on EXP-083's 52f38907: six commits port upstream's NVFP4-G16 paged-KV storage (four U8 planes per layer: K and V E2M1 codes, K and V E4M3 group-16 scales; normalized Hadamard rotation of K and V), its standalone and fused append, and its Grouped, ParallelGrouped and Tiled causal attention planners and kernels as final files from upstream d44ab584 (provenance 4ac73c47, a7818988's masked-width validation, 1192ad76, 1737ca11's shared primitives, d44ab584's width-192 planner), dispatched before the fork's unchanged legacy router, with an explicit storage identity threaded through planning, page geometry, views, workspace sizing, the memory summary, capture identities and checkpoint identities. Launch units are sm_120a-only with rejecting stubs elsewhere. The legacy append and attention kernel files, causal_attention_resolve_route, the Q5 projection routes and the DFlash2 cyclic draft cache are byte-identical to 52f38907. Test-only commit 9805085f fixes the NVFP4 workspace contract test (gpu_tests).",
+      "build": "incremental build in a copy of EXP-079's build tree (container ninfer-dflash2-nvfp4-build from image ninfer-dflash2-build-env:20261001: nvidia/cuda:13.1.2-devel-ubuntu24.04, GNU 13.3.0, CUDA 13.1.115, CMAKE_CUDA_ARCHITECTURES=120a, Release, profile dflash2-nvfp4-5090, NINFER_PATCH_STACK_SHA 008a7781), archive source (source_dirty=true); all 1,384 tracked files hash-identical to 008a7781 (sorted manifest sha256 30aef9c4); CPU tests passed: CLI options, serve options, runtime mechanisms, StateImage layout, checkpoint I/O contract, session checkpoint store, resource manager, checkpoint policy, artifact reader, HTTP error handler, KV cache layout. For the second window only ninfer_softmax_attention_test was rebuilt from 9805085f (sha256 2b000ca1); ninfer-serve and ninfer were unchanged.",
+      "server_binary_sha256": "c260dde972b89176219b86b9b89e8606a227eb4b0899df60560b81b728020598",
+      "cli_binary_sha256": "7f466932f6e786a5ad85261c74cd497c5d4004fbe28057f75edca6d429e69be7",
+      "image": "ninfer-5090:008a7781-dflash2-nvfp4 (sha256:e3113d97889083c20276ce3a0791be5d4d96b9c0902841f4a1205eddbafa2232): EXP-079's image with ninfer-serve and ninfer replaced"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6 (EXP-079's)",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "bytes": 20437336576
+    },
+    "arms": {
+      "spk5-df2k7-c2ds2": "EXP-082's spk3-df2k7-c2ds2 arguments with the new binary: --spec dflash2 --draft-tokens 7 --lm-head-draft --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2 --host-state-slots 24 --host-kv-mib 16384, no durable store",
+      "spk5-df2k7-c2ds4-nvfp4-ckpt": "EXP-083's spk4-df2k7-c2ds2-ckpt arguments with the new binary, --kv-dtype nvfp4 and --device-state-slots 4 (shipped's slot count), --config-sha256 7effe3ce (a label identity), durable store on (--session-checkpoint-dir /checkpoints, quota 24,576 MiB, staging 256 MiB)",
+      "spk5-mtp3-c1": "EXP-083's spk4-mtp3-c1 arguments with the new binary: v0.8.7's one request with the durable store on, --spec mtp --draft-tokens 3, BF16 KV"
+    },
+    "steps": {
+      "gpu_tests": "from the build tree in test image ninfer-dflash2-spike-test:20260930: ninfer_kv_cache_append_test (every case, including NVFP4 exact code and scale bytes); ninfer_softmax_attention_test (every causal, packed and context case) and ninfer_softmax_attention_test --causal-only --kv-dtype nvfp4; ninfer_kv_cache_test; ninfer_qwen3_8_27b_dflash2_nvfp4_real_test; ninfer_qwen3_8_27b_dflash2_checkpoint_real_test 7 1 nvfp4 and 7 1; ninfer_qwen3_8_27b_dflash2_real_test 7 1 1 1 bf16 0 0 and 7 1 0 2 bf16 0 0",
+      "decode_probe": "speculative_decode_probe.py (sha256 a16600f9) on spk5-df2k7-c2ds2 and on a fresh spk5-df2k7-c2ds4-nvfp4-ckpt: --contexts 0,32000,64000,120000 --continuation-context -1 --pair, a code answer of 2,048 tokens behind each context and two 1,024-token requests together; every prompt starts with its own nonce; timings from the server's request log",
+      "durable_sequence": "on a fresh spk5-df2k7-c2ds4-nvfp4-ckpt: restore_probe.py (sha256 3b76b037; --base-tokens 48000, three planted keys, control retrieval, explicit save, two verified `docker restart --time 90` each followed by a restored continuation and a settle save), sibling_continue_probe.py (sha256 928cb51d), multisession_probe.py (sha256 b610e865; 3 sessions x 50K-token bases, 2 rounds of continuation plus one fork each), EXP-083's sequence",
+      "role_corpus": "the frozen 89-case role corpus (sha256 7be1bd85), run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process, on spk5-df2k7-c2ds4-nvfp4-ckpt and spk5-mtp3-c1, compared with the shipped v0.9.0 and v0.8.7 runs"
+    }
+  },
+  "observations": {
+    "gpu_tests": {
+      "first_window_exits": {"kv_cache_append": 0, "softmax_attention": 134, "softmax_attention_nvfp4": 134, "kv_cache": 0, "dflash2_nvfp4_real": 0, "dflash2_checkpoint_real_nvfp4": 0, "dflash2_checkpoint_real_bf16": 0, "dflash2_real_k7_head1_b1": 0, "dflash2_real_k7_head0_b2": 0},
+      "attention_abort": "both attention invocations aborted at their first NVFP4 call: the ported workspace-contract test asked causal_softmax_attention_workspace_capacity_bytes for two- and eight-request intervals up to 17, 193 and 1,025 columns, which the public API rejects for every storage (batched verify carries at most 16 columns, as in upstream, whose test checks those intervals at one request only); the uncaught std::invalid_argument ended the process before any NVFP4 or legacy attention case ran",
+      "fix": "9805085f: batched intervals stay within 16 columns (1-16 and 8-8 at two and eight requests; 1-16, 1-17, 8-8, 17-193 and 17-1,025 at one), and the test requires the API to reject a two-request 17-column interval",
+      "second_window_exits": {"softmax_attention": 0, "softmax_attention_nvfp4": 0},
+      "second_window_lines": ["PASS causal_softmax_attention nvfp4 public-contract correctness", "PASS causal_softmax_attention public-contract correctness", "packed_softmax_attention: PASS", "context_softmax_attention: PASS"],
+      "dflash2_nvfp4_real": "ok kv=nvfp4 K=7 B=2 graph=1 max_context=131072 kv_capacity=262144 device_state_slots=4 accepted=132: two requests decode graph-replayed DFlash2 batches, slots swapped between phases, each row equal to a serial eager NVFP4 oracle",
+      "checkpoint_round_trip": {"nvfp4": "exported 3,522 tokens in 457,943,242 bytes; live next turn 96 tokens, 13 rounds, 82 of 89 drafts accepted, 3,407 reused tokens; restored identical in every field", "bf16": "exported 3,522 tokens in 626,763,978 bytes; identical in every field (EXP-083's values)"},
+      "dflash2_real": "K=7 graph: passed with the optimized head at maximum batch 1 and the full head at maximum batch 2, 20 of 20 accepted"
+    },
+    "capacity_and_memory": {
+      "columns": ["spk5-df2k7-c2ds2 (BF16)", "spk5-df2k7-c2ds4-nvfp4-ckpt"],
+      "kv_cache": ["bf16", "nvfp4-group16"],
+      "device_state_slots": [2, 4],
+      "kv_capacity_tokens": [131520, 262144],
+      "kv_pages": ["2,055 of 4,096", "4,096 of 4,096"],
+      "kv_payload_bytes": [8619294720, 4831838208],
+      "kv_payload_bytes_per_token": [65536, 18432],
+      "available_after_startup_bytes": [2049966080, 5445255168],
+      "vram_after_probe_mib": [29470, 26232],
+      "weights_bytes": [19973043200, 19973043200],
+      "shipped_v090": "160,256 KV tokens, four device state slots, 30,242 MiB after load (EXP-083)"
+    },
+    "decode_probe": {
+      "columns": ["spk5-df2k7-c2ds2 (BF16)", "spk5-df2k7-c2ds4-nvfp4-ckpt"],
+      "ms_per_round": {"context-0": [15.566, 15.553], "context-32000": [18.617, 16.397], "context-64000": [21.39, 17.312], "context-120000": [25.891, 18.822], "pair-1": [22.962, 23.201], "pair-2": [23.29, 23.021]},
+      "ratio_nvfp4_over_bf16": {"context-0": 0.9992, "context-32000": 0.8808, "context-64000": 0.8094, "context-120000": 0.727, "pair-1": 1.0104, "pair-2": 0.9884},
+      "decode_tok_s": {"context-0": [369.6, 389.6], "context-32000": [311.6, 358.9], "context-64000": [273.6, 321.5], "context-120000": [211.5, 298.9], "pair-1": [226.4, 231.1], "pair-2": [233.9, 230.5]},
+      "tokens_per_round": {"context-0": [5.753, 6.059], "context-32000": [5.802, 5.885], "context-64000": [5.851, 5.565], "context-120000": [5.476, 5.626], "pair-1": [5.198, 5.361], "pair-2": [5.447, 5.306]},
+      "pair_client_aggregate_tok_s": [433.57, 434.44],
+      "note": "Every probe prompt starts with its own random nonce, so the two arms decode different texts; tok/s and tokens per round move with the text, ms per round is the like-for-like cost. The plan's reported comparison of the BF16 arm's context-0 output with EXP-082's assumed a fixed prompt and is void."
+    },
+    "restore_probe": {
+      "template_input_tokens": 57889,
+      "cold_prefill_s": 21.174,
+      "checkpoint_bytes": 1661989191,
+      "checkpoint_frontier_tokens": 58138,
+      "explicit_save_s": 1.562,
+      "restart_ready_after_s": [29.39, 29.71],
+      "restored_requests": [
+        {"prompt_tokens": 58186, "computed_prefill_tokens": 214, "reuse_path": "private_response_replay", "ttft_s": 0.317, "tokens_per_round": 5.935},
+        {"prompt_tokens": 58417, "computed_prefill_tokens": 236, "reuse_path": "private_response_replay", "ttft_s": 0.323, "tokens_per_round": 7.609}
+      ],
+      "in_process_control": {"computed_prefill_tokens": 49, "reuse_path": "private_endpoint", "ttft_s": 0.125, "tokens_per_round": 5.062},
+      "planted_keys_quoted": "all three in the control and both restores",
+      "compare_exp083": "BF16 two-slot DFlash2: 4,406,508,551 bytes saved in 3.294 s; shipped v0.9.0 MTP3: 4,514,771,878 bytes in 3.258 s, for the same template"
+    },
+    "sibling_probe": {
+      "steps": ["base", "depth_1", "sibling_1", "sibling_2", "continue_sibling_2"],
+      "cached_tokens_nvfp4": [0, 81, 116, 61, 155],
+      "cached_tokens_shipped_exp083": [0, 81, 116, 61, 155],
+      "cached_tokens_bf16_two_slot_exp083": [0, 81, 116, 0, 155],
+      "server_errors": 0
+    },
+    "multisession_probe": {
+      "continuations_and_forks": 12,
+      "reuse_lost": 0,
+      "server_reuse_paths": ["private_endpoint", "private_long_anchor", "root"],
+      "root_requests_after_bases": 0,
+      "server_errors": 0,
+      "compare_exp083": "shipped v0.9.0 and the BF16 two-slot DFlash2 profile each lost 2 of 12 (r2_continue_D2, r2_continue_D3)"
+    },
+    "durable_store": {
+      "frontier_refusals": 0,
+      "request_errors": 0,
+      "shutdown_lines": ["probe: saved 0, nothing to save 0, refused 0", "restart 1: saved 0, nothing to save 1, refused 0", "restart 2: saved 0, nothing to save 1, refused 0", "durable end: saved 2, nothing to save 3, refused 0", "corpus: saved 0, nothing to save 0, refused 0"]
+    },
+    "role_corpus": {
+      "columns": ["spk5-df2k7-c2ds4-nvfp4-ckpt", "spk5-mtp3-c1"],
+      "identity_vs_shipped": ["10/89 identical to v0.9.0 and to v0.8.7 (79 differ)", "89/89 identical to v0.9.0 and to v0.8.7"],
+      "request_log": {"decode_tok_s": [295.3, 238.16], "tokens_per_round": [4.667, 3.343], "ms_per_round": [15.81, 14.03], "summed_request_seconds": [331.2, 405.0], "prefill_tok_s": [3026.8, 3028.0], "requests": [84, 84]},
+      "decode_gain_over_mtp3": "+24.0%",
+      "compare_earlier_dflash2": "EXP-081 BF16 DFlash2 at one request: 288.09 tok/s, 16.24 ms per round, against shipped's 237.37 (+21.4%)",
+      "scorer_aggregates": {
+        "required_fact_recall": [0.8866, 0.8797],
+        "evidence_precision": [0.9507, 0.9935],
+        "unsupported_claim_rate": [0.2135, 0.236],
+        "schema_valid_rate": [0.9438, 0.9438],
+        "redaction_control_pass_rate": [0.625, 0.5],
+        "secret_leak_count": [8, 10],
+        "critical_miss_count": [10, 10],
+        "forbidden_claim_count": [9, 9],
+        "duplicate_rate": [0.0039, 0.0],
+        "mean_output_tokens": [940.4, 967.6]
+      },
+      "earlier_single_runs": "evidence precision: EXP-080 upstream DFlash2 NVFP4 0.979 against upstream DFlash2 BF16 0.993 (EXP-078); EXP-081 fork DFlash2 BF16 0.987 against shipped 0.994",
+      "errors": "the five json_schema structured-output cases (struct-001, -003, -004, -006, -007) answered HTTP 400 at transport in both arms, as in every earlier corpus run"
+    }
+  },
+  "limits": [
+    "Criterion (a) passed only after the attention tests were rerun in a second window. The fix touched the test source only; the server binary used by every arm is the one built before the first window, and the rerun covered the two attention invocations, not the other seven, which had passed.",
+    "One run per arm and probe on one appliance. The decode probe's prompts carry random nonces, so the two DFlash2 arms decoded different texts; ms per round is the comparable measure, and tok/s and tokens per round move with the text.",
+    "The role-corpus quality figures are one unpowered run per arm. The NVFP4 profile's evidence precision (0.951 against 0.994) and its 79 of 89 changed outputs are the open quality question, not a measured regression.",
+    "The NVFP4 arm ran with the durable store on and the BF16 arm without it; the decode probe saves no checkpoint (its server's shutdown reported saved 0, nothing to save 0).",
+    "Durability and reuse were measured on the NVFP4 arm only in this window; the shipped and BF16 two-slot comparisons are EXP-083's runs of the identical sequence on the same appliance.",
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate. No sm_89 or sm_86 build was made; those lanes compile the NVFP4 launchers as rejecting stubs."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

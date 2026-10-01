@@ -1265,13 +1265,15 @@ without that route the first port slowed with context
 sessions keep the durable store: the draft context ring rides every checkpoint, a restored
 session decodes its next turn exactly as the exporting engine does, and 58K-token sessions
 restore hot across restarts with MTP3 byte-identical
-([EXP-083](docs/measurements/2026-10-01-dflash2-durable-store-rtx5090.json)). Two steps remain
-before the shipped two-request profile. At two requests with BF16 KV DFlash2 leaves 131,520 KV
-tokens and two device state slots where v0.9.0 has 160,256 and four, and under that device-state
-pressure it re-prefilled one short sibling that shipped served from an anchor; NVFP4 KV restores
-all four slots with 262,144 tokens at no measured speed cost on upstream, within a single quality
-screen's bounds ([EXP-080](docs/measurements/2026-09-30-kv-nvfp4-k8v4-rtx5090.json)), and is the
-next port. Then the outputs need a powered quality screen against shipped MTP3.
+([EXP-083](docs/measurements/2026-10-01-dflash2-durable-store-rtx5090.json)). At two requests with
+BF16 KV DFlash2 left 131,520 KV tokens and two device state slots where v0.9.0 has 160,256 and
+four. Upstream's NVFP4 KV, ported with every BF16 path unchanged, gives the two-request DFlash2
+profile four slots and 262,144 KV tokens, rounds 12-27% shorter behind 32K-120K tokens, hot
+restores from 1.66 GB checkpoints and shipped's reuse, with MTP3 byte-identical
+([EXP-084](docs/measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)). One step remains before
+the shipped two-request profile: its outputs differ from shipped's in 79 of 89 role-corpus cases,
+and one run's evidence precision was 0.951 against 0.994, so a powered quality screen against
+shipped MTP3 decides.
 
 ## How to help right now
 

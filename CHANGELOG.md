@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the same probe sequence shipped v0.9.0 lost the same multi-session reuse; DFlash2's two-slot
   profile re-prefilled one short sibling under device-state pressure
   ([EXP-083](docs/measurements/2026-10-01-dflash2-durable-store-rtx5090.json)).
+- EXP-084 receipt: upstream's NVFP4 paged KV, ported onto the fork's DFlash2 spike (`008a7781`)
+  with every BF16, INT8 and FP8 path unchanged, gives the two-request DFlash2 profile four device
+  state slots and 262,144 KV tokens (BF16: two and 131,520; v0.9.0: four and 160,256). Rounds
+  match BF16 at short context and in the pair and are 12-27% shorter behind 32K-120K tokens.
+  The durable sequence keeps hot restores from 1.66 GB checkpoints and shipped's reuse, and MTP3
+  stays byte-identical. One unpowered role-corpus run decoded 24.0% faster than MTP3 with
+  evidence precision 0.951 against 0.994, which a powered quality screen now tests
+  ([EXP-084](docs/measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)).
 
 ## [0.9.1] - 2026-10-01
 
