@@ -488,7 +488,7 @@ def main() -> int:
     manifest["publication"]["external_installation_qualified"] = True
     manifest["qualification"]["external_installation_passed"] = True
     save(manifest_path, manifest)
-    print(f"composed {args.release} acceptance: {len(LANES)} routes, {len(platform_rows)} client "
+    print(f"composed {args.release} acceptance: {len(lanes)} routes, {len(platform_rows)} client "
           f"receipts; commit, then rebind_release.py --pin <commit> --stage platform")
     return 0
 
