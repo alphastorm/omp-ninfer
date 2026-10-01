@@ -116,7 +116,7 @@
     "The engine-level round trip runs in one process through the in-memory session checkpoint API, not the store's files; the store's files and real restarts are covered by the restore probe, whose restored prompts differ from its control, so serve-level restores are shown by planted-key retrieval, hot reuse and drafting rate rather than byte equality.",
     "The power check is a throwaway binary that locates the ring by its position in the host StateImage layout; it is not part of the committed test.",
     "Reuse outcomes in the sibling and multisession probes depend on the planner's cost model and pressure at the moment of each request.",
-    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate."
+    "The spike binary is an incremental archive build (source_dirty=true) of a branch, not a release candidate. Its self-reported identity says patch=7e4d120a: the build tree's NINFER_PATCH_STACK_SHA was not reconfigured after EXP-082, so the binary's source rests on the per-file hash proof against 03212c9d and its SHA-256, not on that label."
   ],
   "raw_prompts_outputs_or_secrets_included": false
 }
