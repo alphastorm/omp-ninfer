@@ -7,11 +7,11 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.9.0`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.9.1`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.9.0 uses upstream OMP 18.4.0 binaries and no client cask.
+v0.7.4. v0.9.1 uses upstream OMP 18.4.0 binaries and no client cask.
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -27,7 +27,94 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.9.0 public release — two requests in flight on the RTX 5090
+### v0.9.1 public release — RTX 3090 on the native Windows runtime
+
+The 2026-10-01 lane release adds **RTX 3090 native Windows** with the unmodified upstream
+OMP 18.4.0 client. RTX 5090 and RTX 4090 components, profiles, model and memory floors are
+byte-identical to v0.9.0. The three runtime identities are:
+
+| Lane | Component tag | Bytes | Server | Source | Profile / configuration |
+| --- | --- | --- | --- | --- | --- |
+| RTX 5090 (unchanged) | `v0.6.14-qwen38-5090-beta.1` | image `sha256:4c816b0c…` | `f62a570e` | `e20060b6` | `qwen38-5090-v0.9.0` / `cf1de114`; two requests in flight |
+| RTX 4090 (unchanged) | `v0.6.10-qwen38-4090-beta.1` | package `a0ea4c81` (574,717,115 bytes) | `e0498fad` | `cba7eb93` | `qwen38-4090-native-v0.6.10-beta.1` / `7a69481f`; one request |
+| RTX 3090 (new) | `v0.6.2-qwen38-3090-beta.1` | package `da1d62f2` (595,676,373 bytes) | `11b3f93c` | `f08309da` | `qwen38-3090-native-v0.6.2-beta.1` / `0f700667`; one request |
+
+RTX 3090 source `f08309da` is the RTX 5090 runtime's `e20060b6` plus one controller fix,
+built for sm_86. Its managed scheduled task, protected state root, graceful stop that saves
+live sessions, durable checkpoints and rollback follow the RTX 4090 lifecycle. The profile
+serves **one request at a time**, with a **30 s** pending timeout, **131,072 tokens of INT8
+KV with MTP3**, an **8192 MiB** host-KV pool and **24 host-state slots**. Keep-warm is off;
+no host-memory floor is declared because the lane was qualified on one host. While serving,
+the GPU-owner controller holds the card at **300 W**, restoring the owner's **370 W** limit
+on stop. Both native lanes are text/tools; vision remains an RTX 5090 container capability.
+
+The [RTX 3090 lane receipt](../releases/v0.9.1/qualification/rtx3090.json) records the
+qualified package on the physical RTX 3090:
+
+- **130,048-token retrieval was exact in 221.0 s** at the 131,072-token ceiling.
+- C1 reached **102.64 tok/s decode** and **93.43% MTP acceptance**, with peak power
+  **299.92 W** under the 300 W cap. This trajectory-sensitive fixture has no like-for-like
+  predecessor on this lane; no speed-up over the historical v0.7.2 RTX 3090 route is claimed.
+- Restart took **104.5 s**, including a managed-stop flush of an unpublished session.
+- Rollback passed in both directions against the lane's **unpublished v0.6.0-beta.1** package.
+  That predecessor predates the stop-event channel, so its stop is a termination.
+- Protected state refused two low-privilege reads; the 15-check agent protocol passed at the
+  shipped host pool and with 8 host-state slots, as did the unmodified OMP 18.4.0 typed tool call.
+
+The first qualification window, on `e20060b6`, failed rollback because the shared Windows
+controller read `context_cache.host_kv_mib` under PowerShell strict mode from a predecessor
+configuration that did not declare it. Source `f08309da` passes `--host-kv-mib` only when
+the release's own configuration declares the field. Every published RTX 4090 package declares
+it, so the unchanged RTX 4090 lane was never exposed.
+
+From v0.9.0, RTX 5090 and RTX 4090 owners change nothing: the OMP binary, `models.yml`,
+`PI_OPENAI_STATEFUL=1` and their launch remain unchanged. RTX 3090 owners follow the
+[quickstart](QUICKSTART.md) and merge `ninfer-native-3090: 1` under
+`providers.maxInFlightRequests` in `~/.omp/agent/config.yml`, as the shared
+[fail-closed config](../examples/manual-tunnel/fail-closed.yml) now does. OMP leaves an
+unlisted provider unlimited; excess requests wait at the server and can expire after 30 s.
+All three lanes serve the unchanged model artifact `eec39564…`.
+
+All five documented routes passed **31 steps** on candidate `c55185dd`
+(`c55185dd39cbdb440620721c2a9d0dc06de010f4`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native
+Windows 7 and RTX 3090 native Windows 7; all three hosts were restored. The upstream macOS
+arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against image `4c816b0c`. Linux ran under **WSL2**,
+not a separately qualified Linux OS. macOS remains preview without a managed installation
+or appliance lifecycle.
+[Documented routes](../releases/v0.9.1/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json).
+
+Both native lanes installed from their public assets. The RTX 3090 documented route performed
+a **fresh canonical upgrade installation** of the published package after preserving the active
+qualified instance; all moved originals were restored. This is not an idempotent-reinstall
+claim. A separate pre-route public-asset probe downloaded every manifest-bound asset, verified
+the closed checksum set, had the downloaded installer accept the installed qualified bytes
+(`already_installed`), started, served, refused an anonymous status request with HTTP 401
+and stopped the release.
+[RTX 3090 public install](../releases/v0.9.1/acceptance/rtx3090-public-install.json) ·
+[RTX 4090 public install](../releases/v0.9.1/acceptance/rtx4090-public-install.json).
+
+The RTX 5090 routes ran in **two production windows** from the maintainer's Apple silicon
+workstation over the tailnet. Downtime was at most **408.4 s (6.8 min)** and **386.5 s
+(6.4 min)** ([restoration](measurements/2026-10-01-v091-acceptance-restoration.json)).
+The first window passed every route, client probe and restoration check, but its summary
+refused an unchanged Windows scheduled task that was `Running` at baseline and `Ready`
+at the end. The summary now requires byte-identical hold markers and tasks with unchanged
+definitions and enabled states; that window's evidence passed the corrected summary. One
+corrected window on the same candidate passed in fresh workspaces.
+
+The RTX 3090 route ran with its console signed out: managed start refuses while any process
+holds at least 1 GiB of GPU memory, and the signed-in desktop's compositor alone held about
+1,070 MiB. The standalone lane does not activate the deferred RTX 3090 fleet scout role.
+The historical v0.7.2 RTX 3090 route remains a separate durable v0.2 lineage with the OMP
+18.0.9 fork client; its sessions do not carry over. The upstream engine merge remains deferred.
+
+[Release notes](../releases/v0.9.1/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.9.1/manifest.json) · [Qualification](../releases/v0.9.1/qualification.json).
+
+### v0.9.0 historical public release — two requests in flight on the RTX 5090
 
 The RTX 5090 serves **two requests at once** with `v0.6.14-qwen38-5090-beta.1`
 (image `4c816b0c`, server `f62a570e`), deployment profile `qwen38-5090-v0.9.0` and
@@ -125,7 +212,7 @@ starts, and the window's drivers had forwarded a terminal that never closes. Eve
 client now reads an empty stdin. Candidate `0d2a7468` passed the RTX 4090 route and a third
 RTX 5090 window.
 
-RTX 3090 remains deferred. [Release notes](../releases/v0.9.0/NINFER_RELEASE_NOTES.md) ·
+RTX 3090 was deferred in v0.9.0. [Release notes](../releases/v0.9.0/NINFER_RELEASE_NOTES.md) ·
 [Manifest](../releases/v0.9.0/manifest.json) · [Qualification](../releases/v0.9.0/qualification.json).
 
 ### v0.8.7 historical public release — long sessions keep their cache
@@ -1477,18 +1564,25 @@ It uses state root `C:/ProgramData/NInfer/qwen38-3090-native`, task
 and container-host pause prerequisite. Existing hold files are snapshotted and audited on both
 lanes. Do not run a window with inference processes, listeners or an outstanding GPU lease.
 
-### RTX 3090 addition after qualification
+### Completed v0.9.1 RTX 3090 addition and future lane procedure
 
-This is a future operator handoff, not a staged or published v0.9.1 release. Obtain the
-composed receipt from the unchanged `scripts/compose_native_qualification.py`, the package
-build receipt and the packager's complete ten-file `package-a` directory. No package hash or
-hardware result is inferred here. The component uses source
+The RTX 3090 addition is complete: v0.9.1 accepted all five documented routes on candidate
+`c55185dd`, with the published package `da1d62f2` and all three hosts restored.
+[Lane qualification](../releases/v0.9.1/qualification/rtx3090.json) ·
+[Documented routes](../releases/v0.9.1/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json).
+
+The commands below retain the completed v0.9.0-to-v0.9.1 cut as a worked example, not an
+instruction to republish it. For a future lane, substitute its release, candidate, lane,
+component identities, state root and fresh workspaces while preserving the composer, rebind
+and verification sequence. Obtain real qualification and package-build receipts plus the
+complete asset directory for that lane; never infer a package hash or hardware result.
+The v0.9.1 component uses source
 `f08309da3cc1d4226d127b7c9ce22267d12070cc` (v0.9.0's RTX 5090 source `e20060b6` plus the
 controller fix that lets a rollback launch a predecessor whose config predates
 `context_cache.host_kv_mib`), tag `v0.6.2-qwen38-3090-beta.1` and package
 `ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`.
-On its build host the assets are `C:/b/ninfer-rtx3090-f08309da/package-a`; when cutting from
-another machine, `ASSETS` must name a verified local copy of that complete directory.
+`ASSETS` must name a verified local copy of the complete component asset directory.
 
 ```sh
 export NINFER_RUNTIME_DIR=/path/to/ninfer-checkout
@@ -1500,8 +1594,9 @@ bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 
 # FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.
 ```
 
-After founder publication, stage the product with the current component pins and deployment
-profile intact. Passing the existing stock-client descriptor resets client/route acceptance
+After founder publication, stage the next product release with the existing lanes' component
+pins and deployment profiles intact. In the worked example, v0.9.0 is the predecessor, not
+the current release. Passing the existing stock-client descriptor resets client/route acceptance
 without changing the OMP binary. Its predecessor-pin warnings are expected because OMP remains
 18.4.0; do not use `--require-clean-client` to demand a different client identity.
 

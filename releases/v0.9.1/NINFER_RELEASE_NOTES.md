@@ -1,10 +1,10 @@
 # OMP NInfer v0.9.1 — RTX 3090 on the native Windows runtime
 
-**Owner-operated, exact-profile 0.x candidate; no SLA.** The RTX 3090 returns as a native
+**Owner-operated, exact-profile 0.x release; no SLA.** The RTX 3090 returns as a native
 Windows lane on the mainline runtime, with the unmodified upstream OMP 18.4.0 client and one
 request at a time. The RTX 5090 and RTX 4090 components, profiles, model and memory floors are
-unchanged from v0.9.0. The five documented routes must pass on the published components before
-v0.9.1 is a release. The upstream engine merge remains deferred.
+unchanged from v0.9.0. The five documented routes are accepted on the published components;
+receipts are linked below. The upstream engine merge remains deferred.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -82,14 +82,27 @@ host. While it serves, its GPU-owner controller holds the card at 300 W and rest
 
 ## Documented routes and clients
 
-Route acceptance is pending. The five documented routes - RTX 5090 container host, macOS
-client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows - must run on the
-published v0.6.14 RTX 5090 image `4c816b0c`, the unchanged v0.6.10 RTX 4090 package and the new
-v0.6.2 RTX 3090 package with upstream OMP 18.4.0, and both native lanes must install from their
-public assets. Fresh client-platform acceptance is also pending. Until those runs pass, v0.9.1
-stays a candidate and `--require-ready` refuses it. v0.9.0's accepted routes are not carried.
-The macOS profile stays `preview`: the upstream client has no managed installation or appliance
-lifecycle. Prior Linux acceptance ran under WSL2, not a separately qualified Linux OS.
+The five documented routes passed on candidate `c55185dd` with unmodified OMP 18.4.0 on the
+published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5),
+RTX 4090 native Windows (7) and RTX 3090 native Windows (7), with all three hosts restored
+([routes](acceptance/documented-routes.json)). Both native lanes installed from their public
+assets ([RTX 3090](acceptance/rtx3090-public-install.json),
+[RTX 4090](acceptance/rtx4090-public-install.json)). The upstream macOS arm64, Windows x64 and
+Linux x64 binaries each passed a typed tool turn, an exact continuation and a fail-closed request
+against RTX 5090 image `4c816b0c`
+([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
+`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
+under WSL2, not a separately qualified Linux OS.
+
+The RTX 5090 routes ran from the maintainer's Apple silicon workstation over the tailnet, in two
+production windows with downtime at most 408.4 s (6.8 min) and 386.5 s (6.4 min)
+([restoration](../../docs/measurements/2026-10-01-v091-acceptance-restoration.json)). The first
+window passed every route, client probe and restoration check, then its summary refused the
+Windows scheduled-task snapshot: the baseline caught the five-minute container-host supervisor
+mid-run and the final snapshot idle, with an unchanged definition. The summary now compares
+each task's definition and enabled state (see the changelog), and the corrected window ran on
+the same candidate. The RTX 3090 route ran with the host's console signed out (see
+[support boundaries](#support-boundaries)).
 
 ## Upgrading from v0.9.0
 

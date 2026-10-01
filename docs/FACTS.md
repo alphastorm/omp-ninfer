@@ -1,9 +1,9 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-09-30 · **Current public release: v0.9.0.**
+Updated: 2026-10-01 · **Current public release: v0.9.1.**
 
-The [v0.9.0 manifest](../releases/v0.9.0/manifest.json) binds the stock-client runtime on
-two eligible GPU routes with unmodified upstream OMP 18.4.0. Each lane's runtime was qualified
+The [v0.9.1 manifest](../releases/v0.9.1/manifest.json) binds the stock-client runtime on
+three eligible GPU routes with unmodified upstream OMP 18.4.0. Each lane's runtime was qualified
 on its published component; fresh client/route acceptance is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 retains the historical three-GPU / OMP 18.0.9 combination.
@@ -11,8 +11,8 @@ retains the historical three-GPU / OMP 18.0.9 combination.
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.9.0 scope runs Qwen3.8 27B through the NInfer engine on one
-NVIDIA RTX 5090 or RTX 4090 and preserves explicitly checkpointed OpenAI Responses
+appliance for Oh My Pi. Its v0.9.1 scope runs Qwen3.8 27B through the NInfer engine on one
+NVIDIA RTX 5090, RTX 4090 or RTX 3090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
 ## Entity relationships
@@ -29,7 +29,7 @@ Qwen3.8 27B  = the served model (registered NInfer artifact, hash-pinned per rel
 All of these should be materially true:
 
 - the operator uses, or intends to use, Oh My Pi;
-- they own an eligible RTX 5090 or RTX 4090 setup in the exact release profile;
+- they own an eligible RTX 5090, RTX 4090 or RTX 3090 setup in the exact release profile;
 - Qwen3.8 27B is the model they want;
 - sessions are long-lived and stateful, and restart recovery matters;
 - privacy and owned hardware matter more than breadth or multi-user throughput.
@@ -42,19 +42,100 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.9.0 eligible hardware
+## v0.9.1 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
 | RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.4.0 with component `v0.6.14-qwen38-5090-beta.1`, profile `qwen38-5090-v0.9.0` and configuration `cf1de114` with `--max-concurrency 2 --pending-timeout-ms 180000 --gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
 | RTX 4090 | native Windows 11 service | 131,072 | OMP 18.4.0 with component `v0.6.10-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), configuration `7a69481f` with `engine.gpu_keep_warm_ms = 60000`, 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 3090 | native Windows 11 service | 131,072 | OMP 18.4.0 with component `v0.6.2-qwen38-3090-beta.1` (sm_86; INT8 KV, MTP3), profile `qwen38-3090-native-v0.6.2-beta.1` and configuration `0f700667`; one request, 30 s pending timeout, 8192 MiB host KV, 24 host-state slots, keep-warm off and a 300 W cap; no host-memory floor declared |
 
-**RTX 3090 is deferred for v0.9.0**, not qualified with OMP 18.4.0. The separately linked
+The RTX 3090 is qualified standalone with OMP 18.4.0. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
-retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`. New-client qualification
-waits for that host’s return.
+retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`; its sessions do not carry
+over to the new native lane. The fleet RTX 3090 scout role remains deferred.
 
-## v0.9.0 — two requests in flight on the RTX 5090
+## v0.9.1 — RTX 3090 on the native Windows runtime
+
+The current release adds the RTX 3090 native Windows lane. The RTX 5090 and RTX 4090
+components, profiles, model and memory floors are **byte-identical to v0.9.0**. The
+[v0.9.1 manifest](../releases/v0.9.1/manifest.json) binds:
+
+| Lane | Component | Image / package | Server | Source | Profile / configuration |
+| --- | --- | --- | --- | --- | --- |
+| RTX 5090 (unchanged) | `v0.6.14-qwen38-5090-beta.1` | image `4c816b0c` | `f62a570e` | `e20060b6` | `qwen38-5090-v0.9.0` / `cf1de114` |
+| RTX 4090 (unchanged) | `v0.6.10-qwen38-4090-beta.1` | package `a0ea4c81` (574,717,115 bytes) | `e0498fad` | `cba7eb93` | `qwen38-4090-native-v0.6.10-beta.1` / `7a69481f` |
+| RTX 3090 (new) | `v0.6.2-qwen38-3090-beta.1` | package `da1d62f2` (595,676,373 bytes) | `11b3f93c` | `f08309da` | `qwen38-3090-native-v0.6.2-beta.1` / `0f700667` |
+
+RTX 3090 source `f08309da` is the RTX 5090's `e20060b6` plus one Windows controller
+fix, built for sm_86. The controller passes `--host-kv-mib` only when the release's own
+configuration declares it, so rollback can launch the older package that predates that
+field. Every published RTX 4090 package declares it; that unchanged lane was not exposed.
+The RTX 3090 uses the same native lifecycle as the RTX 4090: a managed scheduled task,
+a protected state root, graceful stop that saves live sessions, durable session checkpoints
+and rollback to the previous release. While serving, the GPU-owner controller holds the
+card at **300 W** and restores the owner's **370 W** limit on stop.
+
+The published RTX 3090 package passed **all 15 lifecycle phases**:
+
+- **130,048-token retrieval exact in 221.0 s**, at the 131,072-token ceiling.
+- C1 decode at **102.64 tok/s**, **93.43% MTP acceptance**, under the 300 W cap
+  (**299.92 W peak**). C1 is trajectory-sensitive; this is the lane's first C1 on this
+  runtime, not a like-for-like comparison or a speed-up claim against the historical
+  v0.7.2 RTX 3090 lineage.
+- **104.5 s restart**, including managed-stop flush of a previously unpublished session.
+  This short-session gate does not establish loss-free shutdown for every live session.
+- Rollback in both directions against the **unpublished** v0.6.0-beta.1 native package;
+  that predecessor predates the stop-event channel and stops by termination.
+- Protected state with two low-privilege read denials, the 15-check agent protocol at
+  the shipped pool and at eight host-state slots, and upstream OMP 18.4.0's typed tool call.
+
+[RTX 3090 qualification](../releases/v0.9.1/qualification/rtx3090.json). The RTX 5090 and
+RTX 4090 measurements carry unchanged from v0.9.0; qualification and public-route
+acceptance remain separate evidence. The upstream engine merge remains deferred.
+
+The unmodified OMP 18.4.0 binary, `models.yml`, `PI_OPENAI_STATEFUL=1`, model artifact
+`eec39564` and RTX 5090/4090 launch are unchanged. Existing v0.9.0 owners of those two
+lanes change nothing. RTX 3090 owners follow its native route in the [quickstart](QUICKSTART.md)
+and merge `ninfer-native-3090: 1` under `providers.maxInFlightRequests` in
+`~/.omp/agent/config.yml`. OMP leaves an unlisted provider unlimited; this lane serves one
+request at a time and expires a pending request after 30 s.
+
+All five documented routes passed **31 steps** on candidate `c55185dd`
+(`c55185dd39cbdb440620721c2a9d0dc06de010f4`) with unmodified OMP 18.4.0 and the published
+components: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native
+Windows 7 and RTX 3090 native Windows 7; all three hosts were restored. The upstream macOS
+arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against image `4c816b0c`. Linux ran under **WSL2**, not
+a separately qualified Linux OS. macOS remains preview, without a managed installation or
+appliance lifecycle.
+[Documented routes](../releases/v0.9.1/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json).
+
+The RTX 5090 routes ran in **two production windows** from the maintainer's Apple silicon
+workstation over the tailnet. Downtime was at most **408.4 s (6.8 min)** and **386.5 s
+(6.4 min)** ([restoration](measurements/2026-10-01-v091-acceptance-restoration.json)).
+The first window passed its routes, client probes and restoration checks, but its summary
+refused a scheduled-task snapshot: the unchanged supervisor was running at baseline and
+idle afterwards. The summary now compares task definitions and enabled state, with hold
+markers byte-identical; the collected evidence passed that corrected summary. A fresh
+window on the same candidate passed in fresh workspaces.
+
+Both native routes installed from their public assets. The RTX 3090 documented route
+performed a **fresh canonical upgrade installation** of the published package after preserving
+the active published instance, and restored all moved originals afterwards. A separate
+pre-route public-asset probe verified the closed checksum set, received `already_installed`
+from the downloaded installer, started and served the qualified release, refused an anonymous
+status request (HTTP 401), and stopped it with prior state restored.
+[RTX 3090 public install](../releases/v0.9.1/acceptance/rtx3090-public-install.json) ·
+[RTX 4090 public install](../releases/v0.9.1/acceptance/rtx4090-public-install.json).
+The RTX 3090 route ran with its console signed out: managed start refuses while any process
+holds at least 1 GiB of GPU memory, and the signed-in compositor alone held about 1,070 MiB.
+
+[Release notes](../releases/v0.9.1/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.9.1/manifest.json) · [Qualification](../releases/v0.9.1/qualification.json).
+
+## Historical v0.9.0 — two requests in flight on the RTX 5090
 
 The RTX 5090 serves **two requests at once** with `v0.6.14-qwen38-5090-beta.1`
 (image `4c816b0c`, server `f62a570e`), deployment profile `qwen38-5090-v0.9.0` and
@@ -152,7 +233,7 @@ starts, and the window's drivers had forwarded a terminal that never closes. Eve
 client now reads an empty stdin. Candidate `0d2a7468` passed the RTX 4090 route and a third
 RTX 5090 window.
 
-RTX 3090 remains deferred. [Release notes](../releases/v0.9.0/NINFER_RELEASE_NOTES.md) ·
+RTX 3090 was deferred in v0.9.0. [Release notes](../releases/v0.9.0/NINFER_RELEASE_NOTES.md) ·
 [Manifest](../releases/v0.9.0/manifest.json) · [Qualification](../releases/v0.9.0/qualification.json).
 
 ## Historical v0.8.7 — long sessions keep their cache
@@ -804,8 +885,8 @@ RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-
 ## Current model and artifact
 
 Registered NInfer conversion of Qwen3.8 27B (`qwen3_8_27b.ninfer`, groupwise-int weights,
-18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across both
-v0.9.0 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
+18,210,531,328 bytes), artifact SHA-256 `eec39564…14bf3e`, pinned identically across all three
+v0.9.1 lanes and unchanged from the historical three-GPU v0.7.2 manifest.
 
 ## Supported APIs
 
@@ -902,12 +983,13 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Known limitations
 
-- One model; two requests in flight on the RTX 5090 and one on the RTX 4090, not a serving farm.
+- One model; two requests in flight on the RTX 5090 and one on each native lane, not a serving farm.
 - Checkpoints are runtime-fingerprint-bound: they restore only on an identical lane
   (same binary, artifact, and profile) — not across GPU models.
-- RTX 3090 is deferred for v0.9.0; its historical v0.7.2 lane's comfortable working envelope
-  is the 64K class.
-- Vision is available on the 5090 container profile; native Windows RTX 4090 is text-only.
+- RTX 3090 is qualified on one host with no declared host-memory floor; its historical v0.7.2
+  lineage is separate, and those sessions do not carry over. The fleet scout role remains deferred.
+- Vision is available on the RTX 5090 container profile; native Windows RTX 4090 and RTX 3090
+  serve text/tools only.
 - Automatic checkpoints remain best effort: a crash or an expired graceful wait can still leave
   unsaved work, and the v0.8.1 multisession control recorded two root fallbacks among eight
   continuations/forks. Neither universal warm reuse nor loss-free shutdown is claimed.
@@ -921,7 +1003,7 @@ duration or a speed comparison against another runtime’s ordinary in-process p
 
 ## Primary evidence
 
-[v0.9.0 manifest](../releases/v0.9.0/manifest.json) · [release state](RELEASES.md) ·
+[v0.9.1 manifest](../releases/v0.9.1/manifest.json) · [release state](RELEASES.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Compatibility](COMPATIBILITY.md) ·
-[Security model](SECURITY.md) · [v0.9.0 guide](QUICKSTART.md) ·
+[Security model](SECURITY.md) · [v0.9.1 guide](QUICKSTART.md) ·
 [Decision guide](DECISION_GUIDE.md)

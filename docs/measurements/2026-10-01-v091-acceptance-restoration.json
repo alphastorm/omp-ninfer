@@ -1,0 +1,67 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.9.1",
+  "as_of": "2026-10-01",
+  "status": "passed",
+  "rtx5090": {
+    "original_runtime_healthy": true,
+    "original_image_retained": true,
+    "restart_policy": "unless-stopped",
+    "checkpoint_mount_retained": true,
+    "documented_route_key_restored": true,
+    "original_checkout_restored": true,
+    "route_container_absent": true,
+    "window_hold_removed": true,
+    "preexisting_markers_and_supervisors_unchanged": true,
+    "production_windows": 2,
+    "window_downtime_seconds": [
+      408.405,
+      386.537
+    ],
+    "production_downtime_upper_bound_seconds": 794.942,
+    "window_hold_seconds": [
+      408.405,
+      386.537
+    ],
+    "completed_utc": "2026-10-01T04:08:36.627334+00:00"
+  },
+  "rtx4090": {
+    "state_bytes_identical": true,
+    "state_sha256": "7b0fe9c1032f598de242e937c2312053ad76d06cae35686d8a5c2e44b43c6161",
+    "active_release": "qwen38-4090-native-v0.6.10-beta.1-cba7eb932724",
+    "previous_release": "qwen38-4090-native-v0.6.9-beta.1-5ac17674e8e0",
+    "prepared_release": null,
+    "task_state": "Ready",
+    "process_count": 0,
+    "listener_count": 0,
+    "lease_present": false,
+    "power_limit_w": 450,
+    "task_xml_identical": true,
+    "support_bytes_and_acl_sddl_identical": true,
+    "preexisting_holds_preserved": true,
+    "real_client_pointers_unchanged": true,
+    "pending_preserved_moves": 0,
+    "completed_utc": "2026-10-01T03:23:55.8174435Z"
+  },
+  "rtx3090": {
+    "state_bytes_identical": true,
+    "state_sha256": "1a600ffdbe7c030963c22a413d86b75ce3f766a90de2f9df2f69985fb04c530e",
+    "active_release": "qwen38-3090-native-v0.6.2-beta.1-f08309da3cc1",
+    "previous_release": "qwen38-3090-native-v0.6.0-beta.1-03f56e58ec1b",
+    "prepared_release": null,
+    "task_state": "Ready",
+    "process_count": 0,
+    "listener_count": 0,
+    "lease_present": false,
+    "power_limit_w": 370,
+    "task_xml_identical": true,
+    "support_bytes_and_acl_sddl_identical": true,
+    "preexisting_holds_preserved": true,
+    "real_client_pointers_unchanged": true,
+    "pending_preserved_moves": 0,
+    "completed_utc": "2026-10-01T03:27:38.1140569Z"
+  },
+  "production_upgrade_activated": false,
+  "raw_private_paths_credentials_or_outputs_included": false
+}

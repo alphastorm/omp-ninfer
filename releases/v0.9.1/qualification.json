@@ -5,7 +5,7 @@
   "as_of": "2026-10-01",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "The RTX 3090 joins as a native Windows lane. RTX 3090 native Windows runs v0.6.2-qwen38-3090-beta.1 (package da1d62f2, server 11b3f93c, source f08309da): the RTX 5090 v0.6.14 source e20060b6 plus one controller fix, built for sm_86, with serving configuration 0f700667, 131,072 tokens of INT8 KV, an 8192 MiB host-KV pool and one request at a time. RTX 5090 stays on v0.6.14-qwen38-5090-beta.1 (image 4c816b0c, server f62a570e, source e20060b6) with profile qwen38-5090-v0.9.0 (configuration cf1de114) and two requests in flight, and RTX 4090 native Windows stays on v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93) with configuration 7a69481f and one request at a time. The model artifact, the RTX 5090 and RTX 4090 memory floors and the unmodified upstream OMP 18.4.0 client are unchanged; the RTX 3090 serves the same model artifact and declares no host-memory floor. The RTX 3090 gates are the canonical qualification of the published package on the physical RTX 3090; the RTX 5090 and RTX 4090 gates are carried from v0.9.0.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
@@ -65,8 +65,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.14-qwen38-5090-beta.1 (image 4c816b0c), v0.6.10-qwen38-4090-beta.1 and v0.6.2-qwen38-3090-beta.1 components before the cut; the receipt lands at releases/v0.9.1/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.9.1/acceptance/composed-external-installation.json",
+      "sha256": "e8de53a7e9c6c2a8207217627422f46836e8fb17b92e5707b9fccdf37e465b23",
+      "public_url": null,
+      "as_of": "2026-10-01",
+      "release": "v0.9.1",
+      "component_release_tag": "v18.4.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "windows_binary_sha256": "5e8637d7f0e86819eb17238f297b4cef07f5239a4f59e2b26f8b4584a9ea95fe",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "b75f40d32add2c2ce8f6320f567d269338b6970c35786b5d7257efc95bdd2f61",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "89d751f02aede11ed548f7f4605e44b86a00af189712786aed61a6ef8231272e"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "b1166c81348526bdd7fe12c28202294da159b64a6ee0b9af7c06963611c69405"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "efeb38ee351b65b05da072c789e521d87ad89f26453890ef3fac805289d1516e"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all five documented routes on the published v0.9.1 components; runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.9.1/acceptance/documented-routes.json",
+      "sha256": "14eabcf2005394597990407ea5ce14f9502243d0ca43954345813d2ffbb8c689"
     }
   },
   "observed_gates": {
@@ -1317,9 +1351,6 @@
     }
   },
   "interpretation": "The RTX 3090 joins as a native Windows lane; nothing changes for the RTX 5090 and RTX 4090 lanes. On the physical RTX 3090 the package published as v0.6.2-qwen38-3090-beta.1 passed all 15 lifecycle phases: 130,048-token retrieval exactly in 221.0 s, restart with a managed-stop flush of an unpublished session, rollback in both directions against the lane's unpublished v0.6.0-beta.1 package, protected state with two low-privilege read denials, the 15-check agent protocol at the shipped host pool and with 8 host-state slots, the unmodified upstream OMP 18.4.0 client's typed tool call, and the C1 benchmark at 102.64 tokens/s with 93.43% MTP acceptance under the lane's 300 W cap. The first window, at e20060b6, failed its rollback phase: the shared controller read context_cache.host_kv_mib directly under PowerShell strict mode, and v0.6.0's packaged configuration predates that field, so the managed wrapper exited before launching the predecessor. f08309da reads the field only when a release's configuration declares it, as it already read gpu_keep_warm_ms, and a lifecycle-tree test now requires every configuration field newer than the shipped lineage to be read that way; every published RTX 4090 package declares the field. A managed start refuses while any process holds 1 GiB or more of GPU memory: on the qualification host a signed-in desktop's compositor held about 1,070 MiB, so the window ran with the console signed out. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.14-qwen38-5090-beta.1, v0.6.10-qwen38-4090-beta.1 and v0.6.2-qwen38-3090-beta.1 components, including both native public installs",
-    "fresh upstream OMP platform and documented-route acceptance on all five routes"
-  ],
+  "remaining_release_gates": [],
   "deferred_scope": {}
 }

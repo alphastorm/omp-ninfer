@@ -7,15 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-10-01
+
+### Fixed
+
+- A rollback can launch a release older than the controller. The shared Windows controller read
+  `context_cache.host_kv_mib` directly under PowerShell strict mode, and the RTX 3090's v0.6.0
+  configuration predates that field, so the lane's first qualification window, at `e20060b6`,
+  failed its rollback phase: the managed wrapper exited before it launched the predecessor.
+  Runtime `f08309da` passes `--host-kv-mib` only when a release's own configuration declares it,
+  as it already did for `gpu_keep_warm_ms`, and the runtime's lifecycle tests require every
+  configuration field newer than the shipped lineage to be read that way. Every published RTX
+  4090 package declares the field, so the RTX 4090 lane was not exposed.
+- OMP sends the RTX 3090 one request at a time. `examples/manual-tunnel/fail-closed.yml` lists
+  `ninfer-native-3090: 1` under `providers.maxInFlightRequests`; OMP leaves an unlisted provider
+  unlimited, and a request beyond the lane's one waits at the server, which expires it after
+  30 s. The test that binds each provider's limit to its lane's concurrency now reads every
+  `*/models*.fragment.yml`.
+- The RTX 5090 acceptance window judges the Windows host's OMP scheduled tasks by definition and
+  enabled state. v0.9.1's first window passed every route, client probe and restoration check,
+  then its summary refused the task snapshot: the baseline caught the five-minute container-host
+  supervisor mid-run (`Running`) and the final snapshot idle (`Ready`), with an unchanged
+  definition. `scripts/hosts/accept-rtx5090-routes.py` now requires the hold markers
+  byte-identical and each OMP task present, identically defined and as enabled as before; a test
+  passes a mid-run supervisor and refuses a disabled, redefined or removed task.
+
 ### Added
 
-- Prepared the RTX 3090 native v0.6.2-beta.1 lane for the next product release: closed component
-  admission, explicit receipt-verified native-row insertion, one lane-parameterized component
-  cutter and route harness, and five-route acceptance with separate native install receipts.
-  The historical 4090 entrypoints and defaults remain compatible. The new stock OMP 18.4.0
-  quickstart is gated on a future ready v0.9.1 manifest; qualification is in progress, and no
-  release, package publication or hardware acceptance is claimed by this tooling change.
-
+- RTX 3090 native Windows lane `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`, 595,676,373
+  bytes; server `11b3f93c`; source `f08309da`: the RTX 5090 v0.6.14 source `e20060b6` plus the
+  controller fix above, built for sm_86) with deployment profile
+  `qwen38-3090-native-v0.6.2-beta.1` / configuration `0f700667`: one request at a time with a
+  30 s pending timeout, 131,072 tokens of INT8 KV with MTP3, an 8192 MiB host-KV pool, 24
+  host-state slots and keep-warm off, held at 300 W while it serves. It has the RTX 4090's
+  lifecycle: a managed scheduled task, a protected state root, a graceful stop that saves live
+  sessions, durable checkpoints and rollback. On the physical RTX 3090 it passed all 15
+  lifecycle phases: 130,048-token retrieval exactly in 221.0 s, restart with a managed-stop flush
+  of an unpublished session, rollback in both directions against the lane's unpublished
+  v0.6.0-beta.1 package, protected state, the 15-check agent protocol, the unmodified upstream
+  OMP 18.4.0 client's typed tool call, and the C1 benchmark at 102.64 tok/s with 93.43% MTP
+  acceptance ([lane receipt](releases/v0.9.1/qualification/rtx3090.json)). The quickstart's RTX
+  3090 route uses the published assets and stock OMP 18.4.0; the v0.7.2 RTX 3090 route remains
+  separate history.
+- RTX 3090 release tooling: closed component admission for the v0.6.2 tag family, explicit
+  receipt-verified native-row insertion (`scripts/bind_native_variant.py --add`), one
+  lane-parameterized component cutter and route harness whose RTX 4090 entrypoints and defaults
+  are unchanged, and five-route acceptance with separate native public-install receipts.
+- Fresh acceptance on candidate `c55185dd` with unmodified OMP 18.4.0 and the published
+  components: all five documented routes passed **31 steps** (RTX 5090 container host 2, macOS
+  client 10, Windows client 5, RTX 4090 native Windows 7 and RTX 3090 native Windows 7); all
+  three hosts were restored, and both native lanes installed from their public assets
+  ([routes](releases/v0.9.1/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.9.1/acceptance/composed-external-installation.json)). The
+  upstream macOS arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool
+  turn, an exact continuation and a fail-closed request against image `4c816b0c`; Linux ran
+  under WSL2, not a separately qualified Linux OS. The RTX 5090 routes ran from the maintainer's
+  Apple silicon workstation over the tailnet, in two production windows with downtime at most
+  **408.4 s (6.8 min)** and **386.5 s (6.4 min)**
+  ([restoration](docs/measurements/2026-10-01-v091-acceptance-restoration.json)). The first
+  window's summary refused its task snapshot, fixed above; the corrected window ran on the same
+  candidate.
 - `scripts/speculative_decode_probe.py` measures decode rate and draft acceptance for one code
   answer behind 0 to about 120K tokens of context, a continuation that reuses its prefix, and an
   optional pair of requests decoding together. It sends plain Chat Completions, which the shipped
@@ -2006,7 +2057,10 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.6...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.7...v0.9.0
+[0.8.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.6...v0.8.7
 [0.8.6]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.5...v0.8.6
 [0.8.5]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.4...v0.8.5
 [0.8.4]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.3...v0.8.4

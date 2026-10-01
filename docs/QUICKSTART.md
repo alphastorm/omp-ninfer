@@ -5,9 +5,9 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.9.1 is a candidate until its five documented routes pass on the published components.**
-> The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
-> and RTX 3090 native Windows.
+> **v0.9.1 has passed its five documented routes (31 steps) on the published components.**
+> The accepted scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native
+> Windows and RTX 3090 native Windows.
 > The commands below require the published v0.9.1 release and its readiness check.
 > Do not bypass `--require-ready` or mix one release's manifest with another
 > release's commands. See [route acceptance](#v091-route-acceptance) for the recorded runs.
@@ -19,9 +19,9 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.9.1 candidate; route acceptance pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.9.1 candidate; route acceptance pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **v0.9.1 candidate; route acceptance pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.9.1 route accepted; stock OMP 18.4.0** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.9.1 route accepted; stock OMP 18.4.0** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **v0.9.1 route accepted; stock OMP 18.4.0** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 The RTX 3090's earlier
@@ -34,17 +34,19 @@ substitute GPU family names, package URLs, component tags, or variant IDs betwee
 
 ## v0.9.1 route acceptance
 
-Route acceptance is pending. The five documented routes - RTX 5090 container host, macOS client,
-Windows client, RTX 4090 native Windows and RTX 3090 native Windows - must pass on the published
-v0.6.14 RTX 5090 image `4c816b0c`, the unchanged v0.6.10 RTX 4090 package and the new v0.6.2
-RTX 3090 package with unmodified upstream OMP 18.4.0, and fresh client-platform acceptance must
-pass. Until they do, v0.9.1 stays a candidate and `--require-ready` refuses it. v0.9.0's
-[accepted receipts](../releases/v0.9.0/acceptance/documented-routes.json) cover the RTX 5090 and
-RTX 4090 bytes this release carries, not the v0.9.1 candidate.
+The five documented routes - RTX 5090 container host, macOS client, Windows client, RTX 4090
+native Windows and RTX 3090 native Windows - passed all 31 steps on candidate `c55185dd`, using
+the published v0.6.14 RTX 5090 image `4c816b0c`, the unchanged v0.6.10 RTX 4090 package, the new
+v0.6.2 RTX 3090 package and unmodified upstream OMP 18.4.0, with all three hosts restored
+([accepted receipts](../releases/v0.9.1/acceptance/documented-routes.json)). The upstream macOS
+arm64 (preview), Windows x64 and Linux x64 binaries each passed a typed tool turn, an exact
+continuation and a fail-closed request against the RTX 5090 image
+([composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json)).
+Linux ran under WSL2, not a separately qualified Linux OS.
 
 ## Verify the release before setup
 
-The `v0.9.1` candidate composes native Windows OMP over authenticated local loopback
+The `v0.9.1` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 and RTX 3090 use their exact native Windows packages. Every
@@ -487,10 +489,10 @@ text and tools only. Report the outcome with the
 
 ## Native Windows RTX 3090 release lane
 
-**v0.9.1 candidate; route acceptance pending.** These are the published-asset route and the
-blocks its acceptance harness executes; they become an install route once the v0.9.1 manifest is
-ready. Do not bypass the ready gate or use the historical v0.7.2 manifest here. RTX 5090 and
-RTX 4090 keep their v0.9.0 component bytes in this release.
+**v0.9.1 route accepted; stock OMP 18.4.0.** These are the published-asset route and the blocks
+its acceptance harness executed on the physical RTX 3090. Do not bypass the ready gate or use the
+historical v0.7.2 manifest here. RTX 5090 and RTX 4090 keep their v0.9.0 component bytes in this
+release.
 
 Prerequisites: Windows 11 x64, one RTX 3090 (sm_86), NVIDIA driver 570 or newer,
 Git, PowerShell, Python 3 with its `py` launcher, and at least 40 GiB free for model,

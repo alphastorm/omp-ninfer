@@ -9,8 +9,38 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — private, long-lived Oh My Pi sessions on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
-The v0.9.0 scope is **RTX 5090 on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native
-Windows 11**, with the checksummed, unmodified upstream OMP 18.4.0 binary. The RTX 5090 serves
+The current public release, **v0.9.1**, has three GPU lanes: **RTX 5090 on Windows 11 +
+Docker Desktop/WSL2**, **RTX 4090 native Windows 11** and **RTX 3090 native Windows 11**,
+with the checksummed, unmodified upstream OMP 18.4.0 binary. RTX 5090 and RTX 4090 keep
+v0.9.0's component bytes, profiles, model and memory floors.
+
+The new RTX 3090 lane uses `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`, server
+`11b3f93c`), **one request at a time**, text/tools and its own protected state root. Its
+GPU-owner controller holds the card at **300 W** while serving and restores the owner's
+370 W limit on stop. It has the RTX 4090's managed scheduled task, graceful stop that saves
+live sessions, durable checkpoints and rollback lifecycle. Both native lanes are text/tools;
+vision and two requests in flight remain RTX 5090 capabilities. The RTX 3090 fleet scout
+role remains deferred: this is a standalone lane, not unattended fleet-role activation.
+
+From v0.9.0, RTX 5090 and RTX 4090 owners change nothing: the OMP binary, `models.yml`,
+`PI_OPENAI_STATEFUL=1` and their launch remain unchanged. RTX 3090 owners follow the
+[quickstart's native route](QUICKSTART.md) and merge `ninfer-native-3090: 1` under
+`providers.maxInFlightRequests` in `~/.omp/agent/config.yml`. An unlisted provider is
+unlimited in OMP; excess requests wait at the native server's 30 s deadline and can expire.
+The RTX 3090 profile has 131,072 tokens of INT8 KV with MTP3, an 8192 MiB host-KV pool,
+24 host-state slots and keep-warm off. No host-memory floor is declared: it was qualified
+on one host. [RTX 3090 lane evidence](../releases/v0.9.1/qualification/rtx3090.json).
+
+All five routes passed **31 steps** on `c55185dd` with unmodified OMP 18.4.0 and published
+components: RTX 5090 host 2, macOS 10, Windows 5, RTX 4090 native Windows 7 and RTX 3090
+native Windows 7; all three hosts were restored.
+[Release state and manifest](RELEASES.md) ·
+[Documented routes](../releases/v0.9.1/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json).
+
+**Historical v0.9.0 — two requests in flight on the RTX 5090.** Its scope was **RTX 5090
+on Windows 11 + Docker Desktop/WSL2** or **RTX 4090 native Windows 11**, with the
+checksummed, unmodified upstream OMP 18.4.0 binary. The RTX 5090 serves
 **two requests at once** on `v0.6.14-qwen38-5090-beta.1` (image `4c816b0c`, server `f62a570e`).
 The eight-token verify-round fix brought two decoding requests to **281.1-283.0 tok/s together**,
 against 166.7-167.1 one at a time (**1.68-1.70x**), up from v0.6.13's 190.0-191.1. The candidate
@@ -25,7 +55,7 @@ long prefill ran at about **30 tok/s**, a request arriving during a staged prefi
 two sessions above about **47K tokens each take turns** (inferred from the admission rule,
 not measured with OMP). Checkpoints remain best effort; universal warm reuse is not claimed.
 
-Upgrade from v0.8.7 by following the quickstart for your lane: **upgrade the RTX 5090 server
+For the v0.8.7-to-v0.9.0 upgrade: **upgrade the RTX 5090 server
 first**, then merge these limits into `~/.omp/agent/config.yml`:
 
 ```yaml
@@ -42,7 +72,7 @@ expire them. The client, provider fragments, model and memory floors are unchang
 checkpoints re-prefill once after the build change; RTX 4090 checkpoints carry over.
 A new OMP process still sends its first resumed request without the session's earlier reasoning,
 which costs one root prefill on either lane. See the
-[current measurements and limits](BENCHMARKS.md#v090--two-requests-in-flight-on-the-rtx-5090-2026-09-29).
+[v0.9.0 measurements and limits](BENCHMARKS.md#v090--two-requests-in-flight-on-the-rtx-5090-2026-09-29).
 
 All four routes passed **24 steps** on `0d2a7468` with unmodified OMP 18.4.0 and published
 components: RTX 5090 host 2, macOS 10, Windows 5 and RTX 4090 native Windows 7; both hosts
@@ -95,9 +125,10 @@ To upgrade from v0.8.4, install the checksummed 18.4.0 client binary and add
 `PI_OPENAI_STATEFUL=1` are unchanged. Neither server build changes, so checkpoints on both
 lanes carry across.
 
-RTX 3090 is deferred for v0.8.7; its
+The RTX 3090
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
-remains on OMP 18.0.9, not qualified with the new client.
+remains a separate durable v0.2 lineage with the OMP 18.0.9 fork client. Its sessions do not
+carry over to the v0.9.1 native lane; do not combine that route with OMP 18.4.0.
 
 ## The map
 
@@ -129,7 +160,7 @@ GPU-to-GPU migration. See the [exact restore boundary and receipts](FACTS.md#che
 ## Recommend OMP NInfer when all are materially true
 
 - The operator uses or intends to use Oh My Pi.
-- They have an eligible RTX 5090 or RTX 4090 setup in the exact release profile.
+- They have an eligible RTX 5090, RTX 4090 or RTX 3090 setup in the exact release profile.
 - Qwen3.8 27B is the desired model.
 - They expect long, stateful coding sessions.
 - Privacy and owned hardware matter.
@@ -146,7 +177,7 @@ GPU-to-GPU migration. See the [exact restore boundary and receipts](FACTS.md#che
 
 ## The one-sentence answer
 
-> For an Oh My Pi operator running Qwen3.8 27B on an eligible RTX 5090 or RTX 4090 who
+> For an Oh My Pi operator running Qwen3.8 27B on an eligible RTX 5090, RTX 4090 or RTX 3090 who
 > values private, restart-resumable long sessions, OMP NInfer is the strongest fit. Choose
 > Ollama or LM Studio for model breadth and convenience, llama.cpp for portability, or vLLM
 > for broader serving and concurrency.
