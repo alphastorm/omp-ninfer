@@ -485,6 +485,216 @@ cloud-provider request is a release failure. Skip the Vision check in section 8:
 text and tools only. Report the outcome with the
 [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
 
+## Native Windows RTX 3090 release lane
+
+**Qualification in progress for v0.9.1; not a v0.9.0 install lane.** These are the
+future published-asset route and the blocks its acceptance harness executes. They become an
+install route only after the hardware receipt, founder-published component and ready v0.9.1
+manifest exist. Do not bypass the ready gate or use the historical v0.7.2 manifest here.
+RTX 5090 and RTX 4090 retain their v0.9.0 component bytes in that release.
+
+Prerequisites: Windows 11 x64, one RTX 3090 (sm_86), NVIDIA driver 570 or newer,
+Git, PowerShell, Python 3 with its `py` launcher, and at least 40 GiB free for model,
+package and client. Install the exact stock OMP 18.4.0 binary using **Install the exact native
+Windows client** above, then open an elevated PowerShell and run:
+
+```powershell
+git clone --branch v0.9.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+Set-Location omp-ninfer
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+py -3 scripts\verify_release.py --require-ready
+```
+
+
+The qualified package must bind MTP3, INT8 KV, 131072 context tokens, prefill chunk 1024,
+one request at a time and keep-warm off. The managed GPU cap is 300 W; the controller restores
+the owner's 370 W cap and refuses takeover above the 1 GiB interactive GPU-owner threshold.
+The scheduled task is `NInfer-Qwen38-3090-Native`; use its controller, not the task directly.
+
+| Variant id | Installed state root | Request model id | Endpoint |
+| --- | --- | --- | --- |
+| `rtx3090-windows-native` | `%ProgramData%\NInfer\qwen38-3090-native` | `q38-ninfer` | `http://127.0.0.1:18082/v1` |
+
+```powershell
+$VariantId = 'rtx3090-windows-native'
+```
+
+
+The manifest supplies all public URLs and hashes, including the package
+`ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`
+under component tag `v0.6.2-qwen38-3090-beta.1`. A missing or unqualified variant stops
+before download. Keep the model and API key outside the staging directory and state root.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+$ErrorActionPreference = 'Stop'
+$Manifest = Get-Content .\releases\v0.9.1\manifest.json -Raw | ConvertFrom-Json
+$Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
+if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
+  throw 'requested native runtime variant is not uniquely qualified'
+}
+if ($VariantId -cne 'rtx3090-windows-native') { throw 'expected RTX 3090 native variant' }
+$StateRootName = 'qwen38-3090-native'
+$StateRoot = Join-Path $env:ProgramData (Join-Path 'NInfer' $StateRootName)
+# Stage under ProgramData with an administrators-only ACL so no medium-integrity process
+# under the same account can swap bytes between verification and elevated execution. Every
+# step below is fail-closed: an ACL error stops the session before anything is downloaded.
+$Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
+if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
+New-Item -ItemType Directory -Path $Stage | Out-Null
+$Admins = New-Object System.Security.Principal.SecurityIdentifier('S-1-5-32-544')
+$Acl = Get-Acl $Stage
+$Acl.SetAccessRuleProtection($true, $false)
+$Acl.SetOwner($Admins)
+foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
+  $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    (New-Object System.Security.Principal.SecurityIdentifier($Sid)),
+    'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
+  $Acl.AddAccessRule($Rule)
+}
+Set-Acl $Stage $Acl
+$Applied = Get-Acl $Stage
+if (-not $Applied.AreAccessRulesProtected) { throw 'staging ACL protection did not apply' }
+if (@($Applied.Access | Where-Object {
+      $_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin
+      @('S-1-5-32-544', 'S-1-5-18') }).Count -ne 0) {
+  throw 'staging ACL retains a non-administrator principal'
+}
+# The API key and the model live OUTSIDE the staging directory so reruns of this snippet never
+# delete them, and the installer refuses a model stored inside the lane's own state root.
+$KeyDir = Join-Path $env:ProgramData 'omp-ninfer-keys'
+if (-not (Test-Path $KeyDir)) {
+  New-Item -ItemType Directory -Path $KeyDir | Out-Null
+  Set-Acl $KeyDir $Acl
+}
+$ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
+if (-not (Test-Path $ApiKeyFile)) {
+  # Windows PowerShell runs on .NET Framework: no RandomNumberGenerator.Fill or Convert.ToHexString.
+  $Secret = [byte[]]::new(32)
+  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($Secret)
+  [IO.File]::WriteAllText($ApiKeyFile,
+    ([BitConverter]::ToString($Secret).Replace('-', '').ToLowerInvariant() + "`n"),
+    [Text.UTF8Encoding]::new($false))
+}
+$ModelDir = Join-Path $env:ProgramData 'omp-ninfer-model'
+if (-not (Test-Path $ModelDir)) {
+  New-Item -ItemType Directory -Path $ModelDir | Out-Null
+  Set-Acl $ModelDir $Acl
+}
+$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
+& curl.exe --fail --location --continue-at - --output $Model $Manifest.components.model.artifact_url
+# a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
+if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+  throw 'model artifact download failed'
+}
+if ((Get-Item $Model).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+  throw 'model artifact byte count mismatch'
+}
+if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+    $Manifest.components.model.artifact_sha256) {
+  throw 'model artifact checksum mismatch'
+}
+foreach ($Asset in @(
+  @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
+  @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
+  @{ Url = $Variant[0].controller_url; Sha = $Variant[0].controller_sha256 },
+  @{ Url = $Variant[0].gpu_owner_controller_url; Sha = $Variant[0].gpu_owner_controller_sha256 },
+  @{ Url = $Variant[0].state_protection_url; Sha = $Variant[0].state_protection_sha256 }
+)) {
+  $Name = [IO.Path]::GetFileName(([Uri]$Asset.Url).AbsolutePath)
+  $Path = Join-Path $Stage $Name
+  Invoke-WebRequest -UseBasicParsing -Uri $Asset.Url -OutFile $Path
+  if ((Get-FileHash $Path -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Asset.Sha) {
+    throw "native runtime asset checksum mismatch: $Name"
+  }
+}
+$Package = Join-Path $Stage ([IO.Path]::GetFileName(([Uri]$Variant[0].package_url).AbsolutePath))
+if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
+  throw 'native runtime package byte count mismatch'
+}
+$Installer = Join-Path $Stage 'Install-Release.ps1'
+& $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
+  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile -StateRoot $StateRoot `
+  -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
+```
+
+
+### Operate the RTX 3090 native lane
+
+The install leaves the runtime running. Status must identify the selected release, served
+binary, configuration and ready endpoint. Stop checkpoints live sessions and restores GPU
+ownership; Start reacquires ownership. A reboot is not a managed stop and cannot recover
+unpublished state. In a new elevated shell, set `$StateRoot` from the table first.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+$Controller = Join-Path $StateRoot 'Control-Release.ps1'
+& $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
+& $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
+& $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
+& $Controller -Action Status -StateRoot $StateRoot
+```
+
+
+### Point OMP at the RTX 3090 native lane
+
+This text-and-tools lane uses `q38-ninfer`, not the RTX 4090 request model. The fragment
+uses Responses, a 131072-token window, environment-backed authentication and stateful sessions.
+Existing OMP configuration must be merged, never overwritten. Keep the key out of YAML and
+command-line arguments; it lives only in this PowerShell process and its children.
+
+```powershell
+$Provider = 'ninfer-native-3090'
+$Agent = Join-Path $HOME '.omp\agent'
+New-Item -ItemType Directory -Force -Path $Agent | Out-Null
+$ModelsPath = Join-Path $Agent 'models.yml'
+$ConfigPath = Join-Path $Agent 'config.yml'
+if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
+  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+}
+Copy-Item .\examples\windows-native\models-rtx3090.fragment.yml $ModelsPath
+Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
+$env:PI_OPENAI_STATEFUL = '1'
+```
+
+
+After acceptance, `& "$env:LOCALAPPDATA\OMP\omp.exe" --model "$Provider/q38-ninfer"`
+opens the interactive client. Vision and structured JSON-schema output are not qualified here.
+
+### RTX 3090 native lane acceptance
+
+Run in the same shell that loaded the key. Expect the exact tool marker, the exact continuation
+nonce, an outage error with no model response or cloud fallback, and successful recovery.
+
+```powershell
+$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
+$Smoke = Join-Path $env:TEMP ("omp-ninfer-native-" + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
+Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
+Push-Location $Smoke
+try {
+  & $Launcher -p --no-session --auto-approve --model "$Provider/q38-ninfer" `
+    'Use a file-reading tool to read marker.txt, then report its exact single line.'
+  if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
+
+  $Session = Join-Path $Smoke 'sessions'
+  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/q38-ninfer" `
+    'Remember the nonce COBALT-493817 for my next turn. Reply OK only.'
+  if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
+  & $Launcher -p --auto-approve --session-dir $Session --continue `
+    'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
+  if ($LASTEXITCODE -ne 0) { throw 'stateful resume failed' }
+} finally { Pop-Location }
+
+& $Controller -Action Stop -StateRoot $StateRoot | Out-Null
+& $Launcher -p --no-session --auto-approve --max-time 20s `
+  --model "$Provider/q38-ninfer" 'Return LOCAL_ONLY.'
+if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+& $Controller -Action Start -StateRoot $StateRoot | Out-Null
+```
+
+
 ## Managed macOS SSH qualified route
 
 ### Prerequisites

@@ -16,6 +16,10 @@ The script never invents a value: every hash comes from the checksum set, every 
 from the build receipt, and every URL from the tag plus the asset's own filename. It refuses a
 distribution set that does not carry each asset the manifest binds, and it leaves the release's
 hash chain to `rebind_release.py`, which must run afterwards.
+For a new lane, pass --add, --maximum-context-tokens and --qualification-commit after
+committing its real qualification receipt. The verifier must accept that receipt before
+the manifest row and its release-local compatibility/qualification mirrors are added.
+Without --add, a missing row remains an error. Root compatibility is never promoted here.
 """
 
 from __future__ import annotations
@@ -24,10 +28,14 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from render_compatibility import RUNTIME_VARIANT_IDS
+from verify_release import validate_ninfer_variants
 DOWNLOAD = "https://github.com/alphastorm/ninfer/releases/download"
 LANE_VARIANTS = {"rtx4090": "rtx4090-windows-native", "rtx3090": "rtx3090-windows-native"}
 # Every manifest field that names a distribution asset, and the role it plays in the set.
@@ -68,14 +76,26 @@ def require(entries: dict[str, str], name: str) -> str:
 
 
 def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
-         receipt_path: Path, release: str) -> dict[str, Any]:
+         receipt_path: Path, release: str, *, maximum_context_tokens: int | None = None,
+         qualification_commit: str | None = None, add: bool = False) -> dict[str, Any]:
     variant_id = LANE_VARIANTS.get(lane)
     if variant_id is None:
         raise BindError(f"unknown native lane: {lane}")
     variants = manifest["components"].get("ninfer_variants", [])
     variant = next((item for item in variants if item.get("id") == variant_id), None)
+    new_variant = variant is None
     if variant is None:
-        raise BindError(f"manifest has no {variant_id} variant")
+        if not add:
+            raise BindError(f"manifest has no {variant_id} variant; use --add to admit a new lane")
+        if maximum_context_tokens is None or maximum_context_tokens <= 0:
+            raise BindError("a new native variant requires --maximum-context-tokens")
+        if not qualification_commit or not re.fullmatch(r"[0-9a-f]{40}", qualification_commit):
+            raise BindError("a new native variant requires --qualification-commit (receipt commit)")
+        variant = {
+            "id": variant_id, "status": "qualified", "installable": True,
+            "repository": "https://github.com/alphastorm/ninfer",
+            "maximum_context_tokens": maximum_context_tokens,
+        }
 
     entries = parse_checksums(checksums)
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -128,7 +148,64 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     if not summary_path.is_file():
         raise BindError(f"missing lane qualification receipt: {qualification['summary']}")
     qualification["sha256"] = hashlib.sha256(summary_path.read_bytes()).hexdigest()
+    if new_variant:
+        qualification["public_url"] = (
+            f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
+            f"{qualification_commit}/{qualification['summary']}"
+        )
+        errors: list[str] = []
+        validate_ninfer_variants(
+            ROOT, release, [variant], {"runtime_variants": [variant]},
+            manifest["components"]["model"]["artifact_sha256"], errors,
+        )
+        if errors:
+            raise BindError("; ".join(errors))
+        variants.append(variant)
+        variants.sort(key=lambda item: RUNTIME_VARIANT_IDS.index(item["id"]))
+        manifest["components"]["ninfer_variants"] = variants
     return variant
+
+
+def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
+    """Create the authority mirrors only for a newly admitted, verified manifest lane.
+
+    Rebind owns subsequent hash and URL promotion; the root authority remains untouched.
+    """
+    release_root = ROOT / "releases" / release
+    compatibility_path = release_root / "compatibility.json"
+    qualification_path = release_root / "qualification.json"
+    compatibility = json.loads(compatibility_path.read_text(encoding="utf-8"))
+    qualification = json.loads(qualification_path.read_text(encoding="utf-8"))
+    variant_id = variant["id"]
+    lane = variant_id.split("-", 1)[0]
+    summary = variant["qualification"]
+    rows = compatibility.setdefault("runtime_variants", [])
+    if any(row["id"] == variant_id for row in rows):
+        raise BindError(f"compatibility already contains {variant_id} without a manifest row")
+    rows.append({
+        "id": variant_id, "status": variant["status"], "platform": "Windows 11 x64",
+        "gpu": f"NVIDIA GeForce RTX {lane.removeprefix('rtx')}",
+        "cuda_architecture": {"rtx3090": "sm_86", "rtx4090": "sm_89"}[lane],
+        "installation_mode": "native-windows-package", "installable": variant["installable"],
+        "silent_cloud_fallback": False,
+        **{key: variant[key] for key in (
+            "release_tag", "source_commit", "package_name", "package_url", "package_sha256",
+            "package_bytes", "maximum_context_tokens")},
+        "qualification_receipt": {"path": summary["summary"], "url": summary["public_url"],
+                                  "sha256": summary["sha256"]},
+    })
+    rows.sort(key=lambda row: RUNTIME_VARIANT_IDS.index(row["id"]))
+    native = qualification["composition"].setdefault("native_runtime_variants", {})
+    native[variant_id] = {
+        "status": "passed", "beta_qualified": True, "installable": True,
+        "repository_path": summary["summary"], "sha256": summary["sha256"],
+        "release_tag": variant["release_tag"], "package_sha256": variant["package_sha256"],
+    }
+    qualification["composition"]["native_runtime_variants"] = {
+        key: native[key] for key in RUNTIME_VARIANT_IDS if key in native
+    }
+    for path, value in ((compatibility_path, compatibility), (qualification_path, qualification)):
+        path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -140,6 +217,11 @@ def main() -> int:
     parser.add_argument("--checksums", type=Path, required=True, help="the lane's SHA256SUMS")
     parser.add_argument("--receipt", type=Path, required=True,
                         help="the lane's package-build-receipt.json")
+    parser.add_argument("--add", action="store_true", help="explicitly admit a missing native lane")
+    parser.add_argument("--maximum-context-tokens", type=int,
+                        help="qualified context ceiling; required when adding a lane")
+    parser.add_argument("--qualification-commit",
+                        help="40-hex product commit containing the lane receipt; required for a new lane")
     args = parser.parse_args()
 
     manifest_path = ROOT / "releases" / args.release / "manifest.json"
@@ -150,7 +232,13 @@ def main() -> int:
             parser.error(f"missing input: {path}")
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    variant = bind(manifest, args.lane, args.tag, args.checksums, args.receipt, args.release)
+    is_new = not any(row.get("id") == LANE_VARIANTS[args.lane]
+                     for row in manifest["components"].get("ninfer_variants", []))
+    variant = bind(manifest, args.lane, args.tag, args.checksums, args.receipt, args.release,
+                   maximum_context_tokens=args.maximum_context_tokens,
+                   qualification_commit=args.qualification_commit, add=args.add)
+    if is_new:
+        add_lane_rows(args.release, variant)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"bound {variant['id']} in releases/{args.release}/manifest.json")
     print(f"  package {variant['package_name']} {variant['package_bytes']} bytes")

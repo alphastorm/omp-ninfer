@@ -67,6 +67,7 @@ def private_text(path: Path) -> str:
 
 # The documented acceptance's turns: the tool turn, the nonce plant and the nonce recall.
 DOCUMENTED_TURNS = 3
+NATIVE_MODELS = {"rtx4090": "qwen3.8-27b", "rtx3090": "q38-ninfer"}
 
 
 def request_shape(completed: list[dict]) -> dict[str, bool]:
@@ -78,7 +79,10 @@ def request_shape(completed: list[dict]) -> dict[str, bool]:
             "requests_match_turns_and_tool_calls": len(completed) == DOCUMENTED_TURNS + tool_calls}
 
 
-def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, candidate: str) -> dict[str, object]:
+def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, candidate: str,
+                    lane: str = "rtx4090") -> dict[str, object]:
+    model = NATIVE_MODELS[lane]
+    provider = f"ninfer-native-{lane.removeprefix('rtx')}"
     def load(name: str) -> dict:
         return json.loads(private_text(evidence / name))
 
@@ -94,7 +98,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
         return parsed
 
     manifest = json.loads((clone / "releases" / release / "manifest.json").read_text())
-    expected = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == "rtx4090-windows-native")
+    expected = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == f"{lane}-windows-native")
     blocks = json.loads((bundle / "manifest.json").read_text())
     route = load("route.json")
     health, recovery, installed = load("recovery-health.json"), load("recovery-status.json"), load("installed-identity.json")
@@ -115,9 +119,11 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
     structured = load("structured/receipt.json")
     live = structured["live_acceptance"]
     checks = {
-        "runner_passed": route["status"] == "passed" and route["clone_commit"] == candidate,
+        "runner_passed": route["status"] == "passed" and route["clone_commit"] == candidate and
+            route["lane"] == blocks["lane"] == f"{lane}-native",
         "document_hash_matched": route["document_sha256"] == blocks["document_sha256"],
-        "seven_steps_hash_matched": len(route["steps"]) == 7 and all(
+        "seven_steps_hash_matched": len(route["steps"]) == len(blocks["steps"]) == 7 and all(
+            r["slug"] == b["slug"] and
             r["block_sha256"] == r["executed_sha256"] == b["sha256"] and
             r["status"] in ("passed", "substituted") for r, b in zip(route["steps"], blocks["steps"])),
         "clone_override_recorded": candidate in (route["steps"][1]["substitution"] or ""),
@@ -127,9 +133,9 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
         "exact_continuation_nonce": "COBALT-493817" in lines,
         **request_shape(completed),
         "linked_tool_history": any(row["request"].get("has_tool_history") for row in completed),
-        "only_expected_server_model": bool(completed) and all(row["request"]["model"] == "qwen3.8-27b" for row in completed),
+        "only_expected_server_model": bool(completed) and all(row["request"]["model"] == model for row in completed),
         "only_local_client_responses": bool(responses) and all(
-            row.get("provider") == "ninfer-native-4090" and row.get("model") == "qwen3.8-27b" for row in responses),
+            row.get("provider") == provider and row.get("model") == model for row in responses),
         "offline_failed_without_response": bool(offline) and bool(provider_errors) and all(
             row.get("contentBlocks") == 0 and row.get("hasText") is False and row.get("hasToolCalls") is False for row in offline),
         "only_known_local_compatibility_errors": all(row["error"].get("code") == "reasoning_effort_not_supported" for row in rejected),
@@ -162,11 +168,12 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--lane", choices=sorted(NATIVE_MODELS), default="rtx4090")
     p.add_argument("--release", required=True)
     p.add_argument("--candidate", required=True)
     p.add_argument("--workspace", type=Path, required=True)
     p.add_argument("--remote-workspace", required=True)
-    p.add_argument("--host", default="sf-pc")
+    p.add_argument("--host", help="SSH destination; required for rtx3090")
     p.add_argument("--clone", type=Path)
     p.add_argument("--bundle", type=Path)
     p.add_argument("--expected-state-sha256", required=True)
@@ -176,6 +183,13 @@ def main() -> int:
     p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect"), default="dry-run")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
+    if a.host is None:
+        if a.lane != "rtx4090":
+            p.error("--host is required for rtx3090")
+        a.host = "sf-pc"
+    route_lane = f"{a.lane}-native"
+    provider = f"ninfer-native-{a.lane.removeprefix('rtx')}"
+    model = NATIVE_MODELS[a.lane]
     if not re.fullmatch(r"[0-9a-f]{40}", a.candidate):
         p.error("candidate must be an exact commit")
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", a.release):
@@ -195,7 +209,7 @@ def main() -> int:
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
             "window_minutes": a.window_minutes,
-            "client_install": {"lane": "rtx4090-native", "step": "client-install",
+            "client_install": {"lane": route_lane, "step": "client-install",
                                "launcher": r"$env:LOCALAPPDATA\OMP\omp.exe",
                                "distribution_kind": "upstream-release"},
             "restoration": "on-host finally plus independent SSH Restore leg",
@@ -209,6 +223,7 @@ def main() -> int:
     os.chmod(w, 0o700)
     remote_clone = remote + "\\candidate"
     params = {"Release": a.release, "Candidate": a.candidate, "Workspace": remote,
+              "Lane": a.lane,
               "Bundle": remote + "\\bundle", "Clone": remote_clone,
               "ExpectedStateSha256": a.expected_state_sha256, "TemporaryPrevious": a.temporary_previous,
               "Attempt": a.attempt, "WindowMinutes": a.window_minutes}
@@ -244,8 +259,10 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         if run(["git", "-C", str(clone), "status", "--porcelain"]).stdout.strip():
             raise RuntimeError("candidate clone must be clean")
         if not bundle.exists():
-            run([sys.executable, str(clone / "scripts/documented_route.py"), "bundle", "--lane", "rtx4090-native", "--output", str(bundle)])
+            run([sys.executable, str(clone / "scripts/documented_route.py"), "bundle", "--lane", route_lane, "--output", str(bundle)])
         manifest = json.loads((bundle / "manifest.json").read_text())
+        if manifest["lane"] != route_lane:
+            raise RuntimeError("bundle lane differs from selected native lane")
         if manifest["document_sha256"] != sha(clone / manifest["document"]):
             raise RuntimeError("bundle document differs from clean clone")
         if len(manifest["steps"]) != 7 or any(sha(bundle / step["file"]) != step["sha256"] for step in manifest["steps"]):
@@ -265,7 +282,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
     elif a.mode == "validate":
         # Revalidate changed orchestration without repeating a successful installation/download.
         preflight = json.loads((w / "driver-preflight.json").read_text())
-        if preflight["plan"]["candidate"] != a.candidate:
+        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane:
             raise RuntimeError("candidate changed since preflight")
         run(["scp", "-q", str(orchestrator), str(probe),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
@@ -273,8 +290,8 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
 $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $w 'accept-rtx4090-route.ps1'),[ref]$t,[ref]$e)|Out-Null;if($e.Count){throw 'orchestrator parse failed'};
 $h=Join-Path $w 'preflight-home';Set-Variable HOME $h -Scope Global -Force;$env:HOME=$h;$env:USERPROFILE=$h;$env:LOCALAPPDATA=Join-Path $h 'AppData\Local';$env:APPDATA=Join-Path $h 'AppData\Roaming';
 $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated binary missing'};
-& py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
-""".replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate))
+& py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider PROVIDER --model MODEL --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
+""".replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate)).replace("PROVIDER", quote(provider)).replace("MODEL", quote(f"{provider}/{model}"))
         ssh(a.host, code, log=w / "preflight-revalidation.log", timeout=120)
         invoke("DryRun", "restoration-dry-run.json", 120)
         preflight["orchestrator_sha256"] = sha(orchestrator)
@@ -283,7 +300,7 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
         collect()
     elif a.mode == "accept":
         preflight = json.loads((w / "driver-preflight.json").read_text())
-        if preflight["plan"]["candidate"] != a.candidate or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe):
+        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe):
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():
             raise RuntimeError("acceptance attempt already spent; use a new workspace for one authorized correction")
@@ -304,7 +321,7 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
             finally:
                 collect()
                 try:
-                    behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate)
+                    behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate, a.lane)
                     result["behavior_status"] = behavior["status"]
                 except Exception as exc:
                     result["behavior_error"] = str(exc)
@@ -322,7 +339,7 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
     else:
         collect()
         if (w / "evidence" / "route.json").exists():
-            behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate)
+            behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate, a.lane)
             if behavior["status"] != "passed":
                 return 1
     print(json.dumps({"status": "passed", "mode": a.mode, "evidence": str(w / "evidence")}))

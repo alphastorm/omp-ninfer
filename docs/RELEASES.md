@@ -1460,7 +1460,7 @@ upstream provenance and the darwin-arm64, windows-x64 and linux-x64 binaries, wh
 equal their asset hashes, and `scripts/verify_release.py` checks every binding. Client acceptance
 is never inherited from a predecessor release.
 
-RTX 4090 native runtime components use `scripts/hosts/cut-ninfer-4090-component.sh` after the
+Both native runtime lanes use `scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090|rtx4090` after the
 lane's canonical native qualification (`tools/qualification/qualify_native.py` in the runtime
 fork). The default mode checks that the outer `SHA256SUMS` closes and verifies the asset
 directory, that the package build receipt and the lane specification at the commit name the same
@@ -1468,6 +1468,111 @@ release and source, that the source archive's tar stream is byte-identical to `g
 the commit, and that neither the tag nor the release exists. `--publish` is founder-only: it
 pushes the component tag and creates one prerelease with the closed set; binding it into a
 product release stays `scripts/bind_native_variant.py`.
+
+The historical cutter and `accept-rtx4090-route.{py,ps1}` filenames each remain the single
+implementation for both native lanes. Omit `--lane` / `-Lane` for unchanged RTX 4090 behavior;
+RTX 3090 requires an explicit lane and the Python route driver also requires its `--host`.
+It uses state root `C:/ProgramData/NInfer/qwen38-3090-native`, task
+`NInfer-Qwen38-3090-Native` and a stopped 370 W owner baseline, not the RTX 4090's 450 W
+and container-host pause prerequisite. Existing hold files are snapshotted and audited on both
+lanes. Do not run a window with inference processes, listeners or an outstanding GPU lease.
+
+### RTX 3090 addition after qualification
+
+This is a future operator handoff, not a staged or published v0.9.1 release. Obtain the
+composed receipt from the unchanged `scripts/compose_native_qualification.py`, the package
+build receipt and the packager's complete ten-file `package-a` directory. No package hash or
+hardware result is inferred here. The component uses source
+`e20060b6a152a11fd72450549592527e126b035e`, tag `v0.6.2-qwen38-3090-beta.1` and package
+`ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`.
+On its build host the assets are `C:/b/ninfer-rtx3090-e20060b6/package-a`; when cutting from
+another machine, `ASSETS` must name a verified local copy of that complete directory.
+
+```sh
+export NINFER_RUNTIME_DIR=/path/to/ninfer-checkout
+export ASSETS=/path/to/verified-package-a NOTES=/path/to/component-notes.txt
+SUMS_SHA=$(shasum -a 256 "$ASSETS/SHA256SUMS" | cut -d' ' -f1)
+bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 \
+  --commit e20060b6a152a11fd72450549592527e126b035e --assets "$ASSETS" \
+  --checksums-sha "$SUMS_SHA" --notes-file "$NOTES" --dry-run
+# FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.
+```
+
+After founder publication, stage the product with the current component pins and deployment
+profile intact. Passing the existing stock-client descriptor resets client/route acceptance
+without changing the OMP binary. Its predecessor-pin warnings are expected because OMP remains
+18.4.0; do not use `--require-clean-client` to demand a different client identity.
+
+```sh
+python3 - <<'PY'
+import json, subprocess, sys
+from pathlib import Path
+n = json.loads(Path('releases/v0.9.0/manifest.json').read_text())['components']['ninfer']
+flags = {
+    '--release-tag': n['release_tag'], '--source-tag': n['source_archive_url'].split('/')[-2],
+    '--source-commit': n['source_commit'], '--binary-sha': n['server_binary_sha256'],
+    '--archive-sha': n['binary_archive_sha256'], '--source-archive-sha': n['source_archive_sha256'],
+    '--sbom-sha': n['sbom_sha256'], '--image-digest': n['oci_manifest_digest'],
+    '--runtime-receipt-release': n['runtime_receipt_release'],
+    '--archive-name': n['binary_archive_url'].split('/')[-1],
+}
+subprocess.run([sys.executable, 'scripts/stage_release.py', '--from', 'v0.9.0', '--release', 'v0.9.1',
+                '--keep-deployment-profile', '--omp-component',
+                'releases/v0.9.0/qualification/client-components.json',
+                *[arg for pair in flags.items() for arg in pair]], check=True)
+PY
+cp "$QUALIFICATION_RECEIPT" releases/v0.9.1/qualification/rtx3090.json
+git add releases/v0.9.1
+git commit -m 'chore(release): stage v0.9.1 with native 3090 qualification'
+python3 scripts/bind_native_variant.py --release v0.9.1 --lane rtx3090 --add \
+  --maximum-context-tokens 131072 --qualification-commit "$(git rev-parse HEAD)" \
+  --tag v0.6.2-qwen38-3090-beta.1 --checksums "$ASSETS/SHA256SUMS" \
+  --receipt "$ASSETS/package-build-receipt.json"
+python3 scripts/rebind_release.py --release v0.9.1 --draft
+```
+
+`--add` creates the manifest, release compatibility and qualification-composition rows in
+canonical order only after the existing verifier accepts the real qualification receipt.
+Without it a missing row remains an error. The root authority and existing lanes are untouched.
+Commit the bindings, then run `rebind_release.py --release v0.9.1 --pin <receipt-commit> --stage lane`.
+At that cut update the existing routes' product pins to v0.9.1 and the current-release prose;
+do not change their component pins. Freeze the candidate only after those edits are committed.
+
+On the authorized RTX 3090 host, run the public-asset check with the candidate clone:
+
+```powershell
+.\scripts\hosts\accept-native-public-install.ps1 -Lane rtx3090 `
+  -ManifestPath .\releases\v0.9.1\manifest.json `
+  -ExpectedSums .\releases\v0.9.1\qualification\rtx3090-windows-native.SHA256SUMS `
+  -StateRoot C:/ProgramData/NInfer/qwen38-3090-native `
+  -Workspace C:/acceptance/rtx3090-public-install -ReceiptPath C:/acceptance/rtx3090-public-install.json
+```
+
+For documented acceptance, use a fresh same-volume remote workspace and the exact state hash and
+temporary previous-release id from the stopped hardware qualification baseline. Run the same
+driver arguments with `--mode dry-run`, then `preflight`, then once with `accept`:
+
+```sh
+python3 scripts/hosts/accept-rtx4090-route.py --lane rtx3090 --release v0.9.1 \
+  --candidate "$CANDIDATE" --host "$RTX3090_HOST" --workspace "$LOCAL_WINDOW" \
+  --remote-workspace C:/acceptance/rtx3090-route \
+  --expected-state-sha256 "$STATE_SHA" --temporary-previous "$PREVIOUS_RELEASE" --mode dry-run
+```
+
+Run all five documented routes fresh; no predecessor-route acceptance is carried forward.
+`compose_route_acceptance.py --release v0.9.1 --candidate "$CANDIDATE" --as-of "$AS_OF"`
+also takes `--measurement-prefix "$PREFIX" --evidence "$EVIDENCE"` and five `--route LANE=PATH`
+arguments: `rtx5090-container-host`, `rtx5090-macos-client`, `rtx5090-windows-client`,
+`rtx4090-native` and `rtx3090-native`. Evidence needs separate `rtx4090` and `rtx3090`
+preparation/observations/limitations, with real public-install and behavior/restoration results.
+It writes both native public-install receipts and refuses missing lanes or an accepted route
+also listed as deferred. Commit the acceptance, then perform the existing `--stage platform`,
+`--stage acceptance` and `--stage manifest` pin dance, committing between stages and taking
+each pin from the commit containing that stage's input evidence. Finish with:
+
+```sh
+python3 scripts/verify_release.py --release v0.9.1 --require-ready --check-pins
+```
 
 At cut time, move the applicable human-readable entries from `[Unreleased]` in
 [`CHANGELOG.md`](../CHANGELOG.md) into the exact version heading, using the actual ISO 8601

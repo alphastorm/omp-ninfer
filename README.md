@@ -711,6 +711,10 @@ Do not bypass the ready gate. The separately preserved
 remain the historical three-GPU / OMP 18.0.9 route, including RTX 3090. They do not qualify
 RTX 3090 with OMP 18.4.0.
 
+RTX 3090 native **qualification is in progress** for the planned v0.9.1 release. The
+[prepared route](docs/QUICKSTART.md#native-windows-rtx-3090-release-lane) targets stock OMP
+18.4.0; it is not install authority until that release is published and verifies ready.
+
 ## How it works
 
 ![OMP NInfer architecture](assets/architecture.png)

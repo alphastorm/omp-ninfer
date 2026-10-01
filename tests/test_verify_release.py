@@ -1290,6 +1290,25 @@ class ReleaseContractTest(unittest.TestCase):
             )
             self.assertEqual(errors, [])
 
+            old_tag = variant["release_tag"]
+            variant["release_tag"] = "v0.6.2-qwen38-3090-beta.1"
+            variant["package_name"] = "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz"
+            for field, value in tuple(variant.items()):
+                if field.endswith("_url"):
+                    variant[field] = value.replace(old_tag, variant["release_tag"])
+            variant["package_url"] = (
+                f"https://github.com/alphastorm/ninfer/releases/download/{variant['release_tag']}/{variant['package_name']}")
+            errors = []
+            VERIFY_RELEASE.validate_ninfer_variants(root, release, [variant], compatibility, "1" * 64, errors)
+            self.assertEqual(errors, [])
+            for field in ("release_tag", "package_name"):
+                original = variant[field]
+                variant[field] = original.replace("v0.6.2", "v0.6.3")
+                errors = []
+                VERIFY_RELEASE.validate_ninfer_variants(root, release, [variant], compatibility, "1" * 64, errors)
+                self.assertIn(f"components.ninfer_variants.rtx3090-windows-native.{field} is invalid", errors)
+                variant[field] = original
+
             receipt["status"] = "incomplete"
             receipt["beta_qualified"] = False
             receipt["installable"] = False
@@ -1319,6 +1338,10 @@ class ReleaseContractTest(unittest.TestCase):
             )
 
     def test_ga_native_variant_checksum_closure_is_complete(self) -> None:
+        errors = []
+        VERIFY_RELEASE.validate_ninfer_variants(ROOT, "v0.9.0", [{"id": "unknown-native"}],
+                                                {"runtime_variants": []}, "a" * 64, errors)
+        self.assertIn("NInfer runtime variants must use the closed set in canonical order", errors)
         prefix = "components.ninfer_variants.rtx4090-windows-native"
         cases = (
             "missing_digest",

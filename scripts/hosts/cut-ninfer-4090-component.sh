@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publish one RTX 4090 native NInfer component: the release tag at the exact source commit and one
+# Publish one native NInfer component: the release tag at the exact source commit and one
 # prerelease carrying the packager's closed asset set, after its canonical native qualification.
 # The default mode is a no-effect preflight: it proves the outer SHA256SUMS closes and verifies the
 # asset directory, the package build receipt and lane specification name the commit and release,
@@ -7,8 +7,10 @@
 # Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
 #
 # Usage:
-#   cut-ninfer-4090-component.sh --version v0.6.6 --commit <sha40> --assets DIR \
+#   cut-ninfer-4090-component.sh [--lane rtx3090|rtx4090] --version v0.6.6 --commit <sha40> --assets DIR \
 #     --checksums-sha <sha256> --notes-file FILE [--beta 1] [--publish]
+# The historical entrypoint and default lane preserve existing RTX 4090 invocations.
+# RTX 3090 defaults --assets to C:/b/ninfer-rtx3090-<head8>/package-a.
 set -euo pipefail
 
 REPO=alphastorm/ninfer
@@ -17,6 +19,11 @@ RUNTIME_REPO_DIR="${NINFER_RUNTIME_DIR:-$HOME/Development/ninfer-lane-5090}"
 version=""; commit=""; assets=""; checksums_sha=""; notes_file=""; beta=1; publish=0
 while (($#)); do
   case "$1" in
+    --lane|--version|--commit|--assets|--checksums-sha|--notes-file|--beta)
+      (($# >= 2)) || { echo "$1 requires a value" >&2; exit 2; } ;;
+  esac
+  case "$1" in
+    --lane) LANE="$2"; shift 2 ;;
     --version) version="$2"; shift 2 ;;
     --commit) commit="$2"; shift 2 ;;
     --assets) assets="$2"; shift 2 ;;
@@ -28,10 +35,12 @@ while (($#)); do
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+[[ $LANE == rtx3090 || $LANE == rtx4090 ]] || { echo "--lane must be rtx3090 or rtx4090" >&2; exit 2; }
 [[ $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "--version must be vX.Y.Z" >&2; exit 2; }
 [[ $commit =~ ^[0-9a-f]{40}$ ]] || { echo "--commit must be a full lowercase sha" >&2; exit 2; }
 [[ $checksums_sha =~ ^[0-9a-f]{64}$ ]] || { echo "--checksums-sha must be a sha256 hex" >&2; exit 2; }
 [[ $beta =~ ^[1-9][0-9]*$ ]] || { echo "--beta must be a positive integer" >&2; exit 2; }
+if [[ $LANE == rtx3090 && -z $assets ]]; then assets="C:/b/ninfer-rtx3090-${commit:0:8}/package-a"; fi
 [[ -d $assets ]] || { echo "--assets must be a directory" >&2; exit 2; }
 [[ -f $notes_file ]] || { echo "--notes-file must name the release notes" >&2; exit 2; }
 git -C "$RUNTIME_REPO_DIR" cat-file -e "$commit^{commit}" || { echo "commit not in $RUNTIME_REPO_DIR" >&2; exit 1; }
@@ -39,11 +48,14 @@ git -C "$RUNTIME_REPO_DIR" cat-file -e "$commit^{commit}" || { echo "commit not 
   || { echo "SHA256SUMS does not match --checksums-sha" >&2; exit 1; }
 
 spec_json=$(git -C "$RUNTIME_REPO_DIR" show "$commit:packaging/windows/lanes/$LANE/release-spec.json")
-python3 - "$assets" "$version" "$beta" "$commit" "$RUNTIME_REPO_DIR" "$spec_json" <<'PY'
+python3 - "$assets" "$version" "$beta" "$commit" "$RUNTIME_REPO_DIR" "$spec_json" "$LANE" <<'PY'
 import hashlib, json, pathlib, subprocess, sys, tarfile
-root, version, beta, commit, runtime, spec_text = sys.argv[1:]
+root, version, beta, commit, runtime, spec_text, lane = sys.argv[1:]
 root = pathlib.Path(root)
 spec = json.loads(spec_text)
+if (spec["lane"] != lane or spec["product_prefix"] != f"ninfer-{lane}-native"
+        or spec["platform"] != f"windows-x86_64-cuda13.3-{lane}"):
+    raise SystemExit("lane specification disagrees with --lane")
 release_version = f"{version[1:]}-beta.{beta}"
 if spec["release_version"] != release_version:
     raise SystemExit(f"lane specification names {spec['release_version']}, not {release_version}")
@@ -114,7 +126,8 @@ if not prefix or published_tar != expected_tar:
 print(f"assets verified: {package} {entries[package]}; source {prefix}/ is {commit}")
 PY
 
-tag="$version-qwen38-4090-beta.$beta"
+gpu="${LANE#rtx}"
+tag="$version-qwen38-$gpu-beta.$beta"
 git -C "$RUNTIME_REPO_DIR" branch -r --contains "$commit" | grep -q 'origin/' || { echo "commit is not on any origin branch" >&2; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo "gh is not authenticated" >&2; exit 1; }
 [[ $(gh api "repos/$REPO" --jq .permissions.push) == true ]] || { echo "release write permission is unavailable: $REPO" >&2; exit 1; }
@@ -129,6 +142,6 @@ fi
 
 git -C "$RUNTIME_REPO_DIR" push origin "$commit:refs/tags/$tag"
 gh release create "$tag" --repo "$REPO" --verify-tag --prerelease --latest=false \
-  --title "NInfer RTX 4090 native durable-session runtime ($version)" --notes-file "$notes_file" \
+  --title "NInfer RTX $gpu native durable-session runtime ($version)" --notes-file "$notes_file" \
   "$assets"/*
 echo "published $tag; bind it with scripts/bind_native_variant.py"

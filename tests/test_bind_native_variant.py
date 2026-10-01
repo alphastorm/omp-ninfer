@@ -9,6 +9,7 @@ import hashlib
 import importlib.util
 import json
 import unittest
+from copy import deepcopy
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -156,6 +157,78 @@ class BindNativeVariantTest(unittest.TestCase):
         with self.assertRaises(BINDER.BindError) as raised:
             self.bind()
         self.assertIn("malformed checksum line", str(raised.exception))
+
+    def prepare_3090(self) -> None:
+        self.manifest["components"]["ninfer_variants"] = [self.manifest["components"]["ninfer_variants"][1]]
+        self.manifest["components"]["model"] = {"artifact_sha256": digest("model")}
+        self.package_3090 = PACKAGE.replace("rtx4090", "rtx3090").replace("v0.6.1", "v0.6.2")
+        self.tag_3090 = "v0.6.2-qwen38-3090-beta.1"
+        self.receipt["lane"] = "rtx3090"
+        self.receipt["package"]["filename"] = self.package_3090
+        self.write_receipt()
+        self.entries = {name.replace("rtx4090", "rtx3090").replace("v0.6.1", "v0.6.2"): value
+                        for name, value in self.entries.items()}
+        self.entries["package-build-receipt.json"] = self.receipt_digest
+        self.write_checksums()
+        summary = {
+            "artifact_type": "ninfer_windows_release_qualification", "status": "passed",
+            "beta_qualified": True,
+            "identity": {"source_commit": self.receipt["patch_stack_sha"],
+                         "server_binary_sha256": self.receipt["binaries"]["server_sha256"],
+                         "configuration_sha256": self.receipt["config_sha256"]},
+            "package": {"sha256": self.receipt["package"]["sha256"],
+                        "sbom_sha256": self.entries[self.package_3090.removesuffix(".tar.gz") + ".spdx.json"],
+                        **{field + "_sha256": self.entries[name] for field, name in BINDER.SUPPORT_ASSETS.items()}},
+        }
+        self.summary_3090 = self.release_root / "rtx3090.json"
+        self.summary_3090.write_text(json.dumps(summary))
+
+    def add_3090(self, **kwargs):
+        return BINDER.bind(self.manifest, "rtx3090", self.tag_3090, self.checksums_path,
+                           self.receipt_path, "v0.6.8", maximum_context_tokens=131072,
+                           qualification_commit="a" * 40, **kwargs)
+
+    def test_new_lane_requires_explicit_admission_and_verified_receipt(self) -> None:
+        self.prepare_3090()
+        original = deepcopy(self.manifest)
+        with self.assertRaisesRegex(BINDER.BindError, "use --add"):
+            self.add_3090()
+        for mutation in ("incomplete", "other-package"):
+            summary = json.loads(self.summary_3090.read_text())
+            if mutation == "incomplete":
+                summary["status"] = "incomplete"
+            else:
+                summary["status"] = "passed"
+                summary["package"]["sha256"] = digest("other-package")
+            self.summary_3090.write_text(json.dumps(summary))
+            with self.assertRaises(BINDER.BindError):
+                self.add_3090(add=True)
+            self.assertEqual(self.manifest, original)
+
+    def test_add_3090_creates_canonical_mirrors_without_touching_existing_lane(self) -> None:
+        self.prepare_3090()
+        sibling = deepcopy(self.manifest["components"]["ninfer_variants"][0])
+        variant = self.add_3090(add=True)
+        self.assertEqual([row["id"] for row in self.manifest["components"]["ninfer_variants"]],
+                         ["rtx3090-windows-native", "rtx4090-windows-native"])
+        self.assertEqual(self.manifest["components"]["ninfer_variants"][1], sibling)
+        release = self.release_root.parent
+        existing_row = {"id": "rtx4090-windows-native", "untouched": True}
+        (release / "compatibility.json").write_text(json.dumps({"runtime_variants": [existing_row]}))
+        (release / "qualification.json").write_text(json.dumps({"composition": {
+            "native_runtime_variants": {"rtx4090-windows-native": {"untouched": True}}}}))
+        root_authority = self.workspace / "compatibility.json"
+        root_authority.write_text("unchanged root authority")
+        BINDER.add_lane_rows("v0.6.8", variant)
+        rows = json.loads((release / "compatibility.json").read_text())["runtime_variants"]
+        self.assertEqual(rows[1], existing_row)
+        self.assertEqual(rows[0]["cuda_architecture"], "sm_86")
+        self.assertEqual(rows[0]["package_name"], self.package_3090)
+        self.assertEqual(rows[0]["qualification_receipt"]["sha256"], variant["qualification"]["sha256"])
+        native = json.loads((release / "qualification.json").read_text())["composition"]["native_runtime_variants"]
+        self.assertEqual(native["rtx4090-windows-native"], {"untouched": True})
+        self.assertEqual(native["rtx3090-windows-native"]["package_sha256"], variant["package_sha256"])
+        self.assertEqual(root_authority.read_text(), "unchanged root authority")
 
 
 if __name__ == "__main__":

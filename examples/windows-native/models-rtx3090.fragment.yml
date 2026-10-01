@@ -1,0 +1,27 @@
+providers:
+  ninfer-native-3090:
+    baseUrl: http://127.0.0.1:18082/v1
+    api: openai-responses
+    apiKey: NINFER_NATIVE_API_KEY
+    authHeader: true
+    models:
+      - id: q38-ninfer
+        name: Qwen3.8 27B NInfer RTX 3090 native
+        api: openai-responses
+        reasoning: true
+        thinking:
+          mode: effort
+          efforts: [low, medium, xhigh]
+        input:
+          - text
+        supportsTools: true
+        cost:
+          input: 0
+          output: 0
+          cacheRead: 0
+          cacheWrite: 0
+        contextWindow: 131072
+        maxTokens: 32768
+        compat:
+          includeEncryptedReasoning: false
+          supportsReasoningSummary: false

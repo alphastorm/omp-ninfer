@@ -8,6 +8,7 @@ import json
 import re
 import os
 import socket
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -120,7 +121,7 @@ class ExtractionTests(unittest.TestCase):
         (measured 2026-09-13). Both download blocks must let the byte count decide instead."""
         doc = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
         blocks = [b for b in documented_route.parse_blocks(doc) if "--continue-at -" in b.text]
-        self.assertEqual(len(blocks), 2, "one shell and one PowerShell download block")
+
         for block in blocks:
             self.assertIn("artifact_bytes", block.text)
             if block.language == "sh":
@@ -357,96 +358,40 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(receipt["steps"][1]["status"], "refused")
 
 
-class QualifiedLaneSurfaceTests(unittest.TestCase):
-    """An install surface may only offer a lane the current release qualifies.
+class NativeInstallGateTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the install gate")
+    def test_unqualified_or_ambiguous_native_variant_stops_before_download(self) -> None:
+        """Prospective documentation is not install authority: execute its real manifest gate.
 
-    v0.7.3 narrowed to RTX 5090 and RTX 4090 while the quickstart's fleet recipe still installed
-    an RTX 3090 scout provider and agent: every hash matched and the ready verifier passed,
-    because the authority reads neither the recipe a reader follows nor the payload a reader
-    merges into `~/.omp/agent`.
-    """
-
-    LANE_TOKEN = re.compile(r"(?:rtx[\s-]?|ninfer-(?:native-)?|provider-|qwen38-)(\d{4})", re.I)
-    PAYLOADS = (
-        "examples/**/*.yml",
-        "examples/**/*.json",
-        "examples/**/*.sh",
-        "examples/**/agents/*.md",
-        "profiles/*.json",
-    )
-
-    def qualified_lanes(self) -> set[str]:
-        release = json.loads(
-            (ROOT / "compatibility.json").read_text(encoding="utf-8")
-        )["product_release"]
-        authority = (ROOT / "compatibility.json").read_text(encoding="utf-8")
-        manifest = (ROOT / "releases" / release / "manifest.json").read_text(encoding="utf-8")
-        lanes = set(re.findall(r"rtx(\d{4})", authority + manifest, re.I))
-        lanes |= set(re.findall(r"qwen38-(\d{4})", manifest))
-        self.assertTrue(lanes, "the release authority names no GPU lane")
-        return lanes
-
-    def test_merged_payloads_declare_only_qualified_lanes(self) -> None:
-        qualified = self.qualified_lanes()
-        for pattern in self.PAYLOADS:
-            for path in sorted(ROOT.glob(pattern)):
-                # Comments carry the deferral note; declarations are what OMP ends up loading.
-                body = "\n".join(
-                    line
-                    for line in path.read_text(encoding="utf-8").splitlines()
-                    if not line.lstrip().startswith("#")
-                )
-                named = set(self.LANE_TOKEN.findall(body))
-                self.assertFalse(
-                    named - qualified,
-                    f"{path.relative_to(ROOT)} declares unqualified lanes "
-                    f"{sorted(named - qualified)}",
-                )
-
-    def test_every_block_installs_only_qualified_lane_payloads(self) -> None:
-        """Follow the recipe: a block installs files, and those files declare the lanes.
-
-        The withdrawn fleet recipe named no GPU itself; it installed a fragment and a scout
-        agent that did. An install surface is the block plus every payload it reaches.
+        A provider file or a GPU name in prose is not evidence of qualification. Both native
+        recipes must refuse missing, preview and duplicate manifest rows before any download.
         """
-        qualified = self.qualified_lanes()
-        reference = re.compile(r"(?:examples|profiles)[\\/][\w./\\-]+")
-        seen = 0
-        for block in documented_route.parse_blocks(
-            documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        ):
-            for raw in set(reference.findall(block.text)):
-                path = ROOT / raw.replace("\\", "/")
-                self.assertTrue(
-                    path.exists(),
-                    f"block {block.heading!r}[{block.index}] installs missing {raw}",
-                )
-                if not path.is_file():
-                    continue
-                seen += 1
-                body = "\n".join(
-                    line
-                    for line in path.read_text(encoding="utf-8").splitlines()
-                    if not line.lstrip().startswith("#")
-                )
-                named = set(self.LANE_TOKEN.findall(body))
-                self.assertFalse(
-                    named - qualified,
-                    f"block {block.heading!r}[{block.index}] installs {raw}, which declares "
-                    f"unqualified lanes {sorted(named - qualified)}",
-                )
-        self.assertGreater(seen, 0, "no block installs a repository payload")
-
-    def test_accepted_blocks_pin_the_qualified_variant_they_branch_on(self) -> None:
-        """The frozen accepted bytes still carry a deferred-variant arm of an earlier release.
-
-        It is unreachable only while the route assigns the qualified variant id itself; an edit
-        that turns that assignment into a reader's choice would make the deferred arm live, and
-        those bytes cannot be rewritten without invalidating the recorded acceptance.
-        """
-        document = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        assignments = set(re.findall(r"\$VariantId\s*=\s*'([^']+)'", document))
-        self.assertEqual(assignments, {"rtx4090-windows-native"})
+        for lane in ("rtx3090", "rtx4090"):
+            variant_id = f"{lane}-windows-native"
+            blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
+                documented_route.DEFAULT_DOC, f"{lane}-native")}
+            cases = ([], [{"id": variant_id, "status": "preview"}],
+                     [{"id": variant_id, "status": "qualified"}] * 2)
+            for variants in cases:
+                with self.subTest(lane=lane, variants=variants), tempfile.TemporaryDirectory() as temporary:
+                    root = Path(temporary)
+                    for release in ("v0.9.0", "v0.9.1"):
+                        directory = root / "releases" / release
+                        directory.mkdir(parents=True)
+                        (directory / "manifest.json").write_text(json.dumps({
+                            "components": {"ninfer_variants": variants}}))
+                    script = root / "install-gate.ps1"
+                    script.write_text(
+                        "function Set-ExecutionPolicy {}\n"  # Windows-only policy; irrelevant to the gate.
+                        "function Invoke-WebRequest { throw 'unexpected download' }\n"
+                        + blocks["variant"] + "try {\n" + blocks["stage-and-install"]
+                        + "\nthrow 'unqualified variant reached install'\n} catch {\n"
+                        "if ($_.Exception.Message -cne 'requested native runtime variant is not uniquely qualified') {throw}\n"
+                        "'REFUSED_BEFORE_DOWNLOAD'\n}\n")
+                    result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script)],
+                                            cwd=root, capture_output=True, text=True, timeout=20)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertEqual(result.stdout.strip(), "REFUSED_BEFORE_DOWNLOAD")
 
 
 

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Prepared the RTX 3090 native v0.6.2-beta.1 lane for the next product release: closed component
+  admission, explicit receipt-verified native-row insertion, one lane-parameterized component
+  cutter and route harness, and five-route acceptance with separate native install receipts.
+  The historical 4090 entrypoints and defaults remain compatible. The new stock OMP 18.4.0
+  quickstart is gated on a future ready v0.9.1 manifest; qualification is in progress, and no
+  release, package publication or hardware acceptance is claimed by this tooling change.
+
 - `scripts/speculative_decode_probe.py` measures decode rate and draft acceptance for one code
   answer behind 0 to about 120K tokens of context, a continuation that reuses its prefix, and an
   optional pair of requests decoding together. It sends plain Chat Completions, which the shipped

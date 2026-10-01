@@ -18,6 +18,27 @@ SPEC.loader.exec_module(MODULE)
 
 
 class CompatibilityAuthorityTests(unittest.TestCase):
+    def test_3090_native_v062_admission_remains_closed(self) -> None:
+        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        variant = deepcopy(authority["runtime_variants"][0])
+        tag = "v0.6.2-qwen38-3090-beta.1"
+        package = "ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz"
+        variant.update(id="rtx3090-windows-native", gpu="NVIDIA GeForce RTX 3090",
+                       cuda_architecture="sm_86", release_tag=tag, package_name=package,
+                       package_url=f"https://github.com/alphastorm/ninfer/releases/download/{tag}/{package}")
+        authority["runtime_variants"].insert(0, variant)
+        self.assertIn(package, MODULE.render(MODULE.load_authority(self._write(authority))))
+        for field, invalid in (("release_tag", "v0.6.3-qwen38-3090-beta.1"),
+                               ("release_tag", "v0.6.2-qwen38-3090-native-beta.1"),
+                               ("package_name", package.replace("v0.6.2", "v0.6.3")),
+                               ("package_name", package.replace("cuda13.3", "cuda12.8")),
+                               ("id", "rtx3090-linux-native")):
+            with self.subTest(field=field, invalid=invalid):
+                candidate = deepcopy(authority)
+                candidate["runtime_variants"][0][field] = invalid
+                with self.assertRaises(ValueError):
+                    MODULE.load_authority(self._write(candidate))
+
     def upstream_authority(self) -> dict:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
         descriptor = json.loads(

@@ -19,20 +19,32 @@ param(
     [Parameter(Mandatory=$true)][string]$ExpectedStateSha256,
     [Parameter(Mandatory=$true)][string]$TemporaryPrevious,
     [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Route','Live','Offline')][string]$Mode='DryRun',
-    [string]$StateRoot='C:\ProgramData\NInfer\qwen38-4090-native',
-    [string]$TaskName='NInfer-Qwen38-4090-Native',
-    [string]$Stage='C:\ProgramData\omp-ninfer-stage-rtx4090-windows-native',
+    [string]$StateRoot='',
+    [string]$TaskName='',
+    [string]$Stage='',
     [string]$Model='C:\ProgramData\omp-ninfer-model\qwen3_8_27b.ninfer',
     [string]$KeyFile='C:\ProgramData\omp-ninfer-keys\api-key.txt',
     [string]$HostState='C:\ProgramData\OMP\windows-hosts\state',
     [string]$RealHome=$env:USERPROFILE,
     [ValidateRange(1,2)][int]$Attempt=1,
-    [ValidateRange(1,45)][int]$WindowMinutes=45
+    [ValidateRange(1,45)][int]$WindowMinutes=45,
+    [ValidateSet('rtx3090','rtx4090')][string]$Lane='rtx4090'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 $utf8=[Text.UTF8Encoding]::new($false)
+$gpu=$Lane.Substring(3)
+if(-not $StateRoot){$StateRoot="C:\ProgramData\NInfer\qwen38-$gpu-native"}
+if(-not $TaskName){$TaskName="NInfer-Qwen38-$gpu-Native"}
+if(-not $Stage){$Stage="C:\ProgramData\omp-ninfer-stage-$Lane-windows-native"}
+$ownerPowerLimit=if($Lane -eq 'rtx3090'){370}else{450}
+$RequiredHoldPaths=@()
+if($Lane -eq 'rtx4090'){$RequiredHoldPaths=@("$HostState\container-host-paused")}
+$provider="ninfer-native-$gpu"
+$modelId=if($Lane -eq 'rtx3090'){'q38-ninfer'}else{'qwen3.8-27b'}
+$selector="$provider/$modelId"
+$fragment=if($Lane -eq 'rtx3090'){'models-rtx3090.fragment.yml'}else{'models.fragment.yml'}
 $controller=Join-Path $StateRoot 'Control-Release.ps1'
 $self=Join-Path $Workspace 'accept-rtx4090-route.ps1'
 $runner=Join-Path $Workspace 'run-documented-route.ps1'
@@ -49,7 +61,7 @@ function Describe($path) {
 }
 function Probe {
     $state=ReadJson "$StateRoot\state.json"
-    $holdPaths=@("$HostState\container-host-paused","$HostState\lane-container-paused","$realClient\local-4090-supervisor\paused")
+    $holdPaths=@("$HostState\container-host-paused","$HostState\lane-container-paused","$realClient\local-$gpu-supervisor\paused") + @($RequiredHoldPaths)
     if(Test-Path $HostState){$holdPaths+=@(Get-ChildItem $HostState -File|Where-Object Name -Match 'paused|hold'|ForEach-Object FullName)}
     $holds=@($holdPaths|Sort-Object -Unique|ForEach-Object {Describe $_})
     $clientFiles=@(if(Test-Path $realClient){Get-ChildItem $realClient -File -Force|Sort-Object Name|ForEach-Object {Describe $_.FullName}})
@@ -69,8 +81,8 @@ function Probe {
 function AssertBaseline($p) {
     if($p.state_sha256 -cne $ExpectedStateSha256 -or $null -ne $p.prepared_release -or
        $p.task_state -cne 'Ready' -or @($p.processes).Count -ne 0 -or @($p.listeners).Count -ne 0 -or
-       $p.lease_present -or @($p.lease_entries).Count -ne 0 -or $p.power_limit_w -ne 450 -or
-       -not (Test-Path "$HostState\container-host-paused")){throw 'baseline differs from authorized stopped state'}
+       $p.lease_present -or @($p.lease_entries).Count -ne 0 -or $p.power_limit_w -ne $ownerPowerLimit -or
+       @($RequiredHoldPaths|Where-Object {$_ -and -not (Test-Path -LiteralPath $_)}).Count -ne 0){throw 'baseline differs from authorized stopped state'}
     $s=ReadJson "$StateRoot\state.json"
     if(-not $s.releases.PSObject.Properties[$TemporaryPrevious]){throw 'temporary previous release missing'}
     if($s.active_release -eq $s.previous_release -or $s.active_release -eq $TemporaryPrevious){throw 'invalid temporary lineage'}
@@ -143,6 +155,7 @@ function SetIsolation($name) {
 }
 function Child($childMode,$seconds) {
     $values=@{Release=$Release;Candidate=$Candidate;Workspace=$Workspace;Bundle=$Bundle;Clone=$Clone;
+        Lane=$Lane;
         ExpectedStateSha256=$ExpectedStateSha256;TemporaryPrevious=$TemporaryPrevious;Mode=$childMode;
         StateRoot=$StateRoot;TaskName=$TaskName;Stage=$Stage;Model=$Model;KeyFile=$KeyFile;HostState=$HostState;RealHome=$RealHome;Attempt=$Attempt;WindowMinutes=$WindowMinutes}
     $command='& ([scriptblock]::Create([IO.File]::ReadAllText('+ (Quote $self) +')))'
@@ -240,7 +253,7 @@ if($Mode -in @('Live','Offline')) {
     $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
     if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated installed client binary missing'}
     $phase=if($Mode -eq 'Live'){'live'}else{'outage'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $selector --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
     exit $LASTEXITCODE
 }
 if($Mode -eq 'DryRun') {
@@ -269,8 +282,9 @@ if($Mode -eq 'Preflight') {
     if((& git -C $Clone rev-parse HEAD|Out-String).Trim() -cne $Candidate -or (& git -C $Clone status --porcelain|Out-String).Trim()){throw 'candidate clone is not clean and exact'}
     $manifest=ReadJson "$Clone\releases\$Release\manifest.json"
     if($manifest.components.omp.distribution_kind -cne 'upstream-release'){throw 'stock upstream client required'}
-    $variant=@($manifest.components.ninfer_variants|Where-Object id -CEQ 'rtx4090-windows-native')[0]
+    $variant=@($manifest.components.ninfer_variants|Where-Object id -CEQ "$Lane-windows-native")[0]
     $bundleManifest=ReadJson "$Bundle\manifest.json"
+    if($bundleManifest.lane -cne "$Lane-native"){throw 'bundle lane differs from selected native lane'}
     if((Hash "$Clone\docs\QUICKSTART.md") -cne $bundleManifest.document_sha256){throw 'bundle document mismatch'}
     foreach($step in $bundleManifest.steps){if((Hash (Join-Path $Bundle $step.file)) -cne $step.sha256){throw 'bundle block mismatch'};$tokens=$null;$errors=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $Bundle $step.file),[ref]$tokens,[ref]$errors)|Out-Null;if($errors.Count){throw "bundle parse failed: $($step.slug)"}}
     if((Hash $runner) -cne (Hash "$Clone\scripts\hosts\run-documented-route.ps1")){throw 'runner not from candidate'}
@@ -291,18 +305,18 @@ if($Mode -eq 'Preflight') {
     if((Hash $binary) -cne $manifest.components.omp.binary_sha256){throw 'client binary mismatch'}
     $clientAsset=Join-Path "$Workspace\preflight-work" $manifest.components.omp.artifact_name
     if((Hash $clientAsset) -cne $manifest.components.omp.artifact_sha256){throw 'client asset mismatch'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider ninfer-native-4090 --model ninfer-native-4090/qwen3.8-27b --endpoint http://127.0.0.1:18082/v1
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $selector --endpoint http://127.0.0.1:18082/v1
     if($LASTEXITCODE -ne 0){throw 'structured probe preflight failed'}
     $version=(& $binary --version|Out-String).Trim()
     & $binary --help > "$Workspace\client-help.txt"
     $agent=Join-Path $HOME '.omp\agent';New-Item -ItemType Directory -Force $agent|Out-Null
-    Copy-Item "$Clone\examples\windows-native\models.fragment.yml" "$agent\models.yml"
+    Copy-Item (Join-Path "$Clone\examples\windows-native" $fragment) "$agent\models.yml"
     Copy-Item "$Clone\examples\manual-tunnel\fail-closed.yml" "$agent\config.yml"
     # The parse passes only on exit 0 with exactly the documented selector listed; stderr is kept
     # as evidence.
-    $parser=Start-Process -FilePath $binary -ArgumentList 'models','ninfer-native-4090','--json' -WorkingDirectory (Get-Location).ProviderPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Workspace\parser-models.json" -RedirectStandardError "$Workspace\parser-models.stderr"
+    $parser=Start-Process -FilePath $binary -ArgumentList 'models',$provider,'--json' -WorkingDirectory (Get-Location).ProviderPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Workspace\parser-models.json" -RedirectStandardError "$Workspace\parser-models.stderr"
     $parserListed=@((ReadJson "$Workspace\parser-models.json").models|ForEach-Object {$_.selector})
-    if(($parserListed -join ',') -cne 'ninfer-native-4090/qwen3.8-27b' -or $parser.ExitCode -ne 0){throw 'provider parser failed'}
+    if(($parserListed -join ',') -cne $selector -or $parser.ExitCode -ne 0){throw 'provider parser failed'}
     $modelSha=Hash $Model;if($modelSha -cne $manifest.components.model.artifact_sha256 -or (Get-Item $Model).Length -ne $manifest.components.model.artifact_bytes){throw 'documented model identity mismatch'}
     if(-not (Test-Path $KeyFile)){throw 'documented key missing'}
     $b=Snapshot "$Workspace\preflight-snapshot";EnableExactAcl
@@ -322,7 +336,7 @@ if(-not (Test-Path "$Workspace\omp-client-probe.py")){throw 'shared structured p
 $started=[DateTime]::UtcNow;$b=Snapshot $baseline
 $null=ValidateSnapshot $baseline
 $state=ReadJson "$StateRoot\state.json";$instance=[string]$state.active_release
-$variant=@((ReadJson "$Clone\releases\$Release\manifest.json").components.ninfer_variants|Where-Object id -CEQ 'rtx4090-windows-native')[0]
+$variant=@((ReadJson "$Clone\releases\$Release\manifest.json").components.ninfer_variants|Where-Object id -CEQ "$Lane-windows-native")[0]
 if($state.releases.$instance.package_sha256 -cne $variant.package_sha256){throw 'active instance is not the candidate published package'}
 New-Item -ItemType Directory -Force "$Workspace\preserved","$Workspace\qualified-artifacts"|Out-Null
 $prep=[ordered]@{status='preparing';release=$Release;candidate=$Candidate;attempt=$Attempt;started_utc=$started.ToString('o');moves=@();reason='fresh canonical install from preserved differently-bound active instance; not idempotent reinstall';temporary_active=$state.previous_release;temporary_previous=$TemporaryPrevious}

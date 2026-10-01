@@ -49,8 +49,8 @@ from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
          "rtx4090-native")
-NATIVE_LANE = "rtx4090-native"
-NATIVE_VARIANT = "rtx4090-windows-native"
+NATIVE_LANES = {"rtx4090-native": "rtx4090-windows-native",
+                "rtx3090-native": "rtx3090-windows-native"}
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 EVIDENCE_KEYS = ("platforms", "rtx4090", "restoration", "documented_routes", "composed")
 # What every live client run must have observed before its receipt can say passed.
@@ -202,9 +202,9 @@ def main() -> int:
     routes: dict[str, Path] = {}
     for item in args.route:
         lane, _, path = item.partition("=")
-        require(lane in LANES and path, f"bad --route {item!r}")
+        require(lane in (*LANES, "rtx3090-native") and path, f"bad --route {item!r}")
+        require(lane not in routes, f"duplicate --route {lane!r}")
         routes[lane] = Path(path)
-    require(sorted(routes) == sorted(LANES), f"need one --route for each of {', '.join(LANES)}")
     evidence = load(args.evidence)
     require(all(key in evidence for key in EVIDENCE_KEYS), f"evidence needs {', '.join(EVIDENCE_KEYS)}")
 
@@ -215,6 +215,15 @@ def main() -> int:
     qualification_path = release_root / "qualification.json"
     authority_path = ROOT / "compatibility.json"
     manifest = load(manifest_path)
+    variant_ids = {v["id"] for v in manifest["components"].get("ninfer_variants", [])}
+    lanes = LANES + (("rtx3090-native",) if "rtx3090-windows-native" in variant_ids else ())
+    require(sorted(routes) == sorted(lanes), f"need one --route for each of {', '.join(lanes)}")
+    require(not set(lanes).intersection(evidence["documented_routes"].get("deferred_routes", {})),
+            "accepted routes cannot also be deferred")
+    for lane in lanes:
+        if lane in NATIVE_LANES:
+            require(NATIVE_LANES[lane] in variant_ids, f"{lane}: manifest variant is absent")
+            require(lane.removesuffix("-native") in evidence, f"evidence needs {lane.removesuffix('-native')}")
     qualification = load(qualification_path)
     authority = load(authority_path)
     require(authority.get("product_release") == args.release,
@@ -237,7 +246,7 @@ def main() -> int:
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
     route_rows: dict[str, dict] = {}
-    for lane in LANES:
+    for lane in lanes:
         raw = routes[lane].read_bytes()
         receipt = json.loads(raw)
         check_route(lane, receipt, args.candidate)
@@ -254,10 +263,10 @@ def main() -> int:
     executed_documents = {receipt["document_sha256"] for receipt in receipts.values()}
     require(len(executed_documents) == 1, f"routes ran different documents: {executed_documents}")
     executed_document = executed_documents.pop()
-    addresses = {lane: current_addresses(lane) for lane in LANES}
+    addresses = {lane: current_addresses(lane) for lane in lanes}
     blocks_match = all(
         [row["sha256"] for row in addresses[lane]] == [step["block_sha256"] for step in receipts[lane]["steps"]]
-        for lane in LANES
+        for lane in lanes
     )
     require(blocks_match, "a documented block changed after it was executed; rerun that route")
     current_document = sha256(DOCUMENT.read_bytes())
@@ -298,37 +307,44 @@ def main() -> int:
     # 4. The native lane's public-install receipt.
     windows = next(p for p in authority["profiles"]
                    if p["id"] == "windows-docker-local")
-    variant = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == NATIVE_VARIANT)
-    native = evidence["rtx4090"]
-    native_path = acceptance_root / "rtx4090-public-install.json"
-    save(native_path, {
-        "artifact_type": "omp_ninfer_native_public_install_acceptance",
-        "schema_version": 1,
-        "release": args.release,
-        "lane": NATIVE_VARIANT,
-        "as_of": args.as_of,
-        "status": "passed",
-        "candidate_commit": args.candidate,
-        "client": {
-            **windows["client_distribution"],
-            "version": f"omp/{omp['distribution_version']}",
-        },
-        "runtime": {
-            "tag": variant["release_tag"],
-            "source_commit": variant["source_commit"],
-            "package_bytes": variant["package_bytes"],
-            "package_sha256": variant["package_sha256"],
-            "binary_sha256": variant["server_binary_sha256"],
-            "configuration_sha256": variant["configuration_sha256"],
-            "model_sha256": variant["model_artifact_sha256"],
-        },
-        "preparation": native["preparation"],
-        "observations": native["observations"],
-        "documented_route": {"repository_path": route_rows[NATIVE_LANE]["receipt"],
-                             "sha256": route_rows[NATIVE_LANE]["sha256"]},
-        "restoration": restoration_ref,
-        "limitations": native["limitations"],
-    })
+    native_refs: dict[str, dict] = {}
+    for native_lane, native_variant in NATIVE_LANES.items():
+        if native_lane not in lanes:
+            continue
+        gpu_lane = native_lane.removesuffix("-native")
+        variant = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == native_variant)
+        native = evidence[gpu_lane]
+        native_path = acceptance_root / f"{gpu_lane}-public-install.json"
+        save(native_path, {
+            "artifact_type": "omp_ninfer_native_public_install_acceptance",
+            "schema_version": 1,
+            "release": args.release,
+            "lane": native_variant,
+            "as_of": args.as_of,
+            "status": "passed",
+            "candidate_commit": args.candidate,
+            "client": {
+                **windows["client_distribution"],
+                "version": f"omp/{omp['distribution_version']}",
+            },
+            "runtime": {
+                "tag": variant["release_tag"],
+                "source_commit": variant["source_commit"],
+                "package_bytes": variant["package_bytes"],
+                "package_sha256": variant["package_sha256"],
+                "binary_sha256": variant["server_binary_sha256"],
+                "configuration_sha256": variant["configuration_sha256"],
+                "model_sha256": variant["model_artifact_sha256"],
+            },
+            "preparation": native["preparation"],
+            "observations": native["observations"],
+            "documented_route": {"repository_path": route_rows[native_lane]["receipt"],
+                                 "sha256": route_rows[native_lane]["sha256"]},
+            "restoration": restoration_ref,
+            "limitations": native["limitations"],
+        })
+        native_refs[f"{gpu_lane}_public_install"] = {
+            "repository_path": relative(native_path), "sha256": sha256(native_path.read_bytes())}
 
     # 5. The documented-route acceptance.
     routes_doc: dict[str, Any] = {
@@ -351,7 +367,7 @@ def main() -> int:
     routes_doc.update({
         "candidate_commit": args.candidate,
         "routes": route_rows,
-        "steps": [{"lane": lane, "status": "passed"} for lane in LANES],
+        "steps": [{"lane": lane, "status": "passed"} for lane in lanes],
         "current_block_addresses": addresses,
         "restoration_receipt": restoration_ref,
         "deferred_routes": evidence["documented_routes"].get("deferred_routes", {}),
@@ -391,7 +407,7 @@ def main() -> int:
                       for profile in authority["profiles"]],
     }
     composed_path = acceptance_root / "composed-external-installation.json"
-    steps = {lane: {"status": "passed", "blocks": len(route_rows[lane]["steps"])} for lane in LANES}
+    steps = {lane: {"status": "passed", "blocks": len(route_rows[lane]["steps"])} for lane in lanes}
     steps = {"public_client_downloads": public_client_downloads, **steps,
              "linux_live_client": composed["linux_live_client"]}
     save(composed_path, {
@@ -426,8 +442,7 @@ def main() -> int:
         "evidence": {
             "documented_routes": {"repository_path": relative(routes_path),
                                   "sha256": sha256(routes_path.read_bytes())},
-            "rtx4090_public_install": {"repository_path": relative(native_path),
-                                       "sha256": sha256(native_path.read_bytes())},
+            **native_refs,
             "restoration": restoration_ref,
             "published_client_components": {"repository_path": relative(client_components),
                                             "sha256": sha256(client_components.read_bytes())},

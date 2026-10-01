@@ -67,6 +67,15 @@ LANES: dict[str, tuple[Step, ...]] = {
         Step("provider", "Point OMP at the native lane"),
         Step("acceptance", "Native lane acceptance"),
     ),
+    "rtx3090-native": (
+        Step("client-install", "Install the exact native Windows client"),
+        Step("clone-and-verify", "Native Windows RTX 3090 release lane", 0),
+        Step("variant", "Native Windows RTX 3090 release lane", 1),
+        Step("stage-and-install", "Native Windows RTX 3090 release lane", 2),
+        Step("operate", "Operate the RTX 3090 native lane"),
+        Step("provider", "Point OMP at the RTX 3090 native lane"),
+        Step("acceptance", "RTX 3090 native lane acceptance"),
+    ),
     # RTX 5090 container, inference-host half, run inside the WSL2 distro or on Linux.
     "rtx5090-container-host": (
         Step("prepare", "3. Prepare the model and key on the inference host", 0, "sh"),

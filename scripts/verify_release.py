@@ -967,6 +967,8 @@ def validate_ninfer_variants(
             continue
         variant_id = item.get("id", "<unknown>")
         prefix = f"components.ninfer_variants.{variant_id}"
+        if variant_id not in NINFER_VARIANT_IDS:
+            continue  # The closed-set error above is the verdict, not a regex lookup failure.
         status = item.get("status")
         require(status in {"qualified", "preview"},
                 f"{prefix}.status must be qualified or preview", errors)

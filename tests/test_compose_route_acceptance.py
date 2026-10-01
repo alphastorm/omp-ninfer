@@ -323,6 +323,67 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertFalse((self.release_root / "acceptance").exists())
         self.assertEqual(list((self.root / "docs" / "measurements").iterdir()), [])
 
+    def add_3090(self, *, route: bool = True, evidence: bool = True) -> None:
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        variant = deepcopy(manifest["components"]["ninfer_variants"][0])
+        variant.update(id="rtx3090-windows-native", release_tag="v0.6.2-qwen38-3090-beta.1",
+                       package_sha256="3" * 64)
+        manifest["components"]["ninfer_variants"].insert(0, variant)
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        if evidence:
+            source = MODULE.load(self.root / "evidence.json")
+            source["rtx3090"] = {"preparation": {}, "observations": {"lane": "rtx3090"}, "limitations": []}
+            MODULE.save(self.root / "evidence.json", source)
+        if route:
+            receipt = route_receipt("rtx3090-native")
+            receipt["document_sha256"] = MODULE.sha256(self.document.read_bytes())
+            for step, (_, block) in zip(receipt["steps"], MODULE.documented_route.lane_blocks(self.document, "rtx3090-native")):
+                step["block_sha256"] = step["executed_sha256"] = block.sha256
+            path = self.root / "rtx3090-native.json"
+            MODULE.save(path, receipt)
+            self.argv += ["--route", f"rtx3090-native={path}"]
+
+    def test_five_routes_bind_separate_native_public_install_receipts(self) -> None:
+        self.add_3090()
+        self.assertEqual(self.compose(), 0)
+        acceptance = self.release_root / "acceptance"
+        routes = MODULE.load(acceptance / "documented-routes.json")
+        self.assertEqual(set(routes["routes"]), set(MODULE.LANES) | {"rtx3090-native"})
+        external = MODULE.load(acceptance / "composed-external-installation.json")
+        for lane, digest in (("rtx4090", "9" * 64), ("rtx3090", "3" * 64)):
+            path = acceptance / f"{lane}-public-install.json"
+            receipt = MODULE.load(path)
+            self.assertEqual(receipt["runtime"]["package_sha256"], digest)
+            self.assertEqual(receipt["lane"], f"{lane}-windows-native")
+            self.assertEqual(external["evidence"][f"{lane}_public_install"]["sha256"], MODULE.sha256(path.read_bytes()))
+
+    def test_bound_3090_requires_its_route_and_evidence(self) -> None:
+        self.add_3090(route=False, evidence=False)
+        with self.assertRaisesRegex(SystemExit, "need one --route"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+        self.argv += ["--route", f"rtx3090-native={self.root / 'unused.json'}"]
+        with self.assertRaisesRegex(SystemExit, "evidence needs rtx3090"):
+            self.compose()
+
+    def test_unbound_3090_or_duplicate_route_is_refused(self) -> None:
+        self.argv += ["--route", f"rtx3090-native={self.root / 'unused.json'}"]
+        with self.assertRaisesRegex(SystemExit, "need one --route"):
+            self.compose()
+        self.argv[-1] = f"rtx4090-native={self.root / 'unused.json'}"
+        with self.assertRaisesRegex(SystemExit, "duplicate --route"):
+            self.compose()
+
+    def test_accepted_3090_cannot_keep_a_deferred_route_claim(self) -> None:
+        self.add_3090()
+        evidence = MODULE.load(self.root / "evidence.json")
+        evidence["documented_routes"]["deferred_routes"] = {"rtx3090-native": "old release"}
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaisesRegex(SystemExit, "accepted routes cannot also be deferred"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+
     def test_client_from_another_upstream_release_is_refused_before_writing_receipts(self) -> None:
         authority = MODULE.load(self.root / "compatibility.json")
         authority["profiles"][0]["client_distribution"]["upstream_tag"] = "v18.4.0"
