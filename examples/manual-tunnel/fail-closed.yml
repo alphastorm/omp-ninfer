@@ -9,18 +9,20 @@ retry:
 startup:
   checkUpdate: false
 # Each provider's limit is its lane's concurrency: the RTX 5090 (ninfer-beta, ninfer-main) serves
-# two requests at once and the RTX 4090 (ninfer-native-4090, ninfer-heavy) one. A request beyond a
-# lane's concurrency waits at the server and expires after its pending timeout, 180 s on the
-# RTX 5090 and 30 s on the RTX 4090. OMP's async compaction writes the session's summary in a
-# background request as it nears the compaction threshold, and without a limit the user's next
-# turn queued behind it at the server: every attempt expired, and the turn failed once the summary
-# outlasted OMP's resends (a 61 s RTX 4090 handoff did, EXP-072). With the limit, that turn waits
-# in OMP instead, which has no deadline, and the summary still runs while you read or type. Raise
-# an RTX 5090 provider to 2 only against a v0.9.0 server (EXP-077). Every provider id a documented
-# route or the fleet declares is listed: OMP leaves a provider missing here unlimited.
+# two requests at once, and the RTX 4090 (ninfer-native-4090, ninfer-heavy) and RTX 3090
+# (ninfer-native-3090) one each. A request beyond a lane's concurrency waits at the server and
+# expires after its pending timeout, 180 s on the RTX 5090 and 30 s on the native lanes. OMP's
+# async compaction writes the session's summary in a background request as it nears the
+# compaction threshold, and without a limit the user's next turn queued behind it at the server:
+# every attempt expired, and the turn failed once the summary outlasted OMP's resends (a 61 s
+# RTX 4090 handoff did, EXP-072). With the limit, that turn waits in OMP instead, which has no
+# deadline, and the summary still runs while you read or type. Raise an RTX 5090 provider to 2
+# only against a v0.9.0 or later server (EXP-077). Every provider id a documented route or the
+# fleet declares is listed: OMP leaves a provider missing here unlimited.
 providers:
   maxInFlightRequests:
     ninfer-beta: 2
     ninfer-native-4090: 1
+    ninfer-native-3090: 1
     ninfer-main: 2
     ninfer-heavy: 1

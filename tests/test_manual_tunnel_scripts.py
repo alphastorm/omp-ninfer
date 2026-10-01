@@ -70,12 +70,14 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         self.assertIsNotNone(block)
         limits = {name: int(value) for name, value in re.findall(r"^    ([\w-]+): (\d+)$",
                                                                   block.group(1), re.M)}
+        # Every shipped provider fragment, including a lane's own (models-rtx3090.fragment.yml):
+        # the RTX 3090 route installs fail-closed.yml beside its fragment like every other route.
         declared = {
             provider
-            for fragment in (ROOT / "examples").glob("*/models.fragment.yml")
+            for fragment in (ROOT / "examples").glob("*/models*.fragment.yml")
             for provider in re.findall(r"^  ([\w-]+):$", fragment.read_text(encoding="utf-8"), re.M)
         }
-        self.assertTrue({"ninfer-beta", "ninfer-native-4090"} <= declared)
+        self.assertTrue({"ninfer-beta", "ninfer-native-4090", "ninfer-native-3090"} <= declared)
         rtx5090_providers = {"ninfer-main"}
         rtx5090_concurrency = set()
         for path in (ROOT / "profiles").glob("qwen38-rtx5090-*.json"):
