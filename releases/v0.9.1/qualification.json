@@ -2,11 +2,11 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 2,
   "release": "v0.9.1",
-  "as_of": "2026-09-30",
+  "as_of": "2026-10-01",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "Two requests in flight on the RTX 5090. RTX 5090 moves to v0.6.14-qwen38-5090-beta.1 (image 4c816b0c, server f62a570e, source e20060b6): v0.6.13's source plus the RTX 4090 v0.6.10 Windows packaging fix and one kernel change. With two requests, the MTP3 verify round carries eight tokens, and the Q5 projections now take the tensor-core route at eight tokens as they did at four. The RTX 5090 profile qwen38-5090-v0.9.0 (configuration cf1de114) adds --max-concurrency 2 and --pending-timeout-ms 180000 to v0.8.7's serving arguments, and the route config lets OMP send two requests to each RTX 5090 provider (ninfer-beta and ninfer-main). RTX 4090 native Windows stays on v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93), its serving configuration 7a69481f and one request at a time. The model, the memory floors and the unmodified upstream OMP 18.4.0 client are unchanged. RTX 3090 is omitted pending physical-host access. The RTX 5090 profile gates and role corpus below were measured on the published image, and its two-request, long-session, reclamation, durability, barrier, stock-client, agent-mix and probe evidence on the candidate image of the same binary and serving arguments; the RTX 4090 gates are the canonical qualification of the published package, carried from v0.8.7.",
+  "scope": "The RTX 3090 joins as a native Windows lane. RTX 3090 native Windows runs v0.6.2-qwen38-3090-beta.1 (package da1d62f2, server 11b3f93c, source f08309da): the RTX 5090 v0.6.14 source e20060b6 plus one controller fix, built for sm_86, with serving configuration 0f700667, 131,072 tokens of INT8 KV, an 8192 MiB host-KV pool and one request at a time. RTX 5090 stays on v0.6.14-qwen38-5090-beta.1 (image 4c816b0c, server f62a570e, source e20060b6) with profile qwen38-5090-v0.9.0 (configuration cf1de114) and two requests in flight, and RTX 4090 native Windows stays on v0.6.10-qwen38-4090-beta.1 (package a0ea4c81, server e0498fad, source cba7eb93) with configuration 7a69481f and one request at a time. The model artifact, the RTX 5090 and RTX 4090 memory floors and the unmodified upstream OMP 18.4.0 client are unchanged; the RTX 3090 serves the same model artifact and declares no host-memory floor. The RTX 3090 gates are the canonical qualification of the published package on the physical RTX 3090; the RTX 5090 and RTX 4090 gates are carried from v0.9.0.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -66,7 +66,7 @@
     },
     "external_installation_acceptance": {
       "status": "pending",
-      "note": "rerun against the published v0.6.14-qwen38-5090-beta.1 component (image 4c816b0c) before the cut; the receipt lands at releases/v0.9.1/acceptance/composed-external-installation.json"
+      "note": "rerun against the published v0.6.14-qwen38-5090-beta.1 (image 4c816b0c), v0.6.10-qwen38-4090-beta.1 and v0.6.2-qwen38-3090-beta.1 components before the cut; the receipt lands at releases/v0.9.1/acceptance/composed-external-installation.json"
     }
   },
   "observed_gates": {
@@ -1279,19 +1279,47 @@
         ],
         "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
       }
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.2-qwen38-3090-beta.1",
+      "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
+      "server_binary_sha256": "11b3f93c0b05a307423668d55daaae6062afd76229614215701e0ebd10080bd3",
+      "configuration_sha256": "0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 102.64144552513773,
+      "c1_max_memory_used_mib": 22963,
+      "c1_max_power_w": 299.92,
+      "c1_mtp_acceptance_percent": 93.43246592317224,
+      "c1_prefill_tokens_per_second": 893.2920280030625,
+      "context_elapsed_seconds": 220.9506653999997,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "terminate",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.4.0",
+      "omp_transport": "openai-responses",
+      "gpu_keep_warm_ms": 0,
+      "power_limit_w": 300,
+      "owner_power_limit_w": 370,
+      "rollback_note": "Both directions were exercised between candidate qwen38-3090-native-v0.6.2-beta.1-f08309da3cc1 and predecessor qwen38-3090-native-v0.6.0-beta.1-03f56e58ec1b, the lane's only earlier native package, which was never published: its own 2026-09-09 window failed the agent protocol phase. The candidate declares stop-event and stopped gracefully without forced termination. The predecessor predates the stop-event channel and declares terminate; its stop was a forced termination, as that mode provides. The candidate was active again afterwards. The first window, at e20060b6, failed this phase: its controller could not launch a predecessor whose packaged configuration predates context_cache.host_kv_mib, which f08309da fixes.",
+      "evidence": "releases/v0.9.1/qualification/rtx3090.json"
     }
   },
-  "interpretation": "Two requests in flight on the RTX 5090. With two requests the MTP3 verify round carries eight tokens, and v0.6.13 ran their Q5 projections on SIMT kernels (12.8 ms of a 23.9 ms round), so two decoding requests reached only 190.0-191.1 tokens/s together against 166.7-167.1 one at a time (EXP-077). v0.6.14 keeps them on the tensor cores: on the final profile two decoding requests reached 281.1-283.0 tokens/s together (143.5-152.8 each) against 164.6-164.7 for one alone. Outputs are unchanged: the candidate answered the 89-case role corpus byte-identically to v0.6.13, two cases at a time and one at a time, and the published image answered it byte-identically to the candidate. A second request is not free: a decode beside a 71,641-token prefill ran at 30.4-30.6 tokens/s, a request that arrives while a prefill is staged waits for it, and two requests run together only while both prompts and output reservations fit the 160,256-token KV pool; a request that does not fit waits up to 180 s, which with the longest root prefill stays inside OMP 18.4.0's 300 s stream watchdog. Stock OMP 18.4.0 at its limit of 2 kept two requests in flight for 15.7 s of a parent turn fanning out two scout subagents, but that turn took 23.9 s against 22.6 s at its limit of 1 (25.2 against 32.7 s in the candidate window): what the subagents generate varies between runs more than the overlap saves. Two short sessions started together took 8.2 s against 5.6 s. With two requests streaming, a graceful restart ended both streams as incomplete and both continuations resumed from their checkpoints. The v0.8.7 lane evidence holds at two requests: no stock OMP long-session turn prefilled more than 60K tokens from root, a 60,026-token session kept its checkpoint through 35 short sessions and a crash (60,057 cached tokens in 2.99 s), the durability workload and barrier passed, and stock OMP kept one session across graceful restarts. The published image prefilled 130,048 tokens exactly in 58.3 s and decoded 169.79 tokens/s. The RTX 4090 lane and its one request at a time are unchanged. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
+  "interpretation": "The RTX 3090 joins as a native Windows lane; nothing changes for the RTX 5090 and RTX 4090 lanes. On the physical RTX 3090 the package published as v0.6.2-qwen38-3090-beta.1 passed all 15 lifecycle phases: 130,048-token retrieval exactly in 221.0 s, restart with a managed-stop flush of an unpublished session, rollback in both directions against the lane's unpublished v0.6.0-beta.1 package, protected state with two low-privilege read denials, the 15-check agent protocol at the shipped host pool and with 8 host-state slots, the unmodified upstream OMP 18.4.0 client's typed tool call, and the C1 benchmark at 102.64 tokens/s with 93.43% MTP acceptance under the lane's 300 W cap. The first window, at e20060b6, failed its rollback phase: the shared controller read context_cache.host_kv_mib directly under PowerShell strict mode, and v0.6.0's packaged configuration predates that field, so the managed wrapper exited before launching the predecessor. f08309da reads the field only when a release's configuration declares it, as it already read gpu_keep_warm_ms, and a lifecycle-tree test now requires every configuration field newer than the shipped lineage to be read that way; every published RTX 4090 package declares the field. A managed start refuses while any process holds 1 GiB or more of GPU memory: on the qualification host a signed-in desktop's compositor held about 1,070 MiB, so the window ran with the console signed out. Automatic checkpoints stay best effort and universal warm reuse is not claimed.",
   "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.14-qwen38-5090-beta.1 component and runtime image",
-    "fresh upstream OMP platform and documented-route acceptance"
+    "external-installation acceptance against the published v0.6.14-qwen38-5090-beta.1, v0.6.10-qwen38-4090-beta.1 and v0.6.2-qwen38-3090-beta.1 components, including both native public installs",
+    "fresh upstream OMP platform and documented-route acceptance on all five routes"
   ],
-  "deferred_scope": {
-    "rtx3090-windows-native": {
-      "reason": "Physical RTX 3090 host offline. The sm_86 v0.6.2-beta.1 runtime from 5ac17674e8e0b6ecd2bdc56a8eb6f9c397c2c1f4 was built on the RTX 4090 host: 99 of 105 registered tests passed and 6 real-engine/frontend suites skipped without the artifact and a matching device. This is not RTX 3090 qualification; the component is unpublished and absent from the manifest.",
-      "legacy_release": "v0.7.2",
-      "legacy_client": "18.0.9-cross-platform-beta-2",
-      "future_condition": "Run one scripts/qualify_native.py qualification window on the physical RTX 3090 when its host returns, expected around 2026-09-30, before publication or inclusion in the product manifest."
-    }
-  }
+  "deferred_scope": {}
 }

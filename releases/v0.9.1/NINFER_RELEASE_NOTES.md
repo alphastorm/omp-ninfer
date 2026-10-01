@@ -1,11 +1,10 @@
-# OMP NInfer v0.9.0 — Two requests in flight on the RTX 5090
+# OMP NInfer v0.9.1 — RTX 3090 on the native Windows runtime
 
-**Owner-operated, exact-profile 0.x release; no SLA.** The RTX 5090 serves two requests at
-once, so subagents or a second session can run beside the first. The eight-token MTP3 verify
-round uses tensor cores, and the profile gives a request that cannot fit 180 s to wait. The
-RTX 4090 runtime, client, provider fragments, model and memory floors are unchanged from
-v0.8.7. The four documented routes are accepted on the published components; receipts are
-linked below. RTX 3090 and the upstream engine merge remain deferred.
+**Owner-operated, exact-profile 0.x candidate; no SLA.** The RTX 3090 returns as a native
+Windows lane on the mainline runtime, with the unmodified upstream OMP 18.4.0 client and one
+request at a time. The RTX 5090 and RTX 4090 components, profiles, model and memory floors are
+unchanged from v0.9.0. The five documented routes must pass on the published components before
+v0.9.1 is a release. The upstream engine merge remains deferred.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
 [Quickstart](../../docs/QUICKSTART.md) · [Security model](../../docs/SECURITY.md) ·
@@ -13,75 +12,41 @@ linked below. RTX 3090 and the upstream engine merge remain deferred.
 
 ## What changed
 
-### Two decoding requests use the tensor cores
+### The RTX 3090 runs the native Windows runtime
 
-With two requests, the MTP3 verify round carries eight tokens. v0.6.13's Q5 projections left the
-four-token tensor-core route for SIMT kernels: 12.8 ms of a 23.9 ms round, against 5.2 ms with
-one request. Two decoding requests reached 190.0-191.1 tok/s together, only 1.14x the
-166.7-167.1 tok/s one-at-a-time baseline.
+v0.9.0 omitted the RTX 3090 while its host was offline; its last route was v0.7.2's durable v0.2
+lineage with the OMP 18.0.9 fork client. v0.9.1 adds RTX 3090 native Windows
+`v0.6.2-qwen38-3090-beta.1`: the RTX 5090 v0.6.14 runtime source (`e20060b6`, whose parent is
+the RTX 4090's `cba7eb93`) plus one controller fix, built for sm_86. It has the RTX 4090's
+lifecycle: a managed scheduled task, a protected state root, a graceful stop that saves live
+sessions, durable session checkpoints and rollback to the previous release.
 
-v0.6.14 uses tensor cores at eight tokens. Two decoding requests reached 282.0-282.8 tok/s together
-in the candidate window and 281.1-283.0 on the final profile (1.68-1.70x), or 143.5-152.8 tok/s
-each. The output-event gap p50 was 15.6-15.7 ms against 13.7 ms alone. One request alone decoded
-at 164.6-165.6 tok/s across the windows
-([EXP-077](../../docs/measurements/2026-09-29-rtx5090-two-requests-in-flight.json)).
+On the physical RTX 3090 its package passed all 15 canonical qualification phases: 130,048-token
+retrieval exactly in 221.0 s, restart with a managed-stop flush of an unpublished session,
+rollback in both directions against the lane's unpublished v0.6.0-beta.1 package, protected
+state, the 15-check agent protocol at the shipped host pool and with 8 host-state slots, the
+unmodified upstream OMP 18.4.0 client's typed tool call, and the C1 benchmark at 102.64 tok/s with
+93.43% MTP acceptance under the lane's 300 W cap ([lane receipt](qualification/rtx3090.json)).
 
-The candidate answered all 89 role-corpus cases byte-identically to the published v0.6.13 image,
-run two at a time and one at a time on the final profile, and the published v0.6.14 image
-answered all 89 byte-identically to the candidate. Both requests of every decode pair, the decode
-beside a prefill and every fanout branch matched their one-at-a-time outputs. A continuation that
-another request's timing sends down a different reuse path, such as root re-prefill instead of
-replayed continuation, can still differ, as it can one at a time.
+### A rollback can launch a release older than the controller
 
-### OMP can send two requests to the RTX 5090
+The shared Windows controller read `context_cache.host_kv_mib` directly under PowerShell strict
+mode. The RTX 3090's v0.6.0 configuration predates that field, so the first qualification
+window, at `e20060b6`, failed its rollback phase: the managed wrapper exited before it launched
+the predecessor. `f08309da` passes `--host-kv-mib` only when a release's own configuration
+declares it, as it already did for `gpu_keep_warm_ms`, and the runtime's lifecycle tests now
+require every configuration field newer than the shipped lineage to be read that way. Every
+published RTX 4090 package declares the field, so the unchanged RTX 4090 lane was not exposed.
 
-`examples/manual-tunnel/fail-closed.yml` sets `providers.maxInFlightRequests` to 2 for
-`ninfer-beta` and `ninfer-main`, and keeps `ninfer-native-4090` and `ninfer-heavy` at 1. The
-RTX 5090 uses snapcompact without a model request. On the RTX 4090, a turn that meets a
-background compaction summary still waits in OMP, not at the server's 30 s admission deadline.
-The limit must name the route's own provider id: OMP leaves an unlisted provider unlimited.
+### OMP sends the RTX 3090 one request at a time
 
-Stock OMP 18.4.0 at limit 2 kept two requests in flight for 15.7-17.7 s of a parent turn fanning
-out two scout subagents, but the turn's wall time followed what the subagents generated: 25.2 and
-23.9 s at limit 2 in two windows, against 32.7 and 22.6 s at limit 1. Two short OMP sessions
-started together took 7.3 and 8.2 s at limit 2 against 6.5 and 5.6 s at limit 1. One run per limit
-per window; these are workload measurements, not a promise that parallel work finishes sooner
-(EXP-077).
+`examples/manual-tunnel/fail-closed.yml` now lists `ninfer-native-3090: 1` under
+`providers.maxInFlightRequests`. OMP leaves an unlisted provider unlimited, and a request beyond
+the lane's one waits at the server, which expires it after 30 s.
 
-### A request that does not fit can wait 180 seconds
+## Three qualified GPU routes
 
-Two requests share the 160,256-token KV pool only while both prompts and their output
-reservations fit. A request that does not fit waits at the server. At the default 30 s it
-expired with `503 request_queue_timeout`. The final profile sets `--pending-timeout-ms 180000`:
-the wait plus the longest root prefill, 130,048 tokens in 58.4 s on the published image, stays inside
-OMP 18.4.0's 300 s stream-idle watchdog. The server ends a too-long wait and OMP resends.
-
-The reservation is `prompt + max_output_tokens - 1`. OMP sends `max_output_tokens: 32768`, so
-two OMP sessions above about 47K tokens each take turns. This is inferred from the admission
-rule, not measured with OMP. Raising concurrency does not raise how many long sessions keep
-their cache: two alternating 62.4K-token sessions re-prefilled 2 of 4 continuations from root
-at both one and two requests in flight.
-
-### The v0.8.7 lane gates hold at two requests
-
-The final-profile candidate passed stock OMP durable sessions, EXP-072's long-session gate at
-limit 2, checkpoint reclamation, EXP-050's workload plus resume, EXP-051's barrier, the fanout,
-warm-arrival, restore and multisession probes and the agent mix. No long-session turn prefilled
-more than 60K tokens from root; the third planting run stopped at the same harness precondition
-as v0.8.7. With 35 short sessions filling the 24 GiB store, a 60,026-token session reused 60,057
-cached tokens after a crash in 2.99 s. All four stored workload sessions resumed from their
-checkpoints, and none of 24 fresh agent sessions fell back to a full prefill
-([lane receipt](qualification/rtx5090.json)). At two requests the barrier's evicting session was
-admitted beside the held one, so the deferred save before eviction did not arise; the held turn
-was saved after publication and resumed exactly.
-
-A restart with two requests in flight ended both interrupted streams with `response.incomplete`.
-Both continuations reused 62,404 cached tokens after restart, with first output in 5.07-5.53 s.
-Graceful shutdown refused no saves (EXP-077).
-
-## Two qualified GPU routes
-
-- RTX 5090: `v0.6.14-qwen38-5090-beta.1`, image
+- Unchanged RTX 5090: `v0.6.14-qwen38-5090-beta.1`, image
   `sha256:4c816b0c1c75c2f40cfb7e2ae289fc984f5235b6a417dbdc012d636cdd4d65f7`, server
   `f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193`, source
   `e20060b6a152a11fd72450549592527e126b035e`.
@@ -89,89 +54,73 @@ Graceful shutdown refused no saves (EXP-077).
   `a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b` (574,717,115 bytes), server
   `e0498fad39bcb69d21bf7a6124c900be7229e2542c8c7ca72e19b32c606a51d3`, source
   `cba7eb932724c99a4faffd6b7b47256015c9b969`.
-- Unchanged model artifact:
+- New RTX 3090: `v0.6.2-qwen38-3090-beta.1`, package
+  `da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3` (595,676,373 bytes), server
+  `11b3f93c0b05a307423668d55daaae6062afd76229614215701e0ebd10080bd3`, source
+  `f08309da3cc1d4226d127b7c9ce22267d12070cc`.
+- Unchanged model artifact, which the RTX 3090 serves too:
   `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`.
 - Unchanged client: unmodified upstream OMP 18.4.0.
 
-RTX 5090 moves to deployment profile `qwen38-5090-v0.9.0`, configuration
+RTX 5090 keeps deployment profile `qwen38-5090-v0.9.0`, configuration
 `cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32`, with
-`--max-concurrency 2 --pending-timeout-ms 180000`. KV capacity auto-resolves to 160,256 tokens,
-and VRAM after load is 30,244 MiB of 32,607 MiB, against 28,144 MiB with one request. It keeps
-60 s keep-warm, 16384 MiB host KV, the 24 GiB checkpoint quota, BF16 KV, MTP3, 131,072-token
-context and the 28672 MiB host floor. On this profile the published image retrieved 130,048
-tokens exactly in 58.4 s, decoded 169.79 tok/s over 2,048 tokens and passed the agent protocol
-across a restart ([lane receipt](qualification/rtx5090.json)).
+`--max-concurrency 2 --pending-timeout-ms 180000`: two requests in flight, a 160,256-token KV
+pool, 60 s keep-warm, 16384 MiB host KV, the 24 GiB checkpoint quota, BF16 KV, MTP3,
+131,072-token context and the 28672 MiB host floor ([lane receipt](qualification/rtx5090.json)).
 
 RTX 4090 keeps deployment profile `qwen38-4090-native-v0.6.10-beta.1`, configuration
 `7a69481f205c3f211d9dab13347d16589eb22ce3c404b1d555d788c39f72a7d4`, one request at a time and
-its 30 s pending timeout. Its serving arguments remain 60 s keep-warm with the sm_89 spin of
-50 ms every 100 ms, 11264 MiB host KV, 24 host-state slots and the 32768 MiB floor. The carried
-[lane receipt](qualification/rtx4090.json) records the 15 canonical qualification phases,
-including an OMP 18.4.0 typed tool call: 130,048-token retrieval in 91.2 s and decode at
-157.91 tok/s with 87.59% MTP acceptance.
+its 30 s pending timeout, with 60 s keep-warm, 11264 MiB host KV, 24 host-state slots and the
+32768 MiB floor ([lane receipt](qualification/rtx4090.json)).
 
-RTX 3090 is omitted while its physical host is offline. Its built and tested `v0.6.2-beta.1`
-package ([build preparedness](../../docs/measurements/2026-09-28-rtx3090-v062-build-preparedness.json))
-is unpublished and absent from the manifest; one `qualify_native.py` window on the physical
-RTX 3090 remains before inclusion. Its
-[v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
-and OMP 18.0.9 client remain a separate historical route, not a v0.9.0 qualification claim.
+RTX 3090 uses deployment profile `qwen38-3090-native-v0.6.2-beta.1`, configuration
+`0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2`: one request at a time with a
+30 s pending timeout, 131,072 tokens of INT8 KV with MTP3, an 8192 MiB host-KV pool, 24
+host-state slots and keep-warm off. It declares no host-memory floor; it was qualified on one
+host. While it serves, its GPU-owner controller holds the card at 300 W and restores the owner's
+370 W limit on stop.
 
 ## Documented routes and clients
 
-The four documented routes passed on candidate `0d2a7468` with unmodified OMP 18.4.0 on the
-published components: RTX 5090 container host (2 steps), macOS client (10), Windows client (5)
-and RTX 4090 native Windows (7), with both
-hosts restored ([routes](acceptance/documented-routes.json)). The upstream macOS arm64, Windows
-x64 and Linux x64 binaries each passed a typed tool turn, an exact continuation and a
-fail-closed request against RTX 5090 image `4c816b0c`
-([composed acceptance](acceptance/composed-external-installation.json)). The macOS profile stays
-`preview`: the upstream client has no managed installation or appliance lifecycle. Linux ran
-under WSL2, not a separately qualified Linux OS.
+Route acceptance is pending. The five documented routes - RTX 5090 container host, macOS
+client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows - must run on the
+published v0.6.14 RTX 5090 image `4c816b0c`, the unchanged v0.6.10 RTX 4090 package and the new
+v0.6.2 RTX 3090 package with upstream OMP 18.4.0, and both native lanes must install from their
+public assets. Fresh client-platform acceptance is also pending. Until those runs pass, v0.9.1
+stays a candidate and `--require-ready` refuses it. v0.9.0's accepted routes are not carried.
+The macOS profile stays `preview`: the upstream client has no managed installation or appliance
+lifecycle. Prior Linux acceptance ran under WSL2, not a separately qualified Linux OS.
 
-The RTX 5090 routes ran from the maintainer's Apple silicon workstation over the tailnet, in
-three production windows with downtime at most 101.5 s, 324.3 s and 499.3 s (8.3 min)
-([restoration](../../docs/measurements/2026-09-30-v090-acceptance-restoration.json)). The first
-window, on candidate `54f1402e`, failed at the container-host route's start step: the launcher
-still required the server to report one request in flight. Its Windows hold stayed up 10 min
-after production was back, because the WSL-side release went through an interop relay that
-cannot start Windows processes. The second, on candidate `9eca7bae`, failed at the Linux client
-probe: OMP 18.4.0's print mode reads piped stdin to EOF before its first request, and the
-window's drivers forwarded a terminal that never closes. All three are fixed (see the
-changelog).
+## Upgrading from v0.9.0
 
-## Upgrading from v0.8.7
-
-Clone the v0.9.0 tag and follow the quickstart. Upgrade the
-RTX 5090 server to the new image and profile first. Only then merge these values into
-`~/.omp/agent/config.yml`:
+RTX 5090 and RTX 4090 owners change nothing: the image, packages, profiles, OMP binary and
+`models.yml` are v0.9.0's. To add the RTX 3090, follow the quickstart's RTX 3090 native route and
+merge its provider into `~/.omp/agent/config.yml` with the lane's limit:
 
 ```yaml
 providers:
   maxInFlightRequests:
-    ninfer-beta: 2
-    ninfer-native-4090: 1
-    ninfer-main: 2
-    ninfer-heavy: 1
+    ninfer-native-3090: 1
 ```
 
-Add any other NInfer provider id you declare with its lane's limit. A limit of 2 against the
-old one-at-a-time server queues requests at its 30 s deadline, where they can expire. The
-RTX 4090 package, OMP binary, `models.yml` and `PI_OPENAI_STATEFUL=1` are unchanged. Do not use
-a generic `omp update` to move outside the release's pinned bytes.
-
-A session checkpoint is bound to the exact server build. RTX 5090 checkpoints saved by v0.8.7
-report `incompatible` and are not restored: OMP resends the full conversation, each session
-re-prefills once and the old checkpoints age out under the checkpoint quota. RTX 4090
-checkpoints carry over because its runtime is unchanged.
+The RTX 3090 native lane has its own state root and runtime, so sessions from the v0.7.2 RTX
+3090 route do not carry over; its v0.7.2 instructions and OMP 18.0.9 client remain a separate
+historical route. Do not use a generic `omp update` to move outside the release's pinned bytes.
 
 ## Support boundaries
 
-A decode beside another request's 71,641-token prefill ran at 30.4-30.5 tok/s, with output gaps
-up to 479-481 ms. A request arriving while another prefill is staged waits for it (26.7 s in
-the probe). Two requests in flight do not provide preemption or universal warm reuse (EXP-077).
+A managed RTX 3090 or RTX 4090 start refuses while any process holds 1 GiB or more of GPU
+memory, the desktop compositor included. On the RTX 3090 qualification host a signed-in
+desktop's compositor alone held about 1,070 MiB after its applications were closed, so the
+window ran with the console signed out. The RTX 3090 rollback was proven against the lane's
+unpublished v0.6.0-beta.1 package, whose stop is a termination because it predates the
+stop-event channel; its C1 rate is the lane's first, with no like-for-like predecessor.
 
-A restart of the OMP process costs one prefill of a resumed session's context on either lane.
+A decode beside another request's 71,641-token prefill on the RTX 5090 ran at 30.4-30.5 tok/s,
+with output gaps up to 479-481 ms. A request arriving while another prefill is staged waits for
+it. Two requests in flight do not provide preemption or universal warm reuse (EXP-077).
+
+A restart of the OMP process costs one prefill of a resumed session's context on every lane.
 OMP 18.4.0's first request after resuming omits the session's reasoning, so it cannot match the
 restored checkpoint: in v0.8.7's EXP-074 that request prefilled 56,174 tokens from root (32.0 s
 to the first token). The next request carries the reasoning again and caches. A server restart
@@ -179,12 +128,10 @@ alone restores hot. This is an upstream OMP item
 ([EXP-074](../../docs/measurements/2026-09-29-long-session-cache.json)).
 
 Automatic checkpointing remains best effort under live traffic: a crash or an expired graceful
-wait can still leave unpublished work unsaved. After the concurrency probe's evictions, the
-graceful stop refused sessions whose newest turn was no longer resident: 7 at two requests and 5
-at one request with the same runtime (EXP-077). Saving before eviction delays the admitting
+wait can still leave unpublished work unsaved. Saving before eviction delays the admitting
 request - about 6.5 s per 126K-token session on the RTX 5090 in v0.8.7 - and that request waits
 while a victim's reply is still reaching its client, bounded by its own queue deadline.
 Prefill, decode and power figures apply only to the recorded packages, machines and profiles.
 Owner-operated exact profiles only; no SLA, multi-GPU, multi-tenant, priority/preemption or
-silent cloud fallback. Native Windows RTX 4090 is text/tools; vision remains an RTX 5090
-container capability. Do not mix a predecessor manifest with these commands.
+silent cloud fallback. Native Windows RTX 4090 and RTX 3090 are text/tools; vision remains an
+RTX 5090 container capability. Do not mix a predecessor manifest with these commands.

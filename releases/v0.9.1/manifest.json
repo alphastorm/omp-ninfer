@@ -147,7 +147,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "f72c71afcfbb3ab5b4c85efe4784a156f0f712d4f2d1757849175f66e3245428",
+    "summary_sha256": "7811b3e25a030994c465313e480f89eb5454abd48e338d2fc4e8ea420b895672",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/ac0d9cba6c6888bb4bd0bae069060e3d6bad4657/releases/v0.9.1/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": false
@@ -159,15 +159,16 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "This release qualifies the RTX 5090 container and RTX 4090 native Windows routes only. RTX 3090 is deferred; its separately qualified v0.7.2 route retains OMP 18.0.9 and is not qualified with the upstream OMP 18.4.0 client.",
+    "This release qualifies the RTX 5090 container route and the RTX 4090 and RTX 3090 native Windows routes. The RTX 3090's earlier v0.7.2 route ran the OMP 18.0.9 fork client on the durable v0.2 lineage; the native lane replaces it with its own state root, and those sessions do not carry over.",
     "The client is the unmodified upstream OMP binary, which has no appliance commands: installation and lifecycle follow the documented routes, and no client reads the compatibility authority.",
     "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
     "Saving before eviction delays the admitting request, about 6.5 s per 126K-token session on the RTX 5090, and that request waits while a victim's reply is still being stored, bounded by its own queue deadline. Ceiling-class save-before-evict was exercised on the RTX 5090; the RTX 4090 lane runs the same serving runtime through its own qualification phases.",
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
-    "Checkpoints are bound to the exact runtime fingerprint, which includes the server build: RTX 5090 checkpoints saved before v0.9.0 are incompatible with its v0.6.14 runtime, and those sessions replay from the OMP transcript once. The RTX 4090 runtime is unchanged, so its checkpoints carry over.",
+    "Checkpoints are bound to the exact runtime fingerprint, which includes the server build. The RTX 5090 and RTX 4090 runtimes are unchanged from v0.9.0, so their checkpoints carry over; RTX 5090 checkpoints saved before v0.9.0 still replay from the OMP transcript once.",
     "A restart of the OMP process costs one prefill of a resumed session's context on either lane: OMP 18.4.0's first request after resuming omits the session's reasoning, so it cannot match the restored checkpoint (EXP-074).",
     "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
     "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). Since v0.6.7-beta.2 the runtime commits and releases each pinned allocation's size plus 1/64 before pinning it. The field start from the refusing memory state passed with the published v0.6.8 package (3.5 GiB free, 22.6 GiB standby; docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json, issue_48_field_start), and every managed start in the v0.6.10-beta.1 package's canonical qualification pinned the pool; a recurrence reports the commit limit, available commit and available memory.",
+    "A managed RTX 3090 or RTX 4090 start refuses while any process holds 1 GiB or more of GPU memory, the desktop compositor included. On the RTX 3090 qualification host a signed-in desktop's compositor alone held about 1,070 MiB, so that lane's window ran with the console signed out. While the RTX 3090 serves, its GPU-owner controller holds the card at 300 W and restores the owner's 370 W limit on stop.",
     "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
     "The RTX 5090 runs two requests together only while both prompts plus their output reservations (prompt plus max_output_tokens minus one) fit in its 160,256-token KV pool. OMP asks for 32,768 output tokens, so by that rule two sessions above about 47K tokens each take turns: the second waits at the server for up to 180 s, then OMP resends it.",
     "While one RTX 5090 request prefills, the other's decode slows: beside a 71,641-token prefill it ran at 30.4-30.5 tok/s with output gaps up to 481 ms, and a request that arrives while another's prefill is staged waits for that prefill to finish.",
@@ -180,10 +181,11 @@
       "GitHub public release v0.9.1",
       "OMP client: unmodified upstream Oh My Pi v18.4.0 release binaries (published upstream; this release publishes no client)",
       "NInfer RTX5090 v0.6.14-qwen38-5090-beta.1 (published)",
-      "NInfer RTX4090 v0.6.10-qwen38-4090-beta.1 (published)"
+      "NInfer RTX4090 v0.6.10-qwen38-4090-beta.1 (published)",
+      "NInfer RTX3090 v0.6.2-qwen38-3090-beta.1 (published)"
     ],
     "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.14-qwen38-5090-beta.1 component and runtime image 4c816b0c; the composed acceptance receipt is absent until it is"
+      "external-installation acceptance has not been rerun for v0.9.1 against the published v0.6.14-qwen38-5090-beta.1, v0.6.10-qwen38-4090-beta.1 and v0.6.2-qwen38-3090-beta.1 components; the composed acceptance receipt is absent until it is"
     ],
     "external_installation_qualified": true
   }
