@@ -1,0 +1,49 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-089",
+  "title": "DFlash2 K=7 on the RTX 4090 and RTX 3090 native lanes: no-go as ported. Three DFlash2 W8 kernels exceed the 48 KiB static shared-memory limit at device link for sm_89 and sm_86, and the 24 GB lanes would not fit DFlash2 at their 131,072-token contract anyway",
+  "generated_utc": "2026-10-01T17:10:00Z",
+  "status": "completed",
+  "question": "On each 24 GB native Windows lane, with the lane's shipped engine profile otherwise unchanged (INT8 KV, one request, 131,072 context and KV capacity), does the fork's DFlash2 K=7 port built for the lane's architecture run the DFlash2 artifact and decode the role corpus at least 10% faster than MTP3 on the same binary and artifact?",
+  "answer": "Neither lane got a binary. The c11b02f4 source compiled for sm_89 (RTX 4090) and sm_86 (RTX 3090) but failed at CUDA device link on the same three instantiations: the W8 small-T MMA projection the dynamic grouped convolution uses (49,664 bytes of static shared memory) and the DFlash2 W8 SwiGLU row-split MMA schedule <64,96,64,8,2,2,128,1> in both epilogue forms (50,176 bytes), against sm_89's and sm_86's 49,152-byte static limit. sm_120a links the same allocations. Moving them to opt-in dynamic shared memory or smaller schedules is a kernel change the rule excluded, so no GPU window ran and both lanes stayed as found. The port would not have earned a screen: the RTX 4090's shipped MTP3 profile leaves 5.82 GiB after weights and needs 5.22 GiB at runtime for 131,072 INT8 KV tokens with zero headroom, and DFlash2's drafter adds 1.65 GiB of weights (measured on the RTX 5090), so about 85K tokens would fit [inference].",
+  "decision": {
+    "action": "Stop: both native lanes stay on MTP3; no kernel port",
+    "rule": "Pre-registered in ~/.cache/omp-ninfer-v080-scratch/exp089/PLAN.md at 15:38Z before any build, download or window (corpus identity corrected at 15:58Z before any data: the 89-case role corpus 7be1bd85): earns a quality screen only if (a) df2k7 starts at kv-capacity 131,072 with the lane's profile, (b) its role-corpus decode is at least 1.10x mtp3's on the same binary and artifact, (c) 130,048-token retrieval is exact and (d) every case is answered as the shipped runtime answers it with no server error. Build-configuration fixes only; a kernel that needs rewriting for the architecture stops the lane as no-go.",
+    "verdict": "no-go as ported on both lanes: no executable, (a)-(d) unmeasured",
+    "reason": "The founder asked whether porting the kernels and measuring fit had a realistic path to a working lane. It does not at the lanes' contract: the kernel port is small, but 131,072 tokens on 24 GB would then need a sub-INT8 KV format (both sub-BF16 formats failed the RTX 5090's leak screen, EXP-085 and EXP-088) or a smaller drafter artifact (a new conversion and publication), for a gain the RTX 5090 measured at +17-21% on the role corpus and -2 to -5% on free-form reasoning at one request (EXP-086).",
+    "not_decided_here": "A reduced-context DFlash2 profile for the native lanes; nobody has asked for one."
+  },
+  "method": {
+    "hosts": "the RTX 4090 host and the RTX 3090 host, both Windows 11 with driver 617.14. Both lanes were idle with their managed tasks Ready and no lease when the check began.",
+    "builds": {
+      "source": "alphastorm/ninfer c11b02f4df93b221ab8d42cdb8aa9866fb492a71 from a SHA-256-verified source bundle of the read-only Mac checkout",
+      "toolchain": "on the RTX 4090 host: Visual Studio 2022 Build Tools (MSVC 19.44.35228), CUDA 13.3.73, CMake 4.4.2, Ninja 1.13.2, -j8, Release; each lane's release build profile (native-v0.6.10-beta.1-rtx4090, native-v0.6.2-beta.1-rtx3090)",
+      "rtx3090_note": "The RTX 3090 host has no Visual Studio or CUDA toolkit; the shipped RTX 3090 package was built on the RTX 4090 host, so its sm_86 build ran there in its own tree. Nothing was installed on the RTX 3090 host.",
+      "wall_minutes": {"sm_89": 8.9, "sm_86": 8.9}
+    },
+    "artifact": "HF neroued/Qwen3.8-27B-NInfer@dc370fb6 qwen3_8_27b.ninfer downloaded to both hosts and verified (20,437,336,576 bytes, sha256 0634abb0)",
+    "lane_state": "Recorded before and after: active release, task state and definition hashes, state root, binary, config and controller hashes, GPU owner state. Both unchanged; no lease taken; no service started or stopped."
+  },
+  "observations": {
+    "device_link_failures": {
+      "columns": ["kernel", "static_shared_bytes", "limit_bytes", "source"],
+      "w8_small_t_mma InputRows=4096 TileColumns=40 warps=8": ["dynamic grouped-convolution materialized projection", 49664, 49152, "src/ops/dynamic_grouped_conv/w8/w8_dynamic_grouped_conv_add_materialized.cu:34-42; storage src/ops/linear/w8/w8_small_t_mma.cuh:57-69"],
+      "w8_rowsplit_gemm_mma <64,96,64,8,2,2,128,1> Full=false": ["DFlash2 W8 SwiGLU", 50176, 49152, "src/ops/linear_swiglu/w8/w8_linear_swiglu_gemm_mma.cu:118-121; storage src/ops/linear/w8/w8_rowsplit_gemm_mma.cuh:47-58"],
+      "w8_rowsplit_gemm_mma <64,96,64,8,2,2,128,1> Full=true": ["DFlash2 W8 SwiGLU", 50176, 49152, "same"],
+      "sm_120a": "the same static allocations compile and device-link; the schedules carry no architecture guard"
+    },
+    "rtx4090_shipped_mtp3_memory": {
+      "source": "the lane's retained service log (v0.6.10-beta.1, configuration 7a69481f)",
+      "line": "KV capacity explicit resolved=131072 tokens pages=2048/2048 runtime=5.22 GiB free-after-weights=5.82 GiB free-after-startup=688.00 MiB headroom=0.00 MiB slack=615.52 MiB device-state=2-cache+1-active host-kv=11.00 GiB"
+    },
+    "dflash2_drafter_weights_gib": {"value": 1.65, "source": "RTX 5090 free-after-weights 13.25 GiB (MTP3 on the v2 artifact) against 11.60 GiB (DFlash2 on the v2 artifact), EXP-086 and EXP-084 arm logs"},
+    "fit_estimate": "[INFERENCE] 5.82 - 1.65 = 4.17 GiB after weights against MTP3's 5.22 GiB runtime at 131,072 INT8 tokens: about 85K tokens would fit before DFlash2's own draft buffers",
+    "rtx3090_gpu_owner": "the lane's owner controller reported one interactive GPU workload: the sign-in screen's dwm.exe at 1,983 MiB by the WDDM dedicated-usage counter against its 1 GiB threshold, with no user signed in and nvidia-smi showing 180 MiB in use. The founder approved restarting the compositor; it was not needed because no binary linked."
+  },
+  "limits": [
+    "No DFlash2 code ran on either architecture; the fit figure is an inference from the RTX 4090's MTP3 accounting and the RTX 5090's drafter delta.",
+    "The RTX 3090's memory accounting was not read; its shipped profile also holds 131,072 INT8 tokens on 24 GB."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

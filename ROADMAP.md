@@ -1280,8 +1280,14 @@ shorter and exact 130K retrieval
 ([EXP-087](docs/measurements/2026-10-01-dflash2-fp8-kv-precheck-rtx5090.json)), but it failed the
 same screen on secret leaks, 604 against 561
 ([EXP-088](docs/measurements/2026-10-01-dflash2-fp8-kv-quality-screen-rtx5090.json)). The
-quality-cleared DFlash2 profile is BF16 KV at two device state slots and 131,520 KV tokens;
-adopting it is a release decision.
+quality-cleared DFlash2 profile is BF16 KV at two device state slots and 131,520 KV tokens, and
+v0.10.0 adopts it on the RTX 5090. It passed v0.9.0's probes, but free-form reasoning decodes
+2-5% slower than MTP3 at one request and 21-27% slower at two, and one of two sessions lost its
+reuse across a restart
+([EXP-086](docs/measurements/2026-10-01-dflash2-pre-acceptance-probes-rtx5090.json)); the
+candidate's qualification window measures both. The RTX 4090 and RTX 3090 stay on MTP3: the port
+does not link for their architectures and would not fit 131,072 tokens in 24 GB
+([EXP-089](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)).
 
 ## How to help right now
 

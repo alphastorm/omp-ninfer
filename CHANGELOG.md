@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   inside its margin except secret leaks, 604 against shipped's 561 (ratio upper bound 1.135
   against 1.10), so FP8 KV fails as NVFP4 did and BF16 DFlash2 remains the quality-cleared
   profile ([EXP-088](docs/measurements/2026-10-01-dflash2-fp8-kv-quality-screen-rtx5090.json)).
+- EXP-086 receipt: the adopted DFlash2 BF16 two-request profile passed every probe v0.9.0 qualified
+  its RTX 5090 profile with, but decodes free-form reasoning 2-5% slower than MTP3 at one request
+  and 21-27% slower at two, and one of two sessions resumed from root after a restart
+  ([EXP-086](docs/measurements/2026-10-01-dflash2-pre-acceptance-probes-rtx5090.json)).
+- EXP-089 receipt: the DFlash2 port does not link for the RTX 4090 (sm_89) or RTX 3090 (sm_86):
+  three W8 kernels exceed the 48 KiB static shared-memory limit. The 24 GB lanes would not fit it
+  at 131,072 tokens either, so both stay on MTP3
+  ([EXP-089](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)).
 
 ## [0.9.1] - 2026-10-01
 

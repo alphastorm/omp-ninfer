@@ -1,0 +1,74 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-086",
+  "title": "v0.9.0's RTX 5090 pre-acceptance probes on the adopted DFlash2 BF16 profile: every functional probe passes, the written refused-0 rule fails as v0.9.0 would, and free-form reasoning decodes 21-27% slower with two requests in flight",
+  "generated_utc": "2026-10-01T17:05:00Z",
+  "status": "completed",
+  "question": "Does the DFlash2 K=7 two-request profile with BF16 KV and the durable store (the profile the founder chose to adopt after EXP-085 and EXP-088) pass the probes v0.9.0 qualified its RTX 5090 profile with: the profile gates, the two-requests-in-flight matrix and a restart during decode, fanout at 57K and 67K with restarts, warm arrival, and the shared-prefix agent mix?",
+  "answer": "Every probe exited 0 and every scenario reported ok. 130,048-token retrieval was exact in 58.4 s (v0.9.0: 58.4 s), the agent protocol passed across a restart, near_capacity's two 125,879-token requests completed by taking turns as v0.9.0's did, fanout and warm arrival matched or beat v0.9.0, and 0 of 24 fresh agent sessions went to root. The rule as written fails on one clause: it required every shutdown to refuse 0 saves, and the concurrency matrix's stop refused 6, where v0.9.0's documented stop after the same probe refused 7. Beside the rule, two costs appeared. Free-form reasoning text decoded 2-5% slower than MTP3 at one request and 21-27% slower with two requests (207.5-222.1 against 281.1-283.0 tok/s together): DFlash2 drafts only 2.46-2.65 tokens per round there against MTP3's 2.27-2.39, while a two-request round costs 23.1 ms against 15.6 ms. And in the restart probe one of two stored sessions resumed from root (first output 27.0 s against v0.9.0's 5.5 s).",
+  "decision": {
+    "action": "Report; the founder chose to continue to the release candidate (2026-10-01T16:20Z) with these costs visible",
+    "rule": "Pre-registered in ~/.cache/omp-ninfer-v080-scratch/exp086/PLAN.md before EXP-085's verdict, retargeted to this arm at 15:32Z before the window: pass only if (a) the profile gates pass with exact retrieval and the post-restart 404; (b) every c2probe scenario and repeat is ok; (c) the restart probe is ok with both stored sessions resumed; (d) fanout-57k, fanout-67k and warm-arrival exit 0; (e) the agent mix exits 0 with no measured fresh session at root; (f) no server error in any request log and every shutdown ends 'refused 0'.",
+    "verdict": "fail on (f) as written: the c2probe stop refused 6 saves. (a)-(e) pass.",
+    "deviation": "(f)'s refused-0 clause was written without checking v0.9.0's evidence, whose stop after the same probe refused 7 ('checkpoints remain best effort; after the concurrency probe's evictions, stop refused 7 saves at two requests'). The failure is the rule's, not a regression; it is reported as a fail and not reinterpreted.",
+    "not_decided_here": "Whether the reasoning-text slowdown and the restart-reuse loss are acceptable for the release. The v0.10.0 candidate's qualification window measures the restart three times."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm on 127.0.0.1:18099 with production stopped",
+    "window": "Windows lane hold taken; exp086-window.sh ran detached with a 180-minute dead-man; production stopped 15:32:37Z and restored healthy 15:59:50Z (27 min); dead-man cancelled; the arm's checkpoint root removed; hold released with production /health 200 from Windows.",
+    "arm": "spk5-df2k7-c2ds2-ckpt: image ninfer-5090:008a7781-dflash2-nvfp4, server c260dde9, artifact 0634abb0; DFlash2 K=7 with the optimized LM head, BF16 KV, two requests, two device state slots, 24 host state slots, 16 GiB host KV, durable store on (24 GiB quota), keep-warm 60 s; EXP-083's arguments on this binary",
+    "tools": {"qualify_rtx5090_profile.py": "2038f695", "concurrency_probe.py": "5245e8a6", "fleet_probe.py": "9bbdbe91", "warm_arrival_probe.py": "1e25ff5b", "agent_mix_probe.py": "5c6c2cb6"},
+    "baseline": "v0.9.0's release evidence for the same probes (releases/v0.9.0/qualification/rtx5090.json and its window receipts)"
+  },
+  "observations": {
+    "runtime": {"kv_capacity_tokens": 131520, "max_context": 131072, "kv_cache": "bf16", "speculative_backend": "dflash2", "draft_window": 7, "device_state": "2-cache+2-active", "vram_used_mib": 29470, "v090_vram_used_mib": 30244},
+    "profile": {
+      "retrieval": {"prompt_tokens": 130048, "exact": true, "wall_s": 58.386, "v090_wall_s": 58.4},
+      "decode_2048": {"tok_s": 161.82, "tokens_per_round": 2.56, "rounds": 801, "accepted_per_position": [535, 309, 180, 98, 57, 39, 28], "v090_tok_s": 169.79, "v090_tokens_per_round": 2.34},
+      "agent_protocol": "passed: two forks, parent delete 200, deleted continuation 404 before and after the restart, no resurrection, surviving descendant and live sibling continued"
+    },
+    "c2probe": {
+      "columns": ["dflash2 repeat 1", "dflash2 repeat 2", "v090 repeat 1", "v090 repeat 2"],
+      "solo_tok_s": [158.3, 157.9, 162.0, 162.0],
+      "decode_pair_aggregate_tok_s": [207.5, 222.1, 283.0, 281.1],
+      "prefill_during_decode_decode_tok_s": [30.3, 30.2, 30.6, 30.4],
+      "decode_during_prefill_wait_s": [26.78, 26.77, 26.62, 26.65],
+      "two_sessions_root_continuations_of_4": [2, 2, 2, 1],
+      "fanout_makespan_s": [42.38, 36.02, 40.66, 46.31],
+      "near_capacity_makespan_s": [124.5, 126.31, 114.62, 136.13],
+      "all_ok": true
+    },
+    "reasoning_round_economics": {
+      "source": "request logs of both windows' c2probe short-prompt requests (1,024 reasoning tokens each)",
+      "dflash2_tokens_per_round": "2.46-2.65",
+      "mtp3_tokens_per_round": "2.27-2.39",
+      "solo_round_ms": {"dflash2": 15.6, "mtp3": 13.8},
+      "pair_round_ms": {"dflash2": 23.1, "mtp3": 15.6},
+      "role_corpus_reference": "on the role corpus DFlash2 drafts 4.4-4.6 tokens per round against MTP3's 3.34 and decodes 17-21% faster (EXP-081, EXP-085)"
+    },
+    "c2restart": {
+      "ok": true,
+      "columns": ["prompt", "cached", "first_output_s", "v090_cached", "v090_first_output_s"],
+      "interrupted_session_D1": [62537, 0, 23.62, 62404, 0.35],
+      "interrupted_session_D2": [62540, 62404, 24.07, 0, 24.86],
+      "resume_session_D1": [62482, 0, 27.0, 62404, 5.46],
+      "resume_session_D2": [62485, 62404, 27.47, 62404, 5.0],
+      "shutdowns": "saved 0, nothing to save 2, refused 0 (twice)",
+      "note": "Both windows lost one interrupted continuation's reuse before the restart. After it, v0.9.0 restored both sessions from checkpoints; here session D1 re-prefilled from root and D2's restore waited behind it."
+    },
+    "fanout_and_warm_arrival": {
+      "fanout_57k": {"hot_fork_median_s": 0.672, "post_restart_resume_s": 3.428, "checkpoint_bytes": 5035982449, "v090": {"hot_fork_median_s": 0.769, "post_restart_resume_s": 3.187, "checkpoint_bytes": 5188026237}},
+      "fanout_67k": {"hot_fork_median_s": 0.925, "hot_fork_max_s": 2.754, "post_restart_resume_s": 3.469, "v090": {"hot_fork_median_s": 0.851, "hot_fork_max_s": 0.855, "post_restart_resume_s": 3.768}},
+      "warm_arrival": "both orders: control and restored retrieval exact, every post-restart fork hot; resume-first restore plus sequence 4.41 s (v0.9.0: 5.64 s)"
+    },
+    "agent_mix": {"measured_fresh_sessions": 24, "measured_fresh_root": 0, "client_ttft_median_s": {"A": 0.092, "B": 0.096, "C": 0.099}, "v090_client_ttft_median_s": {"A": 0.092, "B": 0.094, "C": 0.1}},
+    "logs": {"request_errors": 0, "requests_done": 138, "c2probe_stop": "saved 1, nothing to save 3, refused 6 (v0.9.0 after the same probe: refused 7)", "other_stops": "refused 0"}
+  },
+  "limits": [
+    "One window, two repeats of each c2probe scenario and one restart repeat; the restart-reuse loss is one observation.",
+    "The binary is the spike's incremental archive build (source_dirty=true), not the release candidate.",
+    "v0.9.0's numbers are its release evidence from 2026-09-29 on the same appliance, not reruns in this window."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
