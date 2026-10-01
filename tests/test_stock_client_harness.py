@@ -242,6 +242,36 @@ class WindowsRouteAnswerTests(unittest.TestCase):
                 self.routes.windows_route_answers(lines)
 
 
+class WindowsHostRestorationTests(unittest.TestCase):
+    """What a production window must leave unchanged on the Windows host it ran against."""
+
+    def setUp(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "rtx5090_routes", ROOT / "scripts" / "hosts" / "accept-rtx5090-routes.py")
+        assert spec and spec.loader
+        self.routes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.routes)
+        task = {"name": "OMP-ContainerHostSupervisor", "path": "\\", "state": "Ready",
+                "definition_sha256": "4c96ce2595ea361bd694af8d68f5737b52637323da12dce0804ee4b79b3c5214"}
+        marker = {"path": "C:\\ProgramData\\OMP\\windows-hosts\\state\\container-host-paused",
+                  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "bytes": 0}
+        self.baseline = {"markers": [marker], "tasks": [task]}
+
+    def snapshot(self, **task):
+        return {"markers": self.baseline["markers"], "tasks": [{**self.baseline["tasks"][0], **task}]}
+
+    def test_a_periodic_task_caught_mid_run_is_unchanged(self) -> None:
+        self.routes.assert_windows_host_unchanged(self.snapshot(state="Running"), self.snapshot(state="Ready"))
+
+    def test_a_disabled_redefined_or_removed_task_or_a_changed_marker_is_refused(self) -> None:
+        for after, message in ((self.snapshot(state="Disabled"), "tasks"),
+                               (self.snapshot(definition_sha256="0" * 64), "tasks"),
+                               ({"markers": self.baseline["markers"], "tasks": []}, "tasks"),
+                               ({"markers": [], "tasks": self.baseline["tasks"]}, "markers")):
+            with self.subTest(after=after), self.assertRaisesRegex(AssertionError, message):
+                self.routes.assert_windows_host_unchanged(self.baseline, after)
+
+
 
 if __name__ == "__main__":
     unittest.main()

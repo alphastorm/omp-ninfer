@@ -56,6 +56,19 @@ def windows_route_answers(lines):
             'exact_nonce_line': True}
 
 
+def assert_windows_host_unchanged(before, after):
+    """The window must leave the host's hold markers byte-identical and its OMP scheduled tasks
+    present, identically defined and as enabled as it found them. A task's Running or Queued state
+    is not part of that: the container-host supervisor runs for about a second every five minutes,
+    and the v0.9.1 window's baseline caught it mid-run (Running) and its final snapshot idle (Ready)."""
+    assert before['markers'] == after['markers'], 'Windows markers changed'
+
+    def identity(tasks):
+        return sorted((t['path'], t['name'], t['definition_sha256'], t['state'] == 'Disabled') for t in tasks)
+    assert identity(before['tasks']) == identity(after['tasks']), 'Windows tasks changed'
+
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', choices=('preflight', 'window', 'windows-live-only', 'restore', 'collect', 'summarize'), required=True)
@@ -224,8 +237,7 @@ def main():
                 receipt['live_acceptance']['execution_context'] = receipt['execution_context']
         result['restoration'] = json.loads((root / 'restoration.json').read_text())
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
-        for field in ('markers', 'tasks'):
-            assert before[field] == after[field], 'Windows ' + field + ' changed'
+        assert_windows_host_unchanged(before, after)
         result['restoration']['windows_markers_tasks_unchanged'] = True
         result['restoration']['windows_health'] = after['windows_health18088']
         assert result['restoration']['window_seconds'] <= 3600
@@ -353,7 +365,7 @@ def main():
         assert client['status'] == 'passed'
         restored = json.loads((root / 'restoration.json').read_text())
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
-        assert before['markers'] == after['markers'] and before['tasks'] == after['tasks']
+        assert_windows_host_unchanged(before, after)
         restored.update({'windows_markers_tasks_unchanged': True, 'windows_health': after['windows_health18088']})
         save('completion-summary.json', {'status': 'passed', 'client': client, 'restoration': restored, 'setup': json.loads((root / 'setup.json').read_text()), 'runtime_observed': json.loads((root / 'runtime-observed.json').read_text())})
     elif a.action == 'summarize':
