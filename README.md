@@ -866,7 +866,7 @@ The v0.9.1 client is the unmodified upstream
 [Oh My Pi v18.4.0 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.0), checked
 against its SHA-256. This product no longer builds or publishes an OMP client. The
 [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi) fork and
-[alphastorm/homebrew-omp](https://github.com/alphastorm/homebrew-omp) distributed the client
+the `alphastorm/homebrew-omp` tap (private since 2026-10-02) distributed the client
 through v0.7.4; they are historical, not the v0.9.1 install path. Stock OMP has no
 `omp appliance` commands: install and operate each lane through the [quickstart](docs/QUICKSTART.md).
 
@@ -986,7 +986,7 @@ NVIDIA.
 | [`alphastorm/omp-ninfer`](https://github.com/alphastorm/omp-ninfer) | Product front door: release manifests, profiles, quickstart, qualification composition, support boundary |
 | [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) | Public tagged RTX 5090, RTX 4090, and RTX 3090 component source |
 | [`can1357/oh-my-pi`](https://github.com/can1357/oh-my-pi) | Upstream OMP release binaries, pinned by SHA-256 in each release manifest |
-| [`alphastorm/homebrew-omp`](https://github.com/alphastorm/homebrew-omp) | Historical client distribution through v0.7.4: archives plus stable `omp` and prerelease `omp-beta` casks |
+| `alphastorm/homebrew-omp` (private since 2026-10-02) | Historical client distribution through v0.7.4: archives plus stable `omp` and prerelease `omp-beta` casks |
 
 Through v0.7.4, the OMP client source was the public fork at
 [`alphastorm/oh-my-pi`](https://github.com/alphastorm/oh-my-pi). Since v0.8.0 the client is upstream OMP;
