@@ -135,8 +135,9 @@ are the evidence introduced here.
 
 DRAFT: Before a cut, the lead must review this prose and the wider lane evidence, complete
 fresh stock-client and published-image route/composed acceptance, reconcile historical review
-and durable-session records, update the release tag allowlist and final launch/profile/runtime
-arguments, and perform the lane/acceptance/manifest commit-pin sequence. The generated
+and durable-session records, finalize launch/profile/runtime arguments, and perform the
+lane/acceptance/manifest commit-pin sequence. The v0.6.15 runtime component is allowlisted
+for release verification; that does not authorize a cut or publication. The generated
 compatibility page describes a staged draft; neither its copied history nor the live root
 profiles authorize installation of this new composition. All publication and acceptance gates
 remain explicit; no product tag is created by this PR.
