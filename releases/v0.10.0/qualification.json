@@ -1,0 +1,258 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.10.0",
+  "as_of": "2026-10-02",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "DRAFT: RTX 5090 advances to v0.6.15-qwen38-5090-beta.1, source eaf221ac, profile qwen38-5090-v0.10.0 and the v2 DFlash2 model artifact 0634abb0. RTX 3090 and RTX 4090 runtime packages and their predecessor model are carried unchanged. Stock upstream OMP v18.4.10 is staged on all three client platforms; fresh client and documented-route acceptance is pending. Historical native lane receipts do not qualify the new client.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "behavioral_source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+    "release_source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+    "release_source_archive_sha256": "fbc7cb86aa85c59cf7e2edcf4454ba76e7f3b3e69aeaecc9ddfd19d4ae8f8f67",
+    "release_server_binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+    "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+    "model_artifact_bytes": 20437336576,
+    "configuration_sha256": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.10.0"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "repository_path": "releases/v0.10.0/qualification/rtx5090.json",
+      "sha256": "28c06311cb0cf76224f8eb08254ac79bdc1e235a55e2ecd62dd34a8c2013538f",
+      "status": "passed",
+      "source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+      "server_binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68"
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+      "release_server_binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "oci_manifest_digest": "sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "binary_package_sha256": "6cedad5812fd20eca83d22c03c5df0116a519c73eed17ab49eaa76acd7a0020f",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.15-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.15-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "5e1d4c771073876bb562fde228c1c97b68f68f1bf53a6b891dc6fcaab133346a",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.6.15-qwen38-5090-beta.1",
+      "anonymous_pull_verified": false,
+      "anonymous_assets_verified": false,
+      "checksums_verified": true,
+      "build_route_note": "DRAFT: The fourth-candidate window used the clean appliance-local eaf221ac build (CUDA 13.1.115) and candidate package-local image, not the subsequently published OCI image. GitHub workflow 37015468410 succeeded and its publication receipt binds archive 6cedad58 to image fff4ee38. The downloaded archive SHA-256 and extracted ninfer-serve SHA-256 match the staged pins. Anonymous image pull and published-image composed acceptance remain pending."
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.10.0/qualification/rtx3090.json",
+        "sha256": "474311a6d91e6747b3f0a34c5f562b752b1c8bea208ffeb16a245fa9516b7ef4",
+        "release_tag": "v0.6.2-qwen38-3090-beta.1",
+        "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3"
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.10.0/qualification/rtx4090.json",
+        "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14",
+        "release_tag": "v0.6.10-qwen38-4090-beta.1",
+        "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b"
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.6.15-qwen38-5090-beta.1 component (image fff4ee38) before the cut; the receipt lands at releases/v0.10.0/acceptance/composed-external-installation.json"
+    }
+  },
+  "observed_gates": {
+    "rtx5090": {
+      "status": "passed",
+      "source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+      "configuration_sha256": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+      "measured_on": "2026-10-02T05:26:31Z",
+      "profile_gates": {
+        "prefill_curve": {
+          "status": "passed",
+          "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+          "prompt_tokens": 130048,
+          "completion_tokens": 17,
+          "exact_output": true,
+          "output": "ORCHID=493817; COLOR=COBALT",
+          "wall_s": 58.738,
+          "tokens_per_second_wall": 2214,
+          "vram_used_mib_after": 29470,
+          "server_prefix_cache_hit_tokens": 0,
+          "server_prefix_reuse_path": "root",
+          "server_computed_prefill_tokens": 130048,
+          "server_prefill_seconds": 58.63006614199999,
+          "cold": true
+        },
+        "decode": {
+          "request_id": "b229e40ef98cac8f29129820618af1cfb474941a59e0ebd23161e117e3392341",
+          "prompt_tokens": 118,
+          "completion_tokens": 2048,
+          "wall_s": 12.806,
+          "completion_tokens_per_second_wall": 159.92,
+          "server_completion_tokens": 2048,
+          "server_decode_seconds": 12.69001310100003,
+          "decode_tokens_per_second": 161.39,
+          "mtp_acceptance_rate": 0.223,
+          "mtp_tokens_per_round": 2.56,
+          "speculative": {
+            "accepted_per_position": [
+              535,
+              309,
+              180,
+              98,
+              57,
+              39,
+              28
+            ],
+            "accepted_tokens": 1246,
+            "backend": "dflash2",
+            "draft_window": 7,
+            "drafted_tokens": 5597,
+            "fallback_steps": 0,
+            "rounds": 801
+          }
+        },
+        "agent_protocol": {
+          "status": "passed",
+          "authenticated_session_identity": true,
+          "stateful_continuation": true,
+          "forks": 2,
+          "parent_delete_status": 200,
+          "deleted_continuation_status": 404,
+          "deleted_continuation_error_code": "previous_response_not_found",
+          "post_restart_deleted_continuation_status": 404,
+          "no_resurrection": true,
+          "surviving_descendant_continued": true,
+          "live_sibling_continuation_status": 200,
+          "live_sibling_continuation_error_code": null
+        }
+      },
+      "runtime": {
+        "kv_cache": "bf16",
+        "kv_capacity_mode": "auto",
+        "kv_capacity_tokens": 131520,
+        "max_context": 131072,
+        "proposal_head": "optimized",
+        "public_model_id": "q38-ninfer",
+        "speculative_backend": "dflash2",
+        "speculative_draft_window": 7
+      },
+      "note": "DRAFT: These profile gates are copied from the actual fourth-candidate receipt, not the predecessor. The 05:02:37\u201306:34:22Z window and 13:43:40\u201313:46:32Z amended criterion-14 rerun passed criteria 1\u201315 as recorded in the window PLAN. The package-local runtime and stock OMP 18.4.0 used in that window do not constitute acceptance of the published image with staged OMP 18.4.10. See NINFER_RELEASE_NOTES.md for the candidate failures, rerun arc, gate numbers, and retained limitations."
+    },
+    "rtx4090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.10-qwen38-4090-beta.1",
+      "source_commit": "cba7eb932724c99a4faffd6b7b47256015c9b969",
+      "server_binary_sha256": "e0498fad39bcb69d21bf7a6124c900be7229e2542c8c7ca72e19b32c606a51d3",
+      "configuration_sha256": "7a69481f205c3f211d9dab13347d16589eb22ce3c404b1d555d788c39f72a7d4",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 157.91175764529982,
+      "c1_max_memory_used_mib": 22774,
+      "c1_max_power_w": 460.9,
+      "c1_mtp_acceptance_percent": 87.58865248226951,
+      "c1_prefill_tokens_per_second": 2116.5252239608553,
+      "context_elapsed_seconds": 91.23760920017958,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "stop-event",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.4.0",
+      "omp_transport": "openai-responses",
+      "gpu_keep_warm_ms": 60000,
+      "rollback_note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.10-beta.1-cba7eb932724 and predecessor qwen38-4090-native-v0.6.9-beta.1-5ac17674e8e0, the published v0.6.9-beta.1 package. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
+      "evidence": "releases/v0.8.7/qualification/rtx4090.json; docs/measurements/2026-09-29-long-session-cache.json (EXP-074: handoff cache, planner fallback, crash after compaction, quota reclamation, the provider limit); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075); docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json (EXP-064, including issue_48_field_start); docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json (EXP-066)",
+      "stock_client_sessions": {
+        "evidence": "docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json",
+        "omp": {
+          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
+          "version": "omp/18.4.0"
+        },
+        "model": "ninfer-native-4090/qwen3.8-27b",
+        "thinking": "low",
+        "checks": {
+          "s1_seed_completed": true,
+          "s1_recall_before_restart": true,
+          "s1_recall_after_restart": true,
+          "s2_recall_new_process": true,
+          "s3_recall_after_restart_new_process": true,
+          "one_session": true
+        },
+        "omp_session_ids": [
+          "01a0eb9e-45bd-70bc-a432-47bed47d4ad6"
+        ],
+        "restarts": [
+          0,
+          0
+        ],
+        "server_stops": [
+          "shutdown: saved 0, nothing to save 1, refused 0 (second restart)",
+          "shutdown: saved 0, nothing to save 1, refused 0 (stop after the proof)"
+        ],
+        "first_request_restore": [
+          "checkpoint restored for session 72e9696e017e on its first request without a response id"
+        ],
+        "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
+      }
+    },
+    "rtx3090_windows_native": {
+      "status": "passed",
+      "release_tag": "v0.6.2-qwen38-3090-beta.1",
+      "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
+      "server_binary_sha256": "11b3f93c0b05a307423668d55daaae6062afd76229614215701e0ebd10080bd3",
+      "configuration_sha256": "0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2",
+      "lifecycle_phases": "15/15",
+      "c1_decode_tokens_per_second": 102.64144552513773,
+      "c1_max_memory_used_mib": 22963,
+      "c1_max_power_w": 299.92,
+      "c1_mtp_acceptance_percent": 93.43246592317224,
+      "c1_prefill_tokens_per_second": 893.2920280030625,
+      "context_elapsed_seconds": 220.9506653999997,
+      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
+      "context_prompt_tokens": 130048,
+      "managed_stop_forced": false,
+      "managed_stop_mode": "stop-event",
+      "managed_stop_outcome": "graceful",
+      "omp_exact_final_answer": true,
+      "protocol_checks": 15,
+      "restart_cached_input_tokens": 42,
+      "restart_process_replaced": true,
+      "rollback": "passed",
+      "rollback_predecessor_stop_mode": "terminate",
+      "security_low_privilege_read_denials": 2,
+      "unsaved_session_cached_input_tokens": 45,
+      "unsaved_session_survived_managed_stop": true,
+      "omp_version": "omp/18.4.0",
+      "omp_transport": "openai-responses",
+      "gpu_keep_warm_ms": 0,
+      "power_limit_w": 300,
+      "owner_power_limit_w": 370,
+      "rollback_note": "Both directions were exercised between candidate qwen38-3090-native-v0.6.2-beta.1-f08309da3cc1 and predecessor qwen38-3090-native-v0.6.0-beta.1-03f56e58ec1b, the lane's only earlier native package, which was never published: its own 2026-09-09 window failed the agent protocol phase. The candidate declares stop-event and stopped gracefully without forced termination. The predecessor predates the stop-event channel and declares terminate; its stop was a forced termination, as that mode provides. The candidate was active again afterwards. The first window, at e20060b6, failed this phase: its controller could not launch a predecessor whose packaged configuration predates context_cache.host_kv_mib, which f08309da fixes.",
+      "evidence": "releases/v0.9.1/qualification/rtx3090.json"
+    }
+  },
+  "interpretation": "DRAFT: The fourth candidate is the first to restore both 62,404-token sessions in all three restart repeats. Criterion 14 passed only after the founder-approved proof amendment and fresh rerun; the earlier two limit-2 proof failures remain part of the evidence. New client acceptance, published-image acceptance, release review, and final commit pins are not claimed by this draft. Carried native observations and review ledgers remain historical evidence, not fresh v0.10.0 client acceptance.",
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.6.15-qwen38-5090-beta.1 component and runtime image",
+    "fresh upstream OMP platform and documented-route acceptance"
+  ],
+  "deferred_scope": {}
+}

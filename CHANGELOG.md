@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Release staging
+
+DRAFT: Stage v0.10.0 from v0.9.1 with RTX 5090 runtime v0.6.15 (source eaf221ac),
+DFlash2 K=7 with BF16 KV, and the published v2 model artifact 0634abb0. The fourth
+candidate passed the fifteen window criteria after the founder-approved criterion-14
+proof amendment and rerun; both sessions restored 62,404 cached tokens in each of
+three restart repeats. RTX 3090 and RTX 4090 retain their runtime packages and
+predecessor model. Stock upstream OMP v18.4.10 raw binaries are staged, not the
+downstream OMP archive; new client and published-image installation acceptance is
+pending. This is not a released or ready composition. See the
+[draft release evidence](releases/v0.10.0/NINFER_RELEASE_NOTES.md).
+
 ### Added
 
 - EXP-083 receipt: on the fork's DFlash2 spike, sessions keep the durable store. The draft
