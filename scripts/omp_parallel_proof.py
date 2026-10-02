@@ -359,16 +359,30 @@ def run_subagents(args, root, shared, codes, record):
     with client(subargs, "parent", observer) as omp:
         turn = omp.prompt(prompt, args.turn_timeout)
         record["turns"].append(turn_record(turn, "parent", 1))
-        returned = sorted(set(CODE.findall(turn["answer"])))
-        completed = observer.completed
-        record["checks"].update(
-            parent_completed=turn["stop"] == "stop", codes_exact=returned == sorted(codes),
-            one_two_item_task_batch=observer.batches == [2],
-            both_subagents_completed=len(completed) == 2 and all(item["ok"] for item in completed)
-            and sorted(code for item in completed for code in item["codes"]) == sorted(codes))
+        record["checks"].update(subagent_checks(observer, turn, codes))
         record["task_batch_sizes"] = observer.batches
         record["task_calls_without_results"] = observer.without_results
-        record["subagent_results"] = completed
+        record["recovered_dispatch"] = observer.batches != [2]
+        record["subagent_results"] = observer.completed
+
+
+def subagent_checks(observer, turn, codes):
+    """What the subagents scenario proves: the parent's first action dispatched both items in one
+    task call, so the engine's measured overlap came from parallel subagents; every subagent the
+    parent ran finished without error; the codes reached the parent through subagent results, not
+    through the parent reading the files itself; and the parent's answer is exact. Stock OMP's
+    recovery from its own task-call nondeterminism is not a failure: eaf221ac's fourth window saw
+    a first task call return no results and be re-issued ([2, 2]), and a scout answer without its
+    code and be re-dispatched alone ([2, 1]), both with every engine request completed under the
+    expected concurrency. A sequential dispatch ([1, 1]) or a parent that read the files itself
+    still fails, because then the overlap is not the subagents'."""
+    returned = sorted(set(CODE.findall(turn["answer"])))
+    completed = observer.completed
+    delivered = sorted({code for item in completed for code in item["codes"]})
+    return dict(parent_completed=turn["stop"] == "stop", codes_exact=returned == sorted(codes),
+                first_task_call_dispatched_both=observer.batches[:1] == [2],
+                subagents_completed=bool(completed) and all(item["ok"] for item in completed),
+                codes_delivered_by_subagents=delivered == sorted(codes))
 
 
 def run_sessions(args, root, shared, codes, record):

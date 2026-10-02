@@ -126,6 +126,28 @@ class SubagentResultTests(unittest.TestCase):
         self.assertEqual(observer.completed, [{"ok": True, "codes": ["ALPHA-CODE=201123"]},
                                               {"ok": False, "codes": ["BETA-CODE=313027"]}])
 
+    def test_recovered_dispatch_passes_but_sequential_errored_or_parent_read_runs_fail(self):
+        codes = ["ALPHA-CODE=201123", "BETA-CODE=313027"]
+        turn = {"stop": "stop", "answer": "ALPHA-CODE=201123\nBETA-CODE=313027"}
+
+        def observed(batches, completed):
+            observer = proof.TaskObserver()
+            observer.batches, observer.completed = list(batches), list(completed)
+            return proof.subagent_checks(observer, turn, codes)
+
+        alpha, beta = {"ok": True, "codes": [codes[0]]}, {"ok": True, "codes": [codes[1]]}
+        # eaf221ac fourth window: a first task call without results, re-issued; then a scout that
+        # answered without its code, re-dispatched alone. Both recovered; both must pass.
+        self.assertTrue(all(observed([2, 2], [alpha, beta]).values()))
+        self.assertTrue(all(observed([2, 1], [alpha, {"ok": True, "codes": []}, beta]).values()))
+        self.assertTrue(all(observed([2], [alpha, beta]).values()))
+        self.assertFalse(observed([1, 1], [alpha, beta])["first_task_call_dispatched_both"])
+        self.assertFalse(observed([2], [alpha, {"ok": False, "codes": [codes[1]]}])["subagents_completed"])
+        self.assertFalse(observed([2], [])["subagents_completed"])
+        self.assertFalse(observed([2], [alpha, {"ok": True, "codes": []}])["codes_delivered_by_subagents"])
+        self.assertFalse(observed([], [])["first_task_call_dispatched_both"])
+        self.assertFalse(proof.subagent_checks(proof.TaskObserver(), {"stop": "length", "answer": ""}, codes)["parent_completed"])
+
 
 class ConfigRewriteTests(unittest.TestCase):
     def test_changes_only_the_selected_provider_without_mutating_the_seed(self):
