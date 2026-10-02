@@ -2,8 +2,8 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090 and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.10.0` candidate targets only those
-exact profiles; installation acceptance is pending. Work outside that wedge needs a new product decision rather than
+lanes, each bound to exact bytes and a receipt. The `v0.10.0` release accepts only those
+exact profiles. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,12 +11,16 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.10.0 candidate
+## Where this is now — v0.10.0
 
-**v0.10.0 is a candidate until its five documented routes pass on the published components.**
-The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
-and RTX 3090 native Windows, with unmodified upstream OMP **18.4.10**. These routes and fresh
-client-platform acceptance have not run yet; `--require-ready` refuses the candidate.
+**v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
+All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream
+OMP **18.4.10**: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native
+Windows 7 and RTX 3090 native Windows 7. All three hosts were restored. The macOS arm64,
+Windows x64 and Linux x64 binaries each passed a typed tool turn, exact continuation and
+fail-closed request against image `fff4ee38`. macOS remains preview without managed client
+installation or appliance lifecycle; Linux ran under WSL2, not a separately qualified Linux OS.
+These are maintainer-operated observations, not independent external-user outcomes.
 
 RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
 and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
@@ -28,9 +32,10 @@ checkpoint-reuse results do not qualify this changed runtime and model.
 RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
 Their native packages and model are unchanged, but their product pin and client move to
 v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
-not acceptance of the candidate. The RTX 3090 fleet scout role stays deferred.
+not fresh OMP 18.4.10 acceptance. The RTX 3090 fleet scout role stays deferred.
 
-[Candidate manifest](releases/v0.10.0/manifest.json) · [Route acceptance](docs/QUICKSTART.md#v0100-route-acceptance).
+[Manifest](releases/v0.10.0/manifest.json) · [Route acceptance](docs/QUICKSTART.md#v0100-route-acceptance).
+[Composed acceptance](releases/v0.10.0/acceptance/composed-external-installation.json).
 
 ## Where this was — v0.9.1
 

@@ -1,0 +1,80 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.10.0",
+  "lane": "rtx3090-windows-native",
+  "as_of": "2026-10-02",
+  "status": "passed",
+  "candidate_commit": "ca9298222ed09f84e3c0e15ff6ef75218d942fb0",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.4.10",
+    "upstream_commit": "cb0d5295e5edd48d000c1979e195186ec92aac79",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 245669888,
+    "asset_sha256": "7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895",
+    "binary_sha256": "7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895",
+    "release_id": 401477136,
+    "asset_id": 604533518,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-windows-x64.exe",
+    "version": "omp/18.4.10"
+  },
+  "runtime": {
+    "tag": "v0.6.2-qwen38-3090-beta.1",
+    "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
+    "package_bytes": 595676373,
+    "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3",
+    "binary_sha256": "11b3f93c0b05a307423668d55daaae6062afd76229614215701e0ebd10080bd3",
+    "configuration_sha256": "0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "preparation": "The active published f08309da instance was preserved before the documented install: exact state bytes, 35 support files, 13 directory SDDLs, the task XML and holds were snapshotted; same-volume moves preserved only that instance's release, secrets and cache and the documented staging directory, and state temporarily selected 03f56e58ec1b with previous e20060b6a152. The literal documented route then performed a fresh canonical upgrade installation of the published package. This is not an idempotent-reinstall claim. All moved originals were restored. The temporary previous was the lane's unpublished e20060b6 instance; the restored lineage is the qualified f08309da instance with the unpublished v0.6.0 package as its previous.",
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_response_replay",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 0,
+    "cloud_fallback_observed": false,
+    "graceful_stop": {
+      "outcome": "graceful",
+      "forced": false,
+      "sessions_saved": 2,
+      "sessions_refused": 0
+    },
+    "structured_client": {
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "exact_visible_final_answer": true,
+      "continuation_exact_nonce": true,
+      "fail_closed_without_model_response": true
+    },
+    "provider_parser": {
+      "listed": [
+        "ninfer-native-3090/q38-ninfer"
+      ],
+      "exit_code": 0
+    },
+    "documented_marker_bare_line": false
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-10-02-v0100-rtx3090-native-run.json",
+    "sha256": "5be1ff4fca38d151e4ef6e5734dc2a7cad0cf15422440c51b81184a2ff13cf9b"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-10-02-v0100-acceptance-restoration.json",
+    "sha256": "05d2ddf57c2688749a8c33d3436903bf84e31363f07da279984c9fa68e9270f3"
+  },
+  "limitations": [
+    "Fresh canonical upgrade installation after preserving the qualification-installed instance; not an idempotent-reinstall qualification.",
+    "Runtime qualification is the RTX 3090 lane receipt; this receipt proves the published package's documented installation and client composition.",
+    "The documented route's tool answer contained the exact marker with surrounding text rather than as a bare line; the structured probe returned the whole visible answer exactly."
+  ]
+}

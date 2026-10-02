@@ -7,14 +7,13 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.9.1`, GitHub `Latest` |
-| Candidate | Five documented routes and fresh client-platform acceptance pending | `v0.10.0`; not ready for installation |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.10.0`, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. The v0.10.0 candidate uses upstream OMP 18.4.10 binaries and no client cask.
-It is a candidate until its five documented routes pass on the published components;
-see the [candidate route acceptance](QUICKSTART.md#v0100-route-acceptance).
+v0.7.4. v0.10.0 uses upstream OMP 18.4.10 binaries and no client cask.
+All five documented routes and fresh platform-client acceptance passed on the published
+components; see [route acceptance](QUICKSTART.md#v0100-route-acceptance).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -30,7 +29,87 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.9.1 public release — RTX 3090 on the native Windows runtime
+### v0.10.0 public release — DFlash2 on the RTX 5090
+
+The 2026-10-02 release changes the RTX 5090 runtime, model and profile and moves every client
+platform to unmodified upstream OMP **18.4.10**. RTX 4090 and RTX 3090 keep their runtime
+packages, native model and serving profiles; their client and product pins change.
+
+| Lane | Component tag | Bytes | Server | Source | Profile / configuration |
+| --- | --- | --- | --- | --- | --- |
+| RTX 5090 | `v0.6.15-qwen38-5090-beta.1` | image `sha256:fff4ee38…` | `7a8908e8` | `eaf221ac` | `qwen38-5090-v0.10.0` / `8b2f4959`; two requests in flight |
+| RTX 4090 (runtime unchanged) | `v0.6.10-qwen38-4090-beta.1` | package `a0ea4c81` (574,717,115 bytes) | `e0498fad` | `cba7eb93` | `qwen38-4090-native-v0.6.10-beta.1` / `7a69481f`; one request |
+| RTX 3090 (runtime unchanged) | `v0.6.2-qwen38-3090-beta.1` | package `da1d62f2` (595,676,373 bytes) | `11b3f93c` | `f08309da` | `qwen38-3090-native-v0.6.2-beta.1` / `0f700667`; one request |
+
+RTX 5090 uses DFlash2 K=7, BF16 KV, **131,520 KV tokens**, a **131,072-token context ceiling**
+and **two device state slots**. Both prompts plus output reservations must fit; the pending
+timeout is 180 s. Model `0634abb0` is 20,437,336,576 bytes at revision
+`dc370fb6295ae8b786e1af4f90d7142a16255c35`; the native lanes retain model `eec39564`.
+The RTX 5090 runtime fingerprint and model change, so predecessor checkpoint reuse is not
+claimed. Use the new manifest and quickstart together, not a generic `omp update`.
+
+The [RTX 5090 profile receipt](../releases/v0.10.0/qualification/rtx5090.json) records exact
+**130,048-token retrieval in 58.738 s** and **161.39 decode tok/s** (159.92 completion tok/s
+wall-clock for 2,048 output tokens). The fourth candidate restored both 62,404-token sessions
+in all three restart repeats. Criterion 14 passed under the founder-approved
+[proof amendment #74](https://github.com/alphastorm/omp-ninfer/pull/74) and a fresh rerun;
+the two failed original limit-2 runs remain failures, preserved in the lane record. The profile
+window used a package-local build and stock OMP 18.4.0; fresh published-image/OMP 18.4.10
+acceptance is distinct evidence, not a relabeling of that window.
+
+All **five documented routes, 31 steps** passed on candidate
+`ca9298222ed09f84e3c0e15ff6ef75218d942fb0` with unmodified upstream OMP **18.4.10**, published
+RTX 5090 image `fff4ee38`, RTX 4090 package `a0ea4c81` and RTX 3090 package `da1d62f2`.
+The receipts record the pre-cut substitution of that commit for the not-yet-created tag and
+an installable check for the ready check; the executable blocks are otherwise bound by hash.
+
+| Route | Steps | Sum of step elapsed seconds | Recorded environment | Receipt |
+| --- | ---: | ---: | --- | --- |
+| RTX 5090 container host | 2 | 54.869 | Ubuntu 24.04.4 LTS under Windows Docker Desktop/WSL2 | [run](measurements/2026-10-02-v0100-rtx5090-container-host-run.json) |
+| RTX 5090 macOS client | 10 | 108.626 | macOS 27.0.1 arm64 | [run](measurements/2026-10-02-v0100-rtx5090-macos-client-run.json) |
+| RTX 5090 Windows client | 5 | 48.258 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx5090-windows-client-run.json) |
+| RTX 4090 native Windows | 7 | 418.322 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx4090-native-run.json) |
+| RTX 3090 native Windows | 7 | 1,142.220 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx3090-native-run.json) |
+
+These are sums of the recorded step timers, not end-to-end installation durations. Both native
+routes performed fresh canonical upgrade installations after preserving the active published
+instances; they do not establish an idempotent-reinstall claim.
+[Documented routes](../releases/v0.10.0/acceptance/documented-routes.json) ·
+[RTX 4090 public install](../releases/v0.10.0/acceptance/rtx4090-public-install.json) ·
+[RTX 3090 public install](../releases/v0.10.0/acceptance/rtx3090-public-install.json).
+
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed an authenticated typed
+tool turn, exact continuation and fail-closed request against the published RTX 5090 image
+([composed acceptance](../releases/v0.10.0/acceptance/composed-external-installation.json)). macOS remains preview:
+the upstream client has no managed installation or appliance lifecycle. Linux ran under Ubuntu
+WSL2, not a separately qualified non-WSL Linux OS. Vision passed on the RTX 5090; native lanes
+remain text/tools. All observations are maintainer-operated, not independent external-user
+installation or repeat-use outcomes.
+
+The RTX 5090 window passed on its **first attempt**, in the c2 workspace, from the maintainer's
+Apple silicon workstation over the tailnet, with production downtime at most **387.499 s
+(6.5 min)**. The earlier candidate `20a75bd5` failed both native routes on the native-model
+block before any install effect. On the accepted candidate, RTX 4090 passed in **attempt c4**
+after two refusals before any install effect: staged-model timestamps changed by the first
+candidate's resumed download, then an interactive GPU owner (Desktop Window Manager above
+1 GiB, with nobody signed in). RTX 3090 passed in **attempt c5**, with the console signed out,
+after refusals for an interactive GPU owner (NVIDIA Overlay on the signed-in console).
+All hosts were restored after every attempt; the accepted runs' receipt records the original
+RTX 5090 runtime healthy, native state and task definitions unchanged, and no production upgrade
+activated ([restoration](measurements/2026-10-02-v0100-acceptance-restoration.json)).
+
+Checkpoint saves remain best effort under traffic, and the multisession control lost warm reuse
+on 2/8 continuations/forks. Two requests in flight provide neither preemption nor universal warm
+reuse; predecessor performance is not a speed-up baseline for this runtime/model. Native starts
+refuse any GPU owner holding at least 1 GiB. RTX 3090 rollback remains proven against its
+**unpublished v0.6.0-beta.1** predecessor, whose stop is a termination. Native lanes are
+text/tools; vision remains RTX 5090 only. The fleet RTX 3090 scout role and upstream engine
+merge remain deferred. Owner-operated exact profiles only; no SLA.
+
+[Release notes](../releases/v0.10.0/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.10.0/manifest.json) · [Qualification](../releases/v0.10.0/qualification.json).
+
+### v0.9.1 historical public release — RTX 3090 on the native Windows runtime
 
 The 2026-10-01 lane release adds **RTX 3090 native Windows** with the unmodified upstream
 OMP 18.4.0 client. RTX 5090 and RTX 4090 components, profiles, model and memory floors are

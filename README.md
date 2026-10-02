@@ -4,7 +4,7 @@
 restart.** Qwen3.8 27B is the model, [Neroued’s NInfer](https://github.com/Neroued/ninfer)
 is the inference engine, and [Oh My Pi](https://github.com/can1357/oh-my-pi) is the coding
 agent. This project packages their integration, explicit continuation, and durable checkpoints
-into exact releases. The v0.10.0 candidate scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
+into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > **Before installing — v0.10.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
@@ -19,7 +19,7 @@ into exact releases. The v0.10.0 candidate scope is one NVIDIA RTX 5090, RTX 409
 <div align="center">
 
 **[Get started with v0.10.0 →](docs/QUICKSTART.md)** ·
-**[v0.10.0 release (when published)](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.10.0)**
+**[Download v0.10.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.10.0)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -81,10 +81,14 @@ long-lived coding sessions.
 serving, or generic OpenAI-compatible inference.
 
 > [!IMPORTANT]
-> **v0.10.0 is a candidate until its five documented routes pass on the published components.**
-> The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
-> and RTX 3090 native Windows, with unmodified upstream OMP **18.4.10**. These routes and fresh
-> client-platform acceptance have not run yet; `--require-ready` refuses the candidate.
+> **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
+> All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream
+> OMP **18.4.10**: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native
+> Windows 7 and RTX 3090 native Windows 7. All three hosts were restored. The macOS arm64,
+> Windows x64 and Linux x64 binaries each passed a typed tool turn, exact continuation and
+> fail-closed request against image `fff4ee38`. macOS remains preview without managed client
+> installation or appliance lifecycle; Linux ran under WSL2, not a separately qualified Linux OS.
+> These are maintainer-operated observations, not independent external-user outcomes.
 >
 > RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
 > and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
@@ -96,8 +100,9 @@ serving, or generic OpenAI-compatible inference.
 > RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
 > Their native packages and model are unchanged, but their product pin and client move to
 > v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
-> not acceptance of the candidate. The RTX 3090 fleet scout role stays deferred.
-> [Candidate manifest](releases/v0.10.0/manifest.json) ·
+> not fresh OMP 18.4.10 acceptance. The RTX 3090 fleet scout role stays deferred.
+> [Manifest](releases/v0.10.0/manifest.json) ·
+> [Composed acceptance](releases/v0.10.0/acceptance/composed-external-installation.json) ·
 > [Route acceptance](docs/QUICKSTART.md#v0100-route-acceptance).
 
 ## What this is — and isn't
@@ -136,7 +141,7 @@ prefix, that reuse is an implicit longest-prefix guess that dies with the proces
 
 OMP NInfer ships the third option as a small set of qualified lanes — OMP, the
 [NInfer](https://github.com/Neroued/ninfer) engine, and lane-specific pinned Qwen3.8 27B artifacts on an
-RTX 5090, RTX 4090 or RTX 3090 in the v0.10.0 candidate — targeting three properties together:
+RTX 5090, RTX 4090 or RTX 3090 in v0.10.0 — with three properties qualified together:
 
 1. **Continuation is explicit and durable, not guessed.** OMP drives NInfer through stateful
    OpenAI Responses (`previous_response_id`): continuation is addressed by transactional lineage —
@@ -812,7 +817,7 @@ why no second gateway sits between OMP and NInfer: [Related work](docs/RELATED_W
 | Vision, tools, thinking | Qualified together on RTX 5090; native RTX 4090 and RTX 3090 are text/tools | Varies by model | Varies by model; tools and structured output documented | Varies by model and build | Varies by model |
 | Release discipline | Model SHA-256, image OCI digest, SBOM, client checksums, one ready manifest | Rolling releases, mutable tags | Rolling desktop releases | Rolling builds | Rolling releases |
 | Fail-closed OMP route | Shipped and acceptance-tested | Depends on your client config | Depends on your client config | Depends on your client config | Depends on your client config |
-| Breadth | Lane-specific pinned artifacts and three candidate GPU lanes in the v0.10.0 manifest | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
+| Breadth | Lane-specific pinned artifacts and three accepted GPU lanes in the v0.10.0 manifest | Thousands of models, broad hardware | Large catalog, desktop UX, llama.cpp/MLX backends | Any GGUF, broad hardware | Broad models, datacenter and consumer GPUs |
 
 Where each shines: **Ollama** is the easiest way to run many models locally. **LM Studio** is the
 most polished desktop experience for browsing and running them. **llama.cpp** has the broadest
@@ -834,8 +839,8 @@ and quantization schemes; they are not cross-comparable and are not claims of th
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM | Upstream of the historical native RTX 3090 lane |
 
 The historical v0.7.2 manifest binds all three lanes to their exact package, receipt, and
-profile. The [v0.10.0 candidate manifest](releases/v0.10.0/manifest.json) targets RTX 5090, RTX 4090 and
-RTX 3090 with upstream OMP 18.4.10; route acceptance is pending and the v0.7.2 RTX 3090 route remains separate history.
+profile. The [v0.10.0 manifest](releases/v0.10.0/manifest.json) binds RTX 5090, RTX 4090 and
+RTX 3090 with upstream OMP 18.4.10; all five documented routes passed, and the v0.7.2 RTX 3090 route remains separate history.
 What comes next: [`ROADMAP.md`](ROADMAP.md).
 
 ## Benchmarks and leaderboard

@@ -5,8 +5,8 @@
   "as_of": "2026-10-02",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "DRAFT: RTX 5090 advances to v0.6.15-qwen38-5090-beta.1, source eaf221ac, profile qwen38-5090-v0.10.0 and the v2 DFlash2 model artifact 0634abb0. RTX 3090 and RTX 4090 runtime packages and their predecessor model are carried unchanged. Stock upstream OMP v18.4.10 is staged on all three client platforms; fresh client and documented-route acceptance is pending. Historical native lane receipts do not qualify the new client.",
+  "external_installation_qualified": true,
+  "scope": "RTX 5090 advances to v0.6.15-qwen38-5090-beta.1, source eaf221ac, profile qwen38-5090-v0.10.0 and the v2 DFlash2 model artifact 0634abb0. RTX 3090 and RTX 4090 runtime packages and their predecessor model are carried unchanged. Fresh stock upstream OMP v18.4.10 acceptance passed on all three client platforms, and all five documented routes passed on the published components. Historical native lane receipts remain distinct from the new client acceptance.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -42,7 +42,7 @@
       "anonymous_pull_verified": false,
       "anonymous_assets_verified": false,
       "checksums_verified": true,
-      "build_route_note": "DRAFT: The fourth-candidate window used the clean appliance-local eaf221ac build (CUDA 13.1.115) and candidate package-local image, not the subsequently published OCI image. GitHub workflow 37015468410 succeeded and its publication receipt binds archive 6cedad58 to image fff4ee38. The downloaded archive SHA-256 and extracted ninfer-serve SHA-256 match the staged pins. Anonymous image pull and published-image composed acceptance remain pending."
+      "build_route_note": "The fourth-candidate window used the clean appliance-local eaf221ac build (CUDA 13.1.115) and package-local image, not the subsequently published OCI image. GitHub workflow 37015468410 succeeded and its publication receipt binds archive 6cedad58 to image fff4ee38. The downloaded archive SHA-256 and extracted ninfer-serve SHA-256 match the release pins. Fresh anonymous image pull and published-image composed acceptance passed separately, as recorded in acceptance/documented-routes.json and acceptance/composed-external-installation.json; the local-packaging flags above describe the original packaging evidence."
     },
     "native_runtime_variants": {
       "rtx3090-windows-native": {
@@ -65,8 +65,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.15-qwen38-5090-beta.1 component (image fff4ee38) before the cut; the receipt lands at releases/v0.10.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.10.0/acceptance/composed-external-installation.json",
+      "sha256": "7e787e030203913d130f78c902ab200a95668a52c656563d4f7809bf6305cb78",
+      "public_url": null,
+      "as_of": "2026-10-02",
+      "release": "v0.10.0",
+      "component_release_tag": "v18.4.10",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895",
+      "windows_binary_sha256": "7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "ff83e40cc933f05245b44872bace2267312b22a106d63bb36e834cefd6cc5118",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "f75f0818773b0c4e5798ecbfae2f481e6eb0c9055b9ee0c5fc4d7c180f93c5db"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "8d1a4f1b4c3e97215c21cbca4dd4be56888614fcf63528b18df27a3db9621090"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "e2f4c04bb87cf83c11d2bc192a4ea7a0b4c234b6a6f7c30e532f9a3e31a87f4d"
+        }
+      ],
+      "note": "Fresh client acceptance on all three platforms against the published RTX 5090 image and all five documented routes on the published v0.10.0 components; runtime qualification is recorded per lane."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.10.0/acceptance/documented-routes.json",
+      "sha256": "09d3328a5a5e8ecf6c9a22a636f56314331c03e66ba742c64bc5fe67a9e879c4"
     }
   },
   "observed_gates": {
@@ -146,7 +180,7 @@
         "speculative_backend": "dflash2",
         "speculative_draft_window": 7
       },
-      "note": "DRAFT: These profile gates are copied from the actual fourth-candidate receipt, not the predecessor. The 05:02:37\u201306:34:22Z window and 13:43:40\u201313:46:32Z amended criterion-14 rerun passed criteria 1\u201315 as recorded in the window PLAN. The package-local runtime and stock OMP 18.4.0 used in that window do not constitute acceptance of the published image with staged OMP 18.4.10. See NINFER_RELEASE_NOTES.md for the candidate failures, rerun arc, gate numbers, and retained limitations."
+      "note": "These profile gates are copied from the actual fourth-candidate receipt, not the predecessor. The 05:02:37\u201306:34:22Z window and 13:43:40\u201313:46:32Z amended criterion-14 rerun passed criteria 1\u201315 as recorded in the window PLAN. The package-local runtime and stock OMP 18.4.0 used in that window are historical observations, distinct from the fresh acceptance of the published image with OMP 18.4.10. See NINFER_RELEASE_NOTES.md for the candidate failures, rerun arc, gate numbers, and retained limitations."
     },
     "rtx4090_windows_native": {
       "status": "passed",
@@ -249,10 +283,7 @@
       "evidence": "releases/v0.9.1/qualification/rtx3090.json"
     }
   },
-  "interpretation": "DRAFT: The fourth candidate is the first to restore both 62,404-token sessions in all three restart repeats. Criterion 14 passed only after the founder-approved proof amendment and fresh rerun; the earlier two limit-2 proof failures remain part of the evidence. New client acceptance, published-image acceptance, release review, and final commit pins are not claimed by this draft. Carried native observations and review ledgers remain historical evidence, not fresh v0.10.0 client acceptance.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.15-qwen38-5090-beta.1 component and runtime image",
-    "fresh upstream OMP platform and documented-route acceptance"
-  ],
+  "interpretation": "The fourth candidate is the first to restore both 62,404-token sessions in all three restart repeats. Criterion 14 passed only after the founder-approved proof amendment and fresh rerun; the earlier two limit-2 proof failures remain part of the evidence. Fresh OMP 18.4.10 client and published-component route/composed acceptance passed on candidate ca9298222ed09f84e3c0e15ff6ef75218d942fb0, with all three hosts restored. Carried native observations and review ledgers remain historical evidence, not fresh release-review approval. All hardware observations are maintainer-operated; no independent external-user installation or repeat-use outcome is inferred.",
+  "remaining_release_gates": [],
   "deferred_scope": {}
 }

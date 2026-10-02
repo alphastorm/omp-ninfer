@@ -7,17 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Release staging
+## [0.10.0] - 2026-10-02
 
-DRAFT: Stage v0.10.0 from v0.9.1 with RTX 5090 runtime v0.6.15 (source eaf221ac),
-DFlash2 K=7 with BF16 KV, and the published v2 model artifact 0634abb0. The fourth
-candidate passed the fifteen window criteria after the founder-approved criterion-14
-proof amendment and rerun; both sessions restored 62,404 cached tokens in each of
-three restart repeats. RTX 3090 and RTX 4090 retain their runtime packages and
-predecessor model. Stock upstream OMP v18.4.10 raw binaries are staged, not the
-downstream OMP archive; new client and published-image installation acceptance is
-pending. This is not a released or ready composition. See the
-[draft release evidence](releases/v0.10.0/NINFER_RELEASE_NOTES.md).
+### Changed
+
+- RTX 5090 advances to runtime `v0.6.15-qwen38-5090-beta.1` (source `eaf221ac`, image
+  `fff4ee38`, server `7a8908e8`), DFlash2 K=7 with BF16 KV, and model `0634abb0`.
+  Profile `qwen38-5090-v0.10.0` / configuration `8b2f4959` has 131,520 KV tokens,
+  two device state slots and two requests in flight. The fourth candidate passed all fifteen
+  window criteria after the founder-approved criterion-14 proof amendment (#74) and rerun;
+  the two failed original limit-2 runs remain preserved. Both sessions restored 62,404 cached
+  tokens in each of three restart repeats. Predecessor checkpoint reuse is not claimed.
+- All clients move to unmodified upstream OMP **18.4.10**, not the downstream OMP archive.
+  RTX 3090 and RTX 4090 retain their runtime packages and predecessor model. All five documented
+  routes passed **31 steps** on candidate `ca929822`, and the macOS arm64 (preview), Windows
+  x64 and Linux x64 binaries each passed a typed tool turn, exact continuation and fail-closed
+  request against the published RTX 5090 image. Linux ran under WSL2, not a separately qualified
+  Linux OS. Both native lanes installed from public assets; all hosts were restored
+  ([routes](releases/v0.10.0/acceptance/documented-routes.json),
+  [composed acceptance](releases/v0.10.0/acceptance/composed-external-installation.json)).
+  The RTX 5090 window passed on its first attempt (c2), with downtime at most **387.499 s**.
+  RTX 4090 passed at c4 after staged-model timestamp and interactive-GPU-owner refusals;
+  RTX 3090 passed at c5 after NVIDIA Overlay refusals. The earlier `20a75bd5` native-model
+  failure and these refusals preceded any install effect; every attempt restored its host
+  ([restoration](docs/measurements/2026-10-02-v0100-acceptance-restoration.json)).
+  These are maintainer-operated observations, not independent external-user outcomes.
+  [Release notes](releases/v0.10.0/NINFER_RELEASE_NOTES.md).
 
 ### Added
 
@@ -2139,7 +2154,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.7...v0.9.0
 [0.8.7]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.6...v0.8.7

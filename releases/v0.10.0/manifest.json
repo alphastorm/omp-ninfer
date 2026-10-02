@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.10.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5c41123cb7a4fe7fd7362c1710883c660c777dca/compatibility.json",
-      "compatibility_sha256": "3511594deed91f2f4cbdd7346873cf3af34ff7f7ecf03b0dfab711385ecdb36c",
+      "compatibility_sha256": "ff83e40cc933f05245b44872bace2267312b22a106d63bb36e834cefd6cc5118",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.4.10",
@@ -155,10 +155,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "87b2fa7856eee6d218a5961869132a7c79890690eb516da5e8bd28a995024bb7",
+    "summary_sha256": "b8e00f40c058549016fbb92e1f90c4be14f8c30686eb83bfe5775bfa5e6c7d45",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5c41123cb7a4fe7fd7362c1710883c660c777dca/releases/v0.10.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -167,19 +167,19 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "DRAFT: This is a staged release, not an accepted installation composition. RTX 5090 candidate-window evidence is bound; fresh published-image, stock upstream OMP v18.4.10 platform, and documented-route acceptance remain pending. Native runtime packages and their model are carried unchanged.",
+    "RTX 5090 v0.6.15 published-image acceptance, all three stock upstream OMP v18.4.10 platform proofs, and all five documented routes passed on candidate ca9298222ed09f84e3c0e15ff6ef75218d942fb0. All three hosts were restored. Native runtime packages and their model are carried unchanged; observations are maintainer-operated, not independent external-user outcomes.",
     "The client is the unmodified upstream OMP binary, which has no appliance commands: installation and lifecycle follow the documented routes, and no client reads the compatibility authority.",
     "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
     "Saving before eviction delays the admitting request, about 6.5 s per 126K-token session on the RTX 5090, and that request waits while a victim's reply is still being stored, bounded by its own queue deadline. Ceiling-class save-before-evict was exercised on the RTX 5090; the RTX 4090 lane runs the same serving runtime through its own qualification phases.",
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
-    "DRAFT: Checkpoints bind the exact runtime fingerprint, including the server build. RTX 5090 changes its runtime and model in this draft; predecessor checkpoint reuse is not claimed. Native runtime packages remain unchanged.",
-    "DRAFT: All OMP 18.4.0 references reported by the predecessor-pin scanner are historical: the process-restart observation (EXP-074), candidate-window client observations in qualification.json, and carried native-client measurements in qualification.json, qualification/rtx3090.json and qualification/rtx4090.json. The release notes explain this evidence inventory. Preserve those receipts and qualification artifacts unchanged; none qualifies staged OMP v18.4.10. Fresh stock-client acceptance must establish its resume behavior, and published-image route/composed acceptance remains required before any cut.",
+    "Checkpoints bind the exact runtime fingerprint, including the server build. RTX 5090 changes its runtime and model in this release; predecessor checkpoint reuse is not claimed. Native runtime packages remain unchanged.",
+    "Historical note: OMP 18.4.0 references describe the EXP-074 process-restart observation, the candidate-window and carried native-client measurements recorded by qualification.json, qualification/rtx3090.json and qualification/rtx4090.json. These receipts retain the clients actually exercised; they do not qualify OMP v18.4.10. Fresh v18.4.10 platform and published-component route/composed acceptance passed separately. Its resume claim is limited to those fresh receipts.",
     "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
     "A managed RTX 4090 start could fail when the driver refused to pin the host-KV pool (alphastorm/omp-ninfer#48). Since v0.6.7-beta.2 the runtime commits and releases each pinned allocation's size plus 1/64 before pinning it. The field start from the refusing memory state passed with the published v0.6.8 package (3.5 GiB free, 22.6 GiB standby; docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json, issue_48_field_start), and every managed start in the v0.6.10-beta.1 package's canonical qualification pinned the pool; a recurrence reports the commit limit, available commit and available memory.",
     "A managed RTX 3090 or RTX 4090 start refuses while any process holds 1 GiB or more of GPU memory, the desktop compositor included. On the RTX 3090 qualification host a signed-in desktop's compositor alone held about 1,070 MiB, so that lane's window ran with the console signed out. While the RTX 3090 serves, its GPU-owner controller holds the card at 300 W and restores the owner's 370 W limit on stop.",
     "Structured JSON-schema output, multi-GPU, multi-tenant, priority, preemption, and silent cloud fallback are unsupported.",
-    "DRAFT: The fourth-candidate RTX 5090 profile has 131,520 BF16 KV tokens, DFlash2 K=7 and two device state slots. Two requests can run together only while both prompts plus output reservations fit; the pending timeout is 180 seconds. Do not carry the predecessor 160,256-token capacity claim.",
-    "DRAFT: Concurrent prefill can delay peer decode. The predecessor latency numbers do not describe this candidate; the new window concurrency receipts require the lead's review.",
+    "The RTX 5090 profile has 131,520 BF16 KV tokens, DFlash2 K=7 and two device state slots. Two requests can run together only while both prompts plus output reservations fit; the pending timeout is 180 seconds. The predecessor 160,256-token capacity does not apply.",
+    "Concurrent prefill can delay peer decode. Predecessor latency numbers do not describe this release. Criterion 14 passed under the amended proof in omp-ninfer #74; both failed original limit-2 runs remain preserved. Two requests in flight do not provide preemption or universal warm reuse.",
     "The OMP provider limit and the server's concurrency move together: a limit of two against a one-at-a-time RTX 5090 server queues requests at the server, where its 30 s default expires them. Upgrade the server before raising the limit.",
     "Measured throughput and latency apply only to the recorded package, machine, and profile."
   ],
@@ -192,9 +192,7 @@
       "NInfer RTX4090 v0.6.10-qwen38-4090-beta.1 (published)",
       "NInfer RTX3090 v0.6.2-qwen38-3090-beta.1 (published)"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.6.15-qwen38-5090-beta.1 component and runtime image fff4ee38; the composed acceptance receipt is absent until it is"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

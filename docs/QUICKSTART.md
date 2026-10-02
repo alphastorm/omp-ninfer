@@ -1,16 +1,16 @@
 # Quickstart
 
-> **v0.10.0 candidate: RTX 5090 · RTX 4090 · RTX 3090; DFlash2 on the RTX 5090**
+> **v0.10.0: RTX 5090 · RTX 4090 · RTX 3090; DFlash2 on the RTX 5090**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.10.0 is a candidate until its five documented routes pass on the published components.**
+> **v0.10.0 passed all five documented routes on the published components.**
 > The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native
 > Windows and RTX 3090 native Windows.
 > The commands below require the published v0.10.0 release and its readiness check.
 > Do not bypass `--require-ready` or mix one release's manifest with another
-> release's commands. See [route acceptance](#v0100-route-acceptance) for the pending gates.
+> release's commands. See [route acceptance](#v0100-route-acceptance) for results and receipts.
 
 ## Choose your lane
 
@@ -19,9 +19,9 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.10.0 candidate; route acceptance pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.10.0 candidate; route acceptance pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **v0.10.0 candidate; route acceptance pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.10.0 accepted** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **v0.10.0 accepted** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **v0.10.0 accepted** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 The RTX 3090's earlier
@@ -34,14 +34,48 @@ substitute GPU family names, package URLs, component tags, or variant IDs betwee
 
 ## v0.10.0 route acceptance
 
-Route acceptance is pending; the five documented routes have not run yet. RTX 5090 container
-host, macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows must
-pass on the published v0.6.15 RTX 5090 image `fff4ee38`, unchanged v0.6.10 RTX 4090 package
-and unchanged v0.6.2 RTX 3090 package with unmodified upstream OMP 18.4.10. Fresh client-platform
-acceptance must also pass. Until then, v0.10.0 stays a candidate and `--require-ready` refuses it.
-The v0.9.1 receipts below are historical; they do not accept this candidate.
+All **five documented routes, 31 steps** passed on candidate
+`ca9298222ed09f84e3c0e15ff6ef75218d942fb0` with unmodified upstream OMP **18.4.10**, published
+RTX 5090 image `fff4ee38`, RTX 4090 package `a0ea4c81` and RTX 3090 package `da1d62f2`.
+The receipts record the pre-cut substitution of that commit for the not-yet-created tag and
+an installable check for the ready check; the executable blocks are otherwise bound by hash.
 
-## v0.9.1 route acceptance
+| Route | Steps | Sum of step elapsed seconds | Recorded environment | Receipt |
+| --- | ---: | ---: | --- | --- |
+| RTX 5090 container host | 2 | 54.869 | Ubuntu 24.04.4 LTS under Windows Docker Desktop/WSL2 | [run](measurements/2026-10-02-v0100-rtx5090-container-host-run.json) |
+| RTX 5090 macOS client | 10 | 108.626 | macOS 27.0.1 arm64 | [run](measurements/2026-10-02-v0100-rtx5090-macos-client-run.json) |
+| RTX 5090 Windows client | 5 | 48.258 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx5090-windows-client-run.json) |
+| RTX 4090 native Windows | 7 | 418.322 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx4090-native-run.json) |
+| RTX 3090 native Windows | 7 | 1,142.220 | Windows 11 Pro | [run](measurements/2026-10-02-v0100-rtx3090-native-run.json) |
+
+These are sums of the recorded step timers, not end-to-end installation durations. Both native
+routes performed fresh canonical upgrade installations after preserving the active published
+instances; they do not establish an idempotent-reinstall claim.
+[Documented routes](../releases/v0.10.0/acceptance/documented-routes.json) ·
+[RTX 4090 public install](../releases/v0.10.0/acceptance/rtx4090-public-install.json) ·
+[RTX 3090 public install](../releases/v0.10.0/acceptance/rtx3090-public-install.json).
+
+The upstream macOS arm64, Windows x64 and Linux x64 binaries each passed an authenticated typed
+tool turn, exact continuation and fail-closed request against the published RTX 5090 image
+([composed acceptance](../releases/v0.10.0/acceptance/composed-external-installation.json)). macOS remains preview:
+the upstream client has no managed installation or appliance lifecycle. Linux ran under Ubuntu
+WSL2, not a separately qualified non-WSL Linux OS. Vision passed on the RTX 5090; native lanes
+remain text/tools. All observations are maintainer-operated, not independent external-user
+installation or repeat-use outcomes.
+
+The RTX 5090 window passed on its **first attempt**, in the c2 workspace, from the maintainer's
+Apple silicon workstation over the tailnet, with production downtime at most **387.499 s
+(6.5 min)**. The earlier candidate `20a75bd5` failed both native routes on the native-model
+block before any install effect. On the accepted candidate, RTX 4090 passed in **attempt c4**
+after two refusals before any install effect: staged-model timestamps changed by the first
+candidate's resumed download, then an interactive GPU owner (Desktop Window Manager above
+1 GiB, with nobody signed in). RTX 3090 passed in **attempt c5**, with the console signed out,
+after refusals for an interactive GPU owner (NVIDIA Overlay on the signed-in console).
+All hosts were restored after every attempt; the accepted runs' receipt records the original
+RTX 5090 runtime healthy, native state and task definitions unchanged, and no production upgrade
+activated ([restoration](measurements/2026-10-02-v0100-acceptance-restoration.json)).
+
+## Historical v0.9.1 route acceptance
 
 The five documented routes - RTX 5090 container host, macOS client, Windows client, RTX 4090
 native Windows and RTX 3090 native Windows - passed all 31 steps on candidate `c55185dd`, using
@@ -55,7 +89,7 @@ Linux ran under WSL2, not a separately qualified Linux OS.
 
 ## Verify the release before setup
 
-The `v0.10.0` candidate composes native Windows OMP over authenticated local loopback
+The `v0.10.0` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 and RTX 3090 use their exact native Windows packages. Every
@@ -63,7 +97,7 @@ route runs the unmodified upstream OMP 18.4.10 client. The RTX 5090 admits two r
 with DFlash2 draft window 7, BF16 KV and two device state slots. Both prompts plus output
 reservations must fit its 131,520-token KV pool.
 
-Historical v0.9.0/v0.9.1 measurements do not describe this candidate. The predecessor's eight-token MTP3 verify round
+Historical v0.9.0/v0.9.1 measurements do not describe v0.10.0. The predecessor's eight-token MTP3 verify round
 uses tensor cores: two decoding requests reached 281.1-283.0 tok/s together against 166.7-167.1
 one at a time (1.68-1.70x). The candidate answered the 89-case role corpus byte-identically to
 v0.6.13, two cases at a time and one at a time, and the published image answered it
@@ -161,8 +195,8 @@ warm reuse is not claimed.
 
 A checkpoint is bound to the exact runtime fingerprint, including the server build and model.
 RTX 5090 changes both in v0.10.0; predecessor checkpoint reuse is not claimed. The RTX 4090
-and RTX 3090 runtime packages and native model are unchanged. Follow the exact candidate
-routes only after the release passes its ready gate; every lane moves to OMP 18.4.10.
+and RTX 3090 runtime packages and native model are unchanged. Follow the exact release
+routes and require the ready gate before setup; every lane moves to OMP 18.4.10.
 
 The RTX 5090 deployment profile is `qwen38-5090-v0.10.0` / configuration `8b2f4959`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
@@ -196,8 +230,10 @@ Start only from the product tag and require its ready contract:
 python3 scripts/verify_release.py --require-ready
 ```
 
-That gate binds the Windows client binary, compatibility authority, NInfer image/SBOM,
-model, configuration, qualification summary, and clean-install acceptance receipt.
+That gate binds the exact upstream OMP platform binaries, compatibility authority, NInfer
+image/SBOM and native packages, lane-specific models, configuration, qualification summary,
+and composed external-installation acceptance. v0.10.0 acceptance covers all five documented
+routes on the published components; it does not expand support beyond those exact profiles.
 
 > [!WARNING]
 > Stay on the exact upstream OMP 18.4.10 binary pinned by this release. The config every route below
@@ -504,8 +540,8 @@ text and tools only. Report the outcome with the
 
 ## Native Windows RTX 3090 release lane
 
-**v0.10.0 candidate; route acceptance pending.** These are the published-asset route and the
-blocks its acceptance harness will execute on the physical RTX 3090. Do not bypass the ready
+**v0.10.0 accepted.** This published-asset route passed all seven documented steps on the
+physical RTX 3090 with stock OMP 18.4.10; receipts are linked above. Do not bypass the ready
 gate or use the historical v0.7.2 manifest here. RTX 4090 and RTX 3090 keep their component bytes;
 RTX 5090 changes its runtime and model in this release.
 
