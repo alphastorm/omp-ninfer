@@ -25,6 +25,8 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                        {"model_url": "https://example.invalid/model", "model_sha256": "a" * 64, "model_bytes": True}):
             with self.subTest(fields=fields):
                 authority = MODULE.load_authority(ROOT / "compatibility.json")
+                for field in ("model_url", "model_sha256", "model_bytes"):
+                    authority["runtime_variants"][0].pop(field, None)
                 authority["runtime_variants"][0].update(fields)
                 with self.assertRaises(ValueError):
                     MODULE.load_authority(self._write(authority))

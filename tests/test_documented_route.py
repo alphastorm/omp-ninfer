@@ -370,12 +370,15 @@ class NativeInstallGateTests(unittest.TestCase):
             variant_id = f"{lane}-windows-native"
             blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
                 documented_route.DEFAULT_DOC, f"{lane}-native")}
+            releases = set(re.findall(r"releases[/\\](v[^/\\\s]+)[/\\]manifest\.json",
+                                      "\n".join(blocks.values())))
+            self.assertTrue(releases, "native route must read a release manifest")
             cases = ([], [{"id": variant_id, "status": "preview"}],
                      [{"id": variant_id, "status": "qualified"}] * 2)
             for variants in cases:
                 with self.subTest(lane=lane, variants=variants), tempfile.TemporaryDirectory() as temporary:
                     root = Path(temporary)
-                    for release in ("v0.9.0", "v0.9.1"):
+                    for release in releases:
                         directory = root / "releases" / release
                         directory.mkdir(parents=True)
                         (directory / "manifest.json").write_text(json.dumps({

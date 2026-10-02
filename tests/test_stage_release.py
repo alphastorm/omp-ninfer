@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -105,6 +106,15 @@ class StageReleaseTests(unittest.TestCase):
                 "--model-sha256", model["artifact_sha256"],
                 "--model-bytes", str(model["artifact_bytes"])]
 
+    @staticmethod
+    def distinct_model(model: dict) -> dict:
+        revision = hashlib.sha256((model["revision"] + "synthetic").encode()).hexdigest()[:40]
+        return dict(
+            model, revision=revision,
+            artifact_url=model["artifact_url"].replace(model["revision"], revision),
+            artifact_sha256=hashlib.sha256((model["artifact_sha256"] + "synthetic").encode()).hexdigest(),
+            artifact_bytes=model["artifact_bytes"] + 1)
+
     def test_primary_model_change_preserves_native_packages_and_predecessor_model(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
         source = root / "releases" / CURRENT
@@ -112,13 +122,14 @@ class StageReleaseTests(unittest.TestCase):
         immutable = [root / "compatibility.json", *(root / "profiles").glob("*.json"),
                      *source.rglob("*")]
         before = {path: path.read_bytes() for path in immutable if path.is_file()}
-        model = self.load(ROOT / "tests/fixtures/dflash2-model.json")
+        model = self.distinct_model(previous["components"]["model"])
+        native = previous["components"].get("native_model", previous["components"]["model"])
         result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         staged = root / "releases" / TARGET
         manifest = self.load(staged / "manifest.json")
         self.assertEqual(manifest["components"]["model"], model)
-        self.assertEqual(manifest["components"]["native_model"], previous["components"]["model"])
+        self.assertEqual(manifest["components"]["native_model"], native)
         for current, old in zip(manifest["components"]["ninfer_variants"],
                                 previous["components"]["ninfer_variants"]):
             self.assertEqual({k: v for k, v in current.items() if k != "qualification"},
@@ -127,7 +138,7 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual({row["runtime"]["model_sha256"] for row in authority["profiles"]},
                          {model["artifact_sha256"]})
         self.assertEqual({row["model_sha256"] for row in authority["runtime_variants"]},
-                         {previous["components"]["model"]["artifact_sha256"]})
+                         {native["artifact_sha256"]})
         qualification = self.load(staged / "qualification.json")
         self.assertEqual(qualification["runtime_identity"]["model_artifact_sha256"], model["artifact_sha256"])
         self.assertEqual({path: path.read_bytes() for path in before}, before)
@@ -136,11 +147,9 @@ class StageReleaseTests(unittest.TestCase):
         root = self.staging_copy(source_release=CURRENT)
         source = root / "releases" / CURRENT / "manifest.json"
         manifest = self.load(source)
-        native = manifest["components"]["model"]
-        manifest["components"]["native_model"] = native
-        model = self.load(ROOT / "tests/fixtures/dflash2-model.json")
-        manifest["components"]["model"] = dict(model, revision="a" * 40,
-            artifact_url=model["artifact_url"].replace(model["revision"], "a" * 40))
+        native = manifest["components"].setdefault("native_model", manifest["components"]["model"])
+        manifest["components"]["model"] = self.distinct_model(manifest["components"]["model"])
+        model = self.distinct_model(manifest["components"]["model"])
         self.save(source, manifest)
         result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -149,19 +158,36 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(components["model"], model)
 
     def test_unchanged_model_does_not_add_redundant_native_model(self) -> None:
-        root = self.staging_copy(source_release=CURRENT)
-        model = self.load(root / "releases" / CURRENT / "manifest.json")["components"]["model"]
-        result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertNotIn("native_model", self.load(root / "releases" / TARGET / "manifest.json")["components"])
+        for split in (False, True):
+            with self.subTest(split=split):
+                root = self.staging_copy(source_release=CURRENT)
+                path = root / "releases" / CURRENT / "manifest.json"
+                manifest = self.load(path)
+                components = manifest["components"]
+                native = components.get("native_model", components["model"])
+                if split:
+                    components["native_model"] = native
+                    components["model"] = self.distinct_model(native)
+                else:
+                    components["model"] = native
+                    components.pop("native_model", None)
+                self.save(path, manifest)
+                model = components["model"]
+                result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                staged = self.load(root / "releases" / TARGET / "manifest.json")["components"]
+                self.assertEqual(staged["model"], model)
+                if split:
+                    self.assertEqual(staged["native_model"], native)
+                else:
+                    self.assertNotIn("native_model", staged)
 
     def test_primary_returning_to_native_model_removes_the_override(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
         path = root / "releases" / CURRENT / "manifest.json"
         manifest = self.load(path)
-        model = manifest["components"]["model"]
-        manifest["components"]["native_model"] = model
-        manifest["components"]["model"] = self.load(ROOT / "tests/fixtures/dflash2-model.json")
+        model = manifest["components"].setdefault("native_model", manifest["components"]["model"])
+        manifest["components"]["model"] = self.distinct_model(manifest["components"]["model"])
         self.save(path, manifest)
         result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

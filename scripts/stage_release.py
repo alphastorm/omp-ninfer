@@ -457,12 +457,15 @@ def main() -> int:
     for location in leftovers:
         print(f"warning: releases/{args.release}/{location}", file=sys.stderr)
     draft_residue = set(DRAFT_POSTURE_RESIDUE)
-    if model_changed:
-        # Only root profiles intentionally remain on the live model. The staged
-        # authority and qualification must already bind the new primary model.
-        draft_residue.add("profile and manifest model hashes must match")
-        for label in ("profile", *(f"profiles/{path.name}"
-                                    for path in (ROOT / "profiles").glob("*.json"))):
+    # Root profiles remain on the live model even when staging an unchanged
+    # historical model. Staged authority and qualification bindings must match.
+    root_profiles = [("profile", dst_dir / manifest["product"]["profile"]),
+                     *((f"profiles/{path.name}", path)
+                       for path in (ROOT / "profiles").glob("*.json"))]
+    for label, path in root_profiles:
+        if load(path)["model"]["artifact_sha256"] != model["artifact_sha256"]:
+            if label == "profile":
+                draft_residue.add("profile and manifest model hashes must match")
             for field in ("hash", "bytes"):
                 draft_residue.add(f"{label}: model {field} must match the manifest")
     if omp_descriptor is not None:

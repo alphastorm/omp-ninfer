@@ -46,8 +46,14 @@ class ReleaseContractTest(unittest.TestCase):
         manifest["qualification"]["external_installation_passed"] = False
         manifest["publication"]["blockers"] = ["external-install acceptance pending"]
         components = manifest["components"]
-        components["native_model"] = components["model"]
-        components["model"] = self.load(ROOT / "tests/fixtures/dflash2-model.json")
+        components.setdefault("native_model", components["model"])
+        previous = components["model"]
+        revision = hashlib.sha256((previous["revision"] + "synthetic").encode()).hexdigest()[:40]
+        components["model"] = dict(
+            previous, revision=revision,
+            artifact_url=previous["artifact_url"].replace(previous["revision"], revision),
+            artifact_sha256=hashlib.sha256((previous["artifact_sha256"] + "synthetic").encode()).hexdigest(),
+            artifact_bytes=previous["artifact_bytes"] + 1)
         model = components["model"]
         lane_path = release / "qualification/rtx5090.json"
         lane = self.load(lane_path)
@@ -348,14 +354,19 @@ class ReleaseContractTest(unittest.TestCase):
         historical_manifest = self.load(historical / "manifest.json")
         historical_profile = historical_manifest["runtime_identity"]["deployment_profile"]
         historical_omp = historical_manifest["components"]["omp"]
+        historical_model = historical_manifest["components"]["model"]
         for profile_path in (root / "profiles").glob("*.json"):
             profile = self.load(profile_path)
             profile["release"] = "v0.2.0-beta.1"
             profile["server"]["deployment_profile"] = historical_profile
+            profile["model"].update(artifact_sha256=historical_model["artifact_sha256"],
+                                    artifact_bytes=historical_model["artifact_bytes"])
             arguments = profile["server"].get("arguments", [])
             for index, argument in enumerate(arguments[:-1]):
                 if argument == "--deployment-profile":
                     arguments[index + 1] = historical_profile
+                elif argument == "--artifact-sha256":
+                    arguments[index + 1] = historical_model["artifact_sha256"]
             # The historical manifest pins the fork client, so a profile that pins a client binary
             # pins its archive, and the provider carries the fork's stateful compat flag.
             client = profile.get("client")
