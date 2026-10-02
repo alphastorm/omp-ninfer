@@ -119,7 +119,16 @@ record production restored healthy; this staging work did not start or stop the 
 
 DRAFT: RTX 3090 remains on v0.6.2-qwen38-3090-beta.1 and RTX 4090 on
 v0.6.10-qwen38-4090-beta.1, with their historical lane receipts and predecessor model retained.
-Those receipts' OMP 18.4.0 references are historical measurements, not v18.4.10 acceptance.
+The predecessor-pin scanner reports OMP 18.4.0 references in these notes, the manifest
+limitations, `qualification.json`, `qualification/rtx3090.json` and
+`qualification/rtx4090.json`. These are historical observations: the summary records the
+candidate-window client and carried native-lane client measurements; the native receipts
+record the client versions actually exercised, including the RTX 4090 orchestrator rerun.
+The manifest's EXP-074 process-restart observation is likewise historical. None qualifies
+the staged v18.4.10 client. The scanner is a literal identity scan, so these warnings remain
+as an evidence inventory, not stale pins to rewrite. Preserve the receipts and qualification
+artifacts unchanged; fresh stock-client, published-image route and composed acceptance
+must establish the staged composition before any cut.
 The inherited durable RTX 5090 and review ledgers are also predecessor records, not fresh
 review approval; the original profile receipt above and explicitly drafted current summary
 are the evidence introduced here.
