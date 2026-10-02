@@ -362,16 +362,23 @@ if (-not (Test-Path $ModelDir)) {
   Set-Acl $ModelDir $Acl
 }
 $Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-& curl.exe --fail --location --continue-at - --output $Model $Manifest.components.model.artifact_url
+# The native lanes serve the manifest's native model: components.native_model when the primary
+# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
+$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
+  $Manifest.components.native_model } else { $Manifest.components.model }
+if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
+  throw 'native model artifact is not the variant''s bound model'
+}
+& curl.exe --fail --location --continue-at - --output $Model $NativeModel.artifact_url
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
-if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$NativeModel.artifact_bytes) {
   throw 'model artifact download failed'
 }
-if ((Get-Item $Model).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+if ((Get-Item $Model).Length -ne [int64]$NativeModel.artifact_bytes) {
   throw 'model artifact byte count mismatch'
 }
 if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
-    $Manifest.components.model.artifact_sha256) {
+    $NativeModel.artifact_sha256) {
   throw 'model artifact checksum mismatch'
 }
 foreach ($Asset in @(
@@ -591,16 +598,23 @@ if (-not (Test-Path $ModelDir)) {
   Set-Acl $ModelDir $Acl
 }
 $Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-& curl.exe --fail --location --continue-at - --output $Model $Manifest.components.model.artifact_url
+# The native lanes serve the manifest's native model: components.native_model when the primary
+# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
+$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
+  $Manifest.components.native_model } else { $Manifest.components.model }
+if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
+  throw 'native model artifact is not the variant''s bound model'
+}
+& curl.exe --fail --location --continue-at - --output $Model $NativeModel.artifact_url
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
-if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$NativeModel.artifact_bytes) {
   throw 'model artifact download failed'
 }
-if ((Get-Item $Model).Length -ne [int64]$Manifest.components.model.artifact_bytes) {
+if ((Get-Item $Model).Length -ne [int64]$NativeModel.artifact_bytes) {
   throw 'model artifact byte count mismatch'
 }
 if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
-    $Manifest.components.model.artifact_sha256) {
+    $NativeModel.artifact_sha256) {
   throw 'model artifact checksum mismatch'
 }
 foreach ($Asset in @(
