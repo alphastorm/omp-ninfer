@@ -2,8 +2,8 @@
 
 This roadmap is a scope boundary, not a promise of dates. The product wedge is OMP plus NInfer
 plus Qwen3.8 on user-controlled RTX cards: qualified RTX 5090, RTX 4090 and RTX 3090 release
-lanes, each bound to exact bytes and a receipt. The `v0.9.1` public release exposes only those
-exact installable profiles. Work outside that wedge needs a new product decision rather than
+lanes, each bound to exact bytes and a receipt. The `v0.10.0` candidate targets only those
+exact profiles; installation acceptance is pending. Work outside that wedge needs a new product decision rather than
 placeholder abstractions, and nothing below becomes part
 of a release until its exact binary and profile are rebound through a new qualification receipt.
 
@@ -11,11 +11,31 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.9.1
+## Where this is now — v0.10.0 candidate
+
+**v0.10.0 is a candidate until its five documented routes pass on the published components.**
+The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
+and RTX 3090 native Windows, with unmodified upstream OMP **18.4.10**. These routes and fresh
+client-platform acceptance have not run yet; `--require-ready` refuses the candidate.
+
+RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
+and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
+configuration `8b2f4959` uses **DFlash2 draft window 7**, **BF16 KV**, **two requests in flight**
+and **two device state slots**. The qualified KV pool is 131,520 tokens; both prompts plus
+output reservations must fit. The pending timeout is 180 s. Predecessor performance and
+checkpoint-reuse results do not qualify this changed runtime and model.
+
+RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
+Their native packages and model are unchanged, but their product pin and client move to
+v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
+not acceptance of the candidate. The RTX 3090 fleet scout role stays deferred.
+
+[Candidate manifest](releases/v0.10.0/manifest.json) · [Route acceptance](docs/QUICKSTART.md#v0100-route-acceptance).
+
+## Where this was — v0.9.1
 
 Install through the [quickstart](docs/QUICKSTART.md); eligibility is one RTX 5090, RTX 4090
-or RTX 3090. **v0.9.1 — RTX 3090 on the native Windows runtime** is the accepted current
-release, dated 2026-10-01.
+or RTX 3090. **v0.9.1 — RTX 3090 on the native Windows runtime** was accepted on 2026-10-01.
 
 The RTX 3090 joins with `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`, server
 `11b3f93c`), deployment profile `qwen38-3090-native-v0.6.2-beta.1` and configuration

@@ -1,17 +1,17 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-01 · **Current public release: v0.9.1.**
+Updated: 2026-10-02 · **Current candidate: v0.10.0; route acceptance pending.**
 
-The [v0.9.1 manifest](../releases/v0.9.1/manifest.json) binds the stock-client runtime on
-three eligible GPU routes with unmodified upstream OMP 18.4.0. Each lane's runtime was qualified
-on its published component; fresh client/route acceptance is separate evidence. The immutable
+The [v0.10.0 manifest](../releases/v0.10.0/manifest.json) binds the stock-client runtime on
+three eligible GPU routes with unmodified upstream OMP 18.4.10. Fresh client/route acceptance has not run yet;
+component qualification is separate evidence. The immutable
 [v0.7.2 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/releases/v0.7.2/manifest.json)
 retains the historical three-GPU / OMP 18.0.9 combination.
 
 ## What it is
 
 OMP NInfer is **durable local inference for coding agents**: the qualified local inference
-appliance for Oh My Pi. Its v0.9.1 scope runs Qwen3.8 27B through the NInfer engine on one
+appliance for Oh My Pi. Its v0.10.0 scope runs Qwen3.8 27B through the NInfer engine on one
 NVIDIA RTX 5090, RTX 4090 or RTX 3090 and preserves explicitly checkpointed OpenAI Responses
 continuation state across process restarts, within the profile’s restore limits.
 
@@ -42,22 +42,43 @@ All of these should be materially true:
 - Multi-user or high-concurrency serving (use vLLM).
 - Generic OpenAI-compatible inference without the durability contract.
 
-## v0.9.1 eligible hardware
+## v0.10.0 eligible hardware
 
 | Lane | Form | Context ceiling | Release |
 |---|---|---:|---|
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.4.0 with component `v0.6.14-qwen38-5090-beta.1`, profile `qwen38-5090-v0.9.0` and configuration `cf1de114` with `--max-concurrency 2 --pending-timeout-ms 180000 --gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
-| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.4.0 with component `v0.6.10-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), configuration `7a69481f` with `engine.gpu_keep_warm_ms = 60000`, 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
-| RTX 3090 | native Windows 11 service | 131,072 | OMP 18.4.0 with component `v0.6.2-qwen38-3090-beta.1` (sm_86; INT8 KV, MTP3), profile `qwen38-3090-native-v0.6.2-beta.1` and configuration `0f700667`; one request, 30 s pending timeout, 8192 MiB host KV, 24 host-state slots, keep-warm off and a 300 W cap; no host-memory floor declared |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 Linux container | 131,072 | OMP 18.4.10 with component `v0.6.15-qwen38-5090-beta.1`, profile `qwen38-5090-v0.10.0` and configuration `8b2f4959` (DFlash2 draft window 7, BF16 KV, two device state slots) with `--max-concurrency 2 --pending-timeout-ms 180000 --gpu-keep-warm-ms 60000`, 16384 MiB host KV and a 28672 MiB runtime-host floor; measured restore limits are recorded below |
+| RTX 4090 | native Windows 11 service | 131,072 | OMP 18.4.10 with component `v0.6.10-qwen38-4090-beta.1` (sm_89; INT8 KV, MTP3, prefill chunk 2,048), configuration `7a69481f` with `engine.gpu_keep_warm_ms = 60000`, 11264 MiB host KV, 24 host-state slots and a 32768 MiB runtime-host floor |
+| RTX 3090 | native Windows 11 service | 131,072 | OMP 18.4.10 with component `v0.6.2-qwen38-3090-beta.1` (sm_86; INT8 KV, MTP3), profile `qwen38-3090-native-v0.6.2-beta.1` and configuration `0f700667`; one request, 30 s pending timeout, 8192 MiB host KV, 24 host-state slots, keep-warm off and a 300 W cap; no host-memory floor declared |
 
-The RTX 3090 is qualified standalone with OMP 18.4.0. The separately linked
+The RTX 3090 is a standalone candidate lane with OMP 18.4.10; route acceptance is pending. The separately linked
 [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 retains OMP 18.0.9 and component `v0.2.5-qwen38-3090-beta.1`; its sessions do not carry
 over to the new native lane. The fleet RTX 3090 scout role remains deferred.
 
-## v0.9.1 — RTX 3090 on the native Windows runtime
+## v0.10.0 candidate
 
-The current release adds the RTX 3090 native Windows lane. The RTX 5090 and RTX 4090
+**v0.10.0 is a candidate until its five documented routes pass on the published components.**
+The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
+and RTX 3090 native Windows, with unmodified upstream OMP **18.4.10**. These routes and fresh
+client-platform acceptance have not run yet; `--require-ready` refuses the candidate.
+
+RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
+and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
+configuration `8b2f4959` uses **DFlash2 draft window 7**, **BF16 KV**, **two requests in flight**
+and **two device state slots**. The qualified KV pool is 131,520 tokens; both prompts plus
+output reservations must fit. The pending timeout is 180 s. Predecessor performance and
+checkpoint-reuse results do not qualify this changed runtime and model.
+
+RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
+Their native packages and model are unchanged, but their product pin and client move to
+v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
+not acceptance of the candidate. The RTX 3090 fleet scout role stays deferred.
+
+[Candidate manifest](../releases/v0.10.0/manifest.json) · [Route acceptance](QUICKSTART.md#v0100-route-acceptance).
+
+## Historical v0.9.1 — RTX 3090 on the native Windows runtime
+
+The v0.9.1 release added the RTX 3090 native Windows lane. The RTX 5090 and RTX 4090
 components, profiles, model and memory floors are **byte-identical to v0.9.0**. The
 [v0.9.1 manifest](../releases/v0.9.1/manifest.json) binds:
 

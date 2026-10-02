@@ -11,9 +11,30 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.9.1 — RTX 3090 on the native Windows runtime (2026-10-01)
+## v0.10.0 candidate — acceptance pending
 
-The current release adds the RTX 3090 native Windows lane with
+**v0.10.0 is a candidate until its five documented routes pass on the published components.**
+The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native Windows
+and RTX 3090 native Windows, with unmodified upstream OMP **18.4.10**. These routes and fresh
+client-platform acceptance have not run yet; `--require-ready` refuses the candidate.
+
+RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
+and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
+configuration `8b2f4959` uses **DFlash2 draft window 7**, **BF16 KV**, **two requests in flight**
+and **two device state slots**. The qualified KV pool is 131,520 tokens; both prompts plus
+output reservations must fit. The pending timeout is 180 s. Predecessor performance and
+checkpoint-reuse results do not qualify this changed runtime and model.
+
+RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
+Their native packages and model are unchanged, but their product pin and client move to
+v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
+not acceptance of the candidate. The RTX 3090 fleet scout role stays deferred.
+
+[Candidate manifest](../releases/v0.10.0/manifest.json) · [Route acceptance](QUICKSTART.md#v0100-route-acceptance).
+
+## Historical v0.9.1 — RTX 3090 on the native Windows runtime (2026-10-01)
+
+The v0.9.1 release added the RTX 3090 native Windows lane with
 `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`, server `11b3f93c`, source `f08309da`),
 deployment profile `qwen38-3090-native-v0.6.2-beta.1` and configuration `0f700667`.
 It serves one request at a time with a 30 s pending timeout, 131,072 tokens of INT8 KV,

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.9.1",
+  "release": "v0.10.0",
   "status": "public",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
@@ -32,12 +32,12 @@
   },
   "model": {
     "public_id": "q38-ninfer",
-    "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-    "artifact_bytes": 18210531328
+    "artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+    "artifact_bytes": 20437336576
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.9.0",
+    "deployment_profile": "qwen38-5090-v0.10.0",
     "container_network_mode": "bridge",
     "restart_policy": "no",
     "arguments": [
@@ -48,13 +48,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "f62a570e49275d6be9445276f81da6960a64d792a59f017362b132864e423193",
+      "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
       "--artifact-sha256",
-      "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
       "--config-sha256",
-      "cf1de114d4cec0daa75b9734cfeceef572fa63224e5edbaffc1ea9deebf3aa32",
+      "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
       "--deployment-profile",
-      "qwen38-5090-v0.9.0",
+      "qwen38-5090-v0.10.0",
       "--max-context",
       "131072",
       "--kv-capacity",
@@ -68,9 +68,9 @@
       "--pending-timeout-ms",
       "180000",
       "--spec",
-      "mtp",
+      "dflash2",
       "--draft-tokens",
-      "3",
+      "7",
       "--lm-head-draft",
       "--vision",
       "--preserve-thinking",
@@ -83,7 +83,7 @@
       "--max-private-continuations",
       "8",
       "--device-state-slots",
-      "4",
+      "2",
       "--host-state-slots",
       "24",
       "--host-kv-mib",

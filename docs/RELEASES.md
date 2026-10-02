@@ -8,10 +8,13 @@ the product manifest binds the exact combination.
 | Channel | Meaning | Current state |
 | --- | --- | --- |
 | Public release | Published exact profiles with stated limitations and non-claims | `v0.9.1`, GitHub `Latest` |
+| Candidate | Five documented routes and fresh client-platform acceptance pending | `v0.10.0`; not ready for installation |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.9.1 uses upstream OMP 18.4.0 binaries and no client cask.
+v0.7.4. The v0.10.0 candidate uses upstream OMP 18.4.10 binaries and no client cask.
+It is a candidate until its five documented routes pass on the published components;
+see the [candidate route acceptance](QUICKSTART.md#v0100-route-acceptance).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
