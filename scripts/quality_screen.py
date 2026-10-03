@@ -82,6 +82,12 @@ PREREGISTRATION: dict[str, Any] = {
                     "same DFlash2 K=7 two-request profile with the fork's FP8 E4M3 row-256 KV and four device "
                     "state slots (spk5-df2k7-c2ds4-fp8-ckpt, server c260dde9), against EXP-085's production screen "
                     "and determinism runs, under this rule unchanged"),
+        "EXP-094": ("registered 2026-10-03 after EXP-092 and EXP-093, before its data: the shipped v0.10.0 DFlash2 "
+                    "K=7 BF16 two-request profile on fork a59c13d0, which adds EXP-092's verify rounds and the 8- "
+                    "and 16-column Q4 query/key projections on the small-T tensor cores (exp094-a59c13d0, server "
+                    "884e5a43), against EXP-085's production screen and determinism runs, under this rule "
+                    "unchanged; its verdict against EXP-085's BF16 DFlash2 runs (spk5-df2k7-c2ds2) is reported, "
+                    "not a gate"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
