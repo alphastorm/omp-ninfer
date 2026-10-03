@@ -1,0 +1,111 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-094",
+  "title": "Q4 query/key projections on the small-T tensor cores on the RTX 5090: one-request DFlash2 rounds 0.8 ms (4-5%) shorter at every context and pair rounds 9% shorter; outputs change but pass EXP-085's powered screen; kept by rule",
+  "generated_utc": "2026-10-03T21:55:00Z",
+  "status": "completed_with_limits",
+  "question": "After EXP-092 the GDN (48 layers, 4,096 rows) and attention (16 layers, 7,168 rows split at 6,144) Q4 query/key projections take 1.68 ms of a one-request DFlash2 K=7 round (2.67 ms in a pair) on the staged SIMT kernel at 28-31% of DRAM bandwidth, and EXP-093 found no faster byte-identical schedule. Routed to the Q4 small-T tensor-core kernel at the verify widths, how much shorter are rounds, and do outputs stay inside EXP-085's quality rule?",
+  "answer": "About 0.8 ms per one-request round at every context and 1.9 ms per pair round, inside the rule. With exactly 8 and 16 columns of the query/key side on q4_small_t_mma_kernel through a split-store epilogue, the 64K trace shows the 64 projections at 823 us per round against 1,675 us (2,670 to 1,091 us in a pair). In an A/B/B/A against EXP-092's candidate, one-request rounds went 15.47 to 14.68 ms at short context (-5.1%), 17.10 to 16.35 at 32K (-4.4%), 18.56 to 17.74 at 64K (-4.4%) and 20.89 to 20.06 at 120K (-4.0%), and pair rounds 21.40 to 19.48 ms (-9.0%), aggregate 453.1 to 504.0 tok/s; the prediction was 0.8 ms and 1.3 ms. Against shipped v0.10.0, through EXP-092's candidate measured in both windows, rounds are 6.0% shorter at short context, 12.5%, 17.1% and 22.7% at 32K, 64K and 120K, and 16.4% in a pair. Outputs change: 33 of 89 role-corpus cases stayed byte-identical to shipped, and the corpus decoded 307.2 tok/s against shipped's 288.1; MTP3 at one request stayed 89/89 identical. Under EXP-085's rule unchanged, registered before its data, the 1,120-prompt screen changed 692 outputs against EXP-085's production run and passed: recall -0.23 points (lower bound -0.55 against -2), evidence precision -0.75 (-1.57 against -2), unsupported claims +0.30 (upper bound 1.79 against 3), redaction pass rate -0.40 (-1.98 against -5), secret leaks 561 to 583 (ratio 1.039, upper bound 1.090 against 1.10), schema, tool selection, tool arguments and duplicates unchanged, every validity check held. Against EXP-085's BF16 DFlash2 runs, the shipped profile's, it also passed. Together with EXP-092 the logged production traffic would have spent 8.8% less time decoding [inference].",
+  "decision": {
+    "action": "keep",
+    "rule": "Pre-registered before either window (PLAN.md) and in omp-ninfer 0082901 (scripts/quality_screen.py follow_on_candidates, 2026-10-03T20:14:09Z) before the screen's data. W3 gate to the screen: every GPU test passes, no request errors, and the one-request round at context 0 and the pair round each at least 3% shorter than exp092-b72daad6 (mean of the A/B/B/A legs) with no context step slower by more than 1%. W4: EXP-085's 1,120-prompt screen and 80-prompt determinism subset against EXP-085's production runs under EXP-085's rule unchanged (pass only when every one-sided 95% paired-bootstrap bound is inside its margin and every validity check holds); the verdict against EXP-085's BF16 DFlash2 runs is reported, not a gate. Keep only if the W3 gate holds and the W4 verdict is pass.",
+    "rule_outcome": {
+      "gpu_tests": "7/7 op tests and 3/3 DFlash2 real-model cases passed; the attention and GDN input-projection tests cover 8 and 16 columns against their FP64 oracles",
+      "request_errors": 0,
+      "context_0_round_ms": {"base": 15.47, "candidate": 14.68, "change": -0.051},
+      "pair_round_ms": {"base": 21.40, "candidate": 19.48, "change": -0.090},
+      "slowest_context_step_change": "none slower; 120K -0.040",
+      "screen_verdict": "pass, no primary metric outside, every validity check held",
+      "secondary_verdict_against_bf16_dflash2": "pass"
+    },
+    "reason": "The tensor-core route halves the projections' time, shortens every round by about the predicted amount, and the outputs it changes are no worse than shipped under the pre-registered powered screen.",
+    "not_decided_here": "Release. The candidate is a branch build (fork perf/qk-tensor-cores at a59c13d0, which carries EXP-092's changes); it reaches production only through a new runtime component and a requalified omp-ninfer release. The screen ran one request at a time, so pairs' changed outputs are covered by the op tests and the one-request screen, not by a pair screen.",
+    "next": "A candidate for the RTX 5090 that carries EXP-092 and EXP-094, qualified through the release lifecycle."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "windows": "The founder granted exclusive use of the appliance. Windows lane hold taken at about 19:38Z and released at about 21:42Z. Two detached driver runs on the appliance, each arming a dead-man restore, stopping production and restoring it healthy: W3 19:38:17-20:13:39Z (cand-window.sh EXP=exp094 CAND=a59c13d0 BASE_ARM=exp092-b72daad6); W4 20:14:35-21:40:55Z (exp094-screen.sh, derived from exp088-window.sh), screen 20:15:06-21:28:33Z, determinism 21:29:14-21:40:00Z. Production /health 200 after each.",
+    "pre_window_evidence": "A throwaway microbench on production headers (cold L2, median of 200 launches) timed the Q4 small-T tensor-core kernel against the production SIMT schedule: GDN 8 columns 29.92 to 15.62 us, 16 columns 42.24 to 23.62; attention 8 columns 38.14 to 19.74, 16 columns 62.75 to 27.90; outputs differed from SIMT in 9-29 of 32,768-114,688 values, each by one BF16 step",
+    "runtime": {
+      "base": "EXP-092's candidate, fork perf/dflash2-rounds at b72daad6 (arm exp092-b72daad6, server 0192f4cd)",
+      "candidate_source": "fork branch perf/qk-tensor-cores at a59c13d0: b72daad6 plus, on non-SM86/89 builds, the GDN independent input projection and the attention small-T input projection sending exactly 8 and 16 columns of the Q4 query/key side to q4_small_t_mma_kernel with a split-store epilogue (rows below the split to the query output, the rest to the key output, each with its own leading dimension). Widths 1-7 and 9-15, the Q5 sides, the native lanes and every other op keep their routes. MTP3 at one request (4 columns) is unchanged except through prefill pieces of exactly 8 or 16 tokens.",
+      "build": "v0.10.0's release recipe: nvidia/cuda:13.1.2-devel-ubuntu24.04, Release, CMAKE_CUDA_ARCHITECTURES=120a, appliance-local profile, clean clone, 256 s; ninfer and ninfer-serve wrapped into an arm image on the published base ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+      "server_binary_sha256": "884e5a436f30663cdd35a8a09fae9838a8120a76f1b631faec81757e148b273c",
+      "image": "ninfer-5090:a59c13d0-exp094 (sha256:659648624eff75f86b729825f9be6fb44fae78bf9869eaf44a0d23bf9e362b77)"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3"
+    },
+    "arms": {
+      "exp094-a59c13d0": "v0100-eaf221ac's arguments (DFlash2 K=7, BF16 KV, prefill chunk 1,024, 60 s keep-warm, two requests, two device state slots, durable store) with only --binary-sha256 changed",
+      "exp094-a59c13d0-mtp3": "v0100-eaf221ac-mtp3's arguments with only --binary-sha256 changed",
+      "exp092-b72daad6": "EXP-092's candidate, the A/B/B/A base"
+    },
+    "steps": {
+      "gpu_tests": "as in EXP-092: seven op tests (attn_input_proj and gdn_input_proj sample 1-9, 16 and 17 columns against FP64 oracles), softmax attention, and the DFlash2 real-model test at K=7 (DFlash2 greedy output equal to ordinary decoding) with the full and optimized head at maximum batch 1 and the full head at maximum batch 2",
+      "probe": "speculative_decode_probe.py (sha256 a16600f9) --contexts 0,32000,64000,120000 --continuation-context -1 --pair, legs exp092-b72daad6, candidate, candidate, exp092-b72daad6, each on a fresh process",
+      "role_corpus": "the frozen 89-case role corpus at reasoning low, concurrency 1, temperature 0, fresh process, compared with shipped v0.10.0's runs",
+      "trace": "candidate under Nsight Systems 2026.1.3, probe at 64K plus the pair, attributed per kernel against EXP-092's candidate trace",
+      "screen": "EXP-085's 1,120 prompts (84 counted cases x 8 whitespace variants, 7 redaction controls x 72; screen sha256 91f98153) on a fresh server, then the 80-prompt determinism subset on another; quality_screen.py sha256 bbe48dc5 (omp-ninfer 0082901) verdicts against exp085-screen/determinism-pub-v0614b1 (rule) and exp085-screen/determinism-spk5-df2k7-c2ds2 (reported)"
+    }
+  },
+  "observations": {
+    "a_b_b_a": {
+      "legs": ["exp092-b72daad6", "candidate", "candidate", "exp092-b72daad6"],
+      "ms_per_round": {
+        "context_0": [15.39, 14.67, 14.69, 15.54],
+        "context_32000": [17.04, 16.36, 16.33, 17.15],
+        "context_64000": [18.49, 17.71, 17.76, 18.62],
+        "context_120000": [20.88, 20.06, 20.05, 20.90],
+        "pair_request_1": [21.45, 19.45, 19.55, 21.39],
+        "pair_request_2": [21.36, 19.56, 19.37, 21.40]
+      },
+      "pair_aggregate_tok_s": [448.14, 501.96, 506.01, 457.97],
+      "means_ms": {"base": {"context_0": 15.47, "context_32000": 17.10, "context_64000": 18.56, "context_120000": 20.89, "pair": 21.40},
+                   "candidate": {"context_0": 14.68, "context_32000": 16.35, "context_64000": 17.74, "context_120000": 20.06, "pair": 19.48}},
+      "against_shipped_v0100_ms": {"shipped_from_exp092": {"context_0": 15.62, "context_32000": 18.68, "context_64000": 21.40, "context_120000": 25.95, "pair": 23.30},
+                                   "candidate": {"context_0": 14.68, "context_32000": 16.35, "context_64000": 17.74, "context_120000": 20.06, "pair": 19.48},
+                                   "bridge": "exp092-b72daad6 measured 15.49/17.17/18.54/20.91/21.42 ms in EXP-092's window and 15.47/17.10/18.56/20.89/21.40 ms in this one"}
+    },
+    "trace_us_per_round": {
+      "one_request_64k": {"round_wall": [18547, 17656], "query_key_projections": [1675, 823], "columns": ["exp092-b72daad6", "candidate"]},
+      "pair": {"round_wall": [21493, 19646], "query_key_projections": [2670, 1091], "columns": ["exp092-b72daad6", "candidate"]},
+      "query_key_bandwidth": "0.85 GB of Q4 weights per round in 823 us, about 1.0 TB/s against 0.5 before [inference from the weight shapes]"
+    },
+    "role_corpus": {
+      "dflash2": {"identical_to_shipped": "33/89", "decode_tok_s": [288.1, 307.2], "ms_per_round": [16.24, 15.12], "tokens_per_round": [4.679, 4.645], "completion_tokens": [81167, 78504], "columns": ["shipped", "candidate"]},
+      "mtp3": {"identical_to_shipped": "89/89", "decode_tok_s": [238.2, 238.1]}
+    },
+    "screen": {
+      "prompts": 1120,
+      "errors": 0,
+      "outputs_identical_to_production": "428/1120",
+      "pairs": {"gate": 671, "redaction": 504},
+      "primary_against_production": {
+        "required_fact_recall": {"production": 0.9377, "candidate": 0.9354, "difference": -0.0023, "lower_95": -0.0055, "margin": -0.02},
+        "evidence_precision": {"production": 0.9784, "candidate": 0.9708, "difference": -0.0075, "lower_95": -0.0157, "margin": -0.02},
+        "unsupported_claim_rate": {"production": 0.2429, "candidate": 0.2459, "difference": 0.0030, "upper_95": 0.0179, "margin": 0.03},
+        "schema_valid_rate": {"production": 1.0, "candidate": 1.0},
+        "tool_selection_accuracy": {"production": 1.0, "candidate": 1.0},
+        "tool_argument_accuracy": {"production": 1.0, "candidate": 1.0},
+        "duplicate_rate": {"production": 0.001, "candidate": 0.001, "upper_95": 0.0, "margin": 0.02},
+        "redaction_control_pass_rate": {"production": 0.5317, "candidate": 0.5278, "difference": -0.0040, "lower_95": -0.0198, "margin": -0.05},
+        "secret_leak_ratio": {"production_total": 561, "candidate_total": 583, "ratio": 1.0392, "upper_95": 1.0901, "margin": 1.10}
+      },
+      "secondary_against_production": {"critical_misses": [79, 81], "forbidden_claims": [68, 72], "mean_output_tokens": [958.0, 956.0]},
+      "validity": {"complete": true, "errors_within_bound": true, "variants_perturb_outputs": true, "deterministic": true, "evaluable": true},
+      "against_bf16_dflash2": {"verdict": "pass", "evidence_precision": {"production": 0.9742, "lower_95": -0.0115}, "unsupported_claim_rate": {"production": 0.234, "upper_95": 0.0268}, "secret_leak_ratio": {"upper_95": 1.0901}}
+    },
+    "real_traffic_estimate": "On the 55,050 rounds logged by v0.10.0's production (338 agent requests), a flat 0.79 ms per round removes 43.5 s of 938 s of decode (4.6%); with EXP-092's per-context saving, 82.5 s (8.8%), about +9.6% decode tok/s [inference]"
+  },
+  "limits": [
+    "Outputs change by construction; the powered screen ran one request at a time, so two requests' 16-column verify is covered by the op tests and by the kernel computing each 16-column pass's column as the 8-column pass computes it (independent n8 tiles, same k order and split-K reduction) [inference from the kernel, not tested bitwise], not by a pair screen.",
+    "The secret-leak upper bound (1.090) is 0.010 inside its 1.10 margin; FP8 KV's, which changed 924 of the screen's outputs (EXP-088), was 1.135.",
+    "One A/B/B/A cycle; legs of the same arm agreed within 0.15 ms. The comparison with shipped chains through EXP-092's candidate across two windows.",
+    "The real-traffic gain is modelled from the probes, not measured in production.",
+    "The candidate is a branch build, not a release candidate, and reaches production only through requalification."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

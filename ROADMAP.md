@@ -1318,8 +1318,11 @@ DFlash2 rounds 8-19% behind 32K-120K tokens and 8% in pairs with both role corpo
 and K=15 drafting does not pay
 ([EXP-092](docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json)). The next round cost,
 the SIMT query/key projections, has no faster byte-identical schedule
-([EXP-093](docs/measurements/2026-10-03-q4-query-key-schedules-rtx5090.json)) and moves to the
-tensor cores only through the powered screen.
+([EXP-093](docs/measurements/2026-10-03-q4-query-key-schedules-rtx5090.json)); on the tensor cores
+they take another 0.8 ms off every one-request round and 1.9 ms off a pair's, and the outputs
+they change pass the powered screen
+([EXP-094](docs/measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json)). Both await an
+RTX 5090 candidate.
 
 ## How to help right now
 
