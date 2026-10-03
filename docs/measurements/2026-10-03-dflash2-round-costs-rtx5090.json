@@ -1,0 +1,120 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-092",
+  "title": "DFlash2 round costs on the RTX 5090: one verify attention pass per layer and the pair's mixer outputs on the small-T tensor cores; one-request rounds 8-19% shorter behind 32K-120K tokens and pair rounds 8% shorter, both corpora byte-identical; kept by rule. K=15 drafting does not pay",
+  "generated_utc": "2026-10-03T19:30:00Z",
+  "status": "completed_with_limits",
+  "question": "v0.10.0 (runtime v0.6.15, source eaf221ac) decodes one request in DFlash2 K=7 rounds of 15.6 ms at short context, 21.4 ms at 64K and 26.0 ms at 120K tokens, and a pair of requests in 23.3 ms rounds. Where does the round go, which byte-preserving changes shorten it, and does a longer draft (K=15) pay?",
+  "answer": "Two measured losses had byte-preserving fixes. (B) Every 8-column verify (one request beyond 320 visible keys, and every pair) ran the 24-head BF16 small-T attention as two chunks of 6 and 2 columns, so each of the 16 attention layers read its whole KV cache twice per round: 32 partial launches took 5,735 us of a 21.3 ms 64K round. One launch per layer that runs both chunks' split partitions in one pass when they coincide, and the two old phases in sequence when they do not, reads it once: 2,959 us in 16 launches, with the reducer at 239 us in 16 launches against 324 us in 32. (A) In a pair the 64 K=6144 mixer-output LinearAdds ran 16 columns on an 80-CTA prompt GEMM at 53.6 us each, 3.43 ms per round; routed to the small-T tensor-core kernel that K=17408 already used at 16 columns, they take 22.1 us. In an A/B/B/A on the appliance one-request rounds went 15.62 to 15.49 ms at short context (-0.8%), 18.68 to 17.17 at 32K (-8.1%), 21.40 to 18.54 at 64K (-13.4%) and 25.95 to 20.91 at 120K (-19.4%), and pair rounds 23.28/23.32 to 21.47/21.36 ms (-7.8%/-8.4%), aggregate 424.2 to 454.3 tok/s: each within 0.3 ms of its source-arithmetic prediction. Both role corpora stayed 89/89 byte-identical to shipped v0.10.0; DFlash2 decoded 288.1 to 293.0 tok/s (16.24 to 15.97 ms rounds) and MTP3 238.2 and 238.1. K=15 does not pay: positions 8-15 are accepted in 20.5% down to 3.5% of rounds, but one request's 16-column verify takes 23.4 ms at short context and leaves the small-T attention route behind 32K (53-134 ms), so its role corpus decoded 188.5 tok/s against K=7's 288.1. Production traffic since v0.10.0 (338 agent requests) decoded one request at a time, 77% of its decode seconds below 16K tokens; at the measured per-context saving the change would have removed 4.2% of that decode time [inference].",
+  "decision": {
+    "action": "keep",
+    "rule": "Pre-registered before either window (PLAN.md): keep both changes only if every GPU test passes, including bitwise fused == chunked at every boundary case; the candidate DFlash2 role corpus is 89/89 byte-identical to shipped DFlash2 (v0100-v0100-eaf221ac-kw60000-bf16-c1024-df2k7) and the candidate MTP3 corpus 89/89 identical to shipped MTP3 (v0100-v0100-eaf221ac-mtp3-kw60000-bf16-c1024-mtp3); there are no request errors; and the one-request round at 64K and the pair round are each at least 5% shorter than shipped (mean of the A/B/B/A legs) with no context step slower by more than 1%. Reject a change whose own criterion fails and report the other. Predictions: pair round 23.1 to about 21.0 ms from A; one-request rounds -1.3/-2.6/-4.9 ms at 32K/64K/120K from B; short-context rounds unchanged within 1%.",
+    "rule_outcome": {
+      "gpu_tests": "7/7 op tests and 3/3 DFlash2 real-model cases passed; the causal attention test's 46 bitwise fused-versus-chunked cases had no mismatch",
+      "dflash2_corpus_identical_to_shipped": "89/89",
+      "mtp3_corpus_identical_to_shipped": "89/89",
+      "request_errors": 0,
+      "one_request_64k_round_ms": {"shipped": 21.40, "candidate": 18.54, "change": -0.134},
+      "pair_round_ms": {"shipped": 23.30, "candidate": 21.42, "change": -0.081},
+      "slowest_context_step_change": "none slower; short context -0.008",
+      "predicted_vs_observed_ms": {"32k": [-1.3, -1.51], "64k": [-2.6, -2.86], "120k": [-4.9, -5.04], "pair": [-2.1, -1.88]}
+    },
+    "reason": "Each change removes a measured duplicate cost, a second KV read per attention layer and a prompt GEMM inside the pair's verify, without moving an output byte on either corpus, and each met its pre-registered threshold at the predicted size.",
+    "not_decided_here": "Release. The candidate is a branch build (fork perf/dflash2-rounds at b72daad6); it reaches production only through a new runtime component and a requalified omp-ninfer release. The real-traffic gain is an estimate from the probe's per-context saving, not a production measurement. Change A alters pair outputs relative to shipped by construction, which the one-request corpora do not exercise.",
+    "next": "The Q4 query/key projections are now the largest gap to bandwidth in every round: 1.68 ms of a 64K one-request round at 28-31% of DRAM bandwidth, where the Q4 tensor-core kernels run at 83-87%. EXP-093 found no faster byte-identical schedule, so the next step is the Q4 small-T tensor-core route for those projections under EXP-085's powered quality screen."
+  },
+  "method": {
+    "appliance": "RTX 5090 (32,607 MiB), Windows 11, Docker Desktop, WSL2 Ubuntu 24.04; one arm at a time on 127.0.0.1:18099 with production stopped",
+    "windows": "The founder granted exclusive use of the appliance. Windows lane hold taken at 17:59Z and released at about 19:06Z. Four detached driver runs on the appliance, each arming a dead-man restore, stopping production and restoring it healthy: W1 shipped K=7 probe and trace 17:59:45-18:04:25Z; the K=15 arm at two requests 18:05:38-18:06:44Z (did not start); K=15 at one request 18:15:02-18:28:28Z; W2 candidate 18:28:49-19:04:56Z. Production /health 200 after each.",
+    "runtime": {
+      "shipped": "v0.10.0's runtime v0.6.15, source eaf221ac, image ninfer-5090:eaf221ac-package-local",
+      "candidate_source": "fork branch perf/dflash2-rounds at b72daad6: eaf221ac plus 3a2fadbd (A: on non-SM86/89 builds the K=6144 LinearAdd routes become 14-15 MmaR64C16, 16 Split2ExactResidual on q5_small_t_mma, 17-32 MmaR64C16) and b72daad6 (B: causal_attention_small_t_tc_fused_bf16_kernel for 24-head BF16 KV at widths 7-8; rows of columns 0-5 keep the split partition of window pos[5]+1 and rows of columns 6 and 7 keep pos[W-1]+1, one pass when both windows give the same split boundaries and the two old phases in sequence otherwise; the reducer takes each column's old window; keys of the call's own columns come from the input, the bytes the old second chunk read from cache; INT8, FP8 and NVFP4 KV and 16-head geometry keep their routes)",
+      "build": "v0.10.0's release recipe: nvidia/cuda:13.1.2-devel-ubuntu24.04, Release, CMAKE_CUDA_ARCHITECTURES=120a, appliance-local profile; ninfer and ninfer-serve wrapped into an arm image on the published base ghcr.io/alphastorm/ninfer@sha256:a19e00c5d7993d7c12341974bdc7e3d13e61d9deaf39e8ce00cf94abd6137712",
+      "server_binary_sha256": "0192f4cd2dbcddb2c266ff02b50f0c26169aae7680b8d48ec4bfc6582ec7e08f",
+      "image": "ninfer-5090:b72daad6-exp092 (sha256:5dee848d7e932bc8e9bb2da95eeae0b132a8d60f382b8f949d80b3474c2db8ad)"
+    },
+    "artifact": {
+      "file": "v2 qwen3_8_27b.ninfer, Hugging Face neroued/Qwen3.8-27B-NInfer revision dc370fb6",
+      "sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3"
+    },
+    "arms": {
+      "v0100-eaf221ac": "shipped v0.10.0 RTX 5090 profile: DFlash2 K=7, BF16 KV, prefill chunk 1,024, 60 s keep-warm, two requests, two device state slots, durable store",
+      "exp092-b72daad6": "v0100-eaf221ac's arguments with only --binary-sha256 changed to the candidate",
+      "exp092-b72daad6-mtp3": "v0100-eaf221ac-mtp3's arguments (MTP3 on the same binary) with only --binary-sha256 changed",
+      "exp092-k15": "shipped arguments with --draft-tokens 15 at one request and no checkpoint, configuration or profile flags; at two requests the server refused to start (minimum Engine runtime reservation requires 11,387,323,904 bytes)"
+    },
+    "steps": {
+      "gpu_tests": "in the build tree, ninfer-dflash2-spike-test:20260930 container: ninfer_linear_add_q5_a16_test (K=6144 route starts include 16 and 17), ninfer_attn_input_proj_test, ninfer_gdn_input_proj_test, ninfer_gdn_input_proj_conv_record_test, ninfer_gdn_input_proj_conv_snapshot_test, ninfer_kv_cache_append_test, ninfer_softmax_attention_test --causal-only (46 cases comparing the fused launch bitwise with the two-chunk public calls: widths 7 and 8, tier and split-capacity straddles, single-pass windows, masked lanes, pairs and fragmented, identity and offset mappings), and the DFlash2 real-model test at K=7: full and optimized head at maximum batch 1, full head at maximum batch 2",
+      "probe": "speculative_decode_probe.py (sha256 a16600f9) --contexts 0,32000,64000,120000 --continuation-context -1 --pair, A/B/B/A legs shipped, candidate, candidate, shipped, each on a fresh process; every probe prompt starts with a fresh nonce",
+      "role_corpus": "the frozen 89-case role corpus, run_qualification.py at reasoning low, concurrency 1, temperature 0, fresh process, compared case by case with shipped v0.10.0's qualification runs",
+      "trace": "candidate under Nsight Systems 2026.1.3 with the probe at 64K plus the pair (--max-tokens 512), attributed per kernel against W1's shipped trace of the same probe",
+      "production_log": "requests-v0100p-20261002T204319Z.jsonl, 353 requests 2026-10-02T20:44Z to 2026-10-03T10:48Z; the 15 requests without tools were probe traffic (among them three cold 102.5K-token and three cold 32.9K-token roots at 08:52-08:55Z) and are excluded"
+    }
+  },
+  "observations": {
+    "production_traffic": {
+      "agent_requests": 338,
+      "wall_share": {"decode": 0.846, "prefill": 0.149, "queue": 0.002},
+      "decode_tok_s": 243.5,
+      "tokens_per_round": 4.148,
+      "ms_per_round": 17.03,
+      "accepted_per_position_per_round": [0.829, 0.648, 0.506, 0.393, 0.312, 0.252, 0.208],
+      "decode_seconds_overlapped_by_another_request": 0.0,
+      "decode_by_context": {"0-16K": {"decode_s": 720, "ms_per_round": 16.66}, "16-32K": {"decode_s": 177, "ms_per_round": 18.13}, "32K+": {"decode_s": 40, "ms_per_round": 19.48}},
+      "prefill": "320,912 of 3,855,336 prompt tokens computed (8.3%); 302 private-response replays computed a median 584 tokens; TTFT median 0.369 s, p90 0.891 s"
+    },
+    "shipped_round_64k_one_request_us": {
+      "round_wall": 21327,
+      "idle_gaps": 343,
+      "causal_attention_small_t_tc_partial_bf16 (32)": 5735,
+      "q5_small_t_mma (192: mixer out, MLP down, GDN value/z, attention gate/value)": 5450,
+      "q4_small_t_mma (65: MLP gate/up, draft head)": 4302,
+      "w8_small_t_mma (22: LM head, drafter)": 1965,
+      "q4_rowsplit_gemm_simt (64: GDN and attention query/key)": 1636,
+      "everything_else": 1897
+    },
+    "k15_one_request": {
+      "accepted_per_position_per_round": [0.83, 0.661, 0.52, 0.424, 0.341, 0.284, 0.241, 0.205, 0.172, 0.143, 0.115, 0.09, 0.07, 0.051, 0.035],
+      "role_corpus": {"decode_tok_s": 188.5, "ms_per_round": 27.49, "tokens_per_round": 5.182, "k7_decode_tok_s": 288.1, "k7_ms_per_round": 16.24, "k7_tokens_per_round": 4.679, "outputs_identical_to_shipped": "37/89"},
+      "probe_ms_per_round": {"context_0": 23.44, "context_32000": 53.02, "context_64000": 82.62, "context_120000": 133.54},
+      "k7_probe_ms_per_round": {"context_0": 15.65, "context_32000": 18.72, "context_64000": 21.42, "context_120000": 25.97}
+    },
+    "a_b_b_a": {
+      "legs": ["shipped abba1", "candidate abba2", "candidate abba3", "shipped abba4"],
+      "ms_per_round": {
+        "context_0": [15.55, 15.49, 15.50, 15.68],
+        "context_32000": [18.61, 17.14, 17.21, 18.75],
+        "context_64000": [21.33, 18.53, 18.55, 21.47],
+        "context_120000": [25.88, 20.89, 20.93, 26.02],
+        "pair_request_1": [23.27, 21.42, 21.52, 23.29],
+        "pair_request_2": [23.29, 21.26, 21.46, 23.35]
+      },
+      "pair_aggregate_tok_s": [422.75, 457.97, 450.53, 425.67],
+      "means": {
+        "shipped_ms": {"context_0": 15.62, "context_32000": 18.68, "context_64000": 21.40, "context_120000": 25.95, "pair": 23.30},
+        "candidate_ms": {"context_0": 15.49, "context_32000": 17.17, "context_64000": 18.54, "context_120000": 20.91, "pair": 21.42}
+      },
+      "kv_capacity_tokens": 131520
+    },
+    "role_corpus": {
+      "dflash2": {"identity": "89/89", "decode_tok_s": [288.1, 293.0], "ms_per_round": [16.24, 15.97], "tokens_per_round": [4.679, 4.679], "prefill_tok_s": [3044, 3024], "columns": ["shipped", "candidate"]},
+      "mtp3": {"identity": "89/89", "decode_tok_s": [238.2, 238.1], "ms_per_round": [14.03, 14.04], "tokens_per_round": [3.342, 3.342], "columns": ["shipped", "candidate"]}
+    },
+    "candidate_trace_us_per_round": {
+      "one_request_64k": {"round_wall": [21327, 18547], "launches": [919, 887], "attention_partial": [5735, 2959], "attention_reduce": [324, 239], "columns": ["shipped", "candidate"]},
+      "pair": {"round_wall": [23425, 21493], "launches": [871, 839], "mixer_out_q5_rowsplit_gemm_mma": [3434, 0], "q5_small_t_mma": [6077, 7490], "attention_partial": [506, 301], "columns": ["shipped", "candidate"]},
+      "kv_bandwidth_64k": "about 4.2 GB of BF16 KV per round in 2,959 us, about 1.4 TB/s against the card's 1.79 TB/s [inference from 4,096 bytes per token per layer]"
+    },
+    "real_traffic_estimate": "Applying the probe's per-context saving (0.13 ms + 0.0427 ms per 1,000 visible tokens, which reproduces the corpus's measured 0.27 ms) to the 55,050 logged rounds removes 39 s of 938 s of decode (4.2%), about +4.3% decode tok/s [inference]"
+  },
+  "limits": [
+    "Probe outputs cannot be compared across runs because every prompt starts with a fresh nonce, so output identity rests on the two 89-case corpora and the 46 bitwise op cases.",
+    "Change A alters bits for 16 columns at K=6144, which is two requests' verify and prefill pieces of exactly 16 tokens: pair outputs differ from shipped by construction (each paired column is computed as in an 8-column pass), and the one-request corpora do not exercise pairs.",
+    "One A/B/B/A cycle; legs of the same arm agreed within 0.14 ms (shipped) and 0.20 ms (candidate).",
+    "The real-traffic gain is modelled from the probe, not measured in production.",
+    "The candidate is a branch build of the fork, not a release candidate, and reaches production only through requalification.",
+    "K=15 ran at one request only; at two requests its runtime reservation did not fit, so it measured drafting yield, not a profile."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

@@ -1312,7 +1312,14 @@ reuse across a restart
 ([EXP-086](docs/measurements/2026-10-01-dflash2-pre-acceptance-probes-rtx5090.json)); the
 candidate's qualification window measures both. The RTX 4090 and RTX 3090 stay on MTP3: the port
 does not link for their architectures and would not fit 131,072 tokens in 24 GB
-([EXP-089](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)).
+([EXP-089](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)). After v0.10.0,
+one verify attention pass per layer and the pair's mixer outputs on the tensor cores shorten
+DFlash2 rounds 8-19% behind 32K-120K tokens and 8% in pairs with both role corpora byte-identical,
+and K=15 drafting does not pay
+([EXP-092](docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json)). The next round cost,
+the SIMT query/key projections, has no faster byte-identical schedule
+([EXP-093](docs/measurements/2026-10-03-q4-query-key-schedules-rtx5090.json)) and moves to the
+tensor cores only through the powered screen.
 
 ## How to help right now
 

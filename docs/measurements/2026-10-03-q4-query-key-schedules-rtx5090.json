@@ -1,0 +1,51 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-093",
+  "title": "Byte-identical Q4 query/key schedules at DFlash2 verify widths on the RTX 5090: every candidate matches production bit for bit and none is faster; the remaining fix changes outputs",
+  "generated_utc": "2026-10-03T19:40:00Z",
+  "status": "completed_with_limits",
+  "question": "After EXP-092 the Q4 query/key projections take 1.68 ms of a one-request DFlash2 round (48 GDN layers at 22.6 us, 16 attention layers at 34.6 us in the 64K trace) at 28-31% of DRAM bandwidth, on the staged SIMT kernel with eight rows per CTA and eight columns per tile. Is there a faster schedule that keeps every output bit?",
+  "answer": "No. Each lane of the staged kernel owns K values [256p + 8L, +8) of every 256-wide phase p and accumulates them in (phase, column) order before one warp reduction per output; EXP-055's direct rows kernel keeps the same ownership. Every candidate below was bitwise-equal to production at 8 and 16 columns on both geometries, as that ownership predicts, and none was faster by more than one timer step. The rows kernel's launch bounds cap it at 64 registers, where 8 and 16 columns spill: 14-59% slower at one or two rows per warp and 8 columns, 77-126% at 16. Fifteen schedules of the staged kernel (rows per CTA 2, 4 or 8; groups per stage 8 or 16; 2-4 pipeline stages; cached or L2-only code loads; minimum blocks 1-8) matched production within -3.3% to +10.7%, except two register caps for more resident CTAs, which spilled and ran 33-55% slower. The fix that remains is the Q4 small-T tensor-core route, which reorders each output's accumulation and therefore needs EXP-085's powered quality screen.",
+  "decision": {
+    "action": "reject",
+    "rule": "Not pre-registered: an exploratory microbench, run before any window, to learn whether a byte-identical route exists. A schedule worth a window had to be bitwise-equal to production at both widths and geometries and clearly faster, by more than the timer step, at 8 columns on both geometries.",
+    "rule_outcome": {
+      "bitwise_equal": "18/18 candidates at 8 and 16 columns, GDN and attention geometries",
+      "best_change_8_columns": {"gdn": "0.0%", "attention": "-0.1%"},
+      "best_change_16_columns": {"gdn": "-0.1%", "attention": "-3.3%"}
+    },
+    "reason": "No byte-identical schedule moves the projection; its cost lies in the per-lane SIMT arithmetic at 8-16 columns, not in staging, pipeline depth or CTA shape.",
+    "next": "Route the GDN and attention query/key projections at 8 and 16 columns to the Q4 small-T tensor-core kernel, which runs the MLP gate/up at 83% and the draft head at 87% of DRAM bandwidth; expect about 1 ms off every one-request round [inference], then run EXP-085's pre-registered powered screen against shipped before any adoption."
+  },
+  "method": {
+    "appliance": "RTX 5090, WSL2 Ubuntu 24.04; production engine loaded and idle on the same GPU (no traffic during exclusive use)",
+    "bench": "throwaway CUDA program, not committed: production headers from fork b72daad6 (q4_rowsplit_gemm_simt.cuh unchanged), built in nvidia/cuda:13.1.2-devel-ubuntu24.04 with nvcc -O3 -arch=sm_120a; random Q4 codes, FP16 group scales uniform in [-0.02, 0.02], BF16 activations N(0,1), seed 5090093",
+    "geometries": "GDN query/key: 4,096 rows, one output; attention query/key: 7,168 rows split at 6,144 into two outputs; K=5120; 8 and 16 columns, the one-request and two-request DFlash2 K=7 verify widths",
+    "timing": "256 MiB device memset before every launch to evict L2, median of 200 launches after 3 warmups, cudaEvent around the launch",
+    "identity": "outputs poisoned with 0xFF before each candidate's first launch and compared as raw BF16 bits with the production schedule's"
+  },
+  "observations": {
+    "production_schedule_us": {"gdn_8": 29.92, "gdn_16": 42.24, "attention_8": 38.18, "attention_16": 62.75},
+    "production_schedule_gb_s": {"gdn_8": 372, "gdn_16": 264, "attention_8": 511, "attention_16": 311},
+    "rows_kernel_change": {
+      "registers": "64 (launch bounds 128 threads, 8 blocks); spills of 60-352 bytes at 8 columns and 224-1,808 bytes at 16 for one or two rows per warp, more at four",
+      "gdn_8": {"r1": "+13.7%", "r2": "+47.9%", "r4": "+259.9%"},
+      "gdn_16": {"r1": "+77.3%", "r2": "+125.9%", "r4": "+300.5%"},
+      "attention_8": {"r1": "+48.3%", "r2": "+58.6%", "r4": "+370.4%"},
+      "attention_16": {"r1": "+98.8%", "r2": "+104.5%", "r4": "+352.6%"}
+    },
+    "staged_schedule_change": {
+      "production": "R8 G16 S2 ca, minimum blocks 1, 127 registers, no spill",
+      "range_without_spill": "-3.3% (attention, 16 columns, R4 G16 S2 ca or R4 G16 S3 cg, minimum blocks 4) to +10.7% (attention, 8 columns, R8 G16 S4 ca)",
+      "register_capped": "R8 G16 S3 ca at minimum blocks 3 and R4 G16 S3 ca at minimum blocks 6 spill (68 bytes stored, 48 loaded) and run 33-55% slower"
+    }
+  },
+  "limits": [
+    "Medians fall on a grid of about 2 us (several different schedules gave identical medians to 0.01 us), so differences under about 5% at 8 columns are not resolved.",
+    "Cold single launches run slower than the same kernels inside the CUDA graph (29.9 against 22.6 us for GDN, 38.2 against 34.6 us for attention), so the ratios, not the absolute times, carry over.",
+    "Only the query/key half of each input projection was timed; the Q5 value/z and gate/value halves already run on the tensor cores.",
+    "Register caps were sampled at two points, not swept."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
