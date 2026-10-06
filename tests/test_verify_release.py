@@ -494,7 +494,9 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertTrue(all("documented-route requalification pending" in item for item in warnings))
         for mode in ("require_ready", "require_installable"):
             with self.subTest(mode=mode):
-                _, errors = VERIFY_RELEASE.validate(root, **{mode: True})
+                _, errors = VERIFY_RELEASE.validate(
+                    root, require_ready=mode == "require_ready",
+                    require_installable=mode == "require_installable")
                 self.assertEqual(len(errors), 2, errors)
                 self.assertTrue(all("unqualified client candidate" in item for item in errors))
 

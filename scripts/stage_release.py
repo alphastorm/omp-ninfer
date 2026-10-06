@@ -512,7 +512,9 @@ def main() -> int:
         else:
             marker = "UNEXPECTED"
         print(f"  [{marker}] {error}")
-    if args.require_clean_client and (leftovers or report.get("warnings")):
+    if args.require_clean_client and (leftovers or any(
+            warning.startswith(f"releases/{args.release}/")
+            for warning in report.get("warnings", []))):
         print("--require-clean-client: staged draft retains predecessor client pins", file=sys.stderr)
         return 1
     if unexpected:

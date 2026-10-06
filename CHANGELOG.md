@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#13689](https://github.com/can1357/oh-my-pi/pull/13689)); no additional configuration is needed.
 - Validate candidate profile identities locally without attributing v0.10.0's qualification to
   the new client. Readiness and installability checks reject the candidate pending requalification.
+  Staging's predecessor-pin check distinguishes those pins from a current-profile candidate warning.
 
 ## [0.10.0] - 2026-10-02
 
