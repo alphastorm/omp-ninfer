@@ -2,7 +2,7 @@
 # Merge into ~/.omp/agent/models.yml (do not overwrite existing providers). Each lane stays
 # loopback-only on its own machine and is reached through an authenticated SSH local forward
 # (examples/fleet/open-tunnels.sh). Model ids are the lanes' exact published ids; provider names
-# identify each lane's role, not a capability claim. Before launching OMP: export PI_OPENAI_STATEFUL=1
+# identify each lane's role, not a capability claim. Each model opts into stateful Responses.
 #
 #   ninfer-main/q38-ninfer    RTX 5090 container, v0.4.8 profile: the interactive lead session.
 #                            Durable checkpoints, template-fork fanout, 131,072 context.
@@ -41,7 +41,7 @@ providers:
         compat:
           includeEncryptedReasoning: false
           supportsReasoningSummary: false
-          supportsImageDetailOriginal: false
+          statefulResponses: true
   ninfer-heavy:
     baseUrl: http://127.0.0.1:18192/v1
     api: openai-responses
@@ -64,3 +64,4 @@ providers:
         compat:
           includeEncryptedReasoning: false
           supportsReasoningSummary: false
+          statefulResponses: true

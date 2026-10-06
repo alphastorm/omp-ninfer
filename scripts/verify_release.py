@@ -1321,8 +1321,16 @@ def validate_profile_contract(
             f"{label}: OMP provider must use the local loopback endpoint", errors)
     require(omp_provider.get("request_model_id") == public_model_id,
             f"{label}: OMP provider request model must match the manifest", errors)
-    if upstream_client:
-        # Stock OMP chains Responses turns only when its environment sets PI_OPENAI_STATEFUL=1; the
+    if profile.get("status") == "candidate":
+        compat = omp_provider.get("compat", {})
+        require(upstream_client and isinstance(compat, dict)
+                and compat.get("statefulResponses") is True
+                and "stateful_responses_environment" not in omp_provider
+                and "ninfer_stateful_responses" not in omp_provider,
+                f"{label}: client candidate must enable per-model compat.statefulResponses, "
+                "not a global environment or fork flag", errors)
+    elif upstream_client:
+        # Historical stock clients chain Responses turns via PI_OPENAI_STATEFUL=1; the
         # fork's ninferStatefulResponses compat flag does not exist upstream and does nothing there.
         require(omp_provider.get("stateful_responses_environment") == {"PI_OPENAI_STATEFUL": "1"}
                 and "ninfer_stateful_responses" not in omp_provider,
@@ -1523,6 +1531,21 @@ def validate(
     archive_keys = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
     for label, candidate in profiles:
         client = candidate.get("client")
+        if candidate.get("status") == "candidate":
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}.get(
+                            candidate.get("installation_mode"))
+            try:
+                validate_client_distribution(client or {}, f"{label} client", platform or "")
+                require((client or {}).get("distribution_kind") == "upstream-release",
+                        f"{label}: client candidate must pin an upstream release", errors)
+            except (ValueError, AttributeError) as error:
+                errors.append(str(error))
+            message = f"{label}: unqualified client candidate; documented-route requalification pending"
+            require(not (require_ready or require_installable), message, errors)
+            if warnings is not None:
+                warnings.append(message + "; published manifest acceptance is unchanged")
+            continue
         if not isinstance(client, dict) or not any(key in client for key in archive_keys):
             continue
         require((client.get("component_release_tag") == omp.get("component_release_tag")

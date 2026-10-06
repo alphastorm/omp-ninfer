@@ -1,6 +1,24 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-02 · **Current release: v0.10.0; all five documented routes accepted.**
+Updated: 2026-10-06 · **Published release: v0.10.0; OMP 18.6.3 client candidate is unreleased.**
+
+## Current client candidate — OMP 18.6.3
+
+Current install fragments and root profiles target unmodified upstream OMP **18.6.3**, source
+`093275112f7adff207608673c0e33c7f3d16e27f`. The profiles' `release: v0.10.0` names their unchanged
+runtime baseline, not a published 18.6.3 product. Their `status: candidate` means **unqualified**.
+GPU-host requalification and fresh acceptance remain pending for the RTX 5090 container host,
+macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows routes.
+No GPU-host runs, new qualification receipts, tags or publication are part of this client repin.
+
+NInfer models use `compat.statefulResponses: true`, replacing the global `PI_OPENAI_STATEFUL=1`
+requirement (upstream [#13686](https://github.com/can1357/oh-my-pi/pull/13686)). Custom Responses
+hosts now default to auto image detail, so RTX 5090 fragments no longer override
+`supportsImageDetailOriginal` ([#13687](https://github.com/can1357/oh-my-pi/pull/13687)).
+Unavailable saved models fail closed upstream ([#13689](https://github.com/can1357/oh-my-pi/pull/13689));
+no additional config is needed. Compaction settings are unchanged.
+
+## Published baseline — v0.10.0
 
 The [v0.10.0 manifest](../releases/v0.10.0/manifest.json) binds the stock-client runtime on
 three eligible GPU routes with unmodified upstream OMP 18.4.10. Fresh client and route acceptance

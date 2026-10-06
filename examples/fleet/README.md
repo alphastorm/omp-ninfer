@@ -13,7 +13,9 @@ The RTX 3090 scout role stays deferred: v0.10.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-Install unmodified upstream OMP 18.4.10 with the checksummed binary from the
+The current fragments target **unreleased candidate OMP 18.6.3**; GPU-host and documented-route
+requalification are pending. No fresh fleet qualification is claimed. For a qualified install,
+use the immutable v0.10.0 guide and fragments. The candidate uses the checksummed binary from the
 [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
 `models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not
@@ -21,15 +23,13 @@ OMP configuration. Fill their `<...>` placeholders from your own deployment. The
 image digest, and receipt for every lane live in the current release manifest; install lanes only
 from those pinned identities.
 
-In every shell that launches OMP:
-
-```sh
-export PI_OPENAI_STATEFUL=1
-```
+Each model in the candidate fragment sets `compat.statefulResponses: true`. Remove the old
+`PI_OPENAI_STATEFUL` export from launch scripts and shell profiles, and unset it in the launching
+shell; an inherited environment value still overrides per-model compatibility.
 
 Stock OMP names each session with `prompt_cache_key`; with API authentication configured, the
 server hashes that key into the session identity without storing the raw key, enabling automatic
-checkpoints and restore. `PI_OPENAI_STATEFUL=1` chains turns with `previous_response_id`. The
+checkpoints and restore. Per-model `compat.statefulResponses` chains turns with `previous_response_id`. The
 fragment disables encrypted reasoning and reasoning summaries because the server refuses fields
 it does not implement. Its thinking efforts match the template's `low`, `medium`, and `xhigh`
 levels (`off` clamps to `low`, `high` to `medium`). Launch the lead with

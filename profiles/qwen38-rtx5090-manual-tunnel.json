@@ -2,12 +2,23 @@
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
   "release": "v0.10.0",
-  "status": "public",
+  "status": "candidate",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
     "os": "macOS",
     "architecture": "arm64",
-    "asset_name": "omp-darwin-arm64"
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.6.3",
+    "upstream_commit": "093275112f7adff207608673c0e33c7f3d16e27f",
+    "published": true,
+    "release_id": 404725465,
+    "asset_id": 615568034,
+    "asset_name": "omp-darwin-arm64",
+    "asset_bytes": 208923376,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64",
+    "asset_sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4",
+    "binary_sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
   },
   "runtime_host": {
     "os": [
@@ -119,8 +130,8 @@
     "maximum_output_tokens": 32768,
     "include_encrypted_reasoning": false,
     "supports_reasoning_summary": false,
-    "stateful_responses_environment": {
-      "PI_OPENAI_STATEFUL": "1"
+    "compat": {
+      "statefulResponses": true
     },
     "cost": {
       "input": 0,

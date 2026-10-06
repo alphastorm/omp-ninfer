@@ -25,3 +25,4 @@ providers:
         compat:
           includeEncryptedReasoning: false
           supportsReasoningSummary: false
+          statefulResponses: true

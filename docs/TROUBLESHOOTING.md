@@ -244,6 +244,11 @@ that OMP did not block images in another config overlay.
 
 ## A long RTX 5090 session fails when OMP compacts it
 
+The unreleased OMP 18.6.3 candidate defaults custom/local Responses hosts to auto image detail
+([upstream #13687](https://github.com/can1357/oh-my-pi/pull/13687)); its current fragments need
+no `supportsImageDetailOriginal` override. GPU-host requalification is still pending. The
+workaround below applies only to the older published clients, including v0.10.0 / OMP 18.4.10.
+
 OMP compacts a 131,072-token session on its own at about 111,412 tokens. For a model that
 accepts images, its first method archives earlier turns as images and asks for native resolution,
 and NInfer refuses the request:

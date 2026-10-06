@@ -45,10 +45,9 @@ class FleetExampleTests(unittest.TestCase):
                     "        compat:\n          includeEncryptedReasoning: false\n          supportsReasoningSummary: false\n",
                     body,
                 )
-                # NInfer serves only `detail: "auto"` images; see test_manual_tunnel_scripts.
-                self.assertEqual(
-                    "          supportsImageDetailOriginal: false\n" in body, image_input,
-                )
+                # Unknown Responses hosts already default to auto image detail in OMP 18.6.3.
+                self.assertNotIn("supportsImageDetailOriginal", body)
+                self.assertIn("          statefulResponses: true\n", body)
                 self.assertEqual("          - image\n" in body, image_input)
         for forbidden in ("requestModelId", "ninferStatefulResponses"):
             self.assertNotIn(forbidden, fragment)

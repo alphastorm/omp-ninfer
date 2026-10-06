@@ -6,6 +6,14 @@ is the inference engine, and [Oh My Pi](https://github.com/can1357/oh-my-pi) is 
 agent. This project packages their integration, explicit continuation, and durable checkpoints
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
+> [!WARNING]
+> **Unreleased client candidate: upstream OMP 18.6.3.** The current install fragments and
+> profiles target this client; GPU-host and all five documented-route requalifications are
+> pending. This combination is not yet published or qualified. The v0.10.0 release and its
+> OMP 18.4.10 receipts below remain the published baseline. For a qualified install, use the
+> [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
+> not these candidate fragments.
+
 > **Before installing — v0.10.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
 > - **RTX 4090:** documented native Windows 11 route.
@@ -762,13 +770,18 @@ machine and profile, not universal GPU claims.
 
 ## Get started
 
-For v0.10.0, choose the RTX 5090 Windows 11 + Docker Desktop/WSL2 container route or an
-RTX 4090 or RTX 3090 native Windows 11 route. Each needs the checksummed upstream OMP 18.4.10 binary, the
-exact runtime and model, and about 40 GiB free disk; the guide lists the lane-specific memory
-floors. Install the documented provider fragment and export `PI_OPENAI_STATEFUL=1` in every shell
-that launches OMP. Read the [v0.10.0 guide](docs/QUICKSTART.md) with its
-[manifest](releases/v0.10.0/manifest.json), then follow its release verification and acceptance
-steps. Do not mix client and runtime authorities from different releases.
+The [current guide](docs/QUICKSTART.md) targets checksummed, unmodified upstream **OMP 18.6.3**
+as an **unreleased candidate** on the existing RTX 5090 container, RTX 4090 native Windows and
+RTX 3090 native Windows runtime lanes. GPU-host requalification and fresh acceptance for all
+five documented routes are pending; no new qualification result or published product is claimed.
+The runtime and model pins remain the [v0.10.0 baseline](releases/v0.10.0/manifest.json).
+
+Each NInfer model now sets `compat.statefulResponses: true` in its provider fragment. Remove
+the old process-wide `PI_OPENAI_STATEFUL` setting and the RTX 5090 image-detail override;
+OMP 18.6.3 defaults custom Responses endpoints to `detail: "auto"`. See the guide's
+[candidate migration](docs/QUICKSTART.md#omp-1863-client-candidate) before changing a client.
+Leave compaction settings unchanged. Normal local validation checks the candidate's static
+contract; readiness and installability gates refuse it until route requalification is recorded.
 
 Do not bypass the ready gate. The separately preserved
 [v0.7.2 quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) and
@@ -777,7 +790,7 @@ remain the historical three-GPU / OMP 18.0.9 route, including RTX 3090. They do 
 RTX 3090 with OMP 18.4.10, and their sessions do not carry over to v0.10.0.
 
 The candidate [RTX 3090 native route](docs/QUICKSTART.md#native-windows-rtx-3090-release-lane)
-uses `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`) with stock OMP 18.4.10: one request
+targets `v0.6.2-qwen38-3090-beta.1` (package `da1d62f2`) with candidate stock OMP 18.6.3: one request
 at a time, a 300 W cap, and text/tools only. RTX 5090 serves two requests and provides vision;
 RTX 4090 stays at one request. Standalone RTX 3090 qualification does not activate its
 deferred fleet scout role.
@@ -868,7 +881,10 @@ after the documented acceptance checks pass. Planned measurements we want next a
 Docs, release tooling, and profile contracts belong here; engine work belongs in the runtime
 repositories. The complete routing and evidence rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The v0.10.0 client is the unmodified upstream
+The unreleased client candidate is unmodified upstream
+[Oh My Pi v18.6.3](https://github.com/can1357/oh-my-pi/releases/tag/v18.6.3), source
+`093275112f7adff207608673c0e33c7f3d16e27f`; its GPU-host requalification is pending.
+The published v0.10.0 client remains the unmodified upstream
 [Oh My Pi v18.4.10 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.10), checked
 against its SHA-256. This product no longer builds or publishes an OMP client. The
 [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi) fork and

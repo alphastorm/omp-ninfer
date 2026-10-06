@@ -1,16 +1,58 @@
 # Quickstart
 
-> **v0.10.0: RTX 5090 · RTX 4090 · RTX 3090; DFlash2 on the RTX 5090**
+> **Unreleased OMP 18.6.3 client candidate · v0.10.0 runtime baseline**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **v0.10.0 passed all five documented routes on the published components.**
-> The scope is RTX 5090 container host, macOS client, Windows client, RTX 4090 native
-> Windows and RTX 3090 native Windows.
-> The commands below require the published v0.10.0 release and its readiness check.
-> Do not bypass `--require-ready` or mix one release's manifest with another
-> release's commands. See [route acceptance](#v0100-route-acceptance) for results and receipts.
+> **The current routes target stock OMP 18.6.3 as an unqualified candidate.** GPU-host
+> requalification is pending; this combination is not yet published. The commands below
+> describe the candidate client contract, not a newly accepted release. `--require-ready`
+> and `--require-installable` intentionally refuse the candidate profiles: do not bypass them.
+> For a qualified install use the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> with its OMP 18.4.10 client and fragments. Its [acceptance](#v0100-route-acceptance) remains historical baseline evidence.
+
+## OMP 18.6.3 client candidate
+
+The client is the unmodified upstream v18.6.3 release, source
+`093275112f7adff207608673c0e33c7f3d16e27f`. The runtime packages, model artifacts,
+deployment profiles and concurrency limits remain the v0.10.0 baseline. Root profiles mark
+this new client combination `status: candidate`; their `release` field still names that runtime
+baseline. The published compatibility authority and release records have not been rebound.
+
+Migration from the published client consists of replacing the checksummed client binary and
+merging these current model fragments:
+
+- Set `statefulResponses: true` under **each NInfer model's `compat`**, in
+  `providers.<provider>.models[].compat` in `~/.omp/agent/models.yml`. Upstream
+  [#13686](https://github.com/can1357/oh-my-pi/pull/13686) supplies this stock setting.
+- Remove `PI_OPENAI_STATEFUL` from launch scripts, shell profiles and service environments.
+  Clear an inherited value with `unset PI_OPENAI_STATEFUL` (POSIX) or
+  `Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue` (PowerShell). The variable
+  still takes precedence over per-model compat, so an inherited `0` would disable chaining.
+- Remove the RTX 5090 `compat.supportsImageDetailOriginal: false` override. Upstream
+  [#13687](https://github.com/can1357/oh-my-pi/pull/13687) defaults custom Responses endpoints
+  to `detail: "auto"`, including replayed history.
+- Keep fail-closed retry/fallback and compaction settings unchanged. Upstream
+  [#13689](https://github.com/can1357/oh-my-pi/pull/13689) refuses an unavailable saved model
+  on resume without another config setting.
+
+Normal `python3 scripts/verify_release.py` checks the static candidate profiles and preserved
+runtime manifest; it does **not** qualify the new client. Before a new product release, rerun
+GPU-host requalification and the documented acceptance separately for every route:
+
+| Documented route | Fresh 18.6.3 acceptance |
+| --- | --- |
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 container host | Pending; runtime identity and host route |
+| macOS arm64 client over manual SSH tunnel | Pending; all client steps, continuation and fail-closed checks; remains preview |
+| Windows x64 client over RTX 5090 local loopback | Pending; all client steps, continuation and fail-closed checks |
+| RTX 4090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
+| RTX 3090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
+
+Bind fresh client-platform and route receipts, the 18.6.3 binary pins and the updated fragments
+in the next product manifest before readiness, a tag or publication. No GPU-host run or fresh
+qualification result is claimed here. A v0.10.0 clone in the baseline setup blocks below gets
+the old published fragments, not this candidate; never combine those two checkout authorities.
 
 ## Choose your lane
 
@@ -19,15 +61,15 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **v0.10.0 accepted** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **v0.10.0 accepted** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **v0.10.0 accepted** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **18.6.3 candidate; requalification pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **18.6.3 candidate; requalification pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **18.6.3 candidate; requalification pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 The RTX 3090's earlier
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
 with the v0.7.2 manifest and OMP 18.0.9 remain a separate historical route on the durable v0.2
-lineage. Do not combine them with v0.10.0 or OMP 18.4.10.
+lineage. Do not combine them with v0.10.0 or the OMP 18.6.3 candidate.
 
 The current native lane is installable only through its exact qualified manifest variant. Do not
 substitute GPU family names, package URLs, component tags, or variant IDs between releases.
@@ -87,13 +129,14 @@ continuation and a fail-closed request against the RTX 5090 image
 ([composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json)).
 Linux ran under WSL2, not a separately qualified Linux OS.
 
-## Verify the release before setup
+## Published runtime baseline and candidate client pin
 
 The `v0.10.0` release composes native Windows OMP over authenticated local loopback
 to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 and RTX 3090 use their exact native Windows packages. Every
-route runs the unmodified upstream OMP 18.4.10 client. The RTX 5090 admits two requests at once,
+published route ran the unmodified upstream OMP 18.4.10 client; the current candidate targets
+18.6.3 and has not repeated that acceptance. The RTX 5090 admits two requests at once,
 with DFlash2 draft window 7, BF16 KV and two device state slots. Both prompts plus output
 reservations must fit its 131,520-token KV pool.
 
@@ -143,7 +186,7 @@ all ten runs of the same commands
 OMP compacts a 131,072-token session on its own at 111,412 tokens. For a model that accepts
 images, its first method archives earlier turns as images at native resolution, which NInfer
 refuses, so every long RTX 5090 session on stock OMP 18.3.0-18.4.0 failed at its first
-compaction. The RTX 5090 fragments now declare `supportsImageDetailOriginal: false`, so OMP sends
+compaction. The historical v0.8.5 fragments declared `supportsImageDetailOriginal: false`, so OMP sent
 `detail: "auto"`: the lane served that compacted continuation and returned the exact nonce, and
 refused the native-resolution request in 9 ms
 ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
@@ -177,7 +220,8 @@ graceful server restarts on both v0.8.7 runtimes, including a new OMP process re
 restart, whose first request the runtime restored from the session's checkpoint
 ([EXP-075](measurements/2026-09-29-stock-omp-1840-durable-sessions.json)). That one-platform,
 short-session proof is separate from the documented-route and client-platform acceptance above.
-The fragments' other fields and `PI_OPENAI_STATEFUL=1` are unchanged: live steering is Codex-WebSocket-only and
+Those published-client observations used `PI_OPENAI_STATEFUL=1`; the 18.6.3 candidate instead
+sets per-model `compat.statefulResponses`. Live steering is Codex-WebSocket-only and
 gated on `compat.supportsSteering`, which these providers do not set, and cache warming does not
 warm a model without a declared `promptCache`.
 
@@ -196,7 +240,8 @@ warm reuse is not claimed.
 A checkpoint is bound to the exact runtime fingerprint, including the server build and model.
 RTX 5090 changes both in v0.10.0; predecessor checkpoint reuse is not claimed. The RTX 4090
 and RTX 3090 runtime packages and native model are unchanged. Follow the exact release
-routes and require the ready gate before setup; every lane moves to OMP 18.4.10.
+routes and require the ready gate before setup; the published baseline uses OMP 18.4.10,
+while the current 18.6.3 candidate remains blocked pending requalification.
 
 The RTX 5090 deployment profile is `qwen38-5090-v0.10.0` / configuration `8b2f4959`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
@@ -215,14 +260,15 @@ occurs reports the commit limit, available commit and available memory.
 Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream
-[Oh My Pi v18.4.10 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.10), not an archive
-or installer. The exact binary identities are:
+[Oh My Pi v18.6.3 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.6.3), not an archive
+or installer. These are **candidate** binary identities from the upstream release's asset
+metadata, not new OMP NInfer qualification results:
 
 | Client binary | Bytes | SHA-256 |
 | --- | --- | --- |
-| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-windows-x64.exe) | 245,669,888 | `7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895` |
-| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-linux-x64) | 291,501,536 | `e3f24c475d90b83acec05a26fd4499d2e6dffbf4ca3b0ee9e3e1bc1ab1a4e289` |
-| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-darwin-arm64) | 218,920,720 | `23d3f9ab712fe700e80a43dbd1e8159dfea8e106bf717648a49b1bba1ad3e508` |
+| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-windows-x64.exe) | 235,715,072 | `453e8ecd17f36e0b7faba2abc761206fe72d16b97fbacbe1281831ad9fa86482` |
+| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-linux-x64) | 281,904,608 | `5972347a0afa983333151e1f27461bc441929a22ab5ec65dfed248eb2108ddaf` |
+| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64) | 208,923,376 | `ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4` |
 
 Start only from the product tag and require its ready contract:
 
@@ -236,7 +282,8 @@ and composed external-installation acceptance. v0.10.0 acceptance covers all fiv
 routes on the published components; it does not expand support beyond those exact profiles.
 
 > [!WARNING]
-> Stay on the exact upstream OMP 18.4.10 binary pinned by this release. The config every route below
+> Stay on the exact upstream OMP 18.6.3 binary when reviewing this candidate; it is not yet
+> qualified or published as an OMP NInfer release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
@@ -276,19 +323,19 @@ py -3 scripts\verify_release.py --require-ready
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-windows-x64.exe'
-$Expected = '7232c209641f0cad7e20bdb3a074cdb2fb31ae2aa73d42c491c705d28e0d3895'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-windows-x64.exe'
+$Expected = '453e8ecd17f36e0b7faba2abc761206fe72d16b97fbacbe1281831ad9fa86482'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
 if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
 $Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
 New-Item -ItemType Directory -Force -Path (Split-Path $Launcher) | Out-Null
 Copy-Item .\omp-windows-x64.exe $Launcher -Force
-$env:PI_OPENAI_STATEFUL = '1'
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 & $Launcher --version
 if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The version must be `omp/18.4.10`. To roll back, re-download the previous pinned binary and verify
+The candidate version must be `omp/18.6.3`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `omp.exe`.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
@@ -486,12 +533,12 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-$env:PI_OPENAI_STATEFUL = '1'
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
 
 Stock OMP names each session with `prompt_cache_key`. With API authentication configured, the
 server hashes that key into the session identity without storing the raw key; this enables
-automatic checkpoints and restore. `PI_OPENAI_STATEFUL=1` makes OMP chain turns with
+automatic checkpoints and restore. The model's `compat.statefulResponses: true` chains turns with
 `previous_response_id`. Encrypted reasoning and reasoning summaries are disabled because the
 server refuses fields it does not implement. The fragment's effort list keeps OMP within the
 template's `low`, `medium`, and `xhigh` levels (`off` clamps to `low`, `high` to `medium`).
@@ -547,7 +594,7 @@ RTX 5090 changes its runtime and model in this release.
 
 Prerequisites: Windows 11 x64, one RTX 3090 (sm_86), NVIDIA driver 570 or newer,
 Git, PowerShell, Python 3 with its `py` launcher, and at least 40 GiB free for model,
-package and client. Install the exact stock OMP 18.4.10 binary using **Install the exact native
+package and client. The candidate targets stock OMP 18.6.3 using **Install the exact native
 Windows client** above, then open an elevated PowerShell and run:
 
 ```powershell
@@ -714,7 +761,7 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-native\models-rtx3090.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-$env:PI_OPENAI_STATEFUL = '1'
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
 
 
@@ -809,19 +856,19 @@ Do not install from moving `main`, an untagged archive, or a manifest whose stat
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/can1357/oh-my-pi/releases/download/v18.4.10/omp-darwin-arm64'
-EXPECTED='23d3f9ab712fe700e80a43dbd1e8159dfea8e106bf717648a49b1bba1ad3e508'
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64'
+EXPECTED='ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4'
 curl --fail --location --output omp-darwin-arm64 "$URL"
 test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
 mkdir -p "$HOME/.local/bin"
 cp omp-darwin-arm64 "$HOME/.local/bin/omp"
 chmod 0755 "$HOME/.local/bin/omp"
-export PI_OPENAI_STATEFUL=1
+unset PI_OPENAI_STATEFUL
 "$HOME/.local/bin/omp" --version
 )
 ```
 
-The version must be `omp/18.4.10`. To roll back, re-download the previous pinned binary and verify
+The candidate version must be `omp/18.6.3`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `~/.local/bin/omp`. Every later step calls bare `omp`, so put
 `$HOME/.local/bin` on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your shell profile
 if you want it to persist) before continuing.
@@ -950,23 +997,23 @@ tunnel. Do not paste the key into YAML, shell history, an issue, or a support bu
 
 ## 7. Add the OMP provider
 
-In every shell that launches OMP, export `PI_OPENAI_STATEFUL=1`. If
+The candidate fragment opts into stateful Responses per model; no global export is needed. If
 `~/.omp/agent/models.yml` does not exist, install the fragment:
 
 ```sh
-export PI_OPENAI_STATEFUL=1
+unset PI_OPENAI_STATEFUL
 install -m 600 examples/manual-tunnel/models.fragment.yml \
   "$HOME/.omp/agent/models.yml"
 ```
 
 Stock OMP names each session with `prompt_cache_key`. With API authentication configured, the
 server hashes that key into the session identity without storing the raw key; this enables
-automatic checkpoints and restore. `PI_OPENAI_STATEFUL=1` makes OMP chain turns with
+automatic checkpoints and restore. The model's `compat.statefulResponses: true` chains turns with
 `previous_response_id`. Encrypted reasoning and reasoning summaries are disabled because the
 server refuses fields it does not implement. The fragment's effort list keeps OMP within the
 template's `low`, `medium`, and `xhigh` levels (`off` clamps to `low`, `high` to `medium`).
 
-If the file already exists, run the export above and merge only the `providers.ninfer-beta` mapping from
+If the file already exists, unset the old global flag and merge only the `providers.ninfer-beta` mapping from
 [`models.fragment.yml`](../examples/manual-tunnel/models.fragment.yml). Do not overwrite existing
 providers or model definitions. The key remains an executable secret reference:
 
@@ -1007,7 +1054,7 @@ if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
 Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
 Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
-$env:PI_OPENAI_STATEFUL = '1'
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
 
 The environment-backed value exists only in that PowerShell process and its children. Do not put
@@ -1071,7 +1118,7 @@ request is a release failure. Restart NInfer with section 4 only after observing
 
 ### macOS/Linux command forms
 
-Run these in the terminal that exported `PI_OPENAI_STATEFUL=1` in section 7, with the tunnel
+Run these in the terminal that installed the per-model candidate fragment in section 7, with the tunnel
 from section 5 open in another. Every check is a `-p` (print) turn, so it exits on its own; the
 shell tests the outcome, and `set -e` stops the sequence at the first failure.
 
@@ -1178,11 +1225,11 @@ standalone native lane, not as an unattended fleet role, so neither the fragment
 declares it. Its three-lane form stays at the immutable v0.7.2 tag with the legacy OMP 18.0.9
 instructions for that lane.
 
-Export `PI_OPENAI_STATEFUL=1` in every shell that launches a fleet agent; the fragment uses the
+The candidate fleet fragment sets `compat.statefulResponses: true` on each model and uses the
 same session identity, thinking efforts, and reasoning compatibility settings as section 7.
 
 ```sh
-export PI_OPENAI_STATEFUL=1
+unset PI_OPENAI_STATEFUL
 # two authenticated forwards; pass - to skip a lane you do not own
 ./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST
 install -m 600 examples/fleet/models.fragment.yml ~/.omp/agent/models.fleet.yml   # merge by hand
