@@ -1,12 +1,12 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-06 · **Published release: v0.10.0; OMP 18.6.3 client candidate is unreleased.**
+Updated: 2026-10-07 · **Published release: v0.10.0; OMP 18.8.3 client candidate is unreleased.**
 
-## Current client candidate — OMP 18.6.3
+## Current client candidate — OMP 18.8.3
 
-Current install fragments and root profiles target unmodified upstream OMP **18.6.3**, source
-`093275112f7adff207608673c0e33c7f3d16e27f`. The profiles' `release: v0.10.0` names their unchanged
-runtime baseline, not a published 18.6.3 product. Their `status: candidate` means **unqualified**.
+Current install fragments and root profiles target unmodified upstream OMP **18.8.3**, source
+`3e3c488a58d294e3a10051da588628e2cfb9d35c`. The profiles' `release: v0.10.0` names their unchanged
+runtime baseline, not a published 18.8.3 product. Their `status: candidate` means **unqualified**.
 GPU-host requalification and fresh acceptance remain pending for the RTX 5090 container host,
 macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows routes.
 No GPU-host runs, new qualification receipts, tags or publication are part of this client repin.

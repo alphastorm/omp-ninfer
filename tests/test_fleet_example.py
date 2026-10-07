@@ -45,7 +45,7 @@ class FleetExampleTests(unittest.TestCase):
                     "        compat:\n          includeEncryptedReasoning: false\n          supportsReasoningSummary: false\n",
                     body,
                 )
-                # Unknown Responses hosts already default to auto image detail in OMP 18.6.3.
+                # Unknown Responses hosts already default to auto image detail in OMP 18.8.3.
                 self.assertNotIn("supportsImageDetailOriginal", body)
                 self.assertIn("          statefulResponses: true\n", body)
                 self.assertEqual("          - image\n" in body, image_input)

@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Target unmodified upstream OMP **18.6.3** in current install instructions and root profiles,
-  pinned to source `093275112f7adff207608673c0e33c7f3d16e27f` and the upstream binary checksums.
+- Target unmodified upstream OMP **18.8.3** in current install instructions and root profiles,
+  pinned to source `3e3c488a58d294e3a10051da588628e2cfb9d35c` and the upstream binary checksums.
   This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
   pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
   Published release records and historical measurements are unchanged.
@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validate candidate profile identities locally without attributing v0.10.0's qualification to
   the new client. Readiness and installability checks reject the candidate pending requalification.
   Staging's predecessor-pin check distinguishes those pins from a current-profile candidate warning.
+- Retire current-client references to the historical fork, Homebrew client casks and
+  `omp appliance` lifecycle. Troubleshooting uses the current model id and upstream per-model
+  `compat.statefulResponses`, not the fork-only `ninferStatefulResponses` key.
 
 ## [0.10.0] - 2026-10-02
 

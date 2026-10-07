@@ -529,7 +529,7 @@ class ReleaseContractTest(unittest.TestCase):
         shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
         path = root / "profiles/qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(path)
-        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.6.3", "v18.4.10")
+        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.3", "v18.4.10")
         self.save(path, profile)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(any("asset_url must bind the upstream tag and asset name" in item

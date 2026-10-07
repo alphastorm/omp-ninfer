@@ -9,16 +9,16 @@
     "architecture": "arm64",
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.6.3",
-    "upstream_commit": "093275112f7adff207608673c0e33c7f3d16e27f",
+    "upstream_tag": "v18.8.3",
+    "upstream_commit": "3e3c488a58d294e3a10051da588628e2cfb9d35c",
     "published": true,
-    "release_id": 404725465,
-    "asset_id": 615568034,
+    "release_id": 406058719,
+    "asset_id": 619505798,
     "asset_name": "omp-darwin-arm64",
-    "asset_bytes": 208923376,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64",
-    "asset_sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4",
-    "binary_sha256": "ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4"
+    "asset_bytes": 212403488,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-darwin-arm64",
+    "asset_sha256": "4421538b6a988527eedf08ec32aa83e27ec31227a3f91028d8f59c103e537b60",
+    "binary_sha256": "4421538b6a988527eedf08ec32aa83e27ec31227a3f91028d8f59c103e537b60"
   },
   "runtime_host": {
     "os": [

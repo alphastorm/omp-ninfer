@@ -1,21 +1,21 @@
 # Quickstart
 
-> **Unreleased OMP 18.6.3 client candidate · v0.10.0 runtime baseline**
+> **Unreleased OMP 18.8.3 client candidate · v0.10.0 runtime baseline**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **The current routes target stock OMP 18.6.3 as an unqualified candidate.** GPU-host
+> **The current routes target stock OMP 18.8.3 as an unqualified candidate.** GPU-host
 > requalification is pending; this combination is not yet published. The commands below
 > describe the candidate client contract, not a newly accepted release. `--require-ready`
 > and `--require-installable` intentionally refuse the candidate profiles: do not bypass them.
 > For a qualified install use the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
 > with its OMP 18.4.10 client and fragments. Its [acceptance](#v0100-route-acceptance) remains historical baseline evidence.
 
-## OMP 18.6.3 client candidate
+## OMP 18.8.3 client candidate
 
-The client is the unmodified upstream v18.6.3 release, source
-`093275112f7adff207608673c0e33c7f3d16e27f`. The runtime packages, model artifacts,
+The client is the unmodified upstream v18.8.3 release, source
+`3e3c488a58d294e3a10051da588628e2cfb9d35c`. The runtime packages, model artifacts,
 deployment profiles and concurrency limits remain the v0.10.0 baseline. Root profiles mark
 this new client combination `status: candidate`; their `release` field still names that runtime
 baseline. The published compatibility authority and release records have not been rebound.
@@ -41,7 +41,7 @@ Normal `python3 scripts/verify_release.py` checks the static candidate profiles 
 runtime manifest; it does **not** qualify the new client. Before a new product release, rerun
 GPU-host requalification and the documented acceptance separately for every route:
 
-| Documented route | Fresh 18.6.3 acceptance |
+| Documented route | Fresh 18.8.3 acceptance |
 | --- | --- |
 | RTX 5090 Windows 11 + Docker Desktop/WSL2 container host | Pending; runtime identity and host route |
 | macOS arm64 client over manual SSH tunnel | Pending; all client steps, continuation and fail-closed checks; remains preview |
@@ -49,7 +49,7 @@ GPU-host requalification and the documented acceptance separately for every rout
 | RTX 4090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
 | RTX 3090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
 
-Bind fresh client-platform and route receipts, the 18.6.3 binary pins and the updated fragments
+Bind fresh client-platform and route receipts, the 18.8.3 binary pins and the updated fragments
 in the next product manifest before readiness, a tag or publication. No GPU-host run or fresh
 qualification result is claimed here. A v0.10.0 clone in the baseline setup blocks below gets
 the old published fragments, not this candidate; never combine those two checkout authorities.
@@ -61,15 +61,15 @@ from GPU-runtime qualification.
 
 | I have | Status | Start here | What success produces |
 | --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **18.6.3 candidate; requalification pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **18.6.3 candidate; requalification pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **18.6.3 candidate; requalification pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **18.8.3 candidate; requalification pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
+| RTX 4090 + native Windows | **18.8.3 candidate; requalification pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
+| RTX 3090 + native Windows | **18.8.3 candidate; requalification pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
 | Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
 
 The RTX 3090's earlier
 [v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
 with the v0.7.2 manifest and OMP 18.0.9 remain a separate historical route on the durable v0.2
-lineage. Do not combine them with v0.10.0 or the OMP 18.6.3 candidate.
+lineage. Do not combine them with v0.10.0 or the OMP 18.8.3 candidate.
 
 The current native lane is installable only through its exact qualified manifest variant. Do not
 substitute GPU family names, package URLs, component tags, or variant IDs between releases.
@@ -136,7 +136,7 @@ to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 and RTX 3090 use their exact native Windows packages. Every
 published route ran the unmodified upstream OMP 18.4.10 client; the current candidate targets
-18.6.3 and has not repeated that acceptance. The RTX 5090 admits two requests at once,
+18.8.3 and has not repeated that acceptance. The RTX 5090 admits two requests at once,
 with DFlash2 draft window 7, BF16 KV and two device state slots. Both prompts plus output
 reservations must fit its 131,520-token KV pool.
 
@@ -220,7 +220,7 @@ graceful server restarts on both v0.8.7 runtimes, including a new OMP process re
 restart, whose first request the runtime restored from the session's checkpoint
 ([EXP-075](measurements/2026-09-29-stock-omp-1840-durable-sessions.json)). That one-platform,
 short-session proof is separate from the documented-route and client-platform acceptance above.
-Those published-client observations used `PI_OPENAI_STATEFUL=1`; the 18.6.3 candidate instead
+Those published-client observations used `PI_OPENAI_STATEFUL=1`; the 18.8.3 candidate instead
 sets per-model `compat.statefulResponses`. Live steering is Codex-WebSocket-only and
 gated on `compat.supportsSteering`, which these providers do not set, and cache warming does not
 warm a model without a declared `promptCache`.
@@ -241,7 +241,7 @@ A checkpoint is bound to the exact runtime fingerprint, including the server bui
 RTX 5090 changes both in v0.10.0; predecessor checkpoint reuse is not claimed. The RTX 4090
 and RTX 3090 runtime packages and native model are unchanged. Follow the exact release
 routes and require the ready gate before setup; the published baseline uses OMP 18.4.10,
-while the current 18.6.3 candidate remains blocked pending requalification.
+while the current 18.8.3 candidate remains blocked pending requalification.
 
 The RTX 5090 deployment profile is `qwen38-5090-v0.10.0` / configuration `8b2f4959`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
@@ -260,15 +260,15 @@ occurs reports the commit limit, available commit and available memory.
 Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream
-[Oh My Pi v18.6.3 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.6.3), not an archive
+[Oh My Pi v18.8.3 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.3), not an archive
 or installer. These are **candidate** binary identities from the upstream release's asset
 metadata, not new OMP NInfer qualification results:
 
 | Client binary | Bytes | SHA-256 |
 | --- | --- | --- |
-| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-windows-x64.exe) | 235,715,072 | `453e8ecd17f36e0b7faba2abc761206fe72d16b97fbacbe1281831ad9fa86482` |
-| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-linux-x64) | 281,904,608 | `5972347a0afa983333151e1f27461bc441929a22ab5ec65dfed248eb2108ddaf` |
-| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64) | 208,923,376 | `ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4` |
+| [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-windows-x64.exe) | 237,049,344 | `fa72244120dbf555e18667716e2e05ea341799ab8d77d060195a035582adb0e7` |
+| [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-linux-x64) | 283,428,320 | `8cb6d6a0035a3c5d9c40a58852ca361569eafc2cecbbeef4521e0fefc8ccbc37` |
+| [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-darwin-arm64) | 212,403,488 | `4421538b6a988527eedf08ec32aa83e27ec31227a3f91028d8f59c103e537b60` |
 
 Start only from the product tag and require its ready contract:
 
@@ -282,7 +282,7 @@ and composed external-installation acceptance. v0.10.0 acceptance covers all fiv
 routes on the published components; it does not expand support beyond those exact profiles.
 
 > [!WARNING]
-> Stay on the exact upstream OMP 18.6.3 binary when reviewing this candidate; it is not yet
+> Stay on the exact upstream OMP 18.8.3 binary when reviewing this candidate; it is not yet
 > qualified or published as an OMP NInfer release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
@@ -323,8 +323,8 @@ py -3 scripts\verify_release.py --require-ready
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-windows-x64.exe'
-$Expected = '453e8ecd17f36e0b7faba2abc761206fe72d16b97fbacbe1281831ad9fa86482'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-windows-x64.exe'
+$Expected = 'fa72244120dbf555e18667716e2e05ea341799ab8d77d060195a035582adb0e7'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
 if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
 $Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
@@ -335,7 +335,7 @@ Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The candidate version must be `omp/18.6.3`. To roll back, re-download the previous pinned binary and verify
+The candidate version must be `omp/18.8.3`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `omp.exe`.
 
 Inside WSL2, continue with **3. Prepare the model and key** and **4. Start NInfer** below. Skip
@@ -594,7 +594,7 @@ RTX 5090 changes its runtime and model in this release.
 
 Prerequisites: Windows 11 x64, one RTX 3090 (sm_86), NVIDIA driver 570 or newer,
 Git, PowerShell, Python 3 with its `py` launcher, and at least 40 GiB free for model,
-package and client. The candidate targets stock OMP 18.6.3 using **Install the exact native
+package and client. The candidate targets stock OMP 18.8.3 using **Install the exact native
 Windows client** above, then open an elevated PowerShell and run:
 
 ```powershell
@@ -856,8 +856,8 @@ Do not install from moving `main`, an untagged archive, or a manifest whose stat
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/can1357/oh-my-pi/releases/download/v18.6.3/omp-darwin-arm64'
-EXPECTED='ab52491643e21b270682691b1319f1161fe2a2658ae4e9a4e3958b1aeb12dcf4'
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-darwin-arm64'
+EXPECTED='4421538b6a988527eedf08ec32aa83e27ec31227a3f91028d8f59c103e537b60'
 curl --fail --location --output omp-darwin-arm64 "$URL"
 test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
 mkdir -p "$HOME/.local/bin"
@@ -868,7 +868,7 @@ unset PI_OPENAI_STATEFUL
 )
 ```
 
-The candidate version must be `omp/18.6.3`. To roll back, re-download the previous pinned binary and verify
+The candidate version must be `omp/18.8.3`. To roll back, re-download the previous pinned binary and verify
 its checksum before replacing `~/.local/bin/omp`. Every later step calls bare `omp`, so put
 `$HOME/.local/bin` on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`, and in your shell profile
 if you want it to persist) before continuing.
