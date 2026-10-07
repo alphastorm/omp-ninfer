@@ -38,12 +38,11 @@ redaction. Security reports always stay private.
   (downstream of [Neroued/ninfer](https://github.com/Neroued/ninfer); kernel/perf work starts at
   [docs/PERFORMANCE.md](docs/PERFORMANCE.md)).
 - OMP session/tool/provider semantics: upstream
-  [Oh My Pi](https://github.com/can1357/oh-my-pi) where the change is general; the pinned client
-  fork only carries the NInfer integration until those parts are upstreamed.
+  [Oh My Pi](https://github.com/can1357/oh-my-pi). This product pins unmodified upstream release
+  binaries and carries no client fork.
 - Native RTX 4090 and RTX 3090 runtime variants: their reviewed branches in `alphastorm/ninfer`
   (upstream ports: [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090),
   [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)).
-- Homebrew cask behavior: `alphastorm/homebrew-omp`.
 
 Do not duplicate implementation across repositories to make a local patch easier.
 
