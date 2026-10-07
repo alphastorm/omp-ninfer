@@ -67,10 +67,10 @@ See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-repli
 
 ## Identity chain
 
-The [current release manifest](../releases/v0.6.9/manifest.json) binds:
+The [published release manifest](../releases/v0.10.0/manifest.json) binds:
 
 1. product release and support channel;
-2. OMP public source revision, all three native client artifacts, Homebrew beta cask, sizes, and hashes;
+2. upstream OMP source revision, platform binaries, byte counts, and SHA-256 pins;
 3. primary NInfer source/server/OCI/SBOM plus each native variant package, source archive,
    SBOM/file inventory, configuration, and qualification receipt;
 4. Qwen artifact revision, byte count, and hash;
@@ -82,7 +82,7 @@ every installable component identity and retains the external-install blocker. `
 requires an exact qualification-summary hash, an external-install pass, and zero blockers.
 `scripts/verify_release.py --require-ready` enforces the cut boundary.
 
-The manifest is authoritative over README examples, Homebrew prose, mutable container tags, and
+The manifest is authoritative over README examples, mutable container tags, and
 branch names. Release images are consumed only by `@sha256:` digest.
 
 ## Component boundaries
@@ -95,11 +95,10 @@ OMP session semantics, or another request proxy.
 
 ### OMP
 
-Owns the coding-agent UX, transcript, tools, model configuration, stateful Responses transaction,
-and `omp appliance ...` lifecycle. The pinned client's exact accepted source is public at
-[alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi), carrying the NInfer provider
-integration with upstreaming still intended (see [`ROADMAP.md`](../ROADMAP.md)). v0.3 ships both
-fail-closed manual configuration and the closed managed appliance adapters.
+Owns the coding-agent UX, transcript, tools, and model configuration. The client is unmodified
+[upstream OMP](https://github.com/can1357/oh-my-pi), pinned by SHA-256; the unreleased candidate
+uses upstream's per-model `compat.statefulResponses` for Responses chaining. It does not inherit
+the published client's qualification. Stock OMP has no `omp appliance` commands.
 
 ### NInfer
 
@@ -109,15 +108,15 @@ runtime and reviewed 3090/4090 branches are public under
 [alphastorm/ninfer](https://github.com/alphastorm/ninfer), retaining their upstream lineage and
 separate hardware contracts.
 
-### Homebrew tap
+### Homebrew tap (historical)
 
-Owns distribution of the exact native client archives (Windows, macOS, Linux). The prerelease
-`omp-beta` cask stays separate from the stable `omp` cask so this product never replaces a user's
-stable OMP.
+The public [alphastorm/oh-my-pi](https://github.com/alphastorm/oh-my-pi) fork and the
+`alphastorm/homebrew-omp` tap (private since 2026-10-02) distributed the client through v0.7.4.
+They are historical, not the current install path. This product no longer builds or publishes
+an OMP client.
 
-## v0.2 cutover
+## Lifecycle routes
 
-The long-term UX stays under `omp appliance ...`. V0.2 adds a remote appliance platform that
-consumes the same manifest, performs state-faithful install/upgrade/rollback, and emits content-safe
-receipts while retaining the manual route as a bounded fallback. It does not add a second product
-name or another continuation owner.
+Install, upgrade, stop, and rollback follow the documented container and native Windows routes
+in the [quickstart](QUICKSTART.md), not `omp appliance` commands. OMP remains the transcript
+and coding-agent UX owner.

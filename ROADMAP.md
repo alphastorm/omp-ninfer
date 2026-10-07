@@ -11,7 +11,28 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — v0.10.0
+## Where this is now — unreleased OMP 18.8.3 client candidate
+
+Current install fragments and profiles target stock upstream OMP **18.8.3**, source
+`3e3c488a58d294e3a10051da588628e2cfb9d35c`, on unchanged v0.10.0 runtime/model pins.
+Per-model `compat.statefulResponses: true` replaces the global environment requirement;
+custom-host auto image detail replaces the RTX 5090 override. Upstream's unavailable-model
+resume fix needs no config. Compaction settings are unchanged.
+
+This candidate is **not yet published or qualified**. Before release, requalify the GPU hosts
+and record fresh documented-route acceptance separately for each of:
+
+- RTX 5090 Windows 11 + Docker Desktop/WSL2 container host;
+- macOS arm64 client over the RTX 5090 manual tunnel (still preview);
+- Windows x64 client over RTX 5090 local loopback;
+- RTX 4090 native Windows runtime/client;
+- RTX 3090 native Windows runtime/client.
+
+Those fresh route and client-platform receipts must bind the 18.8.3 binaries and updated
+fragments in the next product manifest before readiness, a tag or publication. No GPU-host
+run or qualification result is claimed by this branch.
+
+## Published baseline — v0.10.0
 
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
 All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream

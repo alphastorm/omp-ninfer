@@ -9,6 +9,12 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — private, long-lived Oh My Pi sessions on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
+The current install fragments target an **unreleased, unqualified OMP 18.8.3 client candidate**
+on unchanged v0.10.0 runtime/model pins. GPU-host and all five documented-route requalifications
+are pending. Use the [candidate guide](QUICKSTART.md#omp-1883-client-candidate) to distinguish
+that work from the published release evidence below; it does not change this comparison's
+historical measurements or qualify another backend.
+
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
 All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream
 OMP **18.4.10**: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native

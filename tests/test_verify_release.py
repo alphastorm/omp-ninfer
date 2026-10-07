@@ -388,6 +388,21 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
+        # Release-contract fixtures retain the published client, not the live unqualified candidate.
+        omp = self.load(root / "releases" / PUBLIC_RELEASE / "manifest.json")["components"]["omp"]
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["status"] = "public"
+            profile["omp_provider"].pop("compat", None)
+            profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+            client = {key: profile["client"][key] for key in ("os", "architecture")}
+            if profile["installation_mode"] == "manual-ssh-tunnel":
+                client["asset_name"] = "omp-darwin-arm64"
+            else:
+                client.update(asset_url=omp["artifact_url"], asset_sha256=omp["artifact_sha256"],
+                              binary_sha256=omp["binary_sha256"])
+            profile["client"] = client
+            self.save(path, profile)
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
@@ -462,8 +477,75 @@ class ReleaseContractTest(unittest.TestCase):
         )
 
     def test_public_release_passes_ready_validation(self) -> None:
-        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True)
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertEqual(errors, [])
+
+    def test_client_candidate_is_valid_but_not_ready_or_installable(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        warnings = []
+        manifest, errors = VERIFY_RELEASE.validate(root, require_ready=False, warnings=warnings)
+        self.assertEqual(errors, [])
+        self.assertEqual(manifest["components"]["omp"]["upstream_tag"], "v18.4.10")
+        self.assertEqual(len(warnings), 2)
+        self.assertTrue(all("documented-route requalification pending" in item for item in warnings))
+        for mode in ("require_ready", "require_installable"):
+            with self.subTest(mode=mode):
+                _, errors = VERIFY_RELEASE.validate(
+                    root, require_ready=mode == "require_ready",
+                    require_installable=mode == "require_installable")
+                self.assertEqual(len(errors), 2, errors)
+                self.assertTrue(all("unqualified client candidate" in item for item in errors))
+
+    def test_client_candidate_requires_per_model_stateful_responses(self) -> None:
+        for value in (None, False, "true", 1):
+            with self.subTest(value=value):
+                profile = self.load(ROOT / "profiles/qwen38-rtx5090-manual-tunnel.json")
+                profile["omp_provider"]["compat"]["statefulResponses"] = value
+                errors = []
+                VERIFY_RELEASE.validate_profile_contract(
+                    profile, "candidate", profile["release"], profile["model"],
+                    profile["model"]["public_id"], profile["server"]["deployment_profile"],
+                    errors, upstream_client=True)
+                self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
+        for key, value in (("stateful_responses_environment", {"PI_OPENAI_STATEFUL": "1"}),
+                           ("ninfer_stateful_responses", True)):
+            with self.subTest(obsolete_key=key):
+                profile = self.load(ROOT / "profiles/qwen38-rtx5090-manual-tunnel.json")
+                profile["omp_provider"][key] = value
+                errors = []
+                VERIFY_RELEASE.validate_profile_contract(
+                    profile, "candidate", profile["release"], profile["model"],
+                    profile["model"]["public_id"], profile["server"]["deployment_profile"],
+                    errors, upstream_client=True)
+                self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
+
+    def test_client_candidate_checks_exact_upstream_binary_identity(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        path = root / "profiles/qwen38-rtx5090-windows-docker-local.json"
+        profile = self.load(path)
+        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.3", "v18.4.10")
+        self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(any("asset_url must bind the upstream tag and asset name" in item
+                            for item in errors), errors)
+
+    def test_client_candidate_cannot_bypass_qualification_by_relabelling_itself(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["status"] = "public"
+            self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertTrue(any("client archive must be the manifest's OMP component" in item
+                            for item in errors), errors)
 
     def test_unknown_release_channel_fails_closed(self) -> None:
         temporary, root = self.public_draft_copy()
@@ -1209,7 +1291,7 @@ class ReleaseContractTest(unittest.TestCase):
         )
 
     def test_upstream_client_profiles_name_the_stock_stateful_environment(self) -> None:
-        """Stock OMP chains Responses turns only with PI_OPENAI_STATEFUL=1; the fork's
+        """Published OMP 18.4.10 chains Responses turns only with PI_OPENAI_STATEFUL=1; the fork's
         ninferStatefulResponses flag is inert upstream, so a profile still carrying it describes
         a client that silently loses stateful continuation."""
         temporary, root = self.public_draft_copy()

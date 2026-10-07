@@ -112,8 +112,8 @@ Hard constraints — never write:
   another lane
 - cloud hosting, multi-tenant serving, unattended production activation, or universal RTX support
 - "first stateful Responses", automatic restart, or universal performance
-- `omp appliance ...` outside the exact compatibility authority or as an implicit production
-  activation path
+- presenting `omp appliance ...` as a current install or lifecycle command; stock OMP has no
+  such commands
 
 Standing disclaimer: "Community project; not affiliated with or endorsed by
 Oh My Pi, Qwen, or NVIDIA." Never set NVIDIA, Qwen, or OMP marks in ways that

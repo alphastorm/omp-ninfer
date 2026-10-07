@@ -26,4 +26,4 @@ providers:
         compat:
           includeEncryptedReasoning: false
           supportsReasoningSummary: false
-          supportsImageDetailOriginal: false
+          statefulResponses: true

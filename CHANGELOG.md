@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Target unmodified upstream OMP **18.8.3** in current install instructions and root profiles,
+  pinned to source `3e3c488a58d294e3a10051da588628e2cfb9d35c` and the upstream binary checksums.
+  This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
+  pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
+  Published release records and historical measurements are unchanged.
+- Set `compat.statefulResponses: true` on every NInfer model instead of requiring process-wide
+  `PI_OPENAI_STATEFUL=1` ([upstream #13686](https://github.com/can1357/oh-my-pi/pull/13686)).
+  Remove the RTX 5090 `compat.supportsImageDetailOriginal: false` override because unknown/custom
+  Responses hosts now default to auto image detail
+  ([upstream #13687](https://github.com/can1357/oh-my-pi/pull/13687)). Compaction settings are unchanged.
+- Include upstream's fail-closed resume behavior when a saved model is unavailable
+  ([#13689](https://github.com/can1357/oh-my-pi/pull/13689)); no additional configuration is needed.
+- Validate candidate profile identities locally without attributing v0.10.0's qualification to
+  the new client. Readiness and installability checks reject the candidate pending requalification.
+  Staging's predecessor-pin check distinguishes those pins from a current-profile candidate warning.
+- Retire current-client references to the historical fork, Homebrew client casks and
+  `omp appliance` lifecycle. Troubleshooting uses the current model id and upstream per-model
+  `compat.statefulResponses`, not the fork-only `ninferStatefulResponses` key.
+
 ## [0.10.0] - 2026-10-02
 
 ### Changed

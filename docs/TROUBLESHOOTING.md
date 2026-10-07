@@ -218,19 +218,21 @@ key in a diagnostic command, screenshot, issue, or shell trace.
 
 Do not point OMP at a remote LAN address as a workaround.
 
-## OMP cannot resolve `ninfer-beta/local-max`
+## OMP cannot resolve `ninfer-beta/q38-ninfer`
 
 Validate that `~/.omp/agent/models.yml` remains valid YAML and contains exactly one
 `providers.ninfer-beta` mapping. If the file existed before setup, merge the fragment rather
-than nesting a second `providers:` key or overwriting other providers. Keep both provider- and
-model-level `ninferStatefulResponses: true` fields.
+than nesting a second `providers:` key or overwriting other providers. Keep the model id
+`q38-ninfer`. For the unreleased candidate, set `statefulResponses: true` under each model's
+`compat`; stock OMP ignores the fork-only `ninferStatefulResponses` key. For the published
+v0.10.0 client, use its [immutable guide and fragments](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md) instead.
 
 Install or merge the fail-closed `retry` mapping into the launcher-owned default config, then run
 the exact route:
 
 ```sh
 install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
-omp --model ninfer-beta/local-max
+omp --model ninfer-beta/q38-ninfer
 ```
 
 ## Text works but image input fails
@@ -243,6 +245,11 @@ floor stays 28672 MiB. Also check that the image is a supported, readable local 
 that OMP did not block images in another config overlay.
 
 ## A long RTX 5090 session fails when OMP compacts it
+
+The unreleased OMP 18.8.3 candidate defaults custom/local Responses hosts to auto image detail
+([upstream #13687](https://github.com/can1357/oh-my-pi/pull/13687)); its current fragments need
+no `supportsImageDetailOriginal` override. GPU-host requalification is still pending. The
+workaround below applies only to the older published clients, including v0.10.0 / OMP 18.4.10.
 
 OMP compacts a 131,072-token session on its own at about 111,412 tokens. For a model that
 accepts images, its first method archives earlier turns as images and asks for native resolution,

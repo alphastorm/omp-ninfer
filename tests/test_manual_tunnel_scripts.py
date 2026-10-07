@@ -49,12 +49,18 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 self.assertNotIn("3090", fragment)
                 # Only the RTX 5090 container lane supports image input.
                 self.assertEqual(re.findall(r"^          - (\w+)$", fragment, re.M), inputs)
-                # NInfer serves only `detail: "auto"` images. OMP's snapcompact, the first automatic
-                # compaction for image-capable models, asks for "original" unless the model says
-                # otherwise, and the refused request ends a long session at its first compaction.
-                self.assertEqual(
-                    "          supportsImageDetailOriginal: false\n" in fragment, "image" in inputs,
-                )
+                # OMP 18.8.3 defaults custom Responses hosts to auto image detail.
+                self.assertNotIn("supportsImageDetailOriginal", fragment)
+                self.assertIn("          statefulResponses: true\n", fragment)
+
+    def test_every_ninfer_model_opts_into_stateful_responses_without_global_environment(self) -> None:
+        for path in (ROOT / "examples").glob("*/models*.fragment.yml"):
+            with self.subTest(fragment=path.relative_to(ROOT)):
+                fragment = path.read_text(encoding="utf-8")
+                self.assertEqual(len(re.findall(r"^      - id: \S+$", fragment, re.M)),
+                                 fragment.count("          statefulResponses: true\n"))
+                self.assertNotIn("PI_OPENAI_STATEFUL", fragment)
+                self.assertNotIn("supportsImageDetailOriginal", fragment)
 
     def test_every_documented_provider_admits_as_many_requests_as_its_lane(self) -> None:
         # A request past its lane's --max-concurrency waits at the server, which expires it after

@@ -27,7 +27,26 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Tracked upstreams and current position — v0.10.0
+## Current client candidate — OMP 18.8.3
+
+| Upstream | Client pin | State | Why pull it in |
+| --- | --- | --- | --- |
+| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.3 (`3e3c488a58d294e3a10051da588628e2cfb9d35c`), published upstream 2026-10-07T18:47:02Z | OMP NInfer candidate only; not yet published or GPU-host requalified | [#13686](https://github.com/can1357/oh-my-pi/pull/13686) adds per-model `compat.statefulResponses`; [#13687](https://github.com/can1357/oh-my-pi/pull/13687) defaults custom Responses hosts to auto image detail; [#13689](https://github.com/can1357/oh-my-pi/pull/13689) fails closed when a saved model cannot be restored. |
+
+The first two changes retire the global `PI_OPENAI_STATEFUL=1` requirement and the RTX 5090
+`compat.supportsImageDetailOriginal: false` workaround. The third needs no config change.
+The merged commits for #13686 (`429352901c`), #13687 (`01822b63d0`) and #13689 (`8aaf115b8e`)
+are all ancestors of v18.8.3. Its schema admits `statefulResponses` under each model's `compat`
+([`models-config-schema-bundle.ts:74`](https://github.com/can1357/oh-my-pi/blob/v18.8.3/packages/coding-agent/src/config/models-config-schema-bundle.ts#L74));
+the [Responses handler at line 502](https://github.com/can1357/oh-my-pi/blob/v18.8.3/packages/ai/src/providers/openai-responses.ts#L502)
+reads that field below a call option or environment override. Remove the old global setting
+when merging the new fragments. No compaction behavior is changed.
+
+Fresh requalification is pending for each documented route: RTX 5090 container host, macOS
+client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows. The candidate does
+not inherit v0.10.0's OMP 18.4.10 acceptance. See the [candidate guide](QUICKSTART.md#omp-1883-client-candidate).
+
+## Published upstream position — v0.10.0
 
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
 All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream
