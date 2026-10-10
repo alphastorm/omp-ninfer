@@ -218,9 +218,11 @@ class ReleaseContractTest(unittest.TestCase):
             path.write_text(rendered, encoding="utf-8")
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)
-            if "asset_url" in profile.get("client", {}):
-                profile["client"] = descriptor["platforms"]["windows-x64"]
-                self.save(path, profile)
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}[
+                            profile["installation_mode"]]
+            profile["client"] = descriptor["platforms"][platform]
+            self.save(path, profile)
         qualification_path = release_root / "qualification.json"
         qualification = self.load(qualification_path)
         qualification["external_installation_qualified"] = False
@@ -238,6 +240,18 @@ class ReleaseContractTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
         self.assertEqual(errors, [])
+
+    def test_upstream_root_profile_rejects_primary_asset_for_another_platform(self) -> None:
+        temporary, root = self.upstream_candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")
+        path = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
+        profile = self.load(path)
+        profile["client"] = descriptor["platforms"]["windows-x64"]
+        self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False, require_installable=True)
+        self.assertTrue(any("client archive must match darwin-arm64 compatibility distribution"
+                            in error for error in errors), errors)
 
     def test_upstream_component_rejects_invalid_artifact_identity(self) -> None:
         descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")

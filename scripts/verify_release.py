@@ -1528,36 +1528,6 @@ def validate(
                                       runtime.get("deployment_profile"), errors, upstream_omp)
             profiles.append((f"profiles/{extra_path.name}", extra_profile))
 
-    # A profile that pins a client archive must pin the manifest's. v0.7.3 repinned the client in
-    # the manifest while the primary profile kept v0.7.2's archive URL and hashes, and no check read
-    # the profile's copy. A client named only by package (the macOS cask route) pins nothing here.
-    archive_keys = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
-    for label, candidate in profiles:
-        client = candidate.get("client")
-        if candidate.get("status") == "candidate":
-            platform = {"manual-ssh-tunnel": "darwin-arm64",
-                        "native-windows-docker-local": "windows-x64"}.get(
-                            candidate.get("installation_mode"))
-            try:
-                validate_client_distribution(client or {}, f"{label} client", platform or "")
-                require((client or {}).get("distribution_kind") == "upstream-release",
-                        f"{label}: client candidate must pin an upstream release", errors)
-            except (ValueError, AttributeError) as error:
-                errors.append(str(error))
-            message = f"{label}: unqualified client candidate; documented-route requalification pending"
-            require(not (require_ready or require_installable), message, errors)
-            if warnings is not None:
-                warnings.append(message + "; published manifest acceptance is unchanged")
-            continue
-        if not isinstance(client, dict) or not any(key in client for key in archive_keys):
-            continue
-        require((client.get("component_release_tag") == omp.get("component_release_tag")
-                 if not upstream_omp else "component_release_tag" not in client)
-                and client.get("asset_url") == omp.get("artifact_url")
-                and client.get("asset_sha256") == omp.get("artifact_sha256")
-                and client.get("binary_sha256") == omp.get("binary_sha256"),
-                f"{label}: client archive must be the manifest's OMP component", errors)
-
     release_compatibility_path = manifest_path.parent / "compatibility.json"
     compatibility_path = (
         release_compatibility_path
@@ -1574,6 +1544,44 @@ def validate(
         compatibility = load_authority(compatibility_path)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"compatibility.json: {error}")
+
+    # Root archives bind their platform distribution, not the manifest's primary Windows asset.
+    # Historical fork archives still bind the primary component; package-only cask clients pin no archive.
+    archive_keys = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
+    for label, candidate in profiles:
+        client = candidate.get("client")
+        platform = {"manual-ssh-tunnel": "darwin-arm64",
+                    "native-windows-docker-local": "windows-x64"}.get(
+                        candidate.get("installation_mode"))
+        if candidate.get("status") == "candidate":
+            try:
+                validate_client_distribution(client or {}, f"{label} client", platform or "")
+                require((client or {}).get("distribution_kind") == "upstream-release",
+                        f"{label}: client candidate must pin an upstream release", errors)
+            except (ValueError, AttributeError) as error:
+                errors.append(str(error))
+            message = f"{label}: unqualified client candidate; documented-route requalification pending"
+            require(not (require_ready or require_installable), message, errors)
+            if warnings is not None:
+                warnings.append(message + "; published manifest acceptance is unchanged")
+            continue
+        if not isinstance(client, dict) or not any(key in client for key in archive_keys):
+            continue
+        if upstream_omp:
+            distribution = next((item.get("client_distribution", {})
+                                 for item in compatibility.get("profiles", [])
+                                 if OMP_PROFILE_PLATFORMS.get(item.get("id")) == platform), {})
+            require("component_release_tag" not in client
+                    and all(client.get(key) == distribution.get(key)
+                            for key in ("asset_url", "asset_sha256", "binary_sha256")),
+                    f"{label}: client archive must match {platform} compatibility distribution", errors)
+        else:
+            require(client.get("component_release_tag") == omp.get("component_release_tag")
+                    and client.get("asset_url") == omp.get("artifact_url")
+                    and client.get("asset_sha256") == omp.get("artifact_sha256")
+                    and client.get("binary_sha256") == omp.get("binary_sha256"),
+                    f"{label}: client archive must be the manifest's OMP component", errors)
+
     if compatibility:
         root_compatibility_path = root / "compatibility.json"
         if release_compatibility_path.is_file() and root_compatibility_path.is_file():
