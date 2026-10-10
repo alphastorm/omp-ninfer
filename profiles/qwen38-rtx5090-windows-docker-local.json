@@ -1,24 +1,23 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.10.0",
-  "status": "candidate",
+  "release": "v0.11.0",
   "installation_mode": "native-windows-docker-local",
   "client": {
-    "os": "Windows 11",
-    "architecture": "x64",
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
     "upstream_tag": "v18.8.7",
     "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+    "os": "Windows 11",
+    "architecture": "x64",
     "published": true,
-    "release_id": 407957363,
-    "asset_id": 625097593,
     "asset_name": "omp-windows-x64.exe",
     "asset_bytes": 225642496,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe",
     "asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
-    "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc"
+    "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+    "release_id": 407957363,
+    "asset_id": 625097593,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe"
   },
   "runtime_host": {
     "os": [
@@ -48,7 +47,7 @@
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.10.0",
+    "deployment_profile": "qwen38-5090-v0.11.0",
     "container_network_mode": "bridge",
     "restart_policy": "no",
     "arguments": [
@@ -59,13 +58,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+      "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
       "--artifact-sha256",
       "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
       "--config-sha256",
-      "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+      "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
       "--deployment-profile",
-      "qwen38-5090-v0.10.0",
+      "qwen38-5090-v0.11.0",
       "--max-context",
       "131072",
       "--kv-capacity",

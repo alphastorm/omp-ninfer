@@ -235,7 +235,16 @@ platform draft-pin diagnostics, without weakening the provider verifier. The
 corrected code/test head d7e32dd0908fb1b16ace1e0ac5dec1108740b936 passed all
 workflow steps in [CI38043955727](https://github.com/alphastorm/omp-ninfer/actions/runs/38043955727).
 
-## Founder sequence — selection complete → cut → stage → acceptance
+The post-cut root-marker regression was red only on the two unbound-client markers
+before the fix and green after (five focused rebind tests). The actual root lane cut
+and full v0.11.0 `--require-installable` CLI pass. The local full suite exercised347
+tests twice: initial17failures/2errors, then4Mac timing failures/1obsolete fixture
+error; that duplicate fixture setup was removed and its focused test passed. Main
+reports the same timing failures for S2 on untouched Mac code with Ubuntu/Python3.11
+CI passing: no timing threshold or probe was changed. Final-head CI is authority.
+[Complete local failure disposition and lane cut](qualification/root-lane-cut.json).
+
+## Founder sequence — selection/cut/stage/lane complete → acceptance pending
 
 C selection, source publication and the founder's live component cut are complete.
 Staging and lane rebind are now authorized agent steps; only the product live

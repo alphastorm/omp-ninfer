@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Founder published the selected C component13:46Z; workflow38057050899 succeeded. Main reports anonymous image/binary identity. S1 staged the real digest, merged supplemental evidence and draft-rebound successfully under Main authorization. Lane cut/frozen-candidate checks are the next authorized agent step; acceptance is Main-controlled and unexecuted.",
+  "execution_status": "Founder component cut and published workflow completed; S1 real-digest staging and authorized lane rebind completed. Actual v0.11.0 --require-installable passes with manifestcandidate/external acceptance pending. Main dispatches acceptance after the final pushed candidate and CI are reported; no acceptance by S1.",
   "working_directory": "$HOME/Development/omp-ninfer-S1",
   "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
   "selected_option": "c",
@@ -245,15 +245,17 @@
           "agent_authorized_by": "Main, after the founder component cut",
           "executed": true,
           "commit": "5cc028816ac07766c0821e28a52fc433062bc6e4",
-          "remaining": "Final lane receipts/code/docs commit is the --stage lane pin"
+          "remaining": "Lane-receipt pin47c79a3d926184b86291a78c2a6815403d666a21 committed; canonical lane receipts unchanged"
         },
         {
           "order": 8,
           "action": "Rebind the published selected-source lane",
-          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin \"${V011_LANE_COMMIT:?published frozen selected-source lane commit}\"",
+          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin 47c79a3d926184b86291a78c2a6815403d666a21",
           "founder_only": false,
-          "executed": false,
-          "agent_authorized_by": "Main, after the founder component cut"
+          "executed": true,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "pin": "47c79a3d926184b86291a78c2a6815403d666a21",
+          "observed_exit": 0
         },
         {
           "order": 9,
@@ -261,7 +263,10 @@
           "required_input": "V011_CANDIDATE_COMMIT",
           "guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
           "founder_only": false,
-          "agent_authorized_by": "Main, after the founder component cut"
+          "agent_authorized_by": "Main, after the founder component cut",
+          "profile_binding": "Verified installable, not ready; root-lane-cut.json",
+          "frozen_candidate_delivery": "Final40hexcandidate and CIURL are reported in PR78, avoiding self-referential commit pins",
+          "rollback_host_workspace_inputs": "Main acceptance owner supplies actual measured effect/rollback inputs; not assigned to this worker"
         },
         {
           "order": 10,
@@ -312,5 +317,14 @@
       "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
       "rerun_by_this_worker": false
     }
+  },
+  "root_lane_cut": {
+    "executed": true,
+    "authority": "Main",
+    "receipt": "root-lane-cut.json",
+    "pin": "47c79a3d926184b86291a78c2a6815403d666a21",
+    "installable_cli_exit": 0,
+    "manifest_status": "candidate",
+    "external_installation_passed": false
   }
 }

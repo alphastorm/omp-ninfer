@@ -101,7 +101,7 @@
       "python3 -m unittest discover -s tests -v",
       "bash -n examples/manual-tunnel/*.sh"
     ],
-    "dependency": "S2 follow-on commit; use the final own draft-PR CI, not a local full suite",
+    "dependency": "Final pushed-head existing GitHub CI is authority; Main separately authorized full local suite with every failure recorded in root-lane-cut.json",
     "initial": {
       "status": "success",
       "commit": "a1379e45b66abb4016f4a63eb097bc34d3cefe94",
@@ -129,5 +129,34 @@
       "scope": "All existing CI steps on the corrected final code/test head; later changes are receipts/docs only."
     }
   },
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "post_cut": {
+    "receipt": "root-lane-cut.json",
+    "local_full_suite_exercised": true,
+    "initial": {
+      "tests": 347,
+      "failures": 17,
+      "errors": 2,
+      "skipped": 2,
+      "seconds": 208.29
+    },
+    "corrected": {
+      "tests": 347,
+      "failures": 4,
+      "errors": 1,
+      "skipped": 2,
+      "seconds": 207.975
+    },
+    "final_fixture_focused": {
+      "tests": 1,
+      "exit": 0,
+      "seconds": 0.538
+    },
+    "mac_timing_policy": "Four unchanged concurrency timing failures are environment evidence, per Main; final-head Ubuntu/Python3.11 CI is authority. No tolerances widened.",
+    "installable": {
+      "release": "v0.11.0",
+      "exit": 0,
+      "manifest_status": "candidate"
+    }
+  }
 }

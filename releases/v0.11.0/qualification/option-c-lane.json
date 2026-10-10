@@ -2,7 +2,7 @@
   "artifact_type": "omp_ninfer_option_c_lane_qualification",
   "schema_version": 2,
   "classification": "Founder-selected v0.6.16 source; all15 local qualification gates pass; published component staged, route acceptance pending",
-  "overall_verdict": "All15 unchanged local lane criteria pass; fullsm120a ctest111pass/7skip/0fail. Component published/staged; documented-route acceptance remains pending.",
+  "overall_verdict": "All15 unchanged local lane criteria pass; fullsm120a ctest111pass/7skip/0fail. Published component staged/root candidate bound; --require-installable passes. Documented-route acceptance remains pending.",
   "founder_selection": {
     "option": "c",
     "date": "2026-10-10",
@@ -411,5 +411,14 @@
       "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
       "rerun_by_this_worker": false
     }
+  },
+  "root_lane_cut": {
+    "executed": true,
+    "authority": "Main",
+    "receipt": "root-lane-cut.json",
+    "pin": "47c79a3d926184b86291a78c2a6815403d666a21",
+    "installable_cli_exit": 0,
+    "manifest_status": "candidate",
+    "external_installation_passed": false
   }
 }

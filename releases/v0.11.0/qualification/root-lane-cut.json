@@ -1,0 +1,110 @@
+{
+  "artifact_type": "omp_ninfer_v011_root_lane_cut",
+  "schema_version": 1,
+  "authority": "Main explicitly authorized post-founder-publication staging, conditional root-marker consumption and lane rebind",
+  "release": "v0.11.0",
+  "lane_receipt_commit": "47c79a3d926184b86291a78c2a6815403d666a21",
+  "commands": [
+    {
+      "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin 47c79a3d926184b86291a78c2a6815403d666a21",
+      "exit": 0,
+      "compatibility_sha256_prefix": "15d201e7c79d"
+    },
+    {
+      "command": "/opt/homebrew/bin/python3.13 scripts/verify_release.py --release v0.11.0 --require-installable",
+      "exit": 0,
+      "observed": "valid v0.11.0 manifest (candidate)"
+    },
+    {
+      "command": "bash -n examples/manual-tunnel/*.sh",
+      "exit": 0
+    }
+  ],
+  "preserved_invariants": [
+    "Manifest remains candidate; external installation not passed and publication blockers retained",
+    "Upstream clients replaced wholesale per platform before root markers consumed",
+    "Unpromoted and legacy-fork markers still refuse",
+    "No hand-edit of root profiles",
+    "No product publisher or acceptance driver or host/GPU work"
+  ],
+  "published_component": {
+    "receipt": "runtime-publication.json",
+    "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+    "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+    "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+    "anonymous_pull_identity_reported_by": "Main",
+    "anonymous_pull_rerun_by_worker": false
+  },
+  "first_full_local_suite": {
+    "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -v",
+    "tests": 347,
+    "seconds": 208.29,
+    "exit": 1,
+    "failures": 17,
+    "errors": 2,
+    "skipped": 2,
+    "classes": [
+      {
+        "kind": "Pre-cut authority/profile state in immutable-qualified and staged/provider fixtures",
+        "disposition": "Migrated only fixture setup/authoritative contract; all refusal assertions preserved;214b073 precedent"
+      },
+      {
+        "kind": "Cutter child python3 resolved to system3.9",
+        "disposition": "Corrected suite PATH to Python3.13 libexec; no cutter implementation edit"
+      },
+      {
+        "kind": "Four concurrency timing assertions on Mac",
+        "disposition": "Main reports identical untouched-code failures in S2 and passing Ubuntu/Python3.11 CI; no timing tolerance or implementation changes; final-head GitHub CI authority"
+      }
+    ]
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "corrected_full_local_suite": {
+    "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" /opt/homebrew/bin/python3.13 -m unittest discover -s tests -v",
+    "tests": 347,
+    "seconds": 207.975,
+    "exit": 1,
+    "failures": 4,
+    "errors": 1,
+    "skipped": 2,
+    "remaining_failures": [
+      {
+        "test": "test_metrics_count_reasoning_and_measure_concurrent_makespan",
+        "observed_ttft_s": 0.16383291699457914,
+        "expected_s": 0.06,
+        "delta": 0.035
+      },
+      {
+        "test": "test_one_pre_stream_reset_retry_keeps_submit_latency",
+        "observed_decode_tok_s": 434.85547848436306,
+        "expected": 2500,
+        "delta": 700
+      },
+      {
+        "test": "test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
+        "observed_gap_ms": 324.83850000426173,
+        "expected_ms": 180,
+        "delta": 35
+      },
+      {
+        "test": "test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples",
+        "observed_submission_gap_s": 1.147899208997842,
+        "expected_s": 1,
+        "delta": 0.06
+      }
+    ],
+    "remaining_fixture_error": {
+      "test": "test_upstream_descriptor_allows_unpromoted_platform_root_pins",
+      "error": "KeyError: compat",
+      "cause": "Obsolete duplicate legacy-provider setup after fixture helper already removed compat",
+      "disposition": "Removed duplicate setup; both platform-draft refusal assertions retained",
+      "focused_verification": {
+        "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" /opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v",
+        "exit": 0,
+        "tests": 1,
+        "seconds": 0.538
+      }
+    },
+    "timing_disposition": "Main reports the same four failures for S2 on unchanged Mac code and passing Ubuntu/Python3.11 CI. No timing test/threshold or probe implementation edit. Final-head GitHub CI is authority."
+  }
+}

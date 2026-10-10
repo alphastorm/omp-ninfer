@@ -571,7 +571,7 @@ class ReleaseContractTest(unittest.TestCase):
                 VERIFY_RELEASE.validate_profile_contract(
                     profile, "candidate", profile["release"], profile["model"],
                     profile["model"]["public_id"], profile["server"]["deployment_profile"],
-                    errors, upstream_client=True)
+                    errors, upstream_client=True, per_model_stateful=True)
                 self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
         for key, value in (("stateful_responses_environment", {"PI_OPENAI_STATEFUL": "1"}),
                            ("ninfer_stateful_responses", True)):
@@ -582,7 +582,7 @@ class ReleaseContractTest(unittest.TestCase):
                 VERIFY_RELEASE.validate_profile_contract(
                     profile, "candidate", profile["release"], profile["model"],
                     profile["model"]["public_id"], profile["server"]["deployment_profile"],
-                    errors, upstream_client=True)
+                    errors, upstream_client=True, per_model_stateful=True)
                 self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
 
     def test_non_candidate_cannot_select_stateful_contract_from_its_own_tag(self) -> None:

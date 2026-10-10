@@ -345,7 +345,8 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         client identity, authenticates a qualified profile: the bytes hash correctly and the
         evidence is still the wrong release's.
         """
-        authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        # This control needs real acceptance, not the live acceptance-pending candidate.
+        authority = json.loads((ROOT / "releases/v0.10.0/compatibility.json").read_text(encoding="utf-8"))
         release = authority["product_release"]
         elsewhere = "v0.0.1"
         stale_profile = deepcopy(authority)
@@ -366,7 +367,8 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_qualified_profile_must_keep_the_core_client_capabilities(self) -> None:
         """An allowlist cannot see a removal: a shorter list is still a subset."""
-        authority = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))
+        # Keep removal/duplicate refusals on an actually qualified immutable profile.
+        authority = json.loads((ROOT / "releases/v0.10.0/compatibility.json").read_text(encoding="utf-8"))
         qualified = next(index for index, profile in enumerate(authority["profiles"])
                          if profile["status"] == "qualified")
         for capability in sorted(MODULE.REQUIRED_CLIENT_CAPABILITIES):

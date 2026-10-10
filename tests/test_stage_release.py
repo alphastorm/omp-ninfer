@@ -14,7 +14,7 @@ DESCRIPTOR = ROOT / "tests" / "fixtures" / "upstream-omp-component.json"
 SOURCE = "v0.7.4"
 # A release that is never checked in, so the staged tree cannot collide with a real one.
 TARGET = "v0.99.0"
-# The checked-in public release, whose client the root profiles describe.
+# The checked-in root release (which may be an acceptance-pending candidate).
 CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
 
 
@@ -33,6 +33,13 @@ class StageReleaseTests(unittest.TestCase):
         root = Path(temporary.name)
         for name in ("scripts", "profiles", "releases"):
             shutil.copytree(ROOT / name, root / name)
+        if source_release == SOURCE:
+            # Synthetic18.3/legacy-source fixtures keep their historical provider epoch.
+            for path in (root / "profiles").glob("*.json"):
+                profile = self.load(path)
+                profile["omp_provider"].pop("compat", None)
+                profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+                self.save(path, profile)
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
@@ -239,9 +246,6 @@ class StageReleaseTests(unittest.TestCase):
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)
             profile["status"] = "public"
-            # DESCRIPTOR stages legacy stock OMP 18.3, whose qualified contract uses the global override.
-            profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
-            profile["omp_provider"]["compat"].pop("statefulResponses", None)
             self.save(path, profile)
         result = self.stage(root)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
