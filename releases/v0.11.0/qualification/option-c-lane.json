@@ -1,0 +1,360 @@
+{
+  "artifact_type": "omp_ninfer_option_c_lane_qualification",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "source_commit_unpublished": true,
+  "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+  "package_local_image": "ninfer-overnight:S1-1302d639-option-c-package-local",
+  "package_local_image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
+  "deployment_profile": "qwen38-5090-v0.11.0",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "unchanged_criterion_contract": "v0.10.0 criteria1-15, criterion14 amended byPR74",
+  "criteria": [
+    {
+      "criterion": 1,
+      "requirement": "Clean exact source/build/model/image/config identity; unchanged supported serving shape",
+      "status": "pass",
+      "metrics": {
+        "source_dirty": false,
+        "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+        "package_local_image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
+        "deployment_profile": "qwen38-5090-v0.11.0",
+        "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+        "kv_pool_tokens": 131520,
+        "context_tokens": 131072,
+        "max_in_flight": 2,
+        "device_state_slots": 2,
+        "pending_timeout_ms": 180000,
+        "stage_identities": 13,
+        "all_stage_identities_match": true
+      }
+    },
+    {
+      "criterion": 2,
+      "requirement": "Precedent-selected CPU/oracle/BF16 tests",
+      "status": "pass",
+      "metrics": {
+        "full_suite_total": 118,
+        "full_suite_passed": 111,
+        "full_suite_skipped": 7,
+        "full_suite_failed": 0,
+        "full_suite_exit": 0,
+        "direct_bf16_tests": {
+          "head0_b1": 0,
+          "head1_b1": 0,
+          "head0_b2": 0
+        },
+        "nvfp4_real_test_passed": true,
+        "nvfp4_real_test_seconds": 28.7297
+      }
+    },
+    {
+      "criterion": 3,
+      "requirement": "Quality evidence bound to the exact packaged binary",
+      "status": "pass",
+      "metrics": {
+        "binary_identical_to_exp094": false,
+        "identical_serial_role_signatures": 89,
+        "different_serial_role_signatures": 0,
+        "identical_request_bodies": 89,
+        "counted_cases": 84,
+        "counted_errors_each_arm": 0,
+        "excluded_vacuous_errors_each_arm": 5,
+        "new_powered_screen_run": false
+      }
+    },
+    {
+      "criterion": 4,
+      "requirement": "MTP3 control matches the frozen v0.9.0 production corpus",
+      "status": "pass",
+      "metrics": {
+        "compared_cases": 89,
+        "identical_signatures": 89,
+        "different_signatures": 0,
+        "identical_request_bodies": 89
+      }
+    },
+    {
+      "criterion": 5,
+      "requirement": "Exact 130,048-token retrieval, exact 2,048-token decode, agent protocol across restart",
+      "status": "pass",
+      "metrics": {
+        "retrieval_prompt_tokens": 130048,
+        "retrieval_exact": true,
+        "retrieval_wall_s": 58.89,
+        "decode_output_tokens": 2048,
+        "decode_server_tok_s": 179.79,
+        "decode_wall_tok_s": 177.96,
+        "deleted_descendant_post_restart_status": 404,
+        "no_resurrection": true,
+        "live_survivor_restored": true,
+        "idle_vram_mib": 29468,
+        "retrieval_vram_mib": 29470,
+        "transient_retries": 0
+      }
+    },
+    {
+      "criterion": 6,
+      "requirement": "Actual stock OMP macOS arm64 proof exits 0",
+      "status": "pass",
+      "metrics": {
+        "client_version": "18.8.7",
+        "client_binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+        "checks_passed": 6,
+        "passed": true
+      }
+    },
+    {
+      "criterion": 7,
+      "requirement": "No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition",
+      "status": "pass",
+      "metrics": {
+        "runs": 3,
+        "successful_runs": 2,
+        "predecessor_harness_precondition_runs": 1,
+        "compactions_committed": 6,
+        "max_root_computed_prefill_tokens": 58190,
+        "root_prefills_over_60000": 0,
+        "plant_after_runs": [
+          {
+            "plant_after": 2,
+            "passed": true,
+            "compactions": 2,
+            "committed_compactions": 2,
+            "error": null
+          },
+          {
+            "plant_after": 3,
+            "passed": false,
+            "compactions": 2,
+            "committed_compactions": 2,
+            "error": {
+              "redacted": true,
+              "sha256": "ac8ceed691c7a82369b6478a885509d517c28e42de6ea75dafb9458f5ed60a20",
+              "exception_class": "RuntimeError"
+            }
+          },
+          {
+            "plant_after": 1,
+            "passed": true,
+            "compactions": 2,
+            "committed_compactions": 2,
+            "error": null
+          }
+        ]
+      }
+    },
+    {
+      "criterion": 8,
+      "requirement": "Quota reclamation and post-crash long continuation retains at least 60K cached tokens",
+      "status": "pass",
+      "metrics": {
+        "short_records": 35,
+        "quota_bytes": 25769803776,
+        "reclaimed": true,
+        "crash_exit": 0,
+        "continuation_input_tokens": 60079,
+        "continuation_cached_tokens": 60057,
+        "continuation_wall_s": 2.39,
+        "initial_harness_exit": 1,
+        "corrected_harness_exit": 0
+      }
+    },
+    {
+      "criterion": 9,
+      "requirement": "No workload errors, all stored sessions restored from checkpoints, first shutdown refused 0",
+      "status": "pass",
+      "metrics": {
+        "workload_errors": 0,
+        "stored_sessions": 4,
+        "restored_from_checkpoint": 4,
+        "multisession_reuse_losses": 0,
+        "multisession_continuations": 8,
+        "first_shutdown_refused": 0,
+        "ancillary_desk_codes_exact": {
+          "session-D1": true,
+          "session-D2": false
+        }
+      }
+    },
+    {
+      "criterion": 10,
+      "requirement": "Held publication barrier exact restore; shutdown refused0",
+      "status": "pass",
+      "metrics": {
+        "barrier_hit": true,
+        "hold_seconds": 6,
+        "resume_exact": true,
+        "shutdown_refused": 0
+      }
+    },
+    {
+      "criterion": 11,
+      "requirement": "Fanout57k/67k,warm-arrival,restore pass; multisession reuse loss≤2/8",
+      "status": "pass",
+      "metrics": {
+        "fanout57k_exit": 0,
+        "fanout67k_exit": 0,
+        "warm_arrival_exit": 0,
+        "restore_exit": 0,
+        "multisession_exit": 0,
+        "multisession_reuse_lost": 2,
+        "multisession_continuations": 8,
+        "fanout57k_hot_median_s": 0.669,
+        "fanout67k_hot_median_s": 0.79,
+        "restore0_s": 2.88,
+        "restore1_s": 2.937
+      }
+    },
+    {
+      "criterion": 12,
+      "requirement": "Agent mix measured fresh roots0/24",
+      "status": "pass",
+      "metrics": {
+        "measured_fresh_requests": 24,
+        "measured_fresh_root_count": 0,
+        "measured_continuations": 24,
+        "measured_continuation_root_count": 0,
+        "errors": 0
+      }
+    },
+    {
+      "criterion": 13,
+      "requirement": "Seven C2 scenarios twice all pass; three restart pairs retain≥62404cached each",
+      "status": "pass",
+      "metrics": {
+        "scenarios": 7,
+        "repeats": 2,
+        "scenario_runs": 14,
+        "scenario_passes": 14,
+        "restart_repeats": 3,
+        "restored_sessions": 6,
+        "min_resume_cached_tokens": 62404,
+        "failed_requests": 0
+      }
+    },
+    {
+      "criterion": 14,
+      "requirement": "Actual OMP18.8.7 limits1 then2, same server, amendedPR74",
+      "status": "pass",
+      "metrics": {
+        "limit1_passed": true,
+        "limit2_passed": true,
+        "limit1_dispatch": [
+          2
+        ],
+        "limit2_dispatch": [
+          2
+        ],
+        "recovered_limit2": false,
+        "subagents_completed": true,
+        "codes_delivered": true,
+        "parent_codes_exact": true,
+        "same_server_instance": true,
+        "server_instance_id_count": 1,
+        "limit2_subagent_overlap_s": 13.614,
+        "limit2_sessions_overlap_s": 4.976,
+        "qualifies_c2": true,
+        "client_version": "18.8.7",
+        "client_binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+        "errors_each_limit": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "criterion": 15,
+      "requirement": "Server request errors0; shutdown refused≤7 C2probe,0others",
+      "status": "pass",
+      "metrics": {
+        "stages": 13,
+        "server_request_errors": 0,
+        "c2probe_shutdown_refused": 7,
+        "all_other_shutdown_refused": 0
+      }
+    }
+  ],
+  "local_lane_verdict": "pass",
+  "passed_criteria": 15,
+  "failed_criteria": [],
+  "lease_jobs": [
+    {
+      "job": "20261010T105001Z-S1-option-c-lane-criteria-1-15-1382427",
+      "priority": 3,
+      "exit": 0,
+      "elapsed_seconds": 4150,
+      "leftover_containers_stopped": 0,
+      "unowned_containers_left_running": 0
+    },
+    {
+      "job": "20261010T114641Z-S1-option-c-criterion8-own-container-monitor-1418823",
+      "priority": 2,
+      "exit": 0,
+      "elapsed_seconds": 325,
+      "leftover_containers_stopped": 0,
+      "unowned_containers_left_running": 0
+    }
+  ],
+  "invalidated_attempts": [
+    {
+      "criterion": 8,
+      "exit": 1,
+      "classification": "harness-invalid, not candidate failure",
+      "cause": "frozen disk monitor targeted ov-S1-runtime rather than own ov-S1-option-c-runtime",
+      "disposition": "separately frozen literal-container-name correction and fresh criterion8 replay passed",
+      "receipt": "option-c-criterion8-harness.json"
+    },
+    {
+      "criterion": 14,
+      "exit": 1,
+      "transport_exit": 255,
+      "classification": "Mac control bridge interruption, not candidate failure",
+      "cause": "nyc-wsl control polling exited255; underlying cause not measured",
+      "disposition": "resumed only uncompleted parallel phase, exit0; stock/long proofs not rerun",
+      "receipt": "option-c-client-bridge-interruption.json"
+    }
+  ],
+  "retained_non_gate_failures": [
+    {
+      "criterion": 7,
+      "plant_after": 3,
+      "classification": "documented predecessor harness precondition allowed by unchanged gate",
+      "redacted_error_sha256": "ac8ceed691c7a82369b6478a885509d517c28e42de6ea75dafb9458f5ed60a20",
+      "identical_to_original_a59": true
+    },
+    {
+      "criterion": 9,
+      "check": "session-D2 ancillary desk code recall",
+      "result": false,
+      "classification": "not formal criterion9; unchanged requirement is errors, durability and shutdown, not ancillary generated-code accuracy"
+    }
+  ],
+  "baseline_comparison": {
+    "v0100_retrieval_wall_s": 58.738,
+    "option_c_retrieval_wall_s": 58.89,
+    "retrieval_delta_s": 0.15200000000000102,
+    "retrieval_delta_percent": 0.2587762606830246,
+    "v0100_decode_server_tok_s": 161.39,
+    "option_c_decode_server_tok_s": 179.79,
+    "decode_delta_percent": 11.400954210298032,
+    "original_a59_retrieval_wall_s": 58.917,
+    "original_a59_decode_server_tok_s": 179.79,
+    "abba_receipt": "option-c-abba.json"
+  },
+  "receipts": {
+    "evidence": "option-c-lane-evidence.json",
+    "server_logs": "option-c-lane-logs.json",
+    "actual_omp_client": "option-c-omp-client.json",
+    "source": "option-c-source.json",
+    "build": "option-c-build.json",
+    "quality": "option-c-output-identity.json"
+  },
+  "original_a59_proposal_changed": false,
+  "original_desktop_component_assets_replaced": false,
+  "cutter_or_staging_run_for_option_c": false,
+  "published_image_acceptance_run": false,
+  "production_promotion": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}

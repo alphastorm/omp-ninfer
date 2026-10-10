@@ -65,7 +65,7 @@ Founder source choices (the release proposal remains exact `a59c13d0`):
 |---|---|---|---|
 | (a) Restrict the pair route | New source change to3a | Not attempted; clean rebuild, EXP092/094 remeasurement and rescreen required | Approve and qualify a real source fix; do not relax the oracle |
 | (b) Keep the exact target | `a59c13d0` | All15 original local lane criteria pass; full ctest110 pass/7 skip/1 fail in the unshipped NVFP4-KV configuration rejected by EXP085 | Explicit all-green-ctest policy exception, not a skip or suppression; none approved |
-| (c) Omit3a | Local, **unpublished** `1302d63929e400a05e1c9cdb0fc8003a70269825`: eaf+b72+a59 without3a | Clean full sm_120a ctest **111 pass/7 skip/0 fail**, including the NVFP4 oracle;89/89 serial output signatures and request bodies match unchanged a59 (84 counted cases,0 errors;5 vacuous fixture errors excluded). A/B/B/A pair round cost **+9.35%**,19.408→21.222ms; pair aggregate wall throughput505.40→462.33tok/s (**−8.52%**). Single-request round cost changes−0.14% to−0.004% across0/32K/64K/120K. | **Experiment, not candidate**. Source selection and any source publication/cut remain founder decisions; no replacement of the a59 assets or proposal |
+| (c) Omit3a | Local, **unpublished** `1302d63929e400a05e1c9cdb0fc8003a70269825`: eaf+b72+a59 without3a | Clean full sm_120a ctest **111 pass/7 skip/0 fail**, including the NVFP4 oracle;89/89 serial output signatures and request bodies match unchanged a59 (84 counted cases,0 errors;5 vacuous fixture errors excluded). **All15 unchanged local lane criteria pass**: retrieval58.890s, decode179.79server tok/s. A/B/B/A pair round cost **+9.35%**,19.408→21.222ms; pair aggregate wall throughput505.40→462.33tok/s (**−8.52%**). Single-request round cost changes−0.14% to−0.004% across0/32K/64K/120K. | **Experiment, not candidate**. Source selection and any source publication/cut remain founder decisions; no replacement of the a59 assets or proposal |
 
 Option-C cherry-picks applied without conflicts: b72 replay
 `344850b3e9e3c8f5855f6a979a630d1c4eada4a8`, then a59 replay`1302d639…`.
@@ -79,7 +79,24 @@ through the measured a59→EXP094 binding; it is not a newly run powered screen 
 a claim of pair output invariance. The nonce-dependent decode-token-rate swings
 are not attributed to source omission: per-round cost is the comparison metric.
 [Source](qualification/option-c-source.json) · [Build](qualification/option-c-build.json) ·
-[Serial binding](qualification/option-c-output-identity.json) · [ABBA](qualification/option-c-abba.json).
+[Serial binding](qualification/option-c-output-identity.json) · [ABBA](qualification/option-c-abba.json) ·
+[All15 lane criteria](qualification/option-c-lane.json) · [Numeric evidence](qualification/option-c-lane-evidence.json) ·
+[Actual OMP client](qualification/option-c-omp-client.json) · [Server logs](qualification/option-c-lane-logs.json).
+
+Option-C local qualification preserves the original gates and every non-green outcome.
+The initial quota probe was harness-invalid: its frozen disk monitor targeted the old
+container. A separately frozen own-container correction passed with35 short records,
+quota reclamation and60,057 cached tokens after crash/restart. The Mac control bridge
+also exited255 after stock/long completion; only the uncompleted parallel phase was
+resumed and passed. Plant3 retains the byte-identical documented predecessor
+precondition; six compactions committed across all three long runs. Ancillary D2 desk
+code recall remains false, outside the unchanged durability gate. Two multisession
+reuse losses meet the unchanged≤2/8 limit. Seven C2 scenarios pass twice; all six
+restart continuations retain62,404 cached tokens. Actual OMP18.8.7 dispatches2/2
+children at both limits on one server, with13.614s subagent and4.976s session overlap
+at limit2. Across13 stages:0 server request errors, seven permitted C2probe shutdown
+refusals and0 elsewhere. No route acceptance, option-C cutter, staging or promotion ran.
+
 
 The exact new binary differs from EXP-094's `884e5a43…` binary. One uninterrupted
 lease ran the same frozen 89-case role corpus on both images: **89/89 output signatures

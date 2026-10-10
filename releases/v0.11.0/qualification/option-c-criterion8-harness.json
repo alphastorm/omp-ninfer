@@ -1,0 +1,42 @@
+{
+  "artifact_type": "omp_ninfer_option_c_criterion8_harness_disposition",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "initial_attempt": {
+    "lease_job": "20261010T105001Z-S1-option-c-lane-criteria-1-15-1382427",
+    "probe_exit": 1,
+    "receipt_written": false,
+    "disposition": "INVALID, private harness targeted the original own-container name, not a runtime failure",
+    "exception_class": "CalledProcessError",
+    "wrong_container": "ov-S1-runtime",
+    "actual_container": "ov-S1-option-c-runtime",
+    "long_seed_input_tokens": 60026,
+    "long_seed_cached_tokens": 0,
+    "long_seed_seconds": 21.95
+  },
+  "corrected_attempt": {
+    "lease_job": "20261010T114641Z-S1-option-c-criterion8-own-container-monitor-1418823",
+    "priority": 2,
+    "minutes": 20,
+    "isolated_checkpoint_purpose": "lane-short-sessions-corrected-container",
+    "monitor_original_sha256": "1cd20b59e72b48aeea91b57d768be7834df8feacb0d92852a41380d1d7c9201d",
+    "monitor_corrected_sha256": "be92dff0c6d63f03842990be5a82756048cb67f7b38acbe2d53b6a03d22be964",
+    "exact_monitor_diff": "-text = subprocess.run(['docker', 'exec', 'ov-S1-runtime', 'sh', '-c', SCRIPT],\n+text = subprocess.run(['docker', 'exec', 'ov-S1-option-c-runtime', 'sh', '-c', SCRIPT],\n",
+    "driver_sha256": "59744e1343c9fbe396c06607e99ea5e323ee27745feb2c24e216e7f6687ffcff",
+    "observed_result": {
+      "lease_exit": 0,
+      "elapsed_seconds": 325,
+      "probe_exit": 0,
+      "short_records": 35,
+      "reclaimed": true,
+      "continuation_input_tokens": 60079,
+      "continuation_cached_tokens": 60057,
+      "continuation_wall_s": 2.39,
+      "leftover_containers_stopped": 0,
+      "unowned_containers_left_running": 0
+    }
+  },
+  "running_full_lane_job_inputs_changed": false,
+  "runtime_source_changed": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}
