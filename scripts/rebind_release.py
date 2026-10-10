@@ -162,6 +162,8 @@ def promote_root(release: str, manifest_path: Path) -> None:
                                 "native-windows-docker-local": "windows-docker-local"}[
                                     profile["installation_mode"]]
             profile["client"] = dict(clients[compatibility_id])
+            if profile.get("status") == "candidate":
+                profile.pop("status")
         elif any(key in client for key in CLIENT_ARCHIVE_KEYS):
             client["component_release_tag"] = omp["component_release_tag"]
             client["asset_url"] = omp["artifact_url"]

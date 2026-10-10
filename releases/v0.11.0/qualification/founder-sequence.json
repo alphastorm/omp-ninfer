@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Founder selected option(c). Main reports the authorized source push and passing component --dry-run. Live component cut, staging and acceptance remain founder-only and unexecuted.",
+  "execution_status": "Founder published the selected C component13:46Z; workflow38057050899 succeeded. Main reports anonymous image/binary identity. S1 staged the real digest, merged supplemental evidence and draft-rebound successfully under Main authorization. Lane cut/frozen-candidate checks are the next authorized agent step; acceptance is Main-controlled and unexecuted.",
   "working_directory": "$HOME/Development/omp-ninfer-S1",
   "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
   "selected_option": "c",
@@ -182,70 +182,86 @@
       "ordered_steps": [
         {
           "order": 1,
-        "action": "Founder selection of option(c) completed",
-        "founder_only": true,
-        "executed": true,
-        "reported_by": "Main; founder-authorized action on2026-10-10"
+          "action": "Founder selection of option(c) completed",
+          "founder_only": true,
+          "executed": true,
+          "reported_by": "Main; founder-authorized action on2026-10-10"
         },
         {
           "order": 2,
-        "action": "Founder-authorized source publication completed; origin contains the selected commit",
+          "action": "Founder-authorized source publication completed; origin contains the selected commit",
           "command": "git -C \"$HOME/Development/ninfer-S1\" push origin exp/v0616-without-3a2fadbd",
           "founder_only": true,
-        "executed": true,
-        "reported_by": "Main; founder-authorized action on2026-10-10",
-        "reported_remote_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825"
+          "executed": true,
+          "reported_by": "Main; founder-authorized action on2026-10-10",
+          "reported_remote_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825"
         },
         {
           "order": 3,
-        "action": "Post-push cutter preflight passed; live cut remains pending",
+          "action": "Post-push cutter preflight passed; founder subsequently completed the live cut",
           "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
           "founder_only": true,
-        "executed": true,
-        "prior_refusal": "commit is not on any origin branch",
-        "reported_by": "Main; founder-authorized action on2026-10-10",
-        "reported_exit": 0,
-        "reported_excerpt": "preflight ok ... archive bed8c8d4"
+          "executed": true,
+          "prior_refusal": "commit is not on any origin branch",
+          "reported_by": "Main; founder-authorized action on2026-10-10",
+          "reported_exit": 0,
+          "reported_excerpt": "preflight ok ... archive bed8c8d4"
         },
         {
           "order": 4,
           "action": "Cut the selected runtime component",
           "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\"",
           "founder_only": true,
-          "executed": false
+          "executed": true,
+          "executed_by": "Founder; Main report13:46Z"
         },
         {
           "order": 5,
           "action": "Wait for the cutter-dispatched runtime-image workflow; validate the published receipt against this option exact source/archive/binary hashes and supply its real OCI digest",
           "required_input": "NINFER_OCI_DIGEST",
-          "local_image_id_is_not_a_digest": true
+          "local_image_id_is_not_a_digest": true,
+          "executed": true,
+          "observed_by": "Main; worker consumed the published JSON receipt without repeating the pull",
+          "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+          "receipt": "runtime-publication.json"
         },
         {
           "order": 6,
           "action": "Preserve the existing draft and stage the selected published component with its real profile receipt and S2 OMP18.8.7",
-          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
-          "founder_only": true,
-          "executed": false
+          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest \"sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+          "founder_only": false,
+          "executed": true,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "initial_exit": 1,
+          "initial_missing_link": "qualification/option-c-lane.json",
+          "disposition": "Preserved supplements restored; generated bindings retained; draft rebind exit0",
+          "receipt": "staging.json"
         },
         {
           "order": 7,
           "action": "Merge option-C supplemental receipts and selected-source notes without overwriting generated manifest/qualification/compatibility bindings; freeze and publish the resulting lane/evidence commit",
           "required_input": "V011_LANE_COMMIT",
-          "founder_only": true
+          "founder_only": false,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "executed": true,
+          "commit": "5cc028816ac07766c0821e28a52fc433062bc6e4",
+          "remaining": "Final lane receipts/code/docs commit is the --stage lane pin"
         },
         {
           "order": 8,
           "action": "Rebind the published selected-source lane",
           "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin \"${V011_LANE_COMMIT:?published frozen selected-source lane commit}\"",
-          "founder_only": true,
-          "executed": false
+          "founder_only": false,
+          "executed": false,
+          "agent_authorized_by": "Main, after the founder component cut"
         },
         {
           "order": 9,
           "action": "Resolve candidate posture from real qualification; freeze and publish a legitimately installable product candidate and bind its actual rollback/host/workspace inputs",
           "required_input": "V011_CANDIDATE_COMMIT",
-          "guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
-          "founder_only": true
+          "guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
+          "founder_only": false,
+          "agent_authorized_by": "Main, after the founder component cut"
         },
         {
           "order": 10,
@@ -264,7 +280,7 @@
     "s2_initial_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7",
     "s1_cherry_pick": "eaee6d0"
   },
-  "preflight_guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
+  "preflight_guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
   "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
   "follow_on": [
     "Retain native RTX4090 in v0.11.0 and obtain fresh OMP18.8.7 requalification on the founder-designated replacement host.",
@@ -272,19 +288,29 @@
     "Compose fresh receipts for all retained documented routes, then platform/acceptance/manifest pin stages and --require-ready --check-pins before the product cut."
   ],
   "blockers": [
-    "Founder live component cut and its real published OCI digest/receipt remain pending; the local Docker image ID is not a publication digest.",
     "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
     "Native RTX3090 needs fresh OMP18.8.7 acceptance and confirmation of continued physical GPU presence after the replacement-host change.",
     "All retained documented routes need fresh published-component acceptance after the cut; RTX5090 acceptance must use the anonymously pullable published image.",
-    "Legitimately installable frozen product/profile bindings and real rollback/host/workspace inputs are required. A component cut or root promotion does not clear root status:candidate."
+    "Fresh acceptance requires the pushed frozen candidate and actual rollback/host/workspace inputs; no acceptance was run by S1."
   ],
   "original_a59_assets_changed": false,
   "original_a59_proposal_superseded": true,
   "ninfer_source_pushed": true,
   "ninfer_source_pushed_by": "Main with founder authorization",
   "ninfer_source_pushed_by_this_worker": false,
-  "live_component_cut_run": false,
-  "stage_run": false,
+  "live_component_cut_run": true,
+  "stage_run": true,
   "acceptance_run": false,
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
+  "runtime_publication": {
+    "receipt": "runtime-publication.json",
+    "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+    "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/38057050899",
+    "anonymous_pull_and_binary_identity": {
+      "reported_by": "Main",
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "rerun_by_this_worker": false
+    }
+  }
 }

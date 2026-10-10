@@ -62,6 +62,33 @@
       "count": 1,
       "assertions": "Return0 and both Windows/Darwin draft-posture archive mismatches appear",
       "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v"
+    },
+    {
+      "scope": "v0.11.0 root client-candidate marker consumed only by upstream release binding",
+      "test": "PromoteRootTests.test_upstream_promotion_consumes_only_the_bound_client_candidate_marker",
+      "red_before_fix": {
+        "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_rebind_release.py -k consumes_only -v",
+        "exit": 1,
+        "tests": 1,
+        "only_errors": [
+          "profile: unqualified client candidate; documented-route requalification pending",
+          "profiles/qwen38-rtx5090-manual-tunnel.json: unqualified client candidate; documented-route requalification pending"
+        ]
+      },
+      "green_after_fix": {
+        "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_rebind_release.py -v",
+        "exit": 0,
+        "tests": 5,
+        "seconds": 0.5
+      },
+      "full_cli_asserted": "verify_release.py --release v0.11.0 --require-installable --json passes after upstream promotion; unpromoted control refuses",
+      "preserved_controls": [
+        "Legacy fork markers retained",
+        "Manifest remains candidate",
+        "External installation not passed; blockers remain",
+        "Per-platform clients replaced wholesale, not relabelled"
+      ],
+      "authority": "Main marker-policy decision after founder publication"
     }
   ],
   "full_ci": {

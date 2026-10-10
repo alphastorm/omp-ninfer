@@ -7,9 +7,10 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > [!WARNING]
-> **Unreleased client candidate: upstream OMP 18.8.7.** The current install fragments and
-> profiles target this client; GPU-host and all five documented-route requalifications are
-> pending. This combination is not yet published or qualified. The v0.10.0 release and its
+> **Unreleased product candidate: v0.11.0 / upstream OMP 18.8.7.** Current fragments and
+> profiles bind this client to the published v0.6.16 RTX 5090 image; all five documented-route
+> acceptances remain pending. The candidate is installable for maintainer acceptance,
+> not a released or route-qualified product. The v0.10.0 release and its
 > OMP 18.4.10 receipts below remain the published baseline. For a qualified install, use the
 > [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
 > not these candidate fragments.
@@ -22,7 +23,8 @@ its red NVFP4 test remain preserved. These are package-local qualification recei
 not published-image acceptance or production promotion. Native RTX 4090 remains in
 v0.11.0, pending OMP 18.8.7 requalification on the founder-designated replacement
 host; RTX 3090 needs fresh acceptance and confirmation that its GPU remains present.
-Root runtime pins remain v0.10.0.
+The lane cut advances root pins to v0.11.0, image `6a02feba`, server `548fe239`,
+configuration `91a35670`.
 
 > **Before installing — v0.10.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
@@ -36,7 +38,7 @@ Root runtime pins remain v0.10.0.
 
 <div align="center">
 
-**[Get started with v0.10.0 →](docs/QUICKSTART.md)** ·
+**[Get started with v0.10.0 →](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)** ·
 **[Download v0.10.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.10.0)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·

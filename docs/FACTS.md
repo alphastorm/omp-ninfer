@@ -1,16 +1,18 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-10 · **Published release: v0.10.0; OMP 18.8.7 client candidate is unreleased.**
+Updated: 2026-10-10 · **Published product: v0.10.0; installable v0.11.0 candidate is unreleased.**
 
 ## Current client candidate — OMP 18.8.7
 
 Current install fragments and root profiles target unmodified upstream OMP **18.8.7**, source
-`f261ed9faf16b61880b544f599876bface4ded0d`. The profiles' `release: v0.10.0` names their unchanged
-runtime baseline, not a published 18.8.7 product. Their `status: candidate` means **unqualified**.
+`f261ed9faf16b61880b544f599876bface4ded0d`, bound by the v0.11.0 manifest. A root
+`status:candidate` means its client is not bound by the release it names; lane promotion
+consumes that marker only after replacing the client from an upstream-release copy.
+The manifest itself remains candidate, with external acceptance pending and no ready claim.
 GPU-host requalification and fresh acceptance remain pending for the RTX 5090 container host,
 macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows routes.
 Local client rehearsals are not GPU-host requalification or documented-route acceptance.
-No new qualification receipt, tag or publication is claimed by this client repin.
+The runtime component is published; no new product tag or route acceptance is claimed.
 The [2026-10-10 local rehearsal receipts](QUICKSTART.md#local-rehearsal-not-acceptance) record
 passing typed-tool, exact-continuation and fail-closed checks for all three verified 18.8.7
 client binaries against the unchanged published RTX 5090 image; they do not qualify routes.
@@ -22,16 +24,17 @@ hosts now default to auto image detail, so RTX 5090 fragments no longer override
 Unavailable saved models fail closed upstream ([#13689](https://github.com/can1357/oh-my-pi/pull/13689));
 no additional config is needed. Compaction settings are unchanged.
 
-## Separate runtime draft — v0.11.0
+## Current runtime candidate — v0.11.0
 
-The separate [v0.11.0 runtime draft](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) proposes
-RTX 5090 component v0.6.16 from unchanged `a59c13d0`. It does not change root runtime
-pins. The clean package-local profile measured exact 130,048-token retrieval in
-**58.917 s** and **179.79 server decode tok/s** over 2,048 output tokens, against
-v0.10.0's 58.738 s and 161.39 tok/s. These are local rehearsal measurements, not a
-new release or a traffic-weighted performance promise. The draft retains the red
-NVFP4 graph/serial test and solo-versus-paired output diagnostics rather than treating
-a successful command exit as complete qualification.
+The [v0.11.0 candidate](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
+RTX 5090 component v0.6.16/source1302d639, without3a, image6a02feba/server548fe239.
+Profile qwen38-5090-v0.11.0/config91a35670 keeps BF16 KV/DFlash2 K=7/two device slots.
+All 15 local criteria pass; full sm_120a ctest: 111 pass/7 skip/0 fail. Exact 130,048-token
+retrieval is **58.890 s**, 2,048-token decode **179.79 server/177.96 wall tok/s**, against
+v0.10.0's 58.738 s/161.39 server tok/s. This is not route acceptance or a traffic-weighted
+promise. Superseded a59's red NVFP4 oracle remains evidence; no test was suppressed.
+Native RTX 4090 is retained pending new-host OMP 18.8.7 qualification; native RTX 3090 still
+needs fresh acceptance and confirmation of continued GPU presence.
 
 ## Published baseline — v0.10.0
 

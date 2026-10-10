@@ -10,7 +10,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_RELEASE = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+# Immutable ready fixture; root authority may legitimately be a newer candidate.
+PUBLIC_RELEASE = "v0.10.0"
 SPEC = importlib.util.spec_from_file_location(
     "verify_release", ROOT / "scripts" / "verify_release.py"
 )
@@ -21,6 +22,10 @@ STAGE_SPEC = importlib.util.spec_from_file_location("stage_release", ROOT / "scr
 assert STAGE_SPEC is not None and STAGE_SPEC.loader is not None
 STAGE_RELEASE = importlib.util.module_from_spec(STAGE_SPEC)
 STAGE_SPEC.loader.exec_module(STAGE_RELEASE)
+REBIND_SPEC = importlib.util.spec_from_file_location("rebind_release", ROOT / "scripts/rebind_release.py")
+assert REBIND_SPEC is not None and REBIND_SPEC.loader is not None
+REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
+REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
@@ -418,7 +423,14 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
-        # Release-contract fixtures retain the published client, not the live unqualified candidate.
+        shutil.copytree(ROOT / "examples" / "manual-tunnel", root / "examples" / "manual-tunnel")
+        previous_root = REBIND_RELEASE.ROOT
+        try:
+            REBIND_RELEASE.ROOT = root
+            REBIND_RELEASE.promote_root(PUBLIC_RELEASE, root / "releases" / PUBLIC_RELEASE / "manifest.json")
+        finally:
+            REBIND_RELEASE.ROOT = previous_root
+        # Restore the frozen published provider contract, not the live candidate's.
         omp = self.load(root / "releases" / PUBLIC_RELEASE / "manifest.json")["components"]["omp"]
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)
@@ -433,14 +445,24 @@ class ReleaseContractTest(unittest.TestCase):
                               binary_sha256=omp["binary_sha256"])
             profile["client"] = client
             self.save(path, profile)
-        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
-        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        shutil.copy2(root / "releases" / PUBLIC_RELEASE / "COMPATIBILITY.md",
+                     root / "docs" / "COMPATIBILITY.md")
         # Component-mutation fixtures need valid release-note link targets; the
-        # real documentation graph is checked by the ready validation of ROOT.
+        # real documentation graph is checked by the normal validation of ROOT.
         for document in ("QUICKSTART.md", "SECURITY.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
         return temporary, root
+
+    def add_unbound_client_candidate(self, root: Path) -> None:
+        """Change only client/provider state, preserving the fixture's runtime identity."""
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            current = self.load(ROOT / "profiles" / path.name)
+            profile["status"] = "candidate"
+            profile["client"] = current["client"]
+            profile["omp_provider"] = current["omp_provider"]
+            self.save(path, profile)
 
     @staticmethod
     def load(path: Path) -> dict:
@@ -525,7 +547,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_client_candidate_is_valid_but_not_ready_or_installable(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        self.add_unbound_client_candidate(root)
         warnings = []
         manifest, errors = VERIFY_RELEASE.validate(root, require_ready=False, warnings=warnings)
         self.assertEqual(errors, [])
@@ -600,7 +622,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_client_candidate_checks_exact_upstream_binary_identity(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        self.add_unbound_client_candidate(root)
         path = root / "profiles/qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(path)
         profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.7", "v18.4.10")
@@ -612,7 +634,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_client_candidate_cannot_bypass_qualification_by_relabelling_itself(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
-        shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
+        self.add_unbound_client_candidate(root)
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)
             profile["status"] = "public"

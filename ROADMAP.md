@@ -11,23 +11,25 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — unreleased OMP 18.8.7 client candidate
+## Where this is now — installable v0.11.0 product candidate, acceptance pending
 
 The [v0.11.0 draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) separately binds a clean
 local v0.6.16 RTX 5090 package to founder-selected source `1302d639`: EXP-092/094
 without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and all 15 unchanged
 local lane criteria pass; the superseded `a59c13d0` alternative retains its red test
-evidence. The lead reports the authorized source push and passing cutter dry-run.
-The founder live cut, real OCI digest, staging and fresh published-image acceptance
-remain pending. The founder will install an RTX 4090 on the replacement native host
+evidence. The founder published the component at 13:46Z; workflow38057050899 succeeded.
+Main verified anonymously pulled image6a02feba against exact server548fe239.
+The lane cut binds its real digest and OMP 18.8.7 to v0.11.0; fresh documented-route
+acceptance and product publication remain pending. The founder will install an RTX 4090 on the replacement native host
 today: retain that lane in v0.11.0, pending OMP 18.8.7 requalification, rather than
 retiring it or holding the release for the former host decision. Native RTX 3090
 still needs fresh OMP 18.8.7 acceptance and confirmation of continued GPU presence
-after that host change. Nothing in the draft changes current root runtime pins or
-the five-route published baseline; planned hardware is not a qualification receipt.
+after that host change. Current root runtime pins advance to the candidate; the
+five-route v0.10.0 published baseline stays immutable. Planned hardware is not a receipt.
 
 Current install fragments and profiles target stock upstream OMP **18.8.7**, source
-`f261ed9faf16b61880b544f599876bface4ded0d`, on unchanged v0.10.0 runtime/model pins.
+`f261ed9faf16b61880b544f599876bface4ded0d`, bound by the v0.11.0 candidate manifest.
+RTX 5090 runtime is v0.6.16/source1302d639; model and native runtime packages are unchanged.
 Per-model `compat.statefulResponses: true` replaces the global environment requirement;
 custom-host auto image detail replaces the RTX 5090 override. Upstream's unavailable-model
 resume fix needs no config. Compaction settings are unchanged.

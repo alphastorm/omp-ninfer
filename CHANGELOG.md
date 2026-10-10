@@ -13,10 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   EXP-092/094 without `3a2fadbd`, with full sm_120a ctest 111 pass/7 skip/0 fail and
   all 15 local lane criteria passing. Preserve superseded `a59c13d0` and its red
   NVFP4 evidence. Record the lead-reported source publication and passing cutter
-  dry-run; the component cut, real OCI digest, staging and route acceptance remain
-  pending. Retain native RTX 4090 for OMP 18.8.7 requalification on the replacement
+  dry-run, subsequent founder component publication and exact anonymous binary pull.
+  Stage image6a02feba and cut the candidate lane; route acceptance/product publication
+  remain pending. Retain native RTX 4090 for OMP 18.8.7 requalification on the replacement
   host; RTX 3090 still needs fresh acceptance and continued GPU-presence confirmation.
-  No root runtime or production promotion is implied.
+  Root authority/profile/launcher pins advance to v0.11.0; production is not promoted.
+- Consume a root client-candidate marker only when lane promotion replaces its client
+  wholesale from an upstream-release compatibility copy. Non-promoted and legacy-fork
+  markers still refuse installation; the manifest stays candidate with external acceptance
+  pending. The v0.11.0 CLI regression was red before and green after the narrow fix.
 - Enumerate exactly runtime v0.6.16 in the release verifier, without accepting arbitrary
   future tags. Root promotion and verification bind upstream clients to their platform's
   compatibility distribution, not the manifest's primary Windows asset; legacy fork
@@ -26,8 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
   pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
-  This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
-  pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
+  This is an **unreleased v0.11.0 product candidate**, bound to published components;
+  fresh acceptance of all five documented routes remains pending.
   Published release records and historical measurements are unchanged.
   Content-safe 2026-10-10 local rehearsal receipts record passing typed-tool, exact-continuation
   and fail-closed checks on macOS arm64, native Windows x64 and WSL2 Linux x64 against the
@@ -54,7 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Include upstream's fail-closed resume behavior when a saved model is unavailable
   ([#13689](https://github.com/can1357/oh-my-pi/pull/13689)); no additional configuration is needed.
 - Validate candidate profile identities locally without attributing v0.10.0's qualification to
-  the new client. Readiness and installability checks reject the candidate pending requalification.
+  the new client. Unbound root candidates still refuse installation; lane-bound product
+  candidates pass installability but not readiness before fresh acceptance.
   Staging's predecessor-pin check distinguishes those pins from a current-profile candidate warning.
 - Retire current-client references to the historical fork, Homebrew client casks and
   `omp appliance` lifecycle. Troubleshooting uses the current model id and upstream per-model

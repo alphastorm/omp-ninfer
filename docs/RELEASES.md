@@ -29,7 +29,7 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.11.0 draft — founder-selected RTX 5090 v0.6.16
+### v0.11.0 installable candidate — published component, acceptance pending
 
 The [draft notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` by the founder's 2026-10-10 decision:
@@ -38,12 +38,16 @@ EXP-092/094 without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and
 The superseded `a59c13d0` alternative, its red NVFP4 oracle, and invalid attempts
 remain evidence, not hidden exceptions. The proposed client remains unmodified
 upstream OMP 18.8.7. The lead reports that the selected source branch was pushed
-and its cutter dry-run passed; no live component cut or route acceptance is claimed.
+and its cutter dry-run passed. The founder completed the live component cut at13:46Z;
+workflow38057050899 succeeded and Main measured anonymous image6a02feba/server548fe239.
+Real-digest staging and the lane cut bind the root authority to the candidate; no route
+acceptance or product publication is claimed.
 Native RTX 4090 stays in v0.11.0, pending OMP 18.8.7 requalification on the new native
 host. RTX 3090 needs fresh acceptance and continued GPU-presence confirmation.
-The local image ID is not an OCI publication digest: no manifest is fabricated
-before the founder's cut supplies the real digest, and no root runtime pin or
-candidate guard is promoted here. The notes give exact cut → stage → acceptance inputs.
+The real OCI digest is recorded in the published runtime receipt; the local image ID
+was never substituted. Root client markers are consumed only by actual upstream
+per-platform binding; manifest candidate/external acceptance blockers remain. The notes
+give the exact completed cut → staging inputs and pending acceptance sequence.
 
 ### v0.10.0 public release — DFlash2 on the RTX 5090
 
@@ -1631,8 +1635,14 @@ the verifier decides what remains:
 3. Cut: `scripts/rebind_release.py --release <new> --pin <commit containing the final lane
    receipts> --stage lane` promotes the release's compatibility copy to the root authority,
    rewrites the root profiles and launcher examples from the manifest, pins the authority's
-   receipt URLs, and reruns the chain. Flip the manifest to `ready`; commit.
-4. `--pin <that commit> --stage acceptance`; commit. `--pin <that commit> --stage manifest`;
+   receipt URLs, and reruns the chain. A draft manifest becomes `candidate`, not `ready`.
+   An upstream-release client is copied wholesale from its platform row before consuming
+   a root `status:candidate` marker (which means client-unbound-by-named-release). Fork
+   and non-promoted markers remain. Verify `--require-installable`; commit the candidate
+   for the accountable lead's published-image acceptance window. Do not hand-clear guards.
+4. Only after fresh platform/documented-route acceptance, bind the real receipts and
+   ready/external-acceptance transition. `--pin <that commit> --stage acceptance`; commit.
+   `--pin <that commit> --stage manifest`;
    commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
    reads every pinned evidence URL out of local git history and requires it to serve exactly
    the recorded SHA-256; CI repeats it on the release tag with full history.

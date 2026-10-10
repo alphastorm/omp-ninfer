@@ -13,7 +13,7 @@ The RTX 3090 scout role stays deferred: v0.10.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The current fragments target **unreleased candidate OMP 18.8.7**; GPU-host and documented-route
+The current fragments target **unreleased v0.11.0 / OMP18.8.7 candidate**; GPU-host and documented-route
 requalification are pending. No fresh fleet qualification is claimed. For a qualified install,
 use the immutable v0.10.0 guide and fragments. The candidate uses the checksummed binary from the
 [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into

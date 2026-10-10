@@ -92,6 +92,12 @@ selection also retains the per-model contract after a profile is qualified, whil
 historical 18.4.x driver behavior is unchanged.
 See the [candidate guide](QUICKSTART.md#omp-1887-client-candidate).
 
+The v0.11.0 lane stage binds this upstream client to published runtime source1302d639
+and image6a02feba. Root client markers are consumed by that actual upstream binding;
+the product manifest remains candidate, with fresh documented-route acceptance pending.
+EXP-095 below compares the explicitly assigned a59 EXP094 arm, **not** this selected C
+binary; its counterfactual labels and verdicts are not silently rebound.
+
 ## Published upstream position — v0.10.0
 
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**

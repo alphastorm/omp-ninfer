@@ -11,6 +11,17 @@ that produced them; none is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## v0.11.0 candidate — local C qualification, not route acceptance
+
+The selected1302d639 package measures exact 130,048-token retrieval **58.890 s** and
+2,048-token decode **179.79 server/177.96 wall tok/s**; the v0.10.0 gate is 58.738 s and
+161.39 server tok/s (+11.40% decode, not a traffic-weighted promise). Main reports that
+published image6a02feba contains exact server548fe239; fresh route acceptance is pending.
+Against superseded a59, A/B/B/A pair round cost rises 19.408→21.222 ms (+9.35%) and
+paired wall throughput falls 505.40→462.33 tok/s (−8.52%). The source omission has a
+measured cost, not the original source's blanket pair-speedup claim.
+[Selected receipts](../releases/v0.11.0/NINFER_RELEASE_NOTES.md).
+
 ## v0.10.0 — accepted DFlash2 profile
 
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**

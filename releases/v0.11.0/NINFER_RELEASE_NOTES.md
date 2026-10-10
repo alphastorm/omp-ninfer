@@ -1,11 +1,12 @@
-# OMP NInfer v0.11.0 — draft, not a released product
+# OMP NInfer v0.11.0 — installable candidate, not a released product
 
 Founder-selected RTX 5090 component **v0.6.16**, source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` (option **c**), combined with unmodified
 upstream OMP **18.8.7**. The founder published the component at13:46Z; its real OCI
 digest is `sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02`.
 The product is not released: documented-route acceptance and production promotion
-remain unperformed. Root pins stay on v0.10.0 until the authorized lane rebind.
+remain unperformed. The authorized lane rebind advances root pins to this candidate;
+the manifest stays candidate with its external-install acceptance blocker.
 
 ## Founder decisions — 2026-10-10
 
@@ -244,8 +245,8 @@ The exact selected-source sequence and historical refusals are in
 
 ### 1. Founder-only live component cut
 
-This is **not an agent command**. Main reports only its --dry-run form passed.
-Use the selected C notes/assets, not the superseded a59 handoff:
+This completed founder-only command is **not to be rerun by an agent**. Main reports
+the live cut at13:46Z and successful image workflow. Selected C inputs were:
 
 ```bash
 PATH="/opt/homebrew/opt/python@3.13/libexec/bin:$PATH" \
@@ -261,15 +262,17 @@ bash scripts/hosts/cut-ninfer-5090-component.sh \
   --notes-file "$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md"
 ```
 
-Wait for the component publication and runtime-image workflow. Verify its receipt
-against these exact source/archive/binary hashes; export the **real** OCI digest as
-`NINFER_OCI_DIGEST`. Never substitute the package-local Docker image ID.
+The published [runtime receipt](qualification/runtime-publication.json) supplies the
+real image digest below. Main independently pulled it anonymously and checked serve
+SHA548fe239; this worker did not repeat that measurement. Never use the local image ID.
 
 ### 2. Stage with the verified OMP18.8.7 descriptor
 
-Preserve the pre-existing draft outside `releases/`; stage_release refuses an
-existing destination. The command uses the actual selected C profile gate receipt,
-not the authored15-criterion wrapper:
+The following staging command was executed under Main authorization, after preserving
+the complete draft outside `releases/`. Its actual selected C profile gate receipt is
+not the authored15-criterion wrapper. Initial exit1 was the missing supplemental
+option-C link; restoring supplements and draft rebinding resolved it (exit0). Do not
+restage this existing destination. [Staging receipt](qualification/staging.json):
 
 ```bash
 V011_DRAFT_BACKUP="$(mktemp -d "${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX")/v0.11.0"
@@ -283,7 +286,7 @@ mv releases/v0.11.0 "$V011_DRAFT_BACKUP"
   --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \
   --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \
   --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \
-  --image-digest "${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}" \
+  --image-digest "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02" \
   --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \
   --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \
   --lane-receipt "$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json" \

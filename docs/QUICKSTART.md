@@ -1,30 +1,34 @@
 # Quickstart
 
-> **Unreleased OMP 18.8.7 client candidate · v0.10.0 runtime baseline**
+> **Unreleased v0.11.0 product candidate · upstream OMP 18.8.7**
 
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **The current routes target stock OMP 18.8.7 as an unqualified candidate.** GPU-host
-> requalification is pending; this combination is not yet published. The commands below
-> describe the candidate client contract, not a newly accepted release. `--require-ready`
-> and `--require-installable` intentionally refuse the candidate profiles: do not bypass them.
+> **Current profiles bind stock OMP 18.8.7 to the v0.11.0 candidate manifest.**
+> The RTX 5090 component is published and locally qualified; all five fresh route
+> acceptances remain pending. Lane-bound candidates pass `--require-installable`
+> for maintainer acceptance, not `--require-ready`. Unbound root-client markers
+> still refuse installation; do not clear them by hand. The normal setup blocks
+> below require the future product tag and ready gate, not a moving candidate branch.
 > For a qualified install use the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
 > with its OMP 18.4.10 client and fragments. Its [acceptance](#v0100-route-acceptance) remains historical baseline evidence.
 
 ## OMP 18.8.7 client candidate
 
-The separate [v0.11.0 runtime draft](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) contains
-package-local RTX 5090 v0.6.16 qualification evidence and the founder-only morning
-cut → real-digest staging → published-image acceptance sequence. It is **not an install
-route**: keep the candidate guards below, and do not substitute its local Docker image
-for a published digest or run the acceptance-window watchdog during a rehearsal.
+The [v0.11.0 notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) record the completed
+founder component cut, real-digest staging, and pending published-image acceptance.
+Only the accountable lead dispatches the acceptance window against a frozen 40-hex
+candidate, substituting that commit for the not-yet-created tag and the installable
+gate for the ready gate as in v0.10.0. Never use the local Docker image as an OCI digest
+or run the acceptance-window watchdog during a rehearsal.
 
 The client is the unmodified upstream v18.8.7 release, source
-`f261ed9faf16b61880b544f599876bface4ded0d`. The runtime packages, model artifacts,
-deployment profiles and concurrency limits remain the v0.10.0 baseline. Root profiles mark
-this new client combination `status: candidate`; their `release` field still names that runtime
-baseline. The published compatibility authority and release records have not been rebound.
+`f261ed9faf16b61880b544f599876bface4ded0d`. RTX5090 now binds published v0.6.16,
+source1302d639/image6a02feba/server548fe239, profile qwen38-5090-v0.11.0/config91a35670.
+Model, native runtime packages and serving limits are unchanged. The lane stage replaces
+clients wholesale from upstream-release compatibility rows before consuming root markers.
+The product manifest stays candidate with its external-install blocker.
 
 ### Local rehearsal (not acceptance)
 
@@ -61,8 +65,8 @@ merging these current model fragments:
   [#13689](https://github.com/can1357/oh-my-pi/pull/13689) refuses an unavailable saved model
   on resume without another config setting.
 
-Normal `python3 scripts/verify_release.py` checks the static candidate profiles and preserved
-runtime manifest; it does **not** qualify the new client. Before a new product release, rerun
+Normal `python3 scripts/verify_release.py` checks the bound candidate profiles and
+runtime manifest; it does **not** perform documented-route acceptance. Before a new product release, rerun
 GPU-host requalification and the documented acceptance separately for every route:
 
 | Documented route | Fresh 18.8.7 acceptance |
@@ -75,8 +79,8 @@ GPU-host requalification and the documented acceptance separately for every rout
 
 Bind fresh client-platform and route receipts, the 18.8.7 binary pins and the updated fragments
 in the next product manifest before readiness, a tag or publication. Local client rehearsals
-are not GPU-host requalification or documented-route acceptance. A v0.10.0 clone in the baseline setup blocks below gets
-the old published fragments, not this candidate; never combine those two checkout authorities.
+are not documented-route acceptance. The immutable v0.10.0 guide gets the published
+18.4.10 baseline; the intended v0.11.0 blocks below get 18.8.7. Never combine authorities.
 
 ## Choose your lane
 
@@ -216,10 +220,10 @@ refused the native-resolution request in 9 ms
 ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
 model is never compacted into images.
 
-RTX 5090 moves to the published `v0.6.15-qwen38-5090-beta.1` from source
-`eaf221ac7a7c71e3b0049e59508e370c0ded4226`, image `fff4ee38`, with the DFlash2 profile below.
+RTX5090 moves to published `v0.6.16-qwen38-5090-beta.1` from source
+`1302d63929e400a05e1c9cdb0fc8003a70269825`, image `6a02feba`, with the DFlash2 profile below.
 Its model artifact is `0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3`
-([lane receipt](../releases/v0.10.0/qualification/rtx5090.json)).
+([local lane receipt, not route acceptance](../releases/v0.11.0/qualification/rtx5090.json)).
 RTX 4090 keeps the published `v0.6.10-qwen38-4090-beta.1` from source
 `cba7eb932724c99a4faffd6b7b47256015c9b969`. The exact [native package](https://github.com/alphastorm/ninfer/releases/download/v0.6.10-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.10-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz) is
 574,717,115 bytes, SHA-256 `a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b`.
@@ -262,12 +266,12 @@ control recorded root fallback on 2 of 8 continuations/forks without server erro
 warm reuse is not claimed.
 
 A checkpoint is bound to the exact runtime fingerprint, including the server build and model.
-RTX 5090 changes both in v0.10.0; predecessor checkpoint reuse is not claimed. The RTX 4090
-and RTX 3090 runtime packages and native model are unchanged. Follow the exact release
-routes and require the ready gate before setup; the published baseline uses OMP 18.4.10,
-while the current 18.8.7 candidate remains blocked pending requalification.
+RTX5090 changes its server fingerprint in v0.11.0; predecessor checkpoint reuse is not
+claimed. Model and native runtime packages are unchanged. Require the ready gate for a
+normal public install; the18.8.7 candidate is installable only for maintainer acceptance,
+not a newly accepted release.
 
-The RTX 5090 deployment profile is `qwen38-5090-v0.10.0` / configuration `8b2f4959`, with
+The RTX5090 deployment profile is `qwen38-5090-v0.11.0` / configuration `91a35670`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
 and `--pending-timeout-ms 180000`. It keeps `--gpu-keep-warm-ms 60000`, 16384 MiB host KV and
 the 28672 MiB runtime-host floor. KV capacity auto-resolves to 131,520 tokens. The native
@@ -339,7 +343,7 @@ execution disabled; the `Set-ExecutionPolicy` line enables the release's hash-pi
 this window only and changes nothing on the machine - repeat it in any new window that runs one.
 
 ```powershell
-git clone --branch v0.10.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.11.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -387,7 +391,7 @@ line enables the release's hash-pinned scripts for this window only and changes 
 machine - repeat it in any new window that runs one:
 
 ```powershell
-git clone --branch v0.10.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.11.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -624,7 +628,7 @@ package and client. The candidate targets stock OMP 18.8.7 using **Install the e
 Windows client** above, then open an elevated PowerShell and run:
 
 ```powershell
-git clone --branch v0.10.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.11.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -865,10 +869,10 @@ owner.
 
 ## 1. Clone the exact release on both machines
 
-Once v0.10.0 is published and ready, run this on the Mac and inference host:
+Once v0.11.0 is published and ready, run this on the Mac and inference host:
 
 ```sh
-git clone --branch v0.10.0 --depth 1 \
+git clone --branch v0.11.0 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -911,11 +915,11 @@ CHECKPOINTS="$ROOT/checkpoints"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.10.0/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.11.0/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.10.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.11.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.10.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.11.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide

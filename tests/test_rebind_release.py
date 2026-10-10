@@ -4,6 +4,8 @@ import copy
 import importlib.util
 import json
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -79,6 +81,10 @@ class PromoteRootTests(unittest.TestCase):
         omp.pop("distribution_kind", None)
         omp.update(fork)
         module.save(manifest_path, manifest)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["status"] = "candidate"
+            module.save(path, profile)
         before = {path.name: self.load(path) for path in (root / "profiles").glob("*.json")}
 
         module.promote_root(CURRENT, manifest_path)
@@ -86,7 +92,9 @@ class PromoteRootTests(unittest.TestCase):
         pinned = 0
         for path in sorted((root / "profiles").glob("*.json")):
             previous = before[path.name].get("client", {})
-            current = self.load(path).get("client", {})
+            profile = self.load(path)
+            self.assertEqual(profile["status"], "candidate", path.name)
+            current = profile.get("client", {})
             if not any(key in previous for key in ARCHIVE_KEYS):
                 self.assertEqual(current, previous, path.name)
                 continue
@@ -125,6 +133,45 @@ class PromoteRootTests(unittest.TestCase):
             expected = descriptor["platforms"][modes[profile["installation_mode"]]]
             self.assertEqual(profile["client"], expected, path.name)
             self.assertNotIn("component_release_tag", profile["client"], path.name)
+
+    def test_upstream_promotion_consumes_only_the_bound_client_candidate_marker(self) -> None:
+        root, module = self.promotion_copy()
+        release_name = "v0.11.0"
+        release = root / "releases" / release_name
+        if release_name != CURRENT:
+            shutil.copytree(ROOT / "releases" / release_name, release)
+        shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
+        shutil.copy2(release / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        shutil.copy2(release / "compatibility.json", root / "compatibility.json")
+        for name in ("QUICKSTART.md", "SECURITY.md"):
+            (root / "docs" / name).write_text("# Test fixture\n", encoding="utf-8")
+        manifest_path = release / "manifest.json"
+        manifest = self.load(manifest_path)
+        manifest["status"] = "candidate"
+        module.save(manifest_path, manifest)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["status"] = "candidate"
+            module.save(path, profile)
+
+        command = [sys.executable, str(root / "scripts" / "verify_release.py"),
+                   "--release", release_name, "--require-installable", "--json"]
+        before = subprocess.run(command, cwd=root, capture_output=True, text=True)
+        self.assertNotEqual(before.returncode, 0)
+        self.assertTrue(any("unqualified client candidate" in error
+                            for error in json.loads(before.stdout)["errors"]))
+
+        module.promote_root(release_name, manifest_path)
+
+        after = subprocess.run(command, cwd=root, capture_output=True, text=True)
+        self.assertEqual(after.returncode, 0, after.stdout + after.stderr)
+        self.assertEqual(self.load(manifest_path)["status"], "candidate")
+        self.assertFalse(self.load(manifest_path)["qualification"]["external_installation_passed"])
+        self.assertTrue(self.load(manifest_path)["publication"]["blockers"])
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            self.assertNotIn("status", profile)
+            self.assertEqual(profile["release"], release_name)
 
     def test_lane_stage_makes_a_draft_manifest_a_candidate_and_keeps_later_states(self) -> None:
         """The cut must leave a manifest that route acceptance can install. v0.8.5's and

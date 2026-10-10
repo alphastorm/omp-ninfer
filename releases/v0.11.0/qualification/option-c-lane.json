@@ -1,8 +1,8 @@
 {
   "artifact_type": "omp_ninfer_option_c_lane_qualification",
   "schema_version": 2,
-  "classification": "Founder-selected v0.6.16 runtime candidate; package-local lane qualification only",
-  "overall_verdict": "All15 unchanged local lane criteria pass; full sm_120a ctest111pass/7skip/0fail; component publication and documented-route acceptance pending",
+  "classification": "Founder-selected v0.6.16 source; all15 local qualification gates pass; published component staged, route acceptance pending",
+  "overall_verdict": "All15 unchanged local lane criteria pass; fullsm120a ctest111pass/7skip/0fail. Component published/staged; documented-route acceptance remains pending.",
   "founder_selection": {
     "option": "c",
     "date": "2026-10-10",
@@ -390,16 +390,26 @@
     "history_and_exact_commands": "founder-sequence.json",
     "rerun_by_this_worker": false
   },
-  "live_component_cut_run": false,
-  "staging_run": false,
+  "live_component_cut_run": true,
+  "staging_run": true,
   "release_blockers": [
-    "Founder live component cut and its real published OCI digest/receipt remain pending; the local Docker image ID is not a publication digest.",
     "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
     "Native RTX3090 needs fresh OMP18.8.7 acceptance and confirmation of continued physical GPU presence after the replacement-host change.",
     "All retained documented routes need fresh published-component acceptance after the cut; RTX5090 acceptance must use the anonymously pullable published image.",
-    "Legitimately installable frozen product/profile bindings and real rollback/host/workspace inputs are required. A component cut or root promotion does not clear root status:candidate."
+    "Fresh acceptance requires the pushed frozen candidate and actual rollback/host/workspace inputs; no acceptance was run by S1."
   ],
   "published_image_acceptance_run": false,
   "production_promotion": false,
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "live_component_cut_by": "Founder, reported by Main; not this worker",
+  "runtime_publication": {
+    "receipt": "runtime-publication.json",
+    "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+    "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/38057050899",
+    "anonymous_pull_and_binary_identity": {
+      "reported_by": "Main",
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "rerun_by_this_worker": false
+    }
+  }
 }
