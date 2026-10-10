@@ -59,12 +59,27 @@ T8/T16 use the small-T MMA on sm120. The new T16 route matching T8 is not an exa
 T1-oracle guarantee. Different arithmetic paths changing greedy TokenIds is an
 inference, not a measured first-op mechanism or evidence of cross-row state corruption.
 
-Founder alternatives (none executed): (a) restrict the route to satisfy the NVFP4
-oracle: source change, clean rebuild, EXP092/094 remeasurement and rescreen;
-(b) retain exact a59 and disclose the failed, unshipped NVFP4 configuration (NVFP4
-KV was rejected by EXP085): requires an explicit policy exception to all-green
-ctest, not a skipped or suppressed test; (c) eaf+b72+a59 without3a: changed source,
-clean build and remeasurement/requalification. No exception has been approved.
+Founder source choices (the release proposal remains exact `a59c13d0`):
+
+| Choice | Source | Observed evidence and cost | Founder gate |
+|---|---|---|---|
+| (a) Restrict the pair route | New source change to3a | Not attempted; clean rebuild, EXP092/094 remeasurement and rescreen required | Approve and qualify a real source fix; do not relax the oracle |
+| (b) Keep the exact target | `a59c13d0` | All15 original local lane criteria pass; full ctest110 pass/7 skip/1 fail in the unshipped NVFP4-KV configuration rejected by EXP085 | Explicit all-green-ctest policy exception, not a skip or suppression; none approved |
+| (c) Omit3a | Local, **unpublished** `1302d63929e400a05e1c9cdb0fc8003a70269825`: eaf+b72+a59 without3a | Clean full sm_120a ctest **111 pass/7 skip/0 fail**, including the NVFP4 oracle;89/89 serial output signatures and request bodies match unchanged a59 (84 counted cases,0 errors;5 vacuous fixture errors excluded). A/B/B/A pair round cost **+9.35%**,19.408→21.222ms; pair aggregate wall throughput505.40→462.33tok/s (**−8.52%**). Single-request round cost changes−0.14% to−0.004% across0/32K/64K/120K. | **Experiment, not candidate**. Source selection and any source publication/cut remain founder decisions; no replacement of the a59 assets or proposal |
+
+Option-C cherry-picks applied without conflicts: b72 replay
+`344850b3e9e3c8f5855f6a979a630d1c4eada4a8`, then a59 replay`1302d639…`.
+The runtime experiment branch was not pushed. The serve SHA is
+`548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace`;
+its clean version reports CUDA13.1.115/GNU13.3.0/sm_120a. The source archive
+SHA`dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2`
+equals a Mac `git archive` of that exact local commit. Assets are retained separately
+from the original component handoff. The serial quality transfer is transitive
+through the measured a59→EXP094 binding; it is not a newly run powered screen or
+a claim of pair output invariance. The nonce-dependent decode-token-rate swings
+are not attributed to source omission: per-round cost is the comparison metric.
+[Source](qualification/option-c-source.json) · [Build](qualification/option-c-build.json) ·
+[Serial binding](qualification/option-c-output-identity.json) · [ABBA](qualification/option-c-abba.json).
 
 The exact new binary differs from EXP-094's `884e5a43…` binary. One uninterrupted
 lease ran the same frozen 89-case role corpus on both images: **89/89 output signatures

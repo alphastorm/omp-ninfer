@@ -1,0 +1,50 @@
+{
+  "artifact_type": "omp_ninfer_option_c_source_experiment",
+  "schema_version": 1,
+  "classification": "experiment,not release candidate",
+  "local_branch": "exp/v0616-without-3a2fadbd",
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "tree_sha1": "45c3e1fdb29aa6993586d8575edcfb12c730ebd6",
+  "base_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+  "cherry_picks": [
+    {
+      "original": "b72daad6c0150f3e44a80df5fc507482b6201f74",
+      "replayed": "344850b3e9e3c8f5855f6a979a630d1c4eada4a8"
+    },
+    {
+      "original": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+      "replayed": "1302d63929e400a05e1c9cdb0fc8003a70269825"
+    }
+  ],
+  "dropped_commit": "3a2fadbd36038182e5db825ce00cd210cdfa5472",
+  "cherry_pick_conflicts": false,
+  "manual_conflict_resolutions": false,
+  "runtime_manual_edits": false,
+  "source_pushed": false,
+  "build_lease_job": "20261010T102210Z-S1-option-c-clean-build-full-ctest-1363718",
+  "build_lease_priority": 3,
+  "build_lease_minutes": 60,
+  "notes": "Changed-source experiment specifically authorized by the lead; original a59 component assets and release proposal are untouched. No cutter, publication or production action for this source.",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "frozen_private_tool_sha256": {
+    "option-c-build-package.sh": "6fb9ec0237dcf4c282488bc75b450a19aff120eee125cc61089673ff98bb7fcd",
+    "option-c-server.py": "3e51b240a874ab912d393e85d71b8fbb67b81c721414bdb286da5a28175a4d4d",
+    "option-c-ctest-admission.py": "d4e7ef203dd9c464a9836a6d0f3e4fbcee02df23a013598a6d7d6c7d63b7d961",
+    "option-c-quality-timing.sh": "b1d4f5b4cae5b03e47f65183a375863ac349338f3fc6cfb4cd4427b4d1bcee7c",
+    "option-c-summarize-abba.py": "946ec7ab05bfb898cf2bfe5fe6db26af4bcccffa05c3b3cb79beeb3149e3822c",
+    "option-c-lane.sh": "5a9923becf71e41539dafa033952dcaa23e85d3e66c7a8d5a63d00caeecb4ca4",
+    "option-c-lane-cutoff.sh": "41ce82d37acc04bdc4be31cfb77200cd4a252d1e64a4e9bb7446e62918f6b64a",
+    "option-c-publication-barrier.py": "073bf82aa9c685a016e5978961f1f16c92993b0fa38e50a04c921d93243b7c07",
+    "option-c-mac-request.py": "c5f587810f3379dcf70b64334bbded6423d9a2cc6f191d383fa6e449178784db",
+    "option-c-mac-proofs.py": "a1df0e1d30c4e7fef628a11e67f91e9213b6493a669b608aeb7e8e34ddf6d6b6",
+    "option-c-collect-build.py": "4d48c20a1a7296e1e4c9f6bac3ba721ae7ee72ed8a4ea03e9796ec6fc3c51be6",
+    "option-c-quality-cutoff.sh": "c4c27abeb0db9e8681b2b6b8606c3c2c6a841b182af73de976d8c7334389e22e",
+    "option-c-role-error-summary.py": "076d8aa7d3b463603eee7155dc0cf43c4fb6ad03094b7b798652568a34f4711f"
+  },
+  "exact_timing_probe_sha256": "a16600f9bc018e7d1854b60f6408058f8db624bd871b50d698f187b4debf0e2f",
+  "quality_timing_lease_job": "20261010T104747Z-S1-option-c-output-identity-abba-1380701",
+  "lane_lease_job": "20261010T105001Z-S1-option-c-lane-criteria-1-15-1382427",
+  "lane_started_only_before_1830_utc": true,
+  "experiment_source_pushed": false,
+  "original_a59_release_proposal_changed": false
+}
