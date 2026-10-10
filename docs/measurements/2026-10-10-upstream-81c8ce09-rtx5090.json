@@ -54,11 +54,11 @@
   "model_identity": {
     "repository": "neroued/Qwen3.8-27B-NInfer",
     "original_revision": "dc370fb6295ae8b786e1af4f90d7142a16255c35",
-    "original_path": "/home/sunil/builds/models/v2-dflash2/hf-dc370fb6/qwen3_8_27b.ninfer",
+    "original_file": "qwen3_8_27b.ninfer",
     "original_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
     "original_bytes": 20437336576,
     "original_container_version": 2,
-    "upstream_compatible_path": "/home/sunil/builds/models/exp095-upstream-81c8ce09/qwen3_8_27b.v3.ninfer",
+    "upstream_compatible_file": "qwen3_8_27b.v3.ninfer",
     "upstream_compatible_sha256": "fc92d5e6f03ec001edcbcf49304563fc98c5c32f28fe1c1adee51e972265e531",
     "upstream_compatible_bytes": 20437571568,
     "upstream_container_version": 3,
