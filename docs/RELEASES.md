@@ -37,9 +37,9 @@ EXP-092/094 without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and
 [all 15 local lane criteria](../releases/v0.11.0/qualification/option-c-lane.json) pass.
 The superseded `a59c13d0` alternative, its red NVFP4 oracle and invalid attempts
 remain evidence, not hidden exceptions. The client is unmodified upstream OMP 18.8.7.
-The founder completed the live component cut at 13:46Z; workflow 38057050899 succeeded,
-and Main measured anonymous image `6a02feba` / server `548fe239`. The real OCI digest
-is recorded in the published runtime receipt; no local image ID was substituted.
+The [published runtime receipt](../releases/v0.11.0/qualification/runtime-publication.json)
+binds the real OCI image `6a02feba` and exact server `548fe239`. Anonymous image
+pull/identity verification is recorded separately from local build qualification.
 
 All three retained RTX 5090 routes, 17 documented steps and three stock clients passed
 on `5861712f561ff0b3100dd4350e02d777a3f5007e`, with 385.948 s measured downtime and
@@ -51,8 +51,9 @@ Both native lanes are deferred. Owners use the complete immutable v0.10.0 guide,
 OMP 18.4.10 and its manifest/fragments; the co-installed RTX 3090/RTX 4090 host is
 unsupported by unmodified single-visible-GPU packages. Both lanes require multi-GPU
 support and fresh acceptance in a later release, without an environment shim.
-The notes retain the completed cut → staging → acceptance sequence and the remaining
-founder-only product publication command.
+The notes link the detailed selection, publication, staging and acceptance records.
+Product publication uses [`publish-product-release.sh`](../scripts/hosts/publish-product-release.sh);
+its `--publish` mode remains founder-only.
 
 ### v0.10.0 public release — DFlash2 on the RTX 5090
 
@@ -1644,7 +1645,7 @@ the verifier decides what remains:
    An upstream-release client is copied wholesale from its platform row before consuming
    a root `status:candidate` marker (which means client-unbound-by-named-release). Fork
    and non-promoted markers remain. Verify `--require-installable`; commit the candidate
-   for the accountable lead's published-image acceptance window. Do not hand-clear guards.
+   for the release's published-image acceptance window. Do not hand-clear guards.
 4. Only after fresh platform/documented-route acceptance, bind the real receipts and
    ready/external-acceptance transition. `--pin <that commit> --stage acceptance`; commit.
    `--pin <that commit> --stage manifest`;

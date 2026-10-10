@@ -34,9 +34,17 @@ def control_blocks() -> list[documented_route.Block]:
 
 
 class ReleaseProseTests(unittest.TestCase):
-    GLUED = re.compile(
-        r"\b(?:RTX|OMP)\d|"
-        r"\b(?:on|at|to|of|the|with|from|and|than|by|accepted)\d"
+    # One-letter v-versions (v0.11.0) are not words of two or more letters.
+    GLUED = re.compile(r"\b[^\W\d_]{2,}\d\w*\b")
+    IDENTIFIER = re.compile(
+        r"[0-9a-fA-F]{7,}|"  # Committed abbreviated/full hexadecimal identities.
+        r"(?i:bf16|nvfp4|int8|fp(?:8|16|32|64))|"  # Recorded numeric/quantization formats.
+        r"(?i:qwen3|qwen38|dflash2|mtp(?:0|3|7))|"  # Model and speculative-backend names.
+        r"Gen3|x86|arm64|sm120|"  # PCIe generation, CPU targets and CUDA architecture.
+        r"(?i:sha256|sha256sums|mp4)|ext4|WSL2|"  # Digest/file formats, filesystem and OS.
+        r"DS918|can1357|"  # The documented NAS model and upstream repository owner.
+        r"rk2v4|split[24]|rtx3090|"  # Historical model, kernel routes and receipt filename.
+        r"fanout43|durable4090"  # Exact historical council-receipt suffixes in RELEASES.md.
     )
 
     @staticmethod
@@ -51,14 +59,33 @@ class ReleaseProseTests(unittest.TestCase):
                     fence = (token[0], len(token))
                 elif token[0] == fence[0] and len(token) >= fence[1] and not suffix.strip():
                     fence = None
+                lines.append("")
                 continue
-            if fence is None:
-                lines.append(line)
+            lines.append(line if fence is None else "")
         text = "\n".join(lines)
-        text = re.sub(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)", " ", text, flags=re.S)
+        text = re.sub(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)",
+                      lambda match: " " + "\n" * match.group().count("\n"), text, flags=re.S)
         text = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", text)
         text = re.sub(r"(?m)^\s*\[[^\]]+\]:.*$", "", text)
-        return re.sub(r"https?://\S+", "", text)
+        return re.sub(r"\b(?:[A-Za-z][A-Za-z0-9+.-]*://|mailto:)\S+", "", text)
+
+    @classmethod
+    def glued_tokens(cls, text: str) -> list[tuple[int, str]]:
+        prose = cls.prose(text)
+        return [(prose.count("\n", 0, match.start()) + 1, match.group())
+                for match in cls.GLUED.finditer(prose)
+                if cls.IDENTIFIER.fullmatch(match.group()) is None]
+
+    @staticmethod
+    def current_changelog(text: str, release: str) -> str:
+        lines = []
+        current = True
+        for line in text.splitlines():
+            heading = re.match(r"^## \[([^\]]+)\]", line)
+            if heading:
+                current = heading.group(1) in ("Unreleased", release)
+            lines.append(line if current else "")
+        return "\n".join(lines)
 
     def test_release_facing_prose_has_no_glued_tokens(self) -> None:
         release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
@@ -67,14 +94,33 @@ class ReleaseProseTests(unittest.TestCase):
         paths.append(ROOT / "releases" / release / "NINFER_RELEASE_NOTES.md")
         for path in paths:
             with self.subTest(path=str(path.relative_to(ROOT))):
-                matches = self.GLUED.findall(self.prose(path.read_text(encoding="utf-8")))
+                text = path.read_text(encoding="utf-8")
+                if path.name == "CHANGELOG.md":
+                    text = self.current_changelog(text, release)
+                matches = self.glued_tokens(text)
                 self.assertEqual(matches, [], f"{path.relative_to(ROOT)} glued prose: {matches}")
 
     def test_glued_words_are_rejected_in_prose(self) -> None:
-        prefixes = ("RTX", "OMP", "on", "at", "to", "of", "the", "with",
-                    "from", "and", "than", "by", "accepted")
-        text = " ".join(prefix + "1" for prefix in prefixes)
-        self.assertEqual(self.GLUED.findall(self.prose(text)), text.split())
+        text = ("RTX5090 OMP18 Retainedv0 Fresh18 Focused5090 selected1302d639 "
+                "passes28 refused0 Its65b6c426 therefore3a final40 CI38042843797 "
+                "arbitrary123 café2")
+        self.assertEqual([token for _, token in self.glued_tokens(text)], text.split())
+
+    def test_only_complete_documented_identifiers_are_allowed(self) -> None:
+        text = ("abcdef1 eaf221ac c6f41f52 v0.11.0 v18.8.7 Gen3 x86 arm64 sha256 "
+                "SHA256SUMS qwen38 Qwen3.8 DFlash2 MTP0 MTP3 MTP7 NVFP4 BF16 INT8 "
+                "FP8 FP16 FP32 FP64 sm120 MP4 ext4 WSL2 DS918+ can1357 rk2v4-e8 "
+                "split2 split4 rtx3090 fanout43 durable4090")
+        self.assertEqual(self.glued_tokens(text), [])
+        invalid = "abc123 bf16result arm64owners sha256broken mtp99 rtx5090owner"
+        self.assertEqual([token for _, token in self.glued_tokens(invalid)], invalid.split())
+
+    def test_current_changelog_excludes_older_published_entries(self) -> None:
+        text = ("# Changelog\n## [Unreleased]\nFresh18\n"
+                "## [v0.11.0] - 2026-10-10\nRetainedv0\n"
+                "## [v0.10.0] - 2026-10-02\nLegacyv0\n")
+        self.assertEqual(self.glued_tokens(self.current_changelog(text, "v0.11.0")),
+                         [(3, "Fresh18"), (5, "Retainedv0")])
 
     def test_fenced_inline_and_url_literals_are_not_prose(self) -> None:
         text = ("RTX 5090 and OMP 18.8.7; `RTX5090` and ``on5861712f``.\n"
@@ -83,11 +129,13 @@ class ReleaseProseTests(unittest.TestCase):
                 "> ```sh\n> RTX5090 and OMP18.8.7\n> ```\n"
                 "[lane](https://example.invalid/RTX5090/on5861712f)\n"
                 "https://example.invalid/OMP18.8.7\n"
+                "ftp://example.invalid/Fresh18 ssh://example.invalid/OMP18\n"
+                "mailto:person123@example.invalid\n"
                 "[asset]: https://example.invalid/RTX5090\n")
-        self.assertEqual(self.GLUED.findall(self.prose(text)), [])
+        self.assertEqual(self.glued_tokens(text), [])
 
     def test_link_labels_remain_prose(self) -> None:
-        self.assertEqual(self.GLUED.findall(self.prose("[RTX5090](asset.json)")), ["RTX5"])
+        self.assertEqual(self.glued_tokens("[RTX5090](asset.json)"), [(1, "RTX5090")])
 
 
 class ExtractionTests(unittest.TestCase):

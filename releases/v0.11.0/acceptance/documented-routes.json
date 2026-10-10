@@ -7,7 +7,7 @@
   "operator_class": "owner-operated tester-equivalent",
   "mode": "Published RTX 5090 v0.6.16-qwen38-5090-beta.1 runtime with unmodified upstream OMP 18.8.7; exact candidate documented blocks, fresh isolated client homes, initial full route window.",
   "document_sha256": "f6fe3d0e7d54162a8298919fc22e7feea83b14d6d13e3cb95462bc26ab60f88e",
-  "current_document_sha256": "3c88b764ddb8a6dce8479ebb7e27282664599c258e0d7e93a10a2e514577ba42",
+  "current_document_sha256": "1e0a8736b0b78952fcecd8b8fefefdc6fbebac0bd3eb3dab61935ac0327114f7",
   "executed_blocks_match_current": true,
   "document_change": "Founder scopes v0.11.0 to RTX 5090 only: native executable instructions/fleet recipe removed in favor of complete immutable v0.10.0 links and explicit multi-GPU deferral. Current metadata/prose changed; all 17 executed RTX 5090 block addresses/body hashes remain byte-identical to 5861712f. No window rerun or receipt retargeting.",
   "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
@@ -19,7 +19,7 @@
         "start"
       ],
       "elapsed_s": 57.585,
-      "receipt": "docs/measurements/2026-10-10-v0110-5090-only-rtx5090-container-host-run.json",
+      "receipt": "docs/measurements/2026-10-10-v0110-rtx5090-container-host-run.json",
       "sha256": "7b53a423f8648c1d177d0e4c4ce94aca2d22183d77502d40678e1fff6a4cabfa"
     },
     "rtx5090-macos-client": {
@@ -37,7 +37,7 @@
         "fail-closed"
       ],
       "elapsed_s": 109.188,
-      "receipt": "docs/measurements/2026-10-10-v0110-5090-only-rtx5090-macos-client-run.json",
+      "receipt": "docs/measurements/2026-10-10-v0110-rtx5090-macos-client-run.json",
       "sha256": "c0799c04259143c46bf2b3c843cd69e0f6afa9fd6bf85679870c7dd5fa4b41dc"
     },
     "rtx5090-windows-client": {
@@ -50,7 +50,7 @@
         "fail-closed"
       ],
       "elapsed_s": 48.752,
-      "receipt": "docs/measurements/2026-10-10-v0110-5090-only-rtx5090-windows-client-run.json",
+      "receipt": "docs/measurements/2026-10-10-v0110-rtx5090-windows-client-run.json",
       "sha256": "488b9b12ba08b8632b377b73d60ed91e2fc3c109b054e7488633aeae7343b46d"
     }
   },
@@ -179,7 +179,7 @@
     ]
   },
   "restoration_receipt": {
-    "repository_path": "docs/measurements/2026-10-10-v0110-5090-only-acceptance-restoration.json",
+    "repository_path": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
     "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024"
   },
   "deferred_routes": {

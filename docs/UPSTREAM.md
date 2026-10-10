@@ -83,19 +83,18 @@ No `compaction.modelThresholds` setting is recommended or applied: 18.8.7 long-s
 threshold tuning was not measured, and #14952 alone supplies no evidence for a safer numeric
 limit. The 18.8.6 pruning changes target Anthropic cache lookback, not a new NInfer threshold.
 
-Fresh requalification remains pending for each documented route: RTX 5090 container host,
-macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows. Local
-client rehearsals do not inherit or replace v0.10.0's OMP 18.4.10 acceptance.
+The three current RTX 5090 documented routes passed with OMP 18.8.7; native RTX 3090/4090
+lanes are deferred and their owners remain on the complete v0.10.0 guide. Local client
+rehearsals remain separate evidence and do not inherit v0.10.0's OMP 18.4.10 acceptance.
 The [2026-10-10 source review and receipts](measurements/2026-10-10-omp-1887-client-release-review.json)
 bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
 selection also retains the per-model contract after a profile is qualified, while the
 historical 18.4.x driver behavior is unchanged.
 See the [candidate guide](QUICKSTART.md#omp-1887-client-candidate).
 
-The v0.11.0 lane stage binds this upstream client to published runtime source1302d639
-and image6a02feba. Root client markers are consumed by that actual upstream binding;
-the product manifest remains candidate, with fresh documented-route acceptance pending.
-EXP-095 below compares the explicitly assigned a59 EXP094 arm, **not** this selected C
+The ready v0.11.0 candidate binds this upstream client to published runtime source
+`1302d639` and image `6a02feba`, with the retained client and route proofs accepted.
+EXP-095 below compares the original `a59c13d0` EXP-094 arm, **not** the selected
 binary; its counterfactual labels and verdicts are not silently rebound.
 
 ## Published upstream position — v0.10.0
@@ -136,8 +135,8 @@ engine heads below. These are source-watch positions, not adopted runtimes or ro
 | `Don-Chad/ninfer-3090` | `d7277e88` (2026-09-26) | 240 commits after `ef6ecc3c` | All 240 commits listed, but the 300-file list is cut; path overlap is **unknown-truncated**. The shipped native lane remains the separately qualified fork source. |
 
 Upstream `81c8ce09` builds unmodified for **sm_120a** with **CUDA 13.1.115**
-(`ninfer-serve` SHA-256 `31cc09a0…`, local image `ninfer-overnight:S3-81c8ce09`,
-image ID `c353844f…`). Its README and model card require the v3 artifact container. The
+(`ninfer-serve` SHA-256 `31cc09a0…`, package-local image ID `c353844f…`).
+Its README and model card require the v3 artifact container. The
 documented `tools/upgrade_ninfer_v2_to_v3.py` path produced a separate v3 artifact
 (`fc92d5e6…`) from the product's read-only `dc370fb6` v2 artifact (`0634abb0…`); it
 installs the maintained chat template. This local build and upgrade are not a component cut,

@@ -10,8 +10,9 @@ agents** — private, long-lived Oh My Pi sessions on one qualified GPU. The pro
 are excellent at different jobs; most operators should use one of them.
 
 The current install fragments target an **unreleased v0.11.0 product candidate**,
-binding stock OMP 18.8.7 and published RTX 5090 v0.6.16/source1302d639. All five documented-route requalifications
-are pending. Use the [candidate guide](QUICKSTART.md#omp-1887-client-candidate) to distinguish
+binding stock OMP 18.8.7 and published RTX 5090 v0.6.16/source `1302d639`. The three
+RTX 5090 routes passed; native RTX 3090/4090 owners remain on v0.10.0. Use the
+[candidate guide](QUICKSTART.md#omp-1887-client-candidate) to distinguish
 that work from the published release evidence below; it does not change this comparison's
 historical measurements or qualify another backend.
 

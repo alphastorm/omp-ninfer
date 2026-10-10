@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
-  words/numbers). A living-doc/current-note regression rejects glued tokens outside
-  code and URLs; immutable published notes and byte-preserved evidence stay unchanged.
+  words/numbers). The guard rejects any word of two or more letters glued to a digit,
+  with a documented identifier allowlist, outside code and URLs. It covers living docs,
+  current notes and the current entry; older published entries and evidence stay unchanged.
 - Ship the founder-approved v0.11.0 scope as **RTX 5090 only**. All 17 documented
   steps and three stock OMP 18.8.7 clients passed on 5861712f with 385.948 s measured
   downtime and independent restoration. Keep all 5090 executable blocks byte-identical
@@ -19,18 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Native RTX 3090/4090 owners remain on complete immutable v0.10.0 instructions.
   The replacement host has both GPUs; unmodified native packages require exactly
   one visible GPU. Both lanes return after multi-GPU support/fresh acceptance.
-  No environment shim or retargeting of the old 65b6c4263090 pass.
+  No environment shim or retargeting of the old `65b6c426` RTX 3090 pass.
 - Derive composer/verifier native route/evidence requirements from declared manifest
   variants, with the three 5090 routes always required. Missing declared or extra
-  undeclared native proof remains fail-closed. Focused5090-only/native negative
+  undeclared native proof remains fail-closed. Focused 5090-only/native negative
   regressions were red before/green after; unchanged v0.10.0 readiness passes in
-  its bound-root fixture. Native parser controls use a checked-in minimal5861712f
+  its bound-root fixture. Native parser controls use a checked-in minimal `5861712f`
   fixture, not Git history or live instructions.
   Native/pre-cut control fixtures now bind checked-in v0.10.0 state or reset
   candidate acceptance flags; an empty current native set does not drop negative coverage.
 - Harden active acceptance checks to nonce `493817-205361`; retain unchanged
   exact recall, OK-only planting and verbatim recall. The registered old/hardened
-  cohorts each passed50/50 with no material A/B difference. Preserve the first
+  cohorts each passed 50/50 with no material A/B difference. Preserve the first
   failed window and [diagnostic](docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json).
 - Select founder-approved `1302d639` for RTX 5090 v0.6.16: EXP-092/094 without
   `3a2fadbd`, full sm_120a ctest 111 pass/7 skip/0 fail, all 15 local criteria passed.

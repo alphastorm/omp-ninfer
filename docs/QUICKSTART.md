@@ -17,11 +17,11 @@
 ## OMP 18.8.7 client candidate
 
 The [v0.11.0 notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) record the
-completed component cut, real-digest staging and accepted published-image window.
-Only the accountable lead dispatches such windows against a frozen 40-hex candidate.
-The accepted 5090 executable blocks stay byte-identical; this scope/pin follow-on
-is not another acceptance subject or a production promotion. Never use a local
-Docker image as an OCI digest or an acceptance watchdog for a rehearsal.
+runtime/client identities, qualification and accepted published-image routes.
+Use the current guide and manifest together; the accepted RTX 5090 executable
+blocks remain byte-identical to the recorded candidate. Prose and metadata changes
+do not establish a new acceptance result or a production upgrade. A package-local
+Docker image ID is not a published OCI digest.
 
 The client is unmodified upstream v18.8.7, source
 `f261ed9faf16b61880b544f599876bface4ded0d`. RTX 5090 binds published v0.6.16,
@@ -67,11 +67,11 @@ merging these current model fragments:
 Normal `python3 scripts/verify_release.py` checks bound profiles/runtime metadata;
 it does **not** perform route acceptance. Published-image acceptance passed on 5861712f:
 
-| Retainedv0.11.0 route | Fresh18.8.7 acceptance |
+| Retained v0.11.0 route | Fresh 18.8.7 acceptance |
 | --- | --- |
-| RTX 5090 Windows 11 + Docker Desktop/WSL2 host |2/2 documented steps passed|
-| macOS arm64 client over manual SSH tunnel |10/10 passed; client platform remains preview|
-| Windows x64 client over RTX 5090 loopback |5/5 passed|
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 host | 2/2 documented steps passed |
+| macOS arm64 client over manual SSH tunnel | 10/10 passed; client platform remains preview |
+| Windows x64 client over RTX 5090 loopback | 5/5 passed |
 
 All three stock clients, including Linux x64 under WSL2, passed live continuation
 and fail-closed checks. Independent restoration passed; measured downtime was 385.948 s.
@@ -82,16 +82,16 @@ These are owner-operated observations, not independent external-user outcomes.
 
 | I have | Current scope | Start here |
 | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 |Accepted v0.11.0 candidate; product publication still founder-only|[RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2)|
-| RTX 4090 + native Windows |Deferred from v0.11.0; remain on v0.10.0|[Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane)|
-| RTX 3090 + native Windows |Deferred from v0.11.0; remain on v0.10.0|[Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane)|
-| Other GPU/deployment, including two native visible NVIDIA GPUs |Unsupported|[Compatibility boundary](COMPATIBILITY.md)|
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | Accepted v0.11.0 candidate; product publication still founder-only | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) |
+| RTX 4090 + native Windows | Deferred from v0.11.0; remain on v0.10.0 | [Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane) |
+| RTX 3090 + native Windows | Deferred from v0.11.0; remain on v0.10.0 | [Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane) |
+| Other GPU/deployment, including two native visible NVIDIA GPUs | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 The founder installed the 4090 beside the 3090 in the replacement host. Unmodified
 native packages require exactly one visible NVIDIA GPU; name/UUID/ordinal
 binding and unindexed power queries do not support this arrangement. Both lanes
 return in a later multi-GPU-qualified release, without an environment shim.
-Legacyv0.10.0 remains a single-GPU route, not a workaround for that host. Use its
+Legacy v0.10.0 remains a single-GPU route, not a workaround for that host. Use its
 whole manifest/client/fragments/instructions together; never substitute GPU family,
 component tag, package or client between releases.
 

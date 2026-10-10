@@ -15,7 +15,7 @@
     "note": "Unmodified upstream OMP18.8.7, sourcef261ed9f; all three published client hashes/version/tool/continuation/fail-closed identities passed. Native lane legacy clients are not declared by this release."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "31cb65b40d38295c91d8285c45717649787cd7e54b54d079fd749cf1e936ea2b",
+  "compatibility_sha256": "e86c558f4f1545a63d033e1f3002e97739000d771429111e0629a04f3a05f6c7",
   "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "platform_receipts": [
@@ -186,15 +186,15 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.11.0/acceptance/documented-routes.json",
-      "sha256": "cb182f61f9a9ce13784af2a4170281882939fc0c619ab2612954c7a3d3c82ac2"
+      "sha256": "77cfd5b0919495e37abb4667b4f053d1cc2efaf0348ea2fc7d717a367c876d2f"
     },
     "restoration": {
-      "repository_path": "docs/measurements/2026-10-10-v0110-5090-only-acceptance-restoration.json",
+      "repository_path": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
       "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024"
     },
     "published_client_components": {
       "repository_path": "releases/v0.11.0/qualification/client-components.json",
-      "sha256": "c9d32080fb42800b8984677d86df8b07a6eef351f41cb1c78b6ca5696b912d57"
+      "sha256": "b7eb3b7c45b65155a2f0dde5ff7fcd07b52f2ddc6e8c98534deffbc6e26211d3"
     }
   },
   "limitations": [
