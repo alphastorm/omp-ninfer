@@ -15,7 +15,7 @@
     "note": "Unmodified upstream OMP18.8.7, sourcef261ed9f; all three published client hashes/version/tool/continuation/fail-closed identities passed. Native lane legacy clients are not declared by this release."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "ae43ac618940881662e22b26561a881bf5e15f6e68d14a700017a2e41ecd1b12",
+  "compatibility_sha256": "6d2e6b27ead7425c0cc3ed74aadf9948a79b8ae835710c712f96e184ee109d4e",
   "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "platform_receipts": [
