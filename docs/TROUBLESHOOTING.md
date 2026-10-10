@@ -246,7 +246,7 @@ that OMP did not block images in another config overlay.
 
 ## A long RTX 5090 session fails when OMP compacts it
 
-The unreleased OMP 18.8.3 candidate defaults custom/local Responses hosts to auto image detail
+The unreleased OMP 18.8.7 candidate defaults custom/local Responses hosts to auto image detail
 ([upstream #13687](https://github.com/can1357/oh-my-pi/pull/13687)); its current fragments need
 no `supportsImageDetailOriginal` override. GPU-host requalification is still pending. The
 workaround below applies only to the older published clients, including v0.10.0 / OMP 18.4.10.

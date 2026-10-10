@@ -482,6 +482,18 @@ class ReleaseContractTest(unittest.TestCase):
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
         self.assertEqual(errors, [])
 
+    def test_client_candidate_matches_the_verified_upstream_descriptor(self) -> None:
+        descriptor = self.load(ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
+        self.assertEqual(descriptor["omp"]["upstream_tag"], "v18.8.7")
+        self.assertEqual(descriptor["omp"]["upstream_commit"], "f261ed9faf16b61880b544f599876bface4ded0d")
+        for name, platform in (("manual-tunnel", "darwin-arm64"), ("windows-docker-local", "windows-x64")):
+            profile = self.load(ROOT / f"profiles/qwen38-rtx5090-{name}.json")
+            self.assertEqual(profile["status"], "candidate")
+            for key in ("distribution_kind", "upstream_repository", "upstream_tag", "upstream_commit",
+                        "published", "release_id", "asset_id", "asset_name", "asset_bytes", "asset_url",
+                        "asset_sha256", "binary_sha256"):
+                self.assertEqual(profile["client"][key], descriptor["platforms"][platform][key])
+
     def test_client_candidate_is_valid_but_not_ready_or_installable(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
@@ -529,7 +541,7 @@ class ReleaseContractTest(unittest.TestCase):
         shutil.copytree(ROOT / "profiles", root / "profiles", dirs_exist_ok=True)
         path = root / "profiles/qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(path)
-        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.3", "v18.4.10")
+        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.7", "v18.4.10")
         self.save(path, profile)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(any("asset_url must bind the upstream tag and asset name" in item

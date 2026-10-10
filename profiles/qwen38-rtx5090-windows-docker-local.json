@@ -9,16 +9,16 @@
     "architecture": "x64",
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.8.3",
-    "upstream_commit": "3e3c488a58d294e3a10051da588628e2cfb9d35c",
+    "upstream_tag": "v18.8.7",
+    "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
     "published": true,
-    "release_id": 406058719,
-    "asset_id": 619505785,
+    "release_id": 407957363,
+    "asset_id": 625097593,
     "asset_name": "omp-windows-x64.exe",
-    "asset_bytes": 237049344,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.3/omp-windows-x64.exe",
-    "asset_sha256": "fa72244120dbf555e18667716e2e05ea341799ab8d77d060195a035582adb0e7",
-    "binary_sha256": "fa72244120dbf555e18667716e2e05ea341799ab8d77d060195a035582adb0e7"
+    "asset_bytes": 225642496,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe",
+    "asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+    "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc"
   },
   "runtime_host": {
     "os": [

@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Target unmodified upstream OMP **18.8.3** in current install instructions and root profiles,
-  pinned to source `3e3c488a58d294e3a10051da588628e2cfb9d35c` and the upstream binary checksums.
+- Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
+  pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
   This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
   pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
   Published release records and historical measurements are unchanged.

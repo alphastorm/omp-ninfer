@@ -49,7 +49,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 self.assertNotIn("3090", fragment)
                 # Only the RTX 5090 container lane supports image input.
                 self.assertEqual(re.findall(r"^          - (\w+)$", fragment, re.M), inputs)
-                # OMP 18.8.3 defaults custom Responses hosts to auto image detail.
+                # OMP 18.8.7 defaults custom Responses hosts to auto image detail.
                 self.assertNotIn("supportsImageDetailOriginal", fragment)
                 self.assertIn("          statefulResponses: true\n", fragment)
 

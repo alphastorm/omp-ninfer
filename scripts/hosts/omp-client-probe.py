@@ -4,8 +4,10 @@
 Run preflight before opening a runtime window, live while reachable, then outage
 with the same configured route unavailable. --dry-run has no filesystem effects.
 Windows uses PowerShell's native argument dispatch, not a cmd.exe command string.
-Preflight binds --version to the tested release manifest; every client launch enables
-the documented PI_OPENAI_STATEFUL=1 environment for the stock upstream binary.
+Preflight binds --version to the tested release manifest or --client-component.
+Clients with per-model stateful compat (18.8.3+) never receive PI_OPENAI_STATEFUL;
+the historical 18.4.10 baseline still receives its required environment override.
+--local-rehearsal labels candidate probes and never supplies qualification evidence.
 """
 import argparse
 import base64
@@ -16,6 +18,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import subprocess
 import sys
 import urllib.request
@@ -64,7 +67,7 @@ def summarize(text):
             "errors": sorted(set(errors)), "agent_end": any(e.get("type") == "agent_end" for e in events)}
 
 
-def launch(argv, cwd, timeout):
+def launch(argv, cwd, timeout, environment):
     if os.name == "nt":
         # Avoid the historical cmd wrapper which split a prompt into multiple turns.
         quote = lambda s: "'" + str(s).replace("'", "''") + "'"
@@ -76,22 +79,35 @@ def launch(argv, cwd, timeout):
     # before its first request, and a probe run over ssh from a terminal that never closes has a
     # stdin that never ends: v0.9.0's second RTX 5090 window hung there.
     return subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
-                          errors="replace", timeout=timeout, env=dict(os.environ, PI_OPENAI_STATEFUL="1"))
+                          errors="replace", timeout=timeout, env=environment)
 
 
-def expected_client_version(clone, release):
-    manifest_path = Path(clone) / "releases" / release / "manifest.json"
+def expected_client_version(clone, release, client_component=None):
+    manifest_path = Path(client_component) if client_component else Path(clone) / "releases" / release / "manifest.json"
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
         raise ValueError(f"cannot read client version from {manifest_path}: {error}") from error
     try:
-        version = manifest["components"]["omp"]["distribution_version"]
+        omp = manifest["omp"] if client_component else manifest["components"]["omp"]
+        version = omp["distribution_version"]
     except (KeyError, TypeError) as error:
         raise ValueError(f"{manifest_path}: components.omp.distribution_version is missing") from error
     if not isinstance(version, str) or not version.strip():
         raise ValueError(f"{manifest_path}: components.omp.distribution_version must be a non-empty string")
     return "omp/" + version
+
+
+def client_environment(version):
+    match = re.fullmatch(r"omp/([0-9]+)[.]([0-9]+)[.]([0-9]+)", version)
+    if match is None:
+        raise ValueError("client distribution_version must be a semantic version")
+    environment = dict(os.environ)
+    if tuple(map(int, match.groups())) >= (18, 8, 3):
+        environment.pop("PI_OPENAI_STATEFUL", None)
+    else:
+        environment["PI_OPENAI_STATEFUL"] = "1"
+    return environment
 
 
 def main():
@@ -105,12 +121,19 @@ def main():
     parser.add_argument("--key-file")
     parser.add_argument("--expected-runtime")
     parser.add_argument("--vision-image")
+    parser.add_argument("--client-component", help="verified upstream client descriptor; overrides only the client identity")
+    parser.add_argument("--local-rehearsal", action="store_true", help="label an unqualified candidate probe, not acceptance")
     parser.add_argument("--dry-run", action="store_true")
     a = parser.parse_args()
-    expected_version = expected_client_version(a.clone, a.release) if a.phase == "preflight" else None
+    if a.local_rehearsal and not a.client_component:
+        parser.error("--local-rehearsal requires --client-component")
+    expected_version = expected_client_version(a.clone, a.release, a.client_component)
+    environment = client_environment(expected_version)
     if a.dry_run:
         print(json.dumps({"status": "dry-run", "phase": a.phase, "platform": a.platform,
-                          "expected_client_version": expected_version, "environment": {"PI_OPENAI_STATEFUL": "1"},
+                          "expected_client_version": expected_version,
+                          "environment": {k: environment[k] for k in ("PI_OPENAI_STATEFUL",) if k in environment},
+                          "evidence_kind": "local rehearsal" if a.local_rehearsal else "client acceptance",
                           "effects": "none", "output": a.output, "checks": ["typed read/result", "exact marker", "exact continuation nonce", "provider/model isolation", "served runtime identity"]}))
         return
     out, clone = Path(a.output), Path(a.clone)
@@ -122,11 +145,14 @@ def main():
         "wsl_distro_name_present": bool(os.environ.get("WSL_DISTRO_NAME")),
         "wsl_interop_present": bool(os.environ.get("WSL_INTEROP")), "environment_erased": False,
         "native_linux_os_qualification_claimed": False}}
+    receipt["stateful_source"] = "environment" if "PI_OPENAI_STATEFUL" in environment else "per-model compat"
+    if a.local_rehearsal:
+        receipt.update(evidence_kind="local rehearsal", qualification_claimed=False)
     def save():
         receipt["updated_utc"] = now()
         receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     def call(name, args, timeout=210):
-        result = launch([a.binary, *args], out, timeout)
+        result = launch([a.binary, *args], out, timeout, environment)
         (out / (name + ".jsonl")).write_text(result.stdout, encoding="utf-8")
         (out / (name + ".stderr")).write_text(result.stderr, encoding="utf-8")
         summary = summarize(result.stdout)
@@ -140,14 +166,14 @@ def main():
         assert result["returncode"] == 0 and not result["errors"] and result["agent_end"] and only_selected(result), "exit/events/error/provider/model acceptance failed"
     try:
         if a.phase == "preflight":
-            result = launch([a.binary, "--version"], out, 30)
+            result = launch([a.binary, "--version"], out, 30, environment)
             receipt["omp_version"] = result.stdout.strip()
             assert result.returncode == 0 and receipt["omp_version"] == expected_version, f"client version mismatch: expected {expected_version}, observed {receipt['omp_version']!r}"
-            result = launch([a.binary, "--help"], out, 30)
+            result = launch([a.binary, "--help"], out, 30, environment)
             (out / "help.txt").write_text(result.stdout + result.stderr, encoding="utf-8")
             assert result.returncode == 0 and "--mode" in result.stdout and "--session-dir" in result.stdout, "client help contract unavailable"
             args = ["-p", "--model", a.model, "Use the read tool to read marker.txt. Return only its exact single line."]
-            result = launch([sys.executable, "-c", "import json,sys;print(json.dumps(sys.argv[1:]))", *args], out, 30)
+            result = launch([sys.executable, "-c", "import json,sys;print(json.dumps(sys.argv[1:]))", *args], out, 30, environment)
             assert result.returncode == 0 and json.loads(result.stdout) == args, "prompt argv was split"
             receipt["preflight"] = {"status": "passed", "version": receipt["omp_version"], "argv_count": len(args), "argv_exact": True}
         elif a.phase == "outage":

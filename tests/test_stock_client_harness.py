@@ -23,7 +23,7 @@ class ClientPreflightTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.manifest = self.root / "releases" / "v9.9.9" / "manifest.json"
         self.manifest.parent.mkdir(parents=True)
-        self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "31.4.5"}}}))
+        self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "18.4.10"}}}))
         self.binary = self.root / "omp"
         self.binary.write_text(
             f"#!{sys.executable}\n"
@@ -34,7 +34,7 @@ class ClientPreflightTests(unittest.TestCase):
             "if sys.stdin is not None and not sys.stdin.isatty():\n"
             "    sys.stdin.read()\n"
             "if sys.argv[1:] == ['--version']:\n"
-            "    print('omp/31.4.5')\n"
+            "    print('omp/18.4.10')\n"
             "elif sys.argv[1:] == ['--help']:\n"
             "    print('--mode --session-dir --continue --no-session --max-time')\n"
             "else:\n"
@@ -55,9 +55,44 @@ class ClientPreflightTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         receipt = json.loads((self.output / "receipt.json").read_text())
         self.assertEqual(receipt["preflight"]["status"], "passed")
-        self.assertEqual(receipt["preflight"]["version"], "omp/31.4.5")
+        self.assertEqual(receipt["preflight"]["version"], "omp/18.4.10")
         self.assertTrue(receipt["preflight"]["argv_exact"])
         self.assertNotIn("diagnostics", receipt)
+
+    def test_candidate_descriptor_clears_stateful_environment_without_rehearsal(self) -> None:
+        descriptor = self.root / "client-component.json"
+        descriptor.write_text(json.dumps({"omp": {"distribution_version": "18.8.7"}}))
+        self.binary.write_text(self.binary.read_text().replace(
+            "if os.environ.get('PI_OPENAI_STATEFUL') != '1':",
+            "if 'PI_OPENAI_STATEFUL' in os.environ:",
+        ).replace("omp/18.4.10", "omp/18.8.7"))
+        result = self.run_probe("--client-component", str(descriptor))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = json.loads((self.output / "receipt.json").read_text())
+        self.assertEqual(receipt["preflight"]["version"], "omp/18.8.7")
+
+    def test_published_per_model_client_also_clears_stateful_environment(self) -> None:
+        self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "18.8.7"}}}))
+        self.binary.write_text(self.binary.read_text().replace(
+            "if os.environ.get('PI_OPENAI_STATEFUL') != '1':",
+            "if 'PI_OPENAI_STATEFUL' in os.environ:",
+        ).replace("omp/18.4.10", "omp/18.8.7"))
+        result = self.run_probe()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = json.loads((self.output / "receipt.json").read_text())
+        self.assertEqual(receipt["stateful_source"], "per-model compat")
+
+    def test_rehearsal_dry_run_has_no_global_override_or_filesystem_effects(self) -> None:
+        descriptor = self.root / "client-component.json"
+        descriptor.write_text(json.dumps({"omp": {"distribution_version": "18.8.7"}}))
+        self.binary.unlink()
+        result = self.run_probe("--client-component", str(descriptor), "--local-rehearsal", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertEqual(plan["environment"], {})
+        self.assertEqual(plan["evidence_kind"], "local rehearsal")
+        self.assertEqual(plan["expected_client_version"], "omp/18.8.7")
+        self.assertFalse(self.output.exists())
 
     def test_a_client_never_waits_on_the_probes_stdin(self) -> None:
         """v0.9.0's second RTX 5090 window ran the probe over ssh from a terminal that never
@@ -71,16 +106,16 @@ class ClientPreflightTests(unittest.TestCase):
             os.close(read_end)
         self.assertEqual(result.returncode, 0, result.stderr)
         receipt = json.loads((self.output / "receipt.json").read_text())
-        self.assertEqual(receipt["preflight"]["version"], "omp/31.4.5")
+        self.assertEqual(receipt["preflight"]["version"], "omp/18.4.10")
 
     def test_mismatched_version_fails_and_records_expected_and_observed_versions(self) -> None:
-        self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "32.0.0"}}}))
+        self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "18.4.9"}}}))
         result = self.run_probe()
         self.assertNotEqual(result.returncode, 0)
         receipt = json.loads((self.output / "receipt.json").read_text())
         self.assertEqual(receipt["status"], "failed")
-        self.assertIn("expected omp/32.0.0", receipt["first_failing_boundary"])
-        self.assertIn("omp/31.4.5", receipt["first_failing_boundary"])
+        self.assertIn("expected omp/18.4.9", receipt["first_failing_boundary"])
+        self.assertIn("omp/18.4.10", receipt["first_failing_boundary"])
 
     def test_missing_manifest_fails_before_launching_client_or_creating_receipts(self) -> None:
         self.manifest.unlink()
@@ -105,7 +140,7 @@ class ClientPreflightTests(unittest.TestCase):
         result = self.run_probe("--dry-run")
         self.assertEqual(result.returncode, 0, result.stderr)
         plan = json.loads(result.stdout)
-        self.assertEqual(plan["expected_client_version"], "omp/31.4.5")
+        self.assertEqual(plan["expected_client_version"], "omp/18.4.10")
         self.assertEqual(plan["effects"], "none")
         self.assertFalse(self.output.exists())
 

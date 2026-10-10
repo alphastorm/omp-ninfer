@@ -11,10 +11,10 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — unreleased OMP 18.8.3 client candidate
+## Where this is now — unreleased OMP 18.8.7 client candidate
 
-Current install fragments and profiles target stock upstream OMP **18.8.3**, source
-`3e3c488a58d294e3a10051da588628e2cfb9d35c`, on unchanged v0.10.0 runtime/model pins.
+Current install fragments and profiles target stock upstream OMP **18.8.7**, source
+`f261ed9faf16b61880b544f599876bface4ded0d`, on unchanged v0.10.0 runtime/model pins.
 Per-model `compat.statefulResponses: true` replaces the global environment requirement;
 custom-host auto image detail replaces the RTX 5090 override. Upstream's unavailable-model
 resume fix needs no config. Compaction settings are unchanged.
@@ -28,7 +28,7 @@ and record fresh documented-route acceptance separately for each of:
 - RTX 4090 native Windows runtime/client;
 - RTX 3090 native Windows runtime/client.
 
-Those fresh route and client-platform receipts must bind the 18.8.3 binaries and updated
+Those fresh route and client-platform receipts must bind the 18.8.7 binaries and updated
 fragments in the next product manifest before readiness, a tag or publication. No GPU-host
 run or qualification result is claimed by this branch.
 
