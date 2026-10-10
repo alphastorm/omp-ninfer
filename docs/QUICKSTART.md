@@ -5,30 +5,29 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **Current profiles bind stock OMP 18.8.7 to the v0.11.0 candidate manifest.**
-> The RTX 5090 component is published and locally qualified; all five fresh route
-> acceptances remain pending. Lane-bound candidates pass `--require-installable`
-> for maintainer acceptance, not `--require-ready`. Unbound root-client markers
-> still refuse installation; do not clear them by hand. The normal setup blocks
-> below require the future product tag and ready gate, not a moving candidate branch.
-> For a qualified install use the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
-> with its OMP 18.4.10 client and fragments. Its [acceptance](#v0100-route-acceptance) remains historical baseline evidence.
+> **Current scope: RTX5090-onlyv0.11.0 with stock OMP18.8.7.**
+> The published component and all three retained routes passed on frozen
+> `5861712f561ff0b3100dd4350e02d777a3f5007e` (17steps). Readiness additionally
+> requires composed receipts and immutable platform/acceptance/manifest pins.
+> The product tag is not published; normal setup blocks below require that tag
+> and its ready gate, not a moving candidate branch. Native RTX3090/4090 owners
+> remain on the [complete immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> and its OMP18.4.10 client/fragments. Do not mix release authorities.
 
 ## OMP 18.8.7 client candidate
 
-The [v0.11.0 notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) record the completed
-founder component cut, real-digest staging, and pending published-image acceptance.
-Only the accountable lead dispatches the acceptance window against a frozen 40-hex
-candidate, substituting that commit for the not-yet-created tag and the installable
-gate for the ready gate as in v0.10.0. Never use the local Docker image as an OCI digest
-or run the acceptance-window watchdog during a rehearsal.
+The [v0.11.0 notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) record the
+completed component cut, real-digest staging and accepted published-image window.
+Only the accountable lead dispatches such windows against a frozen40-hex candidate.
+The accepted5090 executable blocks stay byte-identical; this scope/pin follow-on
+is not another acceptance subject or a production promotion. Never use a local
+Docker image as an OCI digest or an acceptance watchdog for a rehearsal.
 
-The client is the unmodified upstream v18.8.7 release, source
-`f261ed9faf16b61880b544f599876bface4ded0d`. RTX5090 now binds published v0.6.16,
-source1302d639/image6a02feba/server548fe239, profile qwen38-5090-v0.11.0/config91a35670.
-Model, native runtime packages and serving limits are unchanged. The lane stage replaces
-clients wholesale from upstream-release compatibility rows before consuming root markers.
-The product manifest stays candidate with its external-install blocker.
+The client is unmodified upstream v18.8.7, source
+`f261ed9faf16b61880b544f599876bface4ded0d`. RTX5090 binds published v0.6.16,
+source1302d639/image6a02feba/server548fe239, profileqwen38-5090-v0.11.0/config91a35670.
+The model and serving limits are unchanged. Native packages are not declared
+in this release; their completev0.10.0 routes remain separate legacy authorities.
 
 ### Local rehearsal (not acceptance)
 
@@ -65,42 +64,36 @@ merging these current model fragments:
   [#13689](https://github.com/can1357/oh-my-pi/pull/13689) refuses an unavailable saved model
   on resume without another config setting.
 
-Normal `python3 scripts/verify_release.py` checks the bound candidate profiles and
-runtime manifest; it does **not** perform documented-route acceptance. Before a new product release, rerun
-GPU-host requalification and the documented acceptance separately for every route:
+Normal `python3 scripts/verify_release.py` checks bound profiles/runtime metadata;
+it does **not** perform route acceptance. Published-image acceptance passed on5861712f:
 
-| Documented route | Fresh 18.8.7 acceptance |
+| Retainedv0.11.0 route | Fresh18.8.7 acceptance |
 | --- | --- |
-| RTX 5090 Windows 11 + Docker Desktop/WSL2 container host | Pending; runtime identity and host route |
-| macOS arm64 client over manual SSH tunnel | Pending; all client steps, continuation and fail-closed checks; remains preview |
-| Windows x64 client over RTX 5090 local loopback | Pending; all client steps, continuation and fail-closed checks |
-| RTX 4090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
-| RTX 3090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
+| RTX5090 Windows11 + Docker Desktop/WSL2 host |2/2documented steps passed|
+| macOS arm64 client over manual SSH tunnel |10/10passed; client platform remains preview|
+| Windows x64 client over RTX5090 loopback |5/5passed|
 
-Bind fresh client-platform and route receipts, the 18.8.7 binary pins and the updated fragments
-in the next product manifest before readiness, a tag or publication. Local client rehearsals
-are not documented-route acceptance. The immutable v0.10.0 guide gets the published
-18.4.10 baseline; the intended v0.11.0 blocks below get 18.8.7. Never combine authorities.
+All three stock clients, including Linux x64 under WSL2, passed live continuation
+and fail-closed checks. Independent restoration passed; measured downtime was385.948s.
+See [frozen producer evidence](../releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json).
+These are owner-operated observations, not independent external-user outcomes.
 
 ## Choose your lane
 
-Choose by GPU and runtime before downloading anything. Client-platform qualification is separate
-from GPU-runtime qualification.
+| I have | Current scope | Start here |
+| --- | --- | --- |
+| RTX5090 + Windows11 / Docker Desktop WSL2 |Acceptedv0.11.0 candidate; product publication still founder-only|[RTX5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2)|
+| RTX4090 + native Windows |Deferred fromv0.11.0; remain onv0.10.0|[Complete immutablev0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane)|
+| RTX3090 + native Windows |Deferred fromv0.11.0; remain onv0.10.0|[Complete immutablev0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane)|
+| Other GPU/deployment, including two native visible NVIDIA GPUs |Unsupported|[Compatibility boundary](COMPATIBILITY.md)|
 
-| I have | Status | Start here | What success produces |
-| --- | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | **18.8.7 candidate; requalification pending** | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) | A first OMP turn plus the documented pass/fail acceptance observations |
-| RTX 4090 + native Windows | **18.8.7 candidate; requalification pending** | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) | The documented acceptance checks on the exact published package |
-| RTX 3090 + native Windows | **18.8.7 candidate; requalification pending** | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) | The documented acceptance checks on the exact published package |
-| Any other GPU or deployment | **unsupported** | [Compatibility boundary](COMPATIBILITY.md) | No install attempt; the exact current support policy |
-
-The RTX 3090's earlier
-[v0.7.2 instructions](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md#native-windows-rtx-4090-and-rtx-3090-release-lanes)
-with the v0.7.2 manifest and OMP 18.0.9 remain a separate historical route on the durable v0.2
-lineage. Do not combine them with v0.10.0 or the OMP 18.8.7 candidate.
-
-The current native lane is installable only through its exact qualified manifest variant. Do not
-substitute GPU family names, package URLs, component tags, or variant IDs between releases.
+The founder installed the4090 beside the3090 in the replacement host. Unmodified
+native packages require exactly one visible NVIDIA GPU; name/UUID/ordinal
+binding and unindexed power queries do not support this arrangement. Both lanes
+return in a later multi-GPU-qualified release, without an environment shim.
+Legacyv0.10.0 remains a single-GPU route, not a workaround for that host. Use its
+whole manifest/client/fragments/instructions together; never substitute GPU family,
+component tag, package or client between releases.
 
 ## v0.10.0 route acceptance
 
@@ -375,461 +368,19 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Native Windows RTX 4090 release lane
 
-This native NInfer package is not a substitution for the RTX 5090 image. Before installation,
-the ready manifest must publish `rtx4090-windows-native` as qualified. The ready product
-manifest remains authoritative for every download URL and hash; no absent or unqualified
-variant may be deployed.
-
-Prerequisites: Windows 11 x64, a single RTX 4090 with a current driver, Git, PowerShell,
-Python 3 from python.org (its `py` launcher; the `python3` name Windows ships is a Microsoft
-Store shortcut, not Python), and at least 40 GiB free. Install the OMP client first with
-**Install the exact native Windows client** above; the lane's own steps follow. RTX 4090
-requires at least 32768 MiB of runtime-host memory for its unchanged 11264 MiB pinned host-KV
-pool and 24 host-state slots. Start from an
-elevated PowerShell. Windows ships with script execution disabled; the `Set-ExecutionPolicy`
-line enables the release's hash-pinned scripts for this window only and changes nothing on the
-machine - repeat it in any new window that runs one:
-
-```powershell
-git clone --branch v0.11.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
-Set-Location omp-ninfer
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-py -3 scripts\verify_release.py --require-ready
-```
-
-Use this lane's installed state root, served request model id, and loopback endpoint;
-these values are not interchangeable with a historical release's variants:
-
-| Variant id | Installed state root | Request model id | Endpoint |
-| --- | --- | --- | --- |
-| `rtx4090-windows-native` | `%ProgramData%\NInfer\qwen38-4090-native` | `qwen3.8-27b` | `http://127.0.0.1:18082/v1` |
-
-The RTX 4090 native lane is text and tools only: Vision belongs to the RTX 5090 container
-profile ([`docs/FACTS.md`](FACTS.md)). Set `$VariantId` once:
-
-```powershell
-$VariantId = 'rtx4090-windows-native'
-```
-
-Then let the manifest supply every URL and hash. The shared native blocks and provider fragment
-retain historical RTX 3090 identifiers, but those are not a current install route: the manifest
-guard below refuses a missing or unqualified variant before downloading or installing it.
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.10.0\manifest.json -Raw | ConvertFrom-Json
-$Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
-if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
-  throw 'requested native runtime variant is not uniquely qualified'
-}
-$StateRootName = switch ($VariantId) {
-  'rtx4090-windows-native' { 'qwen38-4090-native' }
-  'rtx3090-windows-native' { 'qwen38-3090-omp-v0.2' }
-  default { throw 'unknown native variant' }
-}
-$StateRoot = Join-Path $env:ProgramData (Join-Path 'NInfer' $StateRootName)
-# Stage under ProgramData with an administrators-only ACL so no medium-integrity process
-# under the same account can swap bytes between verification and elevated execution. Every
-# step below is fail-closed: an ACL error stops the session before anything is downloaded.
-$Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
-if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
-New-Item -ItemType Directory -Path $Stage | Out-Null
-$Admins = New-Object System.Security.Principal.SecurityIdentifier('S-1-5-32-544')
-$Acl = Get-Acl $Stage
-$Acl.SetAccessRuleProtection($true, $false)
-$Acl.SetOwner($Admins)
-foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
-  $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    (New-Object System.Security.Principal.SecurityIdentifier($Sid)),
-    'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
-  $Acl.AddAccessRule($Rule)
-}
-Set-Acl $Stage $Acl
-$Applied = Get-Acl $Stage
-if (-not $Applied.AreAccessRulesProtected) { throw 'staging ACL protection did not apply' }
-if (@($Applied.Access | Where-Object {
-      $_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin
-      @('S-1-5-32-544', 'S-1-5-18') }).Count -ne 0) {
-  throw 'staging ACL retains a non-administrator principal'
-}
-# The API key and the model live OUTSIDE the staging directory so reruns of this snippet never
-# delete them, and the installer refuses a model stored inside the lane's own state root.
-$KeyDir = Join-Path $env:ProgramData 'omp-ninfer-keys'
-if (-not (Test-Path $KeyDir)) {
-  New-Item -ItemType Directory -Path $KeyDir | Out-Null
-  Set-Acl $KeyDir $Acl
-}
-$ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
-if (-not (Test-Path $ApiKeyFile)) {
-  # Windows PowerShell runs on .NET Framework: no RandomNumberGenerator.Fill or Convert.ToHexString.
-  $Secret = [byte[]]::new(32)
-  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($Secret)
-  [IO.File]::WriteAllText($ApiKeyFile,
-    ([BitConverter]::ToString($Secret).Replace('-', '').ToLowerInvariant() + "`n"),
-    [Text.UTF8Encoding]::new($false))
-}
-$ModelDir = Join-Path $env:ProgramData 'omp-ninfer-model'
-if (-not (Test-Path $ModelDir)) {
-  New-Item -ItemType Directory -Path $ModelDir | Out-Null
-  Set-Acl $ModelDir $Acl
-}
-$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-# The native lanes serve the manifest's native model: components.native_model when the primary
-# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
-$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
-  $Manifest.components.native_model } else { $Manifest.components.model }
-if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
-  throw 'native model artifact is not the variant''s bound model'
-}
-& curl.exe --fail --location --continue-at - --output $Model $NativeModel.artifact_url
-# a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
-if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$NativeModel.artifact_bytes) {
-  throw 'model artifact download failed'
-}
-if ((Get-Item $Model).Length -ne [int64]$NativeModel.artifact_bytes) {
-  throw 'model artifact byte count mismatch'
-}
-if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
-    $NativeModel.artifact_sha256) {
-  throw 'model artifact checksum mismatch'
-}
-foreach ($Asset in @(
-  @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
-  @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
-  @{ Url = $Variant[0].controller_url; Sha = $Variant[0].controller_sha256 },
-  @{ Url = $Variant[0].gpu_owner_controller_url; Sha = $Variant[0].gpu_owner_controller_sha256 },
-  @{ Url = $Variant[0].state_protection_url; Sha = $Variant[0].state_protection_sha256 }
-)) {
-  $Name = [IO.Path]::GetFileName(([Uri]$Asset.Url).AbsolutePath)
-  $Path = Join-Path $Stage $Name
-  Invoke-WebRequest -UseBasicParsing -Uri $Asset.Url -OutFile $Path
-  if ((Get-FileHash $Path -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Asset.Sha) {
-    throw "native runtime asset checksum mismatch: $Name"
-  }
-}
-$Package = Join-Path $Stage ([IO.Path]::GetFileName(([Uri]$Variant[0].package_url).AbsolutePath))
-if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
-  throw 'native runtime package byte count mismatch'
-}
-$Installer = Join-Path $Stage 'Install-Release.ps1'
-& $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
-  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile -StateRoot $StateRoot `
-  -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
-```
-
-The install prints one JSON receipt and leaves the server running. The package controller binds
-loopback/Tailscale-only listening, mandatory bearer authentication, the external model hash,
-process-restart checkpoints, and active/previous rollback. Do not mix assets across variants or
-infer install authority from GPU-family names. RTX 4090 uses its exact MTP3 profile.
-Structured JSON-schema output remains unsupported and fails closed.
-
-### Operate the native lane
-
-The installed controller is the only supported lifecycle surface, and every action needs the
-lane's state root. Run these in the window that installed the lane; in a new elevated window,
-first set `$StateRoot` to the lane's state root from the table above. `-Action Restart` does the
-stop and the start in one step:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$Controller = Join-Path $StateRoot 'Control-Release.ps1'
-& $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
-& $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
-& $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
-& $Controller -Action Status -StateRoot $StateRoot
-```
-
-`Status` is the success criterion: it must report the installed release id, the served binary and
-configuration identity, and a ready endpoint. A machine reboot is not a managed stop - the
-scheduled task starts the release again, but a session that was never published (automatically
-above 32,768 frontier tokens, or explicitly through `POST /v1/ninfer/checkpoints`) does not
-survive it. A deliberate `-Action Stop` does save it.
-
-### Point OMP at the native lane
-
-Native Windows OMP does not support the POSIX `!cat` secret reference, so the key is loaded into
-the launching process. Copy the native fragment, then set `$Provider` to the lane you installed:
-
-```powershell
-$Provider = if ($VariantId -ceq 'rtx4090-windows-native') { 'ninfer-native-4090' } else { 'ninfer-native-3090' }
-$Agent = Join-Path $HOME '.omp\agent'
-New-Item -ItemType Directory -Force -Path $Agent | Out-Null
-$ModelsPath = Join-Path $Agent 'models.yml'
-$ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
-}
-Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
-$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
-```
-
-Stock OMP names each session with `prompt_cache_key`. With API authentication configured, the
-server hashes that key into the session identity without storing the raw key; this enables
-automatic checkpoints and restore. The model's `compat.statefulResponses: true` chains turns with
-`previous_response_id`. Encrypted reasoning and reasoning summaries are disabled because the
-server refuses fields it does not implement. The fragment's effort list keeps OMP within the
-template's `low`, `medium`, and `xhigh` levels (`off` clamps to `low`, `high` to `medium`).
-
-The environment-backed value exists only in that PowerShell process and its children. Do not put
-the key itself in YAML, command arguments, shell history, or support bundles. In that process,
-`& "$env:LOCALAPPDATA\OMP\omp.exe" --model "$Provider/qwen3.8-27b"` opens an interactive session on
-the lane; run the acceptance below first, it uses the same process without opening one.
-
-### Native lane acceptance
-
-Run these in the same PowerShell process that loaded `NINFER_NATIVE_API_KEY`:
-
-```powershell
-$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
-$Smoke = Join-Path $env:TEMP ("omp-ninfer-native-" + [Guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
-Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
-Push-Location $Smoke
-try {
-  & $Launcher -p --no-session --auto-approve --model "$Provider/qwen3.8-27b" `
-    'Use a file-reading tool to read marker.txt, then report its exact single line.'
-  if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
-
-  $Session = Join-Path $Smoke 'sessions'
-  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/qwen3.8-27b" `
-    'Remember the nonce 493817-205361 for my next turn. Reply OK only.'
-  if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
-  & $Launcher -p --auto-approve --session-dir $Session --continue `
-    'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
-  if ($LASTEXITCODE -ne 0) { throw 'stateful resume failed' }
-} finally { Pop-Location }
-
-& $Controller -Action Stop -StateRoot $StateRoot | Out-Null
-& $Launcher -p --no-session --auto-approve --max-time 20s `
-  --model "$Provider/qwen3.8-27b" 'Return LOCAL_ONLY.'
-if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
-& $Controller -Action Start -StateRoot $StateRoot | Out-Null
-```
-
-Expected result: the first three turns succeed locally, the outage request fails with a
-connection error and no model response, and the lane serves again after `-Action Start`. Any
-cloud-provider request is a release failure. Skip the Vision check in section 8: these lanes are
-text and tools only. Report the outcome with the
-[clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+**Deferred fromv0.11.0.** Owners remain on the
+[complete immutablev0.10.0 RTX4090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane),
+including its OMP18.4.10 client, manifest and fragments. It requires a single
+visible GPU; a co-installed3090/4090 host is unsupported. No current native
+installation blocks are supplied here.
 
 ## Native Windows RTX 3090 release lane
 
-**v0.10.0 accepted.** This published-asset route passed all seven documented steps on the
-physical RTX 3090 with stock OMP 18.4.10; receipts are linked above. Do not bypass the ready
-gate or use the historical v0.7.2 manifest here. RTX 4090 and RTX 3090 keep their component bytes;
-RTX 5090 changes its runtime and model in this release.
-
-Prerequisites: Windows 11 x64, one RTX 3090 (sm_86), NVIDIA driver 570 or newer,
-Git, PowerShell, Python 3 with its `py` launcher, and at least 40 GiB free for model,
-package and client. The candidate targets stock OMP 18.8.7 using **Install the exact native
-Windows client** above, then open an elevated PowerShell and run:
-
-```powershell
-git clone --branch v0.11.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
-Set-Location omp-ninfer
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-py -3 scripts\verify_release.py --require-ready
-```
-
-
-The qualified package must bind MTP3, INT8 KV, 131072 context tokens, prefill chunk 1024,
-one request at a time and keep-warm off. The managed GPU cap is 300 W; the controller restores
-the owner's 370 W cap and refuses takeover above the 1 GiB interactive GPU-owner threshold.
-The scheduled task is `NInfer-Qwen38-3090-Native`; use its controller, not the task directly.
-
-| Variant id | Installed state root | Request model id | Endpoint |
-| --- | --- | --- | --- |
-| `rtx3090-windows-native` | `%ProgramData%\NInfer\qwen38-3090-native` | `q38-ninfer` | `http://127.0.0.1:18082/v1` |
-
-```powershell
-$VariantId = 'rtx3090-windows-native'
-```
-
-
-The manifest supplies all public URLs and hashes, including the package
-`ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`
-under component tag `v0.6.2-qwen38-3090-beta.1`. A missing or unqualified variant stops
-before download. Keep the model and API key outside the staging directory and state root.
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.10.0\manifest.json -Raw | ConvertFrom-Json
-$Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
-if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
-  throw 'requested native runtime variant is not uniquely qualified'
-}
-if ($VariantId -cne 'rtx3090-windows-native') { throw 'expected RTX 3090 native variant' }
-$StateRootName = 'qwen38-3090-native'
-$StateRoot = Join-Path $env:ProgramData (Join-Path 'NInfer' $StateRootName)
-# Stage under ProgramData with an administrators-only ACL so no medium-integrity process
-# under the same account can swap bytes between verification and elevated execution. Every
-# step below is fail-closed: an ACL error stops the session before anything is downloaded.
-$Stage = Join-Path $env:ProgramData ("omp-ninfer-stage-" + $VariantId)
-if (Test-Path $Stage) { Remove-Item -Recurse -Force $Stage }
-New-Item -ItemType Directory -Path $Stage | Out-Null
-$Admins = New-Object System.Security.Principal.SecurityIdentifier('S-1-5-32-544')
-$Acl = Get-Acl $Stage
-$Acl.SetAccessRuleProtection($true, $false)
-$Acl.SetOwner($Admins)
-foreach ($Sid in @('S-1-5-32-544', 'S-1-5-18')) {
-  $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    (New-Object System.Security.Principal.SecurityIdentifier($Sid)),
-    'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
-  $Acl.AddAccessRule($Rule)
-}
-Set-Acl $Stage $Acl
-$Applied = Get-Acl $Stage
-if (-not $Applied.AreAccessRulesProtected) { throw 'staging ACL protection did not apply' }
-if (@($Applied.Access | Where-Object {
-      $_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -notin
-      @('S-1-5-32-544', 'S-1-5-18') }).Count -ne 0) {
-  throw 'staging ACL retains a non-administrator principal'
-}
-# The API key and the model live OUTSIDE the staging directory so reruns of this snippet never
-# delete them, and the installer refuses a model stored inside the lane's own state root.
-$KeyDir = Join-Path $env:ProgramData 'omp-ninfer-keys'
-if (-not (Test-Path $KeyDir)) {
-  New-Item -ItemType Directory -Path $KeyDir | Out-Null
-  Set-Acl $KeyDir $Acl
-}
-$ApiKeyFile = Join-Path $KeyDir 'api-key.txt'
-if (-not (Test-Path $ApiKeyFile)) {
-  # Windows PowerShell runs on .NET Framework: no RandomNumberGenerator.Fill or Convert.ToHexString.
-  $Secret = [byte[]]::new(32)
-  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($Secret)
-  [IO.File]::WriteAllText($ApiKeyFile,
-    ([BitConverter]::ToString($Secret).Replace('-', '').ToLowerInvariant() + "`n"),
-    [Text.UTF8Encoding]::new($false))
-}
-$ModelDir = Join-Path $env:ProgramData 'omp-ninfer-model'
-if (-not (Test-Path $ModelDir)) {
-  New-Item -ItemType Directory -Path $ModelDir | Out-Null
-  Set-Acl $ModelDir $Acl
-}
-$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-# The native lanes serve the manifest's native model: components.native_model when the primary
-# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
-$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
-  $Manifest.components.native_model } else { $Manifest.components.model }
-if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
-  throw 'native model artifact is not the variant''s bound model'
-}
-& curl.exe --fail --location --continue-at - --output $Model $NativeModel.artifact_url
-# a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
-if ($LASTEXITCODE -ne 0 -and (Get-Item $Model -ErrorAction SilentlyContinue).Length -ne [int64]$NativeModel.artifact_bytes) {
-  throw 'model artifact download failed'
-}
-if ((Get-Item $Model).Length -ne [int64]$NativeModel.artifact_bytes) {
-  throw 'model artifact byte count mismatch'
-}
-if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
-    $NativeModel.artifact_sha256) {
-  throw 'model artifact checksum mismatch'
-}
-foreach ($Asset in @(
-  @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
-  @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
-  @{ Url = $Variant[0].controller_url; Sha = $Variant[0].controller_sha256 },
-  @{ Url = $Variant[0].gpu_owner_controller_url; Sha = $Variant[0].gpu_owner_controller_sha256 },
-  @{ Url = $Variant[0].state_protection_url; Sha = $Variant[0].state_protection_sha256 }
-)) {
-  $Name = [IO.Path]::GetFileName(([Uri]$Asset.Url).AbsolutePath)
-  $Path = Join-Path $Stage $Name
-  Invoke-WebRequest -UseBasicParsing -Uri $Asset.Url -OutFile $Path
-  if ((Get-FileHash $Path -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Asset.Sha) {
-    throw "native runtime asset checksum mismatch: $Name"
-  }
-}
-$Package = Join-Path $Stage ([IO.Path]::GetFileName(([Uri]$Variant[0].package_url).AbsolutePath))
-if ((Get-Item $Package).Length -ne [int64]$Variant[0].package_bytes) {
-  throw 'native runtime package byte count mismatch'
-}
-$Installer = Join-Path $Stage 'Install-Release.ps1'
-& $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
-  -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile -StateRoot $StateRoot `
-  -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
-```
-
-
-### Operate the RTX 3090 native lane
-
-The install leaves the runtime running. Status must identify the selected release, served
-binary, configuration and ready endpoint. Stop checkpoints live sessions and restores GPU
-ownership; Start reacquires ownership. A reboot is not a managed stop and cannot recover
-unpublished state. In a new elevated shell, set `$StateRoot` from the table first.
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-$Controller = Join-Path $StateRoot 'Control-Release.ps1'
-& $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
-& $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
-& $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
-& $Controller -Action Status -StateRoot $StateRoot
-```
-
-
-### Point OMP at the RTX 3090 native lane
-
-This text-and-tools lane uses `q38-ninfer`, not the RTX 4090 request model. The fragment
-uses Responses, a 131072-token window, environment-backed authentication and stateful sessions.
-Existing OMP configuration must be merged, never overwritten. Keep the key out of YAML and
-command-line arguments; it lives only in this PowerShell process and its children.
-
-```powershell
-$Provider = 'ninfer-native-3090'
-$Agent = Join-Path $HOME '.omp\agent'
-New-Item -ItemType Directory -Force -Path $Agent | Out-Null
-$ModelsPath = Join-Path $Agent 'models.yml'
-$ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
-}
-Copy-Item .\examples\windows-native\models-rtx3090.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
-$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
-```
-
-
-After acceptance, `& "$env:LOCALAPPDATA\OMP\omp.exe" --model "$Provider/q38-ninfer"`
-opens the interactive client. Vision and structured JSON-schema output are not qualified here.
-
-### RTX 3090 native lane acceptance
-
-Run in the same shell that loaded the key. Expect the exact tool marker, the exact continuation
-nonce, an outage error with no model response or cloud fallback, and successful recovery.
-
-```powershell
-$Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
-$Smoke = Join-Path $env:TEMP ("omp-ninfer-native-" + [Guid]::NewGuid().ToString('N'))
-New-Item -ItemType Directory -Force -Path $Smoke | Out-Null
-Set-Content -NoNewline -Encoding ascii -Path (Join-Path $Smoke 'marker.txt') -Value 'OMP_NINFER_TOOL_OK'
-Push-Location $Smoke
-try {
-  & $Launcher -p --no-session --auto-approve --model "$Provider/q38-ninfer" `
-    'Use a file-reading tool to read marker.txt, then report its exact single line.'
-  if ($LASTEXITCODE -ne 0) { throw 'text/tool acceptance failed' }
-
-  $Session = Join-Path $Smoke 'sessions'
-  & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/q38-ninfer" `
-    'Remember the nonce 493817-205361 for my next turn. Reply OK only.'
-  if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
-  & $Launcher -p --auto-approve --session-dir $Session --continue `
-    'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
-  if ($LASTEXITCODE -ne 0) { throw 'stateful resume failed' }
-} finally { Pop-Location }
-
-& $Controller -Action Stop -StateRoot $StateRoot | Out-Null
-& $Launcher -p --no-session --auto-approve --max-time 20s `
-  --model "$Provider/q38-ninfer" 'Return LOCAL_ONLY.'
-if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
-& $Controller -Action Start -StateRoot $StateRoot | Out-Null
-```
-
+**Deferred fromv0.11.0.** Owners remain on the
+[complete immutablev0.10.0 RTX3090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane).
+The predecessor65b6c426 native pass is preserved as non-composable evidence, not
+retargeted to this release. The legacy route requires a single visible GPU.
+Both native lanes need multi-GPU support and fresh acceptance in a later release.
 
 ## Managed macOS SSH qualified route
 
@@ -1244,34 +795,13 @@ Expected result: a connection failure and no model response, so the block ends w
 message. Any cloud-provider request is a release failure. Restart the tunnel only after observing
 the failure.
 
-## Fleet: the two qualified lanes in one OMP configuration
+## Fleet: legacy multi-lane configuration
 
-If you own both qualified lanes, [`examples/fleet/`](../examples/fleet/) binds them into
-one configuration with explicit roles: `ninfer-main/q38-ninfer` (RTX 5090) for the interactive
-lead session and `ninfer-heavy/qwen3.8-27b` (RTX 4090) for long-context background workers.
-Every lane stays loopback-only on its own machine. RTX 5090 serves two active requests; RTX 4090
-serves one. The fleet's RTX 3090 scout role stays deferred: v0.10.0 targets the RTX 3090 as a
-standalone native lane, not as an unattended fleet role, so neither the fragment nor this recipe
-declares it. Its three-lane form stays at the immutable v0.7.2 tag with the legacy OMP 18.0.9
-instructions for that lane.
-
-The candidate fleet fragment sets `compat.statefulResponses: true` on each model and uses the
-same session identity, thinking efforts, and reasoning compatibility settings as section 7.
-
-```sh
-unset PI_OPENAI_STATEFUL
-# two authenticated forwards; pass - to skip a lane you do not own
-./examples/fleet/open-tunnels.sh USER@MAIN_HOST USER@HEAVY_HOST
-install -m 600 examples/fleet/models.fragment.yml ~/.omp/agent/models.fleet.yml   # merge by hand
-install -m 600 examples/fleet/agents/fleet-heavy.md ~/.omp/agent/agents/
-```
-
-The fleet is not a throughput claim. Its measured boundary is EXP-016 in
-[`PERFORMANCE.md`](PERFORMANCE.md): on a fixed 14-job batch, cost-aware dispatch across these
-two lanes completed the batch 1.54× faster than the RTX 5090 alone (43.4 s against 66.8 s),
-naive dispatch 1.30×, and pinning jobs by role alone 0.66×. That receipt's faster 2.07× figure
-used a third RTX 3090 lane this release does not qualify. Roles describe what a lane is for;
-where a job runs should follow measured per-lane cost (`scripts/fleet_dispatch.py --policy cost`).
+The RTX5090/RTX4090 fleet recipe and EXP-016 measurements belong to the
+[immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#fleet-the-two-qualified-lanes-in-one-omp-configuration).
+They do not qualify a native lane or a cross-release fleet for RTX5090-onlyv0.11.0.
+Use the complete legacy authority on its supported single-GPU hosts; no
+co-installed native-GPU workaround or current multi-lane install command is supplied.
 
 ## Replicating sessions off the machine
 

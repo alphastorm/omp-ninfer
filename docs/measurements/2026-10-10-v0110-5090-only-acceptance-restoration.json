@@ -1,0 +1,95 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "as_of": "2026-10-10",
+  "status": "passed",
+  "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "rtx5090": {
+    "original_runtime_healthy": true,
+    "original_image_retained": true,
+    "restart_policy": "unless-stopped",
+    "checkpoint_mount_retained": true,
+    "documented_route_key_restored": true,
+    "original_checkout_restored": true,
+    "route_container_absent": true,
+    "window_hold_removed": true,
+    "preexisting_markers_and_supervisors_unchanged": true,
+    "production_windows": 1,
+    "window_downtime_seconds": [
+      385.948
+    ],
+    "production_downtime_lower_bound_seconds": 384.444,
+    "production_downtime_upper_bound_seconds": 386.451,
+    "window_hold_seconds": [
+      387.738
+    ],
+    "completed_utc": "2026-10-10T18:05:15.976274+00:00",
+    "independently_verified_utc": "2026-10-10T18:09:15.176746+00:00",
+    "old_container_id": "2aca26b0316515c9464760639a1ed71986eed217ec9fbd6adc2f1dc3798fa479",
+    "new_container_id": "1ea9d4fc518d9097277219d9a003f1ed10f6aea2dbdfe213f4b3263f48691392",
+    "container_recreated": true,
+    "restoration_identity_criterion": "Same container name, immutable image, deployment profile, binary/configuration arguments, mounts, port and restart policy; designed restore may recreate the container.",
+    "incumbent_identity": {
+      "container_name": "ninfer-5090-v070p",
+      "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "image_id": "sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "deployment_profile": "qwen38-5090-v0.10.0",
+      "binary_sha256_argument": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+      "configuration_sha256_argument": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+      "model_sha256_argument": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "production_port": 18088,
+      "command_unchanged_except_request_log_timestamp": true,
+      "four_mounts_retained": true,
+      "mounts": [
+        {
+          "type": "bind",
+          "destination": "/run/secrets/ninfer_api_key",
+          "read_only": true,
+          "source_retained": true
+        },
+        {
+          "type": "bind",
+          "destination": "/checkpoints",
+          "read_only": false,
+          "source_retained": true
+        },
+        {
+          "type": "bind",
+          "destination": "/models/model.ninfer",
+          "read_only": true,
+          "source_retained": true
+        },
+        {
+          "type": "bind",
+          "destination": "/logs",
+          "read_only": false,
+          "source_retained": true
+        }
+      ]
+    },
+    "windows_health_ok": true,
+    "wsl_health_ok": true,
+    "preexisting_marker_count": 1,
+    "restored_marker_count": 1,
+    "scheduled_task_count": 7,
+    "task_definition_and_enabled_state_unchanged": true,
+    "transient_task_state_compared": false,
+    "execution_policies_unchanged": true,
+    "lease_closed": true,
+    "other_container_identities_unchanged": true,
+    "availability_measurement": {
+      "endpoint": "http://127.0.0.1:18088/health",
+      "poll_interval_seconds": 0.5,
+      "request_timeout_seconds": 1,
+      "last_healthy_before_down_utc": "2026-10-10T17:58:48.339960+00:00",
+      "first_unhealthy_utc": "2026-10-10T17:58:48.842572+00:00",
+      "last_unhealthy_utc": "2026-10-10T18:05:14.288465+00:00",
+      "first_restored_healthy_utc": "2026-10-10T18:05:14.790084+00:00",
+      "monitor_mutations": 0,
+      "method": "Read-only HTTP health sampling; observed outage plus request/poll-boundary uncertainty, distinct from driver window-hold duration."
+    }
+  },
+  "production_upgrade_activated": false,
+  "raw_private_paths_credentials_or_outputs_included": false
+}

@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Component cut/staging/lane and full RTX5090 initial acceptance complete on5861712f: host2/2,macOS10/10,Windows5/5,three stock18.8.7 clients,385.948s measured downtime and independent restoration. Failed65b6c426 window/diagnostic and old3090 pass remain preserved non-composable evidence. No composition:4090 hardware/acceptance pending;3090 founder decision pending re-accept versus drop. S1 copies evidence only and runs no acceptance action.",
+  "execution_status": "Component cut/staging/lane and RTX5090 acceptance complete on5861712f:17steps,three stock18.8.7 clients,385.948s downtime/independent restoration. Founder chooses5090-only; native3090/4090 deferred, owners remain onv0.10.0. Compose existing accepted proof and platform/acceptance/manifest pins before founder-only product publication. No new acceptance, production promotion or live publisher by this worker.",
   "acceptance_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
   "evidence_only_follow_on": true,
   "remaining_acceptance_subject_unchanged": true,
@@ -22,19 +22,19 @@
       "superseded_ctest_evidence_preserved": true
     },
     "native_rtx4090": {
-      "decision": "retain in v0.11.0",
-      "installation": "Founder will install the RTX4090 on the replacement native host today",
-      "qualification": "pending hardware and fresh OMP18.8.7 acceptance on5861712f; not the evidence commit",
-      "retire_or_hold_release_for_former_host_decision": false,
-      "hardware_installation_measured_in_this_receipt": false
+      "decision": "omit fromv0.11.0; prior retain decision superseded",
+      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
+      "hardware_reported_by": "Founder via Main; worker does not remeasure the host",
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
     },
     "native_rtx3090": {
-      "acceptance": "founder decision pending: reinstall/re-accept on5861712f versus drop fromv0.11.0; no drop implemented",
+      "decision": "omit fromv0.11.0; prior reinstall/re-accept versus drop question superseded",
+      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
       "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
       "predecessor_acceptance": "passed, reported by Accept3090 and confirmed bound by Main; preserved evidence only, not composed",
-      "founder_accepted_consequence": "v0.11.0 cannot ship the RTX3090 lane until it is reinstalled and accepted on the new candidate",
-      "continued_gpu_presence": "not inferred from predecessor pass or replacement4090 installation",
-      "presence_measured_in_this_receipt": false
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
     },
     "probe_hardening": {
       "decision": "Harden the probe now, new candidate.",
@@ -329,18 +329,25 @@
     }
   },
   "follow_on": [
-    "Keep5861712f frozen as the acceptance subject; evidence-only commits do not advance it. Preserve failed65b6c426/diagnostic and old3090 pass separately.",
-    "RTX5090 full window/three clients/restoration are complete; this worker performs no rerun, acceptance-candidate change or promotion.",
-    "RTX4090 still awaits hardware and fresh native OMP18.8.7 acceptance on5861712f.",
-    "Founder3090 decision pending: reinstall/re-accept on5861712f versus explicitly drop that lane fromv0.11.0; no drop implemented.",
-    "Do not compose yet. Main may compose only5861712f receipts after every retained route qualifies, then authorized pins/ready checks before founder-only product publication."
+    "Keep5861712f as the accepted subject and preserve all17executed5090block bytes; tooling/scope/pin commits do not advance it.",
+    "Both native lanes are omitted by founder decision; owners use completev0.10.0. Later multi-GPU support/fresh native acceptance is separate scope, without a visibility shim.",
+    "Compose only the three existing5090 routes/three stock-client proofs/restoration; preserve original source capsule/checksums and old65b/diagnostic/3090 proof separately.",
+    "Commit then rebind platform,acceptance,manifest using preceding committed pins; require-ready/check-pins and exact-head CI must pass.",
+    "Keep PR78 draft; run only product publisher--dry-run. Founder alone runs the exact final-head--publish command supplied in the handoff."
   ],
-  "blockers": [
-    "Native RTX4090 remains retained, pending hardware and fresh acceptance on5861712f; planned installation is not measured qualification.",
-    "Native RTX3090 awaits founder decision to reinstall/re-accept on5861712f versus drop it; no scope reduction here; old65b6c426 pass is non-composable evidence.",
-    "No composition or ready/product promotion until every retained route has acceptance on5861712f. RTX5090 now passed; historical first-window failure/diagnostic are not relabelled.",
-    "Evidence-only branch HEAD is not a new acceptance candidate; all remaining native acceptance uses5861712f. This worker runs no acceptance or promotion."
-  ],
+  "scope_composition": {
+    "status": "passed",
+    "declared_routes": 3,
+    "documented_steps": 17,
+    "stock_client_receipts": 3,
+    "native_routes_declared": 0,
+    "accepted_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+    "executed_5090_blocks_byte_identical": true,
+    "input": "releases/v0.11.0/acceptance/rtx5090-only-composition-input.json",
+    "composed_receipt": "releases/v0.11.0/acceptance/composed-external-installation.json",
+    "next_gate": "Existing platform/acceptance/manifest pins, exact-head CI and publisher--dry-run; terminal handoff records final proof"
+  },
+  "blockers": ["Live product publication remains founder-only; later native multi-GPU work is deferred scope, not a current-release gate"],
   "original_a59_assets_changed": false,
   "original_a59_proposal_superseded": true,
   "ninfer_source_pushed": true,
@@ -351,7 +358,7 @@
   "acceptance_run": true,
   "acceptance_run_by_this_worker": false,
   "new_candidate_acceptance_run": true,
-  "new_candidate_acceptance_scope": "RTX5090 only; native/composed acceptance remains pending",
+  "new_candidate_acceptance_scope": "RTX5090-onlyv0.11.0; all retained routes passed, both native lanes explicitly deferred",
   "raw_prompts_outputs_or_secrets_included": false,
   "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
   "runtime_publication": {

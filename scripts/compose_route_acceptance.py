@@ -48,12 +48,11 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
-LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
-         "rtx4090-native")
+LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client")
 NATIVE_LANES = {"rtx4090-native": "rtx4090-windows-native",
                 "rtx3090-native": "rtx3090-windows-native"}
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
-EVIDENCE_KEYS = ("platforms", "rtx4090", "restoration", "documented_routes", "composed")
+EVIDENCE_KEYS = ("platforms", "restoration", "documented_routes", "composed")
 # What every live client run must have observed before its receipt can say passed.
 LIVE_TRUE = ("typed_read_tool_calls", "linked_tool_results", "tool_result_marker",
              "exact_visible_final_answer", "agent_end", "continuation_exact_nonce",
@@ -203,7 +202,7 @@ def main() -> int:
     routes: dict[str, Path] = {}
     for item in args.route:
         lane, _, path = item.partition("=")
-        require(lane in (*LANES, "rtx3090-native") and path, f"bad --route {item!r}")
+        require(lane in (*LANES, *NATIVE_LANES) and path, f"bad --route {item!r}")
         require(lane not in routes, f"duplicate --route {lane!r}")
         routes[lane] = Path(path)
     evidence = load(args.evidence)
@@ -217,14 +216,16 @@ def main() -> int:
     authority_path = ROOT / "compatibility.json"
     manifest = load(manifest_path)
     variant_ids = {v["id"] for v in manifest["components"].get("ninfer_variants", [])}
-    lanes = LANES + (("rtx3090-native",) if "rtx3090-windows-native" in variant_ids else ())
+    lanes = LANES + tuple(lane for lane, variant in NATIVE_LANES.items() if variant in variant_ids)
     require(sorted(routes) == sorted(lanes), f"need one --route for each of {', '.join(lanes)}")
     require(not set(lanes).intersection(evidence["documented_routes"].get("deferred_routes", {})),
             "accepted routes cannot also be deferred")
     for lane in lanes:
         if lane in NATIVE_LANES:
-            require(NATIVE_LANES[lane] in variant_ids, f"{lane}: manifest variant is absent")
             require(lane.removesuffix("-native") in evidence, f"evidence needs {lane.removesuffix('-native')}")
+    for lane in NATIVE_LANES:
+        key = lane.removesuffix("-native")
+        require(key not in evidence or lane in lanes, f"undeclared native evidence: {key}")
     qualification = load(qualification_path)
     authority = load(authority_path)
     require(authority.get("product_release") == args.release,

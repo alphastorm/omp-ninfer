@@ -1001,6 +1001,7 @@ class ReleaseContractTest(unittest.TestCase):
             errors,
         )
 
+    def test_ready_5090_only_has_an_exact_empty_native_set(self) -> None:
         empty_errors: list[str] = []
         VERIFY_RELEASE.validate_exact_lane_set(
             {"components": {"ninfer_variants": []}},
@@ -1008,10 +1009,7 @@ class ReleaseContractTest(unittest.TestCase):
             {"composition": {"native_runtime_variants": {}}},
             empty_errors,
         )
-        self.assertIn(
-            "ready release requires a non-empty components.ninfer_variants id set",
-            empty_errors,
-        )
+        self.assertEqual(empty_errors, [])
 
     def rebind_qualification(self, release_root: Path, mutate) -> None:
         qualification_path = release_root / "qualification.json"

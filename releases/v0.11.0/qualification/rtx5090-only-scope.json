@@ -1,0 +1,255 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_only_scope_receipt",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "as_of": "2026-10-10",
+  "decision": {
+    "authority": "Founder via Main",
+    "scope": "RTX5090-only; native3090/4090 deferred, owners remain onv0.10.0",
+    "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+    "legacy": {
+      "rtx3090-windows-native": {
+        "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+        "legacy_release": "v0.10.0",
+        "legacy_client": "18.4.10",
+        "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane",
+        "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+      },
+      "rtx4090-windows-native": {
+        "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+        "legacy_release": "v0.10.0",
+        "legacy_client": "18.4.10",
+        "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane",
+        "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+      }
+    },
+    "source_no_change": true,
+    "environment_shim_used": false
+  },
+  "acceptance_subject": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "scope_tooling_metadata_changes_subject": false,
+  "block_identity": {
+    "accepted_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+    "accepted_document_sha256": "f6fe3d0e7d54162a8298919fc22e7feea83b14d6d13e3cb95462bc26ab60f88e",
+    "current_document_sha256": "08ee1e97677c06668d575f6dd1fcc8c80fe06994caf8e56ab7986916d3de417b",
+    "executed_blocks": 17,
+    "all_byte_identical": true,
+    "blocks": [
+      {
+        "lane": "rtx5090-container-host",
+        "slug": "prepare",
+        "heading": "3. Prepare the model and key on the inference host",
+        "index": 0,
+        "sha256": "57f93c9af159081afc3a92b186a26a4e26e6e01484e746c850b6999f261ac3b9",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-container-host",
+        "slug": "start",
+        "heading": "4. Start NInfer on the inference host",
+        "index": 0,
+        "sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "client-install",
+        "heading": "2. Install the OMP beta on the Mac",
+        "index": 0,
+        "sha256": "d0ea9dcf012f2b158ed84e66c2299df82ff7d7971f87c933a0ceb3024aaec240",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "tunnel",
+        "heading": "5. Open the tunnel from the Mac",
+        "index": 0,
+        "sha256": "89d723de4acbbcd41e2a2430b615c6c15517c9f37f2db504ec925c17ee33e9b8",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "key",
+        "heading": "6. Install the same key on the Mac",
+        "index": 0,
+        "sha256": "82abb4c053ead673606f344899314b17a0dcae0d9baf3febd821439163cfcb58",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "provider",
+        "heading": "7. Add the OMP provider",
+        "index": 0,
+        "sha256": "a0a296ccaba290816c0d6c41ab84affff90dfc9bd02824c2b72cfb15c3eed9a6",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "fail-closed-config",
+        "heading": "7. Add the OMP provider",
+        "index": 2,
+        "sha256": "11c5c38592fb37b7cd2684be4a826c4d07dbf5d2fe25d9774e8550fab979e281",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "tool",
+        "heading": "Text and tool turn",
+        "index": 0,
+        "sha256": "20be720027ed8cf9cd4297ded3a923adac01873fff27e59ef27bb0f510d973c9",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "vision",
+        "heading": "Image input",
+        "index": 0,
+        "sha256": "a0e9a99e7f7b2304053cb956a9ef5a30240ffb10efd0f1651a73685ee370300e",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "resume",
+        "heading": "Stateful follow-up and OMP resume",
+        "index": 0,
+        "sha256": "cd1befb5daadbb1bbb5df28179b3e9e23a897cc12a921f52e3f2f9b3e88a9d3c",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "survives-restart",
+        "heading": "Session survives the server process",
+        "index": 0,
+        "sha256": "5ea55d391650c75a128a0429da7e422608201a592d9e5771f6a9da9607a7f4dd",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-macos-client",
+        "slug": "fail-closed",
+        "heading": "Fail closed",
+        "index": 0,
+        "sha256": "73341e46e74e37137db0be4318e851b90f9533c43e413731ddad91837772bb61",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-windows-client",
+        "slug": "clone-and-verify",
+        "heading": "Clone and verify the exact product release",
+        "index": 0,
+        "sha256": "3e4947b2f798870dd8182f8ad2a89bec00b273fcae9e10b408605c8ea8b99d4d",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-windows-client",
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "347ad05e917a7b49689000baa0045e9b93ca816526b88fbe457008423e895daa",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-windows-client",
+        "slug": "provider",
+        "heading": "Native Windows OMP",
+        "index": 0,
+        "sha256": "a0c9c6e68df0f2dff202712d458bbced7f958ac3540eb91abe8c54641123bb5b",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-windows-client",
+        "slug": "acceptance",
+        "heading": "Native Windows command forms",
+        "index": 0,
+        "sha256": "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a",
+        "byte_identical": true
+      },
+      {
+        "lane": "rtx5090-windows-client",
+        "slug": "fail-closed",
+        "heading": "Native Windows command forms",
+        "index": 1,
+        "sha256": "d51c07aff9b2569ea02893e97596e639f1a018b6e2e2225745a30bd65e04a3b9",
+        "byte_identical": true
+      }
+    ]
+  },
+  "composition": {
+    "status": "passed",
+    "command": "python3.13 scripts/compose_route_acceptance.py --release v0.11.0 --candidate 5861712f561ff0b3100dd4350e02d777a3f5007e --as-of 2026-10-10 --measurement-prefix 2026-10-10-v0110-5090-only --evidence releases/v0.11.0/acceptance/rtx5090-only-composition-input.json --route rtx5090-container-host=docs/measurements/2026-10-10-v0110-rtx5090-container-host-run.json --route rtx5090-macos-client=docs/measurements/2026-10-10-v0110-rtx5090-macos-client-run.json --route rtx5090-windows-client=docs/measurements/2026-10-10-v0110-rtx5090-windows-client-run.json",
+    "cli_exit": 0,
+    "routes": 3,
+    "client_receipts": 3,
+    "documented_steps": 17,
+    "posture": {
+      "macOS": "preview",
+      "Windows": "qualified",
+      "Linux": "qualified stock binary under WSL2; no native LinuxOS qualification"
+    },
+    "receipt": "releases/v0.11.0/acceptance/composed-external-installation.json"
+  },
+  "producer_evidence": {
+    "original_files": 9,
+    "sha256s_match_original_producer": true,
+    "source_input_sha256": "d51286df1d7a14c089ae6f5a34e9809f14f4ada09ab864e3eb7c8132173e09df",
+    "original_checksums": "releases/v0.11.0/acceptance/rtx5090-evidence-checksums.json",
+    "checksums_observed": [
+      "7b53a423f8648c1d177d0e4c4ce94aca2d22183d77502d40678e1fff6a4cabfa  docs/measurements/2026-10-10-v0110-rtx5090-container-host-run.json",
+      "c0799c04259143c46bf2b3c843cd69e0f6afa9fd6bf85679870c7dd5fa4b41dc  docs/measurements/2026-10-10-v0110-rtx5090-macos-client-run.json",
+      "488b9b12ba08b8632b377b73d60ed91e2fc3c109b054e7488633aeae7343b46d  docs/measurements/2026-10-10-v0110-rtx5090-windows-client-run.json",
+      "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024  docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
+      "9b31ac74b6d58e9a0ae9870d94717e8c3102145f9476f65255fc37885ab49de3  releases/v0.11.0/acceptance/darwin-arm64-18.8.7.json",
+      "b671b86f1e4b88f81187f41dd883caf3026428d8635f212dd63f6c242707bd88  releases/v0.11.0/acceptance/windows-x64-18.8.7.json",
+      "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0  releases/v0.11.0/acceptance/linux-x64-18.8.7.json",
+      "d51286df1d7a14c089ae6f5a34e9809f14f4ada09ab864e3eb7c8132173e09df  releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
+      "3579334580a154f15e616b7dfac82e217427120282958075e2597d2ba22561d8  releases/v0.11.0/acceptance/rtx5090-evidence-checksums.json"
+    ],
+    "failed_65b_window_and_nonce_diagnostic_preserved": true,
+    "old_3090_pass_not_composed": true
+  },
+  "tooling": {
+    "change": "Required native lanes/evidence derive from declared manifest variants; three5090 lanes always required. Exact missing/extra lane/evidence refusal retained.",
+    "red_before": {
+      "selected_tests": 6,
+      "failures": 4,
+      "errors": 1,
+      "subtest_failures_included": true
+    },
+    "green_after": {
+      "selected_tests": 30,
+      "passed": 30,
+      "elapsed_s": 0.526
+    },
+    "actual_scope_follow_on": {
+      "failed_and_unreached_targets_passed": 6,
+      "elapsed_s": 1.145,
+      "extraction_controls_passed": 11,
+      "PowerShell_native_gate_skipped": "PowerShell unavailable on Mac",
+      "unchanged_v010_ready_root_fixture_passed": true,
+      "local_runner_module_timeout_s": 110,
+      "timeout_disposition": "Mac runner control stopped the combined run before completion. Three test-only errors came from deleting an already absent native_model fixture key; removal of that unnecessary deletion made all three pass. No timing guard/source/probe was weakened. Unchanged runner is not rerun; full final-head Ubuntu CI is authority."
+    },
+    "fixture": {
+      "path": "tests/fixtures/native-quickstart-5861712f.md",
+      "source_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+      "source_path": "docs/QUICKSTART.md",
+      "source_document_sha256": "f6fe3d0e7d54162a8298919fc22e7feea83b14d6d13e3cb95462bc26ab60f88e",
+      "native_blocks": 13,
+      "git_history_read_by_fixture_tests": false
+    },
+    "CI": {
+      "workflow": ".github/workflows/ci.yml",
+      "checkout_fetch_depth": 0,
+      "python": "3.11",
+      "suite": "python3 -m unittest discover -s tests -v",
+      "final_head_run": "Required after the existing platform/acceptance/manifest pin stages; terminal handoff records observed result."
+    }
+  },
+  "effects": {
+    "GPU_actions": 0,
+    "acceptance_reruns": 0,
+    "production_promotions": 0,
+    "live_product_publications": 0,
+    "PR_stays_draft": true
+  },
+  "raw_prompts_outputs_private_hostnames_paths_or_secrets_included": false
+}

@@ -1,0 +1,207 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "as_of": "2026-10-10",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Published RTX 5090 v0.6.16-qwen38-5090-beta.1 runtime with unmodified upstream OMP 18.8.7; exact candidate documented blocks, fresh isolated client homes, initial full route window.",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "component_release_tag": "v18.8.7",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+    "upstream_tree": "39226066f2d37044581fe4dbbb2903039d2072b5",
+    "note": "Unmodified upstream OMP18.8.7, sourcef261ed9f; all three published client hashes/version/tool/continuation/fail-closed identities passed. Native lane legacy clients are not declared by this release."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "ae43ac618940881662e22b26561a881bf5e15f6e68d14a700017a2e41ecd1b12",
+  "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+  "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "9b31ac74b6d58e9a0ae9870d94717e8c3102145f9476f65255fc37885ab49de3"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "b671b86f1e4b88f81187f41dd883caf3026428d8635f212dd63f6c242707bd88"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "anonymous": true,
+      "assets": 3,
+      "downloads": [
+        {
+          "profile": "darwin-remote-ssh",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-darwin-arm64",
+          "sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14"
+        },
+        {
+          "profile": "windows-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe",
+          "sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc"
+        },
+        {
+          "profile": "linux-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-linux-x64",
+          "sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a"
+        }
+      ]
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "profile": "linux-docker-local",
+      "omp_version": "omp/18.8.7",
+      "binary_sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a",
+      "scope": "Stock binary under WSL2; no native LinuxOS qualification.",
+      "structured_stream_audit": {
+        "status": "passed",
+        "stateful_source": "per-model compat",
+        "environment": {},
+        "nonce": "493817-205361",
+        "continuation_final_text": "493817-205361",
+        "phases": {
+          "tool": {
+            "providers": [
+              "ninfer-beta"
+            ],
+            "models": [
+              "q38-ninfer"
+            ],
+            "input_image_records": 0,
+            "only_selected_provider_and_model": true,
+            "decode_encoding": "utf-8",
+            "transcript_sha256": "1bfbbf80172f9b502051df2f2fc1a2c8e26cea30d987fdd0237ae855ef01b5d4"
+          },
+          "state": {
+            "providers": [
+              "ninfer-beta"
+            ],
+            "models": [
+              "q38-ninfer"
+            ],
+            "input_image_records": 0,
+            "only_selected_provider_and_model": true,
+            "decode_encoding": "utf-8",
+            "transcript_sha256": "90f66f7ab93ff672dfcc4b5f15977a5ba5463ea890719243dc1fcac33e5306bc"
+          },
+          "continuation": {
+            "providers": [
+              "ninfer-beta"
+            ],
+            "models": [
+              "q38-ninfer"
+            ],
+            "input_image_records": 0,
+            "only_selected_provider_and_model": true,
+            "decode_encoding": "utf-8",
+            "transcript_sha256": "63b73cbb31c6c2020b665cf04f2b5e8e050381710bafceb969636834a2d56dd4"
+          },
+          "fail-closed": {
+            "providers": [
+              "ninfer-beta"
+            ],
+            "models": [
+              "q38-ninfer"
+            ],
+            "input_image_records": 0,
+            "only_selected_provider_and_model": true,
+            "decode_encoding": "utf-8",
+            "transcript_sha256": "cfa1adc81b84af0edc95da8cba7a0a118155d7e038148e343ede4e2ea0af69fc"
+          }
+        }
+      },
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "errors": [
+          "Unable to connect. Is the computer able to access the url?"
+        ],
+        "endpoint": "http://127.0.0.1:18089/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": {
+    "darwin-remote-ssh": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "windows-docker-local": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "linux-docker-local": "Vision not exercised by its structured binary proof; no Linux vision claim."
+  },
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": {
+    "rtx5090-container": {
+      "status": "passed",
+      "repository_path": "releases/v0.11.0/qualification/rtx5090.json",
+      "selected_source": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "all_local_criteria": 15,
+      "ctest": {
+        "passed": 111,
+        "skipped": 7,
+        "failed": 0
+      },
+      "profile": "qwen38-5090-v0.11.0",
+      "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "quality": "Selected C serial89/89 output identity carries poweredEXP094 evidence via a59; not a new powered screen or pair-invariance claim."
+    }
+  },
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.11.0/acceptance/documented-routes.json",
+      "sha256": "ff4d5009fa043e702b3ee13d7c1e352f76a7291996d84dde8df94a1021603bf7"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-10-10-v0110-5090-only-acceptance-restoration.json",
+      "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.11.0/qualification/client-components.json",
+      "sha256": "36fee8a4ec3ee9efcd843ffee4dc8819c897412ab417072b48cbbf886f5ec8e6"
+    }
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent evidence, not independent external-user outcomes.",
+    "macOS client platform remains preview; Linux stock binary is qualified under the observed WSL2 host, not a native LinuxOS.",
+    "Only RTX5090 routes are declared. Native3090/4090 are deferred to a later multi-GPU-qualified release; owners remain on completev0.10.0.",
+    "Failed65b5090 window, nonce diagnostic and old3090 pass remain separate non-composable evidence. No production upgrade or live product cut by this worker."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

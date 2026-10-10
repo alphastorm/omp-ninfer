@@ -205,7 +205,8 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.release_root = self.root / "releases" / self.release
         (self.root / "docs" / "measurements").mkdir(parents=True)
         self.document = self.root / "docs" / "QUICKSTART.md"
-        self.document.write_bytes(MODULE.DOCUMENT.read_bytes())
+        self.document.write_bytes(MODULE.DOCUMENT.read_bytes() + b"\n" +
+                                  (ROOT / "tests/fixtures/native-quickstart-5861712f.md").read_bytes())
         manifest = deepcopy(MANIFEST)
         manifest["components"]["ninfer_variants"] = [{
             "id": "rtx4090-windows-native", "release_tag": "native-runtime",
@@ -249,7 +250,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.argv = ["compose_route_acceptance.py", "--release", self.release, "--candidate", CANDIDATE,
                      "--as-of", "2026-01-02", "--measurement-prefix", "fixture",
                      "--evidence", str(self.root / "evidence.json")]
-        for lane in MODULE.LANES:
+        for lane in (*MODULE.LANES, "rtx4090-native"):
             receipt = route_receipt(lane)
             receipt["document_sha256"] = MODULE.sha256(self.document.read_bytes())
             for step, (_, block) in zip(receipt["steps"], MODULE.documented_route.lane_blocks(self.document, lane)):
@@ -262,6 +263,54 @@ class UpstreamCompositionTests(unittest.TestCase):
         with patch.object(MODULE, "ROOT", self.root), patch.object(MODULE, "DOCUMENT", self.document), \
                 patch.object(sys, "argv", self.argv), redirect_stdout(io.StringIO()):
             return MODULE.main()
+
+    def omit_4090(self) -> None:
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        manifest["components"]["ninfer_variants"] = []
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        evidence = MODULE.load(self.root / "evidence.json")
+        del evidence["rtx4090"]
+        MODULE.save(self.root / "evidence.json", evidence)
+        del self.argv[-2:]
+
+    def test_5090_only_composes_three_routes_without_native_evidence(self) -> None:
+        self.omit_4090()
+        self.assertEqual(self.compose(), 0)
+        acceptance = self.release_root / "acceptance"
+        routes = MODULE.load(acceptance / "documented-routes.json")
+        self.assertEqual(set(routes["routes"]), {
+            "rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client"})
+        external = MODULE.load(acceptance / "composed-external-installation.json")
+        self.assertEqual(len(external["platform_receipts"]), 3)
+        self.assertNotIn("rtx4090_public_install", external["evidence"])
+        self.assertFalse((acceptance / "rtx4090-public-install.json").exists())
+        self.assertEqual(MODULE.load(self.release_root / "manifest.json")["status"], "ready")
+
+    def test_declared_4090_without_its_route_is_refused(self) -> None:
+        del self.argv[-2:]
+        with self.assertRaisesRegex(SystemExit, "need one --route"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_undeclared_4090_route_is_refused(self) -> None:
+        self.omit_4090()
+        self.argv += ["--route", f"rtx4090-native={self.root / 'unused.json'}"]
+        with self.assertRaisesRegex(SystemExit, "need one --route"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_undeclared_native_evidence_is_refused(self) -> None:
+        self.omit_4090()
+        for gpu in ("rtx3090", "rtx4090"):
+            with self.subTest(gpu=gpu):
+                evidence = MODULE.load(self.root / "evidence.json")
+                evidence[gpu] = {"preparation": {}, "observations": {}, "limitations": []}
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, "undeclared native evidence"):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+                del evidence[gpu]
+                MODULE.save(self.root / "evidence.json", evidence)
 
     def test_split_model_keeps_live_clients_primary_and_native_receipts_native(self) -> None:
         manifest = MODULE.load(self.release_root / "manifest.json")
@@ -367,7 +416,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertEqual(self.compose(), 0)
         acceptance = self.release_root / "acceptance"
         routes = MODULE.load(acceptance / "documented-routes.json")
-        self.assertEqual(set(routes["routes"]), set(MODULE.LANES) | {"rtx3090-native"})
+        self.assertEqual(set(routes["routes"]), set(MODULE.LANES) | set(MODULE.NATIVE_LANES))
         external = MODULE.load(acceptance / "composed-external-installation.json")
         for lane, digest in (("rtx4090", "9" * 64), ("rtx3090", "3" * 64)):
             path = acceptance / f"{lane}-public-install.json"

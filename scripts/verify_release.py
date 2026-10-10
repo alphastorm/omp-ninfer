@@ -668,11 +668,6 @@ def validate_exact_lane_set(
         else set()
     )
     require(
-        bool(manifest_variant_ids),
-        "ready release requires a non-empty components.ninfer_variants id set",
-        errors,
-    )
-    require(
         manifest_variant_ids == compatibility_variant_ids,
         "ready components.ninfer_variants ids must exactly match compatibility.runtime_variants ids",
         errors,

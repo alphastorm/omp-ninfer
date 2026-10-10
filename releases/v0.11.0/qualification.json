@@ -5,7 +5,7 @@
   "as_of": "2026-10-10",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "acceptance_nonce_epoch": {
     "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
     "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
@@ -13,14 +13,14 @@
     "diagnostic": "pre-registered no material A/B difference; hardened cohort50/50 exact,0/152 misspelled copies",
     "founder_decision": "Harden the probe now, new candidate; Main relay approximately2026-10-10T17:25Z",
     "active_nonce": "493817-205361",
-    "candidate_binding": "5861712f561ff0b3100dd4350e02d777a3f5007e remains the subject for all remaining acceptance; evidence-only commits do not advance it",
-    "new_candidate_acceptance": "RTX5090 host2/2,macOS10/10,Windows5/5 and three stock18.8.7 clients passed; native/composed acceptance pending",
-    "rtx3090": "Old65b6c426 pass is evidence only/not composable; founder decision pending: reinstall/re-accept on5861712f versus drop the lane; no drop implemented",
-    "rtx4090": "pending hardware and replacement-host acceptance on5861712f"
+    "candidate_binding": "All accepted5090 receipts bind5861712f561ff0b3100dd4350e02d777a3f5007e; scope/tooling/pin commits do not advance that subject",
+    "new_candidate_acceptance": "All current5090 routes and three stock18.8.7 clients passed on5861712f; native lanes are explicitly deferred by founder decision.",
+    "rtx3090": "Deferred fromv0.11.0; old65b6c426 pass is preserved non-composable evidence. Owners remain onv0.10.0.",
+    "rtx4090": "Deferred fromv0.11.0; owners remain onv0.10.0 until multi-GPU support is qualified."
   },
   "rtx5090_route_acceptance": {
     "status": "passed",
-    "scope": "RTX5090 routes/three stock clients only; not composed external-installation qualification",
+    "scope": "Frozen original producer proof is5090-only; its three retained routes compose current-release external acceptance below",
     "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
     "evidence_commit_changes_candidate": false,
     "evidence_path": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
@@ -35,7 +35,12 @@
       "releases/v0.11.0/acceptance/windows-x64-18.8.7.json",
       "releases/v0.11.0/acceptance/linux-x64-18.8.7.json"
     ],
-    "platform_preview_status_preserved": true,
+    "source_platform_receipts_byte_preserved": true,
+    "composed_platform_posture": {
+      "darwin-remote-ssh": "preview",
+      "windows-docker-local": "qualified",
+      "linux-docker-local": "qualified stock binary under WSL2, not a native LinuxOS"
+    },
     "restoration": {
       "path": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
       "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024",
@@ -49,9 +54,9 @@
     },
     "byte_preservation": "Eight original receipt/input files and original checksum manifest retained without JSON serialization; producer sizes/SHA256s verified",
     "checksum_manifest": "releases/v0.11.0/acceptance/rtx5090-evidence-checksums.json",
-    "composition_run": false
+    "composition_run": true
   },
-  "scope": "Selected RTX5090v0.6.16 source1302d639, unchanged model/BF16/DFlash2K7, all15 local criteria and ctest111pass/7skip/0fail; published exact548fe239 binary unchanged. Failed65b6c426 window and registered nonce diagnostic preserved. Hardened5861712f full5090 initial window passed17documented steps/three stock18.8.7 clients with385.948s measured downtime and independent restoration. Evidence-only follow-on does not change that acceptance candidate. Native4090 awaits hardware/acceptance;3090 founder decision pending, old pass non-composable; no lane drop, composition or readiness promotion.",
+  "scope": "Founder-approved RTX5090-onlyv0.11.0: unchanged source1302d639/model0634abb0/BF16/DFlash2K7, all15localgates/ctest111pass7skip0fail, published exact548fe239 binary. All17documented steps/three stock18.8.7 clients passed on5861712f with385.948s measured downtime/restoration. Native3090/4090 are deferred to later multi-GPU support; owners remain onv0.10.0. Failed65b/diagnostic/old3090 proof remain separate, not retargeted.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -91,29 +96,44 @@
       "anonymous_pull_evidence_source": "Main reports verified anonymous pull and exact548fe239 server hash; not repeated by this worker",
       "publication_receipt": "releases/v0.11.0/qualification/runtime-publication.json"
     },
-    "native_runtime_variants": {
-      "rtx3090-windows-native": {
-        "status": "passed",
-        "beta_qualified": true,
-        "installable": true,
-        "repository_path": "releases/v0.11.0/qualification/rtx3090.json",
-        "sha256": "474311a6d91e6747b3f0a34c5f562b752b1c8bea208ffeb16a245fa9516b7ef4",
-        "release_tag": "v0.6.2-qwen38-3090-beta.1",
-        "package_sha256": "da1d62f2d7d9ddcb3907db2baa55ceeac6a678c44e4db43c8848837f1c8162d3"
-      },
-      "rtx4090-windows-native": {
-        "status": "passed",
-        "beta_qualified": true,
-        "installable": true,
-        "repository_path": "releases/v0.11.0/qualification/rtx4090.json",
-        "sha256": "6a215b2b8cf4f2f6749061ac7d051bfcf014eab74386be33175f7a2d9c616d14",
-        "release_tag": "v0.6.10-qwen38-4090-beta.1",
-        "package_sha256": "a0ea4c81a3a70239fa350f2bbbfff9cd088de6d0028c4e73cff5581afa09cc6b"
-      }
-    },
+    "native_runtime_variants": {},
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "RTX5090 routes/clients passed on5861712f/image6a02feba; do not compose yet. Native4090 waits for hardware/acceptance on the same candidate. RTX3090 founder decision pending: re-accept with3090 versus drop the lane; no drop implemented. Failed65b6c426 window/diagnostic and its3090 pass remain preserved non-composable evidence. Evidence-only commits are not new acceptance subjects."
+      "status": "passed",
+      "repository_path": "releases/v0.11.0/acceptance/composed-external-installation.json",
+      "sha256": "d1dfea3cbf19fe2ad3d816e366576185947f13f5b25203ebdb744bfe3cb770e1",
+      "public_url": null,
+      "as_of": "2026-10-10",
+      "release": "v0.11.0",
+      "component_release_tag": "v18.8.7",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "ae43ac618940881662e22b26561a881bf5e15f6e68d14a700017a2e41ecd1b12",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "9b31ac74b6d58e9a0ae9870d94717e8c3102145f9476f65255fc37885ab49de3"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "b671b86f1e4b88f81187f41dd883caf3026428d8635f212dd63f6c242707bd88"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0"
+        }
+      ],
+      "note": "Three retained5090 routes/17exact executed blocks, three stock clients, anonymous public downloads, vision on macOS/Windows, stateful/restart and fail-closed proofs plus independent incumbent restoration passed on5861712f. Metadata/scope/pins do not advance the subject; native lanes are explicitly deferred."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.11.0/acceptance/documented-routes.json",
+      "sha256": "ff4d5009fa043e702b3ee13d7c1e352f76a7291996d84dde8df94a1021603bf7"
     }
   },
   "observed_gates": {
@@ -218,118 +238,24 @@
       "local_lane_matrix": "releases/v0.11.0/qualification/option-c-lane.json",
       "local_lane_criteria_passed": 15,
       "note": "Actual option-C package-local gates and all15 unchanged predecessor criteria. Serial89-case binding ties this binary to EXP094 through a59; fullsm120a ctest111pass/7skip/0fail. This is not published-component or OMP18.8.7 documented-route acceptance."
-    },
-    "rtx4090_windows_native": {
-      "status": "passed",
-      "release_tag": "v0.6.10-qwen38-4090-beta.1",
-      "source_commit": "cba7eb932724c99a4faffd6b7b47256015c9b969",
-      "server_binary_sha256": "e0498fad39bcb69d21bf7a6124c900be7229e2542c8c7ca72e19b32c606a51d3",
-      "configuration_sha256": "7a69481f205c3f211d9dab13347d16589eb22ce3c404b1d555d788c39f72a7d4",
-      "lifecycle_phases": "15/15",
-      "c1_decode_tokens_per_second": 157.91175764529982,
-      "c1_max_memory_used_mib": 22774,
-      "c1_max_power_w": 460.9,
-      "c1_mtp_acceptance_percent": 87.58865248226951,
-      "c1_prefill_tokens_per_second": 2116.5252239608553,
-      "context_elapsed_seconds": 91.23760920017958,
-      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
-      "context_prompt_tokens": 130048,
-      "managed_stop_forced": false,
-      "managed_stop_mode": "stop-event",
-      "managed_stop_outcome": "graceful",
-      "omp_exact_final_answer": true,
-      "protocol_checks": 15,
-      "restart_cached_input_tokens": 42,
-      "restart_process_replaced": true,
-      "rollback": "passed",
-      "rollback_predecessor_stop_mode": "stop-event",
-      "security_low_privilege_read_denials": 2,
-      "unsaved_session_cached_input_tokens": 45,
-      "unsaved_session_survived_managed_stop": true,
-      "omp_version": "omp/18.4.0",
-      "omp_transport": "openai-responses",
-      "gpu_keep_warm_ms": 60000,
-      "rollback_note": "Both directions were exercised between candidate qwen38-4090-native-v0.6.10-beta.1-cba7eb932724 and predecessor qwen38-4090-native-v0.6.9-beta.1-5ac17674e8e0, the published v0.6.9-beta.1 package. Both declared stop-event and stopped gracefully without forced termination; the candidate was active again afterwards.",
-      "evidence": "releases/v0.8.7/qualification/rtx4090.json; docs/measurements/2026-09-29-long-session-cache.json (EXP-074: handoff cache, planner fallback, crash after compaction, quota reclamation, the provider limit); docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json (EXP-075); docs/measurements/2026-09-27-rtx4090-engine-keep-warm.json (EXP-064, including issue_48_field_start); docs/measurements/2026-09-27-rtx4090-keep-warm-long-spin.json (EXP-066)",
-      "stock_client_sessions": {
-        "evidence": "docs/measurements/2026-09-29-stock-omp-1840-durable-sessions.json",
-        "omp": {
-          "sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709",
-          "version": "omp/18.4.0"
-        },
-        "model": "ninfer-native-4090/qwen3.8-27b",
-        "thinking": "low",
-        "checks": {
-          "s1_seed_completed": true,
-          "s1_recall_before_restart": true,
-          "s1_recall_after_restart": true,
-          "s2_recall_new_process": true,
-          "s3_recall_after_restart_new_process": true,
-          "one_session": true
-        },
-        "omp_session_ids": [
-          "01a0eb9e-45bd-70bc-a432-47bed47d4ad6"
-        ],
-        "restarts": [
-          0,
-          0
-        ],
-        "server_stops": [
-          "shutdown: saved 0, nothing to save 1, refused 0 (second restart)",
-          "shutdown: saved 0, nothing to save 1, refused 0 (stop after the proof)"
-        ],
-        "first_request_restore": [
-          "checkpoint restored for session 72e9696e017e on its first request without a response id"
-        ],
-        "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
-      },
-      "evidence_time_scope": "Carried historical native-runtime qualification; not fresh OMP18.8.7 acceptance on the current host",
-      "fresh_omp1887_acceptance": "pending hardware/replacement-host acceptance on5861712f, not the evidence commit"
-    },
-    "rtx3090_windows_native": {
-      "status": "passed",
-      "release_tag": "v0.6.2-qwen38-3090-beta.1",
-      "source_commit": "f08309da3cc1d4226d127b7c9ce22267d12070cc",
-      "server_binary_sha256": "11b3f93c0b05a307423668d55daaae6062afd76229614215701e0ebd10080bd3",
-      "configuration_sha256": "0f70066736b0d48f453a4e036e5640244f048184d28e36aa0e6d0e12aa07f3a2",
-      "lifecycle_phases": "15/15",
-      "c1_decode_tokens_per_second": 102.64144552513773,
-      "c1_max_memory_used_mib": 22963,
-      "c1_max_power_w": 299.92,
-      "c1_mtp_acceptance_percent": 93.43246592317224,
-      "c1_prefill_tokens_per_second": 893.2920280030625,
-      "context_elapsed_seconds": 220.9506653999997,
-      "context_exact_output": "ORCHID=493817; COLOR=COBALT",
-      "context_prompt_tokens": 130048,
-      "managed_stop_forced": false,
-      "managed_stop_mode": "stop-event",
-      "managed_stop_outcome": "graceful",
-      "omp_exact_final_answer": true,
-      "protocol_checks": 15,
-      "restart_cached_input_tokens": 42,
-      "restart_process_replaced": true,
-      "rollback": "passed",
-      "rollback_predecessor_stop_mode": "terminate",
-      "security_low_privilege_read_denials": 2,
-      "unsaved_session_cached_input_tokens": 45,
-      "unsaved_session_survived_managed_stop": true,
-      "omp_version": "omp/18.4.0",
-      "omp_transport": "openai-responses",
-      "gpu_keep_warm_ms": 0,
-      "power_limit_w": 300,
-      "owner_power_limit_w": 370,
-      "rollback_note": "Both directions were exercised between candidate qwen38-3090-native-v0.6.2-beta.1-f08309da3cc1 and predecessor qwen38-3090-native-v0.6.0-beta.1-03f56e58ec1b, the lane's only earlier native package, which was never published: its own 2026-09-09 window failed the agent protocol phase. The candidate declares stop-event and stopped gracefully without forced termination. The predecessor predates the stop-event channel and declares terminate; its stop was a forced termination, as that mode provides. The candidate was active again afterwards. The first window, at e20060b6, failed this phase: its controller could not launch a predecessor whose packaged configuration predates context_cache.host_kv_mib, which f08309da fixes.",
-      "evidence": "releases/v0.9.1/qualification/rtx3090.json",
-      "evidence_time_scope": "Carried historical native-runtime qualification; not fresh OMP18.8.7 acceptance on the current host",
-      "fresh_omp1887_acceptance": "founder decision pending: reinstall/re-accept on5861712f versus drop fromv0.11.0; no drop implemented;65b6c426 pass is evidence only/not composable"
     }
   },
-  "interpretation": "Selected C local gates/ctest and original red/invalid evidence retain their prior scope. RTX5090 published-image acceptance on5861712f now passed; first65b6c426 failure and diagnostic remain preserved. Three runner/platform/restoration receipts are byte-preserved, including preview posture. Native observations/review ledgers remain historical; old65b6c4263090 pass is non-composable. Native4090 and the3090 founder decision block composition/readiness; no new acceptance subject is created by this evidence commit.",
-  "remaining_release_gates": [
-    "RTX4090 hardware installation and fresh native acceptance on5861712f",
-    "Founder RTX3090 decision: reinstall/re-accept on5861712f versus explicitly drop the lane; old65b6c426 pass cannot compose",
-    "No composition until all retained routes are accepted on5861712f; evidence-only commits do not advance the subject",
-    "Authorized platform/acceptance/manifest pins and ready verification before founder-only product publication"
-  ],
-  "deferred_scope": {}
+  "interpretation": "RTX5090-only scope uses the same accepted5861712f blocks/clients/runtime. Native lanes are deferred, not failed current-release gates; current release declares no native package/model/qualification. Historical a59/65b red/invalid receipts, nonce diagnostic and old3090 pass remain evidence only. Actual composition/pins must close before the founder-only product cut.",
+  "remaining_release_gates": [],
+  "deferred_scope": {
+    "rtx3090-windows-native": {
+      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
+      "legacy_client": "18.4.10",
+      "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane",
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+    },
+    "rtx4090-windows-native": {
+      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
+      "legacy_client": "18.4.10",
+      "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane",
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+    }
+  }
 }

@@ -7,22 +7,24 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > [!WARNING]
-> **Unreleased product candidate: v0.11.0 / upstream OMP 18.8.7.** Current fragments and
-> profiles bind this client to the published v0.6.16 RTX 5090 image; all five documented-route
-> acceptances remain pending. The candidate is installable for maintainer acceptance,
-> not a released or route-qualified product. The v0.10.0 release and its
-> OMP 18.4.10 receipts below remain the published baseline. For a qualified install, use the
-> [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
-> not these candidate fragments.
+> **Unreleased v0.11.0 candidate: RTX5090 only / upstream OMP18.8.7.**
+> All three retained routes (17steps) and stock clients passed on frozen5861712f,
+> with385.948s measured downtime and independent restoration. Composition/pins
+> bind the existing proof; the product tag and live publisher remain founder-only.
+> Native RTX3090/4090 owners remain on the complete
+> [immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> and its OMP18.4.10 client/fragments. The co-installed native-GPU host is unsupported;
+> both lanes return in a later multi-GPU-qualified release. Never mix authorities.
 
 The separate [v0.11.0 runtime draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
 founder-selected NInfer `1302d639` as the RTX 5090 **v0.6.16** candidate: the EXP-092/094
 changes without `3a2fadbd`. Its full sm_120a ctest has 111 passes, seven skips and no
 failures; all 15 local lane criteria pass. The superseded `a59c13d0` alternative and
 its red NVFP4 test remain preserved. These are package-local qualification receipts,
-not published-image acceptance or production promotion. Native RTX 4090 remains in
-v0.11.0, pending OMP 18.8.7 requalification on the founder-designated replacement
-host; RTX 3090 needs fresh acceptance and confirmation that its GPU remains present.
+not substitutes for published-image acceptance or a production promotion. Actual
+[5090 acceptance](releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json) passed.
+The founder omitted both native lanes: unmodified packages require exactly one visible
+GPU, while the replacement host has both4090/3090. No device-visibility shim.
 The lane cut advances root pins to v0.11.0, image `6a02feba`, server `548fe239`,
 configuration `91a35670`.
 

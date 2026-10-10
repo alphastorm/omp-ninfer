@@ -11,44 +11,34 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — installable v0.11.0 product candidate, acceptance pending
+## Where this is now — RTX5090-onlyv0.11.0 candidate, accepted routes
 
-The [v0.11.0 draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) separately binds a clean
-local v0.6.16 RTX 5090 package to founder-selected source `1302d639`: EXP-092/094
-without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and all 15 unchanged
-local lane criteria pass; the superseded `a59c13d0` alternative retains its red test
-evidence. The founder published the component at 13:46Z; workflow38057050899 succeeded.
-Main verified anonymously pulled image6a02feba against exact server548fe239.
-The lane cut binds its real digest and OMP 18.8.7 to v0.11.0; fresh documented-route
-acceptance and product publication remain pending. The founder will install an RTX 4090 on the replacement native host
-today: retain that lane in v0.11.0, pending OMP 18.8.7 requalification, rather than
-retiring it or holding the release for the former host decision. Native RTX 3090
-still needs fresh OMP 18.8.7 acceptance and confirmation of continued GPU presence
-after that host change. Current root runtime pins advance to the candidate; the
-five-route v0.10.0 published baseline stays immutable. Planned hardware is not a receipt.
+The [v0.11.0 candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
+NInferv0.6.16/source1302d639 (EXP-092/094 without3a2fadbd) to stock OMP18.8.7,
+sourcef261ed9f. Full sm_120a ctest111pass/7skip/0fail and all15localcriteria
+passed; superseded a59/red NVFP4 proof remains preserved. The real image6a02feba/
+server548fe239/model0634abb0/profileqwen38-5090-v0.11.0/config91a35670 and the
+BF16/DFlash2K7/two-device-slot serving shape are bound unchanged.
 
-Current install fragments and profiles target stock upstream OMP **18.8.7**, source
-`f261ed9faf16b61880b544f599876bface4ded0d`, bound by the v0.11.0 candidate manifest.
-RTX 5090 runtime is v0.6.16/source1302d639; model and native runtime packages are unchanged.
-Per-model `compat.statefulResponses: true` replaces the global environment requirement;
-custom-host auto image detail replaces the RTX 5090 override. Upstream's unavailable-model
-resume fix needs no config. Compaction settings are unchanged.
+All three retained5090 routes passed on5861712f: host2/2,macOS10/10,Windows5/5.
+Three stock clients passed live/fail-closed proof; macOS stays preview and Linux
+is an observed WSL2 binary, not a native LinuxOS qualification. Measured downtime
+was385.948s with independent incumbent restoration. Composition and immutable
+platform→acceptance→manifest pins consume existing proof, preserving all17executed
+block bytes. The tag/live product publisher is still founder-only; no production upgrade.
 
-This candidate is **not yet published or qualified**. Before release, requalify the GPU hosts
-and record fresh documented-route acceptance separately for each of:
+The founder chooses **RTX5090 only** because the replacement native host now has
+both3090/4090, while unmodified packages require exactly one visible GPU. Native
+installer name/UUID/ordinal binding and unindexed power queries cannot support
+that arrangement. No environment shim. Both native lanes are deferred to a later
+multi-GPU-qualified release; owners remain on the whole immutablev0.10.0 guide,
+OMP18.4.10 and its manifest/fragments. Old65b6c4263090 proof is not retargeted.
 
-- RTX 5090 Windows 11 + Docker Desktop/WSL2 container host;
-- macOS arm64 client over the RTX 5090 manual tunnel (still preview);
-- Windows x64 client over RTX 5090 local loopback;
-- RTX 4090 native Windows runtime/client;
-- RTX 3090 native Windows runtime/client.
-
-Those fresh route and client-platform receipts must bind the 18.8.7 binaries and updated
-fragments in the next product manifest before readiness, a tag or publication. Client-probe
-receipts are local rehearsals, not documented-route acceptance or GPU-host requalification.
-The [2026-10-10 rehearsals](docs/QUICKSTART.md#local-rehearsal-not-acceptance) passed the three
-client binaries' typed-tool, exact-continuation and fail-closed checks against published
-v0.10.0 image `fff4ee38`. The five acceptance entries above remain pending.
+Current5090 fragments use per-model `compat.statefulResponses: true`, custom-host
+auto image detail and upstream fail-closed resume; compaction settings are unchanged.
+The earlier [18.8.7 client rehearsals](docs/QUICKSTART.md#local-rehearsal-not-acceptance)
+remain separate evidence againstv0.10.0, not substitutes for the accepted window.
+[Declared deferral and current qualification](releases/v0.11.0/qualification.json).
 
 ## Published baseline — v0.10.0
 

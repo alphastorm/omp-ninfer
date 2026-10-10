@@ -21,13 +21,23 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import documented_route  # noqa: E402
 
 RUNNER = ROOT / "scripts" / "hosts" / "run-documented-route.sh"
+NATIVE_DOC = ROOT / "tests" / "fixtures" / "native-quickstart-5861712f.md"
+
+
+def document_for(lane: str) -> Path:
+    return NATIVE_DOC if lane.endswith("-native") else documented_route.DEFAULT_DOC
+
+
+def control_blocks() -> list[documented_route.Block]:
+    return [block for doc in (documented_route.DEFAULT_DOC, NATIVE_DOC)
+            for block in documented_route.parse_blocks(doc.read_text(encoding="utf-8"))]
 
 
 class ExtractionTests(unittest.TestCase):
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
             with self.subTest(lane=lane):
-                resolved = documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
+                resolved = documented_route.lane_blocks(document_for(lane), lane)
                 self.assertEqual(len(resolved), len(documented_route.LANES[lane]))
                 for step, block in resolved:
                     self.assertEqual(block.language, step.language)
@@ -36,15 +46,15 @@ class ExtractionTests(unittest.TestCase):
     def test_bundle_files_are_the_documented_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
-            manifest = documented_route.bundle(documented_route.DEFAULT_DOC, "rtx4090-native", output)
+            manifest = documented_route.bundle(NATIVE_DOC, "rtx4090-native", output)
             for step in manifest["steps"]:
                 data = (output / step["file"]).read_bytes()
                 self.assertEqual(hashlib.sha256(data).hexdigest(), step["sha256"])
-                block = documented_route.extract(documented_route.DEFAULT_DOC, step["heading"], step["index"])
+                block = documented_route.extract(NATIVE_DOC, step["heading"], step["index"])
                 self.assertEqual(data.decode("utf-8"), block.text)
             self.assertEqual(
                 manifest["document_sha256"],
-                hashlib.sha256(documented_route.DEFAULT_DOC.read_bytes()).hexdigest(),
+                hashlib.sha256(NATIVE_DOC.read_bytes()).hexdigest(),
             )
 
     def test_native_route_steps_carry_the_variables_they_use(self) -> None:
@@ -52,7 +62,7 @@ class ExtractionTests(unittest.TestCase):
         earlier one defined. Catches a doc edit that moves a definition below its first use."""
         defined: set[str] = set()
         import re
-        for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, "rtx4090-native"):
+        for step, block in documented_route.lane_blocks(NATIVE_DOC, "rtx4090-native"):
             used = set(re.findall(r"\$([A-Z][A-Za-z]+)\b", block.text))
             assigned = set(re.findall(r"^\s*\$([A-Z][A-Za-z]+)\s*=", block.text, re.M))
             missing = {name for name in used - assigned - defined if name not in {"Sid", "Rule", "Asset", "Name", "Path", "Applied", "Acl", "Admins", "Secret", "LASTEXITCODE", "HOME"}}
@@ -63,7 +73,7 @@ class ExtractionTests(unittest.TestCase):
         """The Windows routes run in Windows PowerShell 5.1 on .NET Framework. These calls exist
         only on .NET 5+ and failed the RTX 4090 route on a stock host (EXP-032)."""
         forbidden = ("[Convert]::ToHexString", "RandomNumberGenerator]::Fill(", "[Convert]::FromHexString")
-        for block in documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8")):
+        for block in control_blocks():
             if block.language != "powershell":
                 continue
             for call in forbidden:
@@ -74,8 +84,8 @@ class ExtractionTests(unittest.TestCase):
         process' and cannot be checked by a reader's shell; interactive launches live in prose,
         blocks stay non-interactive on every platform (EXP-032)."""
         import re
-        launch = re.compile(r"(?:^|[\s&;(])(?:omp|\$Launcher|& \"\$env:LOCALAPPDATA\\\\OMP\\\\omp\.cmd\")\s")
-        for block in documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8")):
+        launch = re.compile(r"(?:^|[\s&;(])(?:omp|\$Launcher|& \"\$env:LOCALAPPDATA\\OMP\\omp\.cmd\")\s")
+        for block in control_blocks():
             if block.language not in ("sh", "powershell"):
                 continue
             joined = " ".join(line.strip().rstrip("\\`") for line in block.text.splitlines())
@@ -119,8 +129,7 @@ class ExtractionTests(unittest.TestCase):
         """curl 8.5 with --fail turns the CDN's HTTP 416 for a complete-file resume into exit 22,
         so a reader who reruns the prepare block after any later failure was stopped there
         (measured 2026-09-13). Both download blocks must let the byte count decide instead."""
-        doc = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        blocks = [b for b in documented_route.parse_blocks(doc) if "--continue-at -" in b.text]
+        blocks = [block for block in control_blocks() if "--continue-at -" in block.text]
 
         for block in blocks:
             self.assertIn("artifact_bytes", block.text)
@@ -136,7 +145,7 @@ class ExtractionTests(unittest.TestCase):
         structured probe must plant the nonce with an OK-only reply and ask for a verbatim recall."""
         prompts = []
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
+            for step, block in documented_route.lane_blocks(document_for(lane), lane):
                 quoted = r'"([^"\n]*)"' if block.language == "sh" else r"'([^'\n]*)'"
                 prompts += [(f"{lane}/{step.slug}", text) for text in re.findall(quoted, block.text)]
         probe = ast.parse((ROOT / "scripts" / "hosts" / "omp-client-probe.py").read_text(encoding="utf-8"))
@@ -193,7 +202,7 @@ class ExtractionTests(unittest.TestCase):
 
         plants = greps = 0
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
+            for step, block in documented_route.lane_blocks(document_for(lane), lane):
                 for planted in re.findall(r"Remember the nonce ([A-Z0-9-]+)(?: for my next turn)?\.", block.text):
                     plants += 1
                     with self.subTest(lane=lane, step=step.slug, plant=planted):
@@ -415,7 +424,7 @@ class NativeInstallGateTests(unittest.TestCase):
         for lane in ("rtx3090", "rtx4090"):
             variant_id = f"{lane}-windows-native"
             blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
-                documented_route.DEFAULT_DOC, f"{lane}-native")}
+                NATIVE_DOC, f"{lane}-native")}
             releases = set(re.findall(r"releases[/\\](v[^/\\\s]+)[/\\]manifest\.json",
                                       "\n".join(blocks.values())))
             self.assertTrue(releases, "native route must read a release manifest")
