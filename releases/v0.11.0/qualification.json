@@ -100,7 +100,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.11.0/acceptance/composed-external-installation.json",
-      "sha256": "d1dfea3cbf19fe2ad3d816e366576185947f13f5b25203ebdb744bfe3cb770e1",
+      "sha256": "dd3c1caf6a331b584da478e82b872795361b475ca5268da6abff684a46e30314",
       "public_url": null,
       "as_of": "2026-10-10",
       "release": "v0.11.0",
@@ -113,7 +113,7 @@
       "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "ae43ac618940881662e22b26561a881bf5e15f6e68d14a700017a2e41ecd1b12",
+      "compatibility_sha256": "6d2e6b27ead7425c0cc3ed74aadf9948a79b8ae835710c712f96e184ee109d4e",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
