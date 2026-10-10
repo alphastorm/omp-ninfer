@@ -1,10 +1,208 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
-  "schema_version": 1,
-  "execution_status": "Commands documented only; only cutter --dry-run was exercised.",
-  "component_admission": "Resolve the full sm_120a test and paired-output dispositions before authorizing publication.",
-  "component_cut_founder_only": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\"",
-  "staging_after_real_component_publication": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$V011_DRAFT_BACKUP/qualification/rtx5090.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+  "schema_version": 2,
+  "execution_status": "Only Mac asset hashes and cutter --dry-run were exercised. Live source push, cut, staging and acceptance commands are founder-only and unexecuted.",
+  "working_directory": "$HOME/Development/omp-ninfer-S1",
+  "selection": "Choose exactly one source option. Both use the same v0.6.16 tags; never execute both sequences.",
+  "options": [
+    {
+      "name": "a59",
+      "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+      "classification": "Original proposal; qualified except for its ctest policy disposition",
+      "admission": "Founder must explicitly dispose the unshipped NVFP4-KV strict TokenId-vector oracle failure. Fullctest110pass/7skip/1fail; all15 original local lane gates pass. No policy exception was approved overnight.",
+      "ordered_steps": [
+        {
+          "order": 1,
+          "action": "Authorize this exact source and its ctest policy disposition",
+          "founder_only": true
+        },
+        {
+          "order": 2,
+          "action": "Repeat component preflight with the selected original assets",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "observed_exit": 0,
+          "receipt": "component-cut-dry-run.json",
+          "founder_only": true
+        },
+        {
+          "order": 3,
+          "action": "Cut the selected runtime component",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 4,
+          "action": "Wait for the cutter-dispatched runtime-image workflow; validate the published receipt against these exact source/archive/binary hashes and supply its real OCI digest",
+          "required_input": "NINFER_OCI_DIGEST",
+          "local_image_id_is_not_a_digest": true
+        },
+        {
+          "order": 5,
+          "action": "Preserve the existing draft and stage the selected published component with S2 OMP18.8.7",
+          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$V011_DRAFT_BACKUP/qualification/rtx5090.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 6,
+          "action": "Merge supplemental receipts and selected-source notes without overwriting generated manifest/qualification/compatibility bindings; freeze and publish the resulting lane/evidence commit",
+          "required_input": "V011_LANE_COMMIT",
+          "founder_only": true
+        },
+        {
+          "order": 7,
+          "action": "Rebind the published selected-source lane",
+          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin \"${V011_LANE_COMMIT:?published frozen selected-source lane commit}\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 8,
+          "action": "Resolve candidate posture from real qualification; freeze and publish a legitimately installable product candidate and bind its actual rollback/host/workspace inputs",
+          "required_input": "V011_CANDIDATE_COMMIT",
+          "guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
+          "founder_only": true
+        },
+        {
+          "order": 9,
+          "action": "Run published-image acceptance preflight, then the founder-controlled acceptance window",
+          "command": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
+          "founder_only": true,
+          "executed": false
+        }
+      ]
+    },
+    {
+      "name": "c",
+      "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "source_branch": "exp/v0616-without-3a2fadbd",
+      "source_published": false,
+      "classification": "Locally qualified experiment; founder source selection required",
+      "composition": "eaf221ac + b72daad6 + a59c13d0, without3a2fadbd; conflict-free mechanical replay",
+      "admission": "Founder chooses this alternative source and accepts measured pair cost:round+9.3451%, aggregate wall throughput−8.5220%; fullctest111pass/7skip/0fail and all15 unchanged local lane criteria pass.",
+      "assets_directory": "$HOME/Desktop/ninfer-v0.6.16-option-c-release",
+      "assets": [
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz",
+          "bytes": 390426633,
+          "sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd"
+        },
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json",
+          "bytes": 3615,
+          "sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1"
+        },
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS",
+          "bytes": 253,
+          "sha256": "080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146"
+        },
+        {
+          "name": "runtime-source-1302d639.tar.gz",
+          "bytes": 8492102,
+          "sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2"
+        }
+      ],
+      "component_notes_sha256": "b6387fab11a5b5cb578b90e4c57388cf8d693c5900e277bf7a2afe92914a40d2",
+      "lane_receipt": {
+        "path": "$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json",
+        "sha256": "53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe",
+        "source": "Actual content-safe profile gate receipt from option-c-lane-evidence.json.profile; not an authored substitute"
+      },
+      "dry_run": {
+        "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+        "observed_exit": 1,
+        "exact_refusal": "commit is not on any origin branch",
+        "notes_sha256_at_exercise": "529ee2d5540f4476dab47353d5636bbee854f7d6245bc3a17527b399db2131f4",
+        "notes_only_change_after_exercise": "Removed the absolute private Mac home path from the publication notes; the cutter checks notes-file existence, not note content.",
+        "checked_before_refusal": [
+          "All four required assets present",
+          "archive/SBOM/source SHA-256 equal caller inputs",
+          "SHA256SUMS verifies",
+          "Source archive equals exact local git archive",
+          "Packaged identity names this version and commit and source_dirty=false",
+          "Commit exists locally"
+        ],
+        "not_exercised_after_refusal": [
+          "origin-branch admission pass",
+          "publisher workflow check",
+          "GitHub authentication check",
+          "tag/release absence checks"
+        ],
+        "publication_created": false
+      },
+      "ordered_steps": [
+        {
+          "order": 1,
+          "action": "Authorize selection and publication of this alternative source",
+          "founder_only": true
+        },
+        {
+          "order": 2,
+          "action": "Publish the currently local runtime source branch; this is the mandatory prerequisite to the origin-branch cutter guard",
+          "command": "git -C \"$HOME/Development/ninfer-S1\" push origin exp/v0616-without-3a2fadbd",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 3,
+          "action": "Rerun cutter preflight after the founder-authorized source push; require success before live cut",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "founder_only": true,
+          "executed": false,
+          "prior_refusal": "commit is not on any origin branch"
+        },
+        {
+          "order": 4,
+          "action": "Cut the selected runtime component",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 5,
+          "action": "Wait for the cutter-dispatched runtime-image workflow; validate the published receipt against this option exact source/archive/binary hashes and supply its real OCI digest",
+          "required_input": "NINFER_OCI_DIGEST",
+          "local_image_id_is_not_a_digest": true
+        },
+        {
+          "order": 6,
+          "action": "Preserve the existing draft and stage the selected published component with its real profile receipt and S2 OMP18.8.7",
+          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 7,
+          "action": "Merge option-C supplemental receipts and selected-source notes without overwriting generated manifest/qualification/compatibility bindings; freeze and publish the resulting lane/evidence commit",
+          "required_input": "V011_LANE_COMMIT",
+          "founder_only": true
+        },
+        {
+          "order": 8,
+          "action": "Rebind the published selected-source lane",
+          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin \"${V011_LANE_COMMIT:?published frozen selected-source lane commit}\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 9,
+          "action": "Resolve candidate posture from real qualification; freeze and publish a legitimately installable product candidate and bind its actual rollback/host/workspace inputs",
+          "required_input": "V011_CANDIDATE_COMMIT",
+          "guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
+          "founder_only": true
+        },
+        {
+          "order": 10,
+          "action": "Run published-image acceptance preflight, then the founder-controlled acceptance window",
+          "command": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
+          "founder_only": true,
+          "executed": false
+        }
+      ]
+    }
+  ],
   "omp_component_descriptor": {
     "path": "docs/measurements/2026-10-10-omp-1887-client-components.json",
     "sha256": "728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9",
@@ -12,10 +210,8 @@
     "s2_initial_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7",
     "s1_cherry_pick": "eaee6d0"
   },
-  "acceptance_after_legitimate_installability": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
   "preflight_guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
   "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
-  "root_promotion": "After the real qualification/posture prerequisites, freeze and publish the completed lane/evidence commit and run rebind_release.py --release v0.11.0 --stage lane --pin $V011_LANE_COMMIT. This promotes root runtime/model/compatibility pins, not root candidate client status.",
   "follow_on": "Record fresh native RTX 3090/OMP 18.8.7 acceptance, resolve native RTX 4090 retire-versus-hold, compose published-image acceptance for every retained route, pin the platform/acceptance/manifest stages, and require-ready/check-pins before a product cut.",
   "blockers": [
     {
@@ -32,5 +228,10 @@
       "reason": "Published-image acceptance follows the founder cut and a legitimately installable frozen product candidate."
     }
   ],
+  "original_a59_assets_or_proposal_changed": false,
+  "ninfer_source_pushed": false,
+  "live_component_cut_run": false,
+  "stage_run": false,
+  "acceptance_run": false,
   "raw_prompts_outputs_or_secrets_included": false
 }
