@@ -72,6 +72,25 @@ not fresh OMP 18.4.10 acceptance. The RTX 3090 fleet scout role stays deferred.
 [Manifest](../releases/v0.10.0/manifest.json) · [Route acceptance](QUICKSTART.md#v0100-route-acceptance).
 [Composed acceptance](../releases/v0.10.0/acceptance/composed-external-installation.json).
 
+## Current engine watch — 2026-10-10
+
+The [read-only watch receipt](measurements/2026-10-10-upstream-watch.json) records the
+engine heads below. These are source-watch positions, not adopted runtimes or route acceptance.
+
+| Engine upstream | Recorded head | Delta from recorded fork point | Evidence boundary |
+| --- | --- | --- | --- |
+| `Neroued/ninfer` | `81c8ce09` (2026-10-07) | 285 commits after `6e8b2e2a`; 250 listed | The API cuts both commits (250/285) and files (300); path overlap is **unknown-truncated**, not evidence of a clean merge. |
+| `UDPSendToFailed/ninfer-4090` | `5c60b7c9` (2026-09-09) | 57 commits after `11aae2d6` | All 57 commits and 238 files listed; **high-review-overlap**. The head is unchanged; no native-lane adoption or fresh qualification is implied. |
+| `Don-Chad/ninfer-3090` | `d7277e88` (2026-09-26) | 240 commits after `ef6ecc3c` | All 240 commits listed, but the 300-file list is cut; path overlap is **unknown-truncated**. The shipped native lane remains the separately qualified fork source. |
+
+Upstream `81c8ce09` builds unmodified for **sm_120a** with **CUDA 13.1.115**
+(`ninfer-serve` SHA-256 `31cc09a0…`, local image `ninfer-overnight:S3-81c8ce09`,
+image ID `c353844f…`). Its README and model card require the v3 artifact container. The
+documented `tools/upgrade_ninfer_v2_to_v3.py` path produced a separate v3 artifact
+(`fc92d5e6…`) from the product's read-only `dc370fb6` v2 artifact (`0634abb0…`); it
+installs the maintained chat template. This local build and upgrade are not a component cut,
+published image, profile adoption, or acceptance run.
+
 ## Historical upstream position — v0.9.1
 
 Install through the [quickstart](QUICKSTART.md); eligibility is one RTX 5090, RTX 4090
