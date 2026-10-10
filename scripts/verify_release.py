@@ -1278,6 +1278,7 @@ def validate_profile_contract(
     deployment_profile: Any,
     errors: list[str],
     upstream_client: bool = False,
+    per_model_stateful: bool = False,
 ) -> None:
     require(profile.get("schema_version") == 1, f"{label}: schema_version must be 1", errors)
     require(profile.get("release") == release, f"{label}: release must match the manifest", errors)
@@ -1322,9 +1323,7 @@ def validate_profile_contract(
             f"{label}: OMP provider must use the local loopback endpoint", errors)
     require(omp_provider.get("request_model_id") == public_model_id,
             f"{label}: OMP provider request model must match the manifest", errors)
-    client = profile.get("client", {})
-    if profile.get("status") == "candidate" or (upstream_client and isinstance(client, dict)
-            and uses_per_model_stateful(client.get("upstream_tag"))):
+    if profile.get("status") == "candidate" or per_model_stateful:
         compat = omp_provider.get("compat", {})
         require(upstream_client and isinstance(compat, dict)
                 and compat.get("statefulResponses") is True
@@ -1488,6 +1487,7 @@ def validate(
     components = manifest.get("components", {})
     omp = components.get("omp", {})
     upstream_omp = omp.get("distribution_kind") == "upstream-release"
+    per_model_stateful = upstream_omp and uses_per_model_stateful(omp.get("upstream_tag"))
     ninfer = components.get("ninfer", {})
     model = components.get("model", {})
     runtime = manifest.get("runtime_identity", {})
@@ -1510,7 +1510,8 @@ def validate(
             "profile installation_mode must match manifest installation.mode", errors)
     validate_profile_contract(profile, "profile", release, model,
                               runtime.get("public_model_id"),
-                              runtime.get("deployment_profile"), errors, upstream_omp)
+                              runtime.get("deployment_profile"), errors, upstream_omp,
+                              per_model_stateful=per_model_stateful)
     profiles: list[tuple[str, dict[str, Any]]] = [("profile", profile)]
 
     profiles_dir = root / "profiles"
@@ -1525,7 +1526,8 @@ def validate(
                 continue
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
                                       model, runtime.get("public_model_id"),
-                                      runtime.get("deployment_profile"), errors, upstream_omp)
+                                      runtime.get("deployment_profile"), errors, upstream_omp,
+                                      per_model_stateful=per_model_stateful)
             profiles.append((f"profiles/{extra_path.name}", extra_profile))
 
     # A profile that pins a client archive must pin the manifest's. v0.7.3 repinned the client in

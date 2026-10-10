@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   receipts; the per-model contract survives profile qualification instead of reverting to =1.
   Parallel proof identity comes from a descriptor platform row or explicit version/SHA-256
   arguments, not a hardcoded historical binary; mismatches stop before the workload.
+  Non-candidate profile stateful contracts derive from the manifest's OMP version, not an
+  optional profile tag. Resumed host-probe phases retain preflight's expected client version
+  and projected environment and refuse changes before launching or rewriting evidence.
 - Set `compat.statefulResponses: true` on every NInfer model instead of requiring process-wide
   `PI_OPENAI_STATEFUL=1` ([upstream #13686](https://github.com/can1357/oh-my-pi/pull/13686)).
   Remove the RTX 5090 `compat.supportsImageDetailOriginal: false` override because unknown/custom

@@ -17,6 +17,10 @@ SPEC = importlib.util.spec_from_file_location(
 assert SPEC is not None and SPEC.loader is not None
 VERIFY_RELEASE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY_RELEASE)
+STAGE_SPEC = importlib.util.spec_from_file_location("stage_release", ROOT / "scripts/stage_release.py")
+assert STAGE_SPEC is not None and STAGE_SPEC.loader is not None
+STAGE_RELEASE = importlib.util.module_from_spec(STAGE_SPEC)
+STAGE_SPEC.loader.exec_module(STAGE_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
@@ -168,10 +172,11 @@ class ReleaseContractTest(unittest.TestCase):
             self.assertTrue(any(variant["id"] in error and "effective native model" in error
                                 for error in errors), errors)
 
-    def upstream_candidate_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+    def upstream_candidate_copy(self, descriptor: dict | None = None) -> tuple[tempfile.TemporaryDirectory[str], Path]:
         temporary, root = self.public_draft_copy()
         release_root = root / "releases" / PUBLIC_RELEASE
-        descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")
+        if descriptor is None:
+            descriptor = self.load(ROOT / "tests" / "fixtures" / "upstream-omp-component.json")
         manifest = self.load(release_root / "manifest.json")
         previous = manifest["components"]["omp"]
         manifest["components"]["omp"] = {
@@ -483,12 +488,10 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_client_candidate_matches_the_verified_upstream_descriptor(self) -> None:
-        descriptor = self.load(ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
-        self.assertEqual(descriptor["omp"]["upstream_tag"], "v18.8.7")
-        self.assertEqual(descriptor["omp"]["upstream_commit"], "f261ed9faf16b61880b544f599876bface4ded0d")
+        descriptor = STAGE_RELEASE.load_omp_component(
+            ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
         for name, platform in (("manual-tunnel", "darwin-arm64"), ("windows-docker-local", "windows-x64")):
             profile = self.load(ROOT / f"profiles/qwen38-rtx5090-{name}.json")
-            self.assertEqual(profile["status"], "candidate")
             for key in ("distribution_kind", "upstream_repository", "upstream_tag", "upstream_commit",
                         "published", "release_id", "asset_id", "asset_name", "asset_bytes", "asset_url",
                         "asset_sha256", "binary_sha256"):
@@ -535,23 +538,39 @@ class ReleaseContractTest(unittest.TestCase):
                     errors, upstream_client=True)
                 self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
 
+    def test_non_candidate_cannot_select_stateful_contract_from_its_own_tag(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        descriptor = STAGE_RELEASE.load_omp_component(
+            ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["client"]["upstream_tag"] = descriptor["omp"]["upstream_tag"]
+            profile["omp_provider"].pop("stateful_responses_environment")
+            profile["omp_provider"]["compat"] = {"statefulResponses": True}
+            self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(sum("OMP provider must name PI_OPENAI_STATEFUL=1" in item for item in errors), 2, errors)
+
     def test_per_model_client_environment_contract_survives_qualification(self) -> None:
-        for status in ("candidate", "public"):
-            profile = self.load(ROOT / "profiles/qwen38-rtx5090-manual-tunnel.json")
-            profile["status"] = status
-            errors = []
-            VERIFY_RELEASE.validate_profile_contract(
-                profile, "per-model client", profile["release"], profile["model"],
-                profile["model"]["public_id"], profile["server"]["deployment_profile"],
-                errors, upstream_client=True)
-            self.assertEqual(errors, [])
+        descriptor = STAGE_RELEASE.load_omp_component(
+            ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
+        temporary, root = self.upstream_candidate_copy(descriptor)
+        self.addCleanup(temporary.cleanup)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["client"].pop("upstream_tag", None)
+            profile["omp_provider"].pop("stateful_responses_environment")
+            profile["omp_provider"]["compat"] = {"statefulResponses": True}
+            self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertEqual(errors, [])
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
             profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
-            errors = []
-            VERIFY_RELEASE.validate_profile_contract(
-                profile, "per-model client", profile["release"], profile["model"],
-                profile["model"]["public_id"], profile["server"]["deployment_profile"],
-                errors, upstream_client=True)
-            self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
+            self.save(path, profile)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertEqual(sum("per-model compat.statefulResponses" in item for item in errors), 2, errors)
 
     def test_client_candidate_checks_exact_upstream_binary_identity(self) -> None:
         temporary, root = self.public_draft_copy()

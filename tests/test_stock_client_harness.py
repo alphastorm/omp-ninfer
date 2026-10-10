@@ -175,6 +175,8 @@ class ClientPreflightTests(unittest.TestCase):
         self.assertEqual(receipt["preflight"]["status"], "passed")
         self.assertEqual(receipt["preflight"]["version"], "omp/18.4.10")
         self.assertTrue(receipt["preflight"]["argv_exact"])
+        self.assertEqual(receipt["expected_client_version"], "omp/18.4.10")
+        self.assertEqual(receipt["environment"], {"PI_OPENAI_STATEFUL": "1"})
         self.assertNotIn("diagnostics", receipt)
 
     def test_candidate_descriptor_clears_stateful_environment_without_rehearsal(self) -> None:
@@ -188,6 +190,59 @@ class ClientPreflightTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         receipt = json.loads((self.output / "receipt.json").read_text())
         self.assertEqual(receipt["preflight"]["version"], "omp/18.8.7")
+
+        self.assertEqual(receipt["expected_client_version"], "omp/18.8.7")
+        self.assertEqual(receipt["environment"], {})
+
+    def test_resumed_phases_refuse_a_changed_client_contract(self) -> None:
+        descriptor = self.root / "client-component.json"
+        descriptor.write_text(json.dumps({"omp": {"distribution_version": "18.8.7"}}))
+        self.binary.write_text(self.binary.read_text().replace(
+            "if os.environ.get('PI_OPENAI_STATEFUL') != '1':",
+            "if 'PI_OPENAI_STATEFUL' in os.environ:",
+        ).replace("omp/18.4.10", "omp/18.8.7"))
+        result = self.run_probe("--client-component", str(descriptor), "--local-rehearsal")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        before = (self.output / "receipt.json").read_bytes()
+        self.binary.unlink()  # Any attempt to launch instead of refusing the resume must fail.
+        for phase in ("live", "outage", "preflight"):
+            with self.subTest(phase=phase):
+                result = self.run_probe("--phase", phase)  # Baseline manifest would inject =1.
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("preflight client contract", result.stderr)
+                self.assertEqual((self.output / "receipt.json").read_bytes(), before)
+
+    def test_same_client_contract_can_resume_the_outage_phase(self) -> None:
+        event = json.dumps({"type": "message_end", "message": {
+            "role": "assistant", "provider": "ninfer-beta", "model": "q38-ninfer",
+            "content": [], "errorMessage": "fixture route unavailable"}})
+        self.binary.write_text(self.binary.read_text().replace(
+            "    sys.exit('unexpected preflight invocation')",
+            f"    print({event!r})\n    sys.exit(1)",
+        ))
+        result = self.run_probe()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result = self.run_probe("--phase", "outage")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = json.loads((self.output / "receipt.json").read_text())
+        self.assertEqual(receipt["expected_client_version"], "omp/18.4.10")
+        self.assertEqual(receipt["environment"], {"PI_OPENAI_STATEFUL": "1"})
+        self.assertTrue(receipt["live_acceptance"]["fail_closed"]["no_model_response"])
+
+    def test_resumed_phase_refuses_a_changed_recorded_environment(self) -> None:
+        result = self.run_probe()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        path = self.output / "receipt.json"
+        receipt = json.loads(path.read_text())
+        receipt["expected_client_version"] = "omp/18.4.10"
+        receipt["environment"] = {}
+        path.write_text(json.dumps(receipt))
+        before = path.read_bytes()
+        self.binary.unlink()
+        result = self.run_probe("--phase", "outage")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("preflight client contract", result.stderr)
+        self.assertEqual(path.read_bytes(), before)
 
     def test_published_per_model_client_also_clears_stateful_environment(self) -> None:
         self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "18.8.7"}}}))
