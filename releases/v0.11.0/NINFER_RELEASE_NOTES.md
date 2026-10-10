@@ -2,9 +2,10 @@
 
 Founder-selected RTX 5090 component **v0.6.16**, source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` (option **c**), combined with unmodified
-upstream OMP **18.8.7**. Root runtime/model pins and the published v0.10.0 release
-remain unchanged. Component publication, documented-route acceptance and production
-promotion are not claimed.
+upstream OMP **18.8.7**. The founder published the component at13:46Z; its real OCI
+digest is `sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02`.
+The product is not released: documented-route acceptance and production promotion
+remain unperformed. Root pins stay on v0.10.0 until the authorized lane rebind.
 
 ## Founder decisions — 2026-10-10
 
@@ -16,8 +17,11 @@ promotion are not claimed.
   reports pushing `exp/v0616-without-3a2fadbd` to alphastorm/ninfer with origin
   containing exact commit `1302d63929e400a05e1c9cdb0fc8003a70269825`, then a passing
   cutter **--dry-run**, exit0: “preflight ok ... archive bed8c8d4”. No tag, release or
-  workflow was created. This worker did not repeat that preflight or push runtime
-  source. The earlier origin-branch refusal is retained as history, not a blocker.
+  workflow was created by that preflight. The founder subsequently ran the live cut
+  at13:46Z: binary/source tags name1302d639 and runtime-image workflow38057050899
+  succeeded. Main verified an anonymous pull with exact serve548fe239. This worker
+  did not repeat those checks or push runtime source. The earlier origin refusal
+  remains history. [Actual publisher receipt](qualification/runtime-publication.json).
 - **Retain native RTX 4090 in v0.11.0.** The founder will install the card today on
   the replacement native host; its OMP18.8.7 qualification is pending on that host.
   This supersedes the former retire-versus-hold decision, rather than dropping the
@@ -232,9 +236,10 @@ workflow steps in [CI38043955727](https://github.com/alphastorm/omp-ninfer/actio
 
 ## Founder sequence — selection complete → cut → stage → acceptance
 
-C selection, authorized source publication and the lead-reported passing dry-run
-are complete. **Live cut, staging and acceptance remain unexecuted.** The exact
-selected-source sequence and historical refusals are in
+C selection, source publication and the founder's live component cut are complete.
+Staging and lane rebind are now authorized agent steps; only the product live
+publisher remains founder-only. **Documented-route acceptance remains pending.**
+The exact selected-source sequence and historical refusals are in
 [founder-sequence.json](qualification/founder-sequence.json).
 
 ### 1. Founder-only live component cut
@@ -295,9 +300,11 @@ commit, then bind it:
 /opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin "${V011_LANE_COMMIT:?published frozen selected-source lane commit}"
 ```
 
-A component cut or promote_root **does not clear root status:candidate**. Resolve
-installable posture from real qualification; never relabel unqualified profiles to
-evade `--require-installable` or `--require-ready`.
+The root `status:candidate` marker denotes a client not bound by the release it
+names. The lane stage consumes it only after an upstream-release manifest replaces
+that profile's client wholesale from its release compatibility copy. Non-promoted
+markers still refuse installation. The manifest itself stays candidate, with the
+external-install blocker and no acceptance claim until the real ready transition.
 
 ### 3. Published-image acceptance window
 
@@ -329,9 +336,9 @@ before the product cut.
 
 ### Explicit remaining blockers
 
-1. **Component publication:** founder live cut, published runtime receipt and the
-   real anonymously pullable OCI digest remain pending. A reported dry-run pass is
-   not publication.
+1. **Product acceptance:** the component is published and Main's anonymous pull
+   binds the exact548fe239 binary. That is not documented-route/composed acceptance
+   or permission to execute `publish-product-release.sh --publish`.
 2. **Native RTX4090:** retained in v0.11.0, pending fresh OMP18.8.7 qualification
    on the founder-designated replacement host after today's planned installation.
    The former no-host retire/hold decision is superseded, not a release-scope cut.
@@ -340,7 +347,8 @@ before the product cut.
 4. **Every retained documented route:** fresh published-component acceptance after
    the cut; package-local rehearsal is not a substitute. RTX5090 acceptance needs
    the published image, legitimately installable frozen bindings and real rollback
-   inputs. Root status:candidate guards are unchanged.
+   inputs. Non-promoted client-candidate guards remain; acceptance-pending is the
+   manifest's candidate status and external-install blocker after lane promotion.
 
 The selected C source has no unresolved ctest-disposition gate. Historical a59 red
 and invalid outcomes remain preserved, not hidden or relabelled. Public receipts

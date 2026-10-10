@@ -37,7 +37,7 @@
       },
       "receipts": [
         "build.json",
-        "rtx5090.json"
+        "rtx5090-a59-superseded.json"
       ]
     },
     {
@@ -145,7 +145,7 @@
         "transient_retries": 0
       },
       "receipts": [
-        "rtx5090.json"
+        "rtx5090-a59-superseded.json"
       ]
     },
     {

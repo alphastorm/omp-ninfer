@@ -1,33 +1,63 @@
 {
   "artifact_type": "omp_ninfer_rtx5090_profile_gates",
   "schema_version": 1,
-  "generated_utc": "2026-10-10T08:12:09Z",
+  "generated_utc": "2026-10-10T11:17:02Z",
   "identity": {
-    "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+    "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
     "build_profile": "appliance-local",
-    "build_type": "Release",
+    "build_type": {
+      "redacted": true,
+      "sha256": "3c449ba17a333bf2bc9ad4f67897ba023e65a6a23e2e6dbe230e6559529e8555"
+    },
     "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
     "cuda_architecture": "120a",
-    "cuda_compiler": "NVIDIA-13.1.115",
-    "cuda_toolkit": "13.1.115",
-    "cxx_compiler": "GNU-13.3.0",
+    "cuda_compiler": {
+      "redacted": true,
+      "sha256": "9d63cc0e39571f7e14495dc2b1a44b9013a64086044dd5621493aed41e56b961"
+    },
+    "cuda_toolkit": {
+      "redacted": true,
+      "sha256": "6a14f8455a194a7775c555225bd993ca596263a1b66276e940f64744d63bfdc7"
+    },
+    "cxx_compiler": {
+      "redacted": true,
+      "sha256": "2f7bd192fd93021fa9f0ba7cd48b641e871f9c642bf8574f46d17eb1613a5f62"
+    },
     "deployment_profile": "qwen38-5090-v0.11.0",
     "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
     "model_id": "qwen3.8-27b",
-    "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+    "patch_stack_sha": "1302d63929e400a05e1c9cdb0fc8003a70269825",
     "source_dirty": false,
-    "target": "qwen3_8_27b",
+    "target": {
+      "redacted": true,
+      "sha256": "4be118ee3b317915a54bc023cb7d9ed91a76099bbf2149b0ef3cfaaf4d7770f1"
+    },
     "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
-    "weights_id": "groupwise-int"
+    "weights_id": {
+      "redacted": true,
+      "sha256": "74dcfed9d7a363fd7733fae4bb2991440b5dc51c6e201c2b77b2d15f0a5a4387"
+    }
   },
   "runtime": {
-    "kv_cache": "bf16",
-    "kv_capacity_mode": "auto",
+    "kv_cache": {
+      "redacted": true,
+      "sha256": "aa11ee2dcd25726739c0df91c5985ac9b3ae8a3f56e8a43a51f273ac0d6b7138"
+    },
+    "kv_capacity_mode": {
+      "redacted": true,
+      "sha256": "634635a2166efa2ae765abd31d4ae807082287e329a8a7fff42b1fb30f65087e"
+    },
     "kv_capacity_tokens": 131520,
     "max_context": 131072,
-    "proposal_head": "optimized",
+    "proposal_head": {
+      "redacted": true,
+      "sha256": "3d89a916ef2122ff6029daff98631f6f4b8bc47b864864fcb04db43767231232"
+    },
     "public_model_id": "q38-ninfer",
-    "speculative_backend": "dflash2",
+    "speculative_backend": {
+      "redacted": true,
+      "sha256": "af59d99487b1196e4f992ae6a7a60822866ce53fb497eb73b3ab2cb6ad47b9f0"
+    },
     "speculative_draft_window": 7
   },
   "vram_used_mib_idle": 29468,
@@ -38,25 +68,27 @@
       "prompt_tokens": 130048,
       "completion_tokens": 17,
       "exact_output": true,
-      "wall_s": 58.917,
-      "tokens_per_second_wall": 2207.3,
+      "output": {
+        "redacted": true,
+        "sha256": "0bd4ad53af1bea3fde61d0f88ed25a7aa11365fa6bc38c135a433d7d1e61a128"
+      },
+      "wall_s": 58.89,
+      "tokens_per_second_wall": 2208.3,
       "vram_used_mib_after": 29470,
       "server_prefix_cache_hit_tokens": 0,
       "server_prefix_reuse_path": "root",
       "server_computed_prefill_tokens": 130048,
-      "server_prefill_seconds": 58.821373817999984,
-      "cold": true,
-      "output_signature_sha256": "0bd4ad53af1bea3fde61d0f88ed25a7aa11365fa6bc38c135a433d7d1e61a128",
-      "output_signature_method": "SHA-256 of JSON-encoded output string; raw generated output omitted"
+      "server_prefill_seconds": 58.794521223000004,
+      "cold": true
     },
     "decode": {
-      "request_id": "5876199d194033032e2e7490e50c05c040c8cf3289096ed86230e4c577c1f03e",
+      "request_id": "fb311eb28bac2b1dd139288f9178510862decab9933c59146b577b20ec68d01f",
       "prompt_tokens": 118,
       "completion_tokens": 2048,
-      "wall_s": 11.509,
-      "completion_tokens_per_second_wall": 177.95,
+      "wall_s": 11.508,
+      "completion_tokens_per_second_wall": 177.96,
       "server_completion_tokens": 2048,
-      "server_decode_seconds": 11.390812966999992,
+      "server_decode_seconds": 11.391094656000021,
       "decode_tokens_per_second": 179.79,
       "mtp_acceptance_rate": 0.239,
       "mtp_tokens_per_round": 2.67,
@@ -71,7 +103,10 @@
           36
         ],
         "accepted_tokens": 1279,
-        "backend": "dflash2",
+        "backend": {
+          "redacted": true,
+          "sha256": "af59d99487b1196e4f992ae6a7a60822866ce53fb497eb73b3ab2cb6ad47b9f0"
+        },
         "draft_window": 7,
         "drafted_tokens": 5358,
         "fallback_steps": 1,
@@ -85,7 +120,10 @@
       "forks": 2,
       "parent_delete_status": 200,
       "deleted_continuation_status": 404,
-      "deleted_continuation_error_code": "previous_response_not_found",
+      "deleted_continuation_error_code": {
+        "redacted": true,
+        "sha256": "80d3f185fdb96f0581f4dac660ae1e8f56db8282a9d580fadd753d4637117936"
+      },
       "post_restart_deleted_continuation_status": 404,
       "no_resurrection": true,
       "surviving_descendant_continued": true,
@@ -95,13 +133,5 @@
   },
   "status": "passed",
   "vram_used_mib_final": 29468,
-  "transient_retries": 0,
-  "evidence_kind": "package-local rehearsal, not documented-route acceptance",
-  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
-  "gpu": {
-    "name": "NVIDIA GeForce RTX 5090",
-    "vram_mib": 32607,
-    "compute_capability": "12.0",
-    "driver": "610.88"
-  }
+  "transient_retries": 0
 }

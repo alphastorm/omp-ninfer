@@ -1,0 +1,29 @@
+{
+  "artifact_type": "omp_ninfer_v011_component_staging",
+  "schema_version": 1,
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+  "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+  "runtime_publication_receipt": "runtime-publication.json",
+  "founder_component_cut": {
+    "reported_by": "Main",
+    "reported_utc": "2026-10-10T13:46:00Z",
+    "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/38057050899",
+    "anonymous_pull_exact_server_hash_reported": true,
+    "worker_rerun": false
+  },
+  "staging_command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02 \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+  "initial_stage_exit": 1,
+  "initial_unexpected_error": "docs/RELEASES.md has missing local link: ../releases/v0.11.0/qualification/option-c-lane.json",
+  "disposition": "Stage wrote the bindings before supplemental merge; restored the C matrix and authored notes, preserved the a59 profile under a separate name, and replaced inherited claims with actual C measurements. The unchanged staging command was not rerun.",
+  "generated_canonical_profile_sha256": "53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe",
+  "generated_bindings_overwritten_by_supplemental_copy": false,
+  "merged_supplemental_receipts": 37,
+  "draft_rebind": {
+    "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --draft",
+    "exit": 0
+  },
+  "acceptance_run": false,
+  "product_publication_run": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}
