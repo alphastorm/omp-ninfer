@@ -29,25 +29,30 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.11.0 installable candidate — published component, acceptance pending
+### v0.11.0 ready candidate — RTX 5090 only, product publication pending
 
-The [draft notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source
+The [release notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` by the founder's 2026-10-10 decision:
 EXP-092/094 without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and
 [all 15 local lane criteria](../releases/v0.11.0/qualification/option-c-lane.json) pass.
-The superseded `a59c13d0` alternative, its red NVFP4 oracle, and invalid attempts
-remain evidence, not hidden exceptions. The proposed client remains unmodified
-upstream OMP 18.8.7. The lead reports that the selected source branch was pushed
-and its cutter dry-run passed. The founder completed the live component cut at13:46Z;
-workflow38057050899 succeeded and Main measured anonymous image6a02feba/server548fe239.
-Real-digest staging and the lane cut bind the root authority to the candidate; no route
-acceptance or product publication is claimed.
-Native RTX 4090 stays in v0.11.0, pending OMP 18.8.7 requalification on the new native
-host. RTX 3090 needs fresh acceptance and continued GPU-presence confirmation.
-The real OCI digest is recorded in the published runtime receipt; the local image ID
-was never substituted. Root client markers are consumed only by actual upstream
-per-platform binding; manifest candidate/external acceptance blockers remain. The notes
-give the exact completed cut → staging inputs and pending acceptance sequence.
+The superseded `a59c13d0` alternative, its red NVFP4 oracle and invalid attempts
+remain evidence, not hidden exceptions. The client is unmodified upstream OMP 18.8.7.
+The founder completed the live component cut at 13:46Z; workflow 38057050899 succeeded,
+and Main measured anonymous image `6a02feba` / server `548fe239`. The real OCI digest
+is recorded in the published runtime receipt; no local image ID was substituted.
+
+All three retained RTX 5090 routes, 17 documented steps and three stock clients passed
+on `5861712f561ff0b3100dd4350e02d777a3f5007e`, with 385.948 s measured downtime and
+independent restoration. Composition and immutable pins bind that existing proof;
+metadata/prose commits do not advance the subject or alter the executed blocks.
+Product publication remains founder-only; production was not upgraded.
+
+Both native lanes are deferred. Owners use the complete immutable v0.10.0 guide,
+OMP 18.4.10 and its manifest/fragments; the co-installed RTX 3090/RTX 4090 host is
+unsupported by unmodified single-visible-GPU packages. Both lanes require multi-GPU
+support and fresh acceptance in a later release, without an environment shim.
+The notes retain the completed cut → staging → acceptance sequence and the remaining
+founder-only product publication command.
 
 ### v0.10.0 public release — DFlash2 on the RTX 5090
 

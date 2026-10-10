@@ -33,6 +33,63 @@ def control_blocks() -> list[documented_route.Block]:
             for block in documented_route.parse_blocks(doc.read_text(encoding="utf-8"))]
 
 
+class ReleaseProseTests(unittest.TestCase):
+    GLUED = re.compile(
+        r"\b(?:RTX|OMP)\d|"
+        r"\b(?:on|at|to|of|the|with|from|and|than|by|accepted)\d"
+    )
+
+    @staticmethod
+    def prose(text: str) -> str:
+        lines = []
+        fence = None
+        for line in text.splitlines():
+            marker = re.match(r"^\s*(?:>\s*)*(`{3,}|~{3,})(.*)$", line)
+            if marker:
+                token, suffix = marker.groups()
+                if fence is None:
+                    fence = (token[0], len(token))
+                elif token[0] == fence[0] and len(token) >= fence[1] and not suffix.strip():
+                    fence = None
+                continue
+            if fence is None:
+                lines.append(line)
+        text = "\n".join(lines)
+        text = re.sub(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)", " ", text, flags=re.S)
+        text = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", text)
+        text = re.sub(r"(?m)^\s*\[[^\]]+\]:.*$", "", text)
+        return re.sub(r"https?://\S+", "", text)
+
+    def test_release_facing_prose_has_no_glued_tokens(self) -> None:
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        paths = [ROOT / name for name in ("README.md", "CHANGELOG.md", "ROADMAP.md")]
+        paths += sorted((ROOT / "docs").glob("*.md"))
+        paths.append(ROOT / "releases" / release / "NINFER_RELEASE_NOTES.md")
+        for path in paths:
+            with self.subTest(path=str(path.relative_to(ROOT))):
+                matches = self.GLUED.findall(self.prose(path.read_text(encoding="utf-8")))
+                self.assertEqual(matches, [], f"{path.relative_to(ROOT)} glued prose: {matches}")
+
+    def test_glued_words_are_rejected_in_prose(self) -> None:
+        prefixes = ("RTX", "OMP", "on", "at", "to", "of", "the", "with",
+                    "from", "and", "than", "by", "accepted")
+        text = " ".join(prefix + "1" for prefix in prefixes)
+        self.assertEqual(self.GLUED.findall(self.prose(text)), text.split())
+
+    def test_fenced_inline_and_url_literals_are_not_prose(self) -> None:
+        text = ("RTX 5090 and OMP 18.8.7; `RTX5090` and ``on5861712f``.\n"
+                "```sh\nOMP18.8.7 at13:46\n```\n"
+                "~~~~text\nwith385.948s\n~~~~~\n"
+                "> ```sh\n> RTX5090 and OMP18.8.7\n> ```\n"
+                "[lane](https://example.invalid/RTX5090/on5861712f)\n"
+                "https://example.invalid/OMP18.8.7\n"
+                "[asset]: https://example.invalid/RTX5090\n")
+        self.assertEqual(self.GLUED.findall(self.prose(text)), [])
+
+    def test_link_labels_remain_prose(self) -> None:
+        self.assertEqual(self.GLUED.findall(self.prose("[RTX5090](asset.json)")), ["RTX5"])
+
+
 class ExtractionTests(unittest.TestCase):
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:

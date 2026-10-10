@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Component cut/staging/lane and RTX5090 acceptance complete on5861712f:17steps,three stock18.8.7 clients,385.948s downtime/independent restoration. Founder chooses5090-only; native3090/4090 deferred, owners remain onv0.10.0. Compose existing accepted proof and platform/acceptance/manifest pins before founder-only product publication. No new acceptance, production promotion or live publisher by this worker.",
+  "execution_status": "Component cut/staging/lane and RTX 5090 acceptance complete on 5861712f: 17 steps, three stock 18.8.7 clients, 385.948 s downtime/independent restoration. Founder chooses 5090-only; native 3090/4090 deferred, owners remain on v0.10.0. Compose existing accepted proof and platform/acceptance/manifest pins before founder-only product publication. No new acceptance, production promotion or live publisher by this worker.",
   "acceptance_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
   "evidence_only_follow_on": true,
   "remaining_acceptance_subject_unchanged": true,
@@ -22,15 +22,15 @@
       "superseded_ctest_evidence_preserved": true
     },
     "native_rtx4090": {
-      "decision": "omit fromv0.11.0; prior retain decision superseded",
-      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "decision": "omit from v0.11.0; prior retain decision superseded",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
       "legacy_release": "v0.10.0",
       "hardware_reported_by": "Founder via Main; worker does not remeasure the host",
       "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
     },
     "native_rtx3090": {
-      "decision": "omit fromv0.11.0; prior reinstall/re-accept versus drop question superseded",
-      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "decision": "omit from v0.11.0; prior reinstall/re-accept versus drop question superseded",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
       "legacy_release": "v0.10.0",
       "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
       "predecessor_acceptance": "passed, reported by Accept3090 and confirmed bound by Main; preserved evidence only, not composed",
@@ -53,7 +53,7 @@
       "classification": "Superseded alternative, not selected; original red NVFP4 ctest evidence retained",
       "selected": false,
       "execution_prohibited_for_selected_release": true,
-      "admission": "Founder must explicitly dispose the unshipped NVFP4-KV strict TokenId-vector oracle failure. Fullctest110pass/7skip/1fail; all15 original local lane gates pass. No policy exception was approved overnight.",
+      "admission": "Founder must explicitly dispose the unshipped NVFP4-KV strict TokenId-vector oracle failure. Full ctest 110 pass/7 skip/1 fail; all 15 original local lane gates pass. No policy exception was approved overnight.",
       "ordered_steps": [
         {
           "order": 1,
@@ -83,7 +83,7 @@
         },
         {
           "order": 5,
-          "action": "Preserve the existing draft and stage the selected published component with S2 OMP18.8.7",
+          "action": "Preserve the existing draft and stage the selected published component with S2 OMP 18.8.7",
           "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$V011_DRAFT_BACKUP/qualification/rtx5090.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
           "founder_only": true,
           "executed": false
@@ -128,10 +128,10 @@
         "origin_contains_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
         "pushed_by_this_worker": false
       },
-      "classification": "Founder-selected v0.6.16 candidate; all15 unchanged local lane criteria pass; published-image acceptance pending",
+      "classification": "Founder-selected v0.6.16 candidate; all 15 unchanged local lane criteria pass; published-image acceptance pending",
       "selected": true,
-      "composition": "eaf221ac + b72daad6 + a59c13d0, without3a2fadbd; conflict-free mechanical replay",
-      "admission": "Founder selected option(c) on2026-10-10. Fullctest111pass/7skip/0fail and all15 unchanged local criteria pass; measured pair cost remains round+9.3451%, aggregate wall throughput−8.5220%. The superseded a59 ctest exception is not needed for this source.",
+      "composition": "eaf221ac + b72daad6 + a59c13d0, without 3a2fadbd; conflict-free mechanical replay",
+      "admission": "Founder selected option(c) on 2026-10-10. Full ctest 111 pass/7 skip/0 fail and all 15 unchanged local criteria pass; measured pair cost remains round +9.3451%, aggregate wall throughput −8.5220%. The superseded a59 ctest exception is not needed for this source.",
       "assets_directory": "$HOME/Desktop/ninfer-v0.6.16-option-c-release",
       "assets": [
         {
@@ -200,7 +200,7 @@
           "action": "Founder selection of option(c) completed",
           "founder_only": true,
           "executed": true,
-          "reported_by": "Main; founder-authorized action on2026-10-10"
+          "reported_by": "Main; founder-authorized action on 2026-10-10"
         },
         {
           "order": 2,
@@ -208,7 +208,7 @@
           "command": "git -C \"$HOME/Development/ninfer-S1\" push origin exp/v0616-without-3a2fadbd",
           "founder_only": true,
           "executed": true,
-          "reported_by": "Main; founder-authorized action on2026-10-10",
+          "reported_by": "Main; founder-authorized action on 2026-10-10",
           "reported_remote_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825"
         },
         {
@@ -218,7 +218,7 @@
           "founder_only": true,
           "executed": true,
           "prior_refusal": "commit is not on any origin branch",
-          "reported_by": "Main; founder-authorized action on2026-10-10",
+          "reported_by": "Main; founder-authorized action on 2026-10-10",
           "reported_exit": 0,
           "reported_excerpt": "preflight ok ... archive bed8c8d4"
         },
@@ -228,7 +228,7 @@
           "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\"",
           "founder_only": true,
           "executed": true,
-          "executed_by": "Founder; Main report13:46Z"
+          "executed_by": "Founder; Main report 13:46Z"
         },
         {
           "order": 5,
@@ -242,14 +242,14 @@
         },
         {
           "order": 6,
-          "action": "Preserve the existing draft and stage the selected published component with its real profile receipt and S2 OMP18.8.7",
+          "action": "Preserve the existing draft and stage the selected published component with its real profile receipt and S2 OMP 18.8.7",
           "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest \"sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
           "founder_only": false,
           "executed": true,
           "agent_authorized_by": "Main, after the founder component cut",
           "initial_exit": 1,
           "initial_missing_link": "qualification/option-c-lane.json",
-          "disposition": "Preserved supplements restored; generated bindings retained; draft rebind exit0",
+          "disposition": "Preserved supplements restored; generated bindings retained; draft rebind exit 0",
           "receipt": "staging.json"
         },
         {
@@ -293,7 +293,7 @@
           "founder_only": true,
           "executed": true,
           "executed_by": "Accept5090; not this evidence worker",
-          "scope": "RTX5090 routes only; no native acceptance or composition claimed"
+          "scope": "RTX 5090 routes only; no native acceptance or composition claimed"
         }
       ]
     }
@@ -310,7 +310,7 @@
   "acceptance_history": {
     "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
     "first5090_window": "diagnostic-red: expected COBALT-493817, returned COBOLT-493817; host2/2 passed, Mac0/10 and Windows0/5 not reached; restoration passed; no accepted platform receipts promoted",
-    "diagnostic": "pre-registered fixed50/cohort: A-cobalt50/50,0/163 misspelled; B-cobalt50/50,0/165; B-hardened50/50,0/152. No material difference,p=1; hardened green is not acceptance",
+    "diagnostic": "pre-registered fixed50/cohort: A-cobalt50/50,0/163 misspelled; B-cobalt50/50,0/165; B-hardened50/50,0/152. No material difference, p=1; hardened green is not acceptance",
     "rtx3090": "predecessor acceptance passed; preserved by acceptance owner as evidence only, not composed on the new candidate",
     "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
     "accepted_5861712f_rtx5090": {
@@ -358,7 +358,7 @@
   "acceptance_run": true,
   "acceptance_run_by_this_worker": false,
   "new_candidate_acceptance_run": true,
-  "new_candidate_acceptance_scope": "RTX5090-onlyv0.11.0; all retained routes passed, both native lanes explicitly deferred",
+  "new_candidate_acceptance_scope": "RTX 5090-only v0.11.0; all retained routes passed, both native lanes explicitly deferred",
   "raw_prompts_outputs_or_secrets_included": false,
   "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
   "runtime_publication": {

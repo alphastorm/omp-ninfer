@@ -3,7 +3,7 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.11.0`
-Composition: **v0.11.0 upstream OMPv18.8.7 RTX5090-only external installation accepted**
+Composition: **v0.11.0 upstream OMP v18.8.7 RTX 5090-only external installation accepted**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 

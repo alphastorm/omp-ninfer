@@ -4,19 +4,19 @@ Updated: 2026-10-10 · **Published product: v0.10.0; installable v0.11.0 candida
 
 ## Current client candidate — OMP 18.8.7
 
-Current5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
-source `f261ed9faf16b61880b544f599876bface4ded0d`, bound byv0.11.0. All three
-retained routes/17steps and three stock client binaries passed on5861712f, with
-385.948s measured downtime and independent restoration. Existing composition/
+Current 5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
+source `f261ed9faf16b61880b544f599876bface4ded0d`, bound by v0.11.0. All three
+retained routes/17 steps and three stock client binaries passed on 5861712f, with
+385.948 s measured downtime and independent restoration. Existing composition/
 immutable pins bind the proof without advancing that subject or changing executed
 blocks. macOS remains preview; Linux proof qualifies the stock binary under WSL2,
-not a native LinuxOS. The product is not published and production was not upgraded.
+not a native Linux OS. The product is not published and production was not upgraded.
 
 Both native lanes are omitted by founder decision: the replacement host has
-co-installed3090/4090, whereas unmodified packages require exactly one visible GPU.
-No visibility shim. Native owners stay on the complete immutablev0.10.0 guide/
-OMP18.4.10 authority; both lanes return after multi-GPU support/fresh acceptance.
-The old65b6c4263090 pass remains non-composable. Local client rehearsals remain
+co-installed 3090/4090, whereas unmodified packages require exactly one visible GPU.
+No visibility shim. Native owners stay on the complete immutable v0.10.0 guide/
+OMP 18.4.10 authority; both lanes return after multi-GPU support/fresh acceptance.
+The old 65b6c4263090 pass remains non-composable. Local client rehearsals remain
 separate evidence against the predecessor, not route acceptance.
 
 NInfer models use `compat.statefulResponses: true`, replacing the global `PI_OPENAI_STATEFUL=1`
@@ -29,13 +29,13 @@ no additional config is needed. Compaction settings are unchanged.
 ## Current runtime candidate — v0.11.0
 
 The [v0.11.0 candidate](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
-RTX 5090 component v0.6.16/source1302d639, without3a, image6a02feba/server548fe239.
-Profile qwen38-5090-v0.11.0/config91a35670 keeps BF16 KV/DFlash2 K=7/two device slots.
+RTX 5090 component v0.6.16/source 1302d639, without 3a, image 6a02feba/server 548fe239.
+Profile qwen38-5090-v0.11.0/config 91a35670 keeps BF16 KV/DFlash2 K=7/two device slots.
 All 15 local criteria pass; full sm_120a ctest: 111 pass/7 skip/0 fail. Exact 130,048-token
 retrieval is **58.890 s**, 2,048-token decode **179.79 server/177.96 wall tok/s**, against
 v0.10.0's 58.738 s/161.39 server tok/s. This is not route acceptance or a traffic-weighted
 promise. Superseded a59's red NVFP4 oracle remains evidence; no test was suppressed.
-The separate published-image5090 window now passed; both native lanes are deferred.
+The separate published-image 5090 window now passed; both native lanes are deferred.
 [Scope and composed qualification](../releases/v0.11.0/qualification.json).
 
 ## Published baseline — v0.10.0

@@ -11,33 +11,33 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — RTX5090-onlyv0.11.0 candidate, accepted routes
+## Where this is now — RTX 5090-only v0.11.0 candidate, accepted routes
 
 The [v0.11.0 candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
-NInferv0.6.16/source1302d639 (EXP-092/094 without3a2fadbd) to stock OMP18.8.7,
-sourcef261ed9f. Full sm_120a ctest111pass/7skip/0fail and all15localcriteria
-passed; superseded a59/red NVFP4 proof remains preserved. The real image6a02feba/
-server548fe239/model0634abb0/profileqwen38-5090-v0.11.0/config91a35670 and the
-BF16/DFlash2K7/two-device-slot serving shape are bound unchanged.
+NInfer v0.6.16/source 1302d639 (EXP-092/094 without 3a2fadbd) to stock OMP 18.8.7,
+source f261ed9f. Full sm_120a ctest 111 pass/7 skip/0 fail and all 15 local criteria
+passed; superseded a59/red NVFP4 proof remains preserved. The real image 6a02feba/
+server 548fe239/model 0634abb0/profile qwen38-5090-v0.11.0/config 91a35670 and the
+BF16/DFlash2 K7/two-device-slot serving shape are bound unchanged.
 
-All three retained5090 routes passed on5861712f: host2/2,macOS10/10,Windows5/5.
+All three retained 5090 routes passed on 5861712f: host 2/2, macOS 10/10, Windows 5/5.
 Three stock clients passed live/fail-closed proof; macOS stays preview and Linux
-is an observed WSL2 binary, not a native LinuxOS qualification. Measured downtime
-was385.948s with independent incumbent restoration. Composition and immutable
-platform→acceptance→manifest pins consume existing proof, preserving all17executed
+is an observed WSL2 binary, not a native Linux OS qualification. Measured downtime
+was 385.948 s with independent incumbent restoration. Composition and immutable
+platform→acceptance→manifest pins consume existing proof, preserving all 17 executed
 block bytes. The tag/live product publisher is still founder-only; no production upgrade.
 
-The founder chooses **RTX5090 only** because the replacement native host now has
-both3090/4090, while unmodified packages require exactly one visible GPU. Native
+The founder chooses **RTX 5090 only** because the replacement native host now has
+both 3090/4090, while unmodified packages require exactly one visible GPU. Native
 installer name/UUID/ordinal binding and unindexed power queries cannot support
 that arrangement. No environment shim. Both native lanes are deferred to a later
-multi-GPU-qualified release; owners remain on the whole immutablev0.10.0 guide,
-OMP18.4.10 and its manifest/fragments. Old65b6c4263090 proof is not retargeted.
+multi-GPU-qualified release; owners remain on the whole immutable v0.10.0 guide,
+OMP 18.4.10 and its manifest/fragments. Old 65b6c4263090 proof is not retargeted.
 
-Current5090 fragments use per-model `compat.statefulResponses: true`, custom-host
+Current 5090 fragments use per-model `compat.statefulResponses: true`, custom-host
 auto image detail and upstream fail-closed resume; compaction settings are unchanged.
 The earlier [18.8.7 client rehearsals](docs/QUICKSTART.md#local-rehearsal-not-acceptance)
-remain separate evidence againstv0.10.0, not substitutes for the accepted window.
+remain separate evidence against v0.10.0, not substitutes for the accepted window.
 [Declared deferral and current qualification](releases/v0.11.0/qualification.json).
 
 ## Published baseline — v0.10.0

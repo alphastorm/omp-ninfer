@@ -148,7 +148,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-094 | RTX 5090 Q4 query/key projections on the small-T tensor cores | Sending exactly 8 and 16 columns of the GDN and attention Q4 query/key projections to the Q4 small-T tensor-core kernel makes the one-request round at short context and the pair round each at least 3% shorter than EXP-092's candidate, and the outputs it changes pass EXP-085's powered screen under the unchanged rule | Fork `a59c13d0` on EXP-092's `b72daad6`. 64K trace: projections 1,675 → 823 µs per round (2,670 → 1,091 µs in a pair). A/B/B/A: one-request rounds **15.47 → 14.68 / 17.10 → 16.35 / 18.56 → 17.74 / 20.89 → 20.06 ms** at 0/32K/64K/120K tokens (−4.0% to −5.1%), pair **21.40 → 19.48 ms** (−9.0%, 453.1 → 504.0 tok/s); against shipped v0.10.0 −6.0% to −22.7% at one request and −16.4% in a pair. DFlash2 corpus 33/89 byte-identical to shipped at 307.2 against 288.1 tok/s; MTP3 89/89. Screen, registered in `0082901` before its data: 692 of 1,120 outputs changed; recall −0.23 points (bound −0.55), evidence precision −0.75 (−1.57), unsupported claims +0.30 (+1.79), redaction −0.40 (−1.98), leaks 561 → 583 (ratio bound **1.090** against 1.10), every validity check held; it also passes against EXP-085's BF16 DFlash2 runs. With EXP-092, modelled −8.8% of production decode time [inference] ([receipt](measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json)) | kept |
 | EXP-095 | RTX 5090 current upstream architecture versus the next fork candidate | Upstream `81c8ce09` at the common DFlash2 K=7/BF16/131,072/chunk-1,024 shape earns re-porting the fork's product features | Unmodified CUDA 13.1.115/sm_120a build; documented v2→v3 upgrade preserves **1,184/1,184 tensor payloads**. Automatic sizing refuses C2 by **561.47 MiB**; the labelled fixed-KV counterfactual completes A/B/B/A. Common 84 server-completed role cases: fork `a59c13d0` **299.71** versus upstream **251.29 tok/s** (+19.27% fork), rounds **15.12 vs 18.39 ms**; 29/84 channel payloads byte-identical (28/72 valid answers). Stored 32K follow-ups: **128/125 vs 307/77 ms**, mixed rather than a uniform cache win. Upstream JSON-schema **5/5 correct**, weighted decode time/token +2.51%; the seven-token tuple has +281.51% relative overhead. C4 with six total StateImages refuses by **1,501.32 MiB** ([receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)) | rejected — architecture rebase; continue selective backport |
 
-| EXP-096 | Clean v0.6.16 RTX 5090 package and supported-profile rehearsal | Unchanged a59c13d0 can be packaged cleanly, tied to EXP-094's quality evidence and qualified under v0.10.0's fifteen criteria without changing the serving shape | Clean CUDA13.1.115/sm_120a archive and cutter dry-run;89/89serial role signatures match EXP094. Retrieval58.917s versus58.738s;2048decode179.79 versus161.39tok/s. All15unchanged criteria pass, six restart sessions each cached62404, amended OMP18.8.7parallel proof passes. Full ctest110pass/7skip/1fail; exact NVFP4 baseline eaf passes and3a fails. BF16 solo/pair1/5identical on both sources. External initial stop preserved; replacement is separate ([receipt](measurements/2026-10-10-v0616-rtx5090-package-local.json)) | qualified except ctest disposition; no publication |
+| EXP-096 | Clean v0.6.16 RTX 5090 package and supported-profile rehearsal | Unchanged a59c13d0 can be packaged cleanly, tied to EXP-094's quality evidence and qualified under v0.10.0's fifteen criteria without changing the serving shape | Clean CUDA 13.1.115/sm_120a archive and cutter dry-run; 89/89 serial role signatures match EXP094. Retrieval 58.917 s versus 58.738 s; 2048 decode 179.79 versus 161.39 tok/s. All 15 unchanged criteria pass, six restart sessions each cached 62404, amended OMP 18.8.7 parallel proof passes. Full ctest 110 pass/7 skip/1 fail; exact NVFP4 baseline eaf passes and 3a fails. BF16 solo/pair1/5 identical on both sources. External initial stop preserved; replacement is separate ([receipt](measurements/2026-10-10-v0616-rtx5090-package-local.json)) | qualified except ctest disposition; no publication |
 
 Entry detail:
 
@@ -1144,16 +1144,16 @@ Entry detail:
 
 - **EXP-096 — clean package, independent red diagnostics, no cut (2026-10-10).** The
   exact a59c13d0 source was built and packaged without source changes in the v0.6.15
-  build environment. The new binary's serial role outputs match EXP-09489/89, and
-  the supported BF16 profile measured179.79servertok/s (+11.40% on the qualification
+  build environment. The new binary's serial role outputs match EXP-094 in 89/89 cases, and
+  the supported BF16 profile measured 179.79 server tok/s (+11.40% on the qualification
   decode workload, not a traffic-weighted promise). Full sm_120a ctest is red on the
-  NVFP4 graph/serial test; its exact eaf baseline passes and3a2fadbd fails the same
+  NVFP4 graph/serial test; its exact eaf baseline passes and 3a2fadbd fails the same
   assertion. Founder disposition of that unshipped configuration is required.
-  Five-case BF16 solo/pair output identity is1/5 on both shipped eaf and new a59,
+  Five-case BF16 solo/pair output identity is 1/5 on both shipped eaf and new a59,
   so the measured scheduling dependence is not newly attributable to EXP-094.
   A lead-caused Docker stop invalidated the initial later criteria; the distinct
-  replacement passed all15unchanged criteria (six restart resumes each cached62404,
-  actual OMP18.8.7 amended parallel proof passed). The candidate is qualified except
+  replacement passed all 15 unchanged criteria (six restart resumes each cached 62404,
+  actual OMP 18.8.7 amended parallel proof passed). The candidate is qualified except
   for the ctest disposition, not a relabelled initial run. No source fix, publication,
   acceptance-window driver, or production promotion occurred.
   Receipt: [v0.6.16 package-local rehearsal](measurements/2026-10-10-v0616-rtx5090-package-local.json).

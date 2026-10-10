@@ -1,0 +1,94 @@
+{
+  "artifact_type": "omp_ninfer_release_prose_class_closure",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "source_head": "47a6b38d72066325ed84593f89a135a445e26cfa",
+  "acceptance_subject": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "title": "OMP NInfer v0.11.0 — Faster decode and unmodified OMP 18.8.7 on the RTX 5090",
+  "claim_boundary": "11.40% faster on the 2,048-token supported-profile qualification decode workload, not a traffic-weighted promise",
+  "test": {
+    "module": "tests.test_documented_route.ReleaseProseTests",
+    "red": {
+      "tests": 4,
+      "failing_document_subtests": 9,
+      "other_controls_passed": 3,
+      "prose_source_head": "47a6b38d72066325ed84593f89a135a445e26cfa"
+    },
+    "green": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_s": 0.038
+    },
+    "scope": "README, CHANGELOG, ROADMAP, docs/*.md and current release notes; immutable older release notes excluded",
+    "guards": "RTX/OMP directly followed by digits; on/at/to/of/the/with/from/and/than/by/accepted directly followed by digits",
+    "protected": "fenced blocks including quoted/tilde fences, inline code and URL destinations; link labels remain prose"
+  },
+  "literal_preservation": {
+    "markdown": {
+      "docs/PERFORMANCE.md": {
+        "existing_protected_chunks": 416,
+        "unchanged": true
+      },
+      "docs/COMPATIBILITY.md": {
+        "existing_protected_chunks": 54,
+        "unchanged": true
+      },
+      "README.md": {
+        "existing_protected_chunks": 384,
+        "unchanged": true
+      },
+      "docs/QUICKSTART.md": {
+        "existing_protected_chunks": 229,
+        "unchanged": true
+      },
+      "ROADMAP.md": {
+        "existing_protected_chunks": 582,
+        "unchanged": true
+      },
+      "docs/FACTS.md": {
+        "existing_protected_chunks": 442,
+        "unchanged": true
+      },
+      "docs/RELEASES.md": {
+        "existing_protected_chunks": 824,
+        "unchanged": true
+      },
+      "CHANGELOG.md": {
+        "existing_protected_chunks": 795,
+        "unchanged": true
+      },
+      "releases/v0.11.0/NINFER_RELEASE_NOTES.md": {
+        "existing_protected_chunks": 98,
+        "unchanged": true
+      }
+    },
+    "founder_commands": 13,
+    "all_founder_command_values_byte_identical": true,
+    "v0100_and_older_releases_doc_suffix_byte_identical": true
+  },
+  "composition": {
+    "routes": 3,
+    "client_receipts": 3,
+    "documented_steps": 17,
+    "exit": 0,
+    "acceptance_rerun": false,
+    "current_quickstart_sha256": "3c88b764ddb8a6dce8479ebb7e27282664599c258e0d7e93a10a2e514577ba42"
+  },
+  "producer_evidence": "The nine byte-preserved producer files/checksum manifest are unchanged; no source producer receipt or older release record is edited",
+  "effects": {
+    "runtime_source": false,
+    "binary": false,
+    "image": false,
+    "client": false,
+    "profile": false,
+    "model": false,
+    "sampling": false,
+    "provider": false,
+    "nonce": false,
+    "gpu": false,
+    "production": false,
+    "publication": false
+  },
+  "raw_prompts_outputs_private_hostnames_paths_or_secrets_included": false
+}

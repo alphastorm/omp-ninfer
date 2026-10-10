@@ -9,18 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Ship the founder-approvedv0.11.0 scope as **RTX5090 only**. All17documented
-  steps and three stock OMP18.8.7 clients passed on5861712f with385.948s measured
-  downtime and independent restoration. Keep all5090 executable blocks byte-identical
+- Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
+  words/numbers). A living-doc/current-note regression rejects glued tokens outside
+  code and URLs; immutable published notes and byte-preserved evidence stay unchanged.
+- Ship the founder-approved v0.11.0 scope as **RTX 5090 only**. All 17 documented
+  steps and three stock OMP 18.8.7 clients passed on 5861712f with 385.948 s measured
+  downtime and independent restoration. Keep all 5090 executable blocks byte-identical
   while composing existing proof/pins; no production upgrade or live product cut.
-  Native RTX3090/4090 owners remain on complete immutablev0.10.0 instructions.
+  Native RTX 3090/4090 owners remain on complete immutable v0.10.0 instructions.
   The replacement host has both GPUs; unmodified native packages require exactly
   one visible GPU. Both lanes return after multi-GPU support/fresh acceptance.
-  No environment shim or retargeting of the old65b6c4263090 pass.
+  No environment shim or retargeting of the old 65b6c4263090 pass.
 - Derive composer/verifier native route/evidence requirements from declared manifest
-  variants, with the three5090 routes always required. Missing declared or extra
+  variants, with the three 5090 routes always required. Missing declared or extra
   undeclared native proof remains fail-closed. Focused5090-only/native negative
-  regressions were red before/green after; unchangedv0.10.0 readiness passes in
+  regressions were red before/green after; unchanged v0.10.0 readiness passes in
   its bound-root fixture. Native parser controls use a checked-in minimal5861712f
   fixture, not Git history or live instructions.
   Native/pre-cut control fixtures now bind checked-in v0.10.0 state or reset
@@ -29,10 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   exact recall, OK-only planting and verbatim recall. The registered old/hardened
   cohorts each passed50/50 with no material A/B difference. Preserve the first
   failed window and [diagnostic](docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json).
-- Select founder-approved `1302d639` for RTX5090v0.6.16: EXP-092/094 without
-  `3a2fadbd`, full sm_120a ctest111pass/7skip/0fail, all15localcriteria passed.
+- Select founder-approved `1302d639` for RTX 5090 v0.6.16: EXP-092/094 without
+  `3a2fadbd`, full sm_120a ctest 111 pass/7 skip/0 fail, all 15 local criteria passed.
   Preserve superseded a59/red NVFP4 evidence. The founder published the component;
-  the anonymous exact548fe239 binary is bound to staged image6a02feba and root
+  the anonymous exact 548fe239 binary is bound to staged image 6a02feba and root
   profile/configuration pins. Serving shape/model remain unchanged.
 - Consume a root client-candidate marker only when lane promotion replaces its client
   wholesale from an upstream-release compatibility copy. Non-promoted and legacy-fork
@@ -48,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
   pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
   This is an **unreleased v0.11.0 product candidate**, bound to published components;
-  fresh acceptance of the three retained5090 routes passed; native lanes are deferred.
+  fresh acceptance of the three retained 5090 routes passed; native lanes are deferred.
   Published release records and historical measurements are unchanged.
   Content-safe 2026-10-10 local rehearsal receipts record passing typed-tool, exact-continuation
   and fail-closed checks on macOS arm64, native Windows x64 and WSL2 Linux x64 against the

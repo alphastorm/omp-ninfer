@@ -7,13 +7,13 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > [!WARNING]
-> **Unreleased v0.11.0 candidate: RTX5090 only / upstream OMP18.8.7.**
-> All three retained routes (17steps) and stock clients passed on frozen5861712f,
-> with385.948s measured downtime and independent restoration. Composition/pins
+> **Unreleased v0.11.0 candidate: RTX 5090 only / upstream OMP 18.8.7.**
+> All three retained routes (17 steps) and stock clients passed on frozen 5861712f,
+> with 385.948 s measured downtime and independent restoration. Composition/pins
 > bind the existing proof; the product tag and live publisher remain founder-only.
-> Native RTX3090/4090 owners remain on the complete
-> [immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
-> and its OMP18.4.10 client/fragments. The co-installed native-GPU host is unsupported;
+> Native RTX 3090/4090 owners remain on the complete
+> [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> and its OMP 18.4.10 client/fragments. The co-installed native-GPU host is unsupported;
 > both lanes return in a later multi-GPU-qualified release. Never mix authorities.
 
 The separate [v0.11.0 runtime draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
@@ -24,7 +24,7 @@ its red NVFP4 test remain preserved. These are package-local qualification recei
 not substitutes for published-image acceptance or a production promotion. Actual
 [5090 acceptance](releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json) passed.
 The founder omitted both native lanes: unmodified packages require exactly one visible
-GPU, while the replacement host has both4090/3090. No device-visibility shim.
+GPU, while the replacement host has both 4090/3090. No device-visibility shim.
 The lane cut advances root pins to v0.11.0, image `6a02feba`, server `548fe239`,
 configuration `91a35670`.
 
@@ -785,20 +785,20 @@ machine and profile, not universal GPU claims.
 ## Get started
 
 The [current guide](docs/QUICKSTART.md) targets checksummed stock OMP **18.8.7**
-for **RTX5090-onlyv0.11.0**. The three retained routes/17steps and three stock
-clients passed on5861712f against published image6a02feba/server548fe239. The
+for **RTX 5090-only v0.11.0**. The three retained routes/17 steps and three stock
+clients passed on 5861712f against published image 6a02feba/server 548fe239. The
 manifest is ready with immutable composed-evidence pins; product publication is
 still founder-only, not a production promotion or an already-created tag.
 
-Current5090 fragments use per-model `compat.statefulResponses: true`. Remove
+Current 5090 fragments use per-model `compat.statefulResponses: true`. Remove
 the process-wide `PI_OPENAI_STATEFUL` setting and image-detail override; stock
 18.8.7 supplies auto image detail and fail-closed resume. Keep compaction unchanged.
 [Client migration](docs/QUICKSTART.md#omp-1887-client-candidate). Never bypass
 the ready gate or mix an unpublished candidate fragment with a legacy native route.
 
-Native RTX3090/4090 owners remain on the **complete**
-[immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
-OMP18.4.10, manifest and fragments. Both native packages require a single visible
+Native RTX 3090/4090 owners remain on the **complete**
+[immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
+OMP 18.4.10, manifest and fragments. Both native packages require a single visible
 GPU; the co-installed replacement host is unsupported. Both lanes return after
 multi-GPU support/fresh acceptance, without a visibility shim. The older
 [v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
@@ -892,8 +892,8 @@ repositories. The complete routing and evidence rules are in [`CONTRIBUTING.md`]
 
 The unreleased client candidate is unmodified upstream
 [Oh My Pi v18.8.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7), source
-`f261ed9faf16b61880b544f599876bface4ded0d`; its retained5090 routes and three stock
-client proofs passed on5861712f. Native lanes are deferred, not claimed byv0.11.0.
+`f261ed9faf16b61880b544f599876bface4ded0d`; its retained 5090 routes and three stock
+client proofs passed on 5861712f. Native lanes are deferred, not claimed by v0.11.0.
 The published v0.10.0 client remains the unmodified upstream
 [Oh My Pi v18.4.10 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.10), checked
 against its SHA-256. This product no longer builds or publishes an OMP client. The
@@ -1001,7 +1001,7 @@ Ordered by how much this product owes them:
 5. **[Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)** — the RTX 3090 port
    (ReplaySSM, RotorQuant) underlying the historical native RTX 3090 lane. Apache-2.0.
 6. Algorithm and library lineage — Gated DeltaNet
-   ([arXiv:2412.06464](https://arxiv.org/abs/2412.06464)), Tri Dao's ReplaySSM note, Z-Lab's
+   ([arXiv: 2412.06464](https://arxiv.org/abs/2412.06464)), Tri Dao's ReplaySSM note, Z-Lab's
    DFlash, Unsloth's NVFP4 weights, and vendored `utf8proc`, `nlohmann/json`, and `cpp-httplib` —
    credited in full in the runtime repositories.
 

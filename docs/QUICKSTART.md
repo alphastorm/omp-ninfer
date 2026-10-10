@@ -5,29 +5,29 @@
 **Get started with the exact lane for your GPU and runtime.**
 
 > [!IMPORTANT]
-> **Current scope: RTX5090-onlyv0.11.0 with stock OMP18.8.7.**
+> **Current scope: RTX 5090-only v0.11.0 with stock OMP 18.8.7.**
 > The published component and all three retained routes passed on frozen
-> `5861712f561ff0b3100dd4350e02d777a3f5007e` (17steps). Readiness additionally
+> `5861712f561ff0b3100dd4350e02d777a3f5007e` (17 steps). Readiness additionally
 > requires composed receipts and immutable platform/acceptance/manifest pins.
 > The product tag is not published; normal setup blocks below require that tag
-> and its ready gate, not a moving candidate branch. Native RTX3090/4090 owners
-> remain on the [complete immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
-> and its OMP18.4.10 client/fragments. Do not mix release authorities.
+> and its ready gate, not a moving candidate branch. Native RTX 3090/4090 owners
+> remain on the [complete immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> and its OMP 18.4.10 client/fragments. Do not mix release authorities.
 
 ## OMP 18.8.7 client candidate
 
 The [v0.11.0 notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) record the
 completed component cut, real-digest staging and accepted published-image window.
-Only the accountable lead dispatches such windows against a frozen40-hex candidate.
-The accepted5090 executable blocks stay byte-identical; this scope/pin follow-on
+Only the accountable lead dispatches such windows against a frozen 40-hex candidate.
+The accepted 5090 executable blocks stay byte-identical; this scope/pin follow-on
 is not another acceptance subject or a production promotion. Never use a local
 Docker image as an OCI digest or an acceptance watchdog for a rehearsal.
 
 The client is unmodified upstream v18.8.7, source
-`f261ed9faf16b61880b544f599876bface4ded0d`. RTX5090 binds published v0.6.16,
-source1302d639/image6a02feba/server548fe239, profileqwen38-5090-v0.11.0/config91a35670.
+`f261ed9faf16b61880b544f599876bface4ded0d`. RTX 5090 binds published v0.6.16,
+source 1302d639/image 6a02feba/server 548fe239, profile qwen38-5090-v0.11.0/config 91a35670.
 The model and serving limits are unchanged. Native packages are not declared
-in this release; their completev0.10.0 routes remain separate legacy authorities.
+in this release; their complete v0.10.0 routes remain separate legacy authorities.
 
 ### Local rehearsal (not acceptance)
 
@@ -65,16 +65,16 @@ merging these current model fragments:
   on resume without another config setting.
 
 Normal `python3 scripts/verify_release.py` checks bound profiles/runtime metadata;
-it does **not** perform route acceptance. Published-image acceptance passed on5861712f:
+it does **not** perform route acceptance. Published-image acceptance passed on 5861712f:
 
 | Retainedv0.11.0 route | Fresh18.8.7 acceptance |
 | --- | --- |
-| RTX5090 Windows11 + Docker Desktop/WSL2 host |2/2documented steps passed|
-| macOS arm64 client over manual SSH tunnel |10/10passed; client platform remains preview|
-| Windows x64 client over RTX5090 loopback |5/5passed|
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 host |2/2 documented steps passed|
+| macOS arm64 client over manual SSH tunnel |10/10 passed; client platform remains preview|
+| Windows x64 client over RTX 5090 loopback |5/5 passed|
 
 All three stock clients, including Linux x64 under WSL2, passed live continuation
-and fail-closed checks. Independent restoration passed; measured downtime was385.948s.
+and fail-closed checks. Independent restoration passed; measured downtime was 385.948 s.
 See [frozen producer evidence](../releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json).
 These are owner-operated observations, not independent external-user outcomes.
 
@@ -82,12 +82,12 @@ These are owner-operated observations, not independent external-user outcomes.
 
 | I have | Current scope | Start here |
 | --- | --- | --- |
-| RTX5090 + Windows11 / Docker Desktop WSL2 |Acceptedv0.11.0 candidate; product publication still founder-only|[RTX5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2)|
-| RTX4090 + native Windows |Deferred fromv0.11.0; remain onv0.10.0|[Complete immutablev0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane)|
-| RTX3090 + native Windows |Deferred fromv0.11.0; remain onv0.10.0|[Complete immutablev0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane)|
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 |Accepted v0.11.0 candidate; product publication still founder-only|[RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2)|
+| RTX 4090 + native Windows |Deferred from v0.11.0; remain on v0.10.0|[Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane)|
+| RTX 3090 + native Windows |Deferred from v0.11.0; remain on v0.10.0|[Complete immutable v0.10.0 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane)|
 | Other GPU/deployment, including two native visible NVIDIA GPUs |Unsupported|[Compatibility boundary](COMPATIBILITY.md)|
 
-The founder installed the4090 beside the3090 in the replacement host. Unmodified
+The founder installed the 4090 beside the 3090 in the replacement host. Unmodified
 native packages require exactly one visible NVIDIA GPU; name/UUID/ordinal
 binding and unindexed power queries do not support this arrangement. Both lanes
 return in a later multi-GPU-qualified release, without an environment shim.
@@ -213,7 +213,7 @@ refused the native-resolution request in 9 ms
 ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The text-only RTX 4090
 model is never compacted into images.
 
-RTX5090 moves to published `v0.6.16-qwen38-5090-beta.1` from source
+RTX 5090 moves to published `v0.6.16-qwen38-5090-beta.1` from source
 `1302d63929e400a05e1c9cdb0fc8003a70269825`, image `6a02feba`, with the DFlash2 profile below.
 Its model artifact is `0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3`
 ([local lane receipt, not route acceptance](../releases/v0.11.0/qualification/rtx5090.json)).
@@ -259,12 +259,12 @@ control recorded root fallback on 2 of 8 continuations/forks without server erro
 warm reuse is not claimed.
 
 A checkpoint is bound to the exact runtime fingerprint, including the server build and model.
-RTX5090 changes its server fingerprint in v0.11.0; predecessor checkpoint reuse is not
+RTX 5090 changes its server fingerprint in v0.11.0; predecessor checkpoint reuse is not
 claimed. Model and native runtime packages are unchanged. Require the ready gate for a
-normal public install; the18.8.7 candidate is installable only for maintainer acceptance,
+normal public install; the 18.8.7 candidate is installable only for maintainer acceptance,
 not a newly accepted release.
 
-The RTX5090 deployment profile is `qwen38-5090-v0.11.0` / configuration `91a35670`, with
+The RTX 5090 deployment profile is `qwen38-5090-v0.11.0` / configuration `91a35670`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
 and `--pending-timeout-ms 180000`. It keeps `--gpu-keep-warm-ms 60000`, 16384 MiB host KV and
 the 28672 MiB runtime-host floor. KV capacity auto-resolves to 131,520 tokens. The native
@@ -368,17 +368,17 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Native Windows RTX 4090 release lane
 
-**Deferred fromv0.11.0.** Owners remain on the
-[complete immutablev0.10.0 RTX4090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane),
-including its OMP18.4.10 client, manifest and fragments. It requires a single
-visible GPU; a co-installed3090/4090 host is unsupported. No current native
+**Deferred from v0.11.0.** Owners remain on the
+[complete immutable v0.10.0 RTX 4090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane),
+including its OMP 18.4.10 client, manifest and fragments. It requires a single
+visible GPU; a co-installed 3090/4090 host is unsupported. No current native
 installation blocks are supplied here.
 
 ## Native Windows RTX 3090 release lane
 
-**Deferred fromv0.11.0.** Owners remain on the
-[complete immutablev0.10.0 RTX3090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane).
-The predecessor65b6c426 native pass is preserved as non-composable evidence, not
+**Deferred from v0.11.0.** Owners remain on the
+[complete immutable v0.10.0 RTX 3090 route](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane).
+The predecessor 65b6c426 native pass is preserved as non-composable evidence, not
 retargeted to this release. The legacy route requires a single visible GPU.
 Both native lanes need multi-GPU support and fresh acceptance in a later release.
 
@@ -797,9 +797,9 @@ the failure.
 
 ## Fleet: legacy multi-lane configuration
 
-The RTX5090/RTX4090 fleet recipe and EXP-016 measurements belong to the
-[immutablev0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#fleet-the-two-qualified-lanes-in-one-omp-configuration).
-They do not qualify a native lane or a cross-release fleet for RTX5090-onlyv0.11.0.
+The RTX 5090/RTX 4090 fleet recipe and EXP-016 measurements belong to the
+[immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#fleet-the-two-qualified-lanes-in-one-omp-configuration).
+They do not qualify a native lane or a cross-release fleet for RTX 5090-only v0.11.0.
 Use the complete legacy authority on its supported single-GPU hosts; no
 co-installed native-GPU workaround or current multi-lane install command is supplied.
 
