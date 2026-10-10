@@ -68,45 +68,63 @@ class PromoteRootTests(unittest.TestCase):
     def test_lane_stage_repins_profile_client_archives_to_the_manifest_client(self) -> None:
         """v0.8.4 moved the client from OMP 18.3.0 to 18.3.5; the lane stage promoted the
         release into the root profiles but left the Windows profile's archive on 18.3.0."""
-        upstream = {"distribution_kind": "upstream-release",
-                    "artifact_url": "https://github.com/can1357/oh-my-pi/releases/download/"
-                                    "v99.0.0/omp-windows-x64.exe",
-                    "artifact_sha256": "a" * 64, "binary_sha256": "b" * 64}
         fork = {"component_release_tag": "omp-99.0.0-cross-platform-beta-1",
                 "artifact_url": "https://github.com/alphastorm/homebrew-omp/releases/download/"
                                 "omp-99.0.0-cross-platform-beta-1/omp-99.0.0-windows-x64.tar.gz",
                 "artifact_sha256": "c" * 64, "binary_sha256": "d" * 64}
-        for kind, client in (("upstream", upstream), ("fork", fork)):
-            with self.subTest(kind=kind):
-                root, module = self.promotion_copy()
-                manifest_path = root / "releases" / CURRENT / "manifest.json"
-                manifest = self.load(manifest_path)
-                omp = manifest["components"]["omp"]
-                if kind == "fork":
-                    omp.pop("distribution_kind", None)
-                omp.update(client)
-                manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-                before = {path.name: self.load(path) for path in (root / "profiles").glob("*.json")}
+        root, module = self.promotion_copy()
+        manifest_path = root / "releases" / CURRENT / "manifest.json"
+        manifest = self.load(manifest_path)
+        omp = manifest["components"]["omp"]
+        omp.pop("distribution_kind", None)
+        omp.update(fork)
+        module.save(manifest_path, manifest)
+        before = {path.name: self.load(path) for path in (root / "profiles").glob("*.json")}
 
-                module.promote_root(CURRENT, manifest_path)
+        module.promote_root(CURRENT, manifest_path)
 
-                pinned = 0
-                for path in sorted((root / "profiles").glob("*.json")):
-                    previous = before[path.name].get("client", {})
-                    current = self.load(path).get("client", {})
-                    if not any(key in previous for key in ARCHIVE_KEYS):
-                        self.assertEqual(current, previous, path.name)
-                        continue
-                    pinned += 1
-                    expected = copy.deepcopy(previous)
-                    expected.pop("component_release_tag", None)
-                    expected.update(asset_url=client["artifact_url"],
-                                    asset_sha256=client["artifact_sha256"],
-                                    binary_sha256=client["binary_sha256"])
-                    if kind == "fork":
-                        expected["component_release_tag"] = client["component_release_tag"]
-                    self.assertEqual(current, expected, path.name)
-                self.assertGreater(pinned, 0, "no root profile pins a client archive")
+        pinned = 0
+        for path in sorted((root / "profiles").glob("*.json")):
+            previous = before[path.name].get("client", {})
+            current = self.load(path).get("client", {})
+            if not any(key in previous for key in ARCHIVE_KEYS):
+                self.assertEqual(current, previous, path.name)
+                continue
+            pinned += 1
+            expected = copy.deepcopy(previous)
+            expected.update(component_release_tag=fork["component_release_tag"],
+                            asset_url=fork["artifact_url"],
+                            asset_sha256=fork["artifact_sha256"],
+                            binary_sha256=fork["binary_sha256"])
+            self.assertEqual(current, expected, path.name)
+        self.assertGreater(pinned, 0, "no root profile pins a client archive")
+
+    def test_upstream_lane_stage_uses_each_platform_distribution(self) -> None:
+        root, module = self.promotion_copy()
+        release = root / "releases" / CURRENT
+        manifest_path = release / "manifest.json"
+        descriptor = self.load(ROOT / "tests/fixtures/upstream-omp-component.json")
+        manifest = self.load(manifest_path)
+        manifest["components"]["omp"] = descriptor["omp"]
+        module.save(manifest_path, manifest)
+        authority_path = release / "compatibility.json"
+        authority = self.load(authority_path)
+        platforms = {"darwin-remote-ssh": "darwin-arm64",
+                     "windows-docker-local": "windows-x64",
+                     "linux-docker-local": "linux-x64"}
+        for profile in authority["profiles"]:
+            profile["client_distribution"] = descriptor["platforms"][platforms[profile["id"]]]
+        module.save(authority_path, authority)
+
+        module.promote_root(CURRENT, manifest_path)
+
+        modes = {"manual-ssh-tunnel": "darwin-arm64",
+                 "native-windows-docker-local": "windows-x64"}
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            expected = descriptor["platforms"][modes[profile["installation_mode"]]]
+            self.assertEqual(profile["client"], expected, path.name)
+            self.assertNotIn("component_release_tag", profile["client"], path.name)
 
     def test_lane_stage_makes_a_draft_manifest_a_candidate_and_keeps_later_states(self) -> None:
         """The cut must leave a manifest that route acceptance can install. v0.8.5's and

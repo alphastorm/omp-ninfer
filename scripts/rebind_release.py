@@ -141,6 +141,8 @@ def promote_root(release: str, manifest_path: Path) -> None:
         manifest["status"] = "candidate"
         save(manifest_path, manifest)
     omp = manifest["components"]["omp"]
+    clients = {row["id"]: row["client_distribution"]
+               for row in load(release_root / "compatibility.json")["profiles"]}
     for profile_path in sorted((ROOT / "profiles").glob("*.json")):
         profile = load(profile_path)
         profile["release"] = release
@@ -154,14 +156,14 @@ def promote_root(release: str, manifest_path: Path) -> None:
             for key in keys:
                 value = value[key]
             arguments[arguments.index(flag) + 1] = value
-        # A profile that pins a client archive pins the manifest's OMP component, as
-        # verify_release requires; a profile naming only an asset (macOS) pins nothing here.
         client = profile.get("client", {})
-        if any(key in client for key in CLIENT_ARCHIVE_KEYS):
-            if omp.get("distribution_kind") == "upstream-release":
-                client.pop("component_release_tag", None)
-            else:
-                client["component_release_tag"] = omp["component_release_tag"]
+        if omp.get("distribution_kind") == "upstream-release":
+            compatibility_id = {"manual-ssh-tunnel": "darwin-remote-ssh",
+                                "native-windows-docker-local": "windows-docker-local"}[
+                                    profile["installation_mode"]]
+            profile["client"] = dict(clients[compatibility_id])
+        elif any(key in client for key in CLIENT_ARCHIVE_KEYS):
+            client["component_release_tag"] = omp["component_release_tag"]
             client["asset_url"] = omp["artifact_url"]
             client["asset_sha256"] = omp["artifact_sha256"]
             client["binary_sha256"] = omp["binary_sha256"]

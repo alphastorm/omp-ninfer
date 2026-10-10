@@ -20,6 +20,17 @@ SPEC.loader.exec_module(VERIFY_RELEASE)
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
+        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+            "v0.6.16-qwen38-5090-beta.1"))
+        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+            "v0.6.15-qwen38-5090-beta.1"))
+        for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.0-qwen38-5090-beta.1",
+                    "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
+                    "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):
+            with self.subTest(tag=tag):
+                self.assertIsNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+
     def test_historical_manifests_keep_their_native_model_contract(self) -> None:
         for path in sorted((ROOT / "releases").glob("*/manifest.json")):
             with self.subTest(release=path.parent.name):
