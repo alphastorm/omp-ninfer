@@ -1,0 +1,58 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_handoff_checksums",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "status": "passed",
+  "content_safe": true,
+  "files": [
+    {
+      "file": "2026-10-10-v0110-rtx5090-container-host-run.json",
+      "private_markers": 0,
+      "sha256": "7b53a423f8648c1d177d0e4c4ce94aca2d22183d77502d40678e1fff6a4cabfa",
+      "bytes": 1322
+    },
+    {
+      "file": "2026-10-10-v0110-rtx5090-macos-client-run.json",
+      "private_markers": 0,
+      "sha256": "c0799c04259143c46bf2b3c843cd69e0f6afa9fd6bf85679870c7dd5fa4b41dc",
+      "bytes": 4893
+    },
+    {
+      "file": "2026-10-10-v0110-rtx5090-windows-client-run.json",
+      "private_markers": 0,
+      "sha256": "488b9b12ba08b8632b377b73d60ed91e2fc3c109b054e7488633aeae7343b46d",
+      "bytes": 4272
+    },
+    {
+      "file": "darwin-arm64-18.8.7.json",
+      "private_markers": 0,
+      "sha256": "9b31ac74b6d58e9a0ae9870d94717e8c3102145f9476f65255fc37885ab49de3",
+      "bytes": 3772
+    },
+    {
+      "file": "windows-x64-18.8.7.json",
+      "private_markers": 0,
+      "sha256": "b671b86f1e4b88f81187f41dd883caf3026428d8635f212dd63f6c242707bd88",
+      "bytes": 3730
+    },
+    {
+      "file": "linux-x64-18.8.7.json",
+      "private_markers": 0,
+      "sha256": "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0",
+      "bytes": 4006
+    },
+    {
+      "file": "2026-10-10-v0110-acceptance-restoration.json",
+      "private_markers": 0,
+      "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024",
+      "bytes": 3938
+    },
+    {
+      "file": "rtx5090-acceptance-evidence.json",
+      "private_markers": 0,
+      "sha256": "d51286df1d7a14c089ae6f5a34e9809f14f4ada09ab864e3eb7c8132173e09df",
+      "bytes": 22237
+    }
+  ]
+}

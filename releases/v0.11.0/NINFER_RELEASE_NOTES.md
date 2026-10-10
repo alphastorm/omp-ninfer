@@ -32,11 +32,12 @@ the manifest stays candidate with its external-install acceptance blocker.
   authorized the all-numeric nonce `493817-205361` after the registered diagnostic
   below. Runtime source, binary, image, sampling and exact-answer comparisons do
   not change. Fresh acceptance must bind the new pushed class-closure commit.
-- **Retain RTX3090 but accept the lane blocker.** The successful native OMP18.8.7
+- **RTX3090 scope awaits a founder decision.** The successful native OMP18.8.7
   acceptance on predecessor `65b6c4264b3bdf8f3ed793fdd138a1a9da31804b` is preserved
   as evidence only and **not composed**. The founder is replacing that hardware
-  with the RTX4090. v0.11.0 cannot ship the RTX3090 lane until a3090 is reinstalled
-  and re-accepted on the new candidate; no old receipt is retargeted.
+  with the RTX4090. The current decision is reinstall/re-accept with a3090 versus
+  drop that lane from v0.11.0. No scope reduction is made here: while retained,
+  the lane cannot ship without acceptance on5861712f; no old receipt is retargeted.
 
 Current selection/status is in [founder sequence](qualification/founder-sequence.json)
 and the [selected C qualification summary](qualification/option-c-lane.json).
@@ -86,9 +87,49 @@ Historical measurement receipts and the ORCHID/COLOR long-context fixture are
 untouched. The new40hex candidate and exact-head CI URL are delivered in PR78
 and the worker handoff, not self-referentially embedded in this commit.
 
-RTX3090 predecessor acceptance is not composable on this new candidate. Fresh
-RTX5090 full-window acceptance and RTX4090 replacement-host acceptance are pending;
-the RTX3090 lane is blocked until reinstall and new-candidate acceptance.
+RTX3090 predecessor acceptance is not composable. The RTX5090 full window below
+passed on the hardened candidate; RTX4090 hardware/acceptance and the RTX3090
+founder decision remain pending. This does not establish composed readiness.
+
+## Published RTX5090 route acceptance — frozen5861712f
+
+Acceptance owner Accept5090 ran one full **initial** window against candidate
+`5861712f561ff0b3100dd4350e02d777a3f5007e`. Preflight, window, collect and summarize
+all passed. The published image6a02feba served the unchanged548fe239 binary.
+
+| Documented route | Passed steps | Byte-preserved runner |
+| --- | --- | --- |
+| RTX5090 container host |2/2|[runner](../../docs/measurements/2026-10-10-v0110-rtx5090-container-host-run.json)|
+| RTX5090 macOS client |10/10|[runner](../../docs/measurements/2026-10-10-v0110-rtx5090-macos-client-run.json)|
+| RTX5090 Windows client |5/5|[runner](../../docs/measurements/2026-10-10-v0110-rtx5090-windows-client-run.json)|
+
+All three stock OMP18.8.7 clients passed the structured live and fail-closed proofs:
+[macOS arm64](acceptance/darwin-arm64-18.8.7.json),
+[Windows x64](acceptance/windows-x64-18.8.7.json) and
+[Linux x64 under WSL2](acceptance/linux-x64-18.8.7.json). These existing-producer
+receipts retain their candidate preview statuses; no platform posture is promoted.
+
+[Measured restoration](../../docs/measurements/2026-10-10-v0110-acceptance-restoration.json)
+records **385.948s observed downtime** (about385.9s), bounds384.444–386.451s,
+distinct from the387.738s driver hold envelope. Independent health/identity checks
+measured restoration of the incumbent image/profile/arguments (except the request-log
+timestamp), four mounts,
+port/restart policy, route key/checkout, hold markers, task definitions/enabled
+states and execution policies. The designed restore recreated the container; its
+old/new IDs are retained, not silently treated as equal. Production was not upgraded.
+
+The [producer input capsule](acceptance/rtx5090-acceptance-evidence.json) retains
+all phase stream-isolation/hash audits and explicitly claims no native3090/4090
+evidence. Its [original checksums](acceptance/rtx5090-evidence-checksums.json), three
+runners, three platform receipts and restoration are copied without serialization;
+the source sizes and SHA256s match. The failed65b6c426 window and nonce diagnostic
+remain separate preserved evidence, not relabelled.
+
+This is an **evidence-only follow-on**, not a new acceptance candidate. Every
+remaining acceptance still binds5861712f, not this evidence commit. Do not compose
+yet: RTX4090 waits for hardware and the founder must decide the RTX3090 lane.
+The old65b6c4263090 pass is non-composable evidence; manifest candidate/external
+acceptance blockers remain and no production promotion or product cut is authorized.
 
 ## Exact selected component and build
 
@@ -297,11 +338,12 @@ reports the same timing failures for S2 on untouched Mac code with Ubuntu/Python
 CI passing: no timing threshold or probe was changed. Final-head CI is authority.
 [Complete local failure disposition and lane cut](qualification/root-lane-cut.json).
 
-## Founder sequence — selection/cut/stage/lane complete → acceptance pending
+## Founder sequence — selection/cut/stage/lane/5090 complete → native/composition pending
 
 C selection, source publication and the founder's live component cut are complete.
 Staging and lane rebind are now authorized agent steps; only the product live
-publisher remains founder-only. **Documented-route acceptance remains pending.**
+publisher remains founder-only. **RTX5090 routes passed; native/composed acceptance
+remains pending.** Evidence-only follow-ons do not change the5861712f candidate.
 The exact selected-source sequence and historical refusals are in
 [founder-sequence.json](qualification/founder-sequence.json).
 
@@ -373,18 +415,17 @@ external-install blocker and no acceptance claim until the real ready transition
 
 ### 3. Published-image acceptance window
 
-After the founder-authorized nonce hardening, freeze and push the new40hex product
-candidate and obtain its green CI and installability proof. Only then, with actual
-rollback/host/workspace inputs, run a fresh full preflight/window bound to that
-candidate. Do not resume or compose the failed65b6c426 window, or attach its3090
-pass to the new commit. These future commands are documentation only; S1 runs no
-acceptance action:
+This step completed on frozen5861712f with green candidate CI and actual measured
+rollback inputs. The following controller template is retained for audit, not a
+request to rerun the accepted window. S1 copied evidence only and ran no acceptance
+action. Never resume/relabel the failed65b6c426 window or attach its3090 pass to
+the accepted candidate. All remaining native acceptance continues to bind5861712f:
 
 ```bash
 acceptance=(
   /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py
   --release v0.11.0
-  --candidate "${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}"
+  --candidate 5861712f561ff0b3100dd4350e02d777a3f5007e
   --workspace "${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}"
   --wsl-workspace "${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}"
   --windows-workspace "${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}"
@@ -397,28 +438,27 @@ acceptance=(
 "${acceptance[@]}" --action window
 ```
 
-The independent watchdog/restoration is for that future founder-controlled window,
-not the exclusive overnight lease. Compose fresh receipts for every retained route,
-then platform/acceptance/manifest pin stages and `--require-ready --check-pins`
-before the product cut.
+The independent watchdog/restoration measured the completed founder-controlled
+window; no restoration action is repeated here. **Do not compose yet.** After
+RTX4090 acceptance and the explicit RTX3090 scope/acceptance decision, Main may
+compose receipts for every retained route on5861712f, then platform/acceptance/
+manifest pins and `--require-ready --check-pins` before the founder-only product cut.
 
 ### Explicit remaining blockers
 
 1. **Product acceptance:** the component is published and Main's anonymous pull
-   binds the exact548fe239 binary. That is not documented-route/composed acceptance
-   or permission to execute `publish-product-release.sh --publish`.
+   binds the exact548fe239 binary. The5090 routes/clients now passed on5861712f,
+   but native/composed readiness and permission to publish are still absent.
 2. **Native RTX4090:** retained in v0.11.0, pending fresh OMP18.8.7 qualification
    on the founder-designated replacement host after today's planned installation.
    The former no-host retire/hold decision is superseded, not a release-scope cut.
 3. **Native RTX3090:** the predecessor65b6c426 pass is preserved but not composable.
-   The founder accepts that v0.11.0 cannot ship this lane until a3090 is reinstalled
-   and re-accepted on the new hardened candidate. The4090 install is not3090
-   presence or permission to reuse an old-candidate receipt.
-4. **Every retained documented route:** fresh published-component acceptance after
-   the cut; package-local rehearsal is not a substitute. RTX5090 acceptance needs
-   the published image, legitimately installable frozen bindings and real rollback
-   inputs. Non-promoted client-candidate guards remain; acceptance-pending is the
-   manifest's candidate status and external-install blocker after lane promotion.
+   Await the founder's decision: reinstall/re-accept on5861712f versus drop the
+   lane from v0.11.0. No drop is implemented in this evidence-only commit.
+4. **Composition:** deferred until the remaining retained native routes qualify
+   on5861712f. An evidence-only commit does not become a new subject. Current
+   candidate/external-install blockers remain; no platform/acceptance/manifest
+   promotion is performed merely because the5090 slice passed.
 
 The selected C source has no unresolved ctest-disposition gate. Historical a59 red
 and invalid outcomes remain preserved, not hidden or relabelled. Public receipts

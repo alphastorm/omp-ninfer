@@ -1,7 +1,10 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Component cut, published image, staging and lane rebind complete. Predecessor65b6c426 first5090 window failed exact nonce and restored; registered diagnostic found no material difference and hardened50/50. Founder approved numeric nonce and a new candidate. Predecessor3090 pass is evidence-only/not composable. New-candidate acceptance pending;3090 blocked until reinstall/re-acceptance,4090 replacement-host acceptance pending. S1 runs no acceptance action; new40hex and exact-head CI are delivered in PR78/handoff.",
+  "execution_status": "Component cut/staging/lane and full RTX5090 initial acceptance complete on5861712f: host2/2,macOS10/10,Windows5/5,three stock18.8.7 clients,385.948s measured downtime and independent restoration. Failed65b6c426 window/diagnostic and old3090 pass remain preserved non-composable evidence. No composition:4090 hardware/acceptance pending;3090 founder decision pending re-accept versus drop. S1 copies evidence only and runs no acceptance action.",
+  "acceptance_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "evidence_only_follow_on": true,
+  "remaining_acceptance_subject_unchanged": true,
   "working_directory": "$HOME/Development/omp-ninfer-S1",
   "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
   "selected_option": "c",
@@ -21,12 +24,12 @@
     "native_rtx4090": {
       "decision": "retain in v0.11.0",
       "installation": "Founder will install the RTX4090 on the replacement native host today",
-      "qualification": "pending fresh OMP18.8.7 qualification on that host",
+      "qualification": "pending hardware and fresh OMP18.8.7 acceptance on5861712f; not the evidence commit",
       "retire_or_hold_release_for_former_host_decision": false,
       "hardware_installation_measured_in_this_receipt": false
     },
     "native_rtx3090": {
-      "acceptance": "blocked until3090 reinstall and re-acceptance on the new hardened candidate",
+      "acceptance": "founder decision pending: reinstall/re-accept on5861712f versus drop fromv0.11.0; no drop implemented",
       "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
       "predecessor_acceptance": "passed, reported by Accept3090 and confirmed bound by Main; preserved evidence only, not composed",
       "founder_accepted_consequence": "v0.11.0 cannot ship the RTX3090 lane until it is reinstalled and accepted on the new candidate",
@@ -277,15 +280,20 @@
           "founder_only": false,
           "agent_authorized_by": "Main, after the founder component cut",
           "profile_binding": "Verified installable, not ready; root-lane-cut.json",
-          "frozen_candidate_delivery": "The new numeric-nonce class-closure40hexcandidate and exact-head CIURL are reported in PR78/handoff. Predecessor65b6c426 receipts are not retargeted or composed; avoid self-referential commit pins",
+          "frozen_candidate_delivery": "5861712f561ff0b3100dd4350e02d777a3f5007e; exact-head CI38072788672 passed. All remaining acceptance keeps this subject despite later evidence-only commits. Predecessor65b6c426 receipts are not retargeted or composed",
           "rollback_host_workspace_inputs": "Main acceptance owner supplies actual measured effect/rollback inputs; not assigned to this worker"
         },
         {
           "order": 10,
           "action": "Run published-image acceptance preflight, then the founder-controlled acceptance window",
+          "accepted_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+          "command_is_documented_template": true,
+          "execution_evidence": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
           "command": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
           "founder_only": true,
-          "executed": false
+          "executed": true,
+          "executed_by": "Accept5090; not this evidence worker",
+          "scope": "RTX5090 routes only; no native acceptance or composition claimed"
         }
       ]
     }
@@ -304,20 +312,34 @@
     "first5090_window": "diagnostic-red: expected COBALT-493817, returned COBOLT-493817; host2/2 passed, Mac0/10 and Windows0/5 not reached; restoration passed; no accepted platform receipts promoted",
     "diagnostic": "pre-registered fixed50/cohort: A-cobalt50/50,0/163 misspelled; B-cobalt50/50,0/165; B-hardened50/50,0/152. No material difference,p=1; hardened green is not acceptance",
     "rtx3090": "predecessor acceptance passed; preserved by acceptance owner as evidence only, not composed on the new candidate",
-    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json"
+    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
+    "accepted_5861712f_rtx5090": {
+      "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+      "status": "passed",
+      "attempt": "initial full window; no failed-window replay",
+      "documented_steps": "host2/2,macOS10/10,Windows5/5",
+      "stock_omp1887_clients": "darwin-arm64,windows-x64,linux-x64 passed; produced preview receipt status preserved",
+      "downtime_s": 385.948,
+      "restoration": "Independent identity/mount/health/key/checkout/hold/task/policy checks passed; designed container recreation recorded",
+      "evidence": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
+      "restoration_receipt": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
+      "byte_preservation": "Three runners,three platform receipts,restoration,input capsule/checksums retained without serialization; producer sizes/SHA256 verified",
+      "native_or_composed_acceptance_claimed": false,
+      "evidence_commit_changes_candidate": false
+    }
   },
   "follow_on": [
-    "Freeze and push the single nonce class-closure commit; require its installability proof and green exact-head CI. Bind all future acceptance to that new40hexcandidate, not65b6c426.",
-    "Run fresh full published-image RTX5090 preflight/window on the new candidate with measured rollback inputs and restoration reserve; no partial replay of the failed window.",
-    "Retain native RTX4090 and obtain fresh new-candidate OMP18.8.7 replacement-host acceptance after installation.",
-    "RTX3090 lane cannot ship until hardware reinstall and new-candidate re-acceptance; old65b6c426 pass is evidence only, not composable.",
-    "Compose only new-candidate receipts for all retained routes, then platform/acceptance/manifest pin stages and --require-ready --check-pins before the founder-only product cut."
+    "Keep5861712f frozen as the acceptance subject; evidence-only commits do not advance it. Preserve failed65b6c426/diagnostic and old3090 pass separately.",
+    "RTX5090 full window/three clients/restoration are complete; this worker performs no rerun, acceptance-candidate change or promotion.",
+    "RTX4090 still awaits hardware and fresh native OMP18.8.7 acceptance on5861712f.",
+    "Founder3090 decision pending: reinstall/re-accept on5861712f versus explicitly drop that lane fromv0.11.0; no drop implemented.",
+    "Do not compose yet. Main may compose only5861712f receipts after every retained route qualifies, then authorized pins/ready checks before founder-only product publication."
   ],
   "blockers": [
-    "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
-    "Native RTX3090 cannot ship until3090 reinstall and fresh acceptance on the new numeric-nonce candidate; predecessor65b6c426 pass is preserved as evidence only, not composed.",
-    "All retained routes need fresh new-candidate acceptance. First5090 window remains diagnostic-red; diagnostic green does not qualify a route. Use anonymously pullable image6a02feba.",
-    "Fresh acceptance requires the pushed new40hexcandidate, green exact-head CI and actual rollback/host/workspace inputs; no acceptance action by S1."
+    "Native RTX4090 remains retained, pending hardware and fresh acceptance on5861712f; planned installation is not measured qualification.",
+    "Native RTX3090 awaits founder decision to reinstall/re-accept on5861712f versus drop it; no scope reduction here; old65b6c426 pass is non-composable evidence.",
+    "No composition or ready/product promotion until every retained route has acceptance on5861712f. RTX5090 now passed; historical first-window failure/diagnostic are not relabelled.",
+    "Evidence-only branch HEAD is not a new acceptance candidate; all remaining native acceptance uses5861712f. This worker runs no acceptance or promotion."
   ],
   "original_a59_assets_changed": false,
   "original_a59_proposal_superseded": true,
@@ -328,7 +350,8 @@
   "stage_run": true,
   "acceptance_run": true,
   "acceptance_run_by_this_worker": false,
-  "new_candidate_acceptance_run": false,
+  "new_candidate_acceptance_run": true,
+  "new_candidate_acceptance_scope": "RTX5090 only; native/composed acceptance remains pending",
   "raw_prompts_outputs_or_secrets_included": false,
   "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
   "runtime_publication": {

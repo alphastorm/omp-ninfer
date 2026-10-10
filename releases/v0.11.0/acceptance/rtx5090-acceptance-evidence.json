@@ -1,0 +1,627 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_acceptance_evidence",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "as_of": "2026-10-10",
+  "status": "passed",
+  "attempt": "initial",
+  "prior_workspace_used": false,
+  "scope": {
+    "routes": [
+      "rtx5090-container-host",
+      "rtx5090-macos-client",
+      "rtx5090-windows-client"
+    ],
+    "client_platforms": [
+      "darwin-arm64",
+      "windows-x64",
+      "linux-x64"
+    ],
+    "native_3090_and_4090_claimed": false,
+    "compatibility_posture_changed": false
+  },
+  "driver": "scripts/hosts/accept-rtx5090-routes.py",
+  "driver_action_verdicts": [
+    {
+      "action": "preflight",
+      "status": "passed",
+      "exit_code": 0,
+      "elapsed_seconds": 67.17
+    },
+    {
+      "action": "window",
+      "status": "passed",
+      "exit_code": 0,
+      "elapsed_seconds": 433.25
+    },
+    {
+      "action": "collect",
+      "status": "passed",
+      "exit_code": 0,
+      "elapsed_seconds": 40.69
+    },
+    {
+      "action": "summarize",
+      "status": "passed",
+      "exit_code": 0,
+      "elapsed_seconds": 0.21
+    }
+  ],
+  "dry_runs": [
+    {
+      "action": "preflight",
+      "status": "dry-run",
+      "effects": "none"
+    },
+    {
+      "action": "window",
+      "status": "dry-run",
+      "effects": "none"
+    },
+    {
+      "action": "collect",
+      "status": "dry-run",
+      "effects": "none"
+    },
+    {
+      "action": "summarize",
+      "status": "dry-run",
+      "effects": "none"
+    }
+  ],
+  "document_sha256": "f6fe3d0e7d54162a8298919fc22e7feea83b14d6d13e3cb95462bc26ab60f88e",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "step_count": 2,
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "receipt": "2026-10-10-v0110-rtx5090-container-host-run.json",
+      "sha256": "7b53a423f8648c1d177d0e4c4ce94aca2d22183d77502d40678e1fff6a4cabfa"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "step_count": 10,
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "receipt": "2026-10-10-v0110-rtx5090-macos-client-run.json",
+      "sha256": "c0799c04259143c46bf2b3c843cd69e0f6afa9fd6bf85679870c7dd5fa4b41dc"
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "step_count": 5,
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "receipt": "2026-10-10-v0110-rtx5090-windows-client-run.json",
+      "sha256": "488b9b12ba08b8632b377b73d60ed91e2fc3c109b054e7488633aeae7343b46d"
+    }
+  },
+  "platforms": {
+    "darwin-remote-ssh": {
+      "status": "preview",
+      "binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+      "live_acceptance": {
+        "fail_closed": {
+          "exit_code": 1,
+          "no_model_response": true,
+          "only_selected_local_provider_observed": true,
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "errors": [
+            "Unable to connect. Is the computer able to access the url?"
+          ],
+          "endpoint": "http://127.0.0.1:18089/v1",
+          "method": "configured route unavailable; no provider configuration changes"
+        },
+        "omp_version": "omp/18.8.7",
+        "event_counts": {
+          "session": 1,
+          "agent_start": 1,
+          "turn_start": 2,
+          "message_start": 4,
+          "message_end": 4,
+          "message_update": 23,
+          "tool_execution_start": 1,
+          "tool_execution_end": 1,
+          "turn_end": 2,
+          "agent_end": 1
+        },
+        "typed_read_tool_calls": 1,
+        "linked_tool_results": 1,
+        "tool_result_marker": true,
+        "exact_visible_final_answer": true,
+        "agent_end": true,
+        "continuation_exact_nonce": true,
+        "runtime_identity_bound": true,
+        "runtime_server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+        "runtime_configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+        "model_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "raw_transcript_included": false,
+        "vision_observed": true,
+        "vision_input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592",
+        "runtime_image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+        "runtime_variant": "rtx5090-container",
+        "profile_runtime_qualified_by_this_receipt": false,
+        "documented_server_restart_nonce_returned": true
+      },
+      "limitations": [
+        "This receipt qualifies the unmodified upstream OMP 18.8.7 client against published RTX 5090 runtime v0.6.16-qwen38-5090-beta.1, not GPU performance or a managed-appliance installation.",
+        "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt."
+      ]
+    },
+    "windows-docker-local": {
+      "status": "preview",
+      "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "live_acceptance": {
+        "omp_version": "omp/18.8.7",
+        "event_counts": {
+          "session": 1,
+          "agent_start": 1,
+          "turn_start": 2,
+          "message_start": 4,
+          "message_end": 4,
+          "message_update": 28,
+          "tool_execution_start": 1,
+          "tool_execution_end": 1,
+          "turn_end": 2,
+          "agent_end": 1
+        },
+        "typed_read_tool_calls": 1,
+        "linked_tool_results": 1,
+        "tool_result_marker": true,
+        "exact_visible_final_answer": true,
+        "agent_end": true,
+        "continuation_exact_nonce": true,
+        "runtime_identity_bound": true,
+        "runtime_server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+        "runtime_configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+        "model_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "raw_transcript_included": false,
+        "vision_observed": true,
+        "vision_input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592",
+        "fail_closed": {
+          "exit_code": 1,
+          "no_model_response": true,
+          "only_selected_local_provider_observed": true,
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "errors": [
+            "Unable to connect. Is the computer able to access the url?"
+          ],
+          "endpoint": "http://127.0.0.1:18089/v1",
+          "method": "configured route unavailable; no provider configuration changes"
+        },
+        "runtime_image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+        "runtime_variant": "rtx5090-container",
+        "profile_runtime_qualified_by_this_receipt": false
+      },
+      "limitations": [
+        "This receipt qualifies the unmodified upstream OMP 18.8.7 client against published RTX 5090 runtime v0.6.16-qwen38-5090-beta.1, not GPU performance or a managed-appliance installation.",
+        "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt."
+      ]
+    },
+    "linux-docker-local": {
+      "status": "preview",
+      "binary_sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a",
+      "live_acceptance": {
+        "omp_version": "omp/18.8.7",
+        "event_counts": {
+          "session": 1,
+          "agent_start": 1,
+          "turn_start": 2,
+          "message_start": 4,
+          "message_end": 4,
+          "message_update": 67,
+          "tool_execution_start": 1,
+          "tool_execution_end": 1,
+          "turn_end": 2,
+          "agent_end": 1
+        },
+        "typed_read_tool_calls": 1,
+        "linked_tool_results": 1,
+        "tool_result_marker": true,
+        "exact_visible_final_answer": true,
+        "agent_end": true,
+        "continuation_exact_nonce": true,
+        "runtime_identity_bound": true,
+        "runtime_server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+        "runtime_configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+        "model_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "raw_transcript_included": false,
+        "fail_closed": {
+          "exit_code": 1,
+          "no_model_response": true,
+          "only_selected_local_provider_observed": true,
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "errors": [
+            "Unable to connect. Is the computer able to access the url?"
+          ],
+          "endpoint": "http://127.0.0.1:18089/v1",
+          "method": "configured route unavailable; no provider configuration changes"
+        },
+        "runtime_image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+        "runtime_variant": "rtx5090-container",
+        "profile_runtime_qualified_by_this_receipt": false,
+        "execution_context": {
+          "kernel": "6.18.33.2-microsoft-standard-WSL2",
+          "wsl_distro_name_present": false,
+          "wsl_interop_present": false,
+          "environment_erased": false,
+          "native_linux_os_qualification_claimed": false
+        }
+      },
+      "limitations": [
+        "This receipt qualifies the unmodified upstream OMP 18.8.7 client against published RTX 5090 runtime v0.6.16-qwen38-5090-beta.1, not GPU performance or a managed-appliance installation.",
+        "Runtime and serving-profile qualification are recorded separately in the RTX 5090 lane receipt.",
+        "Live inference used the native Linux binary under WSL2. This is not a new non-WSL Linux OS qualification; hosted Linux qualification remains provider-free."
+      ]
+    }
+  },
+  "client_platform_receipts": {
+    "darwin-remote-ssh": {
+      "receipt": "darwin-arm64-18.8.7.json",
+      "sha256": "9b31ac74b6d58e9a0ae9870d94717e8c3102145f9476f65255fc37885ab49de3"
+    },
+    "windows-docker-local": {
+      "receipt": "windows-x64-18.8.7.json",
+      "sha256": "b671b86f1e4b88f81187f41dd883caf3026428d8635f212dd63f6c242707bd88"
+    },
+    "linux-docker-local": {
+      "receipt": "linux-x64-18.8.7.json",
+      "sha256": "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0"
+    }
+  },
+  "structured_stream_audit": {
+    "linux-docker-local": {
+      "status": "passed",
+      "stateful_source": "per-model compat",
+      "environment": {},
+      "nonce": "493817-205361",
+      "continuation_final_text": "493817-205361",
+      "phases": {
+        "tool": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "1bfbbf80172f9b502051df2f2fc1a2c8e26cea30d987fdd0237ae855ef01b5d4"
+        },
+        "state": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "90f66f7ab93ff672dfcc4b5f15977a5ba5463ea890719243dc1fcac33e5306bc"
+        },
+        "continuation": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "63b73cbb31c6c2020b665cf04f2b5e8e050381710bafceb969636834a2d56dd4"
+        },
+        "fail-closed": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "cfa1adc81b84af0edc95da8cba7a0a118155d7e038148e343ede4e2ea0af69fc"
+        }
+      }
+    },
+    "darwin-remote-ssh": {
+      "status": "passed",
+      "stateful_source": "per-model compat",
+      "environment": {},
+      "nonce": "493817-205361",
+      "continuation_final_text": "493817-205361",
+      "phases": {
+        "tool": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "63942b859fddf1e237cea9a4c694285eab321f3b1969bad5a6192856399b6960"
+        },
+        "state": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "fc009452100f435b3f9732abbbdd44957f9d6e588283bbe335db81f13867893f"
+        },
+        "continuation": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "bd6a8b348c27f84ee514ff0b87c9d86e6eaa9647fd76c04897a3134e4d794f00"
+        },
+        "vision": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 3,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "ac15c9458a84d537fffc01c36211c0803231a8178cc385652f5b83ea7fef3558"
+        },
+        "fail-closed": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "c2ef94924810123cf5d4402017903c39359ef632332724a0a33be0dc94117603"
+        }
+      }
+    },
+    "windows-docker-local": {
+      "status": "passed",
+      "stateful_source": "per-model compat",
+      "environment": {},
+      "nonce": "493817-205361",
+      "continuation_final_text": "493817-205361",
+      "phases": {
+        "tool": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "753073cfa5146d4ef5583459d0da543b0c44e110414479a773681c5ecc743b50"
+        },
+        "state": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "b181145d6c4b40e965dd54ee0d7c098bd21b020f2ed3f838a9ad6c8e8ef5ce15"
+        },
+        "continuation": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "82c09bf45016ccb80cab0d0da8cd03f313a996b199ec8883b36bd7bb7e949257"
+        },
+        "vision": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 3,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "765665365d4fff1a59e10994f8fe5a0dcdcb70a72f1a83e04cee87f22eb48813"
+        },
+        "fail-closed": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "e9dafd9f84d2b24080d52e514f82491fdaeea8bca8e0df28dfc60f1191351345"
+        }
+      }
+    }
+  },
+  "restoration": {
+    "rtx5090": {
+      "original_runtime_healthy": true,
+      "original_image_retained": true,
+      "restart_policy": "unless-stopped",
+      "checkpoint_mount_retained": true,
+      "documented_route_key_restored": true,
+      "original_checkout_restored": true,
+      "route_container_absent": true,
+      "window_hold_removed": true,
+      "preexisting_markers_and_supervisors_unchanged": true,
+      "production_windows": 1,
+      "window_downtime_seconds": [
+        385.948
+      ],
+      "production_downtime_lower_bound_seconds": 384.444,
+      "production_downtime_upper_bound_seconds": 386.451,
+      "window_hold_seconds": [
+        387.738
+      ],
+      "completed_utc": "2026-10-10T18:05:15.976274+00:00",
+      "independently_verified_utc": "2026-10-10T18:09:15.176746+00:00",
+      "old_container_id": "2aca26b0316515c9464760639a1ed71986eed217ec9fbd6adc2f1dc3798fa479",
+      "new_container_id": "1ea9d4fc518d9097277219d9a003f1ed10f6aea2dbdfe213f4b3263f48691392",
+      "container_recreated": true,
+      "restoration_identity_criterion": "Same container name, immutable image, deployment profile, binary/configuration arguments, mounts, port and restart policy; designed restore may recreate the container.",
+      "incumbent_identity": {
+        "container_name": "ninfer-5090-v070p",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+        "image_id": "sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+        "deployment_profile": "qwen38-5090-v0.10.0",
+        "binary_sha256_argument": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+        "configuration_sha256_argument": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+        "model_sha256_argument": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+        "production_port": 18088,
+        "command_unchanged_except_request_log_timestamp": true,
+        "four_mounts_retained": true,
+        "mounts": [
+          {
+            "type": "bind",
+            "destination": "/run/secrets/ninfer_api_key",
+            "read_only": true,
+            "source_retained": true
+          },
+          {
+            "type": "bind",
+            "destination": "/checkpoints",
+            "read_only": false,
+            "source_retained": true
+          },
+          {
+            "type": "bind",
+            "destination": "/models/model.ninfer",
+            "read_only": true,
+            "source_retained": true
+          },
+          {
+            "type": "bind",
+            "destination": "/logs",
+            "read_only": false,
+            "source_retained": true
+          }
+        ]
+      },
+      "windows_health_ok": true,
+      "wsl_health_ok": true,
+      "preexisting_marker_count": 1,
+      "restored_marker_count": 1,
+      "scheduled_task_count": 7,
+      "task_definition_and_enabled_state_unchanged": true,
+      "transient_task_state_compared": false,
+      "execution_policies_unchanged": true,
+      "lease_closed": true,
+      "other_container_identities_unchanged": true,
+      "availability_measurement": {
+        "endpoint": "http://127.0.0.1:18088/health",
+        "poll_interval_seconds": 0.5,
+        "request_timeout_seconds": 1,
+        "last_healthy_before_down_utc": "2026-10-10T17:58:48.339960+00:00",
+        "first_unhealthy_utc": "2026-10-10T17:58:48.842572+00:00",
+        "last_unhealthy_utc": "2026-10-10T18:05:14.288465+00:00",
+        "first_restored_healthy_utc": "2026-10-10T18:05:14.790084+00:00",
+        "monitor_mutations": 0,
+        "method": "Read-only HTTP health sampling; observed outage plus request/poll-boundary uncertainty, distinct from driver window-hold duration."
+      }
+    }
+  },
+  "restoration_receipt": {
+    "receipt": "2026-10-10-v0110-acceptance-restoration.json",
+    "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024"
+  },
+  "documented_routes": {
+    "operator_class": "owner-operated tester-equivalent",
+    "mode": "Published RTX 5090 v0.6.16-qwen38-5090-beta.1 runtime with unmodified upstream OMP 18.8.7; exact candidate documented blocks, fresh isolated client homes, initial full route window.",
+    "corrections": [],
+    "private_fleet_projection_included": false
+  },
+  "receipt_producers": {
+    "documented_routes": "scripts/documented_route.py and scripts/hosts/run-documented-route.sh / run-documented-route.ps1",
+    "client_platforms": "scripts/hosts/omp-client-probe.py plus scripts/compose_route_acceptance.py platform_receipt",
+    "restoration": "scripts/hosts/accept-rtx5090-host.py plus independent read-only production and Windows inventory snapshots and HTTP health sampling"
+  },
+  "prior_subject": {
+    "candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+    "disposition": "diagnostic-red preserved separately; not relabelled as acceptance"
+  },
+  "raw_transcripts_or_secrets_included": false
+}
