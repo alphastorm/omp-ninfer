@@ -1,0 +1,93 @@
+{
+  "artifact_type": "omp_ninfer_nvfp4_graph_serial_source_attribution",
+  "schema_version": 1,
+  "lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+  "lease_exit": 0,
+  "lease_seconds": 645,
+  "commits": [
+    {
+      "source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+      "job_exit": 0,
+      "build_completed": true,
+      "test_exit": 0,
+      "test_log_sha256": "f73741eb2be9c48fb695c00ee4fc6e8f5c5a2968603a34214c528a5fa7941fc7",
+      "test_assertion_nvfp4_graph_serial_row_mismatch": false,
+      "test_assertion_incomplete": false
+    },
+    {
+      "source_commit": "3a2fadbd36038182e5db825ce00cd210cdfa5472",
+      "job_exit": 1,
+      "build_completed": true,
+      "test_exit": 1,
+      "test_log_sha256": "48f5275e5aad345d845307f81476fe338b0fa50257c96881eb41bd0f19d0d6a6",
+      "test_assertion_nvfp4_graph_serial_row_mismatch": true,
+      "test_assertion_incomplete": false
+    }
+  ],
+  "runtime_source_changes": false,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "verdict": "regression introduced at3a2fadbd; founder disposition required in unshipped NVFP4 KV configuration",
+  "oracle": {
+    "comparison": "std::equal of complete generated TokenId vectors; exact integer/token identity, not a floating tolerance",
+    "source_file": "tests/targets/qwen3_6_27b/test_engine_dflash2_nvfp4_real.cpp",
+    "serial": {
+      "max_context": 4096,
+      "kv_capacity_tokens": 4096,
+      "concurrency": 1,
+      "cuda_graph": false,
+      "speculative_backend": "none",
+      "kv_cache": "nvfp4"
+    },
+    "graph": {
+      "max_context": 131072,
+      "kv_capacity_minimum": 262144,
+      "concurrency": 2,
+      "device_state_slots": 4,
+      "cuda_graph": true,
+      "speculative_backend": "dflash2",
+      "draft_window": 7,
+      "kv_cache": "nvfp4"
+    },
+    "first_divergent_op_or_row": "unobserved; the test emits no phase,row,token index or intermediate-tensor mismatch",
+    "comparison_symbol": "std::equal(result.generated_token_ids.begin(), result.generated_token_ids.end(), reference[fixtures[row]].begin())",
+    "comparison_lines": [
+      139,
+      140,
+      141
+    ]
+  },
+  "route_change": {
+    "commit": "3a2fadbd36038182e5db825ce00cd210cdfa5472",
+    "file": "src/ops/linear_add/q5/q5_linear_add_plan.cpp",
+    "runtime_changed_lines": 17,
+    "shape": {
+      "k": 6144,
+      "t": 16
+    },
+    "old_schedule": "MmaResidualR64C16",
+    "new_schedule": "Split2ExactResidual",
+    "architecture": "sm120;sm86/sm89 unchanged",
+    "mechanism": "[INFERENCE] The sole runtime diff and fresh baseline identify the T16 Q5 route change as the regression source. Intermediate accumulation/quantization or first-divergent-op mechanisms were not measured.",
+    "bf16_relation": "The separate supported BF16 control is DFlash2 solo versus paired, not eager ordinary versus graph speculative. Shipped eaf and new a59 both differ4/5, so it does not establish a newly introduced BF16 regression or the same numerical mechanism."
+  },
+  "founder_options": [
+    {
+      "option": "a",
+      "decision": "Restrict the3a2fadbd route to restore the NVFP4 exact oracle.",
+      "evidence": "Fresh exact eaf test passes and3a test fails; sole runtime diff routes K6144/T16.",
+      "cost": "Runtime source change; clean rebuild, EXP092/094 remeasurement and unchanged-rule rescreen required. No implementation or GPU work tonight."
+    },
+    {
+      "option": "b",
+      "decision": "Ship unchanged a59 with the unshipped NVFP4 failure explicitly retained.",
+      "evidence": "Supported BF16 tests passed; serial quality bound89/89; NVFP4 KV was rejected by EXP085.",
+      "cost": "Founder policy exception to all-green ctest, with failure disclosure. No test suppression, skip or false all-green claim; no exception has been approved."
+    },
+    {
+      "option": "c",
+      "decision": "Build eaf221ac+b72daad6+a59c13d0 without3a2fadbd.",
+      "evidence": "Exact eaf baseline is green;3a is first red.",
+      "cost": "Different runtime source; clean build, remeasurement and quality requalification. Existing EXP092/094 timings are not transferable without remeasurement. Not built tonight."
+    }
+  ]
+}

@@ -13,6 +13,15 @@ Want to move something here? The fastest ways to help are listed at the end of t
 
 ## Where this is now — unreleased OMP 18.8.7 client candidate
 
+The [v0.11.0 draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) separately binds a clean
+local v0.6.16 RTX 5090 package to unchanged source `a59c13d0` and records qualification
+failures as well as passes. The founder must adjudicate the test/quality dispositions,
+cut the component, supply its real OCI digest, and then obtain fresh published-image
+acceptance. The native RTX 4090 host is unavailable (its designated machine now holds
+an RTX PRO 6000); retire-versus-hold is a founder decision. Native RTX 3090 acceptance
+with OMP 18.8.7 remains a separate, outstanding requirement. Nothing in that draft
+changes the current root runtime pins or the five-route published baseline.
+
 Current install fragments and profiles target stock upstream OMP **18.8.7**, source
 `f261ed9faf16b61880b544f599876bface4ded0d`, on unchanged v0.10.0 runtime/model pins.
 Per-model `compat.statefulResponses: true` replaces the global environment requirement;

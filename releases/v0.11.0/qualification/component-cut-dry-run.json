@@ -1,0 +1,28 @@
+{
+  "artifact_type": "ninfer_v0616_component_cut_dry_run",
+  "schema_version": 1,
+  "version": "v0.6.16",
+  "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+  "binary_release_tag": "v0.6.16-qwen38-5090-beta.1",
+  "source_release_tag": "v0.6.16-qwen38-5090-source.1",
+  "archive_sha256": "95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10",
+  "sbom_sha256": "fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc",
+  "source_archive_sha256": "30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543",
+  "checks": {
+    "mac_archive_sha256": true,
+    "mac_spdx_sha256": true,
+    "mac_checksum_file": true,
+    "mac_source_archive_sha256": true,
+    "source_archive_equals_git_archive": true,
+    "packaged_identity_names_version_and_commit": true,
+    "packaged_identity_source_dirty_false": true,
+    "source_commit_on_origin_branch": true,
+    "publisher_workflow_exists_at_commit": true,
+    "github_auth_available": true,
+    "binary_and_source_tags_absent": true
+  },
+  "dry_run_exit": 0,
+  "publication_created": false,
+  "result": "preflight ok; dry run: no tag, release, or workflow run was created",
+  "command": "NINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" bash scripts/hosts/cut-ninfer-5090-component.sh --version v0.6.16 --commit a59c13d00492d47dc58bf822533688c90c5d1f6a --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 --beta 1 --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\" --dry-run"
+}

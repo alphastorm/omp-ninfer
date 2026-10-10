@@ -1,0 +1,28 @@
+{
+  "candidate_cases": 89,
+  "reference_cases": 89,
+  "identical_output_signatures": 89,
+  "different_output_signatures": 0,
+  "candidate_errors": 5,
+  "reference_errors": 5,
+  "identical_request_bodies": 89,
+  "candidate_responses_sha256": "320061a2255a5f30824a09a4459c71f5b9986467cf123279922c2178666bf16c",
+  "reference_responses_sha256": "0e1fc81b58a6bdad2e4d398beafe24822a281c1610102f0803afca5c7e07ab3d",
+  "signature_fields": [
+    "content",
+    "reasoning",
+    "tool_calls excluding id",
+    "finish_reason",
+    "error",
+    "usage.prompt_tokens",
+    "usage.completion_tokens"
+  ],
+  "excluded_nondeterministic_fields": [
+    "tool_calls.id"
+  ],
+  "pass": true,
+  "evidence_transfer": "MTP3 control matches frozen v0.9.0 corpus",
+  "evidence_kind": "Frozen v0.9.0 production-output control under MTP3; no production server was run",
+  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
+  "raw_prompts_outputs_or_secrets_included": false
+}

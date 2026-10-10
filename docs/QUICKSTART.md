@@ -14,6 +14,12 @@
 
 ## OMP 18.8.7 client candidate
 
+The separate [v0.11.0 runtime draft](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) contains
+package-local RTX 5090 v0.6.16 qualification evidence and the founder-only morning
+cut → real-digest staging → published-image acceptance sequence. It is **not an install
+route**: keep the candidate guards below, and do not substitute its local Docker image
+for a published digest or run the acceptance-window watchdog during a rehearsal.
+
 The client is the unmodified upstream v18.8.7 release, source
 `f261ed9faf16b61880b544f599876bface4ded0d`. The runtime packages, model artifacts,
 deployment profiles and concurrency limits remain the v0.10.0 baseline. Root profiles mark

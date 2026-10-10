@@ -1,0 +1,34 @@
+{
+  "artifact_type": "omp_ninfer_v011_founder_sequence",
+  "schema_version": 1,
+  "execution_status": "Commands documented only; only cutter --dry-run was exercised.",
+  "component_admission": "Resolve the full sm_120a test and paired-output dispositions before authorizing publication.",
+  "component_cut_founder_only": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\"",
+  "staging_after_real_component_publication": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$V011_DRAFT_BACKUP/qualification/rtx5090.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+  "omp_component_descriptor": {
+    "path": "docs/measurements/2026-10-10-omp-1887-client-components.json",
+    "sha256": "728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9",
+    "s2_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7"
+  },
+  "acceptance_after_legitimate_installability": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
+  "preflight_guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
+  "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
+  "root_promotion": "After the real qualification/posture prerequisites, freeze and publish the completed lane/evidence commit and run rebind_release.py --release v0.11.0 --stage lane --pin $V011_LANE_COMMIT. This promotes root runtime/model/compatibility pins, not root candidate client status.",
+  "follow_on": "Record fresh native RTX 3090/OMP 18.8.7 acceptance, resolve native RTX 4090 retire-versus-hold, compose published-image acceptance for every retained route, pin the platform/acceptance/manifest stages, and require-ready/check-pins before a product cut.",
+  "blockers": [
+    {
+      "lane": "native RTX 4090",
+      "reason": "No RTX 4090 host; designated machine has held an RTX PRO 6000 since 2026-10-05.",
+      "decision": "Founder chooses retire versus hold."
+    },
+    {
+      "lane": "native RTX 3090",
+      "reason": "Fresh OMP 18.8.7 acceptance is outside tonight’s scope."
+    },
+    {
+      "lane": "all retained documented routes",
+      "reason": "Published-image acceptance follows the founder cut and a legitimately installable frozen product candidate."
+    }
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

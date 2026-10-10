@@ -1,0 +1,42 @@
+{
+  "artifact_type": "omp_1887_parallel_frozen_dependency_provenance",
+  "schema_version": 1,
+  "source_commit": "239eec2e34ec728bff72bcaf6ac3be118f56d57d",
+  "method": "Freeze the three landed dependency blobs unmodified; explicit CLI SHA/version bind the upstream macOS 18.8.7 binary before any workload. Private gate only coordinates first execution.",
+  "frozen_tools": [
+    {
+      "path": "scripts/omp_parallel_proof.py",
+      "bytes": 32737,
+      "git_blob_sha1": "648ff4527d2288877422e10fbf69f62bce500236",
+      "sha256": "5183f4d93dba8ee37218b30cc6d8643ab7f244391a74cdbfdb9a9f61f3a7a014",
+      "exact_diff_against_source_commit": ""
+    },
+    {
+      "path": "scripts/stock_omp_session_proof.py",
+      "bytes": 11361,
+      "git_blob_sha1": "13e80d2f12b94e89d89295c971031eae30e31145",
+      "sha256": "00a25ce9f7fa6e695c4cd94d59a90d870260657781defb99857398d8f2b43f51",
+      "exact_diff_against_source_commit": ""
+    },
+    {
+      "path": "scripts/omp_client_environment.py",
+      "bytes": 1356,
+      "git_blob_sha1": "5a44dd4ef0e468b0ada4cb92e9eb59c8ec87a462",
+      "sha256": "bb145fa70e6bce2a2d7757e59eb43b4c78b4cafdfb9b6a6c112e442e50709b00",
+      "exact_diff_against_source_commit": ""
+    }
+  ],
+  "identity_arguments": [
+    "--omp-sha256",
+    "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+    "--omp-version",
+    "omp/18.8.7"
+  ],
+  "orchestration_gate_sha256": "4f58442b7c0fc9c608a8f819113a0abf4551e47f563652906d3e64d6bea6d99a",
+  "previous_pi_only_copy": {
+    "sha256": "fc3ff35b34c6720a2a81fb964095dcce7cc53e2d92d1014ed9db3ea7d84e1540",
+    "used_for_parallel_workload": false,
+    "disposition": "Preserved; cannot run OMP 18.8.7 because its historical binary/version pin was not overridable."
+  },
+  "workload_prompts_checks_and_thresholds_changed": false
+}

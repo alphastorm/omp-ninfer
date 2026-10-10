@@ -1,0 +1,33 @@
+{
+  "artifact_type": "omp_ninfer_bf16_solo_pair_output_identity",
+  "schema_version": 1,
+  "scope": "first five sorted counted cases of the frozen EXP-085 role corpus; first cold request is serial",
+  "candidate_source_commit": "eaf221ac7a7c71e3b0049e59508e370c0ded4226",
+  "candidate_binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131520,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "dflash2",
+    "speculative_draft_window": 7
+  },
+  "cases_solo": 5,
+  "cases_paired": 5,
+  "identical_output_signatures": 1,
+  "different_output_signatures": 4,
+  "two_row_decode_observed": true,
+  "decode_rounds": 1592,
+  "decode_row_rounds": 2329,
+  "average_decode_batch": 1.4629396984924623,
+  "solo_responses_sha256": "df8bc5a38500328d6b088a0dad3422e206f52fa36296e632fe9cbeb67045723a",
+  "paired_responses_sha256": "b1e309f120e212e7e678dc8ac3f67acdd06390ece903262f7a6943cebe568605",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "verdict": "fail",
+  "limit": "A five-case state-faithful co-scheduling check, not a full paired powered screen or a claim about all inputs.",
+  "lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+  "lease_seconds": 645
+}

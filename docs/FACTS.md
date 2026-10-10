@@ -22,6 +22,17 @@ hosts now default to auto image detail, so RTX 5090 fragments no longer override
 Unavailable saved models fail closed upstream ([#13689](https://github.com/can1357/oh-my-pi/pull/13689));
 no additional config is needed. Compaction settings are unchanged.
 
+## Separate runtime draft — v0.11.0
+
+The separate [v0.11.0 runtime draft](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) proposes
+RTX 5090 component v0.6.16 from unchanged `a59c13d0`. It does not change root runtime
+pins. The clean package-local profile measured exact 130,048-token retrieval in
+**58.917 s** and **179.79 server decode tok/s** over 2,048 output tokens, against
+v0.10.0's 58.738 s and 161.39 tok/s. These are local rehearsal measurements, not a
+new release or a traffic-weighted performance promise. The draft retains the red
+NVFP4 graph/serial test and solo-versus-paired output diagnostics rather than treating
+a successful command exit as complete qualification.
+
 ## Published baseline — v0.10.0
 
 The [v0.10.0 manifest](../releases/v0.10.0/manifest.json) binds the stock-client runtime on

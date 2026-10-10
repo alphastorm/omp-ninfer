@@ -1,0 +1,1414 @@
+{
+  "artifact_type": "omp_ninfer_v0616_long_session_rehearsals",
+  "schema_version": 1,
+  "client_os": "macOS",
+  "client_architecture": "arm64",
+  "client_version": "18.8.7",
+  "client_binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
+  "frozen_tool_sha256": "7603f7430f98566e0c3a4c81aa10d4be93f54b4d4e501a06fa7ecc9c70742a2e",
+  "runs": {
+    "1": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "fdedf9b4b1a804344725aa021b7b6a4871a0b8ec3e752cffa6ceb8792052b0bb",
+      "receipt": {
+        "artifact_type": "omp_ninfer_long_session_proof",
+        "schema_version": 1,
+        "started_utc": "2026-10-10T08:20:50Z",
+        "omp": {
+          "sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+          "version": "omp/18.8.7"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "environment": {
+          "per_model_compat_statefulResponses": true
+        },
+        "synthetic_prompts_only": true,
+        "parameters": {
+          "compactions": 2,
+          "expect_method": {
+            "redacted": true,
+            "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+          },
+          "seed": 20260928,
+          "filler_bytes": 40000,
+          "plant_after": 1,
+          "restart": false
+        },
+        "resolved_model": {
+          "provider": "ninfer-beta",
+          "id": {
+            "redacted": true,
+            "sha256": "e630e92734b4ea1fb2db9df131306d6e87bb3ed3e6fecdcb9e73acb6f4f7f7c7"
+          },
+          "input": [
+            {
+              "redacted": true,
+              "sha256": "1e1d0f251d3a76fa2b1bfc81164078572623403887db02988b504b0492e9f076"
+            },
+            {
+              "redacted": true,
+              "sha256": "affa657b3c3e9337bdf3c879c0561b74d54a9197fdc6acd834dcdc02837454fc"
+            }
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsStrictMode": false,
+            "supportsReasoningEffort": true,
+            "supportsLongPromptCacheRetention": false,
+            "supportsPromptCacheBreakpoints": false,
+            "strictResponsesPairing": false,
+            "supportsImageDetailOriginal": false,
+            "supportsReasoningSummary": false,
+            "statefulResponses": true,
+            "supportsAllTurnsReasoningContext": false,
+            "supportsConfigurationUpdate": false,
+            "supportsSteering": false,
+            "requiresReasoningOffJuiceInstruction": false,
+            "stripImageInput": false,
+            "reasoningEffortMap": {},
+            "supportsReasoningParams": true,
+            "supportsSamplingParams": true,
+            "supportsPenaltyAndStopParams": true,
+            "thinkingFormat": {
+              "redacted": true,
+              "sha256": "396e987d95cb396ce2bdf21afd91f3b0aa16556afe48812e3822f3fd8e8aff21"
+            },
+            "reasoningDisableMode": {
+              "redacted": true,
+              "sha256": "a5416f1c9297ca09c6080591514dead14130295aa1d1d57e8f8080da264ea244"
+            },
+            "omitReasoningEffort": false,
+            "includeEncryptedReasoning": false,
+            "filterReasoningHistory": false,
+            "disableReasoningOnForcedToolChoice": false,
+            "disableReasoningOnToolChoice": false,
+            "disableReasoningWithTools": false,
+            "supportsToolChoice": true,
+            "supportsForcedToolChoice": true,
+            "supportsNamedToolChoice": true,
+            "reasoningContentField": {
+              "redacted": true,
+              "sha256": "bfdefcf7ae302e99c4138e88a8345028b0e9243bc44cdd946456c6d0f0961757"
+            },
+            "requiresReasoningContentForToolCalls": false,
+            "requiresReasoningContentForAllAssistantTurns": false,
+            "allowsSyntheticReasoningContentForToolCalls": true,
+            "replayReasoningContent": false,
+            "qwenPreserveThinking": false,
+            "qwenTemplateReasoningEffort": false,
+            "requiresThinkingAsText": false,
+            "requiresMistralToolIds": false,
+            "requiresToolResultName": false,
+            "requiresAssistantAfterToolResult": false,
+            "requiresAssistantContentForToolCalls": false,
+            "isOpenRouterHost": false,
+            "isVercelGatewayHost": false,
+            "wireModelIdMode": {
+              "redacted": true,
+              "sha256": "9d8744a6865137f454681fe27ed03040b9c3abbeb7f11c0015414a8d5f137fde"
+            },
+            "alwaysSendMaxTokens": false,
+            "clampOutputToModelMax": true,
+            "supportsObfuscationOptOut": false,
+            "storeResponses": false,
+            "officialEndpoint": false,
+            "harmonyLeakMitigation": false,
+            "rejectRootObjectUnion": false,
+            "retryWithoutStrictOnGrammarError": false,
+            "stripDeepseekSpecialTokens": false,
+            "streamMarkupHealingPattern": {
+              "redacted": true,
+              "sha256": "da7ad5fba1ffe6c6bee8d82c4364ca2b99be697f36e30ff69e8af043d3373abd"
+            },
+            "reasoningDeltasMayBeCumulative": false,
+            "emptyLengthFinishIsContextError": false,
+            "usesOpenAIToolCallIdLimit": false,
+            "streamFirstEventTimeoutMs": 0,
+            "streamIdleTimeoutMs": 300000
+          }
+        },
+        "threshold_tokens": 111412,
+        "epochs": [
+          {
+            "epoch": 1,
+            "durable": {
+              "redacted": true,
+              "sha256": "1c897d635da3bf8d6d225870a43a13c764ff272ff25c2f6d098e4607fafda9fa"
+            },
+            "control": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_recalled": true
+          },
+          {
+            "epoch": 2,
+            "durable": {
+              "redacted": true,
+              "sha256": "cebb907f103377a6959ddbc62155a63a420d92f43f903d0a4debc56856c982b1"
+            },
+            "control": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            },
+            "control_answer": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            },
+            "control_recalled": true
+          }
+        ],
+        "turns": [
+          {
+            "index": 1,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 10.82,
+            "stop": "stop",
+            "input_tokens": 31080,
+            "cache_read_tokens": 0,
+            "output_tokens": 18
+          },
+          {
+            "index": 2,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-durable",
+            "prompt_bytes": 122,
+            "seconds": 0.45,
+            "stop": "stop",
+            "input_tokens": 68,
+            "cache_read_tokens": 31075,
+            "output_tokens": 39,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 3,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 9.94,
+            "stop": "stop",
+            "input_tokens": 23595,
+            "cache_read_tokens": 31138,
+            "output_tokens": 13
+          },
+          {
+            "index": 4,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.29,
+            "stop": "stop",
+            "input_tokens": 23531,
+            "cache_read_tokens": 54728,
+            "output_tokens": 26
+          },
+          {
+            "index": 5,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 16.07,
+            "stop": "stop",
+            "input_tokens": 23548,
+            "cache_read_tokens": 78254,
+            "output_tokens": 13
+          },
+          {
+            "index": 6,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-control",
+            "prompt_bytes": 120,
+            "seconds": 0.67,
+            "stop": "stop",
+            "input_tokens": 63,
+            "cache_read_tokens": 101797,
+            "output_tokens": 33,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 23.09,
+            "stop": "stop",
+            "input_tokens": 57187,
+            "cache_read_tokens": 0,
+            "output_tokens": 15
+          },
+          {
+            "index": 8,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "recall-control",
+            "prompt_bytes": 85,
+            "seconds": 0.56,
+            "stop": "stop",
+            "input_tokens": 48,
+            "cache_read_tokens": 57182,
+            "output_tokens": 43,
+            "answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            }
+          },
+          {
+            "index": 9,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.44,
+            "stop": "stop",
+            "input_tokens": 23558,
+            "cache_read_tokens": 57225,
+            "output_tokens": 13
+          },
+          {
+            "index": 10,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "plant-durable",
+            "prompt_bytes": 123,
+            "seconds": 0.52,
+            "stop": "stop",
+            "input_tokens": 63,
+            "cache_read_tokens": 80778,
+            "output_tokens": 27,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 11,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 12.82,
+            "stop": "stop",
+            "input_tokens": 23619,
+            "cache_read_tokens": 80836,
+            "output_tokens": 13
+          },
+          {
+            "index": 12,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "plant-control",
+            "prompt_bytes": 121,
+            "seconds": 0.62,
+            "stop": "stop",
+            "input_tokens": 63,
+            "cache_read_tokens": 104450,
+            "output_tokens": 28,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 13,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 23.56,
+            "stop": "stop",
+            "input_tokens": 58112,
+            "cache_read_tokens": 0,
+            "output_tokens": 13
+          },
+          {
+            "index": 14,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "recall-control",
+            "prompt_bytes": 85,
+            "seconds": 0.57,
+            "stop": "stop",
+            "input_tokens": 46,
+            "cache_read_tokens": 58107,
+            "output_tokens": 44,
+            "answer": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            }
+          },
+          {
+            "index": 15,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": null,
+            "kind": "recall-durable",
+            "prompt_bytes": 112,
+            "seconds": 1.32,
+            "stop": "stop",
+            "input_tokens": 86,
+            "cache_read_tokens": 58148,
+            "output_tokens": 192,
+            "answer": {
+              "redacted": true,
+              "sha256": "9573bcd7273b3f3132f111f73fcd66840c132eaa92331412dbb5fc5624314a2b"
+            }
+          }
+        ],
+        "compactions": [
+          {
+            "turn": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 101893,
+            "summary_bytes": 1126,
+            "seconds": 0.07
+          },
+          {
+            "turn": 13,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 104541,
+            "summary_bytes": 1127,
+            "seconds": 0.06
+          }
+        ],
+        "restart": null,
+        "after_restart": null,
+        "durable_recall": {
+          "answer": {
+            "redacted": true,
+            "sha256": "9573bcd7273b3f3132f111f73fcd66840c132eaa92331412dbb5fc5624314a2b"
+          },
+          "recalled": {
+            "1": true,
+            "2": true
+          }
+        },
+        "session_ids": [
+          {
+            "redacted": true,
+            "sha256": "1ea24983ed7473ef878e914445818b447de8468735b027e78235a49ebe0f76e4"
+          }
+        ],
+        "checks": {
+          "every_turn_completed": true,
+          "compactions_committed": true,
+          "no_failed_compaction": true,
+          "control_recalled_after_each_compaction": true,
+          "one_session": true,
+          "expected_method": true
+        },
+        "error": null,
+        "passed": true,
+        "finished_utc": "2026-10-10T08:22:55Z"
+      }
+    },
+    "2": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "bb8297b5300f6826f5aed08c7f13c49b3a7b1a6f66b7d5175ff9ab90af71b650",
+      "receipt": {
+        "artifact_type": "omp_ninfer_long_session_proof",
+        "schema_version": 1,
+        "started_utc": "2026-10-10T08:16:54Z",
+        "omp": {
+          "sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+          "version": "omp/18.8.7"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "environment": {
+          "per_model_compat_statefulResponses": true
+        },
+        "synthetic_prompts_only": true,
+        "parameters": {
+          "compactions": 2,
+          "expect_method": {
+            "redacted": true,
+            "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+          },
+          "seed": 20260928,
+          "filler_bytes": 40000,
+          "plant_after": 2,
+          "restart": false
+        },
+        "resolved_model": {
+          "provider": "ninfer-beta",
+          "id": {
+            "redacted": true,
+            "sha256": "e630e92734b4ea1fb2db9df131306d6e87bb3ed3e6fecdcb9e73acb6f4f7f7c7"
+          },
+          "input": [
+            {
+              "redacted": true,
+              "sha256": "1e1d0f251d3a76fa2b1bfc81164078572623403887db02988b504b0492e9f076"
+            },
+            {
+              "redacted": true,
+              "sha256": "affa657b3c3e9337bdf3c879c0561b74d54a9197fdc6acd834dcdc02837454fc"
+            }
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsStrictMode": false,
+            "supportsReasoningEffort": true,
+            "supportsLongPromptCacheRetention": false,
+            "supportsPromptCacheBreakpoints": false,
+            "strictResponsesPairing": false,
+            "supportsImageDetailOriginal": false,
+            "supportsReasoningSummary": false,
+            "statefulResponses": true,
+            "supportsAllTurnsReasoningContext": false,
+            "supportsConfigurationUpdate": false,
+            "supportsSteering": false,
+            "requiresReasoningOffJuiceInstruction": false,
+            "stripImageInput": false,
+            "reasoningEffortMap": {},
+            "supportsReasoningParams": true,
+            "supportsSamplingParams": true,
+            "supportsPenaltyAndStopParams": true,
+            "thinkingFormat": {
+              "redacted": true,
+              "sha256": "396e987d95cb396ce2bdf21afd91f3b0aa16556afe48812e3822f3fd8e8aff21"
+            },
+            "reasoningDisableMode": {
+              "redacted": true,
+              "sha256": "a5416f1c9297ca09c6080591514dead14130295aa1d1d57e8f8080da264ea244"
+            },
+            "omitReasoningEffort": false,
+            "includeEncryptedReasoning": false,
+            "filterReasoningHistory": false,
+            "disableReasoningOnForcedToolChoice": false,
+            "disableReasoningOnToolChoice": false,
+            "disableReasoningWithTools": false,
+            "supportsToolChoice": true,
+            "supportsForcedToolChoice": true,
+            "supportsNamedToolChoice": true,
+            "reasoningContentField": {
+              "redacted": true,
+              "sha256": "bfdefcf7ae302e99c4138e88a8345028b0e9243bc44cdd946456c6d0f0961757"
+            },
+            "requiresReasoningContentForToolCalls": false,
+            "requiresReasoningContentForAllAssistantTurns": false,
+            "allowsSyntheticReasoningContentForToolCalls": true,
+            "replayReasoningContent": false,
+            "qwenPreserveThinking": false,
+            "qwenTemplateReasoningEffort": false,
+            "requiresThinkingAsText": false,
+            "requiresMistralToolIds": false,
+            "requiresToolResultName": false,
+            "requiresAssistantAfterToolResult": false,
+            "requiresAssistantContentForToolCalls": false,
+            "isOpenRouterHost": false,
+            "isVercelGatewayHost": false,
+            "wireModelIdMode": {
+              "redacted": true,
+              "sha256": "9d8744a6865137f454681fe27ed03040b9c3abbeb7f11c0015414a8d5f137fde"
+            },
+            "alwaysSendMaxTokens": false,
+            "clampOutputToModelMax": true,
+            "supportsObfuscationOptOut": false,
+            "storeResponses": false,
+            "officialEndpoint": false,
+            "harmonyLeakMitigation": false,
+            "rejectRootObjectUnion": false,
+            "retryWithoutStrictOnGrammarError": false,
+            "stripDeepseekSpecialTokens": false,
+            "streamMarkupHealingPattern": {
+              "redacted": true,
+              "sha256": "da7ad5fba1ffe6c6bee8d82c4364ca2b99be697f36e30ff69e8af043d3373abd"
+            },
+            "reasoningDeltasMayBeCumulative": false,
+            "emptyLengthFinishIsContextError": false,
+            "usesOpenAIToolCallIdLimit": false,
+            "streamFirstEventTimeoutMs": 0,
+            "streamIdleTimeoutMs": 300000
+          }
+        },
+        "threshold_tokens": 111412,
+        "epochs": [
+          {
+            "epoch": 1,
+            "durable": {
+              "redacted": true,
+              "sha256": "1c897d635da3bf8d6d225870a43a13c764ff272ff25c2f6d098e4607fafda9fa"
+            },
+            "control": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_recalled": true
+          },
+          {
+            "epoch": 2,
+            "durable": {
+              "redacted": true,
+              "sha256": "cebb907f103377a6959ddbc62155a63a420d92f43f903d0a4debc56856c982b1"
+            },
+            "control": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            },
+            "control_answer": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            },
+            "control_recalled": true
+          }
+        ],
+        "turns": [
+          {
+            "index": 1,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 10.56,
+            "stop": "stop",
+            "input_tokens": 31080,
+            "cache_read_tokens": 0,
+            "output_tokens": 34
+          },
+          {
+            "index": 2,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 9.58,
+            "stop": "stop",
+            "input_tokens": 23590,
+            "cache_read_tokens": 31075,
+            "output_tokens": 22
+          },
+          {
+            "index": 3,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-durable",
+            "prompt_bytes": 122,
+            "seconds": 0.5,
+            "stop": "stop",
+            "input_tokens": 72,
+            "cache_read_tokens": 54660,
+            "output_tokens": 32,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 4,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.1,
+            "stop": "stop",
+            "input_tokens": 23550,
+            "cache_read_tokens": 54727,
+            "output_tokens": 22
+          },
+          {
+            "index": 5,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 12.42,
+            "stop": "stop",
+            "input_tokens": 23544,
+            "cache_read_tokens": 78272,
+            "output_tokens": 22
+          },
+          {
+            "index": 6,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-control",
+            "prompt_bytes": 120,
+            "seconds": 0.63,
+            "stop": "stop",
+            "input_tokens": 72,
+            "cache_read_tokens": 101811,
+            "output_tokens": 29,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 20.26,
+            "stop": "stop",
+            "input_tokens": 49712,
+            "cache_read_tokens": 7480,
+            "output_tokens": 22
+          },
+          {
+            "index": 8,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "recall-control",
+            "prompt_bytes": 85,
+            "seconds": 0.51,
+            "stop": "stop",
+            "input_tokens": 55,
+            "cache_read_tokens": 57187,
+            "output_tokens": 31,
+            "answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            }
+          },
+          {
+            "index": 9,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.48,
+            "stop": "stop",
+            "input_tokens": 23546,
+            "cache_read_tokens": 57237,
+            "output_tokens": 26
+          },
+          {
+            "index": 10,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 12.84,
+            "stop": "stop",
+            "input_tokens": 23618,
+            "cache_read_tokens": 80778,
+            "output_tokens": 26
+          },
+          {
+            "index": 11,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "plant-durable",
+            "prompt_bytes": 123,
+            "seconds": 0.75,
+            "stop": "stop",
+            "input_tokens": 76,
+            "cache_read_tokens": 104391,
+            "output_tokens": 29,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 12,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "plant-control",
+            "prompt_bytes": 121,
+            "seconds": 1.18,
+            "stop": "stop",
+            "input_tokens": 79,
+            "cache_read_tokens": 104462,
+            "output_tokens": 29,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 13,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 20.88,
+            "stop": "stop",
+            "input_tokens": 50671,
+            "cache_read_tokens": 7480,
+            "output_tokens": 21
+          },
+          {
+            "index": 14,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "recall-control",
+            "prompt_bytes": 85,
+            "seconds": 0.53,
+            "stop": "stop",
+            "input_tokens": 54,
+            "cache_read_tokens": 58146,
+            "output_tokens": 33,
+            "answer": {
+              "redacted": true,
+              "sha256": "b722214a800a2b26855017779ac1d5fb6bc3f33821927f042237d090c5c27e8a"
+            }
+          },
+          {
+            "index": 15,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": null,
+            "kind": "recall-durable",
+            "prompt_bytes": 112,
+            "seconds": 1.82,
+            "stop": "stop",
+            "input_tokens": 75,
+            "cache_read_tokens": 58195,
+            "output_tokens": 351,
+            "answer": {
+              "redacted": true,
+              "sha256": "1d5ecbcb2bc027d5e30027501adddb91f6521cc91a8f91a0631cd14a7f30be05"
+            }
+          }
+        ],
+        "compactions": [
+          {
+            "turn": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 101912,
+            "summary_bytes": 1126,
+            "seconds": 0.07
+          },
+          {
+            "turn": 13,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 104570,
+            "summary_bytes": 1127,
+            "seconds": 0.07
+          }
+        ],
+        "restart": null,
+        "after_restart": null,
+        "durable_recall": {
+          "answer": {
+            "redacted": true,
+            "sha256": "1d5ecbcb2bc027d5e30027501adddb91f6521cc91a8f91a0631cd14a7f30be05"
+          },
+          "recalled": {
+            "1": false,
+            "2": true
+          }
+        },
+        "session_ids": [
+          {
+            "redacted": true,
+            "sha256": "70210a5cb2f7bbe26a398a6cb79d75cd09a16e383fd885e00fc434f8122a6420"
+          }
+        ],
+        "checks": {
+          "every_turn_completed": true,
+          "compactions_committed": true,
+          "no_failed_compaction": true,
+          "control_recalled_after_each_compaction": true,
+          "one_session": true,
+          "expected_method": true
+        },
+        "error": null,
+        "passed": true,
+        "finished_utc": "2026-10-10T08:18:50Z"
+      }
+    },
+    "3": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "ce227437205e93b9ba6e2d8ac182e5231c248cd1a781b7db4139168f1321df31",
+      "receipt": {
+        "artifact_type": "omp_ninfer_long_session_proof",
+        "schema_version": 1,
+        "started_utc": "2026-10-10T08:18:50Z",
+        "omp": {
+          "sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+          "version": "omp/18.8.7"
+        },
+        "model": "ninfer-beta/q38-ninfer",
+        "thinking": "low",
+        "environment": {
+          "per_model_compat_statefulResponses": true
+        },
+        "synthetic_prompts_only": true,
+        "parameters": {
+          "compactions": 2,
+          "expect_method": {
+            "redacted": true,
+            "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+          },
+          "seed": 20260928,
+          "filler_bytes": 40000,
+          "plant_after": 3,
+          "restart": false
+        },
+        "resolved_model": {
+          "provider": "ninfer-beta",
+          "id": {
+            "redacted": true,
+            "sha256": "e630e92734b4ea1fb2db9df131306d6e87bb3ed3e6fecdcb9e73acb6f4f7f7c7"
+          },
+          "input": [
+            {
+              "redacted": true,
+              "sha256": "1e1d0f251d3a76fa2b1bfc81164078572623403887db02988b504b0492e9f076"
+            },
+            {
+              "redacted": true,
+              "sha256": "affa657b3c3e9337bdf3c879c0561b74d54a9197fdc6acd834dcdc02837454fc"
+            }
+          ],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "compat": {
+            "supportsDeveloperRole": false,
+            "supportsStrictMode": false,
+            "supportsReasoningEffort": true,
+            "supportsLongPromptCacheRetention": false,
+            "supportsPromptCacheBreakpoints": false,
+            "strictResponsesPairing": false,
+            "supportsImageDetailOriginal": false,
+            "supportsReasoningSummary": false,
+            "statefulResponses": true,
+            "supportsAllTurnsReasoningContext": false,
+            "supportsConfigurationUpdate": false,
+            "supportsSteering": false,
+            "requiresReasoningOffJuiceInstruction": false,
+            "stripImageInput": false,
+            "reasoningEffortMap": {},
+            "supportsReasoningParams": true,
+            "supportsSamplingParams": true,
+            "supportsPenaltyAndStopParams": true,
+            "thinkingFormat": {
+              "redacted": true,
+              "sha256": "396e987d95cb396ce2bdf21afd91f3b0aa16556afe48812e3822f3fd8e8aff21"
+            },
+            "reasoningDisableMode": {
+              "redacted": true,
+              "sha256": "a5416f1c9297ca09c6080591514dead14130295aa1d1d57e8f8080da264ea244"
+            },
+            "omitReasoningEffort": false,
+            "includeEncryptedReasoning": false,
+            "filterReasoningHistory": false,
+            "disableReasoningOnForcedToolChoice": false,
+            "disableReasoningOnToolChoice": false,
+            "disableReasoningWithTools": false,
+            "supportsToolChoice": true,
+            "supportsForcedToolChoice": true,
+            "supportsNamedToolChoice": true,
+            "reasoningContentField": {
+              "redacted": true,
+              "sha256": "bfdefcf7ae302e99c4138e88a8345028b0e9243bc44cdd946456c6d0f0961757"
+            },
+            "requiresReasoningContentForToolCalls": false,
+            "requiresReasoningContentForAllAssistantTurns": false,
+            "allowsSyntheticReasoningContentForToolCalls": true,
+            "replayReasoningContent": false,
+            "qwenPreserveThinking": false,
+            "qwenTemplateReasoningEffort": false,
+            "requiresThinkingAsText": false,
+            "requiresMistralToolIds": false,
+            "requiresToolResultName": false,
+            "requiresAssistantAfterToolResult": false,
+            "requiresAssistantContentForToolCalls": false,
+            "isOpenRouterHost": false,
+            "isVercelGatewayHost": false,
+            "wireModelIdMode": {
+              "redacted": true,
+              "sha256": "9d8744a6865137f454681fe27ed03040b9c3abbeb7f11c0015414a8d5f137fde"
+            },
+            "alwaysSendMaxTokens": false,
+            "clampOutputToModelMax": true,
+            "supportsObfuscationOptOut": false,
+            "storeResponses": false,
+            "officialEndpoint": false,
+            "harmonyLeakMitigation": false,
+            "rejectRootObjectUnion": false,
+            "retryWithoutStrictOnGrammarError": false,
+            "stripDeepseekSpecialTokens": false,
+            "streamMarkupHealingPattern": {
+              "redacted": true,
+              "sha256": "da7ad5fba1ffe6c6bee8d82c4364ca2b99be697f36e30ff69e8af043d3373abd"
+            },
+            "reasoningDeltasMayBeCumulative": false,
+            "emptyLengthFinishIsContextError": false,
+            "usesOpenAIToolCallIdLimit": false,
+            "streamFirstEventTimeoutMs": 0,
+            "streamIdleTimeoutMs": 300000
+          }
+        },
+        "threshold_tokens": 111412,
+        "epochs": [
+          {
+            "epoch": 1,
+            "durable": {
+              "redacted": true,
+              "sha256": "1c897d635da3bf8d6d225870a43a13c764ff272ff25c2f6d098e4607fafda9fa"
+            },
+            "control": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            },
+            "control_recalled": true
+          }
+        ],
+        "turns": [
+          {
+            "index": 1,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 8.67,
+            "stop": "stop",
+            "input_tokens": 23600,
+            "cache_read_tokens": 7480,
+            "output_tokens": 57
+          },
+          {
+            "index": 2,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 9.86,
+            "stop": "stop",
+            "input_tokens": 23613,
+            "cache_read_tokens": 31075,
+            "output_tokens": 36
+          },
+          {
+            "index": 3,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.27,
+            "stop": "stop",
+            "input_tokens": 23554,
+            "cache_read_tokens": 54683,
+            "output_tokens": 27
+          },
+          {
+            "index": 4,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-durable",
+            "prompt_bytes": 122,
+            "seconds": 0.61,
+            "stop": "stop",
+            "input_tokens": 77,
+            "cache_read_tokens": 78232,
+            "output_tokens": 46,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 5,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 16.04,
+            "stop": "stop",
+            "input_tokens": 23568,
+            "cache_read_tokens": 78304,
+            "output_tokens": 24
+          },
+          {
+            "index": 6,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "plant-control",
+            "prompt_bytes": 120,
+            "seconds": 0.65,
+            "stop": "stop",
+            "input_tokens": 74,
+            "cache_read_tokens": 101867,
+            "output_tokens": 34,
+            "answer": {
+              "redacted": true,
+              "sha256": "98c4922bb641c65c7a30b7bcafdf230b9b00b6693631c56146ab25b2786ee4a3"
+            }
+          },
+          {
+            "index": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 23.16,
+            "stop": "stop",
+            "input_tokens": 57248,
+            "cache_read_tokens": 0,
+            "output_tokens": 24
+          },
+          {
+            "index": 8,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 1,
+            "kind": "recall-control",
+            "prompt_bytes": 85,
+            "seconds": 0.58,
+            "stop": "stop",
+            "input_tokens": 57,
+            "cache_read_tokens": 57243,
+            "output_tokens": 53,
+            "answer": {
+              "redacted": true,
+              "sha256": "41bd74a9035eac301023d526210d2f52a18af70ce61c1323a9778d0a511f8918"
+            }
+          },
+          {
+            "index": 9,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 11.51,
+            "stop": "stop",
+            "input_tokens": 23568,
+            "cache_read_tokens": 57295,
+            "output_tokens": 27
+          },
+          {
+            "index": 10,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 12.87,
+            "stop": "stop",
+            "input_tokens": 23619,
+            "cache_read_tokens": 80858,
+            "output_tokens": 27
+          },
+          {
+            "index": 11,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "epoch": 2,
+            "kind": "filler",
+            "prompt_bytes": 40095,
+            "seconds": 23.01,
+            "stop": "stop",
+            "input_tokens": 58102,
+            "cache_read_tokens": 0,
+            "output_tokens": 27
+          }
+        ],
+        "compactions": [
+          {
+            "turn": 7,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 101975,
+            "summary_bytes": 1126,
+            "seconds": 0.07
+          },
+          {
+            "turn": 11,
+            "process": {
+              "redacted": true,
+              "sha256": "9e5264d410a977c82c64ce0b6e9b3acf66a30bda6c186494cc90a74583b57036"
+            },
+            "reason": "threshold",
+            "action": {
+              "redacted": true,
+              "sha256": "60e4b238251e6f383184e9c8089b85f1da69f7eaed55efc4939b4912d639b17a"
+            },
+            "committed": true,
+            "end_action": "snapcompact",
+            "aborted": false,
+            "will_retry": false,
+            "skipped": false,
+            "error": null,
+            "tokens_before": 104504,
+            "summary_bytes": 1127,
+            "seconds": 0.07
+          }
+        ],
+        "restart": null,
+        "after_restart": null,
+        "durable_recall": null,
+        "session_ids": [
+          {
+            "redacted": true,
+            "sha256": "742b0d4830e18b595ebe519bf69b5c307879e5109cb389dda639c77cdcee3c4a"
+          }
+        ],
+        "checks": {},
+        "error": {
+          "redacted": true,
+          "sha256": "ac8ceed691c7a82369b6478a885509d517c28e42de6ea75dafb9458f5ed60a20",
+          "exception_class": "RuntimeError"
+        },
+        "passed": false,
+        "finished_utc": "2026-10-10T08:20:50Z"
+      }
+    }
+  },
+  "plant_3_disposition": {
+    "exit": 1,
+    "passed": false,
+    "precondition": "epoch 2: OMP compacted before both identifiers were planted",
+    "compactions_committed_before_failure": 2,
+    "same_predecessor_harness_precondition": true,
+    "rerun": false
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "server_log_gate": {
+    "root_computed_prefill_tokens_max": 58112,
+    "computed_prefill_tokens_max": 58112,
+    "root_prefills_over_60000": 0,
+    "server_request_errors": 0,
+    "source_receipt": "lane-logs-initial.json"
+  },
+  "usage_by_run": [
+    {
+      "plant": 2,
+      "turns": 15,
+      "maxInputTokens": 50671,
+      "maxCachedTokens": 104462,
+      "over60kUncached": []
+    },
+    {
+      "plant": 3,
+      "turns": 11,
+      "maxInputTokens": 58102,
+      "maxCachedTokens": 101867,
+      "over60kUncached": []
+    },
+    {
+      "plant": 1,
+      "turns": 15,
+      "maxInputTokens": 58112,
+      "maxCachedTokens": 104450,
+      "over60kUncached": []
+    }
+  ]
+}

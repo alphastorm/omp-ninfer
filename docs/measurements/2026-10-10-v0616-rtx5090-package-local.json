@@ -1,0 +1,73 @@
+{
+  "experiment": "EXP-096",
+  "artifact_type": "omp_ninfer_v0616_package_local_rehearsal",
+  "schema_version": 1,
+  "verdict": "open: runtime admission withheld",
+  "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+  "source_dirty": false,
+  "server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+  "package_local_image": "ninfer-overnight:S1-a59c13d0-package-local",
+  "package_local_image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "serving_shape": {
+    "speculative_backend": "dflash2",
+    "draft_window": 7,
+    "kv_cache": "bf16",
+    "max_in_flight": 2,
+    "device_state_slots": 2,
+    "kv_pool_tokens": 131520,
+    "context_tokens": 131072,
+    "pending_timeout_ms": 180000
+  },
+  "performance": {
+    "retrieval": {
+      "baseline_wall_s": 58.738,
+      "candidate_wall_s": 58.917,
+      "delta_percent": 0.3047430964622677
+    },
+    "decode": {
+      "baseline_tok_s": 161.39,
+      "candidate_tok_s": 179.79,
+      "delta_percent": 11.400954210298032
+    },
+    "exp094_traffic_prediction_percent": 9.6,
+    "comparison_limit": "The new profile gate is one measured workload, not the EXP-094 traffic-weighted round benchmark or a new production result."
+  },
+  "serial_output_binding": {
+    "reference_experiment": "EXP-094",
+    "candidate_and_reference_cases": 89,
+    "identical_signatures": 89,
+    "counted_errors_each_arm": 0,
+    "counted_cases": 84,
+    "excluded_errors_each_arm": 5
+  },
+  "full_ctest": {
+    "exit": 8,
+    "passed": 110,
+    "skipped": 7,
+    "failed": 1,
+    "failure": "NVFP4 graph batch row differs from its serial NVFP4 oracle",
+    "attribution_lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+    "attribution": "Fresh eaf NVFP4 test0;3a test1 with the exact same assertion. Founder all-green-policy disposition for an unshipped KV mode is required.",
+    "attribution_receipt": "nvfp4-source-attribution.json"
+  },
+  "bf16_solo_pair": {
+    "same_request_bodies": 5,
+    "identical_signatures": 1,
+    "different_signatures": 4,
+    "content_and_reasoning_differences": 4,
+    "errors_each_arm": 0,
+    "old_source_control_lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+    "shipped_eaf_control": {
+      "identical_signatures": 1,
+      "different_signatures": 4,
+      "two_row_decode_observed": true,
+      "binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68"
+    },
+    "disposition": "Supported-profile scheduling dependence also exists at shipped eaf; not a newly attributed a59 BF16 failure."
+  },
+  "lane_matrix": "../../releases/v0.11.0/qualification/lane.json",
+  "release_notes": "../../releases/v0.11.0/NINFER_RELEASE_NOTES.md",
+  "scope": "Local package/quality/lane rehearsal only; no route acceptance or publication. Attribution is complete; corrected criteria10–14 job has not yet delivered a final receipt.",
+  "raw_prompts_outputs_or_secrets_included": false
+}

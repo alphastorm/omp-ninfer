@@ -1,0 +1,175 @@
+{
+  "artifact_type": "omp_ninfer_stock_session_proof",
+  "schema_version": 1,
+  "started_utc": "2026-10-10T08:14:40Z",
+  "omp": {
+    "sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+    "version": "omp/18.8.7"
+  },
+  "model": "ninfer-beta/q38-ninfer",
+  "thinking": "low",
+  "environment": {
+    "per_model_compat_statefulResponses": true
+  },
+  "synthetic_prompts_only": true,
+  "scenarios": [
+    {
+      "id": {
+        "redacted": true,
+        "sha256": "d681fe4ff769f1f834727c9b4e474d2e3b759e910b846fc9b8a90c0e69e320e1"
+      },
+      "continue": false,
+      "steps": [
+        {
+          "turn": {
+            "prompt": {
+              "redacted": true,
+              "sha256": "680806c3624acf91fbdc546e87255735e9b8c389a8d3a25660f0081a1c5af3c5"
+            },
+            "answer": {
+              "redacted": true,
+              "sha256": "d07367dea71fac8a818e50fdad58d00312d7b5d721228a8fcc4134a52961aba4"
+            },
+            "stop": "stop",
+            "seconds": 2.7,
+            "events": 24
+          }
+        },
+        {
+          "turn": {
+            "prompt": {
+              "redacted": true,
+              "sha256": "d916d8ba1f5051b5cc910fe5e4aeca07e6d0644333e241d106a581a1c5f0314a"
+            },
+            "answer": {
+              "redacted": true,
+              "sha256": "07979dc527f3d9aab0440d80a23bc6f4d2afd710ece6b71ede812cd6b5f535d7"
+            },
+            "stop": "stop",
+            "seconds": 0.41,
+            "events": 21
+          }
+        },
+        {
+          "restart": {
+            "exit_code": 0,
+            "seconds": 37.3,
+            "output_tail": {
+              "redacted": true,
+              "sha256": "567a023b8917893f65c887cd122a24d861af69ebb4f3f9d8bff72b29ec751afb"
+            }
+          }
+        },
+        {
+          "turn": {
+            "prompt": {
+              "redacted": true,
+              "sha256": "cb45646a83d491c905bb0bdb74737e9cda9b1c1b52c9fb3e199e1143da95d8df"
+            },
+            "answer": {
+              "redacted": true,
+              "sha256": "4c7f014d7f929e99ffeaae304d96e1b68207d06182f5fdda0a86676c47a9deef"
+            },
+            "stop": "stop",
+            "seconds": 1.09,
+            "events": 19
+          }
+        }
+      ],
+      "state": {
+        "session_id": {
+          "redacted": true,
+          "sha256": "9bd244cf110705684e044f71e43c96f2ee67b4c8df635bf413c3a382fe9834c6"
+        },
+        "message_count": 6
+      }
+    },
+    {
+      "id": {
+        "redacted": true,
+        "sha256": "a4b7b17499a61a7f3188d83dc42dd7d448d4fb591f1dec0f838a82344dbb4e93"
+      },
+      "continue": true,
+      "steps": [
+        {
+          "turn": {
+            "prompt": {
+              "redacted": true,
+              "sha256": "cb45646a83d491c905bb0bdb74737e9cda9b1c1b52c9fb3e199e1143da95d8df"
+            },
+            "answer": {
+              "redacted": true,
+              "sha256": "4c7f014d7f929e99ffeaae304d96e1b68207d06182f5fdda0a86676c47a9deef"
+            },
+            "stop": "stop",
+            "seconds": 0.33,
+            "events": 19
+          }
+        }
+      ],
+      "state": {
+        "session_id": {
+          "redacted": true,
+          "sha256": "9bd244cf110705684e044f71e43c96f2ee67b4c8df635bf413c3a382fe9834c6"
+        },
+        "message_count": 8
+      }
+    },
+    {
+      "id": {
+        "redacted": true,
+        "sha256": "cc27ae65354b10c1426c69960a9e3d219b97707b7c50ff1785e5f9979655e8a3"
+      },
+      "continue": true,
+      "steps": [
+        {
+          "restart": {
+            "exit_code": 0,
+            "seconds": 42.4,
+            "output_tail": {
+              "redacted": true,
+              "sha256": "567a023b8917893f65c887cd122a24d861af69ebb4f3f9d8bff72b29ec751afb"
+            }
+          }
+        },
+        {
+          "turn": {
+            "prompt": {
+              "redacted": true,
+              "sha256": "cb45646a83d491c905bb0bdb74737e9cda9b1c1b52c9fb3e199e1143da95d8df"
+            },
+            "answer": {
+              "redacted": true,
+              "sha256": "4c7f014d7f929e99ffeaae304d96e1b68207d06182f5fdda0a86676c47a9deef"
+            },
+            "stop": "stop",
+            "seconds": 1.22,
+            "events": 27
+          }
+        }
+      ],
+      "state": {
+        "session_id": {
+          "redacted": true,
+          "sha256": "9bd244cf110705684e044f71e43c96f2ee67b4c8df635bf413c3a382fe9834c6"
+        },
+        "message_count": 10
+      }
+    }
+  ],
+  "checks": {
+    "s1_seed_completed": true,
+    "s1_recall_before_restart": true,
+    "s1_recall_after_restart": true,
+    "s2_recall_new_process": true,
+    "s3_recall_after_restart_new_process": true,
+    "one_session": true
+  },
+  "error": null,
+  "passed": true,
+  "finished_utc": "2026-10-10T08:16:08Z",
+  "evidence_kind": "Actual macOS arm64 upstream OMP 18.8.7 on the package-local runtime, not documented-route acceptance",
+  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
+  "frozen_tool_sha256": "0801b7de9b7eacfc26e50bec19ea7dd60f8527c036923330a4cd66e58fcfb372",
+  "raw_prompts_outputs_or_secrets_included": false
+}

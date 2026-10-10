@@ -1,0 +1,42 @@
+{
+  "artifact_type": "omp_ninfer_bf16_solo_pair_output_identity",
+  "schema_version": 1,
+  "scope": "first five sorted counted cases of the frozen EXP-085 role corpus; first cold request is serial",
+  "candidate_source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+  "candidate_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131520,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "dflash2",
+    "speculative_draft_window": 7
+  },
+  "cases_solo": 5,
+  "cases_paired": 5,
+  "identical_output_signatures": 1,
+  "different_output_signatures": 4,
+  "two_row_decode_observed": true,
+  "decode_rounds": 1238,
+  "decode_row_rounds": 1931,
+  "average_decode_batch": 1.559773828756058,
+  "solo_responses_sha256": "2581f06e5b5aa3cafb911c07506de61550e29e3d6984f543f2a869686825dad7",
+  "paired_responses_sha256": "f7ec865738f0ec6a12be65b03306c53918b7e73528fccf0559865cd4b251484b",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "verdict": "fail",
+  "limit": "A five-case state-faithful co-scheduling check, not a full paired powered screen or a claim about all inputs.",
+  "lease_job": "20261010T075735Z-S1-bf16-solo-pair-identity-1160955",
+  "lease_seconds": 169,
+  "lease_exit": 1,
+  "package_local_image": "ninfer-overnight:S1-a59c13d0-package-local",
+  "package_local_image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5090",
+    "vram_mib": 32607,
+    "compute_capability": "12.0",
+    "driver": "610.88"
+  }
+}

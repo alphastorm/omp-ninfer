@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare the v0.11.0 product draft and unchanged-source RTX 5090 v0.6.16 local package
+  (`a59c13d0`), with content-safe build, quality-binding, restart and concurrency receipts.
+  Failures remain explicit; no component publication, route acceptance, root runtime
+  promotion or production promotion is implied.
+- Enumerate exactly runtime v0.6.16 in the release verifier, without accepting arbitrary
+  future tags. Root promotion and verification bind upstream clients to their platform's
+  compatibility distribution, not the manifest's primary Windows asset; legacy fork
+  archive pins remain unchanged. Staging's draft-residue consumer uses the same
+  platform-specific diagnostics. Focused regressions cover the allowlist and cut-blocking
+  Mac/Windows archive bindings.
+
 - Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
   pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
   This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model

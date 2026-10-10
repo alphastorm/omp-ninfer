@@ -1,0 +1,25 @@
+{
+  "artifact_type": "omp_ninfer_qualification_external_interruption",
+  "schema_version": 1,
+  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
+  "interrupted_container": "ov-S1-runtime",
+  "created_utc": "2026-10-10T08:35:40Z",
+  "first_stop_signal_utc": "2026-10-10T08:35:46Z",
+  "forced_stop_signal_utc": "2026-10-10T08:36:16Z",
+  "exit_code": 137,
+  "observed_oom_event": false,
+  "attribution": "Lead confirmed an isolated-root gpu-lease test cleanup incorrectly stopped a container by creation time during another active lease.",
+  "affected_criteria": [
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "candidate_failure": false,
+  "verdict": "invalidated by external lead-caused stop",
+  "cascade": "Failed start retained own container until final cleanup, so later starts reported already exists and their workloads were not exercised.",
+  "correction": "Lead changed cleanup to only new ov-<holder>-* containers and ceased live-Docker tests. S1 launcher now saves failed-start state and removes only its own container/checkpoints without suppressing the failure.",
+  "replacement_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+  "raw_prompts_outputs_or_secrets_included": false
+}

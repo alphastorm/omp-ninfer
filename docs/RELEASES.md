@@ -29,6 +29,16 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.11.0 draft — unchanged-source RTX 5090 v0.6.16
+
+The [draft notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) retain the local receipts,
+including failures and the externally invalidated first attempt. Proposed runtime
+source is `a59c13d00492d47dc58bf822533688c90c5d1f6a`; proposed client is unmodified
+upstream OMP 18.8.7 from the verified component descriptor. The local image ID is not
+an OCI publication digest. No manifest is fabricated before the founder's component
+cut supplies that digest, and no root runtime pin or candidate guard is promoted here.
+The notes give the exact staging inputs and the subsequent acceptance prerequisites.
+
 ### v0.10.0 public release — DFlash2 on the RTX 5090
 
 The 2026-10-02 release changes the RTX 5090 runtime, model and profile and moves every client
