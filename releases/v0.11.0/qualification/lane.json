@@ -17,7 +17,7 @@
     "context_tokens": 131072,
     "pending_timeout_ms": 180000
   },
-  "overall_verdict": "not-qualified: initial criteria10–14 externally invalidated; replacement evidence not yet available",
+  "overall_verdict": "qualified except for the ctest disposition",
   "criteria": [
     {
       "criterion": 1,
@@ -234,69 +234,173 @@
     },
     {
       "criterion": 10,
-      "status": "invalid",
-      "requirement": "Held publication barrier resumes exactly; zero shutdown refusals",
-      "disposition": "The initial arm was stopped externally by the lead at 08:35:46Z, before its workload. No candidate failure is inferred.",
-      "corrected_lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+      "status": "pass",
+      "requirement": "Held publication barrier exact restore; shutdown refused0",
+      "metrics": {
+        "barrier_hit": true,
+        "hold_seconds": 6,
+        "resume_exact": true,
+        "shutdown_refused": 0
+      },
       "receipts": [
-        "external-interruption.json"
+        "publication-barrier.json"
       ]
     },
     {
       "criterion": 11,
-      "status": "invalid",
-      "requirement": "Fanout57k/fanout67k/warm-arrival/restore exit0; multisession loss at most2/8",
-      "disposition": "Initial arm could not start after the externally killed container; corrected lease result has not been received.",
-      "corrected_lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+      "status": "pass",
+      "requirement": "Fanout57k/67k,warm-arrival,restore pass; multisession reuse loss≤2/8",
+      "metrics": {
+        "fanout57k_exit": 0,
+        "fanout67k_exit": 0,
+        "warm_arrival_exit": 0,
+        "restore_exit": 0,
+        "multisession_exit": 0,
+        "multisession_reuse_lost": 2,
+        "multisession_continuations": 8,
+        "fanout57k_hot_median_s": 0.668,
+        "fanout67k_hot_median_s": 0.79,
+        "restore0_s": 2.877,
+        "restore1_s": 2.689
+      },
       "receipts": [
-        "external-interruption.json"
+        "fanout-restore.json"
       ]
     },
     {
       "criterion": 12,
-      "status": "invalid",
-      "requirement": "Agent mix fresh roots0/24",
-      "disposition": "Initial arm invalidated by external-stop cascade; corrected lease result has not been received.",
-      "corrected_lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+      "status": "pass",
+      "requirement": "Agent mix measured fresh roots0/24",
+      "metrics": {
+        "measured_fresh_requests": 24,
+        "measured_fresh_root_count": 0,
+        "measured_continuations": 24,
+        "measured_continuation_root_count": 0,
+        "errors": 0
+      },
       "receipts": [
-        "external-interruption.json"
+        "agent-mix.json"
       ]
     },
     {
       "criterion": 13,
-      "status": "invalid",
-      "requirement": "All7C2 scenarios repeat2 pass; all3 restart pairs retain at least62404 cached tokens per session",
-      "disposition": "Initial arm invalidated by external-stop cascade; corrected lease result has not been received.",
-      "corrected_lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+      "status": "pass",
+      "requirement": "Seven C2 scenarios twice all pass; three restart pairs retain≥62404cached each",
+      "metrics": {
+        "scenarios": 7,
+        "repeats": 2,
+        "scenario_runs": 14,
+        "scenario_passes": 14,
+        "restart_repeats": 3,
+        "restored_sessions": 6,
+        "min_resume_cached_tokens": 62404,
+        "failed_requests": 0
+      },
+      "restart_cache_floors": [
+        {
+          "repeat": 1,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 7.527187047991902
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 6.668489729985595
+            }
+          ]
+        },
+        {
+          "repeat": 2,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 10.712675589020364
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 9.852030201000161
+            }
+          ]
+        },
+        {
+          "repeat": 3,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 8.383857671986334
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 7.526108340942301
+            }
+          ]
+        }
+      ],
       "receipts": [
-        "external-interruption.json"
+        "concurrency.json"
       ]
     },
     {
       "criterion": 14,
-      "status": "invalid",
-      "requirement": "Actual OMP18.8.7 limits1 then2 on same instance, amended #74 criterion",
-      "disposition": "Initial arm never launched its parallel proof. The corrected job uses unmodified S2 239eec2 tooling and explicit1887 identity; its result has not been received.",
-      "corrected_lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+      "status": "pass",
+      "requirement": "Actual OMP18.8.7 limits1 then2, same server, amendedPR74",
+      "metrics": {
+        "limit1_passed": true,
+        "limit2_passed": true,
+        "limit1_dispatch": [
+          2
+        ],
+        "limit2_dispatch": [
+          2,
+          2
+        ],
+        "recovered_limit2": true,
+        "subagents_completed": true,
+        "codes_delivered": true,
+        "parent_codes_exact": true,
+        "same_server_instance": true,
+        "limit2_subagent_overlap_s": 13.146,
+        "limit2_sessions_overlap_s": 5.096
+      },
       "receipts": [
-        "external-interruption.json",
+        "omp-parallel.json",
         "omp-1887-parallel-provenance.json"
       ]
     },
     {
       "criterion": 15,
-      "status": "incomplete",
-      "requirement": "All request logs without server errors; C2 shutdown refusals at most7, every other step0",
+      "status": "pass",
+      "requirement": "Server request errors0; shutdown refused≤7 C2probe,0others",
       "metrics": {
-        "completed_stages": 6,
+        "stages": 12,
         "server_request_errors": 0,
-        "shutdown_refused": 0,
-        "max_long_root_computed_prefill_tokens": 58112
+        "c2probe_shutdown_refused": 7,
+        "all_other_shutdown_refused": 0
       },
-      "disposition": "Only the six completed initial arms can be judged; corrected later-arm logs have not been received.",
       "receipts": [
-        "lane-logs-initial.json",
-        "external-interruption.json"
+        "lane-logs.json"
       ]
     }
   ],
@@ -350,7 +454,21 @@
   },
   "optional_powered_screen": {
     "run": false,
-    "eligibility": "Qualification is not yet complete; the before15:00Z plus empty-queue condition cannot yet be asserted."
+    "eligibility_observed_utc": "2026-10-10T10:12:02Z",
+    "before1500": true,
+    "queue_empty": false,
+    "queued_jobs": 4,
+    "holder": "S5",
+    "reason": "The user requires this extra screen only when qualification finishes before15:00Z AND gpu-lease status has an empty queue. The actual queue was not empty."
   },
-  "raw_prompts_outputs_or_secrets_included": false
+  "raw_prompts_outputs_or_secrets_included": false,
+  "runtime_admission": "Founder policy exception for unshipped NVFP4 oracle failure remains required; no exception approved.",
+  "corrected_lease": {
+    "job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+    "started_utc": "2026-10-10T09:30:43Z",
+    "seconds": 2454,
+    "exit": 0,
+    "leftover_containers_stopped": 0,
+    "unowned_containers_left": 0
+  }
 }

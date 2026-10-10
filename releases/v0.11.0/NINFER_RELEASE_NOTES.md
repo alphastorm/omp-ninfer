@@ -91,7 +91,9 @@ The detailed [lane receipt](qualification/lane.json) distinguishes formal predec
 criteria from independently red diagnostics. Criteria 10–14 of the initial job were
 **invalidated by the lead's external Docker stop**, not by the candidate. The corrected
 lease is `20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878`;
-its result has not yet been incorporated. **The lane is not fully qualified.**
+it completed exit0 in2,454seconds with no leftovers. All15 unchanged criteria pass
+on the actual replacement receipts: **qualified except for the ctest disposition**.
+The invalid initial attempt remains invalid and preserved; it is not relabelled green.
 
 | Criterion | Verdict | Unchanged requirement | Exercised evidence |
 | --- | --- | --- | --- |
@@ -104,12 +106,12 @@ its result has not yet been incorporated. **The lane is not fully qualified.**
 | 7 | PASS | No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition | runs=3; successful_runs=2; predecessor_harness_precondition_runs=1; compactions_committed=6; max_root_computed_prefill_tokens=58112; root_prefills_over_60000=0 |
 | 8 | PASS | Quota reclamation and post-crash long continuation retains at least 60K cached tokens | short_records=35; quota_bytes=25769803776; reclaimed=true; crash_exit=0; continuation_input_tokens=60079; continuation_cached_tokens=60057; continuation_wall_s=2.31 |
 | 9 | PASS | No workload errors, all stored sessions restored from checkpoints, first shutdown refused 0 | workload_errors=0; stored_sessions=4; restored_from_checkpoint=4; multisession_reuse_losses=0; multisession_continuations=8; first_shutdown_refused=0 |
-| 10 | INVALID | Held publication barrier resumes exactly; zero shutdown refusals | The initial arm was stopped externally by the lead at 08:35:46Z, before its workload. No candidate failure is inferred. |
-| 11 | INVALID | Fanout57k/fanout67k/warm-arrival/restore exit0; multisession loss at most2/8 | Initial arm could not start after the externally killed container; corrected lease result has not been received. |
-| 12 | INVALID | Agent mix fresh roots0/24 | Initial arm invalidated by external-stop cascade; corrected lease result has not been received. |
-| 13 | INVALID | All7C2 scenarios repeat2 pass; all3 restart pairs retain at least62404 cached tokens per session | Initial arm invalidated by external-stop cascade; corrected lease result has not been received. |
-| 14 | INVALID | Actual OMP18.8.7 limits1 then2 on same instance, amended #74 criterion | Initial arm never launched its parallel proof. The corrected job uses unmodified S2 239eec2 tooling and explicit1887 identity; its result has not been received. |
-| 15 | INCOMPLETE | All request logs without server errors; C2 shutdown refusals at most7, every other step0 | completed_stages=6; server_request_errors=0; shutdown_refused=0; max_long_root_computed_prefill_tokens=58112 |
+| 10 | PASS | Held publication barrier resumes exactly; zero shutdown refusals | six-second held barrier hit; resume exact; shutdown refused0 |
+| 11 | PASS | Fanout57k/fanout67k/warm-arrival/restore exit0; multisession loss at most2/8 | all exits0; multisession reuse loss2/8; fanout hot medians0.668/0.790s; restore2.877/2.689s |
+| 12 | PASS | Agent mix fresh roots0/24 | measured fresh roots0/24; continuation roots0/24; errors0 |
+| 13 | PASS | All7C2 scenarios repeat2 pass; all3 restart pairs retain at least62404 cached tokens per session | all14scenario runs pass; six post-restart sessions each cached62404; request failures0 |
+| 14 | PASS | Actual OMP18.8.7 limits1 then2 on same instance, amended #74 criterion | both pass; task batches[2] then recovered[2,2]; subagents complete/codes delivered/parent exact; same instance; pair overlap13.146s |
+| 15 | PASS | All request logs without server errors; C2 shutdown refusals at most7, every other step0 | all12stages0server request errors; C2probe refused7; every other stage0 |
 
 The third long-session plant-after=3 run exited 1 at the unchanged, expressly admitted
 predecessor harness precondition. Two compactions had committed; its failure remains
@@ -122,6 +124,16 @@ after restore was **D1 true / D2 false**. That semantic failure is retained sepa
 from the mechanical command's exit 0. All six completed initial stages had zero
 server request errors and zero shutdown refusals.
 [Durability](qualification/durability.json) · [logs](qualification/lane-logs-initial.json).
+Replacement receipts: [held barrier](qualification/publication-barrier.json) ·
+[fanout/restore](qualification/fanout-restore.json) · [agent mix](qualification/agent-mix.json) ·
+[C2 and restart](qualification/concurrency.json) · [actual OMP parallel](qualification/omp-parallel.json) ·
+[all12stage logs](qualification/lane-logs.json). The recovered[2,2]limit2 task dispatch
+passed amendment#74 with all subagents completed/codes delivered and exact parent
+answer; it is explicitly not an unrecovered[1,1]dispatch.
+
+Qualification finished before15:00Z. The required gpu-lease status observation at
+10:12:02Z found S5 holding and four queued jobs, so the conjunctive empty-queue
+condition for an extra full powered screen was false. No extra screen is claimed.
 
 The stock macOS arm64 client is the real upstream 18.8.7 binary, SHA-256
 `cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14`. Its six stock proof
@@ -159,10 +171,16 @@ its separate short/long/pair round-duration claims. [Profile receipt](qualificat
 The initial draft commit a1379e45b66abb4016f4a63eb097bc34d3cefe94 passed the
 full workflow in [CI38042843797](https://github.com/alphastorm/omp-ninfer/actions/runs/38042843797).
 That result precedes the final S2 follow-on and is not a final-head substitution.
+The follow-on exposed the staging regression fixture's legacy OMP18.3 descriptor
+with a modern per-model provider contract; CI38043597806 retained that failure.
+The fixture now uses its real legacy environment and explicitly asserts both
+platform draft-pin diagnostics, without weakening the provider verifier. The
+corrected code/test head d7e32dd0908fb1b16ace1e0ac5dec1108740b936 passed all
+workflow steps in [CI38043955727](https://github.com/alphastorm/omp-ninfer/actions/runs/38043955727).
 
 ## Founder morning sequence — admission → cut → stage → acceptance
 
-First read the corrected lease receipts, disposition the independently red tests/quality
+First read the completed corrected lease receipts, disposition the independently red tests/quality
 observations, and decide whether this exact source is admissible. If a runtime source
 fix is required, this component is not a releasable substitute for EXP-092/094 evidence.
 
@@ -255,8 +273,9 @@ receipts for every retained route, then platform/acceptance/manifest pin stages 
 2. **Native RTX 3090:** fresh OMP 18.8.7 acceptance is outside tonight's scope.
 3. **All retained documented routes:** fresh acceptance must use the anonymously
    pullable published image after the cut, not this package-local image.
-4. The corrected lane/disposition results and a legitimate candidate-posture transition
-   remain prerequisites; cutter preflight success does not prove them.
+4. The unshipped NVFP4 ctest failure requires the founder's explicit policy disposition;
+   a legitimate candidate-posture transition remains a prerequisite. Cutter preflight
+   success does not clear either gate.
 
 All public receipts omit raw prompts, generated content, secrets, private hostnames
 and absolute private paths. Lease jobs and exact identity hashes are preserved.

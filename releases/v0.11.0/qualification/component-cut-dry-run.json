@@ -25,6 +25,8 @@
   "publication_created": false,
   "result": "preflight ok; dry run: no tag, release, or workflow run was created",
   "command": "NINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" bash scripts/hosts/cut-ninfer-5090-component.sh --version v0.6.16 --commit a59c13d00492d47dc58bf822533688c90c5d1f6a --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 --beta 1 --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\" --dry-run",
-  "notes_sha256": "9acf04face55d3eaa252cd933447cb8bb825d1d7b2cfeb9e1a1e624c82c18cab",
-  "latest_preflight_status": "source-attribution note updated; required final dry-run will use unchanged assets and final notes"
+  "notes_sha256": "e84ee2e7190c820f438e4568d5e1fe0b0734704dd6ad39287859aa56ffc32106",
+  "latest_preflight_status": "passed with final source attribution and completed lane notes",
+  "latest_preflight_exit": 0,
+  "latest_preflight_created_publication": false
 }

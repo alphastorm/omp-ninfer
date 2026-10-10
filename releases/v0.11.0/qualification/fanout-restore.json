@@ -2,7 +2,7 @@
   "artifact_type": "omp_ninfer_v0616_fanout_restore_rehearsals",
   "schema_version": 1,
   "lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
-  "scope": "The four completed probes whose exit0 was delivered by the first50-minute wait; multisession is not inferred.",
+  "scope": "Complete fanout57k/fanout67k/warm-arrival/restore/multisession rehearsal; all exits0.",
   "receipts": {
     "fanout-57k": {
       "present": true,
@@ -1544,13 +1544,228 @@
         ],
         "transient_retries": 0
       }
+    },
+    "multisession": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "e14a65884e49488e6e679c29835de4fbe03f607b5b4436fec8f7f6ee54a124f3",
+      "receipt": {
+        "artifact_type": "omp_ninfer_multisession_pressure_probe",
+        "schema_version": 1,
+        "lane": {
+          "redacted": true,
+          "sha256": "5ee23a15af139e1cd8d1636e23de2cc6d84395f4442653b6f37669aca903eecc"
+        },
+        "identity": {
+          "deployment_profile": "qwen38-5090-v0.11.0",
+          "model_id": "qwen3.8-27b",
+          "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+          "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+          "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+          "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+          "source_dirty": false,
+          "build_profile": "appliance-local",
+          "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11"
+        },
+        "generated_utc": "2026-10-10T09:49:00Z",
+        "question": {
+          "redacted": true,
+          "sha256": "07fa078c561d348ceb87af091f1a3151454b57e190a328bd142d2d0ee4267520"
+        },
+        "parameters": {
+          "sessions": 2,
+          "base_tokens_requested": 100000,
+          "rounds": 2,
+          "forks_per_session_per_round": 1
+        },
+        "counters_before": {},
+        "counters_after": {},
+        "summary": {
+          "continuations_and_forks": 8,
+          "reuse_lost": 2,
+          "exposed": true,
+          "server_errors": [],
+          "server_reuse_paths": [
+            {
+              "redacted": true,
+              "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+            },
+            {
+              "redacted": true,
+              "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+            },
+            {
+              "redacted": true,
+              "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+            }
+          ],
+          "server_root_requests_after_bases": 2
+        },
+        "steps": [
+          {
+            "step": "base_D1",
+            "wall_s": 55.907,
+            "input_tokens": 125891,
+            "id": {
+              "redacted": true,
+              "sha256": "7902caeb73ff0c05aba21dc99d9c5936eaea68a7929386e367a1c97fbbac9a86"
+            }
+          },
+          {
+            "step": "base_D2",
+            "wall_s": 56.886,
+            "input_tokens": 125892,
+            "id": {
+              "redacted": true,
+              "sha256": "b91e218d52a64faf1eca5689b2a5df032c83f9ff54a20969b0542b5bd4704951"
+            }
+          },
+          {
+            "step": "r1_continue_D1",
+            "wall_s": 17.98,
+            "prompt_tokens": 125937,
+            "cached_tokens": 125906,
+            "exact": false,
+            "reuse_lost": false,
+            "since_previous_turn_s": 17.98
+          },
+          {
+            "step": "r1_fork1_D1",
+            "wall_s": 0.472,
+            "prompt_tokens": 125992,
+            "cached_tokens": 125960,
+            "reuse_lost": false
+          },
+          {
+            "step": "r1_continue_D2",
+            "wall_s": 56.846,
+            "prompt_tokens": 125938,
+            "cached_tokens": 0,
+            "exact": false,
+            "reuse_lost": true,
+            "since_previous_turn_s": 56.846
+          },
+          {
+            "step": "r1_fork1_D2",
+            "wall_s": 0.404,
+            "prompt_tokens": 125993,
+            "cached_tokens": 125961,
+            "reuse_lost": false
+          },
+          {
+            "step": "r2_continue_D1",
+            "wall_s": 8.626,
+            "prompt_tokens": 125991,
+            "cached_tokens": 125886,
+            "exact": false,
+            "reuse_lost": false,
+            "since_previous_turn_s": 8.626
+          },
+          {
+            "step": "r2_fork1_D1",
+            "wall_s": 0.365,
+            "prompt_tokens": 126046,
+            "cached_tokens": 126014,
+            "reuse_lost": false
+          },
+          {
+            "step": "r2_continue_D2",
+            "wall_s": 57.523,
+            "prompt_tokens": 125992,
+            "cached_tokens": 0,
+            "exact": false,
+            "reuse_lost": true,
+            "since_previous_turn_s": 57.523
+          },
+          {
+            "step": "r2_fork1_D2",
+            "wall_s": 0.385,
+            "prompt_tokens": 126047,
+            "cached_tokens": 126015,
+            "reuse_lost": false
+          }
+        ],
+        "server_reuse_records": [
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 125891,
+            "completion_tokens": 16,
+            "ttft_s": 55.778048571999996
+          },
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 125892,
+            "completion_tokens": 16,
+            "ttft_s": 56.73736155
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 125906,
+            "prompt_tokens": 125937,
+            "completion_tokens": 24,
+            "ttft_s": 17.85432483
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 125960,
+            "prompt_tokens": 125992,
+            "completion_tokens": 24,
+            "ttft_s": 0.32942778599999994
+          },
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 125938,
+            "completion_tokens": 24,
+            "ttft_s": 56.703434634999994
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 125961,
+            "prompt_tokens": 125993,
+            "completion_tokens": 24,
+            "ttft_s": 0.301282768
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 125886,
+            "prompt_tokens": 125991,
+            "completion_tokens": 24,
+            "ttft_s": 8.502850551
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 126014,
+            "prompt_tokens": 126046,
+            "completion_tokens": 24,
+            "ttft_s": 0.262844083
+          },
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 125992,
+            "completion_tokens": 24,
+            "ttft_s": 57.399239408999996
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 126015,
+            "prompt_tokens": 126047,
+            "completion_tokens": 24,
+            "ttft_s": 0.281514794
+          }
+        ]
+      }
     }
   },
   "observed_exit_codes": {
     "fanout-57k": 0,
     "fanout-67k": 0,
     "warm-arrival": 0,
-    "restore": 0
+    "restore": 0,
+    "multisession": 0
   },
   "raw_prompts_outputs_or_secrets_included": false
 }

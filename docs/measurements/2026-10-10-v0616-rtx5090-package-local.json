@@ -2,7 +2,7 @@
   "experiment": "EXP-096",
   "artifact_type": "omp_ninfer_v0616_package_local_rehearsal",
   "schema_version": 1,
-  "verdict": "open: runtime admission withheld",
+  "verdict": "qualified except for the ctest disposition",
   "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
   "source_dirty": false,
   "server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
@@ -68,6 +68,24 @@
   },
   "lane_matrix": "../../releases/v0.11.0/qualification/lane.json",
   "release_notes": "../../releases/v0.11.0/NINFER_RELEASE_NOTES.md",
-  "scope": "Local package/quality/lane rehearsal only; no route acceptance or publication. Attribution is complete; corrected criteria10–14 job has not yet delivered a final receipt.",
-  "raw_prompts_outputs_or_secrets_included": false
+  "scope": "All15 unchanged criteria pass on the clean package-local image; founder ctest-policy disposition remains. No route acceptance, publication or production promotion.",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "criteria_passed": 15,
+  "corrected_lease": {
+    "job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+    "started_utc": "2026-10-10T09:30:43Z",
+    "seconds": 2454,
+    "exit": 0,
+    "leftover_containers_stopped": 0,
+    "unowned_containers_left": 0
+  },
+  "optional_powered_screen": {
+    "run": false,
+    "eligibility_observed_utc": "2026-10-10T10:12:02Z",
+    "before1500": true,
+    "queue_empty": false,
+    "queued_jobs": 4,
+    "holder": "S5",
+    "reason": "The user requires this extra screen only when qualification finishes before15:00Z AND gpu-lease status has an empty queue. The actual queue was not empty."
+  }
 }

@@ -65,7 +65,7 @@
     }
   ],
   "full_ci": {
-    "run": false,
+    "run": true,
     "workflow": ".github/workflows/ci.yml",
     "runner": "ubuntu-latest",
     "python": "3.11",
@@ -93,6 +93,13 @@
       "failures": 1,
       "assertion": "Stage public-root fixture used the legacy18.3 descriptor with a modern1887 per-model provider contract; real verifier rejected the missing legacy PI_OPENAI_STATEFUL=1.",
       "disposition": "Corrected only the fixture to its authoritative legacy descriptor contract, preserving the legitimate provider gate and explicitly asserting both stale platform archive diagnostics."
+    },
+    "corrected_functional_head": {
+      "status": "success",
+      "commit": "d7e32dd0908fb1b16ace1e0ac5dec1108740b936",
+      "run": 38043955727,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38043955727",
+      "scope": "All existing CI steps on the corrected final code/test head; later changes are receipts/docs only."
     }
   },
   "raw_prompts_outputs_or_secrets_included": false
