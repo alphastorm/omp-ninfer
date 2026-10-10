@@ -1,0 +1,51 @@
+{
+  "artifact_type": "omp_ninfer_5090_scope_fixture_disposition",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "as_of": "2026-10-10",
+  "failed_CI": {
+    "head": "eaa30702bce2e198dc611f15d61d5e233673578f",
+    "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38080864398",
+    "tests": 353,
+    "elapsed_s": 174.466,
+    "failures": 1,
+    "errors": 7,
+    "disposition": "Five controls assumed live root still declared native variants or pre-cut acceptance state; no candidate/runtime failure. All composer, declared/extra/refusal controls and ready/pin validation passed."
+  },
+  "fixture_changes": [
+    {
+      "file": "tests/test_compatibility.py",
+      "state": "Three native controls read checked-in publishedv0.10.0 compatibility, independent of current empty native set; malformed model/admission assertions unchanged."
+    },
+    {
+      "file": "tests/test_stage_release.py",
+      "state": "Native-preservation control explicitly stagesv0.10.0; setup binds its real18.4.10 platform clients and legacy provider epoch before taking immutable snapshots. Source/negative assertions unchanged."
+    },
+    {
+      "file": "tests/test_rebind_release.py",
+      "state": "Marker control starts with real pre-cut external-acceptance flags/blocker/summary hash even when live root is ready; before refusal/after consumption and negative expectations unchanged."
+    }
+  ],
+  "focused_green": {
+    "compatibility_controls": 3,
+    "marker_control": 1,
+    "native_preservation_control": 1,
+    "total": 5,
+    "initial_corrected_run": "Four passed; native-preservation client archive mismatch exposed incomplete legacy fixture setup, not a staging exception.",
+    "final_native_preservation": "One changed-input test passed,0.727s; no four already-green controls rerun."
+  },
+  "invariants": {
+    "production_code_changed": false,
+    "validator_exception_added": false,
+    "negative_assertions_removed": false,
+    "git_history_fixture_access": false,
+    "published_v010_records_changed": false,
+    "pinned_authority_qualification_manifest_bytes_changed": false,
+    "accepted_5090_blocks_changed": false,
+    "acceptance_subject": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+    "GPU_actions": 0,
+    "acceptance_reruns": 0
+  },
+  "authority": "Full exact-new-head Ubuntu/Python3.11 CI and publisher--dry-run must pass; observed result is delivered in PR78 metadata/terminal handoff, not substituted by local controls.",
+  "raw_outputs_private_paths_or_secrets_included": false
+}

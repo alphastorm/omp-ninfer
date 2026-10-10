@@ -148,6 +148,17 @@ class PromoteRootTests(unittest.TestCase):
         manifest_path = release / "manifest.json"
         manifest = self.load(manifest_path)
         manifest["status"] = "candidate"
+        # This control starts before acceptance, even after the live root becomes ready.
+        manifest["publication"]["blockers"] = ["external-installation acceptance has not been performed"]
+        manifest["publication"]["external_installation_qualified"] = False
+        manifest["qualification"]["external_installation_passed"] = False
+        qualification_path = release / "qualification.json"
+        qualification = self.load(qualification_path)
+        qualification["external_installation_qualified"] = False
+        qualification["composition"]["external_installation_acceptance"] = {"status": "pending"}
+        qualification["remaining_release_gates"] = ["Published-component external-installation acceptance"]
+        module.save(qualification_path, qualification)
+        manifest["qualification"]["summary_sha256"] = module.sha256(qualification_path)
         module.save(manifest_path, manifest)
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)

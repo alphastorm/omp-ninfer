@@ -33,12 +33,19 @@ class StageReleaseTests(unittest.TestCase):
         root = Path(temporary.name)
         for name in ("scripts", "profiles", "releases"):
             shutil.copytree(ROOT / name, root / name)
-        if source_release == SOURCE:
-            # Synthetic18.3/legacy-source fixtures keep their historical provider epoch.
+        if source_release in (SOURCE, "v0.10.0"):
+            # Historical-source fixtures keep their real legacy provider epoch.
+            if source_release == "v0.10.0":
+                authority = self.load(root / "releases" / source_release / "compatibility.json")
+                clients = {row["id"]: row["client_distribution"] for row in authority["profiles"]}
+                profile_ids = {"manual-ssh-tunnel": "darwin-remote-ssh",
+                               "native-windows-docker-local": "windows-docker-local"}
             for path in (root / "profiles").glob("*.json"):
                 profile = self.load(path)
                 profile["omp_provider"].pop("compat", None)
                 profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+                if source_release == "v0.10.0":
+                    profile["client"] = clients[profile_ids[profile["installation_mode"]]]
                 self.save(path, profile)
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
@@ -123,15 +130,16 @@ class StageReleaseTests(unittest.TestCase):
             artifact_bytes=model["artifact_bytes"] + 1)
 
     def test_primary_model_change_preserves_native_packages_and_predecessor_model(self) -> None:
-        root = self.staging_copy(source_release=CURRENT)
-        source = root / "releases" / CURRENT
+        source_release = "v0.10.0"  # Explicit native baseline, independent of root scope.
+        root = self.staging_copy(source_release=source_release)
+        source = root / "releases" / source_release
         previous = self.load(source / "manifest.json")
         immutable = [root / "compatibility.json", *(root / "profiles").glob("*.json"),
                      *source.rglob("*")]
         before = {path: path.read_bytes() for path in immutable if path.is_file()}
         model = self.distinct_model(previous["components"]["model"])
         native = previous["components"].get("native_model", previous["components"]["model"])
-        result = self.stage(root, None, source_release=CURRENT, model_args=self.model_arguments(model))
+        result = self.stage(root, None, source_release=source_release, model_args=self.model_arguments(model))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         staged = root / "releases" / TARGET
         manifest = self.load(staged / "manifest.json")

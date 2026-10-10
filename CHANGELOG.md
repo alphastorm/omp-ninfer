@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   regressions were red before/green after; unchangedv0.10.0 readiness passes in
   its bound-root fixture. Native parser controls use a checked-in minimal5861712f
   fixture, not Git history or live instructions.
+  Native/pre-cut control fixtures now bind checked-in v0.10.0 state or reset
+  candidate acceptance flags; an empty current native set does not drop negative coverage.
 - Harden active acceptance checks to nonce `493817-205361`; retain unchanged
   exact recall, OK-only planting and verbatim recall. The registered old/hardened
   cohorts each passed50/50 with no material A/B difference. Preserve the first

@@ -9,6 +9,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+# Native controls bind a checked-in published fixture, not the current lane set.
+NATIVE_AUTHORITY = ROOT / "releases" / "v0.10.0" / "compatibility.json"
 SPEC = importlib.util.spec_from_file_location(
     "render_compatibility", ROOT / "scripts" / "render_compatibility.py"
 )
@@ -24,7 +26,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                        {"model_url": "https://example.invalid/model", "model_sha256": "A" * 64, "model_bytes": 10},
                        {"model_url": "https://example.invalid/model", "model_sha256": "a" * 64, "model_bytes": True}):
             with self.subTest(fields=fields):
-                authority = MODULE.load_authority(ROOT / "compatibility.json")
+                authority = MODULE.load_authority(NATIVE_AUTHORITY)
                 for field in ("model_url", "model_sha256", "model_bytes"):
                     authority["runtime_variants"][0].pop(field, None)
                 authority["runtime_variants"][0].update(fields)
@@ -32,7 +34,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                     MODULE.load_authority(self._write(authority))
 
     def test_native_rows_render_their_own_model_binding(self) -> None:
-        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        authority = MODULE.load_authority(NATIVE_AUTHORITY)
         manifest = json.loads((ROOT / "releases" / authority["product_release"] / "manifest.json").read_text())
         model = manifest["components"]["model"]
         for variant in authority["runtime_variants"]:
@@ -45,7 +47,7 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_3090_native_v062_admission_remains_closed(self) -> None:
         # Built from the RTX 4090 row whether or not the root authority already admits the RTX 3090.
-        authority = MODULE.load_authority(ROOT / "compatibility.json")
+        authority = MODULE.load_authority(NATIVE_AUTHORITY)
         authority["runtime_variants"] = [item for item in authority["runtime_variants"]
                                          if item["id"] != "rtx3090-windows-native"]
         variant = deepcopy(next(item for item in authority["runtime_variants"]
