@@ -127,16 +127,27 @@ def main():
                           "effects": "none", "output": a.output, "checks": ["typed read/result", "exact marker", "exact continuation nonce", "provider/model isolation", "served runtime identity"]}))
         return
     out, clone = Path(a.output), Path(a.clone)
-    out.mkdir(parents=True, exist_ok=True)
     receipt_path = out / "receipt.json"
-    receipt = json.loads(receipt_path.read_text(encoding="utf-8")) if receipt_path.exists() else {
+    projected_environment = stateful_environment(environment)
+    if receipt_path.exists():
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        if (receipt.get("expected_client_version") != expected_version
+                or receipt.get("environment") != projected_environment):
+            parser.error("preflight client contract changed or is missing; use a fresh output directory")
+    else:
+        if a.phase != "preflight":
+            parser.error("live and outage phases require a passed preflight in this output directory")
+        out.mkdir(parents=True, exist_ok=True)
+        receipt = {
         "release": a.release, "candidate": a.candidate, "platform": a.platform, "started_utc": now(),
         "phases": {}, "live_acceptance": {}, "execution_context": {"kernel": platform.release(),
         "wsl_distro_name_present": bool(os.environ.get("WSL_DISTRO_NAME")),
         "wsl_interop_present": bool(os.environ.get("WSL_INTEROP")), "environment_erased": False,
-        "native_linux_os_qualification_claimed": False}}
-    receipt["stateful_source"] = "environment" if "PI_OPENAI_STATEFUL" in environment else "per-model compat"
-    receipt["environment"] = stateful_environment(environment)
+        "native_linux_os_qualification_claimed": False},
+        "expected_client_version": expected_version, "environment": projected_environment,
+        "stateful_source": "environment" if "PI_OPENAI_STATEFUL" in environment else "per-model compat"}
+    if a.phase != "preflight" and receipt.get("preflight", {}).get("status") != "passed":
+        parser.error("live and outage phases require a passed preflight in this output directory")
     if a.local_rehearsal:
         receipt.update(evidence_kind="local rehearsal", qualification_claimed=False)
     def save():

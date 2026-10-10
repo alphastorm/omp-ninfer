@@ -146,6 +146,41 @@
     "red": "four errors in 22 client-harness tests before derived identity arguments were supported",
     "green": "22 client-harness tests and 18 parallel contract tests passed; descriptor Darwin row differs from primary asset, modern environment is absent, mismatched version never reaches workload"
   },
+  "review_finding_closure": {
+    "scope": "ReviewPR77 findings, local unit regression only; no new live or acceptance claim",
+    "manifest_contract": "validate derives per-model stateful from components.omp.upstream_tag and supplies both profile-contract callers; candidate status always requires per-model compat",
+    "phase_contract": "Preflight persists expected_client_version and the projected launch environment; resumed live/outage/preflight reject missing or mismatched bindings before launch or receipt mutation",
+    "descriptor_contract": "Candidate profile fields bind the descriptor returned by stage_release.load_omp_component; no repeated tag, commit or status literals",
+    "red": {
+      "manifest": {
+        "tests": 75,
+        "failures": 2
+      },
+      "phase": {
+        "tests": 24,
+        "failures": 4,
+        "errors": 1
+      }
+    },
+    "green": {
+      "manifest": {
+        "tests": 75,
+        "failures": 0
+      },
+      "phase": {
+        "tests": 25,
+        "failures": 0
+      }
+    },
+    "checks": [
+      "Both manifest-driven profile callers reject a spoofed 18.8.x profile tag under the historical manifest",
+      "Modern manifest requires per-model compat even without profile upstream_tag; injected global environment is rejected",
+      "Candidate preflight cannot be resumed through the legacy manifest in live, outage or preflight",
+      "Changed recorded environment is refused without rewriting the receipt",
+      "Same-client outage resumes with historical =1 retained",
+      "Official descriptor is consumed by the staging parser before profile binding assertions"
+    ]
+  },
   "local_full_suite_observations": {
     "initial": "333 tests: eight failures, two skips; four concurrency timing assertions and four cutter fixtures using an interpreter without hashlib.file_digest",
     "explicit_python_3_13_fixture_path": "336 tests: four unchanged concurrency timing assertion failures, six skips; cutter failures resolved",
