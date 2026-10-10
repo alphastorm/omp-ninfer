@@ -1,10 +1,13 @@
 """Offline client preflight and raw-binary installation contracts."""
 from __future__ import annotations
 
+import argparse
+import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -15,12 +18,86 @@ ROOT = Path(__file__).resolve().parents[1]
 PROBE = ROOT / "scripts" / "hosts" / "omp-client-probe.py"
 
 
+class ProofEnvironmentTests(unittest.TestCase):
+    @staticmethod
+    def load(name):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        spec = importlib.util.spec_from_file_location("environment_" + name, ROOT / "scripts" / (name + ".py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_all_rpc_proof_drivers_use_the_client_environment_contract(self):
+        for name in ("stock_omp_session_proof", "omp_parallel_proof", "omp_long_session_proof"):
+            module = self.load(name)
+            for version, expected in (("omp/18.4.0", "1"), ("omp/18.4.10", "1"),
+                                      ("omp/18.8.0", None), ("omp/18.8.3", None), ("omp/18.8.7", None)):
+                with self.subTest(probe=name, version=version), tempfile.TemporaryDirectory() as temporary:
+                    args = argparse.Namespace(home=Path(temporary), omp=Path("fixture-omp"),
+                                              model="ninfer-beta/q38-ninfer", omp_version=version)
+                    with unittest.mock.patch.dict(os.environ, {"PI_OPENAI_STATEFUL": "0"}), \
+                         unittest.mock.patch.object(module.Omp, "_pump"), \
+                         unittest.mock.patch.object(module.Omp, "_wait"), \
+                         unittest.mock.patch.object(module.subprocess, "Popen") as spawn:
+                        omp = module.Omp(args, "environment-invariant", False)
+                        try:
+                            environment = spawn.call_args.kwargs["env"]
+                            if expected is None:
+                                self.assertFalse("PI_OPENAI_STATEFUL" in environment,
+                                                 "per-model client launch contains the global override")
+                            else:
+                                self.assertEqual(environment["PI_OPENAI_STATEFUL"], expected)
+                        finally:
+                            omp.close()
+
+    def test_rpc_proof_receipts_record_the_effective_stateful_environment(self):
+        for name in ("stock_omp_session_proof", "omp_parallel_proof", "omp_long_session_proof"):
+            module = self.load(name)
+            for version in ("omp/18.4.10", "omp/18.8.7"):
+                with self.subTest(probe=name, version=version), tempfile.TemporaryDirectory() as temporary:
+                    home = Path(temporary)
+                    (home / ".omp/agent").mkdir(parents=True)
+                    (home / ".omp/agent/models.yml").write_text("fixture\n")
+                    binary = home / "omp"
+                    binary.write_bytes(b"fixture binary")
+                    sha256 = hashlib.sha256(binary.read_bytes()).hexdigest()
+                    receipt = home / "receipt.json"
+                    argv = ["--omp", str(binary), "--home", str(home), "--model", "ninfer-beta/q38-ninfer",
+                            "--receipt", str(receipt)]
+                    with unittest.mock.patch.dict(os.environ, {"PI_OPENAI_STATEFUL": "0"}), \
+                         unittest.mock.patch.object(module.subprocess, "run", return_value=
+                             subprocess.CompletedProcess([], 0, stdout=version)), \
+                         unittest.mock.patch("builtins.print"):
+                        if name == "omp_parallel_proof":
+                            argv += ["--log-cmd", "true"]
+                            with unittest.mock.patch.object(module, "OMP_VERSION", version), \
+                                 unittest.mock.patch.object(module, "OMP_SHA256", sha256), \
+                                 unittest.mock.patch.object(module, "prepare_home", return_value=home), \
+                                 unittest.mock.patch.object(module, "run_scenario", side_effect=RuntimeError("fixture")):
+                                module.main(argv)
+                        elif name == "omp_long_session_proof":
+                            argv += ["--omp-sha256", sha256]
+                            with unittest.mock.patch.object(module.Session, "start", side_effect=RuntimeError("fixture")):
+                                module.main(argv)
+                        else:
+                            argv += ["--omp-sha256", sha256, "--restart-cmd", "true"]
+                            with unittest.mock.patch.object(module, "run_scenario", side_effect=RuntimeError("fixture")):
+                                module.main(argv)
+                    environment = json.loads(receipt.read_text())["environment"]
+                    if version == "omp/18.8.7":
+                        self.assertNotIn("PI_OPENAI_STATEFUL", environment)
+                    else:
+                        self.assertEqual(environment["PI_OPENAI_STATEFUL"], "1")
+
+
 @unittest.skipIf(os.name == "nt", "local executable fixtures use POSIX launchers")
 class ClientPreflightTests(unittest.TestCase):
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
+        (self.root / "scripts").mkdir()
+        shutil.copyfile(ROOT / "scripts/omp_client_environment.py", self.root / "scripts/omp_client_environment.py")
         self.manifest = self.root / "releases" / "v9.9.9" / "manifest.json"
         self.manifest.parent.mkdir(parents=True)
         self.manifest.write_text(json.dumps({"components": {"omp": {"distribution_version": "18.4.10"}}}))

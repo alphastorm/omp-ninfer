@@ -15,7 +15,8 @@ keeps only a bounded archive and drops the rest of the older middle by design. T
 recorded, not gated.
 
 --home is an isolated HOME whose .omp/agent holds the lane's models.yml and config.yml exactly as the
-documented route writes them. OMP runs in RPC mode with PI_OPENAI_STATEFUL=1, as the route requires.
+documented route writes them. OMP runs in RPC mode. The 18.8.x client epoch and later use
+per-model compat.statefulResponses without PI_OPENAI_STATEFUL; historical 18.4.x clients use =1.
 --restart-cmd must stop the server gracefully, start it again and block until the endpoint answers.
 
 The receipt records OMP's identity, the lane model OMP resolved, every turn's stop reason, usage and
@@ -42,6 +43,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stock_omp_session_proof import Omp, restart  # noqa: E402
+from omp_client_environment import client_environment, stateful_environment  # noqa: E402
 
 WORDS = ("JUNIPER", "LANTERN", "HARBOR", "QUARTZ", "MERIDIAN", "OSPREY", "CITADEL", "TUNDRA",
          "FALCON", "EMBER", "GLACIER", "SEQUOIA")
@@ -227,12 +229,13 @@ def main(argv=None):
         parser.error(f"{args.home}/.omp/agent/models.yml is missing")
     version = subprocess.run([str(args.omp), "--version"], capture_output=True, text=True,
                              env={"HOME": str(args.home), "PATH": "/usr/bin:/bin"}, timeout=60).stdout.strip()
+    args.omp_version = version
 
     facts = identifiers(args.seed, args.compactions)
     receipt = {"artifact_type": "omp_ninfer_long_session_proof", "schema_version": 1,
                "started_utc": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "omp": {"sha256": actual, "version": version}, "model": args.model,
-               "thinking": args.thinking, "environment": {"PI_OPENAI_STATEFUL": "1"},
+               "thinking": args.thinking, "environment": stateful_environment(client_environment(version)),
                "synthetic_prompts_only": True,
                "parameters": {"compactions": args.compactions, "expect_method": args.expect_method,
                               "seed": args.seed, "filler_bytes": args.filler_bytes,

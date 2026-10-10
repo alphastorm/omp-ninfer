@@ -535,6 +535,24 @@ class ReleaseContractTest(unittest.TestCase):
                     errors, upstream_client=True)
                 self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
 
+    def test_per_model_client_environment_contract_survives_qualification(self) -> None:
+        for status in ("candidate", "public"):
+            profile = self.load(ROOT / "profiles/qwen38-rtx5090-manual-tunnel.json")
+            profile["status"] = status
+            errors = []
+            VERIFY_RELEASE.validate_profile_contract(
+                profile, "per-model client", profile["release"], profile["model"],
+                profile["model"]["public_id"], profile["server"]["deployment_profile"],
+                errors, upstream_client=True)
+            self.assertEqual(errors, [])
+            profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+            errors = []
+            VERIFY_RELEASE.validate_profile_contract(
+                profile, "per-model client", profile["release"], profile["model"],
+                profile["model"]["public_id"], profile["server"]["deployment_profile"],
+                errors, upstream_client=True)
+            self.assertTrue(any("per-model compat.statefulResponses" in item for item in errors))
+
     def test_client_candidate_checks_exact_upstream_binary_identity(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)

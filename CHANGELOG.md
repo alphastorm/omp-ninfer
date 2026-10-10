@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
   pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
   Published release records and historical measurements are unchanged.
+- Retarget the previous unreleased 18.8.3 candidate from #76; 18.8.4–18.8.7 release/source
+  review keeps the request compat and async-compaction/provider-limit contract unchanged.
+  #14334 releases one-shot side-session state without clearing the main Responses chain;
+  #14952's optional per-model thresholds are not enabled without long-session evidence.
+- Client probes use the verified component descriptor for local rehearsals. Per-model clients
+  omit the global stateful override in both rehearsal and future acceptance paths; the
+  published v0.10.0 / 18.4.10 probe contract is retained. A shared version-aware helper also
+  governs stock restart, parallel and long-session proof launches and their environment
+  receipts; the per-model contract survives profile qualification instead of reverting to =1.
 - Set `compat.statefulResponses: true` on every NInfer model instead of requiring process-wide
   `PI_OPENAI_STATEFUL=1` ([upstream #13686](https://github.com/can1357/oh-my-pi/pull/13686)).
   Remove the RTX 5090 `compat.supportsImageDetailOriginal: false` override because unknown/custom

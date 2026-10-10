@@ -5,7 +5,7 @@ Run preflight before opening a runtime window, live while reachable, then outage
 with the same configured route unavailable. --dry-run has no filesystem effects.
 Windows uses PowerShell's native argument dispatch, not a cmd.exe command string.
 Preflight binds --version to the tested release manifest or --client-component.
-Clients with per-model stateful compat (18.8.3+) never receive PI_OPENAI_STATEFUL;
+Clients with per-model stateful compat (18.8.x and later) never receive PI_OPENAI_STATEFUL;
 the historical 18.4.10 baseline still receives its required environment override.
 --local-rehearsal labels candidate probes and never supplies qualification evidence.
 """
@@ -18,7 +18,6 @@ import json
 import os
 from pathlib import Path
 import platform
-import re
 import subprocess
 import sys
 import urllib.request
@@ -98,18 +97,6 @@ def expected_client_version(clone, release, client_component=None):
     return "omp/" + version
 
 
-def client_environment(version):
-    match = re.fullmatch(r"omp/([0-9]+)[.]([0-9]+)[.]([0-9]+)", version)
-    if match is None:
-        raise ValueError("client distribution_version must be a semantic version")
-    environment = dict(os.environ)
-    if tuple(map(int, match.groups())) >= (18, 8, 3):
-        environment.pop("PI_OPENAI_STATEFUL", None)
-    else:
-        environment["PI_OPENAI_STATEFUL"] = "1"
-    return environment
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("release", "candidate", "output", "binary", "clone", "platform", "profile"):
@@ -128,11 +115,14 @@ def main():
     if a.local_rehearsal and not a.client_component:
         parser.error("--local-rehearsal requires --client-component")
     expected_version = expected_client_version(a.clone, a.release, a.client_component)
+    # Host drivers may copy this probe out of scripts/hosts; --clone is its source tree.
+    sys.path.insert(0, str(Path(a.clone) / "scripts"))
+    from omp_client_environment import client_environment, stateful_environment
     environment = client_environment(expected_version)
     if a.dry_run:
         print(json.dumps({"status": "dry-run", "phase": a.phase, "platform": a.platform,
                           "expected_client_version": expected_version,
-                          "environment": {k: environment[k] for k in ("PI_OPENAI_STATEFUL",) if k in environment},
+                          "environment": stateful_environment(environment),
                           "evidence_kind": "local rehearsal" if a.local_rehearsal else "client acceptance",
                           "effects": "none", "output": a.output, "checks": ["typed read/result", "exact marker", "exact continuation nonce", "provider/model isolation", "served runtime identity"]}))
         return
@@ -146,6 +136,7 @@ def main():
         "wsl_interop_present": bool(os.environ.get("WSL_INTEROP")), "environment_erased": False,
         "native_linux_os_qualification_claimed": False}}
     receipt["stateful_source"] = "environment" if "PI_OPENAI_STATEFUL" in environment else "per-model compat"
+    receipt["environment"] = stateful_environment(environment)
     if a.local_rehearsal:
         receipt.update(evidence_kind="local rehearsal", qualification_claimed=False)
     def save():

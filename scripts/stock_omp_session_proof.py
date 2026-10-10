@@ -10,7 +10,8 @@ Three scenarios run against one lane, in order, on one OMP session:
 --restart-cmd must stop the server gracefully (so live sessions are saved), start it again and
 block until the endpoint answers; it runs through bash and must exit 0. --home is an isolated
 HOME whose .omp/agent holds the lane's models.yml and config.yml, exactly as the documented
-route writes them. OMP runs in RPC mode with PI_OPENAI_STATEFUL=1, as the route requires.
+route writes them. OMP runs in RPC mode. The 18.8.x client epoch and later use per-model
+compat.statefulResponses with no PI_OPENAI_STATEFUL override; historical 18.4.x clients use =1.
 
 Every recall must name both facts, and all three scenarios must report the same OMP session id.
 The receipt records OMP's identity, each turn's answer and stop reason, each restart's outcome
@@ -34,6 +35,8 @@ import threading
 import time
 from pathlib import Path
 
+from omp_client_environment import client_environment, stateful_environment
+
 NAME, BUILD = "Juniper", "5521"
 SEED = (f"For this session: the release we are preparing is called {NAME} and its build number is "
         f"{BUILD}. Acknowledge in one short sentence.")
@@ -46,7 +49,7 @@ class Omp:
 
     def __init__(self, args, label, cont, observe=None):
         self.observe = observe
-        env = dict(os.environ, HOME=str(args.home), PI_OPENAI_STATEFUL="1", NO_COLOR="1")
+        env = dict(client_environment(args.omp_version), HOME=str(args.home), NO_COLOR="1")
         command = [str(args.omp), "--mode", "rpc", "--model", args.model,
                    "--session-dir", str(args.home / "sessions")]
         if cont:
@@ -183,11 +186,12 @@ def main(argv=None):
         parser.error(f"{args.home}/.omp/agent/models.yml is missing")
     version = subprocess.run([str(args.omp), "--version"], capture_output=True, text=True,
                              env=dict(os.environ, HOME=str(args.home)), timeout=60).stdout.strip()
+    args.omp_version = version
 
     receipt = {"artifact_type": "omp_ninfer_stock_session_proof", "schema_version": 1,
                "started_utc": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "omp": {"sha256": actual, "version": version}, "model": args.model,
-               "thinking": args.thinking, "environment": {"PI_OPENAI_STATEFUL": "1"},
+               "thinking": args.thinking, "environment": stateful_environment(client_environment(version)),
                "synthetic_prompts_only": True, "scenarios": [], "checks": {}, "error": None}
     try:
         s1 = run_scenario(args, "s1-one-process-across-restart", False,

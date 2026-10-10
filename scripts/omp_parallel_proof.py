@@ -5,7 +5,8 @@
 are copied into a disposable HOME. Two session HOMEs share their entire .omp root
 via symlinks: OMP's provider leases live in .omp/run/provider-inflight, NOT in the
 agent directory. Their work and session directories remain separate. The imported
-stock_omp_session_proof.Omp driver enables RPC and PI_OPENAI_STATEFUL=1.
+stock_omp_session_proof.Omp driver enables RPC and chooses stateful chaining by client version:
+per-model compat for 18.8.x and later, PI_OPENAI_STATEFUL=1 for historical 18.4.x clients.
 
 subagents: one parent must call task once with two scout items, each reading its
 own ~20 KB file and returning a random code. The parent must return both codes.
@@ -73,6 +74,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stock_omp_session_proof import Omp  # noqa: E402
+from omp_client_environment import client_environment, stateful_environment  # noqa: E402
 
 OMP_SHA256 = "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709"
 OMP_VERSION = "omp/18.4.0"
@@ -530,7 +532,7 @@ def main(argv=None):
                "omp": {"path": str(args.omp), "sha256": actual, "version": None},
                "provider": args.provider, "model": args.model, "max_in_flight": args.max_in_flight,
                "thinking": args.thinking, "seed": args.seed, "synthetic_prompts_only": True,
-               "environment": {"PI_OPENAI_STATEFUL": "1", "shared_config_root": True},
+               "environment": {"shared_config_root": True},
                "scenarios": [], "errors": []}
     rng = random.Random(args.seed)
     numbers = rng.sample(range(100000, 1000000), 2)
@@ -543,6 +545,8 @@ def main(argv=None):
             if version != OMP_VERSION:
                 raise RuntimeError("pinned OMP version differs")
             receipt["omp"]["version"] = version
+            args.omp_version = version
+            receipt["environment"].update(stateful_environment(client_environment(version)))
             shared = prepare_home(args, root)
             for scenario in scenarios:
                 receipt["scenarios"].append(run_scenario(args, root, shared, scenario, codes))
