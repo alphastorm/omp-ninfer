@@ -182,7 +182,7 @@ class BaselineTests(unittest.TestCase):
     def setUp(self):
         self.baseline = {"max_in_flight": 1, "passed": True, "model": "ninfer-beta/q38-ninfer",
                          "provider": "ninfer-beta", "thinking": "low", "seed": 7,
-                         "omp": {"sha256": proof.OMP_SHA256},
+                         "omp": {"sha256": "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709"},
                          "scenarios": [{"scenario": "sessions", "passed": True,
                                         "server_instance_ids": ["same-lane"], "wall_seconds": 12}]}
         self.current = deepcopy(self.baseline)

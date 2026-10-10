@@ -69,10 +69,8 @@ class ProofEnvironmentTests(unittest.TestCase):
                              subprocess.CompletedProcess([], 0, stdout=version)), \
                          unittest.mock.patch("builtins.print"):
                         if name == "omp_parallel_proof":
-                            argv += ["--log-cmd", "true"]
-                            with unittest.mock.patch.object(module, "OMP_VERSION", version), \
-                                 unittest.mock.patch.object(module, "OMP_SHA256", sha256), \
-                                 unittest.mock.patch.object(module, "prepare_home", return_value=home), \
+                            argv += ["--log-cmd", "true", "--omp-sha256", sha256, "--omp-version", version]
+                            with unittest.mock.patch.object(module, "prepare_home", return_value=home), \
                                  unittest.mock.patch.object(module, "run_scenario", side_effect=RuntimeError("fixture")):
                                 module.main(argv)
                         elif name == "omp_long_session_proof":
@@ -88,6 +86,49 @@ class ProofEnvironmentTests(unittest.TestCase):
                         self.assertNotIn("PI_OPENAI_STATEFUL", environment)
                     else:
                         self.assertEqual(environment["PI_OPENAI_STATEFUL"], "1")
+
+
+class ParallelIdentityTests(unittest.TestCase):
+    def test_descriptor_selects_platform_binary_not_the_primary_asset(self):
+        module = ProofEnvironmentTests.load("omp_parallel_proof")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "omp"
+            binary.write_bytes(b"platform fixture binary")
+            sha256 = hashlib.sha256(binary.read_bytes()).hexdigest()
+            descriptor = root / "client.json"
+            descriptor.write_text(json.dumps({"omp": {"distribution_version": "18.8.7", "binary_sha256": "f" * 64},
+                                              "platforms": {"darwin-arm64": {"binary_sha256": sha256}}}))
+            receipt = root / "receipt.json"
+            argv = ["--omp", str(binary), "--home", str(root), "--log-cmd", "true", "--receipt", str(receipt),
+                    "--client-component", str(descriptor), "--client-platform", "darwin-arm64"]
+            with unittest.mock.patch.object(module.subprocess, "run", return_value=
+                     subprocess.CompletedProcess([], 0, stdout="omp/18.8.7")), \
+                 unittest.mock.patch.object(module, "prepare_home", return_value=root) as prepare, \
+                 unittest.mock.patch.object(module, "run_scenario", side_effect=RuntimeError("fixture")), \
+                 unittest.mock.patch("builtins.print"):
+                self.assertEqual(module.main(argv), 1)
+            prepare.assert_called_once()
+            observed = json.loads(receipt.read_text())
+            self.assertEqual(observed["omp"]["sha256"], sha256)
+            self.assertEqual(observed["omp"]["version"], "omp/18.8.7")
+            self.assertNotIn("PI_OPENAI_STATEFUL", observed["environment"])
+
+    def test_explicit_version_mismatch_stops_before_the_workload(self):
+        module = ProofEnvironmentTests.load("omp_parallel_proof")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "omp"
+            binary.write_bytes(b"identity fixture")
+            argv = ["--omp", str(binary), "--home", str(root), "--log-cmd", "true",
+                    "--receipt", str(root / "receipt.json"), "--omp-version", "omp/18.8.7",
+                    "--omp-sha256", hashlib.sha256(binary.read_bytes()).hexdigest()]
+            with unittest.mock.patch.object(module.subprocess, "run", return_value=
+                     subprocess.CompletedProcess([], 0, stdout="omp/18.4.0")), \
+                 unittest.mock.patch.object(module, "prepare_home") as prepare, \
+                 unittest.mock.patch("builtins.print"):
+                self.assertEqual(module.main(argv), 1)
+            prepare.assert_not_called()
 
 
 @unittest.skipIf(os.name == "nt", "local executable fixtures use POSIX launchers")

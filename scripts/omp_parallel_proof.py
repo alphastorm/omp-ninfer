@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure stock OMP 18.4.0 with one or two requests in flight on one NInfer lane.
+"""Measure an unmodified upstream OMP client with one or two requests in flight on one NInfer lane.
 
 --home is a seed, never modified. Only models.yml, config.yml and the named key file
 are copied into a disposable HOME. Two session HOMEs share their entire .omp root
@@ -46,6 +46,8 @@ Temporary native OMP transcripts and copied credentials are removed on exit.
 
 Operator example (only while the lead has opened the non-production lane):
   python3 scripts/omp_parallel_proof.py --omp /tmp/omp-darwin-arm64 \
+    --client-component docs/measurements/2026-10-10-omp-1887-client-components.json \
+    --client-platform darwin-arm64 \
     --home ~/.cache/omp-ninfer-v080-scratch/v087/proof-seed \
     --provider ninfer-beta --model ninfer-beta/q38-ninfer \
     --scenario subagents --scenario sessions --max-in-flight 1 --seed 50901840 \
@@ -76,8 +78,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stock_omp_session_proof import Omp  # noqa: E402
 from omp_client_environment import client_environment, stateful_environment  # noqa: E402
 
-OMP_SHA256 = "90111c710fb861b03e5ef6fd3257319001acdd77ff7d06d3a6207996f2777709"
-OMP_VERSION = "omp/18.4.0"
 CODE = re.compile(r"(?<![\w-])(?:ALPHA|BETA)-CODE=\d{6}(?![\w-])")
 STOPS = {"stop", "length", "toolUse", "aborted", "error"}
 
@@ -498,9 +498,44 @@ def positive_int(text):
     return value
 
 
+def expected_client_identity(args):
+    """Bind a platform row or explicit CLI identity; never assume a historical client."""
+    if args.client_component:
+        if args.omp_version or not args.client_platform:
+            raise ValueError("--client-component requires --client-platform, not --omp-version")
+        payload = args.client_component.read_bytes()
+        descriptor = json.loads(payload)
+        try:
+            distribution_version = descriptor["omp"]["distribution_version"]
+            sha256 = descriptor["platforms"][args.client_platform]["binary_sha256"]
+        except (KeyError, TypeError) as error:
+            raise ValueError("client descriptor lacks the requested platform binary/version") from error
+        if not isinstance(distribution_version, str):
+            raise ValueError("client descriptor distribution_version must be a string")
+        version = "omp/" + distribution_version
+        provenance = {"source": "client descriptor", "platform": args.client_platform,
+                      "descriptor_sha256": hashlib.sha256(payload).hexdigest()}
+    else:
+        if not args.omp_version or args.client_platform:
+            raise ValueError("--omp-sha256 requires --omp-version, not --client-platform")
+        version, sha256 = args.omp_version, args.omp_sha256
+        provenance = {"source": "explicit CLI identity"}
+    if not isinstance(version, str) or not re.fullmatch(r"omp/[0-9]+[.][0-9]+[.][0-9]+", version):
+        raise ValueError("expected client version must be omp/<major>.<minor>.<patch>")
+    if not isinstance(sha256, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", sha256):
+        raise ValueError("expected client binary SHA-256 must contain 64 hexadecimal digits")
+    return version, sha256.lower(), provenance
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--omp", type=Path, required=True, help="unmodified pinned omp-darwin-arm64 binary")
+    parser.add_argument("--omp", type=Path, required=True, help="unmodified upstream OMP binary")
+    identity = parser.add_mutually_exclusive_group(required=True)
+    identity.add_argument("--client-component", type=Path, help="verified stage_release client descriptor")
+    identity.add_argument("--omp-sha256", help="expected binary SHA-256; requires --omp-version")
+    parser.add_argument("--omp-version", help="expected --version output, e.g. omp/18.8.7")
+    parser.add_argument("--client-platform", choices=("darwin-arm64", "windows-x64", "linux-x64"),
+                        help="descriptor platform row; required with --client-component")
     parser.add_argument("--home", type=Path, required=True, help="read-only route seed HOME")
     parser.add_argument("--provider", default="ninfer-beta")
     parser.add_argument("--model", default="ninfer-beta/q38-ninfer")
@@ -515,6 +550,10 @@ def main(argv=None):
     parser.add_argument("--baseline", type=Path, help="passing --max-in-flight 1 receipt from this server instance")
     parser.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args(argv)
+    try:
+        expected_version, expected_sha256, identity_source = expected_client_identity(args)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
     args.omp, args.home = args.omp.expanduser().resolve(), args.home.expanduser().resolve()
     if not args.model.startswith(args.provider + "/") or not args.model.split("/", 1)[1]:
         parser.error("--model must be <provider>/<wire-model-id>")
@@ -525,11 +564,12 @@ def main(argv=None):
         parser.error("--baseline is for a run with more than one request in flight")
     with args.omp.open("rb") as binary:
         actual = hashlib.file_digest(binary, "sha256").hexdigest()
-    if actual != OMP_SHA256:
-        parser.error("--omp does not match the pinned upstream 18.4.0 darwin-arm64 SHA-256")
+    if actual != expected_sha256:
+        parser.error("--omp does not match the expected client binary SHA-256")
     baseline = json.loads(args.baseline.read_text()) if args.baseline else None
     receipt = {"artifact_type": "omp_ninfer_parallel_proof", "schema_version": 1,
-               "omp": {"path": str(args.omp), "sha256": actual, "version": None},
+               "omp": {"path": str(args.omp), "sha256": actual, "version": None,
+                       "expected_version": expected_version, "identity": identity_source},
                "provider": args.provider, "model": args.model, "max_in_flight": args.max_in_flight,
                "thinking": args.thinking, "seed": args.seed, "synthetic_prompts_only": True,
                "environment": {"shared_config_root": True},
@@ -542,9 +582,9 @@ def main(argv=None):
             root = Path(temporary)
             version = subprocess.run([str(args.omp), "--version"], env=dict(os.environ, HOME=str(root)),
                                      capture_output=True, text=True, check=True, timeout=60).stdout.strip()
-            if version != OMP_VERSION:
-                raise RuntimeError("pinned OMP version differs")
             receipt["omp"]["version"] = version
+            if version != expected_version:
+                raise RuntimeError("client version differs from the expected identity")
             args.omp_version = version
             receipt["environment"].update(stateful_environment(client_environment(version)))
             shared = prepare_home(args, root)

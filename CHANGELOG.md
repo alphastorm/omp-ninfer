@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   published v0.10.0 / 18.4.10 probe contract is retained. A shared version-aware helper also
   governs stock restart, parallel and long-session proof launches and their environment
   receipts; the per-model contract survives profile qualification instead of reverting to =1.
+  Parallel proof identity comes from a descriptor platform row or explicit version/SHA-256
+  arguments, not a hardcoded historical binary; mismatches stop before the workload.
 - Set `compat.statefulResponses: true` on every NInfer model instead of requiring process-wide
   `PI_OPENAI_STATEFUL=1` ([upstream #13686](https://github.com/can1357/oh-my-pi/pull/13686)).
   Remove the RTX 5090 `compat.supportsImageDetailOriginal: false` override because unknown/custom
