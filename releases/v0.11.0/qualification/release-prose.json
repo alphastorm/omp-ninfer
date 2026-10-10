@@ -110,6 +110,14 @@
       "failures": 1,
       "elapsed_s": 0.036,
       "disposition": "The composer updates authority JSON, not the matrix; the matrix still held the old glued label until the platform rebind renders it (rebind_release.py:294-296). Do not repeat unchanged; run the same guard after that document input changes."
+    },
+    "focused_after_platform": {
+      "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" PYTHONPATH=tests /opt/homebrew/bin/python3.13 -m unittest test_documented_route.ReleaseProseTests.test_release_facing_prose_has_no_glued_tokens -v",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_s": 0.032,
+      "disposition": "Passed after the platform rebind rendered the matrix from the corrected input authority label; existing guard unchanged."
     }
   }
 }
