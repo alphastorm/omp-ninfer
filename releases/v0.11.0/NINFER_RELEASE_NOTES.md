@@ -1,44 +1,178 @@
 # OMP NInfer v0.11.0 — draft, not a released product
 
-Proposed RTX 5090 component **v0.6.16**, source
-`a59c13d00492d47dc58bf822533688c90c5d1f6a`, combined with unmodified upstream OMP
-**18.8.7**. Root runtime/model pins and the published v0.10.0 release remain unchanged.
-No tag, GitHub release, registry push, route acceptance or production promotion was performed.
+Founder-selected RTX 5090 component **v0.6.16**, source
+`1302d63929e400a05e1c9cdb0fc8003a70269825` (option **c**), combined with unmodified
+upstream OMP **18.8.7**. Root runtime/model pins and the published v0.10.0 release
+remain unchanged. Component publication, documented-route acceptance and production
+promotion are not claimed.
 
-## Exact component and build
+## Founder decisions — 2026-10-10
 
-v0.6.15 source `eaf221ac` plus `3a2fadbd` (small-T pair Q5 mixer), `b72daad6`
-(EXP-092) and `a59c13d0` (EXP-094), with **no source edits**. The appliance-local
-clean Release build used `ninfer-dflash2-build-env:20261001`, CUDA **13.1.115**,
-GNU **13.3.0** and `sm_120a`. The packaged serve reports that commit and a clean tree.
+- **Select option(c).** The candidate is shipped v0.6.15 `eaf221ac` plus EXP-092
+  `b72daad6` and EXP-094 `a59c13d0`, **without** pair-Q5 change `3a2fadbd`.
+  The exact-a59 proposal is a **superseded alternative**, not the selected source.
+  Its independently red NVFP4 ctest and original assets remain preserved.
+- **Source publication and preflight completed, as reported by the lead.** Main
+  reports pushing `exp/v0616-without-3a2fadbd` to alphastorm/ninfer with origin
+  containing exact commit `1302d63929e400a05e1c9cdb0fc8003a70269825`, then a passing
+  cutter **--dry-run**, exit0: “preflight ok ... archive bed8c8d4”. No tag, release or
+  workflow was created. This worker did not repeat that preflight or push runtime
+  source. The earlier origin-branch refusal is retained as history, not a blocker.
+- **Retain native RTX 4090 in v0.11.0.** The founder will install the card today on
+  the replacement native host; its OMP18.8.7 qualification is pending on that host.
+  This supersedes the former retire-versus-hold decision, rather than dropping the
+  lane or holding the release for that decision. Planned installation is not proof
+  of hardware presence or qualification.
+- **Retain the RTX 3090 acceptance requirement.** Fresh native OMP18.8.7 acceptance
+  and confirmation that the 3090 remains physically present after the host change
+  are still required. Do not infer continued GPU presence from the 4090 plan.
 
-- Serve SHA-256: `675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8`.
-- Local image: `ninfer-overnight:S1-a59c13d0-package-local`; image ID
-  `sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7`.
+Current selection/status is in [founder sequence](qualification/founder-sequence.json)
+and the [selected C qualification summary](qualification/option-c-lane.json).
+Frozen source/build/benchmark receipts retain their contemporaneous experiment
+labels; those historical labels do not override this founder selection.
+
+## Exact selected component and build
+
+The conflict-free mechanical replay is `eaf221ac` → b72 replay
+`344850b3e9e3c8f5855f6a979a630d1c4eada4a8` → a59 replay `1302d639…`.
+No manual runtime fix was introduced. This differs from the original a59 target;
+its clean rebuild, serial-output binding and A/B/B/A cost measurement are real C
+receipts, not an assumption that changing source preserves EXP-092/094 behavior.
+The appliance-local Release build used `ninfer-dflash2-build-env:20261001`, CUDA
+**13.1.115**, GNU **13.3.0** and **sm_120a**. Its version reports the exact selected
+commit and **source_dirty=false**.
+
+- Serve SHA-256: `548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace`.
+- Local image: `ninfer-overnight:S1-1302d639-option-c-package-local`; local ID
+  `sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3`.
   This is **not an OCI publication digest**.
 - Model `0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3`,
   20,437,336,576 bytes.
-- Deployment profile `qwen38-5090-v0.11.0`; configuration identity
+- Profile `qwen38-5090-v0.11.0`; configuration identity
   `91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11`.
-- Shape unchanged from v0.10.0: DFlash2 K=7, BF16 KV, two in flight, two device slots,
-  131,520 KV tokens, 131,072-token context ceiling and 180-second pending timeout.
+- Unchanged v0.10.0 serving shape: DFlash2 K=7, BF16 KV, two in flight, two device
+  slots,131,520 KV tokens,131,072-token context ceiling,180-second pending timeout.
 
-### Assets and founder dry-run
+### Selected assets and founder preflight
 
-Verified on the Mac in `$HOME/Desktop/ninfer-v0.6.16-release/`:
+Mac handoff: `$HOME/Desktop/ninfer-v0.6.16-option-c-release/`. All runtime asset
+hashes were verified on the Mac; candidate selection changes only the notes, not
+those assets. The source archive equals the exact commit's Mac `git archive`.
 
 | Asset | SHA-256 |
 | --- | --- |
-| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz | 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 |
-| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json | fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc |
-| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS | 7fc5b4d0097043a5af6d0adfa74a3e20622106e392fb1cc2c0e935d30f17cace |
-| runtime-source-a59c13d0.tar.gz | 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 |
+| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz | bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd |
+| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json | e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 |
+| ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS | 080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146 |
+| runtime-source-1302d639.tar.gz | dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 |
 
-The source archive equals the Mac's `git archive --format=tar.gz` of the exact commit.
-The cutter's **--dry-run passed**; no tag, release or workflow run was created.
-[Build receipt](qualification/build.json) · [cutter preflight](qualification/component-cut-dry-run.json).
+`RTX5090_QUALIFICATION.json` in that directory is the actual content-safe profile
+receipt extracted from `option-c-lane-evidence.json.profile`, not an authored gate
+substitute. SHA-256: `53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe`.
+Selected component-notes SHA-256, recorded after the lead's dry-run:
+`a8ddab13e9434abc5e89073f0d1fb85d300dc8be2a8e381a623539c9c0b6dc45`. The notes-only update records the founder's decisions;
+the cutter checks notes-file existence, not its prose. Main's preflight pass is
+reported separately from this worker's measured Mac notes hash.
+[Source](qualification/option-c-source.json) · [Build](qualification/option-c-build.json) ·
+[Preflight history and exact commands](qualification/founder-sequence.json).
 
-## Qualification — retain red and invalid verdicts
+## Selected qualification — all15 local criteria pass
+
+Full sm_120a ctest: **111 passed, seven skipped, zero failed**,118 total,exit0,861s.
+The NVFP4 real batch/serial oracle passes28.7297s; BF16 head0b1/head1b1/head0b2 all
+exit0. No failing test was suppressed. The superseded a59 all-green-ctest exception
+is **not needed for the selected C source**. This is local lane qualification, not
+published-component or documented-route acceptance.
+
+### Exact-binary serial quality binding
+
+An uninterrupted lease compared the same frozen89-case role corpus on C and a59:
+**89/89 output signatures and request bodies match**,84 counted cases with0 errors
+per arm, five preregistered vacuous fixture errors excluded per the unchanged
+EXP-085 rule. This binds C serve `548fe239…` through a59 serve `675e72e6…` to the
+measured EXP-094 serve `884e5a43…` serial powered-screen pass. The compared signature
+contains content,reasoning,tool calls,finish reason,error and prompt/completion
+usage, excluding tool-call IDs only; it is not a whole-HTTP-response identity claim.
+No new full powered screen or solo/pair output-invariance claim is made.
+[Selected binding](qualification/option-c-output-identity.json) ·
+[Original a59→EXP094 binding](qualification/output-identity.json).
+
+### Criteria1–15
+
+| Criterion | Verdict | Unchanged requirement | Exercised C evidence |
+| --- | --- | --- | --- |
+| 1 | PASS | Clean exact source/build/model/image/config identity; unchanged supported serving shape | source_dirty=false; all13 stage identities match; BF16 K7,131520 KV tokens,2 in flight/2 device slots,180000ms pending |
+| 2 | PASS | Precedent-selected CPU/oracle/BF16 tests | 118 total:111 pass/7 skip/0 fail,exit0; NVFP4 oracle passes28.7297s; three direct BF16 checks exit0 |
+| 3 | PASS | Quality evidence bound to the exact packaged binary | 89/89 serial signatures and request bodies match a59;84 counted cases,0 errors each;5 preregistered vacuous errors excluded each; no new powered screen |
+| 4 | PASS | MTP3 control matches the frozen v0.9.0 production corpus | 89 signatures and request bodies match the frozen v0.9.0 MTP3 control;0 differences |
+| 5 | PASS | Exact 130,048-token retrieval, exact 2,048-token decode, agent protocol across restart | 130048-token exact retrieval58.890s;2048 output tokens,179.79server/177.96wall tok/s; deleted descendant404 after restart,no resurrection,survivor restored;VRAM29468/29470MiB |
+| 6 | PASS | Actual stock OMP macOS arm64 proof exits 0 | Actual OMP18.8.7, binary cf0227bd…; six checks pass,exit0 |
+| 7 | PASS | No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition | Three runs:two succeed,plant3 retains documented predecessor precondition; six committed compactions; max root prefill58190;0 roots above60000 |
+| 8 | PASS | Quota reclamation and post-crash long continuation retains at least 60K cached tokens | 35 short records;25769803776-byte quota reclaimed;crash exit0;continuation60079 input/60057 cached tokens,2.39s; separate corrected own-container monitor passes |
+| 9 | PASS | No workload errors, all stored sessions restored from checkpoints, first shutdown refused 0 | 0 workload errors;4/4 stored sessions restored;8 continuations,0 reuse losses;first shutdown0;ancillary D1=true/D2=false remains non-gate evidence |
+| 10 | PASS | Held publication barrier exact restore; shutdown refused0 | Six-second publication barrier hit;resume exact;shutdown refused0 |
+| 11 | PASS | Fanout57k/67k,warm-arrival,restore pass; multisession reuse loss≤2/8 | Fanout,restore,warm-arrival and multisession all exit0;reuse loss2/8 within unchanged limit;hot medians0.669/0.790s;restore2.880/2.937s |
+| 12 | PASS | Agent mix measured fresh roots0/24 | Fresh roots0/24;continuation roots0/24;errors0 |
+| 13 | PASS | Seven C2 scenarios twice all pass; three restart pairs retain≥62404cached each | Seven C2 scenarios × two repeats,14/14 pass;three restart pairs/six sessions each retain62404 cached tokens;0 failed requests |
+| 14 | PASS | Actual OMP18.8.7 limits1 then2, same server, amendedPR74 | Actual OMP18.8.7,amended PR74;limits1 and2 naturally dispatch[2],no recovered dispatch;one server;all children/codes/parent checks pass;limit2 overlaps13.614s subagents/4.976s sessions;0 errors |
+| 15 | PASS | Server request errors0; shutdown refused≤7 C2probe,0others | All13 stages:0 server request errors;C2probe shutdown refusals7,all others0 |
+
+The selected matrix uses completed C jobs
+`20261010T105001Z-S1-option-c-lane-criteria-1-15-1382427` (exit0,4150s) and the
+separately frozen criterion8 correction
+`20261010T114641Z-S1-option-c-criterion8-own-container-monitor-1418823`
+(exit0,325s). Both ended without leftover or unowned containers.
+[All15 matrix](qualification/option-c-lane.json) ·
+[Numeric evidence](qualification/option-c-lane-evidence.json) ·
+[Actual OMP client](qualification/option-c-omp-client.json) ·
+[Server logs](qualification/option-c-lane-logs.json).
+
+Retained non-green outcomes are not relabelled green:
+
+- Initial criterion8 exited1 because its frozen disk monitor named the original
+  container, not C's own container. A separate frozen own-container correction and
+  fresh isolated checkpoint replay passed; the first attempt remains invalid.
+  [Harness attribution](qualification/option-c-criterion8-harness.json).
+- The Mac bridge exited255 after stock/long completion. Only the unfinished
+  parallel phase was resumed and passed; its underlying bridge failure mechanism
+  is unmeasured. [Interruption](qualification/option-c-client-bridge-interruption.json).
+- Plant3 exited1 at the byte-identical documented predecessor harness precondition
+  admitted by the unchanged gate. Six compactions committed across the three runs;
+  max computed root prefill58,190,0 above60K.
+  [Precondition](qualification/option-c-long-session-precondition.json).
+- Ancillary restored desk-code recall is D1=true/D2=false, outside the formal
+  durability gate. Multisession reuse losses2/8 meet the unchanged≤2/8 limit;
+  seven permitted C2probe shutdown refusals meet the unchanged log gate.
+
+The real macOS arm64 upstream OMP18.8.7 binary is
+`cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14`.
+S2 final follow-on `b622cbda514ce381658f631cdf1ad61b4b89b7bd` is incorporated as
+`eaee6d0`, following the rebase onto S2 `38a81628e2fb9e35d5b831610489133a5f5c35e7`.
+Its descriptor/hash and candidate provider/client pins are unchanged by selection.
+
+### Measured performance and the cost of omitting3a
+
+C exact retrieval **58.890s** versus v0.10.0 **58.738s**: +0.152s/+0.259%.
+Exact2048-token decode **179.79server tok/s** versus **161.39**: +11.40%; wall
+**177.96tok/s**. Original a59 measured58.917s/179.79server tok/s. Idle/retrieval VRAM
+is29,468/29,470MiB.
+
+Frozen A/B/B/A against a59 measures pair round cost
+**19.40783737→21.2215144973ms (+9.3451%)** and aggregate paired wall throughput
+**505.40→462.33tok/s (−8.5220%)**. Single-request per-round changes across
+0/32K/64K/120K are −0.1409% to−0.0044%; nonce-dependent decode-rate swings are not
+attributed to the omission. This does not reproduce EXP-094's traffic-weighted
++9.6% prediction for the original source or promise its original pair speedup on C.
+[ABBA receipt](qualification/option-c-abba.json).
+
+## Superseded a59 alternative — red evidence preserved
+
+Exact `a59c13d00492d47dc58bf822533688c90c5d1f6a` is **not selected**. Its original
+`$HOME/Desktop/ninfer-v0.6.16-release/` assets and numerical receipts are untouched.
+Do not execute its historical cut/stage sequence: both alternatives share the
+v0.6.16 component tags. No a59 ctest-policy exception was approved or is required
+for C. The following attribution describes the original a59 qualification:
 
 The full sm_120a ctest run returned **8**: **110 passed, seven skipped, one failed**
 (118 tests; 865.41 seconds). The failed NVFP4 graph/serial test reports:
@@ -59,133 +193,19 @@ T8/T16 use the small-T MMA on sm120. The new T16 route matching T8 is not an exa
 T1-oracle guarantee. Different arithmetic paths changing greedy TokenIds is an
 inference, not a measured first-op mechanism or evidence of cross-row state corruption.
 
-Founder source choices (the release proposal remains exact `a59c13d0`):
+All15 original predecessor lane gates passed separately from that full-suite red;
+[original build](qualification/build.json) and [original lane](qualification/lane.json)
+retain their own source/binary, numbers and failure disposition. The initial original
+criteria10–14 were invalidated by the lead's external Docker stop, not a candidate
+fault; the corrected lease exit0 and invalid attempt remain preserved in
+[external-stop attribution](qualification/external-interruption.json).
 
-| Choice | Source | Observed evidence and cost | Founder gate |
-|---|---|---|---|
-| (a) Restrict the pair route | New source change to3a | Not attempted; clean rebuild, EXP092/094 remeasurement and rescreen required | Approve and qualify a real source fix; do not relax the oracle |
-| (b) Keep the exact target | `a59c13d0` | All15 original local lane criteria pass; full ctest110 pass/7 skip/1 fail in the unshipped NVFP4-KV configuration rejected by EXP085 | Explicit all-green-ctest policy exception, not a skip or suppression; none approved |
-| (c) Omit3a | Local, **unpublished** `1302d63929e400a05e1c9cdb0fc8003a70269825`: eaf+b72+a59 without3a | Clean full sm_120a ctest **111 pass/7 skip/0 fail**, including the NVFP4 oracle;89/89 serial output signatures and request bodies match unchanged a59 (84 counted cases,0 errors;5 vacuous fixture errors excluded). **All15 unchanged local lane criteria pass**: retrieval58.890s, decode179.79server tok/s. A/B/B/A pair round cost **+9.35%**,19.408→21.222ms; pair aggregate wall throughput505.40→462.33tok/s (**−8.52%**). Single-request round cost changes−0.14% to−0.004% across0/32K/64K/120K. | **Experiment, not candidate**. Source selection and any source publication/cut remain founder decisions; no replacement of the a59 assets or proposal |
-
-Option-C cherry-picks applied without conflicts: b72 replay
-`344850b3e9e3c8f5855f6a979a630d1c4eada4a8`, then a59 replay`1302d639…`.
-The runtime experiment branch was not pushed. The serve SHA is
-`548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace`;
-its clean version reports CUDA13.1.115/GNU13.3.0/sm_120a. The source archive
-SHA`dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2`
-equals a Mac `git archive` of that exact local commit. Assets are retained separately
-from the original component handoff. The serial quality transfer is transitive
-through the measured a59→EXP094 binding; it is not a newly run powered screen or
-a claim of pair output invariance. The nonce-dependent decode-token-rate swings
-are not attributed to source omission: per-round cost is the comparison metric.
-[Source](qualification/option-c-source.json) · [Build](qualification/option-c-build.json) ·
-[Serial binding](qualification/option-c-output-identity.json) · [ABBA](qualification/option-c-abba.json) ·
-[All15 lane criteria](qualification/option-c-lane.json) · [Numeric evidence](qualification/option-c-lane-evidence.json) ·
-[Actual OMP client](qualification/option-c-omp-client.json) · [Server logs](qualification/option-c-lane-logs.json).
-
-Option-C local qualification preserves the original gates and every non-green outcome.
-The initial quota probe was harness-invalid: its frozen disk monitor targeted the old
-container. A separately frozen own-container correction passed with35 short records,
-quota reclamation and60,057 cached tokens after crash/restart. The Mac control bridge
-also exited255 after stock/long completion; only the uncompleted parallel phase was
-resumed and passed. Plant3 retains the byte-identical documented predecessor
-precondition; six compactions committed across all three long runs. Ancillary D2 desk
-code recall remains false, outside the unchanged durability gate. Two multisession
-reuse losses meet the unchanged≤2/8 limit. Seven C2 scenarios pass twice; all six
-restart continuations retain62,404 cached tokens. Actual OMP18.8.7 dispatches2/2
-children at both limits on one server, with13.614s subagent and4.976s session overlap
-at limit2. Across13 stages:0 server request errors, seven permitted C2probe shutdown
-refusals and0 elsewhere. No route acceptance, option-C cutter, staging or promotion ran.
-
-
-The exact new binary differs from EXP-094's `884e5a43…` binary. One uninterrupted
-lease ran the same frozen 89-case role corpus on both images: **89/89 output signatures
-matched**, with 84 counted cases and zero counted errors in each arm. Five vacuous
-fixture errors are explicitly excluded in both arms. This transfers EXP-094's frozen
-EXP-085 powered-screen pass to this exact binary **for that serial method**, not to
-a fresh full screen or solo/pair equivalence.
-[Quality binding](qualification/output-identity.json).
-
-A separate unchanged-BF16-profile five-case control found **1/5** solo/paired signatures
-identical and **4/5** different, with actual content/reasoning changes, matching request
-hashes and zero errors in either arm. Real two-row execution was observed. The same
-five cases on the shipped eaf221ac image also yielded1/5identical and4/5different,
-with real pair execution (2329row-rounds/1592rounds). The supported-profile
-scheduling dependence is therefore pre-existing, not newly attributable to EXP094.
-This does not prove its numerical mechanism is identical to the NVFP4 oracle failure.
-[Shipped control](qualification/bf16-solo-pair-shipped.json).
-[Pair receipt](qualification/bf16-solo-pair-candidate.json) ·
-[field comparison](qualification/bf16-solo-pair-difference-fields.json).
-
-### Criteria 1–15
-
-The detailed [lane receipt](qualification/lane.json) distinguishes formal predecessor
-criteria from independently red diagnostics. Criteria 10–14 of the initial job were
-**invalidated by the lead's external Docker stop**, not by the candidate. The corrected
-lease is `20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878`;
-it completed exit0 in2,454seconds with no leftovers. All15 unchanged criteria pass
-on the actual replacement receipts: **qualified except for the ctest disposition**.
-The invalid initial attempt remains invalid and preserved; it is not relabelled green.
-
-| Criterion | Verdict | Unchanged requirement | Exercised evidence |
-| --- | --- | --- | --- |
-| 1 | PASS | Clean exact source/build/model/image/config identity; unchanged supported serving shape | source_dirty=false; kv_pool_tokens=131520; context_tokens=131072; max_in_flight=2; device_state_slots=2; pending_timeout_ms=180000 |
-| 2 | PASS | Precedent-selected CPU/oracle/BF16 tests | full_suite_total=118; full_suite_passed=110; full_suite_skipped=7; full_suite_failed=1; full_suite_exit=8 |
-| 3 | PASS | Quality evidence bound to the exact packaged binary | binary_identical_to_exp094=false; identical_serial_role_signatures=89; different_serial_role_signatures=0; counted_cases=84; counted_errors_each_arm=0; excluded_vacuous_errors_each_arm=5 |
-| 4 | PASS | MTP3 control matches the frozen v0.9.0 production corpus | compared_cases=89; identical_signatures=89; different_signatures=0; identical_request_bodies=89 |
-| 5 | PASS | Exact 130,048-token retrieval, exact 2,048-token decode, agent protocol across restart | retrieval_prompt_tokens=130048; retrieval_exact=true; retrieval_wall_s=58.917; decode_output_tokens=2048; decode_server_tok_s=179.79; decode_wall_tok_s=177.95; deleted_descendant_post_restart_status=404; no_resurrection=true; live_survivor_restored=true; idle_vram_mib=29468; retrieval_vram_mib=29470; transient_retries=0 |
-| 6 | PASS | Actual stock OMP macOS arm64 proof exits 0 | checks_passed=6; passed=true |
-| 7 | PASS | No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition | runs=3; successful_runs=2; predecessor_harness_precondition_runs=1; compactions_committed=6; max_root_computed_prefill_tokens=58112; root_prefills_over_60000=0 |
-| 8 | PASS | Quota reclamation and post-crash long continuation retains at least 60K cached tokens | short_records=35; quota_bytes=25769803776; reclaimed=true; crash_exit=0; continuation_input_tokens=60079; continuation_cached_tokens=60057; continuation_wall_s=2.31 |
-| 9 | PASS | No workload errors, all stored sessions restored from checkpoints, first shutdown refused 0 | workload_errors=0; stored_sessions=4; restored_from_checkpoint=4; multisession_reuse_losses=0; multisession_continuations=8; first_shutdown_refused=0 |
-| 10 | PASS | Held publication barrier resumes exactly; zero shutdown refusals | six-second held barrier hit; resume exact; shutdown refused0 |
-| 11 | PASS | Fanout57k/fanout67k/warm-arrival/restore exit0; multisession loss at most2/8 | all exits0; multisession reuse loss2/8; fanout hot medians0.668/0.790s; restore2.877/2.689s |
-| 12 | PASS | Agent mix fresh roots0/24 | measured fresh roots0/24; continuation roots0/24; errors0 |
-| 13 | PASS | All7C2 scenarios repeat2 pass; all3 restart pairs retain at least62404 cached tokens per session | all14scenario runs pass; six post-restart sessions each cached62404; request failures0 |
-| 14 | PASS | Actual OMP18.8.7 limits1 then2 on same instance, amended #74 criterion | both pass; task batches[2] then recovered[2,2]; subagents complete/codes delivered/parent exact; same instance; pair overlap13.146s |
-| 15 | PASS | All request logs without server errors; C2 shutdown refusals at most7, every other step0 | all12stages0server request errors; C2probe refused7; every other stage0 |
-
-The third long-session plant-after=3 run exited 1 at the unchanged, expressly admitted
-predecessor harness precondition. Two compactions had committed; its failure remains
-a failure. Across all three runs, the largest computed/root prefill was **58,112**
-tokens and there were **zero** root prefills above 60K. Both other runs passed.
-[Long sessions](qualification/long-sessions.json).
-
-All four durable workload sessions restored from checkpoint, but desk-code exactness
-after restore was **D1 true / D2 false**. That semantic failure is retained separately
-from the mechanical command's exit 0. All six completed initial stages had zero
-server request errors and zero shutdown refusals.
-[Durability](qualification/durability.json) · [logs](qualification/lane-logs-initial.json).
-Replacement receipts: [held barrier](qualification/publication-barrier.json) ·
-[fanout/restore](qualification/fanout-restore.json) · [agent mix](qualification/agent-mix.json) ·
-[C2 and restart](qualification/concurrency.json) · [actual OMP parallel](qualification/omp-parallel.json) ·
-[all12stage logs](qualification/lane-logs.json). The recovered[2,2]limit2 task dispatch
-passed amendment#74 with all subagents completed/codes delivered and exact parent
-answer; it is explicitly not an unrecovered[1,1]dispatch.
-
-Qualification finished before15:00Z. The required gpu-lease status observation at
-10:12:02Z found S5 holding and four queued jobs, so the conjunctive empty-queue
-condition for an extra full powered screen was false. No extra screen is claimed.
-
-The stock macOS arm64 client is the real upstream 18.8.7 binary, SHA-256
-`cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14`. Its six stock proof
-checks passed. Frozen probe hashes and exact source diffs are in
-[probe provenance](qualification/omp-1887-probe-provenance.json); the corrected parallel
-job uses unmodified S2 `239eec2` tooling with supported version/hash flags, documented
-in [parallel provenance](qualification/omp-1887-parallel-provenance.json). The branch
-was rebased onto S2 final `38a81628e2fb9e35d5b831610489133a5f5c35e7`.
-Its final follow-on `b622cbda514ce381658f631cdf1ad61b4b89b7bd` was cherry-picked
-as eaee6d0, binding non-candidate contracts to manifest OMP identity and resumed
-host-probe phases to their preflight version/environment. Eight affected upstream
-verifier tests passed after this change; the descriptor and its hash are unchanged.
-
-### Measured performance, not a wider promise
-
-Exact 130,048-token retrieval: **58.917 s**, versus v0.10.0 **58.738 s** (+0.305% wall
-time). Exact 2,048-token decode: **179.79 server tok/s**, versus **161.39 tok/s**
-(+11.40%); wall throughput **177.95 tok/s**. Idle/peak retrieval VRAM: **29,468 /
-29,470 MiB**. This does not retest EXP-094's traffic-weighted **+9.6%** prediction or
-its separate short/long/pair round-duration claims. [Profile receipt](qualification/rtx5090.json).
+Five-case BF16 solo/pair controls on a59 and shipped eaf221ac both found1/5 signatures
+identical and4/5 different, with real two-row execution and0 errors. Supported-profile
+scheduling dependence pre-exists EXP094; this neither proves the NVFP4 numerical
+mechanism nor makes a solo/pair-invariance claim for C.
+[Shipped control](qualification/bf16-solo-pair-shipped.json) ·
+[a59 control](qualification/bf16-solo-pair-candidate.json).
 
 ## Release tooling
 
@@ -210,38 +230,41 @@ platform draft-pin diagnostics, without weakening the provider verifier. The
 corrected code/test head d7e32dd0908fb1b16ace1e0ac5dec1108740b936 passed all
 workflow steps in [CI38043955727](https://github.com/alphastorm/omp-ninfer/actions/runs/38043955727).
 
-## Founder morning sequence — admission → cut → stage → acceptance
+## Founder sequence — selection complete → cut → stage → acceptance
 
-First read the completed corrected lease receipts, disposition the independently red tests/quality
-observations, and decide whether this exact source is admissible. If a runtime source
-fix is required, this component is not a releasable substitute for EXP-092/094 evidence.
+C selection, authorized source publication and the lead-reported passing dry-run
+are complete. **Live cut, staging and acceptance remain unexecuted.** The exact
+selected-source sequence and historical refusals are in
+[founder-sequence.json](qualification/founder-sequence.json).
 
 ### 1. Founder-only live component cut
 
-The following is **not an agent command**. Only its --dry-run form was executed tonight:
+This is **not an agent command**. Main reports only its --dry-run form passed.
+Use the selected C notes/assets, not the superseded a59 handoff:
 
 ```bash
 PATH="/opt/homebrew/opt/python@3.13/libexec/bin:$PATH" \
 NINFER_RUNTIME_DIR="$HOME/Development/ninfer-S1" \
 bash scripts/hosts/cut-ninfer-5090-component.sh \
   --version v0.6.16 \
-  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \
-  --assets "$HOME/Desktop/ninfer-v0.6.16-release" \
-  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \
-  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \
-  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \
+  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \
+  --assets "$HOME/Desktop/ninfer-v0.6.16-option-c-release" \
+  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \
+  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \
+  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \
   --beta 1 \
-  --notes-file "$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md"
+  --notes-file "$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md"
 ```
 
-Wait for the component publication and runtime-image workflow. Verify its published
-receipt against these exact hashes and export the **real** OCI digest as
-`NINFER_OCI_DIGEST`. Do not reuse the local Docker image ID or fabricate a digest.
+Wait for the component publication and runtime-image workflow. Verify its receipt
+against these exact source/archive/binary hashes; export the **real** OCI digest as
+`NINFER_OCI_DIGEST`. Never substitute the package-local Docker image ID.
 
-### 2. Stage with the verified OMP 18.8.7 descriptor
+### 2. Stage with the verified OMP18.8.7 descriptor
 
-The existing draft must first be preserved outside `releases/`; stage_release refuses
-a pre-existing destination. The exact command preserves it and uses its actual lane receipt:
+Preserve the pre-existing draft outside `releases/`; stage_release refuses an
+existing destination. The command uses the actual selected C profile gate receipt,
+not the authored15-criterion wrapper:
 
 ```bash
 V011_DRAFT_BACKUP="$(mktemp -d "${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX")/v0.11.0"
@@ -250,31 +273,37 @@ mv releases/v0.11.0 "$V011_DRAFT_BACKUP"
   --from v0.10.0 --release v0.11.0 \
   --release-tag v0.6.16-qwen38-5090-beta.1 \
   --source-tag v0.6.16-qwen38-5090-source.1 \
-  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \
-  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \
-  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \
-  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \
-  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \
+  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \
+  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \
+  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \
+  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \
+  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \
   --image-digest "${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}" \
   --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \
   --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \
-  --lane-receipt "$V011_DRAFT_BACKUP/qualification/rtx5090.json" \
+  --lane-receipt "$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json" \
   --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json
 ```
 
-Descriptor SHA-256: `728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9`.
-Merge supplemental receipts and updated notes back without overwriting generated
-manifest/qualification/compatibility bindings. Freeze and publish the final lane
-evidence commit, then pin it with
-`rebind_release.py --release v0.11.0 --stage lane --pin "$V011_LANE_COMMIT"`.
-The cut and promote_root **do not clear root status:candidate**; resolve that posture
-from real qualification. Never relabel unqualified profiles to evade candidate guards.
+Descriptor SHA-256:
+`728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9`.
+Merge selected-source notes and supplemental receipts without overwriting generated
+manifest/qualification/compatibility bindings. Freeze and publish the lane evidence
+commit, then bind it:
+
+```bash
+/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin "${V011_LANE_COMMIT:?published frozen selected-source lane commit}"
+```
+
+A component cut or promote_root **does not clear root status:candidate**. Resolve
+installable posture from real qualification; never relabel unqualified profiles to
+evade `--require-installable` or `--require-ready`.
 
 ### 3. Published-image acceptance window
 
-Only after a frozen, legitimately installable product candidate and the real rollback
-image/host destinations are known, run fresh preflight and then the founder-authorized
-window. These commands are documented only; no acceptance driver was run tonight:
+Only after a frozen, legitimately installable product candidate and actual
+rollback/host/workspace inputs are known, run preflight and the founder-authorized
+window. These future commands are documentation only:
 
 ```bash
 acceptance=(
@@ -293,21 +322,27 @@ acceptance=(
 "${acceptance[@]}" --action window
 ```
 
-The window's independent watchdog/restoration behavior is appropriate for this future
-founder-controlled acceptance, not for the overnight exclusive lease. Compose fresh
-receipts for every retained route, then platform/acceptance/manifest pin stages and
-`--require-ready --check-pins` before the product cut.
+The independent watchdog/restoration is for that future founder-controlled window,
+not the exclusive overnight lease. Compose fresh receipts for every retained route,
+then platform/acceptance/manifest pin stages and `--require-ready --check-pins`
+before the product cut.
 
-### Explicit blockers
+### Explicit remaining blockers
 
-1. **Native RTX 4090:** no host; the designated machine has held an RTX PRO 6000 since
-   2026-10-05. Founder decides retire versus hold. No substituted GPU is qualified.
-2. **Native RTX 3090:** fresh OMP 18.8.7 acceptance is outside tonight's scope.
-3. **All retained documented routes:** fresh acceptance must use the anonymously
-   pullable published image after the cut, not this package-local image.
-4. The unshipped NVFP4 ctest failure requires the founder's explicit policy disposition;
-   a legitimate candidate-posture transition remains a prerequisite. Cutter preflight
-   success does not clear either gate.
+1. **Component publication:** founder live cut, published runtime receipt and the
+   real anonymously pullable OCI digest remain pending. A reported dry-run pass is
+   not publication.
+2. **Native RTX4090:** retained in v0.11.0, pending fresh OMP18.8.7 qualification
+   on the founder-designated replacement host after today's planned installation.
+   The former no-host retire/hold decision is superseded, not a release-scope cut.
+3. **Native RTX3090:** fresh OMP18.8.7 native acceptance and confirmation of
+   continued physical GPU presence after that host change remain outstanding.
+4. **Every retained documented route:** fresh published-component acceptance after
+   the cut; package-local rehearsal is not a substitute. RTX5090 acceptance needs
+   the published image, legitimately installable frozen bindings and real rollback
+   inputs. Root status:candidate guards are unchanged.
 
-All public receipts omit raw prompts, generated content, secrets, private hostnames
-and absolute private paths. Lease jobs and exact identity hashes are preserved.
+The selected C source has no unresolved ctest-disposition gate. Historical a59 red
+and invalid outcomes remain preserved, not hidden or relabelled. Public receipts
+omit raw prompts, generated content, secrets, private hostnames and absolute private
+paths; lease identifiers and exact identity hashes are retained.

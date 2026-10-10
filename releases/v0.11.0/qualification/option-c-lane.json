@@ -1,9 +1,24 @@
 {
   "artifact_type": "omp_ninfer_option_c_lane_qualification",
-  "schema_version": 1,
-  "classification": "experiment, not candidate",
+  "schema_version": 2,
+  "classification": "Founder-selected v0.6.16 runtime candidate; package-local lane qualification only",
+  "overall_verdict": "All15 unchanged local lane criteria pass; full sm_120a ctest111pass/7skip/0fail; component publication and documented-route acceptance pending",
+  "founder_selection": {
+    "option": "c",
+    "date": "2026-10-10",
+    "authority": "Founder via Ask, relayed by Main",
+    "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+    "source_branch": "exp/v0616-without-3a2fadbd"
+  },
   "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
-  "source_commit_unpublished": true,
+  "source_publication": {
+    "published": true,
+    "reported_by": "Main with founder authorization",
+    "reported_date": "2026-10-10",
+    "origin_contains_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+    "unpublished_at_qualification_time": true,
+    "pushed_by_this_worker": false
+  },
   "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
   "package_local_image": "ninfer-overnight:S1-1302d639-option-c-package-local",
   "package_local_image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
@@ -351,9 +366,39 @@
     "build": "option-c-build.json",
     "quality": "option-c-output-identity.json"
   },
-  "original_a59_proposal_changed": false,
+  "superseded_alternative": {
+    "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+    "classification": "Superseded, not selected",
+    "lane_receipt": "lane.json",
+    "build_receipt": "build.json",
+    "source_attribution_receipt": "nvfp4-source-attribution.json",
+    "full_ctest": {
+      "pass": 110,
+      "skip": 7,
+      "fail": 1,
+      "exit": 8
+    },
+    "failure": "NVFP4 graph batch row differs from its serial NVFP4 oracle",
+    "original_metrics_and_failed_test_evidence_unchanged": true
+  },
   "original_desktop_component_assets_replaced": false,
-  "cutter_or_staging_run_for_option_c": false,
+  "component_cut_preflight": {
+    "status": "pass",
+    "reported_exit": 0,
+    "reported_by": "Main; founder-authorized lead preflight",
+    "reported_excerpt": "preflight ok ... archive bed8c8d4",
+    "history_and_exact_commands": "founder-sequence.json",
+    "rerun_by_this_worker": false
+  },
+  "live_component_cut_run": false,
+  "staging_run": false,
+  "release_blockers": [
+    "Founder live component cut and its real published OCI digest/receipt remain pending; the local Docker image ID is not a publication digest.",
+    "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
+    "Native RTX3090 needs fresh OMP18.8.7 acceptance and confirmation of continued physical GPU presence after the replacement-host change.",
+    "All retained documented routes need fresh published-component acceptance after the cut; RTX5090 acceptance must use the anonymously pullable published image.",
+    "Legitimately installable frozen product/profile bindings and real rollback/host/workspace inputs are required. A component cut or root promotion does not clear root status:candidate."
+  ],
   "published_image_acceptance_run": false,
   "production_promotion": false,
   "raw_prompts_outputs_or_secrets_included": false

@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Prepare the v0.11.0 product draft and unchanged-source RTX 5090 v0.6.16 local package
-  (`a59c13d0`), with content-safe build, quality-binding, restart and concurrency receipts.
-  Failures remain explicit; no component publication, route acceptance, root runtime
-  promotion or production promotion is implied.
+- Select founder-approved `1302d639` for the v0.11.0 / RTX 5090 v0.6.16 candidate:
+  EXP-092/094 without `3a2fadbd`, with full sm_120a ctest 111 pass/7 skip/0 fail and
+  all 15 local lane criteria passing. Preserve superseded `a59c13d0` and its red
+  NVFP4 evidence. Record the lead-reported source publication and passing cutter
+  dry-run; the component cut, real OCI digest, staging and route acceptance remain
+  pending. Retain native RTX 4090 for OMP 18.8.7 requalification on the replacement
+  host; RTX 3090 still needs fresh acceptance and continued GPU-presence confirmation.
+  No root runtime or production promotion is implied.
 - Enumerate exactly runtime v0.6.16 in the release verifier, without accepting arbitrary
   future tags. Root promotion and verification bind upstream clients to their platform's
   compatibility distribution, not the manifest's primary Windows asset; legacy fork

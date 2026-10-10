@@ -1,14 +1,43 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
-  "schema_version": 2,
-  "execution_status": "Only Mac asset hashes and cutter --dry-run were exercised. Live source push, cut, staging and acceptance commands are founder-only and unexecuted.",
+  "schema_version": 3,
+  "execution_status": "Founder selected option(c). Main reports the authorized source push and passing component --dry-run. Live component cut, staging and acceptance remain founder-only and unexecuted.",
   "working_directory": "$HOME/Development/omp-ninfer-S1",
-  "selection": "Choose exactly one source option. Both use the same v0.6.16 tags; never execute both sequences.",
+  "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
+  "selected_option": "c",
+  "founder_decisions": {
+    "date": "2026-10-10",
+    "authority": "Founder via Ask, relayed by Main",
+    "runtime": {
+      "selected_option": "c",
+      "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "source_branch": "exp/v0616-without-3a2fadbd",
+      "source_published": true,
+      "source_published_by": "Main with founder authorization",
+      "source_publication_evidence": "Lead reports origin contains the exact 40-hex selected commit",
+      "superseded_option": "a59",
+      "superseded_ctest_evidence_preserved": true
+    },
+    "native_rtx4090": {
+      "decision": "retain in v0.11.0",
+      "installation": "Founder will install the RTX4090 on the replacement native host today",
+      "qualification": "pending fresh OMP18.8.7 qualification on that host",
+      "retire_or_hold_release_for_former_host_decision": false,
+      "hardware_installation_measured_in_this_receipt": false
+    },
+    "native_rtx3090": {
+      "acceptance": "pending fresh OMP18.8.7 native-route acceptance",
+      "continued_gpu_presence": "must be confirmed after the replacement-host change",
+      "presence_measured_in_this_receipt": false
+    }
+  },
   "options": [
     {
       "name": "a59",
       "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
-      "classification": "Original proposal; qualified except for its ctest policy disposition",
+      "classification": "Superseded alternative, not selected; original red NVFP4 ctest evidence retained",
+      "selected": false,
+      "execution_prohibited_for_selected_release": true,
       "admission": "Founder must explicitly dispose the unshipped NVFP4-KV strict TokenId-vector oracle failure. Fullctest110pass/7skip/1fail; all15 original local lane gates pass. No policy exception was approved overnight.",
       "ordered_steps": [
         {
@@ -77,10 +106,17 @@
       "name": "c",
       "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
       "source_branch": "exp/v0616-without-3a2fadbd",
-      "source_published": false,
-      "classification": "Locally qualified experiment; founder source selection required",
+      "source_published": true,
+      "source_publication": {
+        "reported_by": "Main with founder authorization",
+        "reported_date": "2026-10-10",
+        "origin_contains_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+        "pushed_by_this_worker": false
+      },
+      "classification": "Founder-selected v0.6.16 candidate; all15 unchanged local lane criteria pass; published-image acceptance pending",
+      "selected": true,
       "composition": "eaf221ac + b72daad6 + a59c13d0, without3a2fadbd; conflict-free mechanical replay",
-      "admission": "Founder chooses this alternative source and accepts measured pair cost:round+9.3451%, aggregate wall throughput−8.5220%; fullctest111pass/7skip/0fail and all15 unchanged local lane criteria pass.",
+      "admission": "Founder selected option(c) on2026-10-10. Fullctest111pass/7skip/0fail and all15 unchanged local criteria pass; measured pair cost remains round+9.3451%, aggregate wall throughput−8.5220%. The superseded a59 ctest exception is not needed for this source.",
       "assets_directory": "$HOME/Desktop/ninfer-v0.6.16-option-c-release",
       "assets": [
         {
@@ -104,7 +140,7 @@
           "sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2"
         }
       ],
-      "component_notes_sha256": "b6387fab11a5b5cb578b90e4c57388cf8d693c5900e277bf7a2afe92914a40d2",
+      "component_notes_sha256": "a8ddab13e9434abc5e89073f0d1fb85d300dc8be2a8e381a623539c9c0b6dc45",
       "lane_receipt": {
         "path": "$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json",
         "sha256": "53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe",
@@ -112,46 +148,64 @@
       },
       "dry_run": {
         "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
-        "observed_exit": 1,
-        "exact_refusal": "commit is not on any origin branch",
-        "notes_sha256_at_exercise": "529ee2d5540f4476dab47353d5636bbee854f7d6245bc3a17527b399db2131f4",
-        "notes_only_change_after_exercise": "Removed the absolute private Mac home path from the publication notes; the cutter checks notes-file existence, not note content.",
-        "checked_before_refusal": [
-          "All four required assets present",
-          "archive/SBOM/source SHA-256 equal caller inputs",
-          "SHA256SUMS verifies",
-          "Source archive equals exact local git archive",
-          "Packaged identity names this version and commit and source_dirty=false",
-          "Commit exists locally"
-        ],
-        "not_exercised_after_refusal": [
-          "origin-branch admission pass",
-          "publisher workflow check",
-          "GitHub authentication check",
-          "tag/release absence checks"
-        ],
-        "publication_created": false
+        "status": "pass",
+        "reported_exit": 0,
+        "reported_by": "Main; founder-authorized lead preflight on 2026-10-10",
+        "reported_excerpt": "preflight ok ... archive bed8c8d4",
+        "tag_release_or_workflow_created": false,
+        "rerun_by_this_worker": false,
+        "initial_attempt": {
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "observed_exit": 1,
+          "exact_refusal": "commit is not on any origin branch",
+          "notes_sha256_at_exercise": "529ee2d5540f4476dab47353d5636bbee854f7d6245bc3a17527b399db2131f4",
+          "notes_only_change_after_exercise": "Removed the absolute private Mac home path from the publication notes; the cutter checks notes-file existence, not note content.",
+          "checked_before_refusal": [
+            "All four required assets present",
+            "archive/SBOM/source SHA-256 equal caller inputs",
+            "SHA256SUMS verifies",
+            "Source archive equals exact local git archive",
+            "Packaged identity names this version and commit and source_dirty=false",
+            "Commit exists locally"
+          ],
+          "not_exercised_after_refusal": [
+            "origin-branch admission pass",
+            "publisher workflow check",
+            "GitHub authentication check",
+            "tag/release absence checks"
+          ],
+          "publication_created": false
+        },
+        "notes_sha256_after_lead_report": "a8ddab13e9434abc5e89073f0d1fb85d300dc8be2a8e381a623539c9c0b6dc45",
+        "notes_only_update_after_lead_report": "Updated candidate selection and native-host decisions; all four runtime assets remain unchanged. The cutter checks notes-file existence, not notes content."
       },
       "ordered_steps": [
         {
           "order": 1,
-          "action": "Authorize selection and publication of this alternative source",
-          "founder_only": true
+        "action": "Founder selection of option(c) completed",
+        "founder_only": true,
+        "executed": true,
+        "reported_by": "Main; founder-authorized action on2026-10-10"
         },
         {
           "order": 2,
-          "action": "Publish the currently local runtime source branch; this is the mandatory prerequisite to the origin-branch cutter guard",
+        "action": "Founder-authorized source publication completed; origin contains the selected commit",
           "command": "git -C \"$HOME/Development/ninfer-S1\" push origin exp/v0616-without-3a2fadbd",
           "founder_only": true,
-          "executed": false
+        "executed": true,
+        "reported_by": "Main; founder-authorized action on2026-10-10",
+        "reported_remote_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825"
         },
         {
           "order": 3,
-          "action": "Rerun cutter preflight after the founder-authorized source push; require success before live cut",
+        "action": "Post-push cutter preflight passed; live cut remains pending",
           "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
           "founder_only": true,
-          "executed": false,
-          "prior_refusal": "commit is not on any origin branch"
+        "executed": true,
+        "prior_refusal": "commit is not on any origin branch",
+        "reported_by": "Main; founder-authorized action on2026-10-10",
+        "reported_exit": 0,
+        "reported_excerpt": "preflight ok ... archive bed8c8d4"
         },
         {
           "order": 4,
@@ -212,24 +266,23 @@
   },
   "preflight_guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
   "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
-  "follow_on": "Record fresh native RTX 3090/OMP 18.8.7 acceptance, resolve native RTX 4090 retire-versus-hold, compose published-image acceptance for every retained route, pin the platform/acceptance/manifest stages, and require-ready/check-pins before a product cut.",
-  "blockers": [
-    {
-      "lane": "native RTX 4090",
-      "reason": "No RTX 4090 host; designated machine has held an RTX PRO 6000 since 2026-10-05.",
-      "decision": "Founder chooses retire versus hold."
-    },
-    {
-      "lane": "native RTX 3090",
-      "reason": "Fresh OMP 18.8.7 acceptance is outside tonight’s scope."
-    },
-    {
-      "lane": "all retained documented routes",
-      "reason": "Published-image acceptance follows the founder cut and a legitimately installable frozen product candidate."
-    }
+  "follow_on": [
+    "Retain native RTX4090 in v0.11.0 and obtain fresh OMP18.8.7 requalification on the founder-designated replacement host.",
+    "Confirm continued native RTX3090 GPU presence and obtain its fresh OMP18.8.7 acceptance.",
+    "Compose fresh receipts for all retained documented routes, then platform/acceptance/manifest pin stages and --require-ready --check-pins before the product cut."
   ],
-  "original_a59_assets_or_proposal_changed": false,
-  "ninfer_source_pushed": false,
+  "blockers": [
+    "Founder live component cut and its real published OCI digest/receipt remain pending; the local Docker image ID is not a publication digest.",
+    "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
+    "Native RTX3090 needs fresh OMP18.8.7 acceptance and confirmation of continued physical GPU presence after the replacement-host change.",
+    "All retained documented routes need fresh published-component acceptance after the cut; RTX5090 acceptance must use the anonymously pullable published image.",
+    "Legitimately installable frozen product/profile bindings and real rollback/host/workspace inputs are required. A component cut or root promotion does not clear root status:candidate."
+  ],
+  "original_a59_assets_changed": false,
+  "original_a59_proposal_superseded": true,
+  "ninfer_source_pushed": true,
+  "ninfer_source_pushed_by": "Main with founder authorization",
+  "ninfer_source_pushed_by_this_worker": false,
   "live_component_cut_run": false,
   "stage_run": false,
   "acceptance_run": false,

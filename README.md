@@ -15,9 +15,14 @@ into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 40
 > not these candidate fragments.
 
 The separate [v0.11.0 runtime draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
-unchanged NInfer `a59c13d0` as the proposed RTX 5090 **v0.6.16** component. Its
-package-local measurements and failures are rehearsal evidence, not a publication,
-documented-route acceptance, or a production promotion. Root runtime pins remain v0.10.0.
+founder-selected NInfer `1302d639` as the RTX 5090 **v0.6.16** candidate: the EXP-092/094
+changes without `3a2fadbd`. Its full sm_120a ctest has 111 passes, seven skips and no
+failures; all 15 local lane criteria pass. The superseded `a59c13d0` alternative and
+its red NVFP4 test remain preserved. These are package-local qualification receipts,
+not published-image acceptance or production promotion. Native RTX 4090 remains in
+v0.11.0, pending OMP 18.8.7 requalification on the founder-designated replacement
+host; RTX 3090 needs fresh acceptance and confirmation that its GPU remains present.
+Root runtime pins remain v0.10.0.
 
 > **Before installing — v0.10.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.

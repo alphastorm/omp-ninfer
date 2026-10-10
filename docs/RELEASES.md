@@ -29,15 +29,21 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.11.0 draft — unchanged-source RTX 5090 v0.6.16
+### v0.11.0 draft — founder-selected RTX 5090 v0.6.16
 
-The [draft notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) retain the local receipts,
-including failures and the externally invalidated first attempt. Proposed runtime
-source is `a59c13d00492d47dc58bf822533688c90c5d1f6a`; proposed client is unmodified
-upstream OMP 18.8.7 from the verified component descriptor. The local image ID is not
-an OCI publication digest. No manifest is fabricated before the founder's component
-cut supplies that digest, and no root runtime pin or candidate guard is promoted here.
-The notes give the exact staging inputs and the subsequent acceptance prerequisites.
+The [draft notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source
+`1302d63929e400a05e1c9cdb0fc8003a70269825` by the founder's 2026-10-10 decision:
+EXP-092/094 without `3a2fadbd`. Full sm_120a ctest is 111 pass/7 skip/0 fail and
+[all 15 local lane criteria](../releases/v0.11.0/qualification/option-c-lane.json) pass.
+The superseded `a59c13d0` alternative, its red NVFP4 oracle, and invalid attempts
+remain evidence, not hidden exceptions. The proposed client remains unmodified
+upstream OMP 18.8.7. The lead reports that the selected source branch was pushed
+and its cutter dry-run passed; no live component cut or route acceptance is claimed.
+Native RTX 4090 stays in v0.11.0, pending OMP 18.8.7 requalification on the new native
+host. RTX 3090 needs fresh acceptance and continued GPU-presence confirmation.
+The local image ID is not an OCI publication digest: no manifest is fabricated
+before the founder's cut supplies the real digest, and no root runtime pin or
+candidate guard is promoted here. The notes give exact cut → stage → acceptance inputs.
 
 ### v0.10.0 public release — DFlash2 on the RTX 5090
 
