@@ -54,6 +54,10 @@ K6144/T16 from MmaResidualR64C16 to Split2ExactResidual; intermediate numerical
 mechanism is unmeasured. [Source attribution](qualification/nvfp4-source-attribution.json)
 retains both test exits/log hashes and the precise contract. No source fix or
 unchanged-test rerun was made.
+The Q5 resolver keys the tensor shape, not KV storage; T1 uses residual GEMV while
+T8/T16 use the small-T MMA on sm120. The new T16 route matching T8 is not an exact
+T1-oracle guarantee. Different arithmetic paths changing greedy TokenIds is an
+inference, not a measured first-op mechanism or evidence of cross-row state corruption.
 
 Founder alternatives (none executed): (a) restrict the route to satisfy the NVFP4
 oracle: source change, clean rebuild, EXP092/094 remeasurement and rescreen;
@@ -126,6 +130,10 @@ checks passed. Frozen probe hashes and exact source diffs are in
 job uses unmodified S2 `239eec2` tooling with supported version/hash flags, documented
 in [parallel provenance](qualification/omp-1887-parallel-provenance.json). The branch
 was rebased onto S2 final `38a81628e2fb9e35d5b831610489133a5f5c35e7`.
+Its final follow-on `b622cbda514ce381658f631cdf1ad61b4b89b7bd` was cherry-picked
+as eaee6d0, binding non-candidate contracts to manifest OMP identity and resumed
+host-probe phases to their preflight version/environment. Eight affected upstream
+verifier tests passed after this change; the descriptor and its hash are unchanged.
 
 ### Measured performance, not a wider promise
 
@@ -148,6 +156,9 @@ its separate short/long/pair round-duration claims. [Profile receipt](qualificat
   regression was red before and green after. The candidate-relabelling security
   regression also passed. Full repository verification belongs to the existing
   Ubuntu/Python 3.11 draft-PR CI.
+The initial draft commit a1379e45b66abb4016f4a63eb097bc34d3cefe94 passed the
+full workflow in [CI38042843797](https://github.com/alphastorm/omp-ninfer/actions/runs/38042843797).
+That result precedes the final S2 follow-on and is not a final-head substitution.
 
 ## Founder morning sequence — admission → cut → stage → acceptance
 

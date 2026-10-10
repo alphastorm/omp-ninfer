@@ -67,8 +67,13 @@
     "old_schedule": "MmaResidualR64C16",
     "new_schedule": "Split2ExactResidual",
     "architecture": "sm120;sm86/sm89 unchanged",
-    "mechanism": "[INFERENCE] The sole runtime diff and fresh baseline identify the T16 Q5 route change as the regression source. Intermediate accumulation/quantization or first-divergent-op mechanisms were not measured.",
-    "bf16_relation": "The separate supported BF16 control is DFlash2 solo versus paired, not eager ordinary versus graph speculative. Shipped eaf and new a59 both differ4/5, so it does not establish a newly introduced BF16 regression or the same numerical mechanism."
+    "mechanism": "[INFERENCE] The route change replaces the T16 prompt-MMA schedule with the small-T MMA used at T8. The exact regression is against ordinary eager/T1 GEMV, not a DFlash2 solo/T8 oracle. Different arithmetic paths can change strict greedy TokenIds, but the first numerical divergence and any quantized-KV amplification were not traced. No evidence of cross-row state corruption is established.",
+    "bf16_relation": "The separate supported BF16 control is DFlash2 solo versus paired, not eager ordinary versus graph speculative. Shipped eaf and new a59 both differ4/5, so it does not establish a newly introduced BF16 regression or the same numerical mechanism.",
+    "source_only_observations": [
+      "The resolver keys only rows,K,paddedK and columns; KV storage mode is not an input to this plan.",
+      "T1 dispatches Q5 residual GEMV; on sm120 admitted T8/T16 Split2ExactResidual dispatches q5_small_t_mma_launch with BF16 inputs/output.",
+      "The same Q5 operation is used regardless of BF16 versus NVFP4 KV; a KV-specific route restriction cannot be expressed by the current plan key alone."
+    ]
   },
   "founder_options": [
     {

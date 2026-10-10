@@ -1,0 +1,1556 @@
+{
+  "artifact_type": "omp_ninfer_v0616_fanout_restore_rehearsals",
+  "schema_version": 1,
+  "lease_job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+  "scope": "The four completed probes whose exit0 was delivered by the first50-minute wait; multisession is not inferred.",
+  "receipts": {
+    "fanout-57k": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "a2dbaa1fb9825e40bcbeeb07e55182c8d4edc8f957f28f4a93a0c62eaaafcf56",
+      "receipt": {
+        "artifact_type": "omp_ninfer_fleet_fanout_probe",
+        "schema_version": 3,
+        "lane": {
+          "redacted": true,
+          "sha256": "5ee23a15af139e1cd8d1636e23de2cc6d84395f4442653b6f37669aca903eecc"
+        },
+        "identity": {
+          "deployment_profile": "qwen38-5090-v0.11.0",
+          "model_id": "qwen3.8-27b",
+          "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+          "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+          "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+          "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+          "source_dirty": false,
+          "build_profile": "appliance-local",
+          "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11"
+        },
+        "generated_utc": "2026-10-10T09:38:17Z",
+        "base_tokens_requested": 56000,
+        "branches": 4,
+        "post_restart_branches": 4,
+        "summary": {
+          "template_input_tokens": 67681,
+          "cold_prefill_s": 25.423,
+          "checkpoint_save_s": 3.987,
+          "checkpoint_bytes": 5035982554,
+          "hot_fork_median_s": 0.668,
+          "hot_fork_max_s": 0.71,
+          "restart_ready_s": 0,
+          "post_restart_resume_s": 2.949,
+          "warm_start_first_fork_s": 0.628,
+          "warm_start_fork_median_s": 0.589,
+          "warm_start_fork_max_s": 0.595
+        },
+        "steps": [
+          {
+            "step": "base_prefill",
+            "wall_s": 25.423,
+            "input_tokens": 67681,
+            "id": {
+              "redacted": true,
+              "sha256": "0f203f696d5d450cccfbf929d65a62b6b9b0555877a3bd39b5eba301a413d22b"
+            }
+          },
+          {
+            "step": "warm_edit",
+            "wall_s": 0.535,
+            "id": {
+              "redacted": true,
+              "sha256": "5bf71a169968e03676429fd7b36857dddc7ac51fc7872f54a476271b6ffe8b23"
+            }
+          },
+          {
+            "step": "checkpoint_save",
+            "wall_s": 3.987,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "92fb8880568e8b8a813e51bfa161d86dfec07287a1e78b8d9554c83a62861f8f"
+            },
+            "bytes": 5035982554,
+            "frontier": 67825,
+            "response_records": null
+          },
+          {
+            "step": "branch_0",
+            "wall_s": 0.575,
+            "id": {
+              "redacted": true,
+              "sha256": "0014f8a4c904c38a1fa6f06ffebf0ea6344ee356faec2d292b63ef0f03bdb4b6"
+            }
+          },
+          {
+            "step": "branch_1",
+            "wall_s": 0.668,
+            "id": {
+              "redacted": true,
+              "sha256": "e931478dd4fd7912fa69fd45d6f6b92cb490b38490c4df2481c2136399dc6abe"
+            }
+          },
+          {
+            "step": "branch_2",
+            "wall_s": 0.71,
+            "id": {
+              "redacted": true,
+              "sha256": "b7326ec94e3747a85dd4e3e357e2986419e77407761ec72532e769a9344e49cb"
+            }
+          },
+          {
+            "step": "branch_3",
+            "wall_s": 0.637,
+            "id": {
+              "redacted": true,
+              "sha256": "10d7bd1ca3ca6a61bab82f16342b36410a34776add9d1a3181c476a5c6f099ee"
+            }
+          },
+          {
+            "step": "fanout_save",
+            "wall_s": 3.658,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "060adb4f7e9dee86865a40aefb737dcc8dfb7e5e1c43f0c6b048fe316e872f9e"
+            },
+            "bytes": 5035992381,
+            "frontier": 67828
+          },
+          {
+            "step": "restart",
+            "wall_s": 46.566,
+            "ready_after_s": 0,
+            "prefill_counter_before": 68052,
+            "prefill_counter_after": 53
+          },
+          {
+            "step": "post_restart_resume",
+            "wall_s": 2.949,
+            "id": {
+              "redacted": true,
+              "sha256": "c1fe0d880bf2b0dbc5921f44372ef45f0dd587176914d2d9afdda07e817092d8"
+            }
+          },
+          {
+            "step": "post_restart_branch_0",
+            "wall_s": 0.628,
+            "id": {
+              "redacted": true,
+              "sha256": "47a00d0a6fb93b98c05c83e32b21407ad6836f7fd51886573109d8cdb7bba5f5"
+            },
+            "input_tokens": 67753
+          },
+          {
+            "step": "post_restart_branch_1",
+            "wall_s": 0.577,
+            "id": {
+              "redacted": true,
+              "sha256": "757772fa394a1cbe741fe1d55da0b85fca48ef9ca1e503c4873979cab3c9c9c0"
+            },
+            "input_tokens": 67753
+          },
+          {
+            "step": "post_restart_branch_2",
+            "wall_s": 0.595,
+            "id": {
+              "redacted": true,
+              "sha256": "a707aa1929bb9c98051e35cff5252ef70a4fbf43bd77084072225e904316b5a1"
+            },
+            "input_tokens": 67753
+          },
+          {
+            "step": "post_restart_branch_3",
+            "wall_s": 0.589,
+            "id": {
+              "redacted": true,
+              "sha256": "4f9187fc0b95fad00007da8beee21fdccedc281eae5e7b41cc8b41b1e1791292"
+            },
+            "input_tokens": 67753
+          },
+          {
+            "step": "post_restart_save",
+            "wall_s": 5.047,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "259ec272f792004ac7ab9f5094540efd0ed740521d361ce7352624d54899741f"
+            },
+            "frontier": 67832
+          },
+          {
+            "step": "session_delete",
+            "wall_s": 0,
+            "status": 200
+          }
+        ],
+        "server_reuse_records": [
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 67681,
+            "completion_tokens": 40,
+            "ttft_s": 25.188675824
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 67720,
+            "prompt_tokens": 67746,
+            "completion_tokens": 80,
+            "ttft_s": 0.18044368500000002
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67749,
+            "completion_tokens": 80,
+            "ttft_s": 0.308691904
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67749,
+            "completion_tokens": 80,
+            "ttft_s": 0.313080324
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67749,
+            "completion_tokens": 80,
+            "ttft_s": 0.318515713
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67749,
+            "completion_tokens": 80,
+            "ttft_s": 0.31818940700000004
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 67828,
+            "prompt_tokens": 67856,
+            "completion_tokens": 80,
+            "ttft_s": 0.262658814
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67753,
+            "completion_tokens": 80,
+            "ttft_s": 0.308927942
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67753,
+            "completion_tokens": 80,
+            "ttft_s": 0.31091462
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67753,
+            "completion_tokens": 80,
+            "ttft_s": 0.32926409900000003
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 67676,
+            "prompt_tokens": 67753,
+            "completion_tokens": 80,
+            "ttft_s": 0.32313777099999996
+          }
+        ],
+        "transient_retries": 0
+      }
+    },
+    "fanout-67k": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "2d3c44126d89dfa4af61e51068cc4d254fbbaf8d47bd88d7428b3b4548bfe13e",
+      "receipt": {
+        "artifact_type": "omp_ninfer_fleet_fanout_probe",
+        "schema_version": 3,
+        "lane": {
+          "redacted": true,
+          "sha256": "5ee23a15af139e1cd8d1636e23de2cc6d84395f4442653b6f37669aca903eecc"
+        },
+        "identity": {
+          "deployment_profile": "qwen38-5090-v0.11.0",
+          "model_id": "qwen3.8-27b",
+          "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+          "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+          "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+          "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+          "source_dirty": false,
+          "build_profile": "appliance-local",
+          "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11"
+        },
+        "generated_utc": "2026-10-10T09:39:58Z",
+        "base_tokens_requested": 66000,
+        "branches": 4,
+        "post_restart_branches": 4,
+        "summary": {
+          "template_input_tokens": 79957,
+          "cold_prefill_s": 31.191,
+          "checkpoint_save_s": 5.257,
+          "checkpoint_bytes": 5841707562,
+          "hot_fork_median_s": 0.79,
+          "hot_fork_max_s": 2.578,
+          "restart_ready_s": 0,
+          "post_restart_resume_s": 4.037,
+          "warm_start_first_fork_s": 0.684,
+          "warm_start_fork_median_s": 0.614,
+          "warm_start_fork_max_s": 0.626
+        },
+        "steps": [
+          {
+            "step": "base_prefill",
+            "wall_s": 31.191,
+            "input_tokens": 79957,
+            "id": {
+              "redacted": true,
+              "sha256": "0cb33f7c072fe9474d57724390df25a058ddc815e1adf905ae7232188c707879"
+            }
+          },
+          {
+            "step": "warm_edit",
+            "wall_s": 0.505,
+            "id": {
+              "redacted": true,
+              "sha256": "1546aacda822bfe32627690adf9d5225f4d3b7471139fc4cd9d2db3e339b4d31"
+            }
+          },
+          {
+            "step": "checkpoint_save",
+            "wall_s": 5.257,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "eee97f535722378f323310ef90c5032da2d9bb15230988cdff13eda7ecb0b999"
+            },
+            "bytes": 5841707562,
+            "frontier": 80101,
+            "response_records": null
+          },
+          {
+            "step": "branch_0",
+            "wall_s": 2.578,
+            "id": {
+              "redacted": true,
+              "sha256": "450e5989ecea49dae220a02a5d9381228592c9408028e63681d0a20bca91c985"
+            }
+          },
+          {
+            "step": "branch_1",
+            "wall_s": 0.79,
+            "id": {
+              "redacted": true,
+              "sha256": "8f6efd05a97383405eb3d21d116a70b715a77cdee45ec640a8b5a09b3bd78344"
+            }
+          },
+          {
+            "step": "branch_2",
+            "wall_s": 0.765,
+            "id": {
+              "redacted": true,
+              "sha256": "edcd02394d06927951756bd488ebad871d3da050c60d54374c4c6e6bc8fff361"
+            }
+          },
+          {
+            "step": "branch_3",
+            "wall_s": 0.759,
+            "id": {
+              "redacted": true,
+              "sha256": "8cb18b58a4fc3b012ee1ff1fa9f3f48254fe577123cde903e9650e5194770408"
+            }
+          },
+          {
+            "step": "fanout_save",
+            "wall_s": 5.202,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "3b074c6ebe951a6bae84f8b2fc50b1f0cb180eefd2844242d0d5fb240cece148"
+            },
+            "bytes": 5841717493,
+            "frontier": 80104
+          },
+          {
+            "step": "restart",
+            "wall_s": 42.282,
+            "ready_after_s": 0,
+            "prefill_counter_before": 80664,
+            "prefill_counter_after": 53
+          },
+          {
+            "step": "post_restart_resume",
+            "wall_s": 4.037,
+            "id": {
+              "redacted": true,
+              "sha256": "19c4bbe505d8eacb21a3b431539901fd894e8bdd75941686c7171f531acd662a"
+            }
+          },
+          {
+            "step": "post_restart_branch_0",
+            "wall_s": 0.684,
+            "id": {
+              "redacted": true,
+              "sha256": "efe6c409f1c6d13f0aab3fd66bda03354a310cf4f94f846294bc4daf098f4884"
+            },
+            "input_tokens": 80029
+          },
+          {
+            "step": "post_restart_branch_1",
+            "wall_s": 0.614,
+            "id": {
+              "redacted": true,
+              "sha256": "cfc1601ce7faec0797e995a03f796dc11a6b5189b44459d822cf0dd20a62cc08"
+            },
+            "input_tokens": 80029
+          },
+          {
+            "step": "post_restart_branch_2",
+            "wall_s": 0.606,
+            "id": {
+              "redacted": true,
+              "sha256": "87e45bada1a097ff7e0aed959cf04848461c6913837868d8a908197e86fac6a3"
+            },
+            "input_tokens": 80029
+          },
+          {
+            "step": "post_restart_branch_3",
+            "wall_s": 0.626,
+            "id": {
+              "redacted": true,
+              "sha256": "0a4986f2ecdb5d361c26d3b069b7988e31cf57b0f4fd31a0d4e5545fe5adae61"
+            },
+            "input_tokens": 80029
+          },
+          {
+            "step": "post_restart_save",
+            "wall_s": 5.28,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "25e10ae395cda0390898a1ddb57c757ae73d6d3d399da87fcd7787b25fb872f2"
+            },
+            "frontier": 80108
+          },
+          {
+            "step": "session_delete",
+            "wall_s": 0,
+            "status": 200
+          }
+        ],
+        "server_reuse_records": [
+          {
+            "reuse": "root",
+            "reused_tokens": 0,
+            "prompt_tokens": 79957,
+            "completion_tokens": 40,
+            "ttft_s": 31.021193556
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 79996,
+            "prompt_tokens": 80022,
+            "completion_tokens": 80,
+            "ttft_s": 0.248258243
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80025,
+            "completion_tokens": 80,
+            "ttft_s": 2.265885137
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80025,
+            "completion_tokens": 80,
+            "ttft_s": 0.403748245
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80025,
+            "completion_tokens": 80,
+            "ttft_s": 0.41692178999999996
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80025,
+            "completion_tokens": 80,
+            "ttft_s": 0.412037688
+          },
+          {
+            "reuse": "private_endpoint",
+            "reused_tokens": 80104,
+            "prompt_tokens": 80132,
+            "completion_tokens": 80,
+            "ttft_s": 0.29238561199999996
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80029,
+            "completion_tokens": 80,
+            "ttft_s": 0.336731572
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80029,
+            "completion_tokens": 80,
+            "ttft_s": 0.338508118
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80029,
+            "completion_tokens": 80,
+            "ttft_s": 0.35031505900000004
+          },
+          {
+            "reuse": "private_long_anchor",
+            "reused_tokens": 79952,
+            "prompt_tokens": 80029,
+            "completion_tokens": 80,
+            "ttft_s": 0.352301806
+          }
+        ],
+        "transient_retries": 0
+      }
+    },
+    "warm-arrival": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "61ce61ce1009d95ffcbc0c42a6a3b5b5aa70bf91477e4a80981354c4234db8c0",
+      "receipt": {
+        "artifact_type": "omp_ninfer_warm_arrival_probe",
+        "schema_version": 3,
+        "lane": {
+          "redacted": true,
+          "sha256": "5ee23a15af139e1cd8d1636e23de2cc6d84395f4442653b6f37669aca903eecc"
+        },
+        "identity": {
+          "deployment_profile": "qwen38-5090-v0.11.0",
+          "model_id": "qwen3.8-27b",
+          "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+          "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+          "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+          "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+          "source_dirty": false,
+          "build_profile": "appliance-local",
+          "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11"
+        },
+        "generated_utc": "2026-10-10T09:42:41Z",
+        "base_tokens_requested": 56000,
+        "summary": [
+          {
+            "order": {
+              "redacted": true,
+              "sha256": "ac62e785a98ce36f957fb0757b940b9eeb57cced854c73bac57025e8b3c98370"
+            },
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 25.423,
+            "pre_restart_fork": [
+              {
+                "redacted": true,
+                "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+              },
+              0.528
+            ],
+            "checkpoint_bytes": 5052769357,
+            "post_restart_sequence": [
+              [
+                {
+                  "redacted": true,
+                  "sha256": "1f96a662eba9bb43b270fbc47ed23e40ed835ca32b356e7a0b4dee111b6786c5"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                },
+                67908,
+                3.178
+              ],
+              [
+                {
+                  "redacted": true,
+                  "sha256": "6348e1548c3f336354fbfd6174e12d2d3cc185c0e0479bb63cd1c620495ce7d0"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                67712,
+                0.627
+              ],
+              [
+                {
+                  "redacted": true,
+                  "sha256": "c18d771bb873fad33b12c9b97dc720fa528be101500f9cc800e33543fffbd55e"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                67712,
+                0.592
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 4.397
+          },
+          {
+            "order": {
+              "redacted": true,
+              "sha256": "92982c4fcfd44e07c8a8ff19dd5e82d1e1baa08498a7870affb96434ed4c4797"
+            },
+            "control_retrieval_exact": true,
+            "template_input_tokens": 67717,
+            "cold_prefill_s": 25.372,
+            "pre_restart_fork": [
+              {
+                "redacted": true,
+                "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+              },
+              0.492
+            ],
+            "checkpoint_bytes": 5048572083,
+            "post_restart_sequence": [
+              [
+                {
+                  "redacted": true,
+                  "sha256": "0d574fdf4d451454c555fa7480b96d815ca8f52ad33d897973d2e787289d8d00"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                67712,
+                3.246
+              ],
+              [
+                {
+                  "redacted": true,
+                  "sha256": "5f68d8d4c0927c3a38a379e2e727655ec1efee9992007b9aa849cd57046606c7"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                },
+                67908,
+                0.585
+              ],
+              [
+                {
+                  "redacted": true,
+                  "sha256": "6348e1548c3f336354fbfd6174e12d2d3cc185c0e0479bb63cd1c620495ce7d0"
+                },
+                {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                67712,
+                0.66
+              ]
+            ],
+            "every_post_restart_fork_hot": true,
+            "restored_retrieval_exact": true,
+            "restore_plus_sequence_s": 4.491
+          }
+        ],
+        "runs": {
+          "resume-first": {
+            "steps": [
+              {
+                "step": "base_prefill",
+                "wall_s": 25.423,
+                "id": {
+                  "redacted": true,
+                  "sha256": "613058d66ee758d571eb2eb138f18837b70eedf4513998e79885a2e023e69344"
+                },
+                "input_tokens": 67717,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                },
+                "reuse_frontier": 0,
+                "reused_tokens": 399912,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 0,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                    }
+                  },
+                  "reused_prompt_tokens": 399912,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 6
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 9
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 5247074304
+                  }
+                }
+              },
+              {
+                "step": "pre_restart_fork",
+                "wall_s": 0.528,
+                "id": {
+                  "redacted": true,
+                  "sha256": "4d468b7d50145cac7c3f79e3ede90e314872ba26d1a962c079ee8dccc7d92696"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                },
+                "reuse_frontier": 67756,
+                "reused_tokens": 67756,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67756,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                    }
+                  },
+                  "reused_prompt_tokens": 467668,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 6
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 10
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 5247074304
+                  }
+                }
+              },
+              {
+                "step": "control_retrieval",
+                "wall_s": 0.815,
+                "id": {
+                  "redacted": true,
+                  "sha256": "58ed3010f7f87214929b3396e6588057584f3d76b1270d6719304cfc7009eac4"
+                },
+                "input_tokens": 67913,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                },
+                "reuse_frontier": 67864,
+                "reused_tokens": 67864,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67864,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                    }
+                  },
+                  "reused_prompt_tokens": 535532,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 6
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 10
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 5247074304
+                  }
+                },
+                "exact": true,
+                "missing_keys": [],
+                "output_excerpt": {
+                  "redacted": true,
+                  "sha256": "411e131d432ab242179aa2978b0f0dd97a2c05e7fa63859c0a3a3dd60b517a32"
+                },
+                "incomplete": null,
+                "output_sha256": "9fa25e1b74a10070f9df72a6bbe0fc7be6e90dce81cff8111be65f2a122e54d8"
+              },
+              {
+                "step": "save",
+                "wall_s": 4.365,
+                "mode": "explicit",
+                "generation": {
+                  "redacted": true,
+                  "sha256": "223e1ffdb80ffd37fc0caf90d42ac4a7449ca4a359cc059163b3f5e92aef9093"
+                },
+                "bytes": 5052769357,
+                "frontier": 68086,
+                "response_records": null
+              },
+              {
+                "step": "cache_before_restart",
+                "last_selection": {
+                  "frontier_tokens": 67864,
+                  "path": {
+                    "redacted": true,
+                    "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                  }
+                },
+                "reused_prompt_tokens": 535532,
+                "private_catalog": {
+                  "capacity": 8,
+                  "occupied": 6
+                },
+                "device_state": {
+                  "capacity": 4,
+                  "occupied": 4
+                },
+                "host_state": {
+                  "capacity": 24,
+                  "occupied": 10
+                },
+                "host_kv": {
+                  "capacity_bytes": 17179869184,
+                  "occupied_bytes": 5247074304
+                }
+              },
+              {
+                "step": "restart",
+                "wall_s": 44.366,
+                "ready_after_s": 0,
+                "prefill_counter_before": 68184,
+                "prefill_counter_after": 53
+              },
+              {
+                "step": "cache_after_restart",
+                "last_selection": {
+                  "frontier_tokens": 0,
+                  "path": {
+                    "redacted": true,
+                    "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                  }
+                },
+                "reused_prompt_tokens": 0,
+                "private_catalog": {
+                  "capacity": 8,
+                  "occupied": 0
+                },
+                "device_state": {
+                  "capacity": 4,
+                  "occupied": 0
+                },
+                "host_state": {
+                  "capacity": 24,
+                  "occupied": 0
+                },
+                "host_kv": {
+                  "capacity_bytes": 17179869184,
+                  "occupied_bytes": 0
+                }
+              },
+              {
+                "step": "endpoint_resume_first",
+                "wall_s": 3.178,
+                "id": {
+                  "redacted": true,
+                  "sha256": "fc0b6273e60d2550570a765e1609327b351d10ba77591700981b2328fb20ead5"
+                },
+                "input_tokens": 68131,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                },
+                "reuse_frontier": 67908,
+                "reused_tokens": 67908,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67908,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                    }
+                  },
+                  "reused_prompt_tokens": 67908,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 1
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 2
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 1
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4454350848
+                  }
+                },
+                "exact": true,
+                "missing_keys": [],
+                "output_excerpt": {
+                  "redacted": true,
+                  "sha256": "659eabdff93b3b05c0c905df593872debc1cc116f4535c18f814786fe3ad60dd"
+                },
+                "incomplete": null,
+                "output_sha256": "1635e7cd3a6b18fe8a89ec5a5b087b0f4eb0de7afe1cfb7cfa860391808b0a52"
+              },
+              {
+                "step": "fork_after_resume",
+                "wall_s": 0.627,
+                "id": {
+                  "redacted": true,
+                  "sha256": "9e32f3b371abd6d043c5c80a155a063e606b9f52538875dd0c7feab292f82eb3"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                "reuse_frontier": 67712,
+                "reused_tokens": 67712,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67712,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                    }
+                  },
+                  "reused_prompt_tokens": 135620,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 2
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 3
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 2
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4454350848
+                  }
+                }
+              },
+              {
+                "step": "fork_second",
+                "wall_s": 0.592,
+                "id": {
+                  "redacted": true,
+                  "sha256": "58a9bb543ede351720029e2669b8b44a0fa26fd6f86100da1aec5984997238c8"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                "reuse_frontier": 67712,
+                "reused_tokens": 67712,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67712,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                    }
+                  },
+                  "reused_prompt_tokens": 203332,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 3
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 3
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4454350848
+                  }
+                }
+              },
+              {
+                "step": "session_delete",
+                "status": 200
+              }
+            ],
+            "transient_retries": 0
+          },
+          "fork-first": {
+            "steps": [
+              {
+                "step": "base_prefill",
+                "wall_s": 25.372,
+                "id": {
+                  "redacted": true,
+                  "sha256": "c35964961f5d546ed63848bcbfc544659eba9e7617f0d4d8e03c7042324a48cd"
+                },
+                "input_tokens": 67717,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                },
+                "reuse_frontier": 0,
+                "reused_tokens": 203332,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 0,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                    }
+                  },
+                  "reused_prompt_tokens": 203332,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 4
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 5
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4450156544
+                  }
+                }
+              },
+              {
+                "step": "pre_restart_fork",
+                "wall_s": 0.492,
+                "id": {
+                  "redacted": true,
+                  "sha256": "4c0d1ee767ece66a927891f0933ced4c00c54c0096de941bcc3bc254694347e4"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                },
+                "reuse_frontier": 67756,
+                "reused_tokens": 67756,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67756,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                    }
+                  },
+                  "reused_prompt_tokens": 271088,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 4
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 6
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4450156544
+                  }
+                }
+              },
+              {
+                "step": "control_retrieval",
+                "wall_s": 0.538,
+                "id": {
+                  "redacted": true,
+                  "sha256": "ac5cbbc96b710495a250b3f4f01f57cb210734a153f7a9d243e920292a634d6a"
+                },
+                "input_tokens": 67913,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                },
+                "reuse_frontier": 67864,
+                "reused_tokens": 67864,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67864,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                    }
+                  },
+                  "reused_prompt_tokens": 338952,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 4
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 6
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4450156544
+                  }
+                },
+                "exact": true,
+                "missing_keys": [],
+                "output_excerpt": {
+                  "redacted": true,
+                  "sha256": "12f9ce06a0eaac68e8c0c096d16a8d79add20ce4dad43e2df1e11dcef6b0097c"
+                },
+                "incomplete": null,
+                "output_sha256": "f6589087ba005842b1ea55bdc78591f2450ce303c400752cb01a4b4bc402a851"
+              },
+              {
+                "step": "save",
+                "wall_s": 4.04,
+                "mode": "explicit",
+                "generation": {
+                  "redacted": true,
+                  "sha256": "cb4e450058efdf47abd50b965a114642a8c13eff73c6b574f2975573d1ff5ae7"
+                },
+                "bytes": 5048572083,
+                "frontier": 67990,
+                "response_records": null
+              },
+              {
+                "step": "cache_before_restart",
+                "last_selection": {
+                  "frontier_tokens": 67864,
+                  "path": {
+                    "redacted": true,
+                    "sha256": "9465fafdb0b6dbb87cee56d01b5007759eb2da7d7d52b450aeb28fcc9ea06ea3"
+                  }
+                },
+                "reused_prompt_tokens": 338952,
+                "private_catalog": {
+                  "capacity": 8,
+                  "occupied": 4
+                },
+                "device_state": {
+                  "capacity": 4,
+                  "occupied": 4
+                },
+                "host_state": {
+                  "capacity": 24,
+                  "occupied": 6
+                },
+                "host_kv": {
+                  "capacity_bytes": 17179869184,
+                  "occupied_bytes": 4450156544
+                }
+              },
+              {
+                "step": "restart",
+                "wall_s": 47.718,
+                "ready_after_s": 0,
+                "prefill_counter_before": 68217,
+                "prefill_counter_after": 53
+              },
+              {
+                "step": "cache_after_restart",
+                "last_selection": {
+                  "frontier_tokens": 0,
+                  "path": {
+                    "redacted": true,
+                    "sha256": "956e6e33fe8b21fbf3e7e43d41c304862c78627deb92e26a72fd2b3b57bc60f2"
+                  }
+                },
+                "reused_prompt_tokens": 0,
+                "private_catalog": {
+                  "capacity": 8,
+                  "occupied": 0
+                },
+                "device_state": {
+                  "capacity": 4,
+                  "occupied": 0
+                },
+                "host_state": {
+                  "capacity": 24,
+                  "occupied": 0
+                },
+                "host_kv": {
+                  "capacity_bytes": 17179869184,
+                  "occupied_bytes": 0
+                }
+              },
+              {
+                "step": "fork_first",
+                "wall_s": 3.246,
+                "id": {
+                  "redacted": true,
+                  "sha256": "e80417582649507753f195e11ebc91d15707a3d720747f8bd690229216c4763f"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                "reuse_frontier": 67712,
+                "reused_tokens": 67712,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67712,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                    }
+                  },
+                  "reused_prompt_tokens": 67712,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 2
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 2
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 3
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4458545152
+                  }
+                }
+              },
+              {
+                "step": "endpoint_resume_after_fork",
+                "wall_s": 0.585,
+                "id": {
+                  "redacted": true,
+                  "sha256": "3e57905be3bc11a9ff11771d49b60e2c9f452b5f62b94c3c294d293cde5f7fba"
+                },
+                "input_tokens": 68035,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                },
+                "reuse_frontier": 67908,
+                "reused_tokens": 67908,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67908,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "c6430bfc5cf8d8adaae36166166040d1c33fd2d5ee2f5abba331e24c81d75382"
+                    }
+                  },
+                  "reused_prompt_tokens": 135620,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 2
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 3
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 2
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4454350848
+                  }
+                },
+                "exact": true,
+                "missing_keys": [],
+                "output_excerpt": {
+                  "redacted": true,
+                  "sha256": "7ae4b09b776dc808085742e62416c42a8a27545720dc3cbe2770ea24d8e3eb9a"
+                },
+                "incomplete": null,
+                "output_sha256": "8f9308c7a74eec910467b87bd4fb3fc7ecf55fb6665ac03cabbf7c30a8222684"
+              },
+              {
+                "step": "fork_after_resume",
+                "wall_s": 0.66,
+                "id": {
+                  "redacted": true,
+                  "sha256": "3afc4b7402fee79549f5d6eed22e0acf937e1b6d758166a51664bb41124eb386"
+                },
+                "input_tokens": 67785,
+                "reuse_path": {
+                  "redacted": true,
+                  "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                },
+                "reuse_frontier": 67712,
+                "reused_tokens": 67712,
+                "cache": {
+                  "last_selection": {
+                    "frontier_tokens": 67712,
+                    "path": {
+                      "redacted": true,
+                      "sha256": "56574e9f2d18f8ddb1a0d5f5cfadb0b2a210e797ff83c5baacab6f435cf071fe"
+                    }
+                  },
+                  "reused_prompt_tokens": 203332,
+                  "private_catalog": {
+                    "capacity": 8,
+                    "occupied": 3
+                  },
+                  "device_state": {
+                    "capacity": 4,
+                    "occupied": 4
+                  },
+                  "host_state": {
+                    "capacity": 24,
+                    "occupied": 3
+                  },
+                  "host_kv": {
+                    "capacity_bytes": 17179869184,
+                    "occupied_bytes": 4454350848
+                  }
+                }
+              },
+              {
+                "step": "session_delete",
+                "status": 200
+              }
+            ],
+            "transient_retries": 0
+          }
+        }
+      }
+    },
+    "restore": {
+      "present": true,
+      "valid_json": true,
+      "source_sha256": "2c35108c149ca958858aadcbff2ed8e6e8e93f007d20071dd95de9ac7f64362f",
+      "receipt": {
+        "artifact_type": "omp_ninfer_restore_probe",
+        "schema_version": 3,
+        "lane": {
+          "redacted": true,
+          "sha256": "5ee23a15af139e1cd8d1636e23de2cc6d84395f4442653b6f37669aca903eecc"
+        },
+        "identity": {
+          "deployment_profile": "qwen38-5090-v0.11.0",
+          "model_id": "qwen3.8-27b",
+          "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+          "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+          "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+          "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+          "source_dirty": false,
+          "build_profile": "appliance-local",
+          "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11"
+        },
+        "generated_utc": "2026-10-10T09:44:44Z",
+        "base_tokens_requested": 48000,
+        "summary": {
+          "template_input_tokens": 57889,
+          "cold_prefill_s": 21.04,
+          "checkpoint_bytes": 4402311944,
+          "restore_0_wall_s": 2.877,
+          "restore_1_wall_s": 2.689,
+          "control_retrieval_exact": true,
+          "restored_retrieval_exact": true,
+          "tampered_restore_refused": null
+        },
+        "steps": [
+          {
+            "step": "base_prefill",
+            "wall_s": 21.04,
+            "input_tokens": 57889
+          },
+          {
+            "step": "control_retrieval",
+            "wall_s": 0.786,
+            "exact": true,
+            "missing_keys": [],
+            "output_excerpt": {
+              "redacted": true,
+              "sha256": "9e12483ea4a9fc16c15d7989bda821029f170a04deee24dda08ac315aef22156"
+            },
+            "incomplete": null,
+            "output_sha256": "342b63025e5fa4db009f12a2c814823c589ec448dff0b4a99ef29097140e20e3"
+          },
+          {
+            "step": "checkpoint_save",
+            "wall_s": 3.843,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "ddea7061cd1d984501ad9c16dffdc8b9098edeb8c60d65e13477973d02c6d7a2"
+            },
+            "bytes": 4402311944,
+            "frontier": 58150
+          },
+          {
+            "step": "restart_0",
+            "wall_s": 45.551,
+            "ready_after_s": 0,
+            "prefill_counter_before": 58264,
+            "prefill_counter_after": 53
+          },
+          {
+            "step": "restore_0",
+            "wall_s": 2.877,
+            "id": {
+              "redacted": true,
+              "sha256": "efcd9e76b79f9db4c51eb5fd31fd73e103024441c3af357598e684fcd8059e5e"
+            },
+            "input_tokens": 58198,
+            "status_polls": [
+              {
+                "t_s": 0,
+                "bytes": 4402311944,
+                "created_at_unix_ms": 1791625387451,
+                "frontier_tokens": 58150,
+                "generation": {
+                  "redacted": true,
+                  "sha256": "ddea7061cd1d984501ad9c16dffdc8b9098edeb8c60d65e13477973d02c6d7a2"
+                },
+                "read_backend": {
+                  "redacted": true,
+                  "sha256": "839d912bcabfc18593877527bf5899660ea296f868905cb3d501658cb1ca8b37"
+                },
+                "response_records": 2,
+                "restored_tokens": 58150,
+                "schema_version": 2,
+                "state": {
+                  "redacted": true,
+                  "sha256": "8b7092cc4b053d88fdfb7df09c11c9242c36aba5d07e422786913868eda34bfc"
+                }
+              }
+            ],
+            "started_utc": "2026-10-10T09:43:53Z",
+            "exact": true,
+            "missing_keys": [],
+            "output_excerpt": {
+              "redacted": true,
+              "sha256": "db3795e3f7e77e768ec2b12ed90557bbe90d18b1024a1a2a95790b5de68483a0"
+            },
+            "incomplete": null,
+            "output_sha256": "b6df598acdb9f05feb03fa296610e07a5d9e8d8081c840491646894e957020c7"
+          },
+          {
+            "step": "settle_save_0",
+            "wall_s": 3.979,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "f09a14a5943553cd82fe39f4e9838412d33ff83cc42fb465f105ab0813f7e5c7"
+            }
+          },
+          {
+            "step": "restart_1",
+            "wall_s": 38.419,
+            "ready_after_s": 0,
+            "prefill_counter_before": 279,
+            "prefill_counter_after": 53
+          },
+          {
+            "step": "restore_1",
+            "wall_s": 2.689,
+            "id": {
+              "redacted": true,
+              "sha256": "9725879a6a95cd3444e81a2b3c4eea1455f4f3eb8504703f37636ad14417c2d7"
+            },
+            "input_tokens": 58325,
+            "status_polls": [
+              {
+                "t_s": 0,
+                "bytes": 4410706071,
+                "created_at_unix_ms": 1791625439846,
+                "frontier_tokens": 58277,
+                "generation": {
+                  "redacted": true,
+                  "sha256": "f09a14a5943553cd82fe39f4e9838412d33ff83cc42fb465f105ab0813f7e5c7"
+                },
+                "read_backend": {
+                  "redacted": true,
+                  "sha256": "839d912bcabfc18593877527bf5899660ea296f868905cb3d501658cb1ca8b37"
+                },
+                "response_records": 3,
+                "restored_tokens": 58277,
+                "schema_version": 2,
+                "state": {
+                  "redacted": true,
+                  "sha256": "8b7092cc4b053d88fdfb7df09c11c9242c36aba5d07e422786913868eda34bfc"
+                }
+              }
+            ],
+            "started_utc": "2026-10-10T09:44:38Z",
+            "exact": true,
+            "missing_keys": [],
+            "output_excerpt": {
+              "redacted": true,
+              "sha256": "dd74ac461cacb73084b8f3b7b31e0ccf7df321e6960f65bfc4942227ec22dd34"
+            },
+            "incomplete": null,
+            "output_sha256": "b0cc57ff067ac2c27aab38f5a84b39193da183f737573948c7f394b30887f86a"
+          },
+          {
+            "step": "settle_save_1",
+            "wall_s": 3.751,
+            "mode": "explicit",
+            "generation": {
+              "redacted": true,
+              "sha256": "ed6513c284047b1291bc5b52d3537f51e84d55f4cb817114b4218a8dbd065281"
+            }
+          },
+          {
+            "step": "session_delete",
+            "status": 200
+          }
+        ],
+        "transient_retries": 0
+      }
+    }
+  },
+  "observed_exit_codes": {
+    "fanout-57k": 0,
+    "fanout-67k": 0,
+    "warm-arrival": 0,
+    "restore": 0
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

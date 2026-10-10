@@ -8,7 +8,9 @@
   "omp_component_descriptor": {
     "path": "docs/measurements/2026-10-10-omp-1887-client-components.json",
     "sha256": "728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9",
-    "s2_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7"
+    "s2_final_commit": "b622cbda514ce381658f631cdf1ad61b4b89b7bd",
+    "s2_initial_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7",
+    "s1_cherry_pick": "eaee6d0"
   },
   "acceptance_after_legitimate_installability": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
   "preflight_guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",

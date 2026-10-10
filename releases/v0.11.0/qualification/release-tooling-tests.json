@@ -1,0 +1,80 @@
+{
+  "artifact_type": "omp_ninfer_release_tooling_regressions",
+  "schema_version": 1,
+  "local_python": "/opt/homebrew/bin/python3.13",
+  "tests": [
+    {
+      "scope": "Exact v0.6.16 runtime-tag allowlist",
+      "result": "pass",
+      "count": 1,
+      "rejected_neighbors": [
+        "v0.6.17",
+        "v0.7.0",
+        "beta.0",
+        "beta.01",
+        "wrong GPU lane",
+        "trailing suffix"
+      ],
+      "code_commit": "34715e1c716b959b60957a467aad7e429d2318f5"
+    },
+    {
+      "scope": "Root upstream client distribution platform mapping",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 4,
+      "code_commit": "34715e1c716b959b60957a467aad7e429d2318f5"
+    },
+    {
+      "scope": "Upstream root archive verifier",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 6,
+      "code_commit": "6be307a2967bcbc19baa6c4b096337576e38da97"
+    },
+    {
+      "scope": "Stage draft-residue consumer",
+      "test": "StageReleaseTests.test_upstream_descriptor_allows_unpromoted_platform_root_pins",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 1,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v",
+      "code_commit": "bfa73774baac8c356124a6f7f58e46c00c8a33a3"
+    },
+    {
+      "scope": "Candidate relabelling still fails closed",
+      "test": "ReleaseContractTest.test_client_candidate_cannot_bypass_qualification_by_relabelling_itself",
+      "result": "pass",
+      "count": 1,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_verify_release.py -k test_client_candidate_cannot_bypass_qualification_by_relabelling_itself -v",
+      "code_commit": "bfa73774baac8c356124a6f7f58e46c00c8a33a3"
+    },
+    {
+      "scope": "Upstream verifier after final manifest-stateful contract change",
+      "result": "pass",
+      "count": 8,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_verify_release.py -k upstream -v",
+      "s2_source_commit": "b622cbda514ce381658f631cdf1ad61b4b89b7bd"
+    }
+  ],
+  "full_ci": {
+    "run": false,
+    "workflow": ".github/workflows/ci.yml",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "commands": [
+      "python3 scripts/verify_release.py",
+      "python3 -m unittest discover -s tests -v",
+      "bash -n examples/manual-tunnel/*.sh"
+    ],
+    "dependency": "S2 follow-on commit; use the final own draft-PR CI, not a local full suite",
+    "initial": {
+      "status": "success",
+      "commit": "a1379e45b66abb4016f4a63eb097bc34d3cefe94",
+      "run": 38042843797,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38042843797",
+      "python": "3.11",
+      "scope": "Existing full repository CI before the final S2 follow-on; final-head CI remains required."
+    }
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}
