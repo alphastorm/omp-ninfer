@@ -239,9 +239,14 @@ class StageReleaseTests(unittest.TestCase):
         for path in (root / "profiles").glob("*.json"):
             profile = self.load(path)
             profile["status"] = "public"
+            # DESCRIPTOR stages legacy stock OMP 18.3, whose qualified contract uses the global override.
+            profile["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+            profile["omp_provider"]["compat"].pop("statefulResponses", None)
             self.save(path, profile)
         result = self.stage(root)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("[draft-posture] profile: client archive must match windows-x64 compatibility distribution", result.stdout)
+        self.assertIn("[draft-posture] profiles/qwen38-rtx5090-manual-tunnel.json: client archive must match darwin-arm64 compatibility distribution", result.stdout)
 
     def test_unmodified_predecessor_stages_before_notes_and_evidence_are_rewritten(self) -> None:
         root = self.staging_copy(prepare_client_evidence=False)

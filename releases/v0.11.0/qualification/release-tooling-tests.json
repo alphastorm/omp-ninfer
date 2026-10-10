@@ -54,6 +54,14 @@
       "count": 8,
       "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_verify_release.py -k upstream -v",
       "s2_source_commit": "b622cbda514ce381658f631cdf1ad61b4b89b7bd"
+    },
+    {
+      "scope": "Legacy-descriptor staging fixture after provider-contract closure",
+      "red_on_ci": true,
+      "result": "pass",
+      "count": 1,
+      "assertions": "Return0 and both Windows/Darwin draft-posture archive mismatches appear",
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v"
     }
   ],
   "full_ci": {
@@ -74,6 +82,17 @@
       "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38042843797",
       "python": "3.11",
       "scope": "Existing full repository CI before the final S2 follow-on; final-head CI remains required."
+    },
+    "failed_after_client_fix": {
+      "status": "failure",
+      "commit": "b35ce53b003e8ea7ef5d60f607a50819f8ad0076",
+      "run": 38043597806,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38043597806",
+      "tests": 346,
+      "seconds": 201.9,
+      "failures": 1,
+      "assertion": "Stage public-root fixture used the legacy18.3 descriptor with a modern1887 per-model provider contract; real verifier rejected the missing legacy PI_OPENAI_STATEFUL=1.",
+      "disposition": "Corrected only the fixture to its authoritative legacy descriptor contract, preserving the legitimate provider gate and explicitly asserting both stale platform archive diagnostics."
     }
   },
   "raw_prompts_outputs_or_secrets_included": false
