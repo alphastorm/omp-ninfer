@@ -9,7 +9,7 @@
   "document_sha256": "f6fe3d0e7d54162a8298919fc22e7feea83b14d6d13e3cb95462bc26ab60f88e",
   "current_document_sha256": "3c88b764ddb8a6dce8479ebb7e27282664599c258e0d7e93a10a2e514577ba42",
   "executed_blocks_match_current": true,
-  "document_change": "Founder scopesv0.11.0 to RTX5090 only: native executable instructions/fleet recipe removed in favor of complete immutablev0.10.0 links and explicit multi-GPU deferral. Current metadata/prose changed; all17executed5090block addresses/body hashes remain byte-identical to5861712f. No window rerun or receipt retargeting.",
+  "document_change": "Founder scopes v0.11.0 to RTX 5090 only: native executable instructions/fleet recipe removed in favor of complete immutable v0.10.0 links and explicit multi-GPU deferral. Current metadata/prose changed; all 17 executed RTX 5090 block addresses/body hashes remain byte-identical to 5861712f. No window rerun or receipt retargeting.",
   "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
   "routes": {
     "rtx5090-container-host": {
@@ -184,14 +184,14 @@
   },
   "deferred_routes": {
     "rtx4090-native": {
-      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
       "legacy_release": "v0.10.0",
       "legacy_client": "18.4.10",
       "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane",
       "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
     },
     "rtx3090-native": {
-      "reason": "Founder2026-10-10: RTX4090 was installed beside RTX3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted fromv0.11.0 and return after multi-GPU support is qualified.",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
       "legacy_release": "v0.10.0",
       "legacy_client": "18.4.10",
       "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane",
@@ -199,5 +199,5 @@
     }
   },
   "raw_prompts_outputs_or_secrets_included": false,
-  "qualification_environment": "Owner-operated initial published-image window on frozen5861712f; isolated stock OMP18.8.7 homes and scoped beta-route credentials; native Windows11/Docker DesktopWSL2 host, macOSarm64 SSH client and Windowsx64 loopback client. Linux stock binary live proof ran under WSL2, not a native LinuxOS qualification."
+  "qualification_environment": "Owner-operated initial published-image window on frozen 5861712f; isolated stock OMP 18.8.7 homes and scoped beta-route credentials; native Windows 11/Docker Desktop WSL2 host, macOS arm64 SSH client and Windows x64 loopback client. Linux stock binary live proof ran under WSL2, not a native Linux OS qualification."
 }

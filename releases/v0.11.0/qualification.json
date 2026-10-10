@@ -100,7 +100,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.11.0/acceptance/composed-external-installation.json",
-      "sha256": "f7c168995cb3f32213e7bd1e7668c281106d819826b2507d36237ac2498148c0",
+      "sha256": "321ea2a40dfee3e124f4abfdb85d669eb77103b83ed3e1b5ffee1825bbdb1274",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/697315b58c0393e535ed7c0fd7196256b4e8b87f/releases/v0.11.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-10",
       "release": "v0.11.0",
@@ -113,7 +113,7 @@
       "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "0b6d1b64960ea8154d4c69fe2957353792a3635979af32e2e00f208f7b6f4b85",
+      "compatibility_sha256": "e86c558f4f1545a63d033e1f3002e97739000d771429111e0629a04f3a05f6c7",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -128,12 +128,12 @@
           "sha256": "1158ea375748dfa637a2d2002b376a79b5b96af07119c313b34011f0a12359d0"
         }
       ],
-      "note": "Three retained5090 routes/17exact executed blocks, three stock clients, anonymous public downloads, vision on macOS/Windows, stateful/restart and fail-closed proofs plus independent incumbent restoration passed on5861712f. Metadata/scope/pins do not advance the subject; native lanes are explicitly deferred."
+      "note": "Three retained RTX 5090 routes/17 exact executed blocks, three stock clients, anonymous public downloads, vision on macOS/Windows, stateful/restart and fail-closed proofs plus independent incumbent restoration passed on 5861712f. Metadata/scope/pins do not advance the subject; native lanes are explicitly deferred."
     },
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.11.0/acceptance/documented-routes.json",
-      "sha256": "9d40e00cf98fa1424c43f26b2e7407c1a36417f79c1f7fdcb95bfdc12530f413"
+      "sha256": "cb182f61f9a9ce13784af2a4170281882939fc0c619ab2612954c7a3d3c82ac2"
     }
   },
   "observed_gates": {

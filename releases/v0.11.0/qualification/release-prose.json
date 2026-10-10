@@ -18,7 +18,8 @@
       "tests": 4,
       "failures": 0,
       "errors": 0,
-      "elapsed_s": 0.038
+      "elapsed_s": 0.038,
+      "phase": "After the initial sweep, before generated compatibility prose exposed the remaining source-capsule label"
     },
     "scope": "README, CHANGELOG, ROADMAP, docs/*.md and current release notes; immutable older release notes excluded",
     "guards": "RTX/OMP directly followed by digits; on/at/to/of/the/with/from/and/than/by/accepted directly followed by digits",
@@ -90,5 +91,25 @@
     "production": false,
     "publication": false
   },
-  "raw_prompts_outputs_private_hostnames_paths_or_secrets_included": false
+  "raw_prompts_outputs_private_hostnames_paths_or_secrets_included": false,
+  "regeneration_disposition": {
+    "ci_url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38083581165",
+    "head": "47bec3ab3f56870fcff57e7d0a4a186ede78d8cf",
+    "tests": 357,
+    "failures": 1,
+    "errors": 0,
+    "failed_document": "docs/COMPATIBILITY.md",
+    "root_cause": "The composer faithfully copied the still-glued authored composed.authority_status from the mutable scoped composition capsule; manual authority/matrix edits could not survive regeneration",
+    "corrected_source": "releases/v0.11.0/acceptance/rtx5090-only-composition-input.json",
+    "corrected_fields": "Authored authority status, qualification note and declared-scope prose only; platform/restoration input values and original producer bytes unchanged",
+    "composer_code_changed": false,
+    "guard_weakened": false,
+    "new_validation_or_sanitizer": false,
+    "focused_before_platform": {
+      "tests": 1,
+      "failures": 1,
+      "elapsed_s": 0.036,
+      "disposition": "The composer updates authority JSON, not the matrix; the matrix still held the old glued label until the platform rebind renders it (rebind_release.py:294-296). Do not repeat unchanged; run the same guard after that document input changes."
+    }
+  }
 }
