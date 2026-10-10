@@ -138,6 +138,19 @@
     "red": "candidate-descriptor environment regression test failed against predecessor probe because --client-component was unsupported",
     "green": "18 focused test_stock_client_harness tests passed with Python 3.13; candidate descriptor and future published per-model manifest both omit PI_OPENAI_STATEFUL, while 18.4.10 retains it"
   },
+  "parallel_identity_closure": {
+    "commit": "239eec2e34ec728bff72bcaf6ac3be118f56d57d",
+    "source": "descriptor requested-platform binary SHA/version or explicit --omp-sha256 and --omp-version",
+    "historical_default_removed": true,
+    "pre_workload_hash_and_version_binding": true,
+    "red": "four errors in 22 client-harness tests before derived identity arguments were supported",
+    "green": "22 client-harness tests and 18 parallel contract tests passed; descriptor Darwin row differs from primary asset, modern environment is absent, mismatched version never reaches workload"
+  },
+  "local_full_suite_observations": {
+    "initial": "333 tests: eight failures, two skips; four concurrency timing assertions and four cutter fixtures using an interpreter without hashlib.file_digest",
+    "explicit_python_3_13_fixture_path": "336 tests: four unchanged concurrency timing assertion failures, six skips; cutter failures resolved",
+    "disposition": "No unrelated timing tests changed or suppressed. Automatic Ubuntu/Python 3.11 CI is the full-suite authority."
+  },
   "verdict": "verified upstream client candidate only; runtime/model pins unchanged; qualification and documented-route acceptance remain pending",
   "stateful_class_closure": {
     "commit": "bb41053600bdfe61129b8f5bdd469560218b91d5",
