@@ -90,7 +90,7 @@ Server decode is 11.40% faster; retrieval takes 0.152 s longer. Idle/retrieval V
 was 29,468/29,470 MiB. These figures do not establish a traffic-weighted speedup,
 faster end-to-end OMP work or an improvement on every workload.
 [Selected measurements](qualification/option-c-lane.json) ·
-[v0.10.0 profile receipt](../v0.10.0/qualification/rtx5090.json).
+[v0.10.0 profile receipt](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/releases/v0.10.0/qualification/rtx5090.json).
 
 Omitting `3a2fadbd` has a measured pair cost **against the superseded `a59c13d0`
 alternative**, not against v0.10.0. In one frozen A/B/B/A cycle, mean pair-round time
@@ -234,7 +234,7 @@ installation instructions into a release-operation transcript:
 - [Predecessor solo/pair control](qualification/bf16-solo-pair-shipped.json) and
   [superseded alternative control](qualification/bf16-solo-pair-candidate.json).
 - [Staging](qualification/staging.json), [release-tooling qualification](qualification/root-lane-cut.json)
-  and [release procedure](../../docs/RELEASES.md).
+  and [release procedure](https://github.com/alphastorm/omp-ninfer/blob/bde7673d103831ba321f1f3240a9eb2890722516/docs/RELEASES.md).
 
 Public receipts exclude raw prompts, generated content, secrets and private host paths.
 Earlier failed windows and deferred native evidence are preserved separately, not
