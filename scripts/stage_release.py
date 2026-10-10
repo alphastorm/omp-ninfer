@@ -470,11 +470,12 @@ def main() -> int:
                 draft_residue.add(f"{label}: model {field} must match the manifest")
     if omp_descriptor is not None:
         # As with runtime pins, root clients deliberately remain on the live release.
-        draft_residue.add("profile: client archive must be the manifest's OMP component")
-        draft_residue.update(
-            f"profiles/{path.name}: client archive must be the manifest's OMP component"
-            for path in (ROOT / "profiles").glob("*.json")
-        )
+        for label, path in root_profiles:
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}.get(
+                            load(path).get("installation_mode"))
+            draft_residue.add(
+                f"{label}: client archive must match {platform} compatibility distribution")
     verify = subprocess.run(
         [sys.executable, "scripts/verify_release.py",
          "--release", args.release, "--json"],

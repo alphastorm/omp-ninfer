@@ -234,6 +234,15 @@ class StageReleaseTests(unittest.TestCase):
         self.assertFalse(qualification["external_installation_qualified"])
         self.assertEqual({path: path.read_bytes() for path in before}, before)
 
+    def test_upstream_descriptor_allows_unpromoted_platform_root_pins(self) -> None:
+        root = self.staging_copy()
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            profile["status"] = "public"
+            self.save(path, profile)
+        result = self.stage(root)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_unmodified_predecessor_stages_before_notes_and_evidence_are_rewritten(self) -> None:
         root = self.staging_copy(prepare_client_evidence=False)
         result = self.stage(root)

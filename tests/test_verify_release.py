@@ -599,7 +599,7 @@ class ReleaseContractTest(unittest.TestCase):
             profile["status"] = "public"
             self.save(path, profile)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
-        self.assertTrue(any("client archive must be the manifest's OMP component" in item
+        self.assertTrue(any("client archive must match windows-x64 compatibility distribution" in item
                             for item in errors), errors)
 
     def test_unknown_release_channel_fails_closed(self) -> None:
