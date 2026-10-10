@@ -9,7 +9,11 @@ Current install fragments and root profiles target unmodified upstream OMP **18.
 runtime baseline, not a published 18.8.7 product. Their `status: candidate` means **unqualified**.
 GPU-host requalification and fresh acceptance remain pending for the RTX 5090 container host,
 macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows routes.
-No GPU-host runs, new qualification receipts, tags or publication are part of this client repin.
+Local client rehearsals are not GPU-host requalification or documented-route acceptance.
+No new qualification receipt, tag or publication is claimed by this client repin.
+The [2026-10-10 local rehearsal receipts](QUICKSTART.md#local-rehearsal-not-acceptance) record
+passing typed-tool, exact-continuation and fail-closed checks for all three verified 18.8.7
+client binaries against the unchanged published RTX 5090 image; they do not qualify routes.
 
 NInfer models use `compat.statefulResponses: true`, replacing the global `PI_OPENAI_STATEFUL=1`
 requirement (upstream [#13686](https://github.com/can1357/oh-my-pi/pull/13686)). Custom Responses

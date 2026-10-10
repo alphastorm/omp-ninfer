@@ -53,7 +53,8 @@ Between the 18.8.3 and 18.8.7 tags, the custom-model schema, `openai-shared.ts`,
 `includeEncryptedReasoning: false`, `supportsReasoningSummary: false`, effort list,
 `openai-responses` API and custom-host auto image-detail contract are unchanged.
 The Windows rust-analyzer/lspmux fix in 18.8.5 and native-addon packaging change in 18.8.7
-are not Responses protocol changes; native Windows client behavior needs its own live probe.
+are not Responses protocol changes. The native Windows client passed the bounded
+[local rehearsal](measurements/2026-10-10-omp-1887-windows-x64-local-rehearsal.json), not route qualification.
 
 **#14334 and chaining.** [Provider state](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/providers/openai-responses.ts#L429-L450)
 now implements `releaseSession`: it normalizes the supplied routing-session id and deletes
@@ -75,7 +76,7 @@ matches (exact `provider/model-id` first, then longest trailing-`*` prefix); no 
 the existing settings object. It does not turn async compaction on or off.
 The [provider in-flight gate](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/stream.ts#L637-L654)
 still waits before dispatch until a slot or caller cancellation, not the server's pending
-admission deadline. Keep `examples/manual-tunnel/fail-closed.yml` unchanged: two requests for
+admission deadline. Keep the settings in `examples/manual-tunnel/fail-closed.yml` unchanged: two requests for
 RTX 5090 providers, one for native providers, no `asyncEnabled` override. This retains the
 client-side waiting contract motivated by [EXP-072](measurements/2026-09-28-omp-long-sessions.json).
 No `compaction.modelThresholds` setting is recommended or applied: 18.8.7 long-session or
@@ -85,6 +86,10 @@ limit. The 18.8.6 pruning changes target Anthropic cache lookback, not a new NIn
 Fresh requalification remains pending for each documented route: RTX 5090 container host,
 macOS client, Windows client, RTX 4090 native Windows and RTX 3090 native Windows. Local
 client rehearsals do not inherit or replace v0.10.0's OMP 18.4.10 acceptance.
+The [2026-10-10 source review and receipts](measurements/2026-10-10-omp-1887-client-release-review.json)
+bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
+selection also retains the per-model contract after a profile is qualified, while the
+historical 18.4.x driver behavior is unchanged.
 See the [candidate guide](QUICKSTART.md#omp-1887-client-candidate).
 
 ## Published upstream position — v0.10.0

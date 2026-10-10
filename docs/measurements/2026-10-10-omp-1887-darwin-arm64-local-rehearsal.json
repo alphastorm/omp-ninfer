@@ -1,0 +1,90 @@
+{
+  "artifact_type": "omp_ninfer_client_local_rehearsal",
+  "schema_version": 1,
+  "evidence_kind": "local rehearsal",
+  "qualification_claimed": false,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "platform": "darwin-arm64",
+  "started_utc": "2026-10-10T07:47:14.250498+00:00",
+  "finished_utc": "2026-10-10T07:48:23.886514+00:00",
+  "candidate_source_commit": "c007286eee280d0a98ff912dc04ebe2e7dd9eb77",
+  "probe_script_sha256": "1e32e8724b3a856f04e9472a2060b74607b0918431ae4e02c2de9ab27801e594",
+  "private_receipt_sha256": "46ea11d3210f2832aa9156de9cc1056ab40f4099364ba353db5a6ee745d46210",
+  "gpu_lease_job_id": "20261010T073625Z-S2-omp1887-client-c007286-1128748",
+  "client": {
+    "version": "omp/18.8.7",
+    "upstream_tag": "v18.8.7",
+    "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+    "asset_name": "omp-darwin-arm64",
+    "asset_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+    "binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+    "package_kind": "raw executable",
+    "archive_and_extraction": "not applicable"
+  },
+  "runtime": {
+    "product_release": "v0.10.0",
+    "image_id": "sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+    "image_repo_digests": [
+      "ghcr.io/alphastorm/ninfer-runtime@sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b"
+    ],
+    "server_binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+    "configuration_sha256": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+    "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+    "deployment_profile": "qwen38-5090-v0.10.0",
+    "cuda_toolkit": "13.1.115",
+    "cuda_architecture": "120a",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "driver": "610.88",
+    "gpu_memory_mib": 32607,
+    "server_kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "checkpoint_seccomp_sha256": "6e4207fb1fdcf93c3bdd8d129e69dd265f6ddba2ace0dde32b527649d1a8b555"
+  },
+  "method": {
+    "launch_contract": "production v0.10.0 arguments/model/security policy with slice-local port, key, logs and checkpoints; restart=no",
+    "client_transport": "SSH local forward",
+    "endpoint_port": 18102,
+    "isolated_agent_directory": true,
+    "models_fragment_sha256": "5cfef44ea6a5c7a644d16256bdb8e5392c4424ed236f9d8094cbe5356043d824",
+    "effective_models_sha256": "16b586f1e278a41839620516ff5c486fda8281619bd2bd862fe03eae34052e6b",
+    "fail_closed_config_sha256": "869d86338513bac8cb0dd4ace5844e6c1b9356d7dfe98adf49cb04e22a848d05",
+    "stateful_source": "per-model compat",
+    "environment": {},
+    "outage": "own rehearsal container stopped; unchanged client route requested with no fallback",
+    "native_linux_os_qualification_claimed": false
+  },
+  "checks": {
+    "preflight_version_and_exact_arguments": true,
+    "typed_read_tool_turn": true,
+    "exact_continuation": true,
+    "runtime_identity_bound": true,
+    "selected_provider_and_model_only": true,
+    "global_stateful_override_absent": true,
+    "fail_closed": true
+  },
+  "observations": {
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 22,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "phase_returncodes": {
+      "tool": 0,
+      "state": 0,
+      "continuation": 0,
+      "fail-closed": 1
+    },
+    "fail_closed_error_kind": "deadline exceeded",
+    "fail_closed_exit_code": 1,
+    "only_selected_local_provider_observed": true
+  },
+  "verdict": "pass"
+}

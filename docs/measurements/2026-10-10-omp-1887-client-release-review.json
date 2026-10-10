@@ -1,0 +1,184 @@
+{
+  "artifact_type": "omp_ninfer_client_candidate_release_review",
+  "schema_version": 1,
+  "observed_date": "2026-10-10",
+  "evidence_kind": "source and published-asset review; not release qualification",
+  "qualification_claimed": false,
+  "raw_prompts_outputs_or_secrets_included": false,
+  "source_commit": "c007286eee280d0a98ff912dc04ebe2e7dd9eb77",
+  "runtime_baseline": "v0.10.0",
+  "root_profile_status": "candidate",
+  "upstream": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.8.7",
+    "commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+    "tree": "39226066f2d37044581fe4dbbb2903039d2072b5",
+    "release_id": 407957363,
+    "published_at": "2026-10-09T13:45:03Z",
+    "checksum_asset_id": 625097598,
+    "checksum_file_sha256": "93b33583b5f46677cee7a6b5673e1aae43eb2b1c4c6b2a16a5028b062ec98fe8"
+  },
+  "descriptor": {
+    "path": "docs/measurements/2026-10-10-omp-1887-client-components.json",
+    "sha256": "728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9",
+    "format": "stage_release.py --omp-component: omp component plus platforms map",
+    "predecessor": "releases/v0.10.0/qualification/client-components.json"
+  },
+  "asset_verification": {
+    "method": "Download each GitHub release asset; compute SHA-256 locally; compare with GitHub asset digest and downloaded SHA256SUMS.txt; identify executable format with file.",
+    "asset_kind": "raw executable",
+    "archive_sha256": null,
+    "extraction": "not applicable: upstream publishes raw executables, as for the 18.8.3 candidate; artifact_sha256 and binary_sha256 bind the same downloaded bytes",
+    "platforms": {
+      "darwin-arm64": {
+        "asset": "omp-darwin-arm64",
+        "asset_id": 625097604,
+        "bytes": 200152352,
+        "format": "Mach-O 64-bit executable arm64",
+        "artifact_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+        "binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+        "verdict": "pass"
+      },
+      "windows-x64": {
+        "asset": "omp-windows-x64.exe",
+        "asset_id": 625097593,
+        "bytes": 225642496,
+        "format": "PE32+ executable (console) x86-64",
+        "artifact_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+        "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+        "verdict": "pass"
+      },
+      "linux-x64": {
+        "asset": "omp-linux-x64",
+        "asset_id": 625097595,
+        "bytes": 258102752,
+        "format": "ELF 64-bit LSB executable x86-64, dynamically linked",
+        "artifact_sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a",
+        "binary_sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a",
+        "verdict": "pass"
+      }
+    }
+  },
+  "release_notes_read": [
+    {
+      "tag": "v18.8.4",
+      "published_at": "2026-10-08T03:25:18Z",
+      "relevant_delta": "Auth-broker and usage fixes; no listed change to the custom openai-responses fragments."
+    },
+    {
+      "tag": "v18.8.5",
+      "published_at": "2026-10-08T14:14:16Z",
+      "relevant_delta": "#14952 introduces optional per-model compaction points; #14630 fixes rust-analyzer/lspmux on Windows, not Responses request encoding."
+    },
+    {
+      "tag": "v18.8.6",
+      "published_at": "2026-10-08T19:05:03Z",
+      "relevant_delta": "Anthropic prompt-cache lookback/pruning and mid-turn status fixes; no new NInfer threshold setting inferred."
+    },
+    {
+      "tag": "v18.8.7",
+      "published_at": "2026-10-09T13:45:03Z",
+      "relevant_delta": "#14334 releases one-shot routing state; standalone native addons move from timestamped gzip tarballs to deterministic zstd frames. Published client assets remain raw executables."
+    }
+  ],
+  "unchanged_between_v18_8_3_and_v18_8_7": [
+    {
+      "path": "packages/ai/src/stream.ts",
+      "git_blob": "d61db07973413a157a2c005d40bdc4a8f41eaa43",
+      "contract": "providers.maxInFlightRequests acquisition and waiting before provider dispatch"
+    },
+    {
+      "path": "packages/ai/src/providers/openai-shared.ts",
+      "git_blob": "dea8f630c3ceb876935c12fa4253cf34ac7044bf",
+      "contract": "include/reasoning compat and Responses image-detail encoding"
+    },
+    {
+      "path": "packages/coding-agent/src/config/models-config-schema-bundle.ts",
+      "git_blob": "88f70ab26816473c36521cf776e774728edf95dd",
+      "contract": "custom-model schema including compat.statefulResponses"
+    },
+    {
+      "path": "packages/coding-agent/src/session/settings-stream-fn.ts",
+      "git_blob": "b3448368a8bd8e849356addffdbb633e1524fc49",
+      "contract": "configured per-provider in-flight limits forwarded on each request"
+    }
+  ],
+  "routing_cleanup_review": {
+    "pr": "https://github.com/can1357/oh-my-pi/pull/14334",
+    "merge_commit": "e30e978773543917632ca541b779ad0a63e18560",
+    "source_anchors": [
+      "packages/ai/src/providers/openai-responses.ts:429-450",
+      "packages/ai/src/providers/openai-responses.ts:503-514",
+      "packages/ai/src/providers/openai-responses.ts:516-531",
+      "packages/ai/src/providers/openai-responses.ts:572-600",
+      "packages/coding-agent/src/session/agent-session.ts:11009-11086"
+    ],
+    "finding": "releaseSession normalizes and removes only chain/effort baselines with the supplied routing-session id. One-shot side requests release in finally only without conversationKey; main and keyed side-conversation lineages remain. The previous_response_id/delta-input append contract and stale-id/full-replay behavior are unchanged.",
+    "verdict": "[inference] source-compatible with candidate per-model stateful chaining; source inspection is not route acceptance"
+  },
+  "compaction_review": {
+    "pr": "https://github.com/can1357/oh-my-pi/pull/14952",
+    "source_anchors": [
+      "packages/coding-agent/src/session/context-settings.ts:160-181",
+      "packages/coding-agent/src/session/context-settings.ts:207-223",
+      "packages/coding-agent/src/session/model-compaction-threshold.ts:20-30",
+      "packages/coding-agent/src/config/compaction-threshold.ts:74-155",
+      "packages/coding-agent/src/session/session-maintenance.ts:2077",
+      "packages/ai/src/stream.ts:637-654"
+    ],
+    "async_default": true,
+    "model_thresholds_default": {},
+    "finding": "The new map modifies thresholdTokens/thresholdPercent only for a matching exact provider/model selector or longest trailing-star prefix. No match returns existing settings. asyncEnabled and the provider-cap waiting boundary are unchanged. Candidate config retains provider limits 2 for RTX 5090 and 1 for each native lane, with no asyncEnabled override.",
+    "historical_evidence": "docs/measurements/2026-09-28-omp-long-sessions.json (EXP-072)",
+    "model_thresholds_recommended": false,
+    "model_thresholds_applied": false,
+    "recommendation": "Keep existing compaction and concurrency settings. No 18.8.7 long-session or numeric-threshold tuning was measured; source support alone does not justify a new override."
+  },
+  "probe_regression_evidence": {
+    "red": "candidate-descriptor environment regression test failed against predecessor probe because --client-component was unsupported",
+    "green": "18 focused test_stock_client_harness tests passed with Python 3.13; candidate descriptor and future published per-model manifest both omit PI_OPENAI_STATEFUL, while 18.4.10 retains it"
+  },
+  "verdict": "verified upstream client candidate only; runtime/model pins unchanged; qualification and documented-route acceptance remain pending",
+  "stateful_class_closure": {
+    "commit": "bb41053600bdfe61129b8f5bdd469560218b91d5",
+    "shared_helper": "scripts/omp_client_environment.py",
+    "scope": [
+      "scripts/stock_omp_session_proof.py",
+      "scripts/omp_parallel_proof.py",
+      "scripts/omp_long_session_proof.py",
+      "scripts/hosts/omp-client-probe.py",
+      "scripts/verify_release.py"
+    ],
+    "rule": "18.8.x epoch and later omit PI_OPENAI_STATEFUL even when inherited or qualified; historical 18.4.x launches retain =1; receipts project the selected launch environment",
+    "red": "20 client-harness tests: six expected failures across the three RPC drivers and their receipt fields before the shared contract",
+    "green": "20 client-harness tests and 74 verifier tests passed with Python 3.13, including real subprocess environment checks for candidate-descriptor and future manifest paths"
+  },
+  "local_rehearsal": {
+    "source_commit": "c007286eee280d0a98ff912dc04ebe2e7dd9eb77",
+    "receipts": [
+      "docs/measurements/2026-10-10-omp-1887-linux-x64-wsl2-local-rehearsal.json",
+      "docs/measurements/2026-10-10-omp-1887-windows-x64-local-rehearsal.json",
+      "docs/measurements/2026-10-10-omp-1887-darwin-arm64-local-rehearsal.json"
+    ],
+    "gpu_lease_job_id": "20261010T073625Z-S2-omp1887-client-c007286-1128748",
+    "lease_exit_code": 0,
+    "seconds": 137,
+    "leftover_containers_stopped": 0,
+    "platforms": [
+      {
+        "platform": "linux-x64-wsl2",
+        "verdict": "pass"
+      },
+      {
+        "platform": "windows-x64",
+        "verdict": "pass"
+      },
+      {
+        "platform": "darwin-arm64",
+        "verdict": "pass"
+      }
+    ],
+    "qualification_claimed": false,
+    "coverage": "typed tool turn, exact continuation, fail-closed request and served runtime identity; not a route acceptance or long-session/compaction qualification"
+  }
+}

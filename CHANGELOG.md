@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This is an **unreleased, unqualified client candidate** on unchanged v0.10.0 runtime/model
   pins; GPU-host requalification and fresh acceptance of all five documented routes are pending.
   Published release records and historical measurements are unchanged.
+  Content-safe 2026-10-10 local rehearsal receipts record passing typed-tool, exact-continuation
+  and fail-closed checks on macOS arm64, native Windows x64 and WSL2 Linux x64 against the
+  published v0.10.0 image; these do not qualify any route.
 - Retarget the previous unreleased 18.8.3 candidate from #76; 18.8.4–18.8.7 release/source
   review keeps the request compat and async-compaction/provider-limit contract unchanged.
   #14334 releases one-shot side-session state without clearing the main Responses chain;

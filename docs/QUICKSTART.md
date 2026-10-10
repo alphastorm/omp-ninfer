@@ -20,6 +20,24 @@ deployment profiles and concurrency limits remain the v0.10.0 baseline. Root pro
 this new client combination `status: candidate`; their `release` field still names that runtime
 baseline. The published compatibility authority and release records have not been rebound.
 
+### Local rehearsal (not acceptance)
+
+On 2026-10-10, the verified 18.8.7 macOS arm64, native Windows x64 and WSL2 Linux x64
+binaries each passed a typed read/tool-result turn, exact continuation and an unavailable-route
+fail-closed request against published v0.10.0 image `fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b`.
+The client harness and fragments were frozen at `c007286eee280d0a98ff912dc04ebe2e7dd9eb77`, with isolated
+agent directories, slice-local credentials/checkpoints and no global stateful override.
+These are **local rehearsals only**: no documented route or Linux OS is newly qualified.
+
+- [macOS arm64 receipt](measurements/2026-10-10-omp-1887-darwin-arm64-local-rehearsal.json)
+- [native Windows x64 receipt](measurements/2026-10-10-omp-1887-windows-x64-local-rehearsal.json)
+- [Linux x64 under WSL2 receipt](measurements/2026-10-10-omp-1887-linux-x64-wsl2-local-rehearsal.json)
+- [Release/source and compaction review](measurements/2026-10-10-omp-1887-client-release-review.json)
+
+All client proof drivers share a version-aware environment contract: the 18.8.x epoch and
+later exercise per-model compat with `PI_OPENAI_STATEFUL` absent, including future qualified
+profiles; historical 18.4.x proof launches retain their required =1 override.
+
 Migration from the published client consists of replacing the checksummed client binary and
 merging these current model fragments:
 
@@ -50,8 +68,8 @@ GPU-host requalification and the documented acceptance separately for every rout
 | RTX 3090 native Windows runtime/client | Pending; all native route steps, public install, continuation and fail-closed checks |
 
 Bind fresh client-platform and route receipts, the 18.8.7 binary pins and the updated fragments
-in the next product manifest before readiness, a tag or publication. No GPU-host run or fresh
-qualification result is claimed here. A v0.10.0 clone in the baseline setup blocks below gets
+in the next product manifest before readiness, a tag or publication. Local client rehearsals
+are not GPU-host requalification or documented-route acceptance. A v0.10.0 clone in the baseline setup blocks below gets
 the old published fragments, not this candidate; never combine those two checkout authorities.
 
 ## Choose your lane
@@ -261,8 +279,10 @@ Qualification scratch settings do not replace either public profile.
 
 The client is an unmodified executable from the upstream
 [Oh My Pi v18.8.7 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7), not an archive
-or installer. These are **candidate** binary identities from the upstream release's asset
-metadata, not new OMP NInfer qualification results:
+or installer. These **candidate** assets were downloaded and hashed against the release's
+asset digests and SHA256SUMS.txt, not qualified as a new OMP NInfer release. The
+[release/source review](measurements/2026-10-10-omp-1887-client-release-review.json) and
+[staging descriptor](measurements/2026-10-10-omp-1887-client-components.json) bind those identities:
 
 | Client binary | Bytes | SHA-256 |
 | --- | --- | --- |

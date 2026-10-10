@@ -29,8 +29,11 @@ and record fresh documented-route acceptance separately for each of:
 - RTX 3090 native Windows runtime/client.
 
 Those fresh route and client-platform receipts must bind the 18.8.7 binaries and updated
-fragments in the next product manifest before readiness, a tag or publication. No GPU-host
-run or qualification result is claimed by this branch.
+fragments in the next product manifest before readiness, a tag or publication. Client-probe
+receipts are local rehearsals, not documented-route acceptance or GPU-host requalification.
+The [2026-10-10 rehearsals](docs/QUICKSTART.md#local-rehearsal-not-acceptance) passed the three
+client binaries' typed-tool, exact-continuation and fail-closed checks against published
+v0.10.0 image `fff4ee38`. The five acceptance entries above remain pending.
 
 ## Published baseline — v0.10.0
 
