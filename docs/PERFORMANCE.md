@@ -146,6 +146,7 @@ refer to the runtime repositories. As of 2026-09.
 | EXP-092 | RTX 5090 DFlash2 round costs | One 24-head BF16 small-T attention launch per layer for an 8-column verify, instead of 6- and 2-column chunks that each read the layer's whole KV, and the pair's 16-column K=6144 mixer outputs on the small-T tensor cores make the one-request 64K round and the pair round each at least 5% shorter, with both role corpora byte-identical | Fork `b72daad6` (A `3a2fadbd`, B `b72daad6`) on v0.10.0's source. A/B/B/A: one-request rounds **15.62 → 15.49 / 18.68 → 17.17 / 21.40 → 18.54 / 25.95 → 20.91 ms** at 0/32K/64K/120K tokens (−0.8% to −19.4%), pair **23.30 → 21.42 ms** (−8.1%, 424.2 → 454.3 tok/s), each within 0.3 ms of the prediction. DFlash2 and MTP3 corpora 89/89 byte-identical; DFlash2 corpus 288.1 → 293.0 tok/s. 64K trace: attention partial 5,735 µs in 32 launches → 2,959 µs in 16; the pair's mixer outputs 3.43 → 1.41 ms. K=15 drafting: positions 8–15 accepted in 20.5% down to 3.5% of rounds, but 23.4 ms short-context rounds and 53–134 ms behind 32K; corpus 188.5 against 288.1 tok/s. Production since v0.10.0: 338 agent requests, one at a time, 77% of decode seconds below 16K; modelled gain 4.2% of decode time [inference] ([receipt](measurements/2026-10-03-dflash2-round-costs-rtx5090.json)) | kept (both changes); K=15 rejected |
 | EXP-093 | RTX 5090 byte-identical Q4 query/key schedules at verify widths | A schedule of the staged Q4 SIMT query/key kernel, or EXP-055's direct rows kernel, keeps every output bit and runs the 8- and 16-column projections faster; they take 1.68 ms of a one-request round at 28–31% of DRAM bandwidth | Microbench on production headers, GDN 4,096 rows and attention 7,168 rows, cold L2: all 18 candidates bitwise-equal to production. The rows kernel spills under its 64-register bound and runs 14–59% slower at 8 columns and 77–126% at 16; fifteen staged schedules land at −3.3% to +10.7%, and the register caps that admit more CTAs spill and run 33–55% slower ([receipt](measurements/2026-10-03-q4-query-key-schedules-rtx5090.json)) | rejected; the tensor-core route needs a powered screen |
 | EXP-094 | RTX 5090 Q4 query/key projections on the small-T tensor cores | Sending exactly 8 and 16 columns of the GDN and attention Q4 query/key projections to the Q4 small-T tensor-core kernel makes the one-request round at short context and the pair round each at least 3% shorter than EXP-092's candidate, and the outputs it changes pass EXP-085's powered screen under the unchanged rule | Fork `a59c13d0` on EXP-092's `b72daad6`. 64K trace: projections 1,675 → 823 µs per round (2,670 → 1,091 µs in a pair). A/B/B/A: one-request rounds **15.47 → 14.68 / 17.10 → 16.35 / 18.56 → 17.74 / 20.89 → 20.06 ms** at 0/32K/64K/120K tokens (−4.0% to −5.1%), pair **21.40 → 19.48 ms** (−9.0%, 453.1 → 504.0 tok/s); against shipped v0.10.0 −6.0% to −22.7% at one request and −16.4% in a pair. DFlash2 corpus 33/89 byte-identical to shipped at 307.2 against 288.1 tok/s; MTP3 89/89. Screen, registered in `0082901` before its data: 692 of 1,120 outputs changed; recall −0.23 points (bound −0.55), evidence precision −0.75 (−1.57), unsupported claims +0.30 (+1.79), redaction −0.40 (−1.98), leaks 561 → 583 (ratio bound **1.090** against 1.10), every validity check held; it also passes against EXP-085's BF16 DFlash2 runs. With EXP-092, modelled −8.8% of production decode time [inference] ([receipt](measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json)) | kept |
+| EXP-095 | RTX 5090 current upstream architecture versus the next fork candidate | Upstream `81c8ce09` at the common DFlash2 K=7/BF16/131,072/chunk-1,024 shape earns re-porting the fork's product features | Unmodified CUDA 13.1.115/sm_120a build; documented v2→v3 upgrade preserves **1,184/1,184 tensor payloads**. Automatic sizing refuses C2 by **561.47 MiB**; the labelled fixed-KV counterfactual completes A/B/B/A. Common 84 server-completed role cases: fork `a59c13d0` **299.71** versus upstream **251.29 tok/s** (+19.27% fork), rounds **15.12 vs 18.39 ms**; 29/84 channel payloads byte-identical (28/72 valid answers). Stored 32K follow-ups: **128/125 vs 307/77 ms**, mixed rather than a uniform cache win. Upstream JSON-schema **5/5 correct**, weighted decode time/token +2.51%; the seven-token tuple has +281.51% relative overhead. C4 with six total StateImages refuses by **1,501.32 MiB** ([receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)) | rejected — architecture rebase; continue selective backport |
 
 Entry detail:
 
@@ -1139,6 +1140,91 @@ Entry detail:
   logged production traffic would have spent 8.8% less time decoding [inference]. Receipt:
   [Q4 query/key on the tensor cores](measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json).
 
+- **EXP-095 — current upstream A/B, 2026-10-10; local rehearsal, not adoption.**
+  The [read-only upstream watch](measurements/2026-10-10-upstream-watch.json) pins
+  Neroued/master `81c8ce09`, 285 commits ahead of the fork point; only 250 commits and
+  300 changed files are returned, so overlap is **unknown-truncated**, not low risk.
+  The unmodified sm_120a/CUDA **13.1.115** build has serve-binary SHA-256
+  `31cc09a0495eb74600e3ec161f5fe89b6bcbec6cb121dfaeac1696ac91541e21` and local image
+  `ninfer-overnight:S3-81c8ce09`. Upstream requires container v3; its documented local
+  upgrader transforms the pinned dc370fb6 artifact into a new container whose SHA-256
+  is `fc92d5e6f03ec001edcbcf49304563fc98c5c32f28fe1c1adee51e972265e531`.
+  **1,184/1,184 stored tensor payloads (20,424,296,864 bytes) are identical**, but one
+  of six resources, the chat template, changes. This is not the published v3 artifact
+  and identical tokenized prompts are not assumed.
+
+  Both common arms use DFlash2 K=7, BF16 KV, max-context 131,072, chunk 1,024 and
+  C2 plus two extra Device StateImages. Upstream's automatic pool refuses the shape:
+  11,971,039,745 runtime bytes plus 1 GiB headroom exceeds the 12,456,034,304 available
+  after weights by **561.47 MiB**. The initial fork failure, io_uring EPERM, was a
+  missing experiment-launcher seccomp policy, not a source regression. The corrected
+  A/B/B/A explicitly fixes the common KV pool at **131,072** and uses the repo policy;
+  this removes upstream's automatic headroom and is a **local counterfactual**, not
+  the production auto profile or a newly attested release. The fork retains its 60 s
+  keep-warm and separate 16 GiB Host KV/24 Host StateImage policy; upstream has no
+  keep-warm flag and one shared 16 GiB Host Context budget.
+
+  One role run per arm attempts the same 89 cases at one request and low reasoning.
+  On the **84 common server-completed cases**, including reasoning-only results, the
+  fork decodes **299.71 vs 251.29 tok/s** in **15.12 vs 18.39 ms/round**. The **72
+  cases with a non-error answer in both** give **294.60 vs 246.43 tok/s**; 28/72 full
+  content/reasoning/tool payloads match, versus 29/84 on the server-completed set.
+  Fork client verdicts include 10 reasoning-only and five HTTP 400 failures
+  (the existing runner attempts each of those five three times); upstream has 11
+  reasoning-only verdicts. This is decode evidence, **not 89 successful answers or a
+  powered quality gate**. Matching uses the manifests' UTC phase bounds and sequential
+  prompt/completion-token counts, because the fork logger lacks upstream's new
+  requested-reasoning field; every common case is matched without a missing metric.
+
+  The unchanged speculative probe runs 0/32K/64K/120K single requests and a short
+  pair in A/B/B/A order. Weighted single-request decode rates (fork / upstream) are
+  **367.72/317.14, 356.67/262.22, 344.49/265.06, 290.96/239.74 tok/s**; rounds are
+  **14.66/17.84, 16.27/19.48, 17.69/20.85, 20.03/23.09 ms**. Its random nonces
+  preclude cross-arm byte comparison. Additional same-input pairs at all four contexts
+  complete every request; weighted **client wall** rates, including prefill and queue,
+  are **516.56/437.44, 76.91/76.11, 38.16/38.26, 17.80/15.58 tok/s**. At 120K both
+  observed decode batches average **1.0**, despite two client submissions; upstream
+  reports two preemptions and 108,544 replayed tokens across the two pair repetitions.
+  The fork does not expose those per-request scheduling counters. Cross-arm pair
+  output identity is **0/8**; within-arm repeats are **6/8 fork, 5/8 upstream**, so
+  seeded paired input is not a claim of deterministic output.
+
+  Fresh stored Responses chains at a 32K root complete three turns per arm with
+  `store: true` and `previous_response_id`. Fork follow-ups take **128.22/125.03 ms**,
+  reuse **32,632/33,184 tokens**, and compute **41/34**; upstream takes **306.55/77.21 ms**,
+  reuses **32,112/33,181**, and computes **558/34**. New-input hashes match on all three
+  turns but output hashes match on none, so subsequent full histories differ. The
+  first upstream continuation replays more of the parent; the second is faster than
+  the fork. Anonymous full-history chat follow-ups are also retained separately in
+  the receipt. No process restart, disk persistence or durable fanout is tested here.
+
+  Five upstream JSON-schema families (enum object, nested bounded fields, object
+  array, tuple and numeric bounds) pass strict JSON and every declared assertion,
+  **5/5 constrained**, as do their unconstrained controls. Weighted decoder time per
+  token is **+2.51%**; family ratios are +0.37%, +8.06%, +0.14%, +281.51%, +0.34%.
+  The tuple has only 9/7 unconstrained/constrained tokens, too few to establish a
+  stable percentage overhead. Different output lengths, acceptance and unconstrained-first
+  ordering mean these are observed overheads, not an isolated causal mask cost or
+  semantic-quality test. C4 with two extra images (six total) requires 14,030,279,169
+  runtime bytes and refuses startup by **1,501.32 MiB**, even with explicit KV capacity.
+  A bounded resource-matched C4 follow-up removes both optional extra images, leaving
+  four total. It still requires **13,638,484,481 bytes**, **1,127.67 MiB** above the
+  same free-after-weights budget, and refuses before any request. **No C4 throughput
+  is measured** at the requested common shape; lowering precision, K, context or
+  prefill chunk would substitute a different arm. Both refusal leases stop their
+  own container with exit zero and leave no leftover containers; lease exit zero
+  therefore must not be read as a successful performance result.
+
+  **Verdict: continue selective backport; do not re-port the product wholesale.**
+  The fork is **19.27% faster** on the matched role decode set and has shorter rounds
+  at every sampled context; upstream's cache is mixed, not a blanket improvement.
+  Schema correctness and preemptive scheduling are valuable individual capabilities,
+  but the common automatic BF16 contract does not fit this card and upstream still
+  lacks the fork's **durable disk session store**. A new architecture would need that
+  product contract rebuilt and requalified, not inferred from local throughput.
+  No engine source, profile, production service, registry or upstream issue/PR changes.
+  [Content-safe receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json).
+
 ## Current order
 
 The backlog below is a pool; the program's order is fixed in [`ROADMAP.md`](../ROADMAP.md). The
@@ -1163,6 +1249,7 @@ hypothesis and method before writing code.
 
 | Idea | Why it should work | Status |
 | --- | --- | --- |
+| Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus is 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refuses by 561.47 MiB; durable disk sessions remain fork-only | EXP-095 closed — continue selective backport; no adoption |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold. DFlash2 K=7 rounds idle 324–350 µs each, 1.4–2.2% of a round (EXP-092) | open |
 | Q4 query/key projections on the tensor cores at verify widths | The GDN and attention query/key projections took 1.68 ms of every one-request DFlash2 round (2.67 ms in a pair) on SIMT at 28–31% of DRAM bandwidth, and no byte-identical schedule is faster (EXP-093). On the Q4 small-T tensor-core kernel they take 0.82 ms, rounds are 0.8 ms shorter (1.9 ms in a pair), and the changed outputs pass EXP-085's powered screen (EXP-094) | kept; awaits an RTX 5090 candidate |

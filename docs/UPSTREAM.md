@@ -91,6 +91,65 @@ documented `tools/upgrade_ninfer_v2_to_v3.py` path produced a separate v3 artifa
 installs the maintained chat template. This local build and upgrade are not a component cut,
 published image, profile adoption, or acceptance run.
 
+The [EXP-095 receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)
+preserves the production-contract sizing refusal: at DFlash2 K=7, BF16 KV, 131,072
+context, concurrency two and two extra Device StateImages, upstream needs
+11,971,039,745 bytes plus 1 GiB automatic headroom against 12,456,034,304 bytes
+available after weights (**561.47 MiB short**). Explicit KV sizing removes that automatic
+headroom, but concurrency four with two extra images (six total) still needs
+14,030,279,169 bytes (**1,501.32 MiB short**). These are measured startup refusals,
+not zero-throughput successes. The initial fork failure was the experiment launcher
+omitting the repo-owned io_uring seccomp policy; it is not a fork engine regression.
+
+Upstream's `b9114396` context-cache and preemptive-scheduling architecture remains
+an in-process implementation, without the fork's durable disk session store. Its
+`--host-context-mib` budget combines StateImages, KV and pause snapshots; the fork's
+16 GiB Host KV pool plus 24 Host StateImage slots is a different backing policy.
+Logical concurrency, extra cache images and persistence must not be conflated.
+Removing both optional extra images does not rescue the requested C4 shape:
+four total images still require **13,638,484,481 runtime bytes**, **1,127.67 MiB
+short**. Both C4 attempts stop before any request, so there is **no C4 throughput
+number** here; a smaller K/precision/context/chunk would be a different arm.
+
+### Measured engine comparison — EXP-095
+
+These are **local fixed-KV rehearsals**, not an installable profile or route
+acceptance. The common arms explicitly allocate 131,072 KV tokens, bypassing the
+automatic-headroom refusal above; they retain K=7/BF16/131,072/chunk-1,024/C2. The
+fork's keep-warm and Host KV/StateImage backing are not identical to upstream's.
+
+| Measurement | Fork `a59c13d0` | Upstream `81c8ce09` |
+| --- | --- | --- |
+| One-request low-reasoning corpus, 84 matched server-completed cases | **299.71 tok/s**, 15.12 ms/round | **251.29 tok/s**, 18.39 ms/round |
+| A/B/B/A single-request decode at 0 / 32K / 64K / 120K | **367.72 / 356.67 / 344.49 / 290.96 tok/s** | **317.14 / 262.22 / 265.06 / 239.74 tok/s** |
+| Same-input two-client pairs at 0 / 32K / 64K / 120K; client wall includes prefill/queue | **516.56 / 76.91 / 38.16 / 17.80 tok/s** | **437.44 / 76.11 / 38.26 / 15.58 tok/s** |
+| Stored Responses 32K-root follow-up TTFT, two turns | **128.22 / 125.03 ms**; 41 / 34 tokens computed | **306.55 / 77.21 ms**; 558 / 34 tokens computed |
+| JSON-schema controls, five schema families | Not a fork schema test; five corpus requests return HTTP 400 | **5/5 constrained and 5/5 unconstrained correct**; weighted decode time/token +2.51% |
+| Durable disk session store | Product capability retained; restart not exercised in EXP-095 | No counterpart; context cache is in-process |
+
+All 89 role input-case hashes match, but the matched decode set includes
+reasoning-only client verdicts: fork has 10 plus five HTTP failures; upstream has
+11. Full channels are byte-identical on **29/84** common server-completed cases
+and **28/72** cases with non-error answers in both. Pair output identity is **0/8**
+across engines; seeded within-engine repetitions match only **6/8 fork, 5/8
+upstream**. The maintained v3 chat template differs even though all 1,184 tensor
+payloads match, so this is not a same-tokenized-prompt or powered-quality claim.
+At 120K, both pair arms observe an average decode batch of **1.0**; upstream logs
+two preemptions and 108,544 replayed tokens, not always two-way GPU batching. The
+five schema pairs have different token counts; the tiny 9/7-token tuple's
+**+281.51%** time/token ratio must not be hidden by the +2.51% weighted aggregate.
+
+**Verdict: continue selective backport, rather than re-port the fork's product
+features onto upstream wholesale.** The fork is **19.27% faster** on the common
+role decode set and has shorter rounds at every sampled context. Upstream gains
+schema enforcement and preemption, but warm cache performance is mixed and the
+common automatic BF16 shape refuses this card. Neither those individual features
+nor a local counterfactual replaces the missing **durable disk session store**.
+No upstream adoption, source modification, release, or profile promotion follows
+from this comparison; the [full method and counters](PERFORMANCE.md#experiment-ledger)
+and [content-safe receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)
+retain the exact limitations.
+
 ## Historical upstream position — v0.9.1
 
 Install through the [quickstart](QUICKSTART.md); eligibility is one RTX 5090, RTX 4090
