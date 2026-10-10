@@ -6,7 +6,19 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "Founder-selected RTX5090v0.6.16 source1302d639 without3a, unchanged v0.10.0 model and BF16/DFlash2K7 shape, all15 local criteria and fullctest111pass/7skip/0fail. Its component image is published and Main reports an anonymous exact-binary pull. OMP18.8.7 client and all five documented-route acceptance remain pending. Native3090/4090 runtime packages and historical receipts are carried unchanged;4090 new-host requalification and3090 continued GPU presence/fresh acceptance are not inferred.",
+  "acceptance_nonce_epoch": {
+    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
+    "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+    "first_window": "diagnostic-red; exact nonce mismatch, restoration passed, no accepted platform receipts promoted",
+    "diagnostic": "pre-registered no material A/B difference; hardened cohort50/50 exact,0/152 misspelled copies",
+    "founder_decision": "Harden the probe now, new candidate; Main relay approximately2026-10-10T17:25Z",
+    "active_nonce": "493817-205361",
+    "candidate_binding": "New full40hex class-closure commit and CI URL in PR78 and worker handoff",
+    "new_candidate_acceptance": "pending; diagnostic is not acceptance",
+    "rtx3090": "Old65b6c426 pass retained as evidence only, not composed; lane blocked until3090 reinstall and new-candidate re-acceptance",
+    "rtx4090": "pending replacement-host acceptance on the new candidate"
+  },
+  "scope": "Founder-selected RTX5090v0.6.16 source1302d639 without3a, unchanged model/BF16/DFlash2K7 shape, all15 local criteria and ctest111pass/7skip/0fail. Published component and Main anonymous exact-binary identity remain unchanged. First65b6c426 window failed exact nonce and was restored; registered diagnostic found no material A/B difference and hardened50/50. Founder approved numeric nonce and a new candidate. All retained routes require that candidate:4090 replacement-host acceptance pending;3090 old-candidate pass evidence-only/not composable and lane blocked until hardware reinstall/re-acceptance. Historical native runtime qualification is unchanged, not fresh acceptance.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -68,7 +80,7 @@
     },
     "external_installation_acceptance": {
       "status": "pending",
-      "note": "rerun against the published v0.6.16-qwen38-5090-beta.1 component (image 6a02feba) before the cut; the receipt lands at releases/v0.11.0/acceptance/composed-external-installation.json"
+      "note": "Fresh acceptance must bind the new numeric-nonce candidate and published image6a02feba before the product cut. Preserve failed65b6c426 window and its3090 pass as evidence only; do not compose them. RTX3090 requires reinstall/re-acceptance;4090 replacement-host acceptance pending."
     }
   },
   "observed_gates": {
@@ -239,7 +251,7 @@
         "receipt_sha256": "d50f9ec55b4c5a003fbdb686675a8e1094b4f2ac7a0f43fe9b65d085a5b464a7"
       },
       "evidence_time_scope": "Carried historical native-runtime qualification; not fresh OMP18.8.7 acceptance on the current host",
-      "fresh_omp1887_acceptance": "pending"
+      "fresh_omp1887_acceptance": "pending replacement-host acceptance on the new hardened candidate"
     },
     "rtx3090_windows_native": {
       "status": "passed",
@@ -276,13 +288,15 @@
       "rollback_note": "Both directions were exercised between candidate qwen38-3090-native-v0.6.2-beta.1-f08309da3cc1 and predecessor qwen38-3090-native-v0.6.0-beta.1-03f56e58ec1b, the lane's only earlier native package, which was never published: its own 2026-09-09 window failed the agent protocol phase. The candidate declares stop-event and stopped gracefully without forced termination. The predecessor predates the stop-event channel and declares terminate; its stop was a forced termination, as that mode provides. The candidate was active again afterwards. The first window, at e20060b6, failed this phase: its controller could not launch a predecessor whose packaged configuration predates context_cache.host_kv_mib, which f08309da fixes.",
       "evidence": "releases/v0.9.1/qualification/rtx3090.json",
       "evidence_time_scope": "Carried historical native-runtime qualification; not fresh OMP18.8.7 acceptance on the current host",
-      "fresh_omp1887_acceptance": "pending"
+      "fresh_omp1887_acceptance": "blocked until3090 reinstall and new-candidate acceptance; predecessor65b6c426 pass is evidence only, not composable"
     }
   },
   "interpretation": "Selected C passes all15 unchanged local lane gates and fullsm120a ctest111pass/7skip/0fail. Initial quota monitor invalidity, bridge255, admitted plant3 predecessor precondition, D2ancillary recallfalse and2/8reuse losses remain evidence. Exact a59 and its NVFP4 strict-oracle red are superseded, not suppressed. Local serial output binding is not a new powered screen or pair-invariance claim. Founder component publication and lead anonymous binary identity are complete; fresh OMP18.8.7 published-component acceptance is still a separate gate. Carried native observations/review ledgers remain historical, not fresh release-review or new-host approval.",
   "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.16-qwen38-5090-beta.1 component and runtime image",
-    "fresh upstream OMP platform and documented-route acceptance"
+    "fresh new-candidate RTX5090 full-window acceptance against published image6a02feba",
+    "fresh new-candidate RTX4090 acceptance after replacement-host installation",
+    "RTX3090 hardware reinstall and fresh new-candidate native acceptance; old-candidate pass is not composable",
+    "compose only new-candidate upstream OMP platform and documented-route acceptance before ready/product publication"
   ],
   "deferred_scope": {}
 }

@@ -145,7 +145,7 @@ $results|ConvertTo-Json -Compress
                                              "continuation_exact_nonce", "runtime_identity_bound")},
                     "fail_closed": {"exit_code": 1, "no_model_response": True, "only_selected_local_provider_observed": True}}
             save(evidence / "structured/receipt.json", {"status": "passed", "live_acceptance": live})
-            (evidence / "route.stdout.log").write_text("OMP_NINFER_TOOL_OK\nCOBALT-493817\n")
+            (evidence / "route.stdout.log").write_text("OMP_NINFER_TOOL_OK\n493817-205361\n")
             requests = [{"event": "request_done", "request": {"request_id": str(i), "model": "q38-ninfer",
                          "has_tool_history": i == 1}, "result": {"tool_call_count": int(i == 0)}} for i in range(4)]
             (evidence / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))

@@ -4,8 +4,8 @@ Founder-selected RTX 5090 component **v0.6.16**, source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` (option **c**), combined with unmodified
 upstream OMP **18.8.7**. The founder published the component at13:46Z; its real OCI
 digest is `sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02`.
-The product is not released: documented-route acceptance and production promotion
-remain unperformed. The authorized lane rebind advances root pins to this candidate;
+The product is not released: documented-route acceptance is incomplete and production
+promotion is unperformed. The authorized lane rebind advances root pins to this candidate;
 the manifest stays candidate with its external-install acceptance blocker.
 
 ## Founder decisions — 2026-10-10
@@ -28,14 +28,67 @@ the manifest stays candidate with its external-install acceptance blocker.
   This supersedes the former retire-versus-hold decision, rather than dropping the
   lane or holding the release for that decision. Planned installation is not proof
   of hardware presence or qualification.
-- **Retain the RTX 3090 acceptance requirement.** Fresh native OMP18.8.7 acceptance
-  and confirmation that the 3090 remains physically present after the host change
-  are still required. Do not infer continued GPU presence from the 4090 plan.
+- **Harden the probe now, new candidate.** At approximately17:25Z the founder
+  authorized the all-numeric nonce `493817-205361` after the registered diagnostic
+  below. Runtime source, binary, image, sampling and exact-answer comparisons do
+  not change. Fresh acceptance must bind the new pushed class-closure commit.
+- **Retain RTX3090 but accept the lane blocker.** The successful native OMP18.8.7
+  acceptance on predecessor `65b6c4264b3bdf8f3ed793fdd138a1a9da31804b` is preserved
+  as evidence only and **not composed**. The founder is replacing that hardware
+  with the RTX4090. v0.11.0 cannot ship the RTX3090 lane until a3090 is reinstalled
+  and re-accepted on the new candidate; no old receipt is retargeted.
 
 Current selection/status is in [founder sequence](qualification/founder-sequence.json)
 and the [selected C qualification summary](qualification/option-c-lane.json).
 Frozen source/build/benchmark receipts retain their contemporaneous experiment
 labels; those historical labels do not override this founder selection.
+
+## Acceptance nonce diagnostic and new candidate
+
+The first published-image window on `65b6c4264b3bdf8f3ed793fdd138a1a9da31804b`
+passed preflight and the host2/2 documented steps, then failed the Linux structured
+exact-continuation check: expected `COBALT-493817`, returned `COBOLT-493817`. The
+misspelling was already in the state turn generated thinking; its visible answer
+was OK. Mac0/10 and Windows0/5 steps were not reached. Independent restoration
+passed. This failed window remains diagnostic-red; no accepted platform receipts
+were promoted and no causal runtime/client/backend attribution is made.
+
+The registered diagnostic plan SHA-256
+`8e97924e1437b433b1d76356c1030b954116e44709384bf7c43bd2120888037e`
+preceded the17:06–17:18Z experiment. It used OMP18.8.7, one fresh isolated session
+per trial, the unchanged structured probe plant/recall, per-model stateful compat
+and sampled runtime defaults (temperature1,top_p≈0.95,top_k20), without added
+sampling, seed, thinking or tool restrictions. The fixed-N rule and exact image,
+binary, model and profile identities are in the content-safe
+[diagnostic receipt](../../docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json).
+
+| Cohort | Exact recall | Misspelled / all assistant nonce copies |
+| --- | --- | --- |
+| Published v0.10.0, `COBALT-493817` |50/50|0/163|
+| Published v0.6.16, `COBALT-493817` |50/50|0/165|
+| Published v0.6.16, `493817-205361` |50/50|0/152|
+
+The pre-registered verdict is **no material difference**, one-sided Fisher p=1,
+**hardened green**. All150 unique sessions and302 requests were accounted for;
+hardened trial3 added two read-only bash tool rounds and still recalled exactly.
+This is bounded diagnostic evidence, not a guarantee of deterministic recall or
+route acceptance. The 2026-09-28 EXP-073 precedent separately had91/92 exact
+recalls for the same OK-only/verbatim pair; its hidden misspelling was correctly
+recalled, while its exact failure was a quoted nonce/refusal. Do not conflate it
+with the present failure or the six historical canonical-probe passes. S1 ran
+zero canonical probes; its two Juniper RPC proofs are different evidence.
+
+All active plants, greps and driver constants now use the numeric nonce. The probe
+plant interpolates NONCE; the exact continuation/restart checks are not widened.
+The executable documented-route invariant was red against the unchanged drivers
+and docs, then green after cutover; the context filter `grep -v 493817` remains.
+Historical measurement receipts and the ORCHID/COLOR long-context fixture are
+untouched. The new40hex candidate and exact-head CI URL are delivered in PR78
+and the worker handoff, not self-referentially embedded in this commit.
+
+RTX3090 predecessor acceptance is not composable on this new candidate. Fresh
+RTX5090 full-window acceptance and RTX4090 replacement-host acceptance are pending;
+the RTX3090 lane is blocked until reinstall and new-candidate acceptance.
 
 ## Exact selected component and build
 
@@ -320,9 +373,12 @@ external-install blocker and no acceptance claim until the real ready transition
 
 ### 3. Published-image acceptance window
 
-Only after a frozen, legitimately installable product candidate and actual
-rollback/host/workspace inputs are known, run preflight and the founder-authorized
-window. These future commands are documentation only:
+After the founder-authorized nonce hardening, freeze and push the new40hex product
+candidate and obtain its green CI and installability proof. Only then, with actual
+rollback/host/workspace inputs, run a fresh full preflight/window bound to that
+candidate. Do not resume or compose the failed65b6c426 window, or attach its3090
+pass to the new commit. These future commands are documentation only; S1 runs no
+acceptance action:
 
 ```bash
 acceptance=(
@@ -354,8 +410,10 @@ before the product cut.
 2. **Native RTX4090:** retained in v0.11.0, pending fresh OMP18.8.7 qualification
    on the founder-designated replacement host after today's planned installation.
    The former no-host retire/hold decision is superseded, not a release-scope cut.
-3. **Native RTX3090:** fresh OMP18.8.7 native acceptance and confirmation of
-   continued physical GPU presence after that host change remain outstanding.
+3. **Native RTX3090:** the predecessor65b6c426 pass is preserved but not composable.
+   The founder accepts that v0.11.0 cannot ship this lane until a3090 is reinstalled
+   and re-accepted on the new hardened candidate. The4090 install is not3090
+   presence or permission to reuse an old-candidate receipt.
 4. **Every retained documented route:** fresh published-component acceptance after
    the cut; package-local rehearsal is not a substitute. RTX5090 acceptance needs
    the published image, legitimately installable frozen bindings and real rollback

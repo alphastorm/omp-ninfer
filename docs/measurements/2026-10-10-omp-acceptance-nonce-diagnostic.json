@@ -1,0 +1,330 @@
+{
+  "artifact_type": "omp_ninfer_omp_acceptance_nonce_diagnostic",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "as_of": "2026-10-10",
+  "evidence_kind": "Content-safe diagnostic experiment and founder-authorized probe hardening; not route acceptance",
+  "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+  "first_window": {
+    "candidate_commit": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+    "status": "diagnostic-red; preserved, not promoted",
+    "attempt": "initial",
+    "receipt_sha256": "0ce3e11c3379e556fa9a6aeef2d3bba0fffed77479351abdafa1fcbaacf44c6e",
+    "facts_sha256": "984b42f433720b2947a871c57ed9236605bfbcc0aecc185b6769022d88464524",
+    "expected_nonce": "COBALT-493817",
+    "observed_nonce": "COBOLT-493817",
+    "failure_boundary": "Linux structured continuation exact final-text assertion",
+    "plant_visible_answer": "OK",
+    "misspelling_first_observed": "State-turn generated thinking before continuation",
+    "documented_steps": {
+      "host": "2/2 passed",
+      "macos": "0/10; not reached",
+      "windows": "0/5; not reached"
+    },
+    "runtime_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+    "restoration": "passed; preserved separately by acceptance owner",
+    "accepted_platform_receipts_produced": false
+  },
+  "pre_registration": {
+    "registered_utc": "2026-10-10T17:03:22.372Z",
+    "plan_sha256": "8e97924e1437b433b1d76356c1030b954116e44709384bf7c43bd2120888037e",
+    "harness_sha256": "a70fa4dc73e735759538651452c0f4220341618d5190af46a99b54fa94d71dc2",
+    "decision_rule": {
+      "verbatim": "material regression if B exact-recall failures are >=5/50, or B misspelled-copy rate exceeds A with one-sided Fisher p<0.05 and B has >=2 more exact failures than A; otherwise no material difference",
+      "b_exact_failures_at_least": 5,
+      "b_extra_exact_failures_at_least": 2,
+      "one_sided_fisher_alpha": 0.05,
+      "comparison": "A-cobalt versus B-cobalt only; table rows B then A, columns misspelled then exact copies",
+      "hardened_green": "B-hardened 50/50 exact",
+      "incomplete_run": "no rule verdict; incomplete, not green"
+    }
+  },
+  "method": {
+    "client": {
+      "version": "18.8.7",
+      "platform": "linux-x64-wsl2",
+      "binary_sha256": "b87f9835a0acdbb81bbbad8273aa2d999b608a208598421a9584cffeb3139a8a",
+      "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d"
+    },
+    "model_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+    "plant_template": "Remember the nonce {nonce} for my next turn. Reply OK only.",
+    "recall_prompt": "Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.",
+    "reference": "docs/measurements/2026-09-28-omp-acceptance-sampling.json",
+    "fresh_session_directory_per_trial": true,
+    "fresh_isolated_home_agent_and_XDG_directories_per_trial": true,
+    "global_stateful_override": false,
+    "provider_fragment": "candidate models.fragment.yml, endpoint only substituted to 18102",
+    "settings_fragment": "unmodified candidate fail-closed.yml",
+    "argv": "exact structured probe state and continuation argv; no --thinking, sampling, tool restriction, or seed added",
+    "request_schedule": "one trial and one CLI turn at a time; arm A then arm B cobalt then arm B hardened",
+    "arm_B_container_reused_for_hardened_cohort": true,
+    "nonce_copy_collection": "every matching occurrence in persisted assistant thinking and visible text across both turns; exclude user inputs, tool inputs/results, text/thinking signatures and duplicate streaming events",
+    "misspelled_copy_definition": "nonce-shaped occurrence is not character-for-character equal to that cohort nonce",
+    "exact_recall_definition": "canonical probe summarize final_text equals cohort nonce after its canonical strip, no case-folding, substring or quote tolerance",
+    "request_log_fields": [
+      "resolved sampling including seed",
+      "message_count",
+      "session hash",
+      "reuse_path",
+      "cached/computed/total prompt tokens",
+      "completion tokens",
+      "finish reason",
+      "speculation backend and acceptance"
+    ],
+    "raw_wire_field_provenance": "not captured; no claim that request log resolved sampling proves which HTTP fields were sent",
+    "misspelling_denominator": "all nonce-shaped occurrences in assistant thinking and visible text; signatures excluded"
+  },
+  "execution": {
+    "started_utc": "2026-10-10T17:06:24.642552+00:00",
+    "finished_utc": "2026-10-10T17:18:08.558631+00:00",
+    "status": "complete",
+    "lease_job": "20261010T170624Z-S5090diag-nonce-v0110-1468979",
+    "lease_exit": 0,
+    "lease_seconds": 705,
+    "unique_sessions": 150,
+    "request_counts": {
+      "A-cobalt": 100,
+      "B-cobalt": 100,
+      "B-hardened": 102
+    },
+    "total_requests": 302,
+    "observed_sampling": [
+      {
+        "temperature": 1,
+        "top_p": 0.949999988079071,
+        "top_k": 20,
+        "min_p": 0
+      }
+    ],
+    "unique_request_seeds": 302,
+    "seeds_preserved_as_uint64_decimal_strings": true,
+    "continuation_reuse": {
+      "A-cobalt": {
+        "private_response_replay": 50
+      },
+      "B-cobalt": {
+        "private_response_replay": 50
+      },
+      "B-hardened": {
+        "private_response_replay": 49,
+        "private_long_anchor": 1
+      }
+    },
+    "additional_request_rounds": {
+      "cohort": "B-hardened",
+      "trial": 3,
+      "state_requests": 3,
+      "continuation_requests": 1,
+      "read_only_bash_tool_rounds": 2,
+      "exact_recall_passed": true,
+      "infrastructure_errors": 0
+    },
+    "own_containers_stopped": true,
+    "gpu_after_mib": 0,
+    "no_gpu_retry": true
+  },
+  "runtime_identities": [
+    {
+      "arm": "A",
+      "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "image_id": "sha256:fff4ee38bf687549470072f9bcc7285707577cc3892b5c68c6ec180e1e6b269b",
+      "deployment_profile": "qwen38-5090-v0.10.0",
+      "binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68",
+      "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "config_sha256": "8b2f495992c88d20287b4e31d0bb0b7118203081ea76bae46d80d8e571fd393a",
+      "source_dirty": false,
+      "sampling_defaults": {
+        "greedy": false,
+        "non_thinking": {
+          "frequency_penalty": 0,
+          "min_p": 0,
+          "presence_penalty": 1.5,
+          "temperature": 0.699999988079071,
+          "top_k": 20,
+          "top_p": 0.800000011920929
+        },
+        "omitted_seed": "random",
+        "server_overrides": {
+          "frequency_penalty": null,
+          "min_p": null,
+          "presence_penalty": null,
+          "seed": null,
+          "temperature": null,
+          "top_k": null,
+          "top_p": null
+        },
+        "thinking": {
+          "frequency_penalty": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "temperature": 1,
+          "top_k": 20,
+          "top_p": 0.949999988079071
+        }
+      }
+    },
+    {
+      "arm": "B",
+      "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+      "image_id": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+      "deployment_profile": "qwen38-5090-v0.11.0",
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "source_dirty": false,
+      "sampling_defaults": {
+        "greedy": false,
+        "non_thinking": {
+          "frequency_penalty": 0,
+          "min_p": 0,
+          "presence_penalty": 1.5,
+          "temperature": 0.699999988079071,
+          "top_k": 20,
+          "top_p": 0.800000011920929
+        },
+        "omitted_seed": "random",
+        "server_overrides": {
+          "frequency_penalty": null,
+          "min_p": null,
+          "presence_penalty": null,
+          "seed": null,
+          "temperature": null,
+          "top_k": null,
+          "top_p": null
+        },
+        "thinking": {
+          "frequency_penalty": 0,
+          "min_p": 0,
+          "presence_penalty": 0,
+          "temperature": 1,
+          "top_k": 20,
+          "top_p": 0.949999988079071
+        }
+      }
+    }
+  ],
+  "cohorts": {
+    "A-cobalt": {
+      "planned_trials": 50,
+      "completed_trials": 50,
+      "exact_passes": 50,
+      "exact_failures": 0,
+      "model_written_nonce_copies": 163,
+      "misspelled_copies": 0,
+      "misspelled_copy_rate": 0
+    },
+    "B-cobalt": {
+      "planned_trials": 50,
+      "completed_trials": 50,
+      "exact_passes": 50,
+      "exact_failures": 0,
+      "model_written_nonce_copies": 165,
+      "misspelled_copies": 0,
+      "misspelled_copy_rate": 0
+    },
+    "B-hardened": {
+      "planned_trials": 50,
+      "completed_trials": 50,
+      "exact_passes": 50,
+      "exact_failures": 0,
+      "model_written_nonce_copies": 152,
+      "misspelled_copies": 0,
+      "misspelled_copy_rate": 0
+    }
+  },
+  "verdict": {
+    "material_regression": "no material difference",
+    "one_sided_fisher_p": 1,
+    "hardened_green": true
+  },
+  "evidence_sha256": {
+    "diagnostic-plan.json": "8e97924e1437b433b1d76356c1030b954116e44709384bf7c43bd2120888037e",
+    "diagnostic-results.json": "dc3a711728d3fdfd30c372be5a3b35f215ea50eb0c201163543b463bc5ddd697",
+    "trial-results.jsonl": "7e852d7a776e07ad50d60c0389687a2f5f82cfe6242f750b52b413d49b9e711e"
+  },
+  "collection_limits": {
+    "first_archive_input_error": {
+      "error": "tar: .: file changed as we read it",
+      "exit_code": 1,
+      "input_correction": "archive explicitly named evidence entries instead of dot; no warning suppression or GPU rerun"
+    },
+    "read_limit": {
+      "first_full_range_read": "tool truncated 425551-byte JSONL to 80001 bytes then middle-elided it; JSON parse encountered ellipsis",
+      "resolved": "read 15 exact ten-line ranges; recovered all 150 records"
+    },
+    "private_raw_archive_not_committed": true
+  },
+  "precedent": {
+    "receipt": "docs/measurements/2026-09-28-omp-acceptance-sampling.json",
+    "experiment": "EXP-073",
+    "same_OK_only_verbatim_prompt_pair": true,
+    "trials": 92,
+    "exact_recalls": 91,
+    "documented_grep_passes": 92,
+    "misspelled_copy": "COBOLT-493817",
+    "misspelled_copy_scope": "Remained in thinking; that recall returned the planted nonce. The separate exact-recall failure quoted the nonce while declining to treat it as stored.",
+    "limit": "Separate sampled experiment, not added to canonical cohort passes and not proof of the present failure mechanism."
+  },
+  "founder_decision": {
+    "authority": "Founder via Ask, relayed by Main",
+    "time_approx_utc": "2026-10-10T17:25Z",
+    "decision": "Harden the probe now, new candidate.",
+    "active_nonce": "493817-205361",
+    "comparison": "Unchanged exact final answer; no case-folding, substring or quote tolerance added",
+    "new_candidate_binding": "Full40hex class-closure commit and exact-head CI URL are delivered in PR78 and the worker handoff; not self-referentially embedded here",
+    "rtx3090": "Predecessor65b6c426 acceptance retained as evidence only, not composable. v0.11.0 cannot ship this lane until a3090 is reinstalled and re-accepted on the new candidate.",
+    "rtx4090": "Pending new-candidate acceptance after replacement-host installation",
+    "rtx5090": "Fresh full new-candidate published-image acceptance required; diagnostic green is not acceptance"
+  },
+  "executable_invariant": {
+    "test": "tests/test_documented_route.py::ExtractionTests.test_every_nonce_check_uses_the_documented_numeric_nonce",
+    "red_before": {
+      "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" /opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_documented_route.py -k test_every_nonce_check_uses_the_documented_numeric_nonce -v",
+      "exit": 1,
+      "scope": "All three unchanged drivers and documented plants/greps disagreed with the numeric nonce"
+    },
+    "green_after": {
+      "extraction_tests": 11,
+      "extraction_seconds": 0.167,
+      "native_contract_tests": 4,
+      "native_skipped": 1,
+      "windows_answer_tests": 2,
+      "exit": 0
+    },
+    "preserved": "OK-only plant, verbatim recall, exact driver comparisons, all negative/refusal tests and grep -v493817 restart-context exclusion",
+    "static_commands": {
+      "qualification_hash_refresh": "python3.13 scripts/rebind_release.py --release v0.11.0 --draft",
+      "root_not_promoted": true,
+      "compatibility_sha256_prefix": "15d201e7c79d",
+      "require_installable": "python3.13 scripts/verify_release.py --release v0.11.0 --require-installable: valid v0.11.0 manifest (candidate)",
+      "default_verifier": "passed",
+      "shell_parse": "bash -n examples/manual-tunnel/*.sh: passed"
+    },
+    "full_local_suite": {
+      "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" /opt/homebrew/bin/python3.13 -m unittest discover -s tests -v",
+      "tests": 348,
+      "seconds": 208.778,
+      "exit": 1,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 2,
+      "remaining_timing_failures": [
+        {"test": "test_metrics_count_reasoning_and_measure_concurrent_makespan", "observed_ttft_s": 0.13085141699411906, "expected_s": 0.06, "delta_s": 0.035},
+        {"test": "test_one_pre_stream_reset_retry_keeps_submit_latency", "observed_decode_tok_s": 346.48992342831195, "expected": 2500, "delta": 700},
+        {"test": "test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft", "observed_gap_ms": 258.4989170136396, "expected_ms": 180, "delta_ms": 35},
+        {"test": "test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples", "observed_submission_gap_s": 1.0887844579992816, "expected_s": 1, "delta_s": 0.06}
+      ],
+      "disposition": "Main reports the same four timing failures on untouched S2 Mac code with Ubuntu/Python3.11 CI passing. No timing/probe implementation or threshold changed; no unchanged rerun. Exact pushed-head GitHub CI is the authority, delivered in PR78/handoff before acceptance.",
+      "acceptance_actions_run_by_worker": false
+    }
+  },
+  "limits": [
+    "Fixed50-trial cohorts under sampled defaults do not prove deterministic or universal recall.",
+    "No raw HTTP body was captured; resolved sampling does not establish literal wire-field presence.",
+    "No causal runtime/client/backend attribution from the first sampled failure.",
+    "The first failed window and the earlier3090 acceptance remain evidence, not new-candidate acceptance.",
+    "Runtime source, binary, image, provider, sampling, acceptance thresholds and historical measurements are unchanged."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false,
+  "private_paths_or_hostnames_included": false
+}

@@ -1,7 +1,7 @@
 {
   "artifact_type": "omp_ninfer_v011_founder_sequence",
   "schema_version": 3,
-  "execution_status": "Founder component cut and published workflow completed; S1 real-digest staging and authorized lane rebind completed. Actual v0.11.0 --require-installable passes with manifestcandidate/external acceptance pending. Main dispatches acceptance after the final pushed candidate and CI are reported; no acceptance by S1.",
+  "execution_status": "Component cut, published image, staging and lane rebind complete. Predecessor65b6c426 first5090 window failed exact nonce and restored; registered diagnostic found no material difference and hardened50/50. Founder approved numeric nonce and a new candidate. Predecessor3090 pass is evidence-only/not composable. New-candidate acceptance pending;3090 blocked until reinstall/re-acceptance,4090 replacement-host acceptance pending. S1 runs no acceptance action; new40hex and exact-head CI are delivered in PR78/handoff.",
   "working_directory": "$HOME/Development/omp-ninfer-S1",
   "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
   "selected_option": "c",
@@ -26,9 +26,21 @@
       "hardware_installation_measured_in_this_receipt": false
     },
     "native_rtx3090": {
-      "acceptance": "pending fresh OMP18.8.7 native-route acceptance",
-      "continued_gpu_presence": "must be confirmed after the replacement-host change",
+      "acceptance": "blocked until3090 reinstall and re-acceptance on the new hardened candidate",
+      "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+      "predecessor_acceptance": "passed, reported by Accept3090 and confirmed bound by Main; preserved evidence only, not composed",
+      "founder_accepted_consequence": "v0.11.0 cannot ship the RTX3090 lane until it is reinstalled and accepted on the new candidate",
+      "continued_gpu_presence": "not inferred from predecessor pass or replacement4090 installation",
       "presence_measured_in_this_receipt": false
+    },
+    "probe_hardening": {
+      "decision": "Harden the probe now, new candidate.",
+      "time_approx_utc": "2026-10-10T17:25Z",
+      "active_nonce": "493817-205361",
+      "comparison": "unchanged exact recall; no sampling/provider/runtime/source changes or tolerance widening",
+      "diagnostic_receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
+      "plan_sha256": "8e97924e1437b433b1d76356c1030b954116e44709384bf7c43bd2120888037e",
+      "rule_verdict": "no material difference; hardened green; diagnostic, not acceptance"
     }
   },
   "options": [
@@ -265,7 +277,7 @@
           "founder_only": false,
           "agent_authorized_by": "Main, after the founder component cut",
           "profile_binding": "Verified installable, not ready; root-lane-cut.json",
-          "frozen_candidate_delivery": "Final40hexcandidate and CIURL are reported in PR78, avoiding self-referential commit pins",
+          "frozen_candidate_delivery": "The new numeric-nonce class-closure40hexcandidate and exact-head CIURL are reported in PR78/handoff. Predecessor65b6c426 receipts are not retargeted or composed; avoid self-referential commit pins",
           "rollback_host_workspace_inputs": "Main acceptance owner supplies actual measured effect/rollback inputs; not assigned to this worker"
         },
         {
@@ -287,16 +299,25 @@
   },
   "preflight_guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
   "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
+  "acceptance_history": {
+    "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+    "first5090_window": "diagnostic-red: expected COBALT-493817, returned COBOLT-493817; host2/2 passed, Mac0/10 and Windows0/5 not reached; restoration passed; no accepted platform receipts promoted",
+    "diagnostic": "pre-registered fixed50/cohort: A-cobalt50/50,0/163 misspelled; B-cobalt50/50,0/165; B-hardened50/50,0/152. No material difference,p=1; hardened green is not acceptance",
+    "rtx3090": "predecessor acceptance passed; preserved by acceptance owner as evidence only, not composed on the new candidate",
+    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json"
+  },
   "follow_on": [
-    "Retain native RTX4090 in v0.11.0 and obtain fresh OMP18.8.7 requalification on the founder-designated replacement host.",
-    "Confirm continued native RTX3090 GPU presence and obtain its fresh OMP18.8.7 acceptance.",
-    "Compose fresh receipts for all retained documented routes, then platform/acceptance/manifest pin stages and --require-ready --check-pins before the product cut."
+    "Freeze and push the single nonce class-closure commit; require its installability proof and green exact-head CI. Bind all future acceptance to that new40hexcandidate, not65b6c426.",
+    "Run fresh full published-image RTX5090 preflight/window on the new candidate with measured rollback inputs and restoration reserve; no partial replay of the failed window.",
+    "Retain native RTX4090 and obtain fresh new-candidate OMP18.8.7 replacement-host acceptance after installation.",
+    "RTX3090 lane cannot ship until hardware reinstall and new-candidate re-acceptance; old65b6c426 pass is evidence only, not composable.",
+    "Compose only new-candidate receipts for all retained routes, then platform/acceptance/manifest pin stages and --require-ready --check-pins before the founder-only product cut."
   ],
   "blockers": [
     "Native RTX4090 remains in v0.11.0. Founder will install the card on the replacement native host today; fresh OMP18.8.7 new-host qualification is pending, not a retire-versus-hold decision. Planned hardware is not measured qualification.",
-    "Native RTX3090 needs fresh OMP18.8.7 acceptance and confirmation of continued physical GPU presence after the replacement-host change.",
-    "All retained documented routes need fresh published-component acceptance after the cut; RTX5090 acceptance must use the anonymously pullable published image.",
-    "Fresh acceptance requires the pushed frozen candidate and actual rollback/host/workspace inputs; no acceptance was run by S1."
+    "Native RTX3090 cannot ship until3090 reinstall and fresh acceptance on the new numeric-nonce candidate; predecessor65b6c426 pass is preserved as evidence only, not composed.",
+    "All retained routes need fresh new-candidate acceptance. First5090 window remains diagnostic-red; diagnostic green does not qualify a route. Use anonymously pullable image6a02feba.",
+    "Fresh acceptance requires the pushed new40hexcandidate, green exact-head CI and actual rollback/host/workspace inputs; no acceptance action by S1."
   ],
   "original_a59_assets_changed": false,
   "original_a59_proposal_superseded": true,
@@ -305,7 +326,9 @@
   "ninfer_source_pushed_by_this_worker": false,
   "live_component_cut_run": true,
   "stage_run": true,
-  "acceptance_run": false,
+  "acceptance_run": true,
+  "acceptance_run_by_this_worker": false,
+  "new_candidate_acceptance_run": false,
   "raw_prompts_outputs_or_secrets_included": false,
   "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
   "runtime_publication": {

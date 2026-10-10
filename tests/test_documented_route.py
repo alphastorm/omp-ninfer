@@ -110,7 +110,7 @@ class ExtractionTests(unittest.TestCase):
         restore the model returned that copy instead of the planted nonce. The planted nonce must be
         the only copy of its digits the session holds, whatever the documents say."""
         block = documented_route.extract(documented_route.DEFAULT_DOC, documented_route.RESTART_SEED_HEADING)
-        digits = set(re.findall(r"\b[A-Z]+-(\d{6})\b", block.text))
+        digits = set(re.findall(r"\b(\d{6})-\d{6}\b", block.text))
         self.assertEqual(len(digits), 1, block.text)
         seed = documented_route.restart_seed(documented_route.DEFAULT_DOC, ROOT)
         self.assertNotIn(digits.pop().encode(), seed)
@@ -140,25 +140,71 @@ class ExtractionTests(unittest.TestCase):
                 quoted = r'"([^"\n]*)"' if block.language == "sh" else r"'([^'\n]*)'"
                 prompts += [(f"{lane}/{step.slug}", text) for text in re.findall(quoted, block.text)]
         probe = ast.parse((ROOT / "scripts" / "hosts" / "omp-client-probe.py").read_text(encoding="utf-8"))
+        nonce = next(ast.literal_eval(node.value) for node in probe.body
+                     if isinstance(node, ast.Assign)
+                     and any(isinstance(target, ast.Name) and target.id == "NONCE"
+                             for target in node.targets))
         for node in ast.walk(probe):
             if (isinstance(node, ast.Call) and getattr(node.func, "id", None) == "call"
-                    and len(node.args) == 2 and isinstance(node.args[1], ast.List)
-                    and isinstance(node.args[1].elts[-1], ast.Constant)):
-                prompts.append(("omp-client-probe", node.args[1].elts[-1].value))
+                    and len(node.args) == 2 and isinstance(node.args[1], ast.List)):
+                prompt = node.args[1].elts[-1]
+                if isinstance(prompt, ast.Constant):
+                    self.assertNotIn("Remember the nonce ", prompt.value, "probe plant must interpolate NONCE")
+                    prompts.append(("omp-client-probe", prompt.value))
+                elif isinstance(prompt, ast.JoinedStr):
+                    expected = ast.parse(
+                        'f"Remember the nonce {NONCE} for my next turn. Reply OK only."', mode="eval").body
+                    self.assertEqual(ast.dump(prompt), ast.dump(expected))
+                    prompts.append(("omp-client-probe", f"Remember the nonce {nonce} for my next turn. Reply OK only."))
         planted = recalled = 0
         for where, text in prompts:
             if "nonce" not in text.lower():
                 continue
-            if re.search(r"\b[A-Z]+-\d{6}\b", text):
+            if re.search(r"\b(?:[A-Z]+-\d{6}|\d{6}-\d{6})\b", text):
                 planted += 1
                 self.assertTrue(text.endswith("Reply OK only."), f"{where} invites a restatement: {text!r}")
             else:
                 recalled += 1
                 self.assertIn("verbatim, character for character", text, f"{where}: {text!r}")
                 self.assertTrue(text.endswith("Return nothing else."), f"{where}: {text!r}")
-        # Four documented checks (RTX 4090, Windows, macOS resume and restart) and the probe.
+        # Five documented checks (both native lanes, Windows, macOS resume/restart) and the probe.
         self.assertGreaterEqual(planted, 5)
         self.assertGreaterEqual(recalled, 5)
+
+    def test_every_nonce_check_uses_the_documented_numeric_nonce(self) -> None:
+        """All route plants, greps and driver checks must use the same hardened nonce.
+        This is an exact-recall test; changing its token must not leave a driver
+        checking the previous token or widen the answer comparison."""
+        nonce = "493817-205361"
+        drivers = ("omp-client-probe.py", "accept-rtx5090-routes.py", "accept-rtx4090-route.py")
+        for driver in drivers:
+            tree = ast.parse((ROOT / "scripts" / "hosts" / driver).read_text(encoding="utf-8"))
+            constants = [ast.literal_eval(node.value) for node in tree.body
+                         if isinstance(node, ast.Assign)
+                         and any(isinstance(target, ast.Name) and target.id == "NONCE"
+                                 for target in node.targets)]
+            with self.subTest(driver=driver):
+                self.assertEqual(constants, [nonce], f"{driver} disagrees with the documented nonce")
+            for node in ast.walk(tree):
+                if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                        and re.fullmatch(r"(?:[A-Z]+-\d{6}|\d{6}-\d{6})", node.value)):
+                    with self.subTest(driver=driver, check=node.value):
+                        self.assertEqual(node.value, nonce)
+
+        plants = greps = 0
+        for lane in documented_route.LANES:
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
+                for planted in re.findall(r"Remember the nonce ([A-Z0-9-]+)(?: for my next turn)?\.", block.text):
+                    plants += 1
+                    with self.subTest(lane=lane, step=step.slug, plant=planted):
+                        self.assertEqual(planted, nonce)
+                for checked in re.findall(r"grep -q ([A-Z0-9-]+)", block.text):
+                    if re.fullmatch(r"(?:[A-Z]+-\d{6}|\d{6}-\d{6})", checked):
+                        greps += 1
+                        with self.subTest(lane=lane, step=step.slug, grep=checked):
+                            self.assertEqual(checked, nonce)
+        self.assertGreaterEqual(plants, 5)
+        self.assertEqual(greps, 2)
 
 
 class RunnerTests(unittest.TestCase):

@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Harden every active documented and structured acceptance check to nonce
+  `493817-205361`, with the probe plant interpolating its checked constant and
+  a red-before/green-after invariant across all three drivers, route plants and
+  greps. Keep OK-only planting, verbatim recall and exact answers unchanged. The
+  pre-registered diagnostic found no material A/B difference: each old-nonce
+  cohort and the hardened cohort passed50/50. Preserve the first failed window.
+  The founder requires a new candidate: the RTX3090 pass on65b6c426 is evidence
+  only, not composable; that lane cannot ship until hardware is reinstalled and
+  re-accepted. RTX5090 and replacement-host RTX4090 acceptance remain pending
+  ([diagnostic](docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json)).
 - Select founder-approved `1302d639` for the v0.11.0 / RTX 5090 v0.6.16 candidate:
   EXP-092/094 without `3a2fadbd`, with full sm_120a ctest 111 pass/7 skip/0 fail and
   all 15 local lane criteria passing. Preserve superseded `a59c13d0` and its red

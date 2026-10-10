@@ -23,7 +23,7 @@ import sys
 import urllib.request
 
 MARKER = "OMP_NINFER_TOOL_OK"
-NONCE = "COBALT-493817"
+NONCE = "493817-205361"
 
 
 def now():
@@ -203,7 +203,7 @@ def main():
             tool = call("tool", [*base, "--no-session", "--tools", "read", "Use the read tool to read marker.txt. Return only its exact single line, without quotes or formatting."])
             live_ok(tool)
             assert tool["typed_read_tool_calls"] == 1 and tool["linked_tool_results"] == 1 and tool["final_text"] == MARKER, "typed read/linked result/exact final marker failed"
-            state = call("state", [*base, "--session-dir", str(out / "sessions"), "Remember the nonce COBALT-493817 for my next turn. Reply OK only."])
+            state = call("state", [*base, "--session-dir", str(out / "sessions"), f"Remember the nonce {NONCE} for my next turn. Reply OK only."])
             live_ok(state)
             continuation = call("continuation", ["-p", "--auto-approve", "--mode", "json", "--max-time", "180s", "--session-dir", str(out / "sessions"), "--continue", "Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else."])
             live_ok(continuation)

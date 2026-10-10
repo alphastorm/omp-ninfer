@@ -595,7 +595,7 @@ try {
 
   $Session = Join-Path $Smoke 'sessions'
   & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/qwen3.8-27b" `
-    'Remember the nonce COBALT-493817 for my next turn. Reply OK only.'
+    'Remember the nonce 493817-205361 for my next turn. Reply OK only.'
   if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
   & $Launcher -p --auto-approve --session-dir $Session --continue `
     'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
@@ -816,7 +816,7 @@ try {
 
   $Session = Join-Path $Smoke 'sessions'
   & $Launcher -p --auto-approve --session-dir $Session --model "$Provider/q38-ninfer" `
-    'Remember the nonce COBALT-493817 for my next turn. Reply OK only.'
+    'Remember the nonce 493817-205361 for my next turn. Reply OK only.'
   if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
   & $Launcher -p --auto-approve --session-dir $Session --continue `
     'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
@@ -1126,7 +1126,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Vision acceptance failed' }
 
 $Session = Join-Path $Smoke 'sessions'
 & $Launcher -p --auto-approve --session-dir $Session --model ninfer-beta/q38-ninfer `
-  'Remember the nonce COBALT-493817 for my next turn. Reply OK only.'
+  'Remember the nonce 493817-205361 for my next turn. Reply OK only.'
 if ($LASTEXITCODE -ne 0) { throw 'state setup failed' }
 & $Launcher -p --auto-approve --session-dir $Session --continue `
   'Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else.'
@@ -1186,10 +1186,10 @@ RTX 5090 container lane only. Do not use private screenshots in an issue.
 
 ```sh
 omp -p --auto-approve --session-dir "$SMOKE/sessions" --model ninfer-beta/q38-ninfer \
-  "Remember the nonce COBALT-493817 for my next turn. Reply OK only."
+  "Remember the nonce 493817-205361 for my next turn. Reply OK only."
 omp -p --auto-approve --session-dir "$SMOKE/sessions" --continue \
   "Return the exact nonce from the prior turn verbatim, character for character. Do not correct or change its spelling. Return nothing else." | tee "$SMOKE/resume.txt"
-grep -q COBALT-493817 "$SMOKE/resume.txt"
+grep -q 493817-205361 "$SMOKE/resume.txt"
 ```
 
 The transcript remains authoritative. This checks OMP exit and resume with NInfer stateful
@@ -1214,12 +1214,12 @@ cat "$HOME/omp-ninfer/docs/BENCHMARKS.md" "$HOME/omp-ninfer/README.md" \
     "$HOME/omp-ninfer/CHANGELOG.md" | LC_ALL=C tr -cd '\11\12\40-\176' | grep -v 493817 > "$SMOKE/docs.txt"
 head -c 200000 "$SMOKE/docs.txt" > "$SMOKE/context.md"
 omp -p --auto-approve --session-dir "$SMOKE/durable" --model ninfer-beta/q38-ninfer \
-  @"$SMOKE/context.md" "Hold this material in context. Remember the nonce COBALT-493817. Reply OK only."
+  @"$SMOKE/context.md" "Hold this material in context. Remember the nonce 493817-205361. Reply OK only."
 ssh USER@RUNTIME_HOST docker restart --timeout 60 omp-ninfer-beta
 until curl -sf -m 3 -o /dev/null http://127.0.0.1:18089/health; do sleep 3; done
 omp -p --auto-approve --session-dir "$SMOKE/durable" --continue \
   "Return the exact nonce I asked you to remember verbatim, character for character. Do not correct or change its spelling. Return nothing else." | tee "$SMOKE/durable.txt"
-grep -q COBALT-493817 "$SMOKE/durable.txt"
+grep -q 493817-205361 "$SMOKE/durable.txt"
 ```
 
 Use the SSH destination from section 5; `docker` answers there on Linux and on Windows alike, and

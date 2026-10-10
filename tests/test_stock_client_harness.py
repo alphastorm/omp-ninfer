@@ -438,14 +438,14 @@ class WindowsRouteAnswerTests(unittest.TestCase):
                              (["The exact single line in marker.txt is:", "```", "OMP_NINFER_TOOL_OK", "```"], True)):
             with self.subTest(answer=answer):
                 observed = self.routes.windows_route_answers(
-                    ["Working...", *answer, "Working...", "Got it - COBALT-493817.", "COBALT-493817"])
+                    ["Working...", *answer, "Working...", "Got it - 493817-205361.", "493817-205361"])
                 self.assertEqual(observed, {"tool_marker_observed": True, "plain_stdout_exact_marker": bare,
                                             "exact_nonce_line": True})
 
     def test_a_missing_marker_or_an_inexact_nonce_is_refused(self) -> None:
-        for lines, message in ((["OMP_NINFER_TOOL_OKAY", "COBALT-493817"], "tool marker"),
-                               (["MY_OMP_NINFER_TOOL_OK", "COBALT-493817"], "tool marker"),
-                               (["`OMP_NINFER_TOOL_OK`", "The nonce was COBALT-493817."], "exact nonce")):
+        for lines, message in ((["OMP_NINFER_TOOL_OKAY", "493817-205361"], "tool marker"),
+                               (["MY_OMP_NINFER_TOOL_OK", "493817-205361"], "tool marker"),
+                               (["`OMP_NINFER_TOOL_OK`", "The nonce was 493817-205361."], "exact nonce")):
             with self.subTest(lines=lines), self.assertRaisesRegex(AssertionError, message):
                 self.routes.windows_route_answers(lines)
 

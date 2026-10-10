@@ -67,6 +67,7 @@ def private_text(path: Path) -> str:
 
 # The documented acceptance's turns: the tool turn, the nonce plant and the nonce recall.
 DOCUMENTED_TURNS = 3
+NONCE = "493817-205361"
 NATIVE_MODELS = {"rtx4090": "qwen3.8-27b", "rtx3090": "q38-ninfer"}
 
 
@@ -130,7 +131,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
         # The documented prompt asks to report the line, not to omit surrounding prose.
         # The separate structured probe requires the entire visible final answer exactly.
         "exact_tool_marker": bool(re.search(r"(?<![A-Z0-9_])OMP_NINFER_TOOL_OK(?![A-Z0-9_])", output)),
-        "exact_continuation_nonce": "COBALT-493817" in lines,
+        "exact_continuation_nonce": NONCE in lines,
         **request_shape(completed),
         "linked_tool_history": any(row["request"].get("has_tool_history") for row in completed),
         "only_expected_server_model": bool(completed) and all(row["request"]["model"] == model for row in completed),

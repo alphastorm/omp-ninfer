@@ -40,7 +40,7 @@ def sha(path):
 
 
 MARKER = 'OMP_NINFER_TOOL_OK'
-NONCE = 'COBALT-493817'
+NONCE = '493817-205361'
 MARKER_TOKEN = re.compile(r'(?<![A-Z0-9_])' + MARKER + r'(?![A-Z0-9_])')
 
 
@@ -270,8 +270,8 @@ def main():
             assert len(matches) == 1, 'cannot uniquely bind Mac smoke directory to this route'
             shutil.move(str(matches[0].parent), str(collected_smoke))
             smoke = [collected_smoke / 'durable.txt']
-        assert len(smoke) == 1 and smoke[0].read_text().strip() == 'COBALT-493817', 'documented restart did not return exact nonce'
-        assert (smoke[0].parent / 'resume.txt').read_text().strip() == 'COBALT-493817'
+        assert len(smoke) == 1 and smoke[0].read_text().strip() == NONCE, 'documented restart did not return exact nonce'
+        assert (smoke[0].parent / 'resume.txt').read_text().strip() == NONCE
         tool_output = (smoke[0].parent / 'tool.txt').read_text().strip()
         assert MARKER_TOKEN.search(tool_output), 'documented tool marker absent'
         result['routes']['mac']['tool_marker_observed'] = True
