@@ -35,8 +35,8 @@ The [draft notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's 
 component, model/profile and stock OMP 18.8.7 client while preparing UUID-bound native
 RTX 3090 and RTX 4090 lanes. This is a minor product bump for the returned topology,
 not a runtime or client version substitution. One lane runs at a time on port 18082.
-The [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json) comes from the real
-two-GPU qualification; its OMP 18.0.9 typed-tool phase is not OMP 18.8.7 product acceptance.
+The bound [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json) comes from the
+real two-GPU qualification; its OMP 18.0.9 typed-tool phase is not OMP 18.8.7 product acceptance.
 The native model is restored byte-for-byte from v0.10.0 because v0.11.0 removed its
 separate binding when it deferred both lanes.
 

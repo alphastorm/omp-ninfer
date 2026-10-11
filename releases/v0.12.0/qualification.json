@@ -96,7 +96,17 @@
       "anonymous_pull_evidence_source": "Main reports verified anonymous pull and exact548fe239 server hash; not repeated by this worker",
       "publication_receipt": "releases/v0.11.0/qualification/runtime-publication.json"
     },
-    "native_runtime_variants": {},
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.12.0/qualification/rtx3090.json",
+        "sha256": "1884fd4ee7ddc9b2f5d2e62d00f02f661dd211ebfd01a230fe1768693e6b66c3",
+        "release_tag": "v0.6.3-qwen38-3090-beta.1",
+        "package_sha256": "74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297"
+      }
+    },
     "external_installation_acceptance": {
       "status": "pending",
       "note": "rerun against the published v0.6.16-qwen38-5090-beta.1 component (image 6a02feba) before the cut; the receipt lands at releases/v0.12.0/acceptance/composed-external-installation.json"

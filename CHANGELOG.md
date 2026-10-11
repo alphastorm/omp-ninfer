@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Prepare the v0.12.0 native Windows return on one two-GPU host: staged RTX 3090
+- Prepare the v0.12.0 native Windows return on one two-GPU host: bound RTX 3090
   qualification for v0.6.3-beta.1, exact component admission for RTX 3090 v0.6.3 and
   RTX 4090 v0.6.11, and an executable invariant for UUID-indexed Windows GPU queries
   and power changes. The invariant was red on five unindexed operations and green

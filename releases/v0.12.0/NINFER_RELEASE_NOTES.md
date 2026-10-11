@@ -38,7 +38,7 @@ their existing pins until a separately authorized lane cut.
 
 | Native lane | Prepared component | Package SHA-256 / bytes | Draft state |
 | --- | --- | --- | --- |
-| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Qualification staged; binding follows its receipt commit |
+| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Bound to the committed qualification; component publication and product acceptance pending |
 | RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Unbound: first-release rollback contract refuses composition |
 
 The owner still publishes both component prereleases. Prepared URLs do not establish that

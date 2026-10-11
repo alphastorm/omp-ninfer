@@ -13,6 +13,19 @@ Client status is independent from each GPU runtime qualification. `preview` is n
 | `windows-docker-local` | Windows 11 x64 — upstream `v18.8.7` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe) (sha256 `3fee68733791`) | `qwen38-5090-v0.11.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
 | `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.8.7` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-linux-x64) (sha256 `b87f9835a0ac`) | `qwen38-5090-v0.11.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
 
+## Native runtime variants
+
+These variants use the same OMP clients but own separate native runtime packages and qualification receipts.
+
+| Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
+| --- | --- | --- | --- | ---: | --- | --- | --- | --- |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/63872d2956ef2684021b32a6f478a1836e94c386/releases/v0.12.0/qualification/rtx3090.json) |
+
+Package bindings:
+
+- `rtx3090-windows-native`: component `v0.6.3-qwen38-3090-beta.1`; package [`ninfer-rtx3090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.3-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297`; 595,697,859 bytes.
+- `rtx3090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer); SHA-256 `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`; 18,210,531,328 bytes.
+
 ## Profile boundaries
 
 ### `darwin-remote-ssh`
