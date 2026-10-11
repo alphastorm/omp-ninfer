@@ -65,9 +65,12 @@ if($Action -eq 'Hold') {
     $baseline=Snapshot
     Save-Json 'windows-baseline.json' $baseline
     . (Join-Path $ControlRoot 'bin\windows-host-common.ps1')
-    Save-Json 'own-hold.json' @{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold}
+    $ownership=@{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold;hold_created=$false}
+    Save-Json 'own-hold.json' $ownership
     New-Item -ItemType Directory -Path $HoldDirectory -Force | Out-Null
     New-Item -ItemType File -Path $Hold | Out-Null
+    $ownership.hold_created=$true
+    Save-Json 'own-hold.json' $ownership
     Set-OmpAdminOnlyFile -Path $Hold
     Write-Output 'own lane hold acquired'; return
 }
@@ -75,7 +78,8 @@ if($Action -eq 'Release') {
     $health=Invoke-RestMethod -Uri 'http://127.0.0.1:18088/health' -TimeoutSec 10
     if($health.status -ne 'ok'){throw 'refusing hold release before Windows production health'}
     if(!(Test-Path (Join-Path $Workspace 'own-hold.json'))){throw 'no ownership receipt'}
-    if(Test-Path $Hold){Remove-Item -LiteralPath $Hold -Force}
+    $ownership=Get-Content -Raw (Join-Path $Workspace 'own-hold.json')|ConvertFrom-Json
+    if($ownership.hold_created -and (Test-Path $Hold)){Remove-Item -LiteralPath $Hold -Force}
     $before=Get-Content -Raw (Join-Path $Workspace 'windows-baseline.json')|ConvertFrom-Json
     foreach($path in @($HoldDirectory,$ControlRoot)) {
         $original=@($before.directories|Where-Object path -EQ $path)[0]

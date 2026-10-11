@@ -451,6 +451,7 @@ class HostDirectoryRestorationTests(unittest.TestCase):
         self.sha = "1" * 40
         self.branch = "main"
         self.fail_fetch = False
+        self.windows_commands = []
 
     def command(self, argv, **kwargs):
         argv = [str(v) for v in argv]
@@ -495,6 +496,7 @@ class HostDirectoryRestorationTests(unittest.TestCase):
             command = self.command
             def with_windows(argv, **kwargs):
                 if str(argv[0]).endswith("powershell.exe"):
+                    self.windows_commands.append(argv)
                     return subprocess.CompletedProcess(argv, 0, "fixture hold released", "")
                 return command(argv, **kwargs)
             with unittest.mock.patch.object(self.host.subprocess, "run", side_effect=with_windows):
@@ -542,6 +544,29 @@ class HostDirectoryRestorationTests(unittest.TestCase):
             self.assertEqual((path / "original").read_text(), "original bytes")
             self.assertFalse((path / "window-only").exists())
 
+    def test_nonempty_window_created_parent_releases_hold_and_records_failed_proof(self) -> None:
+        self.action("begin")
+        other_state = self.logs.parent / "other-owner-history"
+        other_state.write_text("unrelated owner bytes")
+        self.key.write_text("window key\n")
+        with self.assertRaisesRegex(AssertionError, "window-created parents retained"):
+            self.action("restore")
+        proof = json.loads((self.workspace / "restoration.json").read_text())
+        self.assertFalse(proof["documented_directories_restored"])
+        self.assertEqual(proof["retained_window_created_parents"], [str(self.logs.parent)])
+        self.assertEqual(proof["windows_release"], "fixture hold released")
+        self.assertTrue(proof["documented_key_restored"] and proof["checkout_restored"])
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertEqual((self.sha, self.branch), ("1" * 40, "main"))
+        self.assertEqual(other_state.read_text(), "unrelated owner bytes")
+        self.assertFalse(self.logs.exists())
+        self.assertFalse(self.checkpoints.exists())
+        self.assertEqual(len(self.windows_commands), 1)
+        with self.assertRaisesRegex(AssertionError, "window-created parents retained"):
+            self.action("restore")
+        self.assertEqual(len(self.windows_commands), 1)
+        self.assertEqual(other_state.read_text(), "unrelated owner bytes")
+
     def test_failed_begin_restores_absence_and_original_key(self) -> None:
         self.fail_fetch = True
         with self.assertRaisesRegex(RuntimeError, "fixture fetch failure"):
@@ -554,6 +579,14 @@ class HostDirectoryRestorationTests(unittest.TestCase):
 
 
 class WindowsHoldDirectoryTests(unittest.TestCase):
+    def test_hold_ownership_is_claimed_only_after_exclusive_creation(self) -> None:
+        source = (ROOT / "scripts/hosts/accept-windows-client.ps1").read_text()
+        hold = source.split("if($Action -eq 'Hold') {", 1)[1].split("if($Action -eq 'Release') {", 1)[0]
+        self.assertLess(hold.index("hold_created=$false"), hold.index("New-Item -ItemType File -Path $Hold"))
+        self.assertLess(hold.index("New-Item -ItemType File -Path $Hold"), hold.index("$ownership.hold_created=$true"))
+        release = source.split("if($Action -eq 'Release') {", 1)[1].split("if($Action -eq 'Preflight') {", 1)[0]
+        self.assertIn("if($ownership.hold_created -and (Test-Path $Hold))", release)
+
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the Windows hold lifecycle")
     def test_hold_restores_absent_or_existing_state_directory_without_touching_other_holds(self) -> None:
         proof = r'''
@@ -571,11 +604,13 @@ function Get-Acl {param($Path,$LiteralPath)
     if(-not (Test-Path -LiteralPath $p)){throw "ACL queried for absent path: $p"}
     @{Sddl='fixture-acl'}
 }
-$results=@(foreach($exists in @($false,$true)) {
-    $root=Join-Path $Scratch "control-$exists";$workspace=Join-Path $Scratch "window-$exists"
+$cases=@(@{exists=$false;race=$false},@{exists=$true;race=$false},@{exists=$false;race=$true},@{exists=$true;race=$true})
+$results=@(foreach($case in $cases) {
+    $exists=$case.exists;$race=$case.race
+    $root=Join-Path $Scratch "control-$exists-$race";$workspace=Join-Path $Scratch "window-$exists-$race"
     New-Item -ItemType Directory -Force "$root/bin",$workspace|Out-Null
     Set-Content "$root/bin/windows-host-common.ps1" 'function Set-OmpAdminOnlyFile {param($Path)}'
-    $env:LOCALAPPDATA=Join-Path $Scratch "client-$exists"
+    $env:LOCALAPPDATA=Join-Path $Scratch "client-$exists-$race"
     $state=Join-Path $root 'state'
     if($exists) {
         New-Item -ItemType Directory -Force $state|Out-Null
@@ -583,7 +618,25 @@ $results=@(foreach($exists in @($false,$true)) {
         (Get-Item $state).LastWriteTimeUtc=[DateTime]::UtcNow.AddHours(-1)
     }
     $script=[scriptblock]::Create($text)
+    if($race) {
+        Add-Content "$root/bin/windows-host-common.ps1" @'
+$null=[IO.Directory]::CreateDirectory((Join-Path $ControlRoot 'state'))
+[IO.File]::WriteAllText((Join-Path $ControlRoot 'state/lane-container-paused'),'racing tool hold')
+'@
+        $holdFailed=$false
+        try {$null=& $script -Action Hold -Workspace $workspace -Release v0.12.0 -Candidate ('1'*40) -ControlRoot $root} catch {$holdFailed=$true}
+        if(-not $holdFailed){throw 'exclusive hold creation unexpectedly succeeded'}
+        $ownership=Get-Content "$workspace/own-hold.json" -Raw|ConvertFrom-Json
+        if($ownership.hold_created -ne $false){throw 'failed acquisition claims a racing tool hold'}
+        try {$null=& $script -Action Release -Workspace $workspace -Release v0.12.0 -Candidate ('1'*40) -ControlRoot $root} catch {}
+        if((Get-Content "$state/lane-container-paused") -cne 'racing tool hold'){throw 'racing tool hold was removed or changed'}
+        if($exists -and (Get-Content "$state/owner-paused") -ne 'unrelated hold bytes'){throw 'unrelated hold changed'}
+        @{original_state_exists=$exists;racing_hold=$true;passed=$true}
+        continue
+    }
     $null=& $script -Action Hold -Workspace $workspace -Release v0.12.0 -Candidate ('1'*40) -ControlRoot $root
+    $ownership=Get-Content "$workspace/own-hold.json" -Raw|ConvertFrom-Json
+    if($ownership.hold_created -ne $true){throw 'successful acquisition did not claim its hold'}
     $before=Get-Content "$workspace/windows-baseline.json" -Raw|ConvertFrom-Json
     $directory=@($before.directories|Where-Object path -EQ $state)[0]
     if($directory.exists -ne $exists){throw 'original state presence not recorded'}
@@ -599,7 +652,7 @@ $results=@(foreach($exists in @($false,$true)) {
             if($final.$field -cne $original.$field){throw "directory metadata changed: $field"}
         }
     }
-    @{original_state_exists=$exists;passed=$true}
+    @{original_state_exists=$exists;racing_hold=$false;passed=$true}
 })
 $results|ConvertTo-Json -Compress
 '''
@@ -611,7 +664,7 @@ $results|ConvertTo-Json -Compress
                                     capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             rows = json.loads(result.stdout)
-            self.assertEqual(len(rows), 2)
+            self.assertEqual(len(rows), 4)
             self.assertTrue(all(row["passed"] for row in rows))
 
 
@@ -660,6 +713,16 @@ class WindowsHostRestorationTests(unittest.TestCase):
     def snapshot(self, **task):
         return {"markers": self.baseline["markers"], "tasks": [{**self.baseline["tasks"][0], **task}],
                 "directories": self.baseline["directories"]}
+
+    def test_failed_directory_restoration_cannot_be_accepted_by_summary_or_recovery(self) -> None:
+        fields = ("checkout_restored", "documented_key_restored", "beta_absent", "documented_directories_restored")
+        proof = dict.fromkeys(fields, True)
+        self.routes.assert_host_restored(proof)
+        for field in fields:
+            with self.subTest(field=field), self.assertRaisesRegex(AssertionError, field):
+                self.routes.assert_host_restored(dict(proof, **{field: False}))
+        with self.assertRaises(KeyError):
+            self.routes.assert_host_restored({field: True for field in fields[:-1]})
 
     def test_a_periodic_task_caught_mid_run_is_unchanged(self) -> None:
         self.routes.assert_windows_host_unchanged(self.snapshot(state="Running"), self.snapshot(state="Ready"))

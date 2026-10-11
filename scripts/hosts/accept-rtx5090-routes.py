@@ -56,6 +56,11 @@ def windows_route_answers(lines):
             'exact_nonce_line': True}
 
 
+def assert_host_restored(restored):
+    for field in ('checkout_restored', 'documented_key_restored', 'beta_absent', 'documented_directories_restored'):
+        assert restored[field], 'host restoration proof failed: ' + field
+
+
 def assert_windows_host_unchanged(before, after):
     """The window must leave the host's hold markers byte-identical and its OMP scheduled tasks
     present, identically defined and as enabled as it found them. A task's Running or Queued state
@@ -237,6 +242,7 @@ def main():
             if label == 'linux':
                 receipt['live_acceptance']['execution_context'] = receipt['execution_context']
         result['restoration'] = json.loads((root / 'restoration.json').read_text())
+        assert_host_restored(result['restoration'])
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
         assert_windows_host_unchanged(before, after)
         result['restoration']['windows_markers_tasks_unchanged'] = True
@@ -248,6 +254,7 @@ def main():
             assert completed['status'] == 'passed'
             result['previous_window_restoration'] = result['restoration']
             result['restoration'] = completed['restoration']
+            assert_host_restored(result['restoration'])
             result['windows_completion_setup'] = completed['setup']
             result['timings'].extend(json.loads((completion / 'timings.json').read_text()))
             prior_seconds = json.loads((Path(a.prior_workspace) / 'restoration.json').read_text())['window_seconds'] if a.prior_workspace else 0
@@ -334,7 +341,7 @@ def main():
         prior = Path(a.prior_workspace)
         assert all(json.loads((prior / (label + '-route.json')).read_text())['status'] == 'passed' for label in ('host', 'mac', 'windows'))
         restored = json.loads((prior / 'restoration.json').read_text())
-        assert restored['checkout_restored'] and restored['documented_key_restored'] and restored['beta_absent']
+        assert_host_restored(restored)
         spent = restored['window_seconds']
         earlier = json.loads((prior / 'window-attempt.json').read_text()).get('prior_workspace')
         if earlier:
@@ -365,6 +372,7 @@ def main():
         client = json.loads((root / 'windows-structured/receipt.json').read_text())
         assert client['status'] == 'passed'
         restored = json.loads((root / 'restoration.json').read_text())
+        assert_host_restored(restored)
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
         assert_windows_host_unchanged(before, after)
         restored.update({'windows_markers_tasks_unchanged': True, 'windows_health': after['windows_health18088']})
@@ -388,7 +396,7 @@ def main():
             prior = Path(a.prior_workspace)
             assert json.loads((prior / 'window-attempt.json').read_text())['attempt'] == 'initial'
             restoration = json.loads((prior / 'restoration.json').read_text())
-            assert restoration['checkout_restored'] and restoration['documented_key_restored'] and restoration['beta_absent']
+            assert_host_restored(restoration)
             watchdog_seconds = int(3600 - restoration['window_seconds'] - 600)
             assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
             assert not (prior / 'corrected-attempt.json').exists(), 'the corrected attempt was already spent'

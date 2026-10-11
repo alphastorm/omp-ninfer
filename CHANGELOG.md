@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   directories retain their original contents and metadata; window artifacts stay in
   the private workspace. Required model and API-key files remain prerequisites. This
   successor fix must not merge before the frozen v0.12.0 candidate is published.
+- Finish the Windows hold release and save a failed restoration proof when unrelated
+  state prevents removal of a window-created Linux parent, without deleting that state.
+  Claim Windows hold ownership only after exclusive creation succeeds, and execute native
+  directory fixtures with initialized preparation time and exclusive lineage arguments.
 
 ### Added
 
