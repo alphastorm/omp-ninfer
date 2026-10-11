@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "release": "v0.12.0",
+  "status": "draft",
+  "channel": "public",
+  "audience": "public",
+  "product": {
+    "name": "OMP NInfer",
+    "tagline": "Stateful local Qwen for long OMP coding sessions.",
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "profile": "../../profiles/qwen38-rtx5090-windows-docker-local.json",
+    "primary_profile_id": "qwen38-rtx5090-windows-docker-local"
+  },
+  "components": {
+    "omp": {
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4e4b863a8d0ae1bd96bedb374b686361c18d2d63/compatibility.json",
+      "compatibility_sha256": "ad61694c4dfca0268d95bde01676d59e896473b14727020e74e82edbad79566e",
+      "distribution_kind": "upstream-release",
+      "upstream_repository": "https://github.com/can1357/oh-my-pi",
+      "upstream_tag": "v18.8.7",
+      "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+      "upstream_tree": "39226066f2d37044581fe4dbbb2903039d2072b5",
+      "release_id": 407957363,
+      "distribution_version": "18.8.7",
+      "platform": "windows-x64",
+      "artifact_name": "omp-windows-x64.exe",
+      "artifact_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe",
+      "artifact_release_id": 407957363,
+      "artifact_asset_id": 625097593,
+      "artifact_published": true,
+      "artifact_bytes": 225642496,
+      "artifact_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc"
+    },
+    "ninfer": {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "release_tag": "v0.6.16-qwen38-5090-beta.1",
+      "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+      "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "source_archive_sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2",
+      "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "binary_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.16-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz",
+      "binary_archive_sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd",
+      "oci_repository": "ghcr.io/alphastorm/ninfer-runtime",
+      "oci_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+      "oci_manifest_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+      "runtime_receipt_release": "v0.6.16-qwen38-5090-runtime-beta.1",
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.16-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1",
+      "source_archive_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.16-qwen38-5090-source.1/runtime-source-1302d639.tar.gz"
+    },
+    "model": {
+      "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
+      "revision": "dc370fb6295ae8b786e1af4f90d7142a16255c35",
+      "artifact_name": "qwen3_8_27b.ninfer",
+      "artifact_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/dc370fb6295ae8b786e1af4f90d7142a16255c35/qwen3_8_27b.ninfer",
+      "artifact_bytes": 20437336576,
+      "artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3"
+    },
+    "ninfer_variants": [],
+    "native_model": {
+      "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
+      "revision": "18dfc887423fa5aabf3cb56fac41490e462b3fab",
+      "artifact_name": "qwen3_8_27b.ninfer",
+      "artifact_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+      "artifact_bytes": 18210531328,
+      "artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    }
+  },
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.11.0",
+    "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 2,
+    "speculative_backend": "dflash2",
+    "draft_tokens": 7,
+    "vision": true,
+    "preserve_thinking": true
+  },
+  "qualification": {
+    "summary": "qualification.json",
+    "summary_sha256": "35e70372363eec4c5741674ca929e2b1480902a10e3767c7f0159f10df92d0ff",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4d39cd14f90834ce6c3ee8150fbfecc5290d7bcf/releases/v0.12.0/qualification.json",
+    "runtime_release_eligible": true,
+    "external_installation_passed": false
+  },
+  "installation": {
+    "mode": "native-windows-docker-local",
+    "quickstart": "../../docs/QUICKSTART.md",
+    "managed_appliance_install": true,
+    "silent_cloud_fallback": false
+  },
+  "limitations": [
+    "Preparation only: RTX 5090 and stock OMP 18.8.7 stay unchanged; native lanes return on one two-GPU Windows host with each installed lane UUID-bound to its own card. Only one native lane runs at a time on loopback port 18082. Fresh product acceptance is pending; predecessor acceptance is not carried forward.",
+    "The client is the unmodified upstream OMP binary, which has no appliance commands: installation and lifecycle follow the documented routes, and no client reads the compatibility authority.",
+    "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
+    "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
+    "Sessions saved under the fork client's ninfer_session names are not reachable from stock OMP: each takes one cold first turn after the upgrade, and those checkpoints age out under the checkpoint quota.",
+    "Structured JSON-schema output, multi-GPU inference, simultaneous native serving, multi-tenant, priority, preemption, and silent cloud fallback are unsupported. RTX 4090 remains unbound until its first-release rollback contract is decided; no unsupported predecessor is invented.",
+    "The RTX 5090 profile has 131,520 BF16 KV tokens, DFlash2 K=7 and two device state slots. Two requests can run together only while both prompts plus output reservations fit; the pending timeout is 180 seconds. The predecessor 160,256-token capacity does not apply.",
+    "Concurrent prefill can delay peer decode; predecessor latency numbers do not describe this release. The unchanged selected C passed amended criterion 14 with natural [2] dispatch at both limits; predecessor and superseded proof failures remain historical evidence. Two requests in flight do not provide preemption or universal warm reuse.",
+    "The OMP provider limit and the server's concurrency move together: a limit of two against a one-at-a-time RTX 5090 server queues requests at the server, where its 30 s default expires them. Upgrade the server before raising the limit.",
+    "Measured throughput and latency apply only to the recorded package, machine, and profile."
+  ],
+  "publication": {
+    "authorized": false,
+    "targets": [
+      "GitHub public release v0.12.0",
+      "OMP client: unmodified upstream Oh My Pi v18.8.7 release binaries; no client published here",
+      "NInfer RTX 5090 v0.6.16-qwen38-5090-beta.1; unchanged published image 6a02feba"
+    ],
+    "blockers": [
+      "Owner publication of both prepared native components is pending; RTX 4090 qualification composition and binding are blocked by the first-release rollback contract.",
+      "Fresh acceptance of every documented v0.12.0 route and all stock OMP 18.8.7 platform clients is pending; no predecessor route acceptance is carried forward.",
+      "Lane, platform, acceptance and manifest pin stages and verify --require-ready remain pending; this preparation performs no cut or publication."
+    ],
+    "external_installation_qualified": false
+  }
+}

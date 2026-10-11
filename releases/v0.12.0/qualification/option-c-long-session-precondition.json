@@ -1,0 +1,43 @@
+{
+  "artifact_type": "omp_ninfer_option_c_long_session_precondition",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+  "criterion": 7,
+  "unchanged_requirement": "No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition",
+  "runs": [
+    {
+      "plant_after": 2,
+      "passed": true,
+      "compactions": 2,
+      "committed_compactions": 2,
+      "error": null
+    },
+    {
+      "plant_after": 3,
+      "passed": false,
+      "compactions": 2,
+      "committed_compactions": 2,
+      "error": {
+        "redacted": true,
+        "sha256": "ac8ceed691c7a82369b6478a885509d517c28e42de6ea75dafb9458f5ed60a20",
+        "exception_class": "RuntimeError"
+      }
+    },
+    {
+      "plant_after": 1,
+      "passed": true,
+      "compactions": 2,
+      "committed_compactions": 2,
+      "error": null
+    }
+  ],
+  "documented_precondition": {
+    "plant_after": 3,
+    "identical_redacted_error_to_original_a59": true,
+    "sha256": "ac8ceed691c7a82369b6478a885509d517c28e42de6ea75dafb9458f5ed60a20",
+    "exception_class": "RuntimeError"
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

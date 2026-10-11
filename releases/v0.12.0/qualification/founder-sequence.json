@@ -1,0 +1,383 @@
+{
+  "artifact_type": "omp_ninfer_v011_founder_sequence",
+  "schema_version": 3,
+  "execution_status": "Component cut/staging/lane and RTX 5090 acceptance complete on 5861712f: 17 steps, three stock 18.8.7 clients, 385.948 s downtime/independent restoration. Founder chooses 5090-only; native 3090/4090 deferred, owners remain on v0.10.0. Compose existing accepted proof and platform/acceptance/manifest pins before founder-only product publication. No new acceptance, production promotion or live publisher by this worker.",
+  "acceptance_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "evidence_only_follow_on": true,
+  "remaining_acceptance_subject_unchanged": true,
+  "working_directory": "$HOME/Development/omp-ninfer-S1",
+  "selection": "Selected option(c) only. The a59 alternative is superseded and must not publish the shared v0.6.16 tags.",
+  "selected_option": "c",
+  "founder_decisions": {
+    "date": "2026-10-10",
+    "authority": "Founder via Ask, relayed by Main",
+    "runtime": {
+      "selected_option": "c",
+      "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "source_branch": "exp/v0616-without-3a2fadbd",
+      "source_published": true,
+      "source_published_by": "Main with founder authorization",
+      "source_publication_evidence": "Lead reports origin contains the exact 40-hex selected commit",
+      "superseded_option": "a59",
+      "superseded_ctest_evidence_preserved": true
+    },
+    "native_rtx4090": {
+      "decision": "omit from v0.11.0; prior retain decision superseded",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
+      "hardware_reported_by": "Founder via Main; worker does not remeasure the host",
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+    },
+    "native_rtx3090": {
+      "decision": "omit from v0.11.0; prior reinstall/re-accept versus drop question superseded",
+      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
+      "legacy_release": "v0.10.0",
+      "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+      "predecessor_acceptance": "passed, reported by Accept3090 and confirmed bound by Main; preserved evidence only, not composed",
+      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
+    },
+    "probe_hardening": {
+      "decision": "Harden the probe now, new candidate.",
+      "time_approx_utc": "2026-10-10T17:25Z",
+      "active_nonce": "493817-205361",
+      "comparison": "unchanged exact recall; no sampling/provider/runtime/source changes or tolerance widening",
+      "diagnostic_receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
+      "plan_sha256": "8e97924e1437b433b1d76356c1030b954116e44709384bf7c43bd2120888037e",
+      "rule_verdict": "no material difference; hardened green; diagnostic, not acceptance"
+    }
+  },
+  "options": [
+    {
+      "name": "a59",
+      "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+      "classification": "Superseded alternative, not selected; original red NVFP4 ctest evidence retained",
+      "selected": false,
+      "execution_prohibited_for_selected_release": true,
+      "admission": "Founder must explicitly dispose the unshipped NVFP4-KV strict TokenId-vector oracle failure. Full ctest 110 pass/7 skip/1 fail; all 15 original local lane gates pass. No policy exception was approved overnight.",
+      "ordered_steps": [
+        {
+          "order": 1,
+          "action": "Authorize this exact source and its ctest policy disposition",
+          "founder_only": true
+        },
+        {
+          "order": 2,
+          "action": "Repeat component preflight with the selected original assets",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "observed_exit": 0,
+          "receipt": "component-cut-dry-run.json",
+          "founder_only": true
+        },
+        {
+          "order": 3,
+          "action": "Cut the selected runtime component",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-release\" \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-release/NINFER_RELEASE_NOTES.md\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 4,
+          "action": "Wait for the cutter-dispatched runtime-image workflow; validate the published receipt against these exact source/archive/binary hashes and supply its real OCI digest",
+          "required_input": "NINFER_OCI_DIGEST",
+          "local_image_id_is_not_a_digest": true
+        },
+        {
+          "order": 5,
+          "action": "Preserve the existing draft and stage the selected published component with S2 OMP 18.8.7",
+          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit a59c13d00492d47dc58bf822533688c90c5d1f6a \\\n  --binary-sha 675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8 \\\n  --archive-sha 95dbe24fade7b776cedf23d3dda0baa9870413b360759dd403ad0351e1f65d10 \\\n  --source-archive-sha 30b89a50d008f621754fdb9d6e4b138588f3acddbbc14ae32206093e172fa543 \\\n  --sbom-sha fdad0f6b905d7a3ff132733c966c92230bfa089e437fd4abf0a71d31d2ad12dc \\\n  --image-digest \"${NINFER_OCI_DIGEST:?supply the real digest from the founder component cut}\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$V011_DRAFT_BACKUP/qualification/rtx5090.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 6,
+          "action": "Merge supplemental receipts and selected-source notes without overwriting generated manifest/qualification/compatibility bindings; freeze and publish the resulting lane/evidence commit",
+          "required_input": "V011_LANE_COMMIT",
+          "founder_only": true
+        },
+        {
+          "order": 7,
+          "action": "Rebind the published selected-source lane",
+          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin \"${V011_LANE_COMMIT:?published frozen selected-source lane commit}\"",
+          "founder_only": true,
+          "executed": false
+        },
+        {
+          "order": 8,
+          "action": "Resolve candidate posture from real qualification; freeze and publish a legitimately installable product candidate and bind its actual rollback/host/workspace inputs",
+          "required_input": "V011_CANDIDATE_COMMIT",
+          "guard": "The component cut does not clear root profile status:candidate; neither rebind_release.promote_root nor the tonight branch changes it. Do not relabel unqualified profiles to evade --require-installable or --require-ready.",
+          "founder_only": true
+        },
+        {
+          "order": 9,
+          "action": "Run published-image acceptance preflight, then the founder-controlled acceptance window",
+          "command": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
+          "founder_only": true,
+          "executed": false
+        }
+      ]
+    },
+    {
+      "name": "c",
+      "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "source_branch": "exp/v0616-without-3a2fadbd",
+      "source_published": true,
+      "source_publication": {
+        "reported_by": "Main with founder authorization",
+        "reported_date": "2026-10-10",
+        "origin_contains_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+        "pushed_by_this_worker": false
+      },
+      "classification": "Founder-selected v0.6.16 candidate; all 15 unchanged local lane criteria pass; published-image acceptance pending",
+      "selected": true,
+      "composition": "eaf221ac + b72daad6 + a59c13d0, without 3a2fadbd; conflict-free mechanical replay",
+      "admission": "Founder selected option(c) on 2026-10-10. Full ctest 111 pass/7 skip/0 fail and all 15 unchanged local criteria pass; measured pair cost remains round +9.3451%, aggregate wall throughput −8.5220%. The superseded a59 ctest exception is not needed for this source.",
+      "assets_directory": "$HOME/Desktop/ninfer-v0.6.16-option-c-release",
+      "assets": [
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz",
+          "bytes": 390426633,
+          "sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd"
+        },
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json",
+          "bytes": 3615,
+          "sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1"
+        },
+        {
+          "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS",
+          "bytes": 253,
+          "sha256": "080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146"
+        },
+        {
+          "name": "runtime-source-1302d639.tar.gz",
+          "bytes": 8492102,
+          "sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2"
+        }
+      ],
+      "component_notes_sha256": "a8ddab13e9434abc5e89073f0d1fb85d300dc8be2a8e381a623539c9c0b6dc45",
+      "lane_receipt": {
+        "path": "$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json",
+        "sha256": "53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe",
+        "source": "Actual content-safe profile gate receipt from option-c-lane-evidence.json.profile; not an authored substitute"
+      },
+      "dry_run": {
+        "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+        "status": "pass",
+        "reported_exit": 0,
+        "reported_by": "Main; founder-authorized lead preflight on 2026-10-10",
+        "reported_excerpt": "preflight ok ... archive bed8c8d4",
+        "tag_release_or_workflow_created": false,
+        "rerun_by_this_worker": false,
+        "initial_attempt": {
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "observed_exit": 1,
+          "exact_refusal": "commit is not on any origin branch",
+          "notes_sha256_at_exercise": "529ee2d5540f4476dab47353d5636bbee854f7d6245bc3a17527b399db2131f4",
+          "notes_only_change_after_exercise": "Removed the absolute private Mac home path from the publication notes; the cutter checks notes-file existence, not note content.",
+          "checked_before_refusal": [
+            "All four required assets present",
+            "archive/SBOM/source SHA-256 equal caller inputs",
+            "SHA256SUMS verifies",
+            "Source archive equals exact local git archive",
+            "Packaged identity names this version and commit and source_dirty=false",
+            "Commit exists locally"
+          ],
+          "not_exercised_after_refusal": [
+            "origin-branch admission pass",
+            "publisher workflow check",
+            "GitHub authentication check",
+            "tag/release absence checks"
+          ],
+          "publication_created": false
+        },
+        "notes_sha256_after_lead_report": "a8ddab13e9434abc5e89073f0d1fb85d300dc8be2a8e381a623539c9c0b6dc45",
+        "notes_only_update_after_lead_report": "Updated candidate selection and native-host decisions; all four runtime assets remain unchanged. The cutter checks notes-file existence, not notes content."
+      },
+      "ordered_steps": [
+        {
+          "order": 1,
+          "action": "Founder selection of option(c) completed",
+          "founder_only": true,
+          "executed": true,
+          "reported_by": "Main; founder-authorized action on 2026-10-10"
+        },
+        {
+          "order": 2,
+          "action": "Founder-authorized source publication completed; origin contains the selected commit",
+          "command": "git -C \"$HOME/Development/ninfer-S1\" push origin exp/v0616-without-3a2fadbd",
+          "founder_only": true,
+          "executed": true,
+          "reported_by": "Main; founder-authorized action on 2026-10-10",
+          "reported_remote_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825"
+        },
+        {
+          "order": 3,
+          "action": "Post-push cutter preflight passed; founder subsequently completed the live cut",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\" \\\n  --dry-run",
+          "founder_only": true,
+          "executed": true,
+          "prior_refusal": "commit is not on any origin branch",
+          "reported_by": "Main; founder-authorized action on 2026-10-10",
+          "reported_exit": 0,
+          "reported_excerpt": "preflight ok ... archive bed8c8d4"
+        },
+        {
+          "order": 4,
+          "action": "Cut the selected runtime component",
+          "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" \\\nNINFER_RUNTIME_DIR=\"$HOME/Development/ninfer-S1\" \\\nbash scripts/hosts/cut-ninfer-5090-component.sh \\\n  --version v0.6.16 \\\n  --commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --assets \"$HOME/Desktop/ninfer-v0.6.16-option-c-release\" \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --beta 1 \\\n  --notes-file \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/NINFER_RELEASE_NOTES.md\"",
+          "founder_only": true,
+          "executed": true,
+          "executed_by": "Founder; Main report 13:46Z"
+        },
+        {
+          "order": 5,
+          "action": "Wait for the cutter-dispatched runtime-image workflow; validate the published receipt against this option exact source/archive/binary hashes and supply its real OCI digest",
+          "required_input": "NINFER_OCI_DIGEST",
+          "local_image_id_is_not_a_digest": true,
+          "executed": true,
+          "observed_by": "Main; worker consumed the published JSON receipt without repeating the pull",
+          "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+          "receipt": "runtime-publication.json"
+        },
+        {
+          "order": 6,
+          "action": "Preserve the existing draft and stage the selected published component with its real profile receipt and S2 OMP 18.8.7",
+          "command": "V011_DRAFT_BACKUP=\"$(mktemp -d \"${TMPDIR:-/tmp}/omp-ninfer-v011-draft.XXXXXX\")/v0.11.0\"\nmv releases/v0.11.0 \"$V011_DRAFT_BACKUP\"\n/opt/homebrew/bin/python3.13 scripts/stage_release.py \\\n  --from v0.10.0 --release v0.11.0 \\\n  --release-tag v0.6.16-qwen38-5090-beta.1 \\\n  --source-tag v0.6.16-qwen38-5090-source.1 \\\n  --source-commit 1302d63929e400a05e1c9cdb0fc8003a70269825 \\\n  --binary-sha 548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace \\\n  --archive-sha bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd \\\n  --source-archive-sha dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2 \\\n  --sbom-sha e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1 \\\n  --image-digest \"sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02\" \\\n  --runtime-receipt-release v0.6.16-qwen38-5090-runtime-beta.1 \\\n  --config-sha 91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11 \\\n  --lane-receipt \"$HOME/Desktop/ninfer-v0.6.16-option-c-release/RTX5090_QUALIFICATION.json\" \\\n  --omp-component docs/measurements/2026-10-10-omp-1887-client-components.json",
+          "founder_only": false,
+          "executed": true,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "initial_exit": 1,
+          "initial_missing_link": "qualification/option-c-lane.json",
+          "disposition": "Preserved supplements restored; generated bindings retained; draft rebind exit 0",
+          "receipt": "staging.json"
+        },
+        {
+          "order": 7,
+          "action": "Merge option-C supplemental receipts and selected-source notes without overwriting generated manifest/qualification/compatibility bindings; freeze and publish the resulting lane/evidence commit",
+          "required_input": "V011_LANE_COMMIT",
+          "founder_only": false,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "executed": true,
+          "commit": "5cc028816ac07766c0821e28a52fc433062bc6e4",
+          "remaining": "Lane-receipt pin47c79a3d926184b86291a78c2a6815403d666a21 committed; canonical lane receipts unchanged"
+        },
+        {
+          "order": 8,
+          "action": "Rebind the published selected-source lane",
+          "command": "/opt/homebrew/bin/python3.13 scripts/rebind_release.py --release v0.11.0 --stage lane --pin 47c79a3d926184b86291a78c2a6815403d666a21",
+          "founder_only": false,
+          "executed": true,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "pin": "47c79a3d926184b86291a78c2a6815403d666a21",
+          "observed_exit": 0
+        },
+        {
+          "order": 9,
+          "action": "Resolve candidate posture from real qualification; freeze and publish a legitimately installable product candidate and bind its actual rollback/host/workspace inputs",
+          "required_input": "V011_CANDIDATE_COMMIT",
+          "guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
+          "founder_only": false,
+          "agent_authorized_by": "Main, after the founder component cut",
+          "profile_binding": "Verified installable, not ready; root-lane-cut.json",
+          "frozen_candidate_delivery": "5861712f561ff0b3100dd4350e02d777a3f5007e; exact-head CI38072788672 passed. All remaining acceptance keeps this subject despite later evidence-only commits. Predecessor65b6c426 receipts are not retargeted or composed",
+          "rollback_host_workspace_inputs": "Main acceptance owner supplies actual measured effect/rollback inputs; not assigned to this worker"
+        },
+        {
+          "order": 10,
+          "action": "Run published-image acceptance preflight, then the founder-controlled acceptance window",
+          "accepted_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+          "command_is_documented_template": true,
+          "execution_evidence": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
+          "command": "acceptance=(\n  /opt/homebrew/bin/python3.13 scripts/hosts/accept-rtx5090-routes.py\n  --release v0.11.0\n  --candidate \"${V011_CANDIDATE_COMMIT:?published frozen 40-hex candidate}\"\n  --workspace \"${V011_MAC_ACCEPTANCE_DIR:?fresh private Mac evidence directory}\"\n  --wsl-workspace \"${V011_WSL_ACCEPTANCE_DIR:?fresh absolute private POSIX evidence directory}\"\n  --windows-workspace \"${V011_WINDOWS_ACCEPTANCE_DIR:?fresh absolute C:/ private evidence directory}\"\n  --production-image \"${RTX5090_INCUMBENT_OCI_IMAGE:?actual measured incumbent rollback image}\"\n  --wsl-host \"${RTX5090_WSL_SSH:?verified POSIX SSH destination, not an assumed alias}\"\n  --windows-host \"${RTX5090_WINDOWS_SSH:?verified Windows SSH destination}\"\n  --route-ssh-destination \"${RTX5090_DOCUMENTED_SSH_DESTINATION:?actual documented route destination}\"\n)\n\"${acceptance[@]}\" --action preflight\n\"${acceptance[@]}\" --action window",
+          "founder_only": true,
+          "executed": true,
+          "executed_by": "Accept5090; not this evidence worker",
+          "scope": "RTX 5090 routes only; no native acceptance or composition claimed"
+        }
+      ]
+    }
+  ],
+  "omp_component_descriptor": {
+    "path": "docs/measurements/2026-10-10-omp-1887-client-components.json",
+    "sha256": "728f6c4486ae7ebf5d7d7b6033b1307d55edc1fbc4f8748de6e689aadb4bd4e9",
+    "s2_final_commit": "b622cbda514ce381658f631cdf1ad61b4b89b7bd",
+    "s2_initial_final_commit": "38a81628e2fb9e35d5b831610489133a5f5c35e7",
+    "s1_cherry_pick": "eaee6d0"
+  },
+  "preflight_guard": "A root status:candidate marks a client not bound by its named release. The lane stage consumes it only after upstream-release per-platform client replacement from the release compatibility copy. Non-promoted/fork markers remain; the manifest candidate status and external acceptance blocker remain.",
+  "draft_preservation": "Staging refuses an existing destination. First preserve the complete draft in the fresh backup and supply its real lane receipt. Merge supplemental receipts and updated notes into the generated tree; do not overwrite the generated manifest, qualification/hash chain or compatibility authority.",
+  "acceptance_history": {
+    "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
+    "first5090_window": "diagnostic-red: expected COBALT-493817, returned COBOLT-493817; host2/2 passed, Mac0/10 and Windows0/5 not reached; restoration passed; no accepted platform receipts promoted",
+    "diagnostic": "pre-registered fixed50/cohort: A-cobalt50/50,0/163 misspelled; B-cobalt50/50,0/165; B-hardened50/50,0/152. No material difference, p=1; hardened green is not acceptance",
+    "rtx3090": "predecessor acceptance passed; preserved by acceptance owner as evidence only, not composed on the new candidate",
+    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
+    "accepted_5861712f_rtx5090": {
+      "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+      "status": "passed",
+      "attempt": "initial full window; no failed-window replay",
+      "documented_steps": "host2/2,macOS10/10,Windows5/5",
+      "stock_omp1887_clients": "darwin-arm64,windows-x64,linux-x64 passed; produced preview receipt status preserved",
+      "downtime_s": 385.948,
+      "restoration": "Independent identity/mount/health/key/checkout/hold/task/policy checks passed; designed container recreation recorded",
+      "evidence": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
+      "restoration_receipt": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
+      "byte_preservation": "Three runners,three platform receipts,restoration,input capsule/checksums retained without serialization; producer sizes/SHA256 verified",
+      "native_or_composed_acceptance_claimed": false,
+      "evidence_commit_changes_candidate": false
+    }
+  },
+  "follow_on": [
+    "Keep5861712f as the accepted subject and preserve all17executed5090block bytes; tooling/scope/pin commits do not advance it.",
+    "Both native lanes are omitted by founder decision; owners use completev0.10.0. Later multi-GPU support/fresh native acceptance is separate scope, without a visibility shim.",
+    "Compose only the three existing5090 routes/three stock-client proofs/restoration; preserve original source capsule/checksums and old65b/diagnostic/3090 proof separately.",
+    "Commit then rebind platform,acceptance,manifest using preceding committed pins; require-ready/check-pins and exact-head CI must pass.",
+    "Keep PR78 draft; run only product publisher--dry-run. Founder alone runs the exact final-head--publish command supplied in the handoff."
+  ],
+  "scope_composition": {
+    "status": "passed",
+    "declared_routes": 3,
+    "documented_steps": 17,
+    "stock_client_receipts": 3,
+    "native_routes_declared": 0,
+    "accepted_candidate": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+    "executed_5090_blocks_byte_identical": true,
+    "input": "releases/v0.11.0/acceptance/rtx5090-only-composition-input.json",
+    "composed_receipt": "releases/v0.11.0/acceptance/composed-external-installation.json",
+    "next_gate": "Existing platform/acceptance/manifest pins, exact-head CI and publisher--dry-run; terminal handoff records final proof"
+  },
+  "blockers": ["Live product publication remains founder-only; later native multi-GPU work is deferred scope, not a current-release gate"],
+  "original_a59_assets_changed": false,
+  "original_a59_proposal_superseded": true,
+  "ninfer_source_pushed": true,
+  "ninfer_source_pushed_by": "Main with founder authorization",
+  "ninfer_source_pushed_by_this_worker": false,
+  "live_component_cut_run": true,
+  "stage_run": true,
+  "acceptance_run": true,
+  "acceptance_run_by_this_worker": false,
+  "new_candidate_acceptance_run": true,
+  "new_candidate_acceptance_scope": "RTX 5090-only v0.11.0; all retained routes passed, both native lanes explicitly deferred",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "live_component_cut_by": "Founder, reported by Main; not executed by this worker",
+  "runtime_publication": {
+    "receipt": "runtime-publication.json",
+    "image_digest": "sha256:6a02feba4163d992cc6a46baf28e0ece2ffe6a2ead91939e566c1b3080f5bc02",
+    "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/38057050899",
+    "anonymous_pull_and_binary_identity": {
+      "reported_by": "Main",
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "rerun_by_this_worker": false
+    }
+  },
+  "root_lane_cut": {
+    "executed": true,
+    "authority": "Main",
+    "receipt": "root-lane-cut.json",
+    "pin": "47c79a3d926184b86291a78c2a6815403d666a21",
+    "installable_cli_exit": 0,
+    "manifest_status": "candidate",
+    "external_installation_passed": false
+  }
+}

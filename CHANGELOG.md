@@ -7,8 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Prepare the v0.12.0 native Windows return on one two-GPU host: staged RTX 3090
+  qualification for v0.6.3-beta.1, exact component admission for RTX 3090 v0.6.3 and
+  RTX 4090 v0.6.11, and an executable invariant for UUID-indexed Windows GPU queries
+  and power changes. The invariant was red on five unindexed operations and green
+  after the host-script sweep; legacy records without a UUID fail closed with more
+  than one card. Both native lanes share port 18082 and run one at a time.
+- Preserve the RTX 4090 composer refusal (`error: phase rollback did not pass`).
+  Its first-release rollback is not applicable on this host; v0.6.10 and older packages
+  are unsupported there. No RTX 4090 receipt, binding or rollback target is invented.
+  An uncommitted first-release proposal is separate from the prepared branch.
+
 ### Changed
 
+- Stage v0.12.0 from v0.11.0 with unchanged RTX 5090 runtime, model and deployment
+  profile and unchanged stock OMP 18.8.7 binaries. Restore the exact v0.10.0 native
+  model contract because v0.11.0 removed it when deferring native lanes; neither
+  the RTX 5090 model nor its serving shape changes. Native qualification used
+  OMP 18.0.9, not the product client: fresh route/platform acceptance, component
+  publication and every cut stage remain pending. This is preparation only.
 - Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
   words/numbers). The guard rejects any word of two or more letters glued to a digit,
   with a documented identifier allowlist, outside code and URLs. It covers living docs,

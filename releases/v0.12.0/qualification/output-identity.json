@@ -1,0 +1,79 @@
+{
+  "artifact_type": "ninfer_v0616_exp094_output_identity_binding",
+  "schema_version": 1,
+  "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5090",
+    "vram_mib": 32607,
+    "compute_capability": "12.0",
+    "driver": "610.88"
+  },
+  "cuda_toolkit": "13.1.115",
+  "lease_job": "20261010T074903Z-S1-quality-identity-a59c13d0-1144599",
+  "lease_started_utc": "2026-10-10T07:50:36Z",
+  "lease_seconds": 777,
+  "lease_exit": 0,
+  "method": "Compare exact server binaries, then frozen EXP-094 role-corpus request and output signatures on fresh package-local and EXP-094 images under the same BF16 DFlash2 K=7 shape in one uninterrupted GPU lease.",
+  "deployment_profile": "qwen38-5090-v0.11.0",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "candidate_image": "ninfer-overnight:S1-a59c13d0-package-local",
+  "candidate_image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+  "reference_image": "ninfer-5090:a59c13d0-exp094",
+  "candidate_server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+  "exp094_server_binary_sha256": "884e5a436f30663cdd35a8a09fae9838a8120a76f1b631faec81757e148b273c",
+  "exp094_expected_server_binary_sha256": "884e5a436f30663cdd35a8a09fae9838a8120a76f1b631faec81757e148b273c",
+  "binary_identical": false,
+  "output_identity": {
+    "candidate_cases": 89,
+    "reference_cases": 89,
+    "identical_output_signatures": 89,
+    "different_output_signatures": 0,
+    "candidate_errors": 5,
+    "reference_errors": 5,
+    "identical_request_bodies": 89,
+    "candidate_responses_sha256": "bf3b45e7f9d9123b375c197377ea16b423783030aa00594263c9f87d830d4ccc",
+    "reference_responses_sha256": "dbae4a4922346f94a1a0ae4143f7b7b5f2ab7ef0a9e924f73f4ec18cd6cc918d",
+    "signature_fields": [
+      "content",
+      "reasoning",
+      "tool_calls",
+      "finish_reason",
+      "error",
+      "usage.completion_tokens",
+      "usage.prompt_tokens"
+    ],
+    "excluded_nondeterministic_fields": [
+      "tool_calls.id"
+    ],
+    "pass": true,
+    "evidence_transfer": "EXP-094 powered-screen pass"
+  },
+  "role_error_disposition": {
+    "role-package": {
+      "counted_cases": 84,
+      "counted_case_errors": 0,
+      "excluded_vacuous_case_errors": 5
+    },
+    "role-exp094": {
+      "counted_cases": 84,
+      "counted_case_errors": 0,
+      "excluded_vacuous_case_errors": 5
+    }
+  },
+  "powered_screen": {
+    "new_run": false,
+    "reference_verdict": "pass",
+    "reference_experiment": "EXP-094",
+    "reference_method": "docs/measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json",
+    "frozen_screen_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c",
+    "primary_rule": "EXP-085 unchanged",
+    "transfer_authority": "Founder-approved assignment: byte-identical role-corpus outputs carry EXP-094 powered-screen pass to the packaged binary."
+  },
+  "limits": [
+    "Serial role-corpus equivalence is measured; this is not a newly run full powered screen.",
+    "The five excluded vacuous-case errors are retained, not counted as successful responses.",
+    "The role comparison excludes nondeterministic tool-call IDs."
+  ],
+  "verdict": "pass",
+  "raw_prompts_outputs_or_secrets_included": false
+}

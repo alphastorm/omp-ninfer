@@ -1,0 +1,162 @@
+{
+  "artifact_type": "omp_ninfer_release_tooling_regressions",
+  "schema_version": 1,
+  "local_python": "/opt/homebrew/bin/python3.13",
+  "tests": [
+    {
+      "scope": "Exact v0.6.16 runtime-tag allowlist",
+      "result": "pass",
+      "count": 1,
+      "rejected_neighbors": [
+        "v0.6.17",
+        "v0.7.0",
+        "beta.0",
+        "beta.01",
+        "wrong GPU lane",
+        "trailing suffix"
+      ],
+      "code_commit": "34715e1c716b959b60957a467aad7e429d2318f5"
+    },
+    {
+      "scope": "Root upstream client distribution platform mapping",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 4,
+      "code_commit": "34715e1c716b959b60957a467aad7e429d2318f5"
+    },
+    {
+      "scope": "Upstream root archive verifier",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 6,
+      "code_commit": "6be307a2967bcbc19baa6c4b096337576e38da97"
+    },
+    {
+      "scope": "Stage draft-residue consumer",
+      "test": "StageReleaseTests.test_upstream_descriptor_allows_unpromoted_platform_root_pins",
+      "red_before_fix": true,
+      "result": "pass",
+      "count": 1,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v",
+      "code_commit": "bfa73774baac8c356124a6f7f58e46c00c8a33a3"
+    },
+    {
+      "scope": "Candidate relabelling still fails closed",
+      "test": "ReleaseContractTest.test_client_candidate_cannot_bypass_qualification_by_relabelling_itself",
+      "result": "pass",
+      "count": 1,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_verify_release.py -k test_client_candidate_cannot_bypass_qualification_by_relabelling_itself -v",
+      "code_commit": "bfa73774baac8c356124a6f7f58e46c00c8a33a3"
+    },
+    {
+      "scope": "Upstream verifier after final manifest-stateful contract change",
+      "result": "pass",
+      "count": 8,
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_verify_release.py -k upstream -v",
+      "s2_source_commit": "b622cbda514ce381658f631cdf1ad61b4b89b7bd"
+    },
+    {
+      "scope": "Legacy-descriptor staging fixture after provider-contract closure",
+      "red_on_ci": true,
+      "result": "pass",
+      "count": 1,
+      "assertions": "Return0 and both Windows/Darwin draft-posture archive mismatches appear",
+      "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_stage_release.py -k test_upstream_descriptor_allows_unpromoted_platform_root_pins -v"
+    },
+    {
+      "scope": "v0.11.0 root client-candidate marker consumed only by upstream release binding",
+      "test": "PromoteRootTests.test_upstream_promotion_consumes_only_the_bound_client_candidate_marker",
+      "red_before_fix": {
+        "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_rebind_release.py -k consumes_only -v",
+        "exit": 1,
+        "tests": 1,
+        "only_errors": [
+          "profile: unqualified client candidate; documented-route requalification pending",
+          "profiles/qwen38-rtx5090-manual-tunnel.json: unqualified client candidate; documented-route requalification pending"
+        ]
+      },
+      "green_after_fix": {
+        "command": "/opt/homebrew/bin/python3.13 -m unittest discover -s tests -p test_rebind_release.py -v",
+        "exit": 0,
+        "tests": 5,
+        "seconds": 0.5
+      },
+      "full_cli_asserted": "verify_release.py --release v0.11.0 --require-installable --json passes after upstream promotion; unpromoted control refuses",
+      "preserved_controls": [
+        "Legacy fork markers retained",
+        "Manifest remains candidate",
+        "External installation not passed; blockers remain",
+        "Per-platform clients replaced wholesale, not relabelled"
+      ],
+      "authority": "Main marker-policy decision after founder publication"
+    }
+  ],
+  "full_ci": {
+    "run": true,
+    "workflow": ".github/workflows/ci.yml",
+    "runner": "ubuntu-latest",
+    "python": "3.11",
+    "commands": [
+      "python3 scripts/verify_release.py",
+      "python3 -m unittest discover -s tests -v",
+      "bash -n examples/manual-tunnel/*.sh"
+    ],
+    "dependency": "Final pushed-head existing GitHub CI is authority; Main separately authorized full local suite with every failure recorded in root-lane-cut.json",
+    "initial": {
+      "status": "success",
+      "commit": "a1379e45b66abb4016f4a63eb097bc34d3cefe94",
+      "run": 38042843797,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38042843797",
+      "python": "3.11",
+      "scope": "Existing full repository CI before the final S2 follow-on; final-head CI remains required."
+    },
+    "failed_after_client_fix": {
+      "status": "failure",
+      "commit": "b35ce53b003e8ea7ef5d60f607a50819f8ad0076",
+      "run": 38043597806,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38043597806",
+      "tests": 346,
+      "seconds": 201.9,
+      "failures": 1,
+      "assertion": "Stage public-root fixture used the legacy18.3 descriptor with a modern1887 per-model provider contract; real verifier rejected the missing legacy PI_OPENAI_STATEFUL=1.",
+      "disposition": "Corrected only the fixture to its authoritative legacy descriptor contract, preserving the legitimate provider gate and explicitly asserting both stale platform archive diagnostics."
+    },
+    "corrected_functional_head": {
+      "status": "success",
+      "commit": "d7e32dd0908fb1b16ace1e0ac5dec1108740b936",
+      "run": 38043955727,
+      "url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38043955727",
+      "scope": "All existing CI steps on the corrected final code/test head; later changes are receipts/docs only."
+    }
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "post_cut": {
+    "receipt": "root-lane-cut.json",
+    "local_full_suite_exercised": true,
+    "initial": {
+      "tests": 347,
+      "failures": 17,
+      "errors": 2,
+      "skipped": 2,
+      "seconds": 208.29
+    },
+    "corrected": {
+      "tests": 347,
+      "failures": 4,
+      "errors": 1,
+      "skipped": 2,
+      "seconds": 207.975
+    },
+    "final_fixture_focused": {
+      "tests": 1,
+      "exit": 0,
+      "seconds": 0.538
+    },
+    "mac_timing_policy": "Four unchanged concurrency timing failures are environment evidence, per Main; final-head Ubuntu/Python3.11 CI is authority. No tolerances widened.",
+    "installable": {
+      "release": "v0.11.0",
+      "exit": 0,
+      "manifest_status": "candidate"
+    }
+  }
+}

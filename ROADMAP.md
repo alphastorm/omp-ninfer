@@ -11,7 +11,22 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Where this is now — RTX 5090-only v0.11.0 candidate, accepted routes
+## Next draft — v0.12.0 native return, preparation only
+
+The [v0.12.0 draft](releases/v0.12.0/NINFER_RELEASE_NOTES.md) restores native RTX 3090
+qualification on the new two-GPU Windows topology, with the RTX 4090 first-release
+rollback decision still blocking that lane's receipt and binding. Both lanes bind their
+own UUID and run sequentially on port 18082. The RTX 5090 component/model/profile and
+stock OMP 18.8.7 client stay unchanged. The separate v0.10.0 native model binding is
+restored; it was removed with the native lanes in v0.11.0.
+
+Owner component publication, fresh acceptance of all documented routes and clients,
+the lane/platform/acceptance/manifest stages and ready verification remain pending.
+Existing product acceptance is not retargeted. Native hardware qualification used
+OMP 18.0.9, not the product's stock OMP 18.8.7 acceptance client. No host operation,
+component publication, product tag or release is part of this preparation.
+
+## Current candidate — RTX 5090-only v0.11.0, accepted routes
 
 The [v0.11.0 candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
 NInfer v0.6.16/source 1302d639 (EXP-092/094 without 3a2fadbd) to stock OMP 18.8.7,

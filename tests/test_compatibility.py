@@ -59,9 +59,9 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                        package_url=f"https://github.com/alphastorm/ninfer/releases/download/{tag}/{package}")
         authority["runtime_variants"].insert(0, variant)
         self.assertIn(package, MODULE.render(MODULE.load_authority(self._write(authority))))
-        for field, invalid in (("release_tag", "v0.6.3-qwen38-3090-beta.1"),
+        for field, invalid in (("release_tag", "v0.6.4-qwen38-3090-beta.1"),
                                ("release_tag", "v0.6.2-qwen38-3090-native-beta.1"),
-                               ("package_name", package.replace("v0.6.2", "v0.6.3")),
+                               ("package_name", package.replace("v0.6.2", "v0.6.4")),
                                ("package_name", package.replace("cuda13.3", "cuda12.8")),
                                ("id", "rtx3090-linux-native")):
             with self.subTest(field=field, invalid=invalid):
@@ -69,6 +69,24 @@ class CompatibilityAuthorityTests(unittest.TestCase):
                 candidate["runtime_variants"][0][field] = invalid
                 with self.assertRaises(ValueError):
                     MODULE.load_authority(self._write(candidate))
+
+    def test_multi_gpu_native_admission_adds_only_the_qualified_versions(self) -> None:
+        for lane, version, next_version in (("rtx3090", "0.6.3", "0.6.4"),
+                                            ("rtx4090", "0.6.11", "0.6.12")):
+            tag_re = MODULE.RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
+            package_re = MODULE.RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
+            for beta in ("1", "2", "11"):
+                tag = f"v{version}-qwen38-{lane[3:]}-beta.{beta}"
+                package = f"ninfer-{lane}-native-v{version}-beta.{beta}-windows-x86_64-cuda13.3-{lane}.tar.gz"
+                with self.subTest(lane=lane, beta=beta):
+                    self.assertIsNotNone(tag_re.fullmatch(tag))
+                    self.assertIsNotNone(package_re.fullmatch(package))
+                    for invalid in (tag.replace(version, next_version), tag.replace(f"beta.{beta}", "beta.0"),
+                                    tag.replace(f"beta.{beta}", "beta.01"), tag + ".extra"):
+                        self.assertIsNone(tag_re.fullmatch(invalid))
+                    for invalid in (package.replace(version, next_version), package.replace("cuda13.3", "cuda13.2"),
+                                    package.replace(f"beta.{beta}", "beta.0"), package + ".extra"):
+                        self.assertIsNone(package_re.fullmatch(invalid))
 
     def upstream_authority(self) -> dict:
         authority = MODULE.load_authority(ROOT / "compatibility.json")

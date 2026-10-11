@@ -1,0 +1,481 @@
+{
+  "artifact_type": "omp_ninfer_option_c_abba_round_experiment",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "arms": {
+    "A": "unchanged a59c13d0 clean packaged runtime",
+    "B": "eaf221ac+b72daad6+a59c13d0 without3a2fadbd"
+  },
+  "order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2"
+  ],
+  "probe_sha256": "a16600f9bc018e7d1854b60f6408058f8db624bd871b50d698f187b4debf0e2f",
+  "method": "Same EXP092/094 contexts0/32000/64000/120000,continuation disabled,pair enabled; fresh process and nonce per leg. Mean server decode_s/rounds; pair row rates averaged,not summed. Pair aggregate wall tok/s retained separately.",
+  "identity": {
+    "A1": {
+      "server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+      "image": "ninfer-overnight:S1-a59c13d0-package-local",
+      "image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+      "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "receipt_sha256": "59b6d6ccc8be1af36e70065bb39888ab8ff934d7f8253f1b348f6181f23553c8"
+    },
+    "B1": {
+      "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "image": "ninfer-overnight:S1-1302d639-option-c-package-local",
+      "image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
+      "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "receipt_sha256": "379cd09afa06d7c443030a48889bd4365f6a5e3456e0a7257949d4ba5581eae9"
+    },
+    "B2": {
+      "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "image": "ninfer-overnight:S1-1302d639-option-c-package-local",
+      "image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
+      "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "receipt_sha256": "c281bcc3e97c7911992ef9a2f5a30230d578a3188959219893c2c2f02d562df3"
+    },
+    "A2": {
+      "server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+      "image": "ninfer-overnight:S1-a59c13d0-package-local",
+      "image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+      "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "receipt_sha256": "ffcf84ebdbab03cd0b1f24e762efdc8087ca4529281a5d618bf09fce51044cc3"
+    }
+  },
+  "workloads": [
+    {
+      "workload": "context-0",
+      "legs": {
+        "A1": {
+          "round_ms": 14.69154543965518,
+          "server_decode_tok_s": 400.57,
+          "rounds": [
+            348
+          ],
+          "tokens_per_round": [
+            5.885
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            108
+          ]
+        },
+        "B1": {
+          "round_ms": 14.715941849002842,
+          "server_decode_tok_s": 396.49,
+          "rounds": [
+            351
+          ],
+          "tokens_per_round": [
+            5.835
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            110
+          ]
+        },
+        "B2": {
+          "round_ms": 14.691177813218383,
+          "server_decode_tok_s": 400.58,
+          "rounds": [
+            348
+          ],
+          "tokens_per_round": [
+            5.885
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            111
+          ]
+        },
+        "A2": {
+          "round_ms": 14.718515313513521,
+          "server_decode_tok_s": 376.07,
+          "rounds": [
+            370
+          ],
+          "tokens_per_round": [
+            5.535
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            109
+          ]
+        }
+      },
+      "a59_round_ms_mean": 14.70503037658435,
+      "option_c_round_ms_mean": 14.703559831110613,
+      "dropping_3a_round_cost_ms": -0.0014705454737367063,
+      "dropping_3a_round_cost_percent": -0.010000288582046046,
+      "a59_server_decode_tok_s_mean": 388.32,
+      "option_c_server_decode_tok_s_mean": 398.53499999999997,
+      "dropping_3a_decode_change_percent": 2.6305624227441315,
+      "a59_leg_spread_ms": 0.026969873858341487,
+      "option_c_leg_spread_ms": 0.024764035784459182
+    },
+    {
+      "workload": "context-32000",
+      "legs": {
+        "A1": {
+          "round_ms": 16.349056014084496,
+          "server_decode_tok_s": 352.87,
+          "rounds": [
+            355
+          ],
+          "tokens_per_round": [
+            5.769
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            32128
+          ]
+        },
+        "B1": {
+          "round_ms": 16.344001519519523,
+          "server_decode_tok_s": 376.29,
+          "rounds": [
+            333
+          ],
+          "tokens_per_round": [
+            6.15
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            32125
+          ]
+        },
+        "B2": {
+          "round_ms": 16.340277967359043,
+          "server_decode_tok_s": 371.91,
+          "rounds": [
+            337
+          ],
+          "tokens_per_round": [
+            6.077
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            32127
+          ]
+        },
+        "A2": {
+          "round_ms": 16.381347371830984,
+          "server_decode_tok_s": 352.17,
+          "rounds": [
+            355
+          ],
+          "tokens_per_round": [
+            5.769
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            32129
+          ]
+        }
+      },
+      "a59_round_ms_mean": 16.36520169295774,
+      "option_c_round_ms_mean": 16.342139743439283,
+      "dropping_3a_round_cost_ms": -0.02306194951845697,
+      "dropping_3a_round_cost_percent": -0.140920655615151,
+      "a59_server_decode_tok_s_mean": 352.52,
+      "option_c_server_decode_tok_s_mean": 374.1,
+      "dropping_3a_decode_change_percent": 6.121638488596393,
+      "a59_leg_spread_ms": 0.03229135774648739,
+      "option_c_leg_spread_ms": 0.003723552160479926
+    },
+    {
+      "workload": "context-64000",
+      "legs": {
+        "A1": {
+          "round_ms": 17.776884213414636,
+          "server_decode_tok_s": 351.24,
+          "rounds": [
+            328
+          ],
+          "tokens_per_round": [
+            6.244
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            64232
+          ]
+        },
+        "B1": {
+          "round_ms": 17.7627651826087,
+          "server_decode_tok_s": 334.2,
+          "rounds": [
+            345
+          ],
+          "tokens_per_round": [
+            5.936
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            64232
+          ]
+        },
+        "B2": {
+          "round_ms": 17.71135164756447,
+          "server_decode_tok_s": 331.32,
+          "rounds": [
+            349
+          ],
+          "tokens_per_round": [
+            5.868
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            64231
+          ]
+        },
+        "A2": {
+          "round_ms": 17.716544543604638,
+          "server_decode_tok_s": 336.04,
+          "rounds": [
+            344
+          ],
+          "tokens_per_round": [
+            5.953
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            64232
+          ]
+        }
+      },
+      "a59_round_ms_mean": 17.746714378509637,
+      "option_c_round_ms_mean": 17.737058415086587,
+      "dropping_3a_round_cost_ms": -0.009655963423050196,
+      "dropping_3a_round_cost_percent": -0.05440986549455351,
+      "a59_server_decode_tok_s_mean": 343.64,
+      "option_c_server_decode_tok_s_mean": 332.76,
+      "dropping_3a_decode_change_percent": -3.166104062390873,
+      "a59_leg_spread_ms": 0.0603396698099985,
+      "option_c_leg_spread_ms": 0.05141353504422952
+    },
+    {
+      "workload": "context-120000",
+      "legs": {
+        "A1": {
+          "round_ms": 20.065278901069544,
+          "server_decode_tok_s": 272.91,
+          "rounds": [
+            374
+          ],
+          "tokens_per_round": [
+            5.476
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            120196
+          ]
+        },
+        "B1": {
+          "round_ms": 20.06548161218836,
+          "server_decode_tok_s": 282.73,
+          "rounds": [
+            361
+          ],
+          "tokens_per_round": [
+            5.673
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            120191
+          ]
+        },
+        "B2": {
+          "round_ms": 20.064979434426217,
+          "server_decode_tok_s": 278.88,
+          "rounds": [
+            366
+          ],
+          "tokens_per_round": [
+            5.596
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            120196
+          ]
+        },
+        "A2": {
+          "round_ms": 20.066945086455338,
+          "server_decode_tok_s": 294.12,
+          "rounds": [
+            347
+          ],
+          "tokens_per_round": [
+            5.902
+          ],
+          "completion_tokens": [
+            2048
+          ],
+          "prompt_tokens": [
+            120197
+          ]
+        }
+      },
+      "a59_round_ms_mean": 20.06611199376244,
+      "option_c_round_ms_mean": 20.06523052330729,
+      "dropping_3a_round_cost_ms": -0.000881470455151856,
+      "dropping_3a_round_cost_percent": -0.004392831333877023,
+      "a59_server_decode_tok_s_mean": 283.515,
+      "option_c_server_decode_tok_s_mean": 280.805,
+      "dropping_3a_decode_change_percent": -0.9558577147593561,
+      "a59_leg_spread_ms": 0.0016661853857939946,
+      "option_c_leg_spread_ms": 0.000502177762143674
+    },
+    {
+      "workload": "pair",
+      "legs": {
+        "A1": {
+          "round_ms": 19.34630716464647,
+          "server_decode_tok_s": 280.575,
+          "rounds": [
+            198,
+            180
+          ],
+          "tokens_per_round": [
+            5.172,
+            5.689
+          ],
+          "completion_tokens": [
+            1024,
+            1024
+          ],
+          "prompt_tokens": [
+            109,
+            107
+          ]
+        },
+        "B1": {
+          "round_ms": 21.167651172498168,
+          "server_decode_tok_s": 252.385,
+          "rounds": [
+            183,
+            201
+          ],
+          "tokens_per_round": [
+            5.596,
+            5.095
+          ],
+          "completion_tokens": [
+            1024,
+            1024
+          ],
+          "prompt_tokens": [
+            110,
+            107
+          ]
+        },
+        "B2": {
+          "round_ms": 21.275377822170768,
+          "server_decode_tok_s": 246.255,
+          "rounds": [
+            192,
+            199
+          ],
+          "tokens_per_round": [
+            5.333,
+            5.146
+          ],
+          "completion_tokens": [
+            1024,
+            1024
+          ],
+          "prompt_tokens": [
+            111,
+            107
+          ]
+        },
+        "A2": {
+          "round_ms": 19.46936757537688,
+          "server_decode_tok_s": 272,
+          "rounds": [
+            199,
+            188
+          ],
+          "tokens_per_round": [
+            5.146,
+            5.447
+          ],
+          "completion_tokens": [
+            1024,
+            1024
+          ],
+          "prompt_tokens": [
+            108,
+            110
+          ]
+        }
+      },
+      "a59_round_ms_mean": 19.407837370011674,
+      "option_c_round_ms_mean": 21.221514497334468,
+      "dropping_3a_round_cost_ms": 1.8136771273227943,
+      "dropping_3a_round_cost_percent": 9.345075871901255,
+      "a59_server_decode_tok_s_mean": 276.2875,
+      "option_c_server_decode_tok_s_mean": 249.32,
+      "dropping_3a_decode_change_percent": -9.76066597294486,
+      "a59_leg_spread_ms": 0.1230604107304103,
+      "option_c_leg_spread_ms": 0.1077266496725997
+    }
+  ],
+  "pair_aggregate_wall_tok_s": {
+    "A1": 509.69,
+    "B1": 463.45,
+    "B2": 461.21,
+    "A2": 501.11
+  },
+  "two_row_decode_observed": {
+    "A1": true,
+    "B1": true,
+    "B2": true,
+    "A2": true
+  },
+  "valid": true,
+  "invalid_reasons": [],
+  "limits": [
+    "One A/B/B/A cycle,not production traffic or a Nsight kernel trace.",
+    "Fresh nonces differ across probes by the unchanged method; do not interpret timing-probe output hashes as a role-corpus identity test.",
+    "Dropping3a is a changed source; this receipt does not retag or replace the original v0.6.16 proposal."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false,
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "source_commit_unpublished": true,
+  "lease_job": "20261010T104747Z-S1-option-c-output-identity-abba-1380701",
+  "lease_exit": 0,
+  "lease_elapsed_seconds": 1027,
+  "interpretation": "Per-round cost is the primary comparison; token rates also depend on fresh-nonce acceptance and output length. No claim that the four single-request token-rate swings are caused by the route omission."
+}

@@ -33,6 +33,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
+. ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $Workspace 'native-gpu.ps1'))))
 $utf8=[Text.UTF8Encoding]::new($false)
 $gpu=$Lane.Substring(3)
 if(-not $StateRoot){$StateRoot="C:\ProgramData\NInfer\qwen38-$gpu-native"}
@@ -61,6 +62,7 @@ function Describe($path) {
 }
 function Probe {
     $state=ReadJson "$StateRoot\state.json"
+    $gpuUuid=Resolve-NativeGpuUuid $StateRoot
     $holdPaths=@("$HostState\container-host-paused","$HostState\lane-container-paused","$realClient\local-$gpu-supervisor\paused") + @($RequiredHoldPaths)
     if(Test-Path $HostState){$holdPaths+=@(Get-ChildItem $HostState -File|Where-Object Name -Match 'paused|hold'|ForEach-Object FullName)}
     $holds=@($holdPaths|Sort-Object -Unique|ForEach-Object {Describe $_})
@@ -74,7 +76,7 @@ function Probe {
         listeners=@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue|Where-Object LocalPort -in @(18082,18088,18089,18099)|Select-Object LocalAddress,LocalPort,OwningProcess)
         lease_present=(Test-Path "$StateRoot\gpu-owner-state\lease.json")
         lease_entries=@(Get-ChildItem "$StateRoot\gpu-owner-state" -Force|ForEach-Object Name)
-        power_limit_w=[double]((& nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits|Out-String).Trim())
+        power_limit_w=(Get-NativeGpuPowerLimit $gpuUuid)
         holds=$holds;client_files=$clientFiles
     }
 }
@@ -233,8 +235,9 @@ function Restore {
     foreach($d in $b.directories){SetExactAcl (Join-Path $StateRoot $d.relative) $d.sddl}
     $xml=[IO.File]::ReadAllText("$baseline\task.xml")
     if([string](Export-ScheduledTask -TaskName $TaskName) -cne $xml){Register-ScheduledTask -TaskName $TaskName -Xml $xml -Force|Out-Null}
-    $power=[double]((& nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits|Out-String).Trim())
-    if($power -ne $b.observable.power_limit_w){& nvidia-smi -pl $b.observable.power_limit_w|Out-Null;if($LASTEXITCODE -ne 0){throw 'power restoration failed'}}
+    $gpuUuid=Resolve-NativeGpuUuid $StateRoot
+    $power=Get-NativeGpuPowerLimit $gpuUuid
+    if($power -ne $b.observable.power_limit_w){& nvidia-smi -i $gpuUuid -pl $b.observable.power_limit_w|Out-Null;if($LASTEXITCODE -ne 0){throw 'power restoration failed'}}
     $result=Audit $b;$result.started_utc=$started.ToString('o');$result.elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds
     SaveJson "$Workspace\restoration.json" $result
     if($result.status -ceq 'passed'){$prep.status='restored';SaveJson $journal $prep}

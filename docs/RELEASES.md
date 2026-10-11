@@ -29,6 +29,25 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.12.0 draft — native return on a two-GPU host, preparation only
+
+The [draft notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's RTX 5090
+component, model/profile and stock OMP 18.8.7 client while preparing UUID-bound native
+RTX 3090 and RTX 4090 lanes. This is a minor product bump for the returned topology,
+not a runtime or client version substitution. One lane runs at a time on port 18082.
+The [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json) comes from the real
+two-GPU qualification; its OMP 18.0.9 typed-tool phase is not OMP 18.8.7 product acceptance.
+The native model is restored byte-for-byte from v0.10.0 because v0.11.0 removed its
+separate binding when it deferred both lanes.
+
+RTX 4090 composition is refused by the unchanged rollback contract: its first release
+on this topology has no supported predecessor. v0.6.10 and earlier packages are not
+rollback targets on a multi-GPU host. It remains unbound pending a separate first-release
+decision. Both component publications, all fresh documented-route/platform acceptance
+and lane/platform/acceptance/manifest pin stages remain pending. Root authority, profiles
+and current install instructions are not promoted by preparation. Never date an unpublished
+changelog version or interpret these notes as publication authorization.
+
 ### v0.11.0 ready candidate — RTX 5090 only, product publication pending
 
 The [release notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source

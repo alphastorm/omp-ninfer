@@ -1632,7 +1632,7 @@ class ReleaseContractTest(unittest.TestCase):
             self.assertEqual(errors, [])
             for field in ("release_tag", "package_name"):
                 original = variant[field]
-                variant[field] = original.replace("v0.6.2", "v0.6.3")
+                variant[field] = original.replace("v0.6.2", "v0.6.4")
                 errors = []
                 VERIFY_RELEASE.validate_ninfer_variants(root, release, [variant], compatibility, "1" * 64, errors)
                 self.assertIn(f"components.ninfer_variants.rtx3090-windows-native.{field} is invalid", errors)

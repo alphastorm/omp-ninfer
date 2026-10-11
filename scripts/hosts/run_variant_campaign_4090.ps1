@@ -126,7 +126,7 @@ function Start-VramSampler([string]$Label) {
     $script = Join-Path $root 'vram-sampler.ps1'
     $out = Join-Path $logs "vram-$Label.jsonl"
     return Start-Process -FilePath 'powershell.exe' -ArgumentList @(
-        '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $script, '-Output', $out
+        '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $script, '-Output', $out, '-StateRoot', $stateRoot
     ) -PassThru -WindowStyle Hidden
 }
 

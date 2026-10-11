@@ -54,6 +54,8 @@ $tokens=$null;$errors=$null
 $null=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors|Out-String)}
 $definitions=$text.Substring(0,$text.IndexOf('# Child isolation happens'))
+New-Item -ItemType Directory -Force C:/window|Out-Null
+Copy-Item (Join-Path (Split-Path $Source) 'native-gpu.ps1') C:/window/native-gpu.ps1
 $assertions=@'
 $p=@{state_sha256=$ExpectedStateSha256;prepared_release=$null;task_state='Ready';processes=@();listeners=@();lease_present=$false;lease_entries=@();power_limit_w=$ownerPowerLimit}
 New-Item -ItemType Directory -Force $StateRoot|Out-Null

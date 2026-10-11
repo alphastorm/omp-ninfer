@@ -16,6 +16,7 @@ param(
 # restores the machine. Records identities as digests only; no hostnames, paths, or outputs.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+. ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'native-gpu.ps1'))))
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 function Sha([string]$Path) { (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
 function ShaText([string]$Text) { $s=[Security.Cryptography.SHA256]::Create(); try { ([BitConverter]::ToString($s.ComputeHash([Text.Encoding]::UTF8.GetBytes($Text))) -replace '-','').ToLowerInvariant() } finally { $s.Dispose() } }
@@ -68,6 +69,7 @@ try {
     $state = Get-Content -LiteralPath (Join-Path $StateRoot 'state.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     $active = [string]$state.active_release
     $rel = $state.releases.PSObject.Properties[$active].Value
+    $gpuUuid = Resolve-NativeGpuUuid $StateRoot
     $installedBinary = Sha ([string]$rel.server_executable)
     $installedConfig = Sha ([string]$rel.config_file)
     if ($installedBinary -cne [string]$v.server_binary_sha256) { throw 'installed server binary is not the manifest binary' }
@@ -80,7 +82,9 @@ try {
     #    instance, so their members are compared against the installed tree.
     if (([string]$v.package_name).EndsWith('.tar.gz')) {
         $installer = Join-Path $Workspace 'Install-Release.ps1'
-        $out = @(& $installer -PackagePath $pkgFile -PackageSha256 ([string]$v.package_sha256) -ModelArtifactPath $ModelArtifactPath -ApiKeyFile ([string]$rel.api_key_file) -StateRoot $StateRoot -NoStart)
+        $installArgs = @{}
+        if ($null -ne $rel.PSObject.Properties['gpu_uuid']) { $installArgs.GpuUuid = $gpuUuid }
+        $out = @(& $installer -PackagePath $pkgFile -PackageSha256 ([string]$v.package_sha256) -ModelArtifactPath $ModelArtifactPath -ApiKeyFile ([string]$rel.api_key_file) -StateRoot $StateRoot -NoStart @installArgs)
         $last = ($out | Where-Object { $_ -is [string] -and $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
         $ins = $last | ConvertFrom-Json
         if ([string]$ins.status -cne 'already_installed' -or [string]$ins.release_id -cne $active -or [string]$ins.package_sha256 -cne [string]$v.package_sha256) { throw 'downloaded installer did not accept the installed release as the exact qualified bytes' }
@@ -139,7 +143,7 @@ try {
     # 6. Restoration: return the release to its prior state.
     if (-not $wasRunning) { & $controller -Action Stop -StateRoot $StateRoot | Out-Null }
     $after = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
-    $limit = [int][double](nvidia-smi.exe --query-gpu=power.limit --format=csv,noheader,nounits)
+    $limit = [int](Get-NativeGpuPowerLimit $gpuUuid)
     $receipt.restoration = [ordered]@{ process_state=[string]$after.process_state; endpoint_state=[string]$after.endpoint_state; prior_state_restored=(([string]$after.process_state -ceq 'running') -eq $wasRunning); power_limit_w=$limit; active_release=[string]$after.release_id }
     $receipt.content_safety = [ordered]@{ hostnames_recorded=0; usernames_recorded=0; private_paths_recorded=0; secret_values_recorded=0; raw_prompts_recorded=0; model_outputs_recorded=0; identities_bound_by_sha256=$true }
     Finish 'passed'

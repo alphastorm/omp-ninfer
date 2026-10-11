@@ -1,0 +1,22 @@
+{
+  "compared_cases": 5,
+  "identical_request_body_sha256": 5,
+  "differences_by_field": {
+    "content": 4,
+    "reasoning": 4,
+    "tool_calls": 0,
+    "finish_reason": 0,
+    "error": 0,
+    "usage.prompt_tokens": 0,
+    "usage.completion_tokens": 4
+  },
+  "errors": {
+    "redacted": true,
+    "sha256": "113793c28bb7c09de398006a8463979c62f18f3bbfe65820ad22a0630e8815d8"
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "error_counts": {
+    "solo": 0,
+    "paired": 0
+  }
+}

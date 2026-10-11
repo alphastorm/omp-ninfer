@@ -206,6 +206,7 @@ def main() -> int:
     scripts = Path(__file__).resolve().parent
     orchestrator = scripts / "accept-rtx4090-route.ps1"
     probe = scripts / "omp-client-probe.py"
+    gpu_helper = scripts / "native-gpu.ps1"
     plan = {"release": a.release, "candidate": a.candidate, "mode": a.mode,
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
@@ -215,7 +216,7 @@ def main() -> int:
                                "distribution_kind": "upstream-release"},
             "restoration": "on-host finally plus independent SSH Restore leg",
             "collection_excludes": ["preserved", "qualified-artifacts", "*-home", "*-temp", "assets", "baseline/files"],
-            "scripts": [str(orchestrator), str(probe)]}
+            "scripts": [str(orchestrator), str(probe), str(gpu_helper)]}
     if a.mode == "dry-run" or a.dry_run:
         print(json.dumps({"status": "passed", "canonical_mutations": 0, "plan": plan}, indent=2))
         return 0
@@ -269,7 +270,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         if len(manifest["steps"]) != 7 or any(sha(bundle / step["file"]) != step["sha256"] for step in manifest["steps"]):
             raise RuntimeError("documented block bytes differ")
         ssh(a.host, "$ErrorActionPreference='Stop';New-Item -ItemType Directory -Force " + quote(remote) + "|Out-Null", timeout=30)
-        run(["scp", "-q", str(orchestrator), str(probe), str(clone / "scripts/hosts/run-documented-route.ps1"),
+        run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper), str(clone / "scripts/hosts/run-documented-route.ps1"),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         run(["scp", "-qr", str(bundle), a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         parse = "$t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile(" + quote(remote + "\\accept-rtx4090-route.ps1") + ",[ref]$t,[ref]$e)|Out-Null;if($e.Count){$e|ConvertTo-Json;exit 1};'PARSE_OK'"
@@ -279,13 +280,14 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         collect()
         (w / "driver-preflight.json").write_text(json.dumps({"status": "passed", "plan": plan,
             "orchestrator_sha256": sha(orchestrator), "probe_sha256": sha(probe),
+            "gpu_helper_sha256": sha(gpu_helper),
             "document_sha256": manifest["document_sha256"], "steps": manifest["steps"]}, indent=2) + "\n")
     elif a.mode == "validate":
         # Revalidate changed orchestration without repeating a successful installation/download.
         preflight = json.loads((w / "driver-preflight.json").read_text())
         if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane:
             raise RuntimeError("candidate changed since preflight")
-        run(["scp", "-q", str(orchestrator), str(probe),
+        run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         code = r"""$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$w=WORKSPACE;
 $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $w 'accept-rtx4090-route.ps1'),[ref]$t,[ref]$e)|Out-Null;if($e.Count){throw 'orchestrator parse failed'};
@@ -297,11 +299,12 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
         invoke("DryRun", "restoration-dry-run.json", 120)
         preflight["orchestrator_sha256"] = sha(orchestrator)
         preflight["probe_sha256"] = sha(probe)
+        preflight["gpu_helper_sha256"] = sha(gpu_helper)
         (w / "driver-preflight.json").write_text(json.dumps(preflight, indent=2) + "\n")
         collect()
     elif a.mode == "accept":
         preflight = json.loads((w / "driver-preflight.json").read_text())
-        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe):
+        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe) or preflight["gpu_helper_sha256"] != sha(gpu_helper):
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():
             raise RuntimeError("acceptance attempt already spent; use a new workspace for one authorized correction")
