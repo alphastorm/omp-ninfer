@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.12.0",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4e4b863a8d0ae1bd96bedb374b686361c18d2d63/compatibility.json",
-      "compatibility_sha256": "a055d3b845633f3a70f1e8b7fa9bb0304cb24510eda1040d19d5d338a4179d66",
+      "compatibility_sha256": "84672823ccbc53ec88b05643c9fef9aad7f4575426ba0545c1185da8b54efb41",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.8.7",
@@ -165,7 +165,7 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "Preparation only: RTX 5090 and stock OMP 18.8.7 stay unchanged; native lanes return on one two-GPU Windows host with each installed lane UUID-bound to its own card. Only one native lane runs at a time on loopback port 18082. Fresh product acceptance is pending; predecessor acceptance is not carried forward.",
+    "Installable candidate: RTX 5090 and stock OMP 18.8.7 stay unchanged; native lanes return on one two-GPU Windows host with each installed lane UUID-bound to its own card. Only one native lane runs at a time on loopback port 18082. Fresh product acceptance is pending; predecessor acceptance is not carried forward.",
     "The client is the unmodified upstream OMP binary, which has no appliance commands: installation and lifecycle follow the documented routes, and no client reads the compatibility authority.",
     "Checkpointing remains best effort under live traffic. Transient automatic refusals retry and admission saves a session's newest turn before evicting it, but a crash or an expired graceful wait can still leave unpublished work unsaved.",
     "The RTX 5090 multisession control observed root fallback on 2 of 8 continuations/forks without server errors; universal warm reuse is not guaranteed.",
@@ -184,9 +184,8 @@
       "NInfer RTX 5090 v0.6.16-qwen38-5090-beta.1; unchanged published image 6a02feba"
     ],
     "blockers": [
-      "Founder publication of both prepared native components is pending; both native qualifications are bound, with RTX 4090 rollback not_applicable under the owner-adopted first-release contract.",
-      "Fresh acceptance of every documented v0.12.0 route and all stock OMP 18.8.7 platform clients is pending; no predecessor route acceptance is carried forward.",
-      "Lane, platform, acceptance and manifest pin stages and verify --require-ready remain pending; this preparation performs no cut or publication."
+      "Fresh external-install acceptance of every documented v0.12.0 route and all stock OMP 18.8.7 platform clients is pending; no predecessor route acceptance is carried forward.",
+      "Platform, acceptance and manifest pin stages and verify --require-ready remain pending; the lane cut is installable but does not authorize product publication."
     ],
     "external_installation_qualified": false
   }

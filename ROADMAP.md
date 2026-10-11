@@ -11,9 +11,9 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Next draft — v0.12.0 native return, preparation only
+## Current candidate — v0.12.0 native return, acceptance pending
 
-The [v0.12.0 draft](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
+The [v0.12.0 candidate](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
 RTX 4090 qualification on the new two-GPU Windows topology. The owner adopted the
 first-release contract in PR #81: RTX 4090 rollback is `not_applicable`, with no target
 or exercised direction; RTX 3090 retains its two-direction proof. Both lanes bind their
@@ -21,13 +21,16 @@ own UUID and run sequentially on port 18082. The RTX 5090 component/model/profil
 stock OMP 18.8.7 client stay unchanged. The separate v0.10.0 native model binding is
 restored; it was removed with the native lanes in v0.11.0.
 
-Owner component publication, fresh acceptance of all documented routes and clients,
-the lane/platform/acceptance/manifest stages and ready verification remain pending.
+The owner published both native components; their public checksums, asset digests,
+package sizes and source tags match the bound identities. The lane cut promotes root
+product/profile/launcher and documented-route pins to v0.12.0, then freezes the candidate.
+Fresh acceptance of all five documented routes, both native public installs and platform
+clients remains pending, followed by platform/acceptance/manifest pins and ready verification.
 Existing product acceptance is not retargeted. Native hardware qualification used
-OMP 18.0.9, not the product's stock OMP 18.8.7 acceptance client. No host operation,
-component publication, product tag or release is part of this preparation.
+OMP 18.0.9, not stock OMP 18.8.7. No host operation or product publication is performed
+by the host-free lane cut; the product tag and release remain owner-only.
 
-## Current candidate — RTX 5090-only v0.11.0, accepted routes
+## Prior candidate — RTX 5090-only v0.11.0, accepted routes
 
 The [v0.11.0 candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
 NInfer v0.6.16/source 1302d639 (EXP-092/094 without 3a2fadbd) to stock OMP 18.8.7,
@@ -43,11 +46,11 @@ was 385.948 s with independent incumbent restoration. Composition and immutable
 platform→acceptance→manifest pins consume existing proof, preserving all 17 executed
 block bytes. The tag/live product publisher is still founder-only; no production upgrade.
 
-The founder chooses **RTX 5090 only** because the replacement native host now has
+For v0.11.0 the founder chose **RTX 5090 only** because the replacement native host has
 both 3090/4090, while unmodified packages require exactly one visible GPU. Native
 installer name/UUID/ordinal binding and unindexed power queries cannot support
-that arrangement. No environment shim. Both native lanes are deferred to a later
-multi-GPU-qualified release; owners remain on the whole immutable v0.10.0 guide,
+that arrangement. No environment shim. Both native lanes were deferred there and return in the v0.12.0 candidate;
+until its ready tag, owners remain on the whole immutable v0.10.0 guide,
 OMP 18.4.10 and its manifest/fragments. Old 65b6c4263090 proof is not retargeted.
 
 Current 5090 fragments use per-model `compat.statefulResponses: true`, custom-host

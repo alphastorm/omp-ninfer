@@ -1,19 +1,22 @@
-# OMP NInfer v0.12.0 — draft, preparation only
+# OMP NInfer v0.12.0 — installable candidate, acceptance pending
 
-This minor release prepares the return of native Windows RTX 3090 and RTX 4090 lanes on
+This minor release returns native Windows RTX 3090 and RTX 4090 lanes on
 one host with two NVIDIA GPUs. Each installed lane binds its own card by GPU UUID; the
 RTX 4090 was at installation index 0 and the RTX 3090 at index 1. **Only one native lane
 runs at a time**: both listen on loopback port 18082. This is not multi-GPU inference,
 simultaneous native serving, multi-tenancy or an automatic lane switch.
 
-Component publication is founder-run and does not authorize a product publication,
-production upgrade or acceptance on a host. No v0.12.0 tag or public product release has been created.
-The root compatibility authority, root profiles and documented install routes remain on
-their existing pins until a separately authorized lane cut.
+The founder published both native component prereleases; their public checksum sets,
+asset digests, package sizes, build receipts and source tags match the manifest pins.
+The authorized host-free lane cut promotes root compatibility, profile, launcher and
+route product pins to this installable candidate, retaining every unchanged component pin.
+No host acceptance, production upgrade, v0.12.0 tag or public product release is performed.
+The owner will schedule acceptance windows and retains the live product publication.
 
-[Draft manifest](manifest.json) · [Draft qualification summary](qualification.json) ·
+[Candidate manifest](manifest.json) · [Candidate qualification summary](qualification.json) ·
 [Release compatibility](COMPATIBILITY.md) · [Current quickstart](../../docs/QUICKSTART.md) ·
-[Security model](../../docs/SECURITY.md). The current quickstart is not a v0.12.0 install guide.
+[Security model](../../docs/SECURITY.md). The current quickstart names v0.12.0; its normal
+installation blocks still require a published ready product tag.
 
 ## Component scope
 
@@ -36,13 +39,14 @@ their existing pins until a separately authorized lane cut.
   absence would incorrectly bind the returned lanes to the RTX 5090's different model. Restoring
   the existing separate native-model contract does not alter the RTX 5090 model.
 
-| Native lane | Prepared component | Package SHA-256 / bytes | Draft state |
+| Native lane | Published component | Package SHA-256 / bytes | Candidate state |
 | --- | --- | --- | --- |
-| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Bound to the committed qualification; component publication and product acceptance pending |
-| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Bound to the committed qualification with rollback `not_applicable`; component publication and product acceptance pending |
+| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Bound to the committed qualification; component published, fresh product acceptance pending |
+| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Bound to the committed qualification with rollback `not_applicable`; component published, fresh product acceptance pending |
 
-The owner still publishes both component prereleases. Prepared URLs do not establish that
-those components are publicly available.
+Both prereleases contain the exact ten-asset set: nine checked distribution members plus
+SHA256SUMS. Downloaded checksums and build receipts match the existing release-local copies
+and every manifest-bound published digest; both tags resolve to source cad19767.
 
 ## Qualification and its boundary
 
@@ -99,16 +103,15 @@ the single-GPU RTX 5090 container/WSL lane.
 
 ## Remaining release gates
 
-1. Owner publishes the exact prepared RTX 3090 and RTX 4090 components.
-2. Separately authorize the lane pin and freeze the new candidate. Update the applicable
-   v0.12.0 documented routes, without changing the unchanged RTX 5090 runtime or OMP client.
-3. Accept every documented route fresh: RTX 5090 container host, macOS client, Windows client,
+1. Published native component verification and the authorized lane pin are complete.
+   Freeze the candidate after root and documented-route product pins are committed.
+2. Accept every documented route fresh: RTX 5090 container host, macOS client, Windows client,
    RTX 3090 native and RTX 4090 native. Collect separate native
    public-install and behavior/restoration evidence, plus all platform-client receipts.
    Exercise native lanes sequentially on their shared port.
-4. Compose acceptance, then perform platform, acceptance and manifest pin stages, committing
+3. Compose acceptance, then perform platform, acceptance and manifest pin stages, committing
    between stages. Finish with `verify_release.py --release v0.12.0 --require-ready --check-pins`.
-5. Product publication remains owner-only. Date the changelog version only at an actual cut.
+4. Product publication remains owner-only. Date the changelog version only at an actual cut.
 
 ## Non-claims
 

@@ -7,26 +7,28 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > [!WARNING]
-> **Unreleased v0.11.0 candidate: RTX 5090 only / upstream OMP 18.8.7.**
-> All three retained routes (17 steps) and stock clients passed on frozen 5861712f,
-> with 385.948 s measured downtime and independent restoration. Composition/pins
-> bind the existing proof; the product tag and live publisher remain founder-only.
-> Native RTX 3090/4090 owners remain on the complete
-> [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
-> and its OMP 18.4.10 client/fragments. The co-installed native-GPU host is unsupported;
-> both lanes return in a later multi-GPU-qualified release. Never mix authorities.
+> **Unreleased v0.12.0 candidate: RTX 5090 plus native RTX 4090 / RTX 3090.**
+> The founder published both UUID-bound native components for the two-GPU host.
+> Only one native lane runs at a time on port 18082. RTX 5090 and stock OMP 18.8.7
+> keep their exact v0.11.0 component/model/profile pins. All five documented routes,
+> native public installs and client-platform proofs need fresh v0.12.0 acceptance.
+> The candidate is not a public product release or a production upgrade. Normal
+> users remain on the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+> until a ready product tag exists; its old native packages do not support two GPUs.
 
-The separate [v0.11.0 runtime draft](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
+The historical [v0.11.0 runtime candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
 founder-selected NInfer `1302d639` as the RTX 5090 **v0.6.16** candidate: the EXP-092/094
 changes without `3a2fadbd`. Its full sm_120a ctest has 111 passes, seven skips and no
 failures; all 15 local lane criteria pass. The superseded `a59c13d0` alternative and
 its red NVFP4 test remain preserved. These are package-local qualification receipts,
 not substitutes for published-image acceptance or a production promotion. Actual
 [5090 acceptance](releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json) passed.
-The founder omitted both native lanes: unmodified packages require exactly one visible
-GPU, while the replacement host has both 4090/3090. No device-visibility shim.
-The lane cut advances root pins to v0.11.0, image `6a02feba`, server `548fe239`,
-configuration `91a35670`.
+That release deferred both native lanes because its packages required exactly one
+visible GPU. The [v0.12.0 candidate](releases/v0.12.0/NINFER_RELEASE_NOTES.md) returns
+both with source cad19767 and UUID-scoped lifecycle scripts. Its lane cut promotes
+root product pins only; RTX 5090 image `6a02feba`, server `548fe239`, configuration
+`91a35670` and stock OMP 18.8.7 stay unchanged. RTX 4090 has no supported rollback
+target on the two-GPU topology; RTX 3090 retains its qualified two-direction proof.
 
 > **Before installing — v0.10.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.

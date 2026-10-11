@@ -29,10 +29,10 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.12.0 draft — native return on a two-GPU host, preparation only
+### v0.12.0 candidate — native return on a two-GPU host, acceptance pending
 
-The [draft notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's RTX 5090
-component, model/profile and stock OMP 18.8.7 client while preparing UUID-bound native
+The [candidate notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's RTX 5090
+component, model/profile and stock OMP 18.8.7 client while returning UUID-bound native
 RTX 3090 and RTX 4090 lanes. This is a minor product bump for the returned topology,
 not a runtime or client version substitution. One lane runs at a time on port 18082.
 The bound [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json) comes from the
@@ -54,10 +54,13 @@ whole protected lineage on the same volume, unregisters only its stopped task, r
 fresh canonical install without a fake predecessor, and restores the original lineage,
 task XML, ACLs, secrets and UUID-selected power limit even after failure. The public-install
 receipt and route composition must explicitly preserve the no-target rollback result.
-Both component publications, all fresh documented-route/platform acceptance
-and lane/platform/acceptance/manifest pin stages remain pending. Root authority, profiles
-and current install instructions are not promoted by preparation. Never date an unpublished
-changelog version or interpret these notes as publication authorization.
+Both native component prereleases are published with exact checked public asset pins.
+The authorized lane cut promotes root authority, profiles, launchers and route product pins
+to v0.12.0 while retaining the unchanged RTX 5090 and OMP component identities.
+All five documented routes, both native public installs and platform-client acceptance
+must run fresh on the frozen candidate; platform/acceptance/manifest pins remain pending.
+No host operation or product publication is performed in the host-free cut. Never date an
+unpublished changelog version or interpret these notes as product publication authorization.
 
 ### v0.11.0 ready candidate — RTX 5090 only, product publication pending
 

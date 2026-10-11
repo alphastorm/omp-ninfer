@@ -1,23 +1,23 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-10 · **Published product: v0.10.0; installable v0.11.0 candidate is unreleased.**
+Updated: 2026-10-11 · **Published product: v0.10.0; installable v0.12.0 candidate is unreleased.**
 
 ## Current client candidate — OMP 18.8.7
 
 Current 5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
-source `f261ed9faf16b61880b544f599876bface4ded0d`, bound by v0.11.0. All three
-retained routes/17 steps and three stock client binaries passed on 5861712f, with
-385.948 s measured downtime and independent restoration. Existing composition/
-immutable pins bind the proof without advancing that subject or changing executed
-blocks. macOS remains preview; Linux proof qualifies the stock binary under WSL2,
+source `f261ed9faf16b61880b544f599876bface4ded0d`, unchanged in v0.12.0. Historical
+v0.11.0 proof passed all three retained routes/17 steps and three stock client binaries
+on 5861712f with 385.948 s downtime and independent restoration. It does not carry
+forward: all five v0.12.0 routes and platform clients need fresh acceptance.
+macOS remains preview; Linux qualification covers the stock binary under WSL2,
 not a native Linux OS. The product is not published and production was not upgraded.
 
-Both native lanes are omitted by founder decision: the replacement host has
-co-installed 3090/4090, whereas unmodified packages require exactly one visible GPU.
-No visibility shim. Native owners stay on the complete immutable v0.10.0 guide/
-OMP 18.4.10 authority; both lanes return after multi-GPU support/fresh acceptance.
-The old 65b6c4263090 pass remains non-composable. Local client rehearsals remain
-separate evidence against the predecessor, not route acceptance.
+Both native lanes return on the two-GPU host with founder-published RTX 4090 v0.6.11
+and RTX 3090 v0.6.3 components from cad19767. Each installed release binds its own
+GPU UUID; only one lane runs on port 18082. RTX 4090 has no supported rollback target
+there; its gate is `not_applicable`, zero directions. RTX 3090 retains its two-direction
+qualification. Legacy v0.10.0 packages still do not support that topology. Old native
+product proof and local client rehearsals remain separate, not retargeted acceptance.
 
 NInfer models use `compat.statefulResponses: true`, replacing the global `PI_OPENAI_STATEFUL=1`
 requirement (upstream [#13686](https://github.com/can1357/oh-my-pi/pull/13686)). Custom Responses
@@ -26,17 +26,17 @@ hosts now default to auto image detail, so RTX 5090 fragments no longer override
 Unavailable saved models fail closed upstream ([#13689](https://github.com/can1357/oh-my-pi/pull/13689));
 no additional config is needed. Compaction settings are unchanged.
 
-## Current runtime candidate — v0.11.0
+## Current runtime candidate — v0.12.0
 
-The [v0.11.0 candidate](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
+The [v0.12.0 candidate](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retains published
 RTX 5090 component v0.6.16/source 1302d639, without 3a, image 6a02feba/server 548fe239.
 Profile qwen38-5090-v0.11.0/config 91a35670 keeps BF16 KV/DFlash2 K=7/two device slots.
 All 15 local criteria pass; full sm_120a ctest: 111 pass/7 skip/0 fail. Exact 130,048-token
 retrieval is **58.890 s**, 2,048-token decode **179.79 server/177.96 wall tok/s**, against
 v0.10.0's 58.738 s/161.39 server tok/s. This is not route acceptance or a traffic-weighted
 promise. Superseded a59's red NVFP4 oracle remains evidence; no test was suppressed.
-The separate published-image 5090 window now passed; both native lanes are deferred.
-[Scope and composed qualification](../releases/v0.11.0/qualification.json).
+The v0.11.0 published-image window passed; v0.12.0 acceptance remains pending on all
+five routes, including the unchanged RTX 5090. [Current qualification](../releases/v0.12.0/qualification.json).
 
 ## Published baseline — v0.10.0
 

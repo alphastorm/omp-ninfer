@@ -35,8 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   profile and unchanged stock OMP 18.8.7 binaries. Restore the exact v0.10.0 native
   model contract because v0.11.0 removed it when deferring native lanes; neither
   the RTX 5090 model nor its serving shape changes. Native qualification used
-  OMP 18.0.9, not the product client: fresh route/platform acceptance, component
-  publication and every cut stage remain pending. This is preparation only.
+  OMP 18.0.9, not the product client. The owner published both native components;
+  their public checksums, asset digests, sizes and source tags match the manifest.
+  The authorized lane cut promotes v0.12.0 root/profile/launcher and documented-route
+  product pins without changing the RTX 5090 or OMP components. Fresh route/platform
+  acceptance and later pin stages remain pending; no host or product publication effect.
 - Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
   words/numbers). The guard rejects any word of two or more letters glued to a digit,
   with a documented identifier allowlist, outside code and URLs. It covers living docs,

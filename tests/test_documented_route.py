@@ -43,7 +43,7 @@ class ReleaseProseTests(unittest.TestCase):
         r"Gen3|x86|arm64|sm120|"  # PCIe generation, CPU targets and CUDA architecture.
         r"(?i:sha256|sha256sums|mp4)|ext4|WSL2|"  # Digest/file formats, filesystem and OS.
         r"DS918|can1357|"  # The documented NAS model and upstream repository owner.
-        r"rk2v4|split[24]|rtx3090|"  # Historical model, kernel routes and receipt filename.
+        r"rk2v4|split[24]|rtx(?:3090|4090)|"  # Historical model, kernel routes and native variant IDs.
         r"fanout43|durable4090"  # Exact historical council-receipt suffixes in RELEASES.md.
     )
 
@@ -101,7 +101,7 @@ class ReleaseProseTests(unittest.TestCase):
                 self.assertEqual(matches, [], f"{path.relative_to(ROOT)} glued prose: {matches}")
 
     def test_glued_words_are_rejected_in_prose(self) -> None:
-        text = ("RTX5090 OMP18 Retainedv0 Fresh18 Focused5090 selected1302d639 "
+        text = ("RTX5090 RTX4090 OMP18 Retainedv0 Fresh18 Focused5090 selected1302d639 "
                 "passes28 refused0 Its65b6c426 therefore3a final40 CI38042843797 "
                 "arbitrary123 café2")
         self.assertEqual([token for _, token in self.glued_tokens(text)], text.split())
@@ -110,9 +110,9 @@ class ReleaseProseTests(unittest.TestCase):
         text = ("abcdef1 eaf221ac c6f41f52 v0.11.0 v18.8.7 Gen3 x86 arm64 sha256 "
                 "SHA256SUMS qwen38 Qwen3.8 DFlash2 MTP0 MTP3 MTP7 NVFP4 BF16 INT8 "
                 "FP8 FP16 FP32 FP64 sm120 MP4 ext4 WSL2 DS918+ can1357 rk2v4-e8 "
-                "split2 split4 rtx3090 fanout43 durable4090")
+                "split2 split4 rtx3090 rtx4090 fanout43 durable4090")
         self.assertEqual(self.glued_tokens(text), [])
-        invalid = "abc123 bf16result arm64owners sha256broken mtp99 rtx5090owner"
+        invalid = "abc123 bf16result arm64owners sha256broken mtp99 rtx4090owner rtx5090owner"
         self.assertEqual([token for _, token in self.glued_tokens(invalid)], invalid.split())
 
     def test_current_changelog_excludes_older_published_entries(self) -> None:
