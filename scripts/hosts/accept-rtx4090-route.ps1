@@ -77,7 +77,7 @@ function Probe {
         processes=@(Get-CimInstance Win32_Process -Filter "Name='ninfer-serve.exe'"|Select-Object ProcessId,ExecutablePath)
         listeners=@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue|Where-Object LocalPort -eq 18082|Select-Object LocalAddress,LocalPort,OwningProcess)
         lease_present=(Test-Path "$StateRoot\gpu-owner-state\lease.json")
-        lease_entries=@(Get-ChildItem "$StateRoot\gpu-owner-state" -Force|ForEach-Object Name)
+        lease_entries=@(if(Test-Path "$StateRoot\gpu-owner-state"){Get-ChildItem "$StateRoot\gpu-owner-state" -Force|ForEach-Object Name})
         power_limit_w=(Get-NativeGpuPowerLimit $gpuUuid)
         holds=$holds;client_files=$clientFiles
     }
@@ -105,8 +105,11 @@ function SupportFiles {
 }
 function SupportDirectories {
     Get-Item $StateRoot
-    foreach($sub in @('gpu-owner','gpu-owner-state','receipts')) {
-        if(Test-Path "$StateRoot\$sub"){Get-Item "$StateRoot\$sub";Get-ChildItem "$StateRoot\$sub" -Directory -Recurse -Force}
+    foreach($sub in @('gpu-owner','gpu-owner-state','receipts','releases','secrets','cache')) {
+        if(Test-Path "$StateRoot\$sub") {
+            Get-Item "$StateRoot\$sub"
+            if($sub -in @('gpu-owner','gpu-owner-state','receipts')){Get-ChildItem "$StateRoot\$sub" -Directory -Recurse -Force}
+        }
     }
 }
 function Snapshot($destination) {
@@ -123,9 +126,17 @@ function Snapshot($destination) {
         $files+=@{relative=$relative;sha256=(Hash $file.FullName);sddl=(Get-Acl $file.FullName).Sddl}
     }
     foreach($dir in @(SupportDirectories)) {
-        $directories+=@{relative=$dir.FullName.Substring($StateRoot.Length).TrimStart('\');sddl=(Get-Acl $dir.FullName).Sddl}
+        $directories+=@{relative=$dir.FullName.Substring($StateRoot.Length).TrimStart('\');exists=$true;sddl=(Get-Acl $dir.FullName).Sddl}
     }
-    SaveJson "$destination\snapshot.json" @{observable=$observable;files=$files;directories=$directories;task_xml_sha256=(Hash "$destination\task.xml")}
+    foreach($sub in @('gpu-owner','gpu-owner-state','receipts','releases','secrets','cache')) {
+        if(-not (Test-Path "$StateRoot\$sub")){$directories+=@{relative=$sub;exists=$false;sddl=$null}}
+    }
+    $state=ReadJson "$StateRoot\state.json"
+    foreach($kind in @('releases','secrets','cache')) {
+        $relative="$kind\$($state.active_release)";$directory=Describe (Join-Path $StateRoot $relative)
+        $directories+=@{relative=$relative;exists=$directory.exists;sddl=$directory.sddl}
+    }
+    SaveJson "$destination\snapshot.json" @{observable=$observable;files=$files;directories=$directories;documented_stage=(Describe $Stage);task_xml_sha256=(Hash "$destination\task.xml")}
     return ReadJson "$destination\snapshot.json"
 }
 function EnableExactAcl {
@@ -202,12 +213,17 @@ function Audit($b) {
         pointers_identical=($after.active_release -ceq $b.observable.active_release -and $after.previous_release -ceq $b.observable.previous_release -and $null -eq $after.prepared_release)
         holds_identical=(($after.holds|ConvertTo-Json -Depth 8 -Compress) -ceq ($b.observable.holds|ConvertTo-Json -Depth 8 -Compress))
         client_files_identical=(($after.client_files|ConvertTo-Json -Depth 8 -Compress) -ceq ($b.observable.client_files|ConvertTo-Json -Depth 8 -Compress))
-        support_identical=$true;support_inventory_identical=$true;directory_acls_identical=$true;pending_preserved_moves=(@(Get-ChildItem "$Workspace\preserved" -Force -ErrorAction SilentlyContinue).Count -eq 0)
+        support_identical=$true;support_inventory_identical=$true;directory_acls_identical=$true;directory_presence_identical=$true;pending_preserved_moves=(@(Get-ChildItem "$Workspace\preserved" -Force -ErrorAction SilentlyContinue).Count -eq 0)
+        documented_stage_identical=(((Describe $Stage)|ConvertTo-Json -Compress) -ceq ($b.documented_stage|ConvertTo-Json -Compress))
     }
     foreach($f in $b.files){$p=Join-Path $StateRoot $f.relative;if((Hash $p) -cne $f.sha256 -or (Get-Acl $p).Sddl -cne $f.sddl){$checks.support_identical=$false}}
     $current=@(SupportFiles|ForEach-Object {$_.FullName.Substring($StateRoot.Length).TrimStart('\')}|Sort-Object)
     if(($current -join "`n") -cne ((@($b.files.relative|Sort-Object)) -join "`n")){$checks.support_inventory_identical=$false}
-    foreach($d in $b.directories){if((Get-Acl (Join-Path $StateRoot $d.relative)).Sddl -cne $d.sddl){$checks.directory_acls_identical=$false}}
+    foreach($d in $b.directories) {
+        $path=Join-Path $StateRoot $d.relative;$exists=Test-Path -LiteralPath $path
+        if($exists -ne $d.exists){$checks.directory_presence_identical=$false}
+        elseif($d.exists -and (Get-Acl -LiteralPath $path).Sddl -cne $d.sddl){$checks.directory_acls_identical=$false}
+    }
     $ok=@($checks.Values|Where-Object {$_ -ne $true}).Count -eq 0
     return @{status=$(if($ok){'passed'}else{'failed'});completed_utc=[DateTime]::UtcNow.ToString('o');checks=$checks;after=$after}
 }
@@ -230,6 +246,8 @@ function Restore {
         if(Test-Path -LiteralPath $m.preserved) {
             if(Test-Path -LiteralPath $m.path){Move-Item -LiteralPath $m.path -Destination (Join-Path "$Workspace\qualified-artifacts" $m.kind)}
             Move-Item -LiteralPath $m.preserved -Destination $m.path
+        } elseif(-not $m.exists -and (Test-Path -LiteralPath $m.path)) {
+            Move-Item -LiteralPath $m.path -Destination (Join-Path "$Workspace\qualified-artifacts" $m.kind)
         }
     }
     foreach($file in @(SupportFiles)) {
@@ -247,9 +265,9 @@ function Restore {
     }
     foreach($d in @(SupportDirectories|Sort-Object {$_.FullName.Length} -Descending)) {
         $relative=$d.FullName.Substring($StateRoot.Length).TrimStart('\')
-        if($relative -notin @($b.directories.relative) -and @(Get-ChildItem $d.FullName -Force).Count -eq 0){Remove-Item -LiteralPath $d.FullName -Force}
+        if($relative -notin @($b.directories|Where-Object exists|ForEach-Object relative) -and @(Get-ChildItem $d.FullName -Force).Count -eq 0){Remove-Item -LiteralPath $d.FullName -Force}
     }
-    foreach($d in $b.directories){SetExactAcl (Join-Path $StateRoot $d.relative) $d.sddl}
+    foreach($d in $b.directories|Where-Object exists){SetExactAcl (Join-Path $StateRoot $d.relative) $d.sddl}
     $xml=[IO.File]::ReadAllText("$baseline\task.xml")
     if($null -eq (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) -or
        [string](Export-ScheduledTask -TaskName $TaskName) -cne $xml){Register-ScheduledTask -TaskName $TaskName -Xml $xml -Force|Out-Null}
@@ -367,16 +385,17 @@ $prep.previous_release_present=-not [string]::IsNullOrWhiteSpace([string]$state.
 if($FirstRelease) {
     # The installer refuses empty state and a task without state. Preserve the whole
     # protected lineage on the same volume; never fake an active predecessor.
-    $prep.moves+=@{kind='lineage-root';path=$StateRoot;preserved="$Workspace\preserved\lineage-root"}
+    $prep.moves+=@{kind='lineage-root';path=$StateRoot;preserved="$Workspace\preserved\lineage-root";exists=$true}
 } else {
-    foreach($kind in @('releases','secrets','cache')){$prep.moves+=@{kind=$kind;path="$StateRoot\$kind\$instance";preserved="$Workspace\preserved\$kind"}}
+    foreach($kind in @('releases','secrets','cache')){$path="$StateRoot\$kind\$instance";$prep.moves+=@{kind=$kind;path=$path;preserved="$Workspace\preserved\$kind";exists=(Test-Path -LiteralPath $path)}}
 }
-if(Test-Path $Stage){$prep.moves+=@{kind='documented-stage';path=$Stage;preserved="$Workspace\preserved\documented-stage"}}
+$prep.moves+=@{kind='documented-stage';path=$Stage;preserved="$Workspace\preserved\documented-stage";exists=(Test-Path -LiteralPath $Stage)}
 $failure=$null;$routeExit=$null;$restored=$null;$boundary='preparation';$effect=$false
 try {
     AssertBaseline (Probe);SaveJson $journal $prep;$effect=$true
     if($FirstRelease){Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false}
-    foreach($m in $prep.moves){Move-Item -LiteralPath $m.path -Destination $m.preserved}
+    foreach($m in $prep.moves){if($m.exists){Move-Item -LiteralPath $m.path -Destination $m.preserved}}
+    New-Item -ItemType Directory -Force $Stage|Out-Null
     if(-not $FirstRelease) {
         $state.releases.PSObject.Properties.Remove($instance);$state.active_release=$prep.temporary_active;$state.previous_release=$TemporaryPrevious
         SaveJson "$StateRoot\state.json" $state

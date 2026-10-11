@@ -1718,6 +1718,20 @@ snapshotted and audited, even when not required. A missing optional host-state d
 staging directory is not an installation prerequisite. Do not run a window with inference
 processes, a listener on the shared native port 18082 or an outstanding GPU lease.
 
+Acceptance snapshots record missing mutable directories as `exists: false`, not as an
+operator preparation requirement. At begin, the driver preserves only existing originals
+and creates its own log, checkpoint, hold-state or documented staging directory as needed.
+Restoration returns existing originals and their metadata, retains window artifacts only
+inside the private workspace, and restores absence for directories the window created.
+It never applies ACLs or timestamps to an originally absent path, removes an empty created
+parent only when safe, and audits both directory presence and existing ACLs. Required model
+and API-key files remain pre-existing, identity-checked inputs; this contract does not
+generate replacement credentials or bypass installation prerequisites.
+
+The absent-directory correction is a successor to the frozen v0.12.0 acceptance candidate,
+not part of that candidate. Do not merge it before v0.12.0 is published: doing so changes
+the exact commit that the completed release acceptance names.
+
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
 
 The RTX 3090 addition is complete: v0.9.1 accepted all five documented routes on candidate

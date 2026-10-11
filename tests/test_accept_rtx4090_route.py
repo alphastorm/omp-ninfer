@@ -90,8 +90,8 @@ function Get-CimInstance {param($ClassName,$Filter) @()}
 function Get-NetTCPConnection {param($State,$ErrorAction) @()}
 New-Item -ItemType Directory -Force "$realClient/local-other-supervisor"|Out-Null
 New-Item -ItemType File -Force "$realClient/local-other-supervisor/paused"|Out-Null
-New-Item -ItemType Directory -Force "$StateRoot/gpu-owner-state"|Out-Null
 $probe=Probe
+if(@($probe.lease_entries).Count){throw 'absent owner-state directory is not an empty lease census'}
 if(@($probe.holds|Where-Object path -Like '*local-other-supervisor*').Count -ne 1){throw 'existing unrelated supervisor hold was not audited'}
 $FirstRelease=$true;$TemporaryPrevious=''
 @{active_release='active';previous_release='';releases=@{active=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
@@ -130,6 +130,103 @@ $results|ConvertTo-Json -Compress
             self.assertEqual(rows["rtx3090"]["selector"], "ninfer-native-3090/q38-ninfer")
             self.assertEqual(rows["rtx4090"]["power"], 450)
             self.assertEqual(rows["rtx4090"]["selector"], "ninfer-native-4090/qwen3.8-27b")
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for directory preservation")
+    def test_optional_native_directories_preserve_presence_in_both_lineage_modes(self) -> None:
+        # Execute the production AST directory statements. Host calls are fixtures; the
+        # support enumerator supplies Windows FullNames on the temporary C: provider drive.
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+New-PSDrive -Name C -PSProvider FileSystem -Root $Scratch|Out-Null
+$text=[IO.File]::ReadAllText($Source);$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+$definitions=$text.Substring(0,$text.IndexOf('# Child isolation happens'))
+New-Item -ItemType Directory -Force C:/window|Out-Null
+Copy-Item (Join-Path (Split-Path $Source) 'native-gpu.ps1') C:/window/native-gpu.ps1
+function Statements($Name,$Predicate) {
+    $function=$ast.Find({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $Name},$false)
+    (($function.Body.EndBlock.Statements|Where-Object $Predicate|ForEach-Object {$_.Extent.Text}) -join "`n")
+}
+$snapshot=Statements Snapshot {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -in @('dir','sub','kind')}
+$snapshot+="`n"+(Statements Snapshot {$_ -is [Management.Automation.Language.PipelineAst] -and $_.Extent.Text.StartsWith('SaveJson ')})
+$restoration=Statements Restore {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -in @('m','d')}
+$audit=Statements Audit {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -eq 'd'}
+$prepare=$text.Substring($text.IndexOf('$prep=[ordered]'),$text.IndexOf('$failure=$null;$routeExit=')-$text.IndexOf('$prep=[ordered]'))
+$begin=$ast.Find({param($node) $node -is [Management.Automation.Language.TryStatementAst] -and $node.Body.Extent.Text.Contains('AssertBaseline (Probe);SaveJson $journal $prep')},$false)
+$beginDirectories=(($begin.Body.Statements|Where-Object {
+    ($_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -eq 'm') -or
+    ($_.Extent.Text -match '^New-Item .*\$Stage')
+}|ForEach-Object {$_.Extent.Text}) -join "`n")
+$assertions=@'
+function Get-Acl {param($Path,$LiteralPath)
+    $p=if($LiteralPath){$LiteralPath}else{$Path}
+    if(-not (Test-Path -LiteralPath $p)){throw "ACL queried for absent path: $p"}
+    @{Sddl='fixture-acl'}
+}
+function SetExactAcl($path,$sddl) {
+    if(-not (Test-Path -LiteralPath $path)){throw "ACL restored onto absent path: $path"}
+}
+function SupportDirectories {
+    @{FullName=$StateRoot}
+    foreach($sub in @('gpu-owner','gpu-owner-state','receipts','releases','secrets','cache')) {
+        if(Test-Path "$StateRoot\$sub"){@{FullName="$StateRoot\$sub"}}
+    }
+}
+function SaveJson($path,$value){$script:savedSnapshot=$value}
+$instance='active';$state=[pscustomobject]@{active_release=$instance;previous_release='previous'}
+New-Item -ItemType Directory -Force $StateRoot,"$StateRoot\releases\$instance","$StateRoot\secrets\$instance","$Workspace\preserved","$Workspace\qualified-artifacts"|Out-Null
+Set-Content "$StateRoot\releases\$instance\original.txt" 'qualified bytes'
+if($StageWasPresent){New-Item -ItemType Directory -Force $Stage|Out-Null;Set-Content "$Stage\original.txt" 'original stage'}
+$observable=@{};$files=@();$directories=@();$destination='C:/unused'
+& ([scriptblock]::Create($snapshot))
+$b=$script:savedSnapshot
+foreach($relative in @('gpu-owner','gpu-owner-state','receipts','cache','cache\active')) {
+    $d=@($b.directories|Where-Object relative -EQ $relative)
+    if($d.Count -ne 1 -or $d[0].exists -ne $false){throw "missing absence snapshot: $relative"}
+}
+if($b.documented_stage.exists -ne $StageWasPresent){throw 'stage presence not snapshotted'}
+Invoke-Expression $prepare
+$stageMove=@($prep.moves|Where-Object kind -EQ 'documented-stage')
+if($stageMove.Count -ne 1 -or $stageMove[0].exists -ne $StageWasPresent){throw 'stage absence not journaled'}
+if(-not $FirstRelease -and @($prep.moves|Where-Object {$_.kind -eq 'cache' -and -not $_.exists}).Count -ne 1){throw 'absent cache was not journaled'}
+Invoke-Expression $beginDirectories
+if(-not (Test-Path $Stage)){throw 'window stage not created at begin'}
+New-Item -ItemType Directory -Force $StateRoot,"$StateRoot\cache\$instance","$StateRoot\gpu-owner-state","$StateRoot\receipts"|Out-Null
+Set-Content "$Stage\window.txt" 'private window state'
+Invoke-Expression $restoration
+if((Test-Path $Stage) -ne $StageWasPresent){throw 'original stage presence not restored'}
+if($StageWasPresent -and (Get-Content "$Stage\original.txt") -ne 'original stage'){throw 'original stage content lost'}
+if(-not (Test-Path "$Workspace\qualified-artifacts\documented-stage\window.txt")){throw 'window artifacts not retained privately'}
+if((Get-Content "$StateRoot\releases\$instance\original.txt") -ne 'qualified bytes'){throw 'qualified lineage not restored'}
+$checks=@{directory_presence_identical=$true;directory_acls_identical=$true}
+Invoke-Expression $audit
+if(-not $checks.directory_presence_identical -or -not $checks.directory_acls_identical){throw 'directory restoration audit failed'}
+@{lane=$Lane;first_release=[bool]$FirstRelease;stage_was_present=$StageWasPresent;passed=$true}
+'@
+$results=@(foreach($lane in @('rtx3090','rtx4090')) {
+    foreach($first in @($false,$true)) {
+        foreach($StageWasPresent in @($false,$true)) {
+            $case="$lane-$first-$StageWasPresent"
+            $root="C:\qualified-$case";$stage="C:\stage-$case"
+            & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.12.0 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot $root -Stage $stage -RealHome C:/home -FirstRelease:$first
+            Remove-Item C:/window/preserved,C:/window/qualified-artifacts -Recurse -Force
+        }
+    }
+})
+$results|ConvertTo-Json -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "directories.ps1"
+            script.write_text(proof)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            rows = json.loads(result.stdout)
+            self.assertEqual(len(rows), 8)
+            self.assertTrue(all(row["passed"] for row in rows))
 
     def test_first_release_mode_is_explicit_exclusive_and_offline(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

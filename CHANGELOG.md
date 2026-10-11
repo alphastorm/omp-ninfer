@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Acceptance drivers record missing mutable directories, create only their own window
+  directories, and restore the original absence instead of requiring an operator to
+  pre-create logs, checkpoints, native caches/staging or Windows hold state. Existing
+  directories retain their original contents and metadata; window artifacts stay in
+  the private workspace. Required model and API-key files remain prerequisites. This
+  successor fix must not merge before the frozen v0.12.0 candidate is published.
+
 ### Added
 
 - Prepare the v0.12.0 native Windows return on one two-GPU host: bound RTX 3090

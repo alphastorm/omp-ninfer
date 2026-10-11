@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -11,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 import unittest.mock
 
@@ -423,6 +425,196 @@ class WindowsInteropRelayTests(unittest.TestCase):
 
 
 
+@unittest.skipIf(os.name == "nt", "host directory preservation uses POSIX modes")
+class HostDirectoryRestorationTests(unittest.TestCase):
+    """Run the real begin/restore filesystem operations; every host command is a fixture."""
+
+    def setUp(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "directory_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")
+        self.host = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.host)
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.home = Path(temporary.name) / "home"
+        self.workspace = Path(temporary.name) / "window"
+        self.workspace.mkdir()
+        self.key = self.home / ".config/omp-ninfer/api-key"
+        self.key.parent.mkdir(parents=True)
+        self.key.write_text("original private fixture key\n")
+        self.logs = self.home / ".local/state/omp-ninfer"
+        self.checkpoints = self.home / ".local/share/omp-ninfer/checkpoints"
+        self.checkpoints.parent.mkdir(parents=True)
+        self.image = {"Config": {"Image": "fixture-image"}, "Image": "fixture-image-id",
+                      "State": {"Running": True},
+                      "HostConfig": {"RestartPolicy": {"Name": "unless-stopped"}}, "Mounts": []}
+        self.sha = "1" * 40
+        self.branch = "main"
+        self.fail_fetch = False
+
+    def command(self, argv, **kwargs):
+        argv = [str(v) for v in argv]
+        code, output = 0, ""
+        if argv[:2] == ["docker", "inspect"]:
+            if "--format" in argv:
+                output = json.dumps(self.image)
+            else:
+                code = 1  # The beta container is absent throughout this filesystem fixture.
+        elif argv[:2] == ["docker", "rm"]:
+            pass
+        elif argv[0] == "git":
+            if "rev-parse" in argv:
+                output = self.branch if "--abbrev-ref" in argv else self.sha
+            elif "checkout" in argv:
+                self.sha, self.branch = (("2" * 40, "HEAD") if "--detach" in argv else ("1" * 40, "main"))
+            elif "fetch" in argv and self.fail_fetch:
+                return subprocess.CompletedProcess(argv, 1, "", "fixture fetch failure")
+        elif argv[0] == "bash":
+            self.image["State"]["Running"] = argv[-1] == "restore"
+        else:
+            self.fail("unexpected external command: " + repr(argv))
+        return subprocess.CompletedProcess(argv, code, output, "")
+
+    def action(self, action):
+        argv = ["accept-rtx5090-host.py", "--action", action, "--workspace", str(self.workspace),
+                "--release", "v0.12.0", "--candidate", "2" * 40, "--windows-workspace", "C:/fixture",
+                "--production-image", "fixture-image", "--restore-after-seconds", "60"]
+        def health(*args, **kwargs):
+            response = io.BytesIO(b'{"status":"ok"}')
+            response.status = 200
+            return response
+        with unittest.mock.patch.object(sys, "argv", argv), \
+             unittest.mock.patch.dict(os.environ), \
+             unittest.mock.patch.object(self.host.Path, "home", return_value=self.home), \
+             unittest.mock.patch.object(self.host.subprocess, "run", side_effect=self.command), \
+             unittest.mock.patch.object(self.host.subprocess, "Popen", return_value=types.SimpleNamespace(pid=123)), \
+             unittest.mock.patch.object(self.host.urllib.request, "urlopen", side_effect=health), \
+             unittest.mock.patch.object(self.host, "windows_environment", return_value={}), \
+             unittest.mock.patch("builtins.print"):
+            # The Windows release command is a fixture too, never a real host operation.
+            command = self.command
+            def with_windows(argv, **kwargs):
+                if str(argv[0]).endswith("powershell.exe"):
+                    return subprocess.CompletedProcess(argv, 0, "fixture hold released", "")
+                return command(argv, **kwargs)
+            with unittest.mock.patch.object(self.host.subprocess, "run", side_effect=with_windows):
+                self.host.main()
+
+    def test_absent_logs_and_checkpoints_are_recorded_created_and_restored_absent(self) -> None:
+        parent = self.logs.parent.parent
+        os.utime(parent, ns=(1_790_000_000_000_000_000, 1_790_000_001_000_000_000))
+        parent_metadata = parent.stat()
+        self.action("begin")
+        baseline = json.loads((self.workspace / "baseline.json").read_text())
+        for path in (self.logs.parent, self.logs, self.checkpoints):
+            self.assertIs(baseline["directories"][str(path)]["exists"], False)
+        for path in (self.logs, self.checkpoints):
+            self.assertEqual(path.stat().st_mode & 0o777, 0o700)
+            (path / "window-only").write_text("private window state")
+        self.key.write_text("window key\n")
+        self.action("restore")
+        for path in (self.logs.parent, self.logs, self.checkpoints):
+            self.assertFalse(path.exists(), path)
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertEqual((parent.stat().st_atime_ns, parent.stat().st_mtime_ns),
+                         (parent_metadata.st_atime_ns, parent_metadata.st_mtime_ns))
+        for label in ("logs", "checkpoints"):
+            self.assertEqual((self.workspace / ("window-" + label) / "window-only").read_text(), "private window state")
+        self.assertTrue(json.loads((self.workspace / "restoration.json").read_text())["documented_key_restored"])
+
+    def test_existing_directories_restore_original_files_modes_and_timestamps(self) -> None:
+        metadata = {}
+        for path in (self.logs, self.checkpoints):
+            path.mkdir(parents=True, mode=0o750)
+            (path / "original").write_text("original bytes")
+            os.utime(path, ns=(1_790_000_000_000_000_000, 1_790_000_001_000_000_000))
+            s = path.stat()
+            metadata[path] = (s.st_mode & 0o777, s.st_atime_ns, s.st_mtime_ns)
+        self.action("begin")
+        baseline = json.loads((self.workspace / "baseline.json").read_text())
+        for path in metadata:
+            self.assertIs(baseline["directories"][str(path)]["exists"], True)
+            (path / "window-only").write_text("window bytes")
+        self.action("restore")
+        for path, expected in metadata.items():
+            s = path.stat()
+            self.assertEqual((s.st_mode & 0o777, s.st_atime_ns, s.st_mtime_ns), expected)
+            self.assertEqual((path / "original").read_text(), "original bytes")
+            self.assertFalse((path / "window-only").exists())
+
+    def test_failed_begin_restores_absence_and_original_key(self) -> None:
+        self.fail_fetch = True
+        with self.assertRaisesRegex(RuntimeError, "fixture fetch failure"):
+            self.action("begin")
+        self.assertFalse(self.logs.exists())
+        self.assertFalse(self.logs.parent.exists())
+        self.assertFalse(self.checkpoints.exists())
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertTrue((self.workspace / "restoration.json").exists())
+
+
+class WindowsHoldDirectoryTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the Windows hold lifecycle")
+    def test_hold_restores_absent_or_existing_state_directory_without_touching_other_holds(self) -> None:
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source);$tokens=$null;$errors=$null
+$null=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+function Get-ScheduledTask {@()}
+function Invoke-WebRequest {param([switch]$UseBasicParsing,$Uri,$TimeoutSec) @{StatusCode=200;Content='{"status":"ok"}'}}
+function Invoke-RestMethod {param($Uri,$TimeoutSec) @{status='ok'}}
+function Get-ExecutionPolicy {param([switch]$List) @()}
+function Get-Acl {param($Path,$LiteralPath)
+    $p=if($LiteralPath){$LiteralPath}else{$Path}
+    if(-not (Test-Path -LiteralPath $p)){throw "ACL queried for absent path: $p"}
+    @{Sddl='fixture-acl'}
+}
+$results=@(foreach($exists in @($false,$true)) {
+    $root=Join-Path $Scratch "control-$exists";$workspace=Join-Path $Scratch "window-$exists"
+    New-Item -ItemType Directory -Force "$root/bin",$workspace|Out-Null
+    Set-Content "$root/bin/windows-host-common.ps1" 'function Set-OmpAdminOnlyFile {param($Path)}'
+    $env:LOCALAPPDATA=Join-Path $Scratch "client-$exists"
+    $state=Join-Path $root 'state'
+    if($exists) {
+        New-Item -ItemType Directory -Force $state|Out-Null
+        Set-Content "$state/owner-paused" 'unrelated hold bytes'
+        (Get-Item $state).LastWriteTimeUtc=[DateTime]::UtcNow.AddHours(-1)
+    }
+    $script=[scriptblock]::Create($text)
+    $null=& $script -Action Hold -Workspace $workspace -Release v0.12.0 -Candidate ('1'*40) -ControlRoot $root
+    $before=Get-Content "$workspace/windows-baseline.json" -Raw|ConvertFrom-Json
+    $directory=@($before.directories|Where-Object path -EQ $state)[0]
+    if($directory.exists -ne $exists){throw 'original state presence not recorded'}
+    if(-not (Test-Path "$state/lane-container-paused")){throw 'own hold was not created'}
+    $null=& $script -Action Release -Workspace $workspace -Release v0.12.0 -Candidate ('1'*40) -ControlRoot $root
+    if((Test-Path $state) -ne $exists){throw 'original state presence not restored'}
+    if(Test-Path "$state/lane-container-paused"){throw 'own hold remains'}
+    if($exists -and (Get-Content "$state/owner-paused") -ne 'unrelated hold bytes'){throw 'unrelated hold changed'}
+    $after=Get-Content "$workspace/windows-final.json" -Raw|ConvertFrom-Json
+    foreach($original in $before.directories) {
+        $final=@($after.directories|Where-Object path -EQ $original.path)[0]
+        foreach($field in @('exists','sddl','creation_time_utc_ticks','last_write_time_utc_ticks')) {
+            if($final.$field -cne $original.$field){throw "directory metadata changed: $field"}
+        }
+    }
+    @{original_state_exists=$exists;passed=$true}
+})
+$results|ConvertTo-Json -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "hold.ps1"
+            script.write_text(proof)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-windows-client.ps1"), directory],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            rows = json.loads(result.stdout)
+            self.assertEqual(len(rows), 2)
+            self.assertTrue(all(row["passed"] for row in rows))
+
+
 class WindowsRouteAnswerTests(unittest.TestCase):
     """The documented Windows commands' visible answers, as the route log records them."""
 
@@ -463,13 +655,27 @@ class WindowsHostRestorationTests(unittest.TestCase):
                 "definition_sha256": "4c96ce2595ea361bd694af8d68f5737b52637323da12dce0804ee4b79b3c5214"}
         marker = {"path": "C:\\ProgramData\\OMP\\windows-hosts\\state\\container-host-paused",
                   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "bytes": 0}
-        self.baseline = {"markers": [marker], "tasks": [task]}
+        self.baseline = {"markers": [marker], "tasks": [task], "directories": []}
 
     def snapshot(self, **task):
-        return {"markers": self.baseline["markers"], "tasks": [{**self.baseline["tasks"][0], **task}]}
+        return {"markers": self.baseline["markers"], "tasks": [{**self.baseline["tasks"][0], **task}],
+                "directories": self.baseline["directories"]}
 
     def test_a_periodic_task_caught_mid_run_is_unchanged(self) -> None:
         self.routes.assert_windows_host_unchanged(self.snapshot(state="Running"), self.snapshot(state="Ready"))
+
+    def test_documented_directory_absence_and_existing_acl_are_restoration_invariants(self) -> None:
+        before = self.snapshot()
+        before["directories"] = [{"path": "C:/fixture/state", "exists": False, "sddl": None}]
+        for directory in ({"path": "C:/fixture/state", "exists": True, "sddl": "fixture-acl"},
+                          {"path": "C:/fixture/other", "exists": False, "sddl": None}):
+            after = dict(self.snapshot(), directories=[directory])
+            with self.subTest(directory=directory), self.assertRaisesRegex(AssertionError, "directories"):
+                self.routes.assert_windows_host_unchanged(before, after)
+        before["directories"] = [{"path": "C:/fixture/state", "exists": True, "sddl": "original-acl"}]
+        after = dict(self.snapshot(), directories=[{"path": "C:/fixture/state", "exists": True, "sddl": "changed-acl"}])
+        with self.assertRaisesRegex(AssertionError, "directories"):
+            self.routes.assert_windows_host_unchanged(before, after)
 
     def test_a_disabled_redefined_or_removed_task_or_a_changed_marker_is_refused(self) -> None:
         for after, message in ((self.snapshot(state="Disabled"), "tasks"),
