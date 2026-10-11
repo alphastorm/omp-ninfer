@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("accept_rtx4090_route",
@@ -42,7 +43,7 @@ class RequestShapeTests(unittest.TestCase):
 
 class NativeLaneTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the native baseline contract")
-    def test_powershell_baseline_enforces_each_lanes_power_and_hold(self) -> None:
+    def test_powershell_baseline_enforces_lane_power_and_operator_holds(self) -> None:
         # Execute the production declarations/functions, stopping before any host operation.
         # C: is a temporary filesystem drive; no ScheduledTask, GPU or network call runs.
         proof = r'''
@@ -59,14 +60,39 @@ Copy-Item (Join-Path (Split-Path $Source) 'native-gpu.ps1') C:/window/native-gpu
 $assertions=@'
 $p=@{state_sha256=$ExpectedStateSha256;prepared_release=$null;task_state='Ready';processes=@();listeners=@();lease_present=$false;lease_entries=@();power_limit_w=$ownerPowerLimit}
 New-Item -ItemType Directory -Force $StateRoot|Out-Null
-@{active_release='active';previous_release='previous';releases=@{older=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
-if($Lane -eq 'rtx4090') {
+@{active_release='active';previous_release='previous';prepared_release=$null;releases=@{older=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
+if(@($RequiredHoldPaths).Count) {
   $rejected=$false;try{AssertBaseline $p}catch{$rejected=$true}
-  if(-not $rejected){throw '4090 accepted a missing required hold'}
-  New-Item -ItemType Directory -Force $HostState|Out-Null
-  New-Item -ItemType File -Force "$HostState/container-host-paused"|Out-Null
+  if(-not $rejected){throw 'accepted missing operator-required holds'}
+  foreach($hold in $RequiredHoldPaths){
+    New-Item -ItemType Directory -Force (Split-Path $hold)|Out-Null
+    New-Item -ItemType File -Force $hold|Out-Null
+  }
 }
 AssertBaseline $p
+if(Test-Path $HostState){throw 'baseline created appliance state'}
+function Start-Process {
+  param($FilePath,$ArgumentList,[switch]$PassThru,$RedirectStandardOutput,$RedirectStandardError)
+  $script:childCommand=[Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($ArgumentList[-1]))
+  $process=[pscustomobject]@{Handle=1;ExitCode=0}
+  $process|Add-Member ScriptMethod WaitForExit {param($milliseconds) if($null -ne $milliseconds){$true}}
+  $process|Add-Member ScriptMethod Refresh {}
+  return $process
+}
+if((Child Route 1) -ne 0){throw 'child argument transport failed'}
+$expected='-RequiredHoldPaths @('+((@($RequiredHoldPaths|ForEach-Object {Quote $_})) -join ',')+')'
+if(-not $script:childCommand.Contains($expected)){throw 'child lost the operator hold array'}
+function Resolve-NativeGpuUuid {param($root) 'fixture-card'}
+function Get-NativeGpuPowerLimit {param($uuid) $ownerPowerLimit}
+function Get-ScheduledTask {param($TaskName) @{State='Ready'}}
+function Get-Acl {param($Path,$LiteralPath) @{Sddl='fixture-acl'}}
+function Get-CimInstance {param($ClassName,$Filter) @()}
+function Get-NetTCPConnection {param($State,$ErrorAction) @()}
+New-Item -ItemType Directory -Force "$realClient/local-other-supervisor"|Out-Null
+New-Item -ItemType File -Force "$realClient/local-other-supervisor/paused"|Out-Null
+New-Item -ItemType Directory -Force "$StateRoot/gpu-owner-state"|Out-Null
+$probe=Probe
+if(@($probe.holds|Where-Object path -Like '*local-other-supervisor*').Count -ne 1){throw 'existing unrelated supervisor hold was not audited'}
 $FirstRelease=$true;$TemporaryPrevious=''
 @{active_release='active';previous_release='';releases=@{active=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
 AssertBaseline $p
@@ -85,6 +111,8 @@ if(-not $rejected){throw 'other lane power limit was accepted'}
 '@
 $results=@(foreach($lane in @('rtx3090','rtx4090')) {
   & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.9.1 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -RealHome C:/home
+  $holds=@("C:/operator/$lane-first-hold","C:/operator/$lane-owner's-hold")
+  & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.9.1 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -RealHome C:/home -RequiredHoldPaths $holds
 })
 $results|ConvertTo-Json -Compress
 '''
@@ -129,19 +157,20 @@ $results|ConvertTo-Json -Compress
         self.assertIn("status='not_applicable'; directions=0", install)
         self.assertIn("public-install acceptance is not a rollback test", install)
 
-    def test_dry_run_preserves_4090_default_and_requires_3090_host(self) -> None:
+    def test_dry_run_requires_an_operator_host_for_both_lanes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             workspace = Path(directory) / "not-created"
             command = [sys.executable, str(ROOT / "scripts/hosts/accept-rtx4090-route.py"),
                        "--release", "v0.9.1", "--candidate", "1" * 40, "--workspace", str(workspace),
                        "--remote-workspace", "C:/acceptance", "--expected-state-sha256", "2" * 64,
                        "--temporary-previous", "previous", "--mode", "dry-run"]
-            default = subprocess.run(command, capture_output=True, text=True)
-            explicit = subprocess.run(command + ["--lane", "rtx4090"], capture_output=True, text=True)
+            default = subprocess.run(command + ["--host", "fixture-host"], capture_output=True, text=True)
+            explicit = subprocess.run(command + ["--lane", "rtx4090", "--host", "fixture-host"], capture_output=True, text=True)
             self.assertEqual(default.returncode, 0, default.stderr)
             self.assertEqual(default.stdout, explicit.stdout)
-            missing_host = subprocess.run(command + ["--lane", "rtx3090"], capture_output=True, text=True)
-            self.assertEqual(missing_host.returncode, 2)
+            for lane in ("rtx3090", "rtx4090"):
+                missing_host = subprocess.run(command + ["--lane", lane], capture_output=True, text=True)
+                self.assertEqual(missing_host.returncode, 2, lane)
             selected = subprocess.run(command + ["--lane", "rtx3090", "--host", "fixture-host"],
                                       capture_output=True, text=True)
             self.assertEqual(selected.returncode, 0, selected.stderr)
@@ -149,6 +178,52 @@ $results|ConvertTo-Json -Compress
             self.assertFalse(workspace.exists())
             unknown = subprocess.run(command + ["--lane", "rtx5090"], capture_output=True, text=True)
             self.assertEqual(unknown.returncode, 2)
+
+    def test_required_holds_are_repeatable_explicit_and_offline(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / "not-created"
+            command = [sys.executable, str(ROOT / "scripts/hosts/accept-rtx4090-route.py"),
+                       "--release", "v0.12.0", "--candidate", "1" * 40, "--host", "fixture-host",
+                       "--workspace", str(workspace), "--remote-workspace", "C:/acceptance",
+                       "--expected-state-sha256", "2" * 64, "--first-release", "--mode", "dry-run"]
+            for lane in ("rtx3090", "rtx4090"):
+                for holds in ([], ["C:/operator/first-hold", "C:/operator/owner's-hold"]):
+                    args = [argument for hold in holds for argument in ("--require-hold", hold)]
+                    result = subprocess.run(command + ["--lane", lane] + args, capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(json.loads(result.stdout)["plan"]["required_hold_paths"], holds)
+                    self.assertFalse(workspace.exists())
+
+    def test_required_hold_array_reaches_the_powershell_driver(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            command = ["accept-rtx4090-route.py", "--release", "v0.12.0", "--candidate", "1" * 40,
+                       "--host", "fixture-host", "--workspace", directory, "--remote-workspace", "C:/acceptance",
+                       "--expected-state-sha256", "2" * 64, "--first-release", "--mode", "restore",
+                       "--require-hold", "C:/operator/first-hold", "--require-hold", "C:/operator/owner's-hold"]
+            completed_process = subprocess.CompletedProcess([], 0, "", "")
+            with mock.patch.object(sys, "argv", command), \
+                    mock.patch.object(DRIVER, "ssh", return_value=completed_process) as ssh, \
+                    mock.patch.object(DRIVER, "run", return_value=completed_process):
+                try:
+                    self.assertEqual(DRIVER.main(), 0)
+                except SystemExit as error:
+                    self.fail(f"operator holds were refused by the argument parser: {error}")
+            self.assertIn("-RequiredHoldPaths @('C:/operator/first-hold','C:/operator/owner''s-hold')",
+                          ssh.call_args_list[0].args[1])
+
+    def test_native_host_contract_is_not_derived_from_the_lane(self) -> None:
+        source = (ROOT / "scripts/hosts/accept-rtx4090-route.ps1").read_text()
+        parameters = source[:source.index("Set-StrictMode")]
+        self.assertIn("[string[]]$RequiredHoldPaths=@()", parameters)
+        self.assertNotIn("$RequiredHoldPaths=", source[source.index("Set-StrictMode"):])
+        self.assertNotIn("local-$gpu-supervisor", source)
+        self.assertIn("-Filter 'local-*-supervisor'", source)
+        for other_host_port in ("18088", "18089", "18099"):
+            self.assertNotIn(other_host_port, source)
+        self.assertIn("-RequiredHoldPaths @(", source)
+        public = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text()
+        self.assertIn('$base = "http://$($rel.host):$($rel.port)"', public)
+        self.assertNotIn("container-host-paused", public)
 
     def test_assessor_binds_3090_model_route_and_package(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -1704,12 +1704,19 @@ pushes the component tag and creates one prerelease with the closed set; binding
 product release stays `scripts/bind_native_variant.py`.
 
 The historical cutter and `accept-rtx4090-route.{py,ps1}` filenames each remain the single
-implementation for both native lanes. Omit `--lane` / `-Lane` for unchanged RTX 4090 behavior;
-RTX 3090 requires an explicit lane and the Python route driver also requires its `--host`.
+implementation for both native lanes. Omit `--lane` / `-Lane` to select RTX 4090;
+RTX 3090 requires an explicit lane. Both lanes require the Python driver's explicit `--host`;
+lane identity never selects a physical SSH destination or a host-appliance hold.
 It uses state root `C:/ProgramData/NInfer/qwen38-3090-native`, task
 `NInfer-Qwen38-3090-Native` and a stopped 370 W owner baseline, not the RTX 4090's 450 W
-and container-host pause prerequisite. Existing hold files are snapshotted and audited on both
-lanes. Do not run a window with inference processes, listeners or an outstanding GPU lease.
+baseline. Host-specific required hold files are explicit, repeatable `--require-hold WINDOWS_PATH`
+arguments, forwarded to PowerShell's `-RequiredHoldPaths`; the default is none. A host with a
+container appliance must pass its actual pause hold explicitly. The two-GPU native host has no
+container appliance and requires no such marker: never create one to satisfy lane identity.
+Existing host-state hold files and all existing local-supervisor pause markers are still
+snapshotted and audited, even when not required. A missing optional host-state directory or
+staging directory is not an installation prerequisite. Do not run a window with inference
+processes, a listener on the shared native port 18082 or an outstanding GPU lease.
 
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
 
@@ -1794,7 +1801,11 @@ On the authorized RTX 3090 host, run the public-asset check with the candidate c
 
 For documented acceptance, use a fresh same-volume remote workspace and the exact state hash and
 temporary previous-release id from the stopped hardware qualification baseline. Run the same
-driver arguments with `--mode dry-run`, then `preflight`, then once with `accept`:
+driver arguments with `--mode dry-run`, then `preflight`, then once with `accept`.
+
+For a host that actually needs a container pause hold, add
+`--require-hold C:/ProgramData/OMP/windows-hosts/state/container-host-paused` to all three
+invocations. Omit it on a native-only host; required holds are never inferred from the lane.
 
 ```sh
 python3 scripts/hosts/accept-rtx4090-route.py --lane rtx3090 --release v0.9.1 \

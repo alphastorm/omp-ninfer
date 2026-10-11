@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Make native route host selection and required holds explicit operator inputs for both
+  lanes. Hosts without a container appliance need no invented pause marker; existing
+  holds are still preserved and audited independently of lane identity. Native endpoint
+  checks use the shared product port, not a predecessor host's unrelated container ports.
 - Admit an explicit first native lineage only with zero rollback directions and
   `not_applicable`, never a fabricated pass or predecessor. The first-release route
   preserves the protected lineage and stopped task, exercises a fresh canonical

@@ -187,7 +187,9 @@ def main() -> int:
     p.add_argument("--candidate", required=True)
     p.add_argument("--workspace", type=Path, required=True)
     p.add_argument("--remote-workspace", required=True)
-    p.add_argument("--host", help="SSH destination; required for rtx3090")
+    p.add_argument("--host", required=True, help="operator-selected native host SSH destination")
+    p.add_argument("--require-hold", action="append", default=[], metavar="WINDOWS_PATH",
+                   help="host-specific required hold file; repeat for each, default none")
     p.add_argument("--clone", type=Path)
     p.add_argument("--bundle", type=Path)
     p.add_argument("--expected-state-sha256", required=True)
@@ -199,10 +201,6 @@ def main() -> int:
     p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect"), default="dry-run")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
-    if a.host is None:
-        if a.lane != "rtx4090":
-            p.error("--host is required for rtx3090")
-        a.host = "sf-pc"
     route_lane = f"{a.lane}-native"
     provider = f"ninfer-native-{a.lane.removeprefix('rtx')}"
     model = NATIVE_MODELS[a.lane]
@@ -226,6 +224,7 @@ def main() -> int:
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
             "window_minutes": a.window_minutes,
+            "required_hold_paths": a.require_hold,
             "lineage_mode": "first_release" if a.first_release else "upgrade",
             "client_install": {"lane": route_lane, "step": "client-install",
                                "launcher": r"$env:LOCALAPPDATA\OMP\omp.exe",
@@ -248,6 +247,7 @@ def main() -> int:
 
     def invoke(mode: str, name: str, timeout: int, check: bool = True) -> subprocess.CompletedProcess[str]:
         arguments = " ".join("-" + key + " " + quote(value) for key, value in {**params, "Mode": mode}.items())
+        arguments += " -RequiredHoldPaths @(" + ",".join(quote(path) for path in a.require_hold) + ")"
         if a.first_release:
             arguments += " -FirstRelease"
         code = "$ProgressPreference='SilentlyContinue'; & ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(remote + "\\accept-rtx4090-route.ps1") + "))) " + arguments

@@ -26,6 +26,7 @@ param(
     [string]$Model='C:\ProgramData\omp-ninfer-model\qwen3_8_27b.ninfer',
     [string]$KeyFile='C:\ProgramData\omp-ninfer-keys\api-key.txt',
     [string]$HostState='C:\ProgramData\OMP\windows-hosts\state',
+    [string[]]$RequiredHoldPaths=@(),
     [string]$RealHome=$env:USERPROFILE,
     [ValidateRange(1,2)][int]$Attempt=1,
     [ValidateRange(1,45)][int]$WindowMinutes=45,
@@ -42,8 +43,6 @@ if(-not $StateRoot){$StateRoot="C:\ProgramData\NInfer\qwen38-$gpu-native"}
 if(-not $TaskName){$TaskName="NInfer-Qwen38-$gpu-Native"}
 if(-not $Stage){$Stage="C:\ProgramData\omp-ninfer-stage-$Lane-windows-native"}
 $ownerPowerLimit=if($Lane -eq 'rtx3090'){370}else{450}
-$RequiredHoldPaths=@()
-if($Lane -eq 'rtx4090'){$RequiredHoldPaths=@("$HostState\container-host-paused")}
 $provider="ninfer-native-$gpu"
 $modelId=if($Lane -eq 'rtx3090'){'q38-ninfer'}else{'qwen3.8-27b'}
 $selector="$provider/$modelId"
@@ -65,8 +64,9 @@ function Describe($path) {
 function Probe {
     $state=ReadJson "$StateRoot\state.json"
     $gpuUuid=Resolve-NativeGpuUuid $StateRoot
-    $holdPaths=@("$HostState\container-host-paused","$HostState\lane-container-paused","$realClient\local-$gpu-supervisor\paused") + @($RequiredHoldPaths)
+    $holdPaths=@($RequiredHoldPaths)
     if(Test-Path $HostState){$holdPaths+=@(Get-ChildItem $HostState -File|Where-Object Name -Match 'paused|hold'|ForEach-Object FullName)}
+    if(Test-Path $realClient){$holdPaths+=@(Get-ChildItem $realClient -Directory -Filter 'local-*-supervisor'|ForEach-Object {Join-Path $_.FullName 'paused'}|Where-Object {Test-Path -LiteralPath $_})}
     $holds=@($holdPaths|Sort-Object -Unique|ForEach-Object {Describe $_})
     $clientFiles=@(if(Test-Path $realClient){Get-ChildItem $realClient -File -Force|Sort-Object Name|ForEach-Object {Describe $_.FullName}})
     [ordered]@{
@@ -75,7 +75,7 @@ function Probe {
         active_release=$state.active_release;previous_release=$state.previous_release;prepared_release=$state.prepared_release
         task_state=[string](Get-ScheduledTask -TaskName $TaskName).State
         processes=@(Get-CimInstance Win32_Process -Filter "Name='ninfer-serve.exe'"|Select-Object ProcessId,ExecutablePath)
-        listeners=@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue|Where-Object LocalPort -in @(18082,18088,18089,18099)|Select-Object LocalAddress,LocalPort,OwningProcess)
+        listeners=@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue|Where-Object LocalPort -eq 18082|Select-Object LocalAddress,LocalPort,OwningProcess)
         lease_present=(Test-Path "$StateRoot\gpu-owner-state\lease.json")
         lease_entries=@(Get-ChildItem "$StateRoot\gpu-owner-state" -Force|ForEach-Object Name)
         power_limit_w=(Get-NativeGpuPowerLimit $gpuUuid)
@@ -86,7 +86,7 @@ function AssertBaseline($p) {
     if($p.state_sha256 -cne $ExpectedStateSha256 -or $null -ne $p.prepared_release -or
        $p.task_state -cne 'Ready' -or @($p.processes).Count -ne 0 -or @($p.listeners).Count -ne 0 -or
        $p.lease_present -or @($p.lease_entries).Count -ne 0 -or $p.power_limit_w -ne $ownerPowerLimit -or
-       @($RequiredHoldPaths|Where-Object {$_ -and -not (Test-Path -LiteralPath $_)}).Count -ne 0){throw 'baseline differs from authorized stopped state'}
+       @($RequiredHoldPaths|Where-Object {-not (Test-Path -LiteralPath $_)}).Count -ne 0){throw 'baseline differs from authorized stopped state'}
     $s=ReadJson "$StateRoot\state.json"
     if($FirstRelease) {
         if(-not [string]::IsNullOrWhiteSpace([string]$s.previous_release) -or
@@ -170,6 +170,7 @@ function Child($childMode,$seconds) {
         StateRoot=$StateRoot;TaskName=$TaskName;Stage=$Stage;Model=$Model;KeyFile=$KeyFile;HostState=$HostState;RealHome=$RealHome;Attempt=$Attempt;WindowMinutes=$WindowMinutes}
     $command='& ([scriptblock]::Create([IO.File]::ReadAllText('+ (Quote $self) +')))'
     foreach($k in $values.Keys){$command+=' -'+$k+' '+(Quote $values[$k])}
+    $command+=' -RequiredHoldPaths @('+((@($RequiredHoldPaths|ForEach-Object {Quote $_})) -join ',')+')'
     if($FirstRelease){$command+=' -FirstRelease'}
     $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
     $name=$childMode.ToLowerInvariant()
