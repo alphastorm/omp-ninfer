@@ -1722,6 +1722,11 @@ It never applies ACLs or timestamps to an originally absent path, removes an emp
 parent only when safe, and audits both directory presence and existing ACLs. Required model
 and API-key files remain pre-existing, identity-checked inputs; this contract does not
 generate replacement credentials or bypass installation prerequisites.
+If another owner writes into a window-created parent, Linux restoration retains that path,
+finishes key/checkout checks and releases the Windows hold, saves a failed directory proof,
+then reports failure. Re-reading that proof still fails; it never deletes the other owner's
+state. Windows hold receipts start with `hold_created: false`, claim ownership only after
+exclusive file creation succeeds, and remove a hold only when that claim is true.
 
 The absent-directory correction is a successor to the frozen v0.12.0 acceptance candidate,
 not part of that candidate. Do not merge it before v0.12.0 is published: doing so changes

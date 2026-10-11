@@ -141,6 +141,8 @@ def main():
         with (root / 'restore.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             if (root / 'restoration.json').exists():
+                previous = json.loads((root / 'restoration.json').read_text())
+                assert not previous.get('retained_window_created_parents'), 'window-created parents retained; restoration proof failed'
                 return
             if not (root / 'baseline.json').exists():
                 baseline()
@@ -189,6 +191,7 @@ def main():
             result['checkout'] = run(['git', '-C', checkout, 'rev-parse', 'HEAD'])
             result['branch'] = run(['git', '-C', checkout, 'rev-parse', '--abbrev-ref', 'HEAD'])
             result['checkout_restored'] = result['checkout'] == b['checkout'] and result['branch'] == b['branch'] and run(['git', '-C', checkout, 'status', '--porcelain']) == ''
+            retained_parents = []
             for path, metadata in sorted(b['directories'].items(), key=lambda v: len(Path(v[0]).parts), reverse=True):
                 if metadata['exists']:
                     os.chmod(path, metadata['mode'])
@@ -196,7 +199,12 @@ def main():
                 elif Path(path).exists():
                     # Only an empty window-created parent may be removed; never recurse
                     # into state another owner added during the window.
-                    Path(path).rmdir()
+                    try:
+                        Path(path).rmdir()
+                    except OSError:
+                        retained_parents.append(path)
+            result['retained_window_created_parents'] = retained_parents
+            result['documented_directories_restored'] = not retained_parents
             assert result['documented_key_restored'] and result['checkout_restored']
             result['beta_absent'] = subprocess.run(['docker', 'inspect', 'omp-ninfer-beta'], capture_output=True).returncode != 0
             assert result['beta_absent']
@@ -204,6 +212,7 @@ def main():
             result['completed_utc'] = now()
             result['window_seconds'] = round(time.time() - b['start_epoch'], 3)
             save('restoration.json', result)
+            assert result['documented_directories_restored'], 'window-created parents retained; restoration proof failed'
     env = dict(os.environ, DOCKER_CONFIG=str(root / 'anonymous-docker'))
     if a.action == 'preflight':
         root.mkdir(mode=0o700, parents=True, exist_ok=True)

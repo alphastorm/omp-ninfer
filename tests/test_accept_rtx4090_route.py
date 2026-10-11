@@ -150,6 +150,7 @@ function Statements($Name,$Predicate) {
     (($function.Body.EndBlock.Statements|Where-Object $Predicate|ForEach-Object {$_.Extent.Text}) -join "`n")
 }
 $snapshot=Statements Snapshot {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -in @('dir','sub','kind')}
+$snapshot='$files=@();$directories=@();'+$snapshot
 $snapshot+="`n"+(Statements Snapshot {$_ -is [Management.Automation.Language.PipelineAst] -and $_.Extent.Text.StartsWith('SaveJson ')})
 $restoration=Statements Restore {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -in @('m','d')}
 $audit=Statements Audit {$_ -is [Management.Automation.Language.ForEachStatementAst] -and $_.Variable.VariablePath.UserPath -eq 'd'}
@@ -175,7 +176,7 @@ function SupportDirectories {
     }
 }
 function SaveJson($path,$value){$script:savedSnapshot=$value}
-$instance='active';$state=[pscustomobject]@{active_release=$instance;previous_release='previous'}
+$instance='active';$state=[pscustomobject]@{active_release=$instance;previous_release=$(if($FirstRelease){$null}else{'previous'})}
 New-Item -ItemType Directory -Force $StateRoot,"$StateRoot\releases\$instance","$StateRoot\secrets\$instance","$Workspace\preserved","$Workspace\qualified-artifacts"|Out-Null
 Set-Content "$StateRoot\releases\$instance\original.txt" 'qualified bytes'
 if($StageWasPresent){New-Item -ItemType Directory -Force $Stage|Out-Null;Set-Content "$Stage\original.txt" 'original stage'}
@@ -187,6 +188,7 @@ foreach($relative in @('gpu-owner','gpu-owner-state','receipts','cache','cache\a
     if($d.Count -ne 1 -or $d[0].exists -ne $false){throw "missing absence snapshot: $relative"}
 }
 if($b.documented_stage.exists -ne $StageWasPresent){throw 'stage presence not snapshotted'}
+$started=[DateTime]::UtcNow
 Invoke-Expression $prepare
 $stageMove=@($prep.moves|Where-Object kind -EQ 'documented-stage')
 if($stageMove.Count -ne 1 -or $stageMove[0].exists -ne $StageWasPresent){throw 'stage absence not journaled'}
@@ -210,7 +212,11 @@ $results=@(foreach($lane in @('rtx3090','rtx4090')) {
         foreach($StageWasPresent in @($false,$true)) {
             $case="$lane-$first-$StageWasPresent"
             $root="C:\qualified-$case";$stage="C:\stage-$case"
-            & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.12.0 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot $root -Stage $stage -RealHome C:/home -FirstRelease:$first
+            try {
+                $lineage=@{FirstRelease=$first}
+                if(-not $first){$lineage.TemporaryPrevious='older'}
+                & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.12.0 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -StateRoot $root -Stage $stage -RealHome C:/home @lineage
+            } catch {throw "$case`: $($_.Exception.Message)`n$($_.ScriptStackTrace)"}
             Remove-Item C:/window/preserved,C:/window/qualified-artifacts -Recurse -Force
         }
     }
