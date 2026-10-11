@@ -29,7 +29,7 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.12.0 candidate — native return on a two-GPU host, acceptance pending
+### v0.12.0 ready candidate — native return on a two-GPU host, publication pending
 
 The [candidate notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's RTX 5090
 component, model/profile and stock OMP 18.8.7 client while returning UUID-bound native
@@ -47,7 +47,7 @@ and route acceptance retain that non-claim. v0.6.10 and earlier packages are uns
 rollback targets on a multi-GPU host. The upgraded RTX 3090 still requires its passed
 two-direction proof. RTX 4090 is now bound to its [public receipt](../releases/v0.12.0/qualification/rtx4090.json)
 under the owner-adopted first-release contract from PR #81; no rollback target is invented.
-For its later, owner-authorized acceptance, replace `--temporary-previous` with
+For its completed owner-authorized acceptance, replace `--temporary-previous` with
 `--first-release` in the documented native driver invocation. Baseline state must contain
 exactly one active release and no previous/prepared release. The window preserves the
 whole protected lineage on the same volume, unregisters only its stopped task, runs the
@@ -57,10 +57,17 @@ receipt and route composition must explicitly preserve the no-target rollback re
 Both native component prereleases are published with exact checked public asset pins.
 The authorized lane cut promotes root authority, profiles, launchers and route product pins
 to v0.12.0 while retaining the unchanged RTX 5090 and OMP component identities.
-All five documented routes, both native public installs and platform-client acceptance
-must run fresh on the frozen candidate; platform/acceptance/manifest pins remain pending.
-No host operation or product publication is performed in the host-free cut. Never date an
-unpublished changelog version or interpret these notes as product publication authorization.
+All five documented routes (31 blocks), both native public installs and three unchanged
+stock OMP 18.8.7 clients passed fresh on frozen candidate
+`7713ceb956eee79f4c3e232ca020d385baff89be`; see [documented routes](../releases/v0.12.0/acceptance/documented-routes.json)
+and [composed acceptance](../releases/v0.12.0/acceptance/composed-external-installation.json).
+Platform, acceptance and manifest pins bind commits holding each stage's final inputs.
+The native roots/tasks/holds/power and RTX 5090 incumbent baseline were restored;
+this frozen driver does not claim restoration of originally absent mutable directories.
+That correction is a separate successor and must not merge before this candidate is published.
+The host-free cut itself performed no host operation; later acceptance was separately
+authorized. Product tag/publication remain owner-only. Never date an unpublished changelog
+version or interpret these notes as product publication authorization.
 
 ### v0.11.0 ready candidate — RTX 5090 only, product publication pending
 
@@ -1838,7 +1845,7 @@ Release notes must lead with the exact support boundary and manual topology, the
 qualification summary, quickstart, security model, and known limitations. Do not claim:
 
 - “first stateful Responses” or “first persistent KV cache”;
-- automatic container restart, multi-GPU, or multi-tenant support;
+- automatic container restart, multi-GPU inference, concurrent native serving or multi-tenant support;
 - structured JSON-schema output or unattended RTX 3090 role activation;
 - support response-time guarantees or other SLAs;
 - universal GPU performance; or

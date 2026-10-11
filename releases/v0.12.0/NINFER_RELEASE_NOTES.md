@@ -1,4 +1,4 @@
-# OMP NInfer v0.12.0 — installable candidate, acceptance pending
+# OMP NInfer v0.12.0 — ready candidate, product publication pending
 
 This minor release returns native Windows RTX 3090 and RTX 4090 lanes on
 one host with two NVIDIA GPUs. Each installed lane binds its own card by GPU UUID; the
@@ -10,8 +10,9 @@ The founder published both native component prereleases; their public checksum s
 asset digests, package sizes, build receipts and source tags match the manifest pins.
 The authorized host-free lane cut promotes root compatibility, profile, launcher and
 route product pins to this installable candidate, retaining every unchanged component pin.
-No host acceptance, production upgrade, v0.12.0 tag or public product release is performed.
-The owner will schedule acceptance windows and retains the live product publication.
+Subsequent owner-authorized acceptance passed on frozen candidate `7713ceb9`, and
+immutable evidence pins are complete. No production upgrade, v0.12.0 tag or public
+product release occurred; the owner retains the live product publication.
 
 [Candidate manifest](manifest.json) · [Candidate qualification summary](qualification.json) ·
 [Release compatibility](COMPATIBILITY.md) · [Current quickstart](../../docs/QUICKSTART.md) ·
@@ -41,8 +42,8 @@ installation blocks still require a published ready product tag.
 
 | Native lane | Published component | Package SHA-256 / bytes | Candidate state |
 | --- | --- | --- | --- |
-| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Bound to the committed qualification; component published, fresh product acceptance pending |
-| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Bound to the committed qualification with rollback `not_applicable`; component published, fresh product acceptance pending |
+| RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Component published; qualification, fresh product route and public install passed |
+| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Component published; fresh product route/public install passed; rollback remains `not_applicable` |
 
 Both prereleases contain the exact ten-asset set: nine checked distribution members plus
 SHA256SUMS. Downloaded checksums and build receipts match the existing release-local copies
@@ -62,7 +63,7 @@ multi-GPU host.
 
 The qualification client was **OMP 18.0.9**, installed as
 `18.0.9-hosted-windows-f4dcba581e4a`; the read-only installed-client record confirms that identity.
-That typed-tool proof is distinct from pending product acceptance with stock OMP 18.8.7.
+That typed-tool proof is distinct from the fresh passed product acceptance with stock OMP 18.8.7.
 No previous product-route or platform-client acceptance is carried forward.
 
 The [RTX 4090 public receipt](qualification/rtx4090.json) is composed from the same real-input
@@ -79,9 +80,9 @@ error: phase rollback did not pass
 The bound lane has no rollback target on this two-GPU host: v0.6.10 and earlier RTX 4090 packages use
 single-visible-GPU lifecycle operations and are unsupported there. The first-release
 change permits only the explicit zero-direction `not_applicable` result,
-never a passed rollback. Later owner-authorized route
-acceptance must use `--first-release`, exercise the fresh install/start/stop/tool/session and
-fail-closed blocks without a predecessor, and restore the preserved original lineage/task/
+never a passed rollback. Fresh owner-authorized route
+acceptance used `--first-release`, exercised the install/start/stop/tool/session and
+fail-closed blocks without a predecessor, and restored the preserved original lineage/task/
 ACLs/secrets/UUID power. No installed rollback target or bidirectional test is claimed.
 
 ## Host-script closure
@@ -101,17 +102,37 @@ exception is pinned to the legacy single-card resolver's exact query/function an
 only once. Shell samplers are explicitly outside this Windows invariant because they run in
 the single-GPU RTX 5090 container/WSL lane.
 
-## Remaining release gates
+## Fresh product acceptance and immutable pins
 
-1. Published native component verification and the authorized lane pin are complete.
-   Freeze the candidate after root and documented-route product pins are committed.
-2. Accept every documented route fresh: RTX 5090 container host, macOS client, Windows client,
-   RTX 3090 native and RTX 4090 native. Collect separate native
-   public-install and behavior/restoration evidence, plus all platform-client receipts.
-   Exercise native lanes sequentially on their shared port.
-3. Compose acceptance, then perform platform, acceptance and manifest pin stages, committing
-   between stages. Finish with `verify_release.py --release v0.12.0 --require-ready --check-pins`.
-4. Product publication remains owner-only. Date the changelog version only at an actual cut.
+All five [documented routes](acceptance/documented-routes.json), 31 blocks and three
+unchanged stock OMP 18.8.7 clients passed on frozen candidate
+`7713ceb956eee79f4c3e232ca020d385baff89be`. [Composed acceptance](acceptance/composed-external-installation.json)
+binds separate native public-install receipts and behavior/restoration proof; no predecessor
+product proof is carried forward. macOS remains preview, and the Linux client was observed
+under WSL2, not a newly qualified native Linux OS. Native routes ran sequentially.
+
+RTX 4090 public attempt 1 failed because the operator supplied a staged model copy rather
+than the installed external reference. Its failed receipt/diagnosis remain unchanged. Both
+corrected public guards derived the model path from the active installed release record
+and verified its recorded size and SHA-256. The corrected RTX 4090 attempt 2 and RTX 3090
+public check passed; their temporary staged guard scripts were deleted.
+
+Both native windows restored all measured canonical state, pointers, release counts, tasks,
+ACLs/secrets, holds and UUID-indexed power. The RTX 5090 receipt restores the retained
+incumbent image/mount/health/key/checkout baseline without a production upgrade; its
+restore receipt records a 389.939 s window. Its initial preflight required preparation of
+an empty checkpoint directory. This frozen candidate does not prove restoration of
+originally absent mutable directories; the separate successor correction must not merge
+before v0.12.0 is published.
+
+Platform, acceptance and manifest stages use commits holding each stage's final inputs,
+and `verify_release.py --release v0.12.0 --require-ready --check-pins` passes. These metadata
+commits do not advance the acceptance subject or change executed blocks.
+
+## Remaining owner step
+
+Only the owner may tag/publish v0.12.0. Date the changelog version only at that actual cut;
+the candidate stays unreleased and its PR stays draft until the owner acts.
 
 ## Non-claims
 

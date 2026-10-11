@@ -8,7 +8,8 @@ Current 5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
 source `f261ed9faf16b61880b544f599876bface4ded0d`, unchanged in v0.12.0. Historical
 v0.11.0 proof passed all three retained routes/17 steps and three stock client binaries
 on 5861712f with 385.948 s downtime and independent restoration. It does not carry
-forward: all five v0.12.0 routes and platform clients need fresh acceptance.
+forward: all five v0.12.0 routes (31 blocks), both public native installs and three stock
+clients passed fresh on frozen candidate `7713ceb9`; immutable evidence pins close that proof.
 macOS remains preview; Linux qualification covers the stock binary under WSL2,
 not a native Linux OS. The product is not published and production was not upgraded.
 
@@ -35,8 +36,10 @@ All 15 local criteria pass; full sm_120a ctest: 111 pass/7 skip/0 fail. Exact 13
 retrieval is **58.890 s**, 2,048-token decode **179.79 server/177.96 wall tok/s**, against
 v0.10.0's 58.738 s/161.39 server tok/s. This is not route acceptance or a traffic-weighted
 promise. Superseded a59's red NVFP4 oracle remains evidence; no test was suppressed.
-The v0.11.0 published-image window passed; v0.12.0 acceptance remains pending on all
-five routes, including the unchanged RTX 5090. [Current qualification](../releases/v0.12.0/qualification.json).
+The v0.11.0 published-image window passed; fresh v0.12.0 acceptance passed all five
+routes, including the unchanged RTX 5090. [Current qualification](../releases/v0.12.0/qualification.json)
+and [composed proof](../releases/v0.12.0/acceptance/composed-external-installation.json)
+remain unreleased product evidence; only the owner may tag/publish.
 
 ## Published baseline — v0.10.0
 

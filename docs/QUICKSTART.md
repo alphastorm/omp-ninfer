@@ -6,8 +6,9 @@
 
 > [!IMPORTANT]
 > **Current scope: RTX 5090 container plus UUID-bound native RTX 4090 and RTX 3090.**
-> The native components are published and lane pins are installable, but all five
-> documented routes and stock OMP 18.8.7 platform clients need fresh v0.12.0 acceptance.
+> The native components are published and all five documented routes, both native public
+> installs and three stock OMP 18.8.7 clients passed fresh on frozen candidate `7713ceb9`;
+> immutable evidence pins are complete.
 > Previous product acceptance is not carried forward, even for the unchanged RTX 5090.
 > Both native lanes share one two-GPU host and port 18082; only one may run at a time.
 > The product tag is not published. Normal setup blocks require that tag and its ready
@@ -18,7 +19,7 @@
 The [v0.12.0 notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) record the unchanged
 RTX 5090/runtime client identities and the two returned native qualifications.
 Use this guide and manifest together. Updated product pins and the restored native
-blocks require fresh acceptance; they do not establish a production upgrade.
+blocks passed fresh acceptance; they do not establish a production upgrade.
 A package-local Docker image ID is not a published OCI digest.
 
 The client is unmodified upstream v18.8.7, source
@@ -81,9 +82,9 @@ These are owner-operated observations, not independent external-user outcomes.
 
 | I have | Current scope | Start here |
 | --- | --- | --- |
-| RTX 5090 + Windows 11 / Docker Desktop WSL2 | v0.12.0 candidate; fresh acceptance pending | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) |
+| RTX 5090 + Windows 11 / Docker Desktop WSL2 | v0.12.0 ready candidate; product publication pending | [RTX 5090 container lane](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 4090 + native Windows, optionally beside RTX 3090 | v0.12.0 candidate; first supported lineage, no rollback target | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 + native Windows, optionally beside RTX 4090 | v0.12.0 candidate; upgraded lineage, fresh acceptance pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 3090 + native Windows, optionally beside RTX 4090 | v0.12.0 ready candidate; upgraded lineage, product publication pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | Other GPU/deployment or simultaneous native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 The founder-published native packages select their own qualified card and bind its UUID,
@@ -94,10 +95,13 @@ host. Never substitute their GPU family, component tag, package or client into v
 ## v0.12.0 route acceptance
 
 All five documented routes, 31 steps, and the three stock OMP 18.8.7 platform-client
-proofs must run fresh on the frozen candidate. No v0.11.0 route receipt carries forward.
-Both native public installs also need fresh checks. Until the receipts and immutable
-platform/acceptance/manifest pins land, the ready gate refuses v0.12.0. These commands
-are candidate documentation, not permission to start a production runtime.
+proofs passed fresh on frozen candidate `7713ceb956eee79f4c3e232ca020d385baff89be`.
+No v0.11.0 route receipt carries forward. Both native public installs also passed;
+[documented routes](../releases/v0.12.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.12.0/acceptance/composed-external-installation.json)
+bind that proof and the immutable platform/acceptance/manifest pins. macOS remains
+preview; Linux ran under WSL2, not a newly qualified native Linux OS. These commands
+remain unreleased candidate documentation, not permission to start a production runtime.
 
 ## v0.10.0 route acceptance
 
@@ -161,7 +165,7 @@ to the exact runtime for the selected qualified lane. RTX 5090 uses
 the digest-pinned image in the manifest through Docker Desktop WSL2; the macOS and Linux client
 routes reach the same image. RTX 4090 and RTX 3090 use their exact native Windows packages. Every
 published route ran the unmodified upstream OMP 18.4.10 client; the current candidate targets
-18.8.7 and requires fresh v0.12.0 acceptance. The RTX 5090 admits two requests at once,
+18.8.7 with fresh passed v0.12.0 acceptance. The RTX 5090 admits two requests at once,
 with DFlash2 draft window 7, BF16 KV and two device state slots. Both prompts plus output
 reservations must fit its 131,520-token KV pool.
 
@@ -266,9 +270,8 @@ warm reuse is not claimed.
 A checkpoint is bound to the exact runtime fingerprint, including the server build and model.
 RTX 5090 changes its server fingerprint in v0.11.0; predecessor checkpoint reuse is not
 claimed. The RTX 5090 model is unchanged in v0.12.0; returned native packages now bind
-their own UUIDs. Require the ready gate for a normal public install; this candidate is
-installable only for maintainer acceptance,
-not a newly accepted release.
+their own UUIDs. This candidate passed acceptance and its ready gate, but a normal
+public install still requires the owner-published product tag; it is not a published release.
 
 The RTX 5090 deployment profile is `qwen38-5090-v0.11.0` / configuration `91a35670`, with
 `--spec dflash2 --draft-tokens 7 --kv-dtype bf16 --max-concurrency 2 --device-state-slots 2`
@@ -289,7 +292,8 @@ Qualification scratch settings do not replace either public profile.
 The client is an unmodified executable from the upstream
 [Oh My Pi v18.8.7 release](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7), not an archive
 or installer. These **candidate** assets were downloaded and hashed against the release's
-asset digests and SHA256SUMS.txt, not qualified as a new OMP NInfer release. The
+asset digests and SHA256SUMS.txt, then accepted as the unchanged v0.12.0 product clients;
+the product remains unpublished. The
 [release/source review](measurements/2026-10-10-omp-1887-client-release-review.json) and
 [staging descriptor](measurements/2026-10-10-omp-1887-client-components.json) bind those identities:
 
@@ -311,8 +315,8 @@ and composed external-installation acceptance. v0.10.0 acceptance covers all fiv
 routes on the published components; it does not expand support beyond those exact profiles.
 
 > [!WARNING]
-> Stay on the exact upstream OMP 18.8.7 binary when reviewing this candidate; it is not yet
-> qualified or published as an OMP NInfer release. The config every route below
+> Stay on the exact upstream OMP 18.8.7 binary when reviewing this accepted candidate;
+> it is not yet published as an OMP NInfer release. The config every route below
 > installs (`examples/manual-tunnel/fail-closed.yml`) turns the client's startup update check
 > off: a generic `omp update` would replace the client outside the release procedure and move it
 > away from the checksummed bytes. Upgrade by cloning the next tag and rerunning the install step.
@@ -374,7 +378,7 @@ section 7 and the **Native Windows command forms** at the start of section 8.
 
 ## Native Windows RTX 4090 release lane
 
-**v0.12.0 candidate; fresh product-route acceptance pending.** Requires Windows 11 x64,
+**v0.12.0 ready candidate; product publication pending.** Requires Windows 11 x64,
 one matching RTX 4090 (sm_89), a supported NVIDIA driver, Git, PowerShell, Python 3
 with its `py` launcher and at least 40 GiB free for the model, package, client and logs.
 An RTX 3090 may be co-installed: the published installer selects the unique qualified
@@ -565,7 +569,7 @@ if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 
 ## Native Windows RTX 3090 release lane
 
-**v0.12.0 candidate; fresh product-route acceptance pending.** Requires Windows 11 x64,
+**v0.12.0 ready candidate; product publication pending.** Requires Windows 11 x64,
 one matching RTX 3090 (sm_86), a supported NVIDIA driver, Git, PowerShell, Python 3
 with its `py` launcher and at least 40 GiB free for the model, package, client and logs.
 The published installer selects the unique qualified card and records its UUID and PCI

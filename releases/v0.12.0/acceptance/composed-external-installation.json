@@ -228,7 +228,7 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.12.0/acceptance/documented-routes.json",
-      "sha256": "7a5ed4656b76417b2b41aeeb1396cbf634fa8fd77cd8c4023a48088f5f93d6a5"
+      "sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68"
     },
     "rtx4090_public_install": {
       "repository_path": "releases/v0.12.0/acceptance/rtx4090-public-install.json",
@@ -244,7 +244,7 @@
     },
     "published_client_components": {
       "repository_path": "releases/v0.12.0/qualification/client-components.json",
-      "sha256": "bd60d51ee26933101d25a68fbf8a39985d4aea7dd7bc7b4ae2fe9b61b0ead1f6"
+      "sha256": "64669196187a33fbd77697b4bbbeea4975e3a051322bead10116e33c95361602"
     }
   },
   "limitations": [

@@ -12,7 +12,8 @@ are excellent at different jobs; most operators should use one of them.
 The current install fragments target an **unreleased v0.12.0 product candidate**,
 retaining stock OMP 18.8.7 and RTX 5090 v0.6.16/source `1302d639`, and returning
 UUID-bound native RTX 3090/4090 on one two-GPU host. Only one native lane may run.
-All five routes need fresh acceptance; normal users remain on v0.10.0 until a ready tag. Use the
+All five routes, both native public installs and three stock clients passed fresh on
+frozen candidate `7713ceb9`; normal users remain on v0.10.0 until the owner publishes a ready tag. Use the
 [candidate guide](QUICKSTART.md#omp-1887-client-candidate) to distinguish
 that work from the published release evidence below; it does not change this comparison's
 historical measurements or qualify another backend.

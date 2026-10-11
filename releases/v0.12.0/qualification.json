@@ -12,7 +12,7 @@
     "candidate_commit": "7713ceb956eee79f4c3e232ca020d385baff89be",
     "evidence_commit_changes_candidate": false,
     "evidence_path": "releases/v0.12.0/acceptance/documented-routes.json",
-    "evidence_sha256": "7a5ed4656b76417b2b41aeeb1396cbf634fa8fd77cd8c4023a48088f5f93d6a5",
+    "evidence_sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68",
     "documented_route_steps": {
       "rtx5090-container-host": "2/2",
       "rtx5090-macos-client": "10/10",
@@ -98,7 +98,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.12.0/acceptance/composed-external-installation.json",
-      "sha256": "99010a4300b304cca4410f271f9875958e9f42b04b396bb5f29681a542bf161d",
+      "sha256": "48be50d8e9554fb344002458bcb625cdf91989321d7de208d72d48ad74796437",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5cc2e8722d42295c6dc430b69a3eb1c84190bfd3/releases/v0.12.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-11",
       "release": "v0.12.0",
@@ -131,7 +131,7 @@
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.12.0/acceptance/documented-routes.json",
-      "sha256": "7a5ed4656b76417b2b41aeeb1396cbf634fa8fd77cd8c4023a48088f5f93d6a5"
+      "sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68"
     }
   },
   "observed_gates": {

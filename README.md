@@ -11,7 +11,9 @@ into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 40
 > The founder published both UUID-bound native components for the two-GPU host.
 > Only one native lane runs at a time on port 18082. RTX 5090 and stock OMP 18.8.7
 > keep their exact v0.11.0 component/model/profile pins. All five documented routes,
-> native public installs and client-platform proofs need fresh v0.12.0 acceptance.
+> both native public installs and three stock clients passed fresh acceptance on
+> frozen candidate `7713ceb9`; [composed proof](releases/v0.12.0/acceptance/composed-external-installation.json)
+> and immutable evidence pins are complete. Product tag/publication remain owner-only.
 > The candidate is not a public product release or a production upgrade. Normal
 > users remain on the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
 > until a ready product tag exists; its old native packages do not support two GPUs.
