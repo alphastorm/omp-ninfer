@@ -66,6 +66,7 @@ def assert_windows_host_unchanged(before, after):
     def identity(tasks):
         return sorted((t['path'], t['name'], t['definition_sha256'], t['state'] == 'Disabled') for t in tasks)
     assert identity(before['tasks']) == identity(after['tasks']), 'Windows tasks changed'
+    assert before['directories'] == after['directories'], 'Windows directories changed'
 
 
 

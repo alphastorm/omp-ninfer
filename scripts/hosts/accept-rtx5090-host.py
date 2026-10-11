@@ -124,10 +124,19 @@ def main():
         assert health(18088)['status'] == 'ok'
         assert run(['git', '-C', checkout, 'status', '--porcelain']) == '', 'original checkout dirty'
         assert not subprocess.run(['docker', 'inspect', 'omp-ninfer-beta'], capture_output=True).returncode == 0, 'beta container already exists'
+        directories = {}
+        for path in (key.parent, home / '.local/share/omp-ninfer', logs.parent.parent, logs.parent, logs, checkpoints):
+            try:
+                metadata = path.stat()
+            except FileNotFoundError:
+                directories[str(path)] = {'exists': False}
+            else:
+                directories[str(path)] = {'exists': True, 'mode': metadata.st_mode & 0o777,
+                                          'atime_ns': metadata.st_atime_ns, 'mtime_ns': metadata.st_mtime_ns}
         return {'started_utc': now(), 'checkout': run(['git', '-C', checkout, 'rev-parse', 'HEAD']), 'branch': run(['git', '-C', checkout, 'rev-parse', '--abbrev-ref', 'HEAD']),
                 'production_image': d['Config']['Image'], 'production_image_id': d['Image'], 'restart': d['HostConfig']['RestartPolicy']['Name'],
                 'mounts': d['Mounts'], 'health': health(18088), 'key_sha256': digest(key),
-                'directories': {str(v): {'mode': v.stat().st_mode & 0o777, 'atime_ns': v.stat().st_atime_ns, 'mtime_ns': v.stat().st_mtime_ns} for v in (key.parent, home / '.local/share/omp-ninfer', logs, checkpoints)}}
+                'directories': directories}
     def restore():
         with (root / 'restore.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
@@ -168,6 +177,8 @@ def main():
                     if path.exists():
                         path.rename(root / ('window-' + label))
                     original.rename(path)
+                elif not b['directories'][str(path)]['exists'] and path.exists():
+                    path.rename(root / ('window-' + label))
             if (root / 'original-api-key').exists():
                 if key.exists():
                     key.unlink()
@@ -178,9 +189,14 @@ def main():
             result['checkout'] = run(['git', '-C', checkout, 'rev-parse', 'HEAD'])
             result['branch'] = run(['git', '-C', checkout, 'rev-parse', '--abbrev-ref', 'HEAD'])
             result['checkout_restored'] = result['checkout'] == b['checkout'] and result['branch'] == b['branch'] and run(['git', '-C', checkout, 'status', '--porcelain']) == ''
-            for path, metadata in b['directories'].items():
-                os.chmod(path, metadata['mode'])
-                os.utime(path, ns=(metadata['atime_ns'], metadata['mtime_ns']))
+            for path, metadata in sorted(b['directories'].items(), key=lambda v: len(Path(v[0]).parts), reverse=True):
+                if metadata['exists']:
+                    os.chmod(path, metadata['mode'])
+                    os.utime(path, ns=(metadata['atime_ns'], metadata['mtime_ns']))
+                elif Path(path).exists():
+                    # Only an empty window-created parent may be removed; never recurse
+                    # into state another owner added during the window.
+                    Path(path).rmdir()
             assert result['documented_key_restored'] and result['checkout_restored']
             result['beta_absent'] = subprocess.run(['docker', 'inspect', 'omp-ninfer-beta'], capture_output=True).returncode != 0
             assert result['beta_absent']
@@ -233,8 +249,9 @@ def main():
         try:
             key.rename(root / 'original-api-key')
             for label, path in (('logs', logs), ('checkpoints', checkpoints)):
-                path.rename(root / ('original-' + label))
-                path.mkdir(mode=0o700)
+                if b['directories'][str(path)]['exists']:
+                    path.rename(root / ('original-' + label))
+                path.mkdir(mode=0o700, parents=True)
             run(['git', '-C', checkout, 'fetch', '-q', str(clone), a.candidate], 90)
             run(['git', '-C', checkout, 'checkout', '-q', '--detach', a.candidate])
             logged('stop-production.log', ['bash', Path(a.window_dir) / 'window.sh', 'stop-production'], 180)

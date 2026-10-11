@@ -15,7 +15,14 @@ $RealLocal=$env:LOCALAPPDATA
 $Clone=Join-Path $Workspace 'candidate'
 $Bundle=Join-Path $Workspace 'windows-bundle'
 $Hold=Join-Path $ControlRoot 'state\lane-container-paused'
+$HoldDirectory=Split-Path $Hold -Parent
 function Save-Json($Name,$Value) { [IO.File]::WriteAllText((Join-Path $Workspace $Name),($Value|ConvertTo-Json -Depth 20),[Text.UTF8Encoding]::new($false)) }
+function DirectorySnapshot($Path) {
+    $exists=Test-Path -LiteralPath $Path
+    if(-not $exists){return @{path=$Path;exists=$false;sddl=$null;creation_time_utc_ticks=$null;last_write_time_utc_ticks=$null}}
+    $directory=Get-Item -LiteralPath $Path
+    return @{path=$Path;exists=$true;sddl=(Get-Acl -LiteralPath $Path).Sddl;creation_time_utc_ticks=$directory.CreationTimeUtc.Ticks;last_write_time_utc_ticks=$directory.LastWriteTimeUtc.Ticks}
+}
 function Snapshot {
     $markers=@()
     foreach($root in @((Join-Path $ControlRoot 'state'),(Join-Path $RealLocal 'OMP'))) {
@@ -33,7 +40,7 @@ function Snapshot {
     $response=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:18088/health' -TimeoutSec 10
     if([int]$response.StatusCode -ne 200){throw 'Windows production health did not return HTTP 200'}
     $health=$response.Content|ConvertFrom-Json
-    return @{timestamp=[DateTime]::UtcNow.ToString('o');markers=$markers;tasks=$tasks;windows_health18088=$health;windows_http_status=[int]$response.StatusCode;execution_policies=@(Get-ExecutionPolicy -List|ForEach-Object {@{scope=$_.Scope.ToString();policy=$_.ExecutionPolicy.ToString()}})}
+    return @{timestamp=[DateTime]::UtcNow.ToString('o');markers=$markers;tasks=$tasks;directories=@((DirectorySnapshot $HoldDirectory),(DirectorySnapshot $ControlRoot),(DirectorySnapshot (Join-Path $RealLocal 'OMP')));windows_health18088=$health;windows_http_status=[int]$response.StatusCode;execution_policies=@(Get-ExecutionPolicy -List|ForEach-Object {@{scope=$_.Scope.ToString();policy=$_.ExecutionPolicy.ToString()}})}
 }
 function Isolate($Name) {
     $NewHome=Join-Path $Workspace $Name
@@ -58,9 +65,10 @@ if($Action -eq 'Hold') {
     $baseline=Snapshot
     Save-Json 'windows-baseline.json' $baseline
     . (Join-Path $ControlRoot 'bin\windows-host-common.ps1')
+    Save-Json 'own-hold.json' @{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold}
+    New-Item -ItemType Directory -Path $HoldDirectory -Force | Out-Null
     New-Item -ItemType File -Path $Hold | Out-Null
     Set-OmpAdminOnlyFile -Path $Hold
-    Save-Json 'own-hold.json' @{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold}
     Write-Output 'own lane hold acquired'; return
 }
 if($Action -eq 'Release') {
@@ -68,8 +76,21 @@ if($Action -eq 'Release') {
     if($health.status -ne 'ok'){throw 'refusing hold release before Windows production health'}
     if(!(Test-Path (Join-Path $Workspace 'own-hold.json'))){throw 'no ownership receipt'}
     if(Test-Path $Hold){Remove-Item -LiteralPath $Hold -Force}
-    $final=Snapshot; Save-Json 'windows-final.json' $final
     $before=Get-Content -Raw (Join-Path $Workspace 'windows-baseline.json')|ConvertFrom-Json
+    foreach($path in @($HoldDirectory,$ControlRoot)) {
+        $original=@($before.directories|Where-Object path -EQ $path)[0]
+        if($original.exists) {
+            $acl=Get-Acl -LiteralPath $path
+            if($acl.Sddl -cne $original.sddl){$acl.SetSecurityDescriptorSddlForm($original.sddl);Set-Acl -LiteralPath $path -AclObject $acl}
+            $directory=Get-Item -LiteralPath $path
+            $directory.CreationTimeUtc=[DateTime]::new([long]$original.creation_time_utc_ticks,[DateTimeKind]::Utc)
+            $directory.LastWriteTimeUtc=[DateTime]::new([long]$original.last_write_time_utc_ticks,[DateTimeKind]::Utc)
+        } elseif(Test-Path -LiteralPath $path) {
+            if(@(Get-ChildItem -LiteralPath $path -Force).Count){throw 'window-created hold directory is not empty; refusing removal'}
+            Remove-Item -LiteralPath $path -Force
+        }
+    }
+    $final=Snapshot; Save-Json 'windows-final.json' $final
     # Hashes, ACLs, definitions, and task states are compared structurally by the collector.
     if($final.markers.Count -ne @($before.markers).Count){throw 'marker inventory count changed'}
     Write-Output 'own lane hold removed after Windows production health'; return
