@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.12.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4e4b863a8d0ae1bd96bedb374b686361c18d2d63/compatibility.json",
-      "compatibility_sha256": "84672823ccbc53ec88b05643c9fef9aad7f4575426ba0545c1185da8b54efb41",
+      "compatibility_sha256": "0799680d5f2f5763baec70a68b0e786a5ceb953907d8908435e2515e89b0f178",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.8.7",
@@ -153,10 +153,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "88019a4b6a0a2d837250816b02e5881948d7867103a47e7ca604b6c98a7d9c66",
+    "summary_sha256": "73c07ba9d0dfbb39fb679932a20b6278d6f5e3c4d1741b80da23cc6fa6e84936",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4d39cd14f90834ce6c3ee8150fbfecc5290d7bcf/releases/v0.12.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -183,10 +183,7 @@
       "OMP client: unmodified upstream Oh My Pi v18.8.7 release binaries; no client published here",
       "NInfer RTX 5090 v0.6.16-qwen38-5090-beta.1; unchanged published image 6a02feba"
     ],
-    "blockers": [
-      "Fresh external-install acceptance of every documented v0.12.0 route and all stock OMP 18.8.7 platform clients is pending; no predecessor route acceptance is carried forward.",
-      "Platform, acceptance and manifest pin stages and verify --require-ready remain pending; the lane cut is installable but does not authorize product publication."
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

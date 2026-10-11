@@ -1,0 +1,81 @@
+{
+    "artifact_type":  "omp_ninfer_documented_route_run",
+    "schema_version":  1,
+    "lane":  "rtx5090-windows-client",
+    "document":  "docs\\QUICKSTART.md",
+    "document_sha256":  "aea3745c4d26d66074a01ba28e6133cead09afb9563de516f64f318096b80e4d",
+    "started_utc":  "2026-10-11T16:25:22.3431608Z",
+    "host_os":  "Microsoft Windows 11 Pro",
+    "powershell":  "5.1.26100.9549",
+    "elevated":  true,
+    "clone_commit":  "7713ceb956eee79f4c3e232ca020d385baff89be",
+    "steps":  [
+                  {
+                      "position":  1,
+                      "slug":  "clone-and-verify",
+                      "heading":  "Clone and verify the exact product release",
+                      "index":  0,
+                      "block_sha256":  "4808b350abc1f5cb81ccfb563029525054650a73125a45413df7466474c139f9",
+                      "executed_sha256":  "4808b350abc1f5cb81ccfb563029525054650a73125a45413df7466474c139f9",
+                      "started_utc":  "2026-10-11T16:25:22.5611721Z",
+                      "status":  "substituted",
+                      "elapsed_seconds":  6.903,
+                      "error":  null,
+                      "substitution":  "cloned commit 7713ceb956eee79f4c3e232ca020d385baff89be in place of the tag this run\u0027s acceptance creates; verified as installable, not ready"
+                  },
+                  {
+                      "position":  2,
+                      "slug":  "client-install",
+                      "heading":  "Install the exact native Windows client",
+                      "index":  0,
+                      "block_sha256":  "347ad05e917a7b49689000baa0045e9b93ca816526b88fbe457008423e895daa",
+                      "executed_sha256":  "347ad05e917a7b49689000baa0045e9b93ca816526b88fbe457008423e895daa",
+                      "started_utc":  "2026-10-11T16:25:29.4780224Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  4.527,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  3,
+                      "slug":  "provider",
+                      "heading":  "Native Windows OMP",
+                      "index":  0,
+                      "block_sha256":  "a0c9c6e68df0f2dff202712d458bbced7f958ac3540eb91abe8c54641123bb5b",
+                      "executed_sha256":  "a0c9c6e68df0f2dff202712d458bbced7f958ac3540eb91abe8c54641123bb5b",
+                      "started_utc":  "2026-10-11T16:25:34.0151564Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  0.09,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  4,
+                      "slug":  "acceptance",
+                      "heading":  "Native Windows command forms",
+                      "index":  0,
+                      "block_sha256":  "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a",
+                      "executed_sha256":  "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a",
+                      "started_utc":  "2026-10-11T16:25:34.1062930Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  7.984,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  5,
+                      "slug":  "fail-closed",
+                      "heading":  "Native Windows command forms",
+                      "index":  1,
+                      "block_sha256":  "d51c07aff9b2569ea02893e97596e639f1a018b6e2e2225745a30bd65e04a3b9",
+                      "executed_sha256":  "d51c07aff9b2569ea02893e97596e639f1a018b6e2e2225745a30bd65e04a3b9",
+                      "started_utc":  "2026-10-11T16:25:42.0918952Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  30.134,
+                      "error":  null,
+                      "substitution":  null
+                  }
+              ],
+    "status":  "passed",
+    "completed_utc":  "2026-10-11T16:26:12.2474170Z"
+}

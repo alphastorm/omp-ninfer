@@ -2,61 +2,40 @@
   "artifact_type": "omp_ninfer_product_qualification",
   "schema_version": 2,
   "release": "v0.12.0",
-  "as_of": "2026-10-10",
+  "as_of": "2026-10-11",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "acceptance_nonce_epoch": {
-    "receipt": "docs/measurements/2026-10-10-omp-acceptance-nonce-diagnostic.json",
-    "predecessor_candidate": "65b6c4264b3bdf8f3ed793fdd138a1a9da31804b",
-    "first_window": "diagnostic-red; exact nonce mismatch, restoration passed, no accepted platform receipts promoted",
-    "diagnostic": "pre-registered no material A/B difference; hardened cohort 50/50 exact, 0/152 misspelled copies",
-    "founder_decision": "Harden the probe now, new candidate; Main relay approximately 2026-10-10T17:25Z",
-    "active_nonce": "493817-205361",
-    "candidate_binding": "All accepted 5090 receipts bind 5861712f561ff0b3100dd4350e02d777a3f5007e; scope/tooling/pin commits do not advance that subject",
-    "new_candidate_acceptance": "All current 5090 routes and three stock 18.8.7 clients passed on 5861712f; native lanes are explicitly deferred by founder decision.",
-    "rtx3090": "Deferred from v0.11.0; old 65b6c426 pass is preserved non-composable evidence. Owners remain on v0.10.0.",
-    "rtx4090": "Deferred from v0.11.0; owners remain on v0.10.0 until multi-GPU support is qualified."
-  },
-  "rtx5090_route_acceptance": {
+  "external_installation_qualified": true,
+  "documented_route_acceptance": {
     "status": "passed",
-    "scope": "Frozen original producer proof is 5090-only; its three retained routes compose current-release external acceptance below",
-    "candidate_commit": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+    "scope": "All five fresh documented routes and three unchanged stock OMP 18.8.7 clients; no predecessor product acceptance is carried forward.",
+    "candidate_commit": "7713ceb956eee79f4c3e232ca020d385baff89be",
     "evidence_commit_changes_candidate": false,
-    "evidence_path": "releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json",
-    "evidence_sha256": "d51286df1d7a14c089ae6f5a34e9809f14f4ada09ab864e3eb7c8132173e09df",
+    "evidence_path": "releases/v0.12.0/acceptance/documented-routes.json",
+    "evidence_sha256": "7a5ed4656b76417b2b41aeeb1396cbf634fa8fd77cd8c4023a48088f5f93d6a5",
     "documented_route_steps": {
       "rtx5090-container-host": "2/2",
       "rtx5090-macos-client": "10/10",
-      "rtx5090-windows-client": "5/5"
+      "rtx5090-windows-client": "5/5",
+      "rtx3090-native": "7/7",
+      "rtx4090-native": "7/7"
     },
     "platform_receipts": [
-      "releases/v0.11.0/acceptance/darwin-arm64-18.8.7.json",
-      "releases/v0.11.0/acceptance/windows-x64-18.8.7.json",
-      "releases/v0.11.0/acceptance/linux-x64-18.8.7.json"
+      "releases/v0.12.0/acceptance/darwin-arm64-18.8.7.json",
+      "releases/v0.12.0/acceptance/windows-x64-18.8.7.json",
+      "releases/v0.12.0/acceptance/linux-x64-18.8.7.json"
     ],
-    "source_platform_receipts_byte_preserved": true,
-    "composed_platform_posture": {
-      "darwin-remote-ssh": "preview",
-      "windows-docker-local": "qualified",
-      "linux-docker-local": "qualified stock binary under WSL2, not a native Linux OS"
-    },
+    "fresh_product_acceptance": true,
     "restoration": {
-      "path": "docs/measurements/2026-10-10-v0110-acceptance-restoration.json",
-      "sha256": "3ae801141a15e88a53f93286a687742c3099a3a869f6fae43ea5662b607fa024",
-      "status": "passed; independently measured identity/mount/health/key/checkout/hold/task/policy restoration",
-      "observed_downtime_s": 385.948,
-      "lower_bound_s": 384.444,
-      "upper_bound_s": 386.451,
-      "driver_hold_s": 387.738,
-      "container_recreation_recorded": true,
-      "production_upgrade_activated": false
+      "path": "docs/measurements/2026-10-11-v0120-acceptance-restoration.json",
+      "status": "passed within the frozen driver canonical-state and incumbent-restoration scope",
+      "driver_hold_s": 389.939,
+      "production_upgrade_activated": false,
+      "optional_directory_absence_restoration_claimed": false
     },
-    "byte_preservation": "Eight original receipt/input files and original checksum manifest retained without JSON serialization; producer sizes/SHA256s verified",
-    "checksum_manifest": "releases/v0.11.0/acceptance/rtx5090-evidence-checksums.json",
     "composition_run": true
   },
-  "scope": "Founder-approved RTX 5090-only v0.11.0: unchanged source 1302d639/model 0634abb0/BF16/DFlash2 K7, all 15 local gates/ctest 111 pass 7 skip 0 fail, published exact 548fe239 binary. All 17 documented steps/three stock 18.8.7 clients passed on 5861712f with 385.948 s measured downtime/restoration. Native 3090/4090 are deferred to later multi-GPU support; owners remain on v0.10.0. Failed 65b/diagnostic/old 3090 proof remain separate, not retargeted.",
+  "scope": "RTX 5090 component/model/profile and stock OMP 18.8.7 are unchanged from v0.11.0. UUID-bound native RTX 3090 and RTX 4090 return on one two-GPU host, one lane at a time on port 18082. All five documented routes (31 blocks), three platform clients and both public native installs passed fresh on frozen candidate 7713ceb956eee79f4c3e232ca020d385baff89be. RTX 3090 rollback is qualified in both directions; RTX 4090 has no supported predecessor and keeps not_applicable rollback.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -92,7 +71,7 @@
       "anonymous_pull_verified": true,
       "anonymous_assets_verified": false,
       "checksums_verified": true,
-      "build_route_note": "Clean appliance-local1302d639 build in ninfer-dflash2-build-env:20261001,CUDA13.1.115/GNU13.3.0/sm120a. Founder cut13:46Z; workflow38057050899 publishes archivebed8c8d4 as image6a02feba. Main verified an anonymous image pull and exact packaged server548fe239. Mac asset checks, public publisher receipt and local C qualification are distinct from the still-pending documented-route/composed acceptance.",
+      "build_route_note": "Retained appliance-local build of source 1302d639 in ninfer-dflash2-build-env:20261001 with CUDA 13.1.115, GNU 13.3.0 and sm_120a. Founder workflow 38057050899 published archive bed8c8d4 as image 6a02feba. The current window independently pulled the unchanged image anonymously and verified the exact packaged server; fresh documented-route/composed acceptance is bound separately below.",
       "anonymous_pull_evidence_source": "Main reports verified anonymous pull and exact548fe239 server hash; not repeated by this worker",
       "publication_receipt": "releases/v0.11.0/qualification/runtime-publication.json"
     },
@@ -117,8 +96,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.6.16-qwen38-5090-beta.1 component (image 6a02feba) before the cut; the receipt lands at releases/v0.12.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.12.0/acceptance/composed-external-installation.json",
+      "sha256": "e0e19e84d75745004d1addd64d34955c69985b8909fcefbead023f1dda5e1767",
+      "public_url": null,
+      "as_of": "2026-10-11",
+      "release": "v0.12.0",
+      "component_release_tag": "v18.8.7",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "0799680d5f2f5763baec70a68b0e786a5ceb953907d8908435e2515e89b0f178",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "8c452f013bdd81d130009ef0aa2b42ab224a01ce25278277f2ce395022b5ef2a"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "afc8a51cd62520271569421615a749c23bf6b59fef54e42dc951fc5157f5804f"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "334129482cfd176af75f67e74695133befe9d2e96ca67e771cd558a6a222b659"
+        }
+      ],
+      "note": "Five fresh routes, three stock OMP 18.8.7 platform receipts and both native public-install proofs passed on frozen candidate 7713ceb956eee79f4c3e232ca020d385baff89be. Canonical native state/tasks/holds/power and the RTX 5090 incumbent baseline were restored. Publication remains owner-only."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.12.0/acceptance/documented-routes.json",
+      "sha256": "7a5ed4656b76417b2b41aeeb1396cbf634fa8fd77cd8c4023a48088f5f93d6a5"
     }
   },
   "observed_gates": {
@@ -225,25 +238,6 @@
       "note": "Actual option-C package-local gates and all 15 unchanged predecessor criteria. Serial 89-case binding ties this binary to EXP094 through a59; full sm120a ctest 111 pass/7 skip/0 fail. This is not published-component or OMP 18.8.7 documented-route acceptance."
     }
   },
-  "interpretation": "RTX 5090-only scope uses the same accepted 5861712f blocks/clients/runtime. Native lanes are deferred, not failed current-release gates; current release declares no native package/model/qualification. Historical a59/65b red/invalid receipts, nonce diagnostic and old 3090 pass remain evidence only. Actual composition/pins must close before the founder-only product cut.",
-  "remaining_release_gates": [
-    "external-installation acceptance against the published v0.6.16-qwen38-5090-beta.1 component and runtime image",
-    "fresh upstream OMP platform and documented-route acceptance"
-  ],
-  "deferred_scope": {
-    "rtx3090-windows-native": {
-      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
-      "legacy_release": "v0.10.0",
-      "legacy_client": "18.4.10",
-      "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-3090-release-lane",
-      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
-    },
-    "rtx4090-windows-native": {
-      "reason": "Founder 2026-10-10: RTX 4090 was installed beside RTX 3090 in the replacement native host. Unmodified native packages require exactly one visible NVIDIA GPU; installer name/UUID/ordinal binding and unindexed power queries do not support that arrangement. No environment shim. Both native lanes are omitted from v0.11.0 and return after multi-GPU support is qualified.",
-      "legacy_release": "v0.10.0",
-      "legacy_client": "18.4.10",
-      "legacy_route": "https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#native-windows-rtx-4090-release-lane",
-      "future_condition": "Qualify multi-GPU support and fresh native client/documented-route acceptance in a later release."
-    }
-  }
+  "interpretation": "Fresh v0.12.0 acceptance is bound to frozen candidate 7713ceb956eee79f4c3e232ca020d385baff89be; metadata/pin commits do not advance that subject. Predecessor v0.11.0 route, nonce and native-deferral records remain historical evidence in that release, not current proof. Canonical native state/tasks/holds/power and the RTX 5090 incumbent baseline were restored; originally absent mutable-directory restoration is not claimed by this frozen driver. Product tag/publication remain owner-only.",
+  "remaining_release_gates": []
 }
