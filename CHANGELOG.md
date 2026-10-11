@@ -9,24 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Compose fresh v0.12.0 acceptance on frozen candidate `7713ceb9`: all five documented
-  routes (31 blocks), three unchanged stock OMP 18.8.7 clients and both native public
-  installs passed. Native lanes ran sequentially; canonical state/tasks/holds/power and
-  the retained RTX 5090 incumbent baseline were restored. The successful corrected
-  RTX 4090 public check used its verified installed model reference; its failed first
-  receipt and refused inline transport remain separate private evidence. Platform,
-  acceptance and manifest pins close the proof chain without changing executed blocks
-  or upgrading production; product tag/publication remain owner-only.
-- Prepare the v0.12.0 native Windows return on one two-GPU host: bound RTX 3090
-  qualification for v0.6.3-beta.1, exact component admission for RTX 3090 v0.6.3 and
-  RTX 4090 v0.6.11, and an executable invariant for UUID-indexed Windows GPU queries
-  and power changes. The invariant was red on five unindexed operations and green
-  after the host-script sweep; legacy records without a UUID fail closed with more
-  than one card. Both native lanes share port 18082 and run one at a time.
-- Bind the RTX 4090 v0.6.11 native public qualification after owner adoption of the
-  first-release contract in PR #81. Rollback remains `not_applicable`, zero directions
-  and no target on the two-GPU host; v0.6.10 and older packages are unsupported there.
-  The initial composer refusal remains historical evidence, not a current binding blocker.
+- Restore native Windows RTX 3090 v0.6.3 and RTX 4090 v0.6.11 lanes on one two-GPU
+  host. Each lane binds its own GPU UUID; only one runs at a time on port 18082.
+- Bind fresh v0.12.0 acceptance: all five documented routes (31 blocks), three stock
+  OMP 18.8.7 clients and both native public installs passed on frozen `7713ceb9`.
+  Measured native and RTX 5090 incumbent baselines were restored; immutable evidence
+  pins preserve every executed block. Production was not upgraded.
 
 ### Changed
 
@@ -34,26 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lanes. Hosts without a container appliance need no invented pause marker; existing
   holds are still preserved and audited independently of lane identity. Native endpoint
   checks use the shared product port, not a predecessor host's unrelated container ports.
-- Admit an explicit first native lineage only with zero rollback directions and
-  `not_applicable`, never a fabricated pass or predecessor. The first-release route
-  preserves the protected lineage and stopped task, exercises a fresh canonical
-  install, and restores the original state; upgraded lineages keep their existing
-  two-direction rollback contract.
+- Admit the RTX 4090's first supported lineage on the two-GPU host with rollback
+  `not_applicable`, zero directions and no target. v0.6.10 and earlier packages are
+  unsupported there; RTX 3090 keeps its real two-direction qualification.
 - Load the native route's GPU resolver through PowerShell's provider-aware file API,
   so its isolated drive fixture and Windows filesystem use the same operation. The
   GPU invariant also rejects new setters/default queries, separate piped invocations
   and enumeration exceptions moved outside the resolver.
-- Stage v0.12.0 from v0.11.0 with unchanged RTX 5090 runtime, model and deployment
-  profile and unchanged stock OMP 18.8.7 binaries. Restore the exact v0.10.0 native
-  model contract because v0.11.0 removed it when deferring native lanes; neither
-  the RTX 5090 model nor its serving shape changes. Native qualification used
-  OMP 18.0.9, not the product client. The owner published both native components;
-  their public checksums, asset digests, sizes and source tags match the manifest.
-  The authorized lane cut promotes v0.12.0 root/profile/launcher and documented-route
-  product pins without changing the RTX 5090 or OMP components. Fresh route/platform
-  acceptance and immutable evidence pins are complete. The host-free cut itself had
-  no host effect; later owner-authorized acceptance restored its measured baselines.
-  No product publication or production upgrade occurred.
+- Retain v0.11.0's RTX 5090 runtime, model, deployment profile and stock OMP 18.8.7
+  binaries. Restore v0.10.0's exact separate native model binding, omitted when v0.11.0
+  deferred those lanes. The v0.12.0 candidate is ready; product publication remains
+  owner-only, with no release date assigned before the actual cut.
+- Give v0.12.0 final descriptive release notes in house style, leading with the exact
+  support boundary, sequential two-GPU native topology and RTX 4090 no-target rollback
+  result. Keep measured qualification, fresh product proof and non-claims distinct.
 - Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
   words/numbers). The guard rejects any word of two or more letters glued to a digit,
   with a documented identifier allowlist, outside code and URLs. It covers living docs,

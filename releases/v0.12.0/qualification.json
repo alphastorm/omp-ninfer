@@ -12,7 +12,7 @@
     "candidate_commit": "7713ceb956eee79f4c3e232ca020d385baff89be",
     "evidence_commit_changes_candidate": false,
     "evidence_path": "releases/v0.12.0/acceptance/documented-routes.json",
-    "evidence_sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68",
+    "evidence_sha256": "39adbb0ea470cfd920e2b8e27438e0ba61f420332d6411660017cf40c52457c2",
     "documented_route_steps": {
       "rtx5090-container-host": "2/2",
       "rtx5090-macos-client": "10/10",
@@ -98,7 +98,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.12.0/acceptance/composed-external-installation.json",
-      "sha256": "48be50d8e9554fb344002458bcb625cdf91989321d7de208d72d48ad74796437",
+      "sha256": "af130245628c57b8a89461b31501fd2c158f891d49672f9dd66caf518a745fdc",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7e0bc6c9f09859150d5e607892f95d1e0d8f4325/releases/v0.12.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-11",
       "release": "v0.12.0",
@@ -111,7 +111,7 @@
       "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "f3247453594ddf2885585b7c226f87a3397c70f043f4afabe3e73739fb8a7883",
+      "compatibility_sha256": "0799680d5f2f5763baec70a68b0e786a5ceb953907d8908435e2515e89b0f178",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -131,7 +131,7 @@
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.12.0/acceptance/documented-routes.json",
-      "sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68"
+      "sha256": "39adbb0ea470cfd920e2b8e27438e0ba61f420332d6411660017cf40c52457c2"
     }
   },
   "observed_gates": {

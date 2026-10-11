@@ -31,7 +31,7 @@ scratch cherry-pick or trial merge) instead of reading the overlap score.
 
 | Upstream | Client pin | State | Why pull it in |
 | --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | OMP NInfer candidate only; not yet published or GPU-host requalified | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
+| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | Published in RTX 5090-only v0.11.0; fresh three-client acceptance passed for the ready, unreleased v0.12.0 candidate | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
 
 The previous unqualified 18.8.3 candidate first brought in #13686 (`429352901c`),
 #13687 (`01822b63d0`) and #13689 (`8aaf115b8e`): per-model stateful Responses,

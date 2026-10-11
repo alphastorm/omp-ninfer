@@ -7,9 +7,9 @@
   "operator_class": "owner-operated tester-equivalent",
   "mode": "All five documented routes on the exact frozen candidate with three unchanged stock OMP 18.8.7 assets and both published native packages.",
   "document_sha256": "aea3745c4d26d66074a01ba28e6133cead09afb9563de516f64f318096b80e4d",
-  "current_document_sha256": "15d556aca28d041a81d992d8a11e73c4ff2cc868523017ddbf5c2cde08f35862",
+  "current_document_sha256": "3bbd96125c2d3c115016cfd3c5b05cb3763947e53243f6a4557a484f122ccf82",
   "executed_blocks_match_current": true,
-  "document_change": "After execution on frozen candidate 7713ceb956eee79f4c3e232ca020d385baff89be, only non-executable guide prose was updated to record fresh passed acceptance and the immutable pin/publication boundary. All 31 executed block SHA-256s remain byte-identical; no route was rerun and the acceptance subject did not advance.",
+  "document_change": "After execution on frozen candidate 7713ceb956eee79f4c3e232ca020d385baff89be, only non-executable guide prose was updated for passed acceptance, the final native-return support boundary and owner-only product publication. All 31 executed block SHA-256s remain byte-identical; no route was rerun and the acceptance subject did not advance.",
   "candidate_commit": "7713ceb956eee79f4c3e232ca020d385baff89be",
   "routes": {
     "rtx5090-container-host": {

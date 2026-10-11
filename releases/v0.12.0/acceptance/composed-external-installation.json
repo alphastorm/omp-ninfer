@@ -15,7 +15,7 @@
     "note": "All three unchanged published OMP 18.8.7 asset/binary identities, versions, tool/continuation and fail-closed proofs passed; both native routes used the same stock Windows client."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "f3247453594ddf2885585b7c226f87a3397c70f043f4afabe3e73739fb8a7883",
+  "compatibility_sha256": "0799680d5f2f5763baec70a68b0e786a5ceb953907d8908435e2515e89b0f178",
   "windows_asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "windows_binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
   "platform_receipts": [
@@ -228,7 +228,7 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.12.0/acceptance/documented-routes.json",
-      "sha256": "192fc132d97a37e817b60fc0965262068871f94eda81af0fd93d41b048d65a68"
+      "sha256": "39adbb0ea470cfd920e2b8e27438e0ba61f420332d6411660017cf40c52457c2"
     },
     "rtx4090_public_install": {
       "repository_path": "releases/v0.12.0/acceptance/rtx4090-public-install.json",
@@ -244,7 +244,7 @@
     },
     "published_client_components": {
       "repository_path": "releases/v0.12.0/qualification/client-components.json",
-      "sha256": "64669196187a33fbd77697b4bbbeea4975e3a051322bead10116e33c95361602"
+      "sha256": "4c288fa9c8052df6906b8cd657440af9fd226b68ea60e331d60a7be2f4d248a9"
     }
   },
   "limitations": [

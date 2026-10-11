@@ -11,7 +11,7 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Current candidate — v0.12.0 native return, acceptance pending
+## Ready candidate — v0.12.0 native return on one two-GPU host
 
 The [v0.12.0 candidate](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
 RTX 4090 qualification on the new two-GPU Windows topology. The owner adopted the
@@ -23,16 +23,16 @@ restored; it was removed with the native lanes in v0.11.0.
 
 The owner published both native components; their public checksums, asset digests,
 package sizes and source tags match the bound identities. The lane cut promotes root
-product/profile/launcher and documented-route pins to v0.12.0, then freezes the candidate.
-Fresh acceptance of all five documented routes, both native public installs and platform
-clients remains pending, followed by platform/acceptance/manifest pins and ready verification.
-Existing product acceptance is not retargeted. Native hardware qualification used
-OMP 18.0.9, not stock OMP 18.8.7. No host operation or product publication is performed
-by the host-free lane cut; the product tag and release remain owner-only.
+product/profile/launcher and documented-route pins to v0.12.0. All five documented routes
+(31 blocks), both native public installs and three stock OMP 18.8.7 clients passed fresh
+on frozen `7713ceb9`; platform/acceptance/manifest pins and strict ready verification are
+complete. Existing product acceptance is not retargeted. Native hardware qualification
+used OMP 18.0.9, not the product client. Authorized acceptance restored its measured
+baselines without upgrading production; only owner tag/publication remains.
 
-## Prior candidate — RTX 5090-only v0.11.0, accepted routes
+## Published baseline — RTX 5090-only v0.11.0
 
-The [v0.11.0 candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
+The [v0.11.0 release](releases/v0.11.0/NINFER_RELEASE_NOTES.md) binds published
 NInfer v0.6.16/source 1302d639 (EXP-092/094 without 3a2fadbd) to stock OMP 18.8.7,
 source f261ed9f. Full sm_120a ctest 111 pass/7 skip/0 fail and all 15 local criteria
 passed; superseded a59/red NVFP4 proof remains preserved. The real image 6a02feba/

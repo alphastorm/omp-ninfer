@@ -1,6 +1,6 @@
 # Quickstart
 
-> **Unreleased v0.12.0 product candidate · upstream OMP 18.8.7**
+> **Ready, unreleased v0.12.0 product candidate · upstream OMP 18.8.7**
 
 **Get started with the exact lane for your GPU and runtime.**
 
@@ -11,6 +11,8 @@
 > immutable evidence pins are complete.
 > Previous product acceptance is not carried forward, even for the unchanged RTX 5090.
 > Both native lanes share one two-GPU host and port 18082; only one may run at a time.
+> RTX 4090 has no supported rollback target on that topology; RTX 3090 retains its
+> separate two-direction qualification. RTX 5090 and stock OMP 18.8.7 are unchanged.
 > The product tag is not published. Normal setup blocks require that tag and its ready
 > gate, not a moving candidate branch. Do not mix release authorities.
 

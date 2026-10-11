@@ -7,19 +7,20 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
 
 > [!WARNING]
-> **Unreleased v0.12.0 candidate: RTX 5090 plus native RTX 4090 / RTX 3090.**
+> **Ready, unreleased v0.12.0: native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
 > The founder published both UUID-bound native components for the two-GPU host.
 > Only one native lane runs at a time on port 18082. RTX 5090 and stock OMP 18.8.7
 > keep their exact v0.11.0 component/model/profile pins. All five documented routes,
 > both native public installs and three stock clients passed fresh acceptance on
 > frozen candidate `7713ceb9`; [composed proof](releases/v0.12.0/acceptance/composed-external-installation.json)
 > and immutable evidence pins are complete. Product tag/publication remain owner-only.
-> The candidate is not a public product release or a production upgrade. Normal
-> users remain on the [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
-> until a ready product tag exists; its old native packages do not support two GPUs.
+> The candidate is not a public product release or a production upgrade. Until its tag,
+> RTX 5090 users follow the [published v0.11.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.11.0/docs/QUICKSTART.md);
+> legacy native users keep the [complete v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+> Those old native packages do not support two GPUs; RTX 4090 has no rollback target there.
 
-The historical [v0.11.0 runtime candidate](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
-founder-selected NInfer `1302d639` as the RTX 5090 **v0.6.16** candidate: the EXP-092/094
+The published [v0.11.0 release](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
+founder-selected NInfer `1302d639` as RTX 5090 **v0.6.16**: the EXP-092/094
 changes without `3a2fadbd`. Its full sm_120a ctest has 111 passes, seven skips and no
 failures; all 15 local lane criteria pass. The superseded `a59c13d0` alternative and
 its red NVFP4 test remain preserved. These are package-local qualification receipts,

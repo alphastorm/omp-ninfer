@@ -29,34 +29,22 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.12.0 ready candidate — native return on a two-GPU host, publication pending
+### v0.12.0 ready candidate — native RTX 3090 and RTX 4090 on one two-GPU host
 
-The [candidate notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retain v0.11.0's RTX 5090
-component, model/profile and stock OMP 18.8.7 client while returning UUID-bound native
-RTX 3090 and RTX 4090 lanes. This is a minor product bump for the returned topology,
-not a runtime or client version substitution. One lane runs at a time on port 18082.
-The bound [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json) comes from the
-real two-GPU qualification; its OMP 18.0.9 typed-tool phase is not OMP 18.8.7 product acceptance.
-The native model is restored byte-for-byte from v0.10.0 because v0.11.0 removed its
-separate binding when it deferred both lanes.
+The [release notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) describe an owner-operated,
+exact-profile 0.x release: UUID-bound native RTX 3090 and RTX 4090 lanes return on one
+Windows host with both GPUs installed. Only one native lane runs at a time on port 18082.
+The RTX 5090 runtime, model/profile and stock OMP 18.8.7 client are unchanged from v0.11.0.
+The separate native model is restored byte-for-byte from v0.10.0; it was omitted when
+v0.11.0 deferred both native lanes.
 
-RTX 4090 has no supported predecessor on this topology. Its explicit first-lineage
-receipt is admissible only as rollback `not_applicable`, zero directions and reason
-`first release of the lineage`; the gate is not rewritten as passed. Composition, binding
-and route acceptance retain that non-claim. v0.6.10 and earlier packages are unsupported
-rollback targets on a multi-GPU host. The upgraded RTX 3090 still requires its passed
-two-direction proof. RTX 4090 is now bound to its [public receipt](../releases/v0.12.0/qualification/rtx4090.json)
-under the owner-adopted first-release contract from PR #81; no rollback target is invented.
-For its completed owner-authorized acceptance, replace `--temporary-previous` with
-`--first-release` in the documented native driver invocation. Baseline state must contain
-exactly one active release and no previous/prepared release. The window preserves the
-whole protected lineage on the same volume, unregisters only its stopped task, runs the
-fresh canonical install without a fake predecessor, and restores the original lineage,
-task XML, ACLs, secrets and UUID-selected power limit even after failure. The public-install
-receipt and route composition must explicitly preserve the no-target rollback result.
-Both native component prereleases are published with exact checked public asset pins.
-The authorized lane cut promotes root authority, profiles, launchers and route product pins
-to v0.12.0 while retaining the unchanged RTX 5090 and OMP component identities.
+The [RTX 4090 receipt](../releases/v0.12.0/qualification/rtx4090.json) has no supported
+rollback target on this topology: `not_applicable`, zero directions, `first release of
+the lineage`. v0.6.10 and earlier packages are unsupported there. Its accepted route
+uses `--first-release`, preserves the protected lineage/task and restores its measured
+baseline without a fake predecessor. The [RTX 3090 receipt](../releases/v0.12.0/qualification/rtx3090.json)
+retains its actual two-direction qualification. Both hardware qualifications used
+OMP 18.0.9; product acceptance separately exercised stock OMP 18.8.7.
 All five documented routes (31 blocks), both native public installs and three unchanged
 stock OMP 18.8.7 clients passed fresh on frozen candidate
 `7713ceb956eee79f4c3e232ca020d385baff89be`; see [documented routes](../releases/v0.12.0/acceptance/documented-routes.json)
@@ -69,7 +57,7 @@ The host-free cut itself performed no host operation; later acceptance was separ
 authorized. Product tag/publication remain owner-only. Never date an unpublished changelog
 version or interpret these notes as product publication authorization.
 
-### v0.11.0 ready candidate — RTX 5090 only, product publication pending
+### v0.11.0 public release — RTX 5090 only
 
 The [release notes](../releases/v0.11.0/NINFER_RELEASE_NOTES.md) select runtime source
 `1302d63929e400a05e1c9cdb0fc8003a70269825` by the founder's 2026-10-10 decision:

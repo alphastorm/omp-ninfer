@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-11 · **Published product: v0.10.0; installable v0.12.0 candidate is unreleased.**
+Updated: 2026-10-11 · **Published product: v0.11.0 (RTX 5090 only); v0.12.0 is ready and unreleased.**
 
 ## Current client candidate — OMP 18.8.7
 
@@ -41,7 +41,11 @@ routes, including the unchanged RTX 5090. [Current qualification](../releases/v0
 and [composed proof](../releases/v0.12.0/acceptance/composed-external-installation.json)
 remain unreleased product evidence; only the owner may tag/publish.
 
-## Published baseline — v0.10.0
+## Published baseline — v0.11.0, legacy native lanes on v0.10.0
+
+The [v0.11.0 manifest](../releases/v0.11.0/manifest.json) binds the published RTX 5090
+runtime and stock OMP 18.8.7. Native lanes were deferred there; legacy native users keep
+the complete v0.10.0 guide and its single-visible-GPU packages until the v0.12.0 tag.
 
 The [v0.10.0 manifest](../releases/v0.10.0/manifest.json) binds the stock-client runtime on
 three eligible GPU routes with unmodified upstream OMP 18.4.10. Fresh client and route acceptance
