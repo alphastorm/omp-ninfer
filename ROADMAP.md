@@ -13,9 +13,10 @@ Want to move something here? The fastest ways to help are listed at the end of t
 
 ## Next draft — v0.12.0 native return, preparation only
 
-The [v0.12.0 draft](releases/v0.12.0/NINFER_RELEASE_NOTES.md) restores native RTX 3090
-qualification on the new two-GPU Windows topology, with the RTX 4090 first-release
-rollback decision still blocking that lane's receipt and binding. Both lanes bind their
+The [v0.12.0 draft](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
+RTX 4090 qualification on the new two-GPU Windows topology. The owner adopted the
+first-release contract in PR #81: RTX 4090 rollback is `not_applicable`, with no target
+or exercised direction; RTX 3090 retains its two-direction proof. Both lanes bind their
 own UUID and run sequentially on port 18082. The RTX 5090 component/model/profile and
 stock OMP 18.8.7 client stay unchanged. The separate v0.10.0 native model binding is
 restored; it was removed with the native lanes in v0.11.0.

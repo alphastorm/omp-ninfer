@@ -45,7 +45,8 @@ receipt is admissible only as rollback `not_applicable`, zero directions and rea
 `first release of the lineage`; the gate is not rewritten as passed. Composition, binding
 and route acceptance retain that non-claim. v0.6.10 and earlier packages are unsupported
 rollback targets on a multi-GPU host. The upgraded RTX 3090 still requires its passed
-two-direction proof. RTX 4090 remains unbound until a public receipt is composed and bound.
+two-direction proof. RTX 4090 is now bound to its [public receipt](../releases/v0.12.0/qualification/rtx4090.json)
+under the owner-adopted first-release contract from PR #81; no rollback target is invented.
 For its later, owner-authorized acceptance, replace `--temporary-previous` with
 `--first-release` in the documented native driver invocation. Baseline state must contain
 exactly one active release and no previous/prepared release. The window preserves the

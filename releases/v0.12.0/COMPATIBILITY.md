@@ -20,11 +20,14 @@ These variants use the same OMP clients but own separate native runtime packages
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
 | rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/63872d2956ef2684021b32a6f478a1836e94c386/releases/v0.12.0/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/f72e12ef7e01a6f9d3a4fb68b9c7ec73b6e8ae0f/releases/v0.12.0/qualification/rtx4090.json) |
 
 Package bindings:
 
 - `rtx3090-windows-native`: component `v0.6.3-qwen38-3090-beta.1`; package [`ninfer-rtx3090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.3-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.6.3-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297`; 595,697,859 bytes.
+- `rtx4090-windows-native`: component `v0.6.11-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.6.11-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.6.11-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.11-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2`; 574,770,447 bytes.
 - `rtx3090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer); SHA-256 `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`; 18,210,531,328 bytes.
+- `rtx4090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer); SHA-256 `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e`; 18,210,531,328 bytes.
 
 ## Profile boundaries
 

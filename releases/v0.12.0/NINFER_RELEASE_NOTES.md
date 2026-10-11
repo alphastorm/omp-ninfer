@@ -6,8 +6,8 @@ RTX 4090 was at installation index 0 and the RTX 3090 at index 1. **Only one nat
 runs at a time**: both listen on loopback port 18082. This is not multi-GPU inference,
 simultaneous native serving, multi-tenancy or an automatic lane switch.
 
-Nothing here authorizes a component or product publication, a production upgrade, or
-acceptance on a host. No v0.12.0 tag or public product release has been created.
+Component publication is founder-run and does not authorize a product publication,
+production upgrade or acceptance on a host. No v0.12.0 tag or public product release has been created.
 The root compatibility authority, root profiles and documented install routes remain on
 their existing pins until a separately authorized lane cut.
 
@@ -39,7 +39,7 @@ their existing pins until a separately authorized lane cut.
 | Native lane | Prepared component | Package SHA-256 / bytes | Draft state |
 | --- | --- | --- | --- |
 | RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297` / 595,697,859 | Bound to the committed qualification; component publication and product acceptance pending |
-| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Unbound: first-release rollback contract refuses composition |
+| RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2` / 574,770,447 | Bound to the committed qualification with rollback `not_applicable`; component publication and product acceptance pending |
 
 The owner still publishes both component prereleases. Prepared URLs do not establish that
 those components are publicly available.
@@ -61,7 +61,10 @@ The qualification client was **OMP 18.0.9**, installed as
 That typed-tool proof is distinct from pending product acceptance with stock OMP 18.8.7.
 No previous product-route or platform-client acceptance is carried forward.
 
-The RTX 4090 window completed its applicable phases, but its rollback receipt is
+The [RTX 4090 public receipt](qualification/rtx4090.json) is composed from the same real-input
+sources and bound under the owner-adopted first-release contract from PR #81. It records
+130,048-token exact retrieval in 91.0 s and C1 decode at 158.7 tok/s. The window completed
+its applicable phases, and its rollback section and deterministic gate remain
 `status: not_applicable`, `directions: 0`, `reason: first release of the lineage`.
 Before the separate first-release change, the composer refused it verbatim:
 
@@ -69,11 +72,10 @@ Before the separate first-release change, the composer refused it verbatim:
 error: phase rollback did not pass
 ```
 
-No RTX 4090 public qualification receipt or manifest variant is fabricated or bound. The lane
-has no rollback target on this two-GPU host: v0.6.10 and earlier RTX 4090 packages use
+The bound lane has no rollback target on this two-GPU host: v0.6.10 and earlier RTX 4090 packages use
 single-visible-GPU lifecycle operations and are unsupported there. The first-release
 change permits only the explicit zero-direction `not_applicable` result,
-never a passed rollback. After composing and binding that receipt, owner-authorized route
+never a passed rollback. Later owner-authorized route
 acceptance must use `--first-release`, exercise the fresh install/start/stop/tool/session and
 fail-closed blocks without a predecessor, and restore the preserved original lineage/task/
 ACLs/secrets/UUID power. No installed rollback target or bidirectional test is claimed.
@@ -98,17 +100,15 @@ the single-GPU RTX 5090 container/WSL lane.
 ## Remaining release gates
 
 1. Owner publishes the exact prepared RTX 3090 and RTX 4090 components.
-2. Decide the RTX 4090 first-release proposal, compose its honest not-applicable rollback
-   receipt, commit the receipt, then bind the lane; do not invent a predecessor.
-3. Separately authorize the lane pin and freeze the new candidate. Update the applicable
+2. Separately authorize the lane pin and freeze the new candidate. Update the applicable
    v0.12.0 documented routes, without changing the unchanged RTX 5090 runtime or OMP client.
-4. Accept every documented route fresh: RTX 5090 container host, macOS client, Windows client,
-   RTX 3090 native and, after the decision/binding, RTX 4090 native. Collect separate native
+3. Accept every documented route fresh: RTX 5090 container host, macOS client, Windows client,
+   RTX 3090 native and RTX 4090 native. Collect separate native
    public-install and behavior/restoration evidence, plus all platform-client receipts.
    Exercise native lanes sequentially on their shared port.
-5. Compose acceptance, then perform platform, acceptance and manifest pin stages, committing
+4. Compose acceptance, then perform platform, acceptance and manifest pin stages, committing
    between stages. Finish with `verify_release.py --release v0.12.0 --require-ready --check-pins`.
-6. Product publication remains owner-only. Date the changelog version only at an actual cut.
+5. Product publication remains owner-only. Date the changelog version only at an actual cut.
 
 ## Non-claims
 

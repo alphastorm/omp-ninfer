@@ -15,10 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and power changes. The invariant was red on five unindexed operations and green
   after the host-script sweep; legacy records without a UUID fail closed with more
   than one card. Both native lanes share port 18082 and run one at a time.
-- Preserve the RTX 4090 composer refusal (`error: phase rollback did not pass`).
-  Its first-release rollback is not applicable on this host; v0.6.10 and older packages
-  are unsupported there. No RTX 4090 receipt, binding or rollback target is invented.
-  The separate first-release change retains the no-target rollback claim.
+- Bind the RTX 4090 v0.6.11 native public qualification after owner adoption of the
+  first-release contract in PR #81. Rollback remains `not_applicable`, zero directions
+  and no target on the two-GPU host; v0.6.10 and older packages are unsupported there.
+  The initial composer refusal remains historical evidence, not a current binding blocker.
 
 ### Changed
 

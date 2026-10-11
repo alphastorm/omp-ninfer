@@ -328,6 +328,31 @@
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
       "model_bytes": 18210531328,
       "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+    },
+    {
+      "id": "rtx4090-windows-native",
+      "status": "qualified",
+      "platform": "Windows 11 x64",
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "cuda_architecture": "sm_89",
+      "installation_mode": "native-windows-package",
+      "installable": true,
+      "silent_cloud_fallback": false,
+      "release_tag": "v0.6.11-qwen38-4090-beta.1",
+      "source_commit": "cad1976764fded5fbe96930c36bed0570b3d3de7",
+      "package_name": "ninfer-rtx4090-native-v0.6.11-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.6.11-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.6.11-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_sha256": "526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2",
+      "package_bytes": 574770447,
+      "maximum_context_tokens": 131072,
+      "qualification_receipt": {
+        "path": "releases/v0.12.0/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f72e12ef7e01a6f9d3a4fb68b9c7ec73b6e8ae0f/releases/v0.12.0/qualification/rtx4090.json",
+        "sha256": "9d3829fe6009190b827c1b705bfb1fe9d4318e7e11e218ae7a87d39d6ea5f656"
+      },
+      "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/18dfc887423fa5aabf3cb56fac41490e462b3fab/qwen3_8_27b.ninfer",
+      "model_bytes": 18210531328,
+      "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
     }
   ]
 }

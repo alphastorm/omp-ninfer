@@ -105,6 +105,15 @@
         "sha256": "1884fd4ee7ddc9b2f5d2e62d00f02f661dd211ebfd01a230fe1768693e6b66c3",
         "release_tag": "v0.6.3-qwen38-3090-beta.1",
         "package_sha256": "74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297"
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.12.0/qualification/rtx4090.json",
+        "sha256": "9d3829fe6009190b827c1b705bfb1fe9d4318e7e11e218ae7a87d39d6ea5f656",
+        "release_tag": "v0.6.11-qwen38-4090-beta.1",
+        "package_sha256": "526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2"
       }
     },
     "external_installation_acceptance": {
