@@ -63,7 +63,7 @@ No previous product-route or platform-client acceptance is carried forward.
 
 The RTX 4090 window completed its applicable phases, but its rollback receipt is
 `status: not_applicable`, `directions: 0`, `reason: first release of the lineage`.
-The unchanged composer refuses it verbatim:
+Before the separate first-release change, the composer refused it verbatim:
 
 ```text
 error: phase rollback did not pass
@@ -71,9 +71,12 @@ error: phase rollback did not pass
 
 No RTX 4090 public qualification receipt or manifest variant is fabricated or bound. The lane
 has no rollback target on this two-GPU host: v0.6.10 and earlier RTX 4090 packages use
-single-visible-GPU lifecycle operations and are unsupported there. A separately supplied,
-uncommitted first-release proposal must be decided before this lane can be added. It is not
-part of the draft branch's operative contract.
+single-visible-GPU lifecycle operations and are unsupported there. The first-release
+change permits only the explicit zero-direction `not_applicable` result,
+never a passed rollback. After composing and binding that receipt, owner-authorized route
+acceptance must use `--first-release`, exercise the fresh install/start/stop/tool/session and
+fail-closed blocks without a predecessor, and restore the preserved original lineage/task/
+ACLs/secrets/UUID power. No installed rollback target or bidirectional test is claimed.
 
 ## Host-script closure
 

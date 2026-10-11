@@ -72,6 +72,14 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(f"error: {message}")
 
 
+def first_release_rollback(value: Any) -> bool:
+    """The orchestrator's explicit zero-direction first-lineage result, not a passed rollback."""
+    return (isinstance(value, dict) and value.get("status") == "not_applicable"
+            and type(value.get("directions")) is int and value["directions"] == 0
+            and value.get("reason") == "first release of the lineage"
+            and value.get("intermediate_release") is None and value.get("stops", []) == [])
+
+
 def omp_event_lines(events_path: Path) -> list[str]:
     raw = events_path.read_bytes()
     for encoding in ("utf-8-sig", "utf-16"):
@@ -150,8 +158,16 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
                        ("security", "security")):
         require(receipts[phase]["status"] == "passed" and evidence[key]["status"] == "passed",
                 f"phase {phase} did not pass")
-    for phase in ("restart", "rollback", "omp"):
+    for phase in ("restart", "omp"):
         require(receipts[phase]["status"] == "passed", f"phase {phase} did not pass")
+    rollback_receipt = receipts["rollback"]
+    first_release = first_release_rollback(rollback_receipt)
+    require(rollback_receipt["status"] == "passed" or first_release,
+            "phase rollback did not pass")
+    if first_release:
+        require(not receipts["preflight"]["initial"].get("previous_release")
+                and rollback_receipt.get("active_release") == f"{release_id}-{build['patch_stack_sha'][:12]}",
+                "first-release rollback must name only the active candidate, never a predecessor")
 
     identity = {
         "build_type": identity_start["build_type"],
@@ -227,8 +243,12 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "exact_output": restart["exact_output"],
         "note": args.persistence_note,
     }
-    rollback_receipt = receipts["rollback"]
-    rollback = {
+    rollback = ({
+        "directions": 0, "reason": rollback_receipt["reason"],
+        "intermediate_release": None, "stops": [],
+        "active_release_after": rollback_receipt["active_release"],
+        "note": args.rollback_note, "status": "not_applicable",
+    } if first_release else {
         "directions": rollback_receipt["directions"],
         "intermediate_release": rollback_receipt["intermediate_release"],
         "active_release_after": rollback_receipt["active_release"],
@@ -237,7 +257,7 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "predecessor_stop_mode": rollback_receipt["predecessor_stop_mode"],
         "note": args.rollback_note,
         "status": rollback_receipt["status"],
-    }
+    })
     omp = receipts["omp"]
     require(omp_event_count(evidence_dir / "omp-events.jsonl") == omp["events"],
             "omp-events.jsonl does not carry the event count the omp phase recorded")
@@ -303,10 +323,13 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "benchmark_c1": benchmark_c1,
     }
     receipt["deterministic_gates"] = {
-        section: "passed" if receipt[section].get("status", "passed") == "passed" else "failed"
+        section: ("not_applicable" if section == "rollback" and first_release else
+                  "passed" if receipt[section].get("status", "passed") == "passed" else "failed")
         for section in GATE_SECTIONS
     }
-    require(all(value == "passed" for value in receipt["deterministic_gates"].values()),
+    require(all(value == "passed" or (section == "rollback" and first_release
+                                    and value == "not_applicable")
+                for section, value in receipt["deterministic_gates"].items()),
             "a gate section did not pass")
     receipt["limitations"] = list(args.limitation)
     receipt["beta_qualified"] = True

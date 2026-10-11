@@ -67,6 +67,17 @@ if($Lane -eq 'rtx4090') {
   New-Item -ItemType File -Force "$HostState/container-host-paused"|Out-Null
 }
 AssertBaseline $p
+$FirstRelease=$true;$TemporaryPrevious=''
+@{active_release='active';previous_release='';releases=@{active=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
+AssertBaseline $p
+foreach($bad in @(@{active_release='active';previous_release='old';releases=@{active=@{}}},
+                 @{active_release='active';previous_release='';releases=@{active=@{};old=@{}}})) {
+  $bad|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
+  $rejected=$false;try{AssertBaseline $p}catch{$rejected=$true}
+  if(-not $rejected){throw 'first release accepted a retained predecessor'}
+}
+$FirstRelease=$false;$TemporaryPrevious='older'
+@{active_release='active';previous_release='previous';releases=@{older=@{}}}|ConvertTo-Json -Depth 5|Set-Content "$StateRoot/state.json"
 $p.power_limit_w=if($Lane -eq 'rtx3090'){450}else{370}
 $rejected=$false;try{AssertBaseline $p}catch{$rejected=$true}
 if(-not $rejected){throw 'other lane power limit was accepted'}
@@ -91,6 +102,32 @@ $results|ConvertTo-Json -Compress
             self.assertEqual(rows["rtx3090"]["selector"], "ninfer-native-3090/q38-ninfer")
             self.assertEqual(rows["rtx4090"]["power"], 450)
             self.assertEqual(rows["rtx4090"]["selector"], "ninfer-native-4090/qwen3.8-27b")
+
+    def test_first_release_mode_is_explicit_exclusive_and_offline(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / "not-created"
+            command = [sys.executable, str(ROOT / "scripts/hosts/accept-rtx4090-route.py"),
+                       "--release", "v0.12.0", "--candidate", "1" * 40, "--host", "fixture-host",
+                       "--workspace", str(workspace), "--remote-workspace", "C:/acceptance",
+                       "--expected-state-sha256", "2" * 64, "--mode", "dry-run"]
+            first = subprocess.run(command + ["--first-release"], capture_output=True, text=True)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(json.loads(first.stdout)["plan"]["lineage_mode"], "first_release")
+            self.assertFalse(workspace.exists())
+            for args in ([], ["--first-release", "--temporary-previous", "older"]):
+                self.assertEqual(subprocess.run(command + args, capture_output=True, text=True).returncode, 2)
+
+    def test_first_release_preserves_real_state_not_an_invalid_empty_record(self) -> None:
+        source = (ROOT / "scripts/hosts/accept-rtx4090-route.ps1").read_text()
+        self.assertIn("first release requires exactly one active release and no predecessor", source)
+        self.assertIn("kind='lineage-root';path=$StateRoot", source)
+        self.assertIn("if($FirstRelease){Unregister-ScheduledTask", source)
+        self.assertIn("if(-not $FirstRelease) {\n        $state.releases", source)
+        self.assertIn("elseif(-not $FirstRelease){throw 'restoration requires an active lifecycle record'}", source)
+        install = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text()
+        self.assertIn("reason='first release of the lineage'", install)
+        self.assertIn("status='not_applicable'; directions=0", install)
+        self.assertIn("public-install acceptance is not a rollback test", install)
 
     def test_dry_run_preserves_4090_default_and_requires_3090_host(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -160,6 +197,21 @@ $results|ConvertTo-Json -Compress
             (log_dir / "client.log").write_text("\n".join(map(json.dumps, logs)))
             result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
             self.assertEqual(result["status"], "passed", result["checks"])
+            variant["qualification"] = {"summary": "qualification/first.json"}
+            save(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
+            save(clone / "releases/v0.9.1/qualification/first.json", {"rollback": {"status": "not_applicable",
+                "directions": 0, "reason": "first release of the lineage"}})
+            preparation = {"lineage_mode": "first_release", "previous_release_present": False,
+                           "temporary_active": None, "temporary_previous": ""}
+            save(evidence / "preparation.json", preparation)
+            result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
+            self.assertEqual(result["status"], "passed", result["checks"])
+            preparation["temporary_previous"] = "unsupported"
+            save(evidence / "preparation.json", preparation)
+            result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
+            self.assertFalse(result["checks"]["first_release_preparation_has_no_predecessor"])
+            del variant["qualification"]
+            save(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
             route["lane"] = "rtx4090-native"
             save(evidence / "route.json", route)
             requests[0]["request"]["model"] = "qwen3.8-27b"

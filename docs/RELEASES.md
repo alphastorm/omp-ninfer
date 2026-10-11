@@ -40,10 +40,20 @@ real two-GPU qualification; its OMP 18.0.9 typed-tool phase is not OMP 18.8.7 pr
 The native model is restored byte-for-byte from v0.10.0 because v0.11.0 removed its
 separate binding when it deferred both lanes.
 
-RTX 4090 composition is refused by the unchanged rollback contract: its first release
-on this topology has no supported predecessor. v0.6.10 and earlier packages are not
-rollback targets on a multi-GPU host. It remains unbound pending a separate first-release
-decision. Both component publications, all fresh documented-route/platform acceptance
+RTX 4090 has no supported predecessor on this topology. Its explicit first-lineage
+receipt is admissible only as rollback `not_applicable`, zero directions and reason
+`first release of the lineage`; the gate is not rewritten as passed. Composition, binding
+and route acceptance retain that non-claim. v0.6.10 and earlier packages are unsupported
+rollback targets on a multi-GPU host. The upgraded RTX 3090 still requires its passed
+two-direction proof. RTX 4090 remains unbound until a public receipt is composed and bound.
+For its later, owner-authorized acceptance, replace `--temporary-previous` with
+`--first-release` in the documented native driver invocation. Baseline state must contain
+exactly one active release and no previous/prepared release. The window preserves the
+whole protected lineage on the same volume, unregisters only its stopped task, runs the
+fresh canonical install without a fake predecessor, and restores the original lineage,
+task XML, ACLs, secrets and UUID-selected power limit even after failure. The public-install
+receipt and route composition must explicitly preserve the no-target rollback result.
+Both component publications, all fresh documented-route/platform acceptance
 and lane/platform/acceptance/manifest pin stages remain pending. Root authority, profiles
 and current install instructions are not promoted by preparation. Never date an unpublished
 changelog version or interpret these notes as publication authorization.

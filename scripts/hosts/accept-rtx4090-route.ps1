@@ -17,7 +17,8 @@ param(
     [Parameter(Mandatory=$true)][string]$Bundle,
     [Parameter(Mandatory=$true)][string]$Clone,
     [Parameter(Mandatory=$true)][string]$ExpectedStateSha256,
-    [Parameter(Mandatory=$true)][string]$TemporaryPrevious,
+    [string]$TemporaryPrevious='',
+    [switch]$FirstRelease,
     [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Route','Live','Offline')][string]$Mode='DryRun',
     [string]$StateRoot='',
     [string]$TaskName='',
@@ -33,6 +34,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
+if(($FirstRelease -and $TemporaryPrevious) -or (-not $FirstRelease -and -not $TemporaryPrevious)){throw 'choose FirstRelease or a TemporaryPrevious, never both'}
 . ([scriptblock]::Create((Get-Content -LiteralPath (Join-Path $Workspace 'native-gpu.ps1') -Raw -Encoding UTF8)))
 $utf8=[Text.UTF8Encoding]::new($false)
 $gpu=$Lane.Substring(3)
@@ -86,8 +88,14 @@ function AssertBaseline($p) {
        $p.lease_present -or @($p.lease_entries).Count -ne 0 -or $p.power_limit_w -ne $ownerPowerLimit -or
        @($RequiredHoldPaths|Where-Object {$_ -and -not (Test-Path -LiteralPath $_)}).Count -ne 0){throw 'baseline differs from authorized stopped state'}
     $s=ReadJson "$StateRoot\state.json"
-    if(-not $s.releases.PSObject.Properties[$TemporaryPrevious]){throw 'temporary previous release missing'}
-    if($s.active_release -eq $s.previous_release -or $s.active_release -eq $TemporaryPrevious){throw 'invalid temporary lineage'}
+    if($FirstRelease) {
+        if(-not [string]::IsNullOrWhiteSpace([string]$s.previous_release) -or
+           @($s.releases.PSObject.Properties).Count -ne 1 -or
+           -not $s.releases.PSObject.Properties[[string]$s.active_release]){throw 'first release requires exactly one active release and no predecessor'}
+    } else {
+        if(-not $s.releases.PSObject.Properties[$TemporaryPrevious]){throw 'temporary previous release missing'}
+        if($s.active_release -eq $s.previous_release -or $s.active_release -eq $TemporaryPrevious){throw 'invalid temporary lineage'}
+    }
 }
 function SupportFiles {
     @(Get-ChildItem $StateRoot -File -Force)
@@ -162,6 +170,7 @@ function Child($childMode,$seconds) {
         StateRoot=$StateRoot;TaskName=$TaskName;Stage=$Stage;Model=$Model;KeyFile=$KeyFile;HostState=$HostState;RealHome=$RealHome;Attempt=$Attempt;WindowMinutes=$WindowMinutes}
     $command='& ([scriptblock]::Create([IO.File]::ReadAllText('+ (Quote $self) +')))'
     foreach($k in $values.Keys){$command+=' -'+$k+' '+(Quote $values[$k])}
+    if($FirstRelease){$command+=' -FirstRelease'}
     $encoded=[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
     $name=$childMode.ToLowerInvariant()
     $p=Start-Process -FilePath "$PSHOME\powershell.exe" -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',$encoded) -PassThru -RedirectStandardOutput "$Workspace\$name.stdout.log" -RedirectStandardError "$Workspace\$name.stderr.log"
@@ -205,9 +214,16 @@ function Restore {
     $started=[DateTime]::UtcNow;$b=ValidateSnapshot $baseline;EnableExactAcl
     $prep=ReadJson $journal
     if($prep.status -eq 'restored'){return Audit $b}
-    Control Stop 'restoration-stop.json'
+    # A first-install failure may leave no active record or no state file. The unchanged
+    # controller rejects that state; skip Stop only for this mode, then prove quiescence.
+    $current=if(Test-Path "$StateRoot\state.json"){ReadJson "$StateRoot\state.json"}else{$null}
+    if($null -ne $current -and -not [string]::IsNullOrWhiteSpace([string]$current.active_release)) {
+        Control Stop 'restoration-stop.json'
+    } elseif(-not $FirstRelease){throw 'restoration requires an active lifecycle record'}
+    $task=Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     if(@(Get-CimInstance Win32_Process -Filter "Name='ninfer-serve.exe'").Count -ne 0 -or
-       [string](Get-ScheduledTask -TaskName $TaskName).State -ceq 'Running'){throw 'stop incomplete: refusing pointer restoration'}
+       ($null -ne $task -and [string]$task.State -ceq 'Running') -or
+       @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue|Where-Object LocalPort -eq 18082).Count -ne 0){throw 'stop incomplete: refusing pointer restoration'}
     # Never relocate the route-created secret outside the protected on-host workspace.
     foreach($m in $prep.moves) {
         if(Test-Path -LiteralPath $m.preserved) {
@@ -234,7 +250,8 @@ function Restore {
     }
     foreach($d in $b.directories){SetExactAcl (Join-Path $StateRoot $d.relative) $d.sddl}
     $xml=[IO.File]::ReadAllText("$baseline\task.xml")
-    if([string](Export-ScheduledTask -TaskName $TaskName) -cne $xml){Register-ScheduledTask -TaskName $TaskName -Xml $xml -Force|Out-Null}
+    if($null -eq (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) -or
+       [string](Export-ScheduledTask -TaskName $TaskName) -cne $xml){Register-ScheduledTask -TaskName $TaskName -Xml $xml -Force|Out-Null}
     $gpuUuid=Resolve-NativeGpuUuid $StateRoot
     $power=Get-NativeGpuPowerLimit $gpuUuid
     if($power -ne $b.observable.power_limit_w){& nvidia-smi -i $gpuUuid -pl $b.observable.power_limit_w|Out-Null;if($LASTEXITCODE -ne 0){throw 'power restoration failed'}}
@@ -344,14 +361,25 @@ $variant=@((ReadJson "$Clone\releases\$Release\manifest.json").components.ninfer
 if($state.releases.$instance.package_sha256 -cne $variant.package_sha256){throw 'active instance is not the candidate published package'}
 New-Item -ItemType Directory -Force "$Workspace\preserved","$Workspace\qualified-artifacts"|Out-Null
 $prep=[ordered]@{status='preparing';release=$Release;candidate=$Candidate;attempt=$Attempt;started_utc=$started.ToString('o');moves=@();reason='fresh canonical install from preserved differently-bound active instance; not idempotent reinstall';temporary_active=$state.previous_release;temporary_previous=$TemporaryPrevious}
-foreach($kind in @('releases','secrets','cache')){$prep.moves+=@{kind=$kind;path="$StateRoot\$kind\$instance";preserved="$Workspace\preserved\$kind"}}
+$prep.lineage_mode=if($FirstRelease){'first_release'}else{'upgrade'}
+$prep.previous_release_present=-not [string]::IsNullOrWhiteSpace([string]$state.previous_release)
+if($FirstRelease) {
+    # The installer refuses empty state and a task without state. Preserve the whole
+    # protected lineage on the same volume; never fake an active predecessor.
+    $prep.moves+=@{kind='lineage-root';path=$StateRoot;preserved="$Workspace\preserved\lineage-root"}
+} else {
+    foreach($kind in @('releases','secrets','cache')){$prep.moves+=@{kind=$kind;path="$StateRoot\$kind\$instance";preserved="$Workspace\preserved\$kind"}}
+}
 if(Test-Path $Stage){$prep.moves+=@{kind='documented-stage';path=$Stage;preserved="$Workspace\preserved\documented-stage"}}
 $failure=$null;$routeExit=$null;$restored=$null;$boundary='preparation';$effect=$false
 try {
     AssertBaseline (Probe);SaveJson $journal $prep;$effect=$true
+    if($FirstRelease){Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false}
     foreach($m in $prep.moves){Move-Item -LiteralPath $m.path -Destination $m.preserved}
-    $state.releases.PSObject.Properties.Remove($instance);$state.active_release=$prep.temporary_active;$state.previous_release=$TemporaryPrevious
-    SaveJson "$StateRoot\state.json" $state
+    if(-not $FirstRelease) {
+        $state.releases.PSObject.Properties.Remove($instance);$state.active_release=$prep.temporary_active;$state.previous_release=$TemporaryPrevious
+        SaveJson "$StateRoot\state.json" $state
+    }
     $prep.status='prepared';$prep.temporary_state_sha256=Hash "$StateRoot\state.json";SaveJson $journal $prep
     $boundary='documented-route';$routeExit=Child Route ([Math]::Min(23*60,($WindowMinutes-10)*60))
     $route=ReadJson "$Workspace\route.json"

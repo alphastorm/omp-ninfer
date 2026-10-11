@@ -28,6 +28,28 @@ REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
 
 
+class FirstReleaseRollbackContractTest(unittest.TestCase):
+    def test_native_binding_and_verifier_keep_the_first_lineage_exception_honest(self) -> None:
+        rollback = {"status": "not_applicable", "directions": 0, "reason": "first release of the lineage"}
+        receipt = {"rollback": rollback, "deterministic_gates": {"rollback": "not_applicable"}}
+        errors = []
+        VERIFY_RELEASE.validate_native_rollback(receipt, "native", errors)
+        self.assertEqual(errors, [])
+        for fields, gate in (({"directions": 2}, "not_applicable"), ({"directions": False}, "not_applicable"),
+                             ({"reason": "phase skipped"}, "not_applicable"),
+                             ({"intermediate_release": "old"}, "not_applicable"), ({}, "passed"),
+                             ({"status": "passed"}, "not_applicable")):
+            with self.subTest(fields=fields, gate=gate):
+                errors = []
+                VERIFY_RELEASE.validate_native_rollback({"rollback": {**rollback, **fields},
+                    "deterministic_gates": {"rollback": gate}}, "native", errors)
+                self.assertEqual(len(errors), 1)
+        errors = []
+        VERIFY_RELEASE.validate_native_rollback({"rollback": {"status": "passed", "directions": 2},
+            "deterministic_gates": {"rollback": "passed"}}, "native", errors)
+        self.assertEqual(errors, [])
+
+
 class ReleaseContractTest(unittest.TestCase):
     def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
         self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(

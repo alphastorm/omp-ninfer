@@ -21,6 +21,9 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from compose_native_qualification import first_release_rollback
+
 
 def quote(value: object) -> str:
     return "'" + str(value).replace("'", "''") + "'"
@@ -152,6 +155,16 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
             live["fail_closed"]["exit_code"] != 0 and live["fail_closed"]["no_model_response"] and live["fail_closed"]["only_selected_local_provider_observed"],
         "restoration_passed": load("restoration.json")["status"] == "passed" and load("final-audit.json")["status"] == "passed",
     }
+    qualification_path = expected.get("qualification", {}).get("summary")
+    qualification_file = (clone / qualification_path if qualification_path and qualification_path.startswith("releases/")
+                          else clone / "releases" / release / str(qualification_path))
+    qualification = json.loads(qualification_file.read_text()) if qualification_path else {}
+    if first_release_rollback(qualification.get("rollback")):
+        preparation = load("preparation.json")
+        checks["first_release_preparation_has_no_predecessor"] = (
+            preparation.get("lineage_mode") == "first_release"
+            and preparation.get("previous_release_present") is False
+            and not preparation.get("temporary_active") and not preparation.get("temporary_previous"))
     behavior = {"status": "passed" if all(checks.values()) else "failed", "checks": checks,
                 "document_sha256": blocks["document_sha256"], "served_identity": identity,
                 "package_sha256": installed["package_sha256"],
@@ -178,7 +191,9 @@ def main() -> int:
     p.add_argument("--clone", type=Path)
     p.add_argument("--bundle", type=Path)
     p.add_argument("--expected-state-sha256", required=True)
-    p.add_argument("--temporary-previous", required=True)
+    lineage = p.add_mutually_exclusive_group(required=True)
+    lineage.add_argument("--temporary-previous")
+    lineage.add_argument("--first-release", action="store_true")
     p.add_argument("--attempt", type=int, choices=(1, 2), default=1)
     p.add_argument("--window-minutes", type=int, choices=range(15, 46), default=45)
     p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect"), default="dry-run")
@@ -211,6 +226,7 @@ def main() -> int:
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
             "window_minutes": a.window_minutes,
+            "lineage_mode": "first_release" if a.first_release else "upgrade",
             "client_install": {"lane": route_lane, "step": "client-install",
                                "launcher": r"$env:LOCALAPPDATA\OMP\omp.exe",
                                "distribution_kind": "upstream-release"},
@@ -227,11 +243,13 @@ def main() -> int:
     params = {"Release": a.release, "Candidate": a.candidate, "Workspace": remote,
               "Lane": a.lane,
               "Bundle": remote + "\\bundle", "Clone": remote_clone,
-              "ExpectedStateSha256": a.expected_state_sha256, "TemporaryPrevious": a.temporary_previous,
+              "ExpectedStateSha256": a.expected_state_sha256, "TemporaryPrevious": a.temporary_previous or "",
               "Attempt": a.attempt, "WindowMinutes": a.window_minutes}
 
     def invoke(mode: str, name: str, timeout: int, check: bool = True) -> subprocess.CompletedProcess[str]:
         arguments = " ".join("-" + key + " " + quote(value) for key, value in {**params, "Mode": mode}.items())
+        if a.first_release:
+            arguments += " -FirstRelease"
         code = "$ProgressPreference='SilentlyContinue'; & ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(remote + "\\accept-rtx4090-route.ps1") + "))) " + arguments
         return ssh(a.host, code, log=w / name, timeout=timeout, check=check)
 

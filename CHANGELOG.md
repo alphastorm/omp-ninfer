@@ -18,10 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preserve the RTX 4090 composer refusal (`error: phase rollback did not pass`).
   Its first-release rollback is not applicable on this host; v0.6.10 and older packages
   are unsupported there. No RTX 4090 receipt, binding or rollback target is invented.
-  An uncommitted first-release proposal is separate from the prepared branch.
+  The separate first-release change retains the no-target rollback claim.
 
 ### Changed
 
+- Admit an explicit first native lineage only with zero rollback directions and
+  `not_applicable`, never a fabricated pass or predecessor. The first-release route
+  preserves the protected lineage and stopped task, exercises a fresh canonical
+  install, and restores the original state; upgraded lineages keep their existing
+  two-direction rollback contract.
 - Load the native route's GPU resolver through PowerShell's provider-aware file API,
   so its isolated drive fixture and Windows filesystem use the same operation. The
   GPU invariant also rejects new setters/default queries, separate piped invocations

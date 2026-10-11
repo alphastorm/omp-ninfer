@@ -23,6 +23,7 @@ from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from omp_client_environment import uses_per_model_stateful
+from compose_native_qualification import first_release_rollback
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
     RUNTIME_VARIANT_PACKAGE_NAME_RES,
@@ -807,6 +808,14 @@ def validate_aggregate_as_of(
                 f"qualification as_of {parent} is older than {label} ({observed})", errors)
 
 
+def validate_native_rollback(receipt: dict[str, Any], label: str, errors: list[str]) -> None:
+    rollback = receipt.get("rollback", {})
+    gate = receipt.get("deterministic_gates", {}).get("rollback")
+    if gate == "not_applicable" or (isinstance(rollback, dict) and rollback.get("status") == "not_applicable"):
+        require(first_release_rollback(rollback) and gate == "not_applicable",
+                f"{label}: rollback not_applicable requires a zero-direction first lineage", errors)
+
+
 def validate_manifest_tag_prose(
     manifest: dict[str, Any],
     errors: list[str],
@@ -1136,6 +1145,7 @@ def validate_ninfer_variants(
             require(isinstance(receipt.get("deferred_gates"), list)
                     and len(receipt["deferred_gates"]) > 0,
                     f"{prefix} preview qualification must enumerate deferred gates", errors)
+        validate_native_rollback(receipt, prefix, errors)
         identity = receipt.get("identity", {})
         package = receipt.get("package", {})
         if parity_receipt:

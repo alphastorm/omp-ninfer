@@ -100,6 +100,24 @@ def refused(function, *arguments) -> str:
     return str(caught.exception)
 
 
+class FirstReleaseNativeTests(unittest.TestCase):
+    def test_first_release_acceptance_cannot_claim_an_upgrade_or_passed_rollback(self) -> None:
+        rollback = {"status": "not_applicable", "directions": 0, "reason": "first release of the lineage"}
+        qualification = {"rollback": rollback}
+        native = {"preparation": {"lineage_mode": "first_release", "previous_release_present": False},
+                  "observations": {"rollback": rollback}}
+        MODULE.check_native_first_release(native, qualification)
+        for path, value in (("lineage_mode", "upgrade"), ("previous_release_present", True)):
+            candidate = deepcopy(native)
+            candidate["preparation"][path] = value
+            self.assertIn("first-release", refused(MODULE.check_native_first_release, candidate, qualification))
+        candidate = deepcopy(native)
+        candidate["observations"]["rollback"]["status"] = "passed"
+        self.assertIn("not_applicable", refused(MODULE.check_native_first_release, candidate, qualification))
+        self.assertIn("first-release", refused(MODULE.check_native_first_release, native, {"rollback": {"status": "passed"}}))
+        MODULE.check_native_first_release({"preparation": {}, "observations": {}}, {"rollback": {"status": "passed"}})
+
+
 class RouteReceiptTests(unittest.TestCase):
     def test_a_fully_passed_route_from_the_candidate_is_accepted(self) -> None:
         MODULE.check_route("rtx4090-native", route_receipt("rtx4090-native"), CANDIDATE)

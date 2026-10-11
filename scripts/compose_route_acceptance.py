@@ -46,6 +46,7 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
     validate_upstream_omp_component,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
+from compose_native_qualification import first_release_rollback
 
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client")
@@ -86,6 +87,18 @@ def relative(path: Path) -> str:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise SystemExit(f"compose_route_acceptance: {message}")
+
+
+def check_native_first_release(native: dict[str, Any], qualification: dict[str, Any]) -> None:
+    first = first_release_rollback(qualification.get("rollback"))
+    preparation = native["preparation"]
+    observed = native["observations"].get("rollback", {})
+    claims_first = preparation.get("lineage_mode") == "first_release" or observed.get("status") == "not_applicable"
+    if first or claims_first:
+        require(first and preparation.get("lineage_mode") == "first_release"
+                and preparation.get("previous_release_present") is False
+                and first_release_rollback(observed),
+                "native first-release acceptance must prove no predecessor and preserve not_applicable rollback")
 
 
 def check_route(lane: str, receipt: dict, candidate: str) -> None:
@@ -248,6 +261,10 @@ def main() -> int:
     for variant in manifest["components"].get("ninfer_variants", []):
         require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
                 f"{variant['id']}: runtime model must match the effective native model")
+        lane_receipt = variant.get("qualification", {}).get("summary")
+        receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
+        check_native_first_release(evidence[variant["id"].split("-")[0]],
+                                   load(receipt_path) if lane_receipt else {})
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}

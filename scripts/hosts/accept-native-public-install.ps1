@@ -70,6 +70,13 @@ try {
     $active = [string]$state.active_release
     $rel = $state.releases.PSObject.Properties[$active].Value
     $gpuUuid = Resolve-NativeGpuUuid $StateRoot
+    $hasPrevious = -not [string]::IsNullOrWhiteSpace([string]$state.previous_release)
+    $firstRelease = -not $hasPrevious -and @($state.releases.PSObject.Properties).Count -eq 1
+    $receipt.lineage_mode = if ($firstRelease) { 'first_release' } else { 'upgrade' }
+    $receipt.previous_release_present = $hasPrevious
+    $receipt.rollback = if ($firstRelease) {
+        [ordered]@{ status='not_applicable'; directions=0; reason='first release of the lineage' }
+    } else { [ordered]@{ status='not_exercised'; note='public-install acceptance is not a rollback test' } }
     $installedBinary = Sha ([string]$rel.server_executable)
     $installedConfig = Sha ([string]$rel.config_file)
     if ($installedBinary -cne [string]$v.server_binary_sha256) { throw 'installed server binary is not the manifest binary' }
