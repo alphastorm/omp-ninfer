@@ -33,7 +33,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-. ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $Workspace 'native-gpu.ps1'))))
+. ([scriptblock]::Create((Get-Content -LiteralPath (Join-Path $Workspace 'native-gpu.ps1') -Raw -Encoding UTF8)))
 $utf8=[Text.UTF8Encoding]::new($false)
 $gpu=$Lane.Substring(3)
 if(-not $StateRoot){$StateRoot="C:\ProgramData\NInfer\qwen38-$gpu-native"}

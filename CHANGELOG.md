@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Load the native route's GPU resolver through PowerShell's provider-aware file API,
+  so its isolated drive fixture and Windows filesystem use the same operation. The
+  GPU invariant also rejects new setters/default queries, separate piped invocations
+  and enumeration exceptions moved outside the resolver.
 - Stage v0.12.0 from v0.11.0 with unchanged RTX 5090 runtime, model and deployment
   profile and unchanged stock OMP 18.8.7 binaries. Restore the exact v0.10.0 native
   model contract because v0.11.0 removed it when deferring native lanes; neither

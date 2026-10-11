@@ -27,23 +27,38 @@ def unindexed_gpu_commands(sources: dict[str, str]) -> list[str]:
         text = re.sub(r"Invoke-NvidiaSmi\s+@\([^)]*\)",
                       lambda match: match[0].replace("\n", " "), text)
         function = ""
+        depth = 0
         for number, line in enumerate(text.splitlines(), 1):
             definition = re.match(r"\s*(?:function\s+([\w-]+)|def\s+(\w+)\()", line)
             if definition:
                 function = definition[1] or definition[2]
+                depth = 0
             if line.lstrip().startswith("#"):
                 continue
             for statement in line.split(";"):
-                for match in operation.finditer(statement):
-                    if match[0] == "-q" and not re.search(r"nvidia[-_]?smi|NvidiaSmi", statement, re.I):
-                        continue
-                    if re.search(r"(?<![\w-])(?:-i|--id)(?:['\"]?\s*[,=]|\s+)", statement):
-                        continue
-                    key = (path, function)
-                    if GPU_ENUMERATIONS.get(key) == match[0] and key not in used_enumerations:
-                        used_enumerations.add(key)
-                        continue
-                    violations.append(f"{path}:{number}: {match[0]} in {function}")
+                calls = list(re.finditer(r"\b(?:nvidia[-_]?smi(?:\.exe)?|Invoke-NvidiaSmi)\b", statement, re.I))
+                commands = ([statement[call.start():calls[index + 1].start() if index + 1 < len(calls) else None]
+                             for index, call in enumerate(calls)] if calls else [statement])
+                for command in commands:
+                    operations = [match[0] for match in operation.finditer(command)]
+                    # Every named invocation is an operation, including new setters and default queries.
+                    for name in operations or (["nvidia-smi"] if calls else []):
+                        if name == "-q" and not calls:
+                            continue
+                        if re.search(r"(?<![\w-])(?:-i|--id)(?:['\"]?\s*[,=]|\s+)", command):
+                            continue
+                        key = (path, function)
+                        inventory_only = re.fullmatch(
+                            r"nvidia-smi(?:\.exe)?\s+--query-gpu=uuid(?:\s+--format=csv,noheader)?\s*\)?",
+                            command.strip(), re.I)
+                        if GPU_ENUMERATIONS.get(key) == name and key not in used_enumerations and inventory_only:
+                            used_enumerations.add(key)
+                            continue
+                        violations.append(f"{path}:{number}: {name} in {function}")
+            if function:
+                depth += line.count("{") - line.count("}")
+                if depth <= 0:
+                    function = ""
     return violations
 
 
@@ -60,6 +75,8 @@ class WindowsHostGpuTests(unittest.TestCase):
             "& $absolutePath -pl 300", "nvidia-smi.exe -q -x",
             "nvidia-smi -i $uuid --query-gpu=name; nvidia-smi --query-gpu=power.limit",
             "& 'C:/tools/nvidia-smi.exe' `\n --power-limit 300",
+            "nvidia-smi --lock-gpu-clocks=100,200", "nvidia-smi -pm 1", "nvidia-smi",
+            "nvidia-smi -i $uuid --query-gpu=name | nvidia-smi --query-gpu=power.limit",
         ):
             with self.subTest(command=command):
                 self.assertTrue(unindexed_gpu_commands({path: command}))
@@ -72,6 +89,10 @@ class WindowsHostGpuTests(unittest.TestCase):
         self.assertEqual(unindexed_gpu_commands({path: source}), [])
         self.assertEqual(len(unindexed_gpu_commands({path: source + "nvidia-smi --query-gpu=uuid"})), 1)
         self.assertTrue(unindexed_gpu_commands({"scripts/hosts/fixture.ps1": source}))
+        self.assertTrue(unindexed_gpu_commands({path: source.replace("--query-gpu=uuid",
+            "--query-gpu=uuid --lock-memory-clocks=300")}))
+        self.assertTrue(unindexed_gpu_commands({path: source.replace("nvidia-smi --query-gpu=uuid",
+            "nvidia-smi -i $uuid --query-gpu=uuid") + "}\nnvidia-smi --query-gpu=uuid"}))
 
 
 if __name__ == "__main__":
