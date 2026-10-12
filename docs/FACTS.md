@@ -1,8 +1,8 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-11 · **Published product: v0.11.0 (RTX 5090 only); v0.12.0 is ready and unreleased.**
+Updated: 2026-10-11 · **Current published product: v0.12.0 (2026-10-11), RTX 5090 plus native RTX 3090 and RTX 4090.**
 
-## Current client candidate — OMP 18.8.7
+## Current client — OMP 18.8.7
 
 Current 5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
 source `f261ed9faf16b61880b544f599876bface4ded0d`, unchanged in v0.12.0. Historical
@@ -11,7 +11,7 @@ on 5861712f with 385.948 s downtime and independent restoration. It does not car
 forward: all five v0.12.0 routes (31 blocks), both public native installs and three stock
 clients passed fresh on frozen candidate `7713ceb9`; immutable evidence pins close that proof.
 macOS remains preview; Linux qualification covers the stock binary under WSL2,
-not a native Linux OS. The product is not published and production was not upgraded.
+not a native Linux OS. The product is published; acceptance did not upgrade production.
 
 Both native lanes return on the two-GPU host with founder-published RTX 4090 v0.6.11
 and RTX 3090 v0.6.3 components from cad19767. Each installed release binds its own
@@ -27,9 +27,9 @@ hosts now default to auto image detail, so RTX 5090 fragments no longer override
 Unavailable saved models fail closed upstream ([#13689](https://github.com/can1357/oh-my-pi/pull/13689));
 no additional config is needed. Compaction settings are unchanged.
 
-## Current runtime candidate — v0.12.0
+## Current runtime — v0.12.0
 
-The [v0.12.0 candidate](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retains published
+The [v0.12.0 release](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) retains published
 RTX 5090 component v0.6.16/source 1302d639, without 3a, image 6a02feba/server 548fe239.
 Profile qwen38-5090-v0.11.0/config 91a35670 keeps BF16 KV/DFlash2 K=7/two device slots.
 All 15 local criteria pass; full sm_120a ctest: 111 pass/7 skip/0 fail. Exact 130,048-token
@@ -39,13 +39,13 @@ promise. Superseded a59's red NVFP4 oracle remains evidence; no test was suppres
 The v0.11.0 published-image window passed; fresh v0.12.0 acceptance passed all five
 routes, including the unchanged RTX 5090. [Current qualification](../releases/v0.12.0/qualification.json)
 and [composed proof](../releases/v0.12.0/acceptance/composed-external-installation.json)
-remain unreleased product evidence; only the owner may tag/publish.
+bind the published product evidence; future tags/publications remain owner-only.
 
 ## Published baseline — v0.11.0, legacy native lanes on v0.10.0
 
 The [v0.11.0 manifest](../releases/v0.11.0/manifest.json) binds the published RTX 5090
-runtime and stock OMP 18.8.7. Native lanes were deferred there; legacy native users keep
-the complete v0.10.0 guide and its single-visible-GPU packages until the v0.12.0 tag.
+runtime and stock OMP 18.8.7. Native lanes were deferred there; before the v0.12.0 tag,
+legacy native users kept the complete v0.10.0 guide and its single-visible-GPU packages.
 
 The [v0.10.0 manifest](../releases/v0.10.0/manifest.json) binds the stock-client runtime on
 three eligible GPU routes with unmodified upstream OMP 18.4.10. Fresh client and route acceptance
