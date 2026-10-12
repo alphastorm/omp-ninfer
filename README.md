@@ -17,7 +17,7 @@ Use the versioned manifest and its ready gate to determine install eligibility; 
 client/route acceptance is separate from the published baseline below.
 
 > [!IMPORTANT]
-> **Current release: v0.12.0, published 2026-10-11 — native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
+> **Published baseline: v0.12.0, published 2026-10-11 — native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
 > The founder published both UUID-bound native components for the two-GPU host.
 > Only one native lane runs at a time on port 18082. RTX 5090 and stock OMP 18.8.7
 > keep their exact v0.11.0 component/model/profile pins. All five documented routes,

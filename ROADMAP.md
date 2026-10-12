@@ -23,7 +23,7 @@ Publication remains owner-only. The manifest gates the exact release posture.
 
 ## Published baseline — v0.12.0 native return on one two-GPU host
 
-Current release, published 2026-10-11.
+Published 2026-10-11.
 
 The [v0.12.0 release](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
 RTX 4090 qualification on the new two-GPU Windows topology. The owner adopted the

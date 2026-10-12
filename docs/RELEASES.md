@@ -16,14 +16,14 @@ publication use the same existing gates. No host window or publication is author
 
 ## Channels
 
-| Channel | Meaning | Current state |
+| Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.0`, published 2026-10-11, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.0`, published 2026-10-11; consult GitHub releases for live `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; the current
-release retains stock OMP 18.8.7.
+published baseline v0.12.0 retains stock OMP 18.8.7; v0.12.1 binds stock 18.10.1.
 All five documented routes and fresh platform-client acceptance passed on the published
 components; see [route acceptance](QUICKSTART.md#v0120-route-acceptance).
 

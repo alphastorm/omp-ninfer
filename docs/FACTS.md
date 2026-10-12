@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-11 · **Current published product: v0.12.0 (2026-10-11), RTX 5090 plus native RTX 3090 and RTX 4090.**
+Updated: 2026-10-12 · **Published baseline: v0.12.0 (2026-10-11), RTX 5090 plus native RTX 3090 and RTX 4090.**
 
 ## v0.12.1 client binding — OMP 18.10.1
 

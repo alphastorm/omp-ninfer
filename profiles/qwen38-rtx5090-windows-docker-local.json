@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.12.0",
+  "release": "v0.12.1",
   "installation_mode": "native-windows-docker-local",
   "client": {
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.8.7",
-    "upstream_commit": "f261ed9faf16b61880b544f599876bface4ded0d",
+    "upstream_tag": "v18.10.1",
+    "upstream_commit": "5d0aaffaf1f987503ce129a642fb6e30339615af",
     "os": "Windows 11",
     "architecture": "x64",
     "published": true,
     "asset_name": "omp-windows-x64.exe",
-    "asset_bytes": 225642496,
-    "asset_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
-    "binary_sha256": "3fee68733791b3d0b2816e8c7b5987813afd103762f8cfd7239d57ed213286dc",
-    "release_id": 407957363,
-    "asset_id": 625097593,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe"
+    "asset_bytes": 243885056,
+    "asset_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+    "binary_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+    "release_id": 410230586,
+    "asset_id": 632821961,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-windows-x64.exe"
   },
   "runtime_host": {
     "os": [

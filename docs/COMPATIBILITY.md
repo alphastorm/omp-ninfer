@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.12.0`
-Composition: **v0.12.0 upstream OMP v18.8.7 all five documented routes and both native public installations accepted**
+Product release: `v0.12.1`
+Composition: **v0.12.1 upstream OMP v18.10.1 client acceptance pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.8.7` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-darwin-arm64) (sha256 `cf0227bdefca`) | `qwen38-5090-v0.11.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2b4285979856d67707f17192c1d1f100bd2132a0/releases/v0.12.0/acceptance/darwin-arm64-18.8.7.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.8.7` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-windows-x64.exe) (sha256 `3fee68733791`) | `qwen38-5090-v0.11.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2b4285979856d67707f17192c1d1f100bd2132a0/releases/v0.12.0/acceptance/windows-x64-18.8.7.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.8.7` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.8.7/omp-linux-x64) (sha256 `b87f9835a0ac`) | `qwen38-5090-v0.11.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2b4285979856d67707f17192c1d1f100bd2132a0/releases/v0.12.0/acceptance/linux-x64-18.8.7.json) |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.10.1` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-darwin-arm64) (sha256 `74d920b72e7a`) | `qwen38-5090-v0.11.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.10.1` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-windows-x64.exe) (sha256 `2ab55ace7787`) | `qwen38-5090-v0.11.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.10.1` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-linux-x64) (sha256 `9798d22d518b`) | `qwen38-5090-v0.11.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
 
 ## Native runtime variants
 
@@ -19,8 +19,8 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/0867614b7b6d684355e35773cc36ed9ab6914f9d/releases/v0.12.0/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/0867614b7b6d684355e35773cc36ed9ab6914f9d/releases/v0.12.0/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/012a6dc757c0cb9bad7ba47f9b15107fab7b6f9e/releases/v0.12.1/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/012a6dc757c0cb9bad7ba47f9b15107fab7b6f9e/releases/v0.12.1/qualification/rtx4090.json) |
 
 Package bindings:
 
@@ -41,6 +41,7 @@ Limitations:
 - RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.
 
 Blockers:
+- upstream OMP v18.10.1 client acceptance is pending
 
 ### `windows-docker-local`
 
@@ -52,6 +53,7 @@ Limitations:
 - RTX 5090 container sessions restore from durable checkpoints after a process restart; checkpoints from an older runtime fingerprint replay once from the OMP transcript.
 
 Blockers:
+- upstream OMP v18.10.1 client acceptance is pending
 
 ### `linux-docker-local`
 
@@ -64,6 +66,7 @@ Limitations:
 - Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.
 
 Blockers:
+- upstream OMP v18.10.1 client acceptance is pending
 
 ## Composition blockers
 

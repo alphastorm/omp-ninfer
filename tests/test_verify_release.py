@@ -657,8 +657,9 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(errors, [])
 
     def test_client_candidate_matches_the_verified_upstream_descriptor(self) -> None:
+        release = self.load(ROOT / "compatibility.json")["product_release"]
         descriptor = STAGE_RELEASE.load_omp_component(
-            ROOT / "docs/measurements/2026-10-10-omp-1887-client-components.json")
+            ROOT / "releases" / release / "qualification/client-components.json")
         for name, platform in (("manual-tunnel", "darwin-arm64"), ("windows-docker-local", "windows-x64")):
             profile = self.load(ROOT / f"profiles/qwen38-rtx5090-{name}.json")
             for key in ("distribution_kind", "upstream_repository", "upstream_tag", "upstream_commit",

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.12.1",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9b7a010222e44b7a7e471f315b5af800f5f6e194/compatibility.json",
-      "compatibility_sha256": "4cfdf4905895f5063c58da81a559b61b9bc87d364f82be40c5e0eb4b11c305d3",
+      "compatibility_sha256": "246d8b34a570c3dc86fa6446cb34e5ff730f4f20cb0185372386d51b0a8f72a7",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.10.1",
