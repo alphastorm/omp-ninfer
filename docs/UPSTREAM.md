@@ -27,7 +27,17 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Current client — OMP 18.8.7
+## v0.12.1 client binding — OMP 18.10.1
+
+Unmodified upstream [v18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1),
+source `5d0aaffaf1f987503ce129a642fb6e30339615af`, published upstream
+2026-10-12T05:55:11Z. This is routine currency; all NInfer runtime/model/profile
+pins stay unchanged. The [host-free Responses applicability report](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
+finds neither 18.9.0 fix trigger in the released emitter. It tested stock 18.8.7
+and 18.10.0, not live 18.10.1 routes. New-client platform and documented acceptance
+use their own receipts; the versioned manifest decides readiness.
+
+## Published baseline client — OMP 18.8.7
 
 | Upstream | Client pin | State | Why pull it in |
 | --- | --- | --- | --- |

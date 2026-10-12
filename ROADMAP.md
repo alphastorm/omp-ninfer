@@ -11,6 +11,16 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
+## v0.12.1 — client-only upstream currency
+
+Pin stock OMP 18.10.1 instead of 18.8.7; runtime packages, both models, profiles and
+topology stay unchanged. This is a patch bump, following the v0.7.2 → v0.7.3
+client-only precedent, not a new runtime feature or support boundary. The specific
+18.9.0 Responses fix is not a demonstrated NInfer bug; [host-free evidence](docs/measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
+records its non-applicability. Fresh client and all five documented-route/public-install
+proof must come from authorized windows; predecessor product acceptance is not retargeted.
+Publication remains owner-only. The manifest gates the exact release posture.
+
 ## Published baseline — v0.12.0 native return on one two-GPU host
 
 Current release, published 2026-10-11.

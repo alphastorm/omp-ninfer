@@ -1,0 +1,38 @@
+{
+  "artifact_type": "omp_ninfer_client_responses_applicability",
+  "schema_version": 1,
+  "as_of": "2026-10-12",
+  "product_release": "v0.12.1",
+  "client_upgrade": {
+    "from": "18.8.7",
+    "to": "18.10.1",
+    "reason": "routine upstream currency / defensive compatibility; no demonstrated NInfer correctness fix from the specific 18.9.0 Responses-stream change"
+  },
+  "evidence": {
+    "original_report": "omp-responses-fix-20261012/REPORT.md",
+    "report_scope": "Host-free released-source inspection and loopback reproduction with exact stock 18.8.7 and 18.10.0 binaries; no fleet/appliance contact",
+    "tested_binary_versions": [
+      "18.8.7",
+      "18.10.0"
+    ],
+    "new_client_inference_qualification_claimed": false,
+    "omp_fix_commit": "d95845494b2dd809dbb6b1c9b85333738826e477",
+    "omp_fix_pr": "https://github.com/can1357/oh-my-pi/pull/11863",
+    "ninfer_source_pins": [
+      "1302d63929e400a05e1c9cdb0fc8003a70269825",
+      "cad1976764fded5fbe96930c36bed0570b3d3de7"
+    ],
+    "released_schema_sha256": "b72eb8abd7c566c405c20d5e5743921d0e2193766dc583699f73d73ae4e901ea"
+  },
+  "verdict": {
+    "affected": false,
+    "reasoning": "NInfer emits raw reasoning_text with explicit content_index and summary [], not lossy indexless summary sections.",
+    "tool_input": "NInfer retains the identical full argument/input snapshot in done, item-done and final response; it does not replace nonempty completed input with an empty terminal snapshot.",
+    "scope_limit": "This finding concerns the named 18.9.0 reasoning-summary/custom-input fix, not every intervening OMP change."
+  },
+  "sources": [
+    "https://github.com/can1357/oh-my-pi/commit/d95845494b2dd809dbb6b1c9b85333738826e477",
+    "https://github.com/alphastorm/ninfer/blob/1302d63929e400a05e1c9cdb0fc8003a70269825/src/serve/responses_schema.cpp",
+    "https://github.com/alphastorm/ninfer/blob/cad1976764fded5fbe96930c36bed0570b3d3de7/src/serve/responses_schema.cpp"
+  ]
+}

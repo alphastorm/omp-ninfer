@@ -33,7 +33,8 @@ class ProofEnvironmentTests(unittest.TestCase):
         for name in ("stock_omp_session_proof", "omp_parallel_proof", "omp_long_session_proof"):
             module = self.load(name)
             for version, expected in (("omp/18.4.0", "1"), ("omp/18.4.10", "1"),
-                                      ("omp/18.8.0", None), ("omp/18.8.3", None), ("omp/18.8.7", None)):
+                                      ("omp/18.8.0", None), ("omp/18.8.3", None), ("omp/18.8.7", None),
+                                      ("omp/18.10.1", None)):
                 with self.subTest(probe=name, version=version), tempfile.TemporaryDirectory() as temporary:
                     args = argparse.Namespace(home=Path(temporary), omp=Path("fixture-omp"),
                                               model="ninfer-beta/q38-ninfer", omp_version=version)

@@ -1,0 +1,248 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger",
+  "schema_version": 1,
+  "review_sequence_id": "CRS-20260925-ninfer-stock-client",
+  "subject": "alphastorm/ninfer 1c17c3facfbfd1243cf7711a412119302e6dbd74..b0e8c2fa: prompt_cache_key session identity for stock OpenAI clients, first-request checkpoint restore, the shared-prefix catalog default max(concurrency, markers), Responses tool outputs given as content parts, and pinning the Windows host-KV pool at start (alphastorm/omp-ninfer#48: the standby-memory retry reviewed in r1 and removed in r3, then the commit precharge of r4 and r5)",
+  "reviews": [
+    {
+      "review_id": "CR-20260925-ninfer-stock-client-r1",
+      "review_mode": "initial",
+      "review_class": "full-council",
+      "subject_commit": "021fccb1",
+      "reviewers": [
+        {
+          "reviewer": "daybreak-blue",
+          "model_family": "gpt",
+          "authority": "independent_evidence"
+        },
+        {
+          "reviewer": "gemini",
+          "model_family": "gemini",
+          "authority": "supplemental_evidence"
+        },
+        {
+          "reviewer": "grok",
+          "model_family": "grok",
+          "authority": "supplemental_evidence"
+        },
+        {
+          "reviewer": "claude",
+          "model_family": "claude",
+          "authority": "supplemental_evidence"
+        }
+      ],
+      "outcome": "closed for remediation: one in-scope P1 (daybreak-blue R1) and five P2/P3 changes; one P1 availability question (daybreak-blue U1) deferred to issue #48"
+    },
+    {
+      "review_id": "CR-20260925-ninfer-stock-client-r2",
+      "review_mode": "remediation",
+      "review_class": "lead-close",
+      "subject_commit": "2e3687c8",
+      "outcome": "closed; M1 verified red on 71ac4e15 and green on 2e3687c8 live on the RTX 4090 (prompt_cache_key with X-NInfer-Session on chat: 200 then 400), M2 red on 021fccb1 and green on 4cf6feee (store regression), M3 and M4 by build and inspection; host suites 11 of 11 on Linux sm_120a and Windows MSVC sm_89; no in-scope P0/P1 remains"
+    },
+    {
+      "review_id": "CR-20260925-ninfer-stock-client-r3",
+      "review_mode": "remediation",
+      "review_class": "lead-close",
+      "subject_commit": "a54f1109",
+      "outcome": "closed; the RTX 4090 qualification of 8f0098da ran the pinning retry on hardware and the retried allocation failed with cudaErrorAlreadyMapped, so a54f1109 removes the retry (daybreak-blue U1 confirmed and mitigated; claude R4, grok U1 and gemini U1 moot); no in-scope P0/P1 remains"
+    },
+    {
+      "review_id": "CR-20260925-ninfer-stock-client-r4",
+      "review_mode": "remediation",
+      "review_class": "lead-close",
+      "subject_commit": "139d5be4",
+      "outcome": "closed; v0.8.0 documented-route acceptance on the published beta.1 components found two defects: stock OMP 18.3.0 returned an image read as a function_call_output whose output is an input_text and input_image array, which the runtime refused as malformed (2e46b8ee accepts content parts), and the RTX 4090's first managed start after the documented install could not pin its 11 GiB host-KV pool (139d5be4 charges the pool's commit before cudaMallocHost and reports commit state on a refusal); no in-scope P0/P1 remains"
+    },
+    {
+      "review_id": "CR-20260925-ninfer-stock-client-r5",
+      "review_mode": "remediation",
+      "review_class": "lead-close",
+      "subject_commit": "b0e8c2fa",
+      "outcome": "closed; the v0.6.7-beta.2 qualification of 86733c0e was refused on its first managed start after a fresh install with 10 MiB of commit free, falsifying r4's exact-size charge; driver trials measured the pin's charge as its size plus an 11-20 MiB page-lock remainder, so b0e8c2fa commits and releases size plus 1/64 before every pinned host allocation, and the canonical qualification then passed all 15 phases including that first start; no in-scope P0/P1 remains"
+    }
+  ],
+  "release_sources": [
+    {
+      "lane": "rtx5090",
+      "commit": "86733c0e93fceccf9af3fa345ca9c8b6754f7abb",
+      "relation": "139d5be4 plus one packaging-only commit advancing the RTX 4090 lane specification, server configuration and Windows release notes to v0.6.7-beta.2; the Windows-only commit charge it contains is compiled out of the Linux binary"
+    },
+    {
+      "lane": "rtx4090",
+      "commit": "b0e8c2fa732e3a84eeb356c5e586879f3563c70c",
+      "relation": "86733c0e plus the r5 margin on the commit charge before pinned host allocations (arena.cu) and the matching Windows release-notes paragraph"
+    }
+  ],
+  "dispositions": [
+    {
+      "id": "daybreak-blue-R1",
+      "severity": "P1",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M1: handle_chat_completions passes X-NInfer-Session presence to resolve_client_session, which refuses prompt_cache_key combined with it (400 invalid_ninfer_identity); a header-only chat request keeps its previous behavior.",
+      "rationale": "Inside the one authenticated principal the client names both and gets the key's session; nothing widens across principals, so P2 after controls. One argument and one condition make the stated contract true on both routes.",
+      "remediation_commit": "5a3ed985"
+    },
+    {
+      "id": "daybreak-blue-U1",
+      "severity": "P1",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "a54f1109 removes the in-process pinned-allocation retry together with its standby conversion and bound: arena.cu returns to its 1c17c3fa bytes and a refused pin fails the start as in the v0.6.6 lane. 139d5be4 (r4) then charges the pool's commit before cudaMallocHost, and b0e8c2fa (r5) commits and releases each pinned allocation's size plus 1/64 first, so the pin no longer waits on a pagefile extension.",
+      "rationale": "The RTX 4090 qualification of 8f0098da answered it: the refusal occurred on a managed start, the conversion ran, and the retried cudaMallocHost failed with cudaErrorAlreadyMapped. A retry that cannot succeed is removed rather than kept; #48 stays open as an intermittent start failure that a new start recovers. r4 and r5 measured the cause on the 32 GiB host: a running server commits about 39 GiB, so a start extends the system-managed pagefile, and a pin whose free commit covered only its size raced that extension.",
+      "remediation_commit": "b0e8c2fa"
+    },
+    {
+      "id": "claude-R4",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "2e3687c8 bounded the conversion by available memory; then a54f1109 removes the in-process pinned-allocation retry together with its standby conversion and bound: arena.cu returns to its 1c17c3fa bytes and a refused pin fails the start as in the v0.6.6 lane.",
+      "rationale": "Makes 'fail as before under genuine exhaustion' true for side effects as well as the error; with enough standby the touch repurposes only file cache.",
+      "remediation_commit": "a54f1109"
+    },
+    {
+      "id": "claude-U1",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M3: restore_checkpoint re-checks latest_response_id under checkpoint_mutex_ for a restore without a response id and skips a session that already has a stored lineage.",
+      "rationale": "Makes one restore per session per process hold under concurrency. The store:false-first case is a client choice that costs one import, which exact prefix matching tolerates.",
+      "remediation_commit": "5c33cdd1"
+    },
+    {
+      "id": "claude-U2",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "accept",
+      "change": "none in code; the remediation record corrects the claim: the pre-filter keeps checkpoint_mutex_ out of a never-saved session's path, but a request can wait at the response store behind another session's import, as previous_response_id restores already make it.",
+      "rationale": "Pre-existing lock scope. With max_concurrency 1 the engine is occupied by that import, so a waiting request loses little extra latency; narrowing the lock would reorder a reviewed publication protocol for no measured gain."
+    },
+    {
+      "id": "claude-U3",
+      "severity": "P2",
+      "result": "falsified",
+      "disposition": "reject",
+      "change": "none",
+      "rationale": "The only recorded refusal is exactly the code the retry handles."
+    },
+    {
+      "id": "daybreak-blue-R2",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M2: may_hold tests sessions/<digest>/current, the published pointer load() requires; a filesystem error still returns true. test_may_hold_prefilter covers a session directory without current.",
+      "rationale": "Latency only: a session whose first save was refused takes checkpoint_mutex_ once per process. The fix makes the pre-filter test the exact publication marker load() uses.",
+      "remediation_commit": "4cf6feee"
+    },
+    {
+      "id": "daybreak-blue-R3",
+      "severity": "P2",
+      "result": "design decision",
+      "disposition": "accept",
+      "change": "none in code; the remediation record states that null prompt_cache_key is omission.",
+      "rationale": "Null selects the anonymous pool exactly as omission does, the rule every nullable identity field follows; nothing widens and stock OMP never sends null. The packet requirement overclaimed."
+    },
+    {
+      "id": "daybreak-blue-U2",
+      "severity": "P2",
+      "result": "unresolved",
+      "disposition": "accept",
+      "change": "none",
+      "rationale": "Bounded: one import per returning session per process; reclaimed residents stay restorable from their own checkpoints and every reclaim is logged; the lane qualification's durability workload runs with this path active."
+    },
+    {
+      "id": "grok-R1",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M1: handle_chat_completions passes X-NInfer-Session presence to resolve_client_session, which refuses prompt_cache_key combined with it (400 invalid_ninfer_identity); a header-only chat request keeps its previous behavior.",
+      "rationale": "Duplicate of daybreak-blue-R1; one change closes both.",
+      "remediation_commit": "5a3ed985"
+    },
+    {
+      "id": "grok-U1",
+      "severity": "P2",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with claude-R4: a54f1109 removes the in-process pinned-allocation retry together with its standby conversion and bound: arena.cu returns to its 1c17c3fa bytes and a refused pin fails the start as in the v0.6.6 lane.",
+      "rationale": "Closed by the same bound.",
+      "remediation_commit": "a54f1109"
+    },
+    {
+      "id": "claude-R1",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "accept",
+      "change": "none in code; the remediation record states the invariant as: requests without a session identity behave exactly as before.",
+      "rationale": "Restoring a returning keyed session is intended for any session name; the retired fork client resumed with previous_response_id. The packet invariant was overbroad."
+    },
+    {
+      "id": "claude-R2",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M1: handle_chat_completions passes X-NInfer-Session presence to resolve_client_session, which refuses prompt_cache_key combined with it (400 invalid_ninfer_identity); a header-only chat request keeps its previous behavior.",
+      "rationale": "Duplicate of daybreak-blue-R1; one change closes both.",
+      "remediation_commit": "5a3ed985"
+    },
+    {
+      "id": "claude-R3",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "defer",
+      "change": "none",
+      "rationale": "Diagnostics only: a skipped restore runs the request from its transcript. A warning line belongs in a later runtime; no contract is violated."
+    },
+    {
+      "id": "claude-R5",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "accept",
+      "change": "none in code; the v0.8.0 release notes state that sessions saved by the fork client are not reachable from stock OMP and age out under the checkpoint quota.",
+      "rationale": "Inherent to changing the client's identity scheme: one cold first turn per session after the upgrade."
+    },
+    {
+      "id": "claude-U4",
+      "severity": "P3",
+      "result": "unresolved",
+      "disposition": "defer",
+      "change": "none",
+      "rationale": "The lane qualifications on published bytes run the durability workload with shared=4; a regression there makes the release diagnostic-red."
+    },
+    {
+      "id": "gemini-U1",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "Merged with claude-R4: a54f1109 removes the in-process pinned-allocation retry together with its standby conversion and bound: arena.cu returns to its 1c17c3fa bytes and a refused pin fails the start as in the v0.6.6 lane.",
+      "rationale": "With less than the request available the retry no longer commits or touches memory.",
+      "remediation_commit": "a54f1109"
+    },
+    {
+      "id": "gemini-U2",
+      "severity": "P3",
+      "result": "unresolved",
+      "disposition": "defer",
+      "change": "none",
+      "rationale": "Deferred to the same qualification evidence."
+    },
+    {
+      "id": "grok-R2",
+      "severity": "P3",
+      "result": "confirmed",
+      "disposition": "mitigate",
+      "change": "M2: may_hold tests sessions/<digest>/current, the published pointer load() requires; a filesystem error still returns true. test_may_hold_prefilter covers a session directory without current.",
+      "rationale": "Duplicate of daybreak-blue-R2; one change closes both.",
+      "remediation_commit": "4cf6feee"
+    }
+  ],
+  "residual_risks": [
+    "alphastorm/omp-ninfer#48 stays open until field confirmation: the RTX 4090 pin refusal was a race with the system-managed pagefile extension, seen on first managed starts after a fresh install and never reproduced on demand. b0e8c2fa's commit precharge passed that start in canonical qualification; a recurrence reports the commit limit, available commit and available memory.",
+    "A first-request restore that finds an incompatible or quarantined checkpoint runs the request from its transcript without a log line.",
+    "A returning session's first request imports its checkpoint even when the replayed transcript diverges, and the import may reclaim inactive residents.",
+    "Sessions saved under fork-client ninfer_session names are not reachable from stock OMP; they age out under the checkpoint quota."
+  ],
+  "review_records_retained": "The lead's review records, packets and reviewer outputs are retained outside the repository; this ledger records their dispositions."
+}

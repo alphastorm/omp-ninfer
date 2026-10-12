@@ -7,6 +7,15 @@ agent. This project packages their integration, explicit continuation, and durab
 into exact, qualified releases. The v0.12.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090
 lane at a time.
 
+## v0.12.1 client binding — stock OMP 18.10.1
+
+The [v0.12.1 release tree](releases/v0.12.1/NINFER_RELEASE_NOTES.md) pins the unmodified
+18.10.1 clients and keeps every v0.12.0 runtime, model and serving profile unchanged.
+This is routine upstream currency, not a demonstrated NInfer correction from the
+18.9.0 Responses-stream fix; [host-free applicability evidence](docs/measurements/2026-10-12-omp-18101-responses-compatibility-review.json) explains why.
+Use the versioned manifest and its ready gate to determine install eligibility; new
+client/route acceptance is separate from the published baseline below.
+
 > [!IMPORTANT]
 > **Current release: v0.12.0, published 2026-10-11 — native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
 > The founder published both UUID-bound native components for the two-GPU host.
@@ -14,8 +23,8 @@ lane at a time.
 > keep their exact v0.11.0 component/model/profile pins. All five documented routes,
 > both native public installs and three stock clients passed fresh acceptance on
 > frozen candidate `7713ceb9`; [composed proof](releases/v0.12.0/acceptance/composed-external-installation.json)
-> and immutable evidence pins are complete. Use the [current guide](docs/QUICKSTART.md)
-> with the published tag. Publication did not upgrade production. Legacy native users
+> and immutable evidence pins are complete. Use the [immutable v0.12.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.12.0/docs/QUICKSTART.md)
+> with that published tag. Publication did not upgrade production. Legacy native users
 > staying on v0.10.0 keep its [complete guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 > Those old native packages do not support two GPUs; RTX 4090 has no rollback target there.
 
@@ -45,7 +54,7 @@ target on the two-GPU topology; RTX 3090 retains its qualified two-direction pro
 
 <div align="center">
 
-**[Get started with v0.12.0 →](docs/QUICKSTART.md)** ·
+**[Get started with published v0.12.0 →](https://github.com/alphastorm/omp-ninfer/blob/v0.12.0/docs/QUICKSTART.md)** ·
 **[Download v0.12.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.0)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
@@ -789,15 +798,16 @@ machine and profile, not universal GPU claims.
 
 ## Get started
 
-The [current guide](docs/QUICKSTART.md) targets the published **v0.12.0** release
-and checksummed stock OMP **18.8.7**. All five documented routes/31 steps, both native
-public installs and three stock clients passed on frozen `7713ceb9`; the manifest
-is ready with immutable composed-evidence pins. Publication was not a production promotion.
+The [versioned guide](docs/QUICKSTART.md) binds **v0.12.1 / stock OMP 18.10.1**.
+Runtime components, models and serving profiles are unchanged from v0.12.0; require
+the exact manifest readiness gate before installing. The [published v0.12.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.12.0/docs/QUICKSTART.md)
+and its stock OMP 18.8.7 proof remain immutable: all five routes/31 steps, both native
+public installs and three clients passed on `7713ceb9`. That is not new-client acceptance.
 
 Current 5090 fragments use per-model `compat.statefulResponses: true`. Remove
 the process-wide `PI_OPENAI_STATEFUL` setting and image-detail override; stock
-18.8.7 supplies auto image detail and fail-closed resume. Keep compaction unchanged.
-[Client migration](docs/QUICKSTART.md#omp-1887-client). Never bypass
+18.10.1 retains auto image detail and fail-closed resume. Keep compaction unchanged.
+[Client migration](docs/QUICKSTART.md#omp-18101-client). Never bypass
 the ready gate or mix current fragments with a legacy native route.
 
 Legacy native RTX 3090/4090 owners staying on v0.10.0 use the **complete**

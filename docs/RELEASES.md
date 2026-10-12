@@ -3,6 +3,17 @@
 OMP NInfer versions the integrated product. Component repositories keep their own versions and tags;
 the product manifest binds the exact combination.
 
+## v0.12.1 — stock OMP 18.10.1, unchanged runtime bindings
+
+Client-only patch following v0.7.3: unmodified upstream OMP 18.10.1 replaces 18.8.7.
+All runtime component bytes, models, serving profiles and the one-lane-at-a-time
+two-GPU native topology are unchanged from v0.12.0. The [host-free applicability report](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
+finds NInfer unaffected by the specific 18.9.0 Responses-stream fix; no new NInfer
+correctness or performance claim is made. [Release notes](../releases/v0.12.1/NINFER_RELEASE_NOTES.md)
+and the manifest name exact new client assets. Fresh platform, documented-route and
+public-install acceptance are separate from carried runtime evidence; readiness and
+publication use the same existing gates. No host window or publication is authorized here.
+
 ## Channels
 
 | Channel | Meaning | Current state |

@@ -1,0 +1,71 @@
+{
+  "artifact_type": "omp_ninfer_option_c_serial_quality_binding",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "source_commit_unpublished": true,
+  "source_dirty": false,
+  "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+  "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "lease_job": "20261010T104747Z-S1-option-c-output-identity-abba-1380701",
+  "lease_priority": 3,
+  "lease_exit": 0,
+  "lease_elapsed_seconds": 1027,
+  "reference": "unchanged clean a59c13d0 package-local archive outputs, not a new reference run",
+  "reference_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+  "comparison": {
+    "candidate_cases": 89,
+    "reference_cases": 89,
+    "identical_output_signatures": 89,
+    "different_output_signatures": 0,
+    "candidate_errors": 5,
+    "reference_errors": 5,
+    "identical_request_bodies": 89,
+    "candidate_responses_sha256": "44b24d1d9e321a7c585a4c3b4eeec23a03877ee282bfa5462cf91549fadb297e",
+    "reference_responses_sha256": "bf3b45e7f9d9123b375c197377ea16b423783030aa00594263c9f87d830d4ccc",
+    "signature_fields": [
+      "content",
+      "reasoning",
+      "tool_calls",
+      "finish_reason",
+      "error",
+      "usage.completion_tokens",
+      "usage.prompt_tokens"
+    ],
+    "excluded_nondeterministic_fields": [
+      "tool_calls.id"
+    ],
+    "pass": true,
+    "evidence_transfer": {
+      "redacted": true,
+      "sha256": "6d304b6adb5b469ea61ddb8e25c7a92252b5d1b4f0a43d276d5478f73e779019"
+    }
+  },
+  "comparison_receipt_sha256": "f90034129a99b42116832d5fb5a1ba74a8b91ea04e64abfe40c65be4050b8db2",
+  "counted_case_disposition": {
+    "counted_cases": 84,
+    "counted_case_errors": 0,
+    "excluded_vacuous_case_errors": 5
+  },
+  "powered_screen_binding": "carried from EXP094 via unchanged a59 package serial output identity",
+  "binding_chain": [
+    {
+      "binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "reference_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+      "identical_output_signatures": 89,
+      "identical_request_bodies": 89
+    },
+    {
+      "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+      "reference_binary_sha256": "884e5a436f30663cdd35a8a09fae9838a8120a76f1b631faec81757e148b273c",
+      "evidence_receipt": "output-identity.json",
+      "evidence_receipt_sha256": "b56992b621aacff3bd5692726328cb2adcc348a041b696bb194246c46d5bd577",
+      "identical_output_signatures": 89,
+      "identical_request_bodies": 89
+    }
+  ],
+  "scope": "serial 89-case role corpus;84 counted cases with0 errors,5 preregistered vacuous fixture errors excluded; not a claim of pair output invariance or a newly executed powered screen",
+  "new_powered_screen_run": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}

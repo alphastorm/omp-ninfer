@@ -1,0 +1,702 @@
+{
+  "artifact_type": "omp_ninfer_option_c_clean_build",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+  "ctest_exit": 0,
+  "ctest_results": {
+    "pass": 111,
+    "skip": 7,
+    "fail": 0
+  },
+  "ctest_seconds": 861,
+  "ctest_tests": [
+    {
+      "name": "ninfer_openai_responses_adapter_test",
+      "result": "pass",
+      "seconds": 0.0748852
+    },
+    {
+      "name": "ninfer_windows_release_contract_test",
+      "result": "pass",
+      "seconds": 0.074303
+    },
+    {
+      "name": "ninfer_public_api_test",
+      "result": "pass",
+      "seconds": 0.00163271
+    },
+    {
+      "name": "ninfer_artifact_reader_test",
+      "result": "pass",
+      "seconds": 0.0021659
+    },
+    {
+      "name": "ninfer_artifact_materialization_test",
+      "result": "pass",
+      "seconds": 0.305307
+    },
+    {
+      "name": "ninfer_media_decode_test",
+      "result": "pass",
+      "seconds": 0.0314919
+    },
+    {
+      "name": "ninfer_device_test",
+      "result": "pass",
+      "seconds": 0.192546
+    },
+    {
+      "name": "ninfer_gpu_keep_warm_test",
+      "result": "pass",
+      "seconds": 0.183448
+    },
+    {
+      "name": "ninfer_decode_graph_test",
+      "result": "pass",
+      "seconds": 0.170481
+    },
+    {
+      "name": "ninfer_tensor_test",
+      "result": "pass",
+      "seconds": 0.0018413
+    },
+    {
+      "name": "ninfer_arena_test",
+      "result": "pass",
+      "seconds": 0.192246
+    },
+    {
+      "name": "ninfer_admission_policy_test",
+      "result": "pass",
+      "seconds": 0.0020051
+    },
+    {
+      "name": "ninfer_context_cost_test",
+      "result": "pass",
+      "seconds": 0.00311135
+    },
+    {
+      "name": "ninfer_resource_manager_test",
+      "result": "pass",
+      "seconds": 0.0484499
+    },
+    {
+      "name": "ninfer_automatic_checkpoint_queue_test",
+      "result": "pass",
+      "seconds": 0.00223609
+    },
+    {
+      "name": "ninfer_checkpoint_policy_test",
+      "result": "pass",
+      "seconds": 0.00134847
+    },
+    {
+      "name": "ninfer_checkpoint_io_contract_test",
+      "result": "pass",
+      "seconds": 0.00186144
+    },
+    {
+      "name": "ninfer_direct_storage_checkpoint_backend_test",
+      "result": "pass",
+      "seconds": 0.00197193
+    },
+    {
+      "name": "ninfer_io_uring_checkpoint_backend_test",
+      "result": "skip",
+      "seconds": 0.00250783
+    },
+    {
+      "name": "ninfer_kv_capacity_test",
+      "result": "pass",
+      "seconds": 0.00159836
+    },
+    {
+      "name": "ninfer_sampling_defaults_test",
+      "result": "pass",
+      "seconds": 0.0208536
+    },
+    {
+      "name": "ninfer_cli_options_test",
+      "result": "pass",
+      "seconds": 0.00197961
+    },
+    {
+      "name": "ninfer_kv_cache_test",
+      "result": "pass",
+      "seconds": 0.173853
+    },
+    {
+      "name": "ninfer_kv_cache_layout_test",
+      "result": "pass",
+      "seconds": 0.00193661
+    },
+    {
+      "name": "ninfer_state_store_test",
+      "result": "pass",
+      "seconds": 0.194181
+    },
+    {
+      "name": "ninfer_gdn_replay_records_test",
+      "result": "pass",
+      "seconds": 0.00327238
+    },
+    {
+      "name": "ninfer_qwen3_6_frontend_test",
+      "result": "skip",
+      "seconds": 0.0171752
+    },
+    {
+      "name": "ninfer_qwen3_6_runtime_mechanisms_test",
+      "result": "pass",
+      "seconds": 0.00166004
+    },
+    {
+      "name": "ninfer_qwen3_6_state_image_test",
+      "result": "pass",
+      "seconds": 0.226685
+    },
+    {
+      "name": "ninfer_qwen3_6_state_image_layout_test",
+      "result": "pass",
+      "seconds": 0.00287695
+    },
+    {
+      "name": "ninfer_qwen3_6_context_store_test",
+      "result": "pass",
+      "seconds": 0.169713
+    },
+    {
+      "name": "ninfer_qwen3_6_27b_prefix_real_test",
+      "result": "skip",
+      "seconds": 0.0198129
+    },
+    {
+      "name": "ninfer_qwen3_8_27b_dflash2_real_test",
+      "result": "pass",
+      "seconds": 30.7615
+    },
+    {
+      "name": "ninfer_qwen3_8_27b_dflash2_nvfp4_real_test",
+      "result": "pass",
+      "seconds": 28.7297
+    },
+    {
+      "name": "ninfer_qwen3_8_27b_dflash2_checkpoint_real_test",
+      "result": "pass",
+      "seconds": 16.1397
+    },
+    {
+      "name": "ninfer_qwen3_8_27b_dflash2_nvfp4_checkpoint_real_test",
+      "result": "pass",
+      "seconds": 15.8436
+    },
+    {
+      "name": "ninfer_qwen3_6_27b_load_plan_test",
+      "result": "skip",
+      "seconds": 0.0211995
+    },
+    {
+      "name": "ninfer_qwen3_6_35b_a3b_real_test",
+      "result": "skip",
+      "seconds": 0.0192239
+    },
+    {
+      "name": "ninfer_qwen3_6_35b_a3b_dflash_real_test",
+      "result": "skip",
+      "seconds": 0.020007
+    },
+    {
+      "name": "ninfer_qwen3_6_35b_a3b_dflash_load_plan_test",
+      "result": "skip",
+      "seconds": 0.00201978
+    },
+    {
+      "name": "ninfer_openai_schema_test",
+      "result": "pass",
+      "seconds": 0.00215641
+    },
+    {
+      "name": "ninfer_responses_schema_test",
+      "result": "pass",
+      "seconds": 0.00352576
+    },
+    {
+      "name": "ninfer_response_store_test",
+      "result": "pass",
+      "seconds": 0.203066
+    },
+    {
+      "name": "ninfer_session_checkpoint_store_test",
+      "result": "pass",
+      "seconds": 2.11709
+    },
+    {
+      "name": "ninfer_anthropic_schema_test",
+      "result": "pass",
+      "seconds": 0.00235025
+    },
+    {
+      "name": "ninfer_tool_call_parser_test",
+      "result": "pass",
+      "seconds": 0.00699247
+    },
+    {
+      "name": "ninfer_serve_options_test",
+      "result": "pass",
+      "seconds": 0.0235524
+    },
+    {
+      "name": "ninfer_request_log_test",
+      "result": "pass",
+      "seconds": 0.0245208
+    },
+    {
+      "name": "ninfer_host_timing_test",
+      "result": "pass",
+      "seconds": 0.00183856
+    },
+    {
+      "name": "ninfer_http_error_handler_test",
+      "result": "pass",
+      "seconds": 0.0257978
+    },
+    {
+      "name": "ninfer_http_server_stop_test",
+      "result": "pass",
+      "seconds": 0.0220899
+    },
+    {
+      "name": "ninfer_bench_support_test",
+      "result": "pass",
+      "seconds": 0.00192764
+    },
+    {
+      "name": "ninfer_context_cost_measure_test",
+      "result": "pass",
+      "seconds": 0.00221479
+    },
+    {
+      "name": "ninfer_add_bias_test",
+      "result": "pass",
+      "seconds": 1.45295
+    },
+    {
+      "name": "ninfer_gelu_test",
+      "result": "pass",
+      "seconds": 1.46769
+    },
+    {
+      "name": "ninfer_silu_mul_test",
+      "result": "pass",
+      "seconds": 1.41023
+    },
+    {
+      "name": "ninfer_residual_add_test",
+      "result": "pass",
+      "seconds": 1.40475
+    },
+    {
+      "name": "ninfer_sigmoid_mul_test",
+      "result": "pass",
+      "seconds": 1.44402
+    },
+    {
+      "name": "ninfer_rmsnorm_test",
+      "result": "pass",
+      "seconds": 1.5407
+    },
+    {
+      "name": "ninfer_rmsnorm_pack_tail_test",
+      "result": "pass",
+      "seconds": 1.69547
+    },
+    {
+      "name": "ninfer_gated_rmsnorm_test",
+      "result": "pass",
+      "seconds": 1.44914
+    },
+    {
+      "name": "ninfer_l2norm_test",
+      "result": "pass",
+      "seconds": 1.47106
+    },
+    {
+      "name": "ninfer_gated_delta_net_test",
+      "result": "pass",
+      "seconds": 2.10884
+    },
+    {
+      "name": "ninfer_causal_conv1d_silu_test",
+      "result": "pass",
+      "seconds": 2.65436
+    },
+    {
+      "name": "ninfer_layer_norm_test",
+      "result": "pass",
+      "seconds": 1.57871
+    },
+    {
+      "name": "ninfer_embedding_test",
+      "result": "pass",
+      "seconds": 1.71656
+    },
+    {
+      "name": "ninfer_argmax_test",
+      "result": "pass",
+      "seconds": 1.72545
+    },
+    {
+      "name": "ninfer_gdn_gating_test",
+      "result": "pass",
+      "seconds": 1.38966
+    },
+    {
+      "name": "ninfer_gdn_gating_proj_test",
+      "result": "pass",
+      "seconds": 1.78468
+    },
+    {
+      "name": "ninfer_rope_test",
+      "result": "pass",
+      "seconds": 1.499
+    },
+    {
+      "name": "ninfer_vision_pos_embed_test",
+      "result": "pass",
+      "seconds": 1.4508
+    },
+    {
+      "name": "ninfer_sampling_test",
+      "result": "pass",
+      "seconds": 1.47895
+    },
+    {
+      "name": "ninfer_scalar_test",
+      "result": "pass",
+      "seconds": 1.34828
+    },
+    {
+      "name": "ninfer_cast_test",
+      "result": "pass",
+      "seconds": 1.40217
+    },
+    {
+      "name": "ninfer_prepare_ragged_prefix_test",
+      "result": "pass",
+      "seconds": 2.33409
+    },
+    {
+      "name": "ninfer_scatter_test",
+      "result": "pass",
+      "seconds": 1.40898
+    },
+    {
+      "name": "ninfer_scatter_bf16_batch_test",
+      "result": "pass",
+      "seconds": 4.10004
+    },
+    {
+      "name": "ninfer_position_test",
+      "result": "pass",
+      "seconds": 1.46095
+    },
+    {
+      "name": "ninfer_linear_topk_test",
+      "result": "pass",
+      "seconds": 2.95059
+    },
+    {
+      "name": "ninfer_candidate_selector_test",
+      "result": "pass",
+      "seconds": 2.51832
+    },
+    {
+      "name": "ninfer_softmax_attention_test",
+      "result": "pass",
+      "seconds": 405.299
+    },
+    {
+      "name": "ninfer_sliding_window_attention_test",
+      "result": "pass",
+      "seconds": 17.1389
+    },
+    {
+      "name": "ninfer_kv_cache_append_test",
+      "result": "pass",
+      "seconds": 16.7753
+    },
+    {
+      "name": "ninfer_rmsnorm_rope_test",
+      "result": "pass",
+      "seconds": 2.40937
+    },
+    {
+      "name": "ninfer_context_kv_materialize_test",
+      "result": "pass",
+      "seconds": 161.638
+    },
+    {
+      "name": "ninfer_prepare_masked_block_test",
+      "result": "pass",
+      "seconds": 1.44419
+    },
+    {
+      "name": "ninfer_sparse_moe_test",
+      "result": "pass",
+      "seconds": 2.45392
+    },
+    {
+      "name": "ninfer_mtp_pack_test",
+      "result": "pass",
+      "seconds": 1.41495
+    },
+    {
+      "name": "ninfer_mtp_round_test",
+      "result": "pass",
+      "seconds": 1.36669
+    },
+    {
+      "name": "ninfer_speculative_round_test",
+      "result": "pass",
+      "seconds": 11.2458
+    },
+    {
+      "name": "ninfer_linear_q4_a16_test",
+      "result": "pass",
+      "seconds": 3.36534
+    },
+    {
+      "name": "ninfer_linear_q5_a16_test",
+      "result": "pass",
+      "seconds": 3.26515
+    },
+    {
+      "name": "ninfer_linear_q6_a16_test",
+      "result": "pass",
+      "seconds": 3.1889
+    },
+    {
+      "name": "ninfer_linear_w8_a16_test",
+      "result": "pass",
+      "seconds": 7.74553
+    },
+    {
+      "name": "ninfer_linear_nvfp4_a16_test",
+      "result": "pass",
+      "seconds": 1.9753
+    },
+    {
+      "name": "ninfer_linear_nvfp4_a4_test",
+      "result": "pass",
+      "seconds": 2.00258
+    },
+    {
+      "name": "ninfer_linear_fp8_a16_test",
+      "result": "pass",
+      "seconds": 4.80862
+    },
+    {
+      "name": "ninfer_linear_fp8_a8_test",
+      "result": "pass",
+      "seconds": 2.20642
+    },
+    {
+      "name": "ninfer_linear_bf16_a16_test",
+      "result": "pass",
+      "seconds": 3.55651
+    },
+    {
+      "name": "ninfer_attn_input_proj_test",
+      "result": "pass",
+      "seconds": 19.5592
+    },
+    {
+      "name": "ninfer_gdn_input_proj_test",
+      "result": "pass",
+      "seconds": 3.65626
+    },
+    {
+      "name": "ninfer_dynamic_grouped_conv_prepare_test",
+      "result": "pass",
+      "seconds": 1.62307
+    },
+    {
+      "name": "ninfer_linear_dynamic_grouped_conv_add_test",
+      "result": "pass",
+      "seconds": 1.95918
+    },
+    {
+      "name": "ninfer_gdn_input_proj_conv_snapshot_test",
+      "result": "pass",
+      "seconds": 3.73585
+    },
+    {
+      "name": "ninfer_gdn_input_proj_conv_record_test",
+      "result": "pass",
+      "seconds": 2.64599
+    },
+    {
+      "name": "ninfer_gated_delta_net_replay_record_test",
+      "result": "pass",
+      "seconds": 2.76406
+    },
+    {
+      "name": "ninfer_gdn_replay_fold_test",
+      "result": "pass",
+      "seconds": 6.8873
+    },
+    {
+      "name": "ninfer_linear_add_q5_a16_test",
+      "result": "pass",
+      "seconds": 1.56653
+    },
+    {
+      "name": "ninfer_linear_add_bf16_a16_test",
+      "result": "pass",
+      "seconds": 1.58477
+    },
+    {
+      "name": "ninfer_linear_add_w8_a16_test",
+      "result": "pass",
+      "seconds": 1.7966
+    },
+    {
+      "name": "ninfer_linear_add_nvfp4_test",
+      "result": "pass",
+      "seconds": 1.63248
+    },
+    {
+      "name": "ninfer_linear_add_fp8_test",
+      "result": "pass",
+      "seconds": 1.72759
+    },
+    {
+      "name": "ninfer_linear_pair_w8_a16_test",
+      "result": "pass",
+      "seconds": 1.59175
+    },
+    {
+      "name": "ninfer_linear_swiglu_q4_a16_test",
+      "result": "pass",
+      "seconds": 2.25062
+    },
+    {
+      "name": "ninfer_linear_swiglu_w8_a16_test",
+      "result": "pass",
+      "seconds": 3.36103
+    },
+    {
+      "name": "ninfer_linear_swiglu_nvfp4_test",
+      "result": "pass",
+      "seconds": 2.07433
+    },
+    {
+      "name": "ninfer_linear_swiglu_fp8_test",
+      "result": "pass",
+      "seconds": 2.30997
+    },
+    {
+      "name": "ninfer_qwen3_6_27b_visual_scatter_test",
+      "result": "pass",
+      "seconds": 1.30997
+    }
+  ],
+  "server_binary_sha256": "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+  "package_local_image": "ninfer-overnight:S1-1302d639-option-c-package-local",
+  "package_local_image_id": "sha256:9e1b9a8a8f435b35bd32f252d4756bf0dc50d3e2512371d97553ea398df4f8e3",
+  "assets": [
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz",
+      "bytes": 390426633,
+      "sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json",
+      "bytes": 3615,
+      "sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS",
+      "bytes": 253,
+      "sha256": "080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146"
+    },
+    {
+      "name": "runtime-source-1302d639.tar.gz",
+      "bytes": 8492102,
+      "sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2"
+    }
+  ],
+  "cuda_toolkit": "13.1.115",
+  "cxx_compiler": "GNU 13.3.0",
+  "raw_prompts_outputs_or_secrets_included": false,
+  "source_commit_unpublished": true,
+  "source_dirty": false,
+  "source_branch": "exp/v0616-without-3a2fadbd",
+  "build_profile": "appliance-local",
+  "cuda_architecture": "120a",
+  "build_container": "ninfer-dflash2-build-env:20261001",
+  "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+  "lease_job": "20261010T102210Z-S1-option-c-clean-build-full-ctest-1363718",
+  "lease_priority": 3,
+  "lease_minutes": 60,
+  "lease_exit": 0,
+  "lease_elapsed_seconds": 1276,
+  "ninfer_serve_version": "ninfer-serve upstream_base_sha=6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc patch_stack_sha=1302d63929e400a05e1c9cdb0fc8003a70269825 build_profile=appliance-local build_type=Release cxx_compiler=GNU-13.3.0 cuda_compiler=NVIDIA-13.1.115 cuda_toolkit=13.1.115 cuda_architecture=120a source_dirty=false",
+  "nvfp4_admission": {
+    "artifact_type": "omp_ninfer_option_c_ctest_admission",
+    "scope": "experiment, not release candidate",
+    "total": 118,
+    "passed": 111,
+    "skipped": 7,
+    "failed": 0,
+    "failed_tests": [],
+    "nvfp4_test_found": true,
+    "nvfp4_test_skipped": false,
+    "ctest_exit": 0,
+    "admitted_for_quality_timing": true,
+    "raw_prompts_outputs_or_secrets_included": false
+  },
+  "direct_bf16_tests": [
+    {
+      "name": "dflash2-k7-head0-b1",
+      "exit": 0
+    },
+    {
+      "name": "dflash2-k7-head1-b1",
+      "exit": 0
+    },
+    {
+      "name": "dflash2-k7-head0-b2",
+      "exit": 0
+    }
+  ],
+  "mac_asset_hash_checks": [
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.tar.gz",
+      "expected_sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd",
+      "observed_sha256": "bed8c8d4f8ccb8fcf8276248d772c0b9c0f98b1e51c58820ff1f698b66d6fcbd",
+      "matches": true
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.spdx.json",
+      "expected_sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1",
+      "observed_sha256": "e91bc5e96e76e71b306ba9436a1829ffc241dc0f64330a16ac169dac33f20bf1",
+      "matches": true
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.6.16-linux-x86_64-cuda13.1.SHA256SUMS",
+      "expected_sha256": "080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146",
+      "observed_sha256": "080ae7b0ffbf51ce99e198e13b99405f0a8c38826b3ba4eae837f8354403e146",
+      "matches": true
+    },
+    {
+      "name": "runtime-source-1302d639.tar.gz",
+      "expected_sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2",
+      "observed_sha256": "dbf5a221d99fdcfa315ae880f2fe58744e90f44d139bfc5ab1ded5d8b83c37b2",
+      "matches": true
+    }
+  ],
+  "source_archive_equals_mac_git_archive": true,
+  "original_component_assets_replaced": false
+}

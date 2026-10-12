@@ -747,7 +747,8 @@ class ReleaseContractTest(unittest.TestCase):
         self.add_unbound_client_candidate(root)
         path = root / "profiles/qwen38-rtx5090-windows-docker-local.json"
         profile = self.load(path)
-        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace("v18.8.7", "v18.4.10")
+        profile["client"]["asset_url"] = profile["client"]["asset_url"].replace(
+            profile["client"]["upstream_tag"], "v18.4.10")
         self.save(path, profile)
         _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
         self.assertTrue(any("asset_url must bind the upstream tag and asset name" in item

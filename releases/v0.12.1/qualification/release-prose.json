@@ -1,0 +1,123 @@
+{
+  "artifact_type": "omp_ninfer_release_prose_class_closure",
+  "schema_version": 1,
+  "release": "v0.11.0",
+  "source_head": "47a6b38d72066325ed84593f89a135a445e26cfa",
+  "acceptance_subject": "5861712f561ff0b3100dd4350e02d777a3f5007e",
+  "title": "OMP NInfer v0.11.0 — Faster decode and unmodified OMP 18.8.7 on the RTX 5090",
+  "claim_boundary": "11.40% faster on the 2,048-token supported-profile qualification decode workload, not a traffic-weighted promise",
+  "test": {
+    "module": "tests.test_documented_route.ReleaseProseTests",
+    "red": {
+      "tests": 4,
+      "failing_document_subtests": 9,
+      "other_controls_passed": 3,
+      "prose_source_head": "47a6b38d72066325ed84593f89a135a445e26cfa"
+    },
+    "green": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_s": 0.038,
+      "phase": "After the initial sweep, before generated compatibility prose exposed the remaining source-capsule label"
+    },
+    "scope": "README, CHANGELOG, ROADMAP, docs/*.md and current release notes; immutable older release notes excluded",
+    "guards": "RTX/OMP directly followed by digits; on/at/to/of/the/with/from/and/than/by/accepted directly followed by digits",
+    "protected": "fenced blocks including quoted/tilde fences, inline code and URL destinations; link labels remain prose"
+  },
+  "literal_preservation": {
+    "markdown": {
+      "docs/PERFORMANCE.md": {
+        "existing_protected_chunks": 416,
+        "unchanged": true
+      },
+      "docs/COMPATIBILITY.md": {
+        "existing_protected_chunks": 54,
+        "unchanged": true
+      },
+      "README.md": {
+        "existing_protected_chunks": 384,
+        "unchanged": true
+      },
+      "docs/QUICKSTART.md": {
+        "existing_protected_chunks": 229,
+        "unchanged": true
+      },
+      "ROADMAP.md": {
+        "existing_protected_chunks": 582,
+        "unchanged": true
+      },
+      "docs/FACTS.md": {
+        "existing_protected_chunks": 442,
+        "unchanged": true
+      },
+      "docs/RELEASES.md": {
+        "existing_protected_chunks": 824,
+        "unchanged": true
+      },
+      "CHANGELOG.md": {
+        "existing_protected_chunks": 795,
+        "unchanged": true
+      },
+      "releases/v0.11.0/NINFER_RELEASE_NOTES.md": {
+        "existing_protected_chunks": 98,
+        "unchanged": true
+      }
+    },
+    "founder_commands": 13,
+    "all_founder_command_values_byte_identical": true,
+    "v0100_and_older_releases_doc_suffix_byte_identical": true
+  },
+  "composition": {
+    "routes": 3,
+    "client_receipts": 3,
+    "documented_steps": 17,
+    "exit": 0,
+    "acceptance_rerun": false,
+    "current_quickstart_sha256": "3c88b764ddb8a6dce8479ebb7e27282664599c258e0d7e93a10a2e514577ba42"
+  },
+  "producer_evidence": "The nine byte-preserved producer files/checksum manifest are unchanged; no source producer receipt or older release record is edited",
+  "effects": {
+    "runtime_source": false,
+    "binary": false,
+    "image": false,
+    "client": false,
+    "profile": false,
+    "model": false,
+    "sampling": false,
+    "provider": false,
+    "nonce": false,
+    "gpu": false,
+    "production": false,
+    "publication": false
+  },
+  "raw_prompts_outputs_private_hostnames_paths_or_secrets_included": false,
+  "regeneration_disposition": {
+    "ci_url": "https://github.com/alphastorm/omp-ninfer/actions/runs/38083581165",
+    "head": "47bec3ab3f56870fcff57e7d0a4a186ede78d8cf",
+    "tests": 357,
+    "failures": 1,
+    "errors": 0,
+    "failed_document": "docs/COMPATIBILITY.md",
+    "root_cause": "The composer faithfully copied the still-glued authored composed.authority_status from the mutable scoped composition capsule; manual authority/matrix edits could not survive regeneration",
+    "corrected_source": "releases/v0.11.0/acceptance/rtx5090-only-composition-input.json",
+    "corrected_fields": "Authored authority status, qualification note and declared-scope prose only; platform/restoration input values and original producer bytes unchanged",
+    "composer_code_changed": false,
+    "guard_weakened": false,
+    "new_validation_or_sanitizer": false,
+    "focused_before_platform": {
+      "tests": 1,
+      "failures": 1,
+      "elapsed_s": 0.036,
+      "disposition": "The composer updates authority JSON, not the matrix; the matrix still held the old glued label until the platform rebind renders it (rebind_release.py:294-296). Do not repeat unchanged; run the same guard after that document input changes."
+    },
+    "focused_after_platform": {
+      "command": "PATH=\"/opt/homebrew/opt/python@3.13/libexec/bin:$PATH\" PYTHONPATH=tests /opt/homebrew/bin/python3.13 -m unittest test_documented_route.ReleaseProseTests.test_release_facing_prose_has_no_glued_tokens -v",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_s": 0.032,
+      "disposition": "Passed after the platform rebind rendered the matrix from the corrected input authority label; existing guard unchanged."
+    }
+  }
+}

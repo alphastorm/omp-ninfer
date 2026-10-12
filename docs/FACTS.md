@@ -2,9 +2,19 @@
 
 Updated: 2026-10-11 · **Current published product: v0.12.0 (2026-10-11), RTX 5090 plus native RTX 3090 and RTX 4090.**
 
-## Current client — OMP 18.8.7
+## v0.12.1 client binding — OMP 18.10.1
 
-Current 5090 fragments/root profiles target unmodified upstream OMP **18.8.7**,
+The versioned client binding is unmodified upstream **18.10.1**, source
+`5d0aaffaf1f987503ce129a642fb6e30339615af`. Runtime/model/profile identities and
+UUID-bound sequential native topology are unchanged. [Host-free review](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
+finds the specific 18.9.0 Responses-stream fix does not trigger on NInfer emitted
+events; this is currency, not a demonstrated NInfer correctness correction. New
+live client/route acceptance is independent of the published proof below; manifest
+readiness determines eligibility.
+
+## Published v0.12.0 client evidence — OMP 18.8.7
+
+The published v0.12.0 fragments/root profiles target unmodified upstream OMP **18.8.7**,
 source `f261ed9faf16b61880b544f599876bface4ded0d`, unchanged in v0.12.0. Historical
 v0.11.0 proof passed all three retained routes/17 steps and three stock client binaries
 on 5861712f with 385.948 s downtime and independent restoration. It does not carry

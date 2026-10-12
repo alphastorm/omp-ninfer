@@ -1,0 +1,107 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-10-10T08:12:09Z",
+  "identity": {
+    "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+    "build_profile": "appliance-local",
+    "build_type": "Release",
+    "config_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.11.0",
+    "model_artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+    "source_dirty": false,
+    "target": "qwen3_8_27b",
+    "upstream_base_sha": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
+    "weights_id": "groupwise-int"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 131520,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "dflash2",
+    "speculative_draft_window": 7
+  },
+  "vram_used_mib_idle": 29468,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "wall_s": 58.917,
+      "tokens_per_second_wall": 2207.3,
+      "vram_used_mib_after": 29470,
+      "server_prefix_cache_hit_tokens": 0,
+      "server_prefix_reuse_path": "root",
+      "server_computed_prefill_tokens": 130048,
+      "server_prefill_seconds": 58.821373817999984,
+      "cold": true,
+      "output_signature_sha256": "0bd4ad53af1bea3fde61d0f88ed25a7aa11365fa6bc38c135a433d7d1e61a128",
+      "output_signature_method": "SHA-256 of JSON-encoded output string; raw generated output omitted"
+    },
+    "decode": {
+      "request_id": "5876199d194033032e2e7490e50c05c040c8cf3289096ed86230e4c577c1f03e",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 11.509,
+      "completion_tokens_per_second_wall": 177.95,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 11.390812966999992,
+      "decode_tokens_per_second": 179.79,
+      "mtp_acceptance_rate": 0.239,
+      "mtp_tokens_per_round": 2.67,
+      "speculative": {
+        "accepted_per_position": [
+          509,
+          306,
+          191,
+          115,
+          73,
+          49,
+          36
+        ],
+        "accepted_tokens": 1279,
+        "backend": "dflash2",
+        "draft_window": 7,
+        "drafted_tokens": 5358,
+        "fallback_steps": 1,
+        "rounds": 767
+      }
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": 29468,
+  "transient_retries": 0,
+  "evidence_kind": "package-local rehearsal, not documented-route acceptance",
+  "lease_job": "20261010T074903Z-S1-lane-criteria-a59c13d0-1144618",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 5090",
+    "vram_mib": 32607,
+    "compute_capability": "12.0",
+    "driver": "610.88"
+  }
+}

@@ -35,6 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Pin unmodified upstream OMP 18.10.1 for v0.12.1, a client-only patch following the
+  v0.7.3 repin precedent. Keep all runtime packages, models, serving profiles, native
+  GPU UUID binding and sequential two-GPU topology unchanged. Fresh changed-client
+  acceptance is separate from v0.12.0 proof; the manifest remains the readiness gate.
+- Record the host-free non-applicability of the specific OMP 18.9.0 Responses-stream
+  fix to NInfer raw reasoning and full tool-argument snapshots. This is routine
+  upstream currency, not a demonstrated NInfer correctness or throughput change.
 - Make native route host selection and required holds explicit operator inputs for both
   lanes. Hosts without a container appliance need no invented pause marker; existing
   holds are still preserved and audited independently of lane identity. Native endpoint

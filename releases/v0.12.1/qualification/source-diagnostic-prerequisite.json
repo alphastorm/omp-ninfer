@@ -1,0 +1,14 @@
+{
+  "artifact_type": "omp_ninfer_source_diagnostic_prerequisite_failure",
+  "schema_version": 1,
+  "lease_job": "20261010T075735Z-S1-nvfp4-source-disposition-1160937",
+  "lease_seconds": 5,
+  "lease_exit": 0,
+  "build_exit": 1,
+  "test_ran": false,
+  "reason": "A shared Git clone had absolute object alternates outside its Docker workspace mount. Source verification could not resolve HEAD; no runtime source build fix was needed.",
+  "changed_prerequisite": "Independent git clone --no-local --no-checkout, fresh source/build/evidence directories; exact same frozen commits and test target.",
+  "successful_follow_on_lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+  "runtime_source_changes": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}
