@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Describe v0.12.0 as the current public release, published 2026-10-11; keep its frozen
+  qualification, documented command blocks and evidence pins unchanged.
 - Acceptance drivers record missing mutable directories, create only their own window
   directories, and restore the original absence instead of requiring an operator to
   pre-create logs, checkpoints, native caches/staging or Windows hold state. Existing
   directories retain their original contents and metadata; window artifacts stay in
   the private workspace. Required model and API-key files remain prerequisites. This
-  successor fix must not merge before the frozen v0.12.0 candidate is published.
+  successor fix was required to wait for publication of the frozen v0.12.0 release.
 - Finish the Windows hold release and save a failed restoration proof when unrelated
   state prevents removal of a window-created Linux parent, without deleting that state.
   Claim Windows hold ownership only after exclusive creation succeeds, and execute native
@@ -44,8 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and enumeration exceptions moved outside the resolver.
 - Retain v0.11.0's RTX 5090 runtime, model, deployment profile and stock OMP 18.8.7
   binaries. Restore v0.10.0's exact separate native model binding, omitted when v0.11.0
-  deferred those lanes. The v0.12.0 candidate is ready; product publication remains
-  owner-only, with no release date assigned before the actual cut.
+  deferred those lanes. The current v0.12.0 release was published on 2026-10-11.
 - Give v0.12.0 final descriptive release notes in house style, leading with the exact
   support boundary, sequential two-GPU native topology and RTX 4090 no-target rollback
   result. Keep measured qualification, fresh product proof and non-claims distinct.
@@ -91,8 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
   pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
-  This is an **unreleased v0.11.0 product candidate**, bound to published components;
-  fresh acceptance of the three retained 5090 routes passed; native lanes are deferred.
+  This was an **unreleased v0.11.0 product candidate**, bound to published components;
+  fresh acceptance of the three retained 5090 routes passed; native lanes were deferred.
   Published release records and historical measurements are unchanged.
   Content-safe 2026-10-10 local rehearsal receipts record passing typed-tool, exact-continuation
   and fail-closed checks on macOS arm64, native Windows x64 and WSL2 Linux x64 against the

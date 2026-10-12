@@ -7,13 +7,14 @@ the product manifest binds the exact combination.
 
 | Channel | Meaning | Current state |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.10.0`, GitHub `Latest` |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.0`, published 2026-10-11, GitHub `Latest` |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.10.0 uses upstream OMP 18.4.10 binaries and no client cask.
+v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; the current
+release retains stock OMP 18.8.7.
 All five documented routes and fresh platform-client acceptance passed on the published
-components; see [route acceptance](QUICKSTART.md#v0100-route-acceptance).
+components; see [route acceptance](QUICKSTART.md#v0120-route-acceptance).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -29,7 +30,9 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.12.0 ready candidate — native RTX 3090 and RTX 4090 on one two-GPU host
+### v0.12.0 public release — native RTX 3090 and RTX 4090 on one two-GPU host
+
+Published 2026-10-11; the current GitHub `Latest` release.
 
 The [release notes](../releases/v0.12.0/NINFER_RELEASE_NOTES.md) describe an owner-operated,
 exact-profile 0.x release: UUID-bound native RTX 3090 and RTX 4090 lanes return on one
@@ -52,10 +55,10 @@ and [composed acceptance](../releases/v0.12.0/acceptance/composed-external-insta
 Platform, acceptance and manifest pins bind commits holding each stage's final inputs.
 The native roots/tasks/holds/power and RTX 5090 incumbent baseline were restored;
 this frozen driver does not claim restoration of originally absent mutable directories.
-That correction is a separate successor and must not merge before this candidate is published.
+That correction was a separate successor and was required to wait for this release's publication.
 The host-free cut itself performed no host operation; later acceptance was separately
-authorized. Product tag/publication remain owner-only. Never date an unpublished changelog
-version or interpret these notes as product publication authorization.
+authorized. Publication did not upgrade production. Future product cuts remain owner-only;
+these notes do not authorize another publication.
 
 ### v0.11.0 public release — RTX 5090 only
 
@@ -1728,9 +1731,9 @@ then reports failure. Re-reading that proof still fails; it never deletes the ot
 state. Windows hold receipts start with `hold_created: false`, claim ownership only after
 exclusive file creation succeeds, and remove a hold only when that claim is true.
 
-The absent-directory correction is a successor to the frozen v0.12.0 acceptance candidate,
-not part of that candidate. Do not merge it before v0.12.0 is published: doing so changes
-the exact commit that the completed release acceptance names.
+The absent-directory correction was a successor to the frozen v0.12.0 acceptance candidate,
+not part of that candidate. PR #82's ordering rule required publication first: merging it
+earlier would have changed the exact commit that the completed release acceptance names.
 
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
 

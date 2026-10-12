@@ -11,9 +11,11 @@ Want to move something here? The fastest ways to help are listed at the end of t
 [`CONTRIBUTING.md`](CONTRIBUTING.md); performance work has its own program page at
 [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md).
 
-## Ready candidate — v0.12.0 native return on one two-GPU host
+## Published baseline — v0.12.0 native return on one two-GPU host
 
-The [v0.12.0 candidate](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
+Current release, published 2026-10-11.
+
+The [v0.12.0 release](releases/v0.12.0/NINFER_RELEASE_NOTES.md) binds native RTX 3090 and
 RTX 4090 qualification on the new two-GPU Windows topology. The owner adopted the
 first-release contract in PR #81: RTX 4090 rollback is `not_applicable`, with no target
 or exercised direction; RTX 3090 retains its two-direction proof. Both lanes bind their
@@ -28,7 +30,7 @@ product/profile/launcher and documented-route pins to v0.12.0. All five document
 on frozen `7713ceb9`; platform/acceptance/manifest pins and strict ready verification are
 complete. Existing product acceptance is not retargeted. Native hardware qualification
 used OMP 18.0.9, not the product client. Authorized acceptance restored its measured
-baselines without upgrading production; only owner tag/publication remains.
+baselines without upgrading production; publication did not promote production.
 
 ## Published baseline — RTX 5090-only v0.11.0
 
@@ -49,9 +51,9 @@ block bytes. The tag/live product publisher is still founder-only; no production
 For v0.11.0 the founder chose **RTX 5090 only** because the replacement native host has
 both 3090/4090, while unmodified packages require exactly one visible GPU. Native
 installer name/UUID/ordinal binding and unindexed power queries cannot support
-that arrangement. No environment shim. Both native lanes were deferred there and return in the v0.12.0 candidate;
-until its ready tag, owners remain on the whole immutable v0.10.0 guide,
-OMP 18.4.10 and its manifest/fragments. Old 65b6c4263090 proof is not retargeted.
+that arrangement. No environment shim. Both native lanes were deferred there and returned
+in the published v0.12.0 release. Legacy owners staying on v0.10.0 use its whole immutable
+guide, OMP 18.4.10 and manifest/fragments. Old 65b6c4263090 proof is not retargeted.
 
 Current 5090 fragments use per-model `compat.statefulResponses: true`, custom-host
 auto image detail and upstream fail-closed resume; compaction settings are unchanged.
