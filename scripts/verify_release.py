@@ -61,6 +61,9 @@ PRIVATE_MARKERS = (
     "ALPHA-OLD",
 )
 PLACEHOLDER_RE = re.compile(r"(?:<[^>]+>|\bTODO\b|\bTBD\b)", re.IGNORECASE)
+PENDING_RELEASE_PROSE_RE = re.compile(
+    r"\b(?:unreleased|publication (?:pending|remains)|ready candidate)\b", re.IGNORECASE
+)
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
 MARKDOWN_REFERENCE_RE = re.compile(r'^\[[^]]+\]:\s+(\S+)', re.MULTILINE)
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1397,6 +1400,23 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
                         f"{document.relative_to(root)} has missing local link: {target}", errors)
 
 
+def validate_release_documentation(root: Path, release: str, errors: list[str]) -> None:
+    release_re = re.compile(r"(?<![\w.-])" + re.escape(release) + r"(?![\w.-])", re.IGNORECASE)
+    for relative in ("README.md", "docs/QUICKSTART.md", "docs/DECISION_GUIDE.md", "ROADMAP.md"):
+        document = root / relative
+        if not document.is_file():
+            continue
+        lines = document.read_text(encoding="utf-8").splitlines()
+        banner_line = next((number for number, line in enumerate(lines, 1)
+                            if line.lstrip().startswith(">")), None) if relative == "docs/QUICKSTART.md" else None
+        for number, line in enumerate(lines, 1):
+            if PENDING_RELEASE_PROSE_RE.search(line) and (release_re.search(line) or number == banner_line):
+                errors.append(
+                    f"{relative}:{number}: describes {release} as unreleased or pending publication; "
+                    "use release-neutral wording before publishing"
+                )
+
+
 def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(repository_files(root, (".md",)))
     documents.update(repository_files(root, (".html", ".svg"), "assets"))
@@ -2097,6 +2117,8 @@ def validate(
         elif warnings is not None:
             warnings.extend(leftovers)
 
+    if require_ready:
+        validate_release_documentation(root, selected_release, errors)
     validate_markdown_links(root, errors)
     validate_public_text(root, errors)
 
