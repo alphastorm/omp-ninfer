@@ -523,6 +523,68 @@ class ReleaseContractTest(unittest.TestCase):
         )
         self.assertEqual(installable_errors, [])
 
+    def test_ready_rejects_unreleased_quickstart_banner(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "docs/QUICKSTART.md").write_text(
+            f"# Quickstart\n\n> **Ready, UNRELEASED {PUBLIC_RELEASE} product candidate**\n",
+            encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [
+            f"docs/QUICKSTART.md:3: describes {PUBLIC_RELEASE} as unreleased or pending publication; "
+            "use release-neutral wording before publishing",
+        ])
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertEqual(errors, [])
+
+    def test_ready_accepts_release_neutral_quickstart_banner(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "docs/QUICKSTART.md").write_text(
+            f"# Quickstart\n\n> **{PUBLIC_RELEASE}: RTX 5090 · RTX 4090 · RTX 3090**\n",
+            encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [])
+
+    def test_ready_rejects_pending_publication_in_user_facing_docs(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        for relative in ("README.md", "docs/QUICKSTART.md", "docs/DECISION_GUIDE.md", "ROADMAP.md"):
+            document = root / relative
+            for wording in ("unreleased", "PUBLICATION PENDING", "Publication remains", "Ready candidate"):
+                with self.subTest(document=relative, wording=wording):
+                    document.write_text(f"# Test fixture\n\n{PUBLIC_RELEASE}: {wording}\n", encoding="utf-8")
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertEqual(errors, [
+                        f"{relative}:3: describes {PUBLIC_RELEASE} as unreleased or pending publication; "
+                        "use release-neutral wording before publishing",
+                    ])
+            document.write_text("# Test fixture\n", encoding="utf-8")
+
+    def test_ready_rejects_pending_quickstart_banner_without_version(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "docs/QUICKSTART.md").write_text(
+            "# Quickstart\n\n> **Ready candidate · exact GPU lanes**\n", encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [
+            f"docs/QUICKSTART.md:3: describes {PUBLIC_RELEASE} as unreleased or pending publication; "
+            "use release-neutral wording before publishing",
+        ])
+
+    def test_ready_documentation_guard_ignores_other_release_versions(self) -> None:
+        temporary, root = self.candidate_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "README.md").write_text(
+            "# Test fixture\n\nv0.9.1: unreleased\nv0.10.01: publication pending\n"
+            "v0.10.0-beta.1: ready candidate\n", encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [])
+
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
