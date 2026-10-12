@@ -27,11 +27,11 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
 
-## Current client candidate — OMP 18.8.7
+## Current client — OMP 18.8.7
 
 | Upstream | Client pin | State | Why pull it in |
 | --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | Published in RTX 5090-only v0.11.0; fresh three-client acceptance passed for the ready, unreleased v0.12.0 candidate | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
+| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | Published in RTX 5090-only v0.11.0; fresh three-client acceptance passed for current v0.12.0, published 2026-10-11 | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
 
 The previous unqualified 18.8.3 candidate first brought in #13686 (`429352901c`),
 #13687 (`01822b63d0`) and #13689 (`8aaf115b8e`): per-model stateful Responses,
@@ -90,9 +90,9 @@ The [2026-10-10 source review and receipts](measurements/2026-10-10-omp-1887-cli
 bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
 selection also retains the per-model contract after a profile is qualified, while the
 historical 18.4.x driver behavior is unchanged.
-See the [candidate guide](QUICKSTART.md#omp-1887-client-candidate).
+See the [current guide](QUICKSTART.md#omp-1887-client).
 
-The ready v0.11.0 candidate binds this upstream client to published runtime source
+The ready v0.11.0 candidate bound this upstream client to published runtime source
 `1302d639` and image `6a02feba`, with the retained client and route proofs accepted.
 EXP-095 below compares the original `a59c13d0` EXP-094 arm, **not** the selected
 binary; its counterfactual labels and verdicts are not silently rebound.
