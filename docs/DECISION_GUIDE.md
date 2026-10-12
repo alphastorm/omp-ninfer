@@ -9,15 +9,14 @@ OMP NInfer deliberately occupies a narrow category: **durable local inference fo
 agents** — private, long-lived Oh My Pi sessions on one qualified GPU. The projects below
 are excellent at different jobs; most operators should use one of them.
 
-The current install fragments target a **ready, unreleased v0.12.0 product candidate**,
+The current install fragments target the **published v0.12.0 release (2026-10-11)**,
 retaining stock OMP 18.8.7 and RTX 5090 v0.6.16/source `1302d639`, and returning
 UUID-bound native RTX 3090/4090 on one two-GPU host. Only one native lane may run.
 All five routes, both native public installs and three stock clients passed fresh on
-frozen candidate `7713ceb9`. Until its tag, RTX 5090 users keep the published v0.11.0
-guide and legacy native users keep the whole v0.10.0 guide; those old native packages
-do not support two GPUs. RTX 4090 has no rollback target on the returned topology. Use the
-[candidate guide](QUICKSTART.md#omp-1887-client-candidate) to distinguish
-that work from the published release evidence below; it does not change this comparison's
+frozen candidate `7713ceb9`. Legacy native users staying on v0.10.0 keep its whole
+guide; those old native packages do not support two GPUs. RTX 4090 has no rollback
+target on the returned topology. Use the [current guide](QUICKSTART.md#omp-1887-client)
+to distinguish this release from the historical evidence below; it does not change this comparison's
 historical measurements or qualify another backend.
 
 **v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**

@@ -4,22 +4,22 @@
 restart.** Qwen3.8 27B is the model, [Neroued’s NInfer](https://github.com/Neroued/ninfer)
 is the inference engine, and [Oh My Pi](https://github.com/can1357/oh-my-pi) is the coding
 agent. This project packages their integration, explicit continuation, and durable checkpoints
-into exact, qualified releases. The v0.10.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090.
+into exact, qualified releases. The v0.12.0 scope is one NVIDIA RTX 5090, RTX 4090 or RTX 3090
+lane at a time.
 
-> [!WARNING]
-> **Ready, unreleased v0.12.0: native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
+> [!IMPORTANT]
+> **Current release: v0.12.0, published 2026-10-11 — native RTX 3090 and RTX 4090 on one two-GPU Windows host.**
 > The founder published both UUID-bound native components for the two-GPU host.
 > Only one native lane runs at a time on port 18082. RTX 5090 and stock OMP 18.8.7
 > keep their exact v0.11.0 component/model/profile pins. All five documented routes,
 > both native public installs and three stock clients passed fresh acceptance on
 > frozen candidate `7713ceb9`; [composed proof](releases/v0.12.0/acceptance/composed-external-installation.json)
-> and immutable evidence pins are complete. Product tag/publication remain owner-only.
-> The candidate is not a public product release or a production upgrade. Until its tag,
-> RTX 5090 users follow the [published v0.11.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.11.0/docs/QUICKSTART.md);
-> legacy native users keep the [complete v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+> and immutable evidence pins are complete. Use the [current guide](docs/QUICKSTART.md)
+> with the published tag. Publication did not upgrade production. Legacy native users
+> staying on v0.10.0 keep its [complete guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 > Those old native packages do not support two GPUs; RTX 4090 has no rollback target there.
 
-The published [v0.11.0 release](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
+The previous [v0.11.0 release](releases/v0.11.0/NINFER_RELEASE_NOTES.md) packages
 founder-selected NInfer `1302d639` as RTX 5090 **v0.6.16**: the EXP-092/094
 changes without `3a2fadbd`. Its full sm_120a ctest has 111 passes, seven skips and no
 failures; all 15 local lane criteria pass. The superseded `a59c13d0` alternative and
@@ -27,26 +27,26 @@ its red NVFP4 test remain preserved. These are package-local qualification recei
 not substitutes for published-image acceptance or a production promotion. Actual
 [5090 acceptance](releases/v0.11.0/acceptance/rtx5090-acceptance-evidence.json) passed.
 That release deferred both native lanes because its packages required exactly one
-visible GPU. The [v0.12.0 candidate](releases/v0.12.0/NINFER_RELEASE_NOTES.md) returns
+visible GPU. The published [v0.12.0 release](releases/v0.12.0/NINFER_RELEASE_NOTES.md) returns
 both with source cad19767 and UUID-scoped lifecycle scripts. Its lane cut promotes
 root product pins only; RTX 5090 image `6a02feba`, server `548fe239`, configuration
 `91a35670` and stock OMP 18.8.7 stay unchanged. RTX 4090 has no supported rollback
 target on the two-GPU topology; RTX 3090 retains its qualified two-direction proof.
 
-> **Before installing — v0.10.0 eligibility**
+> **Before installing — v0.12.0 eligibility**
 > - **RTX 5090:** documented Windows 11 + Docker Desktop/WSL2 runtime route.
 > - **RTX 4090:** documented native Windows 11 route.
-> - **RTX 3090:** documented native Windows 11 route with upstream OMP 18.4.10. Its separate
+> - **RTX 3090:** documented native Windows 11 route with upstream OMP 18.8.7. Its separate
 >   [historical v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 >   stays on OMP 18.0.9; its sessions do not carry over to this lane.
 > - Use the exact pinned client, runtime, model, and profile in the
->   [v0.10.0 manifest](releases/v0.10.0/manifest.json).
+>   [v0.12.0 manifest](releases/v0.12.0/manifest.json).
 >   Other deployments are not supported by implication; check the guide’s memory, disk, and download prerequisites.
 
 <div align="center">
 
-**[Get started with v0.10.0 →](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)** ·
-**[Download v0.10.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.10.0)**
+**[Get started with v0.12.0 →](docs/QUICKSTART.md)** ·
+**[Download v0.12.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.0)**
 
 [Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
 [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
@@ -789,23 +789,22 @@ machine and profile, not universal GPU claims.
 
 ## Get started
 
-The [current guide](docs/QUICKSTART.md) targets checksummed stock OMP **18.8.7**
-for **RTX 5090-only v0.11.0**. The three retained routes/17 steps and three stock
-clients passed on 5861712f against published image 6a02feba/server 548fe239. The
-manifest is ready with immutable composed-evidence pins; product publication is
-still founder-only, not a production promotion or an already-created tag.
+The [current guide](docs/QUICKSTART.md) targets the published **v0.12.0** release
+and checksummed stock OMP **18.8.7**. All five documented routes/31 steps, both native
+public installs and three stock clients passed on frozen `7713ceb9`; the manifest
+is ready with immutable composed-evidence pins. Publication was not a production promotion.
 
 Current 5090 fragments use per-model `compat.statefulResponses: true`. Remove
 the process-wide `PI_OPENAI_STATEFUL` setting and image-detail override; stock
 18.8.7 supplies auto image detail and fail-closed resume. Keep compaction unchanged.
-[Client migration](docs/QUICKSTART.md#omp-1887-client-candidate). Never bypass
-the ready gate or mix an unpublished candidate fragment with a legacy native route.
+[Client migration](docs/QUICKSTART.md#omp-1887-client). Never bypass
+the ready gate or mix current fragments with a legacy native route.
 
-Native RTX 3090/4090 owners remain on the **complete**
+Legacy native RTX 3090/4090 owners staying on v0.10.0 use the **complete**
 [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md),
 OMP 18.4.10, manifest and fragments. Both native packages require a single visible
-GPU; the co-installed replacement host is unsupported. Both lanes return after
-multi-GPU support/fresh acceptance, without a visibility shim. The older
+GPU; those packages do not support a co-installed host. The current release returns
+both UUID-bound lanes after fresh acceptance, without a visibility shim. The older
 [v0.7.2 route](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md)
 remains separate history, not a substitute for either current release authority.
 
@@ -895,10 +894,10 @@ after the documented acceptance checks pass. Planned measurements we want next a
 Docs, release tooling, and profile contracts belong here; engine work belongs in the runtime
 repositories. The complete routing and evidence rules are in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The unreleased client candidate is unmodified upstream
+The v0.11.0 client candidate used unmodified upstream
 [Oh My Pi v18.8.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7), source
 `f261ed9faf16b61880b544f599876bface4ded0d`; its retained 5090 routes and three stock
-client proofs passed on 5861712f. Native lanes are deferred, not claimed by v0.11.0.
+client proofs passed on 5861712f. Native lanes were deferred, not claimed by v0.11.0.
 The published v0.10.0 client remains the unmodified upstream
 [Oh My Pi v18.4.10 binary](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.10), checked
 against its SHA-256. This product no longer builds or publishes an OMP client. The
