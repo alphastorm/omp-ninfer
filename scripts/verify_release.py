@@ -1359,7 +1359,9 @@ def validate_profile_contract(
             f"{label}: model bytes must match the manifest", errors)
 
 
-def repository_files(root: Path, suffixes: tuple[str, ...], under: str = "") -> list[Path]:
+def repository_files(
+    root: Path, suffixes: tuple[str, ...], under: str = "", *, tracked_only: bool = False
+) -> list[Path]:
     """Files the repository can publish: tracked or untracked but not git-ignored.
 
     Ignored local artifacts - a RepoPrompt plan export under prompt-exports/, a scratch note - are
@@ -1368,9 +1370,12 @@ def repository_files(root: Path, suffixes: tuple[str, ...], under: str = "") -> 
     base = root / under if under else root
     if not base.is_dir():
         return []
+    command = ["git", "-C", str(root), "ls-files", "-z", "--cached"]
+    if not tracked_only:
+        command.extend(["--others", "--exclude-standard"])
+    command.extend(["--", under or "."])
     listed = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard",
-         "--", under or "."],
+        command,
         capture_output=True,
     )
     if listed.returncode != 0:
@@ -1402,9 +1407,9 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
 
 def validate_release_documentation(root: Path, release: str, errors: list[str]) -> None:
     release_re = re.compile(r"(?<![\w.-])" + re.escape(release) + r"(?![\w.-])", re.IGNORECASE)
-    for relative in ("README.md", "docs/QUICKSTART.md", "docs/DECISION_GUIDE.md", "ROADMAP.md"):
-        document = root / relative
-        if not document.is_file():
+    for document in repository_files(root, (".md",), tracked_only=True):
+        relative = document.relative_to(root).as_posix()
+        if relative.startswith("releases/"):
             continue
         lines = document.read_text(encoding="utf-8").splitlines()
         banner_line = next((number for number, line in enumerate(lines, 1)

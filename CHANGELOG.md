@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Refuse release readiness when living install docs call the selected release unreleased,
+- Refuse release readiness when tracked Markdown outside `releases/` calls the selected release unreleased,
   a ready candidate or pending publication; require release-neutral wording before publishing.
 - Describe v0.12.0 as the current public release, published 2026-10-11; keep its frozen
   qualification, documented command blocks and evidence pins unchanged.

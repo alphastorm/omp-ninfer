@@ -1586,13 +1586,14 @@ Each `releases/<version>/manifest.json` has three valid states:
 - qualification summary URL/hash matching checked-in bytes;
 - external installation passed from public URLs on the supported topology;
 - no remaining publication blockers;
-- release-neutral wording in README, quickstart, decision guide and roadmap before the
+- release-neutral wording in tracked Markdown outside `releases/` before the
   frozen candidate becomes a tag; and
 - `python3 scripts/verify_release.py --require-ready` passes.
 
 `--require-ready` rejects case-insensitive `unreleased`, `publication pending`,
 `publication remains` or `ready candidate` on a line naming the selected product version
-in those living docs, or in the quickstart's first blockquote banner even without a version.
+in every tracked Markdown file outside `releases/`, or in the quickstart's first blockquote
+banner even without a version.
 Each error names `file:line` and asks for release-neutral wording before publishing.
 A version-and-scope banner such as v0.10.0's stays true before and after publication;
 published evidence under `releases/` is not subject to this living-docs check.
@@ -1691,8 +1692,8 @@ the verifier decides what remains:
    `--pin <that commit> --stage manifest`;
    commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
    reads every pinned evidence URL out of local git history and requires it to serve exactly
-   the recorded SHA-256. It also rejects stale unpublished/ready-candidate wording in living
-   install docs; use release-neutral wording before freezing the tag. CI repeats the gate on
+   the recorded SHA-256. It also rejects stale unpublished/ready-candidate wording in tracked
+   Markdown outside `releases/`; use release-neutral wording before freezing the tag. CI repeats the gate on
    the release tag with full history.
 
 ## Release notes
