@@ -24,10 +24,11 @@ native serving.
   trigger occurs. This is a specific non-applicability result, not a claim about
   every intervening OMP change or fresh 18.10.1 inference qualification.
 - **Fresh client and route evidence stays separate from carried runtime proof.**
-  Version/checksum/CLI preflight can run without an inference host. Live tool,
-  continuation, unavailable-route behavior, documented routes and native public
-  installs require their separately authorized windows. Product readiness is
-  determined by the manifest and verifier, not by predecessor acceptance.
+  Fresh authorized-window acceptance passed on frozen `780b0639`: all five
+  documented routes/31 unchanged blocks, three stock-client live/outage receipts
+  and both native public installs, with independent restoration. Host-free CLI
+  preflight remains a separate proof. Product readiness is determined by the
+  manifest and verifier, not by predecessor product acceptance.
 
 ## Exact stock client identities
 
@@ -65,8 +66,15 @@ are retained; `PI_OPENAI_STATEFUL` must be absent.
 
 Runtime measurements and package qualifications are carried v0.12.0 evidence,
 not new performance measurements or proof of the changed client's behavior. Fresh
-product acceptance requires the 5090 host/macOS/Windows routes in one window and
-both native routes plus their public installs in sequential native windows.
+product acceptance passed the 5090 host/macOS/Windows routes in one 387.855 s window
+and both native routes plus their public installs in sequential native windows.
+The [documented-route receipt](acceptance/documented-routes.json) binds all 31
+executed blocks; [composed proof](acceptance/composed-external-installation.json)
+binds the three newly downloaded clients and native public-install receipts.
+Restoration includes incumbent image/mounts/health/restart policy and checkout/key,
+plus native canonical state/ACLs/tasks/holds/client files/power, mutable directory
+presence and documented staging. Both public checks were idempotent acceptance of
+the installed exact qualified bytes, not fresh rollback tests. Production was not upgraded.
 
 ## Support boundaries
 

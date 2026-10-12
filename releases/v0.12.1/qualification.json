@@ -5,18 +5,38 @@
   "as_of": "2026-10-12",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "documented_route_acceptance": {
-    "status": "pending",
-    "scope": "Fresh stock OMP 18.10.1 acceptance for all five documented routes and both native public installs; no predecessor product acceptance is inherited.",
-    "candidate_commit": null,
+    "status": "passed",
+    "scope": "All five fresh documented routes/31 unchanged blocks, three newly downloaded stock OMP 18.10.1 clients and both native public installs; no predecessor product acceptance is carried forward.",
+    "candidate_commit": "780b0639c3b80c88e4a785afd755db0c28789871",
     "evidence_commit_changes_candidate": false,
-    "documented_route_steps": {},
-    "platform_receipts": [],
-    "fresh_product_acceptance": false,
-    "composition_run": false
+    "evidence_path": "releases/v0.12.1/acceptance/documented-routes.json",
+    "evidence_sha256": "39df415abab1d956d0af7d1c2342e82a4afd0f865d8c122d4d21505fb14be848",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.12.1/acceptance/darwin-arm64-18.10.1.json",
+      "releases/v0.12.1/acceptance/windows-x64-18.10.1.json",
+      "releases/v0.12.1/acceptance/linux-x64-18.10.1.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-10-12-v0121-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 387.855,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true
+    },
+    "composition_run": true
   },
-  "scope": "Client-only patch: stock OMP 18.10.1 replaces 18.8.7. RTX 5090 and both native component bytes, models, UUID-bound two-GPU topology and serving profiles are unchanged from v0.12.0. Runtime qualification and measurements are carried from that release; fresh changed-client platform, documented-route and native public-install acceptance is required. RTX 3090 retains qualified two-direction rollback; RTX 4090 retains no-target not_applicable rollback.",
+  "scope": "Client-only patch: stock OMP 18.10.1 replaces 18.8.7. RTX 5090 and both native component bytes, both models, serving profiles and UUID-bound sequential two-GPU topology are unchanged from v0.12.0; runtime qualification and performance measurements are retained. Fresh platform/live/outage acceptance, all five documented routes/31 unchanged blocks and both native public installs passed on frozen 780b0639c3b80c88e4a785afd755db0c28789871, with independent incumbent/native restoration including directory presence and documented staging. Darwin remains preview; Windows/WSL profiles are qualified by the new runtime-bound live receipts, and Linux scope is WSL2, not a separate native Linux OS. RTX 4090 retains no-target not_applicable rollback; RTX 3090 retains its actual v0.6.2 predecessor and separate carried two-direction component qualification.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
@@ -77,11 +97,82 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Fresh acceptance of stock OMP 18.10.1 against the unchanged published RTX 5090 and native components; compose only actual new window receipts."
+      "status": "passed",
+      "repository_path": "releases/v0.12.1/acceptance/composed-external-installation.json",
+      "sha256": "b04ee065ebacf3373ecb6b1b8977e37e43ea8710f7c508bef48452253f3fbeae",
+      "public_url": null,
+      "as_of": "2026-10-12",
+      "release": "v0.12.1",
+      "component_release_tag": "v18.10.1",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+      "windows_binary_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "2389d991f0d6904eedc0254bb1e3b652fd688c2fdac6f866abb203b0bd5971fe",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "ac81635a8f2443e9f37f6135b70f7cd01fef0342cbf84cfbdc7f95fe988de58c"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "6879290d4463f185abf4ffa657ef49cac3cc53039f45d2f1ab0a92936ac7b6a6"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "bef92a0c09ad888b8e58984ad8c1a0e09221a6b237d9682c550c873aed6d6035"
+        }
+      ],
+      "note": "Five fresh routes/31 unchanged blocks, three stock OMP 18.10.1 platform receipts and both native public-install proofs passed on frozen candidate 780b0639c3b80c88e4a785afd755db0c28789871. Canonical native state/tasks/holds/client files/power/staging/directory presence and the RTX 5090 incumbent baseline were independently restored. No predecessor product acceptance was relabeled; publication remains owner-only."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.12.1/acceptance/documented-routes.json",
+      "sha256": "39df415abab1d956d0af7d1c2342e82a4afd0f865d8c122d4d21505fb14be848"
     }
   },
   "observed_gates": {
+    "changed_client_acceptance": {
+      "status": "passed",
+      "candidate_commit": "780b0639c3b80c88e4a785afd755db0c28789871",
+      "documented_routes": {
+        "rtx5090-container-host": {
+          "status": "passed",
+          "blocks": 2
+        },
+        "rtx5090-macos-client": {
+          "status": "passed",
+          "blocks": 10
+        },
+        "rtx5090-windows-client": {
+          "status": "passed",
+          "blocks": 5
+        },
+        "rtx4090-native": {
+          "status": "passed",
+          "blocks": 7
+        },
+        "rtx3090-native": {
+          "status": "passed",
+          "blocks": 7
+        }
+      },
+      "platform_scope": {
+        "darwin-remote-ssh": "preview; live/tool/continuation/outage/image-input checks passed",
+        "windows-docker-local": "qualified by fresh runtime-bound live evidence",
+        "linux-docker-local": "qualified stock binary under WSL2; no separate native Linux OS qualification"
+      },
+      "native_public_installs": {
+        "rtx4090": "passed",
+        "rtx3090": "passed"
+      },
+      "independent_restoration": "passed, including mutable directory presence and native staging",
+      "runtime_performance_qualification": "retained unchanged; not remeasured"
+    },
     "rtx5090": {
       "status": "passed",
       "source_commit": "1302d63929e400a05e1c9cdb0fc8003a70269825",
@@ -185,11 +276,6 @@
       "note": "Actual option-C package-local gates and all 15 unchanged predecessor criteria. Serial 89-case binding ties this binary to EXP094 through a59; full sm120a ctest 111 pass/7 skip/0 fail. This is not published-component or OMP 18.8.7 documented-route acceptance."
     }
   },
-  "interpretation": "Carried v0.12.0 runtime/component qualification, not fresh OMP 18.10.1 behavior or product-route acceptance. Historical client-specific receipts retain their actual 18.8.7/18.0.9 identities and dates; they do not qualify the new client. Host-free identity/CLI preflight is recorded separately. Live platform, all five documented routes, both public installs, restoration, composition and final platform/acceptance/manifest pins require the authorized windows. No host window or publication is authorized by this record.",
-  "remaining_release_gates": [
-    "fresh stock OMP 18.10.1 macOS/Windows/WSL2 live and outage platform receipts",
-    "all five documented routes and both native public URL installs on the frozen candidate, with independent restoration",
-    "composed external-installation acceptance and platform/acceptance/manifest evidence pins",
-    "strict require-ready/check-pins verification and owner-only product publication"
-  ]
+  "interpretation": "Fresh stock OMP 18.10.1 product acceptance passed independently of the retained v0.12.0 runtime/component qualification. All five routes, three exact stock client binaries and both native public URL installs were observed on frozen 780b0639c3b80c88e4a785afd755db0c28789871; evidence commits do not advance that subject. Structured typed tool/result, exact continuation and fail-closed checks were bound to the observed runtime image/binary/configuration/model. macOS/Windows image input covers RTX 5090 only. Native public installs verified unchanged qualified bytes and idempotence, not new rollback exercise. Independent restoration passed for the RTX 5090 incumbent and both sequential native baselines, including originally absent/present mutable directories and staging. The native preflights ran before the windows, with fresh free-GPU baseline validation at execution; owner sign-out consent was unnecessary because no user was signed in. Owner-approved empty-checkpoint cleanup preceded the 5090 baseline. No production upgrade or publication was performed; publication_authorized remains false and publication is owner-only.",
+  "remaining_release_gates": []
 }

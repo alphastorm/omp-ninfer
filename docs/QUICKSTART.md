@@ -7,8 +7,9 @@
 > [!IMPORTANT]
 > **Current scope: RTX 5090 container plus UUID-bound native RTX 4090 and RTX 3090.**
 > Runtime packages, models, serving profiles and topology are unchanged from v0.12.0;
-> stock OMP 18.10.1 replaces 18.8.7. Runtime qualification is carried, but changed-client
-> and documented-route acceptance is not inherited. Require this exact manifest ready gate.
+> stock OMP 18.10.1 replaces 18.8.7. Runtime qualification is carried; fresh changed-client
+> and all-five-route acceptance passed on frozen `780b0639`, not inherited from v0.12.0.
+> Require this exact manifest ready gate.
 > Both native lanes share one two-GPU host and port 18082; only one may run at a time.
 > RTX 4090 has no supported rollback target on that topology; RTX 3090 retains its
 > separate two-direction qualification. No new runtime or GPU support is implied.
@@ -21,7 +22,7 @@ The [v0.12.1 notes](../releases/v0.12.1/NINFER_RELEASE_NOTES.md) bind new client
 and unchanged runtime/model/profile bytes. This client-only patch follows the v0.7.3
 repin precedent. The [host-free applicability review](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
 finds NInfer unaffected by the specific 18.9.0 Responses-stream fix. Use this guide
-and manifest together; only new authorized-window evidence can qualify the changed client.
+and manifest together; new authorized-window evidence now binds the changed client.
 A package-local Docker image ID is not a published OCI digest.
 
 The client is unmodified upstream v18.10.1, source
@@ -94,14 +95,41 @@ not a fixed ordinal. Installation indices can change without changing that ident
 Legacy v0.10.0 packages remain single-GPU routes and are unsupported on the two-GPU
 host. Never substitute their GPU family, component tag, package or client into v0.12.1.
 
-## v0.12.1 route acceptance boundary
+## v0.12.1 route acceptance
 
-Stock 18.10.1 requires fresh proof of all five routes/31 blocks, three platform clients
-and both native public installs, including independent restoration. The host-free
+Fresh stock OMP 18.10.1 acceptance passed on frozen candidate
+`780b0639c3b80c88e4a785afd755db0c28789871`; no predecessor product receipt was relabeled.
+
+| Documented route | Fresh acceptance |
+| --- | --- |
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 host | 2/2 blocks passed |
+| macOS arm64 client over manual SSH tunnel | 10/10 passed; platform remains preview |
+| Windows x64 client over RTX 5090 loopback | 5/5 passed |
+| Native RTX 4090 on the two-GPU host | 7/7 passed; first-release rollback `not_applicable` |
+| Native RTX 3090 on the two-GPU host | 7/7 passed; real v0.6.2 predecessor retained |
+
+All three newly downloaded stock clients passed runtime-bound typed tool/result,
+exact continuation and unavailable-route fail-closed checks. Windows/WSL profiles
+are qualified by these new live receipts; Linux execution was under WSL2, not a
+separately qualified native Linux OS. Image input passed on macOS and Windows
+against RTX 5090 only; there is no native-lane or Linux vision claim.
+
+Both native public installs verified the exact unchanged component assets and
+idempotence using the installed-record-derived model reference; they did not
+re-exercise rollback. Native lanes ran sequentially on shared port 18082. Independent
+restoration passed for canonical state, ACLs, tasks, holds, client files, power,
+directory presence and documented staging. The RTX 5090 incumbent image/mounts,
+health, restart policy, checkout/key and directory presence/absence were restored;
+its measured window was 387.855 s. Production was not upgraded.
+
+[Documented routes](../releases/v0.12.1/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.12.1/acceptance/composed-external-installation.json)
+bind all 31 byte-identical executed blocks. Only guide prose changed after execution;
+evidence commits do not advance the acceptance subject. These are owner-operated
+tester-equivalent observations, not independent external-user outcomes. The
 [Darwin preflight](../releases/v0.12.1/qualification/client-preflight-darwin-arm64-18.10.1.json)
-checks identity/version/help/argv only. It does not prove a live route, tool turn,
-continuation, outage behavior or served identity. Consult the v0.12.1 manifest and
-qualification record; do not retarget the historical acceptance below.
+remains a separate host-free identity/CLI proof. Consult the exact manifest and
+qualification; publication remains owner-only.
 
 ## v0.12.0 route acceptance
 

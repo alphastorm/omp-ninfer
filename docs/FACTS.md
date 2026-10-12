@@ -8,9 +8,14 @@ The versioned client binding is unmodified upstream **18.10.1**, source
 `5d0aaffaf1f987503ce129a642fb6e30339615af`. Runtime/model/profile identities and
 UUID-bound sequential native topology are unchanged. [Host-free review](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
 finds the specific 18.9.0 Responses-stream fix does not trigger on NInfer emitted
-events; this is currency, not a demonstrated NInfer correctness correction. New
-live client/route acceptance is independent of the published proof below; manifest
-readiness determines eligibility.
+events; this is currency, not a demonstrated NInfer correctness correction. Fresh
+acceptance on frozen `780b0639` passed all five routes/31 unchanged blocks, three
+stock clients and both native public installs; [composed proof](../releases/v0.12.1/acceptance/composed-external-installation.json)
+records independent restoration, including mutable directory presence and native
+staging. macOS remains preview; Windows/WSL qualification is bound to the new live
+receipts, with Linux scope restricted to WSL2. RTX 4090 rollback remains
+`not_applicable`; RTX 3090 retains its real v0.6.2 predecessor. Manifest readiness
+determines eligibility; no production upgrade or new performance claim is implied.
 
 ## Published v0.12.0 client evidence — OMP 18.8.7
 

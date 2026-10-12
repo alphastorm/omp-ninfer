@@ -13,8 +13,11 @@ The [v0.12.1 release tree](releases/v0.12.1/NINFER_RELEASE_NOTES.md) pins the un
 18.10.1 clients and keeps every v0.12.0 runtime, model and serving profile unchanged.
 This is routine upstream currency, not a demonstrated NInfer correction from the
 18.9.0 Responses-stream fix; [host-free applicability evidence](docs/measurements/2026-10-12-omp-18101-responses-compatibility-review.json) explains why.
-Use the versioned manifest and its ready gate to determine install eligibility; new
-client/route acceptance is separate from the published baseline below.
+Fresh acceptance on frozen `780b0639` passed all five routes/31 unchanged blocks,
+three stock clients and both native public installs; [composed proof](releases/v0.12.1/acceptance/composed-external-installation.json)
+records independent incumbent/native restoration. macOS remains preview; Linux
+scope is the stock binary under WSL2. Use the versioned manifest and its ready gate
+for install eligibility; predecessor product acceptance is not retargeted.
 
 > [!IMPORTANT]
 > **Published baseline: v0.12.0, published 2026-10-11 — native RTX 3090 and RTX 4090 on one two-GPU Windows host.**

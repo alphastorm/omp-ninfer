@@ -1,0 +1,202 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.12.1",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-10-12",
+  "status": "passed",
+  "candidate_commit": "780b0639c3b80c88e4a785afd755db0c28789871",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.10.1",
+    "upstream_commit": "5d0aaffaf1f987503ce129a642fb6e30339615af",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 243885056,
+    "asset_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+    "binary_sha256": "2ab55ace7787cd9471282859b4eabfd5d0960868a3c6165cbc1b518a02d3a2fb",
+    "release_id": 410230586,
+    "asset_id": 632821961,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-windows-x64.exe",
+    "version": "omp/18.10.1"
+  },
+  "runtime": {
+    "tag": "v0.6.11-qwen38-4090-beta.1",
+    "source_commit": "cad1976764fded5fbe96930c36bed0570b3d3de7",
+    "package_bytes": 574770447,
+    "package_sha256": "526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2",
+    "binary_sha256": "76f35b74f9f3913b722b39cef8b5bd47d154b16f1ebe00eb88aebab2cff68839",
+    "configuration_sha256": "1971cd29710c953b908003a3b776442e111f39c1ba5dfe9d3e5869e08255e23c",
+    "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e"
+  },
+  "preparation": {
+    "lineage_mode": "first_release",
+    "previous_release_present": false,
+    "qualification_installed_instance_preserved": true,
+    "documented_install": "Fresh canonical install after same-volume preservation; not an idempotent route reinstall.",
+    "two_gpu_host": true,
+    "installed_record_uuid_binding": true,
+    "one_native_lane_at_a_time": true,
+    "shared_port": 18082,
+    "public_install_model_reference": "Derived from the installed active record and verified against its recorded size and digest."
+  },
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_response_replay",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 0,
+    "cloud_fallback_observed": false,
+    "structured_client": {
+      "omp_version": "omp/18.10.1",
+      "event_counts": {
+        "session": 1,
+        "agent_start": 1,
+        "turn_start": 2,
+        "message_start": 4,
+        "message_end": 4,
+        "message_update": 29,
+        "tool_execution_start": 1,
+        "tool_execution_end": 1,
+        "turn_end": 2,
+        "agent_end": 1
+      },
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "tool_result_marker": true,
+      "exact_visible_final_answer": true,
+      "agent_end": true,
+      "continuation_exact_nonce": true,
+      "runtime_identity_bound": true,
+      "runtime_server_binary_sha256": "76f35b74f9f3913b722b39cef8b5bd47d154b16f1ebe00eb88aebab2cff68839",
+      "runtime_configuration_sha256": "1971cd29710c953b908003a3b776442e111f39c1ba5dfe9d3e5869e08255e23c",
+      "model_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+      "providers": [
+        "ninfer-native-4090"
+      ],
+      "models": [
+        "qwen3.8-27b"
+      ],
+      "raw_transcript_included": false,
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-native-4090"
+        ],
+        "models": [
+          "qwen3.8-27b"
+        ],
+        "errors": [
+          "ECONNREFUSED: Unable to connect. Is the computer able to access the url?"
+        ],
+        "endpoint": "http://127.0.0.1:18082/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    },
+    "documented_marker_bare_line": true,
+    "rollback": {
+      "status": "not_applicable",
+      "directions": 0,
+      "reason": "first release of the lineage"
+    },
+    "retained_previous_release": "",
+    "public_install": {
+      "status": "passed",
+      "integrity": {
+        "checksum_set_sha256": "c02655275e7459e085ee81d14af1298e92a326d6ce16293e912475ee3f09d496",
+        "checksum_entries": 9,
+        "assets": {
+          "package": {
+            "sha256": "526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2",
+            "bytes": 574770447,
+            "in_checksum_set": true
+          },
+          "sbom": {
+            "sha256": "6612721d930c1b5514a74c240a1229d80cac471999a26d24f9677863a7eee987",
+            "bytes": 21068,
+            "in_checksum_set": true
+          },
+          "source_archive": {
+            "sha256": "943a2322cb2b7de8a72960cb2dc7861bb2136fe0dd01d0e10eddc0b0c03d620b",
+            "bytes": 7981040,
+            "in_checksum_set": true
+          },
+          "installer": {
+            "sha256": "dc8849c33ccce5e9cbc7e2ae0387aa44773ebc954198b083439f563b6390d64b",
+            "bytes": 73315,
+            "in_checksum_set": true
+          },
+          "controller": {
+            "sha256": "efea8bf7df6adde6a7ad796168238a577fa7ba913490647ba80dd05747311452",
+            "bytes": 66661,
+            "in_checksum_set": true
+          },
+          "gpu_owner_controller": {
+            "sha256": "d36e996c3f192addfb0b4372c151296b3088d54cb2ad5ea157d88980d0ab29e9",
+            "bytes": 15773,
+            "in_checksum_set": true
+          },
+          "state_protection": {
+            "sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36",
+            "bytes": 15203,
+            "in_checksum_set": true
+          }
+        },
+        "all_manifest_assets_downloaded_from_public_urls": true,
+        "all_manifest_asset_hashes_verified": true
+      },
+      "install": {
+        "execution_source": "downloaded-public-url",
+        "outcome": "already_installed",
+        "release_id": "qwen38-4090-native-v0.6.11-beta.1-cad1976764fd",
+        "package_sha256": "526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2",
+        "exact_qualified_bytes_accepted": true,
+        "lifecycle_pointers_changed": false,
+        "runtime_start_requested": false
+      },
+      "smoke": {
+        "authenticated_status_http": 200,
+        "status_ms": 6.5,
+        "served_identity_matches_installed": true,
+        "anonymous_status_http": 401,
+        "completion_http": 200,
+        "completion_ms": 116,
+        "completion_tokens": 3,
+        "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+        "output_contains_marker": true,
+        "speculative_backend": "mtp",
+        "public_model_id": "qwen3.8-27b"
+      },
+      "restoration": {
+        "process_state": "stopped",
+        "endpoint_state": "unavailable",
+        "prior_state_restored": true,
+        "power_limit_w": 450,
+        "active_release": "qwen38-4090-native-v0.6.11-beta.1-cad1976764fd"
+      }
+    }
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-10-12-v0121-rtx4090-native-run.json",
+    "sha256": "11b096b7328ca0e78f576178dcebd24c2acecfb629b7552c2cc955a9eda27fd0"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-10-12-v0121-acceptance-restoration.json",
+    "sha256": "011f4e2098077160ff70cfae4b5b28b6166bef0cb6ebbe6f085500af317f535a"
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent fresh installation and stock-client acceptance, not independent external-user outcomes.",
+    "One Windows host with two installed-record UUID-bound native lanes; one lane at a time on shared port 18082.",
+    "Public-install acceptance verifies exact unchanged qualified bytes and idempotence using the installed model reference; it is not a rollback test.",
+    "First release on the two-GPU host: rollback is not applicable, zero directions and no target; v0.6.10 and earlier packages are unsupported there.",
+    "Fresh independent restoration and the final audit include originally absent/present mutable directories and documented staging, in addition to canonical state/support/task/hold/client/power equality."
+  ]
+}

@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Bind fresh v0.12.1 acceptance on frozen `780b0639`: all five documented routes
+  (31 byte-identical blocks), three stock OMP 18.10.1 clients and both native public
+  installs passed. Independent restoration includes mutable directory presence,
+  native staging and canonical state/tasks/holds/client files/power; production
+  was not upgraded. macOS remains preview and Linux scope remains WSL2.
 - Restore native Windows RTX 3090 v0.6.3 and RTX 4090 v0.6.11 lanes on one two-GPU
   host. Each lane binds its own GPU UUID; only one runs at a time on port 18082.
 - Bind fresh v0.12.0 acceptance: all five documented routes (31 blocks), three stock
@@ -38,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin unmodified upstream OMP 18.10.1 for v0.12.1, a client-only patch following the
   v0.7.3 repin precedent. Keep all runtime packages, models, serving profiles, native
   GPU UUID binding and sequential two-GPU topology unchanged. Fresh changed-client
-  acceptance is separate from v0.12.0 proof; the manifest remains the readiness gate.
+  acceptance passed separately from v0.12.0 proof; the manifest remains the readiness gate.
 - Record the host-free non-applicability of the specific OMP 18.9.0 Responses-stream
   fix to NInfer raw reasoning and full tool-argument snapshots. This is routine
   upstream currency, not a demonstrated NInfer correctness or throughput change.
