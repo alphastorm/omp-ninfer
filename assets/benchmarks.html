@@ -9,24 +9,19 @@
   .head, .foot { display: flex; align-items: center; justify-content: space-between; }
   .head .brand img { width: 22px; height: 22px; }
   .head .brand-name { font-size: 15px; }
-  .main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr); gap: 42px; align-items: center; }
-  .comparison { margin-top: 14px; display: grid; grid-template-columns: auto 72px auto; align-items: end; width: max-content; }
-  .metric strong { display: block; font-size: 54px; line-height: .9; letter-spacing: -.055em; font-weight: 600; }
-  .metric.warm strong { color: var(--ink); }
-  .metric.cold strong { color: var(--muted); font-size: 37px; letter-spacing: -.04em; }
-  .metric span { display: block; margin-top: 10px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
-  .versus { align-self: center; display: flex; align-items: center; gap: 8px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 10px; text-transform: uppercase; }
-  .versus::before, .versus::after { content: ""; width: 18px; height: 1px; background: var(--line-strong); }
-  .descriptor { margin-top: 17px; display: flex; align-items: baseline; gap: 12px; }
-  .descriptor b { font-size: 18px; letter-spacing: -.025em; font-weight: 500; color: var(--warm); }
-  .descriptor span { color: var(--muted); font-size: 11px; }
-  .secondary { border-left: 1px solid var(--line-strong); padding-left: 34px; display: grid; gap: 18px; }
-  .stat { display: grid; grid-template-columns: 118px 1fr; align-items: baseline; gap: 16px; }
-  .stat strong { font-size: 25px; line-height: 1; letter-spacing: -.035em; font-weight: 600; }
-  .stat div { color: var(--body); font-size: 12px; line-height: 1.25; }
-  .stat small { display: block; margin-top: 4px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
-  .lanes { display: flex; gap: 7px; padding-top: 3px; }
-  .lanes .pill { min-height: 25px; padding: 0 9px; font-size: 8px; }
+  .main { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: stretch; }
+  .lane { padding: 18px 30px 14px 0; display: grid; grid-template-rows: auto 1fr auto; row-gap: 14px; }
+  .lane + .lane { border-left: 1px solid var(--line-strong); padding-left: 30px; }
+  .lane .title { display: flex; align-items: baseline; gap: 10px; }
+  .lane .title b { font-size: 17px; letter-spacing: -.02em; font-weight: 600; }
+  .lane .title span { color: var(--muted); font-size: 11px; letter-spacing: .02em; }
+  .metrics { display: grid; gap: 12px; align-content: center; }
+  .metric strong { display: block; font-size: 40px; line-height: .95; letter-spacing: -.05em; font-weight: 600; }
+  .metric strong em { font-style: normal; font-size: 16px; letter-spacing: -.01em; color: var(--body); margin-left: 6px; font-weight: 500; }
+  .metric.secondary strong { font-size: 26px; letter-spacing: -.035em; color: var(--warm); }
+  .metric span { display: block; margin-top: 6px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; }
+  .id { color: var(--quiet); font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: .06em; }
+  .id b { color: var(--muted); font-weight: 500; }
   .foot { border-top: 1px solid var(--line); padding-top: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
   .foot strong { color: var(--local); font-weight: 500; }
 </style>
@@ -34,29 +29,36 @@
 <body>
 <div class="canvas evidence">
   <div class="head">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Released evidence · v0.4</span></div>
+    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Qualification receipts · v0.12.1</span></div>
     <div class="eyebrow">Measured, not estimated</div>
   </div>
   <div class="main">
-    <section>
-      <div class="eyebrow">Historical v0.4.0 · RTX 5090 · request wall time</div>
-      <div class="comparison">
-        <div class="metric warm"><strong>1.79 s</strong><span>Warm follow-up using retained session state</span></div>
-        <div class="versus">vs</div>
-        <div class="metric cold"><strong>47.92 s</strong><span>Cold request at 109,594 tokens; one sample each</span></div>
+    <section class="lane">
+      <div class="title"><b>RTX 5090</b><span>container · Windows 11 Docker/WSL2</span></div>
+      <div class="metrics">
+        <div class="metric"><strong>179.79<em>tok/s</em></strong><span>2,048-token decode · DFlash2 K7 · server-side</span></div>
+        <div class="metric secondary"><strong>58.89 s</strong><span>exact retrieval · 130,048 tokens · cold</span></div>
       </div>
-      <div class="descriptor"><b>Continue from retained state.</b><span>Not a restart-duration comparison.</span></div>
+      <div class="id"><b>v0.6.16</b> · image 6a02feba · BF16 KV · two requests in flight</div>
     </section>
-    <aside class="secondary">
-      <div class="stat"><strong>144.8</strong><div>decode tokens / second<small>RTX 5090 v0.4.0 · agent-shaped MTP3</small></div></div>
-      <div class="stat"><strong>130,448</strong><div>token exact-recall prompt<small>131,072-token ceiling</small></div></div>
-      <div class="lanes">
-        <span class="pill"><span class="dot"></span>v0.7.3: 5090 / 4090</span>
-        <span class="pill">3090 deferred</span>
+    <section class="lane">
+      <div class="title"><b>RTX 4090</b><span>native Windows 11</span></div>
+      <div class="metrics">
+        <div class="metric"><strong>158.66<em>tok/s</em></strong><span>C1 decode · MTP3 · 87.59% acceptance</span></div>
+        <div class="metric secondary"><strong>91.03 s</strong><span>exact retrieval · 130,048 tokens</span></div>
       </div>
-    </aside>
+      <div class="id"><b>v0.6.11</b> · package 52687044 · INT8 KV · one request</div>
+    </section>
+    <section class="lane">
+      <div class="title"><b>RTX 3090</b><span>native Windows 11</span></div>
+      <div class="metrics">
+        <div class="metric"><strong>102.41<em>tok/s</em></strong><span>C1 decode · MTP3 · 93.43% acceptance</span></div>
+        <div class="metric secondary"><strong>220.52 s</strong><span>exact retrieval · 130,048 tokens</span></div>
+      </div>
+      <div class="id"><b>v0.6.3</b> · package 74120de0 · INT8 KV · 300 W cap</div>
+    </section>
   </div>
-  <div class="foot"><span>Scope, method, and immutable receipts</span><strong>docs/BENCHMARKS.md →</strong></div>
+  <div class="foot"><span>One machine and profile per lane · different gates per lane, not a ranking</span><strong>docs/BENCHMARKS.md →</strong></div>
 </div>
 </body>
 </html>
