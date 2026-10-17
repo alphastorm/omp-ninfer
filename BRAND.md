@@ -129,14 +129,14 @@ imply official partnership.
 | `assets/lockup-x.png` / `lockup-x-light.png` | OMP × NInfer alternate, transparent @2x |
 | `assets/lockups.html` | lockup source |
 | `assets/brand.css` | shared color, type, spacing, and guide tokens for campaign assets |
-| `assets/banner.html` | README banner source (1280×320) |
-| `assets/banner.png` | rendered banner @2x (2560×640) |
+| `assets/banner.html` | README banner source (1280×320): headline, promise, one current-release proof line, status strip |
+| `assets/banner.png` | rendered banner @2x (2560×640); the README links it to the quickstart so its "Get started" works |
 | `assets/og.html` | GitHub social preview source (1280×640) |
 | `assets/og.png` | GitHub social preview (1280×640) |
 | `assets/architecture.html` | architecture illustration source (1240×420) |
 | `assets/architecture.png` | rendered architecture @2x (2480×840) — for the README |
-| `assets/benchmarks.html` | released-evidence continuation story source (1240×360) |
-| `assets/benchmarks.png` | rendered released-evidence strip @2x — for the README and benchmarks page |
+| `assets/benchmarks.html` | qualification-receipt strip source (1240×360): one column per lane, each on its own gate |
+| `assets/benchmarks.png` | rendered receipt strip @2x — for the README and benchmarks page; re-render only with a new receipt |
 | `assets/chart-warm-cold.html` / `chart-warm-cold.png` | warm vs cold TTFT chart source (1240×420) and @2x render — benchmarks page |
 | `assets/chart-prefill.html` / `chart-prefill.png` | 5090 prefill-curve chart source (1240×420) and @2x render — benchmarks page |
 | `assets/chart-decode.html` / `chart-decode.png` | per-lane decode chart source (1240×420) and @2x render — benchmarks page |
@@ -173,51 +173,48 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 ## README header (drop-in)
 
+The banner is the hero: it already carries the category eyebrow, headline, tagline, one proof line
+and the status strip, so the text under it must not repeat them. The header adds only what the
+image cannot: a plain three-sentence entity statement, the current-release proof with its receipt,
+the primary action, badges, and the documentation row. No `# OMP NInfer` heading (the wordmark is in
+the banner), no restated headline, no caveat lines above the fold.
+
 ```md
-![OMP NInfer](assets/banner.png)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.12.1.](assets/banner.png)](docs/QUICKSTART.md)
 
 <div align="center">
 
-<sub>DURABLE LOCAL INFERENCE FOR CODING AGENTS</sub>
+[Oh My Pi](https://github.com/can1357/oh-my-pi) is the coding agent. [NInfer](https://github.com/Neroued/ninfer)
+keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
+that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-# OMP NInfer
+Every install route in the guide was run end to end on **v0.12.1** with unmodified
+[Oh My Pi 18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1) — 31 steps,
+three client platforms, both native lanes
+([receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
 
-**Your coding session should survive the process.**
+**[Get started →](docs/QUICKSTART.md)** &nbsp;·&nbsp; [Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1)
 
-Durable session state on your GPU.
+[![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Oh My Pi](https://github.com/can1357/oh-my-pi) (coding-agent client) → **OMP NInfer** (qualified
-appliance and release layer) → [NInfer](https://github.com/Neroued/ninfer) (inference engine) →
-[Qwen3.8 27B](https://huggingface.co/neroued/Qwen3.8-27B-NInfer) (served model).
+[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) ·
+[Benchmarks](docs/BENCHMARKS.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) ·
+[Troubleshooting](docs/TROUBLESHOOTING.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
-**Qualified on RTX 5090 · 4090 · 3090 — v0.12.1, stock Oh My Pi 18.10.1 (published 2026-10-12)**
-
-Fresh v0.12.1 acceptance: five documented routes, 31 steps, three stock clients, and both native
-public installs passed with independent restoration (owner-operated;
-[composed receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
-
-**[Get started](docs/QUICKSTART.md)** ·
-**[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1)**
-
-[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
-[Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
-[Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) ·
-[Troubleshooting](docs/TROUBLESHOOTING.md) · [Roadmap](ROADMAP.md) ·
-[Changelog](CHANGELOG.md)
+</div>
 ```
-
-followed by the badge row and the private-by-design subline as currently set in `README.md`.
 
 Badges are shields.io flat style only, `labelColor 0B0E11`, values in Local violet `#8E7BE8` or
 surface `#1C232B` — never green/red status colors, never more than one row. Sanctioned badges:
 CI, release, measured decode, measured context, license. A measured-value badge must match the
 qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualification receipt.
 
-Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and the scoped
-released-evidence strip at `assets/benchmarks.png` under `## Measured, not estimated`;
-neither is part of the header.
+Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and the
+qualification-receipt strip at `assets/benchmarks.png` under `## Measured, not estimated`; neither
+is part of the header.
 
-The update-banner-free social GIF sits inside the header block directly under the private-by-design
-subline, at width 900 with a full alt description; link the social MP4 and provenance beside it.
+The demo GIF sits under `## What it does`, centered at width 900 with a full alt description and a
+one-line caption naming the release it was recorded on; link the MP4 and provenance beside it. It is
+a demonstration, not the first screen's proof.
 
 Then upload `assets/og.png` at GitHub → Settings → Social preview.
