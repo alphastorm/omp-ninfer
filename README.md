@@ -11,13 +11,14 @@ Every install route in the guide was run end to end on **v0.12.1** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
 
-**[Get started →](docs/QUICKSTART.md)** &nbsp;·&nbsp; [Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1)
+### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) ·
-[Benchmarks](docs/BENCHMARKS.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) ·
-[Troubleshooting](docs/TROUBLESHOOTING.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
+[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
+[Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
+[Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -54,9 +55,9 @@ project does not claim it. What OMP NInfer adds is continuation you can rely on:
 
 <img src="docs/media/omp-ninfer-demo-v3.gif" alt="Oh My Pi on OMP NInfer (v0.3.0 recording, RTX 5090): fixes a ring-buffer bug, reruns the tests to green, then answers a stateful follow-up. Idle gaps compressed." width="900">
 
-<sub>Recorded on v0.3.0 (RTX 5090): a bug fixed, tests rerun to green, then a stateful follow-up.
-15 s, idle gaps compressed, no restart shown ·
-<a href="docs/media/omp-ninfer-demo-v3.mp4">MP4</a> · <a href="docs/media/README.md#canonical-files">provenance</a></sub>
+<sub>Recorded on v0.3.0 (RTX 5090): bug fixed, tests green, stateful follow-up. 15 s, idle gaps
+compressed, no restart shown · <a href="docs/media/omp-ninfer-demo-v3.mp4">MP4</a> ·
+<a href="docs/media/README.md#canonical-files">provenance</a></sub>
 
 </div>
 
