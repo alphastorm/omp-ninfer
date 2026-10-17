@@ -1,19 +1,51 @@
 # OMP NInfer
 
 > Durable local inference for coding agents: the qualified local inference appliance for
-> Oh My Pi. Qwen3.8 27B via the NInfer engine on one NVIDIA RTX 5090, 4090, or 3090, with
-> restart-resumable OpenAI Responses continuation state. Community project; not affiliated
-> with Oh My Pi, Qwen, or NVIDIA.
+> Oh My Pi. Your coding session should survive the process. Oh My Pi (coding-agent client) →
+> OMP NInfer (qualified appliance and release layer) → NInfer (inference engine) → Qwen3.8 27B
+> (served model). Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or
+> NVIDIA.
 
-## Canonical documents
+Qualified on RTX 5090 · 4090 · 3090 — **v0.12.1** (published 2026-10-12, GitHub Latest), stock
+**Oh My Pi 18.10.1**.
+- **RTX 5090 container lane:** Windows 11 + Docker Desktop/WSL2 on loopback `127.0.0.1:18089`
+  (local Windows client or manual macOS SSH tunnel preview); `v0.6.16-qwen38-5090-beta.1`, profile
+  `qwen38-5090-v0.11.0`, model `0634abb0` (20.4 GB), DFlash2 draft window 7, BF16 KV,
+  131,072-token context, two requests in flight, vision + tools.
+- **RTX 4090 and RTX 3090 native Windows 11 lanes:** `v0.6.11-qwen38-4090-beta.1` and
+  `v0.6.3-qwen38-3090-beta.1` on loopback `127.0.0.1:18082`, UUID-bound on one two-GPU host
+  (sequential single-GPU serving, one lane at a time), model `eec39564` (18.2 GB), MTP3, INT8 KV,
+  131,072-token context, one request at a time, text + tools (no vision).
+- **Proof:** Fresh v0.12.1 acceptance on frozen candidate `780b0639` across five documented routes
+  (31 steps), three stock Oh My Pi 18.10.1 clients (macOS arm64 preview, Windows x64, Linux x64
+  under WSL2), and both native Windows public installs (owner-operated); runtime qualifications
+  carry unchanged from v0.12.0 and v0.11.0.
 
-- [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity, fit, guarantees, measured proof, limitations
-- [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose this vs Ollama, LM Studio, llama.cpp, vLLM
-- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md): lane selection and install
-- [Compatibility](https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md): qualified client/runtime combinations
-- [Benchmarks](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md): method and receipt-bound numbers
-- [Security](https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md): boundaries and support rules
-- [Troubleshooting](https://github.com/alphastorm/omp-ninfer/blob/main/docs/TROUBLESHOOTING.md): named failure signatures
+## Release authorities (v0.12.1)
+
+- [v0.12.1 manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/manifest.json): exact client, runtime, model, and profile pins
+- [v0.12.1 release notes](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/NINFER_RELEASE_NOTES.md): release scope, client SHA-256 digests, acceptance, and support boundaries
+- [v0.12.1 tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md): immutable installation guide for v0.12.1
+
+## Living canonical documents
+
+- [Canonical facts](https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md): entity relationship, fit, lane table, models, durability, and checkpoint transport
+- [Decision guide](https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md): when to choose OMP NInfer vs Ollama, LM Studio, llama.cpp, or vLLM
+- [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md): lane selection, prerequisites, and executable installation routes
+- [Compatibility](https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md): generated matrix of qualified client and runtime combinations
+- [Architecture](https://github.com/alphastorm/omp-ninfer/blob/main/docs/ARCHITECTURE.md): state ownership, loopback topology, checkpoint replication, and identity chain
+- [Benchmarks](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md): methodology, per-lane qualification numbers, and historical receipts
+- [Security](https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md): trust boundary, loopback invariants, key handling, and verification
+- [Troubleshooting](https://github.com/alphastorm/omp-ninfer/blob/main/docs/TROUBLESHOOTING.md): failure signatures, recovery, and safe reporting
+- [Media provenance](https://github.com/alphastorm/omp-ninfer/blob/main/docs/media/README.md): recording provenance, hashes, and historical demo scope
+
+## Maintainer and history ledgers
+
+- [Roadmap](https://github.com/alphastorm/omp-ninfer/blob/main/ROADMAP.md): remaining engineering gates and non-promises
+- [Releases](https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md): version identity archive and release cut procedure
+- [Performance program](https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md): append-only experiment ledger (EXP-001..095)
+- [Upstream tracking](https://github.com/alphastorm/omp-ninfer/blob/main/docs/UPSTREAM.md): Oh My Pi and NInfer source-applicability ledger
+- [Changelog](https://github.com/alphastorm/omp-ninfer/blob/main/CHANGELOG.md): chronological release summary
 
 ## Web pages
 

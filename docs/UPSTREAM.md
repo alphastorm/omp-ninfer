@@ -1,10 +1,50 @@
 # Upstream watch
 
-The runtime ships from forks; v0.10.0 uses an unmodified upstream OMP client. This page names
-the upstreams we track, runtime fork points, and the current pull-in position. The watch manifest is
-[`upstream-watch.json`](../upstream-watch.json); the watch tool is
+Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
+to NInfer (inference engine) serving Qwen3.8 27B (served model). The runtime ships from downstream
+forks; published release **v0.12.1** (2026-10-12) pins an unmodified upstream OMP 18.10.1 client.
+This page names the upstreams we track, runtime fork points, and the current pull-in position. The
+watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
 [`docs/measurements/`](measurements/).
+
+## Current positions
+
+| Component / upstream | Current position (v0.12.1) | Upstream base / watch head | Evidence and notes |
+| --- | --- | --- | --- |
+| `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.10.1**, source `5d0aaffaf1f987503ce129a642fb6e30339615af` | Upstream release [`v18.10.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1) (2026-10-12T05:55:11Z) | Routine client currency replacing 18.8.7; see [client setup](QUICKSTART.md#omp-18101-client) and [release notes](../releases/v0.12.1/NINFER_RELEASE_NOTES.md). |
+| `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.6.16-qwen38-5090-beta.1`, source `1302d63929e400a05e1c9cdb0fc8003a70269825` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Image `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0` (`91a35670`), DFlash2 draft window 7, BF16 KV, two requests in flight; carried from v0.11.0/v0.12.0 ([receipt](../releases/v0.12.1/qualification/rtx5090.json)). |
+| `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0 ([RTX 4090](../releases/v0.12.1/qualification/rtx4090.json), [RTX 3090](../releases/v0.12.1/qualification/rtx3090.json)). |
+| `Neroued/ninfer` (engine watch) | Watch verdict `upgrade-available` | Head `81c8ce093b2c1646a87566a8e59d807fcf0ec95c` (2026-10-07), 285 commits ahead of `6e8b2e2a` | 250 commits and 300 files listed (`unknown-truncated`); selective backports continue in place of an architecture rebase ([watch receipt](measurements/2026-10-10-upstream-watch.json), [EXP-095](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)). |
+| `UDPSendToFailed/ninfer-4090` (engine watch) | Watch verdict `upgrade-available` | Head `5c60b7c9` (2026-09-09), 57 commits ahead of `11aae2d6` | 57 commits and 238 files listed (`high-review-overlap`); native lanes now ship from the mainline fork source `cad19767` ([watch receipt](measurements/2026-10-10-upstream-watch.json)). |
+| `Don-Chad/ninfer-3090` (engine watch) | Watch verdict `upgrade-available` | Head `d7277e88` (2026-09-26), 240 commits ahead of `ef6ecc3c` | 240 commits listed, 300 files cut (`unknown-truncated`); native lanes now ship from the mainline fork source `cad19767` ([watch receipt](measurements/2026-10-10-upstream-watch.json)). |
+
+### v0.12.1 client binding — OMP 18.10.1
+
+Published release **v0.12.1** (2026-10-12) pins unmodified upstream
+[v18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1), source
+`5d0aaffaf1f987503ce129a642fb6e30339615af` (published upstream 2026-10-12T05:55:11Z), as routine
+upstream currency. All NInfer runtime, model, and profile pins carry unchanged from v0.12.0; see
+[`QUICKSTART.md#omp-18101-client`](QUICKSTART.md#omp-18101-client).
+
+Two evidence records stay separate:
+
+- **Host-free 18.8.7/18.10.0 Responses applicability review:** The
+  [compatibility review receipt](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
+  inspected both released NInfer emitter source pins (`1302d639` and `cad19767`,
+  `src/serve/responses_schema.cpp`) and ran host-free loopback reproductions with stock OMP 18.8.7
+  and 18.10.0 binaries against upstream commit `d95845494b`
+  ([can1357/oh-my-pi#11863](https://github.com/can1357/oh-my-pi/pull/11863)). Because NInfer emits
+  raw `reasoning_text` deltas with explicit `content_index` and `summary: []` and retains the
+  identical full argument/input snapshot in `done`, `item-done`, and final response events, neither
+  the 18.9.0 lossy-summary nor empty-terminal-input trigger occurs. That review is a specific
+  non-applicability finding on 18.8.7 and 18.10.0, not live 18.10.1 route qualification.
+- **Fresh 18.10.1 route and client acceptance:** Authorized-window acceptance ran separately on
+  frozen candidate `780b0639` across all five documented routes (31 unchanged blocks), all three
+  stock 18.10.1 binaries (macOS arm64 preview, Windows x64, Linux x64 under WSL2), and both native
+  public installs, with independent restoration
+  ([documented routes](../releases/v0.12.1/acceptance/documented-routes.json),
+  [composed acceptance](../releases/v0.12.1/acceptance/composed-external-installation.json)).
 
 ## Running the watch
 
@@ -26,112 +66,6 @@ list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` 
 2026-09-24 a cut list read as no overlap and marked every commit of a 1,387-file engine delta a
 `pull-candidate`. For a delta that large, measure applicability against the fork itself (a
 scratch cherry-pick or trial merge) instead of reading the overlap score.
-
-## v0.12.1 client binding — OMP 18.10.1
-
-Unmodified upstream [v18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1),
-source `5d0aaffaf1f987503ce129a642fb6e30339615af`, published upstream
-2026-10-12T05:55:11Z. This is routine currency; all NInfer runtime/model/profile
-pins stay unchanged. The [host-free Responses applicability report](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
-finds neither 18.9.0 fix trigger in the released emitter. It tested stock 18.8.7
-and 18.10.0, not live 18.10.1 routes. New-client platform and documented acceptance
-use their own receipts; the versioned manifest decides readiness.
-
-## Published baseline client — OMP 18.8.7
-
-| Upstream | Client pin | State | Why pull it in |
-| --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | Published in RTX 5090-only v0.11.0; fresh three-client acceptance passed for current v0.12.0, published 2026-10-11 | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
-
-The previous unqualified 18.8.3 candidate first brought in #13686 (`429352901c`),
-#13687 (`01822b63d0`) and #13689 (`8aaf115b8e`): per-model stateful Responses,
-custom-host auto image detail and fail-closed unavailable-model resume. Those changes remain
-in 18.8.7. Keep `compat.statefulResponses: true` in every NInfer model, remove
-`PI_OPENAI_STATEFUL` from the launch environment, and do not restore the image-detail override.
-The [schema](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/config/models-config-schema-bundle.ts#L74)
-still admits the field. The [Responses handler](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/providers/openai-responses.ts#L503-L514)
-still gives a call option and then the environment precedence over per-model compat.
-
-### 18.8.4–18.8.7 source review
-
-The release notes were read for [18.8.4](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.4),
-[18.8.5](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.5),
-[18.8.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.6) and
-[18.8.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7).
-Between the 18.8.3 and 18.8.7 tags, the custom-model schema, `openai-shared.ts`,
-`ai/src/stream.ts` and `settings-stream-fn.ts` have identical Git blobs. The fragments'
-`includeEncryptedReasoning: false`, `supportsReasoningSummary: false`, effort list,
-`openai-responses` API and custom-host auto image-detail contract are unchanged.
-The Windows rust-analyzer/lspmux fix in 18.8.5 and native-addon packaging change in 18.8.7
-are not Responses protocol changes. The native Windows client passed the bounded
-[local rehearsal](measurements/2026-10-10-omp-1887-windows-x64-local-rehearsal.json), not route qualification.
-
-**#14334 and chaining.** [Provider state](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/providers/openai-responses.ts#L429-L450)
-now implements `releaseSession`: it normalizes the supplied routing-session id and deletes
-only chain/effort entries for that id. Chain lookup is still keyed by base URL, model and
-routing-session id, and unchanged append-prefix logic sends `previous_response_id` plus delta
-input with `store: true`; changed history or a stale response id still causes full replay.
-[AgentSession](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/agent-session.ts#L11009-L11086)
-releases a one-shot side request in `finally` only when it has no `conversationKey`.
-The main conversation and keyed side-conversation lineages are retained. **[inference]** This
-cleanup preserves the fragments' stateful-chaining contract; source inspection alone is not
-route acceptance or a long-session proof.
-
-**Compaction finding.** The [async default](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/context-settings.ts#L207-L223)
-is still `true`; [the background gates](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/session-maintenance.ts#L2077)
-still stop when `asyncEnabled === false`. #14952 routes these checks through
-[resolveModelCompactionSettings](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/model-compaction-threshold.ts#L20-L30).
-The new map defaults empty and changes only threshold token/percentage fields when an entry
-matches (exact `provider/model-id` first, then longest trailing-`*` prefix); no match returns
-the existing settings object. It does not turn async compaction on or off.
-The [provider in-flight gate](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/stream.ts#L637-L654)
-still waits before dispatch until a slot or caller cancellation, not the server's pending
-admission deadline. Keep the settings in `examples/manual-tunnel/fail-closed.yml` unchanged: two requests for
-RTX 5090 providers, one for native providers, no `asyncEnabled` override. This retains the
-client-side waiting contract motivated by [EXP-072](measurements/2026-09-28-omp-long-sessions.json).
-No `compaction.modelThresholds` setting is recommended or applied: 18.8.7 long-session or
-threshold tuning was not measured, and #14952 alone supplies no evidence for a safer numeric
-limit. The 18.8.6 pruning changes target Anthropic cache lookback, not a new NInfer threshold.
-
-The three current RTX 5090 documented routes passed with OMP 18.8.7; native RTX 3090/4090
-lanes are deferred and their owners remain on the complete v0.10.0 guide. Local client
-rehearsals remain separate evidence and do not inherit v0.10.0's OMP 18.4.10 acceptance.
-The [2026-10-10 source review and receipts](measurements/2026-10-10-omp-1887-client-release-review.json)
-bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
-selection also retains the per-model contract after a profile is qualified, while the
-historical 18.4.x driver behavior is unchanged.
-See the [current guide](QUICKSTART.md#omp-1887-client).
-
-The ready v0.11.0 candidate bound this upstream client to published runtime source
-`1302d639` and image `6a02feba`, with the retained client and route proofs accepted.
-EXP-095 below compares the original `a59c13d0` EXP-094 arm, **not** the selected
-binary; its counterfactual labels and verdicts are not silently rebound.
-
-## Published upstream position — v0.10.0
-
-**v0.10.0 is accepted on its published components — DFlash2 on the RTX 5090.**
-All **five documented routes, 31 steps** passed on candidate `ca929822` with unmodified upstream
-OMP **18.4.10**: RTX 5090 container host 2, macOS client 10, Windows client 5, RTX 4090 native
-Windows 7 and RTX 3090 native Windows 7. All three hosts were restored. The macOS arm64,
-Windows x64 and Linux x64 binaries each passed a typed tool turn, exact continuation and
-fail-closed request against image `fff4ee38`. macOS remains preview without managed client
-installation or appliance lifecycle; Linux ran under WSL2, not a separately qualified Linux OS.
-These are maintainer-operated observations, not independent external-user outcomes.
-
-RTX 5090 moves to `v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8`
-and source `eaf221ac`, with model artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile /
-configuration `8b2f4959` uses **DFlash2 draft window 7**, **BF16 KV**, **two requests in flight**
-and **two device state slots**. The qualified KV pool is 131,520 tokens; both prompts plus
-output reservations must fit. The pending timeout is 180 s. Predecessor performance and
-checkpoint-reuse results do not qualify this changed runtime and model.
-
-RTX 4090 keeps `v0.6.10-qwen38-4090-beta.1`; RTX 3090 keeps `v0.6.2-qwen38-3090-beta.1`.
-Their native packages and model are unchanged, but their product pin and client move to
-v0.10.0 / OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence,
-not fresh OMP 18.4.10 acceptance. The RTX 3090 fleet scout role stays deferred.
-
-[Manifest](../releases/v0.10.0/manifest.json) · [Route acceptance](QUICKSTART.md#v0100-route-acceptance).
-[Composed acceptance](../releases/v0.10.0/acceptance/composed-external-installation.json).
 
 ## Current engine watch — 2026-10-10
 
@@ -211,7 +145,164 @@ from this comparison; the [full method and counters](PERFORMANCE.md#experiment-l
 and [content-safe receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)
 retain the exact limitations.
 
-## Historical upstream position — v0.9.1
+## Tracked upstream delta — 2026-09-28
+
+| Upstream | Fork point | Delta | Position |
+|---|---|---|---|
+| `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | `d44ab584`, measured 2026-09-30 | **DFlash2 is worth taking, by port.** On `d44ab584` and the published v3 artifact, DFlash2 K=7 decoded the role corpus 28.2% faster than MTP3 on the same binary and 6.9% faster than the shipped runtime, at one request; it needs 1.65 GiB more weights and two fewer device state slots at two requests ([EXP-078](measurements/2026-09-30-dflash2-rtx5090.json)). Ported onto the fork's runtime (52 of upstream's 79 DFlash2-program commits, including `4b0eb36c`'s verify attention route for 24 query heads), it decodes the corpus 21.4% faster than shipped and 13.6% faster than upstream's DFlash2 at one request, with MTP3 byte-identical ([EXP-081](measurements/2026-09-30-dflash2-verify-route-rtx5090.json)); without that route its round grew with context ([EXP-079](measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)). Two requests' rounds reached upstream's through the fork's own Q5 tensor-core route extended to 16 columns, not upstream's 16-column routes: a pair decodes 8.4% faster than shipped's ([EXP-082](measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json)). Upstream has no durable session store; the fork carries DFlash2's draft context ring through its own checkpoints, with exact restores ([EXP-083](measurements/2026-10-01-dflash2-durable-store-rtx5090.json)). Upstream's NVFP4 KV, ported as final files from `d44ab584` behind the fork's storage identity, gives the two-request DFlash2 profile four device state slots and 262,144 KV tokens with rounds 12-27% shorter behind 32K-120K tokens ([EXP-084](measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)), but it failed the fork's powered quality screen against shipped MTP3 on unsupported claims and secret leaks, where DFlash2 with BF16 KV passed with 1,091 of 1,120 outputs byte-identical to shipped ([EXP-085](measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json)). Upstream's MTP3 decode rounds are still 16-18% slower than the shipped runtime's and its fanout reuse is 0/4 against 4/4, so a merge alone is not the win ([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json), [prior EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). |
+| `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed and are read against v0.7.1's durability work when taken. Upstream removed its NVFP4 path (`dabae909`). |
+| `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | At this report, triage awaited the RTX 3090 host. v0.9.1 accepts the standalone native lane from mainline source `f08309da`; it does not update this historical upstream delta or take the deferred engine merge. |
+| `can1357/oh-my-pi` (client) | Upstream v18.4.0 (`401778d0cd30020ce0f9198f751b13c68850562f`) | Unmodified upstream release binary; published 2026-09-28T03:33:34Z | v0.8.6 pins 18.4.0; all four documented routes passed. Fix `9d3e0d4975` resolves the Windows completion-status defect ([#13470](https://github.com/can1357/oh-my-pi/issues/13470), [EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)). RTX 5090 fragments now set `compat.supportsImageDetailOriginal: false` for automatic compaction ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The route config now sets `compaction.asyncEnabled: false`: three RTX 4090 handoffs took 77.0-83.7 s each with no expired admission; RTX 5090 snapcompact took 0.07-0.08 s ([EXP-072](measurements/2026-09-28-omp-long-sessions.json)); provider fields and `PI_OPENAI_STATEFUL=1` are unchanged; no fork build, archive, installer or cask. |
+
+**Historical client position through v0.7.4.** `omp-18.2.3-cross-platform-beta-1` (source
+`5ade242d`, since v0.7.3) carried 36 downstream commits on upstream `a2d83061` (v18.2.3),
+including the NInfer provider and appliance lifecycle. The 2026-09-24 watch counted 681 upstream
+commits to `62bc57be` (v18.3.0). At that time, the client plan was a rebase plus documented-route
+acceptance rather than direct adoption
+([EXP-046](measurements/2026-09-17-client-repin-evaluation.json)); v0.8.0 instead uses the stock
+binary with the stock-client runtime.
+
+### v0.6.9: parser semantics without the serve-adapter rebase
+
+The [2026-09-12 backport ledger](measurements/2026-09-12-upstream-backport-ledger.json) and the
+2026-09-13 delta counts it was read against are historical evidence for this release. The ledger
+deferred `3b50962b` and `0c5d570c` because their extracted parser files do not exist on this
+tree. The v0.6.9 release instead implements their semantics independently in the downstream
+parser: supported scalar unions, case-insensitive
+booleans, precise numeric lexemes, mathematically integral values, duplicate parameters, and
+balanced embedded markup. It does not import the wholesale serve-adapter rebase or change the
+fork point; custom raw input, history, opaque IDs, and stream ownership are preserved.
+
+Reviewed source `696e78c7b4e3ac28ffcffafc73acc1496e65ef03` includes remediation against
+malformed-region rescans and recursive union traversal; bytewise regressions and an 8,192-deep
+union case pass. It builds the published RTX 5090 `v0.6.5-qwen38-5090-beta.1` and native
+RTX 4090 `v0.6.3-qwen38-4090-beta.1` components. Both lanes are qualified and RTX 4090
+public-URL already-installed acceptance passed; the RTX 5090 documented host 2/2 and macOS
+10/10 routes passed against the published image.
+[Release notes](../releases/v0.6.9/NINFER_RELEASE_NOTES.md).
+The old backport ledger is intentionally unchanged: its deferred parser entry describes that
+earlier campaign, not the candidate's current parser coverage. The deferred pressure-planner
+family is separate; the alternating-session finding is already attributed to host KV capacity
+([EXP-039](measurements/2026-09-13-hostkv-capacity-multisession.json)), not proof that this
+product needs that planner rebase.
+
+## Why the fork points are what they are
+
+- The RTX 5090 lane builds from the mainline runtime whose upstream base is `6e8b2e2a` (since
+  v0.6.2; current selected source `1302d639` in v0.11.0–v0.12.1). Later upstream movement is
+  tracked separately from the reviewed backports and semantic ports named above. The retired
+  container mirror point `4eef14a7` was the lineage's base before v0.6.2 and made the delta read
+  17 commits larger than it is.
+- The RTX 4090 and RTX 3090 native Windows lanes originally vendored their upstreams at the
+  recorded commits (`11aae2d6` and `ef6ecc3c`). Both now ship from the mainline runtime (`cad19767`
+  in v0.12.0 and v0.12.1, adding explicit `--gpu-uuid` device selection on the two-GPU Windows
+  host; earlier v0.9.1 retained RTX 4090 source `cba7eb93`, RTX 5090 child `e20060b6`, and RTX 3090
+  `f08309da`). The durable-checkpoint, security, and packaging work remains downstream.
+- Through v0.7.4, the client fork point was the upstream tag commit onto which downstream patches
+  rebased. Since v0.8.0 (and in v0.12.1 with stock OMP 18.10.1 at `5d0aaffa`), this repository does
+  not build or publish an OMP client; it binds the unmodified upstream release binary instead.
+
+## History
+
+### Published baseline client — OMP 18.8.7
+
+Historical v0.11.0 and v0.12.0 client baseline (superseded by OMP 18.10.1 in v0.12.1).
+
+| Upstream | Client pin | State | Why pull it in |
+| --- | --- | --- | --- |
+| `can1357/oh-my-pi` (client) | Unmodified upstream v18.8.7 (`f261ed9faf16b61880b544f599876bface4ded0d`), published upstream 2026-10-09T13:45:03Z | Published in RTX 5090-only v0.11.0 and three-lane v0.12.0 (2026-10-11); superseded by 18.10.1 in v0.12.1 | [#14334](https://github.com/can1357/oh-my-pi/pull/14334) releases completed one-shot routing state without clearing the main Responses chain; [#14952](https://github.com/can1357/oh-my-pi/pull/14952) adds optional per-model compaction thresholds. |
+
+The previous unqualified 18.8.3 candidate first brought in #13686 (`429352901c`),
+#13687 (`01822b63d0`) and #13689 (`8aaf115b8e`): per-model stateful Responses,
+custom-host auto image detail and fail-closed unavailable-model resume. Those changes remain
+in 18.8.7 and 18.10.1. Keep `compat.statefulResponses: true` in every NInfer model, remove
+`PI_OPENAI_STATEFUL` from the launch environment, and do not restore the image-detail override.
+The [schema](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/config/models-config-schema-bundle.ts#L74)
+still admits the field. The [Responses handler](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/providers/openai-responses.ts#L503-L514)
+still gives a call option and then the environment precedence over per-model compat.
+
+#### 18.8.4–18.8.7 source review
+
+The release notes were read for [18.8.4](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.4),
+[18.8.5](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.5),
+[18.8.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.6) and
+[18.8.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.8.7).
+Between the 18.8.3 and 18.8.7 tags, the custom-model schema, `openai-shared.ts`,
+`ai/src/stream.ts` and `settings-stream-fn.ts` have identical Git blobs. The fragments'
+`includeEncryptedReasoning: false`, `supportsReasoningSummary: false`, effort list,
+`openai-responses` API and custom-host auto image-detail contract are unchanged.
+The Windows rust-analyzer/lspmux fix in 18.8.5 and native-addon packaging change in 18.8.7
+are not Responses protocol changes. In the 2026-10-10 local rehearsals on
+`c007286eee280d0a98ff912dc04ebe2e7dd9eb77` against v0.10.0 image `fff4ee38…`, the macOS arm64,
+Windows x64, and Linux x64 (WSL2) binaries passed bounded local rehearsal checks rather than route
+qualification:
+[macOS arm64 rehearsal](measurements/2026-10-10-omp-1887-darwin-arm64-local-rehearsal.json) ·
+[Windows x64 rehearsal](measurements/2026-10-10-omp-1887-windows-x64-local-rehearsal.json) ·
+[Linux x64 WSL2 rehearsal](measurements/2026-10-10-omp-1887-linux-x64-wsl2-local-rehearsal.json) ·
+[client release review](measurements/2026-10-10-omp-1887-client-release-review.json).
+
+**#14334 and chaining.** [Provider state](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/providers/openai-responses.ts#L429-L450)
+now implements `releaseSession`: it normalizes the supplied routing-session id and deletes
+only chain/effort entries for that id. Chain lookup is still keyed by base URL, model and
+routing-session id, and unchanged append-prefix logic sends `previous_response_id` plus delta
+input with `store: true`; changed history or a stale response id still causes full replay.
+[AgentSession](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/agent-session.ts#L11009-L11086)
+releases a one-shot side request in `finally` only when it has no `conversationKey`.
+The main conversation and keyed side-conversation lineages are retained. **[inference]** This
+cleanup preserves the fragments' stateful-chaining contract; source inspection alone is not
+route acceptance or a long-session proof.
+
+**Compaction finding.** The [async default](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/context-settings.ts#L207-L223)
+is still `true`; [the background gates](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/session-maintenance.ts#L2077)
+still stop when `asyncEnabled === false`. #14952 routes these checks through
+[resolveModelCompactionSettings](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/coding-agent/src/session/model-compaction-threshold.ts#L20-L30).
+The new map defaults empty and changes only threshold token/percentage fields when an entry
+matches (exact `provider/model-id` first, then longest trailing-`*` prefix); no match returns
+the existing settings object. It does not turn async compaction on or off.
+The [provider in-flight gate](https://github.com/can1357/oh-my-pi/blob/f261ed9faf16b61880b544f599876bface4ded0d/packages/ai/src/stream.ts#L637-L654)
+still waits before dispatch until a slot or caller cancellation, not the server's pending
+admission deadline. Keep the settings in `examples/manual-tunnel/fail-closed.yml` unchanged: two requests for
+RTX 5090 providers, one for native providers, no `asyncEnabled` override. This retains the
+client-side waiting contract motivated by [EXP-072](measurements/2026-09-28-omp-long-sessions.json).
+No `compaction.modelThresholds` setting is recommended or applied: 18.8.7 long-session or
+threshold tuning was not measured, and #14952 alone supplies no evidence for a safer numeric
+limit. The 18.8.6 pruning changes target Anthropic cache lookback, not a new NInfer threshold.
+
+In historical v0.11.0, the three RTX 5090 documented routes passed with OMP 18.8.7 while the
+native RTX 3090/4090 lanes were deferred to v0.12.0 (where all five routes passed with 18.8.7).
+Local client rehearsals remain separate evidence and do not inherit v0.10.0's OMP 18.4.10
+acceptance. The [2026-10-10 source review and receipts](measurements/2026-10-10-omp-1887-client-release-review.json)
+bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
+selection also retains the per-model contract after a profile is qualified, while the
+historical 18.4.x driver behavior is unchanged.
+See the [current client guide](QUICKSTART.md#omp-18101-client).
+
+The v0.11.0 release bound this upstream client to published runtime source `1302d639` and image
+`6a02feba`, with the retained client and route proofs accepted. EXP-095 above compares the
+superseded `a59c13d0` EXP-094 arm, **not** the selected `1302d639` binary; its counterfactual
+labels and verdicts are not silently rebound.
+
+### Published upstream position — v0.10.0
+
+In v0.10.0 (2026-10-02, unmodified upstream OMP 18.4.10), RTX 5090 moved to
+`v0.6.15-qwen38-5090-beta.1`, image `fff4ee38`, server `7a8908e8` and source `eaf221ac`, with model
+artifact `0634abb0`. Its `qwen38-5090-v0.10.0` profile / configuration `8b2f4959` uses **DFlash2
+draft window 7**, **BF16 KV**, **two requests in flight** and **two device state slots**. The
+qualified KV pool is 131,520 tokens; both prompts plus output reservations must fit. The pending
+timeout is 180 s. Predecessor performance and checkpoint-reuse results do not qualify this changed
+runtime and model.
+
+RTX 4090 kept `v0.6.10-qwen38-4090-beta.1`; RTX 3090 kept `v0.6.2-qwen38-3090-beta.1`. Their
+native packages and model were unchanged, while their product pin and client moved to v0.10.0 /
+OMP 18.4.10. Historical OMP 18.4.0 observations below remain historical evidence, not fresh OMP
+18.4.10 acceptance. The RTX 3090 fleet scout role stayed deferred. Full v0.10.0 acceptance details
+live in [`RELEASES.md`](RELEASES.md#v0100-public-release--dflash2-on-the-rtx-5090).
+
+[Manifest](../releases/v0.10.0/manifest.json) ·
+[Route acceptance](../releases/v0.10.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.10.0/acceptance/composed-external-installation.json).
+
+### Historical upstream position — v0.9.1
 
 Install through the [quickstart](QUICKSTART.md); eligibility is one RTX 5090, RTX 4090
 or RTX 3090. **v0.9.1 — RTX 3090 on the native Windows runtime** was accepted on 2026-10-01.
@@ -312,7 +403,7 @@ an older release using that release's declared configuration, without requiring 
 introduced later. The optional-field rule and its lifecycle regression coverage are the
 reusable change. This release does not take the deferred upstream engine merge.
 
-## Historical position — v0.9.0
+### Historical position — v0.9.0
 
 The RTX 5090 serves **two requests at once** with `v0.6.14-qwen38-5090-beta.1`
 (image `4c816b0c`, server `f62a570e`), deployment profile `qwen38-5090-v0.9.0` and
@@ -419,7 +510,7 @@ when the server restored a current checkpoint. The next request carries reasonin
 caches. The v0.8.7 measurement below remains the evidence; two requests in flight do not fix
 client replay ([EXP-074](measurements/2026-09-29-long-session-cache.json)).
 
-## Historical position — v0.8.7
+### Historical position — v0.8.7
 
 Long sessions no longer re-prefill from root at compaction handoffs, near-capacity turns, crashes
 after a compaction, or when short sessions fill the checkpoint store. Both lanes move to runtimes
@@ -508,7 +599,7 @@ thinking, so that request no longer matches the session it continues and prefill
 checkpoint. The next request carries the reasoning again and caches. Treating a resumed session's
 own reasoning as replayable on its first request would remove that prefill on either lane.
 
-## Historical position — v0.8.6
+### Historical position — v0.8.6
 
 Long sessions no longer fail a turn while OMP compacts them. The config every documented
 route installs, [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml),
@@ -581,7 +672,7 @@ turn or tool call. Candidate `4f49fce7` passed the RTX 4090 route and a second R
 [Manifest](../releases/v0.8.6/manifest.json) ·
 [Qualification](../releases/v0.8.6/qualification.json).
 
-## Historical position — v0.8.5
+### Historical position — v0.8.5
 
 OMP compacts a 131,072-token session automatically at 111,412 tokens. For an image-capable
 model, its first usable method, snapcompact, archives earlier turns as PNGs at
@@ -657,7 +748,7 @@ its `v0.6.2-beta.1` package is built and tested (99/105 tests) but unpublished; 
 [Release notes](../releases/v0.8.5/NINFER_RELEASE_NOTES.md) ·
 [Qualification](../releases/v0.8.5/qualification.json).
 
-## Historical position — v0.8.4
+### Historical position — v0.8.4
 
 RTX 4090 ships `v0.6.9-qwen38-4090-beta.1` (package `6492588e`, server `65364401`,
 source `5ac17674`, configuration `ccecfbe3`). Its `engine.gpu_keep_warm_ms = 60000` uses an
@@ -709,7 +800,7 @@ package built and tested at `5ac17674` remains unpublished, with hardware qualif
 [Release notes](../releases/v0.8.4/NINFER_RELEASE_NOTES.md) ·
 [Qualification](../releases/v0.8.4/qualification.json).
 
-## Historical position — v0.8.3
+### Historical position — v0.8.3
 
 The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.2.
 RTX 5090 advances to `v0.6.12-qwen38-5090-beta.1` (image `cd9e10b1`, server `3ab266e5`,
@@ -763,7 +854,7 @@ RTX 5090 build in v0.8.3. Each session re-prefills once.
 The preceding v0.8.3 measurements are historical; the tracked-upstream table below records the
 current EXP-065 engine decision and the v0.8.6 client pin.
 
-## Historical position — v0.8.2
+### Historical position — v0.8.2
 
 The unmodified upstream OMP 18.3.0 client and model artifact are unchanged from v0.8.1.
 RTX 5090 advances to `v0.6.11-qwen38-5090-beta.1` (image `26813f56`, server `0d7e042b`,
@@ -801,7 +892,7 @@ RTX 5090 build in v0.8.2. OMP resends the full conversation and each session re-
 
 The upstream delta measurements below remain historical; keep-warm is not an upstream rebase.
 
-## Historical position — v0.8.1
+### Historical position — v0.8.1
 
 Runtime positions below retain the [2026-09-24 report](measurements/2026-09-24-upstream-watch.json);
 they are not new upstream delta measurements. The upstream NInfer rebase remains future work.
@@ -823,58 +914,3 @@ serving settings and floors are unchanged.
 [Release notes](../releases/v0.8.1/NINFER_RELEASE_NOTES.md) ·
 [Documented routes](../releases/v0.8.1/acceptance/documented-routes.json).
 
-## Tracked upstream delta — 2026-09-28
-
-| Upstream | Fork point | Delta | Position |
-|---|---|---|---|
-| `Neroued/ninfer` (engine; both mainline lanes build from one fork source) | `6e8b2e2a` (mainline base) | `d44ab584`, measured 2026-09-30 | **DFlash2 is worth taking, by port.** On `d44ab584` and the published v3 artifact, DFlash2 K=7 decoded the role corpus 28.2% faster than MTP3 on the same binary and 6.9% faster than the shipped runtime, at one request; it needs 1.65 GiB more weights and two fewer device state slots at two requests ([EXP-078](measurements/2026-09-30-dflash2-rtx5090.json)). Ported onto the fork's runtime (52 of upstream's 79 DFlash2-program commits, including `4b0eb36c`'s verify attention route for 24 query heads), it decodes the corpus 21.4% faster than shipped and 13.6% faster than upstream's DFlash2 at one request, with MTP3 byte-identical ([EXP-081](measurements/2026-09-30-dflash2-verify-route-rtx5090.json)); without that route its round grew with context ([EXP-079](measurements/2026-09-30-dflash2-fork-spike-rtx5090.json)). Two requests' rounds reached upstream's through the fork's own Q5 tensor-core route extended to 16 columns, not upstream's 16-column routes: a pair decodes 8.4% faster than shipped's ([EXP-082](measurements/2026-10-01-dflash2-pair-q5-tensor-cores-rtx5090.json)). Upstream has no durable session store; the fork carries DFlash2's draft context ring through its own checkpoints, with exact restores ([EXP-083](measurements/2026-10-01-dflash2-durable-store-rtx5090.json)). Upstream's NVFP4 KV, ported as final files from `d44ab584` behind the fork's storage identity, gives the two-request DFlash2 profile four device state slots and 262,144 KV tokens with rounds 12-27% shorter behind 32K-120K tokens ([EXP-084](measurements/2026-10-01-dflash2-nvfp4-kv-rtx5090.json)), but it failed the fork's powered quality screen against shipped MTP3 on unsupported claims and secret leaks, where DFlash2 with BF16 KV passed with 1,091 of 1,120 outputs byte-identical to shipped ([EXP-085](measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json)). Upstream's MTP3 decode rounds are still 16-18% slower than the shipped runtime's and its fanout reuse is 0/4 against 4/4, so a merge alone is not the win ([EXP-065](measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json), [prior EXP-048](measurements/2026-09-24-engine-window-upstream-vs-shipped.json)). |
-| `UDPSendToFailed/ninfer-4090` (4090 port) | `11aae2d6` | 57 commits at `5c60b7c9` (unchanged since 2026-09-09) | 9 of 51 candidates apply cleanly, all kernel retunes (EXP-045). The fixes this lane wants - chunked KV snapshot staging, the MTP restore stride, publishing finished snapshot saves, WDDM residency budgeting, the D3D12 residency fence, the admission shortfall and `/health` - conflict in files the fork changed and are read against v0.7.1's durability work when taken. Upstream removed its NVFP4 path (`dabae909`). |
-| `Don-Chad/ninfer-3090` (3090 port) | `ef6ecc3c` | 141 commits at `75d94eab` (unchanged since 2026-08-31) | At this report, triage awaited the RTX 3090 host. v0.9.1 accepts the standalone native lane from mainline source `f08309da`; it does not update this historical upstream delta or take the deferred engine merge. |
-| `can1357/oh-my-pi` (client) | Upstream v18.4.0 (`401778d0cd30020ce0f9198f751b13c68850562f`) | Unmodified upstream release binary; published 2026-09-28T03:33:34Z | v0.8.6 pins 18.4.0; all four documented routes passed. Fix `9d3e0d4975` resolves the Windows completion-status defect ([#13470](https://github.com/can1357/oh-my-pi/issues/13470), [EXP-070](measurements/2026-09-28-omp-1840-windows-completion-status.json)). RTX 5090 fragments now set `compat.supportsImageDetailOriginal: false` for automatic compaction ([EXP-071](measurements/2026-09-28-omp-snapcompact-image-detail.json)). The route config now sets `compaction.asyncEnabled: false`: three RTX 4090 handoffs took 77.0-83.7 s each with no expired admission; RTX 5090 snapcompact took 0.07-0.08 s ([EXP-072](measurements/2026-09-28-omp-long-sessions.json)); provider fields and `PI_OPENAI_STATEFUL=1` are unchanged; no fork build, archive, installer or cask. |
-
-**Historical client position through v0.7.4.** `omp-18.2.3-cross-platform-beta-1` (source
-`5ade242d`, since v0.7.3) carried 36 downstream commits on upstream `a2d83061` (v18.2.3),
-including the NInfer provider and appliance lifecycle. The 2026-09-24 watch counted 681 upstream
-commits to `62bc57be` (v18.3.0). At that time, the client plan was a rebase plus documented-route
-acceptance rather than direct adoption
-([EXP-046](measurements/2026-09-17-client-repin-evaluation.json)); v0.8.0 instead uses the stock
-binary with the stock-client runtime.
-
-### v0.6.9: parser semantics without the serve-adapter rebase
-
-The [2026-09-12 backport ledger](measurements/2026-09-12-upstream-backport-ledger.json) and the
-2026-09-13 delta counts it was read against are historical evidence for this release. The ledger
-deferred `3b50962b` and `0c5d570c` because their extracted parser files do not exist on this
-tree. The v0.6.9 release instead implements their semantics independently in the downstream
-parser: supported scalar unions, case-insensitive
-booleans, precise numeric lexemes, mathematically integral values, duplicate parameters, and
-balanced embedded markup. It does not import the wholesale serve-adapter rebase or change the
-fork point; custom raw input, history, opaque IDs, and stream ownership are preserved.
-
-Reviewed source `696e78c7b4e3ac28ffcffafc73acc1496e65ef03` includes remediation against
-malformed-region rescans and recursive union traversal; bytewise regressions and an 8,192-deep
-union case pass. It builds the published RTX 5090 `v0.6.5-qwen38-5090-beta.1` and native
-RTX 4090 `v0.6.3-qwen38-4090-beta.1` components. Both lanes are qualified and RTX 4090
-public-URL already-installed acceptance passed; the RTX 5090 documented host 2/2 and macOS
-10/10 routes passed against the published image.
-[Release notes](../releases/v0.6.9/NINFER_RELEASE_NOTES.md).
-The old backport ledger is intentionally unchanged: its deferred parser entry describes that
-earlier campaign, not the candidate's current parser coverage. The deferred pressure-planner
-family is separate; the alternating-session finding is already attributed to host KV capacity
-([EXP-039](measurements/2026-09-13-hostkv-capacity-multisession.json)), not proof that this
-product needs that planner rebase.
-
-## Why the fork points are what they are
-
-- The 5090 lane builds from the mainline runtime whose upstream base is `6e8b2e2a` (since v0.6.2);
-  later upstream movement is tracked separately from the reviewed backports and semantic ports
-  named above. The retired container mirror point `4eef14a7`
-  was the lineage's base before v0.6.2 and made the delta read 17 commits larger than it is.
-- The 4090/3090 native Windows lanes originally vendored their upstreams at the recorded
-  commits. Both now ship from the mainline runtime: v0.9.1 retains RTX 4090 source
-  `cba7eb93`; RTX 5090 source `e20060b6` is its child, and the RTX 3090 v0.6.2 component
-  builds that source plus the controller rollback fix at `f08309da` for sm_86. The
-  durable-checkpoint, security and packaging work remains downstream.
-- Through v0.7.4, the client fork point was the upstream tag commit onto which downstream
-  patches rebased. v0.9.1 does not build or publish an OMP client; it uses the upstream
-  release binary instead.
