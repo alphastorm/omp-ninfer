@@ -19,10 +19,40 @@ Kernel and runtime changes land in [alphastorm/ninfer](https://github.com/alphas
 (a downstream fork of [Neroued/ninfer](https://github.com/Neroued/ninfer)); this page tracks the
 program so contributors can see the state of play in one place.
 
+## Current state
+
+Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
+to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.12.1**
+(2026-10-12) pins unmodified upstream OMP 18.10.1 (`5d0aaffa`) and carries the v0.12.0 native and
+v0.11.0 RTX 5090 runtime bindings unchanged (see [`FACTS.md`](FACTS.md) and
+[`BENCHMARKS.md`](BENCHMARKS.md)).
+
+- **Current runtimes:**
+  - **RTX 5090 container (`sm_120a`):** `v0.6.16-qwen38-5090-beta.1` (source `1302d639`, image
+    `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0`, configuration
+    `91a35670`) with DFlash2 draft window 7, BF16 KV, 131,072-token context, and two requests in
+    flight ([qualification receipt](../releases/v0.12.1/qualification/rtx5090.json)).
+  - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.6.11-qwen38-4090-beta.1`
+    (package `52687044`, server `76f35b74`) and `v0.6.3-qwen38-3090-beta.1` (package `74120de0`,
+    server `bca236e5`) from shared source `cad19767` and model `eec39564`, with MTP3, INT8 KV,
+    131,072-token context, and one request at a time on a UUID-bound two-GPU host ([RTX 4090
+    receipt](../releases/v0.12.1/qualification/rtx4090.json), [RTX 3090
+    receipt](../releases/v0.12.1/qualification/rtx3090.json)).
+- **Shipped from the ledger:** DFlash2 K=7 with BF16 KV shipped on the RTX 5090 in v0.10.0
+  (EXP-078 to EXP-086, EXP-090). Single-launch 8-column verify attention and tensor-core pair mixer
+  outputs (EXP-092) plus small-T tensor-core Q4 query/key projections at 8 and 16 verify columns
+  (EXP-094) shipped in v0.11.0 (`v0.6.16`, source `1302d639`) and carry into v0.12.0 and v0.12.1.
+  EXP-095 compared the superseded fork candidate `a59c13d0` against upstream `81c8ce09` in a local
+  fixed-KV rehearsal — not the selected `1302d639` runtime — and closed the wholesale rebase
+  question in favor of selective backports. The native lanes retain MTP3 (EXP-089).
+- **Open work:** selective upstream kernel/feature backports, verify-round boundary pipelining
+  (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056), warm-turn fragment consolidation (EXP-059),
+  template-fork warm starts, and paged host-to-device KV prefetch beyond 262K tokens.
+
 ## Measured baseline
 
-One RTX 5090 (`sm_120a`), shipped v0.2 profile — Qwen3.8-27B `groupwise-int`, BF16 KV, MTP3,
-1,024-token prefill chunks, one active request
+Historical v0.2 baseline on one RTX 5090 (`sm_120a`), shipped `v0.2.0-beta.1` profile — Qwen3.8-27B
+`groupwise-int`, BF16 KV, MTP3, 1,024-token prefill chunks, one active request
 ([receipts](../releases/v0.2.0-beta.1/qualification.json)):
 
 | Metric | Value |
@@ -40,9 +70,9 @@ number kernel work is judged against.
 
 ### RTX 3090 candidate reference
 
-The fresh native Windows candidate adds a bounded transferability point, not an
-architecture-normalized comparison: MTP3, INT8 KV, C1, 4,541 computed prefill tokens, and an exact
-1,024-token completion at the 300 W profile cap.
+Historical 2026-08-30 native Windows candidate reference (promoted in v0.3.0), recorded as a bounded
+transferability point rather than an architecture-normalized comparison: MTP3, INT8 KV, C1, 4,541
+computed prefill tokens, and an exact 1,024-token completion at the 300 W profile cap.
 
 | Metric | Value |
 | --- | ---: |
@@ -54,8 +84,9 @@ architecture-normalized comparison: MTP3, INT8 KV, C1, 4,541 computed prefill to
 | Peak power / temperature | **299.8 W / 47 °C** |
 
 Exact package, source, and phase hashes:
-[`2026-08-30-rtx3090-parity.json`](measurements/2026-08-30-rtx3090-parity.json). These numbers
-remain candidate evidence until a new product manifest binds the package.
+[`2026-08-30-rtx3090-parity.json`](measurements/2026-08-30-rtx3090-parity.json). These numbers are
+historical v0.3.0 candidate evidence; current RTX 3090 qualification is in
+[`releases/v0.12.1/qualification/rtx3090.json`](../releases/v0.12.1/qualification/rtx3090.json).
 
 ## The profiling lane
 
@@ -1245,19 +1276,19 @@ Entry detail:
 
 ## Current order
 
-The backlog below is a pool; the program's order is fixed in [`ROADMAP.md`](../ROADMAP.md). The
-MTP campaign retains MTP3 and rejects K5/K7 for the current artifacts. The per-lane variant
-campaign closed the `nvfp4` question for the v0.4 train (rejected on the RTX 5090 because the
-card forces INT8 KV; NVFP4 W4A4 needs Blackwell tensor cores, so the `sm_89`/`sm_86` lanes are
-out of scope and the 4090 upstream removed its NVFP4 path) and produced two configuration-only
-lane changes; those and the RTX 5090 context-cache profile were requalified on 2026-09-05 and
-staged and cut as `v0.4.8` (EXP-015). Each lane carries its own best measured stack rather
-than one shared configuration. The native-lane restore path is fixed at source (EXP-017:
-RTX 4090 restores 24–26× faster, RTX 3090 8.5×); both lanes requalified it on 2026-09-05 and it
-ships in `v0.4.9`. The native lanes now build from mainline (EXP-025): the next RTX 4090 and
-RTX 3090 candidates come from `port/native-lanes-on-mainline`, with the RTX 4090 profile at
-two device-state slots, 24 host state slots, and a 4 GiB Host KV pool, and each is requalified
-through its own lifecycle tool (EXP-026) before a cut.
+The backlog below is a pool; product sequencing lives in [`ROADMAP.md`](../ROADMAP.md). On the
+RTX 5090 lane, DFlash2 K=7 with BF16 KV and two requests in flight replaced MTP3 in v0.10.0, and
+the round-cost reductions from EXP-092 (single-launch 8-column verify attention and tensor-core
+pair mixer outputs) and EXP-094 (small-T tensor-core Q4 query/key projections) shipped in v0.11.0
+(`v0.6.16-qwen38-5090-beta.1`, source `1302d639`) and carry unchanged into v0.12.0 and v0.12.1.
+On the RTX 4090 and RTX 3090 native Windows lanes, MTP3 with INT8 KV and one active request
+remains the qualified stack (`v0.6.11` and `v0.6.3`, source `cad19767`); DFlash2 does not link on
+`sm_89`/`sm_86` or fit the 24 GB 131,072-token budget (EXP-089). EXP-095 compared the superseded
+fork candidate `a59c13d0` against upstream `81c8ce09` in a local fixed-KV rehearsal — not the
+selected `1302d639` runtime — and confirmed that selective backports remain the engineering path
+while upstream lacks the durable disk session store and exceeds the 32 GB automatic C2 BF16 budget.
+Open kernel work targets verify-round host-commit idle time (EXP-058, EXP-092), Q4/Q5 epilogue
+fusion (EXP-056), warm-turn fragment consolidation (EXP-059), and host-to-device KV prefetch.
 
 ## Ideas backlog
 
@@ -1270,7 +1301,7 @@ hypothesis and method before writing code.
 | Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus is 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refuses by 561.47 MiB; durable disk sessions remain fork-only | EXP-095 closed — continue selective backport; no adoption |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold. DFlash2 K=7 rounds idle 324–350 µs each, 1.4–2.2% of a round (EXP-092) | open |
-| Q4 query/key projections on the tensor cores at verify widths | The GDN and attention query/key projections took 1.68 ms of every one-request DFlash2 round (2.67 ms in a pair) on SIMT at 28–31% of DRAM bandwidth, and no byte-identical schedule is faster (EXP-093). On the Q4 small-T tensor-core kernel they take 0.82 ms, rounds are 0.8 ms shorter (1.9 ms in a pair), and the changed outputs pass EXP-085's powered screen (EXP-094) | kept; awaits an RTX 5090 candidate |
+| Q4 query/key projections on the tensor cores at verify widths | The GDN and attention query/key projections took 1.68 ms of every one-request DFlash2 round (2.67 ms in a pair) on SIMT at 28–31% of DRAM bandwidth, and no byte-identical schedule is faster (EXP-093). On the Q4 small-T tensor-core kernel they take 0.82 ms, rounds are 0.8 ms shorter (1.9 ms in a pair), and the changed outputs pass EXP-085's powered screen (EXP-094) | shipped RTX 5090 v0.11.0 (`v0.6.16`, source `1302d639`; carried into v0.12.0 and v0.12.1) |
 | Run a request's consecutive prefill fragments through each layer together | A production-shaped warm turn runs six full-model passes split at chat-template boundaries; merging the fragments' prompt attention into one launch per layer saves about 27 ms per extra prompt pass at 29K context while each fragment keeps its projection route and GDN decomposition (EXP-059) | open |
 | Fold warm-turn template fragments into fewer passes | Four 2–3-token fragments cost 59–60 ms of a 283–307 ms warm turn and the reasoning-block pass runs its projections at 20–25% of peak; six passes to two would take an estimated 115–130 ms off, but needs per-row arithmetic that does not depend on pass width so resumed and cold execution stay bit-identical (EXP-059) | open |
 | Hold the RTX 5090 out of its idle P-states when agent requests arrive | 138 of 446 agent requests, including 103 of 106 new sessions, arrive 5 s or more after the previous one, when the card has stepped toward P8; their first prefill pass runs 1.6–2.3× slower and new-session TTFT is 0.36 s against about 0.19 s on a busy card (EXP-060). A single-warp spin holds P1 (EXP-061). Prototyped in the engine as `--gpu-keep-warm-ms` (EXP-062): new sessions after 12–58 s idle at 0.173–0.181 s TTFT, outputs byte-identical, about 71 W above idle while held; a 60 s grace catches 84 of 138 idle arrivals at about 2.3 W average. Shipped in v0.8.2 with a 60 s grace in the RTX 5090 profile | shipped RTX 5090 v0.8.2; RTX 4090 v0.8.4 with sm_89 50 ms/100 ms keep-warm (EXP-066) |
@@ -1282,10 +1313,10 @@ hypothesis and method before writing code.
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
 | Deeper MTP drafting (K=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
-| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081), a two-request pair 8.4% above shipped's (EXP-082), sessions on the durable store with exact restores (EXP-083), MTP3 byte-identical. With BF16 KV DFlash2 passed the powered quality screen, 1,091 of 1,120 outputs byte-identical to shipped (EXP-085); NVFP4 KV (four slots, 262,144 tokens, EXP-084) failed it on unsupported claims and secret leaks (EXP-085), and FP8 KV (four slots, 249,216 tokens, EXP-087) on secret leaks (EXP-088). The BF16 profile passed v0.9.0's probes but decodes free-form reasoning 2-5% slower solo and 21-27% slower in pairs, and lost one session's reuse across a restart (EXP-086). The port does not link for sm_89 or sm_86 and would not fit 131,072 tokens on 24 GB (EXP-089). One verify attention pass per layer and the pair's mixer outputs on the tensor cores shorten rounds 8–19% behind 32K–120K tokens and 8% in pairs, byte-identical; K=15 drafting does not pay (EXP-092). The 8- and 16-column Q4 query/key projections on the tensor cores take another 0.8 ms off every one-request round and 1.9 ms off a pair's, with outputs changed but inside EXP-085's powered screen (EXP-094) | shipped RTX 5090 v0.10.0 (BF16, two device state slots, 131,520 KV tokens); EXP-092 and EXP-094 await a candidate; native lanes stay on MTP3 |
+| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081), a two-request pair 8.4% above shipped's (EXP-082), sessions on the durable store with exact restores (EXP-083), MTP3 byte-identical. With BF16 KV DFlash2 passed the powered quality screen, 1,091 of 1,120 outputs byte-identical to shipped (EXP-085); NVFP4 KV (four slots, 262,144 tokens, EXP-084) failed it on unsupported claims and secret leaks (EXP-085), and FP8 KV (four slots, 249,216 tokens, EXP-087) on secret leaks (EXP-088). The BF16 profile passed v0.9.0's probes but decodes free-form reasoning 2-5% slower solo and 21-27% slower in pairs, and lost one session's reuse across a restart (EXP-086). The port does not link for sm_89 or sm_86 and would not fit 131,072 tokens on 24 GB (EXP-089). One verify attention pass per layer and the pair's mixer outputs on the tensor cores shorten rounds 8–19% behind 32K–120K tokens and 8% in pairs, byte-identical; K=15 drafting does not pay (EXP-092). The 8- and 16-column Q4 query/key projections on the tensor cores take another 0.8 ms off every one-request round and 1.9 ms off a pair's, with outputs changed but inside EXP-085's powered screen (EXP-094) | shipped RTX 5090 v0.10.0 (BF16, two device state slots, 131,520 KV tokens); EXP-092 and EXP-094 shipped in v0.11.0 (`v0.6.16`, source `1302d639`); native lanes stay on MTP3 |
 | RTX 5090 `nvfp4` artifact swap | Measured on 2026-09-04: 2.22× prefill and −3.5% decode with INT8 KV, refuses to start with BF16 KV at 131,072 context; two-case grounding shift on the private screen | rejected for v0.4; v0.5 candidate with INT8 KV |
-| RTX 4090 prefill chunk 2,048 | Measured on 2026-09-04: +22.8% prefill, +2.0% decode, +270 MiB peak, session time +5.5% to +12.8% against the shipped 512; 4,096 regresses decode | kept; requalify |
-| RTX 3090 131,072-token context | Measured on 2026-09-04: automatic KV capacity 131,072 at 22,465 MiB peak with unchanged throughput on the shipped INT8 profile | kept; qualify |
+| RTX 4090 prefill chunk 2,048 | Measured on 2026-09-04: +22.8% prefill, +2.0% decode, +270 MiB peak, session time +5.5% to +12.8% against the shipped 512; 4,096 regresses decode | shipped v0.4.8 |
+| RTX 3090 131,072-token context | Measured on 2026-09-04: automatic KV capacity 131,072 at 22,465 MiB peak with unchanged throughput on the shipped INT8 profile | shipped v0.4.8 |
 | INT8 KV on the RTX 5090 and RTX 4090 lanes | No session-time gain on the RTX 5090 (4.2 GB VRAM headroom only); +8.8% to +13.3% on the RTX 4090 at 23,180 of 24,564 MiB peak; worse role-corpus screen on both | rejected |
 
 ## Contributing a result

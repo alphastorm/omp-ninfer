@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refresh the README and user documentation around the published v0.12.1 release: front doors state
+  the product, fit and lanes once; release chronology moves to the changelog, docs/RELEASES.md and
+  the tagged release notes; docs/QUICKSTART.md prose is reorganized with every documented-route
+  block byte-identical.
+
+## [0.12.1] - 2026-10-12
+
 ### Fixed
 
 - Refuse release readiness when tracked Markdown outside `releases/` calls the selected release unreleased,
@@ -31,12 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   installs passed. Independent restoration includes mutable directory presence,
   native staging and canonical state/tasks/holds/client files/power; production
   was not upgraded. macOS remains preview and Linux scope remains WSL2.
-- Restore native Windows RTX 3090 v0.6.3 and RTX 4090 v0.6.11 lanes on one two-GPU
-  host. Each lane binds its own GPU UUID; only one runs at a time on port 18082.
-- Bind fresh v0.12.0 acceptance: all five documented routes (31 blocks), three stock
-  OMP 18.8.7 clients and both native public installs passed on frozen `7713ceb9`.
-  Measured native and RTX 5090 incumbent baselines were restored; immutable evidence
-  pins preserve every executed block. Production was not upgraded.
 
 ### Changed
 
@@ -47,6 +50,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Record the host-free non-applicability of the specific OMP 18.9.0 Responses-stream
   fix to NInfer raw reasoning and full tool-argument snapshots. This is routine
   upstream currency, not a demonstrated NInfer correctness or throughput change.
+
+## [0.12.0] - 2026-10-11
+
+### Added
+
+- Restore native Windows RTX 3090 v0.6.3 and RTX 4090 v0.6.11 lanes on one two-GPU
+  host. Each lane binds its own GPU UUID; only one runs at a time on port 18082.
+- Bind fresh v0.12.0 acceptance: all five documented routes (31 blocks), three stock
+  OMP 18.8.7 clients and both native public installs passed on frozen `7713ceb9`.
+  Measured native and RTX 5090 incumbent baselines were restored; immutable evidence
+  pins preserve every executed block. Production was not upgraded.
+
+### Changed
+
 - Make native route host selection and required holds explicit operator inputs for both
   lanes. Hosts without a container appliance need no invented pause marker; existing
   holds are still preserved and audited independently of lane identity. Native endpoint
@@ -64,6 +81,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Give v0.12.0 final descriptive release notes in house style, leading with the exact
   support boundary, sequential two-GPU native topology and RTX 4090 no-target rollback
   result. Keep measured qualification, fresh product proof and non-claims distinct.
+
+## [0.11.0] - 2026-10-10
+
+### Changed
+
 - Keep release-facing prose in house style (RTX 5090, OMP 18.8.7 and separated
   words/numbers). The guard rejects any word of two or more letters glued to a digit,
   with a documented identifier allowlist, outside code and URLs. It covers living docs,
@@ -103,7 +125,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   archive pins remain unchanged. Staging's draft-residue consumer uses the same
   platform-specific diagnostics. Focused regressions cover the allowlist and cut-blocking
   Mac/Windows archive bindings.
-
 - Target unmodified upstream OMP **18.8.7** in current install instructions and root profiles,
   pinned to source `f261ed9faf16b61880b544f599876bface4ded0d` and the upstream binary checksums.
   This was an **unreleased v0.11.0 product candidate**, bound to published components;
@@ -2288,7 +2309,10 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.8.7...v0.9.0

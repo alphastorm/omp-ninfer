@@ -1,6 +1,7 @@
 # Contributing
 
-OMP NInfer has a public release for three exact qualified GPU lanes. High-signal installation
+OMP NInfer connects [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) to three exact qualified
+GPU lanes (RTX 5090, RTX 4090, and RTX 3090). High-signal installation
 reports, reproducible integration defects, documentation corrections, benchmark submissions,
 performance work through the
 [performance program](docs/PERFORMANCE.md), and release-contract fixes are useful. Generic
@@ -34,14 +35,16 @@ redaction. Security reports always stay private.
 
 - Product manifest, profile, setup, qualification composition, benchmarks/leaderboard, and support
   docs: this repository.
-- NInfer engine/server, CUDA kernels, numerical behavior, or container: `alphastorm/ninfer`
-  (downstream of [Neroued/ninfer](https://github.com/Neroued/ninfer); kernel/perf work starts at
+- NInfer engine/server, CUDA kernels, numerical behavior, or container:
+  [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) (downstream of
+  [Neroued/ninfer](https://github.com/Neroued/ninfer); kernel/perf work starts at
   [docs/PERFORMANCE.md](docs/PERFORMANCE.md)).
 - OMP session/tool/provider semantics: upstream
   [Oh My Pi](https://github.com/can1357/oh-my-pi). This product pins unmodified upstream release
-  binaries and carries no client fork.
-- Native RTX 4090 and RTX 3090 runtime variants: their reviewed branches in `alphastorm/ninfer`
-  (upstream ports: [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090),
+  binaries by SHA-256 and carries no client fork.
+- Native Windows RTX 4090 and RTX 3090 runtime components:
+  [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) (upstream port lineage:
+  [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090),
   [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090)).
 
 Do not duplicate implementation across repositories to make a local patch easier.

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OMP NInfer status — current qualified release and lanes</title>
-<meta name="description" content="v0.7.3 client-only OMP 18.2.3 repin: RTX 5090 Docker/WSL2 and RTX 4090 native Windows 11. RTX 3090 deferred; measured runtime limits unchanged.">
+<title>OMP NInfer status — v0.12.1 qualified release and GPU lanes</title>
+<meta name="description" content="OMP NInfer v0.12.1 (published 2026-10-12): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.10.1. Current lane table, sequential native two-GPU topology, and acceptance receipts.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/status/">
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<meta property="og:title" content="OMP NInfer status — current qualified release and lanes">
-<meta property="og:description" content="v0.7.3 client-only OMP 18.2.3 repin: RTX 5090 Docker/WSL2 and RTX 4090 native Windows 11. RTX 3090 deferred; measured runtime limits unchanged.">
+<meta property="og:title" content="OMP NInfer status — v0.12.1 qualified release and GPU lanes">
+<meta property="og:description" content="OMP NInfer v0.12.1 (published 2026-10-12): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.10.1. Current lane table, sequential native two-GPU topology, and acceptance receipts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/status/">
 <meta name="twitter:card" content="summary">
@@ -17,8 +17,10 @@
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
- "operatingSystem": "Windows 11 (RTX 5090 via Docker Desktop/WSL2; RTX 4090 native)",
- "description": "Durable local inference for coding agents. Qwen3.8 27B via NInfer with restart-resumable OpenAI Responses state. v0.7.3 scope: RTX 5090 or RTX 4090 with OMP 18.2.3; RTX 3090 deferred.",
+ "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.12.1 (published 2026-10-12) with stock Oh My Pi 18.10.1 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.12.1",
+ "datePublished": "2026-10-12",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -38,50 +40,90 @@
 </header>
 <main>
 <p class="eyebrow">Status</p>
-<h1>v0.7.3 client repin</h1>
-<p class="lede"><strong>v0.7.3 is the current public release.</strong>
-v0.7.3 advances the pinned client to <strong>OMP 18.2.3</strong> for the two eligible GPU routes below.
-RTX 5090 and RTX 4090 runtime image/package bytes, model, serving settings and host-memory
-floors remain those of v0.7.2. Runtime measurements are carried evidence, not fresh throughput.</p>
+<h1>v0.12.1 — qualified on RTX 5090 · 4090 · 3090</h1>
+<p class="lede">Published 2026-10-12 as GitHub <code>Latest</code>. v0.12.1 binds unmodified upstream
+Oh My Pi <strong>18.10.1</strong> to the three qualified GPU lanes below, carrying unchanged runtime
+and package qualifications from v0.12.0 (native) and v0.11.0 (RTX 5090).</p>
+
+<div class="receipt">
+<strong>Qualified on RTX 5090 · 4090 · 3090 — v0.12.1, stock Oh My Pi 18.10.1</strong>
+<p>Fresh v0.12.1 acceptance on frozen candidate <code>780b0639</code>: five documented routes,
+<span class="n">31</span> steps, three stock Oh My Pi 18.10.1 clients (typed tool turn, exact
+continuation, fail-closed request), and both native Windows public installs passed with independent
+host restoration; owner-operated evidence.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/acceptance/documented-routes.json">Documented routes</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/acceptance/composed-external-installation.json">Composed installation proof</a>.</p>
+</div>
+
+<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md">Get started with v0.12.1</a>
+
+<h2>Current qualified lanes</h2>
 <table>
-<tr><th>Lane</th><th>Form</th><th>Context ceiling</th><th>Notes</th></tr>
-<tr><td>RTX 5090</td><td>Windows 11 + Docker Desktop/WSL2 Linux container</td><td>131,072</td><td>Durable container; vision available</td></tr>
-<tr><td>RTX 4090</td><td>Native Windows 11 service</td><td>131,072</td><td>MTP3 profile; DirectStorage checkpoints; text-only</td></tr>
+<tr><th>Lane</th><th>Runtime tag &amp; artifacts</th><th>Client</th><th>State &amp; serving profile</th><th>Receipt</th></tr>
+<tr>
+<td>RTX 5090 (Windows 11 + Docker Desktop/WSL2, <code>127.0.0.1:18089</code>)</td>
+<td><code>v0.6.16-qwen38-5090-beta.1</code> (source <code>1302d639</code>, image <code>6a02feba</code>, server <code>548fe239</code>, model <code>0634abb0</code> · 20,437,336,576&nbsp;B)</td>
+<td>Stock Oh My Pi <code>18.10.1</code> (Windows x64 local; macOS arm64 manual SSH tunnel preview; Linux x64 under WSL2)</td>
+<td>Qualified — <code>qwen38-5090-v0.11.0</code>, config <code>91a35670</code>: DFlash2 draft window 7, BF16 KV, 131,072 context, two requests in flight, vision + tools + preserved thinking</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/qualification/rtx5090.json">rtx5090.json</a></td>
+</tr>
+<tr>
+<td>RTX 4090 native Windows 11 (<code>127.0.0.1:18082</code>)</td>
+<td><code>v0.6.11-qwen38-4090-beta.1</code> (source <code>cad19767</code>, package <code>52687044</code>, server <code>76f35b74</code>, model <code>eec39564</code> · 18,210,531,328&nbsp;B)</td>
+<td>Stock Oh My Pi <code>18.10.1</code> (<code>omp-windows-x64.exe</code>)</td>
+<td>Qualified — <code>qwen38-4090-native-v0.6.11-beta.1</code>, config <code>1971cd29</code>: MTP3, INT8 KV, 131,072 context, 11,264&nbsp;MiB host KV, one request at a time, text + tools (no vision)</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/qualification/rtx4090.json">rtx4090.json</a></td>
+</tr>
+<tr>
+<td>RTX 3090 native Windows 11 (<code>127.0.0.1:18082</code>)</td>
+<td><code>v0.6.3-qwen38-3090-beta.1</code> (source <code>cad19767</code>, package <code>74120de0</code>, server <code>bca236e5</code>, model <code>eec39564</code> · 18,210,531,328&nbsp;B)</td>
+<td>Stock Oh My Pi <code>18.10.1</code> (<code>omp-windows-x64.exe</code>)</td>
+<td>Qualified — <code>qwen38-3090-native-v0.6.3-beta.1</code>, config <code>93bc3fd6</code>: MTP3, INT8 KV, 131,072 context, 8,192&nbsp;MiB host KV, 300&nbsp;W serving power cap, one request at a time, text + tools (no vision)</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/qualification/rtx3090.json">rtx3090.json</a></td>
+</tr>
 </table>
-<p><strong>RTX 3090 is deferred for v0.7.3.</strong> Its separately linked
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md">historical v0.7.2 route</a>
-remains on OMP 18.0.9, not qualified with the new client. New-client qualification waits for
-its host’s return.</p>
-<h2>Fresh client and documented-route acceptance</h2>
-<p>The published macOS arm64, Windows x64 and Linux x64 clients all passed live inference;
-all three provider-free hosted qualifications are public. The Linux live run used
-<strong>Ubuntu under WSL2</strong>, not a separately qualified non-WSL Linux OS or a
-managed-install readiness claim from diagnostics.</p>
-<p><strong>24 documented steps passed:</strong> RTX 5090 host 2, macOS client 10, Windows client 5,
-and RTX 4090 native 7, on frozen product source
-<a href="https://github.com/alphastorm/omp-ninfer/commit/096c8b889eef4bc89ee2dc316694b847bdf8a39d"><code>096c8b88</code></a>.
-Pre-cut substitutions are recorded and all hosts were restored.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/releases/v0.7.3/acceptance/documented-routes.json">Documented routes</a> ·
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/releases/v0.7.3/qualification.json">Client qualification</a>.</p>
-<p>The authority now uses the client’s existing <code>durable-checkpoint</code> capability rather
-than the rejected <code>process-restart-continuation</code> name; this vocabulary fix adds no runtime behavior.</p>
-<h2>Known caveats</h2>
+
+<h2>Native two-GPU sequential topology and rollback</h2>
 <ul>
-<li>One active request per lane (max concurrency 1); not a serving farm.</li>
-<li>Carried v0.7.2 evidence: both target 126K-token RTX 5090 sessions resumed in 5.96 s and 23.57 s. The combined probe
-process also reported three unsaved predecessor sessions at shutdown, and a separate control
-lost warm reuse on 2 of 8 continuations/forks. This is not universal durability or warm reuse;
-automatic checkpoints remain best effort.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/measurements/2026-09-17-restore-reclaim.json">Exact-source evidence and limits</a>.</li>
-<li>Host/NAS replicas are supported; restore requires the same binary, artifact, profile, and
-session credentials. Transport is not cross-GPU migration or automatic failover.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Evidence and limits</a>.</li>
-<li>Use the exact Oh My Pi client pinned by the release manifest; do not run <code>omp update</code> over a lane install.</li>
+<li><strong>One native lane at a time on port 18082:</strong> Both native Windows lanes install on
+one two-GPU Windows 11 host (RTX 4090 at index 0, RTX 3090 at index 1), each bound to its own GPU
+UUID and PCI address. Only one native lane runs at a time on authenticated loopback port
+<code>127.0.0.1:18082</code>. This is not multi-GPU inference and not concurrent native
+serving.</li>
+<li><strong>Lane-specific rollback:</strong> The RTX 3090 lane retains qualified two-direction
+rollback against its <code>v0.6.2-beta.1</code> predecessor on the two-GPU host. The RTX 4090 lane
+is the first release of its lineage on that topology and has no supported rollback target
+(<code>rollback: not_applicable</code>, zero directions); <code>v0.6.10</code> and earlier RTX 4090
+packages are unsupported on the two-GPU host.</li>
 </ul>
-<p>Machine-readable truth: <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.7.3/releases/v0.7.3/manifest.json">v0.7.3 manifest</a> ·
+
+<h2>Client scope and operating boundaries</h2>
+<ul>
+<li><strong>Stock Oh My Pi 18.10.1:</strong> Unmodified upstream release assets
+(<code>omp-darwin-arm64</code> <code>74d920b7</code>, <code>omp-windows-x64.exe</code>
+<code>2ab55ace</code>, <code>omp-linux-x64</code> <code>9798d22d</code>) pinned in
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/qualification/client-components.json"><code>client-components.json</code></a>.
+Stock OMP has no <code>omp appliance</code> commands; model fragments set per-model
+<code>compat.statefulResponses: true</code>, <code>PI_OPENAI_STATEFUL</code> must be absent, and
+<code>examples/manual-tunnel/fail-closed.yml</code> limits in-flight requests per provider
+(<code>2</code> on RTX 5090, <code>1</code> per native lane).</li>
+<li><strong>macOS preview:</strong> The macOS arm64 client reaches the Windows RTX 5090 container
+over a manual authenticated SSH local forward (<code>127.0.0.1:18089</code>); it remains preview
+without a managed client installer or appliance lifecycle wrapper.</li>
+<li><strong>Linux under WSL2:</strong> Live Linux-client qualification ran on Ubuntu under WSL2
+against the local RTX 5090 container, not on a separately qualified non-WSL Linux OS.</li>
+<li><strong>Durability and checkpoints:</strong> Checkpoints restore after a server restart on all
+three lanes within the same runtime binary, model artifact, serving profile, and session
+credentials. Saves remain best effort under live traffic (a crash or expired graceful wait can lose
+unsaved work), and universal warm reuse is not promised.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Checkpoint transport and NAS replication</a>.</li>
+</ul>
+<p>Machine-readable truth:
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/manifest.json">v0.12.1 manifest</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/releases/v0.12.1/NINFER_RELEASE_NOTES.md">v0.12.1 release notes</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md">release lifecycle</a></p>
-<p class="verified">Updated 2026-09-18: fresh OMP 18.2.3 client/route acceptance; carried v0.7.2 runtime qualification.</p>
+<p class="verified">Updated 2026-10-17 for published v0.12.1 (2026-10-12): fresh Oh My Pi 18.10.1 client, documented-route, and native public-install acceptance; carried runtime qualification.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

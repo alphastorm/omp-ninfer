@@ -39,7 +39,7 @@ stay retired. Do not reuse them.
   the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
   is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
-  When install authority matters, bind it to the current ready release (`v0.6.1`) instead of
+  When install authority matters, bind it to the current ready release (`v0.12.1`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
 - Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
   documentation links whenever the surface has room for only one action. The GitHub `Latest`
@@ -178,22 +178,32 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 <div align="center">
 
+<sub>DURABLE LOCAL INFERENCE FOR CODING AGENTS</sub>
+
 # OMP NInfer
 
-**Durable session state on your GPU.**
+**Your coding session should survive the process.**
 
-**Qualified on RTX 5090 · 4090 · 3090**
+Durable session state on your GPU.
 
-If you use [Oh My Pi](https://github.com/can1357/oh-my-pi) and own a qualified RTX card,
-OMP NInfer keeps Qwen3.8 27B and your session's continuation state on your GPU — as an explicit,
-durable primitive, not a lucky prefix-cache hit.
+[Oh My Pi](https://github.com/can1357/oh-my-pi) (coding-agent client) → **OMP NInfer** (qualified
+appliance and release layer) → [NInfer](https://github.com/Neroued/ninfer) (inference engine) →
+[Qwen3.8 27B](https://huggingface.co/neroued/Qwen3.8-27B-NInfer) (served model).
 
-**[Get started](docs/QUICKSTART.md)**
+**Qualified on RTX 5090 · 4090 · 3090 — v0.12.1, stock Oh My Pi 18.10.1 (published 2026-10-12)**
 
-**[Download v0.6.1](https://github.com/alphastorm/omp-ninfer/releases/latest)** ·
-**[Benchmarks](docs/BENCHMARKS.md)** · **[Architecture](docs/ARCHITECTURE.md)** ·
-**[Performance program](docs/PERFORMANCE.md)** · **[Security](docs/SECURITY.md)** ·
-**[Roadmap](ROADMAP.md)** · **[Changelog](CHANGELOG.md)**
+Fresh v0.12.1 acceptance: five documented routes, 31 steps, three stock clients, and both native
+public installs passed with independent restoration (owner-operated;
+[composed receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
+
+**[Get started](docs/QUICKSTART.md)** ·
+**[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1)**
+
+[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) ·
+[Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
+[Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) ·
+[Troubleshooting](docs/TROUBLESHOOTING.md) · [Roadmap](ROADMAP.md) ·
+[Changelog](CHANGELOG.md)
 ```
 
 followed by the badge row and the private-by-design subline as currently set in `README.md`.
