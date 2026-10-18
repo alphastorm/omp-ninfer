@@ -1,0 +1,51 @@
+{
+  "artifact_type": "omp_ninfer_stock_client_preflight",
+  "schema_version": 1,
+  "product_release": "v0.12.2",
+  "platform": "darwin-arm64",
+  "status": "preflight-passed",
+  "as_of": "2026-10-18",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.12.1",
+    "commit": "291e055836c210f314af3f73f53244e8e9d09de8",
+    "tree": "c9d897cc3f06d7cd80f7cacb5144c208efa70f62"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.12.1",
+    "upstream_commit": "291e055836c210f314af3f73f53244e8e9d09de8",
+    "os": "macOS 27",
+    "architecture": "arm64",
+    "published": true,
+    "asset_name": "omp-darwin-arm64",
+    "asset_bytes": 195462176,
+    "asset_sha256": "fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+    "binary_sha256": "fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+    "release_id": 416123868,
+    "asset_id": 651859229,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.1/omp-darwin-arm64"
+  },
+  "checks": {
+    "downloaded_sha256": "fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+    "downloaded_bytes": 195462176,
+    "release_sha256sums_match": true,
+    "version": "omp/18.12.1",
+    "help_contract": "passed",
+    "prompt_argv_exact": true,
+    "stateful_environment": {},
+    "inherited_pi_openai_stateful_cleared": true
+  },
+  "safety": {
+    "isolated_home": true,
+    "real_omp_home_modified": false,
+    "fleet_contact": false,
+    "inference_request": false,
+    "live_route_qualification_claimed": false
+  },
+  "limitations": [
+    "Identity/version/help/argv preflight only; no live tool, continuation, outage, served-runtime or SSH route acceptance.",
+    "Complete platform acceptance must be composed from the later owner-authorized RTX 5090 window."
+  ]
+}

@@ -13,9 +13,9 @@ The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The versioned fragments bind **v0.12.1 / OMP 18.10.1** with unchanged runtime/model/profile
+The versioned fragments bind **v0.12.2 / OMP 18.12.1** with unchanged runtime/model/profile
 settings. No new-client fleet qualification is claimed; installation eligibility follows
-the exact manifest ready gate. Published v0.12.0 / OMP 18.8.7 proof remains separate. The release uses the checksummed binary from the
+the exact manifest ready gate. Published v0.12.1 / OMP 18.10.1 proof remains separate. The release uses the checksummed binary from the
 [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
 `models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not

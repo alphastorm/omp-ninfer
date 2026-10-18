@@ -6,11 +6,30 @@ product; component repositories keep their own versions and tags, and the produc
 the exact combination.
 
 **Navigation:** [Current release (v0.12.1)](#v0121--stock-omp-18101-unchanged-runtime-bindings) ·
+[Staged v0.12.2](#v0122--stock-omp-18121-unchanged-runtime-bindings) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
+
+## v0.12.2 — stock OMP 18.12.1, unchanged runtime bindings
+
+Staged 2026-10-18 as the next client-only patch; `v0.12.1` stays GitHub `Latest`. Unmodified
+upstream OMP **18.12.1** (`291e0558`) replaces 18.10.1. All runtime component bytes, models,
+serving profiles, and the one-lane-at-a-time two-GPU native topology carry unchanged from
+v0.12.1. 18.12.1 contains the upstream fix for the native Windows client resolving a
+drive-relative operand such as `C:` against its start directory, which let `rm -rf C:` delete it
+([#15511](https://github.com/can1357/oh-my-pi/issues/15511)), and two `omp -p` false-success exit
+fixes ([#15732](https://github.com/can1357/oh-my-pi/pull/15732),
+[#15897](https://github.com/can1357/oh-my-pi/pull/15897)). The
+[client upgrade review](measurements/2026-10-18-omp-18121-client-upgrade-review.json) records the
+asset identities, fix inclusion, the Darwin CLI preflight, and a loopback comparison with 18.10.1;
+no runtime correctness or performance claim is made. Fresh platform, documented-route, and native
+public-install acceptance must pass in authorized windows before readiness. See the
+[release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md),
+[manifest](../releases/v0.12.2/manifest.json), and
+[qualification](../releases/v0.12.2/qualification.json).
 
 ## v0.12.1 — stock OMP 18.10.1, unchanged runtime bindings
 

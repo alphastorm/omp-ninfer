@@ -1,0 +1,195 @@
+{
+  "artifact_type": "omp_ninfer_content_safe_lane_logs",
+  "schema_version": 1,
+  "stages": {
+    "lane-mtp3-control": {
+      "request_log_present": true,
+      "request_log_sha256": "29f88643225627b9b069d75e98da3491f7553d5f4ed6e23b77d152f73ea26509",
+      "records": 254,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 1,
+        "request_start": 84,
+        "throughput": 85,
+        "request_done": 84
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 8504,
+      "max_root_computed_prefill_tokens": 5725,
+      "root_prefills_over_60000": 0,
+      "container_log_present": true,
+      "container_log_sha256": "38a3f9afce6c760bf96092b5dc1e5b901b4c693f9a391df1ce8dfd47a5c83679",
+      "shutdown_summaries": [
+        {
+          "saved": 0,
+          "nothing_to_save": 0,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    },
+    "lane-profile": {
+      "request_log_present": true,
+      "request_log_sha256": "805ea9cbef813d28d2ede2460157ae99494cc97e0c43fe71b1e18386392bd9c4",
+      "records": 31,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 2,
+        "request_start": 7,
+        "throughput": 15,
+        "request_done": 7
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 130048,
+      "max_root_computed_prefill_tokens": 130048,
+      "root_prefills_over_60000": 1,
+      "container_log_present": true,
+      "container_log_sha256": "08ff4f02a13ed042de768e9ab57b48aed7dd5bcdde16d572447bcbf184153cdb",
+      "shutdown_summaries": [
+        {
+          "saved": 1,
+          "nothing_to_save": 0,
+          "refused": 0
+        },
+        {
+          "saved": 0,
+          "nothing_to_save": 0,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    },
+    "lane-stock-omp": {
+      "request_log_present": true,
+      "request_log_sha256": "8f94eb75dab5b61c8e85ebbff06a260a87d9c02087091e2c6734e634645e195f",
+      "records": 16,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 3,
+        "request_start": 5,
+        "request_done": 5,
+        "throughput": 3
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 7580,
+      "max_root_computed_prefill_tokens": 7580,
+      "root_prefills_over_60000": 0,
+      "container_log_present": true,
+      "container_log_sha256": "9a1b2a5504e7b503fc170eb2ede5e48dfa5ffbff0c40103eb063ac54841db412",
+      "shutdown_summaries": [
+        {
+          "saved": 1,
+          "nothing_to_save": 0,
+          "refused": 0
+        },
+        {
+          "saved": 0,
+          "nothing_to_save": 1,
+          "refused": 0
+        },
+        {
+          "saved": 0,
+          "nothing_to_save": 1,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    },
+    "lane-long-sessions": {
+      "request_log_present": true,
+      "request_log_sha256": "3ba340870286372b5b4716d6f499aae742a24a0b1107b57162aa051c8f16518f",
+      "records": 156,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 1,
+        "request_start": 41,
+        "throughput": 73,
+        "request_done": 41
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 58112,
+      "max_root_computed_prefill_tokens": 58112,
+      "root_prefills_over_60000": 0,
+      "container_log_present": true,
+      "container_log_sha256": "99eb68cefc0f7ee3e41ec433e75029fc54468cda1cbf7c64c3ed9172386e8c5d",
+      "shutdown_summaries": [
+        {
+          "saved": 0,
+          "nothing_to_save": 3,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    },
+    "lane-short-sessions": {
+      "request_log_present": true,
+      "request_log_sha256": "2cc05bcffc40a93c9af43f48591b55dc23309f780270da093820bab018dcbb3c",
+      "records": 118,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 2,
+        "request_start": 37,
+        "throughput": 42,
+        "request_done": 37
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 60026,
+      "max_root_computed_prefill_tokens": 60026,
+      "root_prefills_over_60000": 1,
+      "container_log_present": true,
+      "container_log_sha256": "d205f4c8b7012375cd138fbbfda577017eeec39e000e2b56af18c8a407a96f1d",
+      "shutdown_summaries": [
+        {
+          "saved": 0,
+          "nothing_to_save": 1,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    },
+    "lane-workload": {
+      "request_log_present": true,
+      "request_log_sha256": "f9e03be60f6eb7290034465930f4f56f41055886e74b93ddcae409fe8f8aa3e8",
+      "records": 127,
+      "malformed_json_lines": 0,
+      "events": {
+        "server_start": 2,
+        "request_start": 33,
+        "throughput": 59,
+        "request_done": 33
+      },
+      "server_request_errors": 0,
+      "rejection_status_counts": {},
+      "max_computed_prefill_tokens": 130048,
+      "max_root_computed_prefill_tokens": 130048,
+      "root_prefills_over_60000": 4,
+      "container_log_present": true,
+      "container_log_sha256": "a7cf3a6a000d4141cd4d84dd86436d3c70e481106080164d3ca2cfdd836231b7",
+      "shutdown_summaries": [
+        {
+          "saved": 1,
+          "nothing_to_save": 3,
+          "refused": 0
+        },
+        {
+          "saved": 0,
+          "nothing_to_save": 4,
+          "refused": 0
+        }
+      ],
+      "total_shutdown_refused": 0,
+      "shutdown_error_line_count": 0
+    }
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

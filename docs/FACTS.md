@@ -1,13 +1,13 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-17 · Published release: v0.12.1 (2026-10-12) · stock Oh My Pi 18.10.1
+Updated: 2026-10-18 · Published release: v0.12.1 (2026-10-12) · stock Oh My Pi 18.10.1
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.12.1/manifest.json`](../releases/v0.12.1/manifest.json).
-[Get started](QUICKSTART.md) ·
+[Get started](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md) ·
 [Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1)
 
 ## What it is
@@ -55,6 +55,15 @@ Published release **v0.12.1** (2026-10-12, GitHub `Latest`) binds unmodified ups
 authority: [`releases/v0.12.1/manifest.json`](../releases/v0.12.1/manifest.json) ·
 [`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](../releases/v0.12.1/NINFER_RELEASE_NOTES.md) ·
 [`COMPATIBILITY.md`](COMPATIBILITY.md).
+
+Staged next: **v0.12.2** pins unmodified upstream Oh My Pi **18.12.1** (source `291e0558`, tree
+`c9d897cc`; `omp-darwin-arm64` `fa41b27d`, `omp-windows-x64.exe` `1ba0274b`, `omp-linux-x64`
+`16181401`) and changes nothing else in the table below. 18.12.1 stops the native Windows client
+from resolving a drive-relative operand such as `C:` against its start directory
+([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and fixes two `omp -p` false-success
+exits; the [client upgrade review](measurements/2026-10-18-omp-18121-client-upgrade-review.json)
+records the host-free checks. The client row changes only after v0.12.2's own route acceptance and
+ready gate ([manifest](../releases/v0.12.2/manifest.json)).
 
 | Component or lane | Form and transport | Release tag and source | Image or package | Serving profile | Context | Requests in flight | Speculative backend | Modalities |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |

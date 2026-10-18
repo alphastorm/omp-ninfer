@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.12.1.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.12.1.](assets/banner.png)](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -11,11 +11,11 @@ Every install route in the guide was run end to end on **v0.12.1** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
 
-### [Get started →](docs/QUICKSTART.md)
+### [Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1) · [Lanes](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -87,15 +87,20 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 
 ## Get started
 
-1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+1. **[Choose your lane](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
 2. **Clone tag `v0.12.1`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.10.1 client](docs/QUICKSTART.md#omp-18101-client)** with the
+3. **[Install the stock Oh My Pi 18.10.1 client](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#omp-18101-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
 
 Upgrading from v0.12.0 changes only the client. Native owners staying on v0.10.0 keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+
+Next on `main`: v0.12.2 pins stock Oh My Pi 18.12.1, which fixes the native Windows client's
+`C:` path resolution and two `omp -p` false-success exits, with every runtime, model, and profile
+unchanged ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). It becomes installable only after
+its own route acceptance and ready gate; the guide on `main` already targets it.
 
 ## How it works
 

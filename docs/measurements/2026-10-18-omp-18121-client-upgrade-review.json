@@ -1,0 +1,84 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-10-18",
+  "product_release": "v0.12.2",
+  "client_upgrade": {
+    "from": "18.10.1",
+    "to": "18.12.1",
+    "reason": "upstream fixes on documented client paths: a Windows shell-builtin path defect that deleted the wrong directory, and two print-mode false-success exits; no NInfer runtime, model or profile change"
+  },
+  "upstream_fixes": [
+    {
+      "issue": "https://github.com/can1357/oh-my-pi/issues/15511",
+      "pull_request": "https://github.com/can1357/oh-my-pi/pull/15515",
+      "merge_commit": "efde9890d60984e6ccb1d3c2e419ba0f2e0696cf",
+      "first_release": "v18.11.0",
+      "in_v18_10_1": false,
+      "in_v18_12_1": true,
+      "defect": "On Windows, shell builtins resolved a drive-relative operand such as `C:` against the OMP process's start directory instead of the shell's working directory; the reported `cd /c/Temp/x && rm -rf C:` recursively deleted the start directory.",
+      "documented_paths": "native Windows x64 client: the RTX 5090 Windows route and both native RTX 4090 and RTX 3090 lanes",
+      "source_check": "crates/pi-vfs/src/path.rs join_path returns base.join(rel) for a host base at v18.10.1; at v18.12.1 it first resolves drive-relative operands through join_drive_relative"
+    },
+    {
+      "pull_request": "https://github.com/can1357/oh-my-pi/pull/15732",
+      "merge_commit": "44bd74df3f520d949a88e37cd92d518b316ab307",
+      "first_release": "v18.11.1",
+      "in_v18_10_1": false,
+      "in_v18_12_1": true,
+      "defect": "Print mode returned success after length-stop recovery gave up.",
+      "documented_paths": "every documented `omp -p` command form, whose exit status the acceptance blocks check"
+    },
+    {
+      "pull_request": "https://github.com/can1357/oh-my-pi/pull/15897",
+      "merge_commit": "e5c9dbaeef5d39e3030a9267ac0abff8bdfe2cdc",
+      "first_release": "v18.11.3",
+      "in_v18_10_1": false,
+      "in_v18_12_1": true,
+      "defect": "`omp -p` reported a clean finish with an earlier answer when a context overflow could not be compacted enough to retry.",
+      "documented_paths": "every documented `omp -p` command form"
+    }
+  ],
+  "inclusion_method": "GitHub compare of each merge commit against the v18.10.1, v18.12.1 and first-release tags",
+  "host_free_checks": {
+    "asset_identity": "omp-darwin-arm64, omp-windows-x64.exe and omp-linux-x64 were downloaded; each SHA-256 and byte count equals the GitHub asset digest and the release SHA256SUMS.txt row recorded in releases/v0.12.2/qualification/client-components.json",
+    "darwin_cli_preflight": "releases/v0.12.2/qualification/client-preflight-darwin-arm64-18.12.1.json",
+    "loopback_comparison": {
+      "binaries": {
+        "18.10.1": "omp-darwin-arm64 74d920b72e7af01dbe258b41bb0684da7e747af63628eee41e98b5e74e2f21ac",
+        "18.12.1": "omp-darwin-arm64 fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5"
+      },
+      "method": "Isolated HOME per binary holding examples/manual-tunnel/models.fragment.yml (endpoint moved to a loopback stub port) and examples/manual-tunnel/fail-closed.yml; the stub emits NInfer-shaped Responses events: reasoning items with summary [] and reasoning_text deltas with explicit content_index, and the full function-call argument snapshot in arguments.done, output_item.done and response.completed.",
+      "scenarios": {
+        "tool_turn": "both exit 0; one read call with its linked result; final text OMP_NINFER_TOOL_OK",
+        "image_input": "both exit 0 with one input_image request",
+        "seed_and_continue": "both exit 0; a new process with --continue returned the exact nonce",
+        "outage": "both exit 1 under --max-time 20s with zero requests reaching an endpoint"
+      },
+      "request_differences": "user-agent and a 91-character longer instructions string only",
+      "request_invariants": "identical header names and body keys; max_output_tokens 32768; store true; reasoning effort medium; identical input item shapes and tool names; previous_response_id chaining within a process; a cross-process continue replays history with an unchanged prompt_cache_key",
+      "absent_on_both": [
+        "Content-Encoding on request bodies",
+        "connection warm-up or model-discovery requests to the custom endpoint"
+      ],
+      "settings_resolution": "retry.enabled false, retry.modelFallback false, retry.fallbackRevertPolicy never, startup.checkUpdate false and providers.maxInFlightRequests resolve identically",
+      "model_limits": "omp models lists ninfer-beta/q38-ninfer with 131K context and 33K max output on both binaries",
+      "outage_message_change": "ECONNREFUSED text became \"Couldn't connect to 127.0.0.1:<port> (connection refused)\"; no repository script, test or troubleshooting entry matches either text",
+      "raw_captures_retained": false
+    }
+  },
+  "verdict": {
+    "host_free_blocker_found": false,
+    "new_client_inference_qualification_claimed": false,
+    "scope_limit": "The stub reproduces NInfer's documented event shapes, not the NInfer runtime, and only the Darwin binary ran. Live tool, continuation, restart, outage and image-input behavior on the RTX 5090 and native lanes, and the Windows x64 and Linux x64 binaries, remain unproven until the authorized acceptance windows."
+  },
+  "sources": [
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1",
+    "https://github.com/can1357/oh-my-pi/issues/15511",
+    "https://github.com/can1357/oh-my-pi/pull/15515",
+    "https://github.com/can1357/oh-my-pi/pull/15732",
+    "https://github.com/can1357/oh-my-pi/pull/15897",
+    "https://github.com/can1357/oh-my-pi/blob/v18.10.1/crates/pi-vfs/src/path.rs",
+    "https://github.com/can1357/oh-my-pi/blob/v18.12.1/crates/pi-vfs/src/path.rs"
+  ]
+}

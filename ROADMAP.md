@@ -42,6 +42,13 @@ Full release authority: [`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.12.1/qualification.json`](releases/v0.12.1/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
+**Staged next — v0.12.2:** stock Oh My Pi **18.12.1** replaces 18.10.1 with every runtime, model,
+profile, and topology unchanged. It fixes the native Windows client resolving a drive-relative
+operand such as `C:` against its start directory
+([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and two `omp -p` false-success exits.
+It ships only after fresh acceptance of all five documented routes, the three stock clients, and
+both native public installs ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)).
+
 ## Remaining work
 
 Items below remain open in `v0.12.1`; each names the current evidence showing the gap is still

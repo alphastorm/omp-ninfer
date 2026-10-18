@@ -1,0 +1,474 @@
+{
+  "artifact_type": "omp_ninfer_v0616_lane_qualification",
+  "schema_version": 1,
+  "evidence_kind": "content-safe package-local rehearsal; not route acceptance",
+  "source_commit": "a59c13d00492d47dc58bf822533688c90c5d1f6a",
+  "server_binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+  "package_local_image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+  "deployment_profile": "qwen38-5090-v0.11.0",
+  "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+  "serving_shape": {
+    "speculative_backend": "dflash2",
+    "draft_window": 7,
+    "kv_cache": "bf16",
+    "max_in_flight": 2,
+    "device_state_slots": 2,
+    "kv_pool_tokens": 131520,
+    "context_tokens": 131072,
+    "pending_timeout_ms": 180000
+  },
+  "overall_verdict": "qualified except for the ctest disposition",
+  "criteria": [
+    {
+      "criterion": 1,
+      "status": "pass",
+      "requirement": "Clean exact source/build/model/image/config identity; unchanged supported serving shape",
+      "metrics": {
+        "source_dirty": false,
+        "binary_sha256": "675e72e66bce5ef75b74107930d521ad8f7188e38e83907b009d6a58e8ba5df8",
+        "package_local_image_id": "sha256:a848d2bce422c4511d4375f22434b3e4cbc379f759cdb4d318526de370569af7",
+        "deployment_profile": "qwen38-5090-v0.11.0",
+        "configuration_sha256": "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+        "kv_pool_tokens": 131520,
+        "context_tokens": 131072,
+        "max_in_flight": 2,
+        "device_state_slots": 2,
+        "pending_timeout_ms": 180000
+      },
+      "receipts": [
+        "build.json",
+        "rtx5090-a59-superseded.json"
+      ]
+    },
+    {
+      "criterion": 2,
+      "status": "pass",
+      "requirement": "Precedent-selected CPU/oracle/BF16 tests",
+      "metrics": {
+        "full_suite_total": 118,
+        "full_suite_passed": 110,
+        "full_suite_skipped": 7,
+        "full_suite_failed": 1,
+        "full_suite_exit": 8,
+        "direct_bf16_tests": [
+          {
+            "arguments": [
+              7,
+              1,
+              0,
+              1,
+              "bf16",
+              0,
+              0
+            ],
+            "exit": 0
+          },
+          {
+            "arguments": [
+              7,
+              1,
+              1,
+              1,
+              "bf16",
+              0,
+              0
+            ],
+            "exit": 0
+          },
+          {
+            "arguments": [
+              7,
+              1,
+              0,
+              2,
+              "bf16",
+              0,
+              0
+            ],
+            "exit": 0
+          }
+        ]
+      },
+      "scope_caution": "Full sm_120a ctest is independently red on the NVFP4 graph/serial comparison; no all-tests-passed claim.",
+      "receipts": [
+        "build.json"
+      ]
+    },
+    {
+      "criterion": 3,
+      "status": "pass",
+      "requirement": "Quality evidence bound to the exact packaged binary",
+      "metrics": {
+        "binary_identical_to_exp094": false,
+        "identical_serial_role_signatures": 89,
+        "different_serial_role_signatures": 0,
+        "counted_cases": 84,
+        "counted_errors_each_arm": 0,
+        "excluded_vacuous_errors_each_arm": 5
+      },
+      "scope_caution": "EXP-094 serial powered-screen transfer only; paired signatures and the optional extra powered screen are separate decisions.",
+      "receipts": [
+        "output-identity.json",
+        "bf16-solo-pair-candidate.json"
+      ]
+    },
+    {
+      "criterion": 4,
+      "status": "pass",
+      "requirement": "MTP3 control matches the frozen v0.9.0 production corpus",
+      "metrics": {
+        "compared_cases": 89,
+        "identical_signatures": 89,
+        "different_signatures": 0,
+        "identical_request_bodies": 89
+      },
+      "receipts": [
+        "mtp3-control.json"
+      ]
+    },
+    {
+      "criterion": 5,
+      "status": "pass",
+      "requirement": "Exact 130,048-token retrieval, exact 2,048-token decode, agent protocol across restart",
+      "metrics": {
+        "retrieval_prompt_tokens": 130048,
+        "retrieval_exact": true,
+        "retrieval_wall_s": 58.917,
+        "decode_output_tokens": 2048,
+        "decode_server_tok_s": 179.79,
+        "decode_wall_tok_s": 177.95,
+        "deleted_descendant_post_restart_status": 404,
+        "no_resurrection": true,
+        "live_survivor_restored": true,
+        "idle_vram_mib": 29468,
+        "retrieval_vram_mib": 29470,
+        "transient_retries": 0
+      },
+      "receipts": [
+        "rtx5090-a59-superseded.json"
+      ]
+    },
+    {
+      "criterion": 6,
+      "status": "pass",
+      "requirement": "Actual stock OMP macOS arm64 proof exits 0",
+      "metrics": {
+        "client_version": "18.8.7",
+        "client_binary_sha256": "cf0227bdefca0c486bd2aed1771de3ab98930266883eb69d341caf5665caee14",
+        "checks_passed": 6,
+        "passed": true
+      },
+      "receipts": [
+        "stock-omp.json",
+        "omp-1887-probe-provenance.json"
+      ]
+    },
+    {
+      "criterion": 7,
+      "status": "pass",
+      "requirement": "No chained root prefill above 60K; each long run succeeds or stops at the documented predecessor harness precondition",
+      "metrics": {
+        "runs": 3,
+        "successful_runs": 2,
+        "predecessor_harness_precondition_runs": 1,
+        "compactions_committed": 6,
+        "max_root_computed_prefill_tokens": 58112,
+        "root_prefills_over_60000": 0,
+        "plant_after_runs": [
+          2,
+          3,
+          1
+        ]
+      },
+      "retained_failure": {
+        "plant_after": 3,
+        "exit": 1,
+        "error": "epoch 2: OMP compacted before both identifiers were planted",
+        "disposition": "Allowed by the unchanged criterion; not relabelled as a successful run."
+      },
+      "receipts": [
+        "long-sessions.json",
+        "lane-logs-initial.json"
+      ]
+    },
+    {
+      "criterion": 8,
+      "status": "pass",
+      "requirement": "Quota reclamation and post-crash long continuation retains at least 60K cached tokens",
+      "metrics": {
+        "short_records": 35,
+        "quota_bytes": 25769803776,
+        "reclaimed": true,
+        "crash_exit": 0,
+        "continuation_input_tokens": 60079,
+        "continuation_cached_tokens": 60057,
+        "continuation_wall_s": 2.31
+      },
+      "receipts": [
+        "durability.json"
+      ]
+    },
+    {
+      "criterion": 9,
+      "status": "pass",
+      "requirement": "No workload errors, all stored sessions restored from checkpoints, first shutdown refused 0",
+      "metrics": {
+        "workload_errors": 0,
+        "stored_sessions": 4,
+        "restored_from_checkpoint": 4,
+        "multisession_reuse_losses": 0,
+        "multisession_continuations": 8,
+        "first_shutdown_refused": 0
+      },
+      "additional_semantic_observation": {
+        "desk_code_exact_after_restore": {
+          "D1": true,
+          "D2": false
+        },
+        "disposition": "D2 semantic failure retained; the mechanical restore command returning 0 is not evidence of exact code recall."
+      },
+      "receipts": [
+        "durability.json",
+        "lane-logs-initial.json"
+      ]
+    },
+    {
+      "criterion": 10,
+      "status": "pass",
+      "requirement": "Held publication barrier exact restore; shutdown refused0",
+      "metrics": {
+        "barrier_hit": true,
+        "hold_seconds": 6,
+        "resume_exact": true,
+        "shutdown_refused": 0
+      },
+      "receipts": [
+        "publication-barrier.json"
+      ]
+    },
+    {
+      "criterion": 11,
+      "status": "pass",
+      "requirement": "Fanout57k/67k,warm-arrival,restore pass; multisession reuse loss≤2/8",
+      "metrics": {
+        "fanout57k_exit": 0,
+        "fanout67k_exit": 0,
+        "warm_arrival_exit": 0,
+        "restore_exit": 0,
+        "multisession_exit": 0,
+        "multisession_reuse_lost": 2,
+        "multisession_continuations": 8,
+        "fanout57k_hot_median_s": 0.668,
+        "fanout67k_hot_median_s": 0.79,
+        "restore0_s": 2.877,
+        "restore1_s": 2.689
+      },
+      "receipts": [
+        "fanout-restore.json"
+      ]
+    },
+    {
+      "criterion": 12,
+      "status": "pass",
+      "requirement": "Agent mix measured fresh roots0/24",
+      "metrics": {
+        "measured_fresh_requests": 24,
+        "measured_fresh_root_count": 0,
+        "measured_continuations": 24,
+        "measured_continuation_root_count": 0,
+        "errors": 0
+      },
+      "receipts": [
+        "agent-mix.json"
+      ]
+    },
+    {
+      "criterion": 13,
+      "status": "pass",
+      "requirement": "Seven C2 scenarios twice all pass; three restart pairs retain≥62404cached each",
+      "metrics": {
+        "scenarios": 7,
+        "repeats": 2,
+        "scenario_runs": 14,
+        "scenario_passes": 14,
+        "restart_repeats": 3,
+        "restored_sessions": 6,
+        "min_resume_cached_tokens": 62404,
+        "failed_requests": 0
+      },
+      "restart_cache_floors": [
+        {
+          "repeat": 1,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 7.527187047991902
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 6.668489729985595
+            }
+          ]
+        },
+        {
+          "repeat": 2,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 10.712675589020364
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 9.852030201000161
+            }
+          ]
+        },
+        {
+          "repeat": 3,
+          "ok": true,
+          "resumes": [
+            {
+              "label": "resume-session-D1",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62482,
+              "http_status": 200,
+              "wall_s": 8.383857671986334
+            },
+            {
+              "label": "resume-session-D2",
+              "cached_tokens": 62404,
+              "prompt_tokens": 62485,
+              "http_status": 200,
+              "wall_s": 7.526108340942301
+            }
+          ]
+        }
+      ],
+      "receipts": [
+        "concurrency.json"
+      ]
+    },
+    {
+      "criterion": 14,
+      "status": "pass",
+      "requirement": "Actual OMP18.8.7 limits1 then2, same server, amendedPR74",
+      "metrics": {
+        "limit1_passed": true,
+        "limit2_passed": true,
+        "limit1_dispatch": [
+          2
+        ],
+        "limit2_dispatch": [
+          2,
+          2
+        ],
+        "recovered_limit2": true,
+        "subagents_completed": true,
+        "codes_delivered": true,
+        "parent_codes_exact": true,
+        "same_server_instance": true,
+        "limit2_subagent_overlap_s": 13.146,
+        "limit2_sessions_overlap_s": 5.096
+      },
+      "receipts": [
+        "omp-parallel.json",
+        "omp-1887-parallel-provenance.json"
+      ]
+    },
+    {
+      "criterion": 15,
+      "status": "pass",
+      "requirement": "Server request errors0; shutdown refused≤7 C2probe,0others",
+      "metrics": {
+        "stages": 12,
+        "server_request_errors": 0,
+        "c2probe_shutdown_refused": 7,
+        "all_other_shutdown_refused": 0
+      },
+      "receipts": [
+        "lane-logs.json"
+      ]
+    }
+  ],
+  "performance_comparison": {
+    "retrieval": {
+      "baseline_wall_s": 58.738,
+      "candidate_wall_s": 58.917,
+      "delta_percent": 0.3047430964622677
+    },
+    "decode": {
+      "baseline_tok_s": 161.39,
+      "candidate_tok_s": 179.79,
+      "delta_percent": 11.400954210298032
+    },
+    "exp094_traffic_prediction_percent": 9.6,
+    "comparison_limit": "The new profile gate is one measured workload, not the EXP-094 traffic-weighted round benchmark or a new production result."
+  },
+  "independent_red_checks": {
+    "full_sm120a_ctest": {
+      "exit": 8,
+      "passed": 110,
+      "skipped": 7,
+      "failed": 1,
+      "failure": "NVFP4 graph batch row differs from its serial NVFP4 oracle",
+      "attribution_lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+      "attribution": "Fresh eaf NVFP4 test0;3a test1 with the exact same assertion. Founder all-green-policy disposition for an unshipped KV mode is required.",
+      "attribution_receipt": "nvfp4-source-attribution.json"
+    },
+    "bf16_solo_pair": {
+      "same_request_bodies": 5,
+      "identical_signatures": 1,
+      "different_signatures": 4,
+      "content_and_reasoning_differences": 4,
+      "errors_each_arm": 0,
+      "old_source_control_lease_job": "20261010T085423Z-S1-source-disposition-independent-1267851",
+      "shipped_eaf_control": {
+        "identical_signatures": 1,
+        "different_signatures": 4,
+        "two_row_decode_observed": true,
+        "binary_sha256": "7a8908e81b18d0a58dbe1391a7b6e5ad4ac622c008b49b9f589c25c1be8f5e68"
+      },
+      "disposition": "Supported-profile scheduling dependence also exists at shipped eaf; not a newly attributed a59 BF16 failure."
+    },
+    "desk_restore": {
+      "stored_and_restored": 4,
+      "desk_codes_exact": {
+        "D1": true,
+        "D2": false
+      }
+    }
+  },
+  "optional_powered_screen": {
+    "run": false,
+    "eligibility_observed_utc": "2026-10-10T10:12:02Z",
+    "before1500": true,
+    "queue_empty": false,
+    "queued_jobs": 4,
+    "holder": "S5",
+    "reason": "The user requires this extra screen only when qualification finishes before15:00Z AND gpu-lease status has an empty queue. The actual queue was not empty."
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "runtime_admission": "Founder policy exception for unshipped NVFP4 oracle failure remains required; no exception approved.",
+  "corrected_lease": {
+    "job": "20261010T085424Z-S1-lane-criteria-10-14-external-stop-cleared-1267878",
+    "started_utc": "2026-10-10T09:30:43Z",
+    "seconds": 2454,
+    "exit": 0,
+    "leftover_containers_stopped": 0,
+    "unowned_containers_left": 0
+  }
+}

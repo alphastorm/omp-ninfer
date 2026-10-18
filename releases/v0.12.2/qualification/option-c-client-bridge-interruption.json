@@ -1,0 +1,38 @@
+{
+  "artifact_type": "omp_ninfer_option_c_mac_bridge_interruption",
+  "schema_version": 1,
+  "classification": "experiment, not candidate",
+  "initial_bridge": {
+    "exit": 1,
+    "elapsed_seconds": 3885.2,
+    "failing_operation": "nyc-wsl control request polling",
+    "transport_exit": 255,
+    "exception_class": "CalledProcessError",
+    "completed_phases": {
+      "stock": 0,
+      "long": 1
+    },
+    "long_disposition": "plant3 documented predecessor precondition; plants2and1 pass"
+  },
+  "resume": {
+    "phases_to_skip": [
+      "stock",
+      "long"
+    ],
+    "remaining_phase": "parallel",
+    "same_mac_homes": true,
+    "same_host_driver": true,
+    "original_sha256": "a1df0e1d30c4e7fef628a11e67f91e9213b6493a669b608aeb7e8e34ddf6d6b6",
+    "resume_sha256": "bd1a3af0af5fb8789d3cafbc96cb4c5608979ccaf6a24b6c58272d198cdfba23",
+    "exact_diff": "-completed = set()\n+completed = {'stock', 'long'}\n",
+    "observed_result": {
+      "exit": 0,
+      "elapsed_seconds": 1307.14,
+      "phase": "parallel",
+      "phase_exit": 0,
+      "completed_phases_rerun": false
+    }
+  },
+  "runtime_failure_claimed": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}

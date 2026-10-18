@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the product, fit and lanes once; release chronology moves to the changelog, docs/RELEASES.md and
   the tagged release notes; docs/QUICKSTART.md prose is reorganized with every documented-route
   block byte-identical.
+- Pin unmodified upstream OMP 18.12.1 for v0.12.2, a client-only patch following the v0.12.1
+  precedent. Runtime packages, models, serving profiles, native GPU UUID binding and the
+  sequential two-GPU topology are unchanged. 18.12.1 stops the native Windows client from
+  resolving a drive-relative operand such as `C:` against its start directory (upstream #15511)
+  and from exiting `omp -p` with success after a failed run (#15732, #15897). Fresh changed-client
+  acceptance is required; the manifest remains the readiness gate.
+- Point the README's install links at the immutable v0.12.1 guide while the guide on `main`
+  targets v0.12.2.
+
+### Added
+
+- Record the host-free OMP 18.12.1 client upgrade review: fix inclusion checked against both
+  tags, all three asset identities, an isolated Darwin CLI preflight, and a loopback comparison
+  with 18.10.1 against NInfer-shaped Responses events. It is not live route acceptance.
 
 ## [0.12.1] - 2026-10-12
 
