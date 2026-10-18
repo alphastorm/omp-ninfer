@@ -10,7 +10,7 @@ with a local image or modified profile.
 
 ### `release manifest is not installable`
 
-Use a clean clone of the current public release tag (`v0.12.1`) and run
+Use a clean clone of the current public release tag (`v0.12.2`) and run
 `python3 scripts/verify_release.py --require-ready`. Moving `main`, an older tag, or a partially
 staged manifest is not installable. A `draft` or `candidate` manifest retains explicit blockers; do
 not fill missing component identities from a local cache.
@@ -18,7 +18,7 @@ not fill missing component identities from a local cache.
 ### Model byte count or SHA-256 mismatch
 
 Each lane binds an exact artifact URL, revision, byte count, and SHA-256 in
-[`releases/v0.12.1/manifest.json`](../releases/v0.12.1/manifest.json): the RTX 5090 container lane
+[`releases/v0.12.2/manifest.json`](../releases/v0.12.2/manifest.json): the RTX 5090 container lane
 serves `components.model` (`0634abb0`, 20,437,336,576 bytes) and both native Windows lanes serve
 `components.native_model` (`eec39564`, 18,210,531,328 bytes).
 
@@ -35,7 +35,7 @@ use another `.ninfer` file with the same filename.
 ### NInfer image or binary mismatch
 
 The container image reference must contain `@sha256:`. A binary or package mismatch means the local
-bytes do not match the qualified release (`v0.12.1`), even if a mutable tag or filename looks
+bytes do not match the qualified release (`v0.12.2`), even if a mutable tag or filename looks
 correct. Preserve the expected and actual SHA-256 values, remove no unrelated images, and report
 the release and profile IDs together with those two content-safe digests.
 
@@ -191,7 +191,7 @@ server is listening inside the VM, and neither Windows nor WSL2 can reach it
 
 The RTX 5090 route runs the container on Docker `bridge` (`--host 0.0.0.0 --port 8080` inside the
 container) and publishes that port on the inference host's loopback (`--publish
-127.0.0.1:18089:8080`), which both Windows and WSL2 reach. Use the current `v0.12.1` release tag
+127.0.0.1:18089:8080`), which both Windows and WSL2 reach. Use the current `v0.12.2` release tag
 rather than editing ports or bind addresses by hand: the profile's configuration SHA-256 covers
 them, and the launcher refuses any modified profile.
 
@@ -237,7 +237,7 @@ from `examples/windows-native/models-rtx3090.fragment.yml`). If `models.yml` exi
 merge the provider block rather than nesting a second `providers:` key or overwriting other
 providers.
 
-Stock Oh My Pi 18.10.1 uses per-model `compat.statefulResponses: true` under each NInfer model
+Stock Oh My Pi 18.12.1 uses per-model `compat.statefulResponses: true` under each NInfer model
 entry (ignoring the retired fork-only `ninferStatefulResponses` key) and requires
 `PI_OPENAI_STATEFUL` to be unset in the environment (`unset PI_OPENAI_STATEFUL` on POSIX or
 `Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue` in PowerShell) so an inherited
@@ -266,9 +266,9 @@ readable local file, and that no local OMP configuration overlay stripped `image
 
 ### A long RTX 5090 session fails when OMP compacts it
 
-Stock Oh My Pi 18.10.1 includes upstream [#13687](https://github.com/can1357/oh-my-pi/pull/13687),
+Stock Oh My Pi 18.12.1 includes upstream [#13687](https://github.com/can1357/oh-my-pi/pull/13687),
 which defaults custom and local OpenAI Responses endpoints to `detail: "auto"` for both live image
-turns and replayed compaction images. Current `v0.12.1` model fragments therefore need no
+turns and replayed compaction images. Current `v0.12.2` model fragments therefore need no
 image-detail override.
 
 **Legacy pre-18.8.7 clients only:** OMP compacts a 131,072-token session automatically at about
@@ -280,8 +280,8 @@ NInfer refuses:
 400 only input_image detail 'auto' is supported
 ```
 
-If you encounter this error, first verify that `omp --version` reports `omp/18.10.1` and that your
-`models.yml` matches the current `v0.12.1` fragment. On historical pre-18.8.7 releases (such as
+If you encounter this error, first verify that `omp --version` reports `omp/18.12.1` and that your
+`models.yml` matches the current `v0.12.2` fragment. On historical pre-18.8.7 releases (such as
 `v0.10.0` / OMP 18.4.10; see [release history](RELEASES.md#version-identities)), the workaround was
 setting `supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` mapping. The
 text-only native RTX 4090 and RTX 3090 lanes never compact sessions into images.
@@ -292,7 +292,7 @@ text-only native RTX 4090 and RTX 3090 lanes never compact sessions into images.
 503 inference request expired while waiting for admission
 ```
 
-In `v0.12.1`, the RTX 5090 profile serves up to two requests in flight (`--max-concurrency 2`,
+In `v0.12.2`, the RTX 5090 profile serves up to two requests in flight (`--max-concurrency 2`,
 131,520-token BF16 KV pool) with a 180 s pending timeout (`--pending-timeout-ms 180000`), while the
 native Windows RTX 4090 and RTX 3090 lanes each serve one request at a time with a 30 s pending
 timeout. A request arriving when a lane is full waits at the server and expires if admission takes
@@ -366,7 +366,7 @@ conversation content.
 
 ### Two long sessions and what survives a restart
 
-Current `v0.12.1` continuation and checkpoint recovery are bounded by each lane's qualified device
+Current `v0.12.2` continuation and checkpoint recovery are bounded by each lane's qualified device
 and host pools:
 
 - **RTX 5090 container lane (`qwen38-5090-v0.11.0`, configuration `91a35670`):** 131,520-token BF16

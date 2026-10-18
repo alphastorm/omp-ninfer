@@ -4,7 +4,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 (inference engine) → Qwen3.8 27B (served model).
 
 OMP NInfer is an integration and release product, not a third inference runtime. Each published
-release (`v0.12.1`) binds an exact Oh My Pi (OMP) client, NInfer runtime, lane-specific Qwen3.8 27B
+release (`v0.12.2`) binds an exact Oh My Pi (OMP) client, NInfer runtime, lane-specific Qwen3.8 27B
 artifact, hardware profile, loopback topology, and qualification summary.
 
 ## Runtime topology
@@ -12,7 +12,7 @@ artifact, hardware profile, loopback topology, and qualification summary.
 ```mermaid
 sequenceDiagram
     participant User
-    participant OMP as OMP 18.10.1 client (Windows/macOS/Linux)
+    participant OMP as OMP 18.12.1 client (Windows/macOS/Linux)
     participant Route as Loopback route (local or SSH forward)
     participant NInfer as NInfer on a qualified GPU lane
     participant GPU as Lane-pinned Qwen3.8 27B artifact
@@ -95,10 +95,10 @@ See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-repli
 
 ## Identity chain
 
-The [published release manifest](../releases/v0.12.1/manifest.json) binds:
+The [published release manifest](../releases/v0.12.2/manifest.json) binds:
 
 1. product release and support channel;
-2. upstream OMP 18.10.1 source revision, platform binaries, byte counts, and SHA-256 pins;
+2. upstream OMP 18.12.1 source revision, platform binaries, byte counts, and SHA-256 pins;
 3. primary RTX 5090 NInfer source, server binary, OCI digest, and SBOM plus each UUID-bound native
    variant package, source archive, SBOM, installer/controller scripts, configuration, and
    qualification receipt;
@@ -126,8 +126,8 @@ OMP session semantics, or another request proxy.
 ### OMP
 
 Owns the coding-agent UX, transcript, tools, and model configuration. The client is unmodified
-[upstream Oh My Pi 18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1) (source
-`5d0aaffaf1f987503ce129a642fb6e30339615af`), pinned by byte count and SHA-256 across Windows x64,
+[upstream Oh My Pi 18.12.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) (source
+`291e055836c210f314af3f73f53244e8e9d09de8`), pinned by byte count and SHA-256 across Windows x64,
 macOS arm64 (preview), and Linux x64 (WSL2). Each NInfer model entry sets
 `compat.statefulResponses: true` for OpenAI Responses chaining (`previous_response_id` and
 `prompt_cache_key`) with `PI_OPENAI_STATEFUL` unset, and `examples/manual-tunnel/fail-closed.yml`

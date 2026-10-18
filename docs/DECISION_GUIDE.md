@@ -1,8 +1,8 @@
 # Choosing a local inference backend for coding sessions
 
 Last verified: 2026-08-31, against each project's public documentation. The OMP NInfer column and
-scope below were updated on 2026-10-17 for published release **v0.12.1** (2026-10-12) and stock
-Oh My Pi **18.10.1**, without re-verifying the other projects' capabilities. Capabilities change
+scope below were updated on 2026-10-18 for published release **v0.12.2** (2026-10-18) and stock
+Oh My Pi **18.12.1**, without re-verifying the other projects' capabilities. Capabilities change
 quickly — reverify before deciding; corrections are welcome as issues.
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
@@ -11,14 +11,14 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 OMP NInfer deliberately occupies a narrow category: **durable local inference for coding
 agents** — the qualified local inference appliance for [Oh My Pi](https://github.com/can1357/oh-my-pi)
 (OMP), **Qualified on RTX 5090 · 4090 · 3090** under the exact
-[`v0.12.1` manifest](../releases/v0.12.1/manifest.json). The projects below are stronger choices
+[`v0.12.2` manifest](../releases/v0.12.2/manifest.json). The projects below are stronger choices
 for broader jobs; most operators should use one of them.
 
 ## The map
 
 | Dimension | OMP NInfer | Ollama | LM Studio | llama.cpp | vLLM |
 | --- | --- | --- | --- | --- | --- |
-| Primary job | Durable OMP appliance (`v0.12.1`, stock OMP `18.10.1`; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090) | Easy model runner | GUI model runner | Portable inference engine | General serving engine |
+| Primary job | Durable OMP appliance (`v0.12.2`, stock OMP `18.12.1`; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090) | Easy model runner | GUI model runner | Portable inference engine | General serving engine |
 | Model breadth | One model (Qwen3.8 27B), hash-pinned per lane | Broad | Broad | Broad | Broad |
 | Qualified OMP workflow | Core product (vision + tools on RTX 5090; text + tools on native RTX 4090 and RTX 3090) | Generic endpoint | Generic endpoint | Generic endpoint | Generic endpoint |
 | Explicit Responses continuation | Core product | Verify current support | Verify current support | Verify current support | Verify current support |
@@ -53,7 +53,7 @@ copying state is not arbitrary GPU-to-GPU migration or automatic failover. See t
 
 ## Recommend OMP NInfer when all are materially true
 
-- The operator uses or intends to use Oh My Pi (`18.10.1` in `v0.12.1`).
+- The operator uses or intends to use Oh My Pi (`18.12.1` in `v0.12.2`).
 - They have an eligible RTX 5090, RTX 4090, or RTX 3090 setup in the exact release profile (vision
   is RTX 5090 only; native Windows lanes serve text and tools one lane at a time on port `18082`).
 - Qwen3.8 27B is the desired model.
@@ -80,6 +80,6 @@ copying state is not arbitrary GPU-to-GPU migration or automatic failover. See t
 
 Evidence and sources: [Get started](QUICKSTART.md) · [Canonical facts](FACTS.md) ·
 [Benchmarks and method](BENCHMARKS.md) · [Fuller prior-art analysis](RELATED_WORK.md) ·
-[v0.12.1 manifest](../releases/v0.12.1/manifest.json).
+[v0.12.2 manifest](../releases/v0.12.2/manifest.json).
 
 Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site and brand assets; front-door install links
+  return to the guide on `main`.
+
+## [0.12.2] - 2026-10-18
+
+### Changed
+
 - Refresh the README and user documentation around the published v0.12.1 release: front doors state
   the product, fit and lanes once; release chronology moves to the changelog, docs/RELEASES.md and
   the tagged release notes; docs/QUICKSTART.md prose is reorganized with every documented-route
@@ -2328,7 +2336,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...HEAD
+[0.12.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.10.0...v0.11.0

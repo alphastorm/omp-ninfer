@@ -22,8 +22,8 @@ program so contributors can see the state of play in one place.
 ## Current state
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
-to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.12.1**
-(2026-10-12) pins unmodified upstream OMP 18.10.1 (`5d0aaffa`) and carries the v0.12.0 native and
+to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.12.2**
+(2026-10-18) pins unmodified upstream OMP 18.12.1 (`291e0558`) and carries the v0.12.0 native and
 v0.11.0 RTX 5090 runtime bindings unchanged (see [`FACTS.md`](FACTS.md) and
 [`BENCHMARKS.md`](BENCHMARKS.md)).
 
@@ -31,17 +31,17 @@ v0.11.0 RTX 5090 runtime bindings unchanged (see [`FACTS.md`](FACTS.md) and
   - **RTX 5090 container (`sm_120a`):** `v0.6.16-qwen38-5090-beta.1` (source `1302d639`, image
     `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0`, configuration
     `91a35670`) with DFlash2 draft window 7, BF16 KV, 131,072-token context, and two requests in
-    flight ([qualification receipt](../releases/v0.12.1/qualification/rtx5090.json)).
+    flight ([qualification receipt](../releases/v0.12.2/qualification/rtx5090.json)).
   - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.6.11-qwen38-4090-beta.1`
     (package `52687044`, server `76f35b74`) and `v0.6.3-qwen38-3090-beta.1` (package `74120de0`,
     server `bca236e5`) from shared source `cad19767` and model `eec39564`, with MTP3, INT8 KV,
     131,072-token context, and one request at a time on a UUID-bound two-GPU host ([RTX 4090
-    receipt](../releases/v0.12.1/qualification/rtx4090.json), [RTX 3090
-    receipt](../releases/v0.12.1/qualification/rtx3090.json)).
+    receipt](../releases/v0.12.2/qualification/rtx4090.json), [RTX 3090
+    receipt](../releases/v0.12.2/qualification/rtx3090.json)).
 - **Shipped from the ledger:** DFlash2 K=7 with BF16 KV shipped on the RTX 5090 in v0.10.0
   (EXP-078 to EXP-086, EXP-090). Single-launch 8-column verify attention and tensor-core pair mixer
   outputs (EXP-092) plus small-T tensor-core Q4 query/key projections at 8 and 16 verify columns
-  (EXP-094) shipped in v0.11.0 (`v0.6.16`, source `1302d639`) and carry into v0.12.0 and v0.12.1.
+  (EXP-094) shipped in v0.11.0 (`v0.6.16`, source `1302d639`) and carry into v0.12.0 through v0.12.2.
   EXP-095 compared the superseded fork candidate `a59c13d0` against upstream `81c8ce09` in a local
   fixed-KV rehearsal — not the selected `1302d639` runtime — and closed the wholesale rebase
   question in favor of selective backports. The native lanes retain MTP3 (EXP-089).
@@ -86,7 +86,7 @@ computed prefill tokens, and an exact 1,024-token completion at the 300 W profil
 Exact package, source, and phase hashes:
 [`2026-08-30-rtx3090-parity.json`](measurements/2026-08-30-rtx3090-parity.json). These numbers are
 historical v0.3.0 candidate evidence; current RTX 3090 qualification is in
-[`releases/v0.12.1/qualification/rtx3090.json`](../releases/v0.12.1/qualification/rtx3090.json).
+[`releases/v0.12.2/qualification/rtx3090.json`](../releases/v0.12.2/qualification/rtx3090.json).
 
 ## The profiling lane
 
@@ -1280,7 +1280,7 @@ The backlog below is a pool; product sequencing lives in [`ROADMAP.md`](../ROADM
 RTX 5090 lane, DFlash2 K=7 with BF16 KV and two requests in flight replaced MTP3 in v0.10.0, and
 the round-cost reductions from EXP-092 (single-launch 8-column verify attention and tensor-core
 pair mixer outputs) and EXP-094 (small-T tensor-core Q4 query/key projections) shipped in v0.11.0
-(`v0.6.16-qwen38-5090-beta.1`, source `1302d639`) and carry unchanged into v0.12.0 and v0.12.1.
+(`v0.6.16-qwen38-5090-beta.1`, source `1302d639`) and carry unchanged into v0.12.0 through v0.12.2.
 On the RTX 4090 and RTX 3090 native Windows lanes, MTP3 with INT8 KV and one active request
 remains the qualified stack (`v0.6.11` and `v0.6.3`, source `cad19767`); DFlash2 does not link on
 `sm_89`/`sm_86` or fit the 24 GB 131,072-token budget (EXP-089). EXP-095 compared the superseded

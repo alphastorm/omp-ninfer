@@ -1,9 +1,6 @@
 # Quickstart
 
-> **Versioned guide: v0.12.2 · stock Oh My Pi 18.12.1 · eligibility from the manifest ready gate**
->
-> The published release is v0.12.1; until the v0.12.2 tag is published, install from the
-> [immutable v0.12.1 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md).
+> **Versioned guide: v0.12.2 · stock Oh My Pi 18.12.1 · Qualified on RTX 5090 · 4090 · 3090**
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated

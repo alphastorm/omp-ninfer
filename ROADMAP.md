@@ -19,9 +19,11 @@ by Oh My Pi, Qwen, or NVIDIA.
 
 ## Current release
 
-**v0.12.1** (published 2026-10-12, GitHub `Latest`) pins unmodified upstream Oh My Pi **18.10.1**
-(`5d0aaffa`) across macOS arm64 (preview), Windows x64, and Linux x64 (WSL2) while retaining the
-qualified v0.12.0 GPU runtime packages, models, and serving profiles unchanged:
+**v0.12.2** (published 2026-10-18, GitHub `Latest`) pins unmodified upstream Oh My Pi **18.12.1**
+(`291e0558`) across macOS arm64 (preview), Windows x64, and Linux x64 (WSL2) while retaining the
+qualified v0.12.0 GPU runtime packages, models, and serving profiles unchanged. 18.12.1 fixes the
+native Windows client resolving a drive-relative operand such as `C:` against its start directory
+([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and two `omp -p` false-success exits:
 
 - **RTX 5090 container (`v0.6.16-qwen38-5090-beta.1`, source `1302d639`, model `0634abb0`):**
   Windows 11 + Docker Desktop/WSL2 on loopback `127.0.0.1:18089`, BF16 KV, 131,072-token context,
@@ -37,44 +39,35 @@ qualified v0.12.0 GPU runtime packages, models, and serving profiles unchanged:
 Stock OMP has no `omp appliance` lifecycle commands; container and native host scripts own runtime
 lifecycle, and source-first native qualification is an established release procedure
 ([`docs/RELEASES.md#next-native-release-sequencing`](docs/RELEASES.md#next-native-release-sequencing)).
-Full release authority: [`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0.12.1/NINFER_RELEASE_NOTES.md) ·
-[`releases/v0.12.1/manifest.json`](releases/v0.12.1/manifest.json) ·
-[`releases/v0.12.1/qualification.json`](releases/v0.12.1/qualification.json) ·
+Full release authority: [`releases/v0.12.2/NINFER_RELEASE_NOTES.md`](releases/v0.12.2/NINFER_RELEASE_NOTES.md) ·
+[`releases/v0.12.2/manifest.json`](releases/v0.12.2/manifest.json) ·
+[`releases/v0.12.2/qualification.json`](releases/v0.12.2/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
-
-**Staged next — v0.12.2:** stock Oh My Pi **18.12.1** replaces 18.10.1 with every runtime, model,
-profile, and topology unchanged. It fixes the native Windows client resolving a drive-relative
-operand such as `C:` against its start directory
-([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and two `omp -p` false-success exits.
-Fresh acceptance passed on frozen `d7ed4a65`: all five documented routes/31 unchanged blocks, the
-three stock clients, and both native public installs, with independent restoration
-([composed proof](releases/v0.12.2/acceptance/composed-external-installation.json),
-[notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). Publication is owner-only.
 
 ## Remaining work
 
-Items below remain open in `v0.12.1`; each names the current evidence showing the gap is still
+Items below remain open in `v0.12.2`; each names the current evidence showing the gap is still
 unmet:
 
 1. **Independent multi-owner clean-install, recovery, and rollback evidence.** All qualifications
-   and 31-block documented-route acceptances through `v0.12.1` are maintainer-operated on owner
+   and 31-block documented-route acceptances through `v0.12.2` are maintainer-operated on owner
    hardware, and RTX 4090 has no rollback target (`not_applicable`) on the two-GPU Windows host
-   ([`releases/v0.12.1/qualification.json`](releases/v0.12.1/qualification.json),
-   [`releases/v0.12.1/qualification/rtx4090.json`](releases/v0.12.1/qualification/rtx4090.json),
-   [`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0.12.1/NINFER_RELEASE_NOTES.md)).
+   ([`releases/v0.12.2/qualification.json`](releases/v0.12.2/qualification.json),
+   [`releases/v0.12.2/qualification/rtx4090.json`](releases/v0.12.2/qualification/rtx4090.json),
+   [`releases/v0.12.2/NINFER_RELEASE_NOTES.md`](releases/v0.12.2/NINFER_RELEASE_NOTES.md)).
 2. **macOS managed lifecycle and native Linux OS qualification.** The macOS arm64 route remains a
    manual SSH tunnel preview without managed installation or lifecycle, and the Linux x64 client is
    evidenced only under WSL2 on the Windows 11 container host rather than a native Linux OS
-   ([`releases/v0.12.1/qualification.json`](releases/v0.12.1/qualification.json),
+   ([`releases/v0.12.2/qualification.json`](releases/v0.12.2/qualification.json),
    [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)).
 3. **Shared public client acceptance runner and WSL preflight.** Documented-route acceptance still
    requires live GPU-host windows alongside host-free CLI rehearsals
-   ([`releases/v0.12.1/acceptance/documented-routes.json`](releases/v0.12.1/acceptance/documented-routes.json));
+   ([`releases/v0.12.2/acceptance/documented-routes.json`](releases/v0.12.2/acceptance/documented-routes.json));
    a hardware-independent public client acceptance runner and a doctor-level WSL networking and
    loopback preflight ([#15](https://github.com/alphastorm/omp-ninfer/issues/15)) remain open.
 4. **Distribution signing, notarization, and native dependency-level SBOM boundaries.** Windows
    native runtime packages ship unsigned with a file-inventory SBOM rather than a dependency-level
-   SBOM ([`releases/v0.12.1/manifest.json`](releases/v0.12.1/manifest.json),
+   SBOM ([`releases/v0.12.2/manifest.json`](releases/v0.12.2/manifest.json),
    [`docs/SECURITY.md`](docs/SECURITY.md)). OMP NInfer consumes unmodified upstream OMP binaries by
    SHA-256 without rebuilding or re-signing the client; only first-party Windows runtime package
    signing is in scope here.
@@ -83,21 +76,21 @@ unmet:
    on the originating host ([`docs/measurements/2026-09-05-sync-probe-rtx5090.json`](docs/measurements/2026-09-05-sync-probe-rtx5090.json),
    [`docs/FACTS.md#checkpoint-transport-and-nas-replication`](docs/FACTS.md#checkpoint-transport-and-nas-replication)),
    not restoration onto a second physical inference host. The RTX 3090 fleet scout role remains
-   disabled ([`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0.12.1/NINFER_RELEASE_NOTES.md)),
+   disabled ([`releases/v0.12.2/NINFER_RELEASE_NOTES.md`](releases/v0.12.2/NINFER_RELEASE_NOTES.md)),
    and any fleet completed-work claim requires re-running the fixed multi-machine workload
    ([`scripts/fleet_dispatch.py`](scripts/fleet_dispatch.py), EXP-016 in
    [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)).
 6. **Enforced JSON-schema structured output.** The shipped runtime rejects `text.format` and
    `response_format` JSON-schema requests with HTTP 400 rather than ignoring them
-   ([`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0.12.1/NINFER_RELEASE_NOTES.md),
+   ([`releases/v0.12.2/NINFER_RELEASE_NOTES.md`](releases/v0.12.2/NINFER_RELEASE_NOTES.md),
    [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)). Upstream NInfer's constrained decoder passed
    5/5 schema families in local rehearsal
    ([`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json),
    EXP-095) and remains a selective-backport candidate once integrated with the durable store.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
-   ([`releases/v0.12.1/qualification/rtx4090.json`](releases/v0.12.1/qualification/rtx4090.json),
-   [`releases/v0.12.1/qualification/rtx3090.json`](releases/v0.12.1/qualification/rtx3090.json),
+   ([`releases/v0.12.2/qualification/rtx4090.json`](releases/v0.12.2/qualification/rtx4090.json),
+   [`releases/v0.12.2/qualification/rtx3090.json`](releases/v0.12.2/qualification/rtx3090.json),
    [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml)); concurrent
    native requests require memory and latency qualification on those exact packages.
 8. **Open kernel and schedule backlog.** Verify-round host-commit idle time
@@ -170,6 +163,7 @@ per-version history lives in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASES.
 
 | Release | Date | Summary | Notes |
 | --- | --- | --- | --- |
+| `v0.12.2` | 2026-10-18 | Repin stock OMP 18.12.1 (native Windows `C:` path fix, two `omp -p` exit-status fixes) across all five documented routes (31 blocks) with unchanged GPU runtimes, models, and profiles | [notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md) |
 | `v0.12.1` | 2026-10-12 | Repin stock OMP 18.10.1 across all five documented routes (31 blocks) with unchanged GPU runtimes, models, and profiles | [notes](releases/v0.12.1/NINFER_RELEASE_NOTES.md) |
 | `v0.12.0` | 2026-10-11 | Restore native Windows RTX 4090 (`v0.6.11`) and RTX 3090 (`v0.6.3`) UUID-bound on one two-GPU host (one active lane on port 18082) | [notes](releases/v0.12.0/NINFER_RELEASE_NOTES.md) |
 | `v0.11.0` | 2026-10-10 | Ship RTX 5090 `v0.6.16` (`1302d639`, EXP-092/EXP-094 DFlash2 round-cost reductions) and stock OMP 18.8.7 with per-model stateful Responses | [notes](releases/v0.11.0/NINFER_RELEASE_NOTES.md) |

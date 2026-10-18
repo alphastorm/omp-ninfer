@@ -11,8 +11,8 @@ and one release and qualification authority. It does not claim invention of stat
 persistent KV caching.
 
 External sources below were reviewed on 2026-08-26, the NInfer family section on 2026-08-28, and
-the local-server section on 2026-08-29; OMP NInfer self-descriptions were updated on 2026-10-17
-for published release **v0.12.1** (2026-10-12). These projects move quickly; consult their current
+the local-server section on 2026-08-29; OMP NInfer self-descriptions were updated on 2026-10-18
+for published release **v0.12.2** (2026-10-18). These projects move quickly; consult their current
 documentation before making a deployment decision.
 
 ## The NInfer family
@@ -28,7 +28,7 @@ ordering matters:
   `Neroued/ninfer`. It adds the OMP-oriented pieces: stateful OpenAI Responses
   continuation/fork/delete semantics, durable local NVMe checkpoints, authenticated status
   identity, container/OCI/SBOM and native Windows release packaging, and the qualification
-  evidence bound into the [`v0.12.1` manifest](../releases/v0.12.1/manifest.json) across the
+  evidence bound into the [`v0.12.2` manifest](../releases/v0.12.2/manifest.json) across the
   RTX 5090 container lane (`v0.6.16-qwen38-5090-beta.1`, source `1302d639`) and the UUID-bound
   native Windows RTX 4090 (`v0.6.11-qwen38-4090-beta.1`) and RTX 3090
   (`v0.6.3-qwen38-3090-beta.1`) lanes (source `cad19767`).
@@ -45,13 +45,13 @@ Numbers in the table below for `Neroued/ninfer`, `UDPSendToFailed/ninfer-4090`, 
 `Don-Chad/ninfer-3090` are published by each repository's maintainers on their own profiles,
 models, and quantization schemes; they are not cross-comparable and are not claims of this
 product. Product claims for OMP NInfer are bound to the per-lane qualification receipts in
-[`releases/v0.12.1/manifest.json`](../releases/v0.12.1/manifest.json) and detailed in
+[`releases/v0.12.2/manifest.json`](../releases/v0.12.2/manifest.json) and detailed in
 [`BENCHMARKS.md`](BENCHMARKS.md).
 
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens (maintainer-reported) | The original engine; everything below forks or derives from it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | v0.12.1 carried runtime receipts: RTX 5090 179.79 server / 177.96 wall tok/s (2,048-token decode, DFlash2 K=7, BF16 KV); RTX 4090 158.66 tok/s C1 decode (87.59% MTP3 acceptance, INT8 KV); RTX 3090 102.41 tok/s C1 decode (93.43% MTP3 acceptance, INT8 KV, 300 W cap) | This product's public runtime source and qualified component releases |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | v0.12.2 carried runtime receipts: RTX 5090 179.79 server / 177.96 wall tok/s (2,048-token decode, DFlash2 K=7, BF16 KV); RTX 4090 158.66 tok/s C1 decode (87.59% MTP3 acceptance, INT8 KV); RTX 3090 102.41 tok/s C1 decode (93.43% MTP3 acceptance, INT8 KV, 300 W cap) | This product's public runtime source and qualified component releases |
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings (maintainer-reported) | Upstream of the original native RTX 4090 port |
 | [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM (maintainer-reported) | Upstream of the historical v0.7.2 RTX 3090 lineage |
 
@@ -128,7 +128,7 @@ keep a long coding session durable and resumable across process restarts on a GP
 - [llm-d](https://github.com/llm-d/llm-d) targets Kubernetes-native distributed inference.
 
 They address materially broader multi-node and multi-tenant scheduling and serving problems. The
-OMP NInfer v0.12.1 contract is one active GPU lane per host, one resident Qwen3.8 27B artifact per
+OMP NInfer v0.12.2 contract is one active GPU lane per host, one resident Qwen3.8 27B artifact per
 lane, one trusted owner, and bounded local concurrency (two requests in flight on the RTX 5090
 container lane; one request at a time on each native Windows lane, with only one native lane
 running at a time on port `18082`); a distributed control plane would add cost without serving the

@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.12.1.](assets/banner.png)](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.12.2.](assets/banner.png)](docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -6,16 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.12.1** with unmodified
-[Oh My Pi 18.10.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1) — 31 steps,
+Every install route in the guide was run end to end on **v0.12.2** with unmodified
+[Oh My Pi 18.12.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.12.1/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.12.2/acceptance/composed-external-installation.json)).
 
-### [Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md)
+### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.12.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.1) · [Lanes](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.12.2](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.12.2) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -75,34 +75,28 @@ desktop GUI ([LM Studio](https://lmstudio.ai)), the widest hardware reach or App
 
 | Lane | Host and client | What you get | Measured |
 | --- | --- | --- | --- |
-| **RTX 5090** | Windows 11 + Docker Desktop/WSL2 container; Windows client local, macOS over a manual SSH tunnel (preview), Linux client under WSL2 | 131,072-token context, two requests in flight, DFlash2 draft window 7, vision + tools + preserved thinking | 179.79 tok/s decode; exact 130,048-token retrieval in 58.89 s cold ([receipt](releases/v0.12.1/qualification/rtx5090.json)) |
-| **RTX 4090** | Native Windows 11 package; Windows client local | 131,072-token context, one request at a time, MTP3, text + tools | 158.66 tok/s C1 decode; exact 130,048-token retrieval in 91.03 s ([receipt](releases/v0.12.1/qualification/rtx4090.json)) |
-| **RTX 3090** | Native Windows 11 package; Windows client local | 131,072-token context, one request at a time, MTP3, 300 W serving cap, text + tools | 102.41 tok/s C1 decode; exact 130,048-token retrieval in 220.52 s ([receipt](releases/v0.12.1/qualification/rtx3090.json)) |
+| **RTX 5090** | Windows 11 + Docker Desktop/WSL2 container; Windows client local, macOS over a manual SSH tunnel (preview), Linux client under WSL2 | 131,072-token context, two requests in flight, DFlash2 draft window 7, vision + tools + preserved thinking | 179.79 tok/s decode; exact 130,048-token retrieval in 58.89 s cold ([receipt](releases/v0.12.2/qualification/rtx5090.json)) |
+| **RTX 4090** | Native Windows 11 package; Windows client local | 131,072-token context, one request at a time, MTP3, text + tools | 158.66 tok/s C1 decode; exact 130,048-token retrieval in 91.03 s ([receipt](releases/v0.12.2/qualification/rtx4090.json)) |
+| **RTX 3090** | Native Windows 11 package; Windows client local | 131,072-token context, one request at a time, MTP3, 300 W serving cap, text + tools | 102.41 tok/s C1 decode; exact 130,048-token retrieval in 220.52 s ([receipt](releases/v0.12.2/qualification/rtx3090.json)) |
 
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
 port 18082; the RTX 5090 lane serves its own 20.4 GB model artifact and the native lanes share an
 18.2 GB one. Checkpoints are best effort and restore only on the same runtime, model, profile, and
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
-[manifest](releases/v0.12.1/manifest.json).
+[manifest](releases/v0.12.2/manifest.json).
 
 ## Get started
 
-1. **[Choose your lane](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
-2. **Clone tag `v0.12.1`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.10.1 client](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#omp-18101-client)** with the
+1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+2. **Clone tag `v0.12.2`** and run `python3 scripts/verify_release.py --require-ready`.
+3. **[Install the stock Oh My Pi 18.12.1 client](docs/QUICKSTART.md#omp-18121-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
 
-Upgrading from v0.12.0 changes only the client. Native owners staying on v0.10.0 keep the
-[v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
-
-Next on `main`: v0.12.2 pins stock Oh My Pi 18.12.1, which fixes the native Windows client's
-`C:` path resolution and two `omp -p` false-success exits, with every runtime, model, and profile
-unchanged ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). Fresh acceptance on frozen
-`d7ed4a65` passed all five routes/31 unchanged blocks, the three stock clients, and both native
-public installs ([composed proof](releases/v0.12.2/acceptance/composed-external-installation.json));
-it becomes installable when its tag is published. The guide on `main` already targets it.
+Upgrading from v0.12.1 or v0.12.0 changes only the client; 18.12.1 fixes the native Windows
+client's `C:` path resolution and two `omp -p` false-success exits. Native owners staying on
+v0.10.0 keep the [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
 ## How it works
 
@@ -116,7 +110,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 - **NInfer owns inference and retained state.** The C++/CUDA engine from
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports, plus this project's
   explicit Responses state and checkpoints. Retained state accelerates; it is never the source of truth.
-- **The manifest owns identity.** [`releases/v0.12.1/manifest.json`](releases/v0.12.1/manifest.json)
+- **The manifest owns identity.** [`releases/v0.12.2/manifest.json`](releases/v0.12.2/manifest.json)
   binds client, runtime, model, profile, and receipts; `ready` requires composed external acceptance.
 
 [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) ·
@@ -124,7 +118,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 
 ## Measured, not estimated
 
-![Qualification receipts for v0.12.1: RTX 5090 179.79 tok/s and 58.89 s exact retrieval; RTX 4090 158.66 tok/s and 91.03 s; RTX 3090 102.41 tok/s and 220.52 s](assets/benchmarks.png)
+![Qualification receipts for v0.12.2: RTX 5090 179.79 tok/s and 58.89 s exact retrieval; RTX 4090 158.66 tok/s and 91.03 s; RTX 3090 102.41 tok/s and 220.52 s](assets/benchmarks.png)
 
 Each lane is measured on its own gate, machine, and profile; the strip is not a ranking. Method,
 per-lane charts, the warm-versus-cold boundary rules, model quality, and the community table:
@@ -176,7 +170,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
   [model/profile request](https://github.com/alphastorm/omp-ninfer/issues/new?template=model-profile-request.yml).
 
 Routing rules: [CONTRIBUTING.md](CONTRIBUTING.md). Strip keys, hostnames, prompts, outputs, and raw
-logs before filing. Support covers `v0.12.1` and its exact profiles for a single local owner; no SLA.
+logs before filing. Support covers `v0.12.2` and its exact profiles for a single local owner; no SLA.
 Vulnerabilities: [private reporting](SECURITY.md), never a public issue.
 
 ## Credits

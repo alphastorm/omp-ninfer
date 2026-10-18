@@ -2,8 +2,7 @@
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
 to NInfer (inference engine) serving Qwen3.8 27B (served model). The runtime ships from downstream
-forks; published release **v0.12.1** (2026-10-12) pins an unmodified upstream OMP 18.10.1 client,
-and staged v0.12.2 moves it to 18.12.1.
+forks; published release **v0.12.2** (2026-10-18) pins an unmodified upstream OMP 18.12.1 client.
 This page names the upstreams we track, runtime fork points, and the current pull-in position. The
 watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch tool is
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
@@ -11,18 +10,18 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 
 ## Current positions
 
-| Component / upstream | Current position (v0.12.1) | Upstream base / watch head | Evidence and notes |
+| Component / upstream | Current position (v0.12.2) | Upstream base / watch head | Evidence and notes |
 | --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.10.1**, source `5d0aaffaf1f987503ce129a642fb6e30339615af` | Upstream release [`v18.10.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.10.1) (2026-10-12T05:55:11Z) | Routine client currency replacing 18.8.7; see [client setup](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md#omp-18101-client) and [release notes](../releases/v0.12.1/NINFER_RELEASE_NOTES.md). Staged v0.12.2 pins 18.12.1 ([below](#v0122-client-binding--omp-18121)). |
-| `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.6.16-qwen38-5090-beta.1`, source `1302d63929e400a05e1c9cdb0fc8003a70269825` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Image `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0` (`91a35670`), DFlash2 draft window 7, BF16 KV, two requests in flight; carried from v0.11.0/v0.12.0 ([receipt](../releases/v0.12.1/qualification/rtx5090.json)). |
-| `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0 ([RTX 4090](../releases/v0.12.1/qualification/rtx4090.json), [RTX 3090](../releases/v0.12.1/qualification/rtx3090.json)). |
+| `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.12.1**, source `291e055836c210f314af3f73f53244e8e9d09de8` | Upstream release [`v18.12.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) (2026-10-17T23:14:21Z) | Replaces 18.10.1 for the native Windows `C:` path fix and two `omp -p` false-success exit fixes; see [client setup](QUICKSTART.md#omp-18121-client), [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md), and [below](#v0122-client-binding--omp-18121). |
+| `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.6.16-qwen38-5090-beta.1`, source `1302d63929e400a05e1c9cdb0fc8003a70269825` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Image `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0` (`91a35670`), DFlash2 draft window 7, BF16 KV, two requests in flight; carried from v0.11.0/v0.12.0 ([receipt](../releases/v0.12.2/qualification/rtx5090.json)). |
+| `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0 ([RTX 4090](../releases/v0.12.2/qualification/rtx4090.json), [RTX 3090](../releases/v0.12.2/qualification/rtx3090.json)). |
 | `Neroued/ninfer` (engine watch) | Watch verdict `upgrade-available` | Head `81c8ce093b2c1646a87566a8e59d807fcf0ec95c` (2026-10-07), 285 commits ahead of `6e8b2e2a` | 250 commits and 300 files listed (`unknown-truncated`); selective backports continue in place of an architecture rebase ([watch receipt](measurements/2026-10-10-upstream-watch.json), [EXP-095](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)). |
 | `UDPSendToFailed/ninfer-4090` (engine watch) | Watch verdict `upgrade-available` | Head `5c60b7c9` (2026-09-09), 57 commits ahead of `11aae2d6` | 57 commits and 238 files listed (`high-review-overlap`); native lanes now ship from the mainline fork source `cad19767` ([watch receipt](measurements/2026-10-10-upstream-watch.json)). |
 | `Don-Chad/ninfer-3090` (engine watch) | Watch verdict `upgrade-available` | Head `d7277e88` (2026-09-26), 240 commits ahead of `ef6ecc3c` | 240 commits listed, 300 files cut (`unknown-truncated`); native lanes now ship from the mainline fork source `cad19767` ([watch receipt](measurements/2026-10-10-upstream-watch.json)). |
 
 ### v0.12.2 client binding — OMP 18.12.1
 
-Staged release **v0.12.2** pins unmodified upstream
+Published release **v0.12.2** (2026-10-18) pins unmodified upstream
 [v18.12.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1), source
 `291e055836c210f314af3f73f53244e8e9d09de8`, tree `c9d897cc3f06d7cd80f7cacb5144c208efa70f62`
 (published upstream 2026-10-17T23:14:21Z). All NInfer runtime, model, and profile pins carry
@@ -214,17 +213,17 @@ product needs that planner rebase.
 ## Why the fork points are what they are
 
 - The RTX 5090 lane builds from the mainline runtime whose upstream base is `6e8b2e2a` (since
-  v0.6.2; current selected source `1302d639` in v0.11.0–v0.12.1). Later upstream movement is
+  v0.6.2; current selected source `1302d639` in v0.11.0–v0.12.2). Later upstream movement is
   tracked separately from the reviewed backports and semantic ports named above. The retired
   container mirror point `4eef14a7` was the lineage's base before v0.6.2 and made the delta read
   17 commits larger than it is.
 - The RTX 4090 and RTX 3090 native Windows lanes originally vendored their upstreams at the
   recorded commits (`11aae2d6` and `ef6ecc3c`). Both now ship from the mainline runtime (`cad19767`
-  in v0.12.0 and v0.12.1, adding explicit `--gpu-uuid` device selection on the two-GPU Windows
+  in v0.12.0 through v0.12.2, adding explicit `--gpu-uuid` device selection on the two-GPU Windows
   host; earlier v0.9.1 retained RTX 4090 source `cba7eb93`, RTX 5090 child `e20060b6`, and RTX 3090
   `f08309da`). The durable-checkpoint, security, and packaging work remains downstream.
 - Through v0.7.4, the client fork point was the upstream tag commit onto which downstream patches
-  rebased. Since v0.8.0 (and in v0.12.1 with stock OMP 18.10.1 at `5d0aaffa`), this repository does
+  rebased. Since v0.8.0 (and in v0.12.2 with stock OMP 18.12.1 at `291e0558`), this repository does
   not build or publish an OMP client; it binds the unmodified upstream release binary instead.
 
 ## History

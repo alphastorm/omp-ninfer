@@ -5,8 +5,8 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.12.1)](#v0121--stock-omp-18101-unchanged-runtime-bindings) ·
-[Staged v0.12.2](#v0122--stock-omp-18121-unchanged-runtime-bindings) ·
+**Navigation:** [Current release (v0.12.2)](#v0122--stock-omp-18121-unchanged-runtime-bindings) ·
+[Previous v0.12.1](#v0121--stock-omp-18101-unchanged-runtime-bindings) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
@@ -15,7 +15,7 @@ the exact combination.
 
 ## v0.12.2 — stock OMP 18.12.1, unchanged runtime bindings
 
-Staged 2026-10-18 as the next client-only patch; `v0.12.1` stays GitHub `Latest`. Unmodified
+Published **2026-10-18** as GitHub `Latest`, succeeding `v0.12.1` (published 2026-10-12). Unmodified
 upstream OMP **18.12.1** (`291e0558`) replaces 18.10.1. All runtime component bytes, models,
 serving profiles, and the one-lane-at-a-time two-GPU native topology carry unchanged from
 v0.12.1. 18.12.1 contains the upstream fix for the native Windows client resolving a
@@ -35,10 +35,10 @@ restoration ([documented routes](../releases/v0.12.2/acceptance/documented-route
 
 ## v0.12.1 — stock OMP 18.10.1, unchanged runtime bindings
 
-Published **2026-10-12** as GitHub `Latest`, succeeding `v0.12.0` (published 2026-10-11). This
-client-only patch pins unmodified upstream OMP **18.10.1** (`5d0aaffa`) in place of 18.8.7. All
-runtime component bytes, models, serving profiles, and the one-lane-at-a-time two-GPU native
-topology carry unchanged from v0.12.0. The
+Published **2026-10-12** as GitHub `Latest`, succeeding `v0.12.0` (published 2026-10-11);
+superseded by `v0.12.2` on 2026-10-18. This client-only patch pins unmodified upstream OMP
+**18.10.1** (`5d0aaffa`) in place of 18.8.7. All runtime component bytes, models, serving profiles,
+and the one-lane-at-a-time two-GPU native topology carry unchanged from v0.12.0. The
 [host-free applicability report](measurements/2026-10-12-omp-18101-responses-compatibility-review.json)
 finds NInfer unaffected by the specific 18.9.0 Responses-stream fix; no new NInfer correctness or
 performance claim is made. Fresh authorized-window acceptance passed on frozen candidate `780b0639`
@@ -54,15 +54,15 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.1`, published 2026-10-12 (`Latest`); predecessor `v0.12.0` (2026-10-11) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.2`, published 2026-10-18 (`Latest`); predecessor `v0.12.1` (2026-10-12) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
-pinned stock OMP 18.8.7; current `v0.12.1` pins stock OMP 18.10.1. All five documented routes and
-fresh platform-client acceptance passed on the published components; see
-[documented-route acceptance](../releases/v0.12.1/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.12.1/acceptance/composed-external-installation.json).
+pinned stock OMP 18.8.7 and v0.12.1 pinned 18.10.1; current `v0.12.2` pins stock OMP 18.12.1. All
+five documented routes and fresh platform-client acceptance passed on the published components; see
+[documented-route acceptance](../releases/v0.12.2/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -78,10 +78,68 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.12.2 public release — stock OMP 18.12.1 with unchanged GPU lanes
+
+Published 2026-10-18; the current GitHub `Latest` release (predecessor `v0.12.1`, published
+2026-10-12).
+
+The [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md) and
+[manifest](../releases/v0.12.2/manifest.json) bind unmodified upstream OMP **18.12.1** (upstream
+release `v18.12.1`, release ID `416123868`, source commit
+`291e055836c210f314af3f73f53244e8e9d09de8`, source tree
+`c9d897cc3f06d7cd80f7cacb5144c208efa70f62`; [client descriptor](../releases/v0.12.2/qualification/client-components.json))
+in place of 18.10.1:
+
+| Platform | Asset | SHA-256 | Bytes |
+| --- | --- | --- | ---: |
+| macOS arm64 | `omp-darwin-arm64` | `fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5` | 195,462,176 |
+| Windows x64 | `omp-windows-x64.exe` | `1ba0274b48e6d6d095727faf36ec55114f5a6ac05bde5b8714d1565b2b7477bb` | 222,742,016 |
+| Linux x64 | `omp-linux-x64` | `16181401e616d7d895bae31fa97476f1513d4080807d60d3a1a04006191a1bb3` | 254,670,816 |
+
+Per-model `compat.statefulResponses: true`, custom-host auto image detail, fail-closed
+configuration, concurrency, and compaction settings are retained; `PI_OPENAI_STATEFUL` must be
+absent. 18.12.1 stops the native Windows client from resolving a drive-relative operand such as
+`C:` against its start directory ([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and
+from exiting `omp -p` with success after a failed run
+([#15732](https://github.com/can1357/oh-my-pi/pull/15732),
+[#15897](https://github.com/can1357/oh-my-pi/pull/15897)).
+
+All runtime component bytes, models, serving limits, and profiles carry unchanged from v0.12.1:
+
+- **RTX 5090 container:** `v0.6.16-qwen38-5090-beta.1`, source `1302d639`, image `6a02feba`, server
+  `548fe239`, model `0634abb0` (20,437,336,576 bytes), profile `qwen38-5090-v0.11.0`, configuration
+  `91a35670` (DFlash2 draft window 7, BF16 KV, two requests in flight;
+  [lane receipt](../releases/v0.12.2/qualification/rtx5090.json)).
+- **RTX 4090 native Windows:** `v0.6.11-qwen38-4090-beta.1`, package
+  `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2`, server `76f35b74`, source
+  `cad1976764fded5fbe96930c36bed0570b3d3de7`, model
+  `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e` (18,210,531,328 bytes;
+  rollback `not_applicable` on the two-GPU host;
+  [lane receipt](../releases/v0.12.2/qualification/rtx4090.json)).
+- **RTX 3090 native Windows:** `v0.6.3-qwen38-3090-beta.1`, package
+  `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297`, server `bca236e5`, shared
+  source `cad19767` and native model `eec39564` (retaining qualified two-direction rollback against
+  `v0.6.2`; [lane receipt](../releases/v0.12.2/qualification/rtx3090.json)).
+
+The [client upgrade review](measurements/2026-10-18-omp-18121-client-upgrade-review.json) records
+fix inclusion against both tags, all three asset identities, an isolated Darwin CLI preflight, and
+a loopback comparison with 18.10.1. Fresh authorized-window acceptance passed on frozen candidate
+`d7ed4a65095458075ee6b5ea7804ec76474b29da`: all five documented routes / 31 unchanged blocks (RTX
+5090 host 2/2, macOS 10/10 preview, Windows 5/5, native RTX 4090 7/7 with rollback
+`not_applicable`, native RTX 3090 7/7 retaining v0.6.2 rollback), three newly downloaded stock
+18.12.1 clients (typed tool turn, exact continuation, fail-closed request), and both native public
+installs. The RTX 5090 window completed in 411.717 s, and independent restoration verified the
+incumbent image/mounts/health/restart policy and checkout/key plus native canonical
+state/ACLs/tasks/holds/client files/power, mutable directory presence, and documented staging;
+production was not upgraded.
+[Documented routes](../releases/v0.12.2/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json) ·
+[macOS CLI preflight](../releases/v0.12.2/qualification/client-preflight-darwin-arm64-18.12.1.json) ·
+[Qualification](../releases/v0.12.2/qualification.json).
+
 ### v0.12.1 public release — stock OMP 18.10.1 with unchanged GPU lanes
 
-Published 2026-10-12; the current GitHub `Latest` release (predecessor `v0.12.0`, published
-2026-10-11).
+Published 2026-10-12; superseded as GitHub `Latest` by `v0.12.2`.
 
 The [release notes](../releases/v0.12.1/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.12.1/manifest.json) bind unmodified upstream OMP **18.10.1** (upstream
