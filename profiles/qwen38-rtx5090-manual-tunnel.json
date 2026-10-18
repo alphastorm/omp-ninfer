@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.12.1",
+  "release": "v0.12.2",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.10.1",
-    "upstream_commit": "5d0aaffaf1f987503ce129a642fb6e30339615af",
+    "upstream_tag": "v18.12.1",
+    "upstream_commit": "291e055836c210f314af3f73f53244e8e9d09de8",
     "os": "macOS 27",
     "architecture": "arm64",
     "published": true,
     "asset_name": "omp-darwin-arm64",
-    "asset_bytes": 216762400,
-    "asset_sha256": "74d920b72e7af01dbe258b41bb0684da7e747af63628eee41e98b5e74e2f21ac",
-    "binary_sha256": "74d920b72e7af01dbe258b41bb0684da7e747af63628eee41e98b5e74e2f21ac",
-    "release_id": 410230586,
-    "asset_id": 632821967,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.10.1/omp-darwin-arm64"
+    "asset_bytes": 195462176,
+    "asset_sha256": "fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+    "binary_sha256": "fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+    "release_id": 416123868,
+    "asset_id": 651859229,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.1/omp-darwin-arm64"
   },
   "runtime_host": {
     "os": [
