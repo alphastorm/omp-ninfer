@@ -44,7 +44,7 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d7ed4a65095458075ee6b5ea7804ec76474b29da/releases/v0.12.2/acceptance/darwin-arm64-18.12.1.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7a59556dbd510d2ee7f41567857d55e048287ce0/releases/v0.12.2/acceptance/darwin-arm64-18.12.1.json",
         "sha256": "5ab43ac524510734e30123d6f706bc35443a4faaf30bbdee62e8a53a0c6010dc"
       },
       "client_distribution": {
@@ -141,7 +141,7 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d7ed4a65095458075ee6b5ea7804ec76474b29da/releases/v0.12.2/acceptance/windows-x64-18.12.1.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7a59556dbd510d2ee7f41567857d55e048287ce0/releases/v0.12.2/acceptance/windows-x64-18.12.1.json",
         "sha256": "649661154f4795fdab7797c3264cbf61611501d21674480b55216f88c5c1fd65"
       },
       "client_distribution": {
@@ -239,7 +239,7 @@
       ],
       "blockers": [],
       "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d7ed4a65095458075ee6b5ea7804ec76474b29da/releases/v0.12.2/acceptance/linux-x64-18.12.1.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7a59556dbd510d2ee7f41567857d55e048287ce0/releases/v0.12.2/acceptance/linux-x64-18.12.1.json",
         "sha256": "fef1ffecfee1814ec59a081d0f6e07b85a32f9e5700978a0d8881468e94e6e83"
       },
       "client_distribution": {
