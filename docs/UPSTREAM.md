@@ -40,8 +40,9 @@ merge commit is in 18.12.1 and absent from 18.10.1, hashes all three assets agai
 digests and `SHA256SUMS.txt`, and compares stock macOS 18.10.1 and 18.12.1 against a loopback stub
 that emits NInfer-shaped Responses events under the documented fragment and fail-closed config:
 tool turn, image input, `--continue`, and outage behave identically, and requests differ only in
-user-agent and system prompt. It is not live route qualification; fresh acceptance runs in the
-authorized windows.
+user-agent and system prompt. It is not live route qualification; fresh live acceptance of all five
+routes and both native public installs then passed on frozen `d7ed4a65`
+([composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json)).
 
 ### v0.12.1 client binding — OMP 18.10.1
 

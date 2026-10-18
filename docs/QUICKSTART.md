@@ -2,7 +2,7 @@
 
 > **Versioned guide: v0.12.2 · stock Oh My Pi 18.12.1 · eligibility from the manifest ready gate**
 >
-> The published release is v0.12.1; until v0.12.2's manifest passes the ready gate, install from the
+> The published release is v0.12.1; until the v0.12.2 tag is published, install from the
 > [immutable v0.12.1 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.12.1/docs/QUICKSTART.md).
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
@@ -71,16 +71,32 @@ When migrating from an earlier client:
 
 ## Acceptance evidence
 
-Client acceptance is never inherited. v0.12.2 needs fresh proof of all five documented routes
-(31 blocks), the three stock OMP 18.12.1 clients, and both native Windows public installs, with
-independent host restoration. The
+Client acceptance is never inherited. Fresh stock OMP 18.12.1 acceptance passed on frozen
+candidate `d7ed4a65095458075ee6b5ea7804ec76474b29da`; no predecessor product receipt was relabeled.
+
+| Documented route | Fresh acceptance |
+| --- | --- |
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 host | 2/2 blocks passed |
+| macOS arm64 client over manual SSH tunnel | 10/10 passed; platform remains preview |
+| Windows x64 client over RTX 5090 loopback | 5/5 passed |
+| Native RTX 4090 on the two-GPU host | 7/7 passed; first-release rollback `not_applicable` |
+| Native RTX 3090 on the two-GPU host | 7/7 passed; real v0.6.2 predecessor retained |
+
+All three newly downloaded stock clients passed runtime-bound typed tool/result, exact
+continuation, and unavailable-route fail-closed checks. Linux ran under WSL2, not a separately
+qualified native Linux OS. Image input passed on macOS and Windows against RTX 5090 only; there is
+no native-lane or Linux vision claim. Both native public installs verified the exact unchanged
+component assets and idempotence; they did not re-exercise rollback.
+
+Independent restoration passed for the RTX 5090 incumbent (image, mounts, health, restart policy,
+checkout, key, and directory presence; 411.717 s window) and for both sequential native baselines
+(state, ACLs, tasks, holds, client files, power, directory presence, and documented staging).
+Production was not upgraded. [Documented routes](../releases/v0.12.2/acceptance/documented-routes.json)
+and [composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json) bind
+all 31 byte-identical executed blocks; only guide prose changed after execution. These are
+owner-operated tester-equivalent observations, not independent external-user outcomes. The
 [Darwin preflight](../releases/v0.12.2/qualification/client-preflight-darwin-arm64-18.12.1.json)
-covers identity, version, help, and argv only; it is not a live route, tool turn, continuation,
-or outage check. The published v0.12.1 release passed that acceptance with OMP 18.10.1 on frozen
-candidate `780b0639`
-([documented routes](../releases/v0.12.1/acceptance/documented-routes.json),
-[composed acceptance](../releases/v0.12.1/acceptance/composed-external-installation.json)); that
-proof does not transfer to the new client. See [Releases](RELEASES.md).
+remains a separate host-free identity and CLI check. See [Releases](RELEASES.md).
 
 ## Current release at a glance
 

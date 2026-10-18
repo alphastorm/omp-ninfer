@@ -26,7 +26,9 @@ fixes ([#15732](https://github.com/can1357/oh-my-pi/pull/15732),
 [client upgrade review](measurements/2026-10-18-omp-18121-client-upgrade-review.json) records the
 asset identities, fix inclusion, the Darwin CLI preflight, and a loopback comparison with 18.10.1;
 no runtime correctness or performance claim is made. Fresh platform, documented-route, and native
-public-install acceptance must pass in authorized windows before readiness. See the
+public-install acceptance passed on frozen `d7ed4a65` in authorized windows, with independent
+restoration ([documented routes](../releases/v0.12.2/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json)). See the
 [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md),
 [manifest](../releases/v0.12.2/manifest.json), and
 [qualification](../releases/v0.12.2/qualification.json).

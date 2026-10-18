@@ -62,8 +62,10 @@ Staged next: **v0.12.2** pins unmodified upstream Oh My Pi **18.12.1** (source `
 from resolving a drive-relative operand such as `C:` against its start directory
 ([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and fixes two `omp -p` false-success
 exits; the [client upgrade review](measurements/2026-10-18-omp-18121-client-upgrade-review.json)
-records the host-free checks. The client row changes only after v0.12.2's own route acceptance and
-ready gate ([manifest](../releases/v0.12.2/manifest.json)).
+records the host-free checks. Fresh acceptance on frozen `d7ed4a65` passed all five routes/31
+unchanged blocks, the three stock clients, and both native public installs
+([composed proof](../releases/v0.12.2/acceptance/composed-external-installation.json)); the client
+row changes when v0.12.2 is published ([manifest](../releases/v0.12.2/manifest.json)).
 
 | Component or lane | Form and transport | Release tag and source | Image or package | Serving profile | Context | Requests in flight | Speculative backend | Modalities |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |

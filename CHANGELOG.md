@@ -18,12 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sequential two-GPU topology are unchanged. 18.12.1 stops the native Windows client from
   resolving a drive-relative operand such as `C:` against its start directory (upstream #15511)
   and from exiting `omp -p` with success after a failed run (#15732, #15897). Fresh changed-client
-  acceptance is required; the manifest remains the readiness gate.
+  acceptance passed separately from v0.12.1 proof; the manifest remains the readiness gate.
 - Point the README's install links at the immutable v0.12.1 guide while the guide on `main`
   targets v0.12.2.
 
 ### Added
 
+- Bind fresh v0.12.2 acceptance on frozen `d7ed4a65`: all five documented routes
+  (31 byte-identical blocks), three stock OMP 18.12.1 clients and both native public
+  installs passed. Independent restoration includes mutable directory presence,
+  native staging and canonical state/tasks/holds/client files/power; production
+  was not upgraded. macOS remains preview and Linux scope remains WSL2.
 - Record the host-free OMP 18.12.1 client upgrade review: fix inclusion checked against both
   tags, all three asset identities, an isolated Darwin CLI preflight, and a loopback comparison
   with 18.10.1 against NInfer-shaped Responses events. It is not live route acceptance.

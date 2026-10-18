@@ -35,7 +35,12 @@ native serving.
   turn, image input, `--continue` and outage behaved identically, and requests
   differed only in user-agent and system prompt. The unavailable-endpoint error text
   changed; no check depends on it. Live tool, continuation, restart, outage and
-  image-input behavior on real lanes still requires the authorized windows.
+  image-input behavior on real lanes is covered by the fresh acceptance below.
+- **Fresh acceptance passed on frozen `d7ed4a65`.** All five documented routes/31
+  unchanged blocks, three stock-client live/outage receipts and both native public
+  installs passed in authorized windows, with independent restoration. Product
+  readiness is determined by the manifest and verifier, not by predecessor product
+  acceptance.
 
 ## Exact stock client identities
 
@@ -75,8 +80,15 @@ configuration, concurrency and compaction settings are retained;
 
 Runtime measurements and package qualifications are carried v0.12.1 evidence,
 not new performance measurements or proof of the changed client's behavior. Fresh
-product acceptance requires the 5090 host/macOS/Windows routes in one window and
-both native routes plus their public installs in sequential native windows.
+product acceptance passed the 5090 host/macOS/Windows routes in one 411.717 s window
+and both native routes plus their public installs in sequential native windows.
+The [documented-route receipt](acceptance/documented-routes.json) binds all 31
+executed blocks; [composed proof](acceptance/composed-external-installation.json)
+binds the three newly downloaded clients and native public-install receipts.
+Restoration includes incumbent image/mounts/health/restart policy and checkout/key,
+plus native canonical state/ACLs/tasks/holds/client files/power, mutable directory
+presence and documented staging. Both public checks were idempotent acceptance of
+the installed exact qualified bytes, not fresh rollback tests. Production was not upgraded.
 
 ## Support boundaries
 

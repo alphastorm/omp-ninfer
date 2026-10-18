@@ -46,8 +46,10 @@ Full release authority: [`releases/v0.12.1/NINFER_RELEASE_NOTES.md`](releases/v0
 profile, and topology unchanged. It fixes the native Windows client resolving a drive-relative
 operand such as `C:` against its start directory
 ([#15511](https://github.com/can1357/oh-my-pi/issues/15511)) and two `omp -p` false-success exits.
-It ships only after fresh acceptance of all five documented routes, the three stock clients, and
-both native public installs ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)).
+Fresh acceptance passed on frozen `d7ed4a65`: all five documented routes/31 unchanged blocks, the
+three stock clients, and both native public installs, with independent restoration
+([composed proof](releases/v0.12.2/acceptance/composed-external-installation.json),
+[notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). Publication is owner-only.
 
 ## Remaining work
 

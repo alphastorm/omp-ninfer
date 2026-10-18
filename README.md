@@ -99,8 +99,10 @@ Upgrading from v0.12.0 changes only the client. Native owners staying on v0.10.0
 
 Next on `main`: v0.12.2 pins stock Oh My Pi 18.12.1, which fixes the native Windows client's
 `C:` path resolution and two `omp -p` false-success exits, with every runtime, model, and profile
-unchanged ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). It becomes installable only after
-its own route acceptance and ready gate; the guide on `main` already targets it.
+unchanged ([notes](releases/v0.12.2/NINFER_RELEASE_NOTES.md)). Fresh acceptance on frozen
+`d7ed4a65` passed all five routes/31 unchanged blocks, the three stock clients, and both native
+public installs ([composed proof](releases/v0.12.2/acceptance/composed-external-installation.json));
+it becomes installable when its tag is published. The guide on `main` already targets it.
 
 ## How it works
 
