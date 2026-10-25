@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_runtime_package_inventory",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3
+  },
+  "status": "passed",
+  "package": {
+    "artifact_type": "ninfer_local_release_receipt",
+    "asset": {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "sha256": "ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944"
+    },
+    "build_profile": "rtx5090",
+    "checksums": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+    "patch_stack_sha": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "sbom": {
+      "format": "SPDX-2.3",
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sha256": "de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc"
+    },
+    "schema_version": 1,
+    "source_date_epoch": 1792916171,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "build_identity": {
+    "artifact_type": "ninfer_release_build_identity",
+    "binaries": {
+      "ninfer": "6804dd1977bac5b7d852686fae0bd41096a3c8c1892ab09d3da90ef6269134a1",
+      "ninfer-serve": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232"
+    },
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "patch_stack_sha": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "schema_version": 1,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "assets": [
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "bytes": 547027462,
+      "sha256": "ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "bytes": 3596,
+      "sha256": "de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+      "bytes": 348,
+      "sha256": "3e5a52e035bbdda5f0fd33665bf24edcfc9652bc698d605e1f9167671aec4a56"
+    },
+    {
+      "name": "runtime-source-04b603aa.tar.gz",
+      "bytes": 12225267,
+      "sha256": "98a33db050c6145eae02bdc1c126180be34e62acde9fdb5550976ffcacbd4e95"
+    }
+  ],
+  "component_tags": [
+    "v0.7.0-qwen38-5090-beta.1",
+    "v0.7.0-qwen38-5090-source.1",
+    "v0.7.0-qwen38-5090-runtime-beta.1"
+  ],
+  "transferred_assets_sha256_verified": true,
+  "scope": "Local package and transfer hashes, not independent anonymous public download/installation acceptance. Component publication is bound by runtime-publication.json and runtime-base.json.",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc-5090",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+    "json_pointer": "/package_inventory",
+    "supplied_projection_name": "integration-rc-package.json",
+    "supplied_projection_sha256": "ab6d43e6a3c964e7cef597ddde273505e9a2bc3ec24d63e660c5fc726cb88678",
+    "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+  }
+}

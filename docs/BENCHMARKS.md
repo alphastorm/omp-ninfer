@@ -13,6 +13,28 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## v0.13.0 staged runtime — exact-source gates
+
+The product remains a staged draft: council, lane pin and fresh stock-client/public-route
+acceptance are not inferred from runtime measurements. The new
+[lane receipt](../releases/v0.13.0/qualification/rtx5090.json) binds frozen source `04b603aa`,
+server `48d736aa`, published model `81f924d4` and configuration `c73eb8fb`, with runtime image
+`e0419f48` on base `d4377ed0`:
+
+| Gate | Observed result | Scope |
+| --- | --- | --- |
+| Cold exact NIAH | 130,048 prompt tokens, 56.921 s wall / 56.334 s server, 2,284.7 tok/s wall | Zero prefix hit; exact needle output |
+| Decode | 2,048 tokens; 180.06 tok/s server / 176.49 wall; acceptance 0.244, 2.71 tokens/round | DFlash2 K=7, BF16, automatic KV 146,368, two active lanes, 131,072 context |
+| Runtime/agent protocol | Passed across `docker restart`; 30,954 MiB idle VRAM | Authenticated continuation/forks, delete/no-resurrection, surviving sibling |
+| Production schema 3 restart | 20,926 cached tokens / 27 byte-identical continuation bytes, four boots | Authenticated `fsync` save: 2,164,056,150 bytes; not the old tracer |
+| Product-shape startup / C2 | 1,074,790,400 bytes headroom, graph growth +2 MiB; frozen-source E2 29.4234 s | Amended 32 GB gate, KV at least context, headroom at least 768 MiB and baseline minus 32 MiB, graph growth at most 64 MiB |
+| Keep-warm idle TTFT | 0.747845 s off / 0.586125 s on, three samples per arm after 12 s idle | Descriptive only, not powered significance or end-to-end OMP speed |
+
+These are workload-specific runtime gates, not a like-for-like speedup over the historical
+chart strip or the role corpus below. Historical powered quality/leak, actual OMP parallel,
+eight-session fanout/warm-arrival and long OMP compaction are not re-measured for v0.13.0.
+Native package/performance evidence is carried only because its components are unchanged.
+
 ## v0.13.0 candidate measurements — EXP-097
 
 These measurements are not final-runtime, durable-store or public-install acceptance.
@@ -29,14 +51,16 @@ published `81f924d4` binding. Payload/frontend equivalence does not relabel that
 | Median of 84 per-case median decode rates | 338.448 tok/s | 342.150 tok/s | **101.09%**; founder-amended 96% floor passes |
 | Structured-output p95 decode ms/token | 2.78123 | 3.13055 | **1.12560 ratio**, 12.6% slower; tool-definition serialization order attributed |
 | 64K continuation decode | 335.332 tok/s | 290.781 tok/s | Rounds 338 → 392 despite faster rounds; aggregate median does not erase this gap |
-| Frozen published-component/profile startup | Not a comparison | Awaiting exact cut qualification | Record actual automatic KV capacity, free VRAM and binary/model/profile identities |
-| Schema 3 restart, pressure, warm-arrival and public routes | Not carried from predecessor | Awaiting exact cut acceptance | Record the live lane receipt and composed candidate, not a copied timing |
+| Frozen component/profile startup | Not a comparison | Qualified separately above | 146,368 automatic KV tokens; exact source/binary/model/config, not EXP-097's model |
+| Schema 3 restart and pressure | Not carried from predecessor | Qualified separately above | Public routes and historical warm-arrival/long-client workloads remain separate |
 
 The original strict workload-p95 gate is **FAIL**; the founder-amended gate is **PASS**,
 with above-10% tails attributed rather than hidden. The
 [canonical-tool diagnostic](measurements/2026-10-25-exp097-canonical-tools-diagnostic.json)
-explains the structured-output tail but was reverted and is not shipped code. It is not a
-JSON-schema feature-acceptance receipt. Native default rows remain carried, unchanged
+explains the structured-output tail and was reverted in that measurement branch. Integration
+later landed canonical sorted-key serialization `0abe7c8e5` with host byte pins; the full G2
+comparison was not repeated after it. The diagnostic is not JSON-schema feature acceptance.
+Native default rows remain carried, unchanged
 qualification below; rebased native numbers require their own new receipts.
 
 ## Current qualified results — v0.12.2

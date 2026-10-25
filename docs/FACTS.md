@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-25 · Published release: v0.12.2 (2026-10-18) · v0.13.0 preparation below
+Updated: 2026-10-25 · Published release: v0.12.2 (2026-10-18) · v0.13.0 staged draft below
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
@@ -88,20 +88,21 @@ records the host-free checks.
 
 ## Models
 
-### v0.13.0 prepared contract — not yet release acceptance
+### v0.13.0 staged runtime — not yet public-route acceptance
 
-The [prepared notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
+The [staged notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
 [candidate protocol matrix](../releases/v0.13.0/COMPATIBILITY.md) describe the next release.
-The published root authority stays on v0.12.2 until the lane pin; no candidate source, binary
-or image identity is inferred from a moving branch.
+The published root authority stays on v0.12.2 until the lane pin. Frozen source `04b603aa`,
+server `48d736aa`, runtime image `e0419f48` on base `d4377ed0` and their published receipts
+are bound in the staged manifest, not inferred from a moving branch.
 
 | Boundary | Rebased RTX 5090 candidate | Default carried native RTX 4090 / RTX 3090 |
 | --- | --- | --- |
-| Runtime base | Neroued/ninfer master `64d10fbf`; component `v0.7.0-qwen38-5090-beta.1` after cut | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
+| Runtime base | Neroued/ninfer master `64d10fbf`; frozen source `04b603aa`, component `v0.7.0-qwen38-5090-beta.1` | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
 | Stock client | OMP 18.12.6, source `45c35e40`; fresh acceptance required | Same client; native public-install acceptance reruns |
 | Model | Published container version 3 `81f924d4`, 20,437,521,664 bytes, revision `1cbd84e7221e51186bd7f093a149912d2489625b`; text/vision/MTP/DFlash2 | Unchanged `eec39564`, 18,210,531,328 bytes |
-| Structured output | Upstream xgrammar implements `text.format` / `response_format` `json_schema`; **live acceptance pending**, not yet a supported release claim | Rejected with HTTP 400 |
-| Tool names (Chat/Responses) | 128 characters, boundary acceptance required | 64 characters |
+| Structured output | **Runtime-supported:** xgrammar, real grammar and product-smoke evidence for `text.format` / `response_format` `json_schema`; OMP/public-route acceptance is separate | Rejected with HTTP 400 |
+| Tool names (Chat/Responses) | 128 characters on the rebased boundary | 64 characters |
 | Status / request log | Status schema 2 / request-log schema 30 | Status schema 1 / request-log schema 17 |
 | Host store | Shared State/KV budget 21,881,405,440 bytes; 2 extra device slots beyond the 2 active lanes | Existing separate state-slot and host-KV budgets |
 | Disk sessions | New schema 3 directory `checkpoints-v013` at `/checkpoints-v013`; fingerprint schema 2 | Existing lane stores, unchanged |
@@ -109,16 +110,22 @@ or image identity is inferred from a moving branch.
 The published model is downloaded directly; no local model upgrader runs in the release route.
 All 1,184 tensor payloads and all six frontend resources matched the production model upgraded
 locally. Whole-container hashes differ, so only the exact published `81f924d4` artifact is pinned.
-The profile's lifecycle-style configuration identity is `c73eb8fb`; binary/archive/SBOM/image
-identities remain cut inputs. All other tuning stays unchanged apart from K5's unified host
+The profile's lifecycle-style configuration identity is `c73eb8fb`; exact binary/archive/SBOM/image
+identities are bound in the staged manifest. Automatic KV is 146,368 tokens; final-profile
+decode is 180.06 tok/s server / 176.49 wall, exact 130,048-token retrieval is 56.921 s wall,
+and idle VRAM is 30,954 MiB. Production restart reuses 20,926 tokens with 27 identical bytes.
+All other tuning stays unchanged apart from K5's unified host
 mapping and explicit removal of the obsolete `--max-private-continuations` catalog flag.
 
 The new loader never reads or mutates v0.12.x checkpoint roots. Keep them for rollback; prior
 sessions replay from the authoritative OMP transcript for a fresh prefill. Non-blocking export
 captures state under serialization and performs bulk transfer/hash/write outside the execution
 lock, with an epoch-checked final publication. It does not promise loss-free saves or zero latency.
-Rebased native components are an alternative only after their own exact hardware/package/model
-receipts qualify; container capabilities never transfer by assumption.
+Rebased native components target v0.13.1, not this release. The 24 GB shapes need
+`--admission-headroom-mib` (640 MiB RTX 4090 / 768 MiB RTX 3090) and are not yet packaged or
+qualified. Container capabilities never transfer by assumption. Council, new client/public
+acceptance and final pins remain pending; historical powered quality/leak and OMP parallel/fanout
+workloads are not re-measured for v0.13.0.
 
 ### Published v0.12.2 model bindings
 
@@ -146,7 +153,7 @@ v0.12.2 pins two registered NInfer conversion artifacts (`qwen3_8_27b.ninfer`) f
   lanes. Vision inputs (including image tool results and `snapcompact` image archives) are
   qualified on the RTX 5090 lane only; native RTX 4090 and RTX 3090 lanes refuse image inputs with
   `vision_disabled`. Published v0.12.2 rejects enforced JSON-schema output; the v0.13.0
-  rebased-container implementation and its outstanding acceptance are distinguished above.
+  rebased-container runtime support and its separate OMP/public-route acceptance are distinguished above.
 - **Oh My Pi client contract:** Stock Oh My Pi 18.12.1 has no `omp appliance` commands. Model
   fragments set `compat.statefulResponses: true` per model (upstream
   [#13686](https://github.com/can1357/oh-my-pi/pull/13686)), and `PI_OPENAI_STATEFUL` must be

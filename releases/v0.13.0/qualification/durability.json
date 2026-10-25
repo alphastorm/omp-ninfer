@@ -1,0 +1,121 @@
+{
+  "artifact_type": "omp_ninfer_schema3_production_restart",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3
+  },
+  "status": "passed",
+  "g1": {
+    "minimum_checkpoint_hit_tokens": 16384,
+    "observed_checkpoint_hit_tokens": 20926,
+    "byte_identical": true,
+    "continuation_bytes": 27,
+    "production_path": true,
+    "tracer": false,
+    "four_boots": true
+  },
+  "production": {
+    "artifact_type": "ninfer-serve-restore-proof/1",
+    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "source": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "production_path": true,
+    "tracer": false,
+    "first_stop": {
+      "saved": 1,
+      "skipped": 0,
+      "refused": 0,
+      "complete": true
+    },
+    "restart": {
+      "cached_input_tokens": 20926,
+      "continuation_bytes": 27,
+      "continuation_sha256": "5a2528e22c6a6603d5eeafd214223e57812a9da7174bc1a4445c8f9308f8344c",
+      "byte_identical": true,
+      "first_keyed_request_without_parent": true
+    },
+    "save": {
+      "state": "exported",
+      "reason": "none",
+      "committed": true,
+      "origin": "authenticated",
+      "dir_sync": "fsync",
+      "frontier_tokens": 20993,
+      "restored_tokens": 20993,
+      "payload_bytes": 2164056150,
+      "points": 4,
+      "states": 4,
+      "pages": 329
+    },
+    "policy_disabled": {
+      "mode": "startup_warmup_and_unretained_request",
+      "cached_input_tokens": 0,
+      "unretained_retrieve_status": 404,
+      "current_unchanged": true
+    },
+    "isolation": {
+      "foreign_retrieve": 404,
+      "foreign_delete": 404,
+      "missing_capability_retrieve": 404,
+      "own_retrieve": 200,
+      "own_delete": 200,
+      "deleted_after_restart": 404,
+      "descendant_after_restart": 200
+    },
+    "passed": true
+  },
+  "provider_canonical_validation": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/persistence",
+    "source_commit": "138939f385ba4ded5e6774effb7463d39048654f",
+    "evidence_commit": "6563d4390ec32cceba8230dda82754462c6bd879",
+    "evidence_path": "persistence-canonical-r7.json",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "none_restart": {
+      "seconds": 147.341,
+      "continuation_bytes": 146,
+      "points": 3,
+      "states": 3
+    },
+    "mtp_restart": {
+      "seconds": 92.327,
+      "continuation_bytes": 146,
+      "points": 3,
+      "states": 3
+    },
+    "actual_victim": {
+      "seconds": 96.004,
+      "resident_bytes": 608663552,
+      "host_capacity_bytes": 913309696,
+      "verified_bytes": 608671719,
+      "current_pins": 2,
+      "releases": 1,
+      "target_fresh_readers": 1,
+      "reused_tokens": 278,
+      "native_invalid_victim_preserved": true
+    }
+  },
+  "isolation": "New /checkpoints-v013 root. v0.12.x roots remain untouched and sessions replay from client transcripts. The 22,010-token tracer is historical; G1 here uses the final production four-boot proof (20,926 cached tokens).",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc-5090",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+    "json_pointer": "/production_restart",
+    "supplied_projection_name": "serve-restore.json",
+    "supplied_projection_sha256": "4479a487436923e5b2315a8cd92e6a262903d40afc9c0fa5642b340d9c8a4bc3",
+    "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+  }
+}

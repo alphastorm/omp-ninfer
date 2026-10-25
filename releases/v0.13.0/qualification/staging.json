@@ -1,0 +1,60 @@
+{
+  "artifact_type": "omp_ninfer_v013_component_staging",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3
+  },
+  "status": "passed-draft",
+  "binary_component_tag": "v0.7.0-qwen38-5090-beta.1",
+  "binary_archive_sha256": "ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944",
+  "binary_archive_bytes": 547027462,
+  "source_archive_sha256": "98a33db050c6145eae02bdc1c126180be34e62acde9fdb5550976ffcacbd4e95",
+  "sbom_sha256": "de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc",
+  "oci_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
+  "runtime_base_image": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+  "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
+  "runtime_receipt_release": "v0.7.0-qwen38-5090-runtime-beta.1",
+  "model_revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
+  "model_bytes": 20437521664,
+  "cli_inventory": "releases/v0.13.0/qualification/integrated-cli.json",
+  "native_posture": "Unchanged v0.12.2 packages/model; new client/public-install acceptance still required. Rebased natives are not packaged/qualified and target v0.13.1.",
+  "root_authority": "v0.12.2 unchanged until the lead lane-pins this stage commit.",
+  "product_publication_authorized": false,
+  "provenance": [
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "json_pointer": "/package_inventory",
+      "supplied_projection_name": "integration-rc-package.json",
+      "supplied_projection_sha256": "ab6d43e6a3c964e7cef597ddde273505e9a2bc3ec24d63e660c5fc726cb88678",
+      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    },
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "producer": "Lead component-cut log supplied to the release worker; no committed fork path is claimed for this operator record.",
+      "record_name": "cut-log.txt",
+      "record_sha256": "e943a8fce980ac80b136f41b97c43518c7334ab6c40f767462ef35f62acdeb1c",
+      "workflow_urls": [
+        "https://github.com/alphastorm/ninfer/actions/runs/40178487425",
+        "https://github.com/alphastorm/ninfer/actions/runs/40178804483"
+      ],
+      "packaging_evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "packaging_evidence_path": "integration-rc.json"
+    }
+  ]
+}

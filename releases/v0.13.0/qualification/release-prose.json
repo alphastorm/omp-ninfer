@@ -1,0 +1,27 @@
+{
+  "artifact_type": "omp_ninfer_release_prose_checks",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "status": "passed",
+  "subject": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "v013/release-stage",
+    "scope": "Current release-facing README/CHANGELOG/docs prose; canonical staged notes have their own bounded/no-glue regression in the full suite."
+  },
+  "command": "PYTHONPATH=tests python3 -m unittest test_documented_route.ReleaseProseTests -v",
+  "observed": {
+    "tests_run": 6,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 0.04,
+    "result": "OK"
+  },
+  "scope": "No formatter or linter. Markdown links and private markers are checked separately by verify_release; runtime observations are not inferred from prose tests.",
+  "staged_notes": {
+    "test": "test_v013_release_preparation.V013PreparationTests.test_prepared_notes_are_bounded_and_use_readable_release_prose",
+    "result": "passed in the 476-test corrected suite",
+    "maximum_lines": 210,
+    "canonical_filename": "NINFER_RELEASE_NOTES.md"
+  }
+}

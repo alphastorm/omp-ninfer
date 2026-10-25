@@ -1,0 +1,69 @@
+{
+  "artifact_type": "omp_ninfer_release_tooling_checks",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "subject": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "v013/release-stage"
+  },
+  "prior_product_source_ci": {
+    "commit": "1ab652881873fcaccd0ddc51c399cae788dd1d36",
+    "workflow_url": "https://github.com/alphastorm/omp-ninfer/actions/runs/40168513309",
+    "jobs": {
+      "linux": "passed",
+      "macos": "passed",
+      "windows": "passed",
+      "acceptance_dry_run": "passed"
+    },
+    "provenance": "ReleaseStage REPORT at the supplied product checkpoint; this is product tooling evidence, not runtime or live route acceptance."
+  },
+  "fork_harness_ci": {
+    "workflow_urls": [
+      "https://github.com/alphastorm/ninfer/actions/runs/40156691541",
+      "https://github.com/alphastorm/ninfer/actions/runs/40175745353"
+    ],
+    "scope": "Program-owner referenced harness CI; no new run or substituted exact-head CI assertion is made by this worker."
+  },
+  "draft_rebind": {
+    "command": "python3 scripts/rebind_release.py --release v0.13.0 --draft",
+    "exit_code": 0,
+    "output": "wrote releases/v0.13.0/COMPATIBILITY.md\nrebound hash chain for v0.13.0; compatibility 6bd4837ad29a…"
+  },
+  "scope": "No formatter, linter, GPU job, host change, new CI dispatch, publication or full-suite retry of the four unchanged timing failures. Previous CI remains separately source-bound. Metadata/provenance receipts were finalized after the corrected test execution; no executable or prose changes followed it.",
+  "status": "passed-with-documented-local-exclusions",
+  "full_suite_before_fixture_fix": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "tests_run": 480,
+    "failures": 5,
+    "errors": 0,
+    "skipped": 5,
+    "elapsed_seconds": 232.964,
+    "result": "FAILED (failures=5, skipped=5)",
+    "disposition": "One staged-authority fixture drift was repaired in test_stage_release.py. Four timing failures match the exact pre-existing local exclusions in the supplied ReleaseStage REPORT; no tolerance, production code or skip decorator was changed."
+  },
+  "corrected_local_suite": {
+    "command": "python3 -c \"$DISCOVERY_DRIVER\"",
+    "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(test for test in all_tests if test.id() not in excluded)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
+    "excluded_test_ids": [
+      "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
+    ],
+    "tests_run": 476,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 5,
+    "elapsed_seconds": 223.552,
+    "exit_code": 0,
+    "result": "OK (skipped=5)",
+    "scope": "All discovered tests except the four named pre-existing timing-sensitive local cases; this is not a clean 480-test claim. The four failed observations were not rerun unchanged."
+  },
+  "draft_installable_posture": {
+    "command": "python3 scripts/verify_release.py --release v0.13.0 --require-installable",
+    "exit_code": 1,
+    "error_count": 22,
+    "interpretation": "Expected pre-pin draft/root/profile errors only. The root authority, public matrix and live profiles deliberately remain on v0.12.2; the lead lane pin promotes them and changes draft to candidate. No verifier guard is weakened."
+  }
+}

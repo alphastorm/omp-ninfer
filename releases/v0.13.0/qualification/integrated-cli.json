@@ -1,0 +1,151 @@
+{
+  "artifact_type": "omp_ninfer_integrated_cli_inventory",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3
+  },
+  "status": "passed",
+  "cli": {
+    "help_sha256": "0e03d34c9dc4e46b3399fc9edda358defdd3be0b16286f3380eef2331bf957ed",
+    "profile_release": "v0.13.0",
+    "profile_sha256": "64e1f629fd94f8a486998664f7fece81d24785e63bf4d9cd2362b1c605226c1d",
+    "accepted_flags": [
+      "--host",
+      "--port",
+      "--model-id",
+      "--binary-sha256",
+      "--artifact-sha256",
+      "--config-sha256",
+      "--deployment-profile",
+      "--max-context",
+      "--kv-capacity",
+      "--prefill-chunk",
+      "--kv-dtype",
+      "--max-concurrency",
+      "--pending-timeout-ms",
+      "--spec",
+      "--draft-tokens",
+      "--lm-head-draft",
+      "--vision",
+      "--preserve-thinking",
+      "--session-checkpoint-dir",
+      "--session-checkpoint-quota-mib",
+      "--session-checkpoint-staging-mib",
+      "--device-state-slots",
+      "--host-context-mib",
+      "--gpu-keep-warm-ms"
+    ],
+    "obsolete_omitted_controls": [
+      "--max-private-continuations"
+    ],
+    "translations": {
+      "--host-state-slots": "--host-context-mib",
+      "--host-kv-mib": "--host-context-mib"
+    },
+    "host_context_mib": "20867.734375",
+    "checkpoint_mount_target": "/checkpoints-v013"
+  },
+  "accepted_flag_count": 24,
+  "host_context_bytes": 21881405440,
+  "exact_profile": {
+    "schema": "ninfer-integration-product-profile/1",
+    "source": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "profile_sha256": "64e1f629fd94f8a486998664f7fece81d24785e63bf4d9cd2362b1c605226c1d",
+    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "checkpoint_mount_target": "/checkpoints-v013",
+    "passed": true,
+    "startup": {
+      "engine": {
+        "max_context": 131072,
+        "max_concurrency": 2,
+        "prefill_chunk": 1024,
+        "kv_cache": "bf16",
+        "speculative_backend": "dflash2",
+        "speculative_draft_window": 7,
+        "proposal_head": "optimized",
+        "cuda_graph": true,
+        "vision": true,
+        "kv_capacity_mode": "auto",
+        "kv_capacity": 146368
+      },
+      "memory": {
+        "device_budget_bytes": 32429309952,
+        "minimum_runtime_reservation_bytes": 10343649793,
+        "runtime_reservation_bytes": 11346088449,
+        "cuda_graph_rebuild_estimate_bytes": 0,
+        "cuda_graph_prepare_increment_bytes": 0,
+        "cuda_graph_calibration_increment_bytes": 33554432,
+        "cuda_graph_calibration_retained_bytes": 33554432,
+        "startup_retained_bytes": 33786880,
+        "available_after_startup_bytes": 1074790400,
+        "kv_capacity_headroom_bytes": 1073741824,
+        "kv_payload_bytes": 9592373248,
+        "host_context_capacity_bytes": 21881405440
+      },
+      "startup_gate": {
+        "minimum_headroom_bytes": 805306368,
+        "maximum_headroom_loss_bytes": 33554432,
+        "maximum_graph_growth_bytes": 67108864,
+        "baseline_headroom_bytes": 1072693248,
+        "baseline_graph_bytes": {
+          "cuda_graph_rebuild_estimate_bytes": 0,
+          "cuda_graph_calibration_increment_bytes": 31457280,
+          "cuda_graph_calibration_retained_bytes": 31457280,
+          "startup_retained_bytes": 31689728
+        },
+        "graph_deltas_bytes": {
+          "cuda_graph_rebuild_estimate_bytes": 0,
+          "cuda_graph_calibration_increment_bytes": 2097152,
+          "cuda_graph_calibration_retained_bytes": 2097152,
+          "startup_retained_bytes": 2097152
+        }
+      },
+      "total_device_memory_bytes": 34162343936
+    },
+    "gpu_keep_warm_ms": 60000,
+    "device_state_slots": 2,
+    "server_exit": 0,
+    "shutdown": {
+      "artifact_type": "ninfer_serve_shutdown_report",
+      "complete": true,
+      "refused": 0
+    }
+  },
+  "scope": "The lifecycle-style release config is c73eb8fb. The launch-profile file hash and diagnostic configuration hashes are separate identities. +2 extra device states, not two total; keep-warm worker is integrated. No alias for removed max-private-continuations.",
+  "provenance": [
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "json_pointer": "/package_inventory",
+      "supplied_projection_name": "integration-rc-package.json",
+      "supplied_projection_sha256": "ab6d43e6a3c964e7cef597ddde273505e9a2bc3ec24d63e660c5fc726cb88678",
+      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    },
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "json_pointer": "/exact_product_profile",
+      "supplied_projection_name": "exact-profile.json",
+      "supplied_projection_sha256": "3adddbe75025a4f8882c96694242d289ae98d3c440f80843b15608e864babb4f",
+      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    }
+  ]
+}

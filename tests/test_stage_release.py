@@ -152,8 +152,16 @@ class StageReleaseTests(unittest.TestCase):
             "observed_gates": {"fresh_runtime": {"status": "pending"}},
             "documented_route_acceptance": {"status": "pending"},
         })
-        prepared_authority = self.load(ROOT / "releases/v0.13.0/compatibility.json")
-        prepared_authority["product_release"] = TARGET
+        # The real release becomes a full authority after staging. This fixture still
+        # exercises the notes-only input contract, independently of that later posture.
+        prepared_authority = {
+            "artifact_type": "omp_ninfer_prepared_compatibility",
+            "schema_version": 1,
+            "product_release": TARGET,
+            "status": "preparation-only",
+            "runtime_contracts": self.load(
+                ROOT / "releases/v0.13.0/compatibility.json")["runtime_contracts"],
+        }
         self.save(target / "compatibility.json", prepared_authority)
         templates = root / "profiles" / "fixture-new-shape"
         templates.mkdir()

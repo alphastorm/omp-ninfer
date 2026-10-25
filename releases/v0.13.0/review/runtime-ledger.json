@@ -1,0 +1,17 @@
+{
+  "artifact_type": "omp_ninfer_pending_runtime_review_binding",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "status": "pending",
+  "subject": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc-5090",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232"
+  },
+  "council_approval": false,
+  "ledger": null,
+  "reason": "Full council is running on the frozen runtime. Lead replaces this binding with the actual ledger and dispositions; predecessor review evidence is removed, not repurposed.",
+  "product_publication_authorized": false
+}

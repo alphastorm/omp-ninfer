@@ -1,0 +1,385 @@
+{
+  "artifact_type": "omp_ninfer_release_receipt_audit",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "source_release": "v0.12.2",
+  "policy": "Only unchanged native package qualification/checksums carry unchanged. Every changed-runtime receipt is replaced or removed; removed observations are not re-measured for v0.13.0, not passing gates.",
+  "files": [
+    {
+      "file": "agent-mix.json",
+      "disposition": "dropped",
+      "staged_sha256": "83cb1b7d60ddcfe63d408ec5d38a466b5da5387604f9392023056cf363f12d56",
+      "predecessor_sha256": "83cb1b7d60ddcfe63d408ec5d38a466b5da5387604f9392023056cf363f12d56",
+      "reason": "Historical agent-mix/role-arrival latency experiment is not re-measured for v0.13.0; EXP-097 role decode and current product C2 smokes do not reproduce it."
+    },
+    {
+      "file": "bf16-solo-pair-candidate.json",
+      "disposition": "dropped",
+      "staged_sha256": "7c98c298a4eb88cd5770d290ef072c316ef792ccdad569720a2f0e24a0aab6eb",
+      "predecessor_sha256": "7c98c298a4eb88cd5770d290ef072c316ef792ccdad569720a2f0e24a0aab6eb",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "bf16-solo-pair-difference-fields.json",
+      "disposition": "dropped",
+      "staged_sha256": "4ed16289abdc19a39fb86c9eb541df1eb06fc7d41f0d3ea9215da08bad95cfd8",
+      "predecessor_sha256": "4ed16289abdc19a39fb86c9eb541df1eb06fc7d41f0d3ea9215da08bad95cfd8",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "bf16-solo-pair-shipped.json",
+      "disposition": "dropped",
+      "staged_sha256": "52639a7edfe9a5ebe8beba50d9b8b1861583f34219b90e7561a9d35522266157",
+      "predecessor_sha256": "52639a7edfe9a5ebe8beba50d9b8b1861583f34219b90e7561a9d35522266157",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "build.json",
+      "disposition": "replaced",
+      "staged_sha256": "a79f3fe83209a0fae2ce01a8fb305c63f005b2f894401f266dbdd01c4e6901fc",
+      "predecessor_sha256": "a79f3fe83209a0fae2ce01a8fb305c63f005b2f894401f266dbdd01c4e6901fc",
+      "reason": "Frozen-source integration build, host 65/65, dense 11/11, loader and canonical shared MTP/fp8 replace earlier-source build claims."
+    },
+    {
+      "file": "client-components.json",
+      "disposition": "replaced",
+      "staged_sha256": "593a33e5a556906a90fa2edef20621f26f6786e600994e35323f7c9e73d7e206",
+      "predecessor_sha256": "593a33e5a556906a90fa2edef20621f26f6786e600994e35323f7c9e73d7e206",
+      "reason": "Stock OMP 18.12.6 descriptor from the reviewed three-platform assets replaces the stale 18.12.1 descriptor."
+    },
+    {
+      "file": "client-preflight-darwin-arm64-18.12.1.json",
+      "disposition": "dropped",
+      "staged_sha256": "88492f66b504961c90c296f32de58121de8e54e53efde9437a9df571d34c3a5b",
+      "predecessor_sha256": "88492f66b504961c90c296f32de58121de8e54e53efde9437a9df571d34c3a5b",
+      "reason": "Old-client preflight is not acceptance of OMP 18.12.6; current host-free review is separate and live three-platform acceptance remains pending."
+    },
+    {
+      "file": "component-cut-dry-run.json",
+      "disposition": "replaced",
+      "staged_sha256": "03711d03a9889c78c0f88eb21e42c111166acddda7290466c725b25339d4cafc",
+      "predecessor_sha256": "03711d03a9889c78c0f88eb21e42c111166acddda7290466c725b25339d4cafc",
+      "reason": "Lead cut log records the dry-run before the exact v0.7.0 component cut; does not infer product publication."
+    },
+    {
+      "file": "concurrency.json",
+      "disposition": "replaced",
+      "staged_sha256": "efd8b252b15836e7fcff03e5881498b5ec5934d731d54840b0cc4c40ad1b6c8d",
+      "predecessor_sha256": "efd8b252b15836e7fcff03e5881498b5ec5934d731d54840b0cc4c40ad1b6c8d",
+      "reason": "Exact-source product-shape C2/32 GB/idle proof plus separately identified A3/E2 overlap provider; no predecessor latency carryover."
+    },
+    {
+      "file": "durability.json",
+      "disposition": "replaced",
+      "staged_sha256": "c716fa212989f1aea6f39f97a004074cf19690bc0732f72eef9171786a2abc57",
+      "predecessor_sha256": "c716fa212989f1aea6f39f97a004074cf19690bc0732f72eef9171786a2abc57",
+      "reason": "Exact-source four-boot production restart and schema 3 authenticated save, with separately identified canonical native restart provider."
+    },
+    {
+      "file": "external-interruption.json",
+      "disposition": "dropped",
+      "staged_sha256": "5e3ae5acdb6d3d087b8fb0cbfa9f2078b394031e4aee908b0bdc9013b53ba6ad",
+      "predecessor_sha256": "5e3ae5acdb6d3d087b8fb0cbfa9f2078b394031e4aee908b0bdc9013b53ba6ad",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "fanout-restore.json",
+      "disposition": "dropped",
+      "staged_sha256": "4fceda644fb5fd88b6c668a27f2294d3ec8a13e27b5d513e105edb1c15976e51",
+      "predecessor_sha256": "4fceda644fb5fd88b6c668a27f2294d3ec8a13e27b5d513e105edb1c15976e51",
+      "reason": "Historical fanout depths, eight-session warm arrival and multisession workload are not re-measured for v0.13.0; upstream resource-budgeted retention replaces the old fixed private catalog."
+    },
+    {
+      "file": "founder-sequence.json",
+      "disposition": "dropped",
+      "staged_sha256": "a4a87638f618791b95c1e2c60c2eedc3f4b7dccbd100fc243dd888e9a3ac965e",
+      "predecessor_sha256": "a4a87638f618791b95c1e2c60c2eedc3f4b7dccbd100fc243dd888e9a3ac965e",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "lane-logs-initial.json",
+      "disposition": "dropped",
+      "staged_sha256": "4e141073349dbb2e6d8bec7bc60bbeb6ca493dbc9da756966e9b12ad524eac65",
+      "predecessor_sha256": "4e141073349dbb2e6d8bec7bc60bbeb6ca493dbc9da756966e9b12ad524eac65",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "lane-logs.json",
+      "disposition": "dropped",
+      "staged_sha256": "4322af33c218a86339094955896ab5818002eef01b1f410824f7561357470fa0",
+      "predecessor_sha256": "4322af33c218a86339094955896ab5818002eef01b1f410824f7561357470fa0",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "lane.json",
+      "disposition": "dropped",
+      "staged_sha256": "7ae32fc0a2dbc7c04e682072465698d9d2eccbe0e94c26916cfb4a0edbfbc5b4",
+      "predecessor_sha256": "7ae32fc0a2dbc7c04e682072465698d9d2eccbe0e94c26916cfb4a0edbfbc5b4",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "long-sessions.json",
+      "disposition": "dropped",
+      "staged_sha256": "017d7970621db433e1ac4d4c07621c16b35adb6f5d7b9df94d6b5b89bd973aef",
+      "predecessor_sha256": "017d7970621db433e1ac4d4c07621c16b35adb6f5d7b9df94d6b5b89bd973aef",
+      "reason": "Historical multi-session/long-client workload is not re-measured for v0.13.0; fresh NIAH and production restart cover their own narrower gates."
+    },
+    {
+      "file": "mtp3-control.json",
+      "disposition": "dropped",
+      "staged_sha256": "0ca5cb0e53abf2bf05e0eec1e5645e6333f5da29b5ab6f49dac1c2c70953883c",
+      "predecessor_sha256": "0ca5cb0e53abf2bf05e0eec1e5645e6333f5da29b5ab6f49dac1c2c70953883c",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "nvfp4-source-attribution.json",
+      "disposition": "dropped",
+      "staged_sha256": "4df8b1c828aae82b0ccf2af2b79c895f476e2f2d79f8421b0d3e6d67f3f15bf0",
+      "predecessor_sha256": "4df8b1c828aae82b0ccf2af2b79c895f476e2f2d79f8421b0d3e6d67f3f15bf0",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "omp-1887-parallel-provenance.json",
+      "disposition": "dropped",
+      "staged_sha256": "ca6aaaf678ffe3ceabd4ad7890261122c8e9ca220f0810eef112162b50b5fe65",
+      "predecessor_sha256": "ca6aaaf678ffe3ceabd4ad7890261122c8e9ca220f0810eef112162b50b5fe65",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "omp-1887-probe-provenance.json",
+      "disposition": "dropped",
+      "staged_sha256": "916079a7ce3d973cb69b12dd841207ba48b17b34e6f6149d8a40d37403db3c82",
+      "predecessor_sha256": "916079a7ce3d973cb69b12dd841207ba48b17b34e6f6149d8a40d37403db3c82",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "omp-parallel.json",
+      "disposition": "dropped",
+      "staged_sha256": "74e7ccaad117884e8f67ecd95a5f52b2c66de8fb89b5d29809f4c231ca4e7fb8",
+      "predecessor_sha256": "74e7ccaad117884e8f67ecd95a5f52b2c66de8fb89b5d29809f4c231ca4e7fb8",
+      "reason": "Actual OMP parallel-dispatch/makespan experiment is not re-measured for v0.13.0; fresh platform/route acceptance will bind the new client, not predecessor parallel latency."
+    },
+    {
+      "file": "option-c-abba.json",
+      "disposition": "dropped",
+      "staged_sha256": "3a8dcbdb92c568b79262872663d30bff13f6439edf50beff8a8993a709e074ef",
+      "predecessor_sha256": "3a8dcbdb92c568b79262872663d30bff13f6439edf50beff8a8993a709e074ef",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-build.json",
+      "disposition": "dropped",
+      "staged_sha256": "8167164c50e76676a33c76ddfd99bb6f448dfb8bbb5571fdc09a670d63dc3719",
+      "predecessor_sha256": "8167164c50e76676a33c76ddfd99bb6f448dfb8bbb5571fdc09a670d63dc3719",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-client-bridge-interruption.json",
+      "disposition": "dropped",
+      "staged_sha256": "b3a5c59bb5ae7476cf15b3adf2e86f0232f2acd80452fc1b5a1b3bb17aea7df0",
+      "predecessor_sha256": "b3a5c59bb5ae7476cf15b3adf2e86f0232f2acd80452fc1b5a1b3bb17aea7df0",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-criterion8-harness.json",
+      "disposition": "dropped",
+      "staged_sha256": "a82abe9bf0f1b45559e72b813b41542a8b060cab429d6d311514ce6c6086886c",
+      "predecessor_sha256": "a82abe9bf0f1b45559e72b813b41542a8b060cab429d6d311514ce6c6086886c",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-lane-evidence.json",
+      "disposition": "dropped",
+      "staged_sha256": "20d722ff394cffd2da8e90258879932cc0460ebc608d5311f272a0679c4bcdec",
+      "predecessor_sha256": "20d722ff394cffd2da8e90258879932cc0460ebc608d5311f272a0679c4bcdec",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-lane-logs.json",
+      "disposition": "dropped",
+      "staged_sha256": "bd1f297f418c1afd95bdd00f22da5f86150baf9c63569f864869209dece97596",
+      "predecessor_sha256": "bd1f297f418c1afd95bdd00f22da5f86150baf9c63569f864869209dece97596",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-lane.json",
+      "disposition": "dropped",
+      "staged_sha256": "dabf3867b184bc9ea3251de873107bbe9a6a3e0a982f5623e530a53a0063686c",
+      "predecessor_sha256": "dabf3867b184bc9ea3251de873107bbe9a6a3e0a982f5623e530a53a0063686c",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-long-session-precondition.json",
+      "disposition": "dropped",
+      "staged_sha256": "962b4c70951b320c85f16818b6b001b978bf2453e0b0e5837c331767e270258c",
+      "predecessor_sha256": "962b4c70951b320c85f16818b6b001b978bf2453e0b0e5837c331767e270258c",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-omp-client.json",
+      "disposition": "dropped",
+      "staged_sha256": "b3f0fa1e59df1ce091a93fe21cf4d823fb1e05b29b7aa064197763224acccd41",
+      "predecessor_sha256": "b3f0fa1e59df1ce091a93fe21cf4d823fb1e05b29b7aa064197763224acccd41",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "option-c-output-identity.json",
+      "disposition": "dropped",
+      "staged_sha256": "3e017e719d71befc2403fcf60926cf1d1934fe46f43e7f1c052bc290bba0ae0d",
+      "predecessor_sha256": "3e017e719d71befc2403fcf60926cf1d1934fe46f43e7f1c052bc290bba0ae0d",
+      "reason": "Historical 89-case quality binding is not re-measured for v0.13.0; no global output/acceptance parity or powered leak claim transfers."
+    },
+    {
+      "file": "option-c-source.json",
+      "disposition": "dropped",
+      "staged_sha256": "546a4237de7afb9ee66fba93dc01da1551423940f9591f38e4b66410bb720309",
+      "predecessor_sha256": "546a4237de7afb9ee66fba93dc01da1551423940f9591f38e4b66410bb720309",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "output-identity.json",
+      "disposition": "dropped",
+      "staged_sha256": "b56992b621aacff3bd5692726328cb2adcc348a041b696bb194246c46d5bd577",
+      "predecessor_sha256": "b56992b621aacff3bd5692726328cb2adcc348a041b696bb194246c46d5bd577",
+      "reason": "Historical serial/pair output identities and powered quality/leak screens are not re-measured for v0.13.0; current operator, grammar and protocol correctness is narrower."
+    },
+    {
+      "file": "publication-barrier.json",
+      "disposition": "dropped",
+      "staged_sha256": "3d886c094554a085be1a1dcc8efa765f3dbd296217c547ff2c496e963ee51d9f",
+      "predecessor_sha256": "3d886c094554a085be1a1dcc8efa765f3dbd296217c547ff2c496e963ee51d9f",
+      "reason": "Prior runtime publication-barrier experiment is not re-measured for v0.13.0; current host checkpoint queue/epoch tests cover their named invariants only."
+    },
+    {
+      "file": "release-prose.json",
+      "disposition": "replaced",
+      "staged_sha256": "e72aaae315ae7695f0895da1afb3a08b47ff1c7d39651c6930576074ee5dcb29",
+      "predecessor_sha256": "e72aaae315ae7695f0895da1afb3a08b47ff1c7d39651c6930576074ee5dcb29",
+      "reason": "Current release prose/notes checks replace historical prose closure; results come only from this assignment verification."
+    },
+    {
+      "file": "release-tooling-tests.json",
+      "disposition": "replaced",
+      "staged_sha256": "14030b65daae6e084c015cd28cde05814f468121dd8e98de4d49a80888e2adcd",
+      "predecessor_sha256": "14030b65daae6e084c015cd28cde05814f468121dd8e98de4d49a80888e2adcd",
+      "reason": "Current product suite and draft-rebind evidence replace historical tooling checks."
+    },
+    {
+      "file": "root-lane-cut.json",
+      "disposition": "dropped",
+      "staged_sha256": "9095d2717708fecebeee75607656dcc7087ace365a7046aeaaaa50406097f379",
+      "predecessor_sha256": "9095d2717708fecebeee75607656dcc7087ace365a7046aeaaaa50406097f379",
+      "reason": "Historical root promotion is inapplicable to this draft; the lead performs a new lane pin after this commit."
+    },
+    {
+      "file": "rtx3090-windows-native.SHA256SUMS",
+      "disposition": "kept",
+      "staged_sha256": "0ae9a8d59efef7d8eeaeb29737390177acde74e9a2cae48b1ea61010b4f5e278",
+      "predecessor_sha256": "0ae9a8d59efef7d8eeaeb29737390177acde74e9a2cae48b1ea61010b4f5e278",
+      "reason": "Unchanged carried native component, model and profile; prior package qualification/checksums remain valid. OMP 18.12.6 public-install acceptance is not carried."
+    },
+    {
+      "file": "rtx3090.json",
+      "disposition": "kept",
+      "staged_sha256": "1884fd4ee7ddc9b2f5d2e62d00f02f661dd211ebfd01a230fe1768693e6b66c3",
+      "predecessor_sha256": "1884fd4ee7ddc9b2f5d2e62d00f02f661dd211ebfd01a230fe1768693e6b66c3",
+      "reason": "Unchanged carried native component, model and profile; prior package qualification/checksums remain valid. OMP 18.12.6 public-install acceptance is not carried."
+    },
+    {
+      "file": "rtx4090-windows-native.SHA256SUMS",
+      "disposition": "kept",
+      "staged_sha256": "c02655275e7459e085ee81d14af1298e92a326d6ce16293e912475ee3f09d496",
+      "predecessor_sha256": "c02655275e7459e085ee81d14af1298e92a326d6ce16293e912475ee3f09d496",
+      "reason": "Unchanged carried native component, model and profile; prior package qualification/checksums remain valid. OMP 18.12.6 public-install acceptance is not carried."
+    },
+    {
+      "file": "rtx4090.json",
+      "disposition": "kept",
+      "staged_sha256": "9d3829fe6009190b827c1b705bfb1fe9d4318e7e11e218ae7a87d39d6ea5f656",
+      "predecessor_sha256": "9d3829fe6009190b827c1b705bfb1fe9d4318e7e11e218ae7a87d39d6ea5f656",
+      "reason": "Unchanged carried native component, model and profile; prior package qualification/checksums remain valid. OMP 18.12.6 public-install acceptance is not carried."
+    },
+    {
+      "file": "rtx5090-a59-superseded.json",
+      "disposition": "dropped",
+      "staged_sha256": "a4ca59e650c7c1af6d81badce481874b7e62c6d2b303c3d85b9f1da96d5e23aa",
+      "predecessor_sha256": "a4ca59e650c7c1af6d81badce481874b7e62c6d2b303c3d85b9f1da96d5e23aa",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "rtx5090-durable.json",
+      "disposition": "dropped",
+      "staged_sha256": "74a24eeb2681660e18bb0bca9137f5b272a0743e83207190f31920bbb77394e7",
+      "predecessor_sha256": "74a24eeb2681660e18bb0bca9137f5b272a0743e83207190f31920bbb77394e7",
+      "reason": "Historical schema/runtime durability subject changed; replaced by the new schema 3 production restart and restore matrix."
+    },
+    {
+      "file": "rtx5090-only-fixture-disposition.json",
+      "disposition": "dropped",
+      "staged_sha256": "35439598f2005c9140403168c3cdeff14116a695b38c8e8f1ea1d0e35318ef97",
+      "predecessor_sha256": "35439598f2005c9140403168c3cdeff14116a695b38c8e8f1ea1d0e35318ef97",
+      "reason": "Historical fixture waiver does not qualify the new runtime; exact-source host/dense tests and explicit unmeasured gates replace it."
+    },
+    {
+      "file": "rtx5090-only-scope.json",
+      "disposition": "dropped",
+      "staged_sha256": "9d0b244dee59387113818ca8596c74171789bc3c492fe7d4bea2d97df5216df9",
+      "predecessor_sha256": "9d0b244dee59387113818ca8596c74171789bc3c492fe7d4bea2d97df5216df9",
+      "reason": "Historical single-lane proof scope is obsolete; v0.13.0 declares the rebased container and two unchanged native packages explicitly."
+    },
+    {
+      "file": "rtx5090.json",
+      "disposition": "replaced",
+      "staged_sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8",
+      "predecessor_sha256": "53800731ac70fcf2a0b1bce5491924bbd4d8d8eb0d464ce34e20589d34afc7fe",
+      "reason": "Fresh staged exact-source/profile receipt: 130,048-token exact retrieval, 2,048-token decode and authenticated protocol across restart; not predecessor evidence."
+    },
+    {
+      "file": "runtime-publication.json",
+      "disposition": "replaced",
+      "staged_sha256": "a44d940aa4369f07678a91fe6c2aa66082ad6008f3291d57088abc3e6ccc8b26",
+      "predecessor_sha256": "a44d940aa4369f07678a91fe6c2aa66082ad6008f3291d57088abc3e6ccc8b26",
+      "reason": "Published v0.7.0 runtime image receipt at frozen source and digest; runtime-base receipt is separately bound."
+    },
+    {
+      "file": "source-diagnostic-prerequisite.json",
+      "disposition": "dropped",
+      "staged_sha256": "54dc8057228cbb214b1f7b05ed28c04e619caabf8b1303b0224fd45b8731cd22",
+      "predecessor_sha256": "54dc8057228cbb214b1f7b05ed28c04e619caabf8b1303b0224fd45b8731cd22",
+      "reason": "Historical predecessor runtime, fixture, diagnostic or superseded candidate is not re-measured for v0.13.0. Its exact subject is not the frozen rebased runtime; original evidence remains in the immutable predecessor."
+    },
+    {
+      "file": "staging.json",
+      "disposition": "replaced",
+      "staged_sha256": "25f89ddf2484e6f025351d17071cb41c97404e45d5915283e8bf1d6c66456157",
+      "predecessor_sha256": "25f89ddf2484e6f025351d17071cb41c97404e45d5915283e8bf1d6c66456157",
+      "reason": "Exact component/model/profile/CLI inventory and draft cut posture replace predecessor staging claims."
+    },
+    {
+      "file": "stock-omp.json",
+      "disposition": "replaced",
+      "staged_sha256": "7187d7d30c3a409ca06f935922f7f771641747154dd347b68cf203ed988e1ec2",
+      "predecessor_sha256": "7187d7d30c3a409ca06f935922f7f771641747154dd347b68cf203ed988e1ec2",
+      "reason": "18.12.6 host-free asset/client review replaces predecessor live-session proof; real GPU/client acceptance stays pending."
+    }
+  ],
+  "added_files": [
+    "packaging.json",
+    "integrated-cli.json",
+    "restore-matrix.json",
+    "protocol.json",
+    "decode-parity.json",
+    "runtime-base.json",
+    "receipt-audit.json"
+  ],
+  "review_files": {
+    "dropped": [
+      "review/ledger.json",
+      "review/product-ledger.json",
+      "review/composition-ledger.json"
+    ],
+    "replaced": "review/runtime-ledger.json",
+    "reason": "Predecessor reviews do not qualify the rebased runtime or changed client. Runtime council binding is explicitly pending; lead installs the actual ledger."
+  }
+}

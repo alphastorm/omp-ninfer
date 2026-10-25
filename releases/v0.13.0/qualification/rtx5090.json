@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-10-25T09:05:58Z",
+  "identity": {
+    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "config_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_id": "q38-ninfer",
+    "patch_stack_sha": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_dirty": false,
+    "target": "Qwen3_5ForCausalLM",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 146368,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "dflash2",
+    "speculative_draft_window": 7
+  },
+  "vram_used_mib_idle": 30954,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 56.921,
+      "tokens_per_second_wall": 2284.7,
+      "vram_used_mib_after": 30956,
+      "server_prefix_cache_hit_tokens": 0,
+      "server_prefix_reuse_path": "root",
+      "server_computed_prefill_tokens": 130048,
+      "server_prefill_seconds": 56.333941991,
+      "cold": true
+    },
+    "decode": {
+      "request_id": "33c36b91ee8b337fedeb2fd0ef672c62bfe46919e8e855729cf3a874e29d33e3",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 11.604,
+      "completion_tokens_per_second_wall": 176.49,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 11.373731478000007,
+      "decode_tokens_per_second": 180.06,
+      "mtp_acceptance_rate": 0.244,
+      "mtp_tokens_per_round": 2.71,
+      "speculative": {
+        "accepted_per_position": [
+          510,
+          312,
+          190,
+          118,
+          75,
+          49,
+          37
+        ],
+        "accepted_tokens": 1291,
+        "backend": "dflash2",
+        "draft_window": 7,
+        "drafted_tokens": 5281,
+        "fallback_steps": 0,
+        "rounds": 756
+      }
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": 30954,
+  "transient_retries": 0
+}

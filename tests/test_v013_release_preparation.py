@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 import unittest
 from decimal import Decimal
@@ -77,6 +78,59 @@ class V013PreparationTests(unittest.TestCase):
                 self.assertEqual(native["tool_name_max_characters"], 64)
                 self.assertEqual(native["status_schema_version"], 1)
                 self.assertIn("Rejected with HTTP 400", native["json_schema"])
+        else:
+            contracts = authority["runtime_contracts"]
+            self.assertIn("Supported on RTX 5090", contracts[0]["json_schema"])
+            self.assertEqual(contracts[0]["tool_name_max_characters"], 128)
+            for native in contracts[1:]:
+                self.assertIn("Rejected with HTTP 400", native["json_schema"])
+                self.assertEqual(native["tool_name_max_characters"], 64)
+
+    def test_staged_receipt_inventory_carries_only_unchanged_native_subjects(self):
+        release = ROOT / "releases/v0.13.0"
+        if not (release / "manifest.json").exists():
+            self.skipTest("notes-only preparation has no staged receipt inventory")
+        audit = json.loads((release / "qualification/receipt-audit.json").read_text(encoding="utf-8"))
+        allowed = {"rtx3090.json", "rtx4090.json", "rtx3090-windows-native.SHA256SUMS",
+                   "rtx4090-windows-native.SHA256SUMS"}
+        self.assertEqual({item["file"] for item in audit["files"]
+                          if item["disposition"] == "kept"}, allowed)
+        for item in audit["files"]:
+            current = release / "qualification" / item["file"]
+            previous = ROOT / "releases/v0.12.2/qualification" / item["file"]
+            with self.subTest(receipt=item["file"]):
+                self.assertTrue(item["reason"])
+                if item["disposition"] == "dropped":
+                    self.assertFalse(current.exists())
+                elif item["disposition"] == "kept":
+                    self.assertEqual(current.read_bytes(), previous.read_bytes())
+                else:
+                    self.assertNotEqual(current.read_bytes(), previous.read_bytes())
+
+    def test_staged_gate_evidence_keeps_comparison_and_publication_subjects_distinct(self):
+        release = ROOT / "releases/v0.13.0"
+        if not (release / "manifest.json").exists():
+            self.skipTest("notes-only preparation has no frozen runtime identity")
+        manifest = json.loads((release / "manifest.json").read_text(encoding="utf-8"))
+        qualification = json.loads((release / "qualification.json").read_text(encoding="utf-8"))
+        gates = qualification["observed_gates"]
+        self.assertEqual(gates["g1_restart"]["checkpoint_hit_tokens"], 20926)
+        self.assertTrue(gates["g1_restart"]["byte_identical"])
+        self.assertEqual(gates["g2_decode"]["minimum_ratio"], 0.96)
+        self.assertGreaterEqual(gates["g2_decode"]["observed_ratio"], 0.96)
+        self.assertEqual(gates["g3_integrated_qualification"]["host_tests"],
+                         {"passed": 65, "failed": 0, "skipped": 0})
+        self.assertTrue(qualification["not_remeasured_gates"])
+        for item in qualification["not_remeasured_gates"]:
+            self.assertEqual(item["status"], "not re-measured for v0.13.0")
+            self.assertTrue(item["reason"])
+        for name in ("runtime-publication.json", "runtime-base.json"):
+            receipt = json.loads((release / "qualification" / name).read_text(encoding="utf-8"))
+            self.assertEqual(receipt["source_commit"], manifest["components"]["ninfer"]["source_commit"])
+        for key in ("package_inventory", "publication_receipt", "runtime_base_receipt"):
+            edge = qualification["composition"]["local_release_packaging"][key]
+            self.assertEqual(edge["sha256"], hashlib.sha256(
+                (ROOT / edge["repository_path"]).read_bytes()).hexdigest())
 
     def test_prepared_notes_are_bounded_and_use_readable_release_prose(self):
         from test_documented_route import ReleaseProseTests

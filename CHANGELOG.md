@@ -7,25 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - staged draft
+
 ### Changed
 
-- Prepare v0.13.0's RTX 5090 runtime on upstream master `64d10fbf`, published model container
+- Stage v0.13.0's RTX 5090 runtime `04b603aa` on upstream master `64d10fbf`, published model container
   version 3 `81f924d4`, `qwen38-5090-v0.13.0` profile and isolated `checkpoints-v013` root.
   Prior server checkpoints are not migrated; saved client transcripts replay for a fresh prefill.
   K5 replaces the separate Host budgets and rejects the obsolete private-catalog limit.
   All other tuning, including keep-warm, remains explicit in staged profiles.
-- Draft the rebased container's JSON-schema, 128-character tool-name, non-blocking export,
-  status schema 2 and request-log schema 30 boundaries without claiming live acceptance.
-  Default native packages carry unchanged and retain their old capabilities; rebased native
-  packages require separate qualification. Root authority/profile promotion waits for the lane pin.
+- Bind the rebased container's grammar/product-smoke-supported JSON-schema output, 128-character
+  tool names, non-blocking export, status schema 2 and request-log schema 30. Fresh runtime gates:
+  host 65/65 and dense 11/11, real 20,926-token/27-byte exact restart, C2 pressure/restore overlap,
+  amended 32 GB startup with 146,368 automatic KV tokens, and 24 accepted profile flags.
+- Carry the unchanged native packages and their 64-character/no-schema-output limits. Rebased
+  natives target v0.13.1 and need the 24 GB admission-headroom amendment plus separate package
+  qualification. Root authority/profile promotion waits for the lead's lane pin.
 - Attach complete EXP-097 evidence: 101.09% role-corpus median decode, original strict-tail FAIL
   and founder-amended PASS, structured-output p95 ratio 1.126, serial-role/configured-concurrency
-  distinction and the 64K continuation regression. Diagnostic tool canonicalization is not shipped.
+  distinction and the 64K continuation regression. The measurement's canonicalization was
+  diagnostic-only and reverted; integration later landed sorted-key serialization `0abe7c8e5`
+  with host byte pins, without rerunning the complete comparison.
+- Replace or drop every inherited changed-runtime receipt, retaining only unchanged native
+  qualification/checksums; bind the new runtime base/image publication and packaging receipts.
+  Final-profile measurements record 180.06 tok/s decode and exact 130,048-token retrieval in
+  56.921 s. Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
+  Council, fresh client/public-install acceptance and immutable pins remain explicit gates.
 - Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site and brand assets; front-door install links
   return to the guide on `main`.
-- Record the approved v0.13.0 sync target, preserved product families and release gates without
-  staging a release or changing the published pins.
+- Preserve the approved v0.13.0 sync contract and release gates without changing published pins.
 - Review stock OMP 18.12.6 assets against upstream checksums, compare its Responses client paths
   with 18.12.1 on a loopback stub, exercise snapcompact's image-wire gate and `omp -p /compact`,
   and prepare the three-platform `--omp-component` descriptor. No live qualification is claimed.
@@ -2373,6 +2384,7 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
   material.
 
 [Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...HEAD
+[0.13.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...HEAD
 [0.12.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.11.0...v0.12.0

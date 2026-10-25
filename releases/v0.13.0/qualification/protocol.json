@@ -1,0 +1,116 @@
+{
+  "artifact_type": "omp_ninfer_runtime_protocol_and_schema",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3
+  },
+  "status": "passed",
+  "measurement_configuration_sha256": "c488b247d8fbc8ef015677f220b8a6b7900a009600a3cafe069bd30368718aa3",
+  "product_smokes": {
+    "schema": "ninfer-integration-smokes/1",
+    "source": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "config_sha256": "c488b247d8fbc8ef015677f220b8a6b7900a009600a3cafe069bd30368718aa3",
+    "commands": [
+      {
+        "label": "serve_contract",
+        "exit": 0,
+        "seconds": 0.716,
+        "log_sha256": "0024b54204dddb601ed3e925016209f52dab0ae42f7c17234c2060009f992579"
+      },
+      {
+        "label": "agent_product",
+        "exit": 0,
+        "seconds": 3.524,
+        "log_sha256": "1bdeb1d3189677cabfdf0cb7768bd8758dd1e5a3c8320c6cf641a588bfce5adc"
+      }
+    ],
+    "passed": true,
+    "server_exit": 0
+  },
+  "grammar_ctest": {
+    "name": "ninfer_qwen3_5_grammar_real_test",
+    "status": "passed",
+    "seconds": 22.8124
+  },
+  "schema_host_tests": [
+    {
+      "name": "ninfer_json_schema_test",
+      "status": "passed",
+      "seconds": 0.0311336
+    },
+    {
+      "name": "ninfer_json_schema_oracle_test",
+      "status": "passed",
+      "seconds": 2.14368
+    },
+    {
+      "name": "ninfer_openai_schema_test",
+      "status": "passed",
+      "seconds": 0.0345477
+    },
+    {
+      "name": "ninfer_qwen_tool_schema_oracle_test",
+      "status": "passed",
+      "seconds": 0.160614
+    }
+  ],
+  "supported_surfaces": {
+    "responses": "text.format json_schema",
+    "chat_completions": "response_format json_schema",
+    "tool_name_max_characters": 128,
+    "status_schema_version": 2,
+    "request_log_schema_version": 30
+  },
+  "error_contract": {
+    "product_missing_parent": "previous_response_not_found",
+    "vanilla_missing_parent": "response_not_found",
+    "public_vanilla_proof": "Harness provider; not rerun against product"
+  },
+  "release_profile_protocol": "rtx5090.json binds authenticated identity, stateful continuation, two forks, delete/no-resurrection and surviving sibling across docker restart on configuration c73eb8fb.",
+  "scope": "Grammar and product smoke qualify schema output on the rebased RTX 5090 only. Product smoke configuration c488b247 is recorded honestly, not relabelled as lifecycle config c73eb8fb. Stock OMP three-platform/documented-route acceptance remains pending; carried natives reject schema output and retain 64-character tool names.",
+  "provenance": [
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "json_pointer": "/product_smokes",
+      "supplied_projection_name": "smokes.json",
+      "supplied_projection_sha256": "f95f1d85c3f4520f59b1a5306dfecf0f42795ef71bfb68987a835c87c078f2e9",
+      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    },
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc-5090",
+      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "json_pointer": "",
+      "supplied_projection_name": "integration-rc-F.json",
+      "supplied_projection_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    }
+  ],
+  "schema_smoke_assertions": {
+    "chat_json_schema": true,
+    "responses_json_schema": true,
+    "source_path": "tools/smoke/agent_protocol.py",
+    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_function": "structured_output_checks",
+    "assertion": "Both endpoints must complete with exactly the required enum-valued properties and an integer field, with no extra keys. These assertions execute unconditionally in the passed product protocol smoke."
+  }
+}
