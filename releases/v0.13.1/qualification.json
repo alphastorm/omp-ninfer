@@ -61,7 +61,7 @@
     },
     "native_protocol": {
       "status": "pending",
-      "scope": "JSON-schema support, 128-character names, status schema 2 / request-log schema 30, exact-context retrieval, restart/refusal and strict-origin behavior must bind real lane qualification before support flips."
+      "scope": "Require real canonical schema 2 contract=product payloads inside actual normal/pressure phase receipts: true status identity/authentication flags, private same-session reuse, isolated private-state miss (root/shared_stable_prefix), Responses lifecycle and both structured-output results. No legacy raw identity/status/checks or split host_state_slots fields are synthesized. Shared Host MiB/bytes and actual reduced pressure budget must bind the schema 4 profile. JSON-schema support, 128-character names, exact-context retrieval, restart/refusal and strict-origin behavior remain pending actual lane qualification."
     },
     "native_packaging": {
       "status": "pending",
@@ -69,48 +69,30 @@
     },
     "changed_source_review": {
       "status": "pending",
-      "scope": "Pending council for frozen native N, including Windows K6, plus product-side cut/bind/generator tooling at the frozen stage commit. Actual resolver-selected review dispositions must bind the changed repository subjects; the carried 5090 ledger and host-free tests are not native/product tooling approval."
+      "scope": "Pending council for frozen native N, including Windows K6, plus product-side cut/bind/generator and canonical protocol-consumer tooling at the frozen stage commit. Actual resolver-selected review dispositions must bind the changed repository subjects; the carried 5090 ledger and host-free tests are not native/product tooling approval."
     },
     "release_tooling": {
       "status": "passed-with-documented-local-exclusions",
       "artifact_type": "omp_ninfer_release_preparation_checks",
-      "working_tree_base_commit": "e0ee776515405051a6737e1e2300c0568efc7922",
-      "native_dependency_checks": {
-        "command": "env PYTHONPATH=tests python3 -m unittest test_cut_native_component test_bind_native_variant test_generate_native_sbom test_verify_release.DependencySbomContractTests test_stage_release -v",
-        "tests_run": 53,
-        "elapsed_seconds": 17.518,
-        "failures": 0,
-        "errors": 0,
-        "result": "OK"
-      },
-      "prepared_route_checks": {
-        "command": "env PYTHONPATH=tests python3 -m unittest test_v0131_release_preparation test_documented_route -v",
-        "tests_run": 32,
-        "elapsed_seconds": 131.365,
-        "failures": 0,
-        "errors": 0,
-        "skipped": 1,
-        "result": "OK (skipped=1)",
-        "scope": "Extraction/bundle/harness/prose tests; all 31 composer addresses retained, not live route execution."
-      },
+      "working_tree_base_commit": "3da5e98286cfa14d4a91272f4091d73d5cbec17e",
       "local_suite": {
         "command": "python3 -c \"$DISCOVERY_DRIVER\"",
         "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(t for t in all_tests if t.id() not in excluded)\nprint('Discovered:', len(all_tests), 'selected:', selected.countTestCases(), flush=True)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
-        "discovered_tests": 496,
+        "discovered_tests": 506,
         "excluded_test_ids": [
           "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
           "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
           "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
           "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
         ],
-        "tests_run": 492,
-        "elapsed_seconds": 227.355,
+        "tests_run": 502,
+        "elapsed_seconds": 229.326,
         "failures": 0,
         "errors": 0,
         "skipped": 5,
         "exit_code": 0,
         "result": "OK (skipped=5)",
-        "scope": "All discovered tests except the four established unchanged local timing failures. Platform-dependent skips remain visible; this is not a clean 496-test claim."
+        "scope": "All discovered tests except the four established unchanged local timing failures. Five platform-dependent skips remain visible; this is not a clean 506-test claim."
       },
       "stage_helper": {
         "artifact": "release-v0131-stage.sh",
@@ -124,7 +106,17 @@
         "command": "python3 scripts/rebind_release.py --release v0.13.1 --draft",
         "reason": "Main confirmed notes-only --prepared-draft input cannot be rebound before real staging creates manifest.json. Rebind implementation is unchanged; no fake manifest or cut identities."
       },
-      "scope": "Executable/profile/prose/test changes were complete before suite execution. Only result/review-gate metadata is finalized afterward. No formatter, linter, host contact, GPU job, component publication or live acceptance was performed."
+      "scope": "Current canonical protocol-consumer executable/prose/test changes were complete before checks. Only result metadata is finalized afterward. No native hardware result, safe success sample, new lane receipt, component publication or actual staging is inferred; those gates remain pending.",
+      "native_protocol_consumer_checks": {
+        "command": "env PYTHONPATH=tests python3 -m unittest test_compose_native_qualification test_verify_release test_v0131_release_preparation test_documented_route.ReleaseProseTests -v",
+        "tests_run": 119,
+        "elapsed_seconds": 56.557,
+        "failures": 0,
+        "errors": 0,
+        "exit_code": 0,
+        "result": "OK",
+        "scope": "Canonical schema/wrapper/byte-binding/shared-Host and verifier regressions; synthetic unit fixtures are not native hardware evidence."
+      }
     }
   },
   "documented_route_acceptance": {

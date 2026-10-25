@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrate native qualification composition and rebased-native verification to the canonical
+  schema 2 product protocol payload. Preserve real phase wrappers and their raw `.protocol`
+  results; require authenticated status identity, private same-session reuse, isolated-session
+  private-state miss, Responses lifecycle and both structured-output oracles. Evidence files
+  must match their phase payloads and byte hashes. Shared Host MiB/bytes and the recorded reduced
+  pressure budget replace legacy split-pool fields and authored check counts; published historical
+  native receipts remain unchanged under their actual component tags.
 - Prepare v0.13.1 for rebased native Windows RTX 4090/RTX 3090 components
   `v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1`, carrying the exact RTX 5090 beta.2
   runtime and stock OMP 18.12.6. Notes/gates and native profiles are preparation-only; frozen

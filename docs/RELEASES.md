@@ -1993,6 +1993,36 @@ protocol, 64K, restart, rollback, security, OMP, C1, receipt, and 370 W restorat
 prevents shared correctness classes from being discovered after variant binaries and hardware
 evidence are already frozen.
 
+### Canonical native protocol evidence
+
+`scripts/compose_native_qualification.py` consumes the runtime's actual
+`tools/smoke/agent_protocol.py` schema 2 product result, not an authored per-check map.
+The raw `ninfer_agent_protocol_smoke` payload has `contract: product`,
+`status_identity_verified: true`, `authenticated_session_identity: true`, reuse paths,
+Responses lifecycle results and Chat/Responses structured-output results. It has no legacy
+`identity`, `status` or `checks` fields.
+
+Both normal and reduced-budget runs retain their actual phase receipts in `protocol` and
+`protocol_under_pool_pressure`. Each wrapper keeps its real phase status, recorded file hash and
+nested raw `.protocol`; the normal wrapper also retains observed HTTP identity/runtime and GPU
+attestation. Composition checks the raw evidence file's decoded payload and exact byte hash
+against that phase record. It never manufactures a status/check count inside the canonical payload.
+
+Same-session reuse must select `private_endpoint`, `private_input_replay` or `private_long_anchor`.
+An isolated session must select `root` or `shared_stable_prefix`: that is a private-session
+reuse miss, not a promise of zero public-prefix reuse. Both schema-output oracles, completed
+Responses turns/forks, isolation HTTP statuses, parent deletion and surviving descendants must
+pass; a passed phase label cannot hide a failed canonical result.
+
+Schema 4 native configuration records shared `host_context_mib` / exact `host_context_bytes`,
+extra `device_state_slots`, admission headroom and strict-origin policy. Pressure records its
+actual smaller shared Host budget while retaining the profile's extra device slots; it does not
+recreate `host_state_slots`, separate host-KV budgets or a fixed authored check count.
+Native components from v0.7.0 must satisfy these protocol gates in `verify_release.py`.
+Immutable older native receipts stay valid under their real older component tags, not by
+relabeling their legacy fields as new-runtime evidence. Actual new native lane gates remain pending
+until the successful qualification supplies its real canonical payloads.
+
 ### Native dependency SBOM
 
 For a new native package, generate the additional CycloneDX 1.5 JSON inventory with

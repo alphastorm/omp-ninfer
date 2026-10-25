@@ -23,7 +23,10 @@ from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from omp_client_environment import uses_per_model_stateful
-from compose_native_qualification import first_release_rollback
+from compose_native_qualification import (
+    first_release_rollback,
+    native_protocol_qualification_errors,
+)
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
     RUNTIME_VARIANT_PACKAGE_NAME_RES,
@@ -933,7 +936,7 @@ def native_dependency_sbom_filename(package_name: str) -> str:
     return package_name.removesuffix(".tar.gz").removesuffix(".zip") + ".cdx.json"
 
 
-def requires_native_dependency_sbom(item: dict[str, Any]) -> bool:
+def rebased_native_component(item: dict[str, Any]) -> bool:
     tag = item.get("release_tag")
     version = re.match(r"^v(\d+)\.(\d+)\.(\d+)-qwen38-(?:3090|4090)-",
                        tag if isinstance(tag, str) else "")
@@ -943,7 +946,7 @@ def requires_native_dependency_sbom(item: dict[str, Any]) -> bool:
 def validate_dependency_sbom(item: dict[str, Any], prefix: str, errors: list[str]) -> None:
     """Native v0.7.0+ requires the separate dependency inventory; older sets remain valid."""
     if ("sbom_dependency_url" not in item and "sbom_dependency_sha256" not in item
-            and not requires_native_dependency_sbom(item)):
+            and not rebased_native_component(item)):
         return
     url = item.get("sbom_dependency_url")
     require_https(url, f"{prefix}.sbom_dependency_url", errors)
@@ -1054,7 +1057,7 @@ def validate_variant_checksums(
     dependency_url = item.get("sbom_dependency_url")
     if isinstance(dependency_url, str):
         filename = Path(unquote(urlparse(dependency_url).path)).name
-        if filename in entries or requires_native_dependency_sbom(item):
+        if filename in entries or rebased_native_component(item):
             require(
                 entries.get(filename) == [item.get("sbom_dependency_sha256")],
                 f"{prefix} checksums entry {filename} must match sbom_dependency_sha256",
@@ -1230,6 +1233,9 @@ def validate_ninfer_variants(
                     and len(receipt["deferred_gates"]) > 0,
                     f"{prefix} preview qualification must enumerate deferred gates", errors)
         validate_native_rollback(receipt, prefix, errors)
+        if status == "qualified" and rebased_native_component(item):
+            errors.extend(f"{prefix}: {error}"
+                          for error in native_protocol_qualification_errors(receipt))
         identity = receipt.get("identity", {})
         package = receipt.get("package", {})
         if parity_receipt:

@@ -118,6 +118,14 @@ class DependencySbomContractTests(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("must match sbom_dependency_sha256", errors[0])
 
+    def test_rebased_native_cannot_promote_a_legacy_protocol_receipt(self) -> None:
+        # The immutable old receipt remains accepted under its actual old component tag,
+        # but changing the tag cannot promote its legacy protocol fields to native v0.7.0.
+        self.assertEqual(self.validate({}), [])
+        errors = self.validate({"release_tag": "v0.7.0-qwen38-4090-beta.1"})
+        self.assertTrue(any("protocol.protocol: canonical product protocol" in error for error in errors),
+                        errors)
+
 
 class FirstReleaseRollbackContractTest(unittest.TestCase):
     def test_native_binding_and_verifier_keep_the_first_lineage_exception_honest(self) -> None:

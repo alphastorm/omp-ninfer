@@ -4,8 +4,9 @@
 The receipt shipped at ``releases/<version>/qualification/<lane>.json`` is the
 ``ninfer_windows_release_qualification`` form every published native lane carries: the
 orchestrator's phase evidence reshaped into the sections the release tree, its verifier, and
-the public pages read. Until v0.6.7 that reshaping was done by hand for every cut; this script
-is the same composition, and it reproduces the v0.6.1 receipt from that window's inputs.
+the public pages read. Current native composition requires schema 4 shared Host configuration
+and preserves canonical schema-2 product protocol payloads inside their actual phase receipts.
+Published historical receipts remain immutable; no legacy checks map is synthesized.
 
 Inputs are the artifacts the qualification window already produced, nothing is measured here:
 
@@ -26,27 +27,25 @@ authored per release and passed explicitly; the script never invents prose.
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal, DecimalException
+import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
 
 ARTIFACT_TYPE = "ninfer_windows_release_qualification"
-POOL_PRESSURE_WHY = (
-    "The shipped Host StateImage pool hides a class of admission defect that only appears when "
-    "StateImage capacity binds. The same fifteen checks run against the same installed bytes with "
-    "the Host pool reduced to a third of the shipped size."
-)
-GATE_SECTIONS = (
-    "protocol",
-    "protocol_under_pool_pressure",
-    "long_session",
-    "persistence",
-    "rollback",
-    "state_security",
-    "golden_equivalent",
-    "benchmark_c1",
-)
+GATE_PHASES = {
+    "protocol": "protocol",
+    "protocol_under_pool_pressure": "pressure_protocol",
+    "long_session": "context_128k",
+    "persistence": "restart",
+    "rollback": "rollback",
+    "state_security": "security",
+    "golden_equivalent": "omp",
+    "benchmark_c1": "benchmark_c1",
+}
 EVIDENCE_FILES = {
     "protocol": "agent-protocol.json",
     "pressure": "agent-protocol-pressure.json",
@@ -78,6 +77,117 @@ def first_release_rollback(value: Any) -> bool:
             and type(value.get("directions")) is int and value["directions"] == 0
             and value.get("reason") == "first release of the lineage"
             and value.get("intermediate_release") is None and value.get("stops", []) == [])
+
+
+def product_protocol_errors(value: Any) -> list[str]:
+    """Validate the real schema-2 smoke result, never an authored legacy checks map."""
+    if not isinstance(value, dict):
+        return ["canonical product protocol must be an object"]
+    errors = []
+    for field, expected in (("artifact_type", "ninfer_agent_protocol_smoke"),
+                            ("schema_version", 2), ("contract", "product")):
+        if type(value.get(field)) is not type(expected) or value[field] != expected:
+            errors.append(f"{field} must be {expected!r}")
+    for field in ("status", "checks", "identity"):
+        if field in value:
+            errors.append(f"canonical protocol must not carry legacy {field}")
+    for field in ("status_identity_verified", "authenticated_session_identity"):
+        if value.get(field) is not True:
+            errors.append(f"{field} must be true")
+    private = value.get("same_session_reuse_path")
+    if not isinstance(private, str) or private not in {
+            "private_endpoint", "private_input_replay", "private_long_anchor"}:
+        errors.append("same_session_reuse_path must select private continuation reuse")
+    isolated = value.get("isolated_session_reuse_path")
+    if not isinstance(isolated, str) or isolated not in {"root", "shared_stable_prefix"}:
+        errors.append("isolated_session_reuse_path must miss private continuation reuse")
+    count = value.get("anthropic_count_tokens")
+    if type(count) is not int or count <= 0:
+        errors.append("anthropic_count_tokens must be positive")
+    completion = value.get("completion_tokens")
+    if type(completion) is not int or completion < 0:
+        errors.append("completion_tokens must be a nonnegative integer")
+    finishes = ("stop", "length", "tool_calls")
+    if value.get("tool_result_array_finish_reason") not in finishes:
+        errors.append("tool_result_array_finish_reason is invalid")
+    if (value.get("stream_finish_reason") not in finishes
+            or value.get("stream_finish_reason") != value.get("nonstream_finish_reason")):
+        errors.append("stream and nonstream finish reasons must be valid and equal")
+    structured = value.get("structured_output")
+    if not isinstance(structured, dict) or any(
+            structured.get(field) is not True
+            for field in ("chat_json_schema", "responses_json_schema")):
+        errors.append("structured_output must pass Chat and Responses JSON-schema checks")
+    responses = value.get("responses_session_lifecycle")
+    if not isinstance(responses, dict):
+        errors.append("responses_session_lifecycle must be an object")
+    else:
+        for field in ("first_turn_completed", "continuation_completed",
+                      "surviving_descendants_retrieved", "surviving_descendant_continued"):
+            if responses.get(field) is not True:
+                errors.append(f"responses_session_lifecycle.{field} must be true")
+        forks = responses.get("fork_count")
+        if type(forks) is not int or forks < 2:
+            errors.append("responses_session_lifecycle.fork_count must be at least two")
+        for field, status in (("cross_session_status", 404), ("stored_route_isolation_status", 404),
+                              ("parent_delete_status", 200), ("parent_get_after_delete_status", 404)):
+            if type(responses.get(field)) is not int or responses[field] != status:
+                errors.append(f"responses_session_lifecycle.{field} must be {status}")
+    return errors
+
+
+def shared_host_context_bytes(value: Any) -> int | None:
+    if not isinstance(value, str) or re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", value) is None:
+        return None
+    try:
+        size = Decimal(value) * 1048576
+        if size.is_finite() and size > 0 and size == size.to_integral_value():
+            return int(size)
+    except DecimalException:
+        pass
+    return None
+
+
+def native_protocol_qualification_errors(receipt: dict[str, Any]) -> list[str]:
+    """The native release shape preserves actual phase wrappers around canonical payloads."""
+    errors = []
+    gates = receipt.get("deterministic_gates", {})
+    if not isinstance(gates, dict):
+        gates = {}
+    for section in ("protocol", "protocol_under_pool_pressure"):
+        phase = receipt.get(section)
+        if not isinstance(phase, dict):
+            errors.append(f"{section} must carry its actual phase receipt")
+            continue
+        if phase.get("status") != "passed" or gates.get(section) != "passed":
+            errors.append(f"{section} phase and deterministic gate must pass")
+        errors.extend(f"{section}.protocol: {error}"
+                      for error in product_protocol_errors(phase.get("protocol")))
+        if "host_state_slots" in phase or "checks_passed" in phase:
+            errors.append(f"{section} must not use legacy split-pool/check-count fields")
+    configuration = receipt.get("configuration", {})
+    if not isinstance(configuration, dict):
+        return [*errors, "configuration must describe the shared Host profile"]
+    for field in ("host_state_slots", "host_kv_mib", "max_private_continuations"):
+        if field in configuration:
+            errors.append(f"configuration must not use legacy {field}")
+    full_bytes = shared_host_context_bytes(configuration.get("host_context_mib"))
+    if (full_bytes is None or type(configuration.get("host_context_bytes")) is not int
+            or configuration["host_context_bytes"] != full_bytes):
+        errors.append("configuration shared Host MiB/bytes must agree exactly")
+    if configuration.get("concurrency") != 1 or type(configuration.get("concurrency")) is not int:
+        errors.append("canonical native protocol requires concurrency one")
+    slots = configuration.get("device_state_slots")
+    if type(slots) is not int or slots < 0:
+        errors.append("configuration device_state_slots must be a nonnegative integer")
+    pressure = receipt.get("protocol_under_pool_pressure", {})
+    if isinstance(pressure, dict):
+        pressure_bytes = shared_host_context_bytes(pressure.get("host_context_mib"))
+        if pressure_bytes is None or full_bytes is None or pressure_bytes >= full_bytes:
+            errors.append("pressure protocol must record a positive reduced shared Host budget")
+        if type(pressure.get("device_state_slots")) is not int or pressure.get("device_state_slots") != slots:
+            errors.append("pressure protocol must retain the profile's extra device-state slots")
+    return errors
 
 
 def omp_event_lines(events_path: Path) -> list[str]:
@@ -150,11 +260,17 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
     require(identity_start["config_sha256"] == build["config_sha256"]
             == summary["configuration_sha256"],
             "the served configuration, the packaged configuration, and the summary disagree")
-    for name in ("protocol", "pressure"):
-        require(evidence[name]["identity"]["binary_sha256"] == identity_start["binary_sha256"],
-                f"{EVIDENCE_FILES[name]} ran against a different binary")
-    for phase, key in (("protocol", "protocol"), ("pressure_protocol", "pressure"),
-                       ("context_128k", "long_context"), ("benchmark_c1", "c1"),
+    for phase, key in (("protocol", "protocol"), ("pressure_protocol", "pressure")):
+        recorded = receipts[phase]
+        evidence_path = evidence_dir / EVIDENCE_FILES[key]
+        require(recorded.get("status") == "passed", f"phase {phase} did not pass")
+        require(recorded.get("protocol") == evidence[key],
+                f"{EVIDENCE_FILES[key]} differs from its actual phase payload")
+        require(recorded.get("sha256") == hashlib.sha256(evidence_path.read_bytes()).hexdigest(),
+                f"{EVIDENCE_FILES[key]} differs from its phase-recorded bytes")
+    require(receipts["protocol"]["identity"]["binary_sha256"] == identity_start["binary_sha256"],
+            "protocol phase ran against a different binary")
+    for phase, key in (("context_128k", "long_context"), ("benchmark_c1", "c1"),
                        ("security", "security")):
         require(receipts[phase]["status"] == "passed" and evidence[key]["status"] == "passed",
                 f"phase {phase} did not pass")
@@ -196,6 +312,11 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
     engine = server_config["engine"]
     cache = server_config["context_cache"]
     speculative = server_config["speculative"]
+    require(server_config.get("schema_version") == 4,
+            "native composition requires a schema 4 shared Host configuration")
+    host_bytes = shared_host_context_bytes(cache.get("host_context_mib"))
+    require(host_bytes is not None and host_bytes == spec["host_context_translation"]["host_context_bytes"],
+            "shared Host configuration differs from the release specification's byte budget")
     configuration = {
         "public_model_id": server_config["model_id"],
         "max_context": engine["max_context"],
@@ -206,26 +327,16 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "speculative_draft_tokens": speculative["draft_tokens"],
         "concurrency": engine["max_concurrency"],
         "device_state_slots": cache["device_state_slots"],
-        "host_state_slots": cache["host_state_slots"],
-        "host_kv_mib": cache["host_kv_mib"],
-        "max_private_continuations": cache["max_private_continuations"],
+        "host_context_mib": cache["host_context_mib"],
+        "host_context_bytes": host_bytes,
+        "admission_headroom_mib": engine["admission_headroom_mib"],
+        "checkpoint_require_origin_auth": server_config["session_checkpoint"]["require_origin_auth"],
         "managed_stop": spec["lifecycle"]["managed_stop"],
         "graceful_stop_timeout_seconds": spec["lifecycle"]["graceful_stop_timeout_seconds"],
     }
     if "gpu_keep_warm_ms" in engine:
         # Packages built since the field existed declare it; older qualification windows omit it.
         configuration["gpu_keep_warm_ms"] = engine["gpu_keep_warm_ms"]
-    pressure = evidence["pressure"]
-    pressure_receipt = receipts["pressure_protocol"]
-    require(all(pressure["checks"].values()), "pressure protocol carries a failed check")
-    protocol_under_pool_pressure = {
-        "artifact_type": pressure["artifact_type"],
-        "why": POOL_PRESSURE_WHY,
-        "device_state_slots": pressure_receipt["device_state_slots"],
-        "host_state_slots": pressure_receipt["host_state_slots"],
-        "checks_passed": len(pressure["checks"]),
-        "status": pressure["status"],
-    }
     long_context = evidence["long_context"]
     long_session = {key: long_context[key] for key in
                     ("prompt_tokens", "completion_tokens", "elapsed_seconds", "exact_output",
@@ -313,8 +424,8 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "profile": args.profile,
         "identity": identity,
         "configuration": configuration,
-        "protocol": evidence["protocol"],
-        "protocol_under_pool_pressure": protocol_under_pool_pressure,
+        "protocol": receipts["protocol"],
+        "protocol_under_pool_pressure": receipts["pressure_protocol"],
         "long_session": long_session,
         "persistence": persistence,
         "rollback": rollback,
@@ -323,14 +434,14 @@ def compose(args: argparse.Namespace) -> dict[str, Any]:
         "benchmark_c1": benchmark_c1,
     }
     receipt["deterministic_gates"] = {
-        section: ("not_applicable" if section == "rollback" and first_release else
-                  "passed" if receipt[section].get("status", "passed") == "passed" else "failed")
-        for section in GATE_SECTIONS
+        section: receipts[phase]["status"] for section, phase in GATE_PHASES.items()
     }
     require(all(value == "passed" or (section == "rollback" and first_release
                                     and value == "not_applicable")
                 for section, value in receipt["deterministic_gates"].items()),
             "a gate section did not pass")
+    protocol_errors = native_protocol_qualification_errors(receipt)
+    require(not protocol_errors, "; ".join(protocol_errors))
     receipt["limitations"] = list(args.limitation)
     receipt["beta_qualified"] = True
     receipt["package"] = package
