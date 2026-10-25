@@ -557,7 +557,7 @@ class ReleaseContractTest(unittest.TestCase):
                      root / "docs" / "COMPATIBILITY.md")
         # Component-mutation fixtures need valid release-note link targets; the
         # real documentation graph is checked by the normal validation of ROOT.
-        for document in ("QUICKSTART.md", "SECURITY.md"):
+        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
         return temporary, root
 

@@ -458,6 +458,17 @@ def main() -> int:
         f"GitHub public release {args.release}" if target.startswith("GitHub public release ")
         else target for target in manifest["publication"].get("targets", [])
     ]
+    manifest["publication"]["external_installation_qualified"] = False
+    if prepared_prose is not None:
+        manifest["qualification"]["runtime_release_eligible"] = False
+        manifest["publication"]["targets"] = [
+            f"GitHub public release {args.release}",
+            f"NInfer RTX 5090 {args.release_tag}; image {args.image_digest}",
+        ]
+        if omp_descriptor is not None:
+            manifest["publication"]["targets"].append(
+                f"OMP client: unmodified upstream Oh My Pi "
+                f"{omp_descriptor['omp']['upstream_tag']}; no client published here")
     # 3. Release-relative evidence paths move with the tree; the commit part of every public
     #    URL is provisional until the pin dance.
     for variant in manifest["components"].get("ninfer_variants", []):

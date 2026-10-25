@@ -123,7 +123,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
-        for document in ("QUICKSTART.md", "SECURITY.md"):
+        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
 
     @staticmethod
