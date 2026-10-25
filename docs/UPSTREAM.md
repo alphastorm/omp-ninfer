@@ -14,7 +14,7 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 | --- | --- | --- | --- |
 | `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.12.1**, source `291e055836c210f314af3f73f53244e8e9d09de8` | Upstream release [`v18.12.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) (2026-10-17T23:14:21Z) | Replaces 18.10.1 for the native Windows `C:` path fix and two `omp -p` false-success exit fixes; see [published client setup](https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/docs/QUICKSTART.md#omp-18121-client), [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md), and [below](#v0122-client-binding--omp-18121). |
 | `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.6.16-qwen38-5090-beta.1`, source `1302d63929e400a05e1c9cdb0fc8003a70269825` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Image `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0` (`91a35670`), DFlash2 draft window 7, BF16 KV, two requests in flight; carried from v0.11.0/v0.12.0 ([receipt](../releases/v0.12.2/qualification/rtx5090.json)). |
-| `alphastorm/ninfer` (v0.13.0 beta.2 preparation) | Target `v0.7.0-qwen38-5090-beta.2`; F2 inventory and qualification pending | Neroued/ninfer master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Council found durable/restore defects in beta.1 source `04b603aa`; candidate `86e5c0b9` is historical. Strict-origin target config `751d22dc`, profile `qwen38-5090-v0.13.0`, model `81f924d4`; [notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md). New identities, lane proof, remediation disposition and acceptance are not yet bound. |
+| `alphastorm/ninfer` (v0.13.0 staged beta.2) | `v0.7.0-qwen38-5090-beta.2`; source `6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff`, server `9790a004`, image `5d10a998` | Neroued/ninfer master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Strict-origin config `751d22dc`, profile `qwen38-5090-v0.13.0`, model `81f924d4`; fresh host 66/dense 11/lane proof and actual closed council/remediation ledger. Initial candidate `86e5c0b9` is historical; fresh public-route/client acceptance and pins remain separate. [Notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md). |
 | `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0 ([RTX 4090](../releases/v0.12.2/qualification/rtx4090.json), [RTX 3090](../releases/v0.12.2/qualification/rtx3090.json)). |
 | `can1357/oh-my-pi` (staged next client) | Stock **OMP 18.12.6** reviewed and staged; fresh live acceptance pending | Source `45c35e40`, tree `8a90a1b4`, upstream release 2026-10-21 | Three downloaded assets checked against upstream `SHA256SUMS.txt` and API digests; [host-free comparison](measurements/2026-10-25-omp-18126-client-upgrade-review.json). Published v0.12.2 stays on 18.12.1. |
 | `Neroued/ninfer` (engine watch) | Historical watch reported `upgrade-available`; master is now the staged container base | Master `64d10fbf` (2026-10-16), 362 commits after `6e8b2e2a` | Watch listed 250 commits/300 files (`unknown-truncated`), 77 commits after EXP-095's `81c8ce09`; [dated watch](measurements/2026-10-25-upstream-watch.json). Fresh downstream qualification is in the staged v0.13.0 evidence, not inferred from that watch. |
@@ -31,11 +31,12 @@ Rebased native packages follow in v0.13.1: their 24 GB shapes need K5's admissio
 amendment (640 MiB RTX 4090 / 768 MiB RTX 3090), then packaging and hardware qualification. The
 [content-safe plan](measurements/2026-10-25-upstream-sync-plan.json) records targets, planning
 estimates, preserved families and gates; it is not release acceptance. The lead has cut the
-beta.1 container components and staged their exact identities/evidence in `releases/v0.13.0`.
-Council subsequently found durable/restore defects; candidate `86e5c0b9` and its receipts remain
-historical. Beta.2 preparation adds strict origin auth with target config `751d22dc`; F2 inventory,
-new qualification, remediation disposition, lane pin and fresh acceptance remain explicit gates.
-The root files are not repromoted by this preparation; published v0.12.2 pins remain immutable.
+beta.2 container components and staged exact source `6d4d0a05`/asset/lane evidence in
+`releases/v0.13.0`. Initial candidate `86e5c0b9` is historical after the durable/restore council.
+Verified localized remediation and strict-origin config `751d22dc` close those blockers with
+13 named regressions; residual P2/P3/native limitations retain their dispositions.
+The root files wait for the new lane pin; public-route/client acceptance and final pins remain
+separate from closed review. Published v0.12.2 pins remain immutable.
 
 Scout findings shape the port:
 
@@ -80,12 +81,12 @@ The original strict-tail verdict remains FAIL; the amended verdict is PASS, with
 structured-output p95 ratio **1.126** and 64K continuation regression retained in the
 [receipt](measurements/2026-10-25-exp097-role-corpus.json). G3 covers integrated tests, the restore
 failure matrix, 32 GB startup, pressure/concurrency and quality/leak screens plus native
-qualification for changed lanes. Frozen-source host 65/65, dense 11/11, loader, canonical
+qualification for changed lanes. Exact beta.2 host 66/66, dense 11/11, loader, canonical
 MTP/fp8, C2/32 GB, grammar/product smokes and four production boots pass; G1 restores
 20,926 tokens with 27 identical continuation bytes. Powered quality/leak and historical
 OMP parallel/fanout workloads are not re-measured. Canonical sorted-key tool serialization
 `0abe7c8e5` is integrated with host byte pins; the full G2 comparison was not rerun after it.
-G4's full critical-review council ledger is pending; G5 cuts, stages, accepts, composes and pins
+G4's full council plus verified localized remediation ledger is closed; G5 cuts, stages, accepts, composes and pins
 the candidate. The founder alone publishes. Failure retains qualified fork runtimes and research
 receipts rather than silently weakening durability or performance.
 

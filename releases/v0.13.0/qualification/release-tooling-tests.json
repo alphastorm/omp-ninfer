@@ -3,9 +3,13 @@
   "schema_version": 1,
   "release": "v0.13.0",
   "as_of": "2026-10-25",
+  "status": "passed-with-documented-local-exclusions",
   "subject": {
     "repository": "https://github.com/alphastorm/omp-ninfer",
-    "branch": "v013/release-stage"
+    "branch": "v013/release-stage",
+    "working_tree_base_commit": "3e49bde570c5a5757a65c44e075c00867e607e5d",
+    "runtime_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47"
   },
   "prior_product_source_ci": {
     "commit": "1ab652881873fcaccd0ddc51c399cae788dd1d36",
@@ -25,45 +29,45 @@
     ],
     "scope": "Program-owner referenced harness CI; no new run or substituted exact-head CI assertion is made by this worker."
   },
-  "draft_rebind": {
-    "command": "python3 scripts/rebind_release.py --release v0.13.0 --draft",
-    "exit_code": 0,
-    "output": "wrote releases/v0.13.0/COMPATIBILITY.md\nrebound hash chain for v0.13.0; compatibility 6bd4837ad29a…"
-  },
-  "scope": "No formatter, linter, GPU job, host change, new CI dispatch, publication or full-suite retry of the four unchanged timing failures. Previous CI remains separately source-bound. Metadata/provenance receipts were finalized after the corrected test execution; no executable or prose changes followed it.",
-  "status": "passed-with-documented-local-exclusions",
-  "full_suite_before_fixture_fix": {
-    "command": "python3 -m unittest discover -s tests -v",
-    "tests_run": 480,
-    "failures": 5,
+  "current_focused_suite": {
+    "tests_run": 30,
+    "failures": 0,
     "errors": 0,
-    "skipped": 5,
-    "elapsed_seconds": 232.964,
-    "result": "FAILED (failures=5, skipped=5)",
-    "disposition": "One staged-authority fixture drift was repaired in test_stage_release.py. Four timing failures match the exact pre-existing local exclusions in the supplied ReleaseStage REPORT; no tolerance, production code or skip decorator was changed."
+    "elapsed_seconds": 0.062,
+    "result": "OK",
+    "release_prose_cases": 6,
+    "command": "env PYTHONPATH=tests python3 -m unittest test_v013_release_preparation test_documented_route.ReleaseProseTests test_compatibility -v"
   },
+  "scope": "Current beta.2 source/profile/prose/test changes were complete before the 478-test execution. Evidence/check-result metadata and hashes are finalized afterward; no executable, profile or prose changes follow that run. No new CI dispatch, formatter, linter, host/GPU job, publication or live route acceptance was performed. Historical CI retains its actual source.",
   "corrected_local_suite": {
     "command": "python3 -c \"$DISCOVERY_DRIVER\"",
-    "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(test for test in all_tests if test.id() not in excluded)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
+    "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(t for t in all_tests if t.id() not in excluded)\nprint('Discovered:', len(all_tests), 'selected:', selected.countTestCases(), flush=True)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
+    "discovered_tests": 482,
     "excluded_test_ids": [
       "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
       "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
       "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
       "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
     ],
-    "tests_run": 476,
+    "tests_run": 478,
     "failures": 0,
     "errors": 0,
     "skipped": 5,
-    "elapsed_seconds": 223.552,
+    "elapsed_seconds": 225.031,
     "exit_code": 0,
     "result": "OK (skipped=5)",
-    "scope": "All discovered tests except the four named pre-existing timing-sensitive local cases; this is not a clean 480-test claim. The four failed observations were not rerun unchanged."
+    "scope": "All discovered current beta.2 tests except exactly four pre-existing local timing cases. The five platform-dependent skips remain visible; this is not a clean 482-test claim."
+  },
+  "draft_rebind": {
+    "command": "python3 scripts/rebind_release.py --release v0.13.0 --draft",
+    "exit_code": 0,
+    "output": "wrote releases/v0.13.0/COMPATIBILITY.md\nrebound hash chain for v0.13.0; compatibility 10dde191e506…"
   },
   "draft_installable_posture": {
     "command": "python3 scripts/verify_release.py --release v0.13.0 --require-installable",
     "exit_code": 1,
-    "error_count": 22,
-    "interpretation": "Expected pre-pin draft/root/profile errors only. The root authority, public matrix and live profiles deliberately remain on v0.12.2; the lead lane pin promotes them and changes draft to candidate. No verifier guard is weakened."
+    "error_count": 9,
+    "output": "error: root and release compatibility authorities must be byte-identical\nerror: root and release compatibility matrices must be byte-identical\nerror: release manifest is not installable\nerror: profile: --binary-sha256 must occur once and equal components.ninfer.server_binary_sha256\nerror: profile: --config-sha256 must occur once and equal runtime_identity.configuration_sha256\nerror: profile: runtime_identity.configuration_sha256 must equal the identity of the configuration this profile launches\nerror: profiles/qwen38-rtx5090-manual-tunnel.json: --binary-sha256 must occur once and equal components.ninfer.server_binary_sha256\nerror: profiles/qwen38-rtx5090-manual-tunnel.json: --config-sha256 must occur once and equal runtime_identity.configuration_sha256\nerror: profiles/qwen38-rtx5090-manual-tunnel.json: runtime_identity.configuration_sha256 must equal the identity of the configuration this profile launches\n",
+    "interpretation": "Expected draft/root/profile pre-pin failures: the mutable manifest remains draft and the root authority, matrix and live profiles deliberately retain historical candidate 86e5c0b9. The lead must lane-pin this clean beta.2 stage; no verifier guard or root is changed to manufacture installability. No other errors were reported."
   }
 }

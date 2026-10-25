@@ -5,19 +5,20 @@
   "as_of": "2026-10-25",
   "identity": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "deployment_profile": "qwen38-5090-v0.13.0",
-    "checkpoint_schema_version": 3
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
   },
   "status": "passed-scoped",
   "product_shape": {
     "artifact_type": "ninfer_engine_cache_gate",
     "schema_version": 1,
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "baseline_sha256": "d39d3cd17dbe5155ca881c4636bbdabf5dd5ec86691b705c20a6e2bdc2ac1245",
     "shape": {
       "max_context": 131072,
@@ -85,8 +86,8 @@
         "idle_ttft": [
           {
             "label": "idle sample 0",
-            "ttft_s": 0.7478448809997644,
-            "total_s": 0.8526088479848113,
+            "ttft_s": 0.7838923110102769,
+            "total_s": 0.8887107180198655,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -95,8 +96,8 @@
           },
           {
             "label": "idle sample 1",
-            "ttft_s": 0.7287547099986114,
-            "total_s": 0.8335194280080032,
+            "ttft_s": 0.7247229100030381,
+            "total_s": 0.829519522987539,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -105,8 +106,8 @@
           },
           {
             "label": "idle sample 2",
-            "ttft_s": 0.820907029992668,
-            "total_s": 0.9405913809896447,
+            "ttft_s": 0.718170148000354,
+            "total_s": 0.8374697369872592,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -114,15 +115,15 @@
             "reasoning_text_sha256": "89fbf89bcdc63c92062d7b054360ad4787fbb1280dffe3ed06462f87468ce600"
           }
         ],
-        "median_idle_ttft_s": 0.7478448809997644,
+        "median_idle_ttft_s": 0.7247229100030381,
         "c2_siblings": {
-          "decode_row_rounds": 87,
-          "decode_rounds": 70,
+          "decode_row_rounds": 91,
+          "decode_rounds": 73,
           "requests": [
             {
               "label": "fanout seed",
-              "ttft_s": 0.6063975070137531,
-              "total_s": 0.6962643880106043,
+              "ttft_s": 0.6069504060142208,
+              "total_s": 0.6966150320076849,
               "input_tokens": 1848,
               "output_tokens": 32,
               "cached_tokens": 0,
@@ -131,37 +132,37 @@
             },
             {
               "label": "long sibling",
-              "ttft_s": 1.353403023997089,
-              "total_s": 3.1136895759846084,
+              "ttft_s": 1.2795932279841509,
+              "total_s": 3.1631516439956613,
               "input_tokens": 3690,
               "output_tokens": 192,
-              "cached_tokens": 1843,
-              "output_text_sha256": "905dc403ce70fbe5b303bf263e303cf3abc4cf5d67e3a63bd5408cb5b7bc7582",
-              "reasoning_text_sha256": "594dac0f0d6da92d2edb28d5c4b5be4a6289c7589874c615074fbf8d9a17609a"
+              "cached_tokens": 1879,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "8b1dd11c122315e63964a5a30ab4165e126046b598875530c1c0027185324c4c"
             },
             {
               "label": "short sibling",
-              "ttft_s": 1.2792905370006338,
-              "total_s": 1.552248141990276,
+              "ttft_s": 1.3539962650102098,
+              "total_s": 1.6120718650054187,
               "input_tokens": 3690,
               "output_tokens": 48,
-              "cached_tokens": 1879,
+              "cached_tokens": 1843,
               "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
               "reasoning_text_sha256": "d5a4754ef6db79fdf1407fd9af7ebc4ec2cff31387760af78cc9e272e952799e"
             },
             {
               "label": "continue short sibling",
-              "ttft_s": 0.738591636007186,
-              "total_s": 0.8774573160044383,
+              "ttft_s": 0.7385916049825028,
+              "total_s": 0.837800855981186,
               "input_tokens": 5549,
               "output_tokens": 16,
               "cached_tokens": 3737,
               "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-              "reasoning_text_sha256": "a4f26d9706d2fdd3b6da57b4d436b42c813c11085091dad2238d70bc7da8f924"
+              "reasoning_text_sha256": "29bed5cf09ef5c665698aa8b4567aa8da298847b2cb44fde343b31031cf06422"
             }
           ],
           "short_completed_before_long": true,
-          "continuation_started_before_long_completed": true
+          "short_continued_before_long_completed": true
         }
       },
       {
@@ -217,8 +218,8 @@
         "idle_ttft": [
           {
             "label": "idle sample 0",
-            "ttft_s": 0.5794430070091039,
-            "total_s": 0.6842886350059416,
+            "ttft_s": 0.5800360650173388,
+            "total_s": 0.684899209998548,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -227,8 +228,8 @@
           },
           {
             "label": "idle sample 1",
-            "ttft_s": 0.5865310529770795,
-            "total_s": 0.6921624289825559,
+            "ttft_s": 0.5874110189906787,
+            "total_s": 0.6920511909993365,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -237,8 +238,8 @@
           },
           {
             "label": "idle sample 2",
-            "ttft_s": 0.5861250330053736,
-            "total_s": 0.7059649410075508,
+            "ttft_s": 0.5872341200010851,
+            "total_s": 0.707282904011663,
             "input_tokens": 1849,
             "output_tokens": 32,
             "cached_tokens": 0,
@@ -246,15 +247,15 @@
             "reasoning_text_sha256": "89fbf89bcdc63c92062d7b054360ad4787fbb1280dffe3ed06462f87468ce600"
           }
         ],
-        "median_idle_ttft_s": 0.5861250330053736,
+        "median_idle_ttft_s": 0.5872341200010851,
         "c2_siblings": {
-          "decode_row_rounds": 87,
-          "decode_rounds": 70,
+          "decode_row_rounds": 91,
+          "decode_rounds": 73,
           "requests": [
             {
               "label": "fanout seed",
-              "ttft_s": 0.6071700470056385,
-              "total_s": 0.6970298200030811,
+              "ttft_s": 0.6072648440022022,
+              "total_s": 0.6973015239927918,
               "input_tokens": 1848,
               "output_tokens": 32,
               "cached_tokens": 0,
@@ -263,50 +264,52 @@
             },
             {
               "label": "long sibling",
-              "ttft_s": 1.3518807210202795,
-              "total_s": 3.111929681006586,
+              "ttft_s": 1.2802775489981286,
+              "total_s": 3.1637152160110418,
               "input_tokens": 3690,
               "output_tokens": 192,
-              "cached_tokens": 1843,
-              "output_text_sha256": "905dc403ce70fbe5b303bf263e303cf3abc4cf5d67e3a63bd5408cb5b7bc7582",
-              "reasoning_text_sha256": "594dac0f0d6da92d2edb28d5c4b5be4a6289c7589874c615074fbf8d9a17609a"
+              "cached_tokens": 1879,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "8b1dd11c122315e63964a5a30ab4165e126046b598875530c1c0027185324c4c"
             },
             {
               "label": "short sibling",
-              "ttft_s": 1.2772809110174421,
-              "total_s": 1.5504530320176855,
+              "ttft_s": 1.3547671750129666,
+              "total_s": 1.6122096530161798,
               "input_tokens": 3690,
               "output_tokens": 48,
-              "cached_tokens": 1879,
+              "cached_tokens": 1843,
               "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
               "reasoning_text_sha256": "d5a4754ef6db79fdf1407fd9af7ebc4ec2cff31387760af78cc9e272e952799e"
             },
             {
               "label": "continue short sibling",
-              "ttft_s": 0.7387133440061007,
-              "total_s": 0.8774561260070186,
+              "ttft_s": 0.738980519992765,
+              "total_s": 0.8379117159929592,
               "input_tokens": 5549,
               "output_tokens": 16,
               "cached_tokens": 3737,
               "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-              "reasoning_text_sha256": "a4f26d9706d2fdd3b6da57b4d436b42c813c11085091dad2238d70bc7da8f924"
+              "reasoning_text_sha256": "29bed5cf09ef5c665698aa8b4567aa8da298847b2cb44fde343b31031cf06422"
             }
           ],
           "short_completed_before_long": true,
-          "continuation_started_before_long_completed": true
+          "short_continued_before_long_completed": true
         }
       }
     ],
     "passed": true,
-    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
-    "median_idle_ttft_ratio_on_over_off": 0.7837521495390943
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "median_idle_ttft_ratio_on_over_off": 0.8102877829522781
   },
   "exact_profile": {
     "schema": "ninfer-integration-product-profile/1",
-    "source": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "profile_sha256": "64e1f629fd94f8a486998664f7fece81d24785e63bf4d9cd2362b1c605226c1d",
-    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "source": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "profile_sha256": "a0edfcaac2f5bff648b7b677be33fb25e6e9b3bda08f84c2117f540df2fcfb35",
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "require_origin_auth": true,
+    "config_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "checkpoint_mount_target": "/checkpoints-v013",
     "passed": true,
     "startup": {
@@ -368,78 +371,35 @@
   },
   "integrated_pressure_overlap": {
     "phase": "overlap",
+    "counts": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
     "tests": [
       {
         "name": "ninfer_qwen3_5_durable_pressure_real_test",
-        "seconds": 29.4234,
-        "passed": true
+        "status": "passed",
+        "seconds": 38.0356
       }
     ]
   },
-  "provider_overlap": {
-    "repository": "https://github.com/alphastorm/ninfer",
-    "branch": "rebase/engine-cache",
-    "source_commit": "d693c6c7ca805cdb5a6ab4d7688ce600aa58f6b4",
-    "evidence_commit": "8e4d03d59f625eac87b37854c1e02e4b3361467c",
-    "evidence_path": "receipts/engine-cache/a3-e2-582334.json",
-    "ctest": {
-      "seconds": 46.6706,
-      "host_capacity_bytes": 758120448,
-      "resident_bytes": 505040896,
-      "cached_tokens": 1651,
-      "decode_rows": 1173,
-      "decode_rounds": 1170,
-      "target_imported_ms": 24420,
-      "sibling_finished_ms": 45494,
-      "pending_preserves_victim": true,
-      "restore_before_sibling_finishes": true,
-      "exact_deterministic_continuation": true
-    }
-  },
   "policy": {
-    "kv_capacity_at_least_max_context": true,
     "minimum_headroom_mib": 768,
     "maximum_headroom_loss_vs_baseline_mib": 32,
     "maximum_graph_growth_mib": 64,
-    "amendment": "Zero graph growth was superseded by the founder-approved bounded-growth/headroom gate. Both measured arms add 2 MiB graph reservation and improve headroom; the initial zero-growth failure is not hidden."
+    "kv_capacity_at_least_max_context": true,
+    "observed_graph_growth_bytes": 2097152
   },
-  "scope": "Exact frozen-source product-shape startup/C2/idle and E2 overlap, not predecessor agent-mix, natural OMP parallel dispatch, universal warm reuse or constant-batch-two throughput. Three 12-second-idle samples per arm are descriptive, not a powered latency claim.",
-  "provenance": [
-    {
-      "repository": "https://github.com/alphastorm/ninfer",
-      "branch": "rebase/rc-5090",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
-      "evidence_path": "integration-rc.json",
-      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
-      "json_pointer": "/product_shape",
-      "supplied_projection_name": "product-shape.json",
-      "supplied_projection_sha256": "cead917c25f58e58825004b3a0d389c3b00761d1a93d828fe5b93b9afbb0c27b",
-      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
-    },
-    {
-      "repository": "https://github.com/alphastorm/ninfer",
-      "branch": "rebase/rc-5090",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
-      "evidence_path": "integration-rc.json",
-      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
-      "json_pointer": "/exact_product_profile",
-      "supplied_projection_name": "exact-profile.json",
-      "supplied_projection_sha256": "3adddbe75025a4f8882c96694242d289ae98d3c440f80843b15608e864babb4f",
-      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
-    },
-    {
-      "repository": "https://github.com/alphastorm/ninfer",
-      "branch": "rebase/rc-5090",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
-      "evidence_path": "integration-rc.json",
-      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
-      "json_pointer": "",
-      "supplied_projection_name": "integration-rc-F.json",
-      "supplied_projection_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
-      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
-    }
-  ]
+  "scope": "Fresh F2 product-shape startup/C2/idle and E2 overlap. Three idle samples per arm are descriptive, not a powered latency or actual OMP parallel-dispatch claim.",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/product_shape",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
 }

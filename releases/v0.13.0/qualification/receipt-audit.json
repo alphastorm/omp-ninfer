@@ -381,5 +381,42 @@
     ],
     "replaced": "review/runtime-ledger.json",
     "reason": "Predecessor reviews do not qualify the rebased runtime or changed client. Runtime council binding is explicitly pending; lead installs the actual ledger."
+  },
+  "current_runtime": {
+    "release_tag": "v0.7.0-qwen38-5090-beta.2",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47"
+  },
+  "restage_dispositions": {
+    "replaced_runtime_files": [
+      "rtx5090.json",
+      "build.json",
+      "packaging.json",
+      "integrated-cli.json",
+      "concurrency.json",
+      "durability.json",
+      "restore-matrix.json",
+      "protocol.json",
+      "decode-parity.json",
+      "runtime-publication.json",
+      "runtime-base.json",
+      "component-cut-dry-run.json",
+      "staging.json"
+    ],
+    "added_runtime_files": [
+      "remediation.json"
+    ],
+    "unchanged_subject_files": [
+      "rtx3090.json",
+      "rtx4090.json",
+      "rtx3090-windows-native.SHA256SUMS",
+      "rtx4090-windows-native.SHA256SUMS",
+      "stock-omp.json",
+      "client-components.json"
+    ],
+    "base_reuse": "runtime-base.json is a new F2 reuse binding around the true original base publication, not a fabricated F2 base cut.",
+    "performance_scope": "decode-parity.json changes the release subject only; the underlying EXP-097 comparison retains its actual source/model and is not remeasured.",
+    "prose_and_tooling": "Current stage checks replace beta.1 tooling/prose records after execution.",
+    "history": "The original v0.12.2-copy audit below is retained as an intake record, not current runtime proof. Superseded beta.1 runtime receipts remain in Git history, not live qualification files."
   }
 }

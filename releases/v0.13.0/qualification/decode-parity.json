@@ -5,13 +5,14 @@
   "as_of": "2026-10-25",
   "identity": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "deployment_profile": "qwen38-5090-v0.13.0",
-    "checkpoint_schema_version": 3
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
   },
   "status": "passed-performance-comparison",
   "measured_source_commit": "c2dbcbae4bbdd07f73c8aad299fa0552ba17dbf3",
@@ -57,5 +58,5 @@
     "evidence_commit": "80480bec5824e07251487d832920128d135d8638",
     "evidence_path": "bench/measurements/exp097/G2-final-summary.json"
   },
-  "scope": "Serial role requests, configured concurrency two and fixed 131,072 KV tokens, K=7 BF16. Depth pairs are not constant-batch-two decode. This is a provider-level comparison, not final binary/public-artifact performance requalification, full-model output equality or powered leak screening."
+  "scope": "Unchanged EXP-097 provider comparison at measured c2dbcbae/model facba3bd, not a beta.1 identity or a new F2 throughput measurement. Serial role requests, configured concurrency two, fixed 131072 KV/K=7/BF16. No full G2 after canonical serialization or F2 remediation; no global output parity/powered leak claim."
 }

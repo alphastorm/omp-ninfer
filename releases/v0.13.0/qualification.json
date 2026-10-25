@@ -3,73 +3,73 @@
   "schema_version": 2,
   "release": "v0.13.0",
   "as_of": "2026-10-25",
-  "status": "preparation-only",
+  "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
   "documented_route_acceptance": {
     "status": "pending",
     "scope": "Fresh candidate-bound execution of all five routes and 31 current executable blocks, three OMP 18.12.6 client platforms and both native public installations, with independently verified incumbent/native restoration. Updated model/checkpoint/client blocks invalidate predecessor block hashes. Darwin remains preview; Linux scope remains WSL2. No route results or candidate SHA are inferred during preparation."
   },
-  "scope": "Beta.2 restage preparation for RTX 5090 on upstream master 64d10fbf with published model 81f924d4 and stock OMP 18.12.6. Strict-origin target config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared, not qualified. Existing measured runtime bindings remain historical beta.1; unchanged native package qualifications carry, but new client/public-install acceptance does not.",
+  "scope": "Council-remediated RTX 5090 beta.2, exact source 6d4d0a05 on upstream master 64d10fbf, published model 81f924d4 and strict-origin configuration 751d22dc. Stock OMP 18.12.6 and unchanged native v0.12.2 packages/model; new RTX 5090 external acceptance and final evidence pins remain separate.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-    "behavioral_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "release_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "release_source_archive_sha256": "98a33db050c6145eae02bdc1c126180be34e62acde9fdb5550976ffcacbd4e95",
-    "release_server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "behavioral_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "release_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "release_source_archive_sha256": "d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631",
+    "release_server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
     "model_artifact_bytes": 20437521664,
-    "configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "public_model_id": "q38-ninfer",
-    "deployment_profile": "qwen38-5090-v0.13.0"
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "require_origin_auth": true
   },
   "composition": {
     "behavioral_qualification": {
+      "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/rtx5090.json",
-      "sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8",
-      "status": "historical-beta.1-only",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+      "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0",
+      "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+      "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
       "provenance": {
-        "runtime_repository": "https://github.com/alphastorm/ninfer",
-        "runtime_branch": "rebase/rc-5090",
-        "runtime_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+        "repository": "https://github.com/alphastorm/ninfer",
+        "branch": "rebase/rc2-5090",
+        "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
         "producer_script": "scripts/qualify_rtx5090_profile.py",
-        "scope": "Original beta.1 lane observation, preserved byte-true after council defects. It does not qualify strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 or any F2 runtime."
+        "lease": "20261025T124439Z-lane-lane-gates-beta2-6d4d0a05-621024"
       }
     },
     "local_release_packaging": {
-      "status": "pending-F2-inventory",
+      "status": "passed",
       "published": true,
-      "release_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "release_server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
-      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
-      "oci_manifest_digest": "sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
-      "binary_package_sha256": "ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944",
-      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.1/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
-      "sbom_sha256": "de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc",
-      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.1",
-      "binary_package_bytes": 547027462,
+      "release_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+      "release_server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+      "oci_manifest_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+      "binary_package_sha256": "52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d",
+      "binary_package_bytes": 547088535,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.2/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.2",
       "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
       "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
       "package_inventory": {
         "repository_path": "releases/v0.13.0/qualification/packaging.json",
-        "sha256": "3e1625bee0bf392b9e60217c3970a7f6524136e2eda5445ee9ef973a5bc69552"
+        "sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a"
       },
       "publication_receipt": {
         "repository_path": "releases/v0.13.0/qualification/runtime-publication.json",
-        "sha256": "c8aacef002b1b62ce12be29d9a7f63e8178cdd26617a3490cf394ec3e8114309"
+        "sha256": "0ee25885304f96ec344e0c468f802c8ae17872634d201110c4a1aa0905be869f"
       },
       "runtime_base_receipt": {
         "repository_path": "releases/v0.13.0/qualification/runtime-base.json",
-        "sha256": "e998a3d6198abf702fb8bf1d8a6c83ade28849023d572303210f03f3cd734a4d"
+        "sha256": "90b1e1f728ca4ce7039378239a242087659e9f2ec93b9c25c93ff45415f8e30b"
       },
       "anonymous_pull_verified": false,
       "anonymous_assets_verified": false,
       "checksums_verified": true,
-      "build_route_note": "Frozen 04b603aa build: CUDA 13.1.115 / GNU 13.3.0 / sm_120a; 172 incremental steps in 109 s. Lead published the binary/source components and runtime base/image. No independent anonymous pull/download or product route install is inferred; candidate-bound external acceptance supplies that proof.",
-      "evidence_scope": "Published package/image/base fields below name beta.1 only; replace them from the actual beta.2 cut inventory, never by relabelling their hashes."
+      "build_route_note": "Exact F2 source, archive and packaged executable identities; 270 incremental edges/122 s, CUDA 13.1.115 / GNU 13.3.0 / sm_120a. Existing base digest is reused with unchanged Dockerfile/workflows, not relabelled as a new base publication. Anonymous public-download/installation proof belongs to fresh external acceptance."
     },
     "native_runtime_variants": {
       "rtx3090-windows-native": {
@@ -93,65 +93,64 @@
     },
     "external_installation_acceptance": {
       "status": "pending",
-      "note": "Fresh candidate-bound public-image/public-asset, three OMP 18.12.6 platform, all five routes/31 blocks and both carried native public-install acceptances with independent restoration. The lead binds actual receipts after the lane pin; predecessor acceptance is not carried."
+      "note": "Fresh beta.2 RTX 5090 public-image/public-asset, OMP 18.12.6 three-platform/current-route evidence and independent incumbent restoration must be bound after lane pin. Main reports unchanged-native client/public-install windows remain valid; bind their actual receipts/pins rather than inventing execution or requiring a runtime remeasurement."
     }
   },
   "observed_gates": {
     "integrated_cli": {
-      "status": "pending-F2-evidence",
+      "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/integrated-cli.json",
-      "sha256": "6ef22a3b237cf52f51e39a3c591504895bc0027047aed31d1ef9210e4ad84bad",
-      "accepted_flags": 24,
+      "sha256": "ba62dcc8e71384d627c2a896f7b0fedfe9222c9037cf35da6464c448ee1993d8",
+      "accepted_flags": 25,
       "host_context_bytes": 21881405440,
       "device_state_slots_extra": 2,
       "gpu_keep_warm_ms": 60000,
-      "obsolete_private_catalog_flag": "removed without alias by K5",
-      "historical_status": "passed",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject.",
-      "target_profile_flag_count": 25
+      "require_origin_auth": true
     },
     "g1_restart": {
-      "status": "pending-F2-evidence",
+      "status": "passed-production-path",
       "repository_path": "releases/v0.13.0/qualification/durability.json",
-      "sha256": "9dedf7bc0e8e7a6dfd0901a054b16506859769926e4b2336d79d27a096dba948",
+      "sha256": "5ccab53fddc781f3ed702fcb89e2a7a63884dbd2a0cc71cb429a5e3e9cee83c4",
       "minimum_checkpoint_hit_tokens": 16384,
       "checkpoint_hit_tokens": 20926,
       "continuation_bytes": 27,
       "byte_identical": true,
       "four_boots": true,
-      "criterion": "Real production HTTP/Engine/schema 3 authenticated-disk restart on the frozen source/binary and published model; exact release-profile startup and docker-restart protocol are independently bound by integrated-cli.json and rtx5090.json. The historical tracer is not release proof.",
-      "historical_status": "passed-production-path",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject."
+      "criterion": "Exact F2 binary/model production four-boot restart; strict release-profile startup and exact lane docker-restart protocol are independently bound. Not tracer or beta.1 proof."
     },
     "g2_decode": {
       "status": "passed-performance-comparison",
       "repository_path": "releases/v0.13.0/qualification/decode-parity.json",
-      "sha256": "7a5e42039c7c7db0b7811dc31f3e65ed71d8ff89f1464fc6ffd1f7c69a41beac",
+      "sha256": "4eca1adf4ed6d63094d593180c2376162a02a7cc8efcde17a09c75bcdf480af9",
       "minimum_ratio": 0.96,
       "observed_ratio": 1.0109385577955698,
       "observed_percent": 101.09385577955697,
-      "criterion": "Founder-amended median floor 96%; workload p95 above 10% is attributed and nonblocking. EXP-097 original strict-tail FAIL remains preserved, at measured c2dbcbae/model facba3bd with persistence disabled, not final binary/public-artifact acceptance."
+      "criterion": "Unchanged founder-amended EXP-097 provider comparison; serial roles, fixed KV and persistence disabled at c2dbcbae/model facba3bd. Not a newly measured F2 aggregate; attributed tails/depth regressions remain."
     },
     "g3_integrated_qualification": {
-      "status": "pending-F2-evidence",
+      "status": "passed-scoped-with-unmeasured-screens",
       "ctest": {
         "repository_path": "releases/v0.13.0/qualification/build.json",
-        "sha256": "a433e9ecfef5293bf28708828e6f08737738176add68e4824121a51f4ca3de3c"
+        "sha256": "abf1fc95af2901dea1b195b96f39e93f09ed83a8dabc9735b1f284597af9aafa"
       },
       "restore_failure_matrix": {
         "repository_path": "releases/v0.13.0/qualification/restore-matrix.json",
-        "sha256": "7531350634557dde0b5b827cca24069af5eceda2af7cc9f3712b46c46f1fff38"
+        "sha256": "37f069b3cd664eb560213370ec8bfe38eb8aa2c705b27a8cf1b608268ec46c36"
       },
       "c2_and_32gb": {
         "repository_path": "releases/v0.13.0/qualification/concurrency.json",
-        "sha256": "93298466ef3a4cc39c9034e727d775c7b648034a3ce5e97d1550ac450b51f790"
+        "sha256": "2d1ac4d6574f98bd247eb87cdfe00b5ebea4100fb3abb48823cfdc7b5bc394f4"
       },
       "schema_and_product_protocol": {
         "repository_path": "releases/v0.13.0/qualification/protocol.json",
-        "sha256": "0c2163551902ecf17ab458a89b94d308fddd5db0102f168f2e3fe243fa66d27e"
+        "sha256": "10b8165c350028a27d044d30380a7ee508ce17a9aa3bf60788f28840f7ef2c72"
+      },
+      "remediation": {
+        "repository_path": "releases/v0.13.0/qualification/remediation.json",
+        "sha256": "155e26ac16fe45138fa24fdd5cf5d90868323a5366fdd68438567d5fe21f3d5c"
       },
       "host_tests": {
-        "passed": 65,
+        "passed": 66,
         "failed": 0,
         "skipped": 0
       },
@@ -160,59 +159,54 @@
         "failed": 0,
         "skipped": 0
       },
-      "pressure_overlap_seconds": 29.4234,
+      "new_named_remediation_cases": 13,
+      "pressure_overlap_seconds": 38.0356,
       "loader": "passed",
-      "canonical_shared_mtp_fp8": "passed: 12 clients, 1,786 reused tokens, 202 decode rounds / 388 rows, six partial-tail clients, engine available",
-      "criterion": "Exact-source host/dense/loader/shared-prefix, production four-boot restore, E2 C2 overlap, amended 32 GB startup, grammar/product protocol and 24-flag CLI gates. Historical powered quality/leak, long-client/fanout and actual OMP parallel-dispatch screens are explicitly not re-measured below; passing scoped tests do not stand in for those workloads.",
-      "historical_status": "passed-scoped-with-unmeasured-screens",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject."
+      "canonical_shared_mtp_fp8": "passed; canonical artifact, 12 clients, 1786 reused tokens, 202 rounds / 388 rows, six partial-tail clients",
+      "criterion": "Fresh F2 host/dense/loader/shared-prefix/E2/four-boot/strict-product-shape/grammar/protocol/package proof. Thirteen remediation cases are within the host executables. No new powered quality/leak, global output identity or historical OMP workload inference."
     },
     "g4_review": {
-      "status": "remediation-required",
+      "status": "passed",
       "repository_path": "releases/v0.13.0/review/runtime-ledger.json",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "criterion": "Main confirmed P1 durable/restore defects; bind the actual frozen F2 remediation ledger/dispositions after the new inventory and runtime proofs arrive. Preparation wording is not a reviewer verdict or closure receipt.",
-      "council_sequence": "CR-20261025T085950Z-04b603aa"
+      "sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
+      "council_sequence": "CR-20261025T085950Z-04b603aa",
+      "reviewed_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+      "remediated_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+      "closure": "Completed full council at F, then verified localized F2 remediation and direct lead-close. No blocking in-scope P0/P1; residual P2/P3/native limitations retain explicit dispositions. No new council or native-execution claim."
     },
     "rtx5090": {
-      "status": "pending-F2-evidence",
+      "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/rtx5090.json",
-      "sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8",
+      "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0",
       "prefill_prompt_tokens": 130048,
       "exact_retrieval": true,
-      "wall_seconds": 56.921,
-      "server_prefill_seconds": 56.333941991,
-      "tokens_per_second_wall": 2284.7,
+      "wall_seconds": 56.994,
+      "server_prefill_seconds": 56.411413397,
+      "tokens_per_second_wall": 2281.8,
       "decode_completion_tokens": 2048,
-      "decode_tokens_per_second_server": 180.06,
-      "decode_tokens_per_second_wall": 176.49,
+      "decode_tokens_per_second_server": 179.86,
+      "decode_tokens_per_second_wall": 176.27,
       "kv_capacity_tokens": 146368,
       "vram_used_mib_idle": 30954,
-      "agent_protocol_across_docker_restart": "passed",
-      "historical_status": "passed",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject."
+      "agent_protocol_across_docker_restart": "passed"
     },
     "runtime_publication": {
-      "status": "pending-F2-evidence",
+      "status": "passed",
       "runtime_image": {
         "repository_path": "releases/v0.13.0/qualification/runtime-publication.json",
-        "sha256": "c8aacef002b1b62ce12be29d9a7f63e8178cdd26617a3490cf394ec3e8114309"
+        "sha256": "0ee25885304f96ec344e0c468f802c8ae17872634d201110c4a1aa0905be869f"
       },
-      "runtime_base": {
+      "runtime_base_reuse": {
         "repository_path": "releases/v0.13.0/qualification/runtime-base.json",
-        "sha256": "e998a3d6198abf702fb8bf1d8a6c83ade28849023d572303210f03f3cd734a4d"
+        "sha256": "90b1e1f728ca4ce7039378239a242087659e9f2ec93b9c25c93ff45415f8e30b"
       },
-      "product_publication_authorized": false,
-      "historical_status": "passed",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject."
+      "product_publication_authorized": false
     },
     "packaging": {
-      "status": "pending-F2-evidence",
+      "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/packaging.json",
-      "sha256": "3e1625bee0bf392b9e60217c3970a7f6524136e2eda5445ee9ef973a5bc69552",
-      "public_download_acceptance": "pending; do not infer anonymous download or installation from publication",
-      "historical_status": "passed",
-      "evidence_scope": "Numbers, identities and referenced receipts below are historical beta.1, not the prepared strict-origin/F2 subject."
+      "sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
+      "public_download_acceptance": "pending; publication does not prove fresh anonymous installation"
     },
     "stock_client_review": {
       "status": "passed-host-free-only",
@@ -222,42 +216,43 @@
         "repository_path": "releases/v0.13.0/qualification/client-components.json",
         "sha256": "ecc1df23a9820ac4ffd278188766a9eb612dec4b3bdc04dc1956f351fa0fc770"
       },
-      "live_gpu_acceptance": "pending"
+      "live_beta2_acceptance": "pending"
     },
     "changed_client_acceptance": {
       "status": "pending",
-      "criterion": "Fresh runtime-bound live/tool/result/continuation/image-where-supported/outage checks for OMP 18.12.6 on macOS arm64, Windows x64 and Linux x64 under WSL2; five routes/31 current blocks and both native public installs; independent restoration. Rehearsal/stub evidence is not GPU or public-install qualification."
+      "criterion": "Fresh beta.2 RTX 5090 public-image/client routes, three OMP 18.12.6 platforms, exact current blocks and independent incumbent restoration. Bind valid unchanged-native public-install/client/restoration receipts and final immutable pins; no rehearsal or predecessor RTX 5090 acceptance is substituted."
     },
     "release_prose": {
       "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/release-prose.json",
-      "sha256": "c235e6143a4b2a6c3d17d60f0009fe65fc9c5683e5befda21418687d7f08dadc",
-      "evidence_scope": "Historical beta.1 receipt retained byte-true. Current beta.2 preparation checks are recorded in restage_preparation.validation, not relabelled into this receipt."
+      "sha256": "024d9a9a0ca09c1f053930e3702584ea195f38924b2d76f507161137acb4a0e9",
+      "scope": "30 current beta.2 focused checks, including six prose cases and bounded canonical notes."
     },
     "release_tooling": {
       "status": "passed-with-documented-local-exclusions",
       "repository_path": "releases/v0.13.0/qualification/release-tooling-tests.json",
-      "sha256": "2a64cc22d18659aae5bbffed7eaf0c0083b271da1b2e486964668e92e778a10c",
-      "tests_run": 476,
-      "skipped": 5,
-      "excluded_local_timing_cases": 4,
-      "full_suite_observation": "480 tests: four documented timing failures plus one repaired staging-fixture drift; no clean unfiltered-suite claim.",
-      "evidence_scope": "Historical beta.1 receipt retained byte-true. Current beta.2 preparation checks are recorded in restage_preparation.validation, not relabelled into this receipt."
+      "sha256": "dd5202160276c9f126aab6b52c49ebba96c705d0a91a54aae8ffee0f90fddc3c",
+      "scope": "478 selected of 482 discovered tests; zero failures/errors, five platform-dependent skips, four documented local timing exclusions."
+    },
+    "staging": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/qualification/staging.json",
+      "sha256": "f9b97923fa51d6351cb76cf16271badebbb521a7019366677b8b88849b88139a",
+      "stage": "draft",
+      "scope": "Targeted beta.2 restage and hash rebinding only; root promotion and acceptance pins remain lead-owned."
     }
   },
-  "interpretation": "Beta.1 runtime observations and their recorded non-strict configuration are preserved as historical evidence after council defects, not rewritten as strict-auth or F2 proof. Prepared target configuration 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 adds mandatory origin authentication (finding 8); per-principal session capability limitations remain documented. F2 inventory, remediation closure, fresh qualification and acceptance remain unbound.",
+  "interpretation": "All changed-runtime evidence is bound to beta.2 source 6d4d0a05, strict origin config 751d22dc and actual published/lane identities. Existing base publication retains its true original source under an explicit unchanged-base reuse binding. EXP-097 remains separately measured. Full council plus localized remediation is closed by the actual unchanged ledger; residual limitations are not erased. Public/client acceptance and owner-only publication are separate gates.",
+  "eligibility_scope": "Runtime/installability posture only, not product publication or public-route acceptance. Root authority/live profiles remain historical until the lead lane pin; checked-in manifest remains draft. G4 is closed by the bound ledger, not inferred from runtime tests.",
   "remaining_release_gates": [
-    "Supply F2 beta.2 source/binary/archive/source-archive/SBOM/image/base inventory and a fresh lane receipt for strict-origin configuration 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47; stage only after those exact identities arrive.",
-    "G4: replace the pending runtime review binding with the actual frozen-source council ledger and dispositions.",
-    "Lead lane-pin the clean stage commit to promote the release-local authority, profile/server shape and lane URLs; retain root v0.12.2 bytes until that cut.",
-    "Run and bind fresh OMP 18.12.6 acceptance for the RTX 5090 public image on all three client platforms and all current documented routes/31 blocks, plus independent incumbent restoration.",
-    "Run and bind both unchanged native public-install/client acceptances and independently verify native state/task/key/ACL/staging/directory/power restoration; package qualification is carried, acceptance is not.",
-    "Commit and pin platform, composed acceptance and manifest evidence in order; require-ready/check-pins, then founder-only product tag/release. No v0.13.1 native rebase claim is made."
+    "Lead lane-pin the clean beta.2 stage commit, promoting the exact authority/profile bytes and immutable lane URLs; root files remain historical until that cut.",
+    "Bind fresh beta.2 RTX 5090 public-image/public-asset acceptance for all three OMP 18.12.6 client platforms/current routes and independent incumbent restoration.",
+    "Bind actual valid unchanged-native public-install/client/restoration evidence and its immutable pins; the lead reports these windows remain valid, not remeasured by this worker.",
+    "Commit/pin platform, composed acceptance and manifest evidence in order; require-ready/check-pins; founder-only product tag/release."
   ],
-  "eligibility_scope": "Not runtime-release-eligible. Main confirmed release-blocking beta.1 durable/restore defects from CR-20261025T085950Z-04b603aa. All existing runtime identities/receipts are historical beta.1 evidence; none is rebound to the new strict-origin config or inferred as F2 acceptance. Fresh F2 inventory, qualification and remediation disposition are required.",
   "receipt_audit": {
     "repository_path": "releases/v0.13.0/qualification/receipt-audit.json",
-    "sha256": "0b0f7826709f5009692752b4f2e2a4e3779fc84dbd3155d331ef1f9d97f2ec2d"
+    "sha256": "d217b32d013fe0f27cc62929697b698325fc0bbef80f1a978c17025bec00a862"
   },
   "not_remeasured_gates": [
     {
@@ -280,71 +275,5 @@
       "status": "not re-measured for v0.13.0",
       "reason": "101.09% is the completed EXP-097 provider comparison. Final runtime integrates canonical sorted-key serialization 0abe7c8e5 with host byte pins; the full corpus was not rerun after that behavior fix."
     }
-  ],
-  "restage_preparation": {
-    "status": "awaiting-F2-inventory",
-    "target_component": "v0.7.0-qwen38-5090-beta.2",
-    "target_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
-    "historical_candidate_commit": "86e5c0b9b30b0ae905a03d9523bbda7094368982",
-    "historical_runtime_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "historical_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
-    "council_sequence": "CR-20261025T085950Z-04b603aa",
-    "required_launch_flag": "--session-checkpoint-require-origin-auth",
-    "strict_origin_contract": "K1 section 103\u2013114; council finding 8; configured root and API key at least 32 bytes. The documented generated key is 64 characters and the fresh schema 3 root has no MAC-less generations.",
-    "remediation_wording_status": "Prepared fixed-in-beta.2 descriptions only; no F2 source, binary, archive, SBOM, image or lane qualification has been supplied or inferred.",
-    "remediation_scope": [
-      "durable restore/pressure lock order",
-      "automatic-save retry/progress",
-      "per-record delete durability",
-      "restore freshness guard",
-      "quota victim preservation",
-      "victim payload validation",
-      "gate-tag timing"
-    ],
-    "principal_limitation": "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
-    "stage_release_executed": false,
-    "validation": {
-      "scope": "Host-free beta.2 preparation only; no F2 build/GPU/lane/public-install/council-closure proof.",
-      "narrow_boundaries": {
-        "command": "PYTHONPATH=tests python3 -m unittest test_v013_release_preparation test_manual_tunnel_scripts test_documented_route.ReleaseProseTests -v",
-        "tests_run": 28,
-        "elapsed_seconds": 8.385,
-        "result": "OK"
-      },
-      "fixture_red_to_green": {
-        "initial_suite_tests_run": 478,
-        "initial_failures": 35,
-        "initial_errors": 2,
-        "initial_skipped": 5,
-        "initial_elapsed_seconds": 224.619,
-        "cause": "Historical verifier/rebind/staging factories inherited the now-promoted root K5 shape or non-eligible mutable preparation. Factories now start from immutable accepted v0.12.2 source/profiles instead of weakening the verifier or relabelling beta.1.",
-        "focused_tests_run": 5,
-        "focused_elapsed_seconds": 2.23,
-        "focused_result": "OK"
-      },
-      "corrected_suite": {
-        "command": "python3 -c \"$DISCOVERY_DRIVER\"",
-        "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(test for test in all_tests if test.id() not in excluded)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
-        "excluded_test_ids": [
-          "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
-          "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
-          "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
-          "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
-        ],
-        "tests_run": 478,
-        "failures": 0,
-        "errors": 0,
-        "skipped": 5,
-        "elapsed_seconds": 227.104,
-        "exit_code": 0,
-        "result": "OK (skipped=5)",
-        "scope": "All discovered tests except the four pre-existing documented local timing cases; no new skip decorators or tolerance changes."
-      },
-      "draft_rebind": {
-        "command": "python3 scripts/rebind_release.py --release v0.13.0 --draft",
-        "exit_code": 0,
-        "output": "wrote releases/v0.13.0/COMPATIBILITY.md\nrebound hash chain for v0.13.0; compatibility fed5e14c92f4\u2026"
-      }
-    }
-  }
+  ]
 }

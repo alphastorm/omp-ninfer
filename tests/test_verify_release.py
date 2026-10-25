@@ -142,6 +142,8 @@ class ReleaseContractTest(unittest.TestCase):
             "v0.6.15-qwen38-5090-beta.1"))
         self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.1"))
+        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+            "v0.7.0-qwen38-5090-beta.2"))
         for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.1-qwen38-5090-beta.1",
                     "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
                     "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):

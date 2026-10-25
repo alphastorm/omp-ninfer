@@ -5,13 +5,14 @@
   "as_of": "2026-10-25",
   "identity": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "deployment_profile": "qwen38-5090-v0.13.0",
-    "checkpoint_schema_version": 3
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
   },
   "status": "passed",
   "g1": {
@@ -25,8 +26,8 @@
   },
   "production": {
     "artifact_type": "ninfer-serve-restore-proof/1",
-    "binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
-    "source": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "source": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
     "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
     "production_path": true,
@@ -52,10 +53,10 @@
       "dir_sync": "fsync",
       "frontier_tokens": 20993,
       "restored_tokens": 20993,
-      "payload_bytes": 2164056150,
-      "points": 4,
-      "states": 4,
-      "pages": 329
+      "payload_bytes": 2560565777,
+      "points": 6,
+      "states": 6,
+      "pages": 330
     },
     "policy_disabled": {
       "mode": "startup_warmup_and_unretained_request",
@@ -74,48 +75,20 @@
     },
     "passed": true
   },
-  "provider_canonical_validation": {
-    "repository": "https://github.com/alphastorm/ninfer",
-    "branch": "rebase/persistence",
-    "source_commit": "138939f385ba4ded5e6774effb7463d39048654f",
-    "evidence_commit": "6563d4390ec32cceba8230dda82754462c6bd879",
-    "evidence_path": "persistence-canonical-r7.json",
-    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "none_restart": {
-      "seconds": 147.341,
-      "continuation_bytes": 146,
-      "points": 3,
-      "states": 3
-    },
-    "mtp_restart": {
-      "seconds": 92.327,
-      "continuation_bytes": 146,
-      "points": 3,
-      "states": 3
-    },
-    "actual_victim": {
-      "seconds": 96.004,
-      "resident_bytes": 608663552,
-      "host_capacity_bytes": 913309696,
-      "verified_bytes": 608671719,
-      "current_pins": 2,
-      "releases": 1,
-      "target_fresh_readers": 1,
-      "reused_tokens": 278,
-      "native_invalid_victim_preserved": true
-    }
+  "strict_profile": {
+    "require_origin_auth": true,
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "exact_profile_passed": true
   },
-  "isolation": "New /checkpoints-v013 root. v0.12.x roots remain untouched and sessions replay from client transcripts. The 22,010-token tracer is historical; G1 here uses the final production four-boot proof (20,926 cached tokens).",
+  "scope": "Exact F2 binary/model four-boot HTTP/Engine/authenticated-disk proof; strict release-profile startup and lane docker-restart protocol are separately bound. No beta.1 or tracer timing is carried as F2 proof.",
   "provenance": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "branch": "rebase/rc-5090",
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "evidence_path": "integration-rc.json",
-    "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
     "json_pointer": "/production_restart",
-    "supplied_projection_name": "serve-restore.json",
-    "supplied_projection_sha256": "4479a487436923e5b2315a8cd92e6a262903d40afc9c0fa5642b340d9c8a4bc3",
-    "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
   }
 }

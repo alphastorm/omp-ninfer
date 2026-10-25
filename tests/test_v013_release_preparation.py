@@ -72,24 +72,35 @@ class V013PreparationTests(unittest.TestCase):
                 self.assertEqual(
                     verify_release.argument_value(arguments, "--config-sha256"), CONFIG_SHA)
 
-    def test_unbound_beta2_preparation_cannot_reuse_beta1_eligibility(self):
+    def test_staged_beta2_identity_and_remediation_are_bound(self):
         release = ROOT / "releases/v0.13.0"
         manifest = json.loads((release / "manifest.json").read_text(encoding="utf-8"))
-        preparation = manifest.get("restage_preparation", {})
-        if preparation.get("status") != "awaiting-F2-inventory":
-            return
         qualification = json.loads((release / "qualification.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["status"], "draft")
-        self.assertFalse(manifest["qualification"]["runtime_release_eligible"])
-        self.assertEqual(qualification["status"], "preparation-only")
-        self.assertEqual(qualification["observed_gates"]["g4_review"]["status"],
-                         "remediation-required")
-        self.assertEqual(preparation["target_configuration_sha256"], CONFIG_SHA)
-        self.assertFalse(preparation["stage_release_executed"])
-        self.assertNotEqual(
-            preparation["historical_configuration_sha256"], CONFIG_SHA)
-        self.assertIn("prompt_cache_key names a session capability",
-                      preparation["principal_limitation"])
+        ninfer = manifest["components"]["ninfer"]
+        self.assertEqual(ninfer["release_tag"], "v0.7.0-qwen38-5090-beta.2")
+        self.assertEqual(ninfer["source_commit"], "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff")
+        self.assertEqual(manifest["runtime_identity"]["configuration_sha256"], CONFIG_SHA)
+        self.assertTrue(manifest["qualification"]["runtime_release_eligible"])
+        self.assertNotIn("restage_preparation", manifest)
+        self.assertEqual(qualification["observed_gates"]["integrated_cli"]["accepted_flags"], 25)
+        self.assertEqual(qualification["observed_gates"]["g4_review"]["status"], "passed")
+        for name in ("build.json", "packaging.json", "integrated-cli.json", "concurrency.json",
+                     "durability.json", "restore-matrix.json", "protocol.json", "remediation.json",
+                     "staging.json"):
+            receipt = json.loads((release / "qualification" / name).read_text(encoding="utf-8"))
+            with self.subTest(receipt=name):
+                self.assertEqual(receipt["identity"]["source_commit"], ninfer["source_commit"])
+                self.assertEqual(receipt["identity"]["configuration_sha256"], CONFIG_SHA)
+        remediation = json.loads((release / "qualification/remediation.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(remediation["regressions"]), 13)
+        self.assertEqual(len({case["test"] for case in remediation["regressions"]}), 13)
+        review = qualification["observed_gates"]["g4_review"]
+        ledger_path = ROOT / review["repository_path"]
+        self.assertEqual(hashlib.sha256(ledger_path.read_bytes()).hexdigest(), review["sha256"])
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+        self.assertEqual(ledger["reviews"][-1]["subject_commit"], ninfer["source_commit"])
+        self.assertEqual(ledger["reviews"][-1]["review_class"], "lead-close")
+        self.assertTrue(ledger["residual_risks"])
 
     def test_prepared_authority_does_not_claim_accepted_schema_support_on_carried_natives(self):
         path = ROOT / "releases/v0.13.0/compatibility.json"
@@ -151,14 +162,19 @@ class V013PreparationTests(unittest.TestCase):
         self.assertEqual(gates["g2_decode"]["minimum_ratio"], 0.96)
         self.assertGreaterEqual(gates["g2_decode"]["observed_ratio"], 0.96)
         self.assertEqual(gates["g3_integrated_qualification"]["host_tests"],
-                         {"passed": 65, "failed": 0, "skipped": 0})
+                         {"passed": 66, "failed": 0, "skipped": 0})
         self.assertTrue(qualification["not_remeasured_gates"])
         for item in qualification["not_remeasured_gates"]:
             self.assertEqual(item["status"], "not re-measured for v0.13.0")
             self.assertTrue(item["reason"])
-        for name in ("runtime-publication.json", "runtime-base.json"):
-            receipt = json.loads((release / "qualification" / name).read_text(encoding="utf-8"))
-            self.assertEqual(receipt["source_commit"], manifest["components"]["ninfer"]["source_commit"])
+        publication = json.loads((release / "qualification/runtime-publication.json").read_text(
+            encoding="utf-8"))
+        self.assertEqual(publication["source_commit"], manifest["components"]["ninfer"]["source_commit"])
+        base = json.loads((release / "qualification/runtime-base.json").read_text(encoding="utf-8"))
+        self.assertEqual(base["runtime_source_commit"], manifest["components"]["ninfer"]["source_commit"])
+        self.assertEqual(base["original_publication"]["image_reference"],
+                         manifest["components"]["ninfer"]["runtime_base_reference"])
+        self.assertNotEqual(base["original_publication"]["source_commit"], base["runtime_source_commit"])
         for key in ("package_inventory", "publication_receipt", "runtime_base_receipt"):
             edge = qualification["composition"]["local_release_packaging"][key]
             self.assertEqual(edge["sha256"], hashlib.sha256(

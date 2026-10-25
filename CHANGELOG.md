@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.13.0] - staged draft
 
-### Beta.2 restage preparation
+### Beta.2 council remediation
 
-- Withdraw beta.1 candidate `86e5c0b9` from the mutable release posture after council
-  `CR-20261025T085950Z-04b603aa` confirmed durable/restore defects. Its measured receipts remain
-  historical; beta.2 source/assets/lane identities and remediation closure are not yet bound.
-- Add `--session-checkpoint-require-origin-auth` to both prepared launch routes for finding 8
-  and K1 section 103–114. Canonical target configuration:
+- Replace initial candidate `86e5c0b9` with exact beta.2 source `6d4d0a05`, component
+  `v0.7.0-qwen38-5090-beta.2`, server `9790a004`, archive `52dd3be7` and image `5d10a998`.
+  Council `CR-20261025T085950Z-04b603aa` closes after verified localized remediation; the
+  unchanged ledger retains all findings, accepted/deferred residuals and native limits.
+- Fix restore/pressure lock order, progress-sensitive bounded automatic-save retries, gate-tag/
+  native-owner timing, per-record delete survivors, restore freshness, quota-current preservation
+  and full victim payload validation. All 13 named regressions pass in the 66-test host gate.
+- Bind `--session-checkpoint-require-origin-auth` in both launch routes for finding 8
+  and K1 section 103–114. Qualified canonical configuration:
   `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
   The fresh schema 3 root and documented 64-character key meet the existing strict-origin contract.
 - Record the remaining within-principal boundary: `prompt_cache_key` is a session capability;
@@ -23,15 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Stage v0.13.0's RTX 5090 runtime `04b603aa` on upstream master `64d10fbf`, published model container
+- Stage v0.13.0's RTX 5090 runtime `6d4d0a05` on upstream master `64d10fbf`, published model container
   version 3 `81f924d4`, `qwen38-5090-v0.13.0` profile and isolated `checkpoints-v013` root.
   Prior server checkpoints are not migrated; saved client transcripts replay for a fresh prefill.
   K5 replaces the separate Host budgets and rejects the obsolete private-catalog limit.
   All other tuning, including keep-warm, remains explicit in staged profiles.
 - Bind the rebased container's grammar/product-smoke-supported JSON-schema output, 128-character
   tool names, non-blocking export, status schema 2 and request-log schema 30. Fresh runtime gates:
-  host 65/65 and dense 11/11, real 20,926-token/27-byte exact restart, C2 pressure/restore overlap,
-  amended 32 GB startup with 146,368 automatic KV tokens, and 24 accepted profile flags.
+  host 66/66 and dense 11/11, real 20,926-token/27-byte exact restart, C2 pressure/restore overlap,
+  amended 32 GB startup with 146,368 automatic KV tokens, and 25 accepted profile flags.
 - Carry the unchanged native packages and their 64-character/no-schema-output limits. Rebased
   natives target v0.13.1 and need the 24 GB admission-headroom amendment plus separate package
   qualification. Root authority/profile promotion waits for the lead's lane pin.
@@ -41,10 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   diagnostic-only and reverted; integration later landed sorted-key serialization `0abe7c8e5`
   with host byte pins, without rerunning the complete comparison.
 - Replace or drop every inherited changed-runtime receipt, retaining only unchanged native
-  qualification/checksums; bind the new runtime base/image publication and packaging receipts.
-  Final-profile measurements record 180.06 tok/s decode and exact 130,048-token retrieval in
-  56.921 s. Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
-  Council, fresh client/public-install acceptance and immutable pins remain explicit gates.
+  qualification/checksums; bind beta.2 image/package receipts and explicit unchanged-base reuse.
+  Final-profile measurements record 179.86 tok/s decode and exact 130,048-token retrieval in
+  56.994 s. Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
+  Fresh client/public-install evidence and immutable pins remain separate from closed council review.
 - Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site and brand assets; front-door install links
   return to the guide on `main`.

@@ -144,7 +144,7 @@ remains a separate host-free identity and CLI check. See [Releases](RELEASES.md)
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
-| RTX 5090 container (`127.0.0.1:18089`) | Target `v0.7.0-qwen38-5090-beta.2`, upstream base `64d10fbf`; F2 cut identities and qualification not yet bound | `81f924d4` (20,437,521,664 bytes) | `qwen38-5090-v0.13.0` (target config `751d22dc`): strict checkpoint origin auth, DFlash2 draft window 7, BF16 KV, 131,072 context, two active requests, two extra device-state slots, shared Host budget, 180 s pending timeout; fresh beta.2 acceptance required |
+| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` on upstream `64d10fbf`, server `9790a004`, image `5d10a998` | `81f924d4` (20,437,521,664 bytes) | `qwen38-5090-v0.13.0` (config `751d22dc`): mandatory strict origin auth, DFlash2 K=7, BF16 KV (146,368 automatic tokens), 131,072 context, two active requests plus two extra device-state slots, shared Host budget, 180 s pending timeout; fresh public-route acceptance remains separate |
 | RTX 4090 native Windows (`127.0.0.1:18082`) | `v0.6.11-qwen38-4090-beta.1`, source `cad19767`, package `52687044`, server `76f35b74` | `eec39564` (18,210,531,328 bytes) | `qwen38-4090-native-v0.6.11-beta.1` (config `1971cd29`): MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots; text and tools (no vision) |
 | RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.6.3-qwen38-3090-beta.1`, source `cad19767`, package `74120de0`, server `bca236e5` | `eec39564` (18,210,531,328 bytes) | `qwen38-3090-native-v0.6.3-beta.1`: MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots, 300 W serving power cap; text and tools (no vision) |
 
@@ -664,11 +664,12 @@ Use the fresh host directory `checkpoints-v013`, mounted at `/checkpoints-v013`;
 v0.12.x `checkpoints` store untouched for rollback. Never import or upgrade its sessions into the
 new store. The schema 3 loader refuses legacy generations without mutation; prior sessions resume
 by replaying the client transcript for a fresh prefill. New exact-runtime checkpoints accelerate
-later continuations. The prepared runtime implements JSON-schema output and 128-character tool
-names; the [candidate matrix](../releases/v0.13.0/COMPATIBILITY.md) keeps schema support gated on
-live acceptance and distinguishes carried native limits. Beta.1 candidate `86e5c0b9` is
-historical after the council's durable/restore findings; wait for the beta.2 source/assets,
-strict-origin lane receipt and new candidate pin before executing this route.
+later continuations. Exact-source grammar and product smokes qualify JSON-schema output and
+the rebased boundary supports 128-character tool names; the
+[candidate matrix](../releases/v0.13.0/COMPATIBILITY.md) distinguishes carried native limits.
+Beta.2 source/assets, strict-origin lane proof and closed council remediation are bound.
+Wait for its new candidate/public-acceptance pins and ready gate before installing; initial
+candidate `86e5c0b9` is historical, not beta.2 public-route evidence.
 
 ## 4. Start NInfer on the inference host
 
@@ -680,7 +681,7 @@ strict-origin lane receipt and new candidate pin before executing this route.
   --checkpoint-dir "$CHECKPOINTS"
 ```
 
-The beta.2 profile requires `--session-checkpoint-require-origin-auth` and target config
+The qualified beta.2 profile requires `--session-checkpoint-require-origin-auth` and config
 `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`
 (council `CR-20261025T085950Z-04b603aa`, finding 8; K1 section 103–114).
 The flag needs a configured checkpoint root and an API key of at least 32 bytes. The

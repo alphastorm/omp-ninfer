@@ -1,60 +1,52 @@
 {
-  "artifact_type": "omp_ninfer_v013_component_staging",
+  "artifact_type": "omp_ninfer_v013_beta2_component_staging",
   "schema_version": 1,
   "release": "v0.13.0",
   "as_of": "2026-10-25",
   "identity": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-    "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "release_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
     "deployment_profile": "qwen38-5090-v0.13.0",
-    "checkpoint_schema_version": 3
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
   },
   "status": "passed-draft",
-  "binary_component_tag": "v0.7.0-qwen38-5090-beta.1",
-  "binary_archive_sha256": "ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944",
-  "binary_archive_bytes": 547027462,
-  "source_archive_sha256": "98a33db050c6145eae02bdc1c126180be34e62acde9fdb5550976ffcacbd4e95",
-  "sbom_sha256": "de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc",
-  "oci_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
+  "binary_component_tag": "v0.7.0-qwen38-5090-beta.2",
+  "source_component_tag": "v0.7.0-qwen38-5090-source.2",
+  "runtime_receipt_release": "v0.7.0-qwen38-5090-runtime-beta.2",
+  "binary_archive_sha256": "52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d",
+  "binary_archive_bytes": 547088535,
+  "source_archive_sha256": "d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631",
+  "source_archive_bytes": 12229537,
+  "sbom_sha256": "0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670",
+  "checksums_sha256": "e88aa68a5d0e11a4f561247534440641d0a6a6f8bbc2312d9895c15a4fb546f8",
+  "oci_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
   "runtime_base_image": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
-  "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
-  "runtime_receipt_release": "v0.7.0-qwen38-5090-runtime-beta.1",
   "model_revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
   "model_bytes": 20437521664,
-  "cli_inventory": "releases/v0.13.0/qualification/integrated-cli.json",
-  "native_posture": "Unchanged v0.12.2 packages/model; new client/public-install acceptance still required. Rebased natives are not packaged/qualified and target v0.13.1.",
-  "root_authority": "v0.12.2 unchanged until the lead lane-pins this stage commit.",
+  "accepted_profile_flags": 25,
+  "method": "Targeted restage edits plus rebind --draft; stage_release.py was not invoked against the existing tree.",
+  "root_authority": "Historical beta.1 candidate until the lead pins this stage; no root promotion by this worker.",
+  "native_posture": "Unchanged v0.12.2 packages/model. Main reports their existing OMP 18.12.6 windows remain valid; actual evidence/pins must be bound by the lead.",
+  "g4": {
+    "status": "passed",
+    "repository_path": "releases/v0.13.0/review/runtime-ledger.json",
+    "sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
+    "scope": "Initial full council plus verified localized F2 remediation and direct lead-close."
+  },
   "product_publication_authorized": false,
-  "provenance": [
-    {
-      "repository": "https://github.com/alphastorm/ninfer",
-      "branch": "rebase/rc-5090",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
-      "evidence_path": "integration-rc.json",
-      "evidence_sha256": "a1a694a423c83ab6a68a22860753db581575b4374a088f17931291e8fa51f756",
-      "json_pointer": "/package_inventory",
-      "supplied_projection_name": "integration-rc-package.json",
-      "supplied_projection_sha256": "ab6d43e6a3c964e7cef597ddde273505e9a2bc3ec24d63e660c5fc726cb88678",
-      "projection": "Content-safe projection of the committed program-owner evidence. This worker performed no GPU rerun."
-    },
-    {
-      "repository": "https://github.com/alphastorm/ninfer",
-      "branch": "rebase/rc-5090",
-      "source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-      "producer": "Lead component-cut log supplied to the release worker; no committed fork path is claimed for this operator record.",
-      "record_name": "cut-log.txt",
-      "record_sha256": "e943a8fce980ac80b136f41b97c43518c7334ab6c40f767462ef35f62acdeb1c",
-      "workflow_urls": [
-        "https://github.com/alphastorm/ninfer/actions/runs/40178487425",
-        "https://github.com/alphastorm/ninfer/actions/runs/40178804483"
-      ],
-      "packaging_evidence_commit": "a903c7b4741698cceb06107960f0ac000b31ae33",
-      "packaging_evidence_path": "integration-rc.json"
-    }
-  ]
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/package",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
 }

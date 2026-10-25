@@ -1,0 +1,179 @@
+{
+  "artifact_type": "omp_ninfer_beta2_durable_restore_remediation",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-runtime-regressions",
+  "council_sequence": "CR-20261025T085950Z-04b603aa",
+  "fixes": [
+    {
+      "finding": "1",
+      "name": "Durable restore/pressure lock order",
+      "fix": "Worker pressure callbacks inspect bounded bookkeeping and enqueue Pending without waiting for the Responses mutex. The checkpoint thread performs catalog/save work, breaking the restore-commit lock cycle."
+    },
+    {
+      "finding": "2",
+      "name": "Automatic-save retry/progress",
+      "fix": "Every task completion wakes Engine progress, including retryable refusals. The wired TransientRetryBudget allows six retries only after matching Engine/publication/storage progress; unchanged or unrelated progress cannot spin or rearm exhausted work."
+    },
+    {
+      "finding": "3a/3b",
+      "name": "Gate-tag timing and native owner preservation",
+      "fix": "Submission advances the capture epoch without replacing the committed tag. Only a completed native owner acknowledged after Responses publication promotes the endpoint monotonically. Queued expiry and abandoned/unacknowledged turns preserve the prior savable owner; paused unfinished requests may settle by native replay."
+    },
+    {
+      "finding": "4",
+      "name": "Quota victim preservation",
+      "fix": "Prepublication quota planning is non-destructive. Publication replans under the catalog lock; only a durably acknowledged new current permits reclaiming unrelated currents. One incoming-set transient is bounded by quota; failed/stale publication and under-cap saves with deferred cleanup preserve the correct authorities."
+    },
+    {
+      "finding": "5",
+      "name": "Victim payload validation",
+      "fix": "Ordinary destructive pressure uses the real native validator, pins the generation, streams and verifies all native bytes, rechecks the current authenticated index and retains both pins through the worker turn. Metadata-only coverage cannot release the last valid resident copy."
+    },
+    {
+      "finding": "6",
+      "name": "Per-record delete durability",
+      "fix": "DELETE durably publishes undeleted RAM and disk-only survivors before erasing the acknowledged record. When a native endpoint is unavailable/deleted, authenticated responses_only/replay_only state preserves addressable survivors without fabricating native state, native covers() authority or a leaf-delete 409."
+    },
+    {
+      "finding": "9",
+      "name": "Restore freshness guard",
+      "fix": "Restore refuses an endpoint-incompatible live state or any newer live record missing from the loaded generation, including a newer unsaved turn that precedes guard capture; refusal occurs before native commit. Cross-restart numeric publication orders are not compared."
+    }
+  ],
+  "regressions": [
+    {
+      "finding": "1",
+      "test": "pressure_callback_does_not_wait_for_restore_commit",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "automatic_retry_requires_matching_progress",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "automatic_retry_budget_and_terminal_refusal",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "publication_abandonment_completes_pressure",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "6",
+      "test": "durable_record_delete_preserves_survivors",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "6",
+      "test": "durable_delete_retains_disk_only_records",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "9",
+      "test": "test_restore_guard_captured_after_newer_turn",
+      "target": "ninfer_openai_responses_store_test"
+    },
+    {
+      "finding": "3a",
+      "test": "queued_expiry_preserves_committed_tag",
+      "target": "ninfer_engine_checkpoint_control_test"
+    },
+    {
+      "finding": "3b",
+      "test": "test_abandoned_turn_preserves_committed_owner",
+      "target": "ninfer_resource_manager_test"
+    },
+    {
+      "finding": "3b",
+      "test": "paused_request_settles_by_native_replay",
+      "target": "ninfer_engine_checkpoint_adapter_test"
+    },
+    {
+      "finding": "4",
+      "test": "test_quota_stale_publication_preserves_unrelated_currents",
+      "target": "ninfer_session_checkpoint_store_test"
+    },
+    {
+      "finding": "5",
+      "test": "test_ordinary_pressure_preserves_same_size_corrupt_victim",
+      "target": "ninfer_session_checkpoint_store_test"
+    },
+    {
+      "finding": "6",
+      "test": "test_replay_only_survivors_are_durable_without_native_authority",
+      "target": "ninfer_session_checkpoint_store_test"
+    }
+  ],
+  "new_named_case_count": 13,
+  "integrated_host_gate": {
+    "passed": 66,
+    "failed": 0,
+    "skipped": 0
+  },
+  "provider_union": {
+    "source_commit": "3c517249d7573db47fcdbd6deeaa7d844323ec1f",
+    "host_targets_passed": 8,
+    "failures": 0,
+    "skipped": 0,
+    "elapsed_seconds": 3.31,
+    "build_steps": 12,
+    "junit_sha256": "9e2b21c9980c34d462dd4631cc358d7ac8975597e6aa49f88527350798a43631",
+    "log_sha256": "fa9fabfde20f9cd1d8d450651933eedf6f7f525fe5c31acb15ef268a0b07c5ad"
+  },
+  "origin_policy": {
+    "finding": "8",
+    "required_flag": "--session-checkpoint-require-origin-auth",
+    "key_minimum_bytes": 32,
+    "documented_generated_key_characters": 64,
+    "require_origin_auth": true
+  },
+  "principal_limitation": "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+  "review_ledger_binding": {
+    "status": "passed",
+    "repository_path": "releases/v0.13.0/review/runtime-ledger.json",
+    "sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
+    "scope": "Initial full council at reviewed F plus verified localized F2 lead-close; no second council or native-execution claim."
+  },
+  "provenance": [
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rc2-5090",
+      "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+      "evidence_path": "integration-rc.json",
+      "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+      "evidence_post_freeze_uncommitted": true,
+      "json_pointer": "/phases/0",
+      "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+    },
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rem-serve",
+      "source_commit": "3c517249d7573db47fcdbd6deeaa7d844323ec1f",
+      "report_sha256": "f72490a39c94005912b584e5f5a7f663abff19de493782edd931df9f834db0e9",
+      "record": "RemServe REPORT; content-safe descriptions/tests projected, private paths omitted"
+    },
+    {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/rem-engine",
+      "source_commit": "9f6321345fb5c915b8c902e8c550144a571b4788",
+      "report_sha256": "0b64bc6a85b33b32fbf7ae4024f6ff43b1645a702108733c810d01697c0ce6ff",
+      "record": "RemEngine REPORT; content-safe descriptions/tests projected, private paths omitted"
+    }
+  ]
+}

@@ -1,181 +1,172 @@
 # OMP NInfer v0.13.0
 
-**Beta.2 restage preparation; F2 inventory and qualification are not yet bound.** Council
-`CR-20261025T085950Z-04b603aa` found release-blocking defects in the beta.1 durable/restore
-subsystem. Candidate `86e5c0b9` and its measurements below are historical, not beta.2 proof.
-New source/archive/SBOM/image/lane identities, remediation disposition, lane pin and fresh
-stock-client/public-route acceptance remain required. The published product remains
-[v0.12.2](../v0.12.2/NINFER_RELEASE_NOTES.md); these notes do not authorize an upgrade or publication.
+**Staged beta.2 draft; not a published product or accepted public-install composition.** The
+runtime is cut and lane-qualified at `6d4d0a05`. The actual council ledger closes the initial
+review plus verified localized remediation; fresh RTX 5090 client/public-route acceptance and
+final pins remain separate. The published product remains
+[v0.12.2](../v0.12.2/NINFER_RELEASE_NOTES.md). No upgrade or publication is authorized here.
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release
 layer) to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
 ## What changes
 
-- **Rebased RTX 5090 runtime:** beta.2 targets `v0.7.0-qwen38-5090-beta.2`; F2 identities
-  will be supplied by the lead. The historical beta.1 downstream source is
-  `04b603aae4e9ce3c26f4175cf808180c0f05b5fe`, on Neroued/ninfer master
-  `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. This replaces v0.12.2's `1302d639` source
-  and `6e8b2e2a` base. Upstream owns scheduling, grammar, context caches and DFlash2 execution;
-  the product carries authenticated durable sessions, retained Responses and measured kernel routes.
-- **Schema 3 durable store:** authenticated checkpoint sets preserve Responses lineage and native
-  continuation state on the new context substrate. Fingerprint schema 2, checkpoint schema 3,
-  status schema 2 and request-log schema 30 are separate contracts, not interchangeable versions.
-- **JSON-schema structured output is supported on the RTX 5090 lane:** upstream xgrammar,
-  the frozen-source real grammar test and product `serve_contract` / `agent_product` smokes
-  qualify Responses `text.format` and Chat Completions `response_format` with `json_schema`.
-  This is runtime feature evidence, not fresh OMP platform/public-route acceptance. Carried native
-  packages still reject these requests with HTTP 400.
-- **Tool names:** the rebased Chat/Responses boundary accepts up to 128 characters. Carried
-  native packages retain their 64-character limit. Container capabilities do not transfer to natives.
-- **Non-blocking checkpoint export:** capture runs under execution serialization; bulk transfers,
-  hashing and writes run outside the execution lock. Epoch-checked publication prevents stale
-  exports replacing newer state. This addresses `alphastorm/ninfer#34`, not all queueing latency.
-- **Published model container version 3:** use upstream artifact `81f924d4`, not a local
+- **Rebased RTX 5090 runtime:** component `v0.7.0-qwen38-5090-beta.2`, source
+  `6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff`, branch `rebase/rc2-5090`, on upstream master
+  `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. Upstream owns scheduling, grammar, context caches
+  and DFlash2; the product carries authenticated durable sessions, retained Responses and kernel routes.
+- **Schema 3 durable store:** checkpoint schema 3, fingerprint schema 2, status schema 2 and
+  request-log schema 30 are separate contracts. Compatible native checkpoints accelerate restart;
+  saved OMP transcripts remain authoritative.
+- **JSON-schema output is supported on RTX 5090:** exact-source real grammar and product smokes
+  cover Responses `text.format` and Chat Completions `response_format` with `json_schema`.
+  Chat/Responses tool names support 128 characters. Carried natives retain HTTP 400 schema refusal
+  and 64-character names; container capabilities do not transfer to them.
+- **Non-blocking export:** capture is serialized, but bulk transfer/hash/write runs outside the
+  execution lock with epoch-checked publication. This addresses the export lock hold, not all queueing
+  or native import/victim-validation I/O on the worker.
+- **Published model container version 3:** direct upstream artifact `81f924d4`, not a local
   conversion. All 1,184 tensor payloads and six frontend resources matched the production model
   upgraded locally; whole-container bytes differ. Text, vision, MTP and DFlash2 are present.
-- **Stock Oh My Pi 18.12.6:** unmodified upstream assets on all three client platforms. The
+- **Stock OMP 18.12.6:** unmodified upstream assets on three client platforms. The
   [host-free review](../../docs/measurements/2026-10-25-omp-18126-client-upgrade-review.json)
-  covers asset checksums, Responses wire invariants, the image-aware snapcompact gate and print-mode
-  slash dispatch. A loopback stub is not live inference or memory proof.
+  covers checksums, Responses wire invariants, image-aware snapcompact and print-mode slash dispatch.
+  Stub/client-source checks are not fresh beta.2 live inference or memory proof.
 
-## Beta.2 remediation — evidence binding pending
+## Fixed in beta.2 — durable/restore council remediation
 
-The following “fixed in beta.2” wording records the requested council remediation scope,
-not completed F2 qualification; final source, asset and lane evidence will replace this binding:
+Council `CR-20261025T085950Z-04b603aa` reviewed the initial source, then closed by verified
+localized remediation at the exact source above. The unchanged
+[review ledger](review/runtime-ledger.json) preserves the original findings, dispositions and
+residual risks; the [remediation receipt](qualification/remediation.json) binds all 13 named
+regressions within **66/66 host executables**, not 13 additional CTest executables.
 
-- **Fixed in beta.2 — pending binding:** durable restore/pressure lock order.
-- **Fixed in beta.2 — pending binding:** automatic-save retry/progress.
-- **Fixed in beta.2 — pending binding:** per-record delete durability.
-- **Fixed in beta.2 — pending binding:** restore freshness guard.
-- **Fixed in beta.2 — pending binding:** quota victim preservation.
-- **Fixed in beta.2 — pending binding:** victim payload validation.
-- **Fixed in beta.2 — pending binding:** gate-tag timing.
+- **Restore/pressure lock order:** the worker callback only consults bounded bookkeeping and
+  enqueues Pending; the checkpoint thread performs Responses/catalog/save work. K4 atomic commit
+  remains intact. Regression: `pressure_callback_does_not_wait_for_restore_commit`.
+- **Automatic-save retry/progress:** every completion notifies progress, including retryable
+  refusal. Six bounded retries require matching Engine/publication/storage progress; unrelated or
+  unchanged progress cannot spin. Regressions: `automatic_retry_requires_matching_progress`,
+  `automatic_retry_budget_and_terminal_refusal`, `publication_abandonment_completes_pressure`.
+- **Gate-tag timing and native owners:** submission advances capture epoch without replacing the
+  committed tag. Only completed native state acknowledged after Responses publication promotes
+  the endpoint; abandoned/queued turns preserve the prior owner. Unfinished paused work may settle
+  by native replay. Regressions: `queued_expiry_preserves_committed_tag`,
+  `test_abandoned_turn_preserves_committed_owner`, `paused_request_settles_by_native_replay`.
+- **Per-record delete durability:** publish undeleted RAM/disk-only survivors before acknowledgement.
+  An unavailable/deleted native endpoint uses authenticated responses-only replay survivors, never
+  fabricated native state, native eviction authority or a new leaf-delete 409. Regressions:
+  `durable_record_delete_preserves_survivors`, `durable_delete_retains_disk_only_records`,
+  `test_replay_only_survivors_are_durable_without_native_authority`.
+- **Restore freshness:** reject incompatible live lineage or a live record absent from the loaded
+  generation before native commit, even when the newer unsaved turn predates guard capture.
+  Regression: `test_restore_guard_captured_after_newer_turn`.
+- **Quota preservation:** planning is non-destructive; only an acknowledged new current permits
+  victim deletion, with one quota-bounded incoming transient. Stale/refused publication preserves
+  unrelated currents. Regression: `test_quota_stale_publication_preserves_unrelated_currents`.
+- **Victim payload validation:** ordinary destructive pressure validates native metadata and all
+  delivered bytes, pins/rechecks the current index and retains proof pins through the worker turn.
+  Regression: `test_ordinary_pressure_preserves_same_size_corrupt_victim`.
 
-**Strict origin authentication:** both beta.2 launch profiles add
-`--session-checkpoint-require-origin-auth`, as required by council finding 8 and K1
-section 103–114. The canonical target config is
-`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
-The flag requires a checkpoint root and an API key of at least 32 bytes; the documented
-64-character generated key meets that floor. The fresh schema 3 root has no MAC-less
-generations. Unauthenticated imports are refused without mutation, not silently accepted.
+**Strict origin authentication** is mandatory in both product profiles:
+`--session-checkpoint-require-origin-auth` (finding 8; K1 section 103–114). Exact-profile startup
+reports `require_origin_auth=true`; the binary accepts all **25** profile flags. The flag needs a
+checkpoint root and API key of at least 32 bytes; the documented generated key is 64 characters.
+The new schema 3 root has no supported MAC-less producer. Unauthenticated imports refuse without
+mutation. Generic non-strict CLI compatibility is outside this product profile.
 
 Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
-## Historical beta.1 component bindings
+## Exact component bindings
 
 | Subject | Identity |
 | --- | --- |
-| Binary archive | `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz`, 547,027,462 bytes |
-| Archive SHA-256 | `ede7a6c95bf0a4950b7703fd46e8d085afe208818d808421368f7bd80bdb6944` |
-| `ninfer-serve` SHA-256 | `48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232` |
-| Source archive SHA-256 | `98a33db050c6145eae02bdc1c126180be34e62acde9fdb5550976ffcacbd4e95` |
-| SPDX SHA-256 | `de8a9e65194e4732a82c5cdd0b542e67b6407f1b311a38714e47114d426dc0fc` |
-| Runtime image | `ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605` |
-| Runtime base | `ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e` |
-| Image receipt release | `v0.7.0-qwen38-5090-runtime-beta.1` |
-| Base receipt release | `runtime-base-04b603aa-20261025` |
-| Model revision | `1cbd84e7221e51186bd7f093a149912d2489625b`, 20,437,521,664 bytes |
+| Binary archive | `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz`, 547,088,535 bytes |
+| Archive SHA-256 | `52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d` |
+| `ninfer-serve` SHA-256 | `9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55` |
+| Source archive | `runtime-source-6d4d0a05.tar.gz`, 12,229,537 bytes; source tag `v0.7.0-qwen38-5090-source.2` |
+| Source archive SHA-256 | `d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631` |
+| SPDX SHA-256 | `0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670` |
+| SHA256SUMS SHA-256 | `e88aa68a5d0e11a4f561247534440641d0a6a6f8bbc2312d9895c15a4fb546f8` |
+| Runtime image | `ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd` |
+| Unchanged runtime base | `ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e` |
+| Image receipt release | `v0.7.0-qwen38-5090-runtime-beta.2` |
+| Original base receipt release | `runtime-base-04b603aa-20261025`; unchanged Dockerfile/workflows, not a new base cut |
+| Model revision / bytes | `1cbd84e7221e51186bd7f093a149912d2489625b` / 20,437,521,664 |
 | Model SHA-256 | `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da` |
 | Deployment profile | `qwen38-5090-v0.13.0` |
-| Historical beta.1 configuration SHA-256 | `c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f` |
+| Configuration SHA-256 | `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47` |
+| Rendered profile SHA-256 | `a0edfcaac2f5bff648b7b677be33fb25e6e9b3bda08f84c2117f540df2fcfb35` |
 
-The [manifest](manifest.json), [qualification summary](qualification.json) and release-local
-[compatibility matrix](COMPATIBILITY.md) bind the composition. Published runtime base/image
-receipts do not establish anonymous public download or product installation acceptance.
+The [manifest](manifest.json), [qualification](qualification.json) and
+[compatibility matrix](COMPATIBILITY.md) bind these bytes. Publication alone does not prove fresh
+anonymous download or client/public-install acceptance. Initial candidate `86e5c0b9` remains
+historical; neither its runtime measurements nor its RTX 5090 acceptance is relabelled as beta.2.
 
-## Serving profile and upgrade behavior
+## Serving profile and upgrade
 
-The profile keeps 131,072-token context, automatic BF16 KV, DFlash2 with seven draft tokens,
-optimized proposal head, vision, preserved thinking, two active requests, 1,024-token prefill
-chunks, 180-second pending timeout, 24,576 MiB checkpoint quota, 256 MiB staging and
-60,000 ms GPU keep-warm and strict checkpoint origin authentication. The beta.1 measured
-automatic capacity was **146,368 KV tokens**; beta.2 requires its own fresh lane receipt.
+131,072-token context; automatic BF16 KV **146,368 tokens**; DFlash2 K=7; optimized proposal head;
+vision and preserved thinking; two active requests plus two extra device-state slots; 1,024-token
+prefill chunks; 180-second pending timeout; 24,576 MiB checkpoint quota; 256 MiB staging;
+60,000 ms keep-warm. Shared Host budget `20867.734375 MiB` is exactly **21,881,405,440 bytes**.
+The 28,672 MiB host floor is unchanged. K5 removes `--max-private-continuations` without an alias
+or a fixed eight-session guarantee.
 
-- **Isolated checkpoint root:** host directory `checkpoints-v013` mounts at `/checkpoints-v013`.
-  Never mount, scan, copy or migrate the v0.12.x `checkpoints` generations into this root.
-  Preserve the old root untouched for rollback. Legacy outer schemas are refused without mutation.
-- **Prior sessions replay:** v0.12.x server-side state is not carried. Resume the saved OMP
-  transcript for a fresh prefill. The transcript remains authoritative; new compatible checkpoints
-  accelerate later restarts but never replace it.
-- **Shared Host budget:** `--host-context-mib 20867.734375` is 21,881,405,440 bytes, replacing
-  24 host-state slots plus 16,384 MiB host KV. `--device-state-slots 2` means two extra slots
-  beyond the two active lanes, four total. The 28,672 MiB host floor is unchanged.
-- **Removed control:** K5 rejects `--max-private-continuations`; upstream resource-budgeted
-  retention has no replacement alias or fixed eight-session guarantee. The beta.2 target has
-  25 profile flags, including strict origin auth; its accepted-flag inventory is not yet bound.
-- Saves remain best effort. A crash or expired graceful-stop wait can lose unpublished acceleration
-  state. Cross-version/GPU checkpoint migration, universal warm reuse, zero queueing and loss-free
-  shutdown are not promised. Qualification does not activate a production upgrade.
+Use host directory `checkpoints-v013` mounted at `/checkpoints-v013`. Never mount, scan, copy,
+upgrade or migrate v0.12.x generations into it. Keep old roots untouched for rollback; prior
+sessions resume by replaying authoritative OMP transcripts for a fresh prefill. Legacy load refusal
+is not a promise that quota GC preserves an unsupported operator-selected old root.
 
-## Historical beta.1 measured qualification
-
-These observations retain their actual beta.1 source/configuration. They are not relabelled
-as F2 measurements or proof that the council's defects are fixed.
+## Fresh beta.2 qualification
 
 | Gate | Observed result | Scope |
 | --- | --- | --- |
-| Build and integrated tests | 172 incremental build steps / 109 s; host **65/65**, dense **11/11**, zero skips/failures | Frozen source; explicit loader and canonical shared MTP/fp8 also pass |
-| G1 production restart | **20,926 cached tokens**, **27 byte-identical continuation bytes**, four boots | Actual HTTP/Engine/authenticated store, not the historical tracer |
-| Explicit durable save | **2,164,056,150 bytes**, four points/four states/329 pages, 20,993 restored frontier tokens | Authenticated origin and `fsync`; deleted ancestor stays 404, descendant 200 |
-| Pressure/C2 | Frozen-source E2 passes in **29.4234 s** | Separately identified provider proof restores before sibling decode finishes; no weakened overlap assertion |
-| 32 GB startup | **146,368 KV tokens**; **1,074,790,400 bytes** headroom; graph reservation **+2 MiB** versus vanilla | Amended policy: KV at least context, headroom at least 768 MiB and baseline minus 32 MiB, graph growth at most 64 MiB |
-| Keep-warm idle TTFT | Three-sample medians **0.747845 s off / 0.586125 s on** after 12 s idle | Descriptive, not a powered significance claim; C2 siblings exercise both arms |
-| Long retrieval | Exact **130,048-token** NIAH in **56.921 s wall / 56.334 s server**, **2,284.7 tok/s wall** | Cold, zero prefix hit, exact final release profile |
-| Decode | **180.06 tok/s server / 176.49 tok/s wall**, 2,048 tokens | Final profile; DFlash2 acceptance 0.244, 2.71 tokens/round; 30,954 MiB idle VRAM |
-| Agent protocol | Authenticated session, two forks, delete/no-resurrection and surviving sibling pass across `docker restart` | Exact release configuration; three stock-client platform acceptances remain separate |
+| Full RC | 270 incremental edges / 122 s; host **66/66**, dense **11/11**, zero skips/failures; lease exit 0 / 794 s | Exact F2; loader and canonical shared MTP/fp8 also pass |
+| G1 / explicit save | Four boots; **20,926 cached tokens / 27 identical continuation bytes**; authenticated `fsync` save **2,164,056,150 bytes**, four points/states, 329 pages | Actual HTTP/Engine/store, not tracer or predecessor proof |
+| E2 / 32 GB | Restore-overlap **38.0356 s**; headroom **1,074,790,400 bytes**; graph growth **+2 MiB** | KV at least context; headroom at least 768 MiB and baseline minus 32 MiB; graph growth at most 64 MiB |
+| Keep-warm idle TTFT | Three-sample medians **0.724723 s off / 0.587234 s on**, after 12 s idle | Descriptive only, not powered significance or end-to-end OMP speed |
+| Cold exact retrieval | **130,048 tokens**, **56.994 s wall / 56.411 s server**, **2,281.8 tok/s wall** | Zero prefix hit; exact output on strict final profile |
+| Decode | **179.86 tok/s server / 176.27 wall**, 2,048 tokens; acceptance 0.244, 2.71 tokens/round | Exact final profile; 30,954 MiB idle VRAM |
+| Agent protocol | Authenticated identity, two forks, delete/no-resurrection and surviving sibling pass across `docker restart` | Separate from fresh OMP platform/public-route acceptance |
 
-[Benchmarks](../../docs/BENCHMARKS.md) separates these gates from predecessor results and
-EXP-097's different workload. No v0.12.2 runtime observation is relabelled as new-runtime proof.
+### G2 provider comparison, not a new final-runtime aggregate
 
-### G2 matched decode comparison
+EXP-097's A/B/B/A median across 84 serial role cases is **342.150 versus 338.448 tok/s**,
+**101.09%** of shipped, above the founder-amended **96%** floor. All 336 role and 48 depth requests
+returned HTTP 200. Configured concurrency two and overlapping depth pairs are not constant-batch-two
+throughput. [Full evidence](../../docs/measurements/2026-10-25-exp097-role-corpus.json) preserves the
+original strict-tail **FAIL** and amended **PASS**, structured-output p95 ratio **1.126**, and
+64K continuation **335.332 → 290.781 tok/s** / **338 → 392 rounds**.
+The [canonical-tool counterfactual](../../docs/measurements/2026-10-25-exp097-canonical-tools-diagnostic.json)
+was **diagnostic-only and reverted** in that measurement branch; integration later landed sorted-key
+serialization `0abe7c8e5` with host byte pins. No full G2 after that fix or F2 remediation is claimed.
+Measured source/model remain `c2dbcbae` / locally upgraded `facba3bd`, persistence disabled,
+fixed 131,072 KV tokens. [Benchmarks](../../docs/BENCHMARKS.md) keeps these workloads separate.
 
-EXP-097's A/B/B/A median across 84 role cases is **342.150 tok/s** rebased versus
-**338.448 tok/s** shipped, **101.09%**, clearing the founder-amended **96%** floor.
-All 336 role and 48 supplemental depth requests returned HTTP 200. Role calls are serial;
-configured concurrency two and overlapping depth pairs are not constant-batch-two throughput.
-
-The [full evidence copy](../../docs/measurements/2026-10-25-exp097-role-corpus.json) retains
-original strict-tail **FAIL** and amended **PASS**. Structured-output p95 is **1.126** of
-shipped (12.6% slower), attributed to tool-definition serialization order. The
-[counterfactual](../../docs/measurements/2026-10-25-exp097-canonical-tools-diagnostic.json) was
-**diagnostic-only and reverted** in that measurement branch. Integration subsequently landed
-canonical sorted-key serialization `0abe7c8e5` with host byte pins; the full corpus was not rerun.
-At 64K continuation depth the measured decode remains **335.332 → 290.781 tok/s**, with
-**338 → 392 rounds**. Neither the aggregate nor the later fix erases that measured gap.
-
-G2 source is `c2dbcbae`, binary `2f8498d9`, locally upgraded model `facba3bd`, persistence disabled,
-fixed 131,072 KV tokens. It is a provider comparison, not a new final-binary/public-model benchmark.
-Full-model output/acceptance identity and fresh powered quality/leak screening are not proven.
-
-## Carried native Windows lanes and v0.13.1 gap
+## Carried natives and known gaps
 
 | Lane | Unchanged component | Source / model | Boundary |
 | --- | --- | --- | --- |
 | RTX 4090 | `v0.6.11-qwen38-4090-beta.1` | `cad19767` / `eec39564` | MTP3, INT8 KV, 131,072 context, one request, text/tools |
 | RTX 3090 | `v0.6.3-qwen38-3090-beta.1` | `cad19767` / `eec39564` | MTP3, INT8 KV, 131,072 context, one request, text/tools |
 
-Package qualification and SHA256SUMS carry because those subjects are unchanged. Public installs
-and client acceptance must run again with OMP 18.12.6. Both lanes remain GPU-UUID-bound and
-sequential on port `18082`; native schema output and vision remain unsupported. The RTX 4090
-has no supported rollback target on the two-GPU lineage; RTX 3090 retains its qualified predecessor.
+Both remain GPU-UUID-bound and sequential on port `18082`. Unchanged-package qualifications carry;
+Main reports their OMP 18.12.6 public-install windows remain valid, but actual evidence/pins must be
+bound. RTX 4090 has no supported rollback target on the two-GPU lineage; RTX 3090 retains its
+qualified predecessor. Rebased natives target **v0.13.1**, requiring the 24 GB admission-headroom
+amendment (**640 MiB RTX 4090 / 768 MiB RTX 3090**), packages/dependency SBOMs and native hardware/K6
+qualification. Linux proof does not qualify new Windows durability semantics.
 
-Rebased natives target **v0.13.1**, not this release. The new 24 GB shapes require K5's
-`--admission-headroom-mib` amendment (**640 MiB RTX 4090 / 768 MiB RTX 3090**). Engineering
-real-model decode passes do not constitute released packages: rebased source/package/dependency
-SBOM/hardware qualification and public-install acceptance are not yet bound or claimed here.
-
-## Remaining gates and known gaps
-
-- **F2 inventory and G4:** bind beta.2 source/assets/image/base, strict-origin CLI and lane
-  receipts, plus the actual council remediation ledger/dispositions. Neither the preparation
-  wording above nor beta.1 measurements establish closure.
-- **Lane and acceptance pins:** the lead pins this clean stage before fresh three-platform
-  OMP 18.12.6 acceptance, all five routes/31 blocks, both native public installs and independent
-  incumbent/native restoration; then pins platform, composed acceptance and manifest in order.
-- **Not re-measured for v0.13.0:** powered quality/leak and global output parity; historical
-  eight-session fanout/warm-arrival, long OMP sessions/compaction, actual OMP parallel-dispatch and
-  agent-mix latency; full G2 after canonical serialization. Scoped current tests do not replace them.
-- macOS stays preview; Linux live evidence is scoped to WSL2, not native Linux OS qualification.
-  No multi-tenant, multi-GPU, simultaneous native serving, silent cloud fallback, SLA or new signing
-  claim is added. The founder alone publishes the product tag and GitHub release.
+- **Accepted/deferred council residuals:** worker import/proof I/O can delay decode; superseded
+  durable-owner metadata and authenticated gate churn can retain capacity/metadata; stale saves
+  can leave bounded orphan work. Strict MACs prove origin/content, not monotonic anti-replay.
+  Workflow base selection remains digest-pinned but is not automatically cross-checked with the
+  selected source's base receipt. Full dispositions remain in the ledger; these are not erased fixes.
+- **Not re-measured:** powered quality/leak/global output parity, historical eight-session fanout,
+  warm-arrival/long OMP compaction, actual OMP parallel/agent-mix latency, and full G2 after F2.
+- **Remaining release gates:** lead lane pin, fresh beta.2 RTX 5090 three-platform/client/public-route
+  evidence and restoration, unchanged-native evidence binding, then platform/composed acceptance/
+  manifest pins and require-ready/check-pins. The founder alone publishes the product tag/release.
+- Saves remain best effort; no universal warm reuse, loss-free shutdown, zero queueing, multi-tenant,
+  multi-GPU, simultaneous native serving, silent fallback, SLA or new signing claim. macOS is preview;
+  Linux evidence is WSL2-scoped, not independent native Linux OS qualification.

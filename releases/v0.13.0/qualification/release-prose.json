@@ -7,21 +7,27 @@
   "subject": {
     "repository": "https://github.com/alphastorm/omp-ninfer",
     "branch": "v013/release-stage",
-    "scope": "Current release-facing README/CHANGELOG/docs prose; canonical staged notes have their own bounded/no-glue regression in the full suite."
+    "working_tree_base_commit": "3e49bde570c5a5757a65c44e075c00867e607e5d",
+    "runtime_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "scope": "Current beta.2 release prose and bounded canonical notes; not inference or route acceptance."
   },
-  "command": "PYTHONPATH=tests python3 -m unittest test_documented_route.ReleaseProseTests -v",
+  "command": "env PYTHONPATH=tests python3 -m unittest test_v013_release_preparation test_documented_route.ReleaseProseTests test_compatibility -v",
   "observed": {
-    "tests_run": 6,
+    "tests_run": 30,
     "failures": 0,
     "errors": 0,
-    "elapsed_seconds": 0.04,
-    "result": "OK"
+    "elapsed_seconds": 0.062,
+    "result": "OK",
+    "release_prose_cases": 6
   },
-  "scope": "No formatter or linter. Markdown links and private markers are checked separately by verify_release; runtime observations are not inferred from prose tests.",
   "staged_notes": {
-    "test": "test_v013_release_preparation.V013PreparationTests.test_prepared_notes_are_bounded_and_use_readable_release_prose",
-    "result": "passed in the 476-test corrected suite",
+    "canonical_filename": "NINFER_RELEASE_NOTES.md",
+    "sha256": "17e067dba54d3af9d2e41d39eb5f7668fd7a3ffc20cbb04e2f3db073fcd47dcf",
+    "lines": 172,
     "maximum_lines": 210,
-    "canonical_filename": "NINFER_RELEASE_NOTES.md"
-  }
+    "test": "test_v013_release_preparation.V013PreparationTests.test_prepared_notes_are_bounded_and_use_readable_release_prose",
+    "result": "passed"
+  },
+  "scope": "No formatter or linter. Links/private markers are checked separately by verify_release; no runtime or public acceptance is inferred."
 }

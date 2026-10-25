@@ -13,37 +13,41 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.13.0 — beta.2 restage preparation
+## v0.13.0 — staged council-remediated beta.2
 
-Council `CR-20261025T085950Z-04b603aa` confirmed durable/restore defects in beta.1.
-Candidate `86e5c0b9` is historical. Beta.2 target profiles add
+Council `CR-20261025T085950Z-04b603aa` closes its initial review after verified localized
+remediation at `6d4d0a05`; the actual [ledger](../releases/v0.13.0/review/runtime-ledger.json)
+retains original blockers and residual dispositions. Initial candidate `86e5c0b9` is historical.
+Qualified beta.2 profiles add
 `--session-checkpoint-require-origin-auth` (finding 8; K1 section 103–114), canonical config
 `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
-F2 source/assets/image/lane identities and council remediation closure are not yet bound.
-The following beta.1 bindings and measurements are preserved as historical evidence, not beta.2 proof.
+Fresh beta.2 source/assets/image/lane identities and strict-profile proof are bound, not inferred
+from the initial candidate. Fresh RTX 5090 public/client acceptance and final pins remain separate.
 
 The [draft manifest](../releases/v0.13.0/manifest.json),
 [notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
 [qualification](../releases/v0.13.0/qualification.json) bind runtime
-`v0.7.0-qwen38-5090-beta.1`, frozen source `04b603aa` on upstream master `64d10fbf`,
-image `e0419f48` on runtime base `d4377ed0`, published model `81f924d4`, profile
-`qwen38-5090-v0.13.0` / historical config `c73eb8fb`, and stock OMP 18.12.6.
+`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` on upstream master `64d10fbf`,
+image `5d10a998` on unchanged runtime base `d4377ed0`, published model `81f924d4`, profile
+`qwen38-5090-v0.13.0` / strict-origin config `751d22dc`, and stock OMP 18.12.6.
 The root authority/live profiles retain the historical candidate until the next lane pin;
 the published product remains v0.12.2.
 
-Fresh source/runtime gates: host 65/65, dense 11/11, loader/canonical shared MTP/fp8, C2
+Fresh source/runtime gates: host 66/66 including 13 named remediation cases, dense 11/11,
+loader/canonical shared MTP/fp8, C2
 restore overlap, four production boots with 20,926 cached tokens/27 identical continuation bytes,
-and amended 32 GB startup with 146,368 automatic KV tokens. Final-profile decode is 180.06 tok/s;
-exact 130,048-token retrieval takes 56.921 s wall. Grammar and product smoke qualify JSON-schema
+and amended 32 GB startup with 146,368 automatic KV tokens. Final-profile decode is 179.86 tok/s;
+exact 130,048-token retrieval takes 56.994 s wall. Grammar and product smoke qualify JSON-schema
 output on the container, not on the carried native packages. EXP-097 separately clears the 96%
 median floor at 101.09%; its source/model and measured tail/depth regressions remain explicit.
 
 Schema 3 uses `/checkpoints-v013`; old roots are untouched and prior sessions replay from OMP
-transcripts. Native `v0.6.11` / `v0.6.3` packages and model `eec39564` carry unchanged; fresh
-OMP 18.12.6/native public-install acceptance does not carry. Rebased natives target v0.13.1:
+transcripts. Native `v0.6.11` / `v0.6.3` packages and model `eec39564` carry unchanged.
+Valid OMP 18.12.6 native-window evidence remains to bind; v0.12.2 client acceptance is not
+substituted for it. Rebased natives target v0.13.1:
 24 GB shapes need `--admission-headroom-mib` (640 MiB / 768 MiB), then their own packaging
-and hardware qualification. G4's council ledger, lane pin, all five routes/31 blocks, three
-client platforms, independent restoration and final evidence pins remain pending.
+and hardware qualification. G4 is closed. Lane pin, fresh beta.2 routes/client platforms,
+independent restoration, valid unchanged-native evidence binding and final pins remain unbound.
 Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
 
 ## v0.12.2 — stock OMP 18.12.1, unchanged runtime bindings
@@ -1819,8 +1823,9 @@ notes-only directory; it refuses an existing manifest or unrelated contents rath
 `--profile-template-dir profiles/v0.13.0` binds the cut's binary/model/config/client identities
 into release-local profile copies. Their new server shape is promoted only by
 `rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount
-or the unified Host budget. The beta.2 strict-origin target configuration hash is `751d22dc`;
-the earlier non-strict configuration remains only in historical beta.1 receipts.
+or the unified Host budget. The beta.2 strict-origin qualified configuration hash is `751d22dc`.
+Restaging used targeted edits plus `--draft`, not an overwrite of the existing tree by
+`stage_release.py`; initial candidate/receipt bytes remain in Git history, not live runtime proof.
 
 Staging incorporated the prepared protocol boundaries into the full release-local authority.
 Frozen-source grammar and product smoke now qualify JSON-schema support on the container;

@@ -88,19 +88,19 @@ records the host-free checks.
 
 ## Models
 
-### v0.13.0 beta.2 restage preparation — qualification pending
+### v0.13.0 staged beta.2 — public-route acceptance separate
 
 The [staged notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
 [candidate protocol matrix](../releases/v0.13.0/COMPATIBILITY.md) describe the next release.
-The published product remains v0.12.2. Council found durable/restore defects in beta.1:
-candidate `86e5c0b9`, source `04b603aa`, server `48d736aa` and image `e0419f48` are historical.
-The root files retain that historical candidate until a new lane pin; F2 source/assets/lane
-qualification are not yet bound. Prepared strict-origin config `751d22dc` is not beta.1 proof.
+The published product remains v0.12.2. Beta.2 binds remediated source `6d4d0a05`, server
+`9790a004`, image `5d10a998` and strict-origin config `751d22dc`, with fresh lane qualification
+and the actual closed council/remediation ledger. Root files retain historical candidate
+`86e5c0b9` until the new lane pin; fresh beta.2 public-route/client acceptance remains separate.
 
 | Boundary | Rebased RTX 5090 candidate | Default carried native RTX 4090 / RTX 3090 |
 | --- | --- | --- |
-| Runtime base | Neroued/ninfer master `64d10fbf`; target `v0.7.0-qwen38-5090-beta.2`, F2 identities pending | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
-| Stock client | OMP 18.12.6, source `45c35e40`; fresh acceptance required | Same client; native public-install acceptance reruns |
+| Runtime base | Neroued/ninfer master `64d10fbf`; component `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
+| Stock client | OMP 18.12.6, source `45c35e40`; fresh beta.2 RTX 5090 acceptance required | Same client; valid unchanged-native window evidence remains to bind |
 | Model | Published container version 3 `81f924d4`, 20,437,521,664 bytes, revision `1cbd84e7221e51186bd7f093a149912d2489625b`; text/vision/MTP/DFlash2 | Unchanged `eec39564`, 18,210,531,328 bytes |
 | Structured output | **Runtime-supported:** xgrammar, real grammar and product-smoke evidence for `text.format` / `response_format` `json_schema`; OMP/public-route acceptance is separate | Rejected with HTTP 400 |
 | Tool names (Chat/Responses) | 128 characters on the rebased boundary | 64 characters |
@@ -111,12 +111,13 @@ qualification are not yet bound. Prepared strict-origin config `751d22dc` is not
 The published model is downloaded directly; no local model upgrader runs in the release route.
 All 1,184 tensor payloads and all six frontend resources matched the production model upgraded
 locally. Whole-container hashes differ, so only the exact published `81f924d4` artifact is pinned.
-The prepared strict-origin configuration identity is
+The qualified strict-origin configuration identity is
 `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`, adding
 `--session-checkpoint-require-origin-auth` for council finding 8 and K1 section 103–114.
 The flag needs a checkpoint root and a key of at least 32 bytes; the documented key has 64
-characters. The historical beta.1 measurements (146,368 KV tokens, 180.06 tok/s server decode,
-56.921 s exact retrieval and 20,926-token/27-byte restart reuse) do not qualify this new shape.
+characters. Fresh beta.2 measurements: 146,368 KV tokens; 179.86 tok/s server / 176.27 wall decode;
+56.994 s wall / 56.411 server exact retrieval; 20,926-token/27-byte production restart reuse;
+66 host executables including 13 named remediation cases, dense 11/11 and strict-profile startup.
 All other tuning stays unchanged apart from K5's unified host
 mapping and explicit removal of the obsolete `--max-private-continuations` catalog flag.
 
@@ -126,8 +127,8 @@ captures state under serialization and performs bulk transfer/hash/write outside
 lock, with an epoch-checked final publication. It does not promise loss-free saves or zero latency.
 Rebased native components target v0.13.1, not this release. The 24 GB shapes need
 `--admission-headroom-mib` (640 MiB RTX 4090 / 768 MiB RTX 3090) and are not yet packaged or
-qualified. Container capabilities never transfer by assumption. Council, new client/public
-acceptance and final pins remain pending; historical powered quality/leak and OMP parallel/fanout
+qualified. Container capabilities never transfer by assumption. New client/public evidence and
+final pins remain unbound despite closed council review; powered quality/leak and OMP parallel/fanout
 workloads are not re-measured for v0.13.0.
 
 Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.

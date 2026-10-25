@@ -3,15 +3,14 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.13.0",
   "composition": {
-    "status": "v0.13.0 beta.2 restage preparation; F2 inventory, strict-origin qualification and remediation closure pending",
+    "status": "v0.13.0 beta.2 runtime qualified and council remediation closed; OMP 18.12.6 public-route acceptance pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
     "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "ninfer_lifecycle_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "ninfer_lifecycle_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
     "blockers": [
-      "Council CR-20261025T085950Z-04b603aa confirmed durable/restore defects; beta.1 candidate 86e5c0b9b30b0ae905a03d9523bbda7094368982 is historical.",
-      "Beta.2 target config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 requires --session-checkpoint-require-origin-auth; F2 runtime/asset/lane identities and fresh acceptance are not yet bound."
+      "Fresh beta.2 RTX 5090 public-route/client acceptance, unchanged-native evidence binding and final pins remain separate from runtime/council qualification."
     ],
     "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
   },
@@ -45,13 +44,13 @@
         "No secret, raw log, prompt, or model output crosses the receipt boundary.",
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
         "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
-        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
       "blockers": [
-        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
-        "upstream OMP v18.12.6 client acceptance is pending"
+        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
@@ -75,17 +74,17 @@
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c81ff44fceb8d7656966e7b0cb1663b710f7901/releases/v0.13.0/qualification/rtx5090.json",
-          "sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8"
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
-        "image_digest": "sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-        "configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
-        "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -109,13 +108,14 @@
           "store_mount": "/checkpoints-v013",
           "schema_version": 3,
           "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
-          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
         },
         "status_schema_version": 2,
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/04b603aae4e9ce3c26f4175cf808180c0f05b5fe/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -149,13 +149,13 @@
         "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
         "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
-        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
       "blockers": [
-        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
-        "upstream OMP v18.12.6 client acceptance is pending"
+        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
@@ -179,17 +179,17 @@
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c81ff44fceb8d7656966e7b0cb1663b710f7901/releases/v0.13.0/qualification/rtx5090.json",
-          "sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8"
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
-        "image_digest": "sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-        "configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
-        "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -213,13 +213,14 @@
           "store_mount": "/checkpoints-v013",
           "schema_version": 3,
           "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
-          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
         },
         "status_schema_version": 2,
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/04b603aae4e9ce3c26f4175cf808180c0f05b5fe/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -254,13 +255,13 @@
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.",
         "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
-        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
       "blockers": [
-        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
-        "upstream OMP v18.12.6 client acceptance is pending"
+        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
       ],
       "acceptance_receipt": null,
       "client_distribution": {
@@ -284,17 +285,17 @@
         "status": "qualified",
         "receipt": {
           "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c81ff44fceb8d7656966e7b0cb1663b710f7901/releases/v0.13.0/qualification/rtx5090.json",
-          "sha256": "1a0a7f41c20f6b7f2b840f2775aa658ee93782435e9fd5d56c415885adb5b5e8"
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
-        "image_digest": "sha256:e0419f48a50946d862959d6bdf586efc0ef6e36c8685638b7bf7ff68fc30a605",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-        "configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
-        "server_binary_sha256": "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -318,13 +319,14 @@
           "store_mount": "/checkpoints-v013",
           "schema_version": 3,
           "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
-          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
         },
         "status_schema_version": 2,
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/04b603aae4e9ce3c26f4175cf808180c0f05b5fe/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -385,7 +387,7 @@
   "runtime_contracts": [
     {
       "lane": "RTX 5090 rebased container",
-      "json_schema": "Supported on RTX 5090: upstream xgrammar plus frozen-source grammar and product smoke; Responses text.format / Chat response_format json_schema. Stock-client route acceptance remains separate.",
+      "json_schema": "Supported on RTX 5090 beta.2: xgrammar plus exact-source real grammar and product Chat/Responses schema smokes. Strict-origin profile/lane qualified; stock-client public-route acceptance is separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
@@ -404,28 +406,5 @@
       "status_schema_version": 1,
       "request_log_schema_version": 17
     }
-  ],
-  "restage_preparation": {
-    "status": "awaiting-F2-inventory",
-    "target_component": "v0.7.0-qwen38-5090-beta.2",
-    "target_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
-    "historical_candidate_commit": "86e5c0b9b30b0ae905a03d9523bbda7094368982",
-    "historical_runtime_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
-    "historical_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
-    "council_sequence": "CR-20261025T085950Z-04b603aa",
-    "required_launch_flag": "--session-checkpoint-require-origin-auth",
-    "strict_origin_contract": "K1 section 103\u2013114; council finding 8; configured root and API key at least 32 bytes. The documented generated key is 64 characters and the fresh schema 3 root has no MAC-less generations.",
-    "remediation_wording_status": "Prepared fixed-in-beta.2 descriptions only; no F2 source, binary, archive, SBOM, image or lane qualification has been supplied or inferred.",
-    "remediation_scope": [
-      "durable restore/pressure lock order",
-      "automatic-save retry/progress",
-      "per-record delete durability",
-      "restore freshness guard",
-      "quota victim preservation",
-      "victim payload validation",
-      "gate-tag timing"
-    ],
-    "principal_limitation": "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
-    "stage_release_executed": false
-  }
+  ]
 }

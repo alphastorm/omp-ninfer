@@ -13,24 +13,22 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.13.0 historical beta.1 runtime — exact-source gates
+## v0.13.0 staged beta.2 runtime — exact-source gates
 
-Council found durable/restore defects in beta.1; candidate `86e5c0b9` is historical. Beta.2
-preparation adds strict origin authentication with target config `751d22dc`, not a relabelled
-measurement. F2 source/assets, lane qualification and remediation closure are not yet bound.
-The historical
-[lane receipt](../releases/v0.13.0/qualification/rtx5090.json) binds frozen source `04b603aa`,
-server `48d736aa`, published model `81f924d4` and configuration `c73eb8fb`, with runtime image
-`e0419f48` on base `d4377ed0`:
+The fresh [lane receipt](../releases/v0.13.0/qualification/rtx5090.json) binds remediated source
+`6d4d0a05`, server `9790a004`, published model `81f924d4`, strict-origin config `751d22dc`
+and image `5d10a998` on unchanged base `d4377ed0`. The actual council ledger closes the initial
+review plus verified localized remediation; fresh public-route/client acceptance remains separate.
+Initial candidate `86e5c0b9` is historical, not relabelled performance or acceptance evidence.
 
 | Gate | Observed result | Scope |
 | --- | --- | --- |
-| Cold exact NIAH | 130,048 prompt tokens, 56.921 s wall / 56.334 s server, 2,284.7 tok/s wall | Zero prefix hit; exact needle output |
-| Decode | 2,048 tokens; 180.06 tok/s server / 176.49 wall; acceptance 0.244, 2.71 tokens/round | DFlash2 K=7, BF16, automatic KV 146,368, two active lanes, 131,072 context |
+| Cold exact NIAH | 130,048 prompt tokens, 56.994 s wall / 56.411 s server, 2,281.8 tok/s wall | Zero prefix hit; exact needle output |
+| Decode | 2,048 tokens; 179.86 tok/s server / 176.27 wall; acceptance 0.244, 2.71 tokens/round | DFlash2 K=7, BF16, automatic KV 146,368, two active lanes, 131,072 context |
 | Runtime/agent protocol | Passed across `docker restart`; 30,954 MiB idle VRAM | Authenticated continuation/forks, delete/no-resurrection, surviving sibling |
 | Production schema 3 restart | 20,926 cached tokens / 27 byte-identical continuation bytes, four boots | Authenticated `fsync` save: 2,164,056,150 bytes; not the old tracer |
-| Product-shape startup / C2 | 1,074,790,400 bytes headroom, graph growth +2 MiB; frozen-source E2 29.4234 s | Amended 32 GB gate, KV at least context, headroom at least 768 MiB and baseline minus 32 MiB, graph growth at most 64 MiB |
-| Keep-warm idle TTFT | 0.747845 s off / 0.586125 s on, three samples per arm after 12 s idle | Descriptive only, not powered significance or end-to-end OMP speed |
+| Product-shape startup / C2 | 1,074,790,400 bytes headroom, graph growth +2 MiB; frozen-source E2 38.0356 s | Amended 32 GB gate, KV at least context, headroom at least 768 MiB and baseline minus 32 MiB, graph growth at most 64 MiB |
+| Keep-warm idle TTFT | 0.724723 s off / 0.587234 s on, three samples per arm after 12 s idle | Descriptive only, not powered significance or end-to-end OMP speed |
 
 These are workload-specific runtime gates, not a like-for-like speedup over the historical
 chart strip or the role corpus below. Historical powered quality/leak, actual OMP parallel,

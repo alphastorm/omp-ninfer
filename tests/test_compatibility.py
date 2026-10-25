@@ -208,11 +208,14 @@ class CompatibilityAuthorityTests(unittest.TestCase):
 
     def test_runtime_identity_matches_the_release_manifest(self) -> None:
         authority = MODULE.load_authority(ROOT / "compatibility.json")
+        release = ROOT / "releases" / authority["product_release"]
         manifest = json.loads(
-            (
-                ROOT / "releases" / authority["product_release"] / "manifest.json"
-            ).read_text(encoding="utf-8")
+            (release / "manifest.json").read_text(encoding="utf-8")
         )
+        if manifest["status"] == "draft":
+            # --draft deliberately leaves the root on a historical candidate. Its
+            # release-local authority, not that live root, binds the newly staged bytes.
+            authority = MODULE.load_authority(release / "compatibility.json")
         expected = {
             "image_reference": manifest["components"]["ninfer"]["oci_reference"],
             "model_sha256": manifest["components"]["model"]["artifact_sha256"],
