@@ -38,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve the complete validated fleet subject identity in receipts, including upstream base,
+  model ID, build profile and clean-source state, rather than filtering those fields away.
 - Bind the rehearsal loopback server without reverse DNS, so publishing child readiness
   does not depend on the runner's hostname resolver. Keep the existing startup deadline.
 - Ignore command prose when following JSON receipt references; continue rejecting

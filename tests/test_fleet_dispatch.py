@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import importlib.util
+import contextlib
+import io
+import json
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -41,6 +45,24 @@ def make_lane(name: str) -> "MODULE.Lane":
 
 
 class FleetDispatchTests(unittest.TestCase):
+    def test_main_receipt_retains_complete_old_and_new_schema_subjects(self) -> None:
+        fixtures = json.loads((ROOT / "tests/fixtures/status-log-consumers.json").read_text())
+        for schema in (1, 2):
+            lane = make_lane("main")
+            lane.client = mock.Mock()
+            lane.client.request.return_value = fixtures[f"status_{schema}"]
+            with self.subTest(schema=schema), tempfile.TemporaryDirectory() as directory:
+                receipt = Path(directory) / "receipt.json"
+                with mock.patch.object(MODULE, "parse_lane", return_value=lane), \
+                     mock.patch.object(MODULE, "execute_scenario", fake_execute), \
+                     mock.patch.object(MODULE.sys, "argv", ["fleet_dispatch.py", "--lane", "fixture",
+                                                          "--repetitions", "1", "--no-cleanup",
+                                                          "--receipt", str(receipt)]), \
+                     contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(MODULE.main(), 0)
+                subject = json.loads(receipt.read_text())["lanes"]["main"]["identity"]
+                self.assertEqual(subject, fixtures[f"status_{schema}"]["identity"])
+
     def test_job_order_covers_the_frozen_corpus_twice(self) -> None:
         jobs = MODULE.build_jobs()
         self.assertEqual(len(jobs), len(MODULE.CORPUS_STEP_NAMES) * MODULE.REPETITIONS)

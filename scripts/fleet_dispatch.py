@@ -321,9 +321,6 @@ def main() -> int:
         "runs": batches,
         "privacy": "fully synthetic public corpus; hashes and structural metrics only; lane identities are the served status identities",
     }
-    for lane_subject in receipt["lanes"].values():
-        lane_subject["identity"] = {k: v for k, v in lane_subject["identity"].items()
-                                     if k in ("deployment_profile", "binary_sha256", "config_sha256", "model_artifact_sha256", "patch_stack_sha")}
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"receipt written: {args.receipt}", flush=True)
