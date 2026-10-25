@@ -13,6 +13,45 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
+## v0.13.1 — native rebase preparation, not a published release
+
+The [prepared notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
+[gate prose](../releases/v0.13.1/qualification.json) and
+[preparation-only compatibility](../releases/v0.13.1/COMPATIBILITY.md) target native components
+`v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1` on upstream master `64d10fbf`.
+Frozen native N, package/source/binary identities, Windows lane/K6 evidence, review and public
+acceptance are not supplied by this preparation. Published v0.13.0 remains authoritative.
+
+RTX 5090 carries exact beta.2 source `6d4d0a05`, image `5d10a998`, model `81f924d4` and profile
+`qwen38-5090-v0.13.0` / config `751d22dc`; stock OMP 18.12.6 carries its three exact binaries.
+Native lanes move from `eec39564` to the same published version 3 artifact `81f924d4`
+(20,437,521,664 bytes, revision `1cbd84e7`). Both actual packages must bind `components.model`;
+remove the redundant `native_model` override only during real staging.
+
+| Prepared native shape | RTX 4090 | RTX 3090 |
+| --- | --- | --- |
+| Context / KV / request limit | 131,072 / INT8 / one | 131,072 / INT8 / one |
+| Speculation | MTP3, no DFlash2 | MTP3, no DFlash2 |
+| Extra device-state slots / prefill | 2 / 2,048 tokens | 4 / 1,024 tokens |
+| Shared Host budget | 15,506,063,360 bytes (`14787.734375 MiB`) | 12,284,837,888 bytes (`11715.734375 MiB`) |
+| Admission headroom | 640 MiB | 768 MiB |
+| Reported pre-cut C1 decode | 137.35 tok/s | 78.33 tok/s |
+
+The decode observations are not final-package qualification or a like-for-like speedup.
+Strict origin authentication and release-isolated native schema 3 stores replace the old
+checkpoint shape; prior native sessions replay from OMP transcripts. The Windows K6 rename fix
+is reported by its owner but needs actual Windows proof. Native JSON-schema support remains gated
+on real lane grammar/product qualification, not inferred from the carried container.
+The two UUID-bound native lanes still serve sequentially on port `18082`.
+
+The cut helper validates both complete native asset sets, then stages with
+`--from v0.13.0 --release v0.13.1 --prepared-draft --keep-deployment-profile` and binds their real
+qualifications, checksum sets and distinct dependency SBOMs. `rebind --draft` is deferred until that
+real manifest exists; notes-only preparation never fabricates hashes or widens the rebind tool.
+Root authority/matrix/profiles stay published v0.13.0 until the lane pin. Updated model-download
+blocks require explicit `documented_routes.document_change`, fresh route/client/public-install
+and independent restoration proof, followed by the normal evidence pins and founder-only publication.
+
 ## v0.13.0 — rebased RTX 5090 runtime, stock OMP 18.12.6, carried native lanes
 
 Published **2026-10-25** as GitHub `Latest`, succeeding `v0.12.2` (published 2026-10-18). Unmodified

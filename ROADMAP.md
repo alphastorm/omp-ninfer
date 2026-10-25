@@ -46,6 +46,24 @@ Full release authority: [`releases/v0.13.0/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.13.0/qualification.json`](releases/v0.13.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
+## Next release — v0.13.1 native rebase preparation
+
+[Prepared notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
+[gate prose](releases/v0.13.1/qualification.json) target native
+`v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1` while carrying exact RTX 5090 beta.2
+and stock OMP 18.12.6. This is not a new published or installable composition.
+Native profiles now freeze the shared Host budgets (15,506,063,360 / 12,284,837,888 bytes),
+extra slots 2/4, prefill 2,048/1,024, strict origin authentication and admission headroom
+640/768 MiB. Pre-cut real-model C1 decode measured 137.35/78.33 tok/s at 131,072 INT8 MTP3;
+final source/package qualification and Windows K6 evidence remain separate.
+
+The native route moves to the published version 3 artifact `81f924d4` and fresh per-release
+checkpoint roots; old native generations are not migrated. JSON-schema output remains a lane
+qualification gate. Complete packages/dependency SBOMs, frozen N, actual review, fresh
+route/client/public-install/rollback-lineage and independent restoration proof are still required.
+Changed native model blocks require `documented_routes.document_change`; no prior 31-block
+acceptance is relabelled. Published v0.13.0 authority/profiles remain untouched until a real lane pin.
+
 ## Remaining work
 
 Items below remain open after `v0.13.0`; each names the current evidence showing the gap is still
@@ -94,9 +112,10 @@ unmet:
    `v0.13.0` ([`releases/v0.13.0/qualification/protocol.json`](releases/v0.13.0/qualification/protocol.json),
    [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)). The carried native RTX 4090 and RTX 3090
    packages still reject JSON-schema output with HTTP 400 and cap tool names at 64 characters;
-   rebasing the native lanes onto `64d10fbf` (with `--admission-headroom-mib` 640 MiB on RTX 4090
-   and 768 MiB on RTX 3090, native packaging, dependency SBOMs, and Windows hardware qualification)
-   is the `v0.13.1` work.
+   prepared rebased native profiles on `64d10fbf` add `--admission-headroom-mib` 640 MiB on RTX
+   4090 and 768 MiB on RTX 3090 plus strict origin authentication. Frozen-source packages,
+   dependency SBOMs, Windows K6/grammar/hardware qualification and fresh acceptance remain
+   the `v0.13.1` gates, not claims established by the pre-cut decode experiment.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.13.0/qualification/rtx4090.json`](releases/v0.13.0/qualification/rtx4090.json),

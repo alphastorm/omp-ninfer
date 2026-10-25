@@ -1,0 +1,141 @@
+{
+  "artifact_type": "omp_ninfer_release_preparation",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "status": "preparation-only",
+  "scope": "Notes/gate prose for rebased native Windows packages; no manifest, frozen cut or accepted candidate yet. RTX 5090 beta.2 and stock OMP 18.12.6 carry exact unchanged subjects.",
+  "interpretation": "Pre-cut reported measurements do not qualify the final source/package. New native model/download blocks require document_change. Old native/product acceptance is not copied as new-runtime proof.",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "observed_gates": {
+    "carried_rtx5090": {
+      "status": "unchanged-subject",
+      "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+      "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+      "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+      "provenance": "releases/v0.13.0/qualification/rtx5090.json; unchanged runtime evidence only, not v0.13.1 public-route acceptance"
+    },
+    "carried_client": {
+      "status": "unchanged-subject",
+      "upstream_tag": "v18.12.6",
+      "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+      "provenance": "docs/measurements/2026-10-25-omp-18126-client-components.json; no client rebuild"
+    },
+    "native_source_and_profiles": {
+      "status": "profiles-frozen-source-cut-pending",
+      "profile_repository": "https://github.com/alphastorm/ninfer",
+      "profile_branch": "rebase/native-ops",
+      "profile_source_commit": "e899c7296cec78d71aad5fc8b7d14decc7ff8773",
+      "configuration_hash_algorithm": "SHA256 of exact UTF-8/LF packaged server-config.json bytes; not container canonical configuration or K2 fingerprint",
+      "public_port": 18082,
+      "public_profiles": {
+        "rtx3090": {
+          "repository_path": "profiles/v0.13.1/rtx3090/server-config.json",
+          "sha256": "73a33e63db44ecb15bb0a64a39b7f77783c14285543c72977ac0a0675bc00c7d"
+        },
+        "rtx4090": {
+          "repository_path": "profiles/v0.13.1/rtx4090/server-config.json",
+          "sha256": "9774e70154007aa2e803f7d31766e2edb274209b5b2d48f00429472cea6af4fe"
+        }
+      },
+      "scope": "Frozen N and real published packages/qualification still pending. Scratch port-only configurations/packages retain separate hashes and explicit equivalence evidence."
+    },
+    "native_precut_decode": {
+      "status": "measured-not-release-qualified",
+      "reported_by": "program lead",
+      "rtx4090_tokens_per_second": 137.35,
+      "rtx3090_tokens_per_second": 78.33,
+      "maximum_context_tokens": 131072,
+      "kv_capacity_tokens": 131072,
+      "kv_dtype": "int8",
+      "speculative_backend": "mtp",
+      "draft_tokens": 3,
+      "maximum_concurrency": 1,
+      "scope": "Real-model pre-cut decode observations only; no final N/package/config identity or like-for-like speedup claim is invented."
+    },
+    "windows_k6": {
+      "status": "implementation-reported-qualification-pending",
+      "scope": "Native owner reports durable-rename fix per K6. Require exact-source Windows refusal/crash/restore evidence; Linux/5090 proof does not transfer."
+    },
+    "native_protocol": {
+      "status": "pending",
+      "scope": "JSON-schema support, 128-character names, status schema 2 / request-log schema 30, exact-context retrieval, restart/refusal and strict-origin behavior must bind real lane qualification before support flips."
+    },
+    "native_packaging": {
+      "status": "pending",
+      "scope": "Two published component sets with 10 outer checksum entries / 11 files including SHA256SUMS; unchanged inner SPDX plus separate canonical package-stem.cdx.json CycloneDX 1.5 and actual build/input provenance."
+    },
+    "changed_source_review": {
+      "status": "pending",
+      "scope": "Pending council for frozen native N, including Windows K6, plus product-side cut/bind/generator tooling at the frozen stage commit. Actual resolver-selected review dispositions must bind the changed repository subjects; the carried 5090 ledger and host-free tests are not native/product tooling approval."
+    },
+    "release_tooling": {
+      "status": "passed-with-documented-local-exclusions",
+      "artifact_type": "omp_ninfer_release_preparation_checks",
+      "working_tree_base_commit": "e0ee776515405051a6737e1e2300c0568efc7922",
+      "native_dependency_checks": {
+        "command": "env PYTHONPATH=tests python3 -m unittest test_cut_native_component test_bind_native_variant test_generate_native_sbom test_verify_release.DependencySbomContractTests test_stage_release -v",
+        "tests_run": 53,
+        "elapsed_seconds": 17.518,
+        "failures": 0,
+        "errors": 0,
+        "result": "OK"
+      },
+      "prepared_route_checks": {
+        "command": "env PYTHONPATH=tests python3 -m unittest test_v0131_release_preparation test_documented_route -v",
+        "tests_run": 32,
+        "elapsed_seconds": 131.365,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "result": "OK (skipped=1)",
+        "scope": "Extraction/bundle/harness/prose tests; all 31 composer addresses retained, not live route execution."
+      },
+      "local_suite": {
+        "command": "python3 -c \"$DISCOVERY_DRIVER\"",
+        "discovery_driver": "import sys, unittest\nexcluded = set([\"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\"])\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(t for t in all_tests if t.id() not in excluded)\nprint('Discovered:', len(all_tests), 'selected:', selected.countTestCases(), flush=True)\nprint('Documented local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsys.exit(not result.wasSuccessful())\n",
+        "discovered_tests": 496,
+        "excluded_test_ids": [
+          "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
+          "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
+          "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
+          "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
+        ],
+        "tests_run": 492,
+        "elapsed_seconds": 227.355,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 5,
+        "exit_code": 0,
+        "result": "OK (skipped=5)",
+        "scope": "All discovered tests except the four established unchanged local timing failures. Platform-dependent skips remain visible; this is not a clean 496-test claim."
+      },
+      "stage_helper": {
+        "artifact": "release-v0131-stage.sh",
+        "sha256": "2c03878b6886aa7494dd512be03d416bfad75f297f83579d41073f988e103078",
+        "bash_syntax_exit_code": 0,
+        "embedded_python_ast_exit_code": 0,
+        "execution": "Not staged: actual native cut inventory has not arrived."
+      },
+      "draft_rebind": {
+        "status": "deferred-until-real-manifest",
+        "command": "python3 scripts/rebind_release.py --release v0.13.1 --draft",
+        "reason": "Main confirmed notes-only --prepared-draft input cannot be rebound before real staging creates manifest.json. Rebind implementation is unchanged; no fake manifest or cut identities."
+      },
+      "scope": "Executable/profile/prose/test changes were complete before suite execution. Only result/review-gate metadata is finalized afterward. No formatter, linter, host contact, GPU job, component publication or live acceptance was performed."
+    }
+  },
+  "documented_route_acceptance": {
+    "status": "pending",
+    "document_change": "expected: native routes move to the shared published v3 artifact, new model filename and rebased packages; candidate/public-route acceptance must bind the edited blocks, not relabel predecessor bytes"
+  },
+  "remaining_release_gates": [
+    "Freeze native N and exact public profile hashes; bind any separate port-only scratch configuration/package equivalence honestly.",
+    "Cut and verify both complete native asset/checksum/build-receipt/dependency SBOM sets; bind real Windows lane/K6 proof and pending-council dispositions for native N plus product tooling.",
+    "Stage this notes-only tree using actual inventory; bind both native variants to the shared primary model and remove obsolete native_model; audit predecessor evidence by unchanged subject.",
+    "Commit and lane-pin the candidate without premature root promotion; fresh three-platform/client, five-route, native public-install/real rollback-lineage and independent restoration acceptance.",
+    "Compose and pin platform, acceptance and manifest evidence; require-ready/check-pins, tests/CI, then founder-only product publication."
+  ]
+}

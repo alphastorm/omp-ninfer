@@ -1,0 +1,45 @@
+{
+  "artifact_type": "omp_ninfer_prepared_compatibility",
+  "schema_version": 1,
+  "product_release": "v0.13.1",
+  "status": "preparation-only",
+  "runtime_contracts": [
+    {
+      "lane": "RTX 5090 unchanged beta.2 container",
+      "json_schema": "Supported on the unchanged v0.13.0 runtime; v0.13.1 composition/route acceptance remains separate.",
+      "tool_name_max_characters": 128,
+      "status_schema_version": 2,
+      "request_log_schema_version": 30
+    },
+    {
+      "lane": "RTX 4090 rebased native target (not yet qualified)",
+      "json_schema": "Gated on real native grammar/product/lane qualification; no released support claim yet.",
+      "tool_name_max_characters": 128,
+      "status_schema_version": 2,
+      "request_log_schema_version": 30
+    },
+    {
+      "lane": "RTX 3090 rebased native target (not yet qualified)",
+      "json_schema": "Gated on real native grammar/product/lane qualification; no released support claim yet.",
+      "tool_name_max_characters": 128,
+      "status_schema_version": 2,
+      "request_log_schema_version": 30
+    }
+  ],
+  "native_model_transition": {
+    "from_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
+    "to_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
+    "artifact_bytes": 20437521664,
+    "binding": "Both real native variants use components.model; remove redundant native_model only when staging actual packages."
+  },
+  "native_profile_templates": [
+    "profiles/v0.13.1/rtx4090/server-config.json",
+    "profiles/v0.13.1/rtx3090/server-config.json"
+  ],
+  "scope": "Prepared contracts only; native tool-name/status/log targets are not inherited qualification. Published root compatibility authority/matrix stay on v0.13.0 until a real lane pin.",
+  "native_public_configuration_sha256": {
+    "3090": "73a33e63db44ecb15bb0a64a39b7f77783c14285543c72977ac0a0675bc00c7d",
+    "4090": "9774e70154007aa2e803f7d31766e2edb274209b5b2d48f00429472cea6af4fe"
+  }
+}

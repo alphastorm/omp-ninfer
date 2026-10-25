@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare v0.13.1 for rebased native Windows RTX 4090/RTX 3090 components
+  `v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1`, carrying the exact RTX 5090 beta.2
+  runtime and stock OMP 18.12.6. Notes/gates and native profiles are preparation-only; frozen
+  native source/package identities, Windows qualification, review and fresh acceptance remain gates.
+- Move native model-download blocks to the shared published version 3 artifact `81f924d4` and a
+  separate `qwen3_8_27b-v3.ninfer` file, retaining old native models/checkpoints for rollback.
+  Native K5 profiles use strict origin authentication, shared Host budgets, extra device-state
+  slots 2/4 and admission headroom 640/768 MiB; pre-cut C1 decode measured 137.35/78.33 tok/s
+  at 131,072 INT8 MTP3. Neither those experiments nor changed route blocks are final qualification.
 - Require a distinct canonical `<native-package-stem>.cdx.json` dependency SBOM for new native
   components from v0.7.0. The cutter verifies 10 outer checksum entries / 11 files, receipt and
   CycloneDX source/server bindings without replacing the inner SPDX file inventory. Binding and

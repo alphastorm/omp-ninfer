@@ -1,6 +1,13 @@
 # Quickstart
 
-> **Versioned guide: v0.13.0 · stock Oh My Pi 18.12.6 · Qualified on RTX 5090 · 4090 · 3090**
+> **Prepared guide: v0.13.1 · stock Oh My Pi 18.12.6 · native rebase qualification pending**
+
+This branch prepares new native packages; no installable v0.13.1 manifest or accepted candidate
+exists yet. Do not execute its install blocks before the product is published and the ready gate
+passes. The published release remains v0.13.0:
+[use its immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md).
+RTX 5090 runtime/client bytes carry unchanged; native model-download blocks deliberately change
+and require fresh acceptance with `documented_routes.document_change`.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -8,18 +15,18 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Client route in v0.13.0 | Start here |
+| GPU and host | Prepared client route in v0.13.1 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound, no rollback target | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound, two-direction rollback | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; new package/rollback qualification pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; new package/rollback qualification pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
 
-- **Clone the tag and run the ready gate:** start from a clean clone of `v0.13.0` and verify
+- **Clone the tag and run the ready gate:** after publication, start from a clean clone of `v0.13.1` and verify
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
   on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
@@ -29,15 +36,16 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 - **One GPU lane at a time per host:** both native Windows packages install on the same two-GPU
   host, but they share loopback port `127.0.0.1:18082` and serve sequentially — stop one lane and
   release its GPU lease before starting the other.
-- **Two model artifacts (`huggingface.co/neroued/Qwen3.8-27B-NInfer`):** the RTX 5090 container
-  lane uses published container version 3 `81f924d4` (`20,437,521,664` bytes, 20.4 GB);
-  the default carried native Windows lanes retain
-  `eec39564` (`18,210,531,328` bytes, 18.2 GB).
+- **One shared model artifact (`huggingface.co/neroued/Qwen3.8-27B-NInfer`):** all prepared lanes
+  bind published container version 3 `81f924d4` (`20,437,521,664` bytes, 20.4 GB), revision
+  `1cbd84e7221e51186bd7f093a149912d2489625b`. Native routes use a separate new filename;
+  keep the prior `eec39564` model untouched for rollback rather than resuming onto it.
 - **Disk and memory prerequisites:** reserve at least 40 GiB of free disk space on the inference
   host plus a local filesystem for checkpoints (never a network share). RTX 5090 needs
   `28672 MiB` host RAM and a shared Host budget of `20867.734375 MiB` (21,881,405,440 bytes).
-  Carried native RAM / pinned host-KV floors are `32768 MiB` / `11264 MiB`
-  on native RTX 4090, and an `8192 MiB` pinned host-KV pool on native RTX 3090.
+  Native RTX 4090 retains its `32768 MiB` host floor and shared Host budget `14787.734375 MiB`
+  (15,506,063,360 bytes); RTX 3090 uses `11715.734375 MiB` (12,284,837,888 bytes).
+  These replace separate host-slot/KV budgets; no smaller-host qualification is claimed.
 
 ## Contributor acceptance and preflight
 
@@ -75,7 +83,7 @@ changing a running host.
 
 ## OMP 18.12.6 client
 
-Release `v0.13.0` pins unmodified upstream
+Prepared release `v0.13.1` carries v0.13.0's exact unmodified upstream
 [Oh My Pi v18.12.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6) (source
 `45c35e40c46166dc726ccc52f5d27f40f2449f99`, tree `8a90a1b48b370649bd3f026d5f609e500626785c`).
 Exact binary URLs, sizes, and SHA-256 pins (`omp-windows-x64.exe` `73d73c11…`,
@@ -100,9 +108,11 @@ When migrating from an earlier client:
   `ninfer-beta` / `ninfer-main` at `2` and `ninfer-native-4090` / `ninfer-heavy` /
   `ninfer-native-3090` at `1`, and compaction stays at OMP's default.
 
-## Acceptance evidence
+## Previous release acceptance — v0.13.0
 
-Client acceptance is never inherited. Fresh stock OMP 18.12.6 acceptance passed on frozen
+The observations below belong to the immutable v0.13.0 guide, not this edited prepared route.
+Fresh v0.13.1 client, route, native public-install and independent restoration evidence is pending.
+Client acceptance is never inherited. Stock OMP 18.12.6 acceptance passed on frozen
 candidate `b1a54dc9fcf000c7eac09890d0503997988f9dd1`; no predecessor product receipt was relabeled.
 
 | Documented route | Fresh acceptance |
@@ -125,17 +135,20 @@ checkout, key, and directory presence; 403.372 s window) and for both sequential
 Production was not upgraded during the acceptance window.
 [Documented routes](../releases/v0.13.0/acceptance/documented-routes.json) and
 [composed acceptance](../releases/v0.13.0/acceptance/composed-external-installation.json) bind all
-31 byte-identical executed blocks; only guide prose changed after execution. These are
+31 byte-identical blocks in the
+[published guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md);
+only that guide's prose changed after execution. This preparation changes executable native
+model blocks and product references, so it requires an explicit document-change binding. These are
 owner-operated tester-equivalent observations, not independent external-user outcomes. See
 [Releases](RELEASES.md).
 
-## Current release at a glance
+## Prepared composition at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
 | RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` on upstream `64d10fbf`, server `9790a004`, image `5d10a998` | `81f924d4` (20,437,521,664 bytes) | `qwen38-5090-v0.13.0` (config `751d22dc`): mandatory strict origin auth, DFlash2 K=7, BF16 KV (146,368 automatic tokens), 131,072 context, two active requests plus two extra device-state slots, shared Host budget, 180 s pending timeout; JSON-schema output, text, tools, vision, preserved thinking |
-| RTX 4090 native Windows (`127.0.0.1:18082`) | `v0.6.11-qwen38-4090-beta.1`, source `cad19767`, package `52687044`, server `76f35b74` | `eec39564` (18,210,531,328 bytes) | `qwen38-4090-native-v0.6.11-beta.1` (config `1971cd29`): MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots; text and tools (no vision) |
-| RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.6.3-qwen38-3090-beta.1`, source `cad19767`, package `74120de0`, server `bca236e5` | `eec39564` (18,210,531,328 bytes) | `qwen38-3090-native-v0.6.3-beta.1`: MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots, 300 W serving power cap; text and tools (no vision) |
+| RTX 4090 native Windows (`127.0.0.1:18082`) | Target `v0.7.0-qwen38-4090-beta.1`; frozen N/package/server identity and qualification pending | `81f924d4` (20,437,521,664 bytes) | `qwen38-4090-native-v0.7.0-beta.1` (public config `9774e701`): strict origin auth, MTP3/INT8, 131,072 context, C1, 30 s pending timeout, two extra slots, 2,048-token prefill, shared Host budget, 640 MiB admission margin; text/tools, no vision or DFlash2 |
+| RTX 3090 native Windows (`127.0.0.1:18082`) | Target `v0.7.0-qwen38-3090-beta.1`; frozen N/package/server identity and qualification pending | `81f924d4` (20,437,521,664 bytes) | `qwen38-3090-native-v0.7.0-beta.1` (public config `73a33e63`): strict origin auth, MTP3/INT8, 131,072 context, C1, 30 s pending timeout, four extra slots, 1,024-token prefill, shared Host budget, 768 MiB admission margin, 300 W policy; no vision or DFlash2 |
 
 
 - **Serving limits and compaction:** RTX 5090 admits two requests at once and holds a pending
@@ -146,10 +159,10 @@ owner-operated tester-equivalent observations, not independent external-user out
   expiring at the server
   ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
 - **Native two-GPU UUID topology and rollback:** Both native packages bind their GPU UUID and PCI
-  address on a two-GPU Windows 11 host and serve sequentially on port `18082`. RTX 4090 has no
-  supported rollback target (`not_applicable`; `v0.6.10` and earlier single-GPU packages are
-  unsupported on a two-GPU host); RTX 3090 retains qualified two-direction rollback against
-  `v0.6.2-beta.1`.
+  address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Published v0.13.0
+  had no RTX 4090 rollback target and retained RTX 3090's real two-direction result. Neither
+  result qualifies the rebased packages: any new upgrade/rollback must bind an actual supported
+  predecessor with its own model, binary, config and cache root; no direction or target is invented.
 - **Checkpoints and legacy routes:** Stock OMP names each session with `prompt_cache_key`, which the
   authenticated runtime hashes into the session identity. Checkpoints restore across graceful
   restarts on all three lanes, but saves are best effort under traffic (a crash or expired wait can
@@ -159,6 +172,13 @@ owner-operated tester-equivalent observations, not independent external-user out
   the older RTX 3090 `v0.2` lineage on the OMP 18.0.9 fork client remains in the
   [historical v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md).
 - **Session capability boundary:** Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
+- **Native protocol and checkpoint gates:** JSON-schema/128-character-tool-name support must bind
+  actual native grammar/product/lane qualification; the published carried natives' HTTP 400 and
+  64-character limits do not become new support by inference. The schema 4 package config uses
+  `cache/<release-instance-id>/session-checkpoints-v3`, not the old native root. Keep old native
+  roots untouched; never migrate their generations. Replay OMP transcripts for a fresh prefill.
+  Both native profiles require `--session-checkpoint-require-origin-auth` and a key of at least
+  32 bytes; the generated key below is 64 characters. Do not drop strict origin to accept old state.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
@@ -174,7 +194,7 @@ Clone the tag in Windows and in the WSL2 distro that owns Docker (`Set-Execution
 the current window only):
 
 ```powershell
-git clone --branch v0.13.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.13.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -207,10 +227,11 @@ section 8.
 Requires Windows 11 x64, one RTX 4090 (sm_89), a supported NVIDIA driver, Git, PowerShell, Python 3
 (`py` launcher), and 40 GiB free disk. The installer binds the unique RTX 4090 UUID and PCI address
 even beside an RTX 3090 (use `-GpuUuid` if multiple RTX 4090 cards exist; never hide a card). Stop
-the other native lane on port `18082` first; no rollback target exists on the two-GPU topology.
+the other native lane on port `18082` first. This rebased package and its real upgrade/rollback
+lineage remain gated; do not reuse the published predecessor's qualification.
 
 ```powershell
-git clone --branch v0.13.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.13.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -223,7 +244,7 @@ $VariantId = 'rtx4090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.13.0\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.13.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -279,11 +300,10 @@ if (-not (Test-Path $ModelDir)) {
   New-Item -ItemType Directory -Path $ModelDir | Out-Null
   Set-Acl $ModelDir $Acl
 }
-$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-# The native lanes serve the manifest's native model: components.native_model when the primary
-# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
-$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
-  $Manifest.components.native_model } else { $Manifest.components.model }
+$Model = Join-Path $ModelDir 'qwen3_8_27b-v3.ninfer'
+# Both rebased native packages bind the published v3 primary model, not an old native override.
+# Keep the prior v2 filename untouched so a resumed transfer cannot append incompatible bytes.
+$NativeModel = $Manifest.components.model
 if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
   throw 'native model artifact is not the variant''s bound model'
 }
@@ -389,10 +409,11 @@ if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 Requires Windows 11 x64, one RTX 3090 (sm_86), a supported NVIDIA driver, Git, PowerShell, Python 3
 (`py` launcher), and 40 GiB free disk. The installer binds the card's UUID and PCI address even
 beside an RTX 4090 (use `-GpuUuid` if multiple RTX 3090 cards exist). Stop the other native lane on
-port `18082` first; two-direction rollback against `v0.6.2-beta.1` is retained.
+port `18082` first. This rebased package needs its own actual upgrade/rollback qualification;
+the old v0.6.2 result is not carried to a new model/runtime.
 
 ```powershell
-git clone --branch v0.13.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.13.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
@@ -405,7 +426,7 @@ $VariantId = 'rtx3090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.13.0\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.13.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -458,11 +479,10 @@ if (-not (Test-Path $ModelDir)) {
   New-Item -ItemType Directory -Path $ModelDir | Out-Null
   Set-Acl $ModelDir $Acl
 }
-$Model = Join-Path $ModelDir 'qwen3_8_27b.ninfer'
-# The native lanes serve the manifest's native model: components.native_model when the primary
-# (RTX 5090) model differs from it, otherwise components.model. The variant row binds that artifact.
-$NativeModel = if ($Manifest.components.PSObject.Properties['native_model']) {
-  $Manifest.components.native_model } else { $Manifest.components.model }
+$Model = Join-Path $ModelDir 'qwen3_8_27b-v3.ninfer'
+# Both rebased native packages bind the published v3 primary model, not an old native override.
+# Keep the prior v2 filename untouched so a resumed transfer cannot append incompatible bytes.
+$NativeModel = $Manifest.components.model
 if ($NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256) {
   throw 'native model artifact is not the variant''s bound model'
 }
@@ -591,7 +611,7 @@ interface. Both machines and local accounts must be controlled by one trusted ow
 ## 1. Clone the exact release on both machines
 
 ```sh
-git clone --branch v0.13.0 --depth 1 \
+git clone --branch v0.13.1 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git
 cd omp-ninfer
 python3 scripts/verify_release.py --require-ready
@@ -628,11 +648,11 @@ CHECKPOINTS="$ROOT/checkpoints-v013"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.13.0/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.13.1/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.13.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.13.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.13.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.13.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b-v3.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide

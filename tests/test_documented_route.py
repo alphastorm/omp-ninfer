@@ -139,7 +139,7 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
-    def test_v013_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
+    def test_v0131_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
         routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
                   for lane in documented_route.LANES}
         self.assertEqual(sum(len(steps) for steps in routes.values()), 31)
@@ -150,12 +150,20 @@ class ExtractionTests(unittest.TestCase):
                 if step.slug == "client-install":
                     self.assertIn("v18.12.6", block.text)
                 if step.slug == "clone-and-verify":
-                    self.assertIn("v0.13.0", block.text)
+                    self.assertIn("v0.13.1", block.text)
         preparation = documented_route.extract(
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
         self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v013"', preparation)
-        self.assertIn("releases/v0.13.0/manifest.json", preparation)
+        self.assertIn("releases/v0.13.1/manifest.json", preparation)
         self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            steps = {step.slug: block for step, block in routes[lane]}
+            native = steps["stage-and-install"].text
+            self.assertIn(r"releases\v0.13.1\manifest.json", native)
+            self.assertIn("'qwen3_8_27b-v3.ninfer'", native)
+            self.assertIn("$NativeModel = $Manifest.components.model", native)
+            self.assertNotIn("components.native_model", native)
+            self.assertIn("$NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256", native)
 
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
