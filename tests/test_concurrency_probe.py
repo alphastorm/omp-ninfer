@@ -338,8 +338,7 @@ class ConcurrencyProbeTests(unittest.TestCase):
         result = receipt["scenarios"][0]
         b, a = result["requests"]
         offset = a["submitted_monotonic_s"] - b["submitted_monotonic_s"]
-        self.assertGreaterEqual(offset, 1)  # The scenario's intentional submission delay.
-        self.assertLessEqual(offset - 1, 4 * cost)
+        self.assertLessEqual(abs(offset - 1), 4 * cost)  # Intentional one-second delay.
         self.assertLess(a["completed_monotonic_s"], b["first_output_monotonic_s"])
         self.assertEqual(result["interference"]["a_ttft_s"], a["ttft_s"])
         self.assertLessEqual(a["ttft_s"], 4 * max(baseline["ttft_s"], cost))
@@ -350,8 +349,9 @@ class ConcurrencyProbeTests(unittest.TestCase):
         samples = result["vram"]["samples"]
         self.assertGreaterEqual(len(samples), 2)
         interval = samples[1]["monotonic_s"] - samples[0]["monotonic_s"]
-        self.assertGreaterEqual(interval, 1)
-        self.assertLessEqual(interval - 1, 4 * cost)
+        # Windows waits can wake just before their requested deadline. Bound
+        # both directions by the measured host cost, not an exact clock floor.
+        self.assertLessEqual(abs(interval - 1), cost)
 
     def test_session_turns_preserve_both_lineages_and_join_only_run_window_logs(self):
         server = self.server(lambda payload, _: {"status": "incomplete" if not payload.get("previous_response_id") else "completed"})
@@ -443,7 +443,7 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertEqual(len(request["attempts"]), 2)
         first, retried = request["attempts"]
         backoff = retried["submitted_monotonic_s"] - first["completed_monotonic_s"]
-        self.assertGreaterEqual(backoff, 2)  # The documented retry backoff, not a host-speed pin.
+        self.assertLessEqual(abs(backoff - 2), 4 * baseline["ttft_s"])  # Documented retry backoff.
         self.assertGreaterEqual(request["ttft_s"], backoff)
         self.assertLessEqual(request["ttft_s"] - backoff, 4 * baseline["ttft_s"])
         self.assertLessEqual(request["total_s"] - backoff, 4 * baseline["total_s"])
