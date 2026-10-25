@@ -3,15 +3,13 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.13.0",
   "composition": {
-    "status": "v0.13.0 beta.2 runtime qualified and council remediation closed; OMP 18.12.6 public-route acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
     "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
     "ninfer_lifecycle_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
     "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "blockers": [
-      "Fresh beta.2 RTX 5090 public-route/client acceptance, unchanged-native evidence binding and final pins remain separate from runtime/council qualification."
-    ],
+    "blockers": [],
     "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
   },
   "profiles": [
@@ -49,10 +47,11 @@
         "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
         "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
-      "blockers": [
-        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/darwin-arm64-18.12.6.json",
+        "sha256": "5c1d12214f3add300f0de369620a1bfc3d5fea5fdb865b71c94d0703f149882f"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -123,7 +122,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -136,7 +135,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.13.0",
       "aliases": [
@@ -154,10 +153,11 @@
         "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
         "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
-      "blockers": [
-        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/windows-x64-18.12.6.json",
+        "sha256": "95e36fb3c2e2c13f0b3983c37650162b75d8d37a7f6dc6991b5178a23f6d49e7"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -228,7 +228,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -241,7 +241,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.13.0",
       "aliases": [
@@ -260,10 +260,11 @@
         "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
         "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
       ],
-      "blockers": [
-        "Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending."
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/linux-x64-18.12.6.json",
+        "sha256": "adbd6edf09f0f6fe3248b6359f58273337fb9a6d21573bb11e615dfd8dc87614"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

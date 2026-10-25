@@ -5,12 +5,38 @@
   "as_of": "2026-10-25",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "documented_route_acceptance": {
-    "status": "pending",
-    "scope": "Fresh candidate-bound execution of all five routes and 31 current executable blocks, three OMP 18.12.6 client platforms and both native public installations, with independently verified incumbent/native restoration. Updated model/checkpoint/client blocks invalidate predecessor block hashes. Darwin remains preview; Linux scope remains WSL2. No route results or candidate SHA are inferred during preparation."
+    "status": "passed",
+    "scope": "All five fresh documented routes/31 exact current blocks, three newly downloaded stock OMP 18.12.6 clients and both unchanged-native public installs; no predecessor product acceptance is carried forward.",
+    "candidate_commit": "b1a54dc9fcf000c7eac09890d0503997988f9dd1",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.13.0/acceptance/documented-routes.json",
+    "evidence_sha256": "ec66f72e6a51d206e608ad0a96c50a92f3ed47a7aab98b83daf524a29268e85b",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.13.0/acceptance/darwin-arm64-18.12.6.json",
+      "releases/v0.13.0/acceptance/windows-x64-18.12.6.json",
+      "releases/v0.13.0/acceptance/linux-x64-18.12.6.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-10-25-v0130-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 403.372,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true
+    },
+    "composition_run": true
   },
-  "scope": "Council-remediated RTX 5090 beta.2, exact source 6d4d0a05 on upstream master 64d10fbf, published model 81f924d4 and strict-origin configuration 751d22dc. Stock OMP 18.12.6 and unchanged native v0.12.2 packages/model; new RTX 5090 external acceptance and final evidence pins remain separate.",
+  "scope": "Council-remediated RTX 5090 beta.2, exact source 6d4d0a05 on upstream master 64d10fbf, published model 81f924d4 and strict-origin configuration 751d22dc, with stock OMP 18.12.6 and unchanged native v0.12.2 packages/model. Fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen b1a54dc9fcf000c7eac09890d0503997988f9dd1, with independent incumbent/native restoration including directory presence and documented staging. Darwin remains preview; Windows/WSL profiles are qualified by the new runtime-bound live receipts, and Linux scope is WSL2, not a separate native Linux OS. RTX 4090 retains no-target not_applicable rollback; RTX 3090 retains its real predecessor and separate carried rollback qualification. Publication is founder-only.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -92,8 +118,42 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Fresh beta.2 RTX 5090 public-image/public-asset, OMP 18.12.6 three-platform/current-route evidence and independent incumbent restoration must be bound after lane pin. Main reports unchanged-native client/public-install windows remain valid; bind their actual receipts/pins rather than inventing execution or requiring a runtime remeasurement."
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/acceptance/composed-external-installation.json",
+      "sha256": "545e93279e81ea3497f0043a182c968999461db83f5929854fe0d0f645514458",
+      "public_url": null,
+      "as_of": "2026-10-25",
+      "release": "v0.13.0",
+      "component_release_tag": "v18.12.6",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+      "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "a22ef26a5bc20a52355062e0310c0e1d942a77e06fc7cba73c0b61c59dd0b1cc",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "5c1d12214f3add300f0de369620a1bfc3d5fea5fdb865b71c94d0703f149882f"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "95e36fb3c2e2c13f0b3983c37650162b75d8d37a7f6dc6991b5178a23f6d49e7"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "adbd6edf09f0f6fe3248b6359f58273337fb9a6d21573bb11e615dfd8dc87614"
+        }
+      ],
+      "note": "Fresh OMP 18.12.6 platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate b1a54dc9; independent incumbent/native restoration passed. Runtime and carried-native component qualification remain separate; publication is founder-only."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/acceptance/documented-routes.json",
+      "sha256": "ec66f72e6a51d206e608ad0a96c50a92f3ed47a7aab98b83daf524a29268e85b"
     }
   },
   "observed_gates": {
@@ -206,7 +266,7 @@
       "status": "passed",
       "repository_path": "releases/v0.13.0/qualification/packaging.json",
       "sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
-      "public_download_acceptance": "pending; publication does not prove fresh anonymous installation"
+      "public_download_acceptance": "Fresh anonymous runtime-image/client downloads and both native public-asset installs passed in the bound external acceptance; no separate new RTX 5090 binary-archive/SBOM download claim."
     },
     "stock_client_review": {
       "status": "passed-host-free-only",
@@ -214,13 +274,16 @@
       "sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "descriptor": {
         "repository_path": "releases/v0.13.0/qualification/client-components.json",
-        "sha256": "ecc1df23a9820ac4ffd278188766a9eb612dec4b3bdc04dc1956f351fa0fc770"
+        "sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42"
       },
-      "live_beta2_acceptance": "pending"
+      "live_beta2_acceptance": "Passed separately in changed_client_acceptance and its three fresh platform receipts; this source-review receipt remains host-free."
     },
     "changed_client_acceptance": {
-      "status": "pending",
-      "criterion": "Fresh beta.2 RTX 5090 public-image/client routes, three OMP 18.12.6 platforms, exact current blocks and independent incumbent restoration. Bind valid unchanged-native public-install/client/restoration receipts and final immutable pins; no rehearsal or predecessor RTX 5090 acceptance is substituted."
+      "status": "passed",
+      "candidate_commit": "b1a54dc9fcf000c7eac09890d0503997988f9dd1",
+      "repository_path": "releases/v0.13.0/acceptance/documented-routes.json",
+      "sha256": "ec66f72e6a51d206e608ad0a96c50a92f3ed47a7aab98b83daf524a29268e85b",
+      "criterion": "Fresh beta.2 RTX 5090 public-image/client routes, three exact OMP 18.12.6 platforms, all five current routes/31 executable blocks and both unchanged-native public installations passed. Typed tool/result, exact continuation, fail-closed and scoped macOS/Windows image-input observations are bound to runtime identities. Independent same-image incumbent restoration and both native state/support/task/hold/client/power/directory/staging audits passed; no rehearsal or predecessor RTX 5090 acceptance is substituted."
     },
     "release_prose": {
       "status": "passed",
@@ -242,14 +305,9 @@
       "scope": "Targeted beta.2 restage and hash rebinding only; root promotion and acceptance pins remain lead-owned."
     }
   },
-  "interpretation": "All changed-runtime evidence is bound to beta.2 source 6d4d0a05, strict origin config 751d22dc and actual published/lane identities. Existing base publication retains its true original source under an explicit unchanged-base reuse binding. EXP-097 remains separately measured. Full council plus localized remediation is closed by the actual unchanged ledger; residual limitations are not erased. Public/client acceptance and owner-only publication are separate gates.",
-  "eligibility_scope": "Runtime/installability posture only, not product publication or public-route acceptance. Root authority/live profiles remain historical until the lead lane pin; checked-in manifest remains draft. G4 is closed by the bound ledger, not inferred from runtime tests.",
-  "remaining_release_gates": [
-    "Lead lane-pin the clean beta.2 stage commit, promoting the exact authority/profile bytes and immutable lane URLs; root files remain historical until that cut.",
-    "Bind fresh beta.2 RTX 5090 public-image/public-asset acceptance for all three OMP 18.12.6 client platforms/current routes and independent incumbent restoration.",
-    "Bind actual valid unchanged-native public-install/client/restoration evidence and its immutable pins; the lead reports these windows remain valid, not remeasured by this worker.",
-    "Commit/pin platform, composed acceptance and manifest evidence in order; require-ready/check-pins; founder-only product tag/release."
-  ],
+  "interpretation": "Changed-runtime qualification is bound to beta.2 source 6d4d0a05, strict origin config 751d22dc and actual published/lane identities. Fresh stock OMP 18.12.6 product acceptance passed on frozen b1a54dc9fcf000c7eac09890d0503997988f9dd1; evidence commits do not advance that subject. All five current routes, three exact stock client binaries and both native public URL installs were observed with independent incumbent/native restoration. Structured typed tool/result, exact continuation and fail-closed checks bind the observed image/binary/configuration/model; image input covers macOS/Windows against RTX 5090 only. Native installs verify unchanged qualified bytes and idempotence, not new rollback exercise or rebased-native qualification. Existing base publication, separately measured EXP-097, council/remediation closure and unmeasured screens retain their actual scopes. Product publication is a separate founder-only action.",
+  "eligibility_scope": "Runtime/installability and fresh candidate-bound public-route/client acceptance are complete; immutable platform/composed/manifest pins bind their evidence without changing the accepted candidate. Root authority/live profiles name beta.2 and the manifest is ready. G4 is closed by the bound ledger, not inferred from runtime tests; publication_authorized remains false.",
+  "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.13.0/qualification/receipt-audit.json",
     "sha256": "d217b32d013fe0f27cc62929697b698325fc0bbef80f1a978c17025bec00a862"

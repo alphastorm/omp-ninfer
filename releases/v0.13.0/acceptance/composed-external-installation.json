@@ -1,0 +1,222 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Fresh stock OMP 18.12.6 acceptance on frozen candidate b1a54dc9fcf000c7eac09890d0503997988f9dd1 with published RTX 5090 beta.2 and unchanged sequential UUID-bound native components; exact-source runtime qualification and carried native qualification are separate.",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "component_release_tag": "v18.12.6",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "upstream_tree": "8a90a1b48b370649bd3f026d5f609e500626785c",
+    "note": "All three freshly downloaded stock OMP 18.12.6 asset/binary identities, versions, typed tool/result, exact continuation and fail-closed proofs passed; both native routes used the same stock Windows client."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "a22ef26a5bc20a52355062e0310c0e1d942a77e06fc7cba73c0b61c59dd0b1cc",
+  "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+  "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "5c1d12214f3add300f0de369620a1bfc3d5fea5fdb865b71c94d0703f149882f"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "95e36fb3c2e2c13f0b3983c37650162b75d8d37a7f6dc6991b5178a23f6d49e7"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "adbd6edf09f0f6fe3248b6359f58273337fb9a6d21573bb11e615dfd8dc87614"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "anonymous": true,
+      "assets": 3,
+      "downloads": [
+        {
+          "profile": "darwin-remote-ssh",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64",
+          "sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58"
+        },
+        {
+          "profile": "windows-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe",
+          "sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef"
+        },
+        {
+          "profile": "linux-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64",
+          "sha256": "85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4"
+        }
+      ]
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "rtx3090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "profile": "linux-docker-local",
+      "omp_version": "omp/18.12.6",
+      "binary_sha256": "85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4",
+      "scope": "Stock upstream Linux x64 binary under WSL2 against the published RTX 5090 beta.2 container; not a separately qualified native Linux OS.",
+      "structured_stream_audit": {
+        "tool": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "fe369669d9a9624eecafad06464a7afc50f46a74266592203c4db3bd11f07f54"
+        },
+        "state": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "a29295f3fa45e2c348c58f7ed6645b38a431e7de2771fcff66fc5928c830dd79"
+        },
+        "continuation": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "c5413d7b44aa6f07c0e8fd5d84bcfe8d7b612149a76b9e8c3b4ad7e6d519eea6"
+        },
+        "fail-closed": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "f3617ccbc1b1bd38f7b67b2bfd561b91abc142a398e4804bb6b24c2c7c32a915"
+        }
+      },
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "errors": [
+          "Couldn't connect to 127.0.0.1:18089 (connection refused). Check that the server is running and reachable."
+        ],
+        "endpoint": "http://127.0.0.1:18089/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": {
+    "darwin-remote-ssh": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "windows-docker-local": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "linux-docker-local": "Vision not exercised by the structured proof; no Linux vision claim.",
+    "rtx3090-native": "No native vision claim.",
+    "rtx4090-native": "No native vision claim."
+  },
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": {
+    "rtx5090-container": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/qualification/rtx5090.json",
+      "scope": "Exact beta.2 source/binary/model/strict-origin profile qualification is bound separately; this fresh window observed the published image and bound runtime identity during client acceptance."
+    },
+    "rtx4090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/qualification/rtx4090.json",
+      "scope": "Retained unchanged native component qualification; this fresh window observed its bound binary/configuration/model and restored installed lineage during route/public-install acceptance."
+    },
+    "rtx3090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.0/qualification/rtx3090.json",
+      "scope": "Retained unchanged native component qualification; this fresh window observed its bound binary/configuration/model and restored installed lineage during route/public-install acceptance."
+    }
+  },
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.13.0/acceptance/documented-routes.json",
+      "sha256": "ec66f72e6a51d206e608ad0a96c50a92f3ed47a7aab98b83daf524a29268e85b"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.13.0/acceptance/rtx4090-public-install.json",
+      "sha256": "80ea76ae30254502933b49e131a23cb2d325c7cf05f651762cc94af80bb9ed09"
+    },
+    "rtx3090_public_install": {
+      "repository_path": "releases/v0.13.0/acceptance/rtx3090-public-install.json",
+      "sha256": "5b64f642ec327e6cb20a59ae887eaca93d547034a722944b2677fca42f5e66e4"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-10-25-v0130-acceptance-restoration.json",
+      "sha256": "0a92570754bc68bd422209bc438e2c520e65e5f160858cbf112e490a07ccecfd"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.13.0/qualification/client-components.json",
+      "sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42"
+    }
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent acceptance, not independent external-user outcomes.",
+    "RTX 5090 beta.2 uses the rebased runtime, published model container v3 and strict-origin profile; exact runtime qualification and separately measured EXP-097 performance are not inferred from this acceptance.",
+    "Native packages/model/profiles are unchanged from v0.12.2 and retain component qualification; fresh client/public-install acceptance does not qualify rebased natives.",
+    "Darwin remains preview. Windows/WSL profiles are qualified by new runtime-bound live receipts; Linux execution was under WSL2, not a separate native Linux OS.",
+    "One Windows host with two installed-record UUID-bound native lanes; one lane at a time on shared port 18082.",
+    "Image-input checks cover macOS and Windows against RTX 5090 only; no native or Linux vision claim.",
+    "RTX 4090 is a first release on this topology: rollback not_applicable, zero directions, no target. RTX 3090 retains its real v0.6.2 predecessor and separate carried two-direction component qualification; neither fresh public check re-exercised rollback.",
+    "Production was restored, not upgraded. Publication is founder-only."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

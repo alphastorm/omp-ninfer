@@ -3,15 +3,15 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.13.0`
-Composition: **v0.13.0 beta.2 runtime qualified and council remediation closed; OMP 18.12.6 public-route acceptance pending**
+Composition: **qualified**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.12.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64) (sha256 `cfbb5e38cd8f`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.12.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe) (sha256 `73d73c11dc88`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.12.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64) (sha256 `85d9daf3a05f`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.12.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64) (sha256 `cfbb5e38cd8f`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/darwin-arm64-18.12.6.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.12.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe) (sha256 `73d73c11dc88`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/windows-x64-18.12.6.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.12.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64) (sha256 `85d9daf3a05f`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/b1a54dc9fcf000c7eac09890d0503997988f9dd1/releases/v0.13.0/acceptance/linux-x64-18.12.6.json) |
 
 ## Native runtime variants
 
@@ -56,7 +56,6 @@ Limitations:
 - Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ### `windows-docker-local`
 
@@ -73,7 +72,6 @@ Limitations:
 - Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ### `linux-docker-local`
 
@@ -91,8 +89,6 @@ Limitations:
 - Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ## Composition blockers
 
-- Fresh beta.2 RTX 5090 public-route/client acceptance, unchanged-native evidence binding and final pins remain separate from runtime/council qualification.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.13.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4cdb2bc4b37ae1509d6b00694208aba43a54bfbd/compatibility.json",
-      "compatibility_sha256": "c7dc7d9640c68f293f2c0e6aca6442ea10933e324fe0629e65c44658081712f1",
+      "compatibility_sha256": "a22ef26a5bc20a52355062e0310c0e1d942a77e06fc7cba73c0b61c59dd0b1cc",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.12.6",
@@ -159,10 +159,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "de8f32ec0077229010fa32b7928c116e7a7d3cc722f46e3d43d855aceb0242df",
+    "summary_sha256": "3f610cdc78e6fa0d041054142c0ecbddf3b31f0cbc390cbdd27e63b387b46ed5",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4cdb2bc4b37ae1509d6b00694208aba43a54bfbd/releases/v0.13.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -191,11 +191,7 @@
       "NInfer RTX 5090 v0.7.0-qwen38-5090-beta.2; image sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
       "OMP client: unmodified upstream Oh My Pi v18.12.6; no client published here"
     ],
-    "blockers": [
-      "Lead lane-pin this stage to promote exact beta.2 authority/profile bytes and immutable lane URLs.",
-      "external-installation acceptance: fresh beta.2 RTX 5090 public-image/public-asset routes on OMP 18.12.6 across three platforms, all current route blocks and independent incumbent restoration remain unbound.",
-      "Bind the valid unchanged-native public-install/client/restoration evidence and platform/composed acceptance/manifest pins; require-ready/check-pins; founder-only product publication is not authorized."
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

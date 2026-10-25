@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-docker-local-45c35e40-73d73c11dc-v0.13.0",
+  "product_release": "v0.13.0",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "as_of": "2026-10-25",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.12.6",
+    "commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "tree": "8a90a1b48b370649bd3f026d5f609e500626785c"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.12.6",
+    "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 224254976,
+    "asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+    "binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+    "release_id": 420053191,
+    "asset_id": 663781492,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe"
+  },
+  "live_acceptance": {
+    "omp_version": "omp/18.12.6",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 22,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "runtime_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "q38-ninfer"
+    ],
+    "raw_transcript_included": false,
+    "vision_observed": true,
+    "vision_input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "errors": [
+        "Couldn't connect to 127.0.0.1:18089 (connection refused). Check that the server is running and reachable."
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "runtime_image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false,
+    "structured_stream_audit": {
+      "tool": {
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "input_image_records": 0,
+        "only_selected_provider_and_model": true,
+        "decode_encoding": "utf-8",
+        "transcript_sha256": "a5971f4484674b3ecf58a35e06c700c479afe770f42ceb4bb014c4634a11c88d"
+      },
+      "state": {
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "input_image_records": 0,
+        "only_selected_provider_and_model": true,
+        "decode_encoding": "utf-8",
+        "transcript_sha256": "b3559d10c01c8c6940d0cb030c1f85f4253023f51b8dd8a4635ebb7d4e1963e0"
+      },
+      "continuation": {
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "input_image_records": 0,
+        "only_selected_provider_and_model": true,
+        "decode_encoding": "utf-8",
+        "transcript_sha256": "0cc03c4faab690f66a19c35542156b8fddb8ac1cba43619771f7dbd563a7ac0b"
+      },
+      "vision": {
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "input_image_records": 3,
+        "only_selected_provider_and_model": true,
+        "decode_encoding": "utf-8",
+        "transcript_sha256": "afe4d997098b7709f13363b075dda67e6f9e3fef034525c44fa06faebdb6a9be"
+      },
+      "fail-closed": {
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "input_image_records": 0,
+        "only_selected_provider_and_model": true,
+        "decode_encoding": "utf-8",
+        "transcript_sha256": "9fc222ec05a913126e92ddbec5e98691620380d83c5aa2915978b71d0b1373a4"
+      }
+    }
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "Unmodified upstream OMP 18.12.6 against published RTX 5090 beta.2; fresh changed-client acceptance, not a new performance or managed-appliance installation qualification.",
+    "Exact-source runtime and serving-profile qualification are bound separately; these receipts record fresh candidate-bound client observations.",
+    "Image input was observed against the RTX 5090 container, not either native lane."
+  ]
+}
