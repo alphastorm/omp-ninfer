@@ -12,6 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples" / "manual-tunnel"
+ACCEPTED_RELEASE = "v0.12.2"
+ACCEPTED_PROFILES = ROOT / "tests" / "fixtures" / "profiles-v0.12.2"
 
 
 class ManualTunnelScriptsTest(unittest.TestCase):
@@ -120,9 +122,22 @@ class ManualTunnelScriptsTest(unittest.TestCase):
     def copy_contract_tree(root: Path) -> None:
         for directory in ("examples", "profiles", "releases", "scripts"):
             shutil.copytree(ROOT / directory, root / directory)
-        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        # A mutable restage is deliberately not installable. Exercise the real verifier
+        # against the accepted predecessor, not by relabelling the unqualified candidate.
+        release = root / "releases" / ACCEPTED_RELEASE
+        shutil.copy2(release / "compatibility.json", root / "compatibility.json")
+        for profile in ACCEPTED_PROFILES.glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
+        launcher = root / "examples" / "manual-tunnel" / "start-ninfer.sh"
+        text, count = re.subn(
+            r'^MANIFEST="\$ROOT/releases/[^/]+/manifest\.json"$',
+            f'MANIFEST="$ROOT/releases/{ACCEPTED_RELEASE}/manifest.json"',
+            launcher.read_text(encoding="utf-8"), count=1, flags=re.M)
+        if count != 1:
+            raise AssertionError("launcher fixture manifest pin is absent")
+        launcher.write_text(text, encoding="utf-8")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
-        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        shutil.copy2(release / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
         for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
 
@@ -167,8 +182,13 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             check=False,
         )
 
-    def test_start_contract_accepts_checked_in_candidate(self) -> None:
-        result = self.run_script("start-ninfer.sh", "--check-contract")
+    def test_start_contract_accepts_immutable_accepted_predecessor(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.copy_contract_tree(root)
+            result = subprocess.run(
+                ["bash", str(root / "examples/manual-tunnel/start-ninfer.sh"), "--check-contract"],
+                cwd=root, text=True, capture_output=True, check=False)
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -463,8 +483,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                     arguments = profile["server"]["arguments"]
                     arguments[arguments.index("--config-sha256") + 1] = verify_release.configuration_identity(profile)
 
-                release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
-                state["manifest"] = root / "releases" / release / "manifest.json"
+                state["manifest"] = root / "releases" / ACCEPTED_RELEASE / "manifest.json"
                 state["profile"] = root / "profiles" / "qwen38-rtx5090-manual-tunnel.json"
                 result, _, _ = self.launch_with_fakes(root, self.SERVING_DOCKER, serve_on_test_port)
 

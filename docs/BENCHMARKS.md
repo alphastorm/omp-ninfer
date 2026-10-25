@@ -13,10 +13,12 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## v0.13.0 staged runtime — exact-source gates
+## v0.13.0 historical beta.1 runtime — exact-source gates
 
-The product remains a staged draft: council, lane pin and fresh stock-client/public-route
-acceptance are not inferred from runtime measurements. The new
+Council found durable/restore defects in beta.1; candidate `86e5c0b9` is historical. Beta.2
+preparation adds strict origin authentication with target config `751d22dc`, not a relabelled
+measurement. F2 source/assets, lane qualification and remediation closure are not yet bound.
+The historical
 [lane receipt](../releases/v0.13.0/qualification/rtx5090.json) binds frozen source `04b603aa`,
 server `48d736aa`, published model `81f924d4` and configuration `c73eb8fb`, with runtime image
 `e0419f48` on base `d4377ed0`:

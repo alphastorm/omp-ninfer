@@ -15,8 +15,9 @@ DESCRIPTOR = ROOT / "tests" / "fixtures" / "upstream-omp-component.json"
 SOURCE = "v0.7.4"
 # A release that is never checked in, so the staged tree cannot collide with a real one.
 TARGET = "v0.99.0"
-# The checked-in root release (which may be an acceptance-pending candidate).
-CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+# Staging mechanics start from an immutable accepted source, not an unqualified restage.
+CURRENT = "v0.12.2"
+ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
 sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import configuration_identity
 
@@ -36,6 +37,8 @@ class StageReleaseTests(unittest.TestCase):
         root = Path(temporary.name)
         for name in ("scripts", "profiles", "releases"):
             shutil.copytree(ROOT / name, root / name)
+        for profile in ACCEPTED_PROFILES.glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
         if source_release in (SOURCE, "v0.10.0"):
             # Historical-source fixtures keep their real legacy provider epoch.
             if source_release == "v0.10.0":
@@ -50,9 +53,11 @@ class StageReleaseTests(unittest.TestCase):
                 if source_release == "v0.10.0":
                     profile["client"] = clients[profile_ids[profile["installation_mode"]]]
                 self.save(path, profile)
-        shutil.copy2(ROOT / "compatibility.json", root / "compatibility.json")
+        shutil.copy2(ROOT / "releases" / CURRENT / "compatibility.json",
+                     root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
-        shutil.copy2(ROOT / "docs" / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
+        shutil.copy2(ROOT / "releases" / CURRENT / "COMPATIBILITY.md",
+                     root / "docs" / "COMPATIBILITY.md")
         for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
             (root / "docs" / document).write_text("# Staging fixture\n", encoding="utf-8")
         source = root / "releases" / source_release

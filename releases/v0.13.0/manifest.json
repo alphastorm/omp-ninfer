@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.13.0",
-  "status": "candidate",
+  "status": "draft",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4cdb2bc4b37ae1509d6b00694208aba43a54bfbd/compatibility.json",
-      "compatibility_sha256": "0bfe55e21478d72fe7b737a163d94c77ea17875b40f371fc2dbd4553b3ea9e80",
+      "compatibility_sha256": "fed5e14c92f479139bec52cef23b9a4ab186cb969f26a98d3e1564cf7bffb7b6",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.12.6",
@@ -156,9 +156,9 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "1b67254ac01b3257a457d946453ca17610052d25319ad3329a6a618bc22ff5a2",
+    "summary_sha256": "ab76fc3d18234461c0e5e7fa157436c0464803ba4764885ae8ad45e5a31c9e34",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/4cdb2bc4b37ae1509d6b00694208aba43a54bfbd/releases/v0.13.0/qualification.json",
-    "runtime_release_eligible": true,
+    "runtime_release_eligible": false,
     "external_installation_passed": false
   },
   "installation": {
@@ -168,7 +168,7 @@
     "silent_cloud_fallback": false
   },
   "limitations": [
-    "Staged v0.13.0 binds OMP 18.12.6, rebased RTX 5090 source 04b603aa on upstream 64d10fbf, published model 81f924d4 and configuration c73eb8fb. Root authority/profiles stay on v0.12.2 until lane pin. Council disposition and fresh client/public-route acceptance are not granted by runtime eligibility.",
+    "Beta.2 restage preparation targets strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47. Existing component/runtime identities and measured receipts below are historical beta.1 candidate 86e5c0b9b30b0ae905a03d9523bbda7094368982, not F2 qualification. Council P1 remediation, F2 cut inventory and fresh lane/public-route acceptance are required before the next pin.",
     "The client is the unmodified upstream OMP binary and has no appliance commands. Documented installation/lifecycle routes remain authoritative; no client reads the compatibility authority.",
     "Checkpoint schema 3 uses isolated /checkpoints-v013. Do not mount, scan, import or migrate v0.12.x roots; keep old roots untouched for rollback and replay prior sessions from authoritative OMP transcripts.",
     "Checkpointing remains best effort under live traffic. A crash or an expired graceful wait can lose unpublished acceleration state; zero queueing, loss-free shutdown and universal warm reuse are not promised.",
@@ -177,7 +177,8 @@
     "Carried native v0.6.11 RTX 4090 and v0.6.3 RTX 3090 packages/model eec39564 remain unchanged, GPU-UUID-bound and sequential on port 18082; fresh OMP 18.12.6 public-install/client acceptance is required. Rebased 24 GB natives need the K5 admission-headroom amendment and independent packaging/qualification for v0.13.1.",
     "RTX 4090 has no supported rollback target on its two-GPU lineage. RTX 3090 retains its actual qualified predecessor. Runtime upgrade qualification does not activate production.",
     "Powered quality/leak, full-model output/acceptance parity, historical actual OMP parallel dispatch, long-client/fanout/warm-arrival latency, and full G2 after canonical serialization are not re-measured for v0.13.0; scoped current tests are not substitutes.",
-    "Multi-GPU inference, simultaneous native serving, multi-tenant operation, priority guarantees and silent cloud fallback are unsupported. macOS remains preview; Linux live evidence is WSL2-scoped. Measured throughput/latency belongs only to its recorded workload, binary, artifact and profile."
+    "Multi-GPU inference, simultaneous native serving, multi-tenant operation, priority guarantees and silent cloud fallback are unsupported. macOS remains preview; Linux live evidence is WSL2-scoped. Measured throughput/latency belongs only to its recorded workload, binary, artifact and profile.",
+    "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
   ],
   "publication": {
     "authorized": false,
@@ -187,11 +188,35 @@
       "OMP client: unmodified upstream Oh My Pi v18.12.6; no client published here"
     ],
     "blockers": [
+      "Beta.1 council defects require remediation; F2 source/archive/SBOM/image/base/CLI/lane identities and the actual remediation disposition are not yet bound. Strict-origin target configuration 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is preparation only.",
       "G4 council ledger and frozen-source dispositions remain pending.",
       "Lead lane pin must promote the staged authority/profile shape and bind exact lane URLs.",
       "external-installation acceptance: fresh OMP 18.12.6 three-platform RTX 5090 public-image routes, all five routes/31 blocks, both carried native public installs and independent incumbent/native restoration are not yet bound.",
       "Platform, composed acceptance and manifest immutable evidence pins plus require-ready/check-pins remain pending; founder-only product publication is not authorized."
     ],
     "external_installation_qualified": false
+  },
+  "restage_preparation": {
+    "status": "awaiting-F2-inventory",
+    "target_component": "v0.7.0-qwen38-5090-beta.2",
+    "target_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "historical_candidate_commit": "86e5c0b9b30b0ae905a03d9523bbda7094368982",
+    "historical_runtime_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "historical_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "council_sequence": "CR-20261025T085950Z-04b603aa",
+    "required_launch_flag": "--session-checkpoint-require-origin-auth",
+    "strict_origin_contract": "K1 section 103\u2013114; council finding 8; configured root and API key at least 32 bytes. The documented generated key is 64 characters and the fresh schema 3 root has no MAC-less generations.",
+    "remediation_wording_status": "Prepared fixed-in-beta.2 descriptions only; no F2 source, binary, archive, SBOM, image or lane qualification has been supplied or inferred.",
+    "remediation_scope": [
+      "durable restore/pressure lock order",
+      "automatic-save retry/progress",
+      "per-record delete durability",
+      "restore freshness guard",
+      "quota victim preservation",
+      "victim payload validation",
+      "gate-tag timing"
+    ],
+    "principal_limitation": "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+    "stage_release_executed": false
   }
 }

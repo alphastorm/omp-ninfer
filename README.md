@@ -11,14 +11,14 @@ Every install route in the guide was run end to end on **v0.12.2** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.12.2/acceptance/composed-external-installation.json)).
 
-**Next release, staged separately:** [v0.13.0](releases/v0.13.0/NINFER_RELEASE_NOTES.md)
-binds the rebased RTX 5090 runtime `04b603aa` on upstream master `64d10fbf`, published model
-`81f924d4` and stock OMP 18.12.6; native packages carry unchanged. Fresh runtime gates record
-180.06 tok/s decode, exact 130,048-token retrieval in 56.921 s and 20,926-token byte-identical
-restart reuse. JSON-schema output is supported on the rebased container only. Schema 3 uses
-an isolated checkpoint root; old sessions replay from client transcripts. Council disposition,
-lane pin and fresh public/client acceptance remain separate gates; this is not a product
-publication or production upgrade. [Evidence and gaps](releases/v0.13.0/qualification.json).
+**Next release, beta.2 restage preparation:** [v0.13.0](releases/v0.13.0/NINFER_RELEASE_NOTES.md)
+targets the rebased RTX 5090 runtime on upstream master `64d10fbf`, published model `81f924d4`
+and stock OMP 18.12.6; native packages carry unchanged. Council findings require durable/restore
+remediation and strict checkpoint origin authentication (target config `751d22dc`).
+Beta.1 candidate `86e5c0b9` and its measurements are historical, not proof of those fixes.
+F2 identities, new qualification, council disposition, lane pin and fresh public/client acceptance
+are not yet bound. Schema 3 uses an isolated checkpoint root; old sessions replay from transcripts.
+This is not a product publication or production upgrade. [Evidence and gaps](releases/v0.13.0/qualification.json).
 
 ### [Get started →](docs/QUICKSTART.md)
 

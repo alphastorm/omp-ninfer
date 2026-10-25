@@ -13,7 +13,7 @@ import doctor
 import render_compatibility
 import verify_release
 
-CONFIG_SHA = "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f"
+CONFIG_SHA = "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47"
 
 
 class V013PreparationTests(unittest.TestCase):
@@ -35,6 +35,7 @@ class V013PreparationTests(unittest.TestCase):
                     index = old_tuning.index(flag)
                     del old_tuning[index:index + 2]
                 new_tuning = verify_release.tuning_arguments(arguments)
+                new_tuning.remove("--session-checkpoint-require-origin-auth")
                 index = new_tuning.index("--host-context-mib")
                 del new_tuning[index:index + 2]
                 self.assertEqual(new_tuning, old_tuning)
@@ -43,6 +44,7 @@ class V013PreparationTests(unittest.TestCase):
             self.assertEqual(Decimal(host_mib) * (1 << 20), 21881405440)
             self.assertEqual(verify_release.argument_value(arguments, "--device-state-slots"), "2")
             self.assertEqual(verify_release.argument_value(arguments, "--gpu-keep-warm-ms"), "60000")
+            self.assertEqual(arguments.count("--session-checkpoint-require-origin-auth"), 1)
             self.assertEqual(verify_release.configuration_identity(profile), CONFIG_SHA)
             self.assertEqual(verify_release.argument_value(arguments, "--config-sha256"), CONFIG_SHA)
             self.assertEqual(profile["server"]["checkpoint_mount_target"], "/checkpoints-v013")
@@ -58,6 +60,36 @@ class V013PreparationTests(unittest.TestCase):
                 upstream_client=True, per_model_stateful=True)
             self.assertEqual(errors, [])
         self.assertEqual(count, 2)
+
+    def test_strict_origin_profile_copies_share_the_new_configuration(self):
+        for template_path, template in self.profiles():
+            staged = json.loads((ROOT / "releases/v0.13.0/profiles" / template_path.name).read_text(
+                encoding="utf-8"))
+            for profile in (template, staged):
+                arguments = profile["server"]["arguments"]
+                self.assertEqual(arguments.count("--session-checkpoint-require-origin-auth"), 1)
+                self.assertEqual(verify_release.configuration_identity(profile), CONFIG_SHA)
+                self.assertEqual(
+                    verify_release.argument_value(arguments, "--config-sha256"), CONFIG_SHA)
+
+    def test_unbound_beta2_preparation_cannot_reuse_beta1_eligibility(self):
+        release = ROOT / "releases/v0.13.0"
+        manifest = json.loads((release / "manifest.json").read_text(encoding="utf-8"))
+        preparation = manifest.get("restage_preparation", {})
+        if preparation.get("status") != "awaiting-F2-inventory":
+            return
+        qualification = json.loads((release / "qualification.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["status"], "draft")
+        self.assertFalse(manifest["qualification"]["runtime_release_eligible"])
+        self.assertEqual(qualification["status"], "preparation-only")
+        self.assertEqual(qualification["observed_gates"]["g4_review"]["status"],
+                         "remediation-required")
+        self.assertEqual(preparation["target_configuration_sha256"], CONFIG_SHA)
+        self.assertFalse(preparation["stage_release_executed"])
+        self.assertNotEqual(
+            preparation["historical_configuration_sha256"], CONFIG_SHA)
+        self.assertIn("prompt_cache_key names a session capability",
+                      preparation["principal_limitation"])
 
     def test_prepared_authority_does_not_claim_accepted_schema_support_on_carried_natives(self):
         path = ROOT / "releases/v0.13.0/compatibility.json"

@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.13.0] - staged draft
 
+### Beta.2 restage preparation
+
+- Withdraw beta.1 candidate `86e5c0b9` from the mutable release posture after council
+  `CR-20261025T085950Z-04b603aa` confirmed durable/restore defects. Its measured receipts remain
+  historical; beta.2 source/assets/lane identities and remediation closure are not yet bound.
+- Add `--session-checkpoint-require-origin-auth` to both prepared launch routes for finding 8
+  and K1 section 103–114. Canonical target configuration:
+  `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
+  The fresh schema 3 root and documented 64-character key meet the existing strict-origin contract.
+- Record the remaining within-principal boundary: `prompt_cache_key` is a session capability;
+  use unique high-entropy keys and never share an API-key principal among mutually untrusted clients.
+
 ### Changed
 
 - Stage v0.13.0's RTX 5090 runtime `04b603aa` on upstream master `64d10fbf`, published model container

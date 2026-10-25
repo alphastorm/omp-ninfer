@@ -3,7 +3,7 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.13.0`
-Composition: **v0.13.0 upstream OMP v18.12.6 client acceptance pending**
+Composition: **v0.13.0 beta.2 restage preparation; F2 inventory, strict-origin qualification and remediation closure pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
@@ -50,8 +50,12 @@ Limitations:
 - No secret, raw log, prompt, or model output crosses the receipt boundary.
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103–114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).
+- Fixed in beta.2 — pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
 Blockers:
+- Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.
 - upstream OMP v18.12.6 client acceptance is pending
 
 ### `windows-docker-local`
@@ -63,8 +67,12 @@ Limitations:
 - Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103–114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).
+- Fixed in beta.2 — pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
 Blockers:
+- Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.
 - upstream OMP v18.12.6 client acceptance is pending
 
 ### `linux-docker-local`
@@ -77,9 +85,15 @@ Limitations:
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103–114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).
+- Fixed in beta.2 — pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
 Blockers:
+- Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.
 - upstream OMP v18.12.6 client acceptance is pending
 
 ## Composition blockers
 
+- Council CR-20261025T085950Z-04b603aa confirmed durable/restore defects; beta.1 candidate 86e5c0b9b30b0ae905a03d9523bbda7094368982 is historical.
+- Beta.2 target config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 requires --session-checkpoint-require-origin-auth; F2 runtime/asset/lane identities and fresh acceptance are not yet bound.

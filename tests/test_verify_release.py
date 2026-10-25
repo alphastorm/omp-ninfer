@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 # Immutable ready fixture; root authority may legitimately be a newer candidate.
 PUBLIC_RELEASE = "v0.10.0"
+ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
 SPEC = importlib.util.spec_from_file_location(
     "verify_release", ROOT / "scripts" / "verify_release.py"
 )
@@ -530,6 +531,9 @@ class ReleaseContractTest(unittest.TestCase):
         root = Path(temporary.name)
         shutil.copytree(ROOT / "releases", root / "releases")
         shutil.copytree(ROOT / "profiles", root / "profiles")
+        # PUBLIC_RELEASE's historical tuning cannot inherit a newer root's K5 server shape.
+        for profile in ACCEPTED_PROFILES.glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
         shutil.copytree(ROOT / "examples" / "manual-tunnel", root / "examples" / "manual-tunnel")
         previous_root = REBIND_RELEASE.ROOT
         try:

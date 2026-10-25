@@ -144,7 +144,7 @@ remains a separate host-free identity and CLI check. See [Releases](RELEASES.md)
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
-| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.1`, upstream base `64d10fbf`; frozen source/image/server identities supplied by cut | `81f924d4` (20,437,521,664 bytes) | `qwen38-5090-v0.13.0` (config `c73eb8fb`): DFlash2 draft window 7, BF16 KV, 131,072 context, two requests in flight, two extra device-state slots, shared Host budget, 180 s pending timeout; JSON-schema acceptance pending |
+| RTX 5090 container (`127.0.0.1:18089`) | Target `v0.7.0-qwen38-5090-beta.2`, upstream base `64d10fbf`; F2 cut identities and qualification not yet bound | `81f924d4` (20,437,521,664 bytes) | `qwen38-5090-v0.13.0` (target config `751d22dc`): strict checkpoint origin auth, DFlash2 draft window 7, BF16 KV, 131,072 context, two active requests, two extra device-state slots, shared Host budget, 180 s pending timeout; fresh beta.2 acceptance required |
 | RTX 4090 native Windows (`127.0.0.1:18082`) | `v0.6.11-qwen38-4090-beta.1`, source `cad19767`, package `52687044`, server `76f35b74` | `eec39564` (18,210,531,328 bytes) | `qwen38-4090-native-v0.6.11-beta.1` (config `1971cd29`): MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots; text and tools (no vision) |
 | RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.6.3-qwen38-3090-beta.1`, source `cad19767`, package `74120de0`, server `bca236e5` | `eec39564` (18,210,531,328 bytes) | `qwen38-3090-native-v0.6.3-beta.1`: MTP3, INT8 KV, 131,072 context, one request at a time, 30 s pending timeout, 24 host-state slots, 300 W serving power cap; text and tools (no vision) |
 
@@ -168,6 +168,7 @@ remains a separate host-free identity and CLI check. See [Releases](RELEASES.md)
   [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md);
   the older RTX 3090 `v0.2` lineage on the OMP 18.0.9 fork client remains in the
   [historical v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md).
+- **Session capability boundary:** Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
@@ -665,7 +666,9 @@ new store. The schema 3 loader refuses legacy generations without mutation; prio
 by replaying the client transcript for a fresh prefill. New exact-runtime checkpoints accelerate
 later continuations. The prepared runtime implements JSON-schema output and 128-character tool
 names; the [candidate matrix](../releases/v0.13.0/COMPATIBILITY.md) keeps schema support gated on
-live acceptance and distinguishes carried native limits.
+live acceptance and distinguishes carried native limits. Beta.1 candidate `86e5c0b9` is
+historical after the council's durable/restore findings; wait for the beta.2 source/assets,
+strict-origin lane receipt and new candidate pin before executing this route.
 
 ## 4. Start NInfer on the inference host
 
@@ -677,7 +680,14 @@ live acceptance and distinguishes carried native limits.
   --checkpoint-dir "$CHECKPOINTS"
 ```
 
-`start-ninfer.sh` verifies the ready manifest, profile configuration hash, digest-pinned image,
+The beta.2 profile requires `--session-checkpoint-require-origin-auth` and target config
+`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`
+(council `CR-20261025T085950Z-04b603aa`, finding 8; K1 section 103–114).
+The flag needs a configured checkpoint root and an API key of at least 32 bytes. The
+`openssl rand -hex 32` step above generates 64 characters; the fresh schema 3 directory
+has no MAC-less generations. Do not remove the flag to accept an unauthenticated import.
+
+Once the new candidate is qualified, `start-ninfer.sh` verifies the ready manifest, profile configuration hash, digest-pinned image,
 model, and `ninfer-serve` binary, probes the GPU inside the container, and starts `omp-ninfer-beta`
 (`--restart no`, capabilities dropped, `no-new-privileges`, hash-pinned `io_uring` seccomp) on
 `127.0.0.1:18089` with the model and API key mounted read-only (visible to root inside the trusted
@@ -964,9 +974,10 @@ python3 scripts/checkpoint_sync.py import --source <replica-root> --root <checkp
 `checkpoint_sync.py` verifies every manifest-listed file by size and SHA-256, stages outside
 runtime-scanned directories, and publishes the session's `current` pointer last. Each generation's
 `manifest.mac` is an HMAC keyed by the lane's bearer key; pass `--allow-unauthenticated` only for
-legacy local checkpoints, and start servers that receive imports with
-`--session-checkpoint-require-origin-auth` (32-character bearer floor) so unauthenticated or
-altered generations are refused at load.
+legacy local checkpoints, never to bypass the beta.2 release policy. The beta.2 RTX 5090
+profile always starts with `--session-checkpoint-require-origin-auth` (32-byte bearer floor)
+so unauthenticated or altered generations are refused at load. It does not migrate the
+v0.12.x checkpoint store.
 
 For bulk transfer over high-latency or Windows-to-Windows links where single-stream `scp` stalls,
 use [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) (verifies whole-file SHA-256 on both ends):

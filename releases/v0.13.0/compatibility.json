@@ -3,13 +3,16 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.13.0",
   "composition": {
-    "status": "v0.13.0 upstream OMP v18.12.6 client acceptance pending",
+    "status": "v0.13.0 beta.2 restage preparation; F2 inventory, strict-origin qualification and remediation closure pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
     "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
     "ninfer_lifecycle_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
     "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "blockers": [],
+    "blockers": [
+      "Council CR-20261025T085950Z-04b603aa confirmed durable/restore defects; beta.1 candidate 86e5c0b9b30b0ae905a03d9523bbda7094368982 is historical.",
+      "Beta.2 target config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 requires --session-checkpoint-require-origin-auth; F2 runtime/asset/lane identities and fresh acceptance are not yet bound."
+    ],
     "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
   },
   "profiles": [
@@ -41,9 +44,13 @@
         "The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.",
         "No secret, raw log, prompt, or model output crosses the receipt boundary.",
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1."
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
+        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
       ],
       "blockers": [
+        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
         "upstream OMP v18.12.6 client acceptance is pending"
       ],
       "acceptance_receipt": null,
@@ -141,9 +148,13 @@
         "The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.",
         "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1."
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
+        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
       ],
       "blockers": [
+        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
         "upstream OMP v18.12.6 client acceptance is pending"
       ],
       "acceptance_receipt": null,
@@ -242,9 +253,13 @@
         "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
         "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
         "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1."
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "The runtime fields and GPU receipt currently name historical beta.1, not the beta.2 target. Strict-origin config 751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47 is prepared for council finding 8 / K1 section 103\u2013114; it requires a root and an API key of at least 32 bytes (documented generated key: 64 characters).",
+        "Fixed in beta.2 \u2014 pending evidence binding: durable restore/pressure lock order; automatic-save retry/progress; per-record delete durability; restore freshness guard; quota victim preservation; victim payload validation; gate-tag timing. These are prepared remediation descriptions, not F2 qualification.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients."
       ],
       "blockers": [
+        "Beta.2 F2 inventory, strict-origin lane qualification and council remediation closure are pending.",
         "upstream OMP v18.12.6 client acceptance is pending"
       ],
       "acceptance_receipt": null,
@@ -389,5 +404,28 @@
       "status_schema_version": 1,
       "request_log_schema_version": 17
     }
-  ]
+  ],
+  "restage_preparation": {
+    "status": "awaiting-F2-inventory",
+    "target_component": "v0.7.0-qwen38-5090-beta.2",
+    "target_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "historical_candidate_commit": "86e5c0b9b30b0ae905a03d9523bbda7094368982",
+    "historical_runtime_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+    "historical_configuration_sha256": "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
+    "council_sequence": "CR-20261025T085950Z-04b603aa",
+    "required_launch_flag": "--session-checkpoint-require-origin-auth",
+    "strict_origin_contract": "K1 section 103\u2013114; council finding 8; configured root and API key at least 32 bytes. The documented generated key is 64 characters and the fresh schema 3 root has no MAC-less generations.",
+    "remediation_wording_status": "Prepared fixed-in-beta.2 descriptions only; no F2 source, binary, archive, SBOM, image or lane qualification has been supplied or inferred.",
+    "remediation_scope": [
+      "durable restore/pressure lock order",
+      "automatic-save retry/progress",
+      "per-record delete durability",
+      "restore freshness guard",
+      "quota victim preservation",
+      "victim payload validation",
+      "gate-tag timing"
+    ],
+    "principal_limitation": "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+    "stage_release_executed": false
+  }
 }

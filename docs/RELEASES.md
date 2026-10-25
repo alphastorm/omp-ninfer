@@ -13,15 +13,23 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.13.0 — staged rebased RTX 5090 runtime
+## v0.13.0 — beta.2 restage preparation
+
+Council `CR-20261025T085950Z-04b603aa` confirmed durable/restore defects in beta.1.
+Candidate `86e5c0b9` is historical. Beta.2 target profiles add
+`--session-checkpoint-require-origin-auth` (finding 8; K1 section 103–114), canonical config
+`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
+F2 source/assets/image/lane identities and council remediation closure are not yet bound.
+The following beta.1 bindings and measurements are preserved as historical evidence, not beta.2 proof.
 
 The [draft manifest](../releases/v0.13.0/manifest.json),
 [notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
 [qualification](../releases/v0.13.0/qualification.json) bind runtime
 `v0.7.0-qwen38-5090-beta.1`, frozen source `04b603aa` on upstream master `64d10fbf`,
 image `e0419f48` on runtime base `d4377ed0`, published model `81f924d4`, profile
-`qwen38-5090-v0.13.0` / config `c73eb8fb`, and stock OMP 18.12.6. This is a staged draft,
-not the published product. Root authority and live profiles stay on v0.12.2 until the lane pin.
+`qwen38-5090-v0.13.0` / historical config `c73eb8fb`, and stock OMP 18.12.6.
+The root authority/live profiles retain the historical candidate until the next lane pin;
+the published product remains v0.12.2.
 
 Fresh source/runtime gates: host 65/65, dense 11/11, loader/canonical shared MTP/fp8, C2
 restore overlap, four production boots with 20,926 cached tokens/27 identical continuation bytes,
@@ -1811,7 +1819,8 @@ notes-only directory; it refuses an existing manifest or unrelated contents rath
 `--profile-template-dir profiles/v0.13.0` binds the cut's binary/model/config/client identities
 into release-local profile copies. Their new server shape is promoted only by
 `rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount
-or the unified Host budget. The canonical configuration hash is `c73eb8fb` for this exact shape.
+or the unified Host budget. The beta.2 strict-origin target configuration hash is `751d22dc`;
+the earlier non-strict configuration remains only in historical beta.1 receipts.
 
 Staging incorporated the prepared protocol boundaries into the full release-local authority.
 Frozen-source grammar and product smoke now qualify JSON-schema support on the container;

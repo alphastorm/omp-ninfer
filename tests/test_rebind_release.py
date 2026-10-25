@@ -12,7 +12,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+# Root may be a non-eligible preparation; promotion controls use an accepted predecessor.
+CURRENT = "v0.12.2"
+ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
 # The fields verify_release checks against the manifest's OMP component in a root profile.
 ARCHIVE_KEYS = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
 
@@ -27,6 +29,8 @@ class PromoteRootTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
         shutil.copytree(ROOT / "profiles", root / "profiles")
+        for profile in ACCEPTED_PROFILES.glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
         shutil.copytree(ROOT / "examples" / "manual-tunnel", root / "examples" / "manual-tunnel")
         shutil.copytree(ROOT / "releases" / CURRENT, root / "releases" / CURRENT)
         shutil.copytree(ROOT / "scripts", root / "scripts")

@@ -88,17 +88,18 @@ records the host-free checks.
 
 ## Models
 
-### v0.13.0 staged runtime — not yet public-route acceptance
+### v0.13.0 beta.2 restage preparation — qualification pending
 
 The [staged notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
 [candidate protocol matrix](../releases/v0.13.0/COMPATIBILITY.md) describe the next release.
-The published root authority stays on v0.12.2 until the lane pin. Frozen source `04b603aa`,
-server `48d736aa`, runtime image `e0419f48` on base `d4377ed0` and their published receipts
-are bound in the staged manifest, not inferred from a moving branch.
+The published product remains v0.12.2. Council found durable/restore defects in beta.1:
+candidate `86e5c0b9`, source `04b603aa`, server `48d736aa` and image `e0419f48` are historical.
+The root files retain that historical candidate until a new lane pin; F2 source/assets/lane
+qualification are not yet bound. Prepared strict-origin config `751d22dc` is not beta.1 proof.
 
 | Boundary | Rebased RTX 5090 candidate | Default carried native RTX 4090 / RTX 3090 |
 | --- | --- | --- |
-| Runtime base | Neroued/ninfer master `64d10fbf`; frozen source `04b603aa`, component `v0.7.0-qwen38-5090-beta.1` | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
+| Runtime base | Neroued/ninfer master `64d10fbf`; target `v0.7.0-qwen38-5090-beta.2`, F2 identities pending | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
 | Stock client | OMP 18.12.6, source `45c35e40`; fresh acceptance required | Same client; native public-install acceptance reruns |
 | Model | Published container version 3 `81f924d4`, 20,437,521,664 bytes, revision `1cbd84e7221e51186bd7f093a149912d2489625b`; text/vision/MTP/DFlash2 | Unchanged `eec39564`, 18,210,531,328 bytes |
 | Structured output | **Runtime-supported:** xgrammar, real grammar and product-smoke evidence for `text.format` / `response_format` `json_schema`; OMP/public-route acceptance is separate | Rejected with HTTP 400 |
@@ -110,10 +111,12 @@ are bound in the staged manifest, not inferred from a moving branch.
 The published model is downloaded directly; no local model upgrader runs in the release route.
 All 1,184 tensor payloads and all six frontend resources matched the production model upgraded
 locally. Whole-container hashes differ, so only the exact published `81f924d4` artifact is pinned.
-The profile's lifecycle-style configuration identity is `c73eb8fb`; exact binary/archive/SBOM/image
-identities are bound in the staged manifest. Automatic KV is 146,368 tokens; final-profile
-decode is 180.06 tok/s server / 176.49 wall, exact 130,048-token retrieval is 56.921 s wall,
-and idle VRAM is 30,954 MiB. Production restart reuses 20,926 tokens with 27 identical bytes.
+The prepared strict-origin configuration identity is
+`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`, adding
+`--session-checkpoint-require-origin-auth` for council finding 8 and K1 section 103–114.
+The flag needs a checkpoint root and a key of at least 32 bytes; the documented key has 64
+characters. The historical beta.1 measurements (146,368 KV tokens, 180.06 tok/s server decode,
+56.921 s exact retrieval and 20,926-token/27-byte restart reuse) do not qualify this new shape.
 All other tuning stays unchanged apart from K5's unified host
 mapping and explicit removal of the obsolete `--max-private-continuations` catalog flag.
 
@@ -126,6 +129,8 @@ Rebased native components target v0.13.1, not this release. The 24 GB shapes nee
 qualified. Container capabilities never transfer by assumption. Council, new client/public
 acceptance and final pins remain pending; historical powered quality/leak and OMP parallel/fanout
 workloads are not re-measured for v0.13.0.
+
+Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
 
 ### Published v0.12.2 model bindings
 

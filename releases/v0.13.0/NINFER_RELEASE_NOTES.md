@@ -1,8 +1,10 @@
 # OMP NInfer v0.13.0
 
-**Staged draft; not a published product or an accepted public-install candidate.** The runtime
-components are published and their exact bytes are bound below. Council disposition, lane pin,
-stock-client acceptance and public-route pins remain explicit gates. The published product remains
+**Beta.2 restage preparation; F2 inventory and qualification are not yet bound.** Council
+`CR-20261025T085950Z-04b603aa` found release-blocking defects in the beta.1 durable/restore
+subsystem. Candidate `86e5c0b9` and its measurements below are historical, not beta.2 proof.
+New source/archive/SBOM/image/lane identities, remediation disposition, lane pin and fresh
+stock-client/public-route acceptance remain required. The published product remains
 [v0.12.2](../v0.12.2/NINFER_RELEASE_NOTES.md); these notes do not authorize an upgrade or publication.
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release
@@ -10,7 +12,8 @@ layer) to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
 ## What changes
 
-- **Rebased RTX 5090 runtime:** `v0.7.0-qwen38-5090-beta.1`, frozen downstream source
+- **Rebased RTX 5090 runtime:** beta.2 targets `v0.7.0-qwen38-5090-beta.2`; F2 identities
+  will be supplied by the lead. The historical beta.1 downstream source is
   `04b603aae4e9ce3c26f4175cf808180c0f05b5fe`, on Neroued/ninfer master
   `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. This replaces v0.12.2's `1302d639` source
   and `6e8b2e2a` base. Upstream owns scheduling, grammar, context caches and DFlash2 execution;
@@ -36,7 +39,30 @@ layer) to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
   covers asset checksums, Responses wire invariants, the image-aware snapcompact gate and print-mode
   slash dispatch. A loopback stub is not live inference or memory proof.
 
-## Exact component bindings
+## Beta.2 remediation — evidence binding pending
+
+The following “fixed in beta.2” wording records the requested council remediation scope,
+not completed F2 qualification; final source, asset and lane evidence will replace this binding:
+
+- **Fixed in beta.2 — pending binding:** durable restore/pressure lock order.
+- **Fixed in beta.2 — pending binding:** automatic-save retry/progress.
+- **Fixed in beta.2 — pending binding:** per-record delete durability.
+- **Fixed in beta.2 — pending binding:** restore freshness guard.
+- **Fixed in beta.2 — pending binding:** quota victim preservation.
+- **Fixed in beta.2 — pending binding:** victim payload validation.
+- **Fixed in beta.2 — pending binding:** gate-tag timing.
+
+**Strict origin authentication:** both beta.2 launch profiles add
+`--session-checkpoint-require-origin-auth`, as required by council finding 8 and K1
+section 103–114. The canonical target config is
+`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
+The flag requires a checkpoint root and an API key of at least 32 bytes; the documented
+64-character generated key meets that floor. The fresh schema 3 root has no MAC-less
+generations. Unauthenticated imports are refused without mutation, not silently accepted.
+
+Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
+
+## Historical beta.1 component bindings
 
 | Subject | Identity |
 | --- | --- |
@@ -52,7 +78,7 @@ layer) to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 | Model revision | `1cbd84e7221e51186bd7f093a149912d2489625b`, 20,437,521,664 bytes |
 | Model SHA-256 | `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da` |
 | Deployment profile | `qwen38-5090-v0.13.0` |
-| Configuration SHA-256 | `c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f` |
+| Historical beta.1 configuration SHA-256 | `c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f` |
 
 The [manifest](manifest.json), [qualification summary](qualification.json) and release-local
 [compatibility matrix](COMPATIBILITY.md) bind the composition. Published runtime base/image
@@ -63,7 +89,8 @@ receipts do not establish anonymous public download or product installation acce
 The profile keeps 131,072-token context, automatic BF16 KV, DFlash2 with seven draft tokens,
 optimized proposal head, vision, preserved thinking, two active requests, 1,024-token prefill
 chunks, 180-second pending timeout, 24,576 MiB checkpoint quota, 256 MiB staging and
-60,000 ms GPU keep-warm. Frozen-runtime automatic capacity is **146,368 KV tokens**.
+60,000 ms GPU keep-warm and strict checkpoint origin authentication. The beta.1 measured
+automatic capacity was **146,368 KV tokens**; beta.2 requires its own fresh lane receipt.
 
 - **Isolated checkpoint root:** host directory `checkpoints-v013` mounts at `/checkpoints-v013`.
   Never mount, scan, copy or migrate the v0.12.x `checkpoints` generations into this root.
@@ -75,13 +102,16 @@ chunks, 180-second pending timeout, 24,576 MiB checkpoint quota, 256 MiB staging
   24 host-state slots plus 16,384 MiB host KV. `--device-state-slots 2` means two extra slots
   beyond the two active lanes, four total. The 28,672 MiB host floor is unchanged.
 - **Removed control:** K5 rejects `--max-private-continuations`; upstream resource-budgeted
-  retention has no replacement alias or fixed eight-session guarantee. The exact binary accepts
-  all 24 staged profile flags, including the integrated keep-warm worker.
+  retention has no replacement alias or fixed eight-session guarantee. The beta.2 target has
+  25 profile flags, including strict origin auth; its accepted-flag inventory is not yet bound.
 - Saves remain best effort. A crash or expired graceful-stop wait can lose unpublished acceleration
   state. Cross-version/GPU checkpoint migration, universal warm reuse, zero queueing and loss-free
   shutdown are not promised. Qualification does not activate a production upgrade.
 
-## Measured qualification
+## Historical beta.1 measured qualification
+
+These observations retain their actual beta.1 source/configuration. They are not relabelled
+as F2 measurements or proof that the council's defects are fixed.
 
 | Gate | Observed result | Scope |
 | --- | --- | --- |
@@ -137,8 +167,9 @@ SBOM/hardware qualification and public-install acceptance are not yet bound or c
 
 ## Remaining gates and known gaps
 
-- **G4 council:** `review/runtime-ledger.json` is an explicit pending binding for the lead's
-  actual frozen-source ledger/dispositions, not a predecessor approval.
+- **F2 inventory and G4:** bind beta.2 source/assets/image/base, strict-origin CLI and lane
+  receipts, plus the actual council remediation ledger/dispositions. Neither the preparation
+  wording above nor beta.1 measurements establish closure.
 - **Lane and acceptance pins:** the lead pins this clean stage before fresh three-platform
   OMP 18.12.6 acceptance, all five routes/31 blocks, both native public installs and independent
   incumbent/native restoration; then pins platform, composed acceptance and manifest in order.
