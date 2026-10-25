@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bind the rehearsal loopback server without reverse DNS, so publishing child readiness
+  does not depend on the runner's hostname resolver. Keep the existing startup deadline.
 - Ignore command prose when following JSON receipt references; continue rejecting
   rehearsal-class child evidence without treating a shell command as a filesystem path.
 - Treat closed issue #15 as historical route-lifecycle context rather than an open tracker for

@@ -118,6 +118,15 @@ class ReceiptClassTests(unittest.TestCase):
 
 
 class StubTests(unittest.TestCase):
+    def test_loopback_bind_does_not_depend_on_reverse_dns(self):
+        with patch("socket.getfqdn", side_effect=AssertionError("reverse DNS must not run")):
+            server = runner.LoopbackHTTPServer(("127.0.0.1", 0), runner.StubHandler)
+            try:
+                self.assertEqual(server.server_name, "localhost")
+                self.assertGreater(server.server_port, 0)
+            finally:
+                server.server_close()
+
     def test_real_child_restart_restores_response_ids_from_disk(self):
         with tempfile.TemporaryDirectory() as directory:
             stub = runner.Stub(Path(directory), "synthetic-test-key")
