@@ -22,6 +22,8 @@ three client platforms, both native lanes
 
 </div>
 
+[Contributor acceptance and doctor](docs/QUICKSTART.md#contributor-acceptance-and-preflight) run without GPU hardware in rehearsal/offline mode; rehearsal receipts never qualify a release.
+
 [ci]: https://github.com/alphastorm/omp-ninfer/actions/workflows/ci.yml
 [ci-badge]: https://img.shields.io/github/actions/workflow/status/alphastorm/omp-ninfer/ci.yml?branch=main&label=CI&labelColor=0B0E11
 [releases]: https://github.com/alphastorm/omp-ninfer/releases

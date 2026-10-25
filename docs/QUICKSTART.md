@@ -37,6 +37,40 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
   floors are `28672 MiB` / `16384 MiB` inside WSL2 or Linux on RTX 5090, `32768 MiB` / `11264 MiB`
   on native RTX 4090, and an `8192 MiB` pinned host-KV pool on native RTX 3090.
 
+## Contributor acceptance and preflight
+
+You can exercise the stock client without a GPU: run
+`python3 scripts/client_acceptance.py --omp ./omp-darwin-arm64 --omp-sha256 SHA256 --omp-version omp/18.12.1 --local-rehearsal --receipt rehearsal.json`,
+substituting the binary and SHA-256 from the selected release's client descriptor (use
+`omp-windows-x64.exe` or `omp-linux-x64` on those platforms). The runner creates a disposable
+HOME and its own loopback Responses stub, checks a typed read-tool turn, continuation, a real
+stub-process restart, client resume and fail-closed behavior, then removes its temporary state.
+It never modifies your OMP configuration. No model download, Docker or GPU is needed.
+
+The JSON receipt is explicitly `receipt_class: rehearsal`; the release verifier rejects it as
+qualification evidence. It records the exact quickstart heading, block index and block SHA-256
+for the semantic checks exercised, **not** a claim that the install commands or all 31 route
+blocks ran verbatim. Stub restart proves the harness/client path, not NInfer durability or reuse.
+
+For an owner-controlled live lane, omit `--local-rehearsal`, select `--lane`, provide `--endpoint`
+and `--key-file`, and pass `--restart-cmd`, `--stop-cmd`, and `--start-cmd` as JSON argv arrays
+(for example, `'["bash","restart-owned-lane.sh"]'`). Hooks must affect only your owned lane,
+finish only when the route is ready/stopped, and run inside your approved maintenance window.
+The stop test always attempts the start hook in a `finally` block. A live receipt is
+`owner-live`, but does not replace runtime-identity, cache-hit, restoration or release qualification
+gates. See `python3 scripts/client_acceptance.py --help` for options.
+
+Before starting a container lane, run on its inference host:
+`python3 scripts/doctor.py --lane rtx5090 --model MODEL --key-file KEY --omp OMP --client-platform linux-x64`.
+Use `windows-x64` for a native Windows client, add `--hash-model` for the full model SHA-256,
+or `--json` for machine-readable causes and remedies. Native lanes use `--lane rtx4090` or
+`--lane rtx3090` plus `--profile server-config.json --release-spec release-spec.json` from the
+verified package. `--running` checks reachability instead of a free port; `--container NAME`
+also checks the actual container's publication. For a hardware-independent local check, run
+`python3 scripts/doctor.py --offline --json`; skipped hardware checks are never passes.
+Read the [doctor boundaries and remedies](TROUBLESHOOTING.md#named-cause-preflight) before
+changing a running host.
+
 ## OMP 18.12.1 client
 
 Release `v0.12.2` pins unmodified upstream
