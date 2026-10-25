@@ -109,7 +109,10 @@ def validate_receipt_classes(root: Path, release_dir: Path, documents: list[dict
         elif isinstance(value, str) and value.endswith(".json"):
             match = PRODUCT_RAW_URL_RE.fullmatch(value)
             reference = match.group(2) if match else value
-            if "://" in reference:
+            # Receipts also contain prose and complete shell commands ending in
+            # ".json". Only path-shaped references are evidence edges, not those
+            # command strings (which can exceed a filesystem component limit).
+            if not re.fullmatch(r"[A-Za-z0-9_./-]+\.json", reference):
                 return
             for candidate in (root / reference, directory / reference):
                 path = candidate.resolve()

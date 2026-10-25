@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ignore command prose when following JSON receipt references; continue rejecting
+  rehearsal-class child evidence without treating a shell command as a filesystem path.
 - Treat closed issue #15 as historical route-lifecycle context rather than an open tracker for
   the remaining public acceptance runner and WSL preflight.
 - Correct the performance ledger: experimental `3a2fadbd` pair-mixer results did not ship in

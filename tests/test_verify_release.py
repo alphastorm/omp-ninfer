@@ -110,6 +110,19 @@ class FirstReleaseRollbackContractTest(unittest.TestCase):
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            child = root / "child.json"
+            child.write_text('{"receipt_class":"rehearsal"}', encoding="utf-8")
+            errors: list[str] = []
+            VERIFY_RELEASE.validate_receipt_classes(root, root, [{
+                "command": "python3 tool.py \\\n  --argument " + "x" * 512 + ".json",
+                "repository_path": "child.json",
+            }], errors)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("rehearsal receipt is not qualification evidence", errors[0])
+
     def test_rehearsal_cannot_be_bound_as_release_qualification(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)

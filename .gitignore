@@ -18,3 +18,4 @@ acceptance-output/
 # Local agent tooling output
 prompt-exports/
 .ruby-lsp/
+/REPORT.md
