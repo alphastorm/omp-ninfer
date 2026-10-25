@@ -12,7 +12,7 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 
 | Component / upstream | Published position / research status | Upstream base / watch head | Evidence and notes |
 | --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.12.1**, source `291e055836c210f314af3f73f53244e8e9d09de8` | Upstream release [`v18.12.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) (2026-10-17T23:14:21Z) | Replaces 18.10.1 for the native Windows `C:` path fix and two `omp -p` false-success exit fixes; see [client setup](QUICKSTART.md#omp-18121-client), [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md), and [below](#v0122-client-binding--omp-18121). |
+| `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.12.1**, source `291e055836c210f314af3f73f53244e8e9d09de8` | Upstream release [`v18.12.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1) (2026-10-17T23:14:21Z) | Replaces 18.10.1 for the native Windows `C:` path fix and two `omp -p` false-success exit fixes; see [published client setup](https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/docs/QUICKSTART.md#omp-18121-client), [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md), and [below](#v0122-client-binding--omp-18121). |
 | `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.6.16-qwen38-5090-beta.1`, source `1302d63929e400a05e1c9cdb0fc8003a70269825` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Image `6a02feba`, server `548fe239`, model `0634abb0`, profile `qwen38-5090-v0.11.0` (`91a35670`), DFlash2 draft window 7, BF16 KV, two requests in flight; carried from v0.11.0/v0.12.0 ([receipt](../releases/v0.12.2/qualification/rtx5090.json)). |
 | `alphastorm/ninfer` (v0.13.0 prepared container) | Runtime `v0.7.0-qwen38-5090-beta.1`; frozen cut identities pending | Neroued/ninfer master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Profile `qwen38-5090-v0.13.0`, published model `81f924d4`, release-isolated schema 3 checkpoint root; [notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md), [EXP-097](measurements/2026-10-25-exp097-role-corpus.json). This is not the published root authority. |
 | `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0 ([RTX 4090](../releases/v0.12.2/qualification/rtx4090.json), [RTX 3090](../releases/v0.12.2/qualification/rtx3090.json)). |
@@ -103,7 +103,7 @@ Published release **v0.12.2** (2026-10-18) pins unmodified upstream
 [v18.12.1](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1), source
 `291e055836c210f314af3f73f53244e8e9d09de8`, tree `c9d897cc3f06d7cd80f7cacb5144c208efa70f62`
 (published upstream 2026-10-17T23:14:21Z). All NInfer runtime, model, and profile pins carry
-unchanged from v0.12.1; see [`QUICKSTART.md#omp-18121-client`](QUICKSTART.md#omp-18121-client).
+unchanged from v0.12.1; see the [immutable v0.12.2 client guide](https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/docs/QUICKSTART.md#omp-18121-client).
 
 This pull-in fixes defects on documented client paths rather than adding currency for its own
 sake: 18.10.1's native Windows shell builtins resolved a drive-relative operand such as `C:`
@@ -377,7 +377,7 @@ acceptance. The [2026-10-10 source review and receipts](measurements/2026-10-10-
 bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
 selection also retains the per-model contract after a profile is qualified, while the
 historical 18.4.x driver behavior is unchanged.
-See the [current client guide](QUICKSTART.md#omp-18121-client).
+See the [prepared client guide](QUICKSTART.md#omp-18126-client).
 
 The v0.11.0 release bound this upstream client to published runtime source `1302d639` and image
 `6a02feba`, with the retained client and route proofs accepted. EXP-095 above compares the

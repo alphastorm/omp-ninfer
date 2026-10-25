@@ -91,7 +91,7 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 
 1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
 2. **Clone tag `v0.12.2`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.12.1 client](docs/QUICKSTART.md#omp-18121-client)** with the
+3. **[Install the stock Oh My Pi 18.12.1 client](https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/docs/QUICKSTART.md#omp-18121-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
