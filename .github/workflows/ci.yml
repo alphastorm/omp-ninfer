@@ -75,6 +75,10 @@ jobs:
               cls = getattr(importlib.import_module(module), name)
               cls.__unittest_skip__ = True
               cls.__unittest_skip_why__ = "POSIX executable/path/permission fixtures; covered on Ubuntu and macOS"
+          # Linux owns test_concurrency_probe's scheduler/TCP wall-clock fixture assertions.
+          timing = importlib.import_module("test_concurrency_probe").ConcurrencyProbeTests
+          timing.__unittest_skip__ = True
+          timing.__unittest_skip_why__ = "Linux timing-class module; full coverage in release-contract"
           native = importlib.import_module("test_accept_rtx4090_route").NativeLaneTests
           # These two fixtures create a scratch PSDrive named C:, already the system drive here.
           for name in (
@@ -96,7 +100,19 @@ jobs:
         with:
           python-version: "3.13"
       - name: Run contract tests
-        run: python3 -m unittest discover -s tests -v
+        shell: python
+        run: |
+          import importlib
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover("tests")
+          # Explicit platform exclusion: test_concurrency_probe is the Linux timing class.
+          # Do not loosen its clock tolerances; release-contract runs the entire module.
+          timing = importlib.import_module("test_concurrency_probe").ConcurrencyProbeTests
+          timing.__unittest_skip__ = True
+          timing.__unittest_skip_why__ = "Linux timing-class module; full coverage in release-contract"
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          raise SystemExit(not result.wasSuccessful())
 
   acceptance-dry-run:
     runs-on: ubuntu-latest
