@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer benchmarks — measured, receipted lane qualifications</title>
-<meta name="description" content="Receipt-bound measurements for OMP NInfer v0.12.2 (2026-10-18) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
+<meta name="description" content="Receipt-bound measurements for OMP NInfer v0.13.0 (2026-10-25) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/benchmarks/">
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer benchmarks — measured, receipted lane qualifications">
-<meta property="og:description" content="Receipt-bound measurements for OMP NInfer v0.12.2 (2026-10-18) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
+<meta property="og:description" content="Receipt-bound measurements for OMP NInfer v0.13.0 (2026-10-25) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/benchmarks/">
 <meta name="twitter:card" content="summary">
@@ -18,9 +18,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.12.2 (published 2026-10-18) with stock Oh My Pi 18.12.1 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.12.2",
- "datePublished": "2026-10-18",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.0 (published 2026-10-25) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.13.0",
+ "datePublished": "2026-10-25",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -44,34 +44,36 @@
 <p class="lede">Every result below names its release, hardware lane, and measurement boundary.
 Runtime qualification and public-route acceptance are distinct, and warm/cold figures compare
 retained state against a fresh cold start, never an ordinary in-process cached follow-up.</p>
-<p class="verified">v0.12.2 (stock Oh My Pi 18.12.1, published 2026-10-18) adds no new performance
-measurement: runtime qualifications carry unchanged from v0.11.0 (RTX 5090) and v0.12.0 (native
-RTX 4090 and RTX 3090). Method, charts, and the community table:
+<p class="verified">v0.13.0 (stock Oh My Pi 18.12.6, published 2026-10-25) binds fresh RTX 5090
+runtime qualification on upstream master <code>64d10fbf</code> (source <code>6d4d0a05</code>, model
+<code>81f924d4</code>) and carries the v0.12.0/v0.12.2 native RTX 4090 and RTX 3090 runtime
+qualifications unchanged. Method, charts, EXP-097 provider comparison (101.09% median role-corpus
+decode vs v0.12.2's <code>1302d639</code> at <code>c2dbcbae</code>, with attributed structured-output p95 and 64K continuation caveats), and the community table:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a>.</p>
 
-<h2>Current qualified runtime numbers by lane (carried into v0.12.2)</h2>
+<h2>Current qualified runtime numbers by lane (v0.13.0)</h2>
 <table>
 <tr><th>Lane</th><th>Runtime &amp; profile</th><th>130,048-token retrieval</th><th>Decode</th><th>Receipt</th></tr>
 <tr>
 <td>RTX 5090 container (Windows 11 + Docker Desktop/WSL2)</td>
-<td><code>v0.6.16-qwen38-5090-beta.1</code> · <code>qwen38-5090-v0.11.0</code> (source <code>1302d639</code>, image <code>6a02feba</code>, server <code>548fe239</code>, model <code>0634abb0</code> · 20.4&nbsp;GB; DFlash2 draft window 7, BF16 KV, two requests in flight)</td>
-<td><strong>58.89&nbsp;s</strong> cold (exact retrieval at 131,072 ceiling)</td>
-<td><strong>179.79&nbsp;tok/s</strong> server (<strong>177.96&nbsp;tok/s</strong> wall over 2,048 tokens; 0.239 DFlash2 acceptance, 2.67 tokens/round)</td>
-<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/releases/v0.12.2/qualification/rtx5090.json">rtx5090.json</a> (2026-10-10)</td>
+<td><code>v0.7.0-qwen38-5090-beta.2</code> · <code>qwen38-5090-v0.13.0</code> (source <code>6d4d0a05</code> on <code>64d10fbf</code>, image <code>5d10a998</code>, server <code>9790a004</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, two requests in flight)</td>
+<td><strong>56.99&nbsp;s</strong> cold (56.994&nbsp;s / 2,281.8&nbsp;tok/s wall, 56.411&nbsp;s server; exact retrieval at 131,072 ceiling)</td>
+<td><strong>179.86&nbsp;tok/s</strong> server (<strong>176.27&nbsp;tok/s</strong> wall over 2,048 tokens; 0.244 DFlash2 acceptance, 2.71 tokens/round)</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/qualification/rtx5090.json">rtx5090.json</a> (2026-10-25)</td>
 </tr>
 <tr>
 <td>RTX 4090 native Windows 11</td>
 <td><code>v0.6.11-qwen38-4090-beta.1</code> · <code>qwen38-4090-native-v0.6.11-beta.1</code> (source <code>cad19767</code>, package <code>52687044</code>, server <code>76f35b74</code>, model <code>eec39564</code> · 18.2&nbsp;GB; MTP3, INT8 KV, 11,264&nbsp;MiB host KV, one request at a time)</td>
 <td><strong>91.03&nbsp;s</strong> (exact retrieval at 131,072 ceiling)</td>
 <td><strong>158.66&nbsp;tok/s</strong> C1 decode (1,024 tokens, 87.59% MTP acceptance; 2,109&nbsp;tok/s prefill)</td>
-<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/releases/v0.12.2/qualification/rtx4090.json">rtx4090.json</a> (2026-10-11)</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/qualification/rtx4090.json">rtx4090.json</a> (2026-10-11)</td>
 </tr>
 <tr>
 <td>RTX 3090 native Windows 11</td>
 <td><code>v0.6.3-qwen38-3090-beta.1</code> · <code>qwen38-3090-native-v0.6.3-beta.1</code> (source <code>cad19767</code>, package <code>74120de0</code>, server <code>bca236e5</code>, model <code>eec39564</code> · 18.2&nbsp;GB; MTP3, INT8 KV, 8,192&nbsp;MiB host KV, 300&nbsp;W serving cap, one request at a time)</td>
 <td><strong>220.52&nbsp;s</strong> (exact retrieval at 131,072 ceiling)</td>
 <td><strong>102.41&nbsp;tok/s</strong> C1 decode (1,024 tokens, 93.43% MTP acceptance)</td>
-<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/releases/v0.12.2/qualification/rtx3090.json">rtx3090.json</a> (2026-10-11)</td>
+<td><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/qualification/rtx3090.json">rtx3090.json</a> (2026-10-11)</td>
 </tr>
 </table>
 <p>Each lane is qualified on its own model artifact, speculative backend, and benchmark fixture
@@ -79,7 +81,7 @@ RTX 4090 and RTX 3090). Method, charts, and the community table:
 4090 and RTX 3090). Never transfer one lane’s numbers or capabilities to another, and do not read
 single-sample qualification gates as a cross-GPU ranking or a head-to-head comparison against vLLM
 or llama.cpp.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.12.2/releases/v0.12.2/acceptance/documented-routes.json">v0.12.2 documented-route acceptance</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/acceptance/documented-routes.json">v0.13.0 documented-route acceptance</a> ·
 <a href="../status/">release status and lane scope</a>.</p>
 
 <h2>Historical restart measurements: v0.4.0 (2026-08-30, one RTX 5090)</h2>
@@ -98,7 +100,7 @@ or a restart speed-up ratio.</p>
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 experiment ledger: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md">docs/PERFORMANCE.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">Updated 2026-10-18 for published v0.12.2 (2026-10-18): carried v0.11.0/v0.12.0 runtime qualification receipts and labelled historical v0.4.0 restart proof.</p>
+<p class="verified">Updated 2026-10-25 for published v0.13.0 (2026-10-25): fresh RTX 5090 beta.2 runtime qualification, carried v0.12.0/v0.12.2 native runtime receipts, and labelled historical v0.4.0 restart proof.</p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

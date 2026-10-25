@@ -13,15 +13,16 @@ The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The next release's fragments target **v0.13.0 / OMP 18.12.6** only after the lane pin.
-The RTX 5090 profile moves to `qwen38-5090-v0.13.0`, model container version 3 `81f924d4`
-and a fresh host `checkpoints-v013` mounted at `/checkpoints-v013`; prior server sessions replay
-from OMP transcripts, never from the old checkpoint root. Native default components are unchanged.
-JSON-schema output is implemented on the rebased container but awaits live acceptance; carried
-native Chat/Responses tool names remain limited to 64 characters versus the rebased 128.
-No new-client fleet qualification is claimed; installation eligibility follows
-the exact manifest ready gate. Published v0.12.1 / OMP 18.10.1 proof remains separate. The release uses the checksummed binary from the
-[quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
+The current fragments target **v0.13.0 / OMP 18.12.6**.
+The RTX 5090 profile uses `qwen38-5090-v0.13.0` (`751d22dc`), model container version 3 `81f924d4`,
+and host directory `checkpoints-v013` mounted at `/checkpoints-v013` with mandatory
+`--session-checkpoint-require-origin-auth`; prior server sessions replay from OMP transcripts, never
+from the old checkpoint root. Native RTX 4090 components carry unchanged from v0.12.2 (`v0.6.11`,
+model `eec39564`). JSON-schema output and 128-character Chat/Responses tool names are qualified on
+the rebased RTX 5090 container lane, while carried native lanes retain HTTP 400 schema refusal and
+64-character tool names. No multi-machine fleet completed-work qualification is claimed for v0.13.0;
+per-lane installation eligibility follows the exact manifest ready gate. The release uses the
+checksummed binary from the [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
 `models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not
 OMP configuration. Fill their `<...>` placeholders from your own deployment. The exact package,

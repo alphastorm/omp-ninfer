@@ -49,10 +49,10 @@ OMP remains responsible for tool approval and workspace boundaries.
 5. OMP uses explicit local provider routes (`ninfer-beta/q38-ninfer`,
    `ninfer-native-4090/qwen3.8-27b`, or `ninfer-native-3090/q38-ninfer`) with retries, model
    fallback, and automatic client self-updates disabled (`examples/manual-tunnel/fail-closed.yml`).
-6. The upstream OMP 18.12.1 binaries, lane-specific Qwen3.8 27B model artifacts (`0634abb0` on
+6. The upstream OMP 18.12.6 binaries, lane-specific Qwen3.8 27B model artifacts (`81f924d4` on
    RTX 5090 and `eec39564` on the native lanes), NInfer container image and native packages, server
    binaries, seccomp profile, runtime configurations, and qualification summaries are pinned by
-   immutable SHA-256 digests and commits in `releases/v0.12.2/manifest.json` before release status
+   immutable SHA-256 digests and commits in `releases/v0.13.0/manifest.json` before release status
    becomes `ready`.
 7. The NInfer container image is pulled by OCI manifest digest (`@sha256:`), never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
@@ -75,9 +75,9 @@ NInfer retains bounded in-memory Responses and cache state and writes durable se
 checkpoints across all three qualified lanes:
 
 - **RTX 5090 container lane:** Checkpoints and request logs (`requests.jsonl`) live in
-  operator-owned host directories (`chmod 700`, default `~/.local/share/omp-ninfer/checkpoints` and
-  `~/.local/state/omp-ninfer`) bind-mounted into the container at `/checkpoints` (24,576 MiB quota,
-  256 MiB staging) and `/logs`, written as the invoking user via `io_uring` and `O_DIRECT`.
+  operator-owned host directories (`chmod 700`, default `~/.local/share/omp-ninfer/checkpoints-v013` and
+  `~/.local/state/omp-ninfer`) bind-mounted into the container at `/checkpoints-v013` (24,576 MiB quota,
+  256 MiB staging, schema 3, mandatory `--session-checkpoint-require-origin-auth`) and `/logs`, written as the invoking user via `io_uring` and `O_DIRECT`.
 - **Native Windows RTX 4090 and RTX 3090 lanes:** Checkpoints, release metadata, `last-stop.json`,
   and request JSONL logs live under protected state roots
   (`%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`), while
@@ -90,8 +90,10 @@ Checkpoints and replicas are origin-authenticated, not encrypted. Each published
 `manifest.mac`, an HMAC over the manifest bytes keyed from material derived from the lane's bearer
 key and stored outside the checkpoint root. `scripts/checkpoint_sync.py` verifies every file by
 byte count and SHA-256 before atomic rename publication, and the runtime refuses or quarantines
-modified or unauthenticated generations at load (`--session-checkpoint-require-origin-auth`
-requires a valid MAC on roots that receive imports). Because checkpoint payloads and request logs
+modified or unauthenticated generations at load (`--session-checkpoint-require-origin-auth` is
+mandatory in the `qwen38-5090-v0.13.0` profile and requires a valid MAC on at least a 32-byte
+bearer key; within one API-key principal, `prompt_cache_key` names a session capability, so use
+unique high-entropy keys and never share that principal among mutually untrusted clients). Because checkpoint payloads and request logs
 contain unencrypted session state on disk, treat checkpoint directories, replica storage, and log
 directories as sensitive user data even though public qualification receipts record content-safe
 aggregates only.
@@ -121,7 +123,7 @@ defect.
 
 ## Artifact verification
 
-Run from the exact release tag (`v0.12.2`):
+Run from the exact release tag (`v0.13.0`):
 
 ```sh
 python3 scripts/verify_release.py --require-ready

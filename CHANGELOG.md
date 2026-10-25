@@ -7,55 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.13.0] - staged draft
+### Changed
 
-### Beta.2 council remediation
+- Mark v0.13.0 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
 
-- Replace initial candidate `86e5c0b9` with exact beta.2 source `6d4d0a05`, component
-  `v0.7.0-qwen38-5090-beta.2`, server `9790a004`, archive `52dd3be7` and image `5d10a998`.
-  Council `CR-20261025T085950Z-04b603aa` closes after verified localized remediation; the
-  unchanged ledger retains all findings, accepted/deferred residuals and native limits.
-- Fix restore/pressure lock order, progress-sensitive bounded automatic-save retries, gate-tag/
-  native-owner timing, per-record delete survivors, restore freshness, quota-current preservation
-  and full victim payload validation. All 13 named regressions pass in the 66-test host gate.
-- Bind `--session-checkpoint-require-origin-auth` in both launch routes for finding 8
-  and K1 section 103–114. Qualified canonical configuration:
-  `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
-  The fresh schema 3 root and documented 64-character key meet the existing strict-origin contract.
-- Record the remaining within-principal boundary: `prompt_cache_key` is a session capability;
-  use unique high-entropy keys and never share an API-key principal among mutually untrusted clients.
+## [0.13.0] - 2026-10-25
+
+### Added
+
+- Bind fresh v0.13.0 acceptance on frozen candidate `b1a54dc9`: all five documented routes (31
+  byte-identical blocks), three stock OMP 18.12.6 clients, and both carried native Windows public
+  installs (RTX 4090 19/19 gates, RTX 3090 18/18 gates) passed with independent host restoration
+  (403.372 s RTX 5090 window hold; production was not upgraded during the acceptance window).
 
 ### Changed
 
-- Stage v0.13.0's RTX 5090 runtime `6d4d0a05` on upstream master `64d10fbf`, published model container
-  version 3 `81f924d4`, `qwen38-5090-v0.13.0` profile and isolated `checkpoints-v013` root.
-  Prior server checkpoints are not migrated; saved client transcripts replay for a fresh prefill.
-  K5 replaces the separate Host budgets and rejects the obsolete private-catalog limit.
-  All other tuning, including keep-warm, remains explicit in staged profiles.
-- Bind the rebased container's grammar/product-smoke-supported JSON-schema output, 128-character
-  tool names, non-blocking export, status schema 2 and request-log schema 30. Fresh runtime gates:
-  host 66/66 and dense 11/11, real 20,926-token/27-byte exact restart, C2 pressure/restore overlap,
-  amended 32 GB startup with 146,368 automatic KV tokens, and 25 accepted profile flags.
-- Carry the unchanged native packages and their 64-character/no-schema-output limits. Rebased
-  natives target v0.13.1 and need the 24 GB admission-headroom amendment plus separate package
-  qualification. Root authority/profile promotion waits for the lead's lane pin.
-- Attach complete EXP-097 evidence: 101.09% role-corpus median decode, original strict-tail FAIL
-  and founder-amended PASS, structured-output p95 ratio 1.126, serial-role/configured-concurrency
-  distinction and the 64K continuation regression. The measurement's canonicalization was
-  diagnostic-only and reverted; integration later landed sorted-key serialization `0abe7c8e5`
-  with host byte pins, without rerunning the complete comparison.
+- Rebase the RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, server
+  `9790a004`, archive `52dd3be7`, image `5d10a998` on base `d4377ed0`) onto upstream
+  `Neroued/ninfer` master `64d10fbf` with published model container version 3 `81f924d4`
+  (`qwen3_8_27b-v3.ninfer`, revision `1cbd84e7`), profile `qwen38-5090-v0.13.0`, and canonical
+  strict-origin configuration `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`
+  (`--session-checkpoint-require-origin-auth`). The schema 3 checkpoint store uses isolated host
+  directory `checkpoints-v013` mounted at `/checkpoints-v013`; prior v0.12.x checkpoints are kept
+  for rollback and prior sessions replay from OMP transcripts. A unified 21,881,405,440-byte
+  (`20867.734375 MiB`) Host context budget replaces the separate host-slot/host-KV flags and removes
+  the obsolete `--max-private-continuations` flag.
+- Qualify enforced JSON-schema structured output (`text.format` and `response_format` `json_schema`),
+  128-character Chat/Responses tool names, non-blocking checkpoint export, status schema 2, and
+  request-log schema 30 on the RTX 5090 container lane. Fresh runtime gates pass 66/66 host and
+  11/11 dense test executables (including 13 regressions covering restore/pressure lock order,
+  progress-sensitive automatic-save retries, gate-tag/native-owner timing, per-record delete
+  survivors, restore freshness, quota-current preservation, and victim payload validation),
+  four-boot schema 3 restart reuse of 20,926 cached tokens / 27 byte-identical continuation bytes,
+  32 GB C2 restore-overlap (38.0356 s, 1,074,790,400 bytes headroom) with 146,368 automatic BF16 KV
+  tokens, 179.86 tok/s server decode, and 56.994 s cold exact 130,048-token retrieval.
+- Record the within-principal session boundary: `prompt_cache_key` is a session capability within
+  one API-key principal; use unique high-entropy keys and never share an API-key principal among
+  mutually untrusted clients.
+- Carry the unchanged v0.12.2 native Windows RTX 4090 (`v0.6.11-qwen38-4090-beta.1`) and RTX 3090
+  (`v0.6.3-qwen38-3090-beta.1`) packages and model `eec39564` along with their 64-character
+  tool-name and HTTP 400 JSON-schema limits; rebased native packages target `v0.13.1` (requiring the
+  24 GB `--admission-headroom-mib` amendment and independent native packaging/qualification).
+- Attach complete EXP-097 provider decode comparison evidence: 101.09% role-corpus median decode
+  (`342.150` vs `338.448 tok/s` across 84 serial role cases), original strict-tail FAIL and
+  founder-amended PASS, structured-output p95 ratio 1.126, serial-role/configured-concurrency
+  distinction, and the 64K continuation regression (`335.332 → 290.781 tok/s`). The measurement's
+  canonicalization was diagnostic-only and reverted; integration later landed sorted-key
+  serialization `0abe7c8e5` with host byte pins, without rerunning the complete comparison.
 - Replace or drop every inherited changed-runtime receipt, retaining only unchanged native
-  qualification/checksums; bind beta.2 image/package receipts and explicit unchanged-base reuse.
-  Final-profile measurements record 179.86 tok/s decode and exact 130,048-token retrieval in
-  56.994 s. Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
-  Fresh client/public-install evidence and immutable pins remain separate from closed council review.
+  qualification and checksums. Historical powered quality/leak and OMP parallel/fanout latency are
+  not re-measured for v0.13.0.
 - Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site and brand assets; front-door install links
   return to the guide on `main`.
 - Preserve the approved v0.13.0 sync contract and release gates without changing published pins.
 - Review stock OMP 18.12.6 assets against upstream checksums, compare its Responses client paths
   with 18.12.1 on a loopback stub, exercise snapcompact's image-wire gate and `omp -p /compact`,
-  and prepare the three-platform `--omp-component` descriptor. No live qualification is claimed.
+  and bind the three-platform `--omp-component` descriptor; live route and client acceptance is recorded separately in the release acceptance receipts.
 - Refresh upstream-watch positions: record Don-Chad's community adoption, track ashalliants
   separately, replace the inactive UDPSendToFailed 4090 watch with sergiuszm's `rtx4090-port`,
   and compare the stock client against the actually shipped 18.12.1 source.
@@ -2399,8 +2409,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...HEAD
-[0.13.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.11.0...v0.12.0

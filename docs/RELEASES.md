@@ -5,56 +5,58 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.12.2)](#v0122--stock-omp-18121-unchanged-runtime-bindings) ·
-[Previous v0.12.1](#v0121--stock-omp-18101-unchanged-runtime-bindings) ·
+**Navigation:** [Current release (v0.13.0)](#v0130--rebased-rtx-5090-runtime-stock-omp-18126-carried-native-lanes) ·
+[Previous v0.12.2](#v0122--stock-omp-18121-unchanged-runtime-bindings) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.13.0 — staged council-remediated beta.2
+## v0.13.0 — rebased RTX 5090 runtime, stock OMP 18.12.6, carried native lanes
 
-Council `CR-20261025T085950Z-04b603aa` closes its initial review after verified localized
-remediation at `6d4d0a05`; the actual [ledger](../releases/v0.13.0/review/runtime-ledger.json)
-retains original blockers and residual dispositions. Initial candidate `86e5c0b9` is historical.
-Qualified beta.2 profiles add
-`--session-checkpoint-require-origin-auth` (finding 8; K1 section 103–114), canonical config
-`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`.
-Fresh beta.2 source/assets/image/lane identities and strict-profile proof are bound, not inferred
-from the initial candidate. Fresh RTX 5090 public/client acceptance and final pins remain separate.
+Published **2026-10-25** as GitHub `Latest`, succeeding `v0.12.2` (published 2026-10-18). Unmodified
+upstream OMP **18.12.6** (`45c35e40`, tree `8a90a1b4`) replaces 18.12.1. The RTX 5090 container lane
+rebases onto upstream `Neroued/ninfer` master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` as
+component `v0.7.0-qwen38-5090-beta.2` (source `6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff`, image
+`ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd`
+on runtime base `d4377ed0`, server `9790a004`, published model container version 3 `81f924d4` at
+revision `1cbd84e7`, deployment profile `qwen38-5090-v0.13.0`, configuration `751d22dc`). It adds
+enforced JSON-schema structured output (`text.format` and `response_format` `json_schema`),
+128-character Chat/Responses tool names, non-blocking checkpoint export, a shared
+21,881,405,440-byte Host context budget (`20867.734375 MiB`), and an isolated schema 3 checkpoint
+directory (`checkpoints-v013` mounted at `/checkpoints-v013`) with mandatory
+`--session-checkpoint-require-origin-auth` (v0.12.x sessions resume by replaying OMP transcripts).
 
-The [draft manifest](../releases/v0.13.0/manifest.json),
-[notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
-[qualification](../releases/v0.13.0/qualification.json) bind runtime
-`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` on upstream master `64d10fbf`,
-image `5d10a998` on unchanged runtime base `d4377ed0`, published model `81f924d4`, profile
-`qwen38-5090-v0.13.0` / strict-origin config `751d22dc`, and stock OMP 18.12.6.
-The root authority/live profiles retain the historical candidate until the next lane pin;
-the published product remains v0.12.2.
-
-Fresh source/runtime gates: host 66/66 including 13 named remediation cases, dense 11/11,
-loader/canonical shared MTP/fp8, C2
-restore overlap, four production boots with 20,926 cached tokens/27 identical continuation bytes,
-and amended 32 GB startup with 146,368 automatic KV tokens. Final-profile decode is 179.86 tok/s;
-exact 130,048-token retrieval takes 56.994 s wall. Grammar and product smoke qualify JSON-schema
-output on the container, not on the carried native packages. EXP-097 separately clears the 96%
-median floor at 101.09%; its source/model and measured tail/depth regressions remain explicit.
-
-Schema 3 uses `/checkpoints-v013`; old roots are untouched and prior sessions replay from OMP
-transcripts. Native `v0.6.11` / `v0.6.3` packages and model `eec39564` carry unchanged.
-Valid OMP 18.12.6 native-window evidence remains to bind; v0.12.2 client acceptance is not
-substituted for it. Rebased natives target v0.13.1:
-24 GB shapes need `--admission-headroom-mib` (640 MiB / 768 MiB), then their own packaging
-and hardware qualification. G4 is closed. Lane pin, fresh beta.2 routes/client platforms,
-independent restoration, valid unchanged-native evidence binding and final pins remain unbound.
-Historical powered quality/leak and OMP parallel/fanout latency are not re-measured.
+On the final profile, the RTX 5090 lane records exact 130,048-token cold retrieval in **56.994 s**
+(**57.0 s**, **2,281.8 tok/s** wall, 56.411 s server), 2,048-token decode at **179.86 tok/s**
+server-side (**176.27 tok/s** wall, 0.244 DFlash2 acceptance, 2.71 tokens/round), four-boot schema 3
+restart reuse of **20,926 cached tokens** / **27 byte-identical continuation bytes**, 32 GB C2
+restore-overlap in **38.0356 s** with **1,074,790,400 bytes** headroom, and 66/66 host and 11/11
+dense test executables. Separately, EXP-097's provider comparison (`c2dbcbae` / model `facba3bd`,
+persistence disabled, fixed 131,072-token KV) measured **101.09%** median decode parity against
+v0.12.2's `1302d639` across 84 serial role cases
+([`2026-10-25-exp097-role-corpus.json`](measurements/2026-10-25-exp097-role-corpus.json)).
+The native Windows RTX 4090 (`v0.6.11-qwen38-4090-beta.1`) and RTX 3090
+(`v0.6.3-qwen38-3090-beta.1`) packages and model `eec39564` carry unchanged from v0.12.2 (retaining
+HTTP 400 JSON-schema refusal and 64-character tool names); rebased native runtimes target `v0.13.1`.
+Fresh platform, documented-route, and native public-install acceptance passed on frozen candidate
+`b1a54dc9` across all five documented routes (31 blocks), three stock 18.12.6 clients, and both
+native public installs (7/7 blocks and 19/19 route-behavior checks on RTX 4090; 7/7 blocks and
+18/18 route-behavior checks on RTX 3090), with independent restoration (403.372 s RTX 5090
+acceptance-window hold; [documented routes](../releases/v0.13.0/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.13.0/acceptance/composed-external-installation.json),
+[restoration](measurements/2026-10-25-v0130-acceptance-restoration.json)). See the
+[release notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md),
+[manifest](../releases/v0.13.0/manifest.json), and
+[qualification](../releases/v0.13.0/qualification.json).
 
 ## v0.12.2 — stock OMP 18.12.1, unchanged runtime bindings
 
-Published **2026-10-18** as GitHub `Latest`, succeeding `v0.12.1` (published 2026-10-12). Unmodified
-upstream OMP **18.12.1** (`291e0558`) replaces 18.10.1. All runtime component bytes, models,
-serving profiles, and the one-lane-at-a-time two-GPU native topology carry unchanged from
+Published **2026-10-18** as GitHub `Latest`, succeeding `v0.12.1` (published 2026-10-12);
+superseded by `v0.13.0` on 2026-10-25. Unmodified upstream OMP **18.12.1** (`291e0558`) replaces
+18.10.1. All runtime component bytes, models, serving profiles, and the one-lane-at-a-time two-GPU
+native topology carry unchanged from
 v0.12.1. 18.12.1 contains the upstream fix for the native Windows client resolving a
 drive-relative operand such as `C:` against its start directory, which let `rm -rf C:` delete it
 ([#15511](https://github.com/can1357/oh-my-pi/issues/15511)), and two `omp -p` false-success exit
@@ -91,15 +93,16 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.12.2`, published 2026-10-18 (`Latest`); predecessor `v0.12.1` (2026-10-12) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.13.0`, published 2026-10-25 (`Latest`); predecessor `v0.12.2` (2026-10-18) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
-pinned stock OMP 18.8.7 and v0.12.1 pinned 18.10.1; current `v0.12.2` pins stock OMP 18.12.1. All
-five documented routes and fresh platform-client acceptance passed on the published components; see
-[documented-route acceptance](../releases/v0.12.2/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.12.2/acceptance/composed-external-installation.json).
+pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; current `v0.13.0` pins
+stock OMP 18.12.6. All five documented routes and fresh platform-client acceptance passed on the
+published components; see
+[documented-route acceptance](../releases/v0.13.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.13.0/acceptance/composed-external-installation.json).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -115,10 +118,88 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.13.0 public release — rebased RTX 5090 runtime and stock OMP 18.12.6 with carried native lanes
+
+Published 2026-10-25; the current GitHub `Latest` release (predecessor `v0.12.2`, published
+2026-10-18).
+
+The [release notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
+[manifest](../releases/v0.13.0/manifest.json) bind unmodified upstream OMP **18.12.6** (upstream
+release `v18.12.6`, release ID `420053191`, source commit
+`45c35e40c46166dc726ccc52f5d27f40f2449f99`, source tree
+`8a90a1b48b370649bd3f026d5f609e500626785c`;
+[client descriptor](../releases/v0.13.0/qualification/client-components.json)) in place of 18.12.1:
+
+| Platform | Asset | SHA-256 | Bytes |
+| --- | --- | --- | ---: |
+| macOS arm64 | `omp-darwin-arm64` | `cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58` | 197,245,984 |
+| Windows x64 | `omp-windows-x64.exe` | `73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef` | 224,254,976 |
+| Linux x64 | `omp-linux-x64` | `85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4` | 256,702,432 |
+
+Per-model `compat.statefulResponses: true`, custom-host auto image detail, fail-closed
+configuration, concurrency, and compaction settings are retained; `PI_OPENAI_STATEFUL` must be
+absent. The [client upgrade review](measurements/2026-10-25-omp-18126-client-upgrade-review.json)
+records the three asset checksums, Responses wire invariants, image-aware snapcompact gate, and
+print-mode slash dispatch.
+
+Runtime, model, and profile bindings in `v0.13.0`:
+
+- **RTX 5090 container:** `v0.7.0-qwen38-5090-beta.2`, source
+  `6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff` on upstream master
+  `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`, binary archive
+  `52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d` (547,088,535 bytes), source
+  archive `d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631` (12,229,537 bytes,
+  source tag `v0.7.0-qwen38-5090-source.2`), server
+  `9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55`, SPDX SBOM
+  `0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670`, image
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd`
+  on runtime base
+  `ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e`,
+  published model container version 3
+  `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da` (20,437,521,664 bytes,
+  revision `1cbd84e7221e51186bd7f093a149912d2489625b`, downloaded to `qwen3_8_27b-v3.ninfer`),
+  profile `qwen38-5090-v0.13.0`, configuration
+  `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47` (DFlash2 draft window 7, BF16
+  KV with 146,368 automatic tokens, two requests in flight plus two extra device-state slots,
+  shared 21,881,405,440-byte Host context budget, schema 3 checkpoint directory `checkpoints-v013`
+  at `/checkpoints-v013`, mandatory `--session-checkpoint-require-origin-auth`, non-blocking
+  checkpoint export, JSON-schema structured output, 128-character tool names;
+  [lane receipt](../releases/v0.13.0/qualification/rtx5090.json): 130,048-token cold exact retrieval
+  in 56.994 s / 2,281.8 tok/s wall, 2,048-token decode at 179.86 tok/s server / 176.27 tok/s wall,
+  0.244 DFlash2 acceptance, 2.71 tokens/round, protocol across restart; separate EXP-097 provider
+  comparison at `c2dbcbae` / model `facba3bd` measured 101.09% median decode vs v0.12.2 in
+  [`2026-10-25-exp097-role-corpus.json`](measurements/2026-10-25-exp097-role-corpus.json)).
+- **RTX 4090 native Windows (carried unchanged from v0.12.2):** `v0.6.11-qwen38-4090-beta.1`,
+  package `526870444c71add22c3dff8beb0c767aab2cbbb98870ec060398e6b7243de3a2`, server `76f35b74`,
+  source `cad1976764fded5fbe96930c36bed0570b3d3de7`, model
+  `eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e` (18,210,531,328 bytes;
+  rollback `not_applicable` on the two-GPU host;
+  [lane receipt](../releases/v0.13.0/qualification/rtx4090.json)).
+- **RTX 3090 native Windows (carried unchanged from v0.12.2):** `v0.6.3-qwen38-3090-beta.1`,
+  package `74120de0e6b1037e3c994e21b299f5cf4b98d9a3afa4e137d1c2ce8b57bfc297`, server `bca236e5`,
+  shared source `cad19767` and native model `eec39564` (retaining qualified two-direction rollback
+  against `v0.6.2`; [lane receipt](../releases/v0.13.0/qualification/rtx3090.json)).
+
+Fresh authorized-window acceptance passed on frozen candidate
+`b1a54dc9fcf000c7eac09890d0503997988f9dd1`: all five documented routes / 31 blocks (RTX 5090 host
+2/2, macOS 10/10 preview, Windows 5/5, native RTX 4090 7/7 blocks and 19/19 route-behavior checks
+with rollback `not_applicable`, native RTX 3090 7/7 blocks and 18/18 route-behavior checks retaining
+v0.6.2 rollback), three newly downloaded stock 18.12.6 clients (typed tool turn, exact continuation,
+fail-closed request, plus macOS/Windows image input against RTX 5090), and both native public
+installs. The RTX 5090 acceptance-window hold completed in 403.372 s, and independent restoration
+verified the incumbent
+image/mounts/health/restart policy and checkout/key plus native canonical
+state/ACLs/tasks/holds/client files/power, mutable directory presence, and documented staging;
+production was not upgraded during the acceptance window. Rebased native runtimes on `64d10fbf`
+target `v0.13.1`.
+[Documented routes](../releases/v0.13.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.13.0/acceptance/composed-external-installation.json) ·
+[Restoration](measurements/2026-10-25-v0130-acceptance-restoration.json) ·
+[Qualification](../releases/v0.13.0/qualification.json).
+
 ### v0.12.2 public release — stock OMP 18.12.1 with unchanged GPU lanes
 
-Published 2026-10-18; the current GitHub `Latest` release (predecessor `v0.12.1`, published
-2026-10-12).
+Published 2026-10-18; superseded as GitHub `Latest` by `v0.13.0`.
 
 The [release notes](../releases/v0.12.2/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.12.2/manifest.json) bind unmodified upstream OMP **18.12.1** (upstream
@@ -1815,23 +1896,21 @@ Authorization for those external effects remains separate and bounded.
 
 ## Candidate freeze
 
-### v0.13.0 staged server shape
+### v0.13.0 server shape and profile migration
 
-`releases/v0.13.0` now contains the staged manifest, fresh scoped runtime evidence, notes and
-release-local protocol matrix. `stage_release.py --prepared-draft` originally accepted the
-notes-only directory; it refuses an existing manifest or unrelated contents rather than restaging it.
-`--profile-template-dir profiles/v0.13.0` binds the cut's binary/model/config/client identities
-into release-local profile copies. Their new server shape is promoted only by
-`rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount
-or the unified Host budget. The beta.2 strict-origin qualified configuration hash is `751d22dc`.
-Restaging used targeted edits plus `--draft`, not an overwrite of the existing tree by
-`stage_release.py`; initial candidate/receipt bytes remain in Git history, not live runtime proof.
+When a release changes the server CLI shape (as `v0.13.0` did for `/checkpoints-v013`, the shared
+`--host-context-mib` budget, and mandatory `--session-checkpoint-require-origin-auth` with
+configuration hash `751d22dc`), `stage_release.py --profile-template-dir profiles/v0.13.0` binds the
+cut's binary, model, configuration, and client identities into release-local profile copies. That
+new server shape is promoted to the root `profiles/` and `compatibility.json` only by
+`rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount or
+the unified Host budget.
 
-Staging incorporated the prepared protocol boundaries into the full release-local authority.
-Frozen-source grammar and product smoke now qualify JSON-schema support on the container;
-stock-client/public-route acceptance remains a separate gate. Carried native packages retain
-their existing limits. Never edit the immutable predecessor to make the root matrix match
-a candidate: root authority, public matrix and live profiles stay byte-identical until the cut.
+Staging also incorporates the release-local protocol boundaries (`runtime_contracts`) into the
+compatibility authority so that container capabilities (such as JSON-schema structured output and
+128-character tool names on the rebased RTX 5090 lane) remain distinct from carried native package
+limits. Never edit the immutable predecessor to make the root matrix match a candidate: root
+authority, public matrix, and live profiles stay byte-identical until the lane-pin cut.
 
 Before the final external-install smoke, freeze these bytes together:
 
@@ -1905,7 +1984,7 @@ Each pair binds `sbom_dependency_url` and `sbom_dependency_sha256` on the select
 The URL must belong to that row's component release; attach pins only after binding the final
 native component. Omitted arguments retain an already-bound inventory for an unchanged component.
 The verifier accepts historical releases without these optional fields, but rejects partial,
-malformed or cross-release pairs. No published `v0.12.2` pin is changed by this tooling.
+malformed or cross-release pairs. No published `v0.13.0` or historical release pin is changed by this tooling.
 
 ## External-install acceptance
 
@@ -2129,7 +2208,7 @@ qualification summary, quickstart, security model, and known limitations. Do not
 
 - “first stateful Responses” or “first persistent KV cache”;
 - automatic container restart, multi-GPU inference, concurrent native serving or multi-tenant support;
-- structured JSON-schema output or unattended RTX 3090 role activation;
+- structured JSON-schema output on carried native lanes or unattended RTX 3090 role activation;
 - support response-time guarantees or other SLAs;
 - universal GPU performance; or
 - benchmark values not present in the public qualification summary.
