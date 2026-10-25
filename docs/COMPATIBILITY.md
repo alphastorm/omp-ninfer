@@ -3,7 +3,7 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.13.0`
-Composition: **v0.13.0 upstream OMP v18.12.6 client acceptance pending**
+Composition: **v0.13.0 beta.2 runtime qualified and council remediation closed; OMP 18.12.6 public-route acceptance pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
@@ -19,8 +19,8 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c81ff44fceb8d7656966e7b0cb1663b710f7901/releases/v0.13.0/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/3c81ff44fceb8d7656966e7b0cb1663b710f7901/releases/v0.13.0/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.0/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.0/qualification/rtx4090.json) |
 
 Package bindings:
 
@@ -35,7 +35,7 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 
 | Lane | JSON-schema structured output | Tool-name limit | Status schema | Request-log schema |
 | --- | --- | ---: | ---: | ---: |
-| RTX 5090 rebased container | Supported on RTX 5090: upstream xgrammar plus frozen-source grammar and product smoke; Responses text.format / Chat response_format json_schema. Stock-client route acceptance remains separate. | 128 | 2 | 30 |
+| RTX 5090 rebased container | Supported on RTX 5090 beta.2: xgrammar plus exact-source real grammar and product Chat/Responses schema smokes. Strict-origin profile/lane qualified; stock-client public-route acceptance is separate. | 128 | 2 | 30 |
 | RTX 4090 carried native (Chat/Responses) | Rejected with HTTP 400 by unchanged component | 64 | 1 | 17 |
 | RTX 3090 carried native (Chat/Responses) | Rejected with HTTP 400 by unchanged component | 64 | 1 | 17 |
 
@@ -50,9 +50,13 @@ Limitations:
 - No secret, raw log, prompt, or model output crosses the receipt boundary.
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
+- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
+- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
+- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- upstream OMP v18.12.6 client acceptance is pending
+- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ### `windows-docker-local`
 
@@ -63,9 +67,13 @@ Limitations:
 - Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
+- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
+- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
+- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- upstream OMP v18.12.6 client acceptance is pending
+- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ### `linux-docker-local`
 
@@ -77,9 +85,14 @@ Limitations:
 - Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
 - Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.
 - JSON-schema structured output is runtime-supported by grammar/product smoke; fresh OMP 18.12.6 platform and public-route acceptance remains pending. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
+- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
+- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
+- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
 
 Blockers:
-- upstream OMP v18.12.6 client acceptance is pending
+- Fresh beta.2 OMP 18.12.6 RTX 5090 public-route/platform acceptance and final immutable pins remain pending.
 
 ## Composition blockers
 
+- Fresh beta.2 RTX 5090 public-route/client acceptance, unchanged-native evidence binding and final pins remain separate from runtime/council qualification.
