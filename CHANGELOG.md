@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Require a distinct canonical `<native-package-stem>.cdx.json` dependency SBOM for new native
+  components from v0.7.0. The cutter verifies 10 outer checksum entries / 11 files, receipt and
+  CycloneDX source/server bindings without replacing the inner SPDX file inventory. Binding and
+  staging derive the dependency URL/hash from that set; historical packages without an inventory
+  remain valid. The P4 generator accepts real CRT/DirectStorage DLL/license provenance through
+  `--runtime-inventory`, checks packaged bytes and coverage, and records input/license hashes.
 - Mark v0.13.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.

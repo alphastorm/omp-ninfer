@@ -929,9 +929,21 @@ CHECKSUM_TRIGGER_ASSET_FIELDS = CHECKSUM_REQUIRED_ASSET_FIELDS[1:] + (
 SHA256SUMS_ENTRY_RE = re.compile(r"^([0-9a-f]{64}) [ *](.+)$")
 
 
+def native_dependency_sbom_filename(package_name: str) -> str:
+    return package_name.removesuffix(".tar.gz").removesuffix(".zip") + ".cdx.json"
+
+
+def requires_native_dependency_sbom(item: dict[str, Any]) -> bool:
+    tag = item.get("release_tag")
+    version = re.match(r"^v(\d+)\.(\d+)\.(\d+)-qwen38-(?:3090|4090)-",
+                       tag if isinstance(tag, str) else "")
+    return version is not None and tuple(map(int, version.groups())) >= (0, 7, 0)
+
+
 def validate_dependency_sbom(item: dict[str, Any], prefix: str, errors: list[str]) -> None:
-    """The additional native dependency inventory is optional, but its pins are atomic."""
-    if "sbom_dependency_url" not in item and "sbom_dependency_sha256" not in item:
+    """Native v0.7.0+ requires the separate dependency inventory; older sets remain valid."""
+    if ("sbom_dependency_url" not in item and "sbom_dependency_sha256" not in item
+            and not requires_native_dependency_sbom(item)):
         return
     url = item.get("sbom_dependency_url")
     require_https(url, f"{prefix}.sbom_dependency_url", errors)
@@ -942,6 +954,11 @@ def validate_dependency_sbom(item: dict[str, Any], prefix: str, errors: list[str
     )
     require(isinstance(url, str) and url.startswith(asset_prefix) and len(url) > len(asset_prefix),
             f"{prefix}.sbom_dependency_url must bind its component release", errors)
+    package_name = item.get("package_name")
+    require(isinstance(package_name, str) and isinstance(url, str)
+            and url == asset_prefix + native_dependency_sbom_filename(package_name),
+            f"{prefix}.sbom_dependency_url must use the canonical package-stem .cdx.json name",
+            errors)
 
 
 def validate_variant_checksums(
@@ -1037,9 +1054,9 @@ def validate_variant_checksums(
     dependency_url = item.get("sbom_dependency_url")
     if isinstance(dependency_url, str):
         filename = Path(unquote(urlparse(dependency_url).path)).name
-        if filename in entries:
+        if filename in entries or requires_native_dependency_sbom(item):
             require(
-                entries[filename] == [item.get("sbom_dependency_sha256")],
+                entries.get(filename) == [item.get("sbom_dependency_sha256")],
                 f"{prefix} checksums entry {filename} must match sbom_dependency_sha256",
                 errors,
             )

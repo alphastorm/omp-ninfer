@@ -35,7 +35,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from render_compatibility import RUNTIME_VARIANT_IDS
-from verify_release import effective_native_model, validate_ninfer_variants
+from verify_release import (
+    effective_native_model,
+    native_dependency_sbom_filename,
+    validate_dependency_sbom,
+    validate_ninfer_variants,
+)
 DOWNLOAD = "https://github.com/alphastorm/ninfer/releases/download"
 LANE_VARIANTS = {"rtx4090": "rtx4090-windows-native", "rtx3090": "rtx3090-windows-native"}
 # Every manifest field that names a distribution asset, and the role it plays in the set.
@@ -119,6 +124,22 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     source_name = next((name for name in entries if name.endswith("-source.tar.gz")), None)
     if source_name is None:
         raise BindError("distribution set does not carry a source archive")
+    dependency_name = native_dependency_sbom_filename(package_name)
+    dependency_files = [name for name in entries if name.endswith(".cdx.json")]
+    if dependency_files and dependency_files != [dependency_name]:
+        raise BindError("dependency SBOM must use the unique canonical package-stem .cdx.json name")
+    dependency_pins = {}
+    if dependency_name in entries:
+        dependency_pins = {
+            "sbom_dependency_url": f"{DOWNLOAD}/{tag}/{dependency_name}",
+            "sbom_dependency_sha256": entries[dependency_name],
+        }
+    dependency_errors: list[str] = []
+    validate_dependency_sbom(
+        {"release_tag": tag, "package_name": package_name, **dependency_pins},
+        variant_id, dependency_errors)
+    if dependency_errors:
+        raise BindError("; ".join(dependency_errors))
     # The manifest binds the closed outer set - the SHA256SUMS that lists every published asset,
     # not the per-package inner listing - and the verifier requires a byte-identical copy of it
     # in the release tree.
@@ -142,6 +163,9 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         "checksums_url": f"{DOWNLOAD}/{tag}/{checksums.name}",
         "checksums_sha256": hashlib.sha256(checksums.read_bytes()).hexdigest(),
     })
+    for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
+        variant.pop(field, None)
+    variant.update(dependency_pins)
     for field, asset in SUPPORT_ASSETS.items():
         variant[f"{field}_url"] = f"{DOWNLOAD}/{tag}/{asset}"
         variant[f"{field}_sha256"] = require(entries, asset)

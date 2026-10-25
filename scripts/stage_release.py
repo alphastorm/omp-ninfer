@@ -312,7 +312,8 @@ def main() -> int:
         pin_errors: list[str] = []
         # Validate only the supplied pair: an inherited half must not complete an override.
         validate_dependency_sbom(
-            {"release_tag": source_variants[variant_id]["release_tag"], **pins},
+            {"release_tag": source_variants[variant_id]["release_tag"],
+             "package_name": source_variants[variant_id].get("package_name"), **pins},
             f"components.ninfer_variants.{variant_id}", pin_errors)
         if pin_errors:
             parser.error("; ".join(pin_errors))

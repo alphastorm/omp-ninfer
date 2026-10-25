@@ -81,9 +81,16 @@ class NativeCutterTests(unittest.TestCase):
         package = f"{stem}-{spec['platform']}.tar.gz"
         source = f"{stem}-source.tar.gz"
         sbom = f"{stem}-{spec['platform']}.spdx.json"
+        dependency = f"{stem}-{spec['platform']}.cdx.json"
         inner = f"{stem}-{spec['platform']}.SHA256SUMS"
         (root / package).write_bytes(b"native package fixture\n")
         (root / sbom).write_text('{}\n')
+        server_sha = digest(b"server fixture")
+        (root / dependency).write_text(json.dumps({
+            "bomFormat": "CycloneDX", "specVersion": "1.5",
+            "metadata": {"component": {"version": self.commit,
+                                     "hashes": [{"alg": "SHA-256", "content": server_sha}]}}
+        }) + "\n")
         archive = subprocess.run([self.git, "-C", str(self.runtime), "-c", "core.autocrlf=false",
                                   "-c", "core.eol=lf", "archive", "--format=tar",
                                   "--prefix=runtime-source/", self.commit],
@@ -102,7 +109,10 @@ class NativeCutterTests(unittest.TestCase):
                         "package_source_sha": self.commit, "secret_values_recorded": 0,
                         "package": {"filename": package, "sha256": digest((root / package).read_bytes()),
                                     "bytes": (root / package).stat().st_size},
-                        "checksums": {"entries": 9},
+                        "checksums": {"entries": 10},
+                        "binaries": {"server_sha256": server_sha},
+                        "dependency_sbom": {"name": dependency, "format": "CycloneDX-1.5",
+                                            "sha256": digest((root / dependency).read_bytes())},
                         "support_assets": {key: digest((root / name).read_bytes()) for name, key in support.items()}})
         (root / "package-build-receipt.json").write_text(json.dumps(receipt))
         self.sums(root)
@@ -120,7 +130,7 @@ class NativeCutterTests(unittest.TestCase):
     def run_cut(self, command: list[str]) -> subprocess.CompletedProcess:
         return subprocess.run(command, env=self.env, cwd=self.root, capture_output=True, text=True)
 
-    def test_both_lanes_close_the_ten_file_set_without_creating_a_tag(self) -> None:
+    def test_both_lanes_close_the_eleven_file_set_without_creating_a_tag(self) -> None:
         for lane in self.specs:
             with self.subTest(lane=lane):
                 assets = self.assets(lane)
@@ -138,6 +148,37 @@ class NativeCutterTests(unittest.TestCase):
                 self.assertEqual(refs.stdout, "")
                 if lane == "rtx4090":
                     self.assertEqual(self.run_cut(command).stdout, result.stdout)
+
+    def test_dependency_inventory_name_receipt_format_and_runtime_identity_are_bound(self) -> None:
+        for mutation in ("missing", "renamed", "receipt", "spdx", "source", "binary"):
+            with self.subTest(mutation=mutation):
+                assets = self.assets("rtx4090")
+                receipt_path = assets / "package-build-receipt.json"
+                receipt = json.loads(receipt_path.read_text())
+                dependency_path = assets / receipt["dependency_sbom"]["name"]
+                if mutation == "missing":
+                    dependency_path.unlink()
+                elif mutation == "renamed":
+                    dependency_path.rename(assets / "native-dependencies.cdx.json")
+                elif mutation == "receipt":
+                    receipt["dependency_sbom"]["sha256"] = "0" * 64
+                else:
+                    inventory = json.loads(dependency_path.read_text())
+                    if mutation == "spdx":
+                        inventory = {"spdxVersion": "SPDX-2.3"}
+                    elif mutation == "source":
+                        inventory["metadata"]["component"]["version"] = "0" * 40
+                    else:
+                        inventory["metadata"]["component"]["hashes"][0]["content"] = "0" * 64
+                    dependency_path.write_text(json.dumps(inventory))
+                    receipt["dependency_sbom"]["sha256"] = digest(dependency_path.read_bytes())
+                receipt_path.write_text(json.dumps(receipt))
+                self.sums(assets)
+                result = self.run_cut(self.command("rtx4090", assets))
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("distribution set" if mutation in ("missing", "renamed")
+                              else "SBOM", result.stderr)
+                shutil.rmtree(assets)
 
     def test_forgotten_lane_extra_asset_and_receipt_drift_are_refused(self) -> None:
         assets = self.assets("rtx3090")

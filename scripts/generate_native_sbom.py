@@ -8,6 +8,11 @@ The build owner collects it from the installed vcpkg versions and port licenses;
 it is not vcpkg's filesystem mutex file, nor the manifest's version constraints.
 CUDA inventory is {"dlls": [{"path": "bin/cudart64_13.dll", "version": VERSION,
 "eula": HTTPS_URL}]}; obtain versions from the packaged DLLs' VersionInfo.
+Optional --runtime-inventory is {"dlls": [{"name": DLL_NAME, "component": "msvc-crt"
+or "directstorage", "version": VERSION, "bytes": BYTES, "sha256": SHA256}],
+"licenses": {COMPONENT: {"name": LICENSE_NAME, "url": HTTPS_URL or
+"file": RELATIVE_EVIDENCE_FILE, "package_version": VERSION, "package_sha256": SHA256}}}.
+License files are relative to that inventory's directory; package pins are an optional pair.
 Vendored inventory is {"sources": [{"path": "nlohmann", "name": NAME,
 "version": VERSION, "license": SPDX_EXPRESSION, "license_file": "LICENSE.MIT"}]}.
 Paths are relative to the package or source tree's third_party directory.
@@ -32,6 +37,7 @@ from urllib.parse import quote, urlparse
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]*")
 CUDA_DLL_RE = re.compile(r"(?:cudart|cublas|cufft|curand|cusolver|cusparse|nvrtc|nvjitlink|nvfatbin|npp).*\.dll", re.I)
+REDIST_DLL_RE = re.compile(r"(?:concrt|msvcp|vccorlib|vcruntime|dstorage).*\.dll", re.I)
 
 
 def require(condition: bool, message: str) -> None:
@@ -81,7 +87,8 @@ def property_(name: str, value: str) -> dict:
 
 def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
                vcpkg_manifest: Path, vcpkg_lock: Path, cuda_inventory: Path,
-               third_party_inventory: Path, runtime_binary: str = "bin/ninfer-serve.exe") -> dict:
+               third_party_inventory: Path, runtime_inventory: Path | None = None,
+               runtime_binary: str = "bin/ninfer-serve.exe") -> dict:
     require(COMMIT_RE.fullmatch(source_commit) is not None, "source commit must be 40 lower-case hex characters")
     binary, binary_path = relative_file(package_dir, runtime_binary, "runtime binary")
     manifest, lock = load(vcpkg_manifest), load(vcpkg_lock)
@@ -157,6 +164,61 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
             require(dll.relative_to(package_dir).as_posix().casefold() in dll_paths,
                     f"CUDA inventory is missing packaged DLL: {dll.name}")
 
+    if runtime_inventory is not None:
+        inventory = load(runtime_inventory)
+        licenses = inventory.get("licenses")
+        require(isinstance(licenses, dict), "runtime redistributable licenses must be an object")
+        redist_paths: set[str] = set()
+        for row in rows(inventory, "dlls"):
+            name = text(row.get("name"), "runtime DLL name")
+            require(PurePosixPath(name).name == name and name.lower().endswith(".dll"),
+                    "runtime DLL name must be a filename")
+            dll, path = relative_file(package_dir, "bin/" + name, "runtime DLL path")
+            require(path.casefold() not in redist_paths and path.casefold() not in dll_paths,
+                    f"duplicate runtime DLL: {path}")
+            redist_paths.add(path.casefold())
+            component = row.get("component")
+            require(component in ("msvc-crt", "directstorage"), "unknown runtime redistributable component")
+            version = text(row.get("version"), f"{name} version")
+            require(type(row.get("bytes")) is int and row["bytes"] > 0
+                    and row["bytes"] == dll.stat().st_size, f"{name} byte count mismatch")
+            dll_sha = digest(dll)
+            require(row.get("sha256") == dll_sha, f"{name} SHA-256 mismatch")
+            license_ = licenses.get(component)
+            require(isinstance(license_, dict), f"{component} license is missing")
+            license_value = {"name": text(license_.get("name"), f"{component} license name")}
+            properties = [property_("package_path", path), property_("redistributable_component", component)]
+            require("url" in license_ or "file" in license_, f"{component} license needs URL or file evidence")
+            if "url" in license_:
+                url = text(license_["url"], f"{component} license URL")
+                parsed = urlparse(url)
+                require(parsed.scheme == "https" and bool(parsed.netloc)
+                        and not parsed.username and not parsed.password,
+                        f"{component} license URL must be HTTPS")
+                license_value["url"] = url
+            if "file" in license_:
+                evidence, relative = relative_file(
+                    runtime_inventory.parent, license_["file"], f"{component} license file")
+                properties.extend([property_("license_file", relative),
+                                   property_("license_sha256", digest(evidence))])
+            if "package_version" in license_ or "package_sha256" in license_:
+                package_version = text(license_.get("package_version"), f"{component} package version")
+                package_sha = license_.get("package_sha256")
+                require(isinstance(package_sha, str) and re.fullmatch(r"[0-9a-f]{64}", package_sha) is not None,
+                        f"{component} package SHA-256 is invalid")
+                properties.extend([property_("redistributable_package_version", package_version),
+                                   property_("redistributable_package_sha256", package_sha)])
+            ref = "redist:" + path
+            components.append({"type": "library", "bom-ref": ref, "name": name, "version": version,
+                               "hashes": [{"alg": "SHA-256", "content": dll_sha}],
+                               "licenses": [{"license": license_value}], "properties": properties})
+            root_dependencies.add(ref)
+            edges[ref] = []
+        for dll in package_dir.rglob("*"):
+            if dll.is_file() and REDIST_DLL_RE.fullmatch(dll.name):
+                require(dll.relative_to(package_dir).as_posix().casefold() in redist_paths,
+                        f"runtime inventory is missing packaged DLL: {dll.name}")
+
     third_party = source_dir / "third_party"
     require(third_party.is_dir(), "source tree must contain third_party")
     source_paths: set[str] = set()
@@ -180,8 +242,10 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
     actual_sources = {path.name.casefold() for path in third_party.iterdir() if path.is_dir() and not path.name.startswith(".")}
     require(source_paths == actual_sources, "third_party inventory must cover every source directory")
     edges[runtime_ref] = sorted(root_dependencies)
-    inputs = (("vcpkg_manifest", vcpkg_manifest), ("vcpkg_lock", vcpkg_lock),
-              ("cuda_inventory", cuda_inventory), ("third_party_inventory", third_party_inventory))
+    inputs = [("vcpkg_manifest", vcpkg_manifest), ("vcpkg_lock", vcpkg_lock),
+              ("cuda_inventory", cuda_inventory), ("third_party_inventory", third_party_inventory)]
+    if runtime_inventory is not None:
+        inputs.append(("runtime_inventory", runtime_inventory))
     return {"$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json", "bomFormat": "CycloneDX",
             "specVersion": "1.5", "version": 1,
             "metadata": {"component": runtime, "properties": [property_("vcpkg_baseline", baseline),
@@ -199,6 +263,8 @@ def main() -> int:
     parser.add_argument("--vcpkg-lock", type=Path, required=True, help="resolved versions/licenses/dependency snapshot")
     parser.add_argument("--cuda-inventory", type=Path, required=True)
     parser.add_argument("--third-party-inventory", type=Path, required=True)
+    parser.add_argument("--runtime-inventory", type=Path,
+                        help="optional exact CRT/DirectStorage DLL and license inventory")
     parser.add_argument("--runtime-binary", default="bin/ninfer-serve.exe")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -206,7 +272,8 @@ def main() -> int:
         document = build_sbom(package_dir=args.package_dir, source_dir=args.source_dir,
             source_commit=args.source_commit, vcpkg_manifest=args.vcpkg_manifest or args.source_dir / "vcpkg.json",
             vcpkg_lock=args.vcpkg_lock, cuda_inventory=args.cuda_inventory,
-            third_party_inventory=args.third_party_inventory, runtime_binary=args.runtime_binary)
+            third_party_inventory=args.third_party_inventory, runtime_inventory=args.runtime_inventory,
+            runtime_binary=args.runtime_binary)
         args.output.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     except (OSError, ValueError) as error:
         print(f"generate_native_sbom: {error}", file=sys.stderr)

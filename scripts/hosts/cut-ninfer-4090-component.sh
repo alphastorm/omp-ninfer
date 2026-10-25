@@ -4,6 +4,7 @@
 # The default mode is a no-effect preflight: it proves the outer SHA256SUMS closes and verifies the
 # asset directory, the package build receipt and lane specification name the commit and release,
 # the source archive holds exactly that commit's tree, and neither tag nor release exists yet.
+# The outer set includes a distinct dependency CycloneDX SBOM; the inner SPDX remains unchanged.
 # Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
 #
 # Usage:
@@ -63,9 +64,10 @@ stem = f"{spec['product_prefix']}-v{release_version}"
 package = f"{stem}-{spec['platform']}.tar.gz"
 inner_sums = f"{stem}-{spec['platform']}.SHA256SUMS"
 sbom = f"{stem}-{spec['platform']}.spdx.json"
+dependency_sbom = f"{stem}-{spec['platform']}.cdx.json"
 source = f"{stem}-source.tar.gz"
 support = ["Install-Release.ps1", "Control-Release.ps1", "Control-GpuOwner.ps1", "Protect-StateRoot.ps1"]
-listed = set(support) | {package, inner_sums, sbom, source, "package-build-receipt.json"}
+listed = set(support) | {package, inner_sums, sbom, dependency_sbom, source, "package-build-receipt.json"}
 
 raw = (root / "SHA256SUMS").read_bytes()
 if b"\r" in raw or not raw.endswith(b"\n"):
@@ -97,6 +99,19 @@ if receipt["package"] != {"filename": package, "sha256": entries[package],
     raise SystemExit("package receipt does not name the package bytes")
 if receipt["checksums"].get("entries") != len(entries):
     raise SystemExit("package receipt counts a different outer checksum set")
+dependency = receipt.get("dependency_sbom", {})
+if (dependency.get("name") != dependency_sbom
+        or dependency.get("sha256") != entries[dependency_sbom]
+        or dependency.get("format") != "CycloneDX-1.5"):
+    raise SystemExit("package receipt does not bind the dependency CycloneDX SBOM")
+inventory = json.loads((root / dependency_sbom).read_text())
+if inventory.get("bomFormat") != "CycloneDX" or inventory.get("specVersion") != "1.5":
+    raise SystemExit("dependency SBOM must be CycloneDX 1.5, not the package SPDX")
+component = inventory.get("metadata", {}).get("component", {})
+if (component.get("version") != commit
+        or {"alg": "SHA-256", "content": receipt["binaries"]["server_sha256"]}
+        not in component.get("hashes", [])):
+    raise SystemExit("dependency SBOM does not bind this source and server binary")
 support_keys = {"Install-Release.ps1": "installer_sha256", "Control-Release.ps1": "controller_sha256",
                 "Control-GpuOwner.ps1": "gpu_owner_controller_sha256",
                 "Protect-StateRoot.ps1": "state_protection_sha256"}

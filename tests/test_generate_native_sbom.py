@@ -46,7 +46,126 @@ class NativeSbomTests(unittest.TestCase):
         return MODULE.build_sbom(package_dir=self.package, source_dir=self.source,
             source_commit=self.fixture["source_commit"], vcpkg_manifest=self.inputs["manifest"],
             vcpkg_lock=self.inputs["lock"], cuda_inventory=self.inputs["cuda"],
-            third_party_inventory=self.inputs["third_party"])
+            third_party_inventory=self.inputs["third_party"],
+            runtime_inventory=self.inputs.get("runtime_redist"))
+
+    def runtime_inventory(self) -> None:
+        dlls = []
+        for name, component, version in (
+            ("vcruntime140.dll", "msvc-crt", "14.44.35211.0"),
+            ("dstorage.dll", "directstorage", "1.3.2506.2501"),
+            ("dstoragecore.dll", "directstorage", "1.3.2506.2501"),
+        ):
+            data = ("fixture:" + name).encode()
+            (self.package / "bin" / name).write_bytes(data)
+            dlls.append({"name": name, "component": component, "version": version,
+                         "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
+        evidence = self.root / "installed/directstorage-LICENSE.txt"
+        evidence.parent.mkdir()
+        evidence.write_text("Fixture license terms\n")
+        self.fixture["runtime_redist"] = {
+            "dlls": dlls,
+            "licenses": {
+                "msvc-crt": {"name": "Microsoft Visual Studio license terms",
+                             "url": "https://example.invalid/vs-redistribution"},
+                "directstorage": {"name": "Microsoft DirectStorage SDK license terms",
+                                  "file": "installed/directstorage-LICENSE.txt",
+                                  "package_version": "1.3.0", "package_sha256": "a" * 64},
+            },
+        }
+        self.inputs["runtime_redist"] = self.root / "runtime-redist.json"
+
+    def test_runtime_redist_binds_real_dll_bytes_licenses_provenance_and_graph(self) -> None:
+        self.runtime_inventory()
+        document = self.build()
+        components = {item["bom-ref"]: item for item in document["components"]}
+        self.assertEqual(len(components), 10)
+        for row in self.fixture["runtime_redist"]["dlls"]:
+            item = components["redist:bin/" + row["name"]]
+            self.assertEqual(item["version"], row["version"])
+            self.assertEqual(item["hashes"], [{"alg": "SHA-256", "content": row["sha256"]}])
+        ds = components["redist:bin/dstorage.dll"]
+        self.assertEqual(ds["licenses"], [{"license": {
+            "name": "Microsoft DirectStorage SDK license terms"}}])
+        self.assertIn({"name": "ninfer:redistributable_package_sha256", "value": "a" * 64},
+                      ds["properties"])
+        self.assertIn({"name": "ninfer:license_sha256", "value": hashlib.sha256(
+            (self.root / "installed/directstorage-LICENSE.txt").read_bytes()).hexdigest()},
+            ds["properties"])
+        edges = {item["ref"]: item["dependsOn"] for item in document["dependencies"]}
+        self.assertIn("redist:bin/vcruntime140.dll", edges["runtime:bin/ninfer-serve.exe"])
+        self.assertEqual(set(edges), {*components, "runtime:bin/ninfer-serve.exe"})
+        self.assertIn({"name": "ninfer:input:runtime_inventory:sha256", "value": hashlib.sha256(
+            self.inputs["runtime_redist"].read_bytes()).hexdigest()},
+            document["metadata"]["properties"])
+        self.assertNotIn(str(self.root), json.dumps(document))
+        self.fixture["runtime_redist"]["dlls"].reverse()
+        after = self.build()
+        self.assertEqual(document["components"], after["components"])
+        self.assertEqual(document["dependencies"], after["dependencies"])
+
+    def test_runtime_redist_refuses_partial_duplicate_or_mismatched_inventory(self) -> None:
+        self.runtime_inventory()
+        original = deepcopy(self.fixture["runtime_redist"])
+        cases = []
+        for field in ("name", "component", "version", "bytes", "sha256"):
+            value = deepcopy(original)
+            value["dlls"][0].pop(field)
+            cases.append(value)
+        for field, replacement in (("bytes", True), ("bytes", 1), ("sha256", "0" * 64),
+                                   ("component", "unknown"), ("name", "../outside.dll")):
+            value = deepcopy(original)
+            value["dlls"][0][field] = replacement
+            cases.append(value)
+        value = deepcopy(original)
+        value["dlls"].pop()
+        cases.append(value)
+        value = deepcopy(original)
+        value["dlls"].append(deepcopy(value["dlls"][0]))
+        cases.append(value)
+        for value in cases:
+            with self.subTest(value=value):
+                self.fixture["runtime_redist"] = value
+                with self.assertRaises(ValueError):
+                    self.build()
+
+    def test_runtime_license_evidence_and_package_pins_are_required_and_confined(self) -> None:
+        self.runtime_inventory()
+        original = deepcopy(self.fixture["runtime_redist"])
+        for mutation in ("missing", "http", "escape", "no-file", "partial-package", "bad-package"):
+            with self.subTest(mutation=mutation):
+                value = deepcopy(original)
+                if mutation == "missing":
+                    del value["licenses"]["msvc-crt"]
+                elif mutation == "http":
+                    value["licenses"]["msvc-crt"]["url"] = "http://example.invalid/license"
+                elif mutation in ("escape", "no-file"):
+                    value["licenses"]["directstorage"]["file"] = (
+                        "../outside.txt" if mutation == "escape" else "missing.txt")
+                elif mutation == "partial-package":
+                    del value["licenses"]["directstorage"]["package_version"]
+                else:
+                    value["licenses"]["directstorage"]["package_sha256"] = "A" * 64
+                self.fixture["runtime_redist"] = value
+                with self.assertRaises(ValueError):
+                    self.build()
+
+    def test_runtime_redist_cli_is_deterministic(self) -> None:
+        self.runtime_inventory()
+        self.write_inputs()
+        output = self.root / "fixture.cdx.json"
+        command = [sys.executable, str(SCRIPT), "--package-dir", str(self.package),
+                   "--source-dir", str(self.source), "--source-commit", FIXTURE["source_commit"],
+                   "--vcpkg-lock", str(self.inputs["lock"]), "--cuda-inventory", str(self.inputs["cuda"]),
+                   "--third-party-inventory", str(self.inputs["third_party"]),
+                   "--runtime-inventory", str(self.inputs["runtime_redist"]), "--output", str(output)]
+        first = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        before = output.read_bytes()
+        second = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertEqual(before, output.read_bytes())
+        self.assertEqual(first.stdout, second.stdout)
 
     def test_schema_runtime_and_dependency_graph(self) -> None:
         document = self.build()

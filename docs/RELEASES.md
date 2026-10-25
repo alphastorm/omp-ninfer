@@ -1960,6 +1960,8 @@ For a new native package, generate the additional CycloneDX 1.5 JSON inventory w
 `scripts/generate_native_sbom.py` before the component cut. Supply the unpacked package through
 `--package-dir`, its build source tree through `--source-dir`, the exact `--source-commit`,
 and `--vcpkg-lock`, `--cuda-inventory`, `--third-party-inventory` and `--output` files.
+For the rebased native packages, also pass the actual `runtime-redist.json` through
+`--runtime-inventory`; the native package wrapper requires this input.
 The default manifest is the source tree's `vcpkg.json` and the default runtime executable is
 `bin/ninfer-serve.exe`; both have explicit override flags.
 
@@ -1975,16 +1977,34 @@ DLL `path`, exact `version` from its version metadata, and HTTPS `eula` URL. The
 help includes the input schemas; missing versions, licenses, files or dependency edges fail
 instead of producing a partial inventory.
 
+The runtime inventory records `dlls` entries with package `bin/` basenames, `component`
+(`msvc-crt` or `directstorage`), actual file `version`, `bytes` and `sha256`. Its `licenses`
+map binds each component's named license to an HTTPS `url` or an evidence `file` relative to the
+inventory's directory; DirectStorage also records its paired NuGet `package_version` and
+`package_sha256`. The generator verifies the installed DLL byte counts/hashes, exact packaged
+CRT/DirectStorage coverage and confined license files, then records the inventory and license
+digests. It does not infer versions/licenses, label these Microsoft DLLs as CUDA, or publish
+private evidence paths. Components and dependency edges remain deterministic.
+
 Publish the dependency inventory alongside, not instead of, the existing SPDX file SBOM.
+Its canonical filename is `<native-package-stem>.cdx.json`; the original file inventory remains
+`<native-package-stem>.spdx.json`. The closed outer set has **10 hashed entries / 11 files**
+including `SHA256SUMS`: package, inner checksums, SPDX, CycloneDX, source archive, build receipt,
+installer, controller, GPU-owner controller and state-protection helper. The build receipt binds
+`dependency_sbom.name`, `sha256`, `format: CycloneDX-1.5` and generator/input digests.
+Cut preflight checks the actual CycloneDX header, source commit and server hash; renaming SPDX
+does not satisfy it. `bind_native_variant.py` derives dependency pins from the same checksum set.
 When staging a product release that carries that native component,
 `scripts/stage_release.py` accepts paired, repeatable
 `--sbom-dependency-url VARIANT=URL` and `--sbom-dependency-sha256 VARIANT=SHA256` arguments.
 Each pair binds `sbom_dependency_url` and `sbom_dependency_sha256` on the selected
 `components.ninfer_variants` row without changing package, model or existing SPDX pins.
-The URL must belong to that row's component release; attach pins only after binding the final
-native component. Omitted arguments retain an already-bound inventory for an unchanged component.
-The verifier accepts historical releases without these optional fields, but rejects partial,
-malformed or cross-release pairs. No published `v0.13.0` or historical release pin is changed by this tooling.
+The URL must name that row's canonical dependency asset in its component release; attach pins
+only after binding the final native component. Omitted arguments retain an already-bound inventory
+for an unchanged component. The verifier accepts historical components before v0.7.0 without
+dependency pins, but requires the separate canonical inventory and its outer checksum entry on
+rebased v0.7.0 components. Partial, malformed, renamed or cross-release pairs fail even in a draft.
+No published `v0.13.0` or historical release pin is changed by this tooling.
 
 ## External-install acceptance
 

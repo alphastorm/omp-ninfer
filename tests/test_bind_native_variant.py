@@ -86,10 +86,57 @@ class BindNativeVariantTest(unittest.TestCase):
             "".join(f"{value}  {name}\n" for name, value in self.entries.items()), encoding="utf-8"
         )
 
-    def bind(self) -> dict[str, object]:
+    def bind(self, tag: str = TAG) -> dict[str, object]:
         return BINDER.bind(
-            self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path, "v0.6.8"
+            self.manifest, "rtx4090", tag, self.checksums_path, self.receipt_path, "v0.6.8"
         )
+
+    def rebased_assets(self) -> tuple[str, str]:
+        self.receipt["package"]["filename"] = PACKAGE.replace("v0.6.1", "v0.7.0")
+        self.write_receipt()
+        self.entries = {name.replace("v0.6.1", "v0.7.0"): value
+                        for name, value in self.entries.items()}
+        self.entries["package-build-receipt.json"] = self.receipt_digest
+        dependency = self.receipt["package"]["filename"].removesuffix(".tar.gz") + ".cdx.json"
+        self.entries[dependency] = digest("dependency inventory")
+        self.write_checksums()
+        return "v0.7.0-qwen38-4090-beta.1", dependency
+
+    def test_rebased_component_binds_separate_canonical_dependency_inventory(self) -> None:
+        tag, dependency = self.rebased_assets()
+        variant = self.bind(tag)
+        self.assertEqual(variant["sbom_dependency_url"], f"{BINDER.DOWNLOAD}/{tag}/{dependency}")
+        self.assertEqual(variant["sbom_dependency_sha256"], digest("dependency inventory"))
+        self.assertTrue(variant["sbom_url"].endswith(".spdx.json"))
+        self.assertNotEqual(variant["sbom_dependency_sha256"], variant["sbom_sha256"])
+
+    def test_rebased_component_refuses_missing_renamed_or_duplicate_dependency_inventory(self) -> None:
+        tag, dependency = self.rebased_assets()
+        entries = deepcopy(self.entries)
+        original = deepcopy(self.manifest)
+        for replacement in (None, "native-dependencies.cdx.json", "other-lane.cdx.json"):
+            with self.subTest(replacement=replacement):
+                self.entries = dict(entries)
+                value = self.entries.pop(dependency)
+                if replacement:
+                    self.entries[replacement] = value
+                self.write_checksums()
+                with self.assertRaises(BINDER.BindError):
+                    self.bind(tag)
+                self.assertEqual(self.manifest, original)
+                self.assertFalse((self.release_root / "rtx4090-windows-native.SHA256SUMS").exists())
+        self.entries = {**entries, "extra.cdx.json": digest("extra")}
+        self.write_checksums()
+        with self.assertRaisesRegex(BINDER.BindError, "unique canonical"):
+            self.bind(tag)
+
+    def test_older_rebind_without_dependency_inventory_removes_stale_dependency_pins(self) -> None:
+        self.manifest["components"]["ninfer_variants"][-1].update(
+            sbom_dependency_url="https://example.invalid/stale.cdx.json",
+            sbom_dependency_sha256=digest("stale"))
+        variant = self.bind()
+        self.assertNotIn("sbom_dependency_url", variant)
+        self.assertNotIn("sbom_dependency_sha256", variant)
 
     def test_split_model_binds_a_new_lane_to_the_native_artifact(self) -> None:
         self.prepare_3090()

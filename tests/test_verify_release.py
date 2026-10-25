@@ -37,9 +37,10 @@ class DependencySbomContractTests(unittest.TestCase):
         self.authority = json.loads((self.release / "compatibility.json").read_text(encoding="utf-8"))
         self.variant = self.manifest["components"]["ninfer_variants"][-1]
         self.prefix = f"components.ninfer_variants.{self.variant['id']}"
+        self.dependency_name = self.variant["package_name"].removesuffix(".tar.gz") + ".cdx.json"
         self.pins = {"sbom_dependency_url": (
             f"https://github.com/alphastorm/ninfer/releases/download/"
-            f"{self.variant['release_tag']}/native-dependencies.cdx.json"),
+            f"{self.variant['release_tag']}/{self.dependency_name}"),
             "sbom_dependency_sha256": "a" * 64}
 
     def validate(self, pins: dict) -> list[str]:
@@ -63,6 +64,8 @@ class DependencySbomContractTests(unittest.TestCase):
             ({**self.pins, "sbom_dependency_url": "http://example.invalid/bom.json"}, "sbom_dependency_url"),
             ({**self.pins, "sbom_dependency_url": self.pins["sbom_dependency_url"].replace(
                 self.variant["release_tag"], "wrong-component")}, "must bind its component release"),
+            ({**self.pins, "sbom_dependency_url": self.pins["sbom_dependency_url"].replace(
+                ".cdx.json", ".spdx.json")}, "canonical"),
             ({"sbom_dependency_url": None, "sbom_dependency_sha256": None}, "sbom_dependency_sha256"),
         ):
             with self.subTest(pins=pins):
@@ -79,13 +82,41 @@ class DependencySbomContractTests(unittest.TestCase):
             original = (self.release / "qualification" / target.name).read_text(encoding="utf-8")
             variant = {**self.variant, **self.pins}
             for checksum, expected_count in (("a" * 64, 0), ("b" * 64, 1)):
-                target.write_text(original + f"{checksum}  native-dependencies.cdx.json\n", encoding="utf-8")
+                target.write_text(original + f"{checksum}  {self.dependency_name}\n", encoding="utf-8")
                 variant["checksums_sha256"] = VERIFY_RELEASE.sha256_file(target)
                 errors = []
                 VERIFY_RELEASE.validate_variant_checksums(root, PUBLIC_RELEASE, variant, self.prefix, errors)
                 self.assertEqual(len(errors), expected_count, errors)
                 if errors:
                     self.assertIn("must match sbom_dependency_sha256", errors[0])
+
+    def test_rebased_components_require_canonical_dependency_pins_and_outer_checksum_entry(self) -> None:
+        for lane in ("3090", "4090"):
+            package = f"ninfer-rtx{lane}-native-v0.7.0-beta.1-windows-x86_64-cuda13.3-rtx{lane}.tar.gz"
+            tag = f"v0.7.0-qwen38-{lane}-beta.1"
+            dependency = package.removesuffix(".tar.gz") + ".cdx.json"
+            item = {"release_tag": tag, "package_name": package}
+            errors = []
+            VERIFY_RELEASE.validate_dependency_sbom(item, self.prefix, errors)
+            self.assertTrue(any("sbom_dependency_sha256" in error for error in errors))
+            item.update(sbom_dependency_url=(
+                f"https://github.com/alphastorm/ninfer/releases/download/{tag}/{dependency}"),
+                sbom_dependency_sha256="a" * 64)
+            errors = []
+            VERIFY_RELEASE.validate_dependency_sbom(item, self.prefix, errors)
+            self.assertEqual(errors, [])
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "releases" / PUBLIC_RELEASE / "qualification" / f"{self.variant['id']}.SHA256SUMS"
+            target.parent.mkdir(parents=True)
+            target.write_bytes((self.release / "qualification" / target.name).read_bytes())
+            item = {**self.variant, **self.pins, "release_tag": "v0.7.0-qwen38-4090-beta.1",
+                    "checksums_sha256": VERIFY_RELEASE.sha256_file(target)}
+            errors = []
+            VERIFY_RELEASE.validate_variant_checksums(root, PUBLIC_RELEASE, item, self.prefix, errors)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("must match sbom_dependency_sha256", errors[0])
 
 
 class FirstReleaseRollbackContractTest(unittest.TestCase):

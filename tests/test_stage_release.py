@@ -130,7 +130,7 @@ class StageReleaseTests(unittest.TestCase):
         previous = self.load(root / "releases" / CURRENT / "manifest.json")
         variant = previous["components"]["ninfer_variants"][-1]
         url = (f"https://github.com/alphastorm/ninfer/releases/download/"
-               f"{variant['release_tag']}/native-dependencies.cdx.json")
+               f"{variant['release_tag']}/{variant['package_name'].removesuffix('.tar.gz')}.cdx.json")
         pins = {"sbom_dependency_url": url, "sbom_dependency_sha256": "a" * 64}
         result = self.stage(root, None, source_release=CURRENT, dependency_args=[
             "--sbom-dependency-url", f"{variant['id']}={url}",
@@ -229,7 +229,7 @@ class StageReleaseTests(unittest.TestCase):
         variant = manifest["components"]["ninfer_variants"][-1]
         key = variant["id"]
         url = (f"https://github.com/alphastorm/ninfer/releases/download/"
-               f"{variant['release_tag']}/native-dependencies.cdx.json")
+               f"{variant['release_tag']}/{variant['package_name'].removesuffix('.tar.gz')}.cdx.json")
         valid = ["--sbom-dependency-url", f"{key}={url}",
                  "--sbom-dependency-sha256", f"{key}={'a' * 64}"]
         cases = (valid[:2], valid[2:],
@@ -249,7 +249,7 @@ class StageReleaseTests(unittest.TestCase):
         variant = manifest["components"]["ninfer_variants"][-1]
         variant.update(sbom_dependency_url=(
             f"https://github.com/alphastorm/ninfer/releases/download/"
-            f"{variant['release_tag']}/native-dependencies.cdx.json"),
+            f"{variant['release_tag']}/{variant['package_name'].removesuffix('.tar.gz')}.cdx.json"),
             sbom_dependency_sha256="a" * 64)
         self.save(path, manifest)
         result = self.stage(root, None, source_release=CURRENT)
