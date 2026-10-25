@@ -680,6 +680,40 @@ run `stop-ninfer.sh` and then `start-ninfer.sh`:
 Use the inference host's SSH user and host (on Windows 11 with Docker Desktop, the Windows account
 and stock OpenSSH server forwarding `127.0.0.1:18089`) and keep the process running.
 
+**Optional managed tunnel (preview):** after completing the key and provider setup below,
+close your manual tunnel and run `python3 scripts/mac_tunnel.py install --destination USER@RUNTIME_HOST`,
+then `python3 scripts/mac_tunnel.py start`. This first-party helper replaces only the
+foreground SSH process, not the client installer or inference-host service. It installs
+`~/Library/LaunchAgents/com.alphastorm.omp-ninfer.tunnel.plist` and an owner-private helper/config
+under `~/Library/Application Support/omp-ninfer/tunnel`. Install leaves the agent disabled;
+start enables it now and at future GUI logins. A stable Python 3 installation must remain at
+the interpreter path used during install. Reinstall after moving or upgrading that interpreter.
+
+Use an explicit SSH user and hostname/IP, not a configuration alias. The helper deliberately
+ignores SSH configuration to prevent inherited forwards or proxy commands. Verify the host
+key interactively first using the same destination and ensure unattended public-key login works;
+`--identity-file PATH` references an existing SSH private key without copying it. No passwords,
+SSH keys or bearer tokens are placed in the plist, status or configuration JSON. The existing
+`~/.omp/agent/ninfer-beta.key` is referenced only for doctor; `--key-file PATH` selects a different
+existing bearer file. Host-key verification and batch authentication fail closed.
+
+Run `python3 scripts/mac_tunnel.py status` for JSON launchd/listener state and
+`python3 scripts/doctor.py --mac-tunnel --json` (or `python3 scripts/mac_tunnel.py doctor`)
+for an authenticated loopback endpoint check. `--offline` on either doctor skips launchd and
+network probes. Status snapshots are written to the private installation's `status.json`;
+`runtime.json` records the supervisor's current attempt/backoff. Neither is release
+qualification. SSH retries use 1–60 second exponential backoff, resetting after a connection
+survives 60 seconds; launchd also restarts the supervisor. The endpoint can remain unavailable
+while SSH is connected, for example while the model loads.
+
+`python3 scripts/mac_tunnel.py stop` disables future login starts and unloads the owned agent.
+`python3 scripts/mac_tunnel.py uninstall` also removes its installed files, leaving the existing
+bearer, SSH identity and OMP configuration untouched. The documented client URL and fail-closed
+configuration remain unchanged. Nondefault `--local-port`, `--remote-port` and `--ssh-port`
+are for owner-controlled rehearsal/candidate endpoints, not a change to the documented route.
+Managed lifecycle remains preview: a rehearsal stub proves wiring, not RTX 5090 inference,
+Windows forwarding or release acceptance.
+
 ## 6. Install the same key on the Mac
 
 In another Mac terminal, stream the key over SSH from the login shell or the `Ubuntu-24.04` WSL2

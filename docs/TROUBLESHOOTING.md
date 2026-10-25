@@ -212,6 +212,37 @@ This bypasses only credential lookup; digest pinning and hash verification are u
 
 ## Network and authentication
 
+### Managed Mac tunnel (preview)
+
+Use `python3 scripts/mac_tunnel.py status` to distinguish a stopped LaunchAgent, a starting
+supervisor, a connecting SSH process, and exponential backoff. A `listener_owned` value of
+`true` means the current supervisor's SSH child owns only the selected `127.0.0.1` listener;
+it does not prove the remote server is ready. `python3 scripts/doctor.py --mac-tunnel --json`
+checks the existing private bearer file and authenticated `/v1/models` over that listener.
+It never probes Docker, WSL or the GPU and never promotes the macOS preview route.
+
+If SSH repeatedly exits, verify the explicit user@hostname/IP and host key interactively,
+using `ssh -F /dev/null USER@RUNTIME_HOST`; managed SSH ignores configuration aliases and
+requires unattended authentication. Supply an existing `--identity-file PATH` during install
+if needed. Do not disable host-key checking or paste credentials into a command. A passphrase
+key that works only with a terminal's agent may not work in the GUI launchd environment.
+The helper suppresses raw SSH output to avoid collecting private connection information;
+use your interactive SSH session to diagnose the authentication failure.
+
+If the local port is occupied, stop only your own manual tunnel or conflicting process.
+The helper never kills a foreign listener; SSH exits and retries with capped backoff.
+If SSH owns the listener but the endpoint check fails, check the existing bearer file
+(owner-only permissions, nonempty, not a symlink), Windows loopback publication and remote
+service readiness. No cloud provider or alternate port is substituted.
+
+Run lifecycle commands as the logged-in Mac user without sudo. `stop` unloads and disables
+the agent even across future logins; `start` enables it again. Stop before reinstalling to
+change the destination or refresh the installed interpreter/helper. If launchd cannot find
+the pinned Python executable after an upgrade, reinstall using a stable Python 3 path.
+`uninstall` retains credentials and client settings. Private `status.json` snapshots and
+`runtime.json` in `~/Library/Application Support/omp-ninfer/tunnel` contain transport state
+only; stale runtime from a different supervisor PID is not treated as readiness.
+
 ### Port `18089` is occupied
 
 On the RTX 5090 inference host, identify the loopback listener on `127.0.0.1:18089` before

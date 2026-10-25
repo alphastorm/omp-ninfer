@@ -327,6 +327,8 @@ def diagnose(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--mac-tunnel", action="store_true",
+                        help="check only the managed Mac client tunnel, never the remote GPU/WSL host")
     parser.add_argument("--lane", choices=("rtx5090", "rtx4090", "rtx3090"), default="rtx5090")
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--profile", type=Path)
@@ -345,6 +347,20 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.hash_model and not args.model:
         parser.error("--hash-model requires --model")
+    if args.mac_tunnel:
+        if platform.system() != "Darwin":
+            parser.error("--mac-tunnel must run on the Mac client, not the inference host")
+        import mac_tunnel
+        receipt = mac_tunnel.diagnose(args.offline)
+        if args.json:
+            print(json.dumps(receipt, indent=2))
+        else:
+            for check in receipt["checks"]:
+                print(f"{check['status'].upper()} {check['name']}: {check['cause']}")
+                if check["remediation"]:
+                    print("  Remedy: " + check["remediation"])
+            print("status=" + receipt["status"] + " (client transport only; never qualification)")
+        return 1 if receipt["status"] == "failed" else 0
     if args.manifest is None:
         args.manifest = ROOT / "releases" / load(ROOT / "compatibility.json")["product_release"] / "manifest.json"
     try:
