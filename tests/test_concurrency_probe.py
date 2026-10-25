@@ -237,27 +237,67 @@ class ConcurrencyProbeTests(unittest.TestCase):
         receipt = json.loads(self.receipt.read_text())
         return code, receipt
 
+    @staticmethod
+    def python_command(source):
+        argv = [sys.executable, "-c", source]
+        return subprocess.list2cmdline(argv) if sys.platform == "win32" else shlex.join(argv)
+
+    def baseline(self, server, command=None):
+        # Calibrate with a real no-retry request in this process and, when used,
+        # the same shell/subprocess as the sampler. TCP buffering and process
+        # startup costs belong to the host, not to the probe's metric contract.
+        code, receipt = self.run_probe(server, "--scenario", "solo")
+        self.assertEqual(code, 0)
+        request = receipt["scenarios"][0]["requests"][0]
+        cost = request["total_s"]
+        if command:
+            started = time.monotonic()
+            subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
+            cost = max(cost, time.monotonic() - started)
+        return request, cost
+
+    def assert_stream_timing(self, request, call, baseline):
+        sent, received = call["deltas"], [d["monotonic_s"] for d in request["output_deltas"]]
+        self.assertEqual(len(received), len(sent))
+        # A response.created timestamp cannot pass the lower bound: the server
+        # records each real delta immediately before writing it to the socket.
+        for before_write, after_read in zip(sent, received):
+            self.assertGreaterEqual(after_read, before_write)
+            self.assertLessEqual(after_read - before_write, 4 * baseline["ttft_s"])
+        self.assertAlmostEqual(request["ttft_s"], received[0] - request["submitted_monotonic_s"])
+        self.assertAlmostEqual(request["decode_tok_s"], request["output_tokens"] / (received[-1] - received[0]))
+
     def test_metrics_count_reasoning_and_measure_concurrent_makespan(self):
         def plan(payload, _):
             return {"sleeps": [.06, .02, .09, .03] if payload["input"] == PROBE.DECODE_PROMPT else [.10, .10, .12, .08]}
-        server = self.server(plan)
+        server = self.server()
+        baseline, _ = self.baseline(server)
+        server.plan = plan
         code, receipt = self.run_probe(server, "--scenario", "decode_pair")
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         a, b = result["requests"]
         self.assertEqual(server.peak_active, 2)
-        self.assertLess(abs(a["submitted_monotonic_s"] - b["submitted_monotonic_s"]), .04)
-        self.assertAlmostEqual(a["ttft_s"], .06, delta=.035)
-        self.assertAlmostEqual(a["itl_ms"]["max"], 90, delta=30)
-        self.assertAlmostEqual(a["itl_ms"]["p50"], 30, delta=25)
-        self.assertAlmostEqual(a["itl_ms"]["p95"], 84, delta=30)
-        self.assertAlmostEqual(a["itl_ms"]["p99"], 88.8, delta=30)
+        self.assertLess(max(r["submitted_monotonic_s"] for r in (a, b)),
+                        min(r["first_output_monotonic_s"] for r in (a, b)))
+        calls = {call["payload"]["input"]: call for call in server.calls[-2:]}
+        self.assert_stream_timing(a, calls[PROBE.DECODE_PROMPT], baseline)
+        self.assert_stream_timing(b, calls[PROBE.SECOND_DECODE_PROMPT], baseline)
+        stamps = [d["monotonic_s"] for d in a["output_deltas"]]
+        gaps = [(end - start) * 1000 for start, end in zip(stamps, stamps[1:])]
+        low, middle, high = sorted(gaps)
+        self.assertEqual(a["itl_gaps_ms"], gaps)
+        self.assertAlmostEqual(a["itl_ms"]["max"], high)
+        self.assertAlmostEqual(a["itl_ms"]["p50"], middle)
+        self.assertAlmostEqual(a["itl_ms"]["p95"], middle + .9 * (high - middle))
+        self.assertAlmostEqual(a["itl_ms"]["p99"], middle + .98 * (high - middle))
         self.assertEqual([d["kind"] for d in a["output_deltas"]], ["reasoning", "text", "text", "text"])
-        self.assertAlmostEqual(a["decode_tok_s"], 60 / .14, delta=95)
-        self.assertAlmostEqual(b["decode_tok_s"], 60 / .30, delta=40)
-        self.assertAlmostEqual(result["summary"]["aggregate_tok_s"], 120 / .40, delta=55)
-        self.assertAlmostEqual(result["summary"]["fairness"], .14 / .30, delta=.13)
-        self.assertAlmostEqual(result["summary"]["makespan_s"], .40, delta=.06)
+        makespan = (max(r["completed_monotonic_s"] for r in (a, b))
+                    - min(r["submitted_monotonic_s"] for r in (a, b)))
+        self.assertAlmostEqual(result["summary"]["aggregate_tok_s"], 120 / makespan)
+        rates = [r["decode_tok_s"] for r in (a, b)]
+        self.assertAlmostEqual(result["summary"]["fairness"], min(rates) / max(rates))
+        self.assertAlmostEqual(result["summary"]["makespan_s"], makespan)
         self.assertEqual(a["reasoning_tokens"], 10)
         self.assertEqual(a["output_text_sha256"], hashlib.sha256("".join(f"{TEXT}{i}" for i in (1, 2, 3)).encode()).hexdigest())
         self.assertEqual(a["reasoning_text_sha256"], hashlib.sha256(REASONING.encode()).hexdigest())
@@ -267,41 +307,57 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertEqual(receipt["identity"]["server_before"]["body"]["identity"]["runtime_git_commit"], "mock-runtime")
 
     def test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft(self):
-        server = self.server(lambda payload, _: {"sleeps": [.03, .05, .18, .02]
-                                                if payload["input"] == PROBE.DECODE_PROMPT else [.08, .005, .005]})
+        server = self.server()
+        baseline, cost = self.baseline(server)
+        server.plan = lambda payload, _: {
+            "sleeps": [cost, cost, 6 * cost, cost]
+            if payload["input"] == PROBE.DECODE_PROMPT else [2 * cost, cost / 4, cost / 4]}
         code, receipt = self.run_probe(server, "--scenario", "prefill_during_decode", "--stall-after", "2")
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         a, b = result["requests"]
         self.assertGreaterEqual(b["submitted_monotonic_s"], a["output_deltas"][1]["monotonic_s"])
+        self.assertLess(b["first_output_monotonic_s"], a["output_deltas"][2]["monotonic_s"])
         gaps = result["interference"]["a_gaps_overlapping_b_prefill"]
         self.assertEqual(len(gaps), 1)
-        self.assertAlmostEqual(gaps[0]["gap_ms"], 180, delta=35)
-        self.assertAlmostEqual(gaps[0]["overlap_ms"], 80, delta=35)
-        self.assertAlmostEqual(result["interference"]["a_itl_max_ms"], 180, delta=35)
-        self.assertAlmostEqual(result["interference"]["b_ttft_s"], .08, delta=.035)
+        gap = (a["output_deltas"][2]["monotonic_s"] - a["output_deltas"][1]["monotonic_s"]) * 1000
+        self.assertAlmostEqual(gaps[0]["gap_ms"], gap)
+        self.assertAlmostEqual(gaps[0]["overlap_ms"], b["ttft_s"] * 1000)
+        self.assertAlmostEqual(result["interference"]["a_itl_max_ms"], gap)
+        self.assertEqual(result["interference"]["b_ttft_s"], b["ttft_s"])
+        self.assert_stream_timing(b, server.calls[-1], baseline)
 
     def test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples(self):
-        server = self.server(lambda payload, _: {"sleeps": [.03, .01, .01]
-                                                if isinstance(payload["input"], str) else [1.25, .01, .01]})
-        vram = f"{shlex.quote(sys.executable)} -c 'print(1234)'"
+        server = self.server(lambda *_: {"sleeps": [.03, .01, .01]})
+        vram = self.python_command("print(1234)")
+        baseline, cost = self.baseline(server, vram)
+        server.plan = lambda payload, _: {
+            "sleeps": [.03, .01, .01] if isinstance(payload["input"], str) else [1 + 4 * cost, .01, .01]}
         code, receipt = self.run_probe(server, "--scenario", "decode_during_prefill", "--vram-cmd", vram)
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         b, a = result["requests"]
-        self.assertAlmostEqual(a["submitted_monotonic_s"] - b["submitted_monotonic_s"], 1, delta=.06)
+        offset = a["submitted_monotonic_s"] - b["submitted_monotonic_s"]
+        self.assertGreaterEqual(offset, 1)  # The scenario's intentional submission delay.
+        self.assertLessEqual(offset - 1, 4 * cost)
         self.assertLess(a["completed_monotonic_s"], b["first_output_monotonic_s"])
-        self.assertAlmostEqual(result["interference"]["a_ttft_s"], .03, delta=.04)
-        self.assertLess(result["interference"]["a_total_s"], .15)
+        self.assertEqual(result["interference"]["a_ttft_s"], a["ttft_s"])
+        self.assertLessEqual(a["ttft_s"], 4 * max(baseline["ttft_s"], cost))
+        self.assertEqual(result["interference"]["a_total_s"], a["total_s"])
+        self.assertLessEqual(a["total_s"], 4 * cost)
+        self.assert_stream_timing(a, server.calls[-1], baseline)
         self.assertEqual(result["vram"]["peak_mib"], 1234)
         samples = result["vram"]["samples"]
         self.assertGreaterEqual(len(samples), 2)
-        self.assertAlmostEqual(samples[1]["monotonic_s"] - samples[0]["monotonic_s"], 1, delta=.10)
+        interval = samples[1]["monotonic_s"] - samples[0]["monotonic_s"]
+        self.assertGreaterEqual(interval, 1)
+        self.assertLessEqual(interval - 1, 4 * cost)
 
     def test_session_turns_preserve_both_lineages_and_join_only_run_window_logs(self):
         server = self.server(lambda payload, _: {"status": "incomplete" if not payload.get("previous_response_id") else "completed"})
         code, receipt = self.run_probe(server, "--scenario", "two_sessions", "--turns", "2",
-                                       "--log-cmd", f"cat {shlex.quote(str(server.log))}")
+                                       "--log-cmd", self.python_command(
+                                           f"from pathlib import Path; print(Path({str(server.log)!r}).read_text())"))
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         seeds, turn1, turn2 = (result["requests"][offset:offset + 2] for offset in (0, 2, 4))
@@ -329,8 +385,8 @@ class ConcurrencyProbeTests(unittest.TestCase):
         def plan(payload, _):
             return {"sleeps": [.003] * 200} if payload["input"] == PROBE.DECODE_PROMPT else {}
         server = self.server(plan)
-        command = (f"{shlex.quote(sys.executable)} -c " + shlex.quote(
-            f"import urllib.request; urllib.request.urlopen('{server.url}/interrupt').read()"))
+        command = self.python_command(
+            f"import urllib.request; urllib.request.urlopen('{server.url}/interrupt').read()")
         code, receipt = self.run_probe(server, "--scenario", "restart", "--kill-during-decode", command)
         self.assertEqual(code, 0)
         records = receipt["scenarios"][0]["requests"]
@@ -378,13 +434,22 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertTrue(receipt["scenarios"][0]["requests"][1]["ok"])
 
     def test_one_pre_stream_reset_retry_keeps_submit_latency(self):
-        server = self.server(lambda _, index: {"reset": True} if index == 1 else {})
+        server = self.server()
+        baseline, _ = self.baseline(server)
+        server.plan = lambda _, index: {"reset": True} if index == 2 else {}
         code, receipt = self.run_probe(server, "--scenario", "solo")
         self.assertEqual(code, 0)
         request = receipt["scenarios"][0]["requests"][0]
         self.assertEqual(len(request["attempts"]), 2)
-        self.assertGreaterEqual(request["ttft_s"], 2)
-        self.assertAlmostEqual(request["decode_tok_s"], 60 / .024, delta=700)
+        first, retried = request["attempts"]
+        backoff = retried["submitted_monotonic_s"] - first["completed_monotonic_s"]
+        self.assertGreaterEqual(backoff, 2)  # The documented retry backoff, not a host-speed pin.
+        self.assertGreaterEqual(request["ttft_s"], backoff)
+        self.assertLessEqual(request["ttft_s"] - backoff, 4 * baseline["ttft_s"])
+        self.assertLessEqual(request["total_s"] - backoff, 4 * baseline["total_s"])
+        self.assert_stream_timing(request, server.calls[-1], baseline)
+        self.assertGreaterEqual(request["decode_tok_s"], baseline["decode_tok_s"] / 4)
+        self.assertLessEqual(request["decode_tok_s"], 4 * baseline["decode_tok_s"])
 
     def test_total_timeout_bounds_a_continuously_streaming_request(self):
         server = self.server(lambda *_: {"sleeps": [.02] * 100})
