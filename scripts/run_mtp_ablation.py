@@ -918,6 +918,7 @@ SAFE_CONFIGURATION_INCLUDED = {
             "context_cost",
             "cuda_graph",
             "device",
+            "gpu_keep_warm_ms",
             "kv_cache",
             "kv_capacity",
             "kv_capacity_max_page_groups",
@@ -1029,36 +1030,132 @@ SAFE_CONFIGURATION_REQUIRED = {
     "sampling_defaults": SAFE_CONFIGURATION_INCLUDED["sampling_defaults"],
 }
 SAFE_CONFIGURATION_NULLABLE = frozenset({("server", "default_thinking_budget")})
+UPSTREAM_CONFIGURATION_INCLUDED = {
+    **SAFE_CONFIGURATION_INCLUDED,
+    "server": SAFE_CONFIGURATION_INCLUDED["server"] - {"default_reasoning_effort"},
+    "artifact": frozenset(
+        {"size_bytes", "architecture", "name", "formats", "prefill_signature"}
+    ),
+}
+UPSTREAM_CONFIGURATION_EXCLUDED = {
+    **SAFE_CONFIGURATION_EXCLUDED,
+    "artifact": frozenset(
+        {
+            "path", "bytes_read", "host_to_device_bytes", "peak_staging_bytes",
+            "device_object_count", "host_object_count", "load_seconds", "upload_seconds",
+        }
+    ),
+}
+UPSTREAM_CONFIGURATION_REQUIRED = {
+    section: UPSTREAM_CONFIGURATION_INCLUDED[section] | UPSTREAM_CONFIGURATION_EXCLUDED[section]
+    for section in SAFE_CONFIGURATION_INCLUDED
+}
+UPSTREAM_CONFIGURATION_NULLABLE = SAFE_CONFIGURATION_NULLABLE | {
+    ("server", "default_thinking"), ("server", "default_preserve_thinking")
+}
+SAMPLING_PRESET_KEYS = frozenset(
+    {"temperature", "top_p", "top_k", "min_p", "presence_penalty", "frequency_penalty"}
+)
+CONFIGURATION_NESTED_KEYS = {
+    ("engine", "context_cache"): frozenset(
+        {
+            "enabled", "device_state_slots", "total_device_state_slots", "host_state_slots",
+            "host_kv_capacity_bytes", "max_private_continuations", "max_shared_prefixes",
+            "max_long_anchors_per_continuation", "max_cache_markers_per_request",
+        }
+    ),
+    ("engine", "context_cost"): frozenset(
+        {"transfer_source", "prefill_source", "hardware_class", "model_id", "weights_id", "preset_path"}
+    ),
+    ("sampling_defaults", "thinking"): SAMPLING_PRESET_KEYS,
+    ("sampling_defaults", "non_thinking"): SAMPLING_PRESET_KEYS,
+    ("sampling_defaults", "server_overrides"): SAMPLING_PRESET_KEYS | {"seed"},
+}
+UPSTREAM_CONFIGURATION_NESTED_KEYS = {
+    **CONFIGURATION_NESTED_KEYS,
+    ("engine", "context_cache"): frozenset(
+        {"enabled", "device_state_slots", "total_device_state_slots", "host_capacity_bytes"}
+    ),
+    ("engine", "context_cost"): frozenset(
+        {"transfer_source", "prefill_source", "hardware_class", "prefill_signature", "preset_path"}
+    ),
+}
 
 
-def safe_configuration_section(start: Mapping[str, Any], section: str) -> dict[str, Any]:
+def request_log_schema(start: Mapping[str, Any]) -> int:
+    if (
+        start.get("artifact_type") != "ninfer_serve_request_log"
+        or start.get("event") != "server_start"
+    ):
+        raise AblationError("configuration requires a request-log server_start record, not status")
+    version = start.get("schema_version")
+    if type(version) is not int or version not in {17, 27, 28, 29, 30}:
+        raise AblationError("server_start has an unsupported request-log schema_version")
+    return version
+
+
+def safe_configuration_section(
+    start: Mapping[str, Any], section: str, schema_version: int
+) -> dict[str, Any]:
     raw = start.get(section)
     if not isinstance(raw, dict):
         raise AblationError(f"server_start omitted {section}")
-    known = SAFE_CONFIGURATION_INCLUDED[section] | SAFE_CONFIGURATION_EXCLUDED[section]
+    upstream = schema_version >= 27
+    included = UPSTREAM_CONFIGURATION_INCLUDED if upstream else SAFE_CONFIGURATION_INCLUDED
+    excluded = UPSTREAM_CONFIGURATION_EXCLUDED if upstream else SAFE_CONFIGURATION_EXCLUDED
+    required = (
+        UPSTREAM_CONFIGURATION_REQUIRED[section] if upstream
+        else SAFE_CONFIGURATION_REQUIRED[section]
+    )
+    # The pre-port upstream records have no provenance block or keep-warm option.
+    # Classification must not invent either; qualification binds real identities separately.
+    if upstream and schema_version < 30 and section == "engine":
+        required = required - {"gpu_keep_warm_ms"}
+    known = included[section] | excluded[section]
     unknown = sorted(set(raw) - known)
     if unknown:
         raise AblationError(f"server_start {section} has unclassified fields: {unknown}")
-    missing = sorted(SAFE_CONFIGURATION_REQUIRED[section] - set(raw))
+    missing = sorted(required - set(raw))
     if missing:
         raise AblationError(f"server_start {section} omitted required fields: {missing}")
-    result = {
-        key: raw[key] for key in sorted(SAFE_CONFIGURATION_INCLUDED[section]) if key in raw
-    }
+    result = {key: raw[key] for key in sorted(included[section]) if key in raw}
+    nullable = UPSTREAM_CONFIGURATION_NULLABLE if upstream else SAFE_CONFIGURATION_NULLABLE
     nulls = sorted(
         key
-        for key, value in result.items()
-        if value is None and (section, key) not in SAFE_CONFIGURATION_NULLABLE
+        for key, value in (raw if section == "identity" else result).items()
+        if value is None and (section, key) not in nullable
     )
     if nulls:
         raise AblationError(f"server_start {section} has null configuration fields: {nulls}")
+    nested_keys = UPSTREAM_CONFIGURATION_NESTED_KEYS if upstream else CONFIGURATION_NESTED_KEYS
+    for (parent, field), keys in nested_keys.items():
+        if parent != section or field not in result:
+            continue
+        value = result[field]
+        if not isinstance(value, dict):
+            raise AblationError(f"server_start {section}.{field} must be an object")
+        unknown = sorted(set(value) - keys)
+        if unknown:
+            raise AblationError(
+                f"server_start {section}.{field} has unclassified fields: {unknown}"
+            )
+        if upstream:
+            missing = sorted(keys - set(value))
+            if missing:
+                raise AblationError(
+                    f"server_start {section}.{field} omitted required fields: {missing}"
+                )
+        if field != "server_overrides" and any(item is None for item in value.values()):
+            raise AblationError(f"server_start {section}.{field} has null configuration fields")
     return result
 
 
 def safe_configuration(start: Mapping[str, Any]) -> dict[str, Any]:
+    schema_version = request_log_schema(start)
     return {
-        section: safe_configuration_section(start, section)
+        section: safe_configuration_section(start, section, schema_version)
         for section in ("server", "identity", "artifact", "engine", "sampling_defaults")
+        if section != "identity" or schema_version == 30 or "identity" in start
     }
 
 
@@ -1186,6 +1283,8 @@ def summarize_arm(
             "patch_stack_sha": (identity.get("patch_stack_sha"), source_commit),
             "public_model_id": (server.get("public_model_id"), model),
         }
+        if request_log_schema(start) == 30:
+            checks["weights_id"] = (identity.get("weights_id"), model_sha)
         for label, (actual, expected) in checks.items():
             if actual != expected:
                 raise AblationError(

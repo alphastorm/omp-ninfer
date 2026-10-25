@@ -354,13 +354,16 @@ def bind_server_start(
     assert isinstance(server, dict) and isinstance(identity, dict) and isinstance(engine, dict)
     assert isinstance(artifact, dict) and isinstance(sampling, dict)
     expected_artifact = matrix.artifact(spec.weights_id)
+    upstream_port = corpus.request_log_schema(start) == 30
     checks = {
         "identity.binary_sha256": (identity.get("binary_sha256"), matrix.binary_sha256),
         "identity.patch_stack_sha": (identity.get("patch_stack_sha"), matrix.source_commit),
         "identity.model_artifact_sha256": (identity.get("model_artifact_sha256"), expected_artifact["sha256"]),
-        "identity.weights_id": (identity.get("weights_id"), spec.weights_id),
+        "identity.weights_id": (
+            identity.get("weights_id"),
+            expected_artifact["sha256"] if upstream_port else spec.weights_id,
+        ),
         "identity.source_dirty": (identity.get("source_dirty"), False),
-        "artifact.weights_id": (artifact.get("weights_id"), spec.weights_id),
         "artifact.size_bytes": (artifact.get("size_bytes"), expected_artifact["bytes"]),
         "server.public_model_id": (server.get("public_model_id"), model),
         "engine.prefill_chunk": (engine.get("prefill_chunk"), spec.prefill_chunk),
@@ -371,6 +374,10 @@ def bind_server_start(
         "engine.prefix_reuse": (engine.get("prefix_reuse"), True),
         "sampling_defaults.greedy": (sampling.get("greedy"), True),
     }
+    if upstream_port:
+        checks["artifact.architecture"] = (artifact.get("architecture"), identity.get("target"))
+    else:
+        checks["artifact.weights_id"] = (artifact.get("weights_id"), spec.weights_id)
     if spec.speculative_backend == "mtp":
         checks["engine.proposal_head"] = (engine.get("proposal_head"), "optimized")
     for field, (actual, expected) in checks.items():

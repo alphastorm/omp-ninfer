@@ -113,6 +113,8 @@ def server_start(spec: dict[str, Any], instance: str, *, kv_capacity: int = 1310
     artifact = test_manifest()["artifacts"][spec["weights_id"]]
     speculative = spec["speculative_backend"] == "mtp"
     return {
+        "artifact_type": "ninfer_serve_request_log",
+        "schema_version": 17,
         "event": "server_start",
         "server_instance_id": instance,
         "server": {
@@ -416,6 +418,78 @@ class ArmsManifestTests(unittest.TestCase):
         manifest["lanes"][LANE]["arms"][2]["label"] = "Chunk 2048"
         with self.assertRaisesRegex(MODULE.CampaignError, "lowercase"):
             matrix_for(manifest)
+
+
+class StartupSchemaTests(unittest.TestCase):
+    @staticmethod
+    def fixture(schema: int = 30) -> dict[str, Any]:
+        return json.loads(
+            (ROOT / f"tests/fixtures/server-start-schema-{schema}.json").read_text()
+        )
+
+    def bind(self, start: dict[str, Any]) -> dict[str, Any]:
+        matrix = matrix_for()
+        return MODULE.bind_server_start(
+            start, spec=matrix.spec("inc"), matrix=matrix, model=MODEL,
+            instance_id=start["server_instance_id"],
+        )
+
+    def test_schema30_uses_verified_artifact_identity_not_a_logical_alias(self) -> None:
+        binding = self.bind(self.fixture())
+        self.assertEqual(binding["configuration"]["identity"]["weights_id"], GW_SHA)
+        self.assertEqual(binding["capacity"]["kv_capacity"], 131072)
+        self.assertIsNone(binding["configuration"]["server"]["default_thinking"])
+        record = self.fixture()
+        record["identity"]["weights_id"] = "groupwise-int"
+        with self.assertRaisesRegex(MODULE.CampaignError, "identity.weights_id mismatch"):
+            self.bind(record)
+
+    def test_historical_admission_does_not_bypass_campaign_attestation(self) -> None:
+        for schema in (27, 29):
+            record = self.fixture(schema)
+            self.assertNotIn("identity", CORPUS.safe_configuration(record))
+            with self.subTest(schema=schema), self.assertRaisesRegex(
+                MODULE.CampaignError, "omitted.*identity"
+            ):
+                self.bind(record)
+
+    def test_schema30_preserves_required_subject_and_unknown_key_checks(self) -> None:
+        for section, field, value in (
+            ("identity", "binary_sha256", "0" * 64),
+            ("identity", "model_artifact_sha256", "0" * 64),
+            ("identity", "patch_stack_sha", "0" * 40),
+            ("identity", "source_dirty", True),
+            ("artifact", "architecture", "foreign-model"),
+            ("artifact", "size_bytes", 999),
+        ):
+            with self.subTest(field=field):
+                record = self.fixture()
+                record[section][field] = value
+                with self.assertRaisesRegex(MODULE.CampaignError, "mismatch"):
+                    self.bind(record)
+        record = self.fixture()
+        record["engine"]["new_unclassified_knob"] = 1
+        with self.assertRaisesRegex(CORPUS.AblationError, "unclassified fields"):
+            self.bind(record)
+
+    def test_schema30_reduces_complete_correlated_campaign_records(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            trace, log = write_arm_fixtures(
+                Path(tmp), "inc", prefill_rate=3000.0, decode_rate=170.0,
+                instance="schema30-instance",
+            )
+            records = [json.loads(line) for line in log.read_text().splitlines()]
+            records[0] = self.fixture()
+            records[0]["server_instance_id"] = "schema30-instance"
+            for record in records[1:]:
+                record["artifact_type"] = "ninfer_serve_request_log"
+                record["schema_version"] = 30
+            log.write_text("\n".join(map(json.dumps, records)) + "\n")
+            receipt = MODULE.summarize_arm(trace, log, matrix=matrix_for())
+        self.assertEqual(receipt["completed_requests"], 24)
+        self.assertEqual(receipt["configuration"]["identity"]["weights_id"], GW_SHA)
+        self.assertEqual(receipt["model_artifact_sha256"], GW_SHA)
+        self.assertEqual(receipt["configuration"]["engine"]["gpu_keep_warm_ms"], 60000)
 
 
 class EngineKvNameTests(unittest.TestCase):

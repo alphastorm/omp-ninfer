@@ -1,0 +1,132 @@
+{
+  "artifact_type": "ninfer_serve_request_log",
+  "schema_version": 30,
+  "event": "server_start",
+  "timestamp_unix_ms": 1,
+  "server_instance_id": "serve-100-1",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 18082,
+    "public_model_id": "qwen3.8-27b",
+    "api_key_configured": true,
+    "cors_enabled": false,
+    "max_request_bytes": 1048576,
+    "media_cache_bytes": 0,
+    "media_live_bytes": 0,
+    "media_preprocess_threads": 1,
+    "request_log_jsonl": "requests.jsonl",
+    "default_output_tokens": 32768,
+    "default_thinking": null,
+    "default_thinking_budget": null,
+    "default_preserve_thinking": null
+  },
+  "artifact": {
+    "path": "qwen3_8_27b.ninfer",
+    "size_bytes": 1000,
+    "architecture": "Qwen3_5ForCausalLM",
+    "name": "Qwen3.8-27B",
+    "formats": [
+      "groupwise-int"
+    ],
+    "prefill_signature": "qwen3_8_27b-groupwise-int",
+    "bytes_read": 1000,
+    "host_to_device_bytes": 900,
+    "peak_staging_bytes": 64,
+    "device_object_count": 100,
+    "host_object_count": 4,
+    "load_seconds": 12.5,
+    "upload_seconds": 1
+  },
+  "engine": {
+    "device": 0,
+    "max_context": 131072,
+    "kv_capacity_mode": "auto",
+    "kv_capacity": 131072,
+    "kv_capacity_page_groups": 32,
+    "kv_capacity_max_page_groups": 64,
+    "max_concurrency": 1,
+    "max_pending_requests": 16,
+    "pending_timeout_ms": 30000,
+    "prefill_chunk": 1024,
+    "log_stats_interval_ms": 0,
+    "kv_cache": "bf16",
+    "vision": true,
+    "cuda_graph": true,
+    "prefix_reuse": true,
+    "speculative_backend": "mtp",
+    "speculative_draft_window": 3,
+    "proposal_head": "optimized",
+    "context_cost": {
+      "transfer_source": "estimated",
+      "prefill_source": "estimated",
+      "hardware_class": "sm_120a",
+      "prefill_signature": "qwen3_8_27b-groupwise-int",
+      "preset_path": ""
+    },
+    "context_cache": {
+      "enabled": true,
+      "device_state_slots": 2,
+      "total_device_state_slots": 3,
+      "host_capacity_bytes": 8589934592
+    },
+    "gpu_keep_warm_ms": 60000
+  },
+  "sampling_defaults": {
+    "thinking": {
+      "temperature": 1,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "presence_penalty": 0,
+      "frequency_penalty": 0
+    },
+    "non_thinking": {
+      "temperature": 1,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "presence_penalty": 0,
+      "frequency_penalty": 0
+    },
+    "server_overrides": {
+      "temperature": null,
+      "top_p": null,
+      "top_k": null,
+      "min_p": null,
+      "presence_penalty": null,
+      "frequency_penalty": null,
+      "seed": null
+    },
+    "omitted_seed": "random",
+    "greedy": true
+  },
+  "environment": {
+    "device": 0,
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "gpu_uuid": "GPU-00000000-0000-0000-0000-000000000001",
+    "total_device_memory_bytes": 34359738368,
+    "compute_capability_major": 12,
+    "compute_capability_minor": 0,
+    "cuda_compile_version": "13.3",
+    "cuda_runtime_version": "13.3",
+    "cuda_driver_version": "13.3"
+  },
+  "identity": {
+    "upstream_base_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "patch_stack_sha": "dddddddddddddddddddddddddddddddddddddddd",
+    "source_dirty": false,
+    "build_profile": "variant-test",
+    "build_type": "Release",
+    "cxx_compiler": "GNU",
+    "cuda_compiler": "NVIDIA",
+    "cuda_toolkit": "13.3",
+    "cuda_architecture": "120a",
+    "deployment_profile": "variant-test",
+    "binary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "model_artifact_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target": "Qwen3_5ForCausalLM",
+    "model_id": "qwen3.8-27b",
+    "weights_id": "1111111111111111111111111111111111111111111111111111111111111111"
+  }
+}

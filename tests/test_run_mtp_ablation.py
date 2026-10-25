@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -117,6 +118,8 @@ def combine_with_control(
 
 def server_start_fixture(instance: str, arm: int = 3) -> dict[str, object]:
     return {
+        "artifact_type": "ninfer_serve_request_log",
+        "schema_version": 17,
         "event": "server_start",
         "server_instance_id": instance,
         "server": {
@@ -429,6 +432,121 @@ class CorpusContractTests(unittest.TestCase):
         self.assertEqual(message["reasoning_content"], "I need the build result.")
 
 
+class StartupSchemaTests(unittest.TestCase):
+    @staticmethod
+    def fixture(schema: int) -> dict[str, Any]:
+        return json.loads(
+            (ROOT / f"tests/fixtures/server-start-schema-{schema}.json").read_text()
+        )
+
+    def test_historical_upstream_records_do_not_invent_attestation(self) -> None:
+        configurations = []
+        for schema in (27, 29):
+            with self.subTest(schema=schema):
+                configuration = MODULE.safe_configuration(self.fixture(schema))
+                self.assertNotIn("identity", configuration)
+                self.assertNotIn("gpu_keep_warm_ms", configuration["engine"])
+                self.assertIsNone(configuration["server"]["default_thinking"])
+                self.assertIsNone(configuration["server"]["default_preserve_thinking"])
+                self.assertEqual(configuration["artifact"]["architecture"], "Qwen3_5ForCausalLM")
+                self.assertNotIn("path", configuration["artifact"])
+                configurations.append(configuration)
+        self.assertEqual(configurations[0], configurations[1])
+
+    def test_fork_record_keeps_real_optional_identity_and_keep_warm(self) -> None:
+        record = server_start_fixture("fork")
+        record["engine"]["gpu_keep_warm_ms"] = 60000
+        configuration = MODULE.safe_configuration(record)
+        self.assertEqual(configuration["identity"]["binary_sha256"], SHA_B)
+        self.assertNotIn("config_sha256", configuration["identity"])
+        self.assertEqual(configuration["engine"]["gpu_keep_warm_ms"], 60000)
+        del record["identity"]
+        self.assertNotIn("identity", MODULE.safe_configuration(record))
+
+    def test_schema30_preserves_inherit_and_comparable_configuration(self) -> None:
+        record = self.fixture(30)
+        configuration = MODULE.safe_configuration(record)
+        self.assertEqual(configuration["identity"]["weights_id"], "1" * 64)
+        self.assertEqual(configuration["engine"]["gpu_keep_warm_ms"], 60000)
+        self.assertIsNone(configuration["server"]["default_thinking"])
+        self.assertIsNone(configuration["sampling_defaults"]["server_overrides"]["seed"])
+        self.assertEqual(
+            configuration["engine"]["context_cache"]["host_capacity_bytes"], 8589934592
+        )
+        for section, field, value in (
+            ("engine", "gpu_keep_warm_ms", 0),
+            ("server", "default_thinking", False),
+            ("server", "default_preserve_thinking", False),
+            ("artifact", "prefill_signature", "different-profile"),
+        ):
+            with self.subTest(field=field):
+                changed = copy.deepcopy(record)
+                changed[section][field] = value
+                self.assertNotEqual(configuration, MODULE.safe_configuration(changed))
+        changed = copy.deepcopy(record)
+        changed["engine"]["context_cache"]["host_capacity_bytes"] *= 2
+        self.assertNotEqual(configuration, MODULE.safe_configuration(changed))
+        changed = copy.deepcopy(record)
+        changed["artifact"]["device_object_count"] += 1
+        changed["artifact"]["load_seconds"] += 1
+        changed["identity"]["config_sha256"] = SHA_C
+        self.assertEqual(configuration, MODULE.safe_configuration(changed))
+
+    def test_schema30_requires_identity_and_non_null_subjects(self) -> None:
+        record = self.fixture(30)
+        del record["identity"]
+        with self.assertRaisesRegex(MODULE.AblationError, "omitted identity"):
+            MODULE.safe_configuration(record)
+        for section, field in (
+            ("identity", "binary_sha256"), ("identity", "model_artifact_sha256"),
+            ("identity", "config_sha256"), ("identity", "patch_stack_sha"),
+            ("identity", "source_dirty"), ("artifact", "size_bytes"),
+            ("engine", "gpu_keep_warm_ms"),
+        ):
+            for mutation in ("missing", "null"):
+                with self.subTest(section=section, field=field, mutation=mutation):
+                    record = self.fixture(30)
+                    if mutation == "missing":
+                        del record[section][field]
+                    else:
+                        record[section][field] = None
+                    with self.assertRaises(MODULE.AblationError):
+                        MODULE.safe_configuration(record)
+
+    def test_unknown_keys_fail_for_both_historical_and_new_records(self) -> None:
+        records = [server_start_fixture("fork")] + [self.fixture(n) for n in (27, 29, 30)]
+        for original in records:
+            for section in ("server", "artifact", "engine", "sampling_defaults"):
+                with self.subTest(schema=original["schema_version"], section=section):
+                    record = copy.deepcopy(original)
+                    record[section]["unclassified_setting"] = 1
+                    with self.assertRaisesRegex(MODULE.AblationError, "unclassified fields"):
+                        MODULE.safe_configuration(record)
+        for section, field in (
+            ("engine", "context_cache"), ("engine", "context_cost"),
+            ("sampling_defaults", "thinking"), ("sampling_defaults", "server_overrides"),
+        ):
+            with self.subTest(field=field):
+                record = self.fixture(30)
+                record[section][field]["unclassified_setting"] = 1
+                with self.assertRaisesRegex(MODULE.AblationError, "unclassified fields"):
+                    MODULE.safe_configuration(record)
+        record = self.fixture(30)
+        record["artifact"]["weights_id"] = "legacy-label"
+        with self.assertRaisesRegex(MODULE.AblationError, "unclassified fields"):
+            MODULE.safe_configuration(record)
+
+    def test_status_schema_is_not_a_request_log_schema(self) -> None:
+        status = {"artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok"}
+        with self.assertRaisesRegex(MODULE.AblationError, "not status"):
+            MODULE.safe_configuration(status)
+        for schema in (None, True, 31):
+            record = self.fixture(30)
+            record["schema_version"] = schema
+            with self.assertRaisesRegex(MODULE.AblationError, "unsupported request-log"):
+                MODULE.safe_configuration(record)
+
+
 class ReceiptTests(unittest.TestCase):
     def test_safe_configuration_excludes_arm_specific_runtime_state(self) -> None:
         baseline = server_start_fixture("baseline", arm=0)
@@ -516,6 +634,8 @@ class ReceiptTests(unittest.TestCase):
                 encoding="utf-8",
             )
             start = {
+                "artifact_type": "ninfer_serve_request_log",
+                "schema_version": 17,
                 "event": "server_start",
                 "server_instance_id": instance,
                 "server": {
