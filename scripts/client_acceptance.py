@@ -19,6 +19,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import socketserver
 import subprocess
 import sys
 import tempfile
@@ -156,8 +157,17 @@ class StubHandler(http.server.BaseHTTPRequestHandler):
         self.close_connection = True
 
 
+class LoopbackHTTPServer(http.server.ThreadingHTTPServer):
+    def server_bind(self):
+        # HTTPServer.server_bind performs reverse DNS before publishing readiness.
+        # This synthetic server is loopback-only; DNS is not a lifecycle prerequisite.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.server_address[1]
+
+
 def stub_main(store, port):
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", int(port)), StubHandler)
+    server = LoopbackHTTPServer(("127.0.0.1", int(port)), StubHandler)
     server.key = os.environ["OMP_ACCEPTANCE_STUB_KEY"]
     server.store = Path(store) / "responses.json"
     server.lock = threading.Lock()
