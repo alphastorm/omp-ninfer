@@ -141,11 +141,12 @@ def validate_client_distribution(client: dict[str, Any], label: str, platform: s
     ), f"{label}.asset_url must bind the upstream tag and asset name")
 
 
-def load_authority(path: Path) -> dict[str, Any]:
+def load_authority(path: Path, *, allow_prepared: bool = False) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     require(isinstance(value, dict), "compatibility authority must be an object")
     require(value.get("schema_version") == 1, "unsupported compatibility schema")
     if value.get("artifact_type") == "omp_ninfer_prepared_compatibility":
+        require(allow_prepared, "prepared compatibility is not an installable authority")
         require(value.get("status") == "preparation-only", "prepared authority cannot claim readiness")
         require(isinstance(value.get("runtime_contracts"), list)
                 and bool(value["runtime_contracts"]), "prepared runtime contracts are absent")
@@ -496,7 +497,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=root / "docs" / "COMPATIBILITY.md")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    rendered = render(load_authority(args.authority))
+    rendered = render(load_authority(args.authority, allow_prepared=True))
     if args.check:
         require(args.output.read_text(encoding="utf-8") == rendered,
                 "generated compatibility matrix is stale")

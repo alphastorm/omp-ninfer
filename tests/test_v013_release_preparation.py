@@ -60,7 +60,11 @@ class V013PreparationTests(unittest.TestCase):
 
     def test_prepared_authority_does_not_claim_accepted_schema_support_on_carried_natives(self):
         path = ROOT / "releases/v0.13.0/compatibility.json"
-        authority = render_compatibility.load_authority(path)
+        raw = json.loads(path.read_text())
+        if raw.get("artifact_type") == "omp_ninfer_prepared_compatibility":
+            with self.assertRaisesRegex(ValueError, "not an installable authority"):
+                render_compatibility.load_authority(path)
+        authority = render_compatibility.load_authority(path, allow_prepared=True)
         if authority.get("artifact_type") == "omp_ninfer_prepared_compatibility":
             rendered = render_compatibility.render(authority)
             self.assertEqual((ROOT / "releases/v0.13.0/COMPATIBILITY.md").read_text(), rendered)
