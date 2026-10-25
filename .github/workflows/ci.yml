@@ -81,10 +81,6 @@ jobs:
               "test_restart_seed_stays_between_the_checkpoint_gate_and_client_compaction",
           ):
               setattr(extraction, name, unittest.skip("executes the documented POSIX seed pipeline")(getattr(extraction, name)))
-          # Linux owns test_concurrency_probe's scheduler/TCP wall-clock fixture assertions.
-          timing = importlib.import_module("test_concurrency_probe").ConcurrencyProbeTests
-          timing.__unittest_skip__ = True
-          timing.__unittest_skip_why__ = "Linux timing-class module; full coverage in release-contract"
           native = importlib.import_module("test_accept_rtx4090_route").NativeLaneTests
           # These two fixtures create a scratch PSDrive named C:, already the system drive here.
           for name in (
@@ -108,15 +104,9 @@ jobs:
       - name: Run contract tests
         shell: python
         run: |
-          import importlib
           import unittest
 
           suite = unittest.defaultTestLoader.discover("tests")
-          # Explicit platform exclusion: test_concurrency_probe is the Linux timing class.
-          # Do not loosen its clock tolerances; release-contract runs the entire module.
-          timing = importlib.import_module("test_concurrency_probe").ConcurrencyProbeTests
-          timing.__unittest_skip__ = True
-          timing.__unittest_skip_why__ = "Linux timing-class module; full coverage in release-contract"
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           raise SystemExit(not result.wasSuccessful())
 
