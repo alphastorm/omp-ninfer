@@ -15,7 +15,7 @@
     "note": "All three freshly downloaded stock OMP 18.12.6 asset/binary identities, versions, typed tool/result, exact continuation and fail-closed proofs passed; both native routes used the same stock Windows client."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "a22ef26a5bc20a52355062e0310c0e1d942a77e06fc7cba73c0b61c59dd0b1cc",
+  "compatibility_sha256": "9d16759735042711801066b4313a4933e250cad2fe6b6a5a4ef4e4a6d4c480ee",
   "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
   "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
   "platform_receipts": [
