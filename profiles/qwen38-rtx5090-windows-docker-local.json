@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-windows-docker-local",
-  "release": "v0.12.2",
+  "release": "v0.13.0",
   "installation_mode": "native-windows-docker-local",
   "client": {
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.12.1",
-    "upstream_commit": "291e055836c210f314af3f73f53244e8e9d09de8",
+    "upstream_tag": "v18.12.6",
+    "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
     "os": "Windows 11",
     "architecture": "x64",
     "published": true,
     "asset_name": "omp-windows-x64.exe",
-    "asset_bytes": 222742016,
-    "asset_sha256": "1ba0274b48e6d6d095727faf36ec55114f5a6ac05bde5b8714d1565b2b7477bb",
-    "binary_sha256": "1ba0274b48e6d6d095727faf36ec55114f5a6ac05bde5b8714d1565b2b7477bb",
-    "release_id": 416123868,
-    "asset_id": 651859235,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.1/omp-windows-x64.exe"
+    "asset_bytes": 224254976,
+    "asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+    "binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+    "release_id": 420053191,
+    "asset_id": 663781492,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe"
   },
   "runtime_host": {
     "os": [
@@ -42,14 +42,15 @@
   },
   "model": {
     "public_id": "q38-ninfer",
-    "artifact_sha256": "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
-    "artifact_bytes": 20437336576
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "artifact_bytes": 20437521664
   },
   "server": {
     "executable": "/usr/local/bin/ninfer-serve",
-    "deployment_profile": "qwen38-5090-v0.11.0",
+    "deployment_profile": "qwen38-5090-v0.13.0",
     "container_network_mode": "bridge",
     "restart_policy": "no",
+    "status_schema_version": 2,
     "arguments": [
       "--host",
       "0.0.0.0",
@@ -58,13 +59,13 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "548fe239a3f2f97c98d864b4a7b9c6beb1263788633f1a4bf13c101f2beecace",
+      "48d736aae65a7b2edfb8c4cfea547b97af1671e0e443d78499ba4b66833d3232",
       "--artifact-sha256",
-      "0634abb07024221de141456cf04a42ab74b18bc38e1b781c6eb2e062a467eec3",
+      "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
       "--config-sha256",
-      "91a3567002a43025876e811597353764b20e32f0818bcb6c582a5072c96d7e11",
+      "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f",
       "--deployment-profile",
-      "qwen38-5090-v0.11.0",
+      "qwen38-5090-v0.13.0",
       "--max-context",
       "131072",
       "--kv-capacity",
@@ -85,26 +86,23 @@
       "--vision",
       "--preserve-thinking",
       "--session-checkpoint-dir",
-      "/checkpoints",
+      "/checkpoints-v013",
       "--session-checkpoint-quota-mib",
       "24576",
       "--session-checkpoint-staging-mib",
       "256",
-      "--max-private-continuations",
-      "8",
       "--device-state-slots",
       "2",
-      "--host-state-slots",
-      "24",
-      "--host-kv-mib",
-      "16384",
+      "--host-context-mib",
+      "20867.734375",
       "--gpu-keep-warm-ms",
       "60000"
     ],
     "container_port": 8080,
     "published_bind_host": "127.0.0.1",
     "published_port": 18089,
-    "checkpoint_mount_target": "/checkpoints",
+    "checkpoint_mount_target": "/checkpoints-v013",
+    "checkpoint_host_directory": "checkpoints-v013",
     "checkpoint_seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
     "checkpoint_seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
   },
@@ -149,12 +147,15 @@
     "process-restart-continuation",
     "two-long-session-reuse"
   ],
+  "structured_output": {
+    "json_schema": "acceptance-pending",
+    "implementation": "upstream-xgrammar"
+  },
   "unsupported": [
     "native-windows-ninfer",
     "native-windows-cuda",
     "automatic-container-restart",
     "multi-gpu",
-    "multi-tenant",
-    "structured-json-schema-output"
+    "multi-tenant"
   ]
 }
