@@ -18,16 +18,16 @@ CONFIG_SHA = "c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f"
 class V013PreparationTests(unittest.TestCase):
     def profiles(self):
         for path in sorted((ROOT / "profiles/v0.13.0").glob("*.json")):
-            yield path, json.loads(path.read_text())
+            yield path, json.loads(path.read_text(encoding="utf-8"))
 
     def test_new_profile_has_byte_equivalent_host_budget_and_unchanged_other_tuning(self):
         count = 0
         for path, profile in self.profiles():
             count += 1
             arguments = profile["server"]["arguments"]
-            old = json.loads((ROOT / "releases/v0.12.2/manifest.json").read_text())
+            old = json.loads((ROOT / "releases/v0.12.2/manifest.json").read_text(encoding="utf-8"))
             # Root profiles intentionally remain live until the lane pin.
-            previous = json.loads((ROOT / "profiles" / path.name).read_text())
+            previous = json.loads((ROOT / "profiles" / path.name).read_text(encoding="utf-8"))
             if previous["release"] == "v0.12.2":
                 old_tuning = verify_release.tuning_arguments(previous["server"]["arguments"])
                 for flag in ("--host-state-slots", "--host-kv-mib", "--max-private-continuations"):
@@ -60,14 +60,14 @@ class V013PreparationTests(unittest.TestCase):
 
     def test_prepared_authority_does_not_claim_accepted_schema_support_on_carried_natives(self):
         path = ROOT / "releases/v0.13.0/compatibility.json"
-        raw = json.loads(path.read_text())
+        raw = json.loads(path.read_text(encoding="utf-8"))
         if raw.get("artifact_type") == "omp_ninfer_prepared_compatibility":
             with self.assertRaisesRegex(ValueError, "not an installable authority"):
                 render_compatibility.load_authority(path)
         authority = render_compatibility.load_authority(path, allow_prepared=True)
         if authority.get("artifact_type") == "omp_ninfer_prepared_compatibility":
             rendered = render_compatibility.render(authority)
-            self.assertEqual((ROOT / "releases/v0.13.0/COMPATIBILITY.md").read_text(), rendered)
+            self.assertEqual((ROOT / "releases/v0.13.0/COMPATIBILITY.md").read_text(encoding="utf-8"), rendered)
             self.assertIn("Preparation only", rendered)
             contracts = authority["runtime_contracts"]
             self.assertIn("acceptance pending", contracts[0]["json_schema"])
@@ -80,7 +80,7 @@ class V013PreparationTests(unittest.TestCase):
 
     def test_prepared_notes_are_bounded_and_use_readable_release_prose(self):
         from test_documented_route import ReleaseProseTests
-        text = (ROOT / "releases/v0.13.0/NINFER_RELEASE_NOTES.md").read_text()
+        text = (ROOT / "releases/v0.13.0/NINFER_RELEASE_NOTES.md").read_text(encoding="utf-8")
         self.assertLessEqual(len(text.splitlines()), 210)
         self.assertEqual(ReleaseProseTests.glued_tokens(text), [])
         self.assertIn("335.332 → 290.781", text)
