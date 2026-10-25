@@ -1,0 +1,80 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-10-25",
+  "product_release": "v0.13.0",
+  "client_upgrade": {
+    "from": "18.12.1",
+    "to": "18.12.6",
+    "reason": "Review the next stock client on the documented Responses route and exercise the changed snapcompact image-wire gate and print-mode slash-command dispatch. This receipt prepares inputs only; it does not stage or qualify a release.",
+    "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "upstream_tree": "8a90a1b48b370649bd3f026d5f609e500626785c",
+    "release_id": 420053191,
+    "published_at": "2026-10-21T21:02:53Z"
+  },
+  "descriptor_inputs": "docs/measurements/2026-10-25-omp-18126-client-components.json",
+  "upstream_changed_paths": [
+    {
+      "pull_request": "https://github.com/can1357/oh-my-pi/pull/16436",
+      "commits": ["0d650fed", "81a7224e"],
+      "path": "snapcompact selection, inline imaging and session image replacement use sendsImageInputOnWire rather than only the declared image modality",
+      "present_in_target": true,
+      "applicability": "The product's openai-responses route still sends images. A declared-vision Chat Completions control with compat.stripImageInput true must not archive history into images the transport drops."
+    },
+    {
+      "pull_request": "https://github.com/can1357/oh-my-pi/pull/16387",
+      "commits": ["fe57f0da", "9f97686d", "2a76e306", "08542ed0"],
+      "path": "print-mode dispatch of local slash commands, including /compact, with non-zero exit on local failure",
+      "present_in_target": true,
+      "applicability": "Documented prose prompts are unchanged; a slash command supplied to omp -p is no longer sent as ordinary model text."
+    }
+  ],
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Download the three raw release assets and SHA256SUMS.txt to an operator cache; stream SHA-256 over each asset and compare its digest and byte count to both the checksum row and GitHub release asset metadata.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/SHA256SUMS.txt",
+      "assets": [
+        {"name": "omp-darwin-arm64", "asset_id": 663781499, "bytes": 197245984, "sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-windows-x64.exe", "asset_id": 663781492, "bytes": 224254976, "sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-linux-x64", "asset_id": 663781494, "bytes": 256702432, "sha256": "85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4", "sha256sums_match": true, "api_digest_match": true}
+      ]
+    },
+    "loopback_comparison": {
+      "binaries": {
+        "18.12.1": "omp-darwin-arm64 fa41b27d434380e99b713e4f9ced0f73eb1fc0c409fdf23a57c119971d24bac5",
+        "18.12.6": "omp-darwin-arm64 cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58"
+      },
+      "method": "Isolated HOME and empty work directory per scenario; copy the documented models.fragment.yml and fail-closed.yml, changing only the endpoint to a loopback stub. Pin ninfer-beta/q38-ninfer; clear inherited PI_/OMP_/provider overrides, disable the Apple provider and LSP, and use a synthetic loopback key. The stub emits NInfer-shaped Responses reasoning_text events with content_index, summary [], and full argument snapshots in arguments.done, output_item.done and response.completed. Drive the two raw stock binaries in JSON print mode; use stock_omp_session_proof.Omp for the separate RPC compaction comparison.",
+      "scenarios": {
+        "tool_turn": {"18.12.1": {"exit_code": 0, "requests": 2, "read_calls": 1, "linked_tool_results": 1, "final_text": "OMP_NINFER_TOOL_OK"}, "18.12.6": {"exit_code": 0, "requests": 2, "read_calls": 1, "linked_tool_results": 1, "final_text": "OMP_NINFER_TOOL_OK"}},
+        "image_input": {"18.12.1": {"exit_code": 0, "requests": 1, "input_image_parts": 1}, "18.12.6": {"exit_code": 0, "requests": 1, "input_image_parts": 1}},
+        "seed_and_continue": {"18.12.1": {"seed_exit_code": 0, "continue_exit_code": 0, "final_text": "493817-205361", "replayed_input_items": 4, "prompt_cache_key_unchanged": true}, "18.12.6": {"seed_exit_code": 0, "continue_exit_code": 0, "final_text": "493817-205361", "replayed_input_items": 4, "prompt_cache_key_unchanged": true}},
+        "outage": {"18.12.1": {"exit_code": 1, "stub_requests": 0}, "18.12.6": {"exit_code": 1, "stub_requests": 0}, "bound": "--max-time 20s; endpoint is an unused loopback port, not a production service"}
+      },
+      "request_invariants": {"same_header_names": true, "same_body_keys": true, "same_tool_names": true, "max_output_tokens": 32768, "store": true, "reasoning_effort": "medium", "in_process_previous_response_id": true, "cross_process_continue_replays_history": true, "effective_stateful_environment": {}},
+      "observed_prompt_difference": {"18.12.1_instructions_characters": 10107, "18.12.6_instructions_characters": 10271, "delta": 164},
+      "wire_equivalence_limit": "The reviewed invariants match; complete request bytes are not claimed identical. Version user-agent, instructions, volatile IDs and isolated workspace text differ.",
+      "raw_captures_committed": false
+    },
+    "changed_path_proofs": {
+      "snapcompact_wire_gate": {
+        "method": "Three synthetic 1000-line turns per binary and route, then the shared RPC compact command with methodOrder [snapcompact], keepRecentTokens 1, reserveTokens 1024 and asyncEnabled false. The stub reports 60000 input tokens to exercise the reduction path; this is synthetic client-state testing, not token-count or runtime performance evidence.",
+        "product_responses_vision_route": {"18.12.1": {"compact_success": true, "compaction_network_requests": 0, "followup_image_parts": 5, "image_omitted_placeholder": false, "followup_stop": "stop"}, "18.12.6": {"compact_success": true, "compaction_network_requests": 0, "followup_image_parts": 5, "image_omitted_placeholder": false, "followup_stop": "stop"}},
+        "declared_vision_chat_stripped_control": {"configuration": "openai-completions with input [text,image] and compat.stripImageInput true; control only, not a product profile", "18.12.1": {"compact_success": true, "compaction_network_requests": 0, "followup_image_parts": 0, "image_omitted_placeholder": true}, "18.12.6": {"compact_success": false, "error": "No configured compaction method can run manually.", "compaction_network_requests": 0, "followup_image_parts": 0, "image_omitted_placeholder": false, "followup_stop": "stop"}},
+        "initial_fixture_limit": "The initial short-history fixture reached 'snapcompact would not reduce context locally' on image-sending routes. It was replaced by a larger history and explicit synthetic usage; only the latter is the successful archive proof."
+      },
+      "print_compact_dispatch": {
+        "command_form": "omp -p --mode json --model ninfer-beta/q38-ninfer --max-time 20s /compact in a fresh isolated session",
+        "18.12.1": {"exit_code": 0, "stub_requests": 1, "behavior": "slash text sent to the model"},
+        "18.12.6": {"exit_code": 1, "stub_requests": 0, "error": "Compaction failed: Nothing to compact (session too small)", "behavior": "local builtin dispatched and failure propagated"}
+      }
+    }
+  },
+  "verdict": {
+    "host_free_blocker_found": false,
+    "release_staged": false,
+    "new_client_inference_qualification_claimed": false,
+    "scope_limit": "Only Darwin binaries executed against a loopback stub. Windows and Linux execution, live GPU inference, real server restart survival, production compaction quality and all five documented-route acceptances remain separate release gates. An unchanged nonce returned by a scripted stub demonstrates client replay, not model memory."
+  },
+  "sources": ["https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6", "https://github.com/can1357/oh-my-pi/pull/16436", "https://github.com/can1357/oh-my-pi/pull/16387", "https://github.com/can1357/oh-my-pi/blob/v18.12.6/packages/ai/src/providers/vision-guard.ts", "https://github.com/can1357/oh-my-pi/blob/v18.12.6/packages/coding-agent/src/session/compaction-methods.ts", "2026-10-18-omp-18121-client-upgrade-review.json"]
+}

@@ -1,0 +1,77 @@
+{
+  "artifact_type": "omp_ninfer_upstream_sync_plan",
+  "schema_version": 1,
+  "as_of": "2026-10-25",
+  "product_release": "v0.13.0",
+  "status": "approved-program-not-release-qualification",
+  "targets": {
+    "runtime_repository": "https://github.com/alphastorm/ninfer",
+    "upstream_repository": "https://github.com/Neroued/ninfer",
+    "upstream_ref": "master",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "runtime_base_branch": "rebase/upstream-64d10fbf",
+    "lanes": ["rtx5090-container", "rtx4090-native-windows", "rtx3090-native-windows"],
+    "native_scope_decision": "The approved full program includes upstream-based sm_89/sm_86 and MSVC enablement; it supersedes the earlier plan recommendation to leave native lanes on cad19767.",
+    "client_version": "18.12.6",
+    "client_source": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "client_staging": "review and descriptor preparation only in ProductOps; no release staged",
+    "model": "Bind the published v3 artifact 81f924d4 only after tensor-payload comparison with shipped 0634abb0; otherwise bind an explicitly qualified v2-to-v3 upgrade."
+  },
+  "published_baseline": {
+    "product_release": "v0.12.2",
+    "client_version": "18.12.1",
+    "rtx5090_source": "1302d63929e400a05e1c9cdb0fc8003a70269825",
+    "native_source": "cad1976764fded5fbe96930c36bed0570b3d3de7",
+    "upstream_base": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc"
+  },
+  "observed_deltas": {
+    "master_commits_past_shipped_fork_base": 362,
+    "master_changed_files_from_local_git_scout": 2709,
+    "master_commits_past_exp095": 77,
+    "dev_research_head": "a522cfef",
+    "dev_commits_past_master": 172,
+    "master_gains": ["JSON-schema constrained decoding through xgrammar", "preemption and rewritten in-memory context cache", "CUDA-graph startup memory calibration", "v3 artifact and maintained chat template", "Qwen3.8-Flash-Next support, distinct from the shipped dense model"],
+    "upstream_missing": ["disk-durable session checkpoints", "Responses objects surviving a server restart", "full shipped Qwen parser parity at mismatch, constrained-duplicate and deep-union boundaries", "GPU keep-warm", "native Windows and sm_89/sm_86 product enablement"],
+    "parser_scout_correction": "Pinned master already implements declared-string and scalar-union normalization, case-insensitive booleans, exact integer-lexeme classification and unconstrained duplicate-parameter fallback. Remaining semantics must be audited against the shipped corpus; do not replace upstream's parser wholesale.",
+    "dev_fixes_selected_for_isolated_backport": ["9822c38d grammar whitespace", "4ec903a0 direct-I/O alignment", "1e902680 container dependencies"],
+    "historical_performance_boundary": "EXP-095 measured a59c13d0 versus 81c8ce09, not shipped 1302d639 versus 64d10fbf. Its 19.27 percent fork decode advantage is not a measurement of the new target."
+  },
+  "preserve": ["durable sessions on disk with HMAC origin policy", "stateful Responses across process restart", "session isolation and prompt_cache_key naming", "shipped Qwen parser semantics", "DFlash2 and settled draft-ring frontier", "qualified kernel routes", "GPU keep-warm", "two requests in flight on RTX 5090", "GPU-UUID selection", "native Windows package/controller lifecycle", "qualification, smoke and benchmark tooling"],
+  "not_carried": ["unshipped NVFP4 KV cache", "reverted standby-pinning retries 831e8a57/2e3687c8/139d5be4", "unshipped 3a2fadbd Q5 pair-mixer optimization", "fork monolithic Program, resource accounting and scheduler", "fork DFlash2 engine transplant where upstream already supplies the family"],
+  "contracts_to_freeze": {
+    "K1": "checkpoint-set format, integrity and HMAC publication",
+    "K2": "runtime fingerprint version 2",
+    "K3": "internal Engine/Program export-import adapter and prepared transactions",
+    "K4": "Responses restore handshake with atomic no-throw publication",
+    "K5": "canonical configuration and CLI surface",
+    "K6": "durable platform file I/O",
+    "K7": "error and receipt taxonomy"
+  },
+  "design_constraints": ["Stage checkpoint bytes under Engine ownership; hash and write outside the Engine lock.", "Keep upstream stores, scheduling, grammar and frontend authoritative; port behaviors and contract tests rather than entire fork files.", "Deduplicate native checkpoint sets; serialize no pointers, runtime handles or physical slots.", "Restore must be verified-or-refused and must not evict unrelated Responses sessions to create a partial success.", "Use separate new-base state roots and preserve rollback; old responses are not fabricated on the new base.", "Accept tool names up to 128 characters on all three API surfaces."],
+  "estimates": {
+    "classification": "planning inferences, not elapsed time or delivery guarantees",
+    "original_port_agent_hours": [98, 146],
+    "revised_master_without_arch_enablement_agent_hours": [102, 154],
+    "master_with_native_arch_enablement_agent_hours": [126, 194],
+    "native_arch_enablement_increment_agent_hours": [24, 40],
+    "master_tracer_rewrite_agent_hours": [4, 6],
+    "future_dev_bridge_re_port_agent_hours": [16, 24],
+    "reason_for_master": "Frozen target and current CLI, avoiding the still-changing dev unified context pool."
+  },
+  "gates": [
+    {"id": "G1", "criterion": "Byte-identical continuation after a real server restart with at least 16384 checkpoint-hit tokens.", "failure_action": "Re-plan native persistence and retain the fork runtime fallback."},
+    {"id": "G2", "criterion": "Role-corpus decode at C1 and C2, DFlash2 K=7, BF16 KV and 131072 context, within minus 2 percent of shipped 1302d639.", "failure_action": "Do not promote the rebased RTX 5090 runtime; publish research receipts and branch separately."},
+    {"id": "G3", "criterion": "Integrated ctest, corruption/MAC/capacity/identity failure matrix, C2 pressure and durability, 32 GB startup shape, quality/leak screens, and all native lane qualification."},
+    {"id": "G4", "criterion": "Full critical-review council on the frozen candidate, followed by one remediation epoch."},
+    {"id": "G5", "criterion": "Cut components, stage product, run fresh acceptance, compose evidence and pin exact identities; founder alone publishes the product."}
+  ],
+  "fallback_ladder": ["All three upstream-based lanes, client and product-layer work only after their gates pass.", "If RTX 5090 decode parity fails, keep its qualified fork line with the 128-character fix; qualify native components independently and retain rebase research receipts.", "If restart proof fails, keep qualified fork runtimes with the 128-character fix and re-plan persistence from the measured cause."],
+  "community_research": {
+    "Don-Chad/ninfer-3090": "d8c29253 adopted the ashalliants-derived line on 2026-10-16; checkpoint-set and content-addressed-store design reference, not a product adoption. Its checksum is not our HMAC policy and Responses remain process-local.",
+    "ashalliants/ninfer-3090": "Active source line tracked separately; reported DFlash2 and compact KV results use different artifacts, context and power conditions.",
+    "sergiuszm/ninfer-4090": "rtx4090-port replaces the stale UDPSendToFailed watch target; native sm_89 design reference, not proof of our lane.",
+    "EXP-089": "The observed W8 static-shared-memory link failure is fork-local. Upstream Q8 already uses dynamic shared memory; community compact-KV results do not waive our quality/leak screens."
+  },
+  "effect_boundaries": ["No product or component publication by this receipt.", "No GitHub issue, comment or PR is posted; contribution text remains local drafts and requires issue-first maintainer scope confirmation.", "No profile values or shipped release files are changed by ProductOps.", "The 31 documented-route command blocks remain untouched."],
+  "sources": ["https://github.com/Neroued/ninfer/tree/64d10fbf9f8e6bfc79ab0570b94674c5b9997929", "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6", "https://github.com/Don-Chad/ninfer-3090/pull/30", "2026-10-25-upstream-watch.json", "2026-10-10-upstream-81c8ce09-rtx5090.json"]
+}

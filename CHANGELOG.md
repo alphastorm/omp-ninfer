@@ -12,6 +12,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site and brand assets; front-door install links
   return to the guide on `main`.
+- Record the approved v0.13.0 sync target, preserved product families and release gates without
+  staging a release or changing the published pins.
+- Review stock OMP 18.12.6 assets against upstream checksums, compare its Responses client paths
+  with 18.12.1 on a loopback stub, exercise snapcompact's image-wire gate and `omp -p /compact`,
+  and prepare the three-platform `--omp-component` descriptor. No live qualification is claimed.
+- Refresh upstream-watch positions: record Don-Chad's community adoption, track ashalliants
+  separately, replace the inactive UDPSendToFailed 4090 watch with sergiuszm's `rtx4090-port`,
+  and compare the stock client against the actually shipped 18.12.1 source.
+- Classify historical and new-base startup records without conflating request-log schema 30
+  with status schema 2. Preserve template-inherited null defaults, reject unknown configuration
+  keys, and bind the new artifact-SHA weights identity without weakening campaign attestation.
+
+### Fixed
+
+- Treat closed issue #15 as historical route-lifecycle context rather than an open tracker for
+  the remaining public acceptance runner and WSL preflight.
+- Correct the performance ledger: experimental `3a2fadbd` pair-mixer results did not ship in
+  v0.11.0 source `1302d639`; only the h24 BF16 subset of EXP-092 and EXP-094 shipped.
 
 ## [0.12.2] - 2026-10-18
 

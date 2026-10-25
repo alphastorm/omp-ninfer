@@ -63,8 +63,10 @@ unmet:
 3. **Shared public client acceptance runner and WSL preflight.** Documented-route acceptance still
    requires live GPU-host windows alongside host-free CLI rehearsals
    ([`releases/v0.12.2/acceptance/documented-routes.json`](releases/v0.12.2/acceptance/documented-routes.json));
-   a hardware-independent public client acceptance runner and a doctor-level WSL networking and
-   loopback preflight ([#15](https://github.com/alphastorm/omp-ninfer/issues/15)) remain open.
+   the remaining work is a hardware-independent public client acceptance runner and a doctor-level
+   WSL networking and loopback preflight. The earlier route-lifecycle tracker
+   [#15](https://github.com/alphastorm/omp-ninfer/issues/15) is closed; it is historical context, not
+   an open tracker for these additions.
 4. **Distribution signing, notarization, and native dependency-level SBOM boundaries.** Windows
    native runtime packages ship unsigned with a file-inventory SBOM rather than a dependency-level
    SBOM ([`releases/v0.12.2/manifest.json`](releases/v0.12.2/manifest.json),

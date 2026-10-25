@@ -19,11 +19,19 @@
     },
     {
       "id": "ninfer-4090",
-      "upstream": "UDPSendToFailed/ninfer-4090",
-      "upstream_ref": "feat/rtx-4090-sm89-native",
+      "upstream": "sergiuszm/ninfer-4090",
+      "upstream_ref": "rtx4090-port",
       "fork_repo": "alphastorm/ninfer",
-      "fork_point": "11aae2d6342d1fbdc7ef2b9ee17096858be44271",
-      "fork_point_meaning": "vendored base of the native Windows 4090 lane (release/qwen38-4090-v0.1 lineage)",
+      "fork_point": "81c8ce093b2c1646a87566a8e59d807fcf0ec95c",
+      "fork_point_meaning": "research comparison baseline of the active community sm_89 port; not an adopted product source",
+      "previous_upstream": {
+        "repository": "UDPSendToFailed/ninfer-4090",
+        "ref": "feat/rtx-4090-sm89-native",
+        "fork_point": "11aae2d6342d1fbdc7ef2b9ee17096858be44271",
+        "last_observed_head": "5c60b7c9",
+        "last_commit_date": "2026-09-09",
+        "note": "retired watch target; historical native Windows 4090 vendored base remains provenance, not a current adoption"
+      },
       "overlap_paths": [
         "src/",
         "packaging/windows/"
@@ -36,6 +44,21 @@
       "fork_repo": "alphastorm/ninfer",
       "fork_point": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
       "fork_point_meaning": "vendored base of the native Windows 3090 lane (port/omp-v0.2 lineage)",
+      "community_adoption_head": "d8c29253",
+      "community_adoption_date": "2026-10-16",
+      "community_adoption_note": "Don-Chad PR #30 adopted the ashalliants-derived community line; independent of the shipped product source",
+      "overlap_paths": [
+        "src/",
+        "packaging/windows/"
+      ]
+    },
+    {
+      "id": "ninfer-3090-community",
+      "upstream": "ashalliants/ninfer-3090",
+      "upstream_ref": "master",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "81c8ce093b2c1646a87566a8e59d807fcf0ec95c",
+      "fork_point_meaning": "research baseline of the community line adopted by Don-Chad; not an adopted product source",
       "overlap_paths": [
         "src/",
         "packaging/windows/"
@@ -46,8 +69,8 @@
       "upstream": "can1357/oh-my-pi",
       "upstream_ref": "main",
       "fork_repo": "alphastorm/oh-my-pi",
-      "fork_point": "a2d83061c5d673bf3ee495d7652b63ee5a0ceb14",
-      "fork_point_meaning": "upstream v18.2.3 tag commit; the pinned patched client omp-18.2.3-cross-platform-beta-1 (public source 5ade242d, product v0.7.3) carries its downstream patches on this. Supersedes the v18.0.9 point cc14e04f the v0.2-v0.7.2 client rebased onto.",
+      "fork_point": "291e055836c210f314af3f73f53244e8e9d09de8",
+      "fork_point_meaning": "unmodified upstream v18.12.1 shipped by product v0.12.2; v18.12.6 is reviewed separately and is not yet staged",
       "overlap_paths": [
         "packages/ai/",
         "packages/core/"
