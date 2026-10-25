@@ -134,6 +134,31 @@ the computed configuration identity, and the authenticated `/v1/ninfer/status` p
 reporting ready. Do not bypass a mismatch by editing expected hashes locally; any changed
 executable, model, or profile requires a new release qualification binding.
 
+### Native dependency inventory
+
+The native package's existing SPDX file inventory remains authoritative for packaged bytes.
+An additional CycloneDX 1.5 dependency inventory can be generated with
+`scripts/generate_native_sbom.py`. It records resolved vcpkg packages and their dependency graph,
+CUDA runtime DLL names, versions, hashes and EULA URLs, vendored `third_party/` source names,
+versions and license expressions, and the runtime executable's SHA-256 and build source commit.
+The inventories and vcpkg manifest are themselves hash-bound in the output. Absolute build paths
+and operator identities are not recorded.
+
+Versions and licenses must come from the exact build: the generator does not download packages,
+resolve version constraints, infer versions from DLL names, or substitute unknown licenses.
+The resolved vcpkg snapshot must cover the manifest's full transitive dependency closure at the
+same baseline; CUDA DLL and vendored-source inventories must not omit packaged CUDA libraries or
+source directories. CUDA versions come from the packaged DLLs' version metadata; the EULA is
+recorded as an HTTPS license reference, not as a claim that redistribution terms have been met.
+The build owner still reviews license obligations and the complete shipped DLL closure.
+
+A native manifest variant may bind this additional asset with the atomic
+`sbom_dependency_url` / `sbom_dependency_sha256` pair. The verifier checks an HTTPS asset under
+that variant's component release and a lower-case SHA-256; if its checksum entry is also present
+in the pinned checksum set, that entry must agree. Verification is local and does not download
+the dependency SBOM. These optional pins do not replace the package, executable or SPDX pins,
+do not retroactively change older releases, and do not assert that a vulnerability scan passed.
+
 ## Reporting a vulnerability
 
 Follow [`../SECURITY.md`](../SECURITY.md). Do not open a public issue for a vulnerability or attach a

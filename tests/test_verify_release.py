@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,64 @@ REBIND_SPEC = importlib.util.spec_from_file_location("rebind_release", ROOT / "s
 assert REBIND_SPEC is not None and REBIND_SPEC.loader is not None
 REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
+
+
+class DependencySbomContractTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.release = ROOT / "releases" / PUBLIC_RELEASE
+        self.manifest = json.loads((self.release / "manifest.json").read_text(encoding="utf-8"))
+        self.authority = json.loads((self.release / "compatibility.json").read_text(encoding="utf-8"))
+        self.variant = self.manifest["components"]["ninfer_variants"][-1]
+        self.prefix = f"components.ninfer_variants.{self.variant['id']}"
+        self.pins = {"sbom_dependency_url": (
+            f"https://github.com/alphastorm/ninfer/releases/download/"
+            f"{self.variant['release_tag']}/native-dependencies.cdx.json"),
+            "sbom_dependency_sha256": "a" * 64}
+
+    def validate(self, pins: dict) -> list[str]:
+        variants = deepcopy(self.manifest["components"]["ninfer_variants"])
+        variants[-1].update(pins)
+        errors = []
+        VERIFY_RELEASE.validate_ninfer_variants(
+            ROOT, PUBLIC_RELEASE, variants, self.authority,
+            VERIFY_RELEASE.effective_native_model(self.manifest)["artifact_sha256"], errors)
+        return errors
+
+    def test_older_variants_without_dependency_sbom_and_complete_pins_are_accepted(self) -> None:
+        self.assertEqual(self.validate({}), [])
+        self.assertEqual(self.validate(self.pins), [])
+
+    def test_present_dependency_pins_are_atomic_and_release_bound_even_in_drafts(self) -> None:
+        for pins, expected in (
+            ({"sbom_dependency_url": self.pins["sbom_dependency_url"]}, "sbom_dependency_sha256"),
+            ({"sbom_dependency_sha256": "a" * 64}, "sbom_dependency_url"),
+            ({**self.pins, "sbom_dependency_sha256": "A" * 64}, "sbom_dependency_sha256"),
+            ({**self.pins, "sbom_dependency_url": "http://example.invalid/bom.json"}, "sbom_dependency_url"),
+            ({**self.pins, "sbom_dependency_url": self.pins["sbom_dependency_url"].replace(
+                self.variant["release_tag"], "wrong-component")}, "must bind its component release"),
+            ({"sbom_dependency_url": None, "sbom_dependency_sha256": None}, "sbom_dependency_sha256"),
+        ):
+            with self.subTest(pins=pins):
+                self.assertTrue(any(expected in error for error in self.validate(pins)))
+                errors = []
+                VERIFY_RELEASE.validate_dependency_sbom({**self.variant, **pins}, self.prefix, errors)
+                self.assertTrue(any(expected in error for error in errors))
+
+    def test_optional_checksum_entry_cannot_disagree_with_the_dependency_pin(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "releases" / PUBLIC_RELEASE / "qualification" / f"{self.variant['id']}.SHA256SUMS"
+            target.parent.mkdir(parents=True)
+            original = (self.release / "qualification" / target.name).read_text(encoding="utf-8")
+            variant = {**self.variant, **self.pins}
+            for checksum, expected_count in (("a" * 64, 0), ("b" * 64, 1)):
+                target.write_text(original + f"{checksum}  native-dependencies.cdx.json\n", encoding="utf-8")
+                variant["checksums_sha256"] = VERIFY_RELEASE.sha256_file(target)
+                errors = []
+                VERIFY_RELEASE.validate_variant_checksums(root, PUBLIC_RELEASE, variant, self.prefix, errors)
+                self.assertEqual(len(errors), expected_count, errors)
+                if errors:
+                    self.assertIn("must match sbom_dependency_sha256", errors[0])
 
 
 class FirstReleaseRollbackContractTest(unittest.TestCase):

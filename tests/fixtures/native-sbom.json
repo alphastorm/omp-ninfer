@@ -1,0 +1,38 @@
+{
+  "source_commit": "1234567890abcdef1234567890abcdef12345678",
+  "manifest": {
+    "name": "ninfer",
+    "version-string": "0.1.0",
+    "builtin-baseline": "abcdef1234567890abcdef1234567890abcdef12",
+    "dependencies": ["curl", {"name": "ffmpeg", "features": ["zlib"]}]
+  },
+  "lock": {
+    "builtin-baseline": "abcdef1234567890abcdef1234567890abcdef12",
+    "packages": [
+      {"name": "curl", "version": "8.14.1#2", "license": "curl", "dependencies": ["zlib"]},
+      {"name": "ffmpeg", "version": "7.1.1", "license": "LGPL-2.1-or-later", "dependencies": ["zlib"]},
+      {"name": "zlib", "version": "1.3.1", "license": "Zlib", "dependencies": []}
+    ]
+  },
+  "cuda": {
+    "dlls": [
+      {"path": "bin/cudart64_13.dll", "version": "13.3.29", "eula": "https://docs.nvidia.com/cuda/eula/index.html"},
+      {"path": "bin/cublas64_13.dll", "version": "13.3.0.3", "eula": "https://docs.nvidia.com/cuda/eula/index.html"}
+    ]
+  },
+  "third_party": {
+    "sources": [
+      {"path": "nlohmann", "name": "nlohmann-json", "version": "3.12.0", "license": "MIT", "license_file": "LICENSE.MIT"},
+      {"path": "utf8proc", "name": "utf8proc", "version": "2.10.0", "license": "MIT AND Unicode-3.0", "license_file": "LICENSE.md"}
+    ]
+  },
+  "package_files": {
+    "bin/ninfer-serve.exe": "synthetic runtime bytes for host-free SBOM tests\n",
+    "bin/cudart64_13.dll": "synthetic cudart bytes\n",
+    "bin/cublas64_13.dll": "synthetic cublas bytes\n"
+  },
+  "source_files": {
+    "third_party/nlohmann/LICENSE.MIT": "synthetic MIT license fixture\n",
+    "third_party/utf8proc/LICENSE.md": "synthetic MIT and Unicode license fixture\n"
+  }
+}

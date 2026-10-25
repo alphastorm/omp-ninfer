@@ -41,6 +41,8 @@ An explicit --model-revision/--model-sha256/--model-bytes tuple changes the RTX 
 model (repository and artifact name are retained; the URL is derived). Carried
 native variants retain their effective predecessor model in components.native_model,
 omitted when it equals the new primary model. Native package/model hashes never change.
+Optional --sbom-dependency-url/--sbom-dependency-sha256 VARIANT=VALUE pairs attach
+an additional native CycloneDX dependency inventory without replacing the file SBOM.
 """
 
 from __future__ import annotations
@@ -57,10 +59,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import OMP_PROFILE_PLATFORMS
 from verify_release import (
     ContractError,
+    NINFER_VARIANT_IDS,
     client_identity_pins,
     client_pin_locations,
     effective_native_model,
     load_json,
+    validate_dependency_sbom,
     validate_model_component,
     validate_upstream_client_bindings,
     validate_upstream_omp_component,
@@ -175,6 +179,10 @@ def main() -> int:
     parser.add_argument("--archive-sha", required=True, metavar="SHA256")
     parser.add_argument("--source-archive-sha", required=True, metavar="SHA256")
     parser.add_argument("--sbom-sha", required=True, metavar="SHA256")
+    parser.add_argument("--sbom-dependency-url", action="append", default=[], metavar="VARIANT=URL",
+                        help="optional native dependency SBOM; repeat per native variant")
+    parser.add_argument("--sbom-dependency-sha256", action="append", default=[], metavar="VARIANT=SHA256",
+                        help="SHA-256 paired with each --sbom-dependency-url")
     parser.add_argument("--image-digest", required=True, metavar="sha256:...",
                         help="published OCI manifest digest")
     parser.add_argument("--runtime-receipt-release", required=True,
@@ -252,6 +260,27 @@ def main() -> int:
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     source_manifest = load(src_dir / "manifest.json")
+    dependency_pins: dict[str, dict[str, str]] = {}
+    for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
+        for value in getattr(args, field):
+            variant_id, separator, pin = value.partition("=")
+            if not separator or variant_id not in NINFER_VARIANT_IDS or not pin:
+                parser.error(f"--{field.replace('_', '-')} must be VARIANT=VALUE for a native variant")
+            pins = dependency_pins.setdefault(variant_id, {})
+            if field in pins:
+                parser.error(f"duplicate --{field.replace('_', '-')} for {variant_id}")
+            pins[field] = pin
+    source_variants = {item["id"]: item for item in source_manifest["components"].get("ninfer_variants", [])}
+    for variant_id, pins in dependency_pins.items():
+        if variant_id not in source_variants:
+            parser.error(f"dependency SBOM variant is absent from source release: {variant_id}")
+        pin_errors: list[str] = []
+        # Validate only the supplied pair: an inherited half must not complete an override.
+        validate_dependency_sbom(
+            {"release_tag": source_variants[variant_id]["release_tag"], **pins},
+            f"components.ninfer_variants.{variant_id}", pin_errors)
+        if pin_errors:
+            parser.error("; ".join(pin_errors))
     model = source_manifest["components"]["model"]
     model_inputs = (args.model_revision, args.model_sha256, args.model_bytes)
     if any(value is not None for value in model_inputs):
@@ -361,6 +390,7 @@ def main() -> int:
     # 3. Release-relative evidence paths move with the tree; the commit part of every public
     #    URL is provisional until the pin dance.
     for variant in manifest["components"].get("ninfer_variants", []):
+        variant.update(dependency_pins.get(variant["id"], {}))
         qual = variant.get("qualification", {})
         for key in ("summary", "public_url"):
             if isinstance(qual.get(key), str):

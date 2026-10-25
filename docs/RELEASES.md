@@ -1820,6 +1820,38 @@ protocol, 64K, restart, rollback, security, OMP, C1, receipt, and 370 W restorat
 prevents shared correctness classes from being discovered after variant binaries and hardware
 evidence are already frozen.
 
+### Native dependency SBOM
+
+For a new native package, generate the additional CycloneDX 1.5 JSON inventory with
+`scripts/generate_native_sbom.py` before the component cut. Supply the unpacked package through
+`--package-dir`, its build source tree through `--source-dir`, the exact `--source-commit`,
+and `--vcpkg-lock`, `--cuda-inventory`, `--third-party-inventory` and `--output` files.
+The default manifest is the source tree's `vcpkg.json` and the default runtime executable is
+`bin/ninfer-serve.exe`; both have explicit override flags.
+
+The resolved vcpkg lock input is a build-owner snapshot, not vcpkg's filesystem mutex file:
+it records the manifest's `builtin-baseline` and a `packages` array containing each resolved
+package's `name`, exact `version`, SPDX `license` expression and `dependencies` name array,
+including transitive and build dependencies. Collect versions from the installed vcpkg tree and
+licenses from the corresponding pinned port metadata, rather than treating version constraints
+in the manifest as installed versions. The CUDA input's `dlls` array records each package-relative
+DLL `path`, exact `version` from its version metadata, and HTTPS `eula` URL. The vendored input's
+`sources` array records every top-level `third_party/` directory's relative `path`, component
+`name`, exact `version`, SPDX `license` expression and relative `license_file`. The generator's
+help includes the input schemas; missing versions, licenses, files or dependency edges fail
+instead of producing a partial inventory.
+
+Publish the dependency inventory alongside, not instead of, the existing SPDX file SBOM.
+When staging a product release that carries that native component,
+`scripts/stage_release.py` accepts paired, repeatable
+`--sbom-dependency-url VARIANT=URL` and `--sbom-dependency-sha256 VARIANT=SHA256` arguments.
+Each pair binds `sbom_dependency_url` and `sbom_dependency_sha256` on the selected
+`components.ninfer_variants` row without changing package, model or existing SPDX pins.
+The URL must belong to that row's component release; attach pins only after binding the final
+native component. Omitted arguments retain an already-bound inventory for an unchanged component.
+The verifier accepts historical releases without these optional fields, but rejects partial,
+malformed or cross-release pairs. No published `v0.12.2` pin is changed by this tooling.
+
 ## External-install acceptance
 
 The external-install acceptance gate uses clean isolated macOS arm64, Windows x64, and Linux x64

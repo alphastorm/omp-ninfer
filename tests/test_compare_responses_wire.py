@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import sys
 import tempfile
 import unittest
@@ -139,6 +139,21 @@ class ResponsesWireComparisonTest(unittest.TestCase):
         self.assertTrue(result["valid"])
         self.assertFalse(result["equivalent"])
         self.assertTrue(any("custom_tool_call_output" in line for line in result["diff"]))
+
+    def test_capture_host_path_spellings_and_escaped_arguments_normalize(self) -> None:
+        for workspace in (PurePosixPath("/reference/workspace"),
+                          PureWindowsPath("D:/reference/workspace"),
+                          Path("relative-workspace")):
+            with self.subTest(workspace=workspace):
+                prefixes = [str(workspace), workspace.as_posix()]
+                if isinstance(workspace, Path):
+                    prefixes.extend((str(workspace.resolve()), workspace.resolve().as_posix()))
+                for prefix in prefixes:
+                    capture = {"tool_path": prefix + "/input.txt",
+                               "arguments": json.dumps({"path": prefix + "/input.txt"})}
+                    normalized = MODULE.normalize_capture(capture, workspace=workspace)
+                    self.assertEqual(normalized, {"tool_path": "<workspace>/input.txt",
+                        "arguments": json.dumps({"path": "<workspace>/input.txt"})})
 
     def test_sequence_gaps_fail_before_equivalence(self) -> None:
         self.candidate["events"][2]["sequence_number"] = 9
