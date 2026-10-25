@@ -75,6 +75,12 @@ jobs:
               cls = getattr(importlib.import_module(module), name)
               cls.__unittest_skip__ = True
               cls.__unittest_skip_why__ = "POSIX executable/path/permission fixtures; covered on Ubuntu and macOS"
+          extraction = importlib.import_module("test_documented_route").ExtractionTests
+          for name in (
+              "test_restart_seed_never_contains_the_planted_nonce",
+              "test_restart_seed_stays_between_the_checkpoint_gate_and_client_compaction",
+          ):
+              setattr(extraction, name, unittest.skip("executes the documented POSIX seed pipeline")(getattr(extraction, name)))
           # Linux owns test_concurrency_probe's scheduler/TCP wall-clock fixture assertions.
           timing = importlib.import_module("test_concurrency_probe").ConcurrencyProbeTests
           timing.__unittest_skip__ = True

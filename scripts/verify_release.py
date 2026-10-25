@@ -1424,10 +1424,10 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
                 continue
             linked = (document.parent / relative).resolve()
             require(linked.is_relative_to(resolved_root),
-                    f"{document.relative_to(root)} link escapes repository: {target}", errors)
+                    f"{document.relative_to(root).as_posix()} link escapes repository: {target}", errors)
             if linked.is_relative_to(resolved_root):
                 require(linked.exists(),
-                        f"{document.relative_to(root)} has missing local link: {target}", errors)
+                        f"{document.relative_to(root).as_posix()} has missing local link: {target}", errors)
 
 
 def validate_release_documentation(root: Path, release: str, errors: list[str]) -> None:
@@ -1459,7 +1459,7 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
         source = document.read_text(encoding="utf-8")
         for marker in PRIVATE_MARKERS:
             require(marker not in source,
-                    f"{document.relative_to(root)} contains private marker {marker!r}", errors)
+                    f"{document.relative_to(root).as_posix()} contains private marker {marker!r}", errors)
 
 
 def validate(

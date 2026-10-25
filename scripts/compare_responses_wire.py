@@ -9,7 +9,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, cast
 
 ARTIFACT_TYPE = "omp_ninfer_responses_wire_capture"
@@ -26,9 +26,24 @@ class CaptureError(ValueError):
 
 @dataclass
 class Normalizer:
-    workspace: Path | None = None
+    workspace: PurePath | None = None
     ids: dict[str, str] = field(default_factory=dict)
     digests: dict[str, str] = field(default_factory=dict)
+    workspace_prefixes: tuple[str, ...] = field(init=False, default=())
+
+    def __post_init__(self) -> None:
+        if self.workspace is None:
+            return
+        # Captures may use POSIX spelling on Windows, or contain JSON-escaped tool
+        # arguments. Keep the supplied spelling: resolving it on the comparison
+        # machine can add a drive or change separators belonging to the capture host.
+        paths = [self.workspace]
+        if isinstance(self.workspace, Path):
+            paths.append(self.workspace.resolve())
+        prefixes = {spelling for path in paths for spelling in (str(path), path.as_posix())
+                    if spelling not in ("", ".", "/")}
+        prefixes.update(json.dumps(prefix)[1:-1] for prefix in tuple(prefixes))
+        self.workspace_prefixes = tuple(sorted(prefixes, key=lambda prefix: (-len(prefix), prefix)))
 
     def token(self, value: str) -> str:
         match = ID_RE.fullmatch(value)
@@ -85,10 +100,8 @@ def normalize_value(
             return "<present>"
         if lowered in {"ninfer_session", "ninfer_request_id"} and SHA256_RE.fullmatch(value):
             return normalizer.digest(value)
-        if normalizer.workspace is not None:
-            workspace = str(normalizer.workspace)
-            if workspace and workspace in value:
-                value = value.replace(workspace, "<workspace>")
+        for workspace in normalizer.workspace_prefixes:
+            value = value.replace(workspace, "<workspace>")
         if lowered == "id" or lowered.endswith("_id") or lowered in {
             "previous_response_id",
             "call_id",
@@ -160,9 +173,9 @@ def validate_events(events: list[dict[str, Any]], label: str) -> list[str]:
 
 
 def normalize_capture(
-    capture: dict[str, Any], *, workspace: Path | None = None
+    capture: dict[str, Any], *, workspace: PurePath | None = None
 ) -> dict[str, Any]:
-    normalizer = Normalizer(workspace=workspace.resolve() if workspace else None)
+    normalizer = Normalizer(workspace=workspace)
     return normalize_value(capture, normalizer)
 
 
