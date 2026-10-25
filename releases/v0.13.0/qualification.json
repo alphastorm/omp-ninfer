@@ -121,7 +121,7 @@
       "status": "passed",
       "repository_path": "releases/v0.13.0/acceptance/composed-external-installation.json",
       "sha256": "2f6f988121162e664b3a450a6d75771dd2625c7b8f471df9556aef947038156f",
-      "public_url": null,
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/383d571571c3d1b3b9537a70e73f002a762e7db3/releases/v0.13.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-25",
       "release": "v0.13.0",
       "component_release_tag": "v18.12.6",
