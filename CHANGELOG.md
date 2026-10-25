@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare v0.13.0's RTX 5090 runtime on upstream master `64d10fbf`, published model container
+  version 3 `81f924d4`, `qwen38-5090-v0.13.0` profile and isolated `checkpoints-v013` root.
+  Prior server checkpoints are not migrated; saved client transcripts replay for a fresh prefill.
+  K5 replaces the separate Host budgets and rejects the obsolete private-catalog limit.
+  All other tuning, including keep-warm, remains explicit in staged profiles.
+- Draft the rebased container's JSON-schema, 128-character tool-name, non-blocking export,
+  status schema 2 and request-log schema 30 boundaries without claiming live acceptance.
+  Default native packages carry unchanged and retain their old capabilities; rebased native
+  packages require separate qualification. Root authority/profile promotion waits for the lane pin.
+- Attach complete EXP-097 evidence: 101.09% role-corpus median decode, original strict-tail FAIL
+  and founder-amended PASS, structured-output p95 ratio 1.126, serial-role/configured-concurrency
+  distinction and the 64K continuation regression. Diagnostic tool canonicalization is not shipped.
 - Mark v0.12.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site and brand assets; front-door install links
   return to the guide on `main`.
@@ -26,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ignore command prose when following JSON receipt references; continue rejecting
+  rehearsal-class child evidence without treating a shell command as a filesystem path.
 - Treat closed issue #15 as historical route-lifecycle context rather than an open tracker for
   the remaining public acceptance runner and WSL preflight.
 - Correct the performance ledger: experimental `3a2fadbd` pair-mixer results did not ship in

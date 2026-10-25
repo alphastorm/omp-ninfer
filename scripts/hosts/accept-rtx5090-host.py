@@ -92,7 +92,10 @@ def main():
     checkout = home / 'omp-ninfer'
     key = home / '.config/omp-ninfer/api-key'
     logs = home / '.local/state/omp-ninfer'
-    checkpoints = home / '.local/share/omp-ninfer/checkpoints'
+    checkpoint_directory = 'checkpoints-v013' if a.release == 'v0.13.0' else 'checkpoints'
+    checkpoints = home / '.local/share/omp-ninfer' / checkpoint_directory
+    model_name = 'qwen3_8_27b-v3.ninfer' if a.release == 'v0.13.0' else 'qwen3_8_27b.ninfer'
+    model = home / '.local/share/omp-ninfer' / model_name
     os.environ['PATH'] = '/usr/bin:/bin:/usr/local/bin:/usr/lib/wsl/lib:' + os.environ.get('PATH', '')
     def save(name, value):
         (root / name).write_text(json.dumps(value, indent=2) + '\n')
@@ -233,7 +236,6 @@ def main():
         assert not list(dockerconfig.iterdir()), 'anonymous Docker configuration is not empty'
         logged('anonymous-runtime-pull.log', ['docker', 'pull', runtime['image_reference']], 600, env)
         image = inspect(runtime['image_reference'])
-        model = home / '.local/share/omp-ninfer/qwen3_8_27b.ninfer'
         assert model.stat().st_size == runtime['model_bytes'] and digest(model) == runtime['model_sha256']
         asset = root / dist['asset_url'].rsplit('/', 1)[-1]
         if not asset.exists():
@@ -283,7 +285,7 @@ def main():
         # Reuse the original documented key only inside this same trusted host boundary.
         shutil.copy2(root / 'original-api-key', key)
         logged('beta-setup.log', [clone / 'examples/manual-tunnel/start-ninfer.sh',
-               '--model', home / '.local/share/omp-ninfer/qwen3_8_27b.ninfer',
+               '--model', model,
                '--api-key-file', key, '--log-dir', logs, '--checkpoint-dir', checkpoints], 1200, env)
         save('setup.json', {'status': 'passed', 'kind': 'published launcher setup; no route runner invoked', 'candidate': a.candidate, 'completed_utc': now()})
     elif a.action == 'identity':

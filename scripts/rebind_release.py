@@ -144,7 +144,8 @@ def promote_root(release: str, manifest_path: Path) -> None:
     clients = {row["id"]: row["client_distribution"]
                for row in load(release_root / "compatibility.json")["profiles"]}
     for profile_path in sorted((ROOT / "profiles").glob("*.json")):
-        profile = load(profile_path)
+        staged_profile = release_root / "profiles" / profile_path.name
+        profile = load(staged_profile if staged_profile.is_file() else profile_path)
         profile["release"] = release
         model = manifest["components"]["model"]
         profile["model"].update(artifact_sha256=model["artifact_sha256"],

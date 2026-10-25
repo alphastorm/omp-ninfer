@@ -72,6 +72,26 @@ fi
 
 python3 "$ROOT/scripts/verify_release.py" --require-installable
 
+CHECKPOINT_HOST_DIRECTORY=$(python3 - "$PROFILE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+print(json.loads(Path(sys.argv[1]).read_text())["server"].get("checkpoint_host_directory", ""))
+PY
+)
+if [[ -n "$CHECKPOINT_HOST_DIRECTORY" ]]; then
+  if [[ "$(basename -- "$CHECKPOINT_DIR")" != "$CHECKPOINT_HOST_DIRECTORY" || -L "$CHECKPOINT_DIR" ]]; then
+    printf 'error: --checkpoint-dir must name a separate, non-symlink %s directory; retain the prior store for rollback\n' \
+      "$CHECKPOINT_HOST_DIRECTORY" >&2
+    exit 1
+  fi
+  if [[ -e "$CHECKPOINT_DIR" && ! -O "$CHECKPOINT_DIR" ]]; then
+    printf 'error: --checkpoint-dir must be owned by the invoking user\n' >&2
+    exit 1
+  fi
+fi
+
 # The GPU is probed inside the pinned image below: the host need not carry nvidia-smi on PATH
 # (a WSL2 distro reached over ssh does not), Docker reaching the device is what matters.
 for command in docker python3 sha256sum; do
@@ -210,6 +230,7 @@ for value in (
     served["--max-concurrency"],
     served["--max-context"],
     served["--kv-dtype"],
+    str(server.get("status_schema_version", 1)),
     *server["arguments"],
 ):
     print(value, end="\0")
@@ -227,7 +248,8 @@ MINIMUM_RUNTIME_MEMORY_MIB=${PROFILE_VALUES[8]}
 EXPECTED_MAX_CONCURRENCY=${PROFILE_VALUES[9]}
 EXPECTED_MAX_CONTEXT=${PROFILE_VALUES[10]}
 EXPECTED_KV_CACHE=${PROFILE_VALUES[11]}
-PROFILE_ARGS=("${PROFILE_VALUES[@]:12}")
+EXPECTED_STATUS_SCHEMA=${PROFILE_VALUES[12]}
+PROFILE_ARGS=("${PROFILE_VALUES[@]:13}")
 
 if [[ ! -f "$MODEL_PATH" ]]; then
   printf 'error: model is not a regular file: %s\n' "$MODEL_PATH" >&2
@@ -398,6 +420,7 @@ python3 - \
   "$EXPECTED_MAX_CONCURRENCY" \
   "$EXPECTED_MAX_CONTEXT" \
   "$EXPECTED_KV_CACHE" \
+  "$EXPECTED_STATUS_SCHEMA" \
   "http://$PUBLISHED_BIND_HOST:$PUBLISHED_PORT/v1/ninfer/status" <<'PY'
 import json
 import sys
@@ -407,7 +430,7 @@ import urllib.request
 from pathlib import Path
 
 (key_path, upstream, source, binary_sha, model_sha, config_sha, deployment_profile,
- max_concurrency, max_context, kv_cache, status_url) = sys.argv[1:]
+ max_concurrency, max_context, kv_cache, status_schema, status_url) = sys.argv[1:]
 api_key = Path(key_path).read_text(encoding="utf-8").strip()
 request = urllib.request.Request(
     status_url,
@@ -431,7 +454,7 @@ runtime = status.get("runtime", {})
 scheduler = status.get("scheduler", {})
 expected = {
     "artifact_type": (status.get("artifact_type"), "ninfer_server_status"),
-    "schema_version": (status.get("schema_version"), 1),
+    "schema_version": (status.get("schema_version"), int(status_schema)),
     "status": (status.get("status"), "ok"),
     "upstream_base_sha": (identity.get("upstream_base_sha"), upstream),
     "patch_stack_sha": (identity.get("patch_stack_sha"), source),

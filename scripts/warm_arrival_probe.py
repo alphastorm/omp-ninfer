@@ -35,14 +35,19 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fleet_probe import Lane, now, verified_restart  # noqa: E402
+from fleet_probe import Lane, now, required_counter, verified_restart  # noqa: E402
 from restore_probe import plant_keys, retrieval_prompt, retrieval_result  # noqa: E402
 
 ORDERS = ("resume-first", "fork-first")
 
 
 def cache_snapshot(lane: Lane) -> dict[str, Any]:
-    cache = lane.status().get("cache", {})
+    status = lane.status()
+    cache = status["cache"]
+    required_counter(cache, "reused_prompt_tokens")
+    selection = cache.get("last_selection")
+    if not isinstance(selection, dict) or not isinstance(selection.get("path"), str):
+        raise ValueError("qualification requires cache.last_selection.path")
     return {
         "last_selection": cache.get("last_selection"),
         "reused_prompt_tokens": cache.get("reused_prompt_tokens"),
@@ -50,6 +55,7 @@ def cache_snapshot(lane: Lane) -> dict[str, Any]:
         "device_state": cache.get("device_state"),
         "host_state": cache.get("host_state"),
         "host_kv": cache.get("host_kv"),
+        "unavailable_fields": status.get("unavailable_fields", {}),
     }
 
 
@@ -104,7 +110,7 @@ class Run:
             stop.set()
             thread.join(timeout=5.0)
         snapshot = cache_snapshot(self.lane)
-        reused_now = int(snapshot.get("reused_prompt_tokens") or 0)
+        reused_now = snapshot["reused_prompt_tokens"]
         payload: dict[str, Any] = {
             "wall_s": round(wall, 3),
             "id": document["id"],

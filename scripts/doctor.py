@@ -15,6 +15,7 @@ import csv
 import hashlib
 import ipaddress
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -53,6 +54,8 @@ def thresholds(profile, spec=None):
     arguments = profile.get("server", {}).get("arguments", [])
     kv = (int(arguments[arguments.index("--host-kv-mib") + 1]) if "--host-kv-mib" in arguments
           else profile.get("context_cache", {}).get("host_kv_mib", 0))
+    if "--host-context-mib" in arguments:
+        kv = math.ceil(float(arguments[arguments.index("--host-context-mib") + 1]))
     return {"ram_total_mib": host.get("minimum_runtime_memory_mib", 0),
             "ram_free_mib": host.get("minimum_free_memory_mib", kv),
             "vram_total_mib": host.get("minimum_vram_mib", 0),

@@ -109,7 +109,10 @@ def validate_receipt_classes(root: Path, release_dir: Path, documents: list[dict
         elif isinstance(value, str) and value.endswith(".json"):
             match = PRODUCT_RAW_URL_RE.fullmatch(value)
             reference = match.group(2) if match else value
-            if "://" in reference:
+            # Receipts also contain prose and complete shell commands ending in
+            # ".json". Only path-shaped references are evidence edges, not those
+            # command strings (which can exceed a filesystem component limit).
+            if not re.fullmatch(r"[A-Za-z0-9_./-]+\.json", reference):
                 return
             for candidate in (root / reference, directory / reference):
                 path = candidate.resolve()
@@ -910,7 +913,7 @@ REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
 NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
 NINFER_RELEASE_TAG_RE = re.compile(
     r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3|0\.4\.4|0\.4\.5|0\.5\.1|0\.6\.2|0\.6\.3|0\.6\.4"
-    r"|0\.6\.5|0\.6\.6|0\.6\.7|0\.6\.8|0\.6\.9|0\.6\.10|0\.6\.11|0\.6\.12|0\.6\.13|0\.6\.14|0\.6\.15|0\.6\.16)-qwen38-5090-beta\.[1-9][0-9]*$"
+    r"|0\.6\.5|0\.6\.6|0\.6\.7|0\.6\.8|0\.6\.9|0\.6\.10|0\.6\.11|0\.6\.12|0\.6\.13|0\.6\.14|0\.6\.15|0\.6\.16|0\.7\.0)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
 CHECKSUM_REQUIRED_ASSET_FIELDS = (
     "package",
@@ -1287,6 +1290,11 @@ def validate_server_arguments(
                 f"{label}: {flag} must occur once with a non-empty value", errors)
     for flag in REQUIRED_SERVER_FLAGS:
         require(arguments.count(flag) == 1, f"{label}: must include {flag} exactly once", errors)
+    if server.get("status_schema_version") == 2:
+        require(argument_value(arguments, "--host-context-mib") == "20867.734375",
+                f"{label}: unified Host budget must preserve 21881405440 bytes", errors)
+        for flag in ("--host-state-slots", "--host-kv-mib", "--max-private-continuations"):
+            require(flag not in arguments, f"{label}: obsolete K5 flag {flag}", errors)
     require("--api-key" not in arguments, f"{label}: must not embed an API key", errors)
 
 
@@ -1374,8 +1382,12 @@ def validate_profile_contract(
             f"{label}: published port must bind the runtime host loopback", errors)
     require(server.get("published_port") == transport.get("runtime_port"),
             f"{label}: published port must be the transport's runtime port", errors)
-    require(server.get("checkpoint_mount_target") == "/checkpoints",
-            f"{label}: checkpoint mount target must be /checkpoints", errors)
+    checkpoint_target = "/checkpoints-v013" if server.get("status_schema_version") == 2 else "/checkpoints"
+    require(server.get("checkpoint_mount_target") == checkpoint_target,
+            f"{label}: checkpoint mount target must be {checkpoint_target}", errors)
+    if server.get("status_schema_version") == 2:
+        require(server.get("checkpoint_host_directory") == "checkpoints-v013",
+                f"{label}: checkpoint host directory must be checkpoints-v013", errors)
     seccomp_path = server.get("checkpoint_seccomp_profile")
     require(seccomp_path == "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
             f"{label}: checkpoint seccomp profile must be the repository-owned io_uring profile",

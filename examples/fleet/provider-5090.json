@@ -4,5 +4,5 @@
   "base_url": "http://127.0.0.1:<local-forward-port-5090>",
   "api_key_file": "<path-to-this-lane's-api-key-file>",
   "stateful_continuation": true,
-  "note": "RTX 5090 container lane; durable session checkpoints (v0.4.0)"
+  "note": "v0.13.0 after lane pin: qwen38-5090-v0.13.0, model v3 81f924d4; fresh checkpoints-v013 mounted at /checkpoints-v013. Cut image identities remain in the release manifest; no fleet qualification is inferred."
 }

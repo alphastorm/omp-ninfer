@@ -110,6 +110,19 @@ class FirstReleaseRollbackContractTest(unittest.TestCase):
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            child = root / "child.json"
+            child.write_text('{"receipt_class":"rehearsal"}', encoding="utf-8")
+            errors: list[str] = []
+            VERIFY_RELEASE.validate_receipt_classes(root, root, [{
+                "command": "python3 tool.py \\\n  --argument " + "x" * 512 + ".json",
+                "repository_path": "child.json",
+            }], errors)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("rehearsal receipt is not qualification evidence", errors[0])
+
     def test_rehearsal_cannot_be_bound_as_release_qualification(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
@@ -126,7 +139,9 @@ class ReleaseContractTest(unittest.TestCase):
             "v0.6.16-qwen38-5090-beta.1"))
         self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.15-qwen38-5090-beta.1"))
-        for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.0-qwen38-5090-beta.1",
+        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+            "v0.7.0-qwen38-5090-beta.1"))
+        for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.1-qwen38-5090-beta.1",
                     "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
                     "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):
             with self.subTest(tag=tag):

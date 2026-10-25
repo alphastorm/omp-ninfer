@@ -211,7 +211,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         self.assertIn("release manifest is not installable", result.stderr)
 
     def launch_with_fakes(
-        self, root: Path, docker_script: str, mutate_profile=None, probe: dict | None = None
+        self, root: Path, docker_script: str, mutate_profile=None, probe: dict | None = None,
+        checkpoint_directory: str | None = None,
     ) -> tuple[subprocess.CompletedProcess[str], Path, dict]:
         """Run the launcher against a synthetic release with a fake docker on PATH; the fake
         captures the `run` argv the launcher would hand to Docker. The synthetic manifest
@@ -263,7 +264,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 "--model", str(model),
                 "--api-key-file", str(key),
                 "--log-dir", str(root / "logs"),
-                "--checkpoint-dir", str(root / "checkpoints"),
+                "--checkpoint-dir", str(root / (checkpoint_directory or profile["server"].get(
+                    "checkpoint_host_directory", "checkpoints"))),
             ],
             cwd=root,
             env=environment,
@@ -404,8 +406,11 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         sys.path.insert(0, str(ROOT / "scripts"))
         import verify_release  # noqa: PLC0415
 
-        for served_offset, accepted in ((0, True), (-1, False)):
-            with self.subTest(served_offset=served_offset), tempfile.TemporaryDirectory() as temporary:
+        for profile_schema, served_schema, served_offset, accepted in (
+            (1, 1, 0, True), (1, 1, -1, False), (2, 2, 0, True), (2, 1, 0, False),
+        ):
+            with self.subTest(schema=profile_schema, served_schema=served_schema,
+                              served_offset=served_offset), tempfile.TemporaryDirectory() as temporary:
                 root = Path(temporary)
                 state: dict = {}
 
@@ -417,7 +422,7 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                         declared = int(verify_release.argument_value(arguments, "--max-concurrency"))
                         body = json.dumps({
                             "artifact_type": "ninfer_server_status",
-                            "schema_version": 1,
+                            "schema_version": served_schema,
                             "status": "ok",
                             "identity": {
                                 "upstream_base_sha": manifest["components"]["ninfer"]["upstream_commit"],
@@ -450,6 +455,10 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 self.addCleanup(server.shutdown)
 
                 def serve_on_test_port(profile: dict) -> None:
+                    if profile_schema == 2:
+                        template = json.loads((ROOT / "profiles/v0.13.0" /
+                                               "qwen38-rtx5090-manual-tunnel.json").read_text())
+                        profile["server"] = template["server"]
                     profile["server"]["published_port"] = server.server_address[1]
                     arguments = profile["server"]["arguments"]
                     arguments[arguments.index("--config-sha256") + 1] = verify_release.configuration_identity(profile)
@@ -465,7 +474,19 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 else:
                     self.assertEqual(result.returncode, 1, result.stderr)
                     self.assertIn("authenticated NInfer identity mismatch", result.stderr)
-                    self.assertIn("max_concurrency", result.stderr)
+                    self.assertIn("max_concurrency" if served_offset else "schema_version", result.stderr)
+
+    def test_new_store_profile_refuses_the_legacy_host_directory_before_docker(self) -> None:
+        def new_store(profile: dict) -> None:
+            profile["server"]["checkpoint_host_directory"] = "checkpoints-v013"
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result, capture, _ = self.launch_with_fakes(
+                root, self.CAPTURING_DOCKER, new_store, checkpoint_directory="checkpoints")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("separate, non-symlink checkpoints-v013", result.stderr)
+            self.assertFalse(capture.exists())
 
     @staticmethod
     def write_common_fakes(fake_bin: Path) -> None:

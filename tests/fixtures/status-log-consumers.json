@@ -1,0 +1,78 @@
+{
+  "fixture_scope": "Synthetic source-shaped status and request_done records; no live qualification claim.",
+  "status_1": {
+    "artifact_type": "ninfer_server_status", "schema_version": 1, "status": "ok",
+    "identity": {
+      "deployment_profile": "fixture-5090", "model_id": "q38-ninfer",
+      "model_artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "binary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "upstream_base_sha": "cccccccccccccccccccccccccccccccccccccccc",
+      "patch_stack_sha": "dddddddddddddddddddddddddddddddddddddddd",
+      "source_dirty": false, "build_profile": "fixture-sm120a",
+      "config_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "runtime": {"public_model_id": "q38-ninfer", "max_context": 131072, "kv_cache": "bf16"},
+    "scheduler": {"max_concurrency": 2, "running": 0, "prefilling": 0, "decode_ready": 0, "waiting": 0, "materializing": 0, "capture_pending": 0, "computed_prefill_tokens": 12000, "committed_decode_tokens": 512},
+    "cache": {
+      "last_selection": {"path": "private_long_anchor", "frontier_tokens": 10000},
+      "reused_prompt_tokens": 10000,
+      "private_catalog": {"occupied": 1, "capacity": 8},
+      "device_state": {"occupied": 1, "capacity": 2},
+      "host_state": {"occupied": 1, "capacity": 24},
+      "host_kv": {"occupied_bytes": 1000, "capacity_bytes": 17179869184}
+    },
+    "mtp": {"rounds": 0, "drafted_tokens": 0, "accepted_tokens": 0, "fallback_steps": 0, "acceptance_ratio": null, "tokens_per_round": null}
+  },
+  "status_2": {
+    "artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok",
+    "identity": {
+      "deployment_profile": "fixture-5090", "model_id": "q38-ninfer",
+      "model_artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "binary_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "upstream_base_sha": "cccccccccccccccccccccccccccccccccccccccc",
+      "patch_stack_sha": "dddddddddddddddddddddddddddddddddddddddd",
+      "source_dirty": false, "build_profile": "fixture-sm120a",
+      "config_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "runtime": {"public_model_id": "q38-ninfer", "max_context": 131072, "kv_cache": "bf16"},
+    "scheduler": {"max_concurrency": 2, "running": 0, "prefilling": 0, "decode_ready": 0, "waiting": 0, "paused": 0, "replaying": 0, "materializing": 0, "capture_pending": 0, "terminal_pending": 0, "computed_prefill_tokens": 12000, "committed_decode_tokens": 512},
+    "cache": {
+      "last_selection": {"path": "private_long_anchor", "frontier_tokens": 10000},
+      "reused_prompt_tokens": 10000,
+      "private_catalog": {"occupied": 1, "capacity": null},
+      "device_state": {"occupied": 1, "capacity": 4},
+      "host_state": {"occupied": 1, "capacity": null},
+      "host_kv": {"occupied_bytes": 1000, "capacity_bytes": null},
+      "private_evictions": null, "shared_evictions": null,
+      "last_materialization_predicted_nanoseconds": null
+    },
+    "mtp": {"rounds": 0, "drafted_tokens": 0, "accepted_tokens": 0, "fallback_steps": 0, "acceptance_ratio": null, "tokens_per_round": null},
+    "unavailable_fields": {
+      "cache.private_catalog.capacity": "master catalog is resource-budgeted, not a fixed private-slot count",
+      "cache.host_state.capacity": "unified Host pool has no independently reserved State capacity",
+      "cache.host_kv.capacity_bytes": "unified Host pool has no independently reserved KV capacity"
+    }
+  },
+  "request_done_17": {
+    "artifact_type": "ninfer_serve_request_log", "schema_version": 17,
+    "event": "request_done", "server_instance_id": "serve-fixture-1", "timestamp_unix_ms": 2000,
+    "request": {"request_id": 1, "protocol": "openai_responses", "model": "q38-ninfer", "message_count": 1, "tool_count": 0, "enable_thinking": false,
+      "client_identity": {"request_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "session_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}},
+    "result": {"prompt_tokens": 12000, "completion_tokens": 512, "computed_prefill_tokens": 2000, "prefix_cache_hit_tokens": 10000, "prefix_reuse_path": "private_long_anchor", "finish_reason": "stop", "tool_call_count": 0},
+    "timings_seconds": {"prepare": 0.01, "ttft": 0.2, "prefill": 1.0, "decode": 2.0, "total": 3.0},
+    "engine_timing": {"queue_wait_seconds": 0.01},
+    "speculative": {"backend": "dflash2", "draft_window": 7, "rounds": 256, "drafted_tokens": 1024, "accepted_tokens": 256, "fallback_steps": 0, "accepted_per_position": [128, 64, 32, 16, 8, 4, 4]}
+  },
+  "request_done_30": {
+    "artifact_type": "ninfer_serve_request_log", "schema_version": 30,
+    "event": "request_done", "server_instance_id": "serve-fixture-1", "timestamp_unix_ms": 2000,
+    "request": {"request_id": 1, "http_request_id": "fixture-request", "protocol": "openai_responses", "model": "q38-ninfer", "message_count": 1, "tool_count": 0, "enable_thinking": false,
+      "client_identity": {"request_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "session_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}},
+    "result": {"prompt_tokens": 12000, "completion_tokens": 512, "computed_prefill_tokens": 2000, "prefix_cache_hit_tokens": 10000, "prefix_reuse_path": "private_long_anchor", "finish_reason": "stop", "tool_call_count": 0},
+    "timings_seconds": {"prepare": 0.01, "ttft": 0.2, "vision": 0.0, "prefill": 1.0, "decode": 2.0, "total": 3.0},
+    "engine_timing": {"queue_wait_seconds": 0.01},
+    "speculative": {"backend": "dflash2", "draft_window": 7, "rounds": 256, "drafted_tokens": 1024, "accepted_tokens": 256, "fallback_steps": 0, "accepted_per_position": [128, 64, 32, 16, 8, 4, 4]},
+    "constraint": {"mode": "none"}, "first_output_timing": null,
+    "generation": {"engine_request_id": 1, "scheduling": {}, "admission": {}}
+  }
+}

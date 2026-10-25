@@ -10,8 +10,9 @@ qualification receipt.
 
 Standing support boundaries for the 0.x series: owner-operated exact profiles with no SLA or upgrade
 commitment; two requests in flight on the RTX 5090 container lane and one active request on each
-native Windows lane (RTX 4090 and RTX 3090, running one lane at a time on port 18082); JSON-schema
-structured output rejected rather than ignored; the unattended RTX 3090 fleet scout role disabled;
+native Windows lane (RTX 4090 and RTX 3090, running one lane at a time on port 18082); carried-native
+JSON-schema output rejected while the rebased container's implementation awaits live acceptance;
+the unattended RTX 3090 fleet scout role disabled;
 no cloud hosting, multi-GPU inference, multi-tenant serving, priority or preemptive scheduling,
 automatic container restart, or silent cloud fallback; and no support or performance claim outside
 the exact recorded package, machine, and profile. Community project; not affiliated with or endorsed
@@ -82,13 +83,13 @@ unmet:
    and any fleet completed-work claim requires re-running the fixed multi-machine workload
    ([`scripts/fleet_dispatch.py`](scripts/fleet_dispatch.py), EXP-016 in
    [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)).
-6. **Enforced JSON-schema structured output.** The shipped runtime rejects `text.format` and
-   `response_format` JSON-schema requests with HTTP 400 rather than ignoring them
-   ([`releases/v0.12.2/NINFER_RELEASE_NOTES.md`](releases/v0.12.2/NINFER_RELEASE_NOTES.md),
-   [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)). Upstream NInfer's constrained decoder passed
-   5/5 schema families in local rehearsal
-   ([`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json),
-   EXP-095) and remains a selective-backport candidate once integrated with the durable store.
+6. **Enforced JSON-schema output — implementation resolved in the v0.13.0 rebase.**
+   Upstream xgrammar now supplies Responses `text.format` and Chat `response_format`
+   `json_schema` on the rebased RTX 5090 candidate. This is no longer a selective-backport
+   design item; live positive/negative acceptance and exact component binding remain release
+   gates ([prepared matrix](releases/v0.13.0/COMPATIBILITY.md),
+   [gate prose](releases/v0.13.0/qualification.json)). Carried native packages still reject
+   structured output; neither native support nor accepted container support is inferred.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.12.2/qualification/rtx4090.json`](releases/v0.12.2/qualification/rtx4090.json),
@@ -105,10 +106,14 @@ unmet:
 Negative and deferred results stay visible in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)
 so future work does not repeat closed experiments:
 
-- **Wholesale upstream engine merge — deferred (EXP-045, EXP-048, EXP-065, EXP-095).** Upstream
+- **Wholesale upstream engine merge — prior deferral superseded by v0.13.0 (EXP-097).** Earlier upstream
   NInfer (`594930e7`, `e31bc99b`, `81c8ce09`) trailed the fork by 18–19% on matched decode, lost
   sibling fanout reuse, overran the 32 GB automatic C2 BF16 budget by 561 MiB, and lacked the
-  durable disk session store; engineering continues via selective backports
+  durable disk session store. The approved program re-ports the durable/runtime families onto
+  master `64d10fbf`; default native packages carry unchanged if native rebases miss the window.
+  EXP-097 clears the founder-amended 96% median decode floor at 101.09%, while retaining the
+  structured-output p95 regression and continuation-depth caveats
+  ([complete comparison](docs/measurements/2026-10-25-exp097-role-corpus.json)). Earlier observations remain historical
   ([`docs/UPSTREAM.md`](docs/UPSTREAM.md),
   [`docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json`](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json),
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
@@ -157,6 +162,15 @@ Before a v1.0 decision:
 
 Explicitly not on this path (a new product decision, not a milestone): multi-tenant serving,
 priority or preemptive scheduling, universal hardware claims, and silent cloud fallback.
+
+## Prepared release
+
+| Release | State | Summary | Authority |
+| --- | --- | --- | --- |
+| `v0.13.0` | Cut identities and fresh acceptance pending | RTX 5090 base `64d10fbf`, model container version 3, schema 3 checkpoint root, JSON-schema implementation, 128-character tool names, non-blocking export, stock OMP 18.12.6; default natives carried unchanged | [notes](releases/v0.13.0/NINFER_RELEASE_NOTES.md), [gates](releases/v0.13.0/qualification.json) |
+
+This row is not a shipped-release claim. The root authority changes only at the lane pin, and
+the founder alone publishes after component, review, fresh route and manifest gates pass.
 
 ## Shipped
 

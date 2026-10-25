@@ -13,6 +13,32 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## v0.13.0 candidate measurements — EXP-097
+
+These measurements are not final-runtime, durable-store or public-install acceptance.
+The [complete evidence copy](measurements/2026-10-25-exp097-role-corpus.json) comes from
+`alphastorm/ninfer` evidence commit `80480bec`, tested source `c2dbcbae`. A/B/B/A runs use
+84 role cases each (336 role requests plus 48 depth requests; zero HTTP errors), fixed
+131,072-token KV, DFlash2 K=7, BF16 KV and configured maximum concurrency two. Role calls
+are serial. Supplemental pairs overlap prefill/decode and are not constant-batch-two decode.
+Persistence is disabled; the candidate uses locally upgraded model `facba3bd`, not the final
+published `81f924d4` binding. Payload/frontend equivalence does not relabel that acceptance.
+
+| Candidate comparison | Shipped | Rebased | Interpretation |
+| --- | ---: | ---: | --- |
+| Median of 84 per-case median decode rates | 338.448 tok/s | 342.150 tok/s | **101.09%**; founder-amended 96% floor passes |
+| Structured-output p95 decode ms/token | 2.78123 | 3.13055 | **1.12560 ratio**, 12.6% slower; tool-definition serialization order attributed |
+| 64K continuation decode | 335.332 tok/s | 290.781 tok/s | Rounds 338 → 392 despite faster rounds; aggregate median does not erase this gap |
+| Frozen published-component/profile startup | Not a comparison | Awaiting exact cut qualification | Record actual automatic KV capacity, free VRAM and binary/model/profile identities |
+| Schema 3 restart, pressure, warm-arrival and public routes | Not carried from predecessor | Awaiting exact cut acceptance | Record the live lane receipt and composed candidate, not a copied timing |
+
+The original strict workload-p95 gate is **FAIL**; the founder-amended gate is **PASS**,
+with above-10% tails attributed rather than hidden. The
+[canonical-tool diagnostic](measurements/2026-10-25-exp097-canonical-tools-diagnostic.json)
+explains the structured-output tail but was reverted and is not shipped code. It is not a
+JSON-schema feature-acceptance receipt. Native default rows remain carried, unchanged
+qualification below; rebased native numbers require their own new receipts.
+
 ## Current qualified results — v0.12.2
 
 Published release **v0.12.2** (2026-10-18) pins unmodified upstream OMP **18.12.1** (`291e0558`) and

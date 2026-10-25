@@ -68,6 +68,8 @@ from verify_release import (
     validate_model_component,
     validate_upstream_client_bindings,
     validate_upstream_omp_component,
+    configuration_identity,
+    argument_value,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,6 +221,12 @@ def main() -> int:
     parser.add_argument("--require-clean-client", action="store_true",
                         help="after writing the draft, fail if any predecessor client pin remains; "
                              "otherwise report file:line warnings for the lead to resolve")
+    parser.add_argument("--prepared-draft", action="store_true",
+                        help="preserve pre-cut notes and qualification prose in an existing "
+                             "notes-only release directory (never overwrite a manifest)")
+    parser.add_argument("--profile-template-dir", type=Path,
+                        help="new server-profile shapes; identity/client pins are filled from "
+                             "this cut and templates are promoted only at the lane pin")
     args = parser.parse_args()
     if args.require_clean_client and args.omp_component is None:
         parser.error("--require-clean-client requires --omp-component")
@@ -249,8 +257,35 @@ def main() -> int:
     dst_dir = ROOT / "releases" / args.release
     if not src_dir.is_dir():
         parser.error(f"missing source release tree: {src_dir}")
+    prepared: dict[str, bytes] = {}
     if dst_dir.exists():
-        parser.error(f"refusing to overwrite existing tree: {dst_dir}")
+        allowed = {"NINFER_RELEASE_NOTES.md", "qualification.json",
+                   "compatibility.json", "COMPATIBILITY.md"}
+        if (not args.prepared_draft or not dst_dir.is_dir()
+                or any(not path.is_file() or path.name not in allowed
+                       for path in dst_dir.iterdir())):
+            parser.error(f"refusing to overwrite existing tree: {dst_dir}")
+        prepared = {path.name: path.read_bytes() for path in dst_dir.iterdir()}
+        if not prepared:
+            parser.error("--prepared-draft requires prepared notes or gate prose")
+    elif args.prepared_draft:
+        parser.error("--prepared-draft requires a notes-only release directory")
+    prepared_prose = json.loads(prepared["qualification.json"]) if "qualification.json" in prepared else None
+    if prepared_prose is not None:
+        allowed = {"artifact_type", "schema_version", "release", "status", "scope",
+                   "interpretation", "observed_gates", "remaining_release_gates",
+                   "documented_route_acceptance", "publication_authorized",
+                   "external_installation_qualified"}
+        if set(prepared_prose) - allowed or prepared_prose.get("release") != args.release:
+            parser.error("prepared qualification must contain only this release's gate prose")
+    prepared_contracts = None
+    if "compatibility.json" in prepared:
+        authority = json.loads(prepared["compatibility.json"])
+        if (authority.get("artifact_type") != "omp_ninfer_prepared_compatibility"
+                or authority.get("product_release") != args.release
+                or authority.get("status") != "preparation-only"):
+            parser.error("prepared compatibility must be this release's preparation-only contract")
+        prepared_contracts = authority["runtime_contracts"]
 
     # The archive is named by the RUNTIME version embedded in the release tag, which can
     # trail the product release (e.g. product v0.4.6 shipping runtime v0.4.5).
@@ -315,6 +350,20 @@ def main() -> int:
         source_manifest["runtime_identity"]["configuration_sha256"]
         if args.keep_deployment_profile else args.config_sha
     )
+    profile_templates = {}
+    if args.profile_template_dir is not None:
+        if args.keep_deployment_profile:
+            parser.error("--profile-template-dir requires a new --config-sha")
+        for current in sorted((ROOT / "profiles").glob("*.json")):
+            path = args.profile_template_dir / current.name
+            if not path.is_file():
+                parser.error(f"profile template missing: {path.name}")
+            template = load(path)
+            if template["server"]["deployment_profile"] != profile_to:
+                parser.error(f"profile template deployment_profile must be {profile_to}")
+            if configuration_identity(template) != config_sha:
+                parser.error(f"profile template configuration hash mismatch: {path.name}")
+            profile_templates[current.name] = template
     # The configuration identity hashes --deployment-profile, so a renamed profile cannot keep
     # the source's identity: v0.8.3 was staged that way and its launcher refused the candidate.
     if profile_to != profile_from and (
@@ -325,7 +374,9 @@ def main() -> int:
                      "--keep-deployment-profile")
 
     # 1. Copy the tree.
-    shutil.copytree(src_dir, dst_dir)
+    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=bool(prepared))
+    if "NINFER_RELEASE_NOTES.md" in prepared:
+        (dst_dir / "NINFER_RELEASE_NOTES.md").write_bytes(prepared["NINFER_RELEASE_NOTES.md"])
 
     # 2. Manifest component + identity pins.
     manifest_path = dst_dir / "manifest.json"
@@ -374,6 +425,26 @@ def main() -> int:
     })
     manifest["runtime_identity"]["deployment_profile"] = profile_to
     manifest["runtime_identity"]["configuration_sha256"] = config_sha
+    for name, template in profile_templates.items():
+        template["release"] = args.release
+        template["model"].update(artifact_sha256=model["artifact_sha256"],
+                                 artifact_bytes=model["artifact_bytes"])
+        arguments = template["server"]["arguments"]
+        for flag, value in (
+            ("--binary-sha256", args.binary_sha),
+            ("--artifact-sha256", model["artifact_sha256"]),
+            ("--config-sha256", config_sha),
+            ("--deployment-profile", profile_to),
+        ):
+            arguments[arguments.index(flag) + 1] = value
+        if omp_descriptor is not None:
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}[
+                            template["installation_mode"]]
+            template["client"] = dict(omp_descriptor["platforms"][platform])
+        output = dst_dir / "profiles" / name
+        output.parent.mkdir(exist_ok=True)
+        dump(output, template)
     # A staged tree is a draft: the predecessor's acceptance does not carry, and the cut is
     # gated on a fresh composed acceptance against the published component.
     manifest["status"] = "draft"
@@ -422,6 +493,25 @@ def main() -> int:
         compatibility = load(compat_path)
         bind_upstream_client(compatibility, omp_descriptor, args.release)
         dump(compat_path, compatibility)
+    if prepared_contracts is not None or profile_templates:
+        compatibility = load(compat_path)
+        if prepared_contracts is not None:
+            compatibility["runtime_contracts"] = prepared_contracts
+        if profile_templates:
+            server = next(iter(profile_templates.values()))["server"]
+            for profile in compatibility["profiles"]:
+                profile["runtime"].update(
+                    speculative_backend=argument_value(server["arguments"], "--spec"),
+                    draft_tokens=int(argument_value(server["arguments"], "--draft-tokens")),
+                    status_schema_version=server.get("status_schema_version", 1),
+                    request_log_schema_version=30,
+                    session_checkpoints={
+                        "store_mount": server["checkpoint_mount_target"],
+                        "schema_version": 3,
+                        "seccomp_profile": server["checkpoint_seccomp_profile"],
+                        "seccomp_sha256": server["checkpoint_seccomp_sha256"],
+                    })
+        dump(compat_path, compatibility)
 
     qual_path = dst_dir / "qualification.json"
     qualification = load(qual_path)
@@ -430,6 +520,7 @@ def main() -> int:
     identity.update({
         "upstream_commit": ninfer["upstream_commit"],
         "model_artifact_sha256": model["artifact_sha256"],
+        "model_artifact_bytes": model["artifact_bytes"],
         "behavioral_source_commit": args.source_commit,
         "release_source_commit": args.source_commit,
         "release_source_archive_sha256": args.source_archive_sha,
@@ -472,6 +563,14 @@ def main() -> int:
         qualification["remaining_release_gates"].append(
             "fresh upstream OMP platform and documented-route acceptance"
         )
+    if prepared_prose is not None:
+        qualification.update(prepared_prose)
+        # Preparation carries prose, not the predecessor's build/download proofs.
+        behavioral["status"] = "passed" if args.lane_receipt is not None else "pending"
+        packaging["status"] = "pending"
+        for field in ("anonymous_pull_verified", "anonymous_assets_verified", "checksums_verified",
+                      "build_route_note", "anonymous_pull_evidence_source", "publication_receipt"):
+            packaging.pop(field, None)
     dump(qual_path, qualification)
     shutil.rmtree(dst_dir / "acceptance", ignore_errors=True)
 
@@ -487,6 +586,11 @@ def main() -> int:
     for location in leftovers:
         print(f"warning: releases/{args.release}/{location}", file=sys.stderr)
     draft_residue = set(DRAFT_POSTURE_RESIDUE)
+    if prepared_prose is not None:
+        draft_residue.update({
+            "qualification must record runtime-release-eligible",
+            "qualification must record passing local release packaging",
+        })
     # Root profiles remain on the live model even when staging an unchanged
     # historical model. Staged authority and qualification bindings must match.
     root_profiles = [("profile", dst_dir / manifest["product"]["profile"]),

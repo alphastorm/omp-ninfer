@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import shutil
 import subprocess
@@ -16,6 +17,8 @@ SOURCE = "v0.7.4"
 TARGET = "v0.99.0"
 # The checked-in root release (which may be an acceptance-pending candidate).
 CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+sys.path.insert(0, str(ROOT / "scripts"))
+from verify_release import configuration_identity
 
 
 class StageReleaseTests(unittest.TestCase):
@@ -135,6 +138,77 @@ class StageReleaseTests(unittest.TestCase):
             self.assertEqual({key: value for key, value in after.items() if key != "qualification"},
                              {key: value for key, value in expected.items() if key != "qualification"})
         self.assertEqual(self.load(root / "releases" / CURRENT / "manifest.json"), previous)
+
+    def test_prepared_notes_gate_prose_and_new_profile_shape_survive_staging_and_promote_at_lane_pin(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        target = root / "releases" / TARGET
+        target.mkdir()
+        notes = "# Prepared fixture notes\nNo predecessor acceptance is claimed.\n"
+        (target / "NINFER_RELEASE_NOTES.md").write_text(notes)
+        self.save(target / "qualification.json", {
+            "release": TARGET, "status": "preparation-only",
+            "scope": "Fresh runtime and client acceptance required.",
+            "interpretation": "No inherited observations.",
+            "observed_gates": {"fresh_runtime": {"status": "pending"}},
+            "documented_route_acceptance": {"status": "pending"},
+        })
+        prepared_authority = self.load(ROOT / "releases/v0.13.0/compatibility.json")
+        prepared_authority["product_release"] = TARGET
+        self.save(target / "compatibility.json", prepared_authority)
+        templates = root / "profiles" / "fixture-new-shape"
+        templates.mkdir()
+        for path in (ROOT / "profiles/v0.13.0").glob("*.json"):
+            profile = self.load(path)
+            profile["release"] = TARGET
+            profile["server"]["deployment_profile"] = f"qwen38-5090-{TARGET}"
+            arguments = profile["server"]["arguments"]
+            arguments[arguments.index("--deployment-profile") + 1] = f"qwen38-5090-{TARGET}"
+            config = configuration_identity(profile)
+            arguments[arguments.index("--config-sha256") + 1] = config
+            self.save(templates / path.name, profile)
+        live = [root / "compatibility.json", *(root / "profiles").glob("*.json")]
+        original = {path: path.read_bytes() for path in live}
+        descriptor = ROOT / "docs/measurements/2026-10-25-omp-18126-client-components.json"
+        result = self.stage(root, descriptor, source_release=CURRENT, config_sha=config,
+                            dependency_args=["--prepared-draft", "--profile-template-dir", str(templates)])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual((target / "NINFER_RELEASE_NOTES.md").read_text(), notes)
+        self.assertEqual({path: path.read_bytes() for path in live}, original)
+        qualification = self.load(target / "qualification.json")
+        self.assertEqual(qualification["observed_gates"], {"fresh_runtime": {"status": "pending"}})
+        self.assertEqual(qualification["composition"]["local_release_packaging"]["status"], "pending")
+        self.assertNotIn("publication_receipt", qualification["composition"]["local_release_packaging"])
+        authority = self.load(target / "compatibility.json")
+        self.assertEqual(authority["runtime_contracts"], prepared_authority["runtime_contracts"])
+        for row in authority["profiles"]:
+            self.assertEqual(row["runtime"]["session_checkpoints"]["store_mount"], "/checkpoints-v013")
+            self.assertEqual(row["runtime"]["speculative_backend"], "dflash2")
+            self.assertEqual(row["runtime"]["draft_tokens"], 7)
+        manifest_path = target / "manifest.json"
+        manifest = self.load(manifest_path)
+        shutil.copytree(ROOT / "examples/manual-tunnel", root / "examples/manual-tunnel")
+        spec = importlib.util.spec_from_file_location("prepared_rebind", root / "scripts/rebind_release.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.promote_root(TARGET, manifest_path)
+        for path in (root / "profiles").glob("*.json"):
+            profile = self.load(path)
+            self.assertEqual(profile["release"], TARGET)
+            self.assertEqual(profile["server"]["status_schema_version"], 2)
+            self.assertEqual(profile["server"]["checkpoint_mount_target"], "/checkpoints-v013")
+            args = profile["server"]["arguments"]
+            self.assertEqual(args[args.index("--binary-sha256") + 1],
+                             manifest["components"]["ninfer"]["server_binary_sha256"])
+            self.assertEqual(configuration_identity(profile), config)
+
+    def test_prepared_draft_never_overwrites_an_existing_manifest(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        target = root / "releases" / TARGET
+        target.mkdir()
+        (target / "manifest.json").write_text('{"release":"already-staged"}')
+        result = self.stage(root, None, source_release=CURRENT, dependency_args=["--prepared-draft"])
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertEqual(self.load(target / "manifest.json"), {"release": "already-staged"})
 
     def test_partial_invalid_or_duplicate_dependency_pins_fail_before_staging(self) -> None:
         root = self.staging_copy(source_release=CURRENT)

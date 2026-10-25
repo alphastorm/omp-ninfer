@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-18 · Published release: v0.12.2 (2026-10-18) · stock Oh My Pi 18.12.1
+Updated: 2026-10-25 · Published release: v0.12.2 (2026-10-18) · v0.13.0 preparation below
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
@@ -88,6 +88,40 @@ records the host-free checks.
 
 ## Models
 
+### v0.13.0 prepared contract — not yet release acceptance
+
+The [prepared notes](../releases/v0.13.0/NINFER_RELEASE_NOTES.md) and
+[candidate protocol matrix](../releases/v0.13.0/COMPATIBILITY.md) describe the next release.
+The published root authority stays on v0.12.2 until the lane pin; no candidate source, binary
+or image identity is inferred from a moving branch.
+
+| Boundary | Rebased RTX 5090 candidate | Default carried native RTX 4090 / RTX 3090 |
+| --- | --- | --- |
+| Runtime base | Neroued/ninfer master `64d10fbf`; component `v0.7.0-qwen38-5090-beta.1` after cut | Existing `v0.6.11` / `v0.6.3` components, source `cad19767` |
+| Stock client | OMP 18.12.6, source `45c35e40`; fresh acceptance required | Same client; native public-install acceptance reruns |
+| Model | Published container version 3 `81f924d4`, 20,437,521,664 bytes, revision `1cbd84e7221e51186bd7f093a149912d2489625b`; text/vision/MTP/DFlash2 | Unchanged `eec39564`, 18,210,531,328 bytes |
+| Structured output | Upstream xgrammar implements `text.format` / `response_format` `json_schema`; **live acceptance pending**, not yet a supported release claim | Rejected with HTTP 400 |
+| Tool names (Chat/Responses) | 128 characters, boundary acceptance required | 64 characters |
+| Status / request log | Status schema 2 / request-log schema 30 | Status schema 1 / request-log schema 17 |
+| Host store | Shared State/KV budget 21,881,405,440 bytes; 2 extra device slots beyond the 2 active lanes | Existing separate state-slot and host-KV budgets |
+| Disk sessions | New schema 3 directory `checkpoints-v013` at `/checkpoints-v013`; fingerprint schema 2 | Existing lane stores, unchanged |
+
+The published model is downloaded directly; no local model upgrader runs in the release route.
+All 1,184 tensor payloads and all six frontend resources matched the production model upgraded
+locally. Whole-container hashes differ, so only the exact published `81f924d4` artifact is pinned.
+The profile's lifecycle-style configuration identity is `c73eb8fb`; binary/archive/SBOM/image
+identities remain cut inputs. All other tuning stays unchanged apart from K5's unified host
+mapping and explicit removal of the obsolete `--max-private-continuations` catalog flag.
+
+The new loader never reads or mutates v0.12.x checkpoint roots. Keep them for rollback; prior
+sessions replay from the authoritative OMP transcript for a fresh prefill. Non-blocking export
+captures state under serialization and performs bulk transfer/hash/write outside the execution
+lock, with an epoch-checked final publication. It does not promise loss-free saves or zero latency.
+Rebased native components are an alternative only after their own exact hardware/package/model
+receipts qualify; container capabilities never transfer by assumption.
+
+### Published v0.12.2 model bindings
+
 v0.12.2 pins two registered NInfer conversion artifacts (`qwen3_8_27b.ninfer`) from
 [`neroued/Qwen3.8-27B-NInfer`](https://huggingface.co/neroued/Qwen3.8-27B-NInfer) in
 [`releases/v0.12.2/manifest.json`](../releases/v0.12.2/manifest.json):
@@ -111,7 +145,8 @@ v0.12.2 pins two registered NInfer conversion artifacts (`qwen3_8_27b.ninfer`) f
   and preserved thinking (`reasoning_text` deltas with `summary: []`) are qualified on all three
   lanes. Vision inputs (including image tool results and `snapcompact` image archives) are
   qualified on the RTX 5090 lane only; native RTX 4090 and RTX 3090 lanes refuse image inputs with
-  `vision_disabled`. Enforced JSON-schema structured output is rejected.
+  `vision_disabled`. Published v0.12.2 rejects enforced JSON-schema output; the v0.13.0
+  rebased-container implementation and its outstanding acceptance are distinguished above.
 - **Oh My Pi client contract:** Stock Oh My Pi 18.12.1 has no `omp appliance` commands. Model
   fragments set `compat.statefulResponses: true` per model (upstream
   [#13686](https://github.com/can1357/oh-my-pi/pull/13686)), and `PI_OPENAI_STATEFUL` must be
@@ -219,8 +254,9 @@ capabilities to another):
 - **Client platform limits:** macOS (`darwin-arm64`) is preview without managed client installation
   or appliance lifecycle; Linux (`linux-x64`) live evidence is under WSL2 only, not a separately
   qualified native Linux OS.
-- **Native lanes are text and tools only:** Vision is qualified only on the RTX 5090 container
-  lane. Enforced JSON-schema structured output is unsupported on all lanes.
+- **Carried native lanes are text and tools only:** Vision is qualified only on the RTX 5090
+  container lane. Carried native JSON-schema output remains rejected; the rebased container's
+  implemented support becomes a release claim only after fresh live acceptance.
 - **Not multi-GPU inference or concurrent native serving:** Only one UUID-bound native lane runs at
   a time on port `18082`. RTX 4090 has no supported rollback target on the two-GPU host, and
   `v0.6.10` or earlier RTX 4090 packages are unsupported there.

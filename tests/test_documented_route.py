@@ -139,6 +139,24 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
+    def test_v013_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
+        routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
+                  for lane in documented_route.LANES}
+        self.assertEqual(sum(len(steps) for steps in routes.values()), 31)
+        for lane, steps in routes.items():
+            for step, block in steps:
+                self.assertEqual(documented_route.extract(
+                    documented_route.DEFAULT_DOC, step.heading, step.index).text, block.text)
+                if step.slug == "client-install":
+                    self.assertIn("v18.12.6", block.text)
+                if step.slug == "clone-and-verify":
+                    self.assertIn("v0.13.0", block.text)
+        preparation = documented_route.extract(
+            documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
+        self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v013"', preparation)
+        self.assertIn("releases/v0.13.0/manifest.json", preparation)
+        self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
+
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
             with self.subTest(lane=lane):

@@ -1778,6 +1778,22 @@ Authorization for those external effects remains separate and bounded.
 
 ## Candidate freeze
 
+### v0.13.0 prepared server shape
+
+`releases/v0.13.0` initially contains preparation-only notes, qualification gate prose and a
+protocol matrix, not an installable manifest. `stage_release.py --prepared-draft` accepts only
+that notes-only directory; it still refuses an existing manifest or unrelated contents.
+`--profile-template-dir profiles/v0.13.0` binds the cut's binary/model/config/client identities
+into release-local profile copies. Their new server shape is promoted only by
+`rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount
+or the unified Host budget. The canonical configuration hash is `c73eb8fb` for this exact shape.
+
+The prepared `compatibility.json` is explicitly `preparation-only`; staging incorporates its
+runtime protocol boundaries into the normal full authority, then renders the matrix. JSON-schema
+support remains acceptance-pending until its live schema gate passes. Carried native packages
+retain their existing limits. Never edit the immutable predecessor to make the root matrix match
+a candidate: root authority, public matrix and live profiles stay byte-identical until the cut.
+
 Before the final external-install smoke, freeze these bytes together:
 
 1. upstream OMP release binaries for Windows x64, Linux x64 and macOS arm64;

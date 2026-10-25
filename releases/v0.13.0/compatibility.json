@@ -1,0 +1,29 @@
+{
+  "artifact_type": "omp_ninfer_prepared_compatibility",
+  "schema_version": 1,
+  "product_release": "v0.13.0",
+  "status": "preparation-only",
+  "runtime_contracts": [
+    {
+      "lane": "RTX 5090 rebased container",
+      "json_schema": "Implemented by upstream xgrammar; live acceptance pending (not yet a supported release claim)",
+      "tool_name_max_characters": 128,
+      "status_schema_version": 2,
+      "request_log_schema_version": 30
+    },
+    {
+      "lane": "RTX 4090 carried native (Chat/Responses)",
+      "json_schema": "Rejected with HTTP 400 by unchanged component",
+      "tool_name_max_characters": 64,
+      "status_schema_version": 1,
+      "request_log_schema_version": 17
+    },
+    {
+      "lane": "RTX 3090 carried native (Chat/Responses)",
+      "json_schema": "Rejected with HTTP 400 by unchanged component",
+      "tool_name_max_characters": 64,
+      "status_schema_version": 1,
+      "request_log_schema_version": 17
+    }
+  ]
+}

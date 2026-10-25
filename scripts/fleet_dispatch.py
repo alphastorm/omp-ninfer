@@ -38,6 +38,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fleet_probe import lane_identity  # noqa: E402
 from run_mtp_ablation import (  # noqa: E402
     CORPUS_STEP_NAMES,
     REPETITIONS,
@@ -300,7 +301,8 @@ def main() -> int:
         "corpus_sha256": manifest["sha256"],
         "corpus_version": manifest["version"],
         "policy": args.policy,
-        "lanes": {name: {"model": lane.model, "identity": lane.client.request("GET", "/v1/ninfer/status").get("identity", {})} for name, lane in lanes.items()},
+        "lanes": {name: {"model": lane.model, "identity": lane_identity(
+            lane.client.request("GET", "/v1/ninfer/status"))} for name, lane in lanes.items()},
         "job_order": list(JOB_ORDER),
         "role_of_scenario": ROLE_OF_SCENARIO if args.policy == "role" else None,
         "cost_model": ({"receipts": [str(p) for p in args.cost_model],
@@ -319,8 +321,8 @@ def main() -> int:
         "runs": batches,
         "privacy": "fully synthetic public corpus; hashes and structural metrics only; lane identities are the served status identities",
     }
-    for lane_identity in receipt["lanes"].values():
-        lane_identity["identity"] = {k: v for k, v in lane_identity["identity"].items()
+    for lane_subject in receipt["lanes"].values():
+        lane_subject["identity"] = {k: v for k, v in lane_subject["identity"].items()
                                      if k in ("deployment_profile", "binary_sha256", "config_sha256", "model_artifact_sha256", "patch_stack_sha")}
     args.receipt.parent.mkdir(parents=True, exist_ok=True)
     args.receipt.write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

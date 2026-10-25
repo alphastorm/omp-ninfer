@@ -1,0 +1,50 @@
+{
+  "artifact_type": "omp_ninfer_product_qualification",
+  "schema_version": 2,
+  "release": "v0.13.0",
+  "status": "preparation-only",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Rebased RTX 5090 runtime on upstream master 64d10fbf, published model container v3 81f924d4, new qwen38-5090-v0.13.0 profile and release-isolated checkpoint store; stock OMP 18.12.6 across three client platforms. Default native posture carries v0.12.2 packages/model unchanged, with fresh native public-install and client acceptance required. Rebasing either native lane requires its own source/package/model/qualification bindings. No predecessor 5090 behavioral, packaging or route acceptance is relabelled as proof of this candidate.",
+  "interpretation": "Preparation only. Stage fills cut identities and installs a real RTX 5090 lane receipt; pending gates become observed only from their actual evidence. G2 is a separate fixed-KV performance comparison with persistence disabled and the locally upgraded facba3bd model, not final-runtime/public-artifact acceptance. JSON-schema support remains acceptance-pending until live positive/negative tests pass. Checkpoint schema 3, runtime fingerprint schema 2, status schema 2 and request-log schema 30 are distinct. Old checkpoint roots are preserved untouched; prior sessions replay from client transcripts. Carried native packages retain their prior capabilities, 64-character tool names and status schema 1. Owner-operated evidence is not an independent external-user result.",
+  "documented_route_acceptance": {
+    "status": "pending",
+    "scope": "Fresh candidate-bound execution of all five routes and 31 current executable blocks, three OMP 18.12.6 client platforms and both native public installations, with independently verified incumbent/native restoration. Updated model/checkpoint/client blocks invalidate predecessor block hashes. Darwin remains preview; Linux scope remains WSL2. No route results or candidate SHA are inferred during preparation."
+  },
+  "observed_gates": {
+    "integrated_cli": {
+      "status": "pending",
+      "criterion": "Frozen binary --help/accepted-flag inventory matches all predecessor flags or explicit K5 mappings: shared host budget 21881405440 bytes via --host-context-mib 20867.734375; +2 device-state slots; obsolete --max-private-continuations removed by contract; --gpu-keep-warm-ms 60000 integrated with its actual worker."
+    },
+    "g1_restart": {
+      "status": "pending",
+      "criterion": "At least 16K checkpoint-hit tokens and byte-identical continuation after a real process restart, on schema 3 and the exact frozen binary/model/profile."
+    },
+    "g2_decode": {
+      "status": "passed-performance-comparison",
+      "repository_path": "docs/measurements/2026-10-25-exp097-role-corpus.json",
+      "sha256": "4199d27b0bdf5cc984786d5a97ddc084ecbc380cf8930ae6737c795bafb144bc",
+      "criterion": "Founder-amended floor: role-corpus median at least 96% of shipped 1302d639; workload p95 regressions above 10% are attributed, not blocking. Original strict-tail gate remains FAIL in the receipt.",
+      "observation": "84 role cases; A/B/B/A; median 342.15025465782605 versus 338.4481203327641 tok/s, ratio 1.0109385577955698. Concurrency two is configured, role calls are serial; paired depth probes are not constant-B2 throughput. Structured-output p95 ratio 1.1255975022693392 is attributed to tool-definition serialization order by a diagnostic-only reverted counterfactual. The 64K continuation remains 335.3322478818433 to 290.7812854279529 tok/s with 338 to 392 rounds."
+    },
+    "g3_integrated_qualification": {
+      "status": "pending",
+      "criterion": "Frozen integrated tests, authentication/identity/corruption/capacity restore failure matrix, pressure plus concurrency, non-blocking export, keep-warm, 32 GB startup, quality and leak screens; real schema-output and 128-character tool-name acceptance. Optional native rebases require separate native hardware qualification."
+    },
+    "g4_review": {
+      "status": "pending",
+      "criterion": "Full critical-review council on the frozen complete candidate, followed by its single remediation epoch; this preparation is not a council receipt."
+    },
+    "changed_client_acceptance": {
+      "status": "pending",
+      "criterion": "Fresh runtime-bound live/tool/result/continuation/image-where-supported/outage checks for stock OMP 18.12.6, all current route blocks and both native public installations; no rehearsal-class receipt; independent image/state/task/ACL/key/directory/power restoration. Runtime performance is newly qualified only on changed lanes."
+    }
+  },
+  "remaining_release_gates": [
+    "Supply frozen source, binary/archive/source-archive/SBOM/image/runtime-receipt identities and the actual lane receipt; stage with the prepared profile and configuration c73eb8fbe14a7fdbfbbd20aaeb13b7fec5783ca53f077a7b757f2f706ab3205f.",
+    "Bind actual G1/G3/G4 evidence and packaging/public-download proof; replace preparation-only status with runtime-release-eligible only when those gates pass.",
+    "Choose carried natives or bind independently qualified rebased native components and their effective model/dependency inventories.",
+    "Lane-pin a clean candidate; run owner-approved windows with fresh workspaces, compose actual platform/route/public-install/restoration receipts, and change structured-output support only after live acceptance.",
+    "Commit and pin platform, acceptance and manifest evidence; require-ready with check-pins; founder-only product tag/release; post-publication docs flip."
+  ]
+}

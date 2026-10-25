@@ -135,7 +135,9 @@ class Lane:
             return error.code
 
     def status(self, timeout: float = 60.0) -> dict[str, Any]:
-        return self._request("/v1/ninfer/status", None, timeout)
+        status = self._request("/v1/ninfer/status", None, timeout)
+        lane_identity(status)
+        return status
 
     def identity(self, timeout: float = 60.0) -> dict[str, Any]:
         return lane_identity(self.status(timeout))
@@ -148,9 +150,41 @@ IDENTITY_KEYS = ("deployment_profile", "model_id", "model_artifact_sha256", "bin
                  "config_sha256")
 
 
+def validate_status(status: dict[str, Any]) -> None:
+    """Accept the carried fork and rebased contracts, not a health/error response.
+
+    Schema 2 keeps the identity/counter spellings. Its resource-budgeted cache
+    capacities may be null, with reasons in unavailable_fields; do not turn those
+    diagnostic values into zero or make them prerequisites for readiness.
+    """
+    if (status.get("artifact_type") != "ninfer_server_status"
+            or type(status.get("schema_version")) is not int
+            or status["schema_version"] not in (1, 2)
+            or status.get("status") != "ok"):
+        raise ValueError("unsupported or unavailable NInfer status")
+    for group in ("identity", "runtime", "scheduler", "cache", "mtp"):
+        if not isinstance(status.get(group), dict):
+            raise ValueError(f"NInfer status omitted {group}")
+
+
+def required_counter(group: dict[str, Any], key: str) -> int:
+    value = group.get(key)
+    if type(value) is not int or value < 0:
+        raise ValueError(f"qualification requires a nonnegative integer {key}")
+    return value
+
+
 def lane_identity(status: dict[str, Any]) -> dict[str, Any]:
+    validate_status(status)
     identity = status.get("identity") or {}
-    return {key: identity[key] for key in IDENTITY_KEYS if key in identity}
+    for key in IDENTITY_KEYS:
+        value = identity.get(key)
+        if key == "source_dirty":
+            if value is not False:
+                raise ValueError("qualification requires clean source_dirty=false")
+        elif not isinstance(value, str) or not value:
+            raise ValueError(f"qualification requires identity.{key}")
+    return {key: identity[key] for key in IDENTITY_KEYS}
 
 
 def wait_ready(lane: Lane, deadline_seconds: float) -> float:
@@ -172,14 +206,14 @@ def verified_restart(lane: Lane, command: str) -> dict[str, Any]:
     subject.
     """
     status_before = lane.status()
-    before = status_before.get("scheduler", {}).get("computed_prefill_tokens")
+    before = required_counter(status_before["scheduler"], "computed_prefill_tokens")
     identity_before = lane_identity(status_before)
     started = now()
     subprocess.run(command, shell=True, check=True, capture_output=True, timeout=600)
     ready = wait_ready(lane, 600.0)
     status_after = lane.status()
-    after = status_after.get("scheduler", {}).get("computed_prefill_tokens")
-    if before is not None and after is not None and after >= before:
+    after = required_counter(status_after["scheduler"], "computed_prefill_tokens")
+    if after >= before:
         raise RuntimeError("restart command returned but the lane's counters did not reset")
     identity_after = lane_identity(status_after)
     if identity_after != identity_before:

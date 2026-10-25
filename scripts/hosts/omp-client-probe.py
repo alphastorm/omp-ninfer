@@ -30,6 +30,22 @@ def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def runtime_identity(status, expected):
+    assert (status.get("artifact_type") == "ninfer_server_status"
+            and type(status.get("schema_version")) is int
+            and status["schema_version"] in (1, 2)), "unsupported runtime status contract"
+    if "status_schema_version" in expected:
+        assert status["schema_version"] == expected["status_schema_version"], "runtime status schema mismatch"
+    identity = status["identity"]
+    for actual, wanted in (("binary_sha256", "server_binary_sha256"),
+                           ("model_artifact_sha256", "model_sha256"),
+                           ("config_sha256", "configuration_sha256")):
+        assert isinstance(identity.get(actual), str) and identity[actual] == expected[wanted], \
+            "served runtime identity mismatch: " + actual
+    assert status["status"] == "ok" and identity.get("source_dirty") is False, "runtime not clean/healthy"
+    return identity
+
+
 def summarize(text):
     events = []
     for line in text.splitlines():
@@ -193,10 +209,7 @@ def main():
             comp = clone / "compatibility.json"
             authority = json.loads(comp.read_text(encoding="utf-8"))
             expected = json.loads(Path(a.expected_runtime).read_text(encoding="utf-8")) if a.expected_runtime else next(p["runtime"] for p in authority["profiles"] if p["id"] == a.profile)
-            identity = status["identity"]
-            for actual, wanted in (("binary_sha256", "server_binary_sha256"), ("model_artifact_sha256", "model_sha256"), ("config_sha256", "configuration_sha256")):
-                assert identity[actual] == expected[wanted], "served runtime identity mismatch: " + actual
-            assert status["status"] == "ok" and identity.get("source_dirty") is False, "runtime not clean/healthy"
+            identity = runtime_identity(status, expected)
             receipt["runtime_identity_observed"] = identity
             (out / "marker.txt").write_text(MARKER + "\n", encoding="utf-8")
             base = ["-p", "--auto-approve", "--mode", "json", "--model", a.model, "--max-time", "180s"]

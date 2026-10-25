@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fleet_probe import Lane, now, wait_ready  # noqa: E402
+from fleet_probe import Lane, now, required_counter, wait_ready  # noqa: E402
 
 EXPECTED_LONG = "ORCHID=493817; COLOR=COBALT"
 DECODE_PROMPT = (
@@ -244,14 +244,15 @@ def main() -> int:
             "server_prefix_reuse_path": last["result"].get("prefix_reuse_path"),
             "server_computed_prefill_tokens": last["result"].get("computed_prefill_tokens"),
             "server_prefill_seconds": last.get("timings_seconds", {}).get("prefill"),
-            "cold": (last["result"].get("prefix_cache_hit_tokens") or 0) == 0,
+            "cold": required_counter(last["result"], "prefix_cache_hit_tokens") == 0,
         })
     if decode_record is not None:
         result = decode_record.get("result", {})
         timings = decode_record.get("timings_seconds", {})
         speculative = decode_record.get("speculative", {})
-        drafted = speculative.get("drafted_tokens") or 0
-        rounds = speculative.get("rounds") or 0
+        drafted = required_counter(speculative, "drafted_tokens")
+        rounds = required_counter(speculative, "rounds")
+        accepted = required_counter(speculative, "accepted_tokens")
         receipt["gates"]["decode"].update({
             "server_completion_tokens": result.get("completion_tokens"),
             "server_decode_seconds": timings.get("decode"),
@@ -259,7 +260,7 @@ def main() -> int:
                 round(result["completion_tokens"] / timings["decode"], 2)
                 if timings.get("decode") else None),
             "mtp_acceptance_rate": (
-                round(speculative.get("accepted_tokens", 0) / drafted, 3) if drafted else None),
+                round(accepted / drafted, 3) if drafted else None),
             "mtp_tokens_per_round": (
                 round(result["completion_tokens"] / rounds, 2) if rounds else None),
             "speculative": speculative,
