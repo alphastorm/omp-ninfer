@@ -6,6 +6,48 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 Fix the first concrete mismatch. Do not rerun an unchanged install or replace an immutable identity
 with a local image or modified profile.
 
+## Named-cause preflight
+
+Run `python3 scripts/doctor.py --offline --json` from your clone for a no-host check, or use
+the [quickstart doctor command](QUICKSTART.md#contributor-acceptance-and-preflight) on the
+inference host before starting its lane. Each failure has a stable check name, a cause and a
+remediation; JSON never includes bearer values, local filenames, GPU UUIDs or raw command output.
+Exit 1 means a check failed. Offline exit 0 means the selected local checks passed, **not**
+that a GPU host was checked. Doctor receipts are preflight, never release qualification.
+
+- **`docker_reachability`, `wsl2_reachability`, `docker_bind_mounts`:** start the model-owning
+  WSL2 distro, enable its Docker Desktop integration and restart Docker Desktop while the distro
+  is running. The probe uses the pinned image with `--pull=never` and read-only mounts; it neither
+  downloads an image nor starts/stops an existing container. Run in the model's WSL distro for
+  Linux paths. The launcher remains authoritative for checkpoint-directory staging.
+- **`docker_network_mode`, `container_network`:** use bridge publication
+  `127.0.0.1:18089:8080`, not `--network host`. Issue #15 was fixed in the documented route:
+  Docker Desktop's host network is the engine VM, not the Windows loopback endpoint.
+- **`loopback_bind`, `loopback_port_free`, `loopback_reachability`:** the container route uses
+  port 18089; both sequential native lanes share 18082. Inspect the owner rather than killing an
+  unknown process. `--running` checks an existing listener and connectivity; it does not claim
+  the service behind that port has the right runtime identity.
+- **`driver_floor`, `gpu_selection`:** update the host NVIDIA driver or select the intended
+  `--gpu-uuid`. Native driver floors come from the package release spec; the container uses a
+  declared profile floor or CUDA 13's major compatibility floor of 580. This is a prerequisite,
+  not a claim that every driver above it was qualified.
+- **`ram_total_mib`, `ram_free_mib`, `vram_total_mib`, `vram_free_mib`:** floors come from the
+  selected profile. Total RAM/VRAM floors are not reinterpreted as free-memory floors. Before
+  startup, available RAM must at least back the profile's pinned host-KV pool unless the profile
+  declares a separate free-RAM floor. Free VRAM is reported; a free-VRAM gate is applied only
+  when the profile declares one. `--running` does not demand memory already allocated by NInfer
+  be free. For a WSL RAM shortage, raise `[wsl2] memory=32GB` in `.wslconfig`, then shut down
+  WSL and restart Docker **only during an owner-approved window**.
+- **`model_file`, `model_bytes`, `model_sha256`, `omp_hash`, `bearer_permissions`:** use the
+  pinned lane artifact and stock client, opt into full model hashing with `--hash-model`, and
+  keep the bearer file owner-only. POSIX files must be owner-owned with no group/world access;
+  native Windows uses a protected owner/SYSTEM/Administrators ACL. Do not paste keys into reports.
+
+Doctor does not install, repair, stop production, change firewall rules or grant permission for
+a maintenance window. Re-run only after fixing the named cause. A contributor's `rehearsal`
+acceptance receipt is deliberately rejected by `verify_release.py`; obtain owner-run live and
+release-gate evidence instead of relabeling the receipt.
+
 ## Release and identity
 
 ### `release manifest is not installable`

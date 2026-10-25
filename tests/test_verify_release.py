@@ -51,6 +51,17 @@ class FirstReleaseRollbackContractTest(unittest.TestCase):
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_rehearsal_cannot_be_bound_as_release_qualification(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        path = root / "releases" / PUBLIC_RELEASE / "qualification.json"
+        qualification = self.load(path)
+        qualification["receipt_class"] = "rehearsal"
+        self.save(path, qualification)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+        self.assertTrue(any("rehearsal receipt is not qualification evidence" in error
+                            for error in errors), errors)
+
     def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
         self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.16-qwen38-5090-beta.1"))

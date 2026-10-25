@@ -88,6 +88,42 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def validate_receipt_classes(root: Path, release_dir: Path, documents: list[dict],
+                            errors: list[str]) -> None:
+    """Reject rehearsals, including bound child receipts outside the release directory.
+
+    Historical owner receipts predate receipt_class and remain valid. An owner-live
+    label is not sufficient qualification: all existing identity/behavior gates still run.
+    """
+    seen: set[Path] = set()
+
+    def visit(value: Any, label: str, directory: Path) -> None:
+        if isinstance(value, list):
+            for index, child in enumerate(value):
+                visit(child, f"{label}[{index}]", directory)
+        elif isinstance(value, dict):
+            require(value.get("receipt_class") != "rehearsal",
+                    f"{label}: rehearsal receipt is not qualification evidence", errors)
+            for key, child in value.items():
+                visit(child, f"{label}.{key}", directory)
+        elif isinstance(value, str) and value.endswith(".json"):
+            match = PRODUCT_RAW_URL_RE.fullmatch(value)
+            reference = match.group(2) if match else value
+            if "://" in reference:
+                return
+            for candidate in (root / reference, directory / reference):
+                path = candidate.resolve()
+                if not path.is_relative_to(root.resolve()) or not path.is_file():
+                    continue
+                if path not in seen:
+                    seen.add(path)
+                    visit(load_json(path), path.relative_to(root.resolve()).as_posix(), path.parent)
+                break
+
+    for document in documents:
+        visit(document, "bound evidence", release_dir)
+
+
 def resolve_product_release(root: Path, requested: str | None) -> str:
     release = requested
     if release is None:
@@ -2124,6 +2160,8 @@ def validate(
 
     if require_ready:
         validate_release_documentation(root, selected_release, errors)
+    validate_receipt_classes(root, manifest_path.parent,
+                            [manifest, qualification, compatibility], errors)
     validate_markdown_links(root, errors)
     validate_public_text(root, errors)
 
