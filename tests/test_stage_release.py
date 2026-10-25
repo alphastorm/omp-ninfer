@@ -91,7 +91,8 @@ class StageReleaseTests(unittest.TestCase):
               *, require_clean_client: bool = False,
               source_release: str = SOURCE,
               config_sha: str | None = None,
-              model_args: list[str] | None = None) -> subprocess.CompletedProcess:
+              model_args: list[str] | None = None,
+              dependency_args: list[str] | None = None) -> subprocess.CompletedProcess:
         ninfer = self.load(root / "releases" / source_release / "manifest.json")["components"]["ninfer"]
         command = [
             sys.executable, str(root / "scripts" / "stage_release.py"),
@@ -113,7 +114,62 @@ class StageReleaseTests(unittest.TestCase):
         if require_clean_client:
             command.append("--require-clean-client")
         command.extend(model_args or [])
+        command.extend(dependency_args or [])
         return subprocess.run(command, cwd=root, capture_output=True, text=True)
+
+    def test_optional_dependency_sbom_binds_only_the_selected_native_variant(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        previous = self.load(root / "releases" / CURRENT / "manifest.json")
+        variant = previous["components"]["ninfer_variants"][-1]
+        url = (f"https://github.com/alphastorm/ninfer/releases/download/"
+               f"{variant['release_tag']}/native-dependencies.cdx.json")
+        pins = {"sbom_dependency_url": url, "sbom_dependency_sha256": "a" * 64}
+        result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+            "--sbom-dependency-url", f"{variant['id']}={url}",
+            "--sbom-dependency-sha256", f"{variant['id']}={'a' * 64}"])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")
+        for before, after in zip(previous["components"]["ninfer_variants"],
+                                 staged["components"]["ninfer_variants"]):
+            expected = {**before, **pins} if before["id"] == variant["id"] else before
+            self.assertEqual({key: value for key, value in after.items() if key != "qualification"},
+                             {key: value for key, value in expected.items() if key != "qualification"})
+        self.assertEqual(self.load(root / "releases" / CURRENT / "manifest.json"), previous)
+
+    def test_partial_invalid_or_duplicate_dependency_pins_fail_before_staging(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        manifest = self.load(root / "releases" / CURRENT / "manifest.json")
+        variant = manifest["components"]["ninfer_variants"][-1]
+        key = variant["id"]
+        url = (f"https://github.com/alphastorm/ninfer/releases/download/"
+               f"{variant['release_tag']}/native-dependencies.cdx.json")
+        valid = ["--sbom-dependency-url", f"{key}={url}",
+                 "--sbom-dependency-sha256", f"{key}={'a' * 64}"]
+        cases = (valid[:2], valid[2:],
+                 valid[:2] + ["--sbom-dependency-sha256", f"{key}={'A' * 64}"],
+                 ["--sbom-dependency-url", f"{key}=https://example.invalid/dependencies.json", *valid[2:]],
+                 valid + valid[:2], ["--sbom-dependency-url", f"unknown={url}", *valid[2:]])
+        for arguments in cases:
+            with self.subTest(arguments=arguments):
+                result = self.stage(root, None, source_release=CURRENT, dependency_args=arguments)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_omitted_dependency_pins_preserve_an_existing_native_inventory(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        path = root / "releases" / CURRENT / "manifest.json"
+        manifest = self.load(path)
+        variant = manifest["components"]["ninfer_variants"][-1]
+        variant.update(sbom_dependency_url=(
+            f"https://github.com/alphastorm/ninfer/releases/download/"
+            f"{variant['release_tag']}/native-dependencies.cdx.json"),
+            sbom_dependency_sha256="a" * 64)
+        self.save(path, manifest)
+        result = self.stage(root, None, source_release=CURRENT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")["components"]["ninfer_variants"][-1]
+        for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
+            self.assertEqual(staged[field], variant[field])
 
     def model_arguments(self, model: dict) -> list[str]:
         return ["--model-revision", model["revision"],

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "v013/**", release/v0.13.0]
     tags: ["v*"]
   pull_request:
 
@@ -35,3 +35,92 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Parse shell launchers
         run: bash -n examples/manual-tunnel/*.sh
+
+  windows-contract:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Parse every host and example PowerShell script
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $files = @(Get-ChildItem -Path scripts/hosts -Filter *.ps1 -File)
+          $files += @(Get-ChildItem -Path examples -Filter *.ps1 -File -Recurse)
+          if ($files.Count -eq 0) { throw 'No PowerShell scripts found' }
+          foreach ($f in $files) {
+            Write-Host "Parsing $($f.Name)"
+            $null = [ScriptBlock]::Create((Get-Content -Raw -LiteralPath $f.FullName))
+          }
+      - name: Run portable contract suite on native Windows
+        shell: python
+        run: |
+          import importlib
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover("tests")
+          # These fixtures execute POSIX shell launchers, fake executables and uid/mode APIs.
+          # Ubuntu and macOS run them in full; all other discovered tests run here.
+          posix = (
+              ("test_cut_native_component", "NativeCutterTests"),
+              ("test_documented_route", "RunnerTests"),
+              ("test_fleet_example", "FleetExampleTests"),
+              ("test_manual_tunnel_scripts", "ManualTunnelScriptsTest"),
+          )
+          for module, name in posix:
+              cls = getattr(importlib.import_module(module), name)
+              cls.__unittest_skip__ = True
+              cls.__unittest_skip_why__ = "POSIX executable/path/permission fixtures; covered on Ubuntu and macOS"
+          native = importlib.import_module("test_accept_rtx4090_route").NativeLaneTests
+          # These two fixtures create a scratch PSDrive named C:, already the system drive here.
+          for name in (
+              "test_powershell_baseline_enforces_lane_power_and_operator_holds",
+              "test_optional_native_directories_preserve_presence_in_both_lineage_modes",
+          ):
+              setattr(native, name, unittest.skip("scratch C: PSDrive fixture runs on Ubuntu and macOS")(getattr(native, name)))
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          raise SystemExit(not result.wasSuccessful())
+
+  macos-contract:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Run contract tests
+        run: python3 -m unittest discover -s tests -v
+
+  acceptance-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Compose acceptance against disposable host-free evidence
+        # The composer has no dry-run mode: its fixtures redirect every write to a temp tree.
+        run: python3 -m unittest discover -s tests -p test_compose_route_acceptance.py -v
+      - name: Plan both native routes without contacting hosts
+        env:
+          CANDIDATE: ${{ github.sha }}
+        run: |
+          release=$(python3 -c 'import json; print(json.load(open("compatibility.json"))["product_release"])')
+          for lane in rtx4090 rtx3090; do
+            workspace="$RUNNER_TEMP/acceptance-dry-run-$lane"
+            python3 scripts/hosts/accept-rtx4090-route.py \
+              --lane "$lane" --release "$release" --candidate "$CANDIDATE" \
+              --workspace "$workspace" --remote-workspace C:/ci/acceptance \
+              --host no-host.invalid --expected-state-sha256 "$(printf '0%.0s' {1..64})" \
+              --temporary-previous ci-predecessor --mode dry-run
+            test ! -e "$workspace"
+          done

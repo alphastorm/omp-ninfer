@@ -890,6 +890,21 @@ CHECKSUM_TRIGGER_ASSET_FIELDS = CHECKSUM_REQUIRED_ASSET_FIELDS[1:] + (
 SHA256SUMS_ENTRY_RE = re.compile(r"^([0-9a-f]{64}) [ *](.+)$")
 
 
+def validate_dependency_sbom(item: dict[str, Any], prefix: str, errors: list[str]) -> None:
+    """The additional native dependency inventory is optional, but its pins are atomic."""
+    if "sbom_dependency_url" not in item and "sbom_dependency_sha256" not in item:
+        return
+    url = item.get("sbom_dependency_url")
+    require_https(url, f"{prefix}.sbom_dependency_url", errors)
+    require_sha(item.get("sbom_dependency_sha256"), f"{prefix}.sbom_dependency_sha256", errors)
+    asset_prefix = (
+        "https://github.com/alphastorm/ninfer/releases/download/"
+        + str(item.get("release_tag")) + "/"
+    )
+    require(isinstance(url, str) and url.startswith(asset_prefix) and len(url) > len(asset_prefix),
+            f"{prefix}.sbom_dependency_url must bind its component release", errors)
+
+
 def validate_variant_checksums(
     root: Path,
     release: str,
@@ -980,6 +995,15 @@ def validate_variant_checksums(
             f"{prefix} checksums entry {filename} must match {field}_sha256",
             errors,
         )
+    dependency_url = item.get("sbom_dependency_url")
+    if isinstance(dependency_url, str):
+        filename = Path(unquote(urlparse(dependency_url).path)).name
+        if filename in entries:
+            require(
+                entries[filename] == [item.get("sbom_dependency_sha256")],
+                f"{prefix} checksums entry {filename} must match sbom_dependency_sha256",
+                errors,
+            )
 
 
 def validate_ninfer_variants(
@@ -1031,6 +1055,7 @@ def validate_ninfer_variants(
         require(item.get("repository") == "https://github.com/alphastorm/ninfer",
                 f"{prefix}.repository must be the public NInfer repository", errors)
         require_git_sha(item.get("source_commit"), f"{prefix}.source_commit", errors)
+        validate_dependency_sbom(item, prefix, errors)
         for field in (
             "source_archive_sha256",
             "sbom_sha256",
