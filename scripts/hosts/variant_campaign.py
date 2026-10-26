@@ -351,7 +351,9 @@ class Server:
                          arm["image"]] + self.argv[1:]
 
     def image_command(self, argv: list[str]) -> list[str]:
-        return ["docker", "run", "--rm", "--name", self.container + "-info", "--entrypoint", argv[0],
+        # The ELF loader needs the NVIDIA runtime's libcuda mount even for --version.
+        return ["docker", "run", "--rm", "--name", self.container + "-info",
+                "--gpus", "device=" + self.plan["gpu_uuid"], "--entrypoint", argv[0],
                 self.arm["image"]] + argv[1:]
 
     def binary_identity(self) -> tuple[str, str]:

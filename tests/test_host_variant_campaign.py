@@ -174,6 +174,15 @@ class CampaignTests(unittest.TestCase):
                 server.start()
             popen.assert_not_called()
 
+    def test_container_identity_mounts_selected_driver_even_for_version(self):
+        server = object.__new__(HOST.Server)
+        server.container = "ov-Harness-identity"
+        server.plan = {"gpu_uuid": "GPU-selected"}
+        server.arm = {"image": "sha256:fixed"}
+        args = server.image_command(["/bin/server", "--version"])
+        self.assertEqual(args[args.index("--gpus") + 1], "device=GPU-selected")
+        self.assertEqual(args[-2:], ["sha256:fixed", "--version"])
+
     def test_removed_lane_and_sampler_scripts_have_no_second_entrypoint(self):
         hosts = ROOT / "scripts/hosts"
         for name in ("run_variant_campaign_3090.ps1", "run_variant_campaign_4090.ps1",
