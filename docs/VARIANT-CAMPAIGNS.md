@@ -17,6 +17,8 @@ When staging a subset, retain `scripts/hosts/{variant_campaign,common}.py` and
 - The arm order is **A/B/B/A**, each a fresh server. The same model bytes, request
   construction and GPU UUID are used throughout. Every arm records binary/model SHA-256,
   version, effective configuration and its SHA-256, GPU UUID, driver and power limit.
+  The exact launch argv is also recorded, including explicit port/model-ID overrides
+  and scratch checkpoint locations; its hash is not a substitute for those private bytes.
 - Sampling is built in (default 0.2 seconds) and mandatory. VRAM/power/temperature/GPU
   utilization samples and maxima include load, warmup and measured requests. A sampling
   failure invalidates the arm. `ready_memory_mib` separates loaded memory from peak.

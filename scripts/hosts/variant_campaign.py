@@ -642,6 +642,7 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
             receipt["identity"] = {"binary_sha256": server.binary_sha, "binary_version": server.version,
                                    "model_sha256": model_sha, "config": config, "config_sha256": digest(config),
                                    "gpu": gpu(plan["gpu_uuid"]), "image": arm.get("image"),
+                                   "server_arguments": server.argv,
                                    "server_arguments_sha256": digest(server.argv)}
             with sampler:
                 server.start()
