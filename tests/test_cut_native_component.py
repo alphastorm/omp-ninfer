@@ -211,6 +211,10 @@ class NativeCutterTests(unittest.TestCase):
                     result = self.run_cut(self.command(lane, assets) + ["--lane", lane, flag, value])
                     self.assertEqual(result.returncode, 2)
                     self.assertIn(message, result.stderr)
+            with self.subTest(lane=lane, flags="--dry-run --publish"):
+                result = self.run_cut(self.command(lane, assets) + ["--lane", lane, "--dry-run", "--publish"])
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("choose --dry-run or --publish", result.stderr)
         result = self.run_cut(["bash", str(CUTTER), "--lane"])
         self.assertEqual(result.returncode, 2)
         self.assertIn("--lane requires a value", result.stderr)
