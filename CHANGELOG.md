@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   full JSON/tool schema checks, bound FP64 op errors and exact long retrieval; and frozen
   held-out ON/OFF perplexity followed only when acceptable by a pre-registered,
   sequential 200-prompt claim/secret screen. Full EXP-085 remains an escalation.
+- Calibrate baseline-relative streaming probe test fixtures from their measured
+  first-output/decode spans instead of independent fixed sleeps, preserving the timing
+  assertions without making scheduler/TCP jitter a cross-request speed contract.
 - Unify runtime component cutting under `scripts/hosts/cut-ninfer-component.sh --kind
   container|native` with explicit lane selection, preserved kind-specific preflights/assets,
   and no-effect defaults; publication requires `--publish`, never together with `--dry-run`.

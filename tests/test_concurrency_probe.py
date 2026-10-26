@@ -268,12 +268,28 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertAlmostEqual(request["ttft_s"], received[0] - request["submitted_monotonic_s"])
         self.assertAlmostEqual(request["decode_tok_s"], request["output_tokens"] / (received[-1] - received[0]))
 
+    @staticmethod
+    def calibrated_sleeps(baseline):
+        intervals = len(baseline["output_deltas"]) - 1
+        span = baseline["last_output_monotonic_s"] - baseline["first_output_monotonic_s"]
+        return [baseline["ttft_s"], *([span / intervals] * intervals)]
+
+    def test_calibrated_sleeps_preserve_the_measured_stream_spans(self):
+        baseline = {"ttft_s": .4, "first_output_monotonic_s": 10.4,
+                    "last_output_monotonic_s": 11.3, "output_deltas": [{}] * 4}
+        sleeps = self.calibrated_sleeps(baseline)
+        self.assertEqual(sleeps[0], baseline["ttft_s"])
+        self.assertEqual(len(sleeps), len(baseline["output_deltas"]))
+        self.assertAlmostEqual(sum(sleeps[1:]), .9)
+        baseline["last_output_monotonic_s"] = 14
+        self.assertAlmostEqual(sum(self.calibrated_sleeps(baseline)[1:]), 3.6)
+
     def test_metrics_count_reasoning_and_measure_concurrent_makespan(self):
-        def plan(payload, _):
-            return {"sleeps": [.06, .02, .09, .03] if payload["input"] == PROBE.DECODE_PROMPT else [.10, .10, .12, .08]}
         server = self.server()
-        baseline, _ = self.baseline(server)
-        server.plan = plan
+        baseline, cost = self.baseline(server)
+        server.plan = lambda payload, _: {
+            "sleeps": [2 * cost, cost, 3 * cost, 2 * cost]
+            if payload["input"] == PROBE.DECODE_PROMPT else [3 * cost, 3 * cost, 4 * cost, 3 * cost]}
         code, receipt = self.run_probe(server, "--scenario", "decode_pair")
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
@@ -332,8 +348,9 @@ class ConcurrencyProbeTests(unittest.TestCase):
         server = self.server(lambda *_: {"sleeps": [.03, .01, .01]})
         vram = self.python_command("print(1234)")
         baseline, cost = self.baseline(server, vram)
+        sleeps = self.calibrated_sleeps(baseline)
         server.plan = lambda payload, _: {
-            "sleeps": [.03, .01, .01] if isinstance(payload["input"], str) else [1 + 4 * cost, .01, .01]}
+            "sleeps": sleeps if isinstance(payload["input"], str) else [1 + 4 * cost, *sleeps[1:]]}
         code, receipt = self.run_probe(server, "--scenario", "decode_during_prefill", "--vram-cmd", vram)
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
@@ -437,7 +454,8 @@ class ConcurrencyProbeTests(unittest.TestCase):
     def test_one_pre_stream_reset_retry_keeps_submit_latency(self):
         server = self.server()
         baseline, _ = self.baseline(server)
-        server.plan = lambda _, index: {"reset": True} if index == 2 else {}
+        sleeps = self.calibrated_sleeps(baseline)
+        server.plan = lambda _, index: {"reset": True} if index == 2 else {"sleeps": sleeps}
         with mock.patch.object(PROBE.time, "sleep", wraps=time.sleep) as sleep:
             code, receipt = self.run_probe(server, "--scenario", "solo")
         self.assertEqual(code, 0)
