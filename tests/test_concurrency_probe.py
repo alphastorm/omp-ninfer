@@ -64,6 +64,8 @@ class MockResponsesServer(http.server.ThreadingHTTPServer):
 
 class MockHandler(http.server.BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
+    # Keep fixture SSE flushes independent of the host's delayed-ACK/Nagle cycle.
+    disable_nagle_algorithm = True
 
     def log_message(self, *_):
         pass

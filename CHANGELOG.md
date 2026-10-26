@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Calibrate baseline-relative streaming probe test fixtures from their measured
   first-output/decode spans instead of independent fixed sleeps, preserving the timing
   assertions without making scheduler/TCP jitter a cross-request speed contract.
+  Disable Nagle in the fixture so SSE flushes do not wait on host-dependent delayed ACKs.
 - Unify runtime component cutting under `scripts/hosts/cut-ninfer-component.sh --kind
   container|native` with explicit lane selection, preserved kind-specific preflights/assets,
   and no-effect defaults; publication requires `--publish`, never together with `--dry-run`.
