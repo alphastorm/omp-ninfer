@@ -14,7 +14,7 @@
   "components": {
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/compatibility.json",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7efd4ce97e1858cc79745f4b699e530c25ab401c/compatibility.json",
       "compatibility_sha256": "6657c41e329463720f22d6badf2c776f81bba3385b63932e22fa147410a424ee",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -96,7 +96,7 @@
         "qualification": {
           "summary": "releases/v0.13.1/qualification/rtx3090.json",
           "sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/releases/v0.13.1/qualification/rtx3090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7efd4ce97e1858cc79745f4b699e530c25ab401c/releases/v0.13.1/qualification/rtx3090.json"
         },
         "sbom_dependency_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.cdx.json",
         "sbom_dependency_sha256": "fc28d50ef76f4c019c3a44088f34ca115b110a9065f301fab84f2010667e9f5b"
@@ -133,7 +133,7 @@
         "qualification": {
           "summary": "releases/v0.13.1/qualification/rtx4090.json",
           "sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/releases/v0.13.1/qualification/rtx4090.json"
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7efd4ce97e1858cc79745f4b699e530c25ab401c/releases/v0.13.1/qualification/rtx4090.json"
         },
         "sbom_dependency_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.cdx.json",
         "sbom_dependency_sha256": "c5d9141e3be5d2c9408e5a67dc8c0b3ebdf82cfb68174c54ea737fa35d83b556"
@@ -155,8 +155,8 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "58680589466ba1c7dcdaf40ad42f6eab08da62220e5451f375c0845363e22f0f",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/releases/v0.13.1/qualification.json",
+    "summary_sha256": "224ed625583e72a3d38b5bc1ece56f417757b94e30764bcb406c00c833ac7c15",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7efd4ce97e1858cc79745f4b699e530c25ab401c/releases/v0.13.1/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
   },

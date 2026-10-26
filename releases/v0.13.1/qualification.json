@@ -414,10 +414,10 @@
       "scope": "Current prose/notes checks exercised in the selected suite; public-route acceptance remains separate."
     },
     "staging": {
-      "status": "passed-draft",
+      "status": "passed",
       "repository_path": "releases/v0.13.1/qualification/staging.json",
       "stage": "draft",
-      "scope": "Targeted actual beta.2 bind/copy/rebind only; no premature root promotion, host/GPU execution, acceptance pins or product publication.",
+      "scope": "The bound historical draft-stage receipt records targeted actual beta.2 bind/copy/rebind without premature promotion. The subsequent stage and lane pin promoted the exact candidate; fresh acceptance and closed council evidence are bound separately. No product publication is granted.",
       "sha256": "16a30edac9cbecbcddd48db3b1fe5245ca52d86312df31c3ad0fc5be33ba55ca"
     },
     "native_ci": {
