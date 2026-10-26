@@ -1,0 +1,848 @@
+{
+  "artifact_type": "omp_ninfer_frozen_runtime_build",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed",
+  "job": "20261025T121805Z-int2-rc2-6d4d0a05-617648",
+  "job_exit": 0,
+  "elapsed_seconds": 794,
+  "build": {
+    "seconds": 122,
+    "exit": 0,
+    "incremental_steps": 270,
+    "step_count_source": "Integrator5-RC-inventory"
+  },
+  "build_identity": {
+    "artifact_type": "ninfer_release_build_identity",
+    "binaries": {
+      "ninfer": "bf5a0540160c3c295a1adc6dc531f9e2c510064f9b450956e97690e6363de7c9",
+      "ninfer-serve": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55"
+    },
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "patch_stack_sha": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "schema_version": 1,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "ctest": [
+    {
+      "phase": "host",
+      "counts": {
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "ninfer_public_api_test",
+          "status": "passed",
+          "seconds": 0.00185538
+        },
+        {
+          "name": "ninfer_checkpoint_io_contract_test",
+          "status": "passed",
+          "seconds": 0.00222587
+        },
+        {
+          "name": "ninfer_direct_storage_checkpoint_backend_test",
+          "status": "passed",
+          "seconds": 0.00201097
+        },
+        {
+          "name": "ninfer_io_uring_checkpoint_backend_test",
+          "status": "passed",
+          "seconds": 2.79348
+        },
+        {
+          "name": "ninfer_uint128_test",
+          "status": "passed",
+          "seconds": 0.0019563
+        },
+        {
+          "name": "ninfer_uint128_exact_test",
+          "status": "passed",
+          "seconds": 0.0402763
+        },
+        {
+          "name": "ninfer_durable_file_test",
+          "status": "passed",
+          "seconds": 0.123164
+        },
+        {
+          "name": "ninfer_file_test",
+          "status": "passed",
+          "seconds": 0.00323652
+        },
+        {
+          "name": "ninfer_cpu_system_test",
+          "status": "passed",
+          "seconds": 0.015635
+        },
+        {
+          "name": "ninfer_cpu_task_pool_test",
+          "status": "passed",
+          "seconds": 0.0365325
+        },
+        {
+          "name": "ninfer_cpu_executor_test",
+          "status": "passed",
+          "seconds": 0.0582732
+        },
+        {
+          "name": "ninfer_read_queue_test",
+          "status": "passed",
+          "seconds": 0.00414436
+        },
+        {
+          "name": "ninfer_gdn_replay_records_test",
+          "status": "passed",
+          "seconds": 0.00266218
+        },
+        {
+          "name": "ninfer_host_timing_test",
+          "status": "passed",
+          "seconds": 0.00166357
+        },
+        {
+          "name": "ninfer_jinja_test",
+          "status": "passed",
+          "seconds": 0.00479334
+        },
+        {
+          "name": "ninfer_chat_templates_test",
+          "status": "passed",
+          "seconds": 0.163679
+        },
+        {
+          "name": "ninfer_weight_bank_test",
+          "status": "passed",
+          "seconds": 0.00206699
+        },
+        {
+          "name": "ninfer_artifact_reader_test",
+          "status": "passed",
+          "seconds": 0.00391449
+        },
+        {
+          "name": "ninfer_artifact_backing_test",
+          "status": "passed",
+          "seconds": 0.00337877
+        },
+        {
+          "name": "ninfer_artifact_cpu_materialization_test",
+          "status": "passed",
+          "seconds": 0.00359085
+        },
+        {
+          "name": "ninfer_scheduler_test",
+          "status": "passed",
+          "seconds": 0.0016822
+        },
+        {
+          "name": "ninfer_engine_cache_gate_test",
+          "status": "passed",
+          "seconds": 0.0633868
+        },
+        {
+          "name": "ninfer_engine_options_test",
+          "status": "passed",
+          "seconds": 0.0859641
+        },
+        {
+          "name": "ninfer_engine_checkpoint_control_test",
+          "status": "passed",
+          "seconds": 0.00265467
+        },
+        {
+          "name": "ninfer_engine_checkpoint_adapter_test",
+          "status": "passed",
+          "seconds": 0.00146557
+        },
+        {
+          "name": "ninfer_durable_contract_headers_test",
+          "status": "passed",
+          "seconds": 0.00233347
+        },
+        {
+          "name": "ninfer_durable_contracts_test",
+          "status": "passed",
+          "seconds": 0.032692
+        },
+        {
+          "name": "ninfer_context_cost_test",
+          "status": "passed",
+          "seconds": 0.00304986
+        },
+        {
+          "name": "ninfer_resource_manager_test",
+          "status": "passed",
+          "seconds": 0.00352311
+        },
+        {
+          "name": "ninfer_kv_capacity_test",
+          "status": "passed",
+          "seconds": 0.00168073
+        },
+        {
+          "name": "ninfer_sampling_defaults_test",
+          "status": "passed",
+          "seconds": 0.00204076
+        },
+        {
+          "name": "ninfer_grammar_test",
+          "status": "passed",
+          "seconds": 0.012615
+        },
+        {
+          "name": "ninfer_regex_choice_test",
+          "status": "passed",
+          "seconds": 0.00616091
+        },
+        {
+          "name": "ninfer_regex_choice_oracle_test",
+          "status": "passed",
+          "seconds": 0.0624411
+        },
+        {
+          "name": "ninfer_json_schema_test",
+          "status": "passed",
+          "seconds": 0.0274458
+        },
+        {
+          "name": "ninfer_json_schema_oracle_test",
+          "status": "passed",
+          "seconds": 1.9793
+        },
+        {
+          "name": "ninfer_media_decode_test",
+          "status": "passed",
+          "seconds": 0.0237848
+        },
+        {
+          "name": "ninfer_prompt_input_test",
+          "status": "passed",
+          "seconds": 0.00486353
+        },
+        {
+          "name": "ninfer_pretty_logging_test",
+          "status": "passed",
+          "seconds": 0.00236977
+        },
+        {
+          "name": "ninfer_perplexity_evaluation_test",
+          "status": "passed",
+          "seconds": 0.00144186
+        },
+        {
+          "name": "ninfer_cli_options_test",
+          "status": "passed",
+          "seconds": 0.00173969
+        },
+        {
+          "name": "ninfer_openai_schema_test",
+          "status": "passed",
+          "seconds": 0.026354
+        },
+        {
+          "name": "ninfer_openai_responses_test",
+          "status": "passed",
+          "seconds": 0.00441906
+        },
+        {
+          "name": "ninfer_openai_responses_store_test",
+          "status": "passed",
+          "seconds": 0.023023
+        },
+        {
+          "name": "ninfer_session_checkpoint_service_test",
+          "status": "passed",
+          "seconds": 0.00211792
+        },
+        {
+          "name": "ninfer_serve_restore_runner_test",
+          "status": "passed",
+          "seconds": 0.0469282
+        },
+        {
+          "name": "ninfer_session_checkpoint_store_test",
+          "status": "passed",
+          "seconds": 9.22171
+        },
+        {
+          "name": "ninfer_automatic_checkpoint_queue_test",
+          "status": "passed",
+          "seconds": 1.44488
+        },
+        {
+          "name": "ninfer_checkpoint_policy_test",
+          "status": "passed",
+          "seconds": 0.00174261
+        },
+        {
+          "name": "ninfer_anthropic_schema_test",
+          "status": "passed",
+          "seconds": 0.00307823
+        },
+        {
+          "name": "ninfer_serve_options_test",
+          "status": "passed",
+          "seconds": 0.00287077
+        },
+        {
+          "name": "ninfer_request_log_test",
+          "status": "passed",
+          "seconds": 0.0254
+        },
+        {
+          "name": "ninfer_metrics_test",
+          "status": "passed",
+          "seconds": 0.00267224
+        },
+        {
+          "name": "ninfer_http_error_handler_test",
+          "status": "passed",
+          "seconds": 0.0265539
+        },
+        {
+          "name": "ninfer_http_server_stop_test",
+          "status": "passed",
+          "seconds": 0.0272119
+        },
+        {
+          "name": "ninfer_stop_event_test",
+          "status": "passed",
+          "seconds": 0.00163435
+        },
+        {
+          "name": "ninfer_http_transport_test",
+          "status": "passed",
+          "seconds": 0.00345317
+        },
+        {
+          "name": "ninfer_bench_support_test",
+          "status": "passed",
+          "seconds": 0.00210151
+        },
+        {
+          "name": "ninfer_context_cost_measure_test",
+          "status": "passed",
+          "seconds": 0.00232691
+        },
+        {
+          "name": "ninfer_qwen3_5_loading_test",
+          "status": "passed",
+          "seconds": 0.00616469
+        },
+        {
+          "name": "ninfer_qwen3_5_state_image_layout_test",
+          "status": "passed",
+          "seconds": 0.00159388
+        },
+        {
+          "name": "ninfer_qwen_frontend_test",
+          "status": "passed",
+          "seconds": 0.741385
+        },
+        {
+          "name": "ninfer_qwen_tool_constraints_test",
+          "status": "passed",
+          "seconds": 0.033193
+        },
+        {
+          "name": "ninfer_qwen_tool_schema_oracle_test",
+          "status": "passed",
+          "seconds": 0.140177
+        },
+        {
+          "name": "ninfer_checkpoint_codec_test",
+          "status": "passed",
+          "seconds": 0.00357171
+        },
+        {
+          "name": "ninfer_tool_call_parser_test",
+          "status": "passed",
+          "seconds": 0.0086224
+        }
+      ]
+    },
+    {
+      "phase": "real",
+      "counts": {
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "ninfer_qwen3_5_native_transactions_test",
+          "status": "passed",
+          "seconds": 16.9552
+        },
+        {
+          "name": "ninfer_qwen3_5_prefix_real_test",
+          "status": "passed",
+          "seconds": 83.8913
+        },
+        {
+          "name": "ninfer_qwen3_5_preemption_real_test",
+          "status": "passed",
+          "seconds": 39.2611
+        },
+        {
+          "name": "ninfer_qwen3_5_grammar_real_test",
+          "status": "passed",
+          "seconds": 21.7383
+        },
+        {
+          "name": "ninfer_qwen3_5_tools_real_test",
+          "status": "passed",
+          "seconds": 18.6477
+        },
+        {
+          "name": "ninfer_qwen3_5_score_real_test",
+          "status": "passed",
+          "seconds": 10.9888
+        },
+        {
+          "name": "ninfer_qwen3_5_vision_workspace_test",
+          "status": "passed",
+          "seconds": 9.46654
+        },
+        {
+          "name": "ninfer_qwen3_5_dflash2_real_test",
+          "status": "passed",
+          "seconds": 25.7925
+        },
+        {
+          "name": "ninfer_qwen3_5_dflash_prefill_real_test",
+          "status": "passed",
+          "seconds": 10.8778
+        },
+        {
+          "name": "ninfer_qwen3_5_agent_continuation_real_test",
+          "status": "passed",
+          "seconds": 12.3778
+        },
+        {
+          "name": "ninfer_kv_history_test",
+          "status": "passed",
+          "seconds": 0.210834
+        }
+      ]
+    },
+    {
+      "phase": "overlap",
+      "counts": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "ninfer_qwen3_5_durable_pressure_real_test",
+          "status": "passed",
+          "seconds": 38.0356
+        }
+      ]
+    }
+  ],
+  "loader": {
+    "exit": 0,
+    "vision": true,
+    "speculative": "dflash2",
+    "proposal": "optimized"
+  },
+  "canonical_shared_mtp_fp8": {
+    "exit": 0,
+    "backend": "mtp",
+    "kv_dtype": "fp8",
+    "artifact": "canonical",
+    "clients": 12,
+    "reused_tokens": 1786,
+    "decode_rounds": 202,
+    "decode_rows": 388,
+    "partial_tail_clients": 6,
+    "engine_available": true,
+    "counts_source": "Integrator5-RC-inventory"
+  },
+  "cpu_preflight": {
+    "schema": "ninfer-integration-rc2-cpu/1",
+    "source": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "passed": true,
+    "gpu_compute": false,
+    "tests": [
+      {
+        "name": "ninfer_public_api_test",
+        "seconds": 0.0019116,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_checkpoint_io_contract_test",
+        "seconds": 0.00280546,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_direct_storage_checkpoint_backend_test",
+        "seconds": 0.00269077,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_io_uring_checkpoint_backend_test",
+        "seconds": 0.399241,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_uint128_test",
+        "seconds": 0.00234822,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_uint128_exact_test",
+        "seconds": 0.0762098,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_durable_file_test",
+        "seconds": 0.0204248,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_file_test",
+        "seconds": 0.00290881,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_cpu_system_test",
+        "seconds": 0.00764067,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_cpu_task_pool_test",
+        "seconds": 0.0228352,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_cpu_executor_test",
+        "seconds": 0.0463927,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_read_queue_test",
+        "seconds": 0.00447922,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_gdn_replay_records_test",
+        "seconds": 0.010722,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_host_timing_test",
+        "seconds": 0.00217432,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_jinja_test",
+        "seconds": 0.00860084,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_chat_templates_test",
+        "seconds": 0.199683,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_weight_bank_test",
+        "seconds": 0.00232664,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_artifact_reader_test",
+        "seconds": 0.00482137,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_artifact_backing_test",
+        "seconds": 0.00563987,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_artifact_cpu_materialization_test",
+        "seconds": 0.00615762,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_scheduler_test",
+        "seconds": 0.00196532,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_engine_cache_gate_test",
+        "seconds": 0.0940517,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_engine_options_test",
+        "seconds": 0.0439361,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_engine_checkpoint_control_test",
+        "seconds": 0.00484805,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_engine_checkpoint_adapter_test",
+        "seconds": 0.0018023,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_durable_contract_headers_test",
+        "seconds": 0.00668926,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_durable_contracts_test",
+        "seconds": 0.0596649,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_context_cost_test",
+        "seconds": 0.00401541,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_resource_manager_test",
+        "seconds": 0.00505599,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_kv_capacity_test",
+        "seconds": 0.00228508,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_sampling_defaults_test",
+        "seconds": 0.00307845,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_grammar_test",
+        "seconds": 0.0177942,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_regex_choice_test",
+        "seconds": 0.0150106,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_regex_choice_oracle_test",
+        "seconds": 0.104497,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_json_schema_test",
+        "seconds": 0.0337436,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_json_schema_oracle_test",
+        "seconds": 1.91594,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_media_decode_test",
+        "seconds": 0.0203605,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_prompt_input_test",
+        "seconds": 0.00570548,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_pretty_logging_test",
+        "seconds": 0.00435542,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_perplexity_evaluation_test",
+        "seconds": 0.00184426,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_cli_options_test",
+        "seconds": 0.00265133,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_openai_schema_test",
+        "seconds": 0.0391134,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_openai_responses_test",
+        "seconds": 0.0121891,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_openai_responses_store_test",
+        "seconds": 0.0233666,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_session_checkpoint_service_test",
+        "seconds": 0.00266693,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_serve_restore_runner_test",
+        "seconds": 0.0764918,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_session_checkpoint_store_test",
+        "seconds": 1.44725,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_automatic_checkpoint_queue_test",
+        "seconds": 1.09202,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_checkpoint_policy_test",
+        "seconds": 0.00215476,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_anthropic_schema_test",
+        "seconds": 0.00895957,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_serve_options_test",
+        "seconds": 0.00514944,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_request_log_test",
+        "seconds": 0.0410547,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_metrics_test",
+        "seconds": 0.00246479,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_http_error_handler_test",
+        "seconds": 0.0393753,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_http_server_stop_test",
+        "seconds": 0.0372029,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_stop_event_test",
+        "seconds": 0.00187866,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_http_transport_test",
+        "seconds": 0.00772626,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_bench_support_test",
+        "seconds": 0.00368855,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_context_cost_measure_test",
+        "seconds": 0.00241192,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_qwen3_5_loading_test",
+        "seconds": 0.0100128,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_qwen3_5_state_image_layout_test",
+        "seconds": 0.00269791,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_qwen_frontend_test",
+        "seconds": 0.598439,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_qwen_tool_constraints_test",
+        "seconds": 0.0416331,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_qwen_tool_schema_oracle_test",
+        "seconds": 0.248539,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_checkpoint_codec_test",
+        "seconds": 0.00433774,
+        "status": "passed"
+      },
+      {
+        "name": "ninfer_tool_call_parser_test",
+        "seconds": 0.0130015,
+        "status": "passed"
+      }
+    ],
+    "counts": {
+      "passed": 66,
+      "failed": 0,
+      "skipped": 0
+    },
+    "job": 15500,
+    "slot": 0,
+    "build_steps": 182,
+    "build_seconds": 1632,
+    "host_seconds": 7.28,
+    "log_sha256": "6c3e4e6154b7a1d319e0f6fc05f8555ea59038447c5b3d9bc570209e57d05f1a"
+  },
+  "leftover_containers": 0,
+  "unowned_containers": 0,
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/phases",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
+}

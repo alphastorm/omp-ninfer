@@ -1,0 +1,182 @@
+{
+  "artifact_type": "omp_ninfer_native_durable_capacity_admission_remediation",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed-integrated-runtime-regressions",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/upstream-64d10fbf",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "fixes": [
+    {
+      "id": "windows_k6_current_publication",
+      "commit": "00d28edb6206e77d20eab71c12aea46e498bcaf2",
+      "starting_source": "e2ba490ae5a0acc5e1d7fe60582e99f095c61980",
+      "starting_source_already_handle_anchored": true,
+      "change": "Preserve native handle-anchored replacement; route the remaining legacy rename helper through K6; mark current replacement possibly visible before the fallible rename/parent fence and retain the generation on uncertain publication. Extended-length/protected roots are covered independently.",
+      "counterfactual_source": "4074ee392a419f091baa25d3a4749cdc33ba3b6b",
+      "provider_measurement": {
+        "source_commit": "00d28edb6206e77d20eab71c12aea46e498bcaf2",
+        "architecture": "89",
+        "build_steps_passed": 49,
+        "build_steps_total": 49,
+        "host_tests_passed": 19,
+        "host_tests_total": 19,
+        "host_test_seconds": 30.36,
+        "failures": 0,
+        "skips": 0,
+        "gpu_executed": false,
+        "red_ctest_exit": 8,
+        "red_case_seconds": 0.16,
+        "green_case_seconds": 0.08,
+        "red_case": "Real rename completed; injected current-parent flush failed; uncertain publication must retain the generation named by actual current.",
+        "green_case": "Save remains unacknowledged/IoUnavailable; retained visible generation and payload reconcile in a new store instance."
+      },
+      "named_integrated_cases": [
+        "ninfer_durable_file_pinned-destination_test",
+        "ninfer_durable_file_reparse-guard_test",
+        "ninfer_durable_file_identity-guards_test",
+        "ninfer_durable_file_directory-publication_test",
+        "ninfer_durable_file_extended-paths_test",
+        "ninfer_session_checkpoint_store_current_flush_test",
+        "ninfer_session_checkpoint_store_protected_long_root_test"
+      ],
+      "scope": "Native starting source was already anchored; do not transfer the earlier 5090 pathname finding. Provider execution is selected sm_89 host testing, not final N11 GPU, power-loss, arbitrary-filesystem or POSIX fsync equivalence. Legacy DirectStorage create/read/delete/lock pathname APIs are outside production-store K6 proof."
+    },
+    {
+      "id": "physical_disk_capacity",
+      "commit": "5253d003a0e1ea7dc7906d31cdf27e068d8c436f",
+      "change": "Classify ENOSPC and Windows ERROR_DISK_FULL/ERROR_HANDLE_DISK_FULL as Capacity, preserve the first writer/publication cause and possibly visible generation, and use the existing DELETE HTTP 409 capacity refusal without mutating surviving Responses objects. Unrelated I/O remains IoUnavailable.",
+      "error_numbers": {
+        "posix_enospc": 28,
+        "windows_error_disk_full": 112,
+        "windows_error_handle_disk_full": 39
+      },
+      "counterfactual_source": "16809eb38fc9455cf6a7e0930e69d0e6b7e21d76",
+      "runtime_baseline": "a542759411602b1d60ef1f9e90d4b6a361275eda",
+      "named_integrated_cases": [
+        "ninfer_session_checkpoint_store_capacity_test",
+        "ninfer_automatic_checkpoint_queue_test"
+      ],
+      "red_provider": {
+        "source_commit": "16809eb38fc9455cf6a7e0930e69d0e6b7e21d76",
+        "ctest_exit": 8,
+        "capacity_classification_assertion_failed": true,
+        "durable_delete_capacity_assertion_failed": true,
+        "abnormal_termination_observed": false,
+        "evidence_path": "receipts/capacity-red.json",
+        "evidence_sha256": "7467bdccd6b20b56a1cdb39c58a490ae07e79f5be9744d465b5462bc80965c0e"
+      },
+      "limitation": "The coordinator cannot distinguish disk Capacity from native Capacity. Bounded rearm still requires Engine/admission progress, not external disk reclamation alone. Explicit client retry after reclaim remains possible.",
+      "limitation_contract_commit": "a816c1259"
+    },
+    {
+      "id": "finite_export_admission",
+      "commit": "5ecb96fb5b1d114b0d746f0633cb7b2d9ae7da97",
+      "change": "Count only prepared worker-owned native export leases as finite future capacity progress. Capacity-possible admission waits while exports remain; normal and exceptional completion destroy native leases before decrementing/waking scheduler capacity and admission. Preserve queue expiry, genuine impossibility, source retention, no-prefix and reclaim policy.",
+      "counterfactual_source": "9e501b0e3ba05a57d46ee1045a34d1ae2446cec8",
+      "runtime_baseline": "6b2163a7ffbd5be09d84570ed3aea8bf749188b9",
+      "counterfactual_basis": "Observed failing runtime plus behavior-preserving admission-predicate extraction and host fixture; not unmodified-base evidence.",
+      "named_integrated_case": "ninfer_engine_checkpoint_adapter_test",
+      "named_cases": [
+        "paused_request_settlement",
+        "export_success",
+        "export_writer_exception",
+        "overlapping_exports",
+        "genuine_capacity"
+      ],
+      "red_provider": {
+        "ctest_exit": 8,
+        "expected_failed_cases": [
+          "export_success",
+          "export_writer_exception",
+          "overlapping_exports"
+        ],
+        "unchanged_controls": [
+          "paused_request_settlement",
+          "genuine_capacity"
+        ],
+        "abnormal_termination_observed": false,
+        "evidence_path": "receipts/admission-red-assessment.json",
+        "evidence_sha256": "5fe9cf4ace3158a09c586614cb8979fa7375b1fbd7d1da18dc9f27d3073570e1",
+        "runner_false_positive_corrected_without_test_rerun": true
+      },
+      "scope": "Production adapter/predicate with simulated native ownership, not the complete native ResourceManager or a GPU fixture. No global serialization, sleep retry, fabricated progress or reclaim-policy change."
+    }
+  ],
+  "integrated_closure": {
+    "status": "passed",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "repository_path": "releases/v0.13.1/qualification/native-integration.json",
+    "sha256": "43762c11764279ef28d53686e16344129c4be41f80b545ac858cc79468741e8b",
+    "native_receipts": {
+      "rtx4090": {
+        "evidence_path": "qualification/rtx4090.json",
+        "sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330"
+      },
+      "rtx3090": {
+        "evidence_path": "qualification/rtx3090.json",
+        "sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf"
+      }
+    },
+    "scope": "Fresh complete N11 host matrix and both real native pressure/restart/strict-origin chains close integrated regressions. This does not claim a new live disk-exhaustion or power-loss experiment, full ResourceManager coverage from the host fixture, or council approval."
+  },
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/upstream-64d10fbf",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "evidence_path": "integration-native-rc3.json",
+    "evidence_sha256": "2b4a63e1a943e34cf80346ec373ce4ca1c701021f7732ad4ef04289393859112",
+    "evidence_post_freeze_uncommitted": true,
+    "checkpoint": {
+      "tag": "rebase/ckpt-native-3",
+      "source": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "tag_object_sha": "55fb5c03cffb06f2efd7e8f308d43fabb7f2fc4c",
+      "pushed": true
+    },
+    "scope": "Integrator6 accepted and byte-mirrored both actual complete N11 lane receipts/summaries. Receipts were captured after source freeze; no false claim that 7a25cd72 itself commits the measurements. C3 REPORT-only successor a0b646bf9 is outside the cut and is not the runtime source."
+  },
+  "council_approval_granted": false,
+  "publication_authorized": false,
+  "exact_source_host_matrix": {
+    "status": "passed",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "windows": {
+      "sm86": {
+        "passed": 90,
+        "total": 90,
+        "reused": false
+      },
+      "sm89": {
+        "passed": 90,
+        "total": 90,
+        "reused": false
+      }
+    },
+    "provenance": {
+      "repository": "https://github.com/alphastorm/ninfer",
+      "branch": "rebase/upstream-64d10fbf",
+      "evidence_path": "receipts/cpu-matrix.json",
+      "evidence_sha256": "060dda7b03a342641358e47ac43734a41bd4877fb67014a22ada2d61b116b19e",
+      "evidence_post_freeze_uncommitted": true
+    },
+    "scope": "Fresh complete Windows host matrices at N11; selected K6/capacity/admission providers retain their original subjects above. Both final native GPU chains are still a separate pending closure."
+  },
+  "historical_provider_report": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_snapshot_commit": "eecb437f99d21cbc7f48740694de3cd6e51d4421",
+    "evidence_path": "REPORT.md",
+    "evidence_sha256": "d2c26e7354037c38539f93eac377e3d56c9880fdb9f0483d85b4f4534de15c0c",
+    "sections": [
+      "Engine export capacity progress",
+      "K6 Windows contract mapping",
+      "K6 native qualification",
+      "Physical disk-capacity refusal"
+    ],
+    "scope": "Content-safe projection of the immutable program source-snapshot report supplied by NativeOps, retaining each provider's actual tested source and boundary. Final N11 closure is separate."
+  }
+}

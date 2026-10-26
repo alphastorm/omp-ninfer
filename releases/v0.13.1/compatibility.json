@@ -1,8 +1,387 @@
 {
-  "artifact_type": "omp_ninfer_prepared_compatibility",
   "schema_version": 1,
+  "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.13.1",
-  "status": "preparation-only",
+  "composition": {
+    "status": "v0.13.1 upstream OMP v18.12.6 client acceptance pending",
+    "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
+    "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
+    "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "ninfer_lifecycle_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "blockers": [],
+    "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
+  },
+  "profiles": [
+    {
+      "id": "darwin-remote-ssh",
+      "adapter": "darwin-remote-ssh",
+      "status": "preview",
+      "transport": "ssh-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "checkpoint",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": false,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.13.1",
+      "aliases": [
+        "macos-arm64-remote-ssh"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.",
+        "No secret, raw log, prompt, or model output crosses the receipt boundary.",
+        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+      ],
+      "blockers": [
+        "upstream OMP v18.12.6 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "distribution_kind": "upstream-release",
+        "upstream_repository": "https://github.com/can1357/oh-my-pi",
+        "upstream_tag": "v18.12.6",
+        "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+        "os": "macOS 27",
+        "architecture": "arm64",
+        "published": true,
+        "asset_name": "omp-darwin-arm64",
+        "asset_bytes": 197245984,
+        "asset_sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58",
+        "binary_sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58",
+        "release_id": 420053191,
+        "asset_id": 663781499,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.13.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.1/qualification/rtx5090.json",
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
+        "model_bytes": 20437521664,
+        "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 2,
+        "kv_dtype": "bf16",
+        "speculative_backend": "dflash2",
+        "draft_tokens": 7,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision",
+          "durable-checkpoint"
+        ],
+        "session_checkpoints": {
+          "store_mount": "/checkpoints-v013",
+          "schema_version": 3,
+          "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
+        },
+        "status_schema_version": 2,
+        "request_log_schema_version": 30
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "windows-docker-local",
+      "adapter": "windows-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "checkpoint",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": false,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.13.1",
+      "aliases": [
+        "windows-11-x64-docker-desktop"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.",
+        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
+        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+      ],
+      "blockers": [
+        "upstream OMP v18.12.6 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "distribution_kind": "upstream-release",
+        "upstream_repository": "https://github.com/can1357/oh-my-pi",
+        "upstream_tag": "v18.12.6",
+        "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+        "os": "Windows 11",
+        "architecture": "x64",
+        "published": true,
+        "asset_name": "omp-windows-x64.exe",
+        "asset_bytes": 224254976,
+        "asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+        "binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+        "release_id": 420053191,
+        "asset_id": 663781492,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.13.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.1/qualification/rtx5090.json",
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
+        "model_bytes": 20437521664,
+        "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 2,
+        "kv_dtype": "bf16",
+        "speculative_backend": "dflash2",
+        "draft_tokens": 7,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision",
+          "durable-checkpoint"
+        ],
+        "session_checkpoints": {
+          "store_mount": "/checkpoints-v013",
+          "schema_version": 3,
+          "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
+        },
+        "status_schema_version": 2,
+        "request_log_schema_version": 30
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
+        "arguments": []
+      }
+    },
+    {
+      "id": "linux-docker-local",
+      "adapter": "linux-docker-local",
+      "status": "preview",
+      "transport": "local-loopback",
+      "commands": [
+        "doctor",
+        "plan",
+        "install",
+        "status",
+        "benchmark",
+        "checkpoint",
+        "rollback",
+        "support-bundle"
+      ],
+      "silent_cloud_fallback": false,
+      "installable": false,
+      "support_owner": "alphastorm/omp-ninfer",
+      "product_release": "v0.13.1",
+      "aliases": [
+        "linux-x64-docker"
+      ],
+      "local_port": 18089,
+      "container_port": 8080,
+      "limitations": [
+        "The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
+        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
+        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
+        "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.",
+        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
+        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
+        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
+        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+      ],
+      "blockers": [
+        "upstream OMP v18.12.6 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
+      "client_distribution": {
+        "distribution_kind": "upstream-release",
+        "upstream_repository": "https://github.com/can1357/oh-my-pi",
+        "upstream_tag": "v18.12.6",
+        "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+        "os": "Ubuntu 24.04",
+        "architecture": "x64",
+        "published": true,
+        "asset_name": "omp-linux-x64",
+        "asset_bytes": 256702432,
+        "asset_sha256": "85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4",
+        "binary_sha256": "85d9daf3a05fc76e8cd425ae1904eb576af8d21cc85fcf4690742626e07ccfa4",
+        "release_id": 420053191,
+        "asset_id": 663781494,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64"
+      },
+      "gpu_qualification": {
+        "profile": "qwen38-5090-v0.13.0",
+        "status": "qualified",
+        "receipt": {
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.1/qualification/rtx5090.json",
+          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+        }
+      },
+      "runtime": {
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
+        "model_bytes": 20437521664,
+        "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "minimum_vram_gib": 31,
+        "minimum_disk_gib": 64,
+        "cuda_architecture": "sm_120a",
+        "maximum_context_tokens": 131072,
+        "maximum_output_tokens": 32768,
+        "maximum_concurrency": 2,
+        "kv_dtype": "bf16",
+        "speculative_backend": "dflash2",
+        "draft_tokens": 7,
+        "vision": true,
+        "preserve_thinking": true,
+        "capabilities": [
+          "tools",
+          "reasoning",
+          "thinking-history",
+          "stateful-responses",
+          "vision",
+          "durable-checkpoint"
+        ],
+        "session_checkpoints": {
+          "store_mount": "/checkpoints-v013",
+          "schema_version": 3,
+          "seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
+          "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+          "require_origin_auth": true
+        },
+        "status_schema_version": 2,
+        "request_log_schema_version": 30
+      },
+      "lifecycle": {
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
+        "arguments": []
+      }
+    }
+  ],
+  "runtime_variants": [
+    {
+      "id": "rtx3090-windows-native",
+      "status": "qualified",
+      "platform": "Windows 11 x64",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "cuda_architecture": "sm_86",
+      "installation_mode": "native-windows-package",
+      "installable": true,
+      "silent_cloud_fallback": false,
+      "release_tag": "v0.7.0-qwen38-3090-beta.2",
+      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "package_name": "ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d",
+      "package_bytes": 967836157,
+      "maximum_context_tokens": 131072,
+      "qualification_receipt": {
+        "path": "releases/v0.13.1/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.1/qualification/rtx3090.json",
+        "sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf"
+      },
+      "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
+      "model_bytes": 20437521664,
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    {
+      "id": "rtx4090-windows-native",
+      "status": "qualified",
+      "platform": "Windows 11 x64",
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "cuda_architecture": "sm_89",
+      "installation_mode": "native-windows-package",
+      "installable": true,
+      "silent_cloud_fallback": false,
+      "release_tag": "v0.7.0-qwen38-4090-beta.2",
+      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "package_name": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+      "package_bytes": 950981452,
+      "maximum_context_tokens": 131072,
+      "qualification_receipt": {
+        "path": "releases/v0.13.1/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3572f43c38a6b4a8937680de99806f162bd7fb7/releases/v0.13.1/qualification/rtx4090.json",
+        "sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330"
+      },
+      "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
+      "model_bytes": 20437521664,
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    }
+  ],
   "runtime_contracts": [
     {
       "lane": "RTX 5090 unchanged beta.2 container",
@@ -12,34 +391,18 @@
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 4090 rebased native target (not yet qualified)",
-      "json_schema": "Gated on real native grammar/product/lane qualification; no released support claim yet.",
+      "lane": "RTX 4090 rebased native Windows",
+      "json_schema": "Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 3090 rebased native target (not yet qualified)",
-      "json_schema": "Gated on real native grammar/product/lane qualification; no released support claim yet.",
+      "lane": "RTX 3090 rebased native Windows",
+      "json_schema": "Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
     }
-  ],
-  "native_model_transition": {
-    "from_artifact_sha256": "eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6b80199514bf3e",
-    "to_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
-    "revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
-    "artifact_bytes": 20437521664,
-    "binding": "Both real native variants use components.model; remove redundant native_model only when staging actual packages."
-  },
-  "native_profile_templates": [
-    "profiles/v0.13.1/rtx4090/server-config.json",
-    "profiles/v0.13.1/rtx3090/server-config.json"
-  ],
-  "scope": "Prepared contracts only; native tool-name/status/log targets are not inherited qualification. Published root compatibility authority/matrix stay on v0.13.0 until a real lane pin.",
-  "native_public_configuration_sha256": {
-    "3090": "73a33e63db44ecb15bb0a64a39b7f77783c14285543c72977ac0a0675bc00c7d",
-    "4090": "9774e70154007aa2e803f7d31766e2edb274209b5b2d48f00429472cea6af4fe"
-  }
+  ]
 }

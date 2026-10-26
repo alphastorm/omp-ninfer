@@ -1,0 +1,34 @@
+{
+  "artifact_type": "omp_ninfer_component_cut_dry_run_record",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-lead-record",
+  "command": "scripts/hosts/cut-ninfer-5090-component.sh --version v0.7.0 --commit 6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff --assets $ASSETS --archive-sha 52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d --sbom-sha 0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670 --source-archive-sha d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631 --base-image ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e --beta 2 --notes-file $NOTES",
+  "dry_run": "Lead cut log records dry-run success before beta.2 tags/prereleases and workflow publication; this worker performed no cut.",
+  "resulting_tags": [
+    "v0.7.0-qwen38-5090-beta.2",
+    "v0.7.0-qwen38-5090-source.2",
+    "v0.7.0-qwen38-5090-runtime-beta.2"
+  ],
+  "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/40194097880",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "operator_record_name": "cut-log.txt",
+    "operator_record_sha256": "d143766ddfe538df9c9207e756edc5e754872ff8d04a07beac7d1f76389eb050",
+    "scope": "Content-safe lead-run command projection; no private operator path or fabricated committed evidence path."
+  }
+}

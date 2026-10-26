@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_rtx5090_profile_gates",
+  "schema_version": 1,
+  "generated_utc": "2026-10-25T12:45:21Z",
+  "identity": {
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "config_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_id": "q38-ninfer",
+    "patch_stack_sha": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "source_dirty": false,
+    "target": "Qwen3_5ForCausalLM",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "runtime": {
+    "kv_cache": "bf16",
+    "kv_capacity_mode": "auto",
+    "kv_capacity_tokens": 146368,
+    "max_context": 131072,
+    "proposal_head": "optimized",
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "dflash2",
+    "speculative_draft_window": 7
+  },
+  "vram_used_mib_idle": 30954,
+  "gates": {
+    "prefill_curve": {
+      "status": "passed",
+      "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "prompt_tokens": 130048,
+      "completion_tokens": 17,
+      "exact_output": true,
+      "output": "ORCHID=493817; COLOR=COBALT",
+      "wall_s": 56.994,
+      "tokens_per_second_wall": 2281.8,
+      "vram_used_mib_after": 30956,
+      "server_prefix_cache_hit_tokens": 0,
+      "server_prefix_reuse_path": "root",
+      "server_computed_prefill_tokens": 130048,
+      "server_prefill_seconds": 56.411413397,
+      "cold": true
+    },
+    "decode": {
+      "request_id": "c41332d60593715330d13d6cceb0e39f0b4aa9b3f91858f47db5ff39aa0290d2",
+      "prompt_tokens": 118,
+      "completion_tokens": 2048,
+      "wall_s": 11.619,
+      "completion_tokens_per_second_wall": 176.27,
+      "server_completion_tokens": 2048,
+      "server_decode_seconds": 11.386403697999988,
+      "decode_tokens_per_second": 179.86,
+      "mtp_acceptance_rate": 0.244,
+      "mtp_tokens_per_round": 2.71,
+      "speculative": {
+        "accepted_per_position": [
+          510,
+          312,
+          190,
+          118,
+          75,
+          49,
+          37
+        ],
+        "accepted_tokens": 1291,
+        "backend": "dflash2",
+        "draft_window": 7,
+        "drafted_tokens": 5281,
+        "fallback_steps": 0,
+        "rounds": 756
+      }
+    },
+    "agent_protocol": {
+      "status": "passed",
+      "authenticated_session_identity": true,
+      "stateful_continuation": true,
+      "forks": 2,
+      "parent_delete_status": 200,
+      "deleted_continuation_status": 404,
+      "deleted_continuation_error_code": "previous_response_not_found",
+      "post_restart_deleted_continuation_status": 404,
+      "no_resurrection": true,
+      "surviving_descendant_continued": true,
+      "live_sibling_continuation_status": 200,
+      "live_sibling_continuation_error_code": null
+    }
+  },
+  "status": "passed",
+  "vram_used_mib_final": 30954,
+  "transient_retries": 0
+}

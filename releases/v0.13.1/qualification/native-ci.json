@@ -1,0 +1,85 @@
+{
+  "artifact_type": "omp_ninfer_native_source_ci_binding",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed",
+  "repository": "https://github.com/alphastorm/ninfer",
+  "branch": "rebase/upstream-64d10fbf",
+  "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+  "workflow": ".github/workflows/build.yml",
+  "workflow_name": "Build and host contracts",
+  "run_id": 40273897706,
+  "run_number": 83,
+  "run_attempt": 1,
+  "event": "push",
+  "run_status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-10-26T05:22:48Z",
+  "updated_at": "2026-10-26T05:26:20Z",
+  "provenance": {
+    "api_url": "https://api.github.com/repos/alphastorm/ninfer/actions/runs/40273897706",
+    "public_url": "https://github.com/alphastorm/ninfer/actions/runs/40273897706",
+    "method": "Read-only retrieval of the completed run metadata; no workflow was dispatched or rerun by the release author."
+  },
+  "scope": "Exact-head fork CI only. It supplies no native GPU execution, final package/configuration identity, public-install acceptance, council approval or product publication. Both complete native qualification chains must be fresh on this successor; beta.1 hardware observations are not relabelled.",
+  "superseded_candidate": {
+    "source_commit": "eecb437f99d21cbc7f48740694de3cd6e51d4421",
+    "component_tags": [
+      "v0.7.0-qwen38-4090-beta.1",
+      "v0.7.0-qwen38-3090-beta.1"
+    ],
+    "disposition": "Published component bytes remain immutable but unused after the program lead reported a tests/test_release_package.py CI fixture failure. No failed check was rerun by this author to confirm it."
+  },
+  "jobs": [
+    {
+      "name": "Windows MSVC configure-only (PortableCore manifest required)",
+      "conclusion": "success",
+      "url": "https://github.com/alphastorm/ninfer/actions/runs/40273897706/job/121412425974"
+    },
+    {
+      "name": "Linux CUDA 13 / host tests / bounded sm_120a compile",
+      "conclusion": "success",
+      "url": "https://github.com/alphastorm/ninfer/actions/runs/40273897706/job/121412426098"
+    },
+    {
+      "name": "Weekly or manual full Linux runtime compile",
+      "conclusion": "skipped",
+      "url": "https://github.com/alphastorm/ninfer/actions/runs/40273897706/job/121412426830"
+    }
+  ],
+  "linux_results": {
+    "host_ctest": {
+      "passed": 12,
+      "failed": 0
+    },
+    "sm120_tooling": {
+      "passed": 30
+    },
+    "release_package": {
+      "passed": 5,
+      "skipped": 1
+    },
+    "lifecycle_container": {
+      "passed": 15
+    },
+    "agent_protocol": {
+      "passed": 16
+    },
+    "measurement_and_serve_corpus": {
+      "passed": 58
+    }
+  },
+  "limitations": [
+    "Weekly/manual full Linux runtime job is conditionally skipped on a push.",
+    "Windows CI is configure-only; separate physical native build and host matrices are required."
+  ],
+  "program_receipt": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/upstream-64d10fbf",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "evidence_path": "receipts/fork-ci-summary.json",
+    "evidence_sha256": "e1310808b8d4219cbdce1bed316fc10918672efeef6e5fb653c37566dcf3a1ec",
+    "evidence_post_freeze_uncommitted": true
+  }
+}

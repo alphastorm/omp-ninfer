@@ -1,4 +1,4 @@
-"""Native preparation binds real public config bytes, never invented cut or acceptance proof."""
+"""Native staging binds real package subjects without transferring predecessor approval."""
 from __future__ import annotations
 
 from decimal import Decimal
@@ -11,13 +11,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import render_compatibility
+import verify_release
 
 RELEASE = ROOT / "releases/v0.13.1"
 MODEL_SHA = "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
 CONFIGS = {
-    "4090": ("9774e70154007aa2e803f7d31766e2edb274209b5b2d48f00429472cea6af4fe",
+    "4090": ("b21cdaf8b5edeed4e7d498edf5dbfae77a993145f1d511a8e1aa1b7bdab42950",
              2, 2048, 15506063360, 640, 60000, "qwen3.8-27b"),
-    "3090": ("73a33e63db44ecb15bb0a64a39b7f77783c14285543c72977ac0a0675bc00c7d",
+    "3090": ("b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
              4, 1024, 12284837888, 768, 0, "q38-ninfer"),
 }
 
@@ -39,7 +40,7 @@ class V0131PreparationTests(unittest.TestCase):
                 profile = json.loads(raw)
                 self.assertEqual(profile["artifact_type"], "ninfer_windows_server_config")
                 self.assertEqual(profile["schema_version"], 4)
-                identity = f"qwen38-{number}-native-v0.7.0-beta.1"
+                identity = f"qwen38-{number}-native-v0.7.0-beta.2"
                 self.assertEqual(profile["release_id"], identity)
                 self.assertEqual(profile["deployment_profile"], identity)
                 self.assertEqual(profile["listen"]["host"], "127.0.0.1")
@@ -69,52 +70,51 @@ class V0131PreparationTests(unittest.TestCase):
                                  "max_cache_markers_per_request"):
                     self.assertNotIn(obsolete, profile["context_cache"])
 
-    def test_preparation_has_no_fake_manifest_or_runtime_acceptance(self) -> None:
-        manifest_path = RELEASE / "manifest.json"
+    def test_native_stage_binds_real_model_profiles_and_qualification(self) -> None:
+        manifest = load(RELEASE / "manifest.json")
         qualification = load(RELEASE / "qualification.json")
-        if not manifest_path.exists():
-            self.assertEqual({path.name for path in RELEASE.iterdir()},
-                             {"NINFER_RELEASE_NOTES.md", "qualification.json",
-                              "compatibility.json", "COMPATIBILITY.md"})
-            self.assertEqual(qualification["status"], "preparation-only")
-            self.assertFalse(qualification["publication_authorized"])
-            self.assertFalse(qualification["external_installation_qualified"])
-            gates = qualification["observed_gates"]
-            self.assertEqual(gates["native_packaging"]["status"], "pending")
-            self.assertEqual(gates["native_protocol"]["status"], "pending")
-            self.assertEqual(gates["native_precut_decode"]["status"], "measured-not-release-qualified")
-            self.assertEqual(gates["native_precut_decode"]["rtx4090_tokens_per_second"], 137.35)
-            self.assertEqual(gates["native_precut_decode"]["rtx3090_tokens_per_second"], 78.33)
-        else:
-            manifest = load(manifest_path)
-            self.assertNotIn("native_model", manifest["components"])
-            self.assertEqual(manifest["components"]["model"]["artifact_sha256"], MODEL_SHA)
-            for variant in manifest["components"]["ninfer_variants"]:
-                number = variant["id"].split("-", 1)[0][3:]
-                self.assertEqual(variant["release_tag"], f"v0.7.0-qwen38-{number}-beta.1")
-                self.assertEqual(variant["model_artifact_sha256"], MODEL_SHA)
-                self.assertEqual(variant["configuration_sha256"], CONFIGS[number][0])
+        self.assertNotIn("native_model", manifest["components"])
+        self.assertEqual(manifest["components"]["model"]["artifact_sha256"], MODEL_SHA)
+        sources = set()
+        for variant in manifest["components"]["ninfer_variants"]:
+            number = variant["id"].split("-", 1)[0][3:]
+            self.assertRegex(variant["release_tag"], rf"^v0\.7\.0-qwen38-{number}-beta\.[1-9][0-9]*$")
+            self.assertEqual(variant["model_artifact_sha256"], MODEL_SHA)
+            self.assertEqual(variant["configuration_sha256"], CONFIGS[number][0])
+            path = ROOT / variant["qualification"]["summary"]
+            receipt = load(path)
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),
+                             variant["qualification"]["sha256"])
+            self.assertEqual(receipt["identity"]["source_commit"], variant["source_commit"])
+            self.assertEqual(receipt["identity"]["server_binary_sha256"],
+                             variant["server_binary_sha256"])
+            self.assertEqual(receipt["identity"]["configuration_sha256"],
+                             variant["configuration_sha256"])
+            self.assertEqual(receipt["package"]["sha256"], variant["package_sha256"])
+            self.assertEqual(receipt["package"]["dependency_sbom_sha256"],
+                             variant["sbom_dependency_sha256"])
+            sources.add(variant["source_commit"])
+            if qualification["status"] == "runtime-release-eligible":
+                self.assertEqual(variant["release_tag"], f"v0.7.0-qwen38-{number}-beta.2")
+                self.assertEqual(receipt["status"], "passed")
+                self.assertEqual(receipt["protocol"]["protocol"]["structured_output"],
+                                 {"chat_json_schema": True, "responses_json_schema": True})
+        self.assertEqual(len(sources), 1)
 
-    def test_prepared_matrix_is_rendered_and_cannot_be_installed(self) -> None:
+    def test_release_local_matrix_is_rendered_and_lane_scoped(self) -> None:
         path = RELEASE / "compatibility.json"
-        authority = load(path)
-        if authority.get("artifact_type") == "omp_ninfer_prepared_compatibility":
-            with self.assertRaisesRegex(ValueError, "not an installable authority"):
-                render_compatibility.load_authority(path)
-            authority = render_compatibility.load_authority(path, allow_prepared=True)
-            self.assertEqual(authority["status"], "preparation-only")
-            self.assertEqual(authority["native_model_transition"]["to_artifact_sha256"], MODEL_SHA)
+        authority = render_compatibility.load_authority(path)
+        if load(RELEASE / "qualification.json")["status"] == "runtime-release-eligible":
             for native in authority["runtime_contracts"][1:]:
-                self.assertIn("Gated", native["json_schema"])
-                self.assertIn("not yet qualified", native["lane"])
-        else:
-            authority = render_compatibility.load_authority(path)
+                self.assertIn("Supported", native["json_schema"])
+                self.assertEqual(native["tool_name_max_characters"], 128)
+                self.assertEqual(native["status_schema_version"], 2)
+                self.assertEqual(native["request_log_schema_version"], 30)
         self.assertEqual((RELEASE / "COMPATIBILITY.md").read_text(encoding="utf-8"),
                          render_compatibility.render(authority))
 
     def test_unpinned_preparation_preserves_published_root_authority(self) -> None:
-        manifest_path = RELEASE / "manifest.json"
-        if not manifest_path.exists() or load(manifest_path)["status"] == "draft":
+        if load(RELEASE / "manifest.json")["status"] == "draft":
             self.assertEqual((ROOT / "compatibility.json").read_bytes(),
                              (ROOT / "releases/v0.13.0/compatibility.json").read_bytes())
             self.assertEqual((ROOT / "docs/COMPATIBILITY.md").read_bytes(),
@@ -125,11 +125,58 @@ class V0131PreparationTests(unittest.TestCase):
         text = (RELEASE / "NINFER_RELEASE_NOTES.md").read_text(encoding="utf-8")
         self.assertLessEqual(len(text.splitlines()), 210)
         self.assertEqual(ReleaseProseTests.glued_tokens(text), [])
-        self.assertIn("137.35", text)
-        self.assertIn("78.33", text)
-        self.assertIn("Pre-cut experiment", text)
+        if load(RELEASE / "qualification.json")["status"] == "runtime-release-eligible":
+            for number in CONFIGS:
+                receipt = load(RELEASE / "qualification" / f"rtx{number}.json")
+                self.assertIn(f'{receipt["benchmark_c1"]["decode_tokens_per_second"]:.2f}', text)
+                self.assertIn(f'{receipt["long_session"]["elapsed_seconds"]:.2f}', text)
+        self.assertIn("640", text)
+        self.assertIn("768", text)
+        self.assertIn("session-checkpoints-v3", text)
+        self.assertIn("ntfs-write-through", text)
         self.assertIn("documented_routes.document_change", text)
         self.assertIn("prompt_cache_key names a session capability", text)
+
+    def test_native_beta2_allowlist_does_not_broaden_primary_5090_tags(self) -> None:
+        for number in CONFIGS:
+            variant_id = f"rtx{number}-windows-native"
+            tag = f"v0.7.0-qwen38-{number}-beta.2"
+            self.assertIsNotNone(
+                render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(tag))
+            self.assertIsNone(verify_release.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+            other = "3090" if number == "4090" else "4090"
+            self.assertIsNone(
+                render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(
+                    f"v0.7.0-qwen38-{other}-beta.2"))
+        self.assertIsNotNone(
+            verify_release.NINFER_RELEASE_TAG_RE.fullmatch("v0.7.0-qwen38-5090-beta.2"))
+
+    def test_receipt_audit_covers_every_staged_file_and_keeps_carried_bytes(self) -> None:
+        audit = load(RELEASE / "qualification/receipt-audit.json")
+        self.assertEqual(audit["release"], "v0.13.1")
+        self.assertEqual(audit["source_release"], "v0.13.0")
+        rows = {row["file"]: row for row in audit["files"]}
+        staged = {path.name for path in (RELEASE / "qualification").iterdir() if path.is_file()}
+        self.assertEqual(staged, {
+            name for name, row in rows.items() if row["disposition"] != "dropped"
+        })
+        for name, row in rows.items():
+            if row["disposition"] == "kept-unchanged-subject":
+                self.assertEqual((RELEASE / "qualification" / name).read_bytes(),
+                                 (ROOT / "releases/v0.13.0/qualification" / name).read_bytes())
+
+    def test_pending_native_council_cannot_inherit_5090_approval(self) -> None:
+        qualification = load(RELEASE / "qualification.json")
+        gate = qualification["observed_gates"]["g4_review"]
+        if gate["status"] == "pending":
+            ledger = load(ROOT / gate["repository_path"])
+            self.assertFalse(ledger["approval_granted"])
+            self.assertFalse(ledger["publication_authorized"])
+            self.assertFalse(ledger["public_route_acceptance_granted"])
+            carried = ledger["carried_rtx5090_review"]
+            path = ROOT / carried["repository_path"]
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), carried["sha256"])
+            self.assertIn("no native", carried["scope"].lower())
 
 
 if __name__ == "__main__":

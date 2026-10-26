@@ -1,0 +1,62 @@
+{
+  "artifact_type": "omp_ninfer_g2_decode_parity",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-performance-comparison",
+  "measured_source_commit": "c2dbcbae4bbdd07f73c8aad299fa0552ba17dbf3",
+  "measured_binary_sha256": "2f8498d9afa8b2d447a05b610cf3a9a50973c3436c18d20190224946c22f1c5b",
+  "measured_model_sha256": "facba3bd318139c50899d4a0d74576837f73f0f498a461961467d56df10f4944",
+  "persistence_enabled": false,
+  "policy": {
+    "median_decode_floor_ratio": 0.96,
+    "p95_regressions_above_ratio": 1.1,
+    "p95_attribution_nonblocking": true,
+    "founder_amended_on": "2026-10-25"
+  },
+  "measured": {
+    "role_cases": 84,
+    "role_requests": 336,
+    "depth_requests": 48,
+    "http_errors": 0,
+    "candidate_median_decode_tokens_per_second": 342.15025465782605,
+    "shipped_median_decode_tokens_per_second": 338.4481203327641,
+    "candidate_over_shipped": 1.0109385577955698,
+    "percent_of_shipped": 101.09385577955697,
+    "structured_output_p95_ratio": 1.1255975022693392,
+    "depth64k_shipped_tokens_per_second": 335.3322478818433,
+    "depth64k_candidate_tokens_per_second": 290.7812854279529,
+    "depth64k_shipped_rounds": 338,
+    "depth64k_candidate_rounds": 392
+  },
+  "original_strict_tail_gate": "FAIL",
+  "amended_gate": "PASS",
+  "serialization_disposition": {
+    "measured_attribution": "Canonical sorted-key tool serialization removes the extra token and attributes the structured-output p95 gap. The EXP-097 counterfactual was diagnostic-only and reverted.",
+    "integrated_fix_commit": "0abe7c8e5f7d7509315c775921ae37d8350bc27a",
+    "integrated_evidence_source": "ec927e574c564c33852b7befd349b29a31a038d9",
+    "integrated_host_byte_pins_passed": true,
+    "full_g2_after_fix": "not re-measured for v0.13.0; final runtime includes the reviewed canonical serialization fix but the 101.09% statistic remains bound to c2dbcbae."
+  },
+  "product_evidence_path": "docs/measurements/2026-10-25-exp097-role-corpus.json",
+  "product_evidence_sha256": "4199d27b0bdf5cc984786d5a97ddc084ecbc380cf8930ae6737c795bafb144bc",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/kernel-routes",
+    "source_commit": "c2dbcbae4bbdd07f73c8aad299fa0552ba17dbf3",
+    "evidence_commit": "80480bec5824e07251487d832920128d135d8638",
+    "evidence_path": "bench/measurements/exp097/G2-final-summary.json"
+  },
+  "scope": "Unchanged EXP-097 provider comparison at measured c2dbcbae/model facba3bd, not a beta.1 identity or a new F2 throughput measurement. Serial role requests, configured concurrency two, fixed 131072 KV/K=7/BF16. No full G2 after canonical serialization or F2 remediation; no global output parity/powered leak claim."
+}

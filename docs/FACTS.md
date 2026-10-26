@@ -1,13 +1,13 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-25 · Published release: v0.13.0 (2026-10-25) · stock Oh My Pi 18.12.6
+Updated: 2026-10-26 · Published release: v0.13.0 (2026-10-25) · stock Oh My Pi 18.12.6
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.13.0/manifest.json`](../releases/v0.13.0/manifest.json).
-[Get started](QUICKSTART.md) ·
+[Get started](https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md) ·
 [Download v0.13.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.0)
 
 ## What it is
@@ -104,39 +104,58 @@ slash dispatch.
   `--admission-headroom-mib` amendment of 640 MiB on RTX 4090 and 768 MiB on RTX 3090, native
   packaging, dependency SBOMs, and hardware qualification).
 
-## Next release — v0.13.1 native preparation
+## Next release — v0.13.1 native draft
 
-The [prepared notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
-[native contract matrix](../releases/v0.13.1/COMPATIBILITY.md) are not an installable manifest or
-new qualification. They target native `v0.7.0-qwen38-4090-beta.1` /
-`v0.7.0-qwen38-3090-beta.1` on upstream master `64d10fbf`, carrying the exact v0.13.0 RTX 5090
-beta.2 runtime/profile and unmodified OMP 18.12.6 assets. Native N/cut identities, real Windows
-qualification/K6 proof, review and fresh public-route/client acceptance remain gates.
+The [draft notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
+[manifest](../releases/v0.13.1/manifest.json) and
+[native contract matrix](../releases/v0.13.1/COMPATIBILITY.md) stage the native rebase onto upstream
+master `64d10fbf`, carrying the exact v0.13.0 RTX 5090 beta.2 runtime/profile and unmodified
+OMP 18.12.6 assets. Native beta.1 cuts at `eecb437f` are published but unused after a fork CI
+fixture failure. Native beta.2 source `7a25cd72` has exact-head CI, actual packages and both fresh
+full hardware chains. Both beta.2 prereleases and their exact inventories are published and bound;
+lead lane/evidence pins, native/product-tooling council and fresh
+public-route/client acceptance remain gates.
 
 Both natives move to published model version 3 `81f924d4`, revision
 `1cbd84e7221e51186bd7f093a149912d2489625b`, 20,437,521,664 bytes. Native downloads use a new
 `qwen3_8_27b-v3.ninfer` file, not resumed bytes from the prior version 2 model. Real package binding
-removes `components.native_model` only once both native variants match `components.model`.
-Old native model/checkpoint roots stay untouched for rollback; prior sessions replay transcripts.
+has removed `components.native_model` because both staged variants match `components.model`.
+Old native model/checkpoint roots stay untouched; prior sessions replay transcripts.
 
-| Prepared native contract | RTX 4090 | RTX 3090 |
+| Actual beta.2 public configuration | RTX 4090 | RTX 3090 |
 | --- | --- | --- |
-| Profile | `qwen38-4090-native-v0.7.0-beta.1` | `qwen38-3090-native-v0.7.0-beta.1` |
-| Public config SHA-256 | `9774e70154007aa2e803f7d31766e2edb274209b5b2d48f00429472cea6af4fe` | `73a33e63db44ecb15bb0a64a39b7f77783c14285543c72977ac0a0675bc00c7d` |
+| Profile | `qwen38-4090-native-v0.7.0-beta.2` | `qwen38-3090-native-v0.7.0-beta.2` |
+| Public config SHA-256 | `b21cdaf8b5edeed4e7d498edf5dbfae77a993145f1d511a8e1aa1b7bdab42950` | `b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75` |
 | Context / KV / speculation / requests | 131,072 / INT8 / MTP3 / one | 131,072 / INT8 / MTP3 / one |
 | Extra slots / prefill | 2 / 2,048 | 4 / 1,024 |
 | Shared Host bytes / admission margin | 15,506,063,360 / 640 MiB | 12,284,837,888 / 768 MiB |
-| Pre-cut real-model C1 decode | 137.35 tok/s | 78.33 tok/s |
+| Keep-warm | 60,000 ms | Disabled |
+| Fresh C1 decode / exact 130,048-token retrieval | 150.94 tok/s / 85.71 s | 84.06 tok/s / 208.78 s |
 
 Native config identities hash the exact UTF-8/LF packaged JSON bytes, not the container's canonical
 configuration or checkpoint fingerprint. Public port `18082` and separate scratch port-only
 config/packages must retain distinct hashes/equivalence evidence. Both profiles require
 `--session-checkpoint-require-origin-auth` and the existing 32-byte bearer floor, remove
 `--max-private-continuations`, and use release-isolated schema 3 directories. DFlash2 and vision
-remain disabled. Native JSON-schema/128-character-name/status/log contracts remain gated on actual
-lane qualification; no smaller-host or final-package performance claim transfers from these experiments.
+remain disabled. Fresh native normal/pressure product smokes support Chat/Responses JSON-schema,
+128-character-name, status schema 2 and request-log schema 30 contracts on this source;
+new public-route acceptance is not inferred from them or from the 5090 ledger.
+No smaller-host or cross-artifact speedup claim is made.
 Each actual new package carries a canonical dependency-level CycloneDX inventory in addition to,
-not renamed from, its SPDX file inventory; publication and exact asset hashes remain pending.
+not renamed from, its SPDX file inventory, including actual CRT and DirectStorage provenance.
+Windows K6 acknowledges `ntfs-write-through`, not POSIX `fsync` or a power-loss guarantee.
+Disk-capacity refusal preserves surviving objects; rearm still requires Engine/admission progress
+or explicit client retry, not external disk reclamation alone. Finite export leases are released
+before waking admission. Final-source restart fixtures must show a new process, exact markers and
+positive cached reuse against an independently measured warmup-counter baseline, not absolute zero.
+Both final native receipts record 1,647 explicit-save / 1,650 graceful-flush cached tokens and
+first-lineage rollback `not_applicable` with zero directions; the old RTX 3090 rollback proof does
+not transfer. Restored process count is zero, leases are released, tasks are `Ready`, incumbent
+state is untouched and owner power returns to 450/370 W. These are fixture-scoped observations,
+not a loss-free-shutdown or cross-artifact speedup claim.
+
+All following current-release facts and model tables describe published v0.13.0 unless marked
+otherwise; staged native capabilities do not silently change that accepted product.
 
 ## Models
 

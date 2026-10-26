@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_runtime_package_inventory",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed",
+  "package": {
+    "artifact_type": "ninfer_local_release_receipt",
+    "asset": {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "sha256": "52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d"
+    },
+    "build_profile": "rtx5090",
+    "checksums": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+    "patch_stack_sha": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "sbom": {
+      "format": "SPDX-2.3",
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sha256": "0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670"
+    },
+    "schema_version": 1,
+    "source_date_epoch": 1792927260,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "build_identity": {
+    "artifact_type": "ninfer_release_build_identity",
+    "binaries": {
+      "ninfer": "bf5a0540160c3c295a1adc6dc531f9e2c510064f9b450956e97690e6363de7c9",
+      "ninfer-serve": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55"
+    },
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "patch_stack_sha": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "schema_version": 1,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "assets": [
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "bytes": 547088535,
+      "sha256": "52dd3be726a1ea05f81e142a11e75ac984359ecafdf42aeeb8c192356214b43d"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "bytes": 3596,
+      "sha256": "0d360628359f4b554cec0393c5c088265e3454d271fc633bbf2af044c9d69670"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+      "bytes": 348,
+      "sha256": "e88aa68a5d0e11a4f561247534440641d0a6a6f8bbc2312d9895c15a4fb546f8"
+    },
+    {
+      "name": "runtime-source-6d4d0a05.tar.gz",
+      "bytes": 12229537,
+      "sha256": "d6bde7844abc6db5c9c9cd857b25a104049339fd5801bd40b1b245bd11e85631"
+    }
+  ],
+  "component_tags": [
+    "v0.7.0-qwen38-5090-beta.2",
+    "v0.7.0-qwen38-5090-source.2",
+    "v0.7.0-qwen38-5090-runtime-beta.2"
+  ],
+  "transferred_assets_sha256_verified": true,
+  "transfer_evidence": "Integrator5 reports every asset transfer size and SHA-256 verified; no independent anonymous public download is inferred.",
+  "scope": "Exact beta.2 local archive/source/SPDX inventory and transfer verification. Publication is separately bound; stock-client/public-install acceptance remains distinct.",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/package",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
+}

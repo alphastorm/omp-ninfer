@@ -1,0 +1,405 @@
+{
+  "artifact_type": "omp_ninfer_runtime_product_shape_and_c2",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-scoped",
+  "product_shape": {
+    "artifact_type": "ninfer_engine_cache_gate",
+    "schema_version": 1,
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "baseline_sha256": "d39d3cd17dbe5155ca881c4636bbdabf5dd5ec86691b705c20a6e2bdc2ac1245",
+    "shape": {
+      "max_context": 131072,
+      "max_concurrency": 2,
+      "prefill_chunk": 1024,
+      "kv_cache": "bf16",
+      "speculative_backend": "dflash2",
+      "speculative_draft_window": 7,
+      "proposal_head": "optimized",
+      "cuda_graph": true,
+      "vision": true
+    },
+    "idle_seconds": 12,
+    "arms": [
+      {
+        "gpu_keep_warm_ms": 0,
+        "startup": {
+          "engine": {
+            "max_context": 131072,
+            "max_concurrency": 2,
+            "prefill_chunk": 1024,
+            "kv_cache": "bf16",
+            "speculative_backend": "dflash2",
+            "speculative_draft_window": 7,
+            "proposal_head": "optimized",
+            "cuda_graph": true,
+            "vision": true,
+            "kv_capacity_mode": "auto",
+            "kv_capacity": 146368
+          },
+          "memory": {
+            "device_budget_bytes": 32429309952,
+            "minimum_runtime_reservation_bytes": 10343649793,
+            "runtime_reservation_bytes": 11346088449,
+            "cuda_graph_rebuild_estimate_bytes": 0,
+            "cuda_graph_prepare_increment_bytes": 0,
+            "cuda_graph_calibration_increment_bytes": 33554432,
+            "cuda_graph_calibration_retained_bytes": 33554432,
+            "startup_retained_bytes": 33786880,
+            "available_after_startup_bytes": 1074790400,
+            "kv_capacity_headroom_bytes": 1073741824,
+            "kv_payload_bytes": 9592373248,
+            "host_context_capacity_bytes": 21881405440
+          },
+          "startup_gate": {
+            "minimum_headroom_bytes": 805306368,
+            "maximum_headroom_loss_bytes": 33554432,
+            "maximum_graph_growth_bytes": 67108864,
+            "baseline_headroom_bytes": 1072693248,
+            "baseline_graph_bytes": {
+              "cuda_graph_rebuild_estimate_bytes": 0,
+              "cuda_graph_calibration_increment_bytes": 31457280,
+              "cuda_graph_calibration_retained_bytes": 31457280,
+              "startup_retained_bytes": 31689728
+            },
+            "graph_deltas_bytes": {
+              "cuda_graph_rebuild_estimate_bytes": 0,
+              "cuda_graph_calibration_increment_bytes": 2097152,
+              "cuda_graph_calibration_retained_bytes": 2097152,
+              "startup_retained_bytes": 2097152
+            }
+          },
+          "total_device_memory_bytes": 34162343936
+        },
+        "idle_ttft": [
+          {
+            "label": "idle sample 0",
+            "ttft_s": 0.7838923110102769,
+            "total_s": 0.8887107180198655,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "7deaec8db3012714b6aaad83392789eec78b0ab1308cfa24367ded32aae6d421"
+          },
+          {
+            "label": "idle sample 1",
+            "ttft_s": 0.7247229100030381,
+            "total_s": 0.829519522987539,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "e340513a8f00c02a1ce938dc2da458f128ca2c267fbf730f70370099e9d13d98"
+          },
+          {
+            "label": "idle sample 2",
+            "ttft_s": 0.718170148000354,
+            "total_s": 0.8374697369872592,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "89fbf89bcdc63c92062d7b054360ad4787fbb1280dffe3ed06462f87468ce600"
+          }
+        ],
+        "median_idle_ttft_s": 0.7247229100030381,
+        "c2_siblings": {
+          "decode_row_rounds": 91,
+          "decode_rounds": 73,
+          "requests": [
+            {
+              "label": "fanout seed",
+              "ttft_s": 0.6069504060142208,
+              "total_s": 0.6966150320076849,
+              "input_tokens": 1848,
+              "output_tokens": 32,
+              "cached_tokens": 0,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "26d78447cc5c62b5b52b7f2577b56d8a70f5f4fa0f9fa99904de6c6df39f7a3d"
+            },
+            {
+              "label": "long sibling",
+              "ttft_s": 1.2795932279841509,
+              "total_s": 3.1631516439956613,
+              "input_tokens": 3690,
+              "output_tokens": 192,
+              "cached_tokens": 1879,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "8b1dd11c122315e63964a5a30ab4165e126046b598875530c1c0027185324c4c"
+            },
+            {
+              "label": "short sibling",
+              "ttft_s": 1.3539962650102098,
+              "total_s": 1.6120718650054187,
+              "input_tokens": 3690,
+              "output_tokens": 48,
+              "cached_tokens": 1843,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "d5a4754ef6db79fdf1407fd9af7ebc4ec2cff31387760af78cc9e272e952799e"
+            },
+            {
+              "label": "continue short sibling",
+              "ttft_s": 0.7385916049825028,
+              "total_s": 0.837800855981186,
+              "input_tokens": 5549,
+              "output_tokens": 16,
+              "cached_tokens": 3737,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "29bed5cf09ef5c665698aa8b4567aa8da298847b2cb44fde343b31031cf06422"
+            }
+          ],
+          "short_completed_before_long": true,
+          "short_continued_before_long_completed": true
+        }
+      },
+      {
+        "gpu_keep_warm_ms": 60000,
+        "startup": {
+          "engine": {
+            "max_context": 131072,
+            "max_concurrency": 2,
+            "prefill_chunk": 1024,
+            "kv_cache": "bf16",
+            "speculative_backend": "dflash2",
+            "speculative_draft_window": 7,
+            "proposal_head": "optimized",
+            "cuda_graph": true,
+            "vision": true,
+            "kv_capacity_mode": "auto",
+            "kv_capacity": 146368
+          },
+          "memory": {
+            "device_budget_bytes": 32429309952,
+            "minimum_runtime_reservation_bytes": 10343649793,
+            "runtime_reservation_bytes": 11346088449,
+            "cuda_graph_rebuild_estimate_bytes": 0,
+            "cuda_graph_prepare_increment_bytes": 0,
+            "cuda_graph_calibration_increment_bytes": 33554432,
+            "cuda_graph_calibration_retained_bytes": 33554432,
+            "startup_retained_bytes": 33786880,
+            "available_after_startup_bytes": 1074790400,
+            "kv_capacity_headroom_bytes": 1073741824,
+            "kv_payload_bytes": 9592373248,
+            "host_context_capacity_bytes": 21881405440
+          },
+          "startup_gate": {
+            "minimum_headroom_bytes": 805306368,
+            "maximum_headroom_loss_bytes": 33554432,
+            "maximum_graph_growth_bytes": 67108864,
+            "baseline_headroom_bytes": 1072693248,
+            "baseline_graph_bytes": {
+              "cuda_graph_rebuild_estimate_bytes": 0,
+              "cuda_graph_calibration_increment_bytes": 31457280,
+              "cuda_graph_calibration_retained_bytes": 31457280,
+              "startup_retained_bytes": 31689728
+            },
+            "graph_deltas_bytes": {
+              "cuda_graph_rebuild_estimate_bytes": 0,
+              "cuda_graph_calibration_increment_bytes": 2097152,
+              "cuda_graph_calibration_retained_bytes": 2097152,
+              "startup_retained_bytes": 2097152
+            }
+          },
+          "total_device_memory_bytes": 34162343936
+        },
+        "idle_ttft": [
+          {
+            "label": "idle sample 0",
+            "ttft_s": 0.5800360650173388,
+            "total_s": 0.684899209998548,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "7deaec8db3012714b6aaad83392789eec78b0ab1308cfa24367ded32aae6d421"
+          },
+          {
+            "label": "idle sample 1",
+            "ttft_s": 0.5874110189906787,
+            "total_s": 0.6920511909993365,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "e340513a8f00c02a1ce938dc2da458f128ca2c267fbf730f70370099e9d13d98"
+          },
+          {
+            "label": "idle sample 2",
+            "ttft_s": 0.5872341200010851,
+            "total_s": 0.707282904011663,
+            "input_tokens": 1849,
+            "output_tokens": 32,
+            "cached_tokens": 0,
+            "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "reasoning_text_sha256": "89fbf89bcdc63c92062d7b054360ad4787fbb1280dffe3ed06462f87468ce600"
+          }
+        ],
+        "median_idle_ttft_s": 0.5872341200010851,
+        "c2_siblings": {
+          "decode_row_rounds": 91,
+          "decode_rounds": 73,
+          "requests": [
+            {
+              "label": "fanout seed",
+              "ttft_s": 0.6072648440022022,
+              "total_s": 0.6973015239927918,
+              "input_tokens": 1848,
+              "output_tokens": 32,
+              "cached_tokens": 0,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "26d78447cc5c62b5b52b7f2577b56d8a70f5f4fa0f9fa99904de6c6df39f7a3d"
+            },
+            {
+              "label": "long sibling",
+              "ttft_s": 1.2802775489981286,
+              "total_s": 3.1637152160110418,
+              "input_tokens": 3690,
+              "output_tokens": 192,
+              "cached_tokens": 1879,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "8b1dd11c122315e63964a5a30ab4165e126046b598875530c1c0027185324c4c"
+            },
+            {
+              "label": "short sibling",
+              "ttft_s": 1.3547671750129666,
+              "total_s": 1.6122096530161798,
+              "input_tokens": 3690,
+              "output_tokens": 48,
+              "cached_tokens": 1843,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "d5a4754ef6db79fdf1407fd9af7ebc4ec2cff31387760af78cc9e272e952799e"
+            },
+            {
+              "label": "continue short sibling",
+              "ttft_s": 0.738980519992765,
+              "total_s": 0.8379117159929592,
+              "input_tokens": 5549,
+              "output_tokens": 16,
+              "cached_tokens": 3737,
+              "output_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "reasoning_text_sha256": "29bed5cf09ef5c665698aa8b4567aa8da298847b2cb44fde343b31031cf06422"
+            }
+          ],
+          "short_completed_before_long": true,
+          "short_continued_before_long_completed": true
+        }
+      }
+    ],
+    "passed": true,
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "median_idle_ttft_ratio_on_over_off": 0.8102877829522781
+  },
+  "exact_profile": {
+    "schema": "ninfer-integration-product-profile/1",
+    "source": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "profile_sha256": "a0edfcaac2f5bff648b7b677be33fb25e6e9b3bda08f84c2117f540df2fcfb35",
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "require_origin_auth": true,
+    "config_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "checkpoint_mount_target": "/checkpoints-v013",
+    "passed": true,
+    "startup": {
+      "engine": {
+        "max_context": 131072,
+        "max_concurrency": 2,
+        "prefill_chunk": 1024,
+        "kv_cache": "bf16",
+        "speculative_backend": "dflash2",
+        "speculative_draft_window": 7,
+        "proposal_head": "optimized",
+        "cuda_graph": true,
+        "vision": true,
+        "kv_capacity_mode": "auto",
+        "kv_capacity": 146368
+      },
+      "memory": {
+        "device_budget_bytes": 32429309952,
+        "minimum_runtime_reservation_bytes": 10343649793,
+        "runtime_reservation_bytes": 11346088449,
+        "cuda_graph_rebuild_estimate_bytes": 0,
+        "cuda_graph_prepare_increment_bytes": 0,
+        "cuda_graph_calibration_increment_bytes": 33554432,
+        "cuda_graph_calibration_retained_bytes": 33554432,
+        "startup_retained_bytes": 33786880,
+        "available_after_startup_bytes": 1074790400,
+        "kv_capacity_headroom_bytes": 1073741824,
+        "kv_payload_bytes": 9592373248,
+        "host_context_capacity_bytes": 21881405440
+      },
+      "startup_gate": {
+        "minimum_headroom_bytes": 805306368,
+        "maximum_headroom_loss_bytes": 33554432,
+        "maximum_graph_growth_bytes": 67108864,
+        "baseline_headroom_bytes": 1072693248,
+        "baseline_graph_bytes": {
+          "cuda_graph_rebuild_estimate_bytes": 0,
+          "cuda_graph_calibration_increment_bytes": 31457280,
+          "cuda_graph_calibration_retained_bytes": 31457280,
+          "startup_retained_bytes": 31689728
+        },
+        "graph_deltas_bytes": {
+          "cuda_graph_rebuild_estimate_bytes": 0,
+          "cuda_graph_calibration_increment_bytes": 2097152,
+          "cuda_graph_calibration_retained_bytes": 2097152,
+          "startup_retained_bytes": 2097152
+        }
+      },
+      "total_device_memory_bytes": 34162343936
+    },
+    "gpu_keep_warm_ms": 60000,
+    "device_state_slots": 2,
+    "server_exit": 0,
+    "shutdown": {
+      "artifact_type": "ninfer_serve_shutdown_report",
+      "complete": true,
+      "refused": 0
+    }
+  },
+  "integrated_pressure_overlap": {
+    "phase": "overlap",
+    "counts": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "tests": [
+      {
+        "name": "ninfer_qwen3_5_durable_pressure_real_test",
+        "status": "passed",
+        "seconds": 38.0356
+      }
+    ]
+  },
+  "policy": {
+    "minimum_headroom_mib": 768,
+    "maximum_headroom_loss_vs_baseline_mib": 32,
+    "maximum_graph_growth_mib": 64,
+    "kv_capacity_at_least_max_context": true,
+    "observed_graph_growth_bytes": 2097152
+  },
+  "scope": "Fresh F2 product-shape startup/C2/idle and E2 overlap. Three idle samples per arm are descriptive, not a powered latency or actual OMP parallel-dispatch claim.",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/product_shape",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
+}

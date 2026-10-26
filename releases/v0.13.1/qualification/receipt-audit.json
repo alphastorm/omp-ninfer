@@ -1,0 +1,208 @@
+{
+  "artifact_type": "omp_ninfer_release_receipt_audit",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "source_release": "v0.13.0",
+  "policy": "Keep only exact unchanged 5090/client subjects at their original measured identities. All current native proof and composition/prose/tooling metadata is replaced or freshly added. No predecessor/superseded native proof or 5090 approval is presented as native v0.13.1 qualification.",
+  "files": [
+    {
+      "file": "rtx3090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "0ae9a8d59efef7d8eeaeb29737390177acde74e9a2cae48b1ea61010b4f5e278",
+      "staged_sha256": "55bb8f69079879bb6e572fbe96ce5077ff74f4c3e1f1b6e8902b7f1f462e99d5",
+      "disposition": "replaced",
+      "reason": "Replace prior native runtime/model evidence with exact accepted fresh 7a25cd72 beta.2 lane qualification or its actual published 10-entry outer checksum set. Public/scratch identities and public-package-executed=false are preserved honestly."
+    },
+    {
+      "file": "rtx3090.json",
+      "predecessor_sha256": "1884fd4ee7ddc9b2f5d2e62d00f02f661dd211ebfd01a230fe1768693e6b66c3",
+      "staged_sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf",
+      "disposition": "replaced",
+      "reason": "Replace prior native runtime/model evidence with exact accepted fresh 7a25cd72 beta.2 lane qualification or its actual published 10-entry outer checksum set. Public/scratch identities and public-package-executed=false are preserved honestly."
+    },
+    {
+      "file": "rtx4090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "c02655275e7459e085ee81d14af1298e92a326d6ce16293e912475ee3f09d496",
+      "staged_sha256": "c514dd96b0b8422c8769cc64df16f208e8d42eb6a2613fbd35eb1436e5a4f71f",
+      "disposition": "replaced",
+      "reason": "Replace prior native runtime/model evidence with exact accepted fresh 7a25cd72 beta.2 lane qualification or its actual published 10-entry outer checksum set. Public/scratch identities and public-package-executed=false are preserved honestly."
+    },
+    {
+      "file": "rtx4090.json",
+      "predecessor_sha256": "9d3829fe6009190b827c1b705bfb1fe9d4318e7e11e218ae7a87d39d6ea5f656",
+      "staged_sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330",
+      "disposition": "replaced",
+      "reason": "Replace prior native runtime/model evidence with exact accepted fresh 7a25cd72 beta.2 lane qualification or its actual published 10-entry outer checksum set. Public/scratch identities and public-package-executed=false are preserved honestly."
+    },
+    {
+      "file": "rtx5090.json",
+      "predecessor_sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0",
+      "staged_sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep byte-identical qualification of the unchanged 5090 beta.2 binary/model/configuration; no new v0.13.1 measurement or route acceptance."
+    },
+    {
+      "file": "stock-omp.json",
+      "predecessor_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
+      "staged_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged stock OMP 18.12.6 host-free review at its real historical release/source; current client/platform acceptance is pending."
+    },
+    {
+      "file": "staging.json",
+      "predecessor_sha256": "f9b97923fa51d6351cb76cf16271badebbb521a7019366677b8b88849b88139a",
+      "staged_sha256": "16a30edac9cbecbcddd48db3b1fe5245ca52d86312df31c3ad0fc5be33ba55ca",
+      "disposition": "replaced",
+      "reason": "Replace predecessor staging.json with current v0.13.1 stage evidence; tooling/prose result metadata is recorded only after actual current checks."
+    },
+    {
+      "file": "runtime-publication.json",
+      "predecessor_sha256": "0ee25885304f96ec344e0c468f802c8ae17872634d201110c4a1aa0905be869f",
+      "staged_sha256": "0ee25885304f96ec344e0c468f802c8ae17872634d201110c4a1aa0905be869f",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged published 5090 beta.2 image receipt at 6d4d0a05; it is not native component publication."
+    },
+    {
+      "file": "runtime-base.json",
+      "predecessor_sha256": "90b1e1f728ca4ce7039378239a242087659e9f2ec93b9c25c93ff45415f8e30b",
+      "staged_sha256": "90b1e1f728ca4ce7039378239a242087659e9f2ec93b9c25c93ff45415f8e30b",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged 5090 runtime-base reuse binding and original base-publication identity; no new base cut."
+    },
+    {
+      "file": "restore-matrix.json",
+      "predecessor_sha256": "37f069b3cd664eb560213370ec8bfe38eb8aa2c705b27a8cf1b608268ec46c36",
+      "staged_sha256": "37f069b3cd664eb560213370ec8bfe38eb8aa2c705b27a8cf1b608268ec46c36",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep the unchanged 5090 beta.2 restore/fault matrix; it supplies no Windows K6 or native runtime evidence."
+    },
+    {
+      "file": "remediation.json",
+      "predecessor_sha256": "155e26ac16fe45138fa24fdd5cf5d90868323a5366fdd68438567d5fe21f3d5c",
+      "staged_sha256": "155e26ac16fe45138fa24fdd5cf5d90868323a5366fdd68438567d5fe21f3d5c",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep historical 5090 F/F2 remediation and its original review pointers; no native/product-tooling council transfer."
+    },
+    {
+      "file": "release-tooling-tests.json",
+      "predecessor_sha256": "dd5202160276c9f126aab6b52c49ebba96c705d0a91a54aae8ffee0f90fddc3c",
+      "staged_sha256": "1e019b0877a4e10fc4f0982e87cccd3bf5de4dcbd3606313881059913285bdaf",
+      "disposition": "replaced",
+      "reason": "Replace predecessor checks with the actual current 505-of-509 selected suite (four unchanged timing exclusions, five platform skips), successful draft rebind and exact expected prepin verifier posture."
+    },
+    {
+      "file": "release-prose.json",
+      "predecessor_sha256": "024d9a9a0ca09c1f053930e3702584ea195f38924b2d76f507161137acb4a0e9",
+      "staged_sha256": "d851138ee86c763efadb79caa0a91c0867258891f7d2694e572b16dab685d483",
+      "disposition": "replaced",
+      "reason": "Replace predecessor prose proof with actually exercised current release prose and bounded 167-line canonical notes, including fresh native measurement and authority-scope invariants."
+    },
+    {
+      "file": "receipt-audit.json",
+      "predecessor_sha256": "d217b32d013fe0f27cc62929697b698325fc0bbef80f1a978c17025bec00a862",
+      "disposition": "replaced",
+      "reason": "Replace the v0.12.2-to-v0.13.0 audit with this complete v0.13.0-to-v0.13.1 subject audit; self-hash deliberately omitted."
+    },
+    {
+      "file": "protocol.json",
+      "predecessor_sha256": "10b8165c350028a27d044d30380a7ee508ce17a9aa3bf60788f28840f7ef2c72",
+      "staged_sha256": "10b8165c350028a27d044d30380a7ee508ce17a9aa3bf60788f28840f7ef2c72",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep actual 5090 beta.2 grammar/product smoke subject. Any historical native limits describe v0.13.0 only; new native support needs its own final-source receipts."
+    },
+    {
+      "file": "packaging.json",
+      "predecessor_sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
+      "staged_sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged 5090 beta.2 archive/source/SPDX inventory; no new native asset or public-install claim."
+    },
+    {
+      "file": "integrated-cli.json",
+      "predecessor_sha256": "ba62dcc8e71384d627c2a896f7b0fedfe9222c9037cf35da6464c448ee1993d8",
+      "staged_sha256": "ba62dcc8e71384d627c2a896f7b0fedfe9222c9037cf35da6464c448ee1993d8",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged 5090 strict-origin profile/25-flag inventory; native schema 4 profile bytes and shared budgets are independently bound."
+    },
+    {
+      "file": "durability.json",
+      "predecessor_sha256": "5ccab53fddc781f3ed702fcb89e2a7a63884dbd2a0cc71cb429a5e3e9cee83c4",
+      "staged_sha256": "5ccab53fddc781f3ed702fcb89e2a7a63884dbd2a0cc71cb429a5e3e9cee83c4",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged 5090 production four-boot restart and strict-profile proof; never relabel it Windows durability."
+    },
+    {
+      "file": "decode-parity.json",
+      "predecessor_sha256": "4eca1adf4ed6d63094d593180c2376162a02a7cc8efcde17a09c75bcdf480af9",
+      "staged_sha256": "4eca1adf4ed6d63094d593180c2376162a02a7cc8efcde17a09c75bcdf480af9",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep historical EXP-097 provider source/model and 101.09% result above the 96% policy; not a new v0.13.1 or native decode comparison."
+    },
+    {
+      "file": "concurrency.json",
+      "predecessor_sha256": "2d1ac4d6574f98bd247eb87cdfe00b5ebea4100fb3abb48823cfdc7b5bc394f4",
+      "staged_sha256": "2d1ac4d6574f98bd247eb87cdfe00b5ebea4100fb3abb48823cfdc7b5bc394f4",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep unchanged 5090 C2/32 GB/overlap proof; native profiles remain C1 with their own pressure gates."
+    },
+    {
+      "file": "component-cut-dry-run.json",
+      "predecessor_sha256": "8532627a2f123754fa3005136cfa7b51b39bbd089edb97eefa508c9a3d6971de",
+      "staged_sha256": "8532627a2f123754fa3005136cfa7b51b39bbd089edb97eefa508c9a3d6971de",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep historical 5090 beta.2 dry-run/cut record; native beta.2 needs its own actual preflights and publication."
+    },
+    {
+      "file": "client-components.json",
+      "predecessor_sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42",
+      "staged_sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep the exact three unchanged upstream OMP 18.12.6 asset descriptors; no client rebuild or new acceptance is inferred."
+    },
+    {
+      "file": "build.json",
+      "predecessor_sha256": "abf1fc95af2901dea1b195b96f39e93f09ed83a8dabc9735b1f284597af9aafa",
+      "staged_sha256": "abf1fc95af2901dea1b195b96f39e93f09ed83a8dabc9735b1f284597af9aafa",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep exact 5090 beta.2 host/dense/build/loader proof. New native builds/Windows tests must bind the final native source."
+    },
+    {
+      "file": "native-ci.json",
+      "disposition": "added",
+      "staged_sha256": "a103a498b23adf364bf821222bdff0c9973890b83b56ba9f3d63d10453f6cb18",
+      "reason": "Add observed completed exact-head N11 fork CI; no new GPU/package or council claim."
+    },
+    {
+      "file": "native-remediation.json",
+      "disposition": "added",
+      "staged_sha256": "412a9ee57816b750e0c1b600a523e662818530e0aa97733e1187c3458eacf3b9",
+      "reason": "Add source-bound Windows K6/capacity/finite-export fixes, their explicitly historical provider red/green and fresh exact-source N11 host/full native integrated closure, without council approval."
+    },
+    {
+      "file": "native-integration.json",
+      "disposition": "added",
+      "reason": "Add fresh accepted exact-source N11 CI/build/package/full native runtime/protocol/restart/restoration and honest scratch-equivalence proof.",
+      "staged_sha256": "43762c11764279ef28d53686e16344129c4be41f80b545ac858cc79468741e8b"
+    },
+    {
+      "file": "native-publication.json",
+      "disposition": "added",
+      "reason": "Add actual beta.2 no-effect preflights and separately observed executed public prereleases/tag targets/11 uploaded asset digests.",
+      "staged_sha256": "eff33c1a177d31ff817dd573479dda23d915534ef7623a29a52c679b8f77d348"
+    }
+  ],
+  "dropped_files": [],
+  "review_ledger": {
+    "file": "review/runtime-ledger.json",
+    "disposition": "replaced-with-pending-native-product-binding",
+    "repository_path": "releases/v0.13.1/review/runtime-ledger.json",
+    "sha256": "29719961801bdc507559b972517fa34c44c5f0b229870dc33fc191abfe8fc817",
+    "predecessor_repository_path": "releases/v0.13.0/review/runtime-ledger.json",
+    "predecessor_sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
+    "reason": "The original 5090 ledger remains immutable and valid only for the unchanged 5090 subject. No native or new product-tooling approval is fabricated."
+  },
+  "public_acceptance": {
+    "disposition": "not-carried",
+    "reason": "No acceptance directory is copied or represented as fresh v0.13.1 proof. Candidate/public URL installation and restoration remain separate gates."
+  }
+}

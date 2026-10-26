@@ -1,0 +1,40 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger_pending_binding",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "status": "pending",
+  "approval_granted": false,
+  "scope": "Pending native-runtime and changed product-tooling council. This file is not a review result or a disposition ledger. The lead binds actual resolver-selected findings and closure on the frozen subjects before release readiness.",
+  "native_runtime": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/upstream-64d10fbf",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "binding_status": "Frozen source 7a25cd72 has exact-head CI, both fresh accepted native hardware chains and published beta.2 components with byte-exact package/profile/qualification bindings. Actual native council findings/dispositions remain pending; runtime evidence grants no approval.",
+    "required_scope": [
+      "Windows K6 handle-anchored replacement, current-parent fence and protected extended-length roots",
+      "Disk-capacity taxonomy, survivor-preserving DELETE refusal and finite-export admission progress",
+      "Exact native binary/model/configuration identities, shared Host pressure, strict-origin restart and GPU/controller isolation",
+      "Native package/source/checksum and distinct SPDX/CycloneDX supply-chain bindings"
+    ]
+  },
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "v0131/release-stage",
+    "stage_commit": null,
+    "binding_status": "Bind the immutable stage commit after authoring; local tests and carried RTX 5090 approval do not approve changed product tooling.",
+    "required_scope": [
+      "Native component cut, binding, staging and verifier changes",
+      "Dependency SBOM generation including runtime redistributable provenance",
+      "Canonical schema 2 native protocol consumer and shared Host qualification contracts"
+    ]
+  },
+  "carried_rtx5090_review": {
+    "status": "unchanged-subject-only",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "repository_path": "releases/v0.13.0/review/runtime-ledger.json",
+    "sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
+    "scope": "Historical full RTX 5090 council and localized remediation only. It supplies no native execution, Windows K6, new product-tooling approval or v0.13.1 publication authority. The original ledger bytes remain in the immutable predecessor."
+  },
+  "publication_authorized": false,
+  "public_route_acceptance_granted": false
+}

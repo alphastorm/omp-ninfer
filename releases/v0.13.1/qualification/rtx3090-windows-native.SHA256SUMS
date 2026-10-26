@@ -1,0 +1,10 @@
+432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334  Control-GpuOwner.ps1
+6d7ab386c4dcc383d60907cdc3636d67683b3a92c3e4991aac7ede05ff93bb0a  Control-Release.ps1
+91c8f535a60dfcc46db42e0e84aec974cb1d52677dd5c13cb97b8dc984f3d5c2  Install-Release.ps1
+d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36  Protect-StateRoot.ps1
+1d0e5fc7d1203e6c921b351709fe913c0c3869a91accd76e821f39638d3915a5  ninfer-rtx3090-native-v0.7.0-beta.2-source.tar.gz
+8ec539b10d38f3639e18915ffc2df93f49da4d1866edb2b5a36930c6828abca2  ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS
+fc28d50ef76f4c019c3a44088f34ca115b110a9065f301fab84f2010667e9f5b  ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.cdx.json
+4021054dd83d49b372112f129f0f7f36124221fb5620c057c574095966ed18cb  ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.spdx.json
+626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d  ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz
+cd69ed6f8be7d178a0a2e5f7d8d72e0b5281cdc9ae5ff6c276c42a07e2e229eb  package-build-receipt.json

@@ -46,20 +46,23 @@ Full release authority: [`releases/v0.13.0/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.13.0/qualification.json`](releases/v0.13.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
-## Next release — v0.13.1 native rebase preparation
+## Next release — v0.13.1 native rebase draft
 
-[Prepared notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
-[gate prose](releases/v0.13.1/qualification.json) target native
-`v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1` while carrying exact RTX 5090 beta.2
-and stock OMP 18.12.6. This is not a new published or installable composition.
+[Draft notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
+[qualification](releases/v0.13.1/qualification.json) stage native
+`v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2` while carrying exact RTX 5090 beta.2
+and stock OMP 18.12.6. This is not a published or publicly accepted composition.
 Native profiles now freeze the shared Host budgets (15,506,063,360 / 12,284,837,888 bytes),
 extra slots 2/4, prefill 2,048/1,024, strict origin authentication and admission headroom
-640/768 MiB. Pre-cut real-model C1 decode measured 137.35/78.33 tok/s at 131,072 INT8 MTP3;
-final source/package qualification and Windows K6 evidence remain separate.
+640/768 MiB. The first beta.1 source `eecb437f` passed hardware chains but failed a fork CI
+fixture; its published cuts remain unused. Fresh successor `7a25cd72` now passes both complete
+native chains, with 150.94/84.06 tok/s C1 decode and 85.71/208.78 s exact 130,048-token retrieval.
+Both beta.2 prereleases, inventories and fresh qualification/profile bindings are now recorded;
+native/product-tooling council, lead lane/evidence pins and fresh public acceptance remain.
 
 The native route moves to the published version 3 artifact `81f924d4` and fresh per-release
-checkpoint roots; old native generations are not migrated. JSON-schema output remains a lane
-qualification gate. Complete packages/dependency SBOMs, frozen N, actual review, fresh
+checkpoint roots; old native generations are not migrated. JSON-schema output remains an exact-source
+lane gate. Actual review, fresh
 route/client/public-install/rollback-lineage and independent restoration proof are still required.
 Changed native model blocks require `documented_routes.document_change`; no prior 31-block
 acceptance is relabelled. Published v0.13.0 authority/profiles remain untouched until a real lane pin.
@@ -88,13 +91,14 @@ unmet:
    ([`releases/v0.13.0/acceptance/documented-routes.json`](releases/v0.13.0/acceptance/documented-routes.json)).
    The earlier route-lifecycle tracker [#15](https://github.com/alphastorm/omp-ninfer/issues/15) is
    closed; it is historical context, not an open tracker for these additions.
-4. **Distribution signing, notarization, and native dependency-level SBOM bindings.**
+4. **Distribution signing and notarization.**
    [`scripts/generate_native_sbom.py`](scripts/generate_native_sbom.py) generates CycloneDX 1.5
    dependency SBOMs and the verifier supports `sbom_dependency_url` / `sbom_dependency_sha256`,
-   while the carried Windows native runtime packages in
-   [`releases/v0.13.0/manifest.json`](releases/v0.13.0/manifest.json) still ship unsigned with an
-   SPDX file-inventory SBOM until rebased native packages are cut in `v0.13.1`
-   ([`docs/SECURITY.md`](docs/SECURITY.md)). OMP NInfer consumes unmodified upstream OMP binaries by
+   and both staged beta.2 native components in
+   [`releases/v0.13.1/manifest.json`](releases/v0.13.1/manifest.json) bind actual separate dependency
+   inventories, including CRT/DirectStorage, beside their SPDX file inventories. Package signing
+   and notarization remain unclaimed ([`docs/SECURITY.md`](docs/SECURITY.md)).
+   OMP NInfer consumes unmodified upstream OMP binaries by
    SHA-256 without rebuilding or re-signing the client; only first-party Windows runtime package
    signing is in scope here.
 5. **Same-profile second-machine recovery and fixed fleet workload gates.** Off-machine replication
@@ -112,10 +116,11 @@ unmet:
    `v0.13.0` ([`releases/v0.13.0/qualification/protocol.json`](releases/v0.13.0/qualification/protocol.json),
    [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)). The carried native RTX 4090 and RTX 3090
    packages still reject JSON-schema output with HTTP 400 and cap tool names at 64 characters;
-   prepared rebased native profiles on `64d10fbf` add `--admission-headroom-mib` 640 MiB on RTX
-   4090 and 768 MiB on RTX 3090 plus strict origin authentication. Frozen-source packages,
-   dependency SBOMs, Windows K6/grammar/hardware qualification and fresh acceptance remain
-   the `v0.13.1` gates, not claims established by the pre-cut decode experiment.
+   staged rebased native profiles on `64d10fbf` add `--admission-headroom-mib` 640 MiB on RTX
+   4090 and 768 MiB on RTX 3090 plus strict origin authentication. Actual published beta.2
+   packages, dependency SBOMs and fresh source `7a25cd72` host/hardware/protocol qualification
+   are bound. Native/product-tooling council and candidate-bound public-route/client acceptance,
+   not implementation or inherited evidence, remain the release gates.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.13.0/qualification/rtx4090.json`](releases/v0.13.0/qualification/rtx4090.json),

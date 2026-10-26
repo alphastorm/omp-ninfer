@@ -1,0 +1,492 @@
+{
+  "artifact_type": "ninfer_windows_release_qualification",
+  "benchmark_c1": {
+    "completion_tokens": 1024,
+    "computed_prefill_tokens": 4541,
+    "decode_tokens_per_second": 84.0570716980472,
+    "max_gpu_utilization_percent": 100,
+    "max_memory_used_mib": 22734,
+    "max_power_w": 300.11,
+    "max_temperature_c": 54.88,
+    "mtp_acceptance_percent": 92.96296296296296,
+    "power_envelope_w": 301.0,
+    "prefill_tokens_per_second": 921.6295994385873,
+    "prompt_tokens": 4541,
+    "status": "passed",
+    "wall_seconds": 17.201568099990254
+  },
+  "beta_qualified": true,
+  "configuration": {
+    "admission_headroom_mib": 768,
+    "checkpoint_require_origin_auth": true,
+    "concurrency": 1,
+    "device_state_slots": 4,
+    "gpu_keep_warm_ms": 0,
+    "graceful_stop_timeout_seconds": 900,
+    "host_context_bytes": 12284837888,
+    "host_context_mib": "11715.734375",
+    "kv_capacity": 131072,
+    "kv_dtype": "int8",
+    "managed_stop": "stop-event",
+    "max_context": 131072,
+    "prefill_chunk": 1024,
+    "public_model_id": "q38-ninfer",
+    "speculative_backend": "mtp",
+    "speculative_draft_tokens": 3
+  },
+  "deterministic_gates": {
+    "benchmark_c1": "passed",
+    "golden_equivalent": "passed",
+    "long_session": "passed",
+    "persistence": "passed",
+    "protocol": "passed",
+    "protocol_under_pool_pressure": "passed",
+    "rollback": "not_applicable",
+    "state_security": "passed"
+  },
+  "golden_equivalent": {
+    "artifact_type": "ninfer_omp_golden_equivalent_receipt",
+    "omp": {
+      "client_version": "omp/18.12.6",
+      "events": 43,
+      "tool_results": 1,
+      "typed_tool_name": "read"
+    },
+    "oracles": {
+      "exact_visible_final_answer": "passed",
+      "tool_result_continuation": "passed",
+      "typed_tool_invocation": "passed"
+    },
+    "raw_transcript_included": false,
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "identity": {
+    "binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+    "build_profile": "native-v0.7.0-beta.2-rtx3090",
+    "build_type": "Release",
+    "config_sha256": "b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
+    "configuration_binding": "public-package-with-port-only-scratch-equivalence",
+    "configuration_sha256": "b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
+    "cuda_architecture": "86",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35228.0",
+    "deployment_profile": "qwen38-3090-native-v0.7.0-beta.2",
+    "gpu_index": 1,
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "lineage_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_id": "q38-ninfer",
+    "patch_stack_sha": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "qualified_configuration_sha256": "19c06eac9bba03f9535ba1cadff17e31961a37657d967f4119e1f03382d60e26",
+    "server_binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "source_dirty": false,
+    "target": "Qwen3_5ForCausalLM",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "limitations": [
+    "Public packages retain port 18082 and were not executed. The isolated installed rehearsals differ only in listen.port.",
+    "C1 and the recorded shared-Host pressure budget are the qualified profiles; no multi-GPU inference or smaller-host claim.",
+    "Restart proves the two recorded short sessions, not loss-free shutdown of every live session."
+  ],
+  "long_session": {
+    "completion_tokens": 17,
+    "elapsed_seconds": 208.78068590001203,
+    "exact_output": "ORCHID=493817; COLOR=COBALT",
+    "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+    "prompt_tokens": 130048,
+    "status": "passed"
+  },
+  "orchestration_evidence": {
+    "benchmark_c1": {
+      "receipt_sha256": "9c7ce5884f2dfc3076301f524d475a2e7fede7503a0e1b085d94e86fc595770f",
+      "status": "passed"
+    },
+    "context_128k": {
+      "receipt_sha256": "9312c3b3bba42e95ed1644303d8c5a03c5c325548539d8b183cea9f2b39c542e",
+      "status": "passed"
+    },
+    "neutral_build": {
+      "receipt_sha256": "ab3505b98bea2eb6e88c04e2a81a86049049737e16290092548e3c1a2f658e81",
+      "status": "passed"
+    },
+    "omp": {
+      "receipt_sha256": "46e717c94751cd911eed8216ef7ea65151da045d49971a16d105f87b9a7643be",
+      "status": "passed"
+    },
+    "package": {
+      "receipt_sha256": "4f2a42fce4e83cd936f362fac42ac6860c91edd6eb694682c416aaa8a00ca943",
+      "status": "passed"
+    },
+    "preflight": {
+      "receipt_sha256": "3cbdc0ab712cda4c3c3e1bd46b62c898a97dfc5221d872af057c1311613af9fc",
+      "status": "passed"
+    },
+    "pressure_protocol": {
+      "receipt_sha256": "86f420822020963f8c179f0f387bd728aeb725302cd1856fa8fbe75c88ea745f",
+      "status": "passed"
+    },
+    "private_path_scan": {
+      "receipt_sha256": "c61dd191e5bf571c1637edf0f7955ab42fce0a7dfc0f3fd06655214b5ff9b59e",
+      "status": "passed"
+    },
+    "protocol": {
+      "receipt_sha256": "7582f4cd4d3e4b9399fbd6f94d90afef99e69ac8910c0e71d12936d15c5adb97",
+      "status": "passed"
+    },
+    "receipt": {
+      "receipt_sha256": "0692969e569fc6b8426920be81b3f7e46abfabd8d16f7797659e79cfeaa61570",
+      "status": "passed"
+    },
+    "restart": {
+      "receipt_sha256": "71dd3ee43d09f933c1d110499fa9bf0177a0ac64a0a9638bced36126190b9231",
+      "status": "passed"
+    },
+    "restore": {
+      "receipt_sha256": "10e1179524e75980f3491e4e2f6604e0376697231f2e698cd854fa78f516f830",
+      "status": "passed"
+    },
+    "rollback": {
+      "receipt_sha256": "2a3e3da6fe8d6d00d853af8806acf329d844fe16a63881c8a53e189ef7145a54",
+      "status": "passed"
+    },
+    "security": {
+      "receipt_sha256": "15ba0af09c7b1138565bddd86ddb28e860c6e4c6d3a5bfb3467b7ebebab7dceb",
+      "status": "passed"
+    },
+    "transfer_install": {
+      "receipt_sha256": "8f8dba197efbb1d11595a747a4616d76fe0f66fc3117739476f6e4db199d5e45",
+      "status": "passed"
+    }
+  },
+  "package": {
+    "bytes": 967836157,
+    "controller_sha256": "6d7ab386c4dcc383d60907cdc3636d67683b3a92c3e4991aac7ede05ff93bb0a",
+    "dependency_sbom_sha256": "fc28d50ef76f4c019c3a44088f34ca115b110a9065f301fab84f2010667e9f5b",
+    "filename": "ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+    "installer_sha256": "91c8f535a60dfcc46db42e0e84aec974cb1d52677dd5c13cb97b8dc984f3d5c2",
+    "outer_checksums_sha256": "55bb8f69079879bb6e572fbe96ce5077ff74f4c3e1f1b6e8902b7f1f462e99d5",
+    "sbom_sha256": "4021054dd83d49b372112f129f0f7f36124221fb5620c057c574095966ed18cb",
+    "sha256": "626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d",
+    "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+  },
+  "persistence": {
+    "cached_input_tokens": 1647,
+    "checkpoint_bytes": 521686162,
+    "checkpoint_files": 11,
+    "counter_baseline": {
+      "committed_decode_tokens": 3,
+      "computed_prefill_tokens": 53,
+      "reused_prompt_tokens": 0
+    },
+    "counters_after_restart": {
+      "committed_decode_tokens": 3,
+      "computed_prefill_tokens": 53,
+      "reused_prompt_tokens": 0
+    },
+    "deletion_semantics": "logical-object-deletion",
+    "exact_output": "CHECKPOINT-NATIVE-731942",
+    "explicit_control": {
+      "cached_input_tokens": 1647,
+      "checkpoint_save": "explicit_endpoint",
+      "exact_output": "CHECKPOINT-NATIVE-731942",
+      "frontier_tokens": 1647,
+      "save_bytes": 521653529
+    },
+    "managed_stop": {
+      "elapsed_seconds": 5.587,
+      "exit_code": null,
+      "forced": false,
+      "graceful_wait_seconds": 900,
+      "mode": "stop-event",
+      "outcome": "graceful"
+    },
+    "managed_stop_flush": {
+      "cached_input_tokens": 1650,
+      "checkpoint_save": "shutdown_flush",
+      "exact_output": "MANAGED-STOP-FLUSH-408137",
+      "state_after_restart": "available",
+      "state_before_stop": "missing"
+    },
+    "process_replaced": true,
+    "restart_counters_reset": true,
+    "restart_seconds": 37.20308529998874,
+    "secure_erasure_claimed": false,
+    "status": "passed",
+    "status_schema_version": 2
+  },
+  "profile": "MTP3",
+  "protocol": {
+    "identity": {
+      "binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+      "build_profile": "native-v0.7.0-beta.2-rtx3090",
+      "build_type": "Release",
+      "config_sha256": "19c06eac9bba03f9535ba1cadff17e31961a37657d967f4119e1f03382d60e26",
+      "cuda_architecture": "86",
+      "cuda_compiler": "NVIDIA-13.3.73",
+      "cuda_toolkit": "13.3.73",
+      "cxx_compiler": "MSVC-19.44.35228.0",
+      "deployment_profile": "qwen38-3090-native-v0.7.0-beta.2",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "model_id": "q38-ninfer",
+      "patch_stack_sha": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "source_dirty": false,
+      "target": "Qwen3_5ForCausalLM",
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    "protocol": {
+      "anthropic_count_tokens": 55,
+      "artifact_type": "ninfer_agent_protocol_smoke",
+      "authenticated_session_identity": true,
+      "completion_tokens": 3,
+      "contract": "product",
+      "isolated_session_reuse_path": "shared_stable_prefix",
+      "nonstream_finish_reason": "stop",
+      "responses_session_lifecycle": {
+        "continuation_completed": true,
+        "cross_session_status": 404,
+        "first_turn_completed": true,
+        "fork_count": 2,
+        "parent_delete_status": 200,
+        "parent_get_after_delete_status": 404,
+        "stored_route_isolation_status": 404,
+        "surviving_descendant_continued": true,
+        "surviving_descendants_retrieved": true
+      },
+      "same_session_reuse_path": "private_input_replay",
+      "schema_version": 2,
+      "status_identity_verified": true,
+      "stream_finish_reason": "stop",
+      "structured_output": {
+        "chat_json_schema": true,
+        "responses_json_schema": true
+      },
+      "tool_result_array_finish_reason": "length"
+    },
+    "runtime": {
+      "kv_cache": "int8-group64",
+      "kv_capacity_mode": "explicit",
+      "kv_capacity_tokens": 131072,
+      "max_context": 131072,
+      "proposal_head": "optimized",
+      "public_model_id": "q38-ninfer",
+      "speculative_backend": "mtp",
+      "speculative_draft_window": 3
+    },
+    "sha256": "da61aa092bf334cb392cefbc8ca956f71111e24fbdafd55967ff04e3a565f89f",
+    "startup_attestation": {
+      "gpu_index": 1,
+      "gpu_name": "NVIDIA GeForce RTX 3090",
+      "gpu_uuid_verified": true,
+      "request_log_schema": 30
+    },
+    "status": "passed"
+  },
+  "protocol_under_pool_pressure": {
+    "device_state_slots": 4,
+    "host_context_mib": "9366.578125",
+    "protocol": {
+      "anthropic_count_tokens": 55,
+      "artifact_type": "ninfer_agent_protocol_smoke",
+      "authenticated_session_identity": true,
+      "completion_tokens": 3,
+      "contract": "product",
+      "isolated_session_reuse_path": "shared_stable_prefix",
+      "nonstream_finish_reason": "stop",
+      "responses_session_lifecycle": {
+        "continuation_completed": true,
+        "cross_session_status": 404,
+        "first_turn_completed": true,
+        "fork_count": 2,
+        "parent_delete_status": 200,
+        "parent_get_after_delete_status": 404,
+        "stored_route_isolation_status": 404,
+        "surviving_descendant_continued": true,
+        "surviving_descendants_retrieved": true
+      },
+      "same_session_reuse_path": "private_input_replay",
+      "schema_version": 2,
+      "status_identity_verified": true,
+      "stream_finish_reason": "stop",
+      "structured_output": {
+        "chat_json_schema": true,
+        "responses_json_schema": true
+      },
+      "tool_result_array_finish_reason": "length"
+    },
+    "sha256": "da61aa092bf334cb392cefbc8ca956f71111e24fbdafd55967ff04e3a565f89f",
+    "status": "passed"
+  },
+  "qualification_window": {
+    "controller_lease_evidence": [
+      {
+        "acquired_utc": "2026-10-26T06:24:53.8045448Z",
+        "active": true,
+        "controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+        "gpu_uuid_verified": true,
+        "launch_id": "4566d75fb2e74da4963f5cda8fdc7bec",
+        "lease_file_sha256": "7af15c8c7c457a0919017c5f53ce5640631f2e002ec046c403555b1db0584c3e",
+        "phase": "protocol",
+        "pid": 12936,
+        "release_id": "qwen38-3090-native-v0.7.0-beta.2-7a25cd72f490"
+      },
+      {
+        "acquired_utc": "2026-10-26T06:30:37.8331512Z",
+        "active": true,
+        "controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+        "gpu_uuid_verified": true,
+        "launch_id": "88d65af089414dc0b282afb764cc6390",
+        "lease_file_sha256": "9da0cdf66b576a1d735b5ff930086e7865e49182a5adcd64da17f721ff36a8c4",
+        "phase": "context_128k",
+        "pid": 23896,
+        "release_id": "qwen38-3090-native-v0.7.0-beta.2-7a25cd72f490"
+      },
+      {
+        "acquired_utc": "2026-10-26T06:30:37.8331512Z",
+        "active": true,
+        "controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+        "gpu_uuid_verified": true,
+        "launch_id": "3817b448583546799e192a8a812ff956",
+        "lease_file_sha256": "9da0cdf66b576a1d735b5ff930086e7865e49182a5adcd64da17f721ff36a8c4",
+        "phase": "restart",
+        "pid": 26440,
+        "release_id": "qwen38-3090-native-v0.7.0-beta.2-7a25cd72f490"
+      },
+      {
+        "acquired_utc": "2026-10-26T06:36:37.6126864Z",
+        "active": true,
+        "controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+        "gpu_uuid_verified": true,
+        "launch_id": "05dd9a15dc774a04be4b63ab94b0a64c",
+        "lease_file_sha256": "e06ed8ddd7b5d0d6b5a041534f65748d7e127c8c5f2a0828776a3d9b2ed4cb58",
+        "phase": "benchmark_c1",
+        "pid": 21336,
+        "release_id": "qwen38-3090-native-v0.7.0-beta.2-7a25cd72f490"
+      }
+    ],
+    "grant": {
+      "authorized_by": "Main",
+      "expires_utc": null,
+      "hold": false,
+      "id": "I6-N7a25cd72-rtx3090",
+      "lane": "rtx3090",
+      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "until": "inventory_complete"
+    },
+    "sibling_evidence_sha256": "c88a5cb83bf44138929f882fad40d2a47cd2f330af7c80d7cc04a949198dba0d"
+  },
+  "qualified_utc": "2026-10-26T06:37:46Z",
+  "release_id": "qwen38-3090-native-v0.7.0-beta.2",
+  "restoration": {
+    "gpu_lease_active": false,
+    "incumbent_state": "untouched",
+    "power_limit_w": 370,
+    "process_count": 0,
+    "status": "passed",
+    "task_state": "Ready"
+  },
+  "rollback": {
+    "active_release": "qwen38-3090-native-v0.7.0-beta.2-7a25cd72f490",
+    "directions": 0,
+    "reason": "first release of the lineage",
+    "status": "not_applicable"
+  },
+  "schema_version": 1,
+  "scratch_equivalence": {
+    "configuration_delta": {
+      "path": "/listen/port",
+      "public": 18082,
+      "scratch": 18211
+    },
+    "identical_binaries": {
+      "benchmark_sha256": "5c1249159ba444a2cf2d16360d5aec98c6614e88ecfe4dd9ebde45bfb9fc74a4",
+      "ninfer_sha256": "de73561b1167246136b7d10c26b78c2666659d89eb9fe75dbe312e13d7a4d766",
+      "server_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790"
+    },
+    "identical_support_assets": {
+      "controller_sha256": "6d7ab386c4dcc383d60907cdc3636d67683b3a92c3e4991aac7ede05ff93bb0a",
+      "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+      "installer_sha256": "91c8f535a60dfcc46db42e0e84aec974cb1d52677dd5c13cb97b8dc984f3d5c2",
+      "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+    },
+    "observed_identity": {
+      "binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+      "build_profile": "native-v0.7.0-beta.2-rtx3090",
+      "build_type": "Release",
+      "config_sha256": "19c06eac9bba03f9535ba1cadff17e31961a37657d967f4119e1f03382d60e26",
+      "cuda_architecture": "86",
+      "cuda_compiler": "NVIDIA-13.3.73",
+      "cuda_toolkit": "13.3.73",
+      "cxx_compiler": "MSVC-19.44.35228.0",
+      "deployment_profile": "qwen38-3090-native-v0.7.0-beta.2",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "model_id": "q38-ninfer",
+      "patch_stack_sha": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "source_dirty": false,
+      "target": "Qwen3_5ForCausalLM",
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    "production_route_activation_performed": false,
+    "public_configuration_sha256": "b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
+    "public_package_executed": false,
+    "public_package_sha256": "626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d",
+    "scratch_configuration_sha256": "19c06eac9bba03f9535ba1cadff17e31961a37657d967f4119e1f03382d60e26",
+    "scratch_package_sha256": "c0355da483007faa2ecfe63fe4d67c7acd6e0898fd24d0919901eb6025a93c18",
+    "startup_attestation": {
+      "gpu_index": 1,
+      "gpu_name": "NVIDIA GeForce RTX 3090",
+      "gpu_uuid_verified": true,
+      "request_log_schema": 30
+    },
+    "status": "passed"
+  },
+  "state_security": {
+    "absolute_nvidia_shim_interceptions": 0,
+    "active_interactive_gpu_rejections": 1,
+    "artifact_type": "ninfer_windows_state_security_regression",
+    "atomic_race_collision_rejections": 1,
+    "child_junction_rejections": 1,
+    "clean_default_managed_parent_creations": 2,
+    "forbidden_hook_patterns_scanned": 10,
+    "gpu_binding_lease_refusal_assertions": 2,
+    "gpu_power_evidence_class": "real-trusted-absolute-nvidia-smi",
+    "gpu_power_fixture_calls": 0,
+    "gpu_workload_evidence_class": "selected-nvml-residency-function-shim-and-real-idle-precheck",
+    "gpu_workload_measurement_source": "nvidia-smi.memory.used",
+    "installer_prewrite_root_rejections": 3,
+    "low_privilege_effective_read_denials": 2,
+    "low_privilege_effective_write_denials": 2,
+    "managed_release_acl_state_assertions": 1,
+    "managed_request_log_acl_state_assertions": 1,
+    "managed_rollback_directions": 0,
+    "null_dacl_rejections": 1,
+    "populated_root_status_milliseconds": 849,
+    "precreated_root_rejections": 1,
+    "prepared_lease_restore_assertions": 0,
+    "preplanted_gpu_owner_rejections": 1,
+    "qualified_power_limit_w": 300,
+    "raced_state_recursive_deletions": 0,
+    "request_jsonl_effective_access_denials": 2,
+    "request_jsonl_under_protected_state": true,
+    "resident_memory_boundary_assertions": 2,
+    "restored_power_limit_w": 370,
+    "retained_state_helper_hash_assertions": 0,
+    "root_dacl_protected": true,
+    "root_junction_rejections": 1,
+    "root_owner_sid": "S-1-5-32-544",
+    "schema_version": 2,
+    "shipped_scripts_scanned": 4,
+    "shipped_test_bypass": false,
+    "startup_gpu_evidence_assertions": 10,
+    "status": "passed",
+    "unowned_root_rejections": 1,
+    "wddm_diagnostics_only_assertions": 2
+  },
+  "status": "passed"
+}

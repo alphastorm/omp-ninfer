@@ -13,44 +13,58 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.13.1 — native rebase preparation, not a published release
+## v0.13.1 — staged native rebase, not a published release
 
-The [prepared notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
-[gate prose](../releases/v0.13.1/qualification.json) and
-[preparation-only compatibility](../releases/v0.13.1/COMPATIBILITY.md) target native components
-`v0.7.0-qwen38-4090-beta.1` / `v0.7.0-qwen38-3090-beta.1` on upstream master `64d10fbf`.
-Frozen native N, package/source/binary identities, Windows lane/K6 evidence, review and public
-acceptance are not supplied by this preparation. Published v0.13.0 remains authoritative.
+The [draft notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
+[qualification](../releases/v0.13.1/qualification.json) and
+[release-local compatibility](../releases/v0.13.1/COMPATIBILITY.md) stage rebased native Windows
+lanes on upstream master `64d10fbf`. Native beta.1 cuts at `eecb437f` were published but are
+superseded after a fork CI test-fixture failure; they are not an accepted release candidate.
+Successor source `7a25cd72` has exact-head fork CI, actual packages and both fresh full native
+chains for `v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2`.
+Published v0.13.0 remains authoritative.
 
 RTX 5090 carries exact beta.2 source `6d4d0a05`, image `5d10a998`, model `81f924d4` and profile
 `qwen38-5090-v0.13.0` / config `751d22dc`; stock OMP 18.12.6 carries its three exact binaries.
 Native lanes move from `eec39564` to the same published version 3 artifact `81f924d4`
-(20,437,521,664 bytes, revision `1cbd84e7`). Both actual packages must bind `components.model`;
-remove the redundant `native_model` override only during real staging.
+(20,437,521,664 bytes, revision `1cbd84e7`). Both staged native variants bind `components.model`;
+the obsolete `native_model` override is removed.
 
-| Prepared native shape | RTX 4090 | RTX 3090 |
+| Native shape | RTX 4090 | RTX 3090 |
 | --- | --- | --- |
 | Context / KV / request limit | 131,072 / INT8 / one | 131,072 / INT8 / one |
 | Speculation | MTP3, no DFlash2 | MTP3, no DFlash2 |
 | Extra device-state slots / prefill | 2 / 2,048 tokens | 4 / 1,024 tokens |
 | Shared Host budget | 15,506,063,360 bytes (`14787.734375 MiB`) | 12,284,837,888 bytes (`11715.734375 MiB`) |
 | Admission headroom | 640 MiB | 768 MiB |
-| Reported pre-cut C1 decode | 137.35 tok/s | 78.33 tok/s |
+| Keep-warm | 60,000 ms | Disabled |
+| Fresh C1 decode / exact 130,048-token retrieval | 150.94 tok/s / 85.71 s | 84.06 tok/s / 208.78 s |
 
-The decode observations are not final-package qualification or a like-for-like speedup.
 Strict origin authentication and release-isolated native schema 3 stores replace the old
-checkpoint shape; prior native sessions replay from OMP transcripts. The Windows K6 rename fix
-is reported by its owner but needs actual Windows proof. Native JSON-schema support remains gated
-on real lane grammar/product qualification, not inferred from the carried container.
-The two UUID-bound native lanes still serve sequentially on port `18082`.
+checkpoint shape; prior native sessions replay OMP transcripts, never imported generations.
+Windows K6 uses handle-anchored replacement and a current-parent publication fence; failed
+publication retains any possibly visible generation. Disk exhaustion preserves the first cause
+and returns `capacity` without deleting surviving Responses objects. Prepared finite exports
+are admission progress, released before wakeup; this is not a retry or reclaim-policy change.
+The UUID-bound native lanes remain sequential on port `18082`, without native vision or DFlash2.
 
-The cut helper validates both complete native asset sets, then stages with
-`--from v0.13.0 --release v0.13.1 --prepared-draft --keep-deployment-profile` and binds their real
-qualifications, checksum sets and distinct dependency SBOMs. `rebind --draft` is deferred until that
-real manifest exists; notes-only preparation never fabricates hashes or widens the rebind tool.
-Root authority/matrix/profiles stay published v0.13.0 until the lane pin. Updated model-download
-blocks require explicit `documented_routes.document_change`, fresh route/client/public-install
-and independent restoration proof, followed by the normal evidence pins and founder-only publication.
+Each new native asset set has 10 hashed entries plus `SHA256SUMS` (11 files), including
+its SPDX file inventory and separate canonical `<package-stem>.cdx.json`. The dependency
+CycloneDX records actual vcpkg/CUDA/vendored and CRT/DirectStorage inputs. Native configuration
+hashes bind raw UTF-8/LF bytes; a port-only scratch package has distinct config/package hashes and
+explicit equivalence. Hardware rehearsal is not execution of the public package.
+
+Fresh Windows 90/90 per architecture, 75 package units, both Linux three-binary builds, canonical
+normal/pressure protocol, exact-context retrieval, 1,647/1,650-token strict restart reuse, OMP
+18.12.6 and actual restoration passed. Both rebased native lineages have no supported predecessor
+(`not_applicable`, zero rollback directions). Both beta.2 prereleases and their exact inventories
+are published and bound. Native/product-tooling council, lead lane/evidence pins and new public
+acceptance remain gates. Carried 5090/client receipts retain their original
+subjects and dates; predecessor public acceptance and the 5090 ledger are not transferred.
+The mutable draft is rebound with `rebind_release.py --release v0.13.1 --draft`; root
+authority/matrix/profiles stay published v0.13.0 until the lead lane pin. Updated model-download
+blocks require explicit `documented_routes.document_change`, fresh platform/client/public-install
+and independent restoration proof, then the normal evidence pins and founder-only publication.
 
 ## v0.13.0 — rebased RTX 5090 runtime, stock OMP 18.12.6, carried native lanes
 

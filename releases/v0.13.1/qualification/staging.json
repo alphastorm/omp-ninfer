@@ -1,0 +1,82 @@
+{
+  "artifact_type": "omp_ninfer_native_component_staging",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed-draft",
+  "native_source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+  "native_component_tags": [
+    "v0.7.0-qwen38-3090-beta.2",
+    "v0.7.0-qwen38-4090-beta.2"
+  ],
+  "native_bindings": [
+    {
+      "id": "rtx3090-windows-native",
+      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "package_sha256": "626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d",
+      "server_binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+      "configuration_sha256": "b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
+      "checksums_sha256": "55bb8f69079879bb6e572fbe96ce5077ff74f4c3e1f1b6e8902b7f1f462e99d5",
+      "dependency_sbom_sha256": "fc28d50ef76f4c019c3a44088f34ca115b110a9065f301fab84f2010667e9f5b",
+      "qualification_sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf"
+    },
+    {
+      "id": "rtx4090-windows-native",
+      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+      "server_binary_sha256": "cfc3e06649f5e539397963556f7e5459592d0d5ee7ae330a622cd5f43c356251",
+      "configuration_sha256": "b21cdaf8b5edeed4e7d498edf5dbfae77a993145f1d511a8e1aa1b7bdab42950",
+      "checksums_sha256": "c514dd96b0b8422c8769cc64df16f208e8d42eb6a2613fbd35eb1436e5a4f71f",
+      "dependency_sbom_sha256": "c5d9141e3be5d2c9408e5a67dc8c0b3ebdf82cfb68174c54ea737fa35d83b556",
+      "qualification_sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330"
+    }
+  ],
+  "shared_model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+  "obsolete_native_model_override_present": false,
+  "carried_rtx5090": {
+    "release_tag": "v0.7.0-qwen38-5090-beta.2",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "scope": "Exact unchanged v0.13.0 subject."
+  },
+  "method": "Targeted restage preserves authored notes/gates/contracts: copy both exact accepted native lane receipts and raw public profiles; execute scripts/bind_native_variant.py for both beta.2 tags using the actual checksum/build-receipt sets; rebind --draft. Existing-manifest overwrite protection is unchanged.",
+  "draft_rebind_command": "python3 scripts/rebind_release.py --release v0.13.1 --draft",
+  "root_authority": "Unchanged published v0.13.0 until lead lane pin; no root promotion in this stage.",
+  "g4": "pending-native-and-product-tooling-ledger",
+  "external_installation_acceptance": "pending",
+  "product_publication_authorized": false,
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/upstream-64d10fbf",
+    "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "evidence_path": "integration-native-rc3.json",
+    "evidence_sha256": "2b4a63e1a943e34cf80346ec373ce4ca1c701021f7732ad4ef04289393859112",
+    "evidence_post_freeze_uncommitted": true,
+    "checkpoint": {
+      "tag": "rebase/ckpt-native-3",
+      "source": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "tag_object_sha": "55fb5c03cffb06f2efd7e8f308d43fabb7f2fc4c",
+      "pushed": true
+    },
+    "scope": "Integrator6 accepted and byte-mirrored both actual complete N11 lane receipts/summaries. Receipts were captured after source freeze; no false claim that 7a25cd72 itself commits the measurements. C3 REPORT-only successor a0b646bf9 is outside the cut and is not the runtime source."
+  },
+  "binder_input_bindings": [
+    {
+      "lane": "rtx4090",
+      "tag": "v0.7.0-qwen38-4090-beta.2",
+      "checksums_artifact": "SHA256SUMS",
+      "checksums_sha256": "c514dd96b0b8422c8769cc64df16f208e8d42eb6a2613fbd35eb1436e5a4f71f",
+      "build_receipt_artifact": "package-build-receipt.json",
+      "build_receipt_sha256": "734e9f4d109b70eb6cb21a128a4f052ae1f08d8d4fc9bb3e516547cdb471356c"
+    },
+    {
+      "lane": "rtx3090",
+      "tag": "v0.7.0-qwen38-3090-beta.2",
+      "checksums_artifact": "SHA256SUMS",
+      "checksums_sha256": "55bb8f69079879bb6e572fbe96ce5077ff74f4c3e1f1b6e8902b7f1f462e99d5",
+      "build_receipt_artifact": "package-build-receipt.json",
+      "build_receipt_sha256": "cd69ed6f8be7d178a0a2e5f7d8d72e0b5281cdc9ae5ff6c276c42a07e2e229eb"
+    }
+  ]
+}

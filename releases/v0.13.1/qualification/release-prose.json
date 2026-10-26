@@ -1,0 +1,36 @@
+{
+  "artifact_type": "omp_ninfer_release_prose_checks",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed",
+  "subject": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "v0131/release-stage",
+    "working_tree_base_commit": "9711fc037151e97beddc1ce40b84497ff2652da2",
+    "native_source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "notes_path": "releases/v0.13.1/NINFER_RELEASE_NOTES.md",
+    "notes_sha256": "68fa9eb79a1434a38a96a6d0e9088db48ad976a90076083b53d8d0222ab82881"
+  },
+  "verification": {
+    "repository_path": "releases/v0.13.1/qualification/release-tooling-tests.json",
+    "sha256": "1e019b0877a4e10fc4f0982e87cccd3bf5de4dcbd3606313881059913285bdaf",
+    "included_prose_case_count": 6,
+    "included_prose_cases": [
+      "test_current_changelog_excludes_older_published_entries (test_documented_route.ReleaseProseTests.test_current_changelog_excludes_older_published_entries) ... ok",
+      "test_fenced_inline_and_url_literals_are_not_prose (test_documented_route.ReleaseProseTests.test_fenced_inline_and_url_literals_are_not_prose) ... ok",
+      "test_glued_words_are_rejected_in_prose (test_documented_route.ReleaseProseTests.test_glued_words_are_rejected_in_prose) ... ok",
+      "test_link_labels_remain_prose (test_documented_route.ReleaseProseTests.test_link_labels_remain_prose) ... ok",
+      "test_only_complete_documented_identifiers_are_allowed (test_documented_route.ReleaseProseTests.test_only_complete_documented_identifiers_are_allowed) ... ok",
+      "test_release_facing_prose_has_no_glued_tokens (test_documented_route.ReleaseProseTests.test_release_facing_prose_has_no_glued_tokens) ... ok"
+    ],
+    "stage_notes_invariant": "test_v0131_release_preparation.V0131PreparationTests.test_notes_are_bounded_readable_and_keep_measurement_gates_distinct passed in the selected suite"
+  },
+  "staged_notes": {
+    "line_count": 167,
+    "maximum_lines": 210,
+    "word_glued_digit_tokens": 0,
+    "measurement_scope": "Fresh N11 native numbers, carried original 5090/client subjects, historical superseded candidate explicitly separated."
+  },
+  "scope": "Result of actually exercised current prose/notes tests inside the 505-test selected suite. Links/private markers were exercised by the real prepin verifier with only its five recorded root-promotion/installability errors. No runtime, native council or public-route acceptance is inferred."
+}

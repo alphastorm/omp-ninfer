@@ -17,8 +17,33 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 | `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.6.11-qwen38-4090-beta.1` (`52687044`, server `76f35b74`); RTX 3090 `v0.6.3-qwen38-3090-beta.1` (`74120de0`, server `bca236e5`); shared source `cad1976764fded5fbe96930c36bed0570b3d3de7` | Mainline fork base `6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc` | Model `eec39564`, MTP3, INT8 KV, one request at a time, UUID-bound on one two-GPU Windows host (sequential on port 18082); carried from v0.12.0/v0.12.2 ([RTX 4090](../releases/v0.13.0/qualification/rtx4090.json), [RTX 3090](../releases/v0.13.0/qualification/rtx3090.json)); rebased native packages target `v0.13.1`. |
 | `Neroued/ninfer` (engine watch) | Shipped RTX 5090 container base in `v0.13.0` | Master `64d10fbf` (2026-10-16), 362 commits after `6e8b2e2a` | Watch listed 250 commits/300 files (`unknown-truncated`), 77 commits after EXP-095's `81c8ce09`; [dated watch](measurements/2026-10-25-upstream-watch.json). Downstream qualification is bound in [`releases/v0.13.0/qualification.json`](../releases/v0.13.0/qualification.json). |
 | `sergiuszm/ninfer-4090` (engine watch) | `upgrade-available`; active `sm_89` reference | `rtx4090-port` at `7f47a622` (2026-10-24), 172 commits after research baseline `81c8ce09` | Replaces the inactive `UDPSendToFailed` watch; its old `11aae2d6` fork point remains in the manifest as provenance. No community runtime is adopted. |
-| `Don-Chad/ninfer-3090` (engine watch) | `upgrade-available`; community adoption recorded | Master `d8c29253` (2026-10-16), 1,907 commits after historical fork point `ef6ecc3c` | [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) adopted the ashalliants-derived line. Commit/file lists are cut; overlap is `unknown-truncated`. Shipped native source remains `cad19767`. |
+| `Don-Chad/ninfer-3090` (engine watch) | `upgrade-available`; community adoption recorded | Master `d8c29253` (2026-10-16), 1,907 commits after historical fork point `ef6ecc3c` | [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) adopted the ashalliants-derived line. Commit/file lists are cut; overlap is `unknown-truncated`. Published v0.13.0 native source remains `cad19767`; the separate v0.13.1 port below adopts no community binary. |
 | `ashalliants/ninfer-3090` (community source watch) | `upgrade-available`; tracked separately | Master `0312a1d7` (2026-10-24), 1,890 commits after research baseline `81c8ce09` | Active source of the adopted community line; commit/file lists are cut (`unknown-truncated`). Performance and persistence claims require independent qualification. |
+
+## v0.13.1 native runtime draft
+
+The [staged native release](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) ports sm_89 / sm_86
+and Windows onto the same upstream master `64d10fbf` foundation as the unchanged RTX 5090 beta.2
+component. Both native lanes move to published model version 3 `81f924d4`, INT8 KV, MTP3,
+131,072 context, one active request, shared Host budgets and 640/768 MiB admission headroom.
+This is a downstream Windows/architecture port, not new upstream Windows support, a dev-pool
+adoption, native DFlash2 qualification or an adopted community runtime.
+
+K6 preserves existing handle-anchored publication and adds the missing current-parent failure
+handling/extended-root coverage. Physical disk exhaustion retains its first cause and returns
+`capacity` without deleting surviving Responses objects; prepared off-worker exports are finite
+admission progress, with lease destruction before wakeup. Native roots remain isolated from
+predecessor generations, and the separate dependency CycloneDX includes real CRT/DirectStorage
+provenance without replacing SPDX.
+
+The first native beta.1 cuts at `eecb437f` are published but unused after a fork CI fixture defect.
+Frozen beta.2 source `7a25cd72` has exact-head CI, Windows 90/90 per architecture, 75 package units,
+both Linux builds and both fresh full hardware chains (150.94/84.06 tok/s C1 decode;
+85.71/208.78 s exact 130,048-token retrieval; 1,647/1,650-token restart reuse). Both actual beta.2
+prereleases, inventories and byte-mirrored qualification/profile receipts are bound; native/product-tooling
+council and lead lane/evidence pins remain pending.
+Neither old native proof nor the carried RTX 5090 ledger transfers. New client/public-route
+acceptance is independent. Published v0.13.0 positions above remain authoritative until the cut.
 
 ## v0.13.0 sync program
 

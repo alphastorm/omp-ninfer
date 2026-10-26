@@ -72,6 +72,35 @@ explains the structured-output tail and was diagnostic-only and reverted in that
 branch; integration later landed canonical sorted-key serialization `0abe7c8e5` with host byte pins,
 without repeating the full corpus comparison.
 
+## Staged v0.13.1 native qualification boundary
+
+The [native draft](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) moves both Windows lanes to the
+published version 3 model `81f924d4`, shared Host budgets and 640/768 MiB admission headroom,
+while retaining 131,072-token INT8 KV, MTP3 and C1. The current qualified v0.13.0 table above is
+not silently replaced: source, model and configuration changes prevent a like-for-like native
+speedup or parity claim.
+
+Fresh beta.2 qualification at `7a25cd72` measured **150.94 / 84.06 tok/s** C1 decode and exact
+130,048-token retrieval in **85.71 / 208.78 s** on RTX 4090 / RTX 3090. Both short restart fixtures
+reused 1,647 explicit-save and 1,650 managed-stop tokens, with exact sentinels, a replaced process
+and counters matching an independently measured cold-process baseline. These are not the
+RTX 5090's 16,384-token G1 frontier or universal loss-free shutdown.
+The historical beta.1 source `eecb437f` failed a fork CI fixture; its published cuts remain unused.
+
+The final source has [exact-head fork CI](https://github.com/alphastorm/ninfer/actions/runs/40273897706),
+fresh Windows 90/90 per architecture, 75 package units, both Linux three-binary builds and both
+full native hardware chains. Final-source normal/pressure canonical product payloads passed
+private same-session replay, isolated private-state miss, Responses lifecycle and both
+Chat/Responses JSON-schema oracles. Reduced shared Host budgets were 12,438.578125 MiB on
+RTX 4090 and 9,366.578125 MiB on RTX 3090, with two/four extra device-state slots retained.
+A port-only scratch rehearsal is not execution of the public package. New public-route/client
+acceptance and native/product-tooling council remain separate. Actual byte-mirror/publication/stage
+bindings name beta.2 and never relabel the earlier candidate.
+
+The unchanged RTX 5090 beta.2 measurements and EXP-097 provider comparison above retain their
+actual v0.13.0 subjects. The 96% G2 policy is not a new native throughput gate; no full new G2,
+powered quality/leak or historical OMP parallel/fanout campaign is claimed for this draft.
+
 ## Method
 
 - **`prefill_curve` and `long_session`:** Cold-process exact retrieval at **130,048 prompt tokens**

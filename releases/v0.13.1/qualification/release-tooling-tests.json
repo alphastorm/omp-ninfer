@@ -1,0 +1,73 @@
+{
+  "artifact_type": "omp_ninfer_release_tooling_checks",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed-with-documented-local-exclusions",
+  "subject": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "v0131/release-stage",
+    "working_tree_base_commit": "9711fc037151e97beddc1ce40b84497ff2652da2",
+    "native_source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "public_configuration_sha256": {
+      "3090": "b49aad9915dd333f14cc7a3f0bb269aec124b38112e8ea984af3f569fe2dac75",
+      "4090": "b21cdaf8b5edeed4e7d498edf5dbfae77a993145f1d511a8e1aa1b7bdab42950"
+    },
+    "scope": "Current executable/profile/prose/test changes were complete before this execution; only measured result metadata and hash edges are finalized afterward."
+  },
+  "local_suite": {
+    "command_template": "python3 -c \"$DISCOVERY_DRIVER\"",
+    "discovery_driver": "import json, sys, time, unittest\nexcluded = {\n    \"test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan\",\n    \"test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency\",\n    \"test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft\",\n    \"test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples\",\n}\ndef flatten(suite):\n    for item in suite:\n        if isinstance(item, unittest.TestSuite):\n            yield from flatten(item)\n        else:\n            yield item\nall_tests = list(flatten(unittest.defaultTestLoader.discover('tests')))\nselected = unittest.TestSuite(test for test in all_tests if test.id() not in excluded)\nprint('Discovered:', len(all_tests), 'selected:', selected.countTestCases(), flush=True)\nprint('Documented unchanged local timing exclusions:', *sorted(excluded), sep='\\n', flush=True)\nstarted = time.perf_counter()\nresult = unittest.TextTestRunner(verbosity=2).run(selected)\nsummary = {'discovered_tests': len(all_tests), 'selected_tests': result.testsRun, 'excluded_test_ids': sorted(excluded), 'elapsed_seconds': round(time.perf_counter() - started, 3), 'failures': len(result.failures), 'errors': len(result.errors), 'skipped': len(result.skipped), 'successful': result.wasSuccessful()}\nprint('RELEASE_SUITE_JSON=' + json.dumps(summary, sort_keys=True), flush=True)\nsys.exit(not result.wasSuccessful())\n",
+    "discovered_tests": 509,
+    "elapsed_seconds": 234.779,
+    "errors": 0,
+    "excluded_test_ids": [
+      "test_concurrency_probe.ConcurrencyProbeTests.test_metrics_count_reasoning_and_measure_concurrent_makespan",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_one_pre_stream_reset_retry_keeps_submit_latency",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft",
+      "test_concurrency_probe.ConcurrencyProbeTests.test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples"
+    ],
+    "failures": 0,
+    "selected_tests": 505,
+    "skipped": 5,
+    "successful": true,
+    "tests_run": 505,
+    "exit_code": 0,
+    "result": "OK (skipped=5)",
+    "scope": "All 509 discovered tests except the four established unchanged local timing failures. 505 tests ran with zero failures/errors and five visible platform-dependent skips; not a clean 509-test claim. No timing input, assertion, skip decorator or tolerance was changed."
+  },
+  "draft_rebind": {
+    "command": "python3 scripts/rebind_release.py --release v0.13.1 --draft",
+    "exit_code": 0,
+    "output": [
+      "wrote releases/v0.13.1/COMPATIBILITY.md",
+      "rebound hash chain for v0.13.1; compatibility b622abec1551…"
+    ],
+    "compatibility_sha256": "b622abec15512838deec5e42c2da82dfbf0fc333a48e5b8c6bbd4f5c356a5b4a"
+  },
+  "draft_installable_posture": {
+    "command": "python3 scripts/verify_release.py --release v0.13.1 --require-installable",
+    "exit_code": 1,
+    "errors": [
+      "profile: release must match the manifest",
+      "profiles/qwen38-rtx5090-manual-tunnel.json: release must match the manifest",
+      "root and release compatibility authorities must be byte-identical",
+      "root and release compatibility matrices must be byte-identical",
+      "release manifest is not installable"
+    ],
+    "scope": "Expected pre-lane-pin posture: live profile release labels and root authorities remain published v0.13.0 by instruction. No root promotion or verifier weakening; lead lane pin and subsequent verification are separate."
+  },
+  "stage_helper": {
+    "artifact": "release-v0131-stage.sh",
+    "sha256": "098a8740abf2e975696f71c3dfb5d2d90b00daeeff1d486740868a04e6706f59",
+    "scope": "Prepared beta.2 source/profile/canonical CDX binding helper; not executed against the existing manifest because overwrite protection intentionally refuses it. The actual stage used targeted binder/copy/rebind commands instead."
+  },
+  "remote_ci": {
+    "fork_source": {
+      "repository_path": "releases/v0.13.1/qualification/native-ci.json",
+      "sha256": "a103a498b23adf364bf821222bdff0c9973890b83b56ba9f3d63d10453f6cb18"
+    },
+    "current_product_stage": "Not dispatched or claimed by this author. Previously observed fleet admission has no development-eligible alphastorm/omp-ninfer profile; that unchanged failure was not rerun."
+  },
+  "scope": "Local host-free unit/integration/prose/route-contract coverage only. No formatter, linter, host/GPU job, new publication, public URL installation or council was executed by the release author."
+}

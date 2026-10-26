@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.13.0.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.13.0.](assets/banner.png)][published-guide]
 
 <div align="center">
 
@@ -11,11 +11,11 @@ Every install route in the guide was run end to end on **v0.13.0** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.13.0/acceptance/composed-external-installation.json)).
 
-### [Get started →](docs/QUICKSTART.md)
+### [Get started →][published-guide]
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.13.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.13.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.0) · [Lanes][published-lanes] ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -33,6 +33,9 @@ three client platforms, both native lanes
 [context-badge]: https://img.shields.io/badge/context-130%2C048%20tokens%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
+[published-guide]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md
+[published-lanes]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md#choose-your-lane
+[published-client]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md#omp-18126-client
 
 ## What it does
 
@@ -89,9 +92,9 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 
 ## Get started
 
-1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+1. **[Choose your lane][published-lanes]** and check its prerequisites.
 2. **Clone tag `v0.13.0`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.12.6 client](docs/QUICKSTART.md#omp-18126-client)** with the
+3. **[Install the stock Oh My Pi 18.12.6 client][published-client]** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
@@ -102,6 +105,18 @@ Upgrading from v0.12.2 on RTX 5090 moves the container runtime onto upstream mas
 for rollback; prior sessions replay from OMP transcripts); the native RTX 4090 and RTX 3090
 packages carry unchanged from v0.12.2 and update only the stock Oh My Pi 18.12.6 client. Native
 owners staying on v0.10.0 keep the [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+
+### Next release: rebased native Windows lanes
+
+The [v0.13.1 draft](releases/v0.13.1/NINFER_RELEASE_NOTES.md) moves both native lanes onto upstream
+master `64d10fbf`, the shared published version 3 model, strict-origin schema 3 checkpoints and
+shared Host budgets, with 640/768 MiB admission headroom. The RTX 5090 beta.2 runtime and stock
+OMP 18.12.6 carry unchanged. Both native beta.2 packages are published and freshly qualified,
+including Chat/Responses JSON-schema output and 128-character tool names. Changed-source council
+and fresh candidate-bound public-route acceptance remain separate gates in the
+[draft qualification](releases/v0.13.1/qualification.json); this is not a published product.
+The front-door links above stay on the accepted v0.13.0 guide while the working-tree guide stages
+the next native model/download contract.
 
 ## How it works
 
@@ -145,7 +160,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
 
 | Document | What it answers |
 | --- | --- |
-| [Quickstart](docs/QUICKSTART.md) | Which lane, prerequisites, exact install, acceptance checks |
+| [Published quickstart][published-guide] | Which lane, prerequisites, exact install, acceptance checks |
 | [Facts](docs/FACTS.md) | Current identities, limits, and non-claims in one place |
 | [Decision guide](docs/DECISION_GUIDE.md) | This versus Ollama, LM Studio, llama.cpp, vLLM |
 | [Compatibility](docs/COMPATIBILITY.md) | Qualified client and runtime combinations (generated) |

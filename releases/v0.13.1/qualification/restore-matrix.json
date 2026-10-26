@@ -1,0 +1,127 @@
+{
+  "artifact_type": "omp_ninfer_schema3_restore_failure_matrix",
+  "schema_version": 1,
+  "release": "v0.13.0",
+  "as_of": "2026-10-25",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-scoped",
+  "host_ctest": {
+    "passed": 66,
+    "failed": 0,
+    "skipped": 0
+  },
+  "service_native_refusals": [
+    "CapacityRefused/Capacity",
+    "Corrupt/InvalidIndex",
+    "Corrupt/PayloadSizeMismatch",
+    "Corrupt/PayloadDigestMismatch",
+    "IdentityMismatch/FingerprintMismatch",
+    "IdentityMismatch/StalePublication",
+    "PolicyDisabled/CacheDisabled",
+    "Unavailable/IoUnavailable"
+  ],
+  "responses_admission_refusals": [
+    "Capacity",
+    "StaleRevision",
+    "TransactionBusy",
+    "ForeignSessionCollision",
+    "newer-live-endpoint-or-record"
+  ],
+  "invariants": [
+    "Native/store refusal cannot publish partial Responses state.",
+    "The freshness guard rejects older snapshots even when a newer unsaved endpoint predates capture.",
+    "Strict origin rejects unauthenticated generations without mutation; verified MAC/digest mismatch fails closed.",
+    "Per-record deletion preserves authenticated survivors, including disk-only and replay-only records, before acknowledging erasure.",
+    "Replay-only survivors never authorize native eviction.",
+    "Quota victims survive stale/failed publication; ordinary pressure verifies native payloads before destructive release.",
+    "Pending callbacks do not wait for the Responses lock; retries require matching real progress."
+  ],
+  "remediation_cases": [
+    {
+      "finding": "1",
+      "test": "pressure_callback_does_not_wait_for_restore_commit",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "automatic_retry_requires_matching_progress",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "automatic_retry_budget_and_terminal_refusal",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "2",
+      "test": "publication_abandonment_completes_pressure",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "6",
+      "test": "durable_record_delete_preserves_survivors",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "6",
+      "test": "durable_delete_retains_disk_only_records",
+      "target": "ninfer_automatic_checkpoint_queue_test"
+    },
+    {
+      "finding": "9",
+      "test": "test_restore_guard_captured_after_newer_turn",
+      "target": "ninfer_openai_responses_store_test"
+    },
+    {
+      "finding": "3a",
+      "test": "queued_expiry_preserves_committed_tag",
+      "target": "ninfer_engine_checkpoint_control_test"
+    },
+    {
+      "finding": "3b",
+      "test": "test_abandoned_turn_preserves_committed_owner",
+      "target": "ninfer_resource_manager_test"
+    },
+    {
+      "finding": "3b",
+      "test": "paused_request_settles_by_native_replay",
+      "target": "ninfer_engine_checkpoint_adapter_test"
+    },
+    {
+      "finding": "4",
+      "test": "test_quota_stale_publication_preserves_unrelated_currents",
+      "target": "ninfer_session_checkpoint_store_test"
+    },
+    {
+      "finding": "5",
+      "test": "test_ordinary_pressure_preserves_same_size_corrupt_victim",
+      "target": "ninfer_session_checkpoint_store_test"
+    },
+    {
+      "finding": "6",
+      "test": "test_replay_only_survivors_are_durable_without_native_authority",
+      "target": "ninfer_session_checkpoint_store_test"
+    }
+  ],
+  "scope": "Fresh F2 host fault-injection/native validation and production restart/C2 proof. Thirteen named remediation cases are internal cases within host executables, not thirteen additional CTest executables.",
+  "provenance": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/rc2-5090",
+    "source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "evidence_path": "integration-rc.json",
+    "evidence_sha256": "ff4296fdd4f51ffc875c3a80f22768f81282bb820d8f1d2d297f185fd7d5ba98",
+    "evidence_post_freeze_uncommitted": true,
+    "json_pointer": "/phases/0",
+    "scope": "Content-safe projection of Integrator5 exact-source evidence. Attestation was recorded after source freeze; no false claim that F2 itself commits the measured receipt. Product stage commit binds this projection."
+  }
+}
