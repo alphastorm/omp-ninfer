@@ -220,6 +220,17 @@ class EndpointTest(unittest.TestCase):
             with self.assertRaises(SCREEN.ScreenError):
                 SCREEN.endpoint_root(bad)
 
+    def test_baseline_cli_captures_once_or_exports_without_a_candidate(self):
+        with patch.object(SCREEN, "sharded_pair", return_value={"status": "shard-complete"}) as capture, \
+             patch("sys.stdout", new=io.StringIO()):
+            self.assertEqual(SCREEN.main(["baseline", "--lane", "rtx3090", "--plan", "plan.json",
+                                          "--out", "out", "--max-shards", "1", "--resume"]), 0)
+        self.assertTrue(capture.call_args.kwargs["baseline_only"])
+        with patch.object(SCREEN, "export_baseline", return_value={"layout": {"counted_prompts": 1120}}) as export, \
+             patch("sys.stdout", new=io.StringIO()):
+            self.assertEqual(SCREEN.main(["baseline", "--from-campaign", "captured", "--out", "cache"]), 0)
+        export.assert_called_once_with(Path("captured"), Path("cache"))
+
     def test_wrong_served_id_fails_before_any_corpus_request(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -296,7 +307,9 @@ class ShardsTest(unittest.TestCase):
                          "model_sha256": "model", "config_sha256": "config", "image": None,
                          "seccomp_profile_sha256": None,
                          "gpu": {"uuid": "GPU-selected", "driver": "driver", "power_limit_w": 450}}
-        self.fingerprint = {"arms": {"A": self.identity, "B": self.identity}, "inputs": "frozen"}
+        self.fingerprint = {"lane": "rtx4090", "arms": {"A": self.identity, "B": self.identity}, "inputs": "frozen",
+                            "preregistration_sha256": "preregistration",
+                            "capture_contract": dict(SCREEN.CAPTURE_CONTRACT, model_id="qwen3.8-27b")}
         self.patches = [
             patch.object(self.runner, "validate_plan"),
             patch.object(SCREEN, "pair_fingerprint", return_value=self.fingerprint),
@@ -312,7 +325,10 @@ class ShardsTest(unittest.TestCase):
         run = directory / "quality"
         run.mkdir()
         ids = [json.loads(line)["case_id"] for line in kwargs["quality_cases"].read_text().splitlines()]
-        self.runner.save(run / "manifest.json", {"label": "test"})
+        self.runner.save(run / "manifest.json", {"label": "test", **self.fingerprint["capture_contract"],
+                                                "case_files": [{"path": str(kwargs["quality_cases"]),
+                                                                "sha256": self.runner.sha256_file(kwargs["quality_cases"])}],
+                                                "case_count": len(ids), "corpus_sha256": "fixture-corpus"})
         scores, responses = [], []
         for sample_id in ids:
             case, variant = sample_id.rsplit(".v", 1)
@@ -323,8 +339,9 @@ class ShardsTest(unittest.TestCase):
                            "schema_valid": True, "tool_evaluable": True, "tool_selection_ok": True,
                            "tool_argument_ok": True, "output_tokens": 100, "secret_leaks": sample["leaks"]})
         (run / "responses.jsonl").write_text("".join(json.dumps(row) + "\n" for row in responses))
-        self.runner.save(run / "scores.json", {"per_case": scores})
-        receipt = {"status": "passed", "identity": self.identity, "wall_seconds": len(ids) * 2}
+        self.runner.save(run / "scores.json", {"per_case": scores, "corpus_sha256": "fixture-corpus"})
+        identity = self.fingerprint["arms"]["A" if index in (0, 3) else "B"]
+        receipt = {"status": "passed", "identity": identity, "wall_seconds": len(ids) * 2}
         self.runner.save(directory / "receipt.json", receipt)
         return receipt
 
@@ -382,7 +399,8 @@ class ShardsTest(unittest.TestCase):
             self.pair(max_shards=1, resume=True)
         prompt.write_bytes(original)
         run = next(self.out.glob("0-production-*/attempt-*/quality"))
-        (run / "manifest.json").write_text('{"label":"changed"}')
+        manifest = self.runner.load(run / "manifest.json")
+        self.runner.save(run / "manifest.json", {**manifest, "label": "changed"})
         with self.assertRaisesRegex(SCREEN.ScreenError, "hash changed"):
             self.pair(max_shards=1, resume=True)
         self.mocks[-1].assert_not_called()
@@ -486,6 +504,148 @@ class ShardsTest(unittest.TestCase):
         with self.assertRaisesRegex(SCREEN.ScreenError, "unsealed finished/failed"):
             self.pair(max_shards=1, resume=True)
         self.mocks[-1].assert_not_called()
+
+    def baseline(self, **kwargs):
+        return SCREEN.sharded_pair("rtx4090", self.plan, self.out, shard_size=50, baseline_only=True, **kwargs)
+
+    def test_complete_baseline_is_captured_once_then_only_candidate_and_fresh_subset_run(self):
+        first = self.baseline(max_shards=1)
+        self.assertNotIn("baseline", first)
+        baseline = self.baseline(resume=True)
+        self.assertEqual(baseline["status"], "baseline-complete")
+        self.assertNotIn("quality", baseline)
+        self.assertEqual({call.args[4] for call in self.mocks[-1].call_args_list}, {0, 3})
+        self.mocks[-1].reset_mock()
+        # An intentionally changed B binary is valid; the stored A identity must stay unchanged.
+        self.fingerprint["arms"]["B"] = {**self.identity, "binary_sha256": "candidate-binary"}
+        candidate = self.root / "candidate"
+        original = SCREEN.decide
+        with patch.object(SCREEN, "decide", side_effect=lambda *args: original(*args, resamples=100)):
+            result = SCREEN.sharded_pair("rtx4090", self.plan, candidate, shard_size=50,
+                                          baseline=Path(baseline["baseline"]))
+        self.assertEqual({call.args[4] for call in self.mocks[-1].call_args_list}, {1, 2})
+        self.assertEqual(result["quality"]["counted_prompts"], 240)
+        self.assertEqual(result["quality"]["verdict"], "pass")
+        self.assertTrue(result["byte_comparison"]["all_identical"])
+        self.assertEqual(result["determinism_byte_comparison"]["production"]["compared"], 80)
+
+    def test_baseline_reuse_refuses_runtime_corpus_prompt_and_sampling_mismatches_before_gpu(self):
+        baseline = Path(self.baseline()["baseline"])
+        self.mocks[-1].reset_mock()
+        mutations = [
+            lambda value: value["arms"]["A"].update(binary_sha256="other"),
+            lambda value: value["arms"]["A"].update(model_sha256="other"),
+            lambda value: value["arms"]["A"].update(config_sha256="other"),
+            lambda value: value["arms"]["A"]["gpu"].update(driver="other"),
+            lambda value: value.update(inputs="other"),
+            lambda value: value["capture_contract"].update(reasoning_level="medium"),
+        ]
+        for mutation in mutations:
+            changed = json.loads(json.dumps(self.fingerprint))
+            mutation(changed)
+            with patch.object(SCREEN, "pair_fingerprint", return_value=changed):
+                with self.assertRaisesRegex(SCREEN.ScreenError, "stored baseline"):
+                    SCREEN.sharded_pair("rtx4090", self.plan, self.root / "candidate",
+                                         shard_size=50, baseline=baseline, max_shards=1)
+        with self.assertRaisesRegex(SCREEN.ScreenError, "prompt set/shard plan"):
+            SCREEN.sharded_pair("rtx4090", self.plan, self.root / "candidate",
+                                 shard_size=40, baseline=baseline, max_shards=1)
+        cases = self.cases / "set.jsonl"
+        original = cases.read_bytes()
+        cases.write_bytes(original.replace(b"Answer.", b"Different task."))
+        with self.assertRaisesRegex(SCREEN.ScreenError, "prompt set/shard plan"):
+            SCREEN.sharded_pair("rtx4090", self.plan, self.root / "candidate",
+                                 shard_size=50, baseline=baseline, max_shards=1)
+        cases.write_bytes(original)
+        self.assertFalse((self.root / "candidate").exists())
+        self.mocks[-1].assert_not_called()
+
+    def test_baseline_reuse_reopens_source_and_merged_bytes_instead_of_trusting_cached_hashes(self):
+        baseline = Path(self.baseline()["baseline"])
+        self.mocks[-1].reset_mock()
+        merged = baseline / "runs/production/responses.jsonl"
+        original = merged.read_bytes()
+        merged.write_bytes(original.replace(b"log-001:0", b"edited:0"))
+        # Even updating a cached hash is insufficient: source seals regenerate the expected bytes.
+        path = baseline / "baseline.json"
+        artifact = self.runner.load(path)
+        artifact["runs"]["production"]["responses.jsonl"] = self.runner.sha256_file(merged)
+        self.runner.save(path, artifact)
+        with self.assertRaisesRegex(SCREEN.ScreenError, "evidence changed"):
+            SCREEN.sharded_pair("rtx4090", self.plan, self.root / "candidate", shard_size=50,
+                                 baseline=baseline, max_shards=1)
+        self.assertFalse((self.root / "candidate").exists())
+        self.mocks[-1].assert_not_called()
+
+    def test_incomplete_baseline_cannot_be_exported_or_reused(self):
+        self.baseline(max_shards=1)
+        with self.assertRaises((SCREEN.ScreenError, OSError)):
+            SCREEN.export_baseline(self.out, self.root / "cache")
+        self.assertFalse((self.root / "cache/baseline.json").exists())
+
+    def test_stored_baseline_or_source_mutation_is_refused_during_candidate_resume(self):
+        baseline = Path(self.baseline()["baseline"])
+        candidate = self.root / "candidate"
+        SCREEN.sharded_pair("rtx4090", self.plan, candidate, shard_size=50,
+                             baseline=baseline, max_shards=1)
+        self.mocks[-1].reset_mock()
+        manifest = next(self.out.glob("0-production-*/attempt-*/quality/manifest.json"))
+        value = self.runner.load(manifest)
+        self.runner.save(manifest, {**value, "label": "edited"})
+        with self.assertRaisesRegex(SCREEN.ScreenError, "hash changed"):
+            SCREEN.sharded_pair("rtx4090", self.plan, candidate, shard_size=50,
+                                 baseline=baseline, max_shards=1, resume=True)
+        self.mocks[-1].assert_not_called()
+
+    def test_capture_prompt_and_sampling_manifest_mismatches_cannot_be_sealed(self):
+        layout, _ = SCREEN.shard_plan(self.cases, 50)
+        job = layout["jobs"][0]
+        self.pair(max_shards=1)
+        capture = next(self.out.glob("0-production-*/attempt-*"))
+        path = capture / "quality/manifest.json"
+        original = self.runner.load(path)
+        changed = json.loads(json.dumps(original))
+        changed["case_files"][0]["sha256"] = "different"
+        self.runner.save(path, changed)
+        with self.assertRaisesRegex(SCREEN.ScreenError, "prompt identity"):
+            SCREEN.verified_capture(self.runner, capture, job, self.identity)
+        changed = json.loads(json.dumps(original))
+        changed["sampling"]["temperature"] = 0.5
+        self.runner.save(path, changed)
+        with self.assertRaisesRegex(SCREEN.ScreenError, "sampling settings"):
+            SCREEN.verified_capture(self.runner, capture, job, self.identity)
+
+    def test_legacy_full_campaign_baseline_can_be_exported_without_recapturing(self):
+        original = SCREEN.decide
+        with patch.object(SCREEN, "decide", side_effect=lambda *args: original(*args, resamples=100)):
+            self.pair()
+        self.mocks[-1].reset_mock()
+        artifact = SCREEN.export_baseline(self.out, self.root / "cache")
+        self.assertEqual(len(artifact["layout"]["jobs"]), 7)
+        self.assertEqual(set(artifact["runs"]), {"production", "production_determinism"})
+        self.assertTrue(all(artifact["validity"].values()))
+        self.mocks[-1].assert_not_called()
+
+    def test_error_bound_is_not_weakened_or_replaced_by_byte_comparison(self):
+        original_capture = self.capture
+        def errored(*args, **kwargs):
+            receipt = original_capture(*args, **kwargs)
+            path = args[5] / "quality/responses.jsonl"
+            rows = [json.loads(line) for line in path.read_text().splitlines()]
+            if rows[-1]["case_id"] == "worklog-001.v7":
+                rows[-1]["error"] = "transport-error"
+                path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            return receipt
+        self.mocks[-1].side_effect = errored
+        baseline = Path(self.baseline()["baseline"])
+        original = SCREEN.decide
+        with patch.object(SCREEN, "decide", side_effect=lambda *args: original(*args, resamples=100)):
+            result = SCREEN.sharded_pair("rtx4090", self.plan, self.root / "candidate", shard_size=50,
+                                          baseline=baseline)
+        self.assertEqual(result["quality"]["verdict"], "pass")
+        self.assertEqual(result["quality"]["validity"]["errored_samples"], {"production": 1, "candidate": 1})
+        self.assertFalse(result["byte_comparison"]["all_identical"])
+        self.assertTrue(result["byte_comparison"]["retained_bytes_identical"])
 
 
 if __name__ == "__main__":

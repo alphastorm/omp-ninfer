@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   validity rules and reporting actual model-output byte comparisons. Add deterministic,
   bounded fresh-server shards with identity-verified resume, retained capture seals and
   complete-set-only reduction, plus per-100-prompt wall timing and sampled GPU clocks.
+  Capture/seal each shipped baseline once and reuse its verified full screen and fresh
+  determinism subset for later candidate-only screens without repeating the baseline.
+- Add risk-scaled quality gates for one integrated candidate per lane: cached 84-case
+  retained-byte comparisons; rounding divergence with exact generated-token indices,
+  full JSON/tool schema checks, bound FP64 op errors and exact long retrieval; and frozen
+  held-out ON/OFF perplexity followed only when acceptable by a pre-registered,
+  sequential 200-prompt claim/secret screen. Full EXP-085 remains an escalation.
 - Unify runtime component cutting under `scripts/hosts/cut-ninfer-component.sh --kind
   container|native` with explicit lane selection, preserved kind-specific preflights/assets,
   and no-effect defaults; publication requires `--publish`, never together with `--dry-run`.

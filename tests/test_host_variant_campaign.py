@@ -117,7 +117,11 @@ class CampaignTests(unittest.TestCase):
                                        shard_size=100, max_shards=1, resume=True)
             self.assertEqual(result["status"], "shard-complete")
             pair.assert_called_once_with("rtx4090", Path("plan"), Path("out"),
-                                         shard_size=100, max_shards=1, resume=True)
+                                         shard_size=100, max_shards=1, resume=True, baseline=None)
+            pair.reset_mock()
+            HOST.run_campaign("rtx4090", Path("plan"), Path("out"), mode="quality", baseline=Path("cache"))
+            pair.assert_called_once_with("rtx4090", Path("plan"), Path("out"),
+                                         shard_size=100, max_shards=None, resume=False, baseline=Path("cache"))
         for mode, index, profile in (("c1", None, False), ("quality", 0, False), ("quality", None, True)):
             with self.assertRaises(HOST.CampaignError):
                 HOST.run_campaign("rtx4090", Path("plan"), Path("out"), mode=mode,

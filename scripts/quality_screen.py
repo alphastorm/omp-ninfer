@@ -158,6 +158,11 @@ GATE_FIELDS = ("facts_found", "facts_total", "citations_supported", "citations_t
                "schema_valid", "tool_evaluable", "tool_selection_ok", "tool_argument_evaluable",
                "tool_argument_ok", "items_duplicate", "items_total", "critical", "forbidden", "count")
 REDACTION_FIELDS = ("leaks", "passed", "count")
+CAPTURE_CONTRACT = {
+    "transport": "raw-http", "reasoning_level": "low", "reasoning_wire": "top-level",
+    "reasoning_token_headroom": 8192, "max_output_tokens": 1024, "concurrency": 1,
+    "sampling": {"seed": None, "temperature": 0.0, "top_p": None},
+}
 
 
 def variants_for(control: bool) -> int:
@@ -569,27 +574,39 @@ def capture_endpoint(*, qualification: Path, cases: Path, fixtures: Path, base_u
     return run_identity(out)
 
 
+def response_bytes(row: dict[str, Any], *, include_finish_reason: bool = False) -> bytes:
+    tools = [{k: v for k, v in tool.items() if k != "id"} for tool in row.get("tool_calls") or []]
+    value = [row.get("content") or "", row.get("reasoning") or "", tools]
+    if include_finish_reason:
+        value.append(row.get("finish_reason"))
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+
 def compare_responses(baseline: Path, candidate: Path,
                       sample_ids: Sequence[str] | None = None) -> dict[str, Any]:
     """Compare actual model-output bytes, not token counts or timing-bearing response envelopes."""
-    def outputs(run: Path) -> dict[str, bytes]:
+    def outputs(run: Path) -> tuple[dict[str, bytes], set[str]]:
         rows = {}
+        errors = set()
         for line in (run / "responses.jsonl").read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             row = json.loads(line)
             case = row["case_id"]
-            if case in rows or row.get("error"):
-                raise ScreenError("byte comparison requires unique successful response IDs")
-            tools = [{k: v for k, v in tool.items() if k != "id"} for tool in row.get("tool_calls") or []]
-            rows[case] = json.dumps([row.get("content") or "", row.get("reasoning") or "", tools],
-                                   ensure_ascii=False, separators=(",", ":")).encode()
-        return rows
-    a, b = outputs(baseline), outputs(candidate)
+            if case in rows:
+                raise ScreenError("byte comparison requires unique response IDs")
+            if row.get("error"):
+                errors.add(case)
+            rows[case] = response_bytes(row)
+        return rows, errors
+    (a, a_errors), (b, b_errors) = outputs(baseline), outputs(candidate)
     ids = sorted(set(a) | set(b)) if sample_ids is None else list(sample_ids)
     equal = sum(case in a and case in b and a[case] == b[case] for case in ids)
+    errored = {"baseline": len(a_errors.intersection(ids)), "candidate": len(b_errors.intersection(ids))}
+    retained_equal = bool(ids) and equal == len(ids)
     return {"compared": len(ids), "identical": equal, "different_or_missing": len(ids) - equal,
-            "all_identical": bool(ids) and equal == len(ids),
+            "errored_responses": errored, "retained_bytes_identical": retained_equal,
+            "all_identical": retained_equal and not any(errored.values()),
             "projection": "UTF-8 JSON [content, reasoning, tool_calls], excluding transport/tool-call IDs and timings"}
 
 
@@ -652,32 +669,181 @@ def pair_fingerprint(runner: Any, lane: str, plan_path: Path, plan: dict[str, An
         inputs[name] = entries
     scripts = Path(__file__).resolve().parent
     return {"lane": lane, "plan_sha256": runner.sha256_file(plan_path), "arms": arms, "inputs": inputs,
+            "capture_contract": dict(CAPTURE_CONTRACT, model_id=plan.get(
+                "model_id", runner.effective_config(plan, plan["arms"]["A"]).get("model_id", "q38-ninfer"))),
             "preregistration_sha256": runner.digest(PREREGISTRATION),
             "tools": {name: runner.sha256_file(scripts / name) for name in
                       ("quality_screen.py", "redaction_screen.py", "hosts/variant_campaign.py", "hosts/common.py")}}
 
 
-def verified_capture(runner: Any, directory: Path, job: dict[str, Any], expected: dict[str, Any]) -> dict[str, Any]:
+def verified_capture(runner: Any, directory: Path, job: dict[str, Any], expected: dict[str, Any],
+                     contract: dict[str, Any] | None = None) -> dict[str, Any]:
     receipt = runner.load(directory / "receipt.json")
     if receipt["status"] != "passed" or runtime_identity(receipt["identity"]) != expected:
         raise ScreenError(f"{job['id']}: failed or changed runtime identity")
     run = directory / "quality"
     rows = [json.loads(line) for line in (run / "responses.jsonl").read_text(encoding="utf-8").splitlines()
             if line.strip()]
-    scored = runner.load(run / "scores.json")["per_case"]
+    scores = runner.load(run / "scores.json")
+    scored = scores["per_case"]
     expected_ids = job["prompt_ids"]
     if [row["case_id"] for row in rows] != expected_ids:
         raise ScreenError(f"{job['id']}: capture order/completeness differs from shard plan")
     if len(scored) != len(expected_ids) or {row["case_id"] for row in scored} != set(expected_ids):
         raise ScreenError(f"{job['id']}: scored IDs differ from shard plan")
+    manifest = runner.load(run / "manifest.json")
+    if ([entry["sha256"] for entry in manifest["case_files"]] != [job["cases_sha256"]]
+            or manifest["case_count"] != len(expected_ids)
+            or scores["corpus_sha256"] != manifest["corpus_sha256"]):
+        raise ScreenError(f"{job['id']}: captured/scored prompt identity differs from shard plan")
+    actual = capture_contract(manifest)
+    if contract is not None and actual != contract:
+        raise ScreenError(f"{job['id']}: sampling/model identity differs from capture contract")
     load_run(run)  # Check score/response binding before this capture becomes skippable.
     return {"receipt_sha256": runner.sha256_file(directory / "receipt.json"),
             "files": {name: runner.sha256_file(run / name) for name in
                       ("manifest.json", "responses.jsonl", "scores.json")}}
 
 
+def capture_contract(manifest: dict[str, Any]) -> dict[str, Any]:
+    actual = {key: manifest[key] for key in (*CAPTURE_CONTRACT, "model_id")}
+    if any(actual[key] != value for key, value in CAPTURE_CONTRACT.items()):
+        raise ScreenError("capture changed EXP-085 sampling settings")
+    return actual
+
+
+def verified_seal(runner: Any, root: Path, manifest: dict[str, Any],
+                  job: dict[str, Any]) -> tuple[Path, dict[str, Any]]:
+    directory = root / job["id"]
+    seal = runner.load(directory / "complete.json")
+    capture = directory / seal["capture"]
+    expected = manifest["identity"]["arms"]["A" if job["arm_index"] in (0, 3) else "B"]
+    actual = {"manifest_sha256": runner.digest(manifest), "job": job, "capture": seal["capture"],
+              "evidence": verified_capture(runner, capture, job, expected, manifest["identity"].get("capture_contract"))}
+    if seal != actual:
+        raise ScreenError(f"{job['id']}: sealed capture identity/hash changed")
+    return capture, actual
+
+
+def frozen_file(path: Path, data: bytes, *, verify_only: bool = False) -> None:
+    if path.exists():
+        if path.read_bytes() != data:
+            raise ScreenError(f"stored baseline/merged evidence changed: {path.name}")
+    elif verify_only:
+        raise ScreenError(f"stored baseline evidence missing: {path.name}")
+    else:
+        path.write_bytes(data)
+
+
+def merge_captures(runner: Any, manifest: dict[str, Any], completed: list[tuple[dict[str, Any], Path]],
+                   merged: Path, roles: Sequence[str], *, verify_only: bool = False) -> tuple[dict[str, Path], list]:
+    if not verify_only:
+        merged.mkdir(parents=True, exist_ok=True)
+    runs, timing = {}, []
+    by_id = {job["id"]: capture for job, capture in completed}
+    for role in roles:
+        directory = merged / role
+        if not verify_only:
+            directory.mkdir(exist_ok=True)
+        per_case, responses = [], []
+        for job in manifest["layout"]["jobs"]:
+            if job["role"] != role:
+                continue
+            capture = by_id[job["id"]]
+            per_case.extend(runner.load(capture / "quality/scores.json")["per_case"])
+            responses.append((capture / "quality/responses.jsonl").read_text(encoding="utf-8").rstrip() + "\n")
+            seconds = runner.load(capture / "receipt.json")["wall_seconds"]
+            timing.append({"shard": job["id"], "prompts": len(job["prompt_ids"]), "wall_seconds": seconds,
+                           "wall_seconds_per_100_prompts": seconds * 100 / len(job["prompt_ids"])})
+        data = {"scores.json": json.dumps({"per_case": per_case, "corpus_sha256": runner.digest(manifest)}, indent=2) + "\n",
+                "responses.jsonl": "".join(responses),
+                "manifest.json": json.dumps({"label": role, "shards_manifest_sha256": runner.digest(manifest)}, indent=2) + "\n"}
+        for name, text in data.items():
+            frozen_file(directory / name, text.encode("utf-8"), verify_only=verify_only)
+        runs[role] = directory
+    return runs, timing
+
+
+def export_baseline(source: Path, destination: Path, *, verify_only: bool = False) -> dict[str, Any]:
+    """Seal one complete shipped screen + fresh subset; no candidate and no powered verdict."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
+    import variant_campaign as runner
+    source, destination = source.resolve(), destination.resolve()
+    manifest = runner.load(source / "shards.json")
+    jobs = [job for job in manifest["layout"]["jobs"]
+            if job["role"] in ("production", "production_determinism")]
+    if not jobs or not any(job["role"] == "production_determinism" for job in jobs):
+        raise ScreenError("stored baseline requires its full screen and fresh determinism subset")
+    completed, contracts, seals = [], [], {}
+    for job in jobs:
+        if runner.sha256_file(source / job["cases"]) != job["cases_sha256"]:
+            raise ScreenError("stored baseline prompt file identity changed")
+        capture, _ = verified_seal(runner, source, manifest, job)
+        completed.append((job, capture))
+        contracts.append(capture_contract(runner.load(capture / "quality/manifest.json")))
+        seals[job["id"]] = runner.sha256_file(source / job["id"] / "complete.json")
+    if any(contract != contracts[0] for contract in contracts):
+        raise ScreenError("stored baseline changed sampling/model between shards")
+    runs, timing = merge_captures(runner, manifest, completed, destination / "runs",
+                                  ("production", "production_determinism"), verify_only=verify_only)
+    samples = load_run(runs["production"])
+    subset = [sample for job in jobs if job["role"] == "production_determinism" for sample in job["prompt_ids"]]
+    direct = compare_responses(runs["production"], runs["production_determinism"], subset)
+    cases = sorted({base_id(sample) for sample in samples})
+    gate = [row for sample, row in samples.items() if int(sample.rsplit(".v", 1)[1]) < variants_for(False)
+            and not row["error"]]
+    errors = sum(bool(row["error"]) for row in samples.values())
+    perturbed = sum(len({samples[variant_id(case, index)]["output"] for index in range(variants_for(False))}) >= 2
+                    for case in cases)
+    checks = {"complete": len(samples) == manifest["layout"]["counted_prompts"],
+              "errors_within_bound": errors <= math.floor(len(samples) * PREREGISTRATION["validity"]["max_error_fraction"]),
+              "variants_perturb_outputs": perturbed >= math.ceil(len(cases) * PREREGISTRATION["validity"]["min_perturbed_case_fraction"]),
+              "deterministic": direct["retained_bytes_identical"],
+              "evaluable": bool(gate) and any(row["control"] and not row["error"] for row in samples.values())
+              and all(value is not None for value in gate_rates(column_sums(
+                  [sample_vector(row, GATE_FIELDS) for row in gate])).values())}
+    if not all(checks.values()):
+        raise ScreenError(f"stored baseline fails EXP-085 validity: {checks}")
+    artifact = {"artifact_type": "omp-ninfer.quality-baseline", "schema_version": 1, "source": str(source),
+                "source_manifest_sha256": runner.sha256_file(source / "shards.json"),
+                "identity": manifest["identity"], "capture_contract": contracts[0],
+                "layout": {**manifest["layout"], "jobs": jobs}, "capture_seals": seals,
+                "runs": {role: {name: runner.sha256_file(directory / name) for name in
+                                ("manifest.json", "scores.json", "responses.jsonl")} for role, directory in runs.items()},
+                "validity": checks, "determinism_byte_comparison": direct, "timing": timing}
+    frozen_file(destination / "baseline.json", (json.dumps(artifact, indent=2) + "\n").encode("utf-8"),
+                verify_only=verify_only)
+    return artifact
+
+
+def verify_baseline(path: Path, layout: dict[str, Any], fingerprint: dict[str, Any]) -> dict[str, Any]:
+    if not path.is_dir() and path.name != "baseline.json":
+        raise ScreenError("stored baseline must name its directory or baseline.json")
+    directory = path if path.is_dir() else path.parent
+    baseline = json.loads((directory / "baseline.json").read_text(encoding="utf-8"))
+    if baseline.get("artifact_type") != "omp-ninfer.quality-baseline" or baseline.get("schema_version") != 1:
+        raise ScreenError("unsupported stored baseline")
+    expected_layout = {**layout, "jobs": [job for job in layout["jobs"]
+                                        if job["role"] in ("production", "production_determinism")]}
+    if baseline["layout"] != expected_layout:
+        raise ScreenError("stored baseline prompt set/shard plan changed")
+    for field in ("lane", "inputs", "preregistration_sha256"):
+        if baseline["identity"][field] != fingerprint[field]:
+            raise ScreenError(f"stored baseline {field} identity changed")
+    if baseline["identity"]["arms"]["A"] != fingerprint["arms"]["A"]:
+        raise ScreenError("stored baseline binary/model/profile/GPU identity changed")
+    if baseline["capture_contract"] != fingerprint["capture_contract"]:
+        raise ScreenError("stored baseline sampling/model identity changed")
+    # Reopen the source seals and regenerate/compare every merged byte, not just cached hashes.
+    actual = export_baseline(Path(baseline["source"]), directory, verify_only=True)
+    if actual != baseline:
+        raise ScreenError("stored baseline evidence changed")
+    return baseline
+
+
 def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100,
-                 max_shards: int | None = None, resume: bool = False) -> dict[str, Any]:
+                 max_shards: int | None = None, resume: bool = False,
+                 baseline: Path | None = None, baseline_only: bool = False) -> dict[str, Any]:
     """Run at most max_shards fresh captures; no verdict exists until all sealed shards verify."""
     sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
     import variant_campaign as runner
@@ -687,7 +853,17 @@ def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100
     runner.validate_plan(plan, lane)
     layout, files = shard_plan(Path(plan["cases"]), shard_size)
     fingerprint = pair_fingerprint(runner, lane, plan_path, plan)
+    stored = None
+    if baseline is not None:
+        if baseline_only:
+            raise ScreenError("baseline capture cannot reuse another baseline")
+        stored = verify_baseline(baseline, layout, fingerprint)
+        layout["jobs"] = [job for job in layout["jobs"] if job["role"] in ("candidate", "candidate_determinism")]
+    elif baseline_only:
+        layout["jobs"] = [job for job in layout["jobs"] if job["role"] in ("production", "production_determinism")]
     manifest = {"artifact_type": "omp-ninfer.quality-shard-plan", "layout": layout, "identity": fingerprint}
+    if stored is not None:
+        manifest["baseline"] = {"path": str(baseline.resolve()), "sha256": runner.digest(stored)}
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     manifest_path = out / "shards.json"
@@ -720,13 +896,7 @@ def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100
         if not seal_path.exists():
             pending.append(job)
             continue
-        seal = runner.load(seal_path)
-        capture = directory / seal["capture"]
-        expected = fingerprint["arms"]["A" if job["arm_index"] in (0, 3) else "B"]
-        actual = {"manifest_sha256": manifest_sha, "job": job, "capture": seal["capture"],
-                  "evidence": verified_capture(runner, capture, job, expected)}
-        if seal != actual:
-            raise ScreenError(f"{job['id']}: sealed capture identity/hash changed")
+        capture, _ = verified_seal(runner, out, manifest, job)
         completed.append((job, capture))
     for job in pending[:max_shards]:
         directory = out / job["id"]
@@ -740,7 +910,7 @@ def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100
                            job["arm_index"], capture, "quality", quality_cases=out / job["cases"])
         expected = fingerprint["arms"]["A" if job["arm_index"] in (0, 3) else "B"]
         seal = {"manifest_sha256": manifest_sha, "job": job, "capture": capture.name,
-                "evidence": verified_capture(runner, capture, job, expected)}
+                "evidence": verified_capture(runner, capture, job, expected, fingerprint.get("capture_contract"))}
         temporary = directory / "complete.tmp"
         runner.save(temporary, seal)
         temporary.replace(directory / "complete.json")
@@ -750,36 +920,25 @@ def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100
                               "completed_shards": len(completed), "total_shards": len(layout["jobs"])}
     if len(completed) != len(layout["jobs"]):
         return dict(result, status="shard-complete")
-    merged = out / "merged"
-    merged.mkdir(exist_ok=True)
-    runs = {}
-    timing = []
-    by_id = {job["id"]: capture for job, capture in completed}
-    for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
-        directory = merged / role
-        directory.mkdir(exist_ok=True)
-        per_case, responses = [], []
-        for job in layout["jobs"]:
-            if job["role"] != role:
-                continue
-            capture = by_id[job["id"]]
-            per_case.extend(runner.load(capture / "quality/scores.json")["per_case"])
-            responses.append((capture / "quality/responses.jsonl").read_text(encoding="utf-8").rstrip() + "\n")
-            seconds = runner.load(capture / "receipt.json")["wall_seconds"]
-            timing.append({"shard": job["id"], "prompts": len(job["prompt_ids"]), "wall_seconds": seconds,
-                           "wall_seconds_per_100_prompts": seconds * 100 / len(job["prompt_ids"])})
-        runner.save(directory / "scores.json", {"per_case": per_case, "corpus_sha256": manifest_sha})
-        (directory / "responses.jsonl").write_text("".join(responses), encoding="utf-8")
-        runner.save(directory / "manifest.json", {"label": role, "shards_manifest_sha256": manifest_sha})
-        runs[role] = directory
+    if baseline_only:
+        export_baseline(out, out / "baseline")
+        return dict(result, status="baseline-complete", baseline=str(out / "baseline"))
+    roles = ("candidate", "candidate_determinism") if stored is not None else (
+        "production", "candidate", "production_determinism", "candidate_determinism")
+    runs, timing = merge_captures(runner, manifest, completed, out / "merged", roles)
+    if stored is not None:
+        directory = baseline if baseline.is_dir() else baseline.parent
+        runs.update({role: directory / "runs" / role for role in ("production", "production_determinism")})
+        result["baseline"] = manifest["baseline"]
     result["quality"] = verdict(argparse.Namespace(**runs))
     result["byte_comparison"] = compare_responses(runs["production"], runs["candidate"])
-    subset = [sample for job in layout["jobs"] if job["role"] == "production_determinism"
+    subset = [sample for job in (stored["layout"]["jobs"] if stored is not None else layout["jobs"])
+              if job["role"] == "production_determinism"
               for sample in job["prompt_ids"]]
     result["determinism_byte_comparison"] = {
         role: compare_responses(runs[role], runs[role + "_determinism"], subset)
         for role in ("production", "candidate")}
-    direct = all(row["all_identical"] for row in result["determinism_byte_comparison"].values())
+    direct = all(row["retained_bytes_identical"] for row in result["determinism_byte_comparison"].values())
     result["quality"]["validity"]["checks"]["deterministic_bytes"] = direct
     if not direct:
         result["quality"]["validity"]["valid"] = False
@@ -818,6 +977,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     pair.add_argument("--shard-size", type=int, help="prompts per fresh-server shard; identical boundaries in both arms")
     pair.add_argument("--max-shards", type=int, help="capture at most this many shards in this lock hold")
     pair.add_argument("--resume", action="store_true", help="verify identities and skip sealed completed shards")
+    pair.add_argument("--baseline", type=Path, help="reuse a complete sealed baseline instead of capturing A")
+    baseline = commands.add_parser("baseline", help="capture/seal the shipped screen + fresh subset once")
+    baseline.add_argument("--lane", choices=("rtx3090", "rtx4090", "rtx5090"))
+    baseline.add_argument("--plan", type=Path)
+    baseline.add_argument("--out", type=Path, required=True)
+    baseline.add_argument("--shard-size", type=int, default=100)
+    baseline.add_argument("--max-shards", type=int)
+    baseline.add_argument("--resume", action="store_true")
+    baseline.add_argument("--from-campaign", type=Path, help="export an existing complete A arm + fresh A subset")
     args = parser.parse_args(argv)
     try:
         if args.command == "variants":
@@ -831,11 +999,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                                       fixtures=args.fixtures, base_url=args.base_url, model=args.model,
                                       api_key_file=args.api_key_file, out=args.out, label=args.label,
                                       timeout=args.timeout)
+        elif args.command == "baseline":
+            if args.from_campaign:
+                artifact = export_baseline(args.from_campaign, args.out)
+                result = {"status": "baseline-complete", "baseline": str(args.out),
+                          "counted_prompts": artifact["layout"]["counted_prompts"]}
+            else:
+                if not args.lane or not args.plan:
+                    raise ScreenError("baseline capture requires --lane and --plan")
+                result = sharded_pair(args.lane, args.plan, args.out, shard_size=args.shard_size,
+                                      max_shards=args.max_shards, resume=args.resume, baseline_only=True)
         else:
             sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
             from variant_campaign import run_campaign
             result = run_campaign(args.lane, args.plan, args.out, mode="quality", shard_size=args.shard_size,
-                                  max_shards=args.max_shards, resume=args.resume)
+                                  max_shards=args.max_shards, resume=args.resume, baseline=args.baseline)
     except (ScreenError, OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         print(f"quality_screen: {error}", file=sys.stderr)
         return 2

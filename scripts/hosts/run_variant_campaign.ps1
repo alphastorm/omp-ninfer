@@ -9,6 +9,7 @@ param(
     [ValidateRange(1, 2147483647)][int]$ShardSize,
     [ValidateRange(1, 2147483647)][int]$MaxShards,
     [switch]$Resume,
+    [string]$Baseline,
     [switch]$Nsys
 )
 # Run on the GPU host under the fleet's hostlock/gpu-lease. On WSL use the Python
@@ -22,6 +23,7 @@ if ($ArmIndex -ge 0) { $arguments += @('--arm-index', [string]$ArmIndex) }
 if ($PSBoundParameters.ContainsKey('ShardSize')) { $arguments += @('--shard-size', [string]$ShardSize) }
 if ($PSBoundParameters.ContainsKey('MaxShards')) { $arguments += @('--max-shards', [string]$MaxShards) }
 if ($Resume) { $arguments += '--resume' }
+if ($Baseline) { $arguments += @('--baseline', $Baseline) }
 if ($Nsys) { $arguments += '--nsys' }
 $pythonCommand = Get-Command -Name $Python -CommandType Application -ErrorAction Stop
 $global:LASTEXITCODE = 2

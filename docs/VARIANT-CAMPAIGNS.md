@@ -1,5 +1,124 @@
 # Matched runtime campaigns
 
+## Risk-scaled quality gates
+
+Use `scripts/quality_gates.py` for ordinary admission. Gate **one combined candidate
+per lane**, not each output-changing slice separately. The full EXP-085 screen
+below is an escalation after a real problem, not the default or a full null-pair
+machinery check.
+
+All gates use the existing private qualification executor/scorer, temperature 0,
+low reasoning and the same frozen corpus/model/profile on the same selected GPU.
+Capture the shipped 84-case role baseline once per lane, then reuse its sealed
+bytes for T1/T2. For example, repeat each bounded command with `--resume` in a new
+external hold until it reports completion:
+
+```sh
+python3 scripts/quality_gates.py cache --kind role --lane rtx4090 \
+  --plan PLAN.json --out ROLE_BASELINE --shard-size 42 --max-shards 1
+python3 scripts/quality_gates.py t1 --lane rtx4090 --plan PLAN.json \
+  --baseline ROLE_BASELINE --out BYTE_GATE --shard-size 42 --max-shards 1
+```
+
+Plans use the format below: A is the shipped baseline, B is the integrated candidate.
+Both role arms must have exactly the same effective configuration, GPU, driver and
+power. A stored cache is accepted only after reopening its prompt files, capture
+seals, raw responses, scored samples, actual output bytes and actual token traces,
+with matching binary/model/profile/sampling/corpus/tool identities.
+Each capture is a fresh owned server and restores its found power limit.
+
+- **T1, output-identical changes:** pass only when all **84/84 retained outputs
+  compare byte for byte** and neither arm has a response error. The result lists
+  identical/differing cases and per-case first divergent byte/token indices.
+  Raw tool-argument strings are preserved; only nondeterministic tool IDs are
+  excluded. The projection also includes content, reasoning and finish reason.
+- **T2, rounding-only changes:** require the bound per-kernel FP64 proof, no more
+  than **10% divergent role cases (at most 8/84)**, zero candidate task-check
+  failures and the exact **130,048-token retrieval** answer. JSON outputs validate
+  against their full declared schema; tool calls must name declared/required tools
+  and parse into schema-valid JSON argument objects. Token indices come from the
+  server's retained `generated_token_ids`, never bytes relabelled as tokens or a
+  retokenization approximation. Captures refuse retries/extra requests that would
+  make response-to-token ordering ambiguous.
+
+Bind the four native small-T op tests' real verbose CTest log to the candidate:
+
+```sh
+python3 scripts/quality_gates.py fp64 --log CTEST_LOG \
+  --server-binary IMMUTABLE_BIN/ninfer-serve.exe --out FP64.json
+python3 scripts/quality_gates.py t2 --lane rtx4090 --plan PLAN.json \
+  --baseline ROLE_BASELINE --numerics FP64.json --out ROUNDING_GATE \
+  --shard-size 42 --max-shards 1
+```
+
+The log must contain exactly the four named Q5-add, Q4-SwiGLU, two-output and
+multi-output linear tests, their reduction-error statistics and a complete
+successful CTest summary. Test binaries must belong to the same immutable binary
+set as the server. The proof records/rechecks source, executable and log hashes;
+non-finite or out-of-limit errors cannot pass. T2's plan additionally supplies
+`retrieval_fixture`, the existing long-NIAH messages. After the role shards, repeat
+with `--resume` for the separately bounded retrieval capture. The gate reopens the
+actual retained retrieval bytes instead of trusting an `exact` flag.
+
+**T3, deliberate math changes:** first run the frozen held-out perplexity ON/OFF
+pair at contexts 1,024/2,048 and strides 512/1,024, INT8 KV:
+
+```sh
+python3 scripts/quality_gates.py ppl --plan PPL_PLAN.json --out PPL_RUN
+```
+
+The private PPL plan supplies `model_path`, `model_sha256`, `gpu_uuid`, optional
+`power_limit_w`, `candidate_server_binary`, `corpus_manifest`,
+`corpus_manifest_sha256`, `corpus_provenance_sha256`, optional `runtime_paths`
+(DLL directories), and `arms: {off: {binary, binary_sha256}, on: {...}}`.
+Use ON/OFF PPL binaries from the frozen candidate build; never regenerate the
+held-out streams. The runner uses the real `ninfer-perplexity` schema-2 reports,
+verifies scored-token/domain/configuration equality and finite, consistent NLL.
+**Any aggregate Δmean-NLL above 0.02 nats or domain above 0.05 nats fails:
+the math route stays OFF.** Build provenance remains a separate admission gate.
+
+Only after PPL passes, capture the targeted baseline once and run the candidate:
+
+```sh
+python3 scripts/quality_gates.py cache --kind math --lane rtx4090 \
+  --plan PLAN.json --ppl PPL_RUN/result.json --out MATH_BASELINE \
+  --shard-size 50 --max-shards 1
+python3 scripts/quality_gates.py t3 --lane rtx4090 --plan PLAN.json \
+  --baseline MATH_BASELINE --ppl PPL_RUN/result.json --out MATH_GATE \
+  --shard-size 50 --max-shards 1
+```
+
+The deterministic 200-prompt plan has 100 grounded claim probes (two whitespace
+variants of 50 class-balanced cases with forbidden-claim/support-span oracles) and
+100 variants of the secret controls. Fifty-prompt shards alternate the categories;
+the first 100 prompts cover every selected case/control. Every scored look is
+retained. The pre-registered finite risk rule is:
+
+1. Stop **invalid** on a response error, or **fail** on any task-check failure,
+   newly leaked secret relative to its paired baseline (including a different
+   secret at an unchanged leak count), or more than six introduced unsupported
+   claims. Improvements never cancel an introduced regression.
+2. Stop **pass** after at least 100 paired prompts only if all selected cases are
+   covered and all their retained output bytes are identical, with PPL already
+   passed.
+3. Otherwise finish all 200 and pass only with zero newly leaked secret cases,
+   at most six introduced unsupported claims (3% of the planned pairs), and no
+   task/response failures.
+
+This is a bounded, pre-registered risk screen, **not** EXP-085, a powered
+non-inferiority estimate, or an optional-stopping p-value claim. A reported issue
+can justify escalation; do not automatically spend a full 1,120-prompt pair.
+DFlash2 draft quantization needs its target-verified speed gate, not a quality screen.
+
+Gate commands return 0 for pass or a bounded partial capture, 1 for fail and 2 for
+invalid evidence. A partial capture has no passing verdict; release/reacquire the
+external lock and repeat with `--resume`. Completed early T3 decisions never start
+more shards on resume. Use per-GPU locks for non-timing correctness gates; retain
+the whole-host timing lock for throughput/latency measurements. Keep raw evidence
+private and keep the complete deployment frozen while a cache/candidate uses it.
+
+## Campaign runner
+
 Use `scripts/hosts/run_variant_campaign.ps1 -Lane rtx4090 -Plan plan.json -Output runs/c1`
 on native Windows, or `python3 scripts/hosts/variant_campaign.py --lane rtx5090 --plan plan.json
 --out runs/c1` on Linux. These replace the three historical lane-specific scripts and
@@ -7,6 +126,7 @@ both standalone VRAM samplers. The older `scripts/run_variant_campaign.py` remai
 separate frozen variant-matrix reducer, not a host lifecycle driver.
 When staging a subset, retain `scripts/hosts/{variant_campaign,common}.py` and
 `scripts/{quality_screen,redaction_screen}.py` with their directory hierarchy.
+Add `scripts/quality_gates.py` for the risk-tier commands.
 Quality mode also needs the private qualification root's `manifest.schema.json`,
 `scripts/{run_qualification,score_qualification,_qual}.py`, cases and fixtures.
 Keep that whole input set frozen, not just the public runner.
@@ -190,6 +310,57 @@ and runtime identity preflight are additional hold overhead).
 Choose a smaller fixed size before starting when a shard would exceed the host's
 hold limit; a per-request timeout is not a whole-hold watchdog. The external worker
 must enforce its own hold deadline and owned-process/power cleanup.
+
+### Capture the shipped baseline once
+
+When several output-changing changes will be screened as one integrated candidate,
+do not run a full null pair. Capture the shipped baseline and its fresh first-80
+subset once per lane:
+
+```sh
+python3 scripts/quality_screen.py baseline --lane rtx4090 --plan PLAN.json \
+  --out PRIVATE_BASELINE --shard-size 100 --max-shards 1
+# Repeat in separate per-GPU quality holds:
+python3 scripts/quality_screen.py baseline --lane rtx4090 --plan PLAN.json \
+  --out PRIVATE_BASELINE --shard-size 100 --max-shards 1 --resume
+```
+
+The plan's A arm is the shipped baseline; B is not captured by this command.
+At size 100 the complete baseline is 12 screen shards plus one fresh 80-prompt
+shard, **1,200 requests**, ending with `PRIVATE_BASELINE/baseline/baseline.json`
+and `status: baseline-complete`. This is baseline evidence, not a paired verdict.
+An existing sharded campaign's complete A screen and fresh A subset can be
+exported without rerunning either:
+
+```sh
+python3 scripts/quality_screen.py baseline --from-campaign EXISTING_CAMPAIGN \
+  --out PRIVATE_BASELINE_EXPORT
+```
+
+Then capture only the integrated candidate and its fresh subset:
+
+```sh
+python3 scripts/quality_screen.py pair --lane rtx4090 --plan PLAN.json \
+  --baseline PRIVATE_BASELINE/baseline --out PRIVATE_CANDIDATE \
+  --shard-size 100 --max-shards 1
+# Repeat with --resume, releasing the external lock between captures.
+```
+
+`--baseline` accepts the exported directory or its `baseline.json`; the host
+runner and PowerShell wrapper expose the same option (`-Baseline`). Keep plan A
+pointing to the exact shipped baseline bytes/profile. Plan B may name the
+intentionally changed candidate binary/profile. Baseline reuse refuses a mismatch
+in A's binary/version, model, effective configuration, GPU/driver/power, prompt
+set/order/shard boundaries, qualification/corpus/fixture bytes, or sampling/model
+contract. It reopens the source shard seals and capture files and reconstructs
+the merged bytes; editing a cached digest does not bless changed evidence.
+Candidate resume additionally freezes its own runner, plan, baseline binding and
+runtime identities. Never overwrite a frozen baseline or candidate deployment.
+
+Only a full baseline plus full candidate plus both fresh 80-prompt subsets can
+produce EXP-085's unchanged powered verdict. Missing/errored model responses are
+reported in byte comparisons, not silently presented as successful identical
+outputs; the registered one-percent error bound remains the quality validity rule.
 
 ## Nsight Systems
 

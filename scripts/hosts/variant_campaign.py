@@ -721,12 +721,13 @@ def capture_arm(lane: str, plan: dict[str, Any], model_sha: str, key_file: Path,
 
 def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profile: bool = False,
                  arm_index: int | None = None, shard_size: int | None = None,
-                 max_shards: int | None = None, resume: bool = False) -> dict[str, Any]:
-    if shard_size is not None or max_shards is not None or resume:
+                 max_shards: int | None = None, resume: bool = False,
+                 baseline: Path | None = None) -> dict[str, Any]:
+    if shard_size is not None or max_shards is not None or resume or baseline is not None:
         if mode != "quality" or arm_index is not None or profile:
             raise CampaignError("sharding/resume requires quality mode without arm-index or profiling")
         return quality.sharded_pair(lane, plan_path, out, shard_size=100 if shard_size is None else shard_size,
-                                    max_shards=max_shards, resume=resume)
+                                    max_shards=max_shards, resume=resume, baseline=baseline)
     plan = load(plan_path)
     validate_plan(plan, lane)
     out = out.resolve()
@@ -792,10 +793,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--shard-size", type=int, help="quality only: prompts per fresh-server shard")
     parser.add_argument("--max-shards", type=int, help="quality only: bounded captures in this hold")
     parser.add_argument("--resume", action="store_true", help="quality only: verify and skip completed shards")
+    parser.add_argument("--baseline", type=Path, help="quality only: complete identity-verified stored baseline")
     args = parser.parse_args(argv)
     try:
         result = run_campaign(args.lane, args.plan, args.out, args.mode, args.nsys, args.arm_index,
-                              args.shard_size, args.max_shards, args.resume)
+                              args.shard_size, args.max_shards, args.resume, args.baseline)
     except (CampaignError, quality.ScreenError, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
         print(f"variant_campaign: {error}", file=sys.stderr)
         return 2
