@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.13.1",
-  "status": "draft",
+  "status": "candidate",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/compatibility.json",
-      "compatibility_sha256": "b622abec15512838deec5e42c2da82dfbf0fc333a48e5b8c6bbd4f5c356a5b4a",
+      "compatibility_sha256": "3ce611b3558ee9bb5e55a80b7d63094502b6640e0726ac8424729e47567d74a6",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.12.6",
@@ -191,7 +191,7 @@
     ],
     "blockers": [
       "Actual changed native-runtime and product-tooling council dispositions are pending.",
-      "The stage commit requires the lead lane pin and fresh platform/client and all-five-route acceptance, including both native public installs and independent restoration.",
+      "External-installation acceptance has not been rerun against this candidate: fresh platform/client receipts and all five documented routes, including both native public installs and independent restoration, are pending.",
       "Platform, acceptance and manifest evidence pins, require-ready/check-pins and founder-only product publication remain pending."
     ],
     "external_installation_qualified": false
