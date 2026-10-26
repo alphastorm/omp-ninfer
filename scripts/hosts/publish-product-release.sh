@@ -16,17 +16,18 @@ set -euo pipefail
 
 REPO=alphastorm/omp-ninfer
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-release=""; commit=""; pr=""; publish=0
+release=""; commit=""; pr=""; publish=0; dry_run=0
 while (($#)); do
   case "$1" in
     --release) release="$2"; shift 2 ;;
     --commit) commit="$2"; shift 2 ;;
     --pr) pr="$2"; shift 2 ;;
     --publish) publish=1; shift ;;
-    --dry-run) shift ;;
+    --dry-run) dry_run=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+((publish && dry_run)) && { echo "choose --dry-run or --publish, not both" >&2; exit 2; }
 [[ $release =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "--release must be vX.Y.Z" >&2; exit 2; }
 [[ $commit =~ ^[0-9a-f]{40}$ ]] || { echo "--commit must be a full lowercase sha" >&2; exit 2; }
 [[ $pr =~ ^[1-9][0-9]*$ ]] || { echo "--pr must be a pull request number" >&2; exit 2; }

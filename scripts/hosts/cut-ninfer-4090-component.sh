@@ -17,7 +17,7 @@ set -euo pipefail
 REPO=alphastorm/ninfer
 LANE=rtx4090
 RUNTIME_REPO_DIR="${NINFER_RUNTIME_DIR:-$HOME/Development/ninfer-lane-5090}"
-version=""; commit=""; assets=""; checksums_sha=""; notes_file=""; beta=1; publish=0
+version=""; commit=""; assets=""; checksums_sha=""; notes_file=""; beta=1; publish=0; dry_run=0
 while (($#)); do
   case "$1" in
     --lane|--version|--commit|--assets|--checksums-sha|--notes-file|--beta)
@@ -32,10 +32,11 @@ while (($#)); do
     --notes-file) notes_file="$2"; shift 2 ;;
     --beta) beta="$2"; shift 2 ;;
     --publish) publish=1; shift ;;
-    --dry-run) shift ;;
+    --dry-run) dry_run=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
+((publish && dry_run)) && { echo "choose --dry-run or --publish, not both" >&2; exit 2; }
 [[ $LANE == rtx3090 || $LANE == rtx4090 ]] || { echo "--lane must be rtx3090 or rtx4090" >&2; exit 2; }
 [[ $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "--version must be vX.Y.Z" >&2; exit 2; }
 [[ $commit =~ ^[0-9a-f]{40}$ ]] || { echo "--commit must be a full lowercase sha" >&2; exit 2; }
