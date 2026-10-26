@@ -55,7 +55,8 @@ def load(path: Path) -> Any:
 
 
 def save(path: Path, value: Any) -> None:
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    # Match EXP-085's report encoding, including its explicitly unbounded leak ratios.
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
 def digest(value: Any) -> str:
@@ -175,7 +176,7 @@ def validate_plan(plan: dict[str, Any], lane: str) -> None:
 
 
 def server_arguments(config: dict[str, Any], paths: dict[str, str], arm: dict[str, Any]) -> list[str]:
-    args = [paths["model"], "--host", "127.0.0.1", "--port", paths["port"],
+    args = [paths["model"], "--host", paths.get("bind_host", "127.0.0.1"), "--port", paths["port"],
             "--api-key-file", paths["key_file"], "--model-id", paths["model_id"],
             "--binary-sha256", paths["binary_sha256"], "--artifact-sha256", paths["model_sha256"],
             "--config-sha256", digest(config), "--deployment-profile", "matched-campaign",
@@ -340,7 +341,7 @@ class Server:
                       "binary_sha256": self.binary_sha, "model_sha256": model_sha, "base_url": self.root}
         if arm.get("image"):
             self.paths.update(model="/model.ninfer", key_file="/campaign/api-key", log="/campaign/requests.jsonl",
-                              checkpoints="/campaign/checkpoints")
+                              checkpoints="/campaign/checkpoints", bind_host="0.0.0.0")
         self.argv = [arm["binary"]] + server_arguments(config, self.paths, arm)
         self.stop_event = None
         if os.name == "nt" and not arm.get("image"):
@@ -353,7 +354,8 @@ class Server:
                          "/campaign/profile" if arm.get("image") else str(directory / "profile")] + self.argv
         if arm.get("image"):
             shutil.copyfile(key_file, directory / "api-key")
-            self.argv = ["docker", "run", "--rm", "--name", self.container, "--network", "host",
+            self.argv = ["docker", "run", "--rm", "--name", self.container,
+                         "--publish", f"127.0.0.1:{port}:{port}",
                          "--gpus", "device=" + plan["gpu_uuid"]] + self.docker_security_args + ["--volume",
                          str(Path(plan["model_path"]).resolve()) + ":/model.ninfer:ro", "--volume",
                          str(directory.resolve()) + ":/campaign", "--entrypoint", self.argv[0],
@@ -717,7 +719,7 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
                                            check=True, timeout=float(plan.get("workload_timeout_seconds", 3000)))
                 receipt["status"] = "passed"
         except BaseException as error:
-            receipt["error_type"] = type(error).__name__
+            receipt.update(status="failed", error_type=type(error).__name__)
             raise
         finally:
             try:

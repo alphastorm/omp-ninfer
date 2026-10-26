@@ -65,7 +65,9 @@ are scratch per-arm directories, never the installed store. Device selection use
 
 For Docker, each arm additionally supplies `image` (prefer an immutable digest) and
 `binary` as its path **inside** that image. The Linux host runs Docker directly, using
-host networking, the selected GPU, a read-only model mount and per-arm scratch mounts.
+loopback-only published ports, the selected GPU, a read-only model mount and per-arm scratch mounts.
+The server binds `0.0.0.0` inside its container; publishing `127.0.0.1:PORT:PORT`
+works with Docker Desktop/WSL as well as native Linux without host-networking settings.
 Containers are named `ov-<holder>-*`; `holder` defaults to `harness`. No incumbent image
 or container is stopped, removed or renamed. Port defaults: native 18082, Docker 18089;
 `port` and `model_id` override them. The container image must include `sha256sum` and

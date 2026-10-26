@@ -17,5 +17,8 @@ $runner = Join-Path $PSScriptRoot 'variant_campaign.py'
 $arguments = @($runner, '--lane', $Lane, '--plan', $Plan, '--out', $Output, '--mode', $Mode)
 if ($ArmIndex -ge 0) { $arguments += @('--arm-index', [string]$ArmIndex) }
 if ($Nsys) { $arguments += '--nsys' }
-& $Python @arguments
+$pythonCommand = Get-Command -Name $Python -CommandType Application -ErrorAction Stop
+$global:LASTEXITCODE = 2
+$ErrorActionPreference = 'Continue'
+& $pythonCommand.Source @arguments
 exit $LASTEXITCODE

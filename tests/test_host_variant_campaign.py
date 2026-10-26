@@ -6,7 +6,9 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import shutil
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -110,6 +112,7 @@ class CampaignTests(unittest.TestCase):
                   "session_checkpoint": {"enabled": True, "quota_mib": 24576, "staging_mib": 256,
                                          "require_origin_auth": True}}
         args = HOST.server_arguments(config, paths, {})
+        self.assertEqual(args[args.index("--host") + 1], "127.0.0.1")
         self.assertIn("--no-prefix-reuse", args)
         self.assertEqual(args[args.index("--spec") + 1], "dflash2")
         self.assertEqual(args[args.index("--draft-tokens") + 1], "7")
@@ -209,6 +212,27 @@ class CampaignTests(unittest.TestCase):
             with self.assertRaisesRegex(HOST.CampaignError, "different frozen runner"):
                 HOST.run_campaign("rtx4090", path, out, arm_index=1)
 
+    def test_sampler_exit_failure_cannot_leave_a_successful_arm_receipt(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            path = root / "plan.json"
+            HOST.save(path, self.plan(root))
+            server = MagicMock(binary_sha="b", version="v", argv=["server"], seccomp_profile=None,
+                               checkpoint_filesystem=None, paths={"model_id": "model"},
+                               root="http://127.0.0.1", key="key")
+            sampler = MagicMock()
+            sampler.rows = []
+            sampler.__exit__.side_effect = HOST.CampaignError("sampler exit failed")
+            with patch.object(HOST, "gpu", return_value={"power_limit_w": 450, "memory_used_mib": 1}), \
+                 patch.object(HOST, "Server", return_value=server), \
+                 patch.object(HOST, "Sampler", return_value=sampler), \
+                 patch.object(HOST, "http", return_value={}), \
+                 patch.object(HOST, "c1", return_value=[]):
+                with self.assertRaisesRegex(HOST.CampaignError, "sampler exit failed"):
+                    HOST.run_campaign("rtx4090", path, root / "out", arm_index=0)
+            self.assertEqual(HOST.load(root / "out/0-A/receipt.json")["status"], "failed")
+            server.stop.assert_called_once()
+
     def test_existing_endpoint_is_refused_before_process_launch(self):
         server = object.__new__(HOST.Server)
         server.paths = {"port": "18082"}
@@ -249,6 +273,9 @@ class CampaignTests(unittest.TestCase):
                 server = HOST.Server(plan, arm, config, directory, "model-sha", key, False)
             self.assertEqual(server.checkpoint_filesystem, "ext4")
             self.assertEqual(server.paths["checkpoints"], "/campaign/checkpoints")
+            self.assertEqual(server.argv[server.argv.index("--publish") + 1], "127.0.0.1:18089:18089")
+            self.assertEqual(server.argv[server.argv.index("--host") + 1], "0.0.0.0")
+            self.assertNotIn("--network", server.argv)
 
     def test_removed_lane_and_sampler_scripts_have_no_second_entrypoint(self):
         hosts = ROOT / "scripts/hosts"
@@ -259,12 +286,38 @@ class CampaignTests(unittest.TestCase):
         self.assertIn("[string]$Lane", text)
         self.assertNotIn("wsl.exe", text)
 
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is required for native stderr/exit semantics")
+    def test_powershell_wrapper_keeps_native_warnings_and_real_exit_codes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            wrapper = root / "run_variant_campaign.ps1"
+            shutil.copyfile(ROOT / "scripts/hosts/run_variant_campaign.ps1", wrapper)
+            (root / "variant_campaign.py").write_text(
+                "import sys\nprint('expected-native-warning',file=sys.stderr)\n"
+                "sys.exit(2 if sys.argv[sys.argv.index('--mode')+1]=='role' else 0)\n")
+            for mode, expected in (("c1", 0), ("role", 2)):
+                result = subprocess.run(
+                    [shutil.which("pwsh"), "-NoProfile", "-NonInteractive", "-File", str(wrapper),
+                     "-Lane", "rtx4090", "-Plan", "unused", "-Output", "unused",
+                     "-Mode", mode, "-Python", sys.executable],
+                    capture_output=True, text=True, timeout=30)
+                self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                self.assertIn("expected-native-warning", result.stdout + result.stderr)
+
     def test_powered_failure_or_invalidity_is_not_a_successful_cli_exit(self):
         for verdict, expected in (("pass", 0), ("fail", 1), ("invalid", 2)):
             with patch.object(HOST, "run_campaign", return_value={"quality": {"verdict": verdict}}), \
                  patch("sys.stdout", new=io.StringIO()):
                 self.assertEqual(HOST.main(["--lane", "rtx4090", "--plan", "plan.json",
                                             "--out", "out", "--mode", "quality"]), expected)
+
+    def test_unbounded_registered_leak_ratio_is_reported_not_a_serialization_failure(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "result.json"
+            report = {"verdict": "fail", "primary": {"secret_leak_ratio":
+                      {"ratio": float("inf"), "inside_margin": False}}}
+            HOST.save(path, report)
+            self.assertEqual(HOST.load(path), report)
 
 
 class TraceTests(unittest.TestCase):
