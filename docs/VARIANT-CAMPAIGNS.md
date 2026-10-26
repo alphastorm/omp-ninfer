@@ -27,6 +27,10 @@ When staging a subset, retain `scripts/hosts/{variant_campaign,common}.py` and
   edits a release root, changes a driver or touches a production container.
 - Evidence roots are private: logs, model paths, API key files and quality responses
   are not public receipts. Do not commit the plan or raw results to this repository.
+- C1/role/custom output projections are retained in private `outputs/*.json` files:
+  content, reasoning and tool calls, excluding transport/tool-call IDs. Final reduction
+  reopens and compares those actual UTF-8 bytes, with a digest integrity check.
+  A digest-only reduction is explicitly not reported as a byte comparison.
 
 ## Plan
 
@@ -66,6 +70,11 @@ Containers are named `ov-<holder>-*`; `holder` defaults to `harness`. No incumbe
 or container is stopped, removed or renamed. Port defaults: native 18082, Docker 18089;
 `port` and `model_id` override them. The container image must include `sha256sum` and
 support its server's `--version`.
+If the lane requires reviewed io_uring syscalls, supply `seccomp_profile` (globally
+or per arm) as the host path to its existing reviewed Docker seccomp JSON. Its SHA-256
+and exact Docker argv are recorded. The runner never edits that shared policy or
+substitutes an unconfined policy. Driver mounts are selected by UUID even for
+`--version`, because the CUDA-linked ELF loader needs `libcuda.so.1`.
 
 ## Modes
 

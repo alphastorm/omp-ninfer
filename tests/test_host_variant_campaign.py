@@ -42,18 +42,38 @@ class CampaignTests(unittest.TestCase):
                 for label in HOST.ORDER]
 
     def test_abba_uses_weighted_rates_and_real_digest_equality(self):
-        result = HOST.summarize_arms(self.arms())
-        self.assertEqual(result["candidate_baseline_decode_ratio"], 1.25)
-        self.assertTrue(result["all_output_bytes_identical"])
         arms = self.arms()
+        result = HOST.summarize_arms(arms)
+        self.assertEqual(result["candidate_baseline_decode_ratio"], 1.25)
+        self.assertTrue(result["per_case"]["case"]["all_output_digests_identical"])
+        self.assertIsNone(result["all_output_bytes_identical"])
         arms[2]["requests"][0]["output_sha256"] = "different"
-        self.assertFalse(HOST.summarize_arms(arms)["all_output_bytes_identical"])
+        self.assertFalse(HOST.summarize_arms(arms)["per_case"]["case"]["all_output_digests_identical"])
+
+    def test_byte_identity_reads_actual_private_outputs_and_refuses_changed_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            arms = self.arms()
+            for index, arm in enumerate(arms):
+                directory = root / f"{index}-{arm['arm']}"
+                directory.mkdir()
+                path = directory / "output.json"
+                path.write_bytes(b"actual output")
+                arm["requests"][0].update(output_file=path.name, output_sha256=HOST.sha256_file(path))
+            self.assertTrue(HOST.summarize_arms(arms, root)["all_output_bytes_identical"])
+            changed = root / "2-B/output.json"
+            changed.write_bytes(b"different bytes")
+            with self.assertRaisesRegex(HOST.CampaignError, "output evidence changed"):
+                HOST.summarize_arms(arms, root)
+            arms[2]["requests"][0]["output_sha256"] = HOST.sha256_file(changed)
+            self.assertFalse(HOST.summarize_arms(arms, root)["all_output_bytes_identical"])
 
     def test_missing_case_or_changed_repeat_identity_is_refused(self):
         for mutation in (lambda arms: arms[2]["requests"].clear(),
                          lambda arms: arms[3]["identity"].update(binary_sha256="other"),
                          lambda arms: arms[2]["identity"]["gpu"].update(power_limit_w=350),
                          lambda arms: arms[1]["identity"].update(model_sha256="other"),
+                         lambda arms: arms[3]["identity"].update(seccomp_profile_sha256="changed"),
                          lambda arms: arms[1]["requests"][0].update(request_sha256="other")):
             arms = self.arms()
             mutation(arms)
@@ -111,6 +131,29 @@ class CampaignTests(unittest.TestCase):
             with self.assertRaises(HOST.CampaignError):
                 HOST.c1(server)
 
+    def test_capture_retains_exact_model_output_bytes_separately_from_metrics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            server = MagicMock(directory=root, plan={}, root="http://127.0.0.1", key="key")
+            record = {"event": "request_done",
+                      "result": {"prompt_tokens": 7, "computed_prefill_tokens": 7, "completion_tokens": 5},
+                      "timings_seconds": {"decode": 0.2, "prefill": 0.1},
+                      "speculative": {"rounds": 2, "drafted_tokens": 6, "accepted_tokens": 3, "backend": "mtp"}}
+            tool = {"id": "transport-only", "function": {"name": "read", "arguments": "{}"}}
+            def respond(*unused, **kwargs):
+                (root / "requests.jsonl").write_text(json.dumps(record) + "\n")
+                return {"choices": [{"message": {"content": "exact\r\nfinal", "reasoning_content": None,
+                                                  "reasoning": "a reason", "tool_calls": [tool]},
+                                      "finish_reason": "length"}]}
+            with patch.object(HOST, "http", side_effect=respond):
+                row = HOST.request_metrics(server, {"model": "test"}, "case")
+            path = root / row["output_file"]
+            self.assertEqual(json.loads(path.read_bytes()),
+                             ["exact\r\nfinal", "a reason", [{"function": tool["function"]}]])
+            self.assertEqual(row["output_sha256"], HOST.sha256_file(path))
+            self.assertNotIn("content", row)
+            self.assertNotIn("reasoning", row)
+
     def test_power_and_owned_process_are_restored_on_workload_failure(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -125,7 +168,7 @@ class CampaignTests(unittest.TestCase):
             def power(unused, watts):
                 current[0] = watts
             server = MagicMock(binary_sha="b", version="v", argv=["server"],
-                               paths={"model_id": "model"}, root="http://127.0.0.1", key="key")
+                               paths={"model_id": "model"}, root="http://127.0.0.1", key="key", seccomp_profile=None)
             sampler = MagicMock()
             sampler.rows = []
             with patch.object(HOST, "gpu", side_effect=selected_gpu), \
@@ -179,8 +222,10 @@ class CampaignTests(unittest.TestCase):
         server.container = "ov-Harness-identity"
         server.plan = {"gpu_uuid": "GPU-selected"}
         server.arm = {"image": "sha256:fixed"}
+        server.docker_security_args = ["--security-opt", "seccomp=reviewed.json"]
         args = server.image_command(["/bin/server", "--version"])
         self.assertEqual(args[args.index("--gpus") + 1], "device=GPU-selected")
+        self.assertEqual(args[args.index("--security-opt") + 1], "seccomp=reviewed.json")
         self.assertEqual(args[-2:], ["sha256:fixed", "--version"])
 
     def test_removed_lane_and_sampler_scripts_have_no_second_entrypoint(self):

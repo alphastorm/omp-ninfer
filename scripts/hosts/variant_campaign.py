@@ -320,6 +320,9 @@ class Server:
         self.stdout = self.stderr = None
         self.profile = profile
         self.nsys = arm.get("nsys_path", plan.get("nsys_path", "nsys"))
+        self.seccomp_profile = arm.get("seccomp_profile", plan.get("seccomp_profile")) if arm.get("image") else None
+        self.docker_security_args = (["--security-opt", "seccomp=" + str(self.seccomp_profile)]
+                                     if self.seccomp_profile else [])
         self.binary_sha, self.version = self.binary_identity()
         port = str(plan.get("port", 18089 if arm.get("image") else 18082))
         self.root = "http://127.0.0.1:" + port
@@ -345,7 +348,7 @@ class Server:
         if arm.get("image"):
             shutil.copyfile(key_file, directory / "api-key")
             self.argv = ["docker", "run", "--rm", "--name", self.container, "--network", "host",
-                         "--gpus", "device=" + plan["gpu_uuid"], "--volume",
+                         "--gpus", "device=" + plan["gpu_uuid"]] + self.docker_security_args + ["--volume",
                          str(Path(plan["model_path"]).resolve()) + ":/model.ninfer:ro", "--volume",
                          str(directory.resolve()) + ":/campaign", "--entrypoint", self.argv[0],
                          arm["image"]] + self.argv[1:]
@@ -353,7 +356,7 @@ class Server:
     def image_command(self, argv: list[str]) -> list[str]:
         # The ELF loader needs the NVIDIA runtime's libcuda mount even for --version.
         return ["docker", "run", "--rm", "--name", self.container + "-info",
-                "--gpus", "device=" + self.plan["gpu_uuid"], "--entrypoint", argv[0],
+                "--gpus", "device=" + self.plan["gpu_uuid"]] + self.docker_security_args + ["--entrypoint", argv[0],
                 self.arm["image"]] + argv[1:]
 
     def binary_identity(self) -> tuple[str, str]:
@@ -438,7 +441,7 @@ class Server:
         argv = [self.nsys, "export", "--type", "sqlite", "--output", str(database), str(report)]
         if self.arm.get("image"):
             argv = ["docker", "run", "--rm", "--name", self.container + "-export", "--volume",
-                    str(self.directory.resolve()) + ":/campaign", "--entrypoint", self.nsys,
+                    str(self.directory.resolve()) + ":/campaign"] + self.docker_security_args + ["--entrypoint", self.nsys,
                     self.arm["image"], "export", "--type", "sqlite", "--output", "/campaign/profile.sqlite",
                     "/campaign/profile.nsys-rep"]
         command(argv, timeout=300)
@@ -475,9 +478,15 @@ def request_metrics(server: Server, body: dict[str, Any], label: str) -> dict[st
     message = response["choices"][0]["message"]
     # Tool-call transport IDs vary per request and are not model output.
     tools = [{k: v for k, v in tool.items() if k != "id"} for tool in message.get("tool_calls", [])]
-    output = [message.get("content") or "", message.get("reasoning_content", message.get("reasoning")) or "", tools]
+    output = [message.get("content") or "", message.get("reasoning_content") or message.get("reasoning") or "", tools]
+    encoded_output = json.dumps(output, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    output_file = Path("outputs") / (digest([label, body]) + ".json")
+    (server.directory / output_file).parent.mkdir(exist_ok=True)
+    (server.directory / output_file).write_bytes(encoded_output)
+    (server.directory / output_file).chmod(0o600)
     row = {"id": label, "wall_seconds": wall, "request_sha256": digest(body),
-           "output_sha256": digest(output), "prompt_tokens": result["prompt_tokens"],
+           "output_sha256": hashlib.sha256(encoded_output).hexdigest(),
+           "output_file": output_file.as_posix(), "prompt_tokens": result["prompt_tokens"],
            "computed_prefill_tokens": result["computed_prefill_tokens"],
            "completion_tokens": result["completion_tokens"],
            "prefix_cache_hit_tokens": result.get("prefix_cache_hit_tokens", 0),
@@ -558,7 +567,7 @@ def role_requests(server: Server, plan: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def summarize_arms(arms: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_arms(arms: list[dict[str, Any]], output_root: Path | None = None) -> dict[str, Any]:
     if [arm["arm"] for arm in arms] != list(ORDER):
         raise CampaignError("complete campaign must have A/B/B/A arms in order")
     identities = [arm["identity"] for arm in arms]
@@ -574,6 +583,16 @@ def summarize_arms(arms: list[dict[str, Any]]) -> dict[str, Any]:
                 raise CampaignError("repeated arm changed binary or configuration")
         if identities[left]["gpu"]["power_limit_w"] != identities[right]["gpu"]["power_limit_w"]:
             raise CampaignError("repeated arm changed power limit")
+        if identities[left].get("seccomp_profile_sha256") != identities[right].get("seccomp_profile_sha256"):
+            raise CampaignError("repeated arm changed its reviewed syscall policy")
+    outputs: dict[str, list[bytes]] = {}
+    if output_root is not None:
+        for index, arm in enumerate(arms):
+            for row in arm.get("requests", []):
+                encoded = (output_root / f"{index}-{arm['arm']}" / row["output_file"]).read_bytes()
+                if hashlib.sha256(encoded).hexdigest() != row["output_sha256"]:
+                    raise CampaignError("private output evidence changed after capture")
+                outputs.setdefault(row["id"], []).append(encoded)
     samples = {label: [row for arm in arms if arm["arm"] == label for row in arm.get("requests", [])]
                for label in ("A", "B")}
     rates = {label: sum(row["completion_tokens"] for row in rows) / sum(row["decode_seconds"] for row in rows)
@@ -589,11 +608,13 @@ def summarize_arms(arms: list[dict[str, Any]]) -> dict[str, Any]:
         per_case[id_] = {"candidate_baseline_decode_ratio": statistics.median(
             row["decode_tokens_per_second"] for row in selected["B"]) / statistics.median(
             row["decode_tokens_per_second"] for row in selected["A"]),
-            "all_output_bytes_identical": len({row["output_sha256"] for rows in selected.values() for row in rows}) == 1}
+            "all_output_digests_identical": len({row["output_sha256"] for rows in selected.values() for row in rows}) == 1,
+            "all_output_bytes_identical": len(set(outputs[id_])) == 1 if output_root is not None else None}
     return {"weighted_decode_tokens_per_second": rates,
             "candidate_baseline_decode_ratio": rates["B"] / rates["A"] if rates else None,
             "per_case": per_case,
-            "all_output_bytes_identical": all(row["all_output_bytes_identical"] for row in per_case.values()) if per_case else None}
+            "all_output_bytes_identical": all(row["all_output_bytes_identical"] for row in per_case.values())
+            if per_case and output_root is not None else None}
 
 
 def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profile: bool = False,
@@ -646,6 +667,8 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
             receipt["identity"] = {"binary_sha256": server.binary_sha, "binary_version": server.version,
                                    "model_sha256": model_sha, "config": config, "config_sha256": digest(config),
                                    "gpu": gpu(plan["gpu_uuid"]), "image": arm.get("image"),
+                                   "seccomp_profile_sha256": sha256_file(Path(server.seccomp_profile))
+                                   if server.seccomp_profile else None,
                                    "server_arguments": server.argv,
                                    "server_arguments_sha256": digest(server.argv)}
             with sampler:
@@ -726,7 +749,7 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
         result["quality"] = quality.verdict(args)
         result["byte_comparison"] = quality.compare_responses(args.production, args.candidate)
     else:
-        result["summary"] = summarize_arms(arms)
+        result["summary"] = summarize_arms(arms, out)
     save(out / "result.json", result)
     return result
 
