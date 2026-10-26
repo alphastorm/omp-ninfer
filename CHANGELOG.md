@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replace the three lane-specific runtime campaign launchers and standalone VRAM samplers
+  with a [matched GPU-host runner](docs/VARIANT-CAMPAIGNS.md): UUID-selected native/Docker
+  A/B/B/A arms, qualification-identical C1, role/custom/retrieval workloads, mandatory resource
+  sampling, per-arm identities and found-power restoration. Add optional CUDA Graph/NVTX
+  profiling with per-op round/prefill attribution and graph-launch CPU time.
+- Extend the EXP-085 powered quality screen with endpoint-generic capture and fresh-server
+  same-host baseline/candidate pairing, retaining the registered statistical margins and
+  validity rules and reporting actual model-output byte comparisons.
 - Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.

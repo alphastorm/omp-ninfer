@@ -30,8 +30,12 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import random
+import subprocess
 import sys
+import urllib.parse
+import urllib.request
 from operator import itemgetter
 from pathlib import Path
 from typing import Any, Sequence
@@ -510,6 +514,76 @@ def verdict(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def endpoint_root(base_url: str) -> str:
+    """Accept either a server root or its OpenAI /v1 base, without lane assumptions."""
+    parsed = urllib.parse.urlsplit(base_url)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password:
+        raise ScreenError("base URL must be an HTTP(S) endpoint without embedded credentials")
+    if parsed.query or parsed.fragment or parsed.path.rstrip("/") not in ("", "/v1"):
+        raise ScreenError("base URL must name the server root or /v1")
+    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "", "", ""))
+
+
+def capture_endpoint(*, qualification: Path, cases: Path, fixtures: Path, base_url: str,
+                     model: str, api_key_file: Path, out: Path, label: str,
+                     timeout: float = 900) -> dict[str, Any]:
+    """Run the existing private executor/scorer, keeping EXP-085's request settings."""
+    root = endpoint_root(base_url)
+    key = api_key_file.read_text(encoding="utf-8-sig").strip()
+    if not key:
+        raise ScreenError("API key file is empty")
+    request = urllib.request.Request(root + "/v1/models", headers={"Authorization": "Bearer " + key})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        models = json.load(response)
+    if model not in {entry.get("id") for entry in models.get("data", [])}:
+        raise ScreenError(f"endpoint does not serve requested model {model!r}")
+    scripts = qualification / "scripts"
+    for name in ("run_qualification.py", "score_qualification.py"):
+        if not (scripts / name).is_file():
+            raise ScreenError(f"missing private qualification script: {name}")
+    if out.exists():
+        raise ScreenError(f"refusing to mix a new capture with existing run: {out}")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    commands = [
+        [sys.executable, str(scripts / "run_qualification.py"), "--model", model,
+         "--base-url", root + "/v1", "--cases", str(cases), "--fixtures", str(fixtures),
+         "--out", str(out), "--concurrency", "1", "--reasoning-mode", "low",
+         "--reasoning-wire", "top-level", "--reasoning-token-headroom", "8192",
+         "--temperature", "0", "--timeout", str(timeout), "--no-ssh", "--label", label],
+        [sys.executable, str(scripts / "score_qualification.py"), "--run", str(out),
+         "--cases", str(cases)],
+    ]
+    env = dict(os.environ, LOCAL_5090_API_KEY=key)
+    for index, command in enumerate(commands):
+        with (out.parent / f"{out.name}-{index}.log").open("wb") as log:
+            subprocess.run(command, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+                           env=env, check=True, timeout=3500)
+    return run_identity(out)
+
+
+def compare_responses(baseline: Path, candidate: Path) -> dict[str, Any]:
+    """Compare actual model-output bytes, not token counts or timing-bearing response envelopes."""
+    def outputs(run: Path) -> dict[str, bytes]:
+        rows = {}
+        for line in (run / "responses.jsonl").read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            case = row["case_id"]
+            if case in rows or row.get("error"):
+                raise ScreenError("byte comparison requires unique successful response IDs")
+            tools = [{k: v for k, v in tool.items() if k != "id"} for tool in row.get("tool_calls") or []]
+            rows[case] = json.dumps([row.get("content") or "", row.get("reasoning") or "", tools],
+                                   ensure_ascii=False, separators=(",", ":")).encode()
+        return rows
+    a, b = outputs(baseline), outputs(candidate)
+    ids = sorted(set(a) | set(b))
+    equal = sum(case in a and case in b and a[case] == b[case] for case in ids)
+    return {"compared": len(ids), "identical": equal, "different_or_missing": len(ids) - equal,
+            "all_identical": bool(ids) and equal == len(ids),
+            "projection": "UTF-8 JSON [content, reasoning, tool_calls], excluding transport/tool-call IDs and timings"}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -521,15 +595,38 @@ def main(argv: Sequence[str] | None = None) -> int:
     for name in ("production", "candidate", "production-determinism", "candidate-determinism"):
         decision.add_argument(f"--{name}", type=Path, required=True)
     decision.add_argument("--out", type=Path)
+    capture = commands.add_parser("run", help="capture and score cases on any native or container endpoint")
+    capture.add_argument("--base-url", required=True)
+    capture.add_argument("--model", required=True, help="served ID, e.g. qwen3.8-27b or q38-ninfer")
+    capture.add_argument("--api-key-file", type=Path, required=True)
+    capture.add_argument("--qualification", type=Path, required=True)
+    capture.add_argument("--cases", type=Path, required=True)
+    capture.add_argument("--fixtures", type=Path, required=True)
+    capture.add_argument("--out", type=Path, required=True)
+    capture.add_argument("--label", default="paired-quality")
+    capture.add_argument("--timeout", type=float, default=900)
+    pair = commands.add_parser("pair", help="fresh-server baseline/candidate screen on one host (A/B/B/A)")
+    pair.add_argument("--lane", choices=("rtx3090", "rtx4090", "rtx5090"), required=True)
+    pair.add_argument("--plan", type=Path, required=True)
+    pair.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "variants":
             result = write_variants(args.cases, args.out, args.determinism_out)
-        else:
+        elif args.command == "verdict":
             result = verdict(args)
             if args.out:
                 args.out.write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
-    except (ScreenError, OSError, KeyError, ValueError) as error:
+        elif args.command == "run":
+            result = capture_endpoint(qualification=args.qualification, cases=args.cases,
+                                      fixtures=args.fixtures, base_url=args.base_url, model=args.model,
+                                      api_key_file=args.api_key_file, out=args.out, label=args.label,
+                                      timeout=args.timeout)
+        else:
+            sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
+            from variant_campaign import run_campaign
+            result = run_campaign(args.lane, args.plan, args.out, mode="quality")
+    except (ScreenError, OSError, KeyError, ValueError, subprocess.SubprocessError) as error:
         print(f"quality_screen: {error}", file=sys.stderr)
         return 2
     summary = {key: result[key] for key in ("verdict", "validity", "pairs", "primary") if key in result}

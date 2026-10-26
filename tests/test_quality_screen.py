@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from typing import Any, Callable
 
@@ -197,6 +199,72 @@ class VariantsTest(unittest.TestCase):
             root = Path(temp)
             with self.assertRaises(SCREEN.ScreenError):
                 SCREEN.write_variants(self.write_cases(root, [bare]), root / "screen.jsonl", root / "subset.jsonl")
+
+
+class EndpointTest(unittest.TestCase):
+    def test_native_and_container_urls_do_not_encode_a_lane(self) -> None:
+        for port in (18082, 18089):
+            root = f"http://127.0.0.1:{port}"
+            for suffix in ("", "/", "/v1", "/v1/"):
+                self.assertEqual(SCREEN.endpoint_root(root + suffix), root)
+        for bad in ("file:///tmp/key", "http://user:secret@example.com", "http://example.com/v1?key=x",
+                    "http://example.com/chat/completions"):
+            with self.assertRaises(SCREEN.ScreenError):
+                SCREEN.endpoint_root(bad)
+
+    def test_wrong_served_id_fails_before_any_corpus_request(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            key = root / "key"
+            key.write_text("secret")
+            with patch.object(SCREEN.urllib.request, "urlopen",
+                              return_value=io.BytesIO(b'{"data":[{"id":"q38-ninfer"}]}')), \
+                 patch.object(SCREEN.subprocess, "run") as runner:
+                with self.assertRaisesRegex(SCREEN.ScreenError, "does not serve"):
+                    SCREEN.capture_endpoint(qualification=root, cases=root, fixtures=root,
+                                            base_url="http://127.0.0.1:18082/v1", model="qwen3.8-27b",
+                                            api_key_file=key, out=root / "new", label="test")
+                runner.assert_not_called()
+
+    def test_capture_preserves_powered_settings_and_keeps_key_off_argv(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "scripts").mkdir()
+            for name in ("run_qualification.py", "score_qualification.py"):
+                (root / "scripts" / name).touch()
+            key = root / "key"
+            key.write_text("secret")
+            with patch.object(SCREEN.urllib.request, "urlopen",
+                              return_value=io.BytesIO(b'{"data":[{"id":"q38-ninfer"}]}')), \
+                 patch.object(SCREEN.subprocess, "run") as runner, \
+                 patch.object(SCREEN, "run_identity", return_value={"label": "test"}):
+                SCREEN.capture_endpoint(qualification=root, cases=root, fixtures=root,
+                                        base_url="http://127.0.0.1:18089", model="q38-ninfer",
+                                        api_key_file=key, out=root / "new", label="test")
+            argv = runner.call_args_list[0].args[0]
+            self.assertEqual(argv[argv.index("--base-url") + 1], "http://127.0.0.1:18089/v1")
+            self.assertEqual(argv[argv.index("--concurrency") + 1], "1")
+            self.assertEqual(argv[argv.index("--reasoning-token-headroom") + 1], "8192")
+            self.assertEqual(argv[argv.index("--reasoning-mode") + 1], "low")
+            self.assertNotIn("secret", argv)
+            self.assertEqual(runner.call_args_list[0].kwargs["env"]["LOCAL_5090_API_KEY"], "secret")
+
+    def test_byte_comparison_uses_outputs_not_response_timing_or_tool_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            baseline, candidate = root / "A", root / "B"
+            baseline.mkdir()
+            candidate.mkdir()
+            row = {"case_id": "case", "content": "exact", "reasoning": "reason",
+                   "tool_calls": [{"id": "transport-A", "function": {"name": "read", "arguments": "{}"}}]}
+            (baseline / "responses.jsonl").write_text(json.dumps(row) + "\n")
+            row["wall_ms"] = 999
+            row["tool_calls"][0]["id"] = "transport-B"
+            (candidate / "responses.jsonl").write_text(json.dumps(row) + "\n")
+            self.assertTrue(SCREEN.compare_responses(baseline, candidate)["all_identical"])
+            row["content"] += " "
+            (candidate / "responses.jsonl").write_text(json.dumps(row) + "\n")
+            self.assertEqual(SCREEN.compare_responses(baseline, candidate)["different_or_missing"], 1)
 
 
 if __name__ == "__main__":

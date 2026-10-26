@@ -14,14 +14,14 @@ HOSTS = ROOT / "scripts/hosts"
 
 class NativeGpuTests(unittest.TestCase):
     def test_all_probe_entrypoints_load_the_same_helper(self) -> None:
-        for filename in ("accept-native-public-install.ps1", "accept-rtx4090-route.ps1", "vram-sampler.ps1"):
+        for filename in ("accept-native-public-install.ps1", "accept-rtx4090-route.ps1"):
             with self.subTest(filename=filename):
                 text = (HOSTS / filename).read_text()
                 self.assertIn("'native-gpu.ps1'", text)
                 self.assertIn("Resolve-NativeGpuUuid $StateRoot", text)
-        for lane in ("3090", "4090"):
-            text = (HOSTS / f"run_variant_campaign_{lane}.ps1").read_text()
-            self.assertIn("'-StateRoot', $stateRoot", text)
+        campaign = (HOSTS / "variant_campaign.py").read_text()
+        self.assertIn('"--gpus", "device=" + plan["gpu_uuid"]', campaign)
+        self.assertIn('CUDA_VISIBLE_DEVICES=self.plan["gpu_uuid"]', campaign)
         driver = (HOSTS / "accept-rtx4090-route.py").read_text()
         self.assertIn('gpu_helper = scripts / "native-gpu.ps1"', driver)
         self.assertIn('preflight["gpu_helper_sha256"] != sha(gpu_helper)', driver)
