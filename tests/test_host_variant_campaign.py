@@ -143,10 +143,12 @@ class CampaignTests(unittest.TestCase):
                       "timings_seconds": {"decode": 0.2, "prefill": 0.1},
                       "speculative": {"rounds": 2, "drafted_tokens": 6, "accepted_tokens": 3, "backend": "mtp"}}
             tool = {"id": "transport-only", "function": {"name": "read", "arguments": "{}"}}
+            tool_calls = [tool]
             def respond(*unused, **kwargs):
-                (root / "requests.jsonl").write_text(json.dumps(record) + "\n")
+                with (root / "requests.jsonl").open("a") as log:
+                    log.write(json.dumps(record) + "\n")
                 return {"choices": [{"message": {"content": "exact\r\nfinal", "reasoning_content": None,
-                                                  "reasoning": "a reason", "tool_calls": [tool]},
+                                                  "reasoning": "a reason", "tool_calls": tool_calls},
                                       "finish_reason": "length"}]}
             with patch.object(HOST, "http", side_effect=respond):
                 row = HOST.request_metrics(server, {"model": "test"}, "case")
@@ -156,6 +158,10 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(row["output_sha256"], HOST.sha256_file(path))
             self.assertNotIn("content", row)
             self.assertNotIn("reasoning", row)
+            tool_calls = None
+            with patch.object(HOST, "http", side_effect=respond):
+                second = HOST.request_metrics(server, {"model": "test"}, "case-without-tools")
+            self.assertEqual(json.loads((root / second["output_file"]).read_bytes())[2], [])
 
     def test_power_and_owned_process_are_restored_on_workload_failure(self):
         with tempfile.TemporaryDirectory() as temp:

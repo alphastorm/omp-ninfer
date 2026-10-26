@@ -485,7 +485,7 @@ def request_metrics(server: Server, body: dict[str, Any], label: str) -> dict[st
     result, timing, spec = record["result"], record["timings_seconds"], record["speculative"]
     message = response["choices"][0]["message"]
     # Tool-call transport IDs vary per request and are not model output.
-    tools = [{k: v for k, v in tool.items() if k != "id"} for tool in message.get("tool_calls", [])]
+    tools = [{k: v for k, v in tool.items() if k != "id"} for tool in message.get("tool_calls") or []]
     output = [message.get("content") or "", message.get("reasoning_content") or message.get("reasoning") or "", tools]
     encoded_output = json.dumps(output, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     output_file = Path("outputs") / (digest([label, body]) + ".json")
