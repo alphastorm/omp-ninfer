@@ -752,6 +752,7 @@ class WindowsHostRestorationTests(unittest.TestCase):
                 self.routes.assert_windows_host_unchanged(self.baseline, after)
 
 
+@unittest.skipIf(os.name == "nt", "WSL host driver requires POSIX fcntl")
 class DocumentedHostNamesTests(unittest.TestCase):
     """The 5090 host driver checks and preserves exactly what the current guide's host route creates."""
 
