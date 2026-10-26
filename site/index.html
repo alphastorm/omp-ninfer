@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer — durable local inference for coding agents</title>
-<meta name="description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.0 (2026-10-25) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
+<meta name="description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.1 (2026-10-26) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/">
 <link rel="stylesheet" href="site.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer — durable local inference for coding agents">
-<meta property="og:description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.0 (2026-10-25) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
+<meta property="og:description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.1 (2026-10-26) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/">
 <meta name="twitter:card" content="summary">
@@ -18,9 +18,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.0 (published 2026-10-25) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.13.0",
- "datePublished": "2026-10-25",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.1 (published 2026-10-26) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.13.1",
+ "datePublished": "2026-10-26",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -49,32 +49,32 @@ Qwen3.8&nbsp;27B (served model). Your session’s continuation state is an expli
 primitive that survives an inference-server restart, not a lucky prefix-cache hit.</p>
 
 <div class="receipt">
-<strong>Qualified on RTX 5090 · 4090 · 3090 — v0.13.0, stock Oh My Pi 18.12.6 (published 2026-10-25)</strong>
-<p>Fresh v0.13.0 acceptance: five documented routes, <span class="n">31</span> steps, three stock
-clients, and both native Windows public installs passed with independent host restoration;
+<strong>Qualified on RTX 5090 · 4090 · 3090 — v0.13.1, stock Oh My Pi 18.12.6 (published 2026-10-26)</strong>
+<p>Fresh v0.13.1 acceptance: five documented routes, <span class="n">31</span> steps, three stock
+clients, and both native Windows public installs (<code>v0.7.0</code> beta.2 packages) passed with independent host restoration;
 owner-operated evidence.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/manifest.json">manifest</a> ·
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/releases/v0.13.0/NINFER_RELEASE_NOTES.md">release notes</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/releases/v0.13.1/manifest.json">manifest</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/releases/v0.13.1/NINFER_RELEASE_NOTES.md">release notes</a> ·
 <a href="status/">lanes and status</a></p>
 </div>
 
-<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md">Get started with v0.13.0</a>
-<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.0">Download v0.13.0</a>
+<a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md">Get started with v0.13.1</a>
+<a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.1">Download v0.13.1</a>
 
 <h2>What is measured</h2>
 <ul>
-<li><strong>RTX 5090 (<code>qwen38-5090-v0.13.0</code>, DFlash2 draft window 7, BF16 KV, model
-<code>81f924d4</code>):</strong> exact 130,048-token retrieval in <strong>56.99&nbsp;s</strong>
+<li><strong>RTX 5090 (<code>qwen38-5090-v0.13.0</code>, DFlash2 draft window 7, BF16 KV, runtime
+carried from v0.13.0, model <code>81f924d4</code>):</strong> exact 130,048-token retrieval in <strong>56.99&nbsp;s</strong>
 cold; 2,048-token decode at <strong>179.86&nbsp;tok/s</strong> server-side (176.27&nbsp;tok/s
 wall).</li>
-<li><strong>RTX 4090 native Windows 11 (<code>v0.6.11-qwen38-4090-beta.1</code>, MTP3, INT8 KV,
-model <code>eec39564</code>; carried from v0.12.0/v0.12.2):</strong> exact 130,048-token retrieval in
-<strong>91.03&nbsp;s</strong>; C1 decode at <strong>158.66&nbsp;tok/s</strong> (87.59% MTP
-acceptance, 2,109&nbsp;tok/s prefill).</li>
-<li><strong>RTX 3090 native Windows 11 (<code>v0.6.3-qwen38-3090-beta.1</code>, MTP3, INT8 KV,
-300&nbsp;W serving cap, model <code>eec39564</code>; carried from v0.12.0/v0.12.2):</strong> exact 130,048-token retrieval in
-<strong>220.52&nbsp;s</strong>; C1 decode at <strong>102.41&nbsp;tok/s</strong> (93.43% MTP
-acceptance).</li>
+<li><strong>RTX 4090 native Windows 11 (<code>v0.7.0-qwen38-4090-beta.2</code>, MTP3, INT8 KV,
+model <code>81f924d4</code>):</strong> exact 130,048-token retrieval in
+<strong>85.71&nbsp;s</strong>; C1 decode at <strong>150.94&nbsp;tok/s</strong> (87.59% MTP
+acceptance, 2,190.89&nbsp;tok/s prefill).</li>
+<li><strong>RTX 3090 native Windows 11 (<code>v0.7.0-qwen38-3090-beta.2</code>, MTP3, INT8 KV,
+300&nbsp;W serving cap, model <code>81f924d4</code>):</strong> exact 130,048-token retrieval in
+<strong>208.78&nbsp;s</strong>; C1 decode at <strong>84.06&nbsp;tok/s</strong> (92.96% MTP
+acceptance, 921.63&nbsp;tok/s prefill).</li>
 </ul>
 <p>Historical v0.4.0 restart receipt (2026-08-30, one RTX 5090, not a current-release timing or
 restart speed-up ratio): 109,589 retained tokens served after a Docker restart in 24.8&nbsp;s
@@ -95,7 +95,7 @@ to a transcript replay rather than cloud fallback.
 
 <h2>Use it when</h2>
 <ul>
-<li>You use Oh My Pi (<code>18.12.6</code> in <code>v0.13.0</code>) and own an eligible RTX 5090,
+<li>You use Oh My Pi (<code>18.12.6</code> in <code>v0.13.1</code>) and own an eligible RTX 5090,
 RTX 4090, or RTX 3090 setup matching the exact release profile.</li>
 <li>Qwen3.8 27B is the model you want, running privately on hardware you own.</li>
 <li>Coding sessions are long-lived, and explicit continuation across inference-server restarts
@@ -110,7 +110,7 @@ this — the narrow target is what makes the recommendation credible.</p>
 <h2>How it fits together</h2>
 <p><code>Oh My Pi</code> (coding-agent client) → <code>OMP NInfer</code> (qualified appliance and
 release layer) → <code>NInfer</code> (inference engine) → <code>Qwen3.8 27B</code> (served model:
-20.4&nbsp;GB <code>81f924d4</code> on RTX 5090; 18.2&nbsp;GB <code>eec39564</code> on native lanes).
+20.4&nbsp;GB <code>81f924d4</code> across all three lanes).
 Loopback-only, bearer-authenticated, fail-closed instead of cloud fallback, every byte hash-pinned.
 Full detail: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">canonical facts</a>.</p>
 <p>Oh My Pi owns the conversation transcript, tools, coding workflow, and subagents.

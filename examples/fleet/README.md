@@ -13,15 +13,19 @@ The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The current fragments target **v0.13.0 / OMP 18.12.6**.
+The current fragments target **v0.13.1 / OMP 18.12.6**.
 The RTX 5090 profile uses `qwen38-5090-v0.13.0` (`751d22dc`), model container version 3 `81f924d4`,
 and host directory `checkpoints-v013` mounted at `/checkpoints-v013` with mandatory
-`--session-checkpoint-require-origin-auth`; prior server sessions replay from OMP transcripts, never
-from the old checkpoint root. Native RTX 4090 components carry unchanged from v0.12.2 (`v0.6.11`,
-model `eec39564`). JSON-schema output and 128-character Chat/Responses tool names are qualified on
-the rebased RTX 5090 container lane, while carried native lanes retain HTTP 400 schema refusal and
-64-character tool names. No multi-machine fleet completed-work qualification is claimed for v0.13.0;
-per-lane installation eligibility follows the exact manifest ready gate. The release uses the
+`--session-checkpoint-require-origin-auth` (carried unchanged from v0.13.0); prior server sessions
+replay from OMP transcripts, never from the old checkpoint root. Native RTX 4090 uses
+`v0.7.0-qwen38-4090-beta.2` (source `7a25cd72` on `64d10fbf`, profile
+`qwen38-4090-native-v0.7.0-beta.2`, public config `b21cdaf8`), the same published model container
+version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`), and release-isolated schema 3 checkpoint directory
+`cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the installed release ID such as `qwen38-4090-native-v0.7.0-beta.2-7a25cd72f490`) with mandatory
+`--session-checkpoint-require-origin-auth`. Enforced JSON-schema output and 128-character
+Chat/Responses tool names are qualified on both the RTX 5090 container and rebased native lanes. No
+multi-machine fleet completed-work qualification is claimed for v0.13.1; per-lane installation
+eligibility follows the exact manifest ready gate. The release uses the
 checksummed binary from the [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
 `models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not

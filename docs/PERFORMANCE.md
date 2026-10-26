@@ -22,23 +22,26 @@ program so contributors can see the state of play in one place.
 ## Current state
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
-to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.13.0**
-(2026-10-25) pins unmodified upstream OMP 18.12.6 (`45c35e40`), rebases the RTX 5090 container
-runtime onto upstream `Neroued/ninfer` master `64d10fbf`, and carries the v0.12.0/v0.12.2 native
-Windows runtime bindings unchanged (see [`FACTS.md`](FACTS.md) and [`BENCHMARKS.md`](BENCHMARKS.md)).
+to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.13.1**
+(2026-10-26) pins unmodified upstream OMP 18.12.6 (`45c35e40`), rebases the native Windows RTX 4090
+and RTX 3090 runtimes onto upstream `Neroued/ninfer` master `64d10fbf` at source `7a25cd72`, and
+carries the v0.13.0 RTX 5090 container runtime (`6d4d0a05` on `64d10fbf`) unchanged (see
+[`FACTS.md`](FACTS.md) and [`BENCHMARKS.md`](BENCHMARKS.md)).
 
 - **Current runtimes:**
   - **RTX 5090 container (`sm_120a`):** `v0.7.0-qwen38-5090-beta.2` (source `6d4d0a05` on upstream
     master `64d10fbf`, image `5d10a998`, server `9790a004`, model `81f924d4`, profile
-    `qwen38-5090-v0.13.0`, configuration `751d22dc`) with DFlash2 draft window 7, BF16 KV (146,368
-    automatic KV tokens), 131,072-token context, and two requests in flight
-    ([qualification receipt](../releases/v0.13.0/qualification/rtx5090.json)).
-  - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.6.11-qwen38-4090-beta.1`
-    (package `52687044`, server `76f35b74`) and `v0.6.3-qwen38-3090-beta.1` (package `74120de0`,
-    server `bca236e5`) from shared source `cad19767` and model `eec39564`, with MTP3, INT8 KV,
-    131,072-token context, and one request at a time on a UUID-bound two-GPU host ([RTX 4090
-    receipt](../releases/v0.13.0/qualification/rtx4090.json), [RTX 3090
-    receipt](../releases/v0.13.0/qualification/rtx3090.json)).
+    `qwen38-5090-v0.13.0`, configuration `751d22dc`; carried from `v0.13.0`) with DFlash2 draft
+    window 7, BF16 KV (146,368 automatic KV tokens), 131,072-token context, and two requests in
+    flight ([qualification receipt](../releases/v0.13.1/qualification/rtx5090.json)).
+  - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.7.0-qwen38-4090-beta.2`
+    (package `ffaa410a`, server `cfc3e066`, profile `qwen38-4090-native-v0.7.0-beta.2`,
+    configuration `b21cdaf8`) and `v0.7.0-qwen38-3090-beta.2` (package `626ba6ff`, server
+    `cdd24c5e`, profile `qwen38-3090-native-v0.7.0-beta.2`, configuration `b49aad99`) from shared
+    source `7a25cd72` on upstream master `64d10fbf` and shared model `81f924d4`, with MTP3
+    (`--lm-head-draft`), INT8 KV, 131,072-token context, and one request at a time on a UUID-bound
+    two-GPU host ([RTX 4090 receipt](../releases/v0.13.1/qualification/rtx4090.json), [RTX 3090
+    receipt](../releases/v0.13.1/qualification/rtx3090.json)).
 - **Shipped from the ledger:** DFlash2 K=7 with BF16 KV shipped on the RTX 5090 in v0.10.0
   (EXP-078 to EXP-086, EXP-090). Single-launch 8-column verify attention (the shipped subset of
   EXP-092) plus small-T tensor-core Q4 query/key projections at 8 and 16 verify columns
@@ -91,7 +94,7 @@ computed prefill tokens, and an exact 1,024-token completion at the 300 W profil
 Exact package, source, and phase hashes:
 [`2026-08-30-rtx3090-parity.json`](measurements/2026-08-30-rtx3090-parity.json). These numbers are
 historical v0.3.0 candidate evidence; current RTX 3090 qualification is in
-[`releases/v0.13.0/qualification/rtx3090.json`](../releases/v0.13.0/qualification/rtx3090.json).
+[`releases/v0.13.1/qualification/rtx3090.json`](../releases/v0.13.1/qualification/rtx3090.json).
 
 ## The profiling lane
 
@@ -1293,12 +1296,13 @@ experimental T=16 Q5 pair mixer) and EXP-094 (small-T tensor-core Q4 query/key p
 (`v0.6.16-qwen38-5090-beta.1`, source `1302d639`, carried through v0.12.2) and are ported onto
 upstream master `64d10fbf` in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097).
 On the RTX 4090 and RTX 3090 native Windows lanes, MTP3 with INT8 KV and one active request
-remains the qualified stack (`v0.6.11` and `v0.6.3`, source `cad19767`); DFlash2 does not link on
-`sm_89`/`sm_86` or fit the 24 GB 131,072-token budget (EXP-089). EXP-095 compared the superseded
-fork candidate `a59c13d0` against upstream `81c8ce09` in a local fixed-KV rehearsal — not the
-selected `1302d639` runtime — before the [v0.13.0 rebase](UPSTREAM.md#v0130-sync-program) re-ported
-the durable store and kernel routes onto `64d10fbf` (EXP-097: 101.09% median role-corpus decode vs
-`1302d639`; rebased native packages target `v0.13.1`).
+remains the qualified stack (`v0.7.0-qwen38-4090-beta.2` and `v0.7.0-qwen38-3090-beta.2`, source
+`7a25cd72` on `64d10fbf` in `v0.13.1`); DFlash2 does not link on `sm_89`/`sm_86` or fit the 24 GB
+131,072-token budget (EXP-089). EXP-095 compared the superseded fork candidate `a59c13d0` against
+upstream `81c8ce09` in a local fixed-KV rehearsal — not the selected `1302d639` runtime — before
+the [v0.13.0 and v0.13.1 rebases](UPSTREAM.md#v0130-sync-program) re-ported the durable store and
+kernel routes onto `64d10fbf` (EXP-097: 101.09% median role-corpus decode vs `1302d639` on RTX
+5090; native Windows packages shipped in `v0.13.1` at `7a25cd72`).
 Open kernel work targets verify-round host-commit idle time (EXP-058, EXP-092), Q4/Q5 epilogue
 fusion (EXP-056), warm-turn fragment consolidation (EXP-059), and host-to-device KV prefetch.
 
@@ -1310,7 +1314,7 @@ hypothesis and method before writing code.
 
 | Idea | Why it should work | Status |
 | --- | --- | --- |
-| Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus on `81c8ce09` was 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refused by 561.47 MiB; re-porting the kernel routes and schema 3 durable store onto master `64d10fbf` reached 101.09% median role-corpus decode against `1302d639` (EXP-097) | EXP-095 closed; RTX 5090 rebase shipped in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097) |
+| Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus on `81c8ce09` was 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refused by 561.47 MiB; re-porting the kernel routes and schema 3 durable store onto master `64d10fbf` reached 101.09% median role-corpus decode against `1302d639` (EXP-097) | EXP-095 closed; RTX 5090 rebase shipped in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097) and native Windows rebase shipped in v0.13.1 (`v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2`, source `7a25cd72`) |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold. DFlash2 K=7 rounds idle 324–350 µs each, 1.4–2.2% of a round (EXP-092) | open |
 | Q4 query/key projections on the tensor cores at verify widths | The GDN and attention query/key projections took 1.68 ms of every one-request DFlash2 round (2.67 ms in a pair) on SIMT at 28–31% of DRAM bandwidth, and no byte-identical schedule is faster (EXP-093). On the Q4 small-T tensor-core kernel they take 0.82 ms, rounds are 0.8 ms shorter (1.9 ms in a pair), and the changed outputs pass EXP-085's powered screen (EXP-094) | shipped RTX 5090 v0.11.0 (`v0.6.16`, source `1302d639`; ported into v0.13.0 `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`) |

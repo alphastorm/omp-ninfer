@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
+
+## [0.13.1] - 2026-10-26
+
+### Added
+
+- Bind fresh v0.13.1 acceptance on frozen candidate `92dfb132`: all five documented routes (31
+  byte-identical blocks), three stock OMP 18.12.6 clients, and both first-of-lineage beta.2 native
+  Windows public installs (RTX 4090 19/19 and RTX 3090 19/19 route-behavior checks; rollback
+  `not_applicable`, zero directions) passed with independent host restoration (429.388 s RTX 5090
+  hold, 370.64 s RTX 4090 window, 398.01 s RTX 3090 window; production was not upgraded during the
+  acceptance window). Both native-runtime (`CR-20261026T071003Z-7a25cd72`) and product-tooling
+  (`CR-20261026T082448Z-92dfb132`) full councils closed without remediation, with deferred
+  residuals tracked in [#88](https://github.com/alphastorm/omp-ninfer/issues/88),
+  [#89](https://github.com/alphastorm/omp-ninfer/issues/89), and
+  [#90](https://github.com/alphastorm/omp-ninfer/issues/90).
+
+### Changed
+
 - Migrate native qualification composition and rebased-native verification to the canonical
   schema 2 product protocol payload. Preserve real phase wrappers and their raw `.protocol`
   results; require authenticated status identity, private same-session reuse, isolated-session
@@ -16,15 +37,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   must match their phase payloads and byte hashes. Shared Host MiB/bytes and the recorded reduced
   pressure budget replace legacy split-pool fields and authored check counts; published historical
   native receipts remain unchanged under their actual component tags.
-- Stage v0.13.1 for rebased native Windows RTX 4090/RTX 3090 components on upstream master
-  `64d10fbf`, carrying the exact RTX 5090 beta.2 runtime/profile and stock OMP 18.12.6.
-  Native beta.1 source `eecb437f` is superseded after a fork CI fixture defect. Fresh beta.2 source
-  `7a25cd72` passes exact-head CI, both Windows 90/90 matrices, 75 package units, Linux builds and
-  both full native chains. Actual published beta.2 inventories/qualification/profile bindings
-  are bound. Both native-runtime and product-tooling councils closed without remediation; fresh
-  candidate `92dfb132` passed all five routes/31 blocks, three stock clients and both first-of-lineage
-  native public installs with independent restoration. Immutable evidence pins preserve that
-  accepted candidate; product publication is separate.
+- Rebase the native Windows RTX 4090 (`v0.7.0-qwen38-4090-beta.2`) and RTX 3090
+  (`v0.7.0-qwen38-3090-beta.2`) components onto upstream master `64d10fbf` at frozen source
+  `7a25cd72`, carrying the exact RTX 5090 beta.2 runtime/profile (`v0.7.0-qwen38-5090-beta.2`,
+  source `6d4d0a05`) and stock OMP 18.12.6. Native beta.1 source `eecb437f` is superseded after a
+  fork CI fixture defect. Fresh beta.2 source `7a25cd72` passes exact-head CI, both Windows 90/90
+  matrices, 75 package units, Linux builds, and both full native hardware chains, with actual
+  published beta.2 11-asset sets, qualification receipts, and profile bindings bound in
+  `releases/v0.13.1/manifest.json`.
 - Disclose the carried RTX 5090 export-lease admission risk (reachability not reproduced,
   [#88](https://github.com/alphastorm/omp-ninfer/issues/88)) and unchanged native installer
   failed-stop rollback/repair residual ([#89](https://github.com/alphastorm/omp-ninfer/issues/89)).
@@ -33,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tag/source/tree and asset identities; preserve the current-guide assertions.
 - Move native model-download blocks to the shared published version 3 artifact `81f924d4` and a
   separate `qwen3_8_27b-v3.ninfer` file, retaining old native models/checkpoints for rollback.
-  Native K5 profiles use strict origin authentication, shared Host budgets, extra device-state
+  Native profiles use strict origin authentication, shared Host budgets, extra device-state
   slots 2/4 and admission headroom 640/768 MiB at 131,072 INT8 MTP3 C1. Isolated schema 3 native
   roots replay old transcripts rather than importing old generations; changed route blocks require
   explicit document-change acceptance.
@@ -42,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lineages have rollback `not_applicable`, zero directions. Normal/pressure canonical product
   smokes establish native Chat/Responses JSON-schema support; no matched native speedup/parity or
   inherited public-package execution is claimed.
-- Bind Windows K6 handle-anchored replacement/current-parent fence semantics, capacity-preserving
+- Bind Windows handle-anchored replacement and current-parent fence semantics, capacity-preserving
   save/DELETE refusals and finite-export admission progress. Required Windows regressions and
   final hardware proof are scoped separately from the unchanged RTX 5090 council. No power-loss,
   disk-reclaim-triggered rearm, global retry or new native DFlash2/vision claim is made.
@@ -50,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   components from v0.7.0. The cutter verifies 10 outer checksum entries / 11 files, receipt and
   CycloneDX source/server bindings without replacing the inner SPDX file inventory. Binding and
   staging derive the dependency URL/hash from that set; historical packages without an inventory
-  remain valid. The P4 generator accepts real CRT/DirectStorage DLL/license provenance through
+  remain valid. `scripts/generate_native_sbom.py` accepts real CRT/DirectStorage DLL/license provenance through
   `--runtime-inventory`, checks packaged bytes and coverage, and records input/license hashes.
 - Mark v0.13.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets. Front-door install links
@@ -2452,7 +2472,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...v0.12.2
 [0.12.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.0...v0.12.1
