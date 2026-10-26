@@ -75,6 +75,11 @@ or per arm) as the host path to its existing reviewed Docker seccomp JSON. Its S
 and exact Docker argv are recorded. The runner never edits that shared policy or
 substitutes an unconfined policy. Driver mounts are selected by UUID even for
 `--version`, because the CUDA-linked ELF loader needs `libcuda.so.1`.
+Checkpoint-enabled containers must use an **ext4 output root** (WSL's Linux filesystem),
+not a DrvFS/9p Windows-drive mount. The per-arm `/campaign/checkpoints` store shares that
+mount. The runner checks its host filesystem with `findmnt` before launching any
+container and records it; it never tries to put an O_DIRECT checkpoint store on DrvFS.
+Checkpoint-disabled smoke evidence can stay on a Windows-drive mount.
 
 ## Modes
 

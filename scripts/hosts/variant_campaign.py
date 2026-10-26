@@ -323,6 +323,12 @@ class Server:
         self.seccomp_profile = arm.get("seccomp_profile", plan.get("seccomp_profile")) if arm.get("image") else None
         self.docker_security_args = (["--security-opt", "seccomp=" + str(self.seccomp_profile)]
                                      if self.seccomp_profile else [])
+        self.checkpoint_filesystem = None
+        if arm.get("image") and config.get("session_checkpoint", {}).get("enabled"):
+            self.checkpoint_filesystem = command(
+                ["findmnt", "--noheadings", "--output", "FSTYPE", "--target", str(directory)]).stdout.strip()
+            if self.checkpoint_filesystem != "ext4":
+                raise CampaignError("container checkpoint stores require WSL ext4; choose an ext4 --out root")
         self.binary_sha, self.version = self.binary_identity()
         port = str(plan.get("port", 18089 if arm.get("image") else 18082))
         self.root = "http://127.0.0.1:" + port
@@ -669,6 +675,7 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
                                    "gpu": gpu(plan["gpu_uuid"]), "image": arm.get("image"),
                                    "seccomp_profile_sha256": sha256_file(Path(server.seccomp_profile))
                                    if server.seccomp_profile else None,
+                                   "checkpoint_filesystem": server.checkpoint_filesystem,
                                    "server_arguments": server.argv,
                                    "server_arguments_sha256": digest(server.argv)}
             with sampler:

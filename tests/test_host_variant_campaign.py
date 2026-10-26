@@ -168,7 +168,8 @@ class CampaignTests(unittest.TestCase):
             def power(unused, watts):
                 current[0] = watts
             server = MagicMock(binary_sha="b", version="v", argv=["server"],
-                               paths={"model_id": "model"}, root="http://127.0.0.1", key="key", seccomp_profile=None)
+                               paths={"model_id": "model"}, root="http://127.0.0.1", key="key",
+                               seccomp_profile=None, checkpoint_filesystem=None)
             sampler = MagicMock()
             sampler.rows = []
             with patch.object(HOST, "gpu", side_effect=selected_gpu), \
@@ -227,6 +228,27 @@ class CampaignTests(unittest.TestCase):
         self.assertEqual(args[args.index("--gpus") + 1], "device=GPU-selected")
         self.assertEqual(args[args.index("--security-opt") + 1], "seccomp=reviewed.json")
         self.assertEqual(args[-2:], ["sha256:fixed", "--version"])
+
+    def test_container_checkpoint_store_refuses_drvfs_before_starting_any_container(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            directory = root / "arm"
+            directory.mkdir()
+            key = root / "key"
+            key.write_text("key")
+            plan = {"gpu_uuid": "GPU-selected", "model_path": str(root / "model")}
+            arm = {"image": "sha256:fixed", "binary": "/bin/server"}
+            config = {"session_checkpoint": {"enabled": True, "quota_mib": 64, "staging_mib": 8}}
+            with patch.object(HOST, "command", return_value=MagicMock(stdout="9p\n")), \
+                 patch.object(HOST.Server, "binary_identity") as identity:
+                with self.assertRaisesRegex(HOST.CampaignError, "require WSL ext4"):
+                    HOST.Server(plan, arm, config, directory, "model-sha", key, False)
+                identity.assert_not_called()
+            with patch.object(HOST, "command", return_value=MagicMock(stdout="ext4\n")), \
+                 patch.object(HOST.Server, "binary_identity", return_value=("binary-sha", "version")):
+                server = HOST.Server(plan, arm, config, directory, "model-sha", key, False)
+            self.assertEqual(server.checkpoint_filesystem, "ext4")
+            self.assertEqual(server.paths["checkpoints"], "/campaign/checkpoints")
 
     def test_removed_lane_and_sampler_scripts_have_no_second_entrypoint(self):
         hosts = ROOT / "scripts/hosts"
