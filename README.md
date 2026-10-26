@@ -108,13 +108,15 @@ owners staying on v0.10.0 keep the [v0.10.0 guide](https://github.com/alphastorm
 
 ### Next release: rebased native Windows lanes
 
-The [v0.13.1 draft](releases/v0.13.1/NINFER_RELEASE_NOTES.md) moves both native lanes onto upstream
+The [v0.13.1 composition](releases/v0.13.1/NINFER_RELEASE_NOTES.md) moves both native lanes onto upstream
 master `64d10fbf`, the shared published version 3 model, strict-origin schema 3 checkpoints and
 shared Host budgets, with 640/768 MiB admission headroom. The RTX 5090 beta.2 runtime and stock
 OMP 18.12.6 carry unchanged. Both native beta.2 packages are published and freshly qualified,
-including Chat/Responses JSON-schema output and 128-character tool names. Changed-source council
-and fresh candidate-bound public-route acceptance remain separate gates in the
-[draft qualification](releases/v0.13.1/qualification.json); this is not a published product.
+including Chat/Responses JSON-schema output and 128-character tool names. The native council
+closed without remediation. Fresh acceptance on `92dfb132` passed all five routes/31 blocks,
+three stock clients and both first-of-lineage native public installs with independent restoration.
+The [qualification](releases/v0.13.1/qualification.json) keeps product-tooling council binding and
+final evidence pins separate; this is not a published product.
 The front-door links above stay on the accepted v0.13.0 guide while the working-tree guide stages
 the next native model/download contract.
 

@@ -46,26 +46,30 @@ Full release authority: [`releases/v0.13.0/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.13.0/qualification.json`](releases/v0.13.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
-## Next release — v0.13.1 native rebase draft
+## Next release — v0.13.1 native rebase composition
 
-[Draft notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
+[Prepared notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
 [qualification](releases/v0.13.1/qualification.json) stage native
 `v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2` while carrying exact RTX 5090 beta.2
-and stock OMP 18.12.6. This is not a published or publicly accepted composition.
+and stock OMP 18.12.6. Fresh candidate acceptance passed; this is not a published product.
 Native profiles now freeze the shared Host budgets (15,506,063,360 / 12,284,837,888 bytes),
 extra slots 2/4, prefill 2,048/1,024, strict origin authentication and admission headroom
 640/768 MiB. The first beta.1 source `eecb437f` passed hardware chains but failed a fork CI
 fixture; its published cuts remain unused. Fresh successor `7a25cd72` now passes both complete
 native chains, with 150.94/84.06 tok/s C1 decode and 85.71/208.78 s exact 130,048-token retrieval.
-Both beta.2 prereleases, inventories and fresh qualification/profile bindings are now recorded;
-native/product-tooling council, lead lane/evidence pins and fresh public acceptance remain.
+Both beta.2 prereleases, inventories and fresh qualification/profile bindings are recorded.
+The native council closed without remediation, and the stage/lane pin is complete. Fresh
+candidate `92dfb132` passed all five routes/31 blocks, three stock clients and both native public
+installs with independent restoration. Product-tooling council binding and final evidence pins
+remain separate gates.
 
 The native route moves to the published version 3 artifact `81f924d4` and fresh per-release
 checkpoint roots; old native generations are not migrated. JSON-schema output remains an exact-source
-lane gate. Actual review, fresh
-route/client/public-install/rollback-lineage and independent restoration proof are still required.
-Changed native model blocks require `documented_routes.document_change`; no prior 31-block
-acceptance is relabelled. Published v0.13.0 authority/profiles remain untouched until a real lane pin.
+lane gate. Both canonical roots were freshly installed after preserving their old lineages;
+both rebased lineages have no predecessor and zero rollback directions. Subsequent public-URL
+checks returned `already_installed`. Changed native blocks bind
+`documented_routes.document_change`; no prior 31-block acceptance is relabelled. Working
+authority/profiles name v0.13.1; published front-door links stay on v0.13.0 until publication.
 
 ## Remaining work
 
@@ -119,8 +123,8 @@ unmet:
    staged rebased native profiles on `64d10fbf` add `--admission-headroom-mib` 640 MiB on RTX
    4090 and 768 MiB on RTX 3090 plus strict origin authentication. Actual published beta.2
    packages, dependency SBOMs and fresh source `7a25cd72` host/hardware/protocol qualification
-   are bound. Native/product-tooling council and candidate-bound public-route/client acceptance,
-   not implementation or inherited evidence, remain the release gates.
+   are bound. The native council and fresh candidate-bound public-route/client acceptance are
+   complete; product-tooling council binding and final evidence pins precede product publication.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.13.0/qualification/rtx4090.json`](releases/v0.13.0/qualification/rtx4090.json),

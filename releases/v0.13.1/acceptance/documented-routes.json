@@ -1,0 +1,314 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.13.1",
+  "as_of": "2026-10-26",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Fresh candidate-bound execution of all five v0.13.1 documented routes; pre-publication clone substitutions are explicit in the unchanged runner receipts.",
+  "document_sha256": "d46aadd9bd27af251fa111f9dbbe61d9724c24a3ae97de5a9575f57ac6b8f03a",
+  "current_document_sha256": "4ddc7dee957de760e0e1deaf2f9a7c596258c7bf7c8ff76d70d3ae92c361e226",
+  "executed_blocks_match_current": true,
+  "document_change": "Compared with v0.13.0, the accepted v0.13.1 candidate changes the native package bindings and model-download blocks: both native variants bind components.model, download published v3 artifact 81f924d4 into a separate qwen3_8_27b-v3.ninfer file, and install actual beta.2 packages. All five routes executed those candidate blocks fresh at 92dfb132; no predecessor route acceptance is relabelled. After that execution, the guide banner, acceptance summary and native identity table were truth-up prose edits only; every current executable route block remains byte-identical to its candidate receipt.",
+  "candidate_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 58.811,
+      "receipt": "docs/measurements/2026-10-26-v0131-rtx5090-container-host-run.json",
+      "sha256": "7db06ee19c84a519837979198a8a260e2d16f27484f5235e14e7521cf6fa9dd2"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 121.564,
+      "receipt": "docs/measurements/2026-10-26-v0131-rtx5090-macos-client-run.json",
+      "sha256": "c4f26fab910894849558fe1a3c13df0f9ee0080a9e71bd2130cf41de1e4bfcd2"
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 66.039,
+      "receipt": "docs/measurements/2026-10-26-v0131-rtx5090-windows-client-run.json",
+      "sha256": "b88c2e11025de19d84e0d3fd0d76bbbb7ab9b8f1e4eaad57b8481a44eb82a17a"
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 303.906,
+      "receipt": "docs/measurements/2026-10-26-v0131-rtx4090-native-run.json",
+      "sha256": "c5866284c114a639d1a10a8217cec4d0875c8278fa850182f1afcc0647655872"
+    },
+    "rtx3090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 323.983,
+      "receipt": "docs/measurements/2026-10-26-v0131-rtx3090-native-run.json",
+      "sha256": "5f8b7116e2a62cbb21b4d1fe455a7a9059ffcdb95bd2a2b5e3ee35b1ce18942a"
+    }
+  },
+  "steps": [
+    {
+      "lane": "rtx5090-container-host",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-macos-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-windows-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx4090-native",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx3090-native",
+      "status": "passed"
+    }
+  ],
+  "current_block_addresses": {
+    "rtx5090-container-host": [
+      {
+        "slug": "prepare",
+        "heading": "3. Prepare the model and key on the inference host",
+        "index": 0,
+        "sha256": "91357f9425492f74477a15e9f19cf3adc53cc464bf4eafd7c23f7756b0a6b12d"
+      },
+      {
+        "slug": "start",
+        "heading": "4. Start NInfer on the inference host",
+        "index": 0,
+        "sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87"
+      }
+    ],
+    "rtx5090-macos-client": [
+      {
+        "slug": "client-install",
+        "heading": "2. Install the OMP beta on the Mac",
+        "index": 0,
+        "sha256": "9071afc35b253607e9b0b5292f681d2414cb49df94a24eb4952aed895f042e68"
+      },
+      {
+        "slug": "tunnel",
+        "heading": "5. Open the tunnel from the Mac",
+        "index": 0,
+        "sha256": "89d723de4acbbcd41e2a2430b615c6c15517c9f37f2db504ec925c17ee33e9b8"
+      },
+      {
+        "slug": "key",
+        "heading": "6. Install the same key on the Mac",
+        "index": 0,
+        "sha256": "82abb4c053ead673606f344899314b17a0dcae0d9baf3febd821439163cfcb58"
+      },
+      {
+        "slug": "provider",
+        "heading": "7. Add the OMP provider",
+        "index": 0,
+        "sha256": "a0a296ccaba290816c0d6c41ab84affff90dfc9bd02824c2b72cfb15c3eed9a6"
+      },
+      {
+        "slug": "fail-closed-config",
+        "heading": "7. Add the OMP provider",
+        "index": 2,
+        "sha256": "11c5c38592fb37b7cd2684be4a826c4d07dbf5d2fe25d9774e8550fab979e281"
+      },
+      {
+        "slug": "tool",
+        "heading": "Text and tool turn",
+        "index": 0,
+        "sha256": "20be720027ed8cf9cd4297ded3a923adac01873fff27e59ef27bb0f510d973c9"
+      },
+      {
+        "slug": "vision",
+        "heading": "Image input",
+        "index": 0,
+        "sha256": "a0e9a99e7f7b2304053cb956a9ef5a30240ffb10efd0f1651a73685ee370300e"
+      },
+      {
+        "slug": "resume",
+        "heading": "Stateful follow-up and OMP resume",
+        "index": 0,
+        "sha256": "cd1befb5daadbb1bbb5df28179b3e9e23a897cc12a921f52e3f2f9b3e88a9d3c"
+      },
+      {
+        "slug": "survives-restart",
+        "heading": "Session survives the server process",
+        "index": 0,
+        "sha256": "5ea55d391650c75a128a0429da7e422608201a592d9e5771f6a9da9607a7f4dd"
+      },
+      {
+        "slug": "fail-closed",
+        "heading": "Fail closed",
+        "index": 0,
+        "sha256": "73341e46e74e37137db0be4318e851b90f9533c43e413731ddad91837772bb61"
+      }
+    ],
+    "rtx5090-windows-client": [
+      {
+        "slug": "clone-and-verify",
+        "heading": "Clone and verify the exact product release",
+        "index": 0,
+        "sha256": "2539c93eb8baeb2996ae1e398c7101ce24b684b6dde25afe3c70cb436ac9a109"
+      },
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8765b7f92d21e0ca9e682dd135d0cf3faa1502ca7d3c70773f79c3a4dc98747d"
+      },
+      {
+        "slug": "provider",
+        "heading": "Native Windows OMP",
+        "index": 0,
+        "sha256": "a0c9c6e68df0f2dff202712d458bbced7f958ac3540eb91abe8c54641123bb5b"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "Native Windows command forms",
+        "index": 0,
+        "sha256": "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a"
+      },
+      {
+        "slug": "fail-closed",
+        "heading": "Native Windows command forms",
+        "index": 1,
+        "sha256": "d51c07aff9b2569ea02893e97596e639f1a018b6e2e2225745a30bd65e04a3b9"
+      }
+    ],
+    "rtx4090-native": [
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8765b7f92d21e0ca9e682dd135d0cf3faa1502ca7d3c70773f79c3a4dc98747d"
+      },
+      {
+        "slug": "clone-and-verify",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 0,
+        "sha256": "2539c93eb8baeb2996ae1e398c7101ce24b684b6dde25afe3c70cb436ac9a109"
+      },
+      {
+        "slug": "variant",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 1,
+        "sha256": "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c"
+      },
+      {
+        "slug": "stage-and-install",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 2,
+        "sha256": "ea0c85f0650f06aa6de650a5dc38a686a1a3ced6435fcdfe58fe39c3caa2b64a"
+      },
+      {
+        "slug": "operate",
+        "heading": "Operate the native lane",
+        "index": 0,
+        "sha256": "7cae194b60f169c3c80f015fc81fb893b79e9d335e3804865a8077566f0b58e7"
+      },
+      {
+        "slug": "provider",
+        "heading": "Point OMP at the native lane",
+        "index": 0,
+        "sha256": "5da3bcc0c27555bc1c715c304c7e6f42f5b05f359f71c9c014e521e4db56fe5e"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "Native lane acceptance",
+        "index": 0,
+        "sha256": "3df16b6fbac015eb82b4586ea4d7f8876817d52b6b13e730b3c1956f84ed9743"
+      }
+    ],
+    "rtx3090-native": [
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8765b7f92d21e0ca9e682dd135d0cf3faa1502ca7d3c70773f79c3a4dc98747d"
+      },
+      {
+        "slug": "clone-and-verify",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 0,
+        "sha256": "2539c93eb8baeb2996ae1e398c7101ce24b684b6dde25afe3c70cb436ac9a109"
+      },
+      {
+        "slug": "variant",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 1,
+        "sha256": "a7f599d12c0ad7efa6d52de222d0efd457f754baf8bf49132d4bfc28c5c9e17b"
+      },
+      {
+        "slug": "stage-and-install",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 2,
+        "sha256": "6be02630da6fea14398a11833f56d98477909bcc846f0487780db7172bb8fc65"
+      },
+      {
+        "slug": "operate",
+        "heading": "Operate the RTX 3090 native lane",
+        "index": 0,
+        "sha256": "7cae194b60f169c3c80f015fc81fb893b79e9d335e3804865a8077566f0b58e7"
+      },
+      {
+        "slug": "provider",
+        "heading": "Point OMP at the RTX 3090 native lane",
+        "index": 0,
+        "sha256": "46107d47d76d3b951bee29ffb1afcde504b0c88b32fedfa324401780d664cdfe"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "RTX 3090 native lane acceptance",
+        "index": 0,
+        "sha256": "cf623310a9e99ca227052e60283e3e0024e6ef1ca32b72670bdae0b47f93c73e"
+      }
+    ]
+  },
+  "restoration_receipt": {
+    "repository_path": "docs/measurements/2026-10-26-v0131-acceptance-restoration.json",
+    "sha256": "9e739050e8fead167002167841abd6ce57a4edad199eaed862fcafe83c4b61fc"
+  },
+  "deferred_routes": {},
+  "raw_prompts_outputs_or_secrets_included": false,
+  "qualification_environment": "One RTX 5090 Windows/WSL2 container host with a macOS remote client, plus one two-GPU native Windows host with UUID-bound RTX 4090/3090 lanes executed sequentially. Both native canonical beta.2 roots were first of their rebased lineage; old lineages were preserved separately. Owner-operated tester-equivalent, not independent external-user outcomes."
+}

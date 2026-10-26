@@ -5,12 +5,40 @@
   "as_of": "2026-10-26",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "documented_route_acceptance": {
-    "status": "pending",
-    "document_change": "Expected: native routes now use the shared published v3 model, separate v3 filename and real beta.2 packages. Fresh candidate acceptance must bind these edited blocks, not relabel predecessor bytes."
+    "status": "passed",
+    "scope": "All five fresh documented routes/31 exact candidate blocks, three newly downloaded unchanged stock OMP 18.12.6 clients and both rebased beta.2 native public installs; no predecessor product acceptance is carried forward.",
+    "candidate_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.13.1/acceptance/documented-routes.json",
+    "evidence_sha256": "d675bdcd3a7d4329124c94fe0c0bacc4db3d863369cc117977a46f928bd2347d",
+    "document_change": "Fresh candidate execution covers the changed native beta.2 packages and components.model v3 download blocks with a separate qwen3_8_27b-v3.ninfer filename. Later guide edits change prose only; all current executable route blocks match their candidate receipts.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.13.1/acceptance/darwin-arm64-18.12.6.json",
+      "releases/v0.13.1/acceptance/windows-x64-18.12.6.json",
+      "releases/v0.13.1/acceptance/linux-x64-18.12.6.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-10-26-v0131-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 429.388,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_baseline": "Freshly promoted canonical beta.2 roots; old lineage roots preserved separately, not reactivated."
+    },
+    "composition_run": true
   },
-  "scope": "Actual published beta.2 native source 7a25cd72, complete byte-mirrored lane/package/profile/dependency proof, exact unchanged 5090 beta.2 and stock OMP 18.12.6. Runtime/installability posture only; native/product-tooling G4, fresh candidate-bound public routes and product publication remain independent.",
+  "scope": "Published native beta.2 source 7a25cd72, byte-mirrored lane/package/profile/dependency proof, exact unchanged RTX 5090 beta.2 and stock OMP 18.12.6. Fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate 92dfb13285994f1527711cf464847f07e44613dd, with independent incumbent/native restoration including directory presence and documented staging. Darwin remains preview; Windows and WSL2 client profiles are qualified, not a separate native Linux OS. Both native canonical beta.2 roots were freshly installed after preserving old lineages; each rebased lineage has no predecessor, rollback not_applicable and zero directions. Native council is closed; product-tooling council binding, immutable evidence pins and publication remain separate.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -109,8 +137,42 @@
       "sha256": "eff33c1a177d31ff817dd573479dda23d915534ef7623a29a52c679b8f77d348"
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "No v0.13.0 or superseded native candidate acceptance transfers. Run the final pinned v0.13.1 candidate across all five routes, three client platforms, both actual native public installs and independent restoration before composing and pinning acceptance."
+      "status": "passed",
+      "repository_path": "releases/v0.13.1/acceptance/composed-external-installation.json",
+      "sha256": "36924de2576bde364558f31677ee830526a81787fb9114487f1b14013719a7d6",
+      "public_url": null,
+      "as_of": "2026-10-26",
+      "release": "v0.13.1",
+      "component_release_tag": "v18.12.6",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+      "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "e895c5eb2ebe1c13789cfec975d13fee5c81dc1cdace649b155c8738c0bf6dc4",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "93799ae9f0a73c33ab0d8907e9c6b216ed6c8fc409b91958a6a1911b95621385"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "c4f779177e81d3debc09c851b54d6b89a118d5af55cae4c8c2ec0b106dc1505f"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "5877a4c96a0a9ac69ec02e931963bef00587c879032b2c1bbae3e913a0338369"
+        }
+      ],
+      "note": "Fresh candidate 92dfb132 passed all five routes/31 exact blocks, three stock OMP 18.12.6 clients, both first-of-lineage beta.2 native public installs and independent restoration. Canonical promotions were fresh; later public URL checks were idempotent already_installed. Runtime qualification, council dispositions, immutable pins and product publication remain distinct."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.13.1/acceptance/documented-routes.json",
+      "sha256": "d675bdcd3a7d4329124c94fe0c0bacc4db3d863369cc117977a46f928bd2347d"
     }
   },
   "observed_gates": {
@@ -249,7 +311,7 @@
       "status": "passed",
       "repository_path": "releases/v0.13.1/qualification/packaging.json",
       "sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
-      "public_download_acceptance": "Pending v0.13.1 candidate-bound public-install acceptance; v0.13.0 acceptance is historical only.",
+      "public_download_acceptance": "Fresh public runtime-image/client downloads and both beta.2 native public-asset checks passed in the bound external acceptance. Canonical native promotions were fresh; later public URL installs returned already_installed. No separate new RTX 5090 binary-archive/SPDX download claim.",
       "evidence_scope": "Carried unchanged RTX 5090 beta.2 or stock OMP 18.12.6 subject, measured/reviewed for v0.13.0. Not a new v0.13.1 measurement, native approval or candidate-bound public-route acceptance.",
       "native_components": {
         "repository_path": "releases/v0.13.1/qualification/native-publication.json",
@@ -262,9 +324,9 @@
       "sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "descriptor": {
         "repository_path": "releases/v0.13.1/qualification/client-components.json",
-        "sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42"
+        "sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4"
       },
-      "live_beta2_acceptance": "The unchanged stock client was accepted for v0.13.0; new composition/platform/route acceptance remains pending.",
+      "live_beta2_acceptance": "Passed separately on candidate 92dfb132 in changed_client_acceptance and its three fresh platform receipts; this carried source-review receipt remains host-free.",
       "evidence_scope": "Carried unchanged RTX 5090 beta.2 or stock OMP 18.12.6 subject, measured/reviewed for v0.13.0. Not a new v0.13.1 measurement, native approval or candidate-bound public-route acceptance."
     },
     "native_source_and_profiles": {
@@ -314,14 +376,19 @@
       "scope": "Actual published beta.2 closed sets include separate package SPDX file inventories (not renamed/replaced) and canonical package-stem.cdx.json dependency inventories. Ten CRT and two DirectStorage DLL components have actual byte/version/license provenance. Immutable build receipts retain pre-hardware status; separate final lane qualification passes."
     },
     "g4_review": {
-      "status": "pending",
+      "status": "native-closed-product-tooling-pending",
       "repository_path": "releases/v0.13.1/review/runtime-ledger.json",
-      "sha256": "29719961801bdc507559b972517fa34c44c5f0b229870dc33fc191abfe8fc817",
-      "criterion": "Actual native-runtime and changed product-tooling council required on immutable subjects. The carried RTX 5090 ledger does not approve native execution, Windows K6 or new cut/bind/SBOM/protocol-consumer tooling."
+      "sha256": "b2a623b5f979c880a6d12e541521cb55bfec47fa22b7ef1f308db6a562ca676a",
+      "native_council": "CR-20261026T071003Z-7a25cd72",
+      "native_source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "criterion": "Native full council closed without remediation, no confirmed or unresolved in-scope P0/P1; deferred issues #88/#89 are disclosed. Changed product-tooling council binding remains pending on candidate 92dfb132. The carried RTX 5090 ledger and runtime tests do not approve that separate subject."
     },
     "changed_client_acceptance": {
-      "status": "pending",
-      "criterion": "Fresh candidate-bound three-platform stock OMP 18.12.6 acceptance, all five current documented routes, both native public URL installs and independent restoration. The unchanged 5090 component still requires new composition-bound route evidence. Changed native model blocks require documented_routes.document_change; old acceptance and actual legacy rollback directions are not relabelled."
+      "status": "passed",
+      "candidate_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+      "repository_path": "releases/v0.13.1/acceptance/documented-routes.json",
+      "sha256": "d675bdcd3a7d4329124c94fe0c0bacc4db3d863369cc117977a46f928bd2347d",
+      "criterion": "Fresh unchanged RTX 5090 public-image/client routes, three exact stock OMP 18.12.6 clients, all five current routes/31 executable blocks and both rebased native beta.2 public packages passed. Typed tool/result, exact continuation, fail-closed and scoped macOS/Windows image-input observations bind actual image/binary/configuration/model identities. Independent same-image incumbent restoration and both native state/ACL/support/task/hold/client/power/directory/staging audits passed. Both canonical native roots were first of their rebased lineage, with zero rollback directions; later public URL checks were already_installed. Changed native blocks have an explicit document_change; no rehearsal or predecessor product acceptance is substituted."
     },
     "release_tooling": {
       "status": "passed-with-documented-local-exclusions",
@@ -411,13 +478,11 @@
       "scope": "Fresh actual N11 lane proof with honest scratch equivalence, canonical normal/pressure payloads, strict-origin restart, OMP and restoration. Not candidate-bound public URL installation or native council."
     }
   },
-  "interpretation": "Both current native variants use exact-source fresh N11 proof and published beta.2 assets. The 5090/client receipts retain their original unchanged v0.13.0 subjects, dates and performance-comparison limits. Scratch qualification does not claim public-package execution. Neither native runtime tests nor carried 5090 review approve the new native/product-tooling G4 subject.",
-  "eligibility_scope": "This grants runtime/installability posture only, not council approval, candidate-bound public-route/client acceptance or product publication. G4 is explicitly pending in its ledger. Root authority/live profiles remain published v0.13.0 until the lead lane pin; require-ready/check-pins belong after the actual acceptance/evidence pins.",
+  "interpretation": "Both native variants bind exact-source fresh N11 qualification and actual published beta.2 assets. Their original scratch qualification retains public_package_executed=false and distinct config/package hashes; the separate new candidate-bound routes/public URL acceptance executed the real public packages and exact public configurations. Carried RTX 5090/client runtime/source-review receipts keep their original v0.13.0 subjects, dates and performance limits, while all five routes and three live clients were accepted fresh on 92dfb132. Image input covers macOS/Windows against RTX 5090 only. Native canonical promotions used fresh first-of-lineage roots after preserving old lineages; subsequent public URL checks verified idempotence, not another upgrade or rollback. Evidence-only commits do not advance the accepted candidate. Native council closed without remediation; product-tooling council closure must be bound separately. Product publication is not granted by this receipt.",
+  "eligibility_scope": "Runtime/installability and fresh candidate-bound public-route/client acceptance are complete. Root authority/live profiles name v0.13.1. Immutable platform/composed/manifest pins bind evidence without changing the accepted candidate. Native council closure is bound, not inferred from tests; product-tooling council binding and final verification remain separate. publication_authorized stays false.",
   "remaining_release_gates": [
-    "Bind actual native-runtime and changed product-tooling G4 findings/dispositions on frozen source 7a25cd72 and the immutable stage commit; the pending ledger grants no approval.",
-    "Lead lane-pin the exact stage commit without changing the accepted subject or promoting roots early.",
-    "Run fresh stock OMP three-platform, all-five-route, both native public-install and independent restoration acceptance; record documented_routes.document_change and only real rollback lineage.",
-    "Compose and pin platform, acceptance and manifest evidence; require-ready/check-pins and founder-only product publication."
+    "Bind Main's actual closed product-tooling council artifacts on immutable candidate 92dfb132; native/runtime evidence grants no approval of that subject.",
+    "Complete platform, composed acceptance and manifest evidence pins, full suite, require-ready/check-pins and head CI before lead-owned product publication."
   ],
   "receipt_audit": {
     "repository_path": "releases/v0.13.1/qualification/receipt-audit.json",

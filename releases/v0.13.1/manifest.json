@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.13.1",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/compatibility.json",
-      "compatibility_sha256": "3ce611b3558ee9bb5e55a80b7d63094502b6640e0726ac8424729e47567d74a6",
+      "compatibility_sha256": "e895c5eb2ebe1c13789cfec975d13fee5c81dc1cdace649b155c8738c0bf6dc4",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.12.6",
@@ -155,10 +155,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "76473b213252c2cda2f804d7fcff87a5b058571c1db9df73bb4b0888c7b3f275",
+    "summary_sha256": "974e3fa4cf7766176e0df618a107a2fb292200f6aaec1a7d3e03329b217bd795",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bb49e966da92d8d0492c15514fe14215b89c4187/releases/v0.13.1/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -189,11 +189,7 @@
       "Published NInfer native RTX 4090/RTX 3090 v0.7.0 beta.2 components at 7a25cd72; exact 11-asset sets bound",
       "OMP client: unmodified upstream Oh My Pi v18.12.6; no client published here"
     ],
-    "blockers": [
-      "Actual changed native-runtime and product-tooling council dispositions are pending.",
-      "External-installation acceptance has not been rerun against this candidate: fresh platform/client receipts and all five documented routes, including both native public installs and independent restoration, are pending.",
-      "Platform, acceptance and manifest evidence pins, require-ready/check-pins and founder-only product publication remain pending."
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

@@ -21,7 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Native beta.1 source `eecb437f` is superseded after a fork CI fixture defect. Fresh beta.2 source
   `7a25cd72` passes exact-head CI, both Windows 90/90 matrices, 75 package units, Linux builds and
   both full native chains. Actual published beta.2 inventories/qualification/profile bindings
-  are staged; native/product-tooling review, lead lane/evidence pins and new public acceptance remain gates.
+  are bound. The native council closed without remediation; fresh candidate `92dfb132` passed all
+  five routes/31 blocks, three stock clients and both first-of-lineage native public installs with
+  independent restoration. Product-tooling council binding and final evidence pins remain gates.
+- Disclose the carried RTX 5090 export-lease admission risk (reachability not reproduced,
+  [#88](https://github.com/alphastorm/omp-ninfer/issues/88)) and unchanged native installer
+  failed-stop rollback/repair residual ([#89](https://github.com/alphastorm/omp-ninfer/issues/89)).
 - Move native model-download blocks to the shared published version 3 artifact `81f924d4` and a
   separate `qwen3_8_27b-v3.ninfer` file, retaining old native models/checkpoints for rollback.
   Native K5 profiles use strict origin authentication, shared Host budgets, extra device-state

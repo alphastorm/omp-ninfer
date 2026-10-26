@@ -20,7 +20,7 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 | `Don-Chad/ninfer-3090` (engine watch) | `upgrade-available`; community adoption recorded | Master `d8c29253` (2026-10-16), 1,907 commits after historical fork point `ef6ecc3c` | [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) adopted the ashalliants-derived line. Commit/file lists are cut; overlap is `unknown-truncated`. Published v0.13.0 native source remains `cad19767`; the separate v0.13.1 port below adopts no community binary. |
 | `ashalliants/ninfer-3090` (community source watch) | `upgrade-available`; tracked separately | Master `0312a1d7` (2026-10-24), 1,890 commits after research baseline `81c8ce09` | Active source of the adopted community line; commit/file lists are cut (`unknown-truncated`). Performance and persistence claims require independent qualification. |
 
-## v0.13.1 native runtime draft
+## v0.13.1 native runtime composition
 
 The [staged native release](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) ports sm_89 / sm_86
 and Windows onto the same upstream master `64d10fbf` foundation as the unchanged RTX 5090 beta.2
@@ -40,10 +40,12 @@ The first native beta.1 cuts at `eecb437f` are published but unused after a fork
 Frozen beta.2 source `7a25cd72` has exact-head CI, Windows 90/90 per architecture, 75 package units,
 both Linux builds and both fresh full hardware chains (150.94/84.06 tok/s C1 decode;
 85.71/208.78 s exact 130,048-token retrieval; 1,647/1,650-token restart reuse). Both actual beta.2
-prereleases, inventories and byte-mirrored qualification/profile receipts are bound; native/product-tooling
-council and lead lane/evidence pins remain pending.
-Neither old native proof nor the carried RTX 5090 ledger transfers. New client/public-route
-acceptance is independent. Published v0.13.0 positions above remain authoritative until the cut.
+prereleases, inventories and byte-mirrored qualification/profile receipts are bound. The native
+council closed without remediation. Fresh candidate `92dfb132` acceptance passed all five routes,
+three client platforms and both first-of-lineage native public installs with independent
+restoration. Neither old native proof nor the carried RTX 5090 ledger transfers. Product-tooling
+council binding and final evidence pins remain separate gates. The lane pin has promoted working
+authorities; published v0.13.0 positions above remain the public product until publication.
 
 ## v0.13.0 sync program
 
@@ -54,9 +56,9 @@ Published release **v0.13.0** (2026-10-25) moves the RTX 5090 container onto ups
 `eec39564` unchanged and re-accepting all five documented routes (31 blocks), three stock 18.12.6
 clients, and both native public installs on frozen candidate `b1a54dc9`
 ([composed acceptance](../releases/v0.13.0/acceptance/composed-external-installation.json)).
-Rebased native packages follow in `v0.13.1`: their 24 GB shapes need the `--admission-headroom-mib`
-amendment (640 MiB on RTX 4090 / 768 MiB on RTX 3090), then packaging, dependency SBOMs, and
-Windows hardware qualification. The
+Rebased native packages in `v0.13.1` bind the 24 GB `--admission-headroom-mib` amendment
+(640 MiB on RTX 4090 / 768 MiB on RTX 3090), packaging, dependency SBOMs and fresh Windows
+hardware/public-route qualification. The
 [content-safe plan](measurements/2026-10-25-upstream-sync-plan.json) records the port scope and
 gates:
 

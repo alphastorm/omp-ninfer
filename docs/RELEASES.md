@@ -15,7 +15,7 @@ the exact combination.
 
 ## v0.13.1 — staged native rebase, not a published release
 
-The [draft notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
+The [prepared notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
 [qualification](../releases/v0.13.1/qualification.json) and
 [release-local compatibility](../releases/v0.13.1/COMPATIBILITY.md) stage rebased native Windows
 lanes on upstream master `64d10fbf`. Native beta.1 cuts at `eecb437f` were published but are
@@ -58,13 +58,17 @@ Fresh Windows 90/90 per architecture, 75 package units, both Linux three-binary 
 normal/pressure protocol, exact-context retrieval, 1,647/1,650-token strict restart reuse, OMP
 18.12.6 and actual restoration passed. Both rebased native lineages have no supported predecessor
 (`not_applicable`, zero rollback directions). Both beta.2 prereleases and their exact inventories
-are published and bound. Native/product-tooling council, lead lane/evidence pins and new public
-acceptance remain gates. Carried 5090/client receipts retain their original
-subjects and dates; predecessor public acceptance and the 5090 ledger are not transferred.
-The mutable draft is rebound with `rebind_release.py --release v0.13.1 --draft`; root
-authority/matrix/profiles stay published v0.13.0 until the lead lane pin. Updated model-download
-blocks require explicit `documented_routes.document_change`, fresh platform/client/public-install
-and independent restoration proof, then the normal evidence pins and founder-only publication.
+are published and bound. The native council closed without remediation. Fresh candidate
+`92dfb132` passed all five routes/31 blocks, three stock OMP clients and both native public
+installs with independent restoration. Canonical beta.2 roots were installed fresh from the
+documented blocks after preserving old lineages; subsequent public-URL checks returned
+`already_installed`, with no rebased-lineage predecessor or invented rollback direction.
+Carried 5090/client qualification receipts retain their original subjects and dates; predecessor
+product acceptance and the 5090 ledger are not transferred. The lane pin has promoted the
+v0.13.1 authority/matrix/profiles. Updated native package/model-download blocks are bound through
+explicit `documented_routes.document_change`; post-acceptance guide edits change prose only.
+Product-tooling council binding and final evidence pins precede publication by the lead.
+Front-door published links stay on v0.13.0 until publication.
 
 ## v0.13.0 — rebased RTX 5090 runtime, stock OMP 18.12.6, carried native lanes
 

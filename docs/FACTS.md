@@ -104,17 +104,20 @@ slash dispatch.
   `--admission-headroom-mib` amendment of 640 MiB on RTX 4090 and 768 MiB on RTX 3090, native
   packaging, dependency SBOMs, and hardware qualification).
 
-## Next release — v0.13.1 native draft
+## Next release — v0.13.1 native composition
 
-The [draft notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
+The [prepared notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md),
 [manifest](../releases/v0.13.1/manifest.json) and
 [native contract matrix](../releases/v0.13.1/COMPATIBILITY.md) stage the native rebase onto upstream
 master `64d10fbf`, carrying the exact v0.13.0 RTX 5090 beta.2 runtime/profile and unmodified
 OMP 18.12.6 assets. Native beta.1 cuts at `eecb437f` are published but unused after a fork CI
 fixture failure. Native beta.2 source `7a25cd72` has exact-head CI, actual packages and both fresh
-full hardware chains. Both beta.2 prereleases and their exact inventories are published and bound;
-lead lane/evidence pins, native/product-tooling council and fresh
-public-route/client acceptance remain gates.
+full hardware chains. Both beta.2 prereleases and their exact inventories are published and bound.
+The native council closed without remediation. Fresh candidate `92dfb132` acceptance passed all
+five routes/31 blocks, three stock clients and both native public installs with independent
+restoration. Both canonical roots were freshly promoted with no rebased-lineage predecessor;
+the subsequent public-URL checks were idempotent `already_installed` operations. Product-tooling
+council binding and final evidence pins remain separate gates; v0.13.0 is still the public product.
 
 Both natives move to published model version 3 `81f924d4`, revision
 `1cbd84e7221e51186bd7f093a149912d2489625b`, 20,437,521,664 bytes. Native downloads use a new

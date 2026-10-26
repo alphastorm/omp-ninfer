@@ -1,15 +1,56 @@
 {
-  "artifact_type": "omp_ninfer_review_ledger_pending_binding",
+  "artifact_type": "omp_ninfer_review_ledger",
   "schema_version": 1,
   "release": "v0.13.1",
-  "status": "pending",
+  "status": "native-closed-product-tooling-pending",
   "approval_granted": false,
-  "scope": "Pending native-runtime and changed product-tooling council. This file is not a review result or a disposition ledger. The lead binds actual resolver-selected findings and closure on the frozen subjects before release readiness.",
+  "scope": "The frozen native-runtime full council is closed without remediation, with no confirmed or unresolved in-scope P0/P1. Changed product-tooling council binding remains pending; native runtime evidence and carried RTX 5090 review do not approve that separate subject.",
   "native_runtime": {
     "repository": "https://github.com/alphastorm/ninfer",
     "branch": "rebase/upstream-64d10fbf",
     "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
-    "binding_status": "Frozen source 7a25cd72 has exact-head CI, both fresh accepted native hardware chains and published beta.2 components with byte-exact package/profile/qualification bindings. Actual native council findings/dispositions remain pending; runtime evidence grants no approval.",
+    "status": "closed-without-remediation",
+    "review_sequence_id": "omp-ninfer-v0.13.1-native-eecb437f",
+    "review_id": "CR-20261026T071003Z-7a25cd72",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "base_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "subject_digest": "acf8cd783976b34afd7c69f17a702cd0832f59f17a686b0d2e2fc5f8cec84048",
+    "binding_status": "Main closed the actual N11 native-runtime/packaging/workflow-binding council without remediation. All ten returned evidence/unresolved items have final dispositions; no confirmed or unresolved in-scope P0/P1 remains. Published native beta.2 components at this source stand.",
+    "receipt_digests": {
+      "close-report.md": "58dae42d06dfe4b3a9caf9fecb68f7304bac9a361587ebdbef940199f57eb2d5",
+      "ledger.md": "ccd32f601bfcff765cc30c83a27a0b86a5f3ac407deb71cbe40c8dbe38272ac4",
+      "review-record.json": "bf4b132d3c6f8bdb56e30c859310e93b0ce29b88d165585a6d1a41b2aebfd959",
+      "packet.md": "2dd802db92c8c69198ca08d1ff5a380a41e5597c2d9783995553e4097e4c3171",
+      "panel-selection.json": "45b2fce652509bb0eab3ff9cff17474e46223df6f36beb33b8cae3539506711a",
+      "resolver-receipt.json": "3c41179db4601ba82c58bd2319fdf2b1d02b5b3f0ab49b06315ca540b912e783",
+      "review-dispatch-envelope.json": "1a3319326c6f88cf19017eea043266759eef79c801fb7920143cfcc010eaf705",
+      "close-recheck.json": "07b4a6bad0d7d299e00da2685ec1af325baae50b1261035425bc331a08056380"
+    },
+    "reviewer_results": {
+      "daybreak-blue": "completed; openai-codex/gpt-6-sol:max",
+      "gemini-argon": "completed; google-antigravity/gemini-4-argon:high; no findings",
+      "gpt-astra": "completed; openai-codex/gpt-6-astra:max",
+      "claude-mythos": "missing/transport_failure; HTTP 429; the one permitted retry failed identically",
+      "claude": "completed; anthropic/claude-fable-5-1:max",
+      "oracle_shadow": "failed outside the council; unauthenticated web session; nonblocking"
+    },
+    "dispositions": {
+      "L1": "defer P2: carried RTX 5090 export-lease admission reachability not reproduced; notes disclosure and issue #88",
+      "L2": "accept P3: prior-epoch finding IDs in packet; process deviation, not a subject defect",
+      "L3": "defer P2: unchanged failed-stop installer rollback cleanup; notes disclosure and issue #89",
+      "L4": "defer P2: engine-fatal isolated capacity miss; issue #89",
+      "L5": "reject: unchanged incumbent-state contract; falsified",
+      "L6": "defer P3: checkpoint open/close OS-error classification; issue #89",
+      "L7": "defer P3: unregistered same-instance cleanup ownership; issue #89",
+      "L8": "defer P3: conservative stale-generation retention; issue #89",
+      "L9": "reject: published runtime-base targetCommitish matches source; falsified",
+      "L10": "defer P3: full sm_120a runtime compile concerns the next RTX 5090 cut only; issue #88"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/omp-ninfer/issues/88",
+      "https://github.com/alphastorm/omp-ninfer/issues/89"
+    ],
     "required_scope": [
       "Windows K6 handle-anchored replacement, current-parent fence and protected extended-length roots",
       "Disk-capacity taxonomy, survivor-preserving DELETE refusal and finite-export admission progress",
@@ -20,8 +61,9 @@
   "product_tooling": {
     "repository": "https://github.com/alphastorm/omp-ninfer",
     "branch": "v0131/release-stage",
-    "stage_commit": null,
-    "binding_status": "Bind the immutable stage commit after authoring; local tests and carried RTX 5090 approval do not approve changed product tooling.",
+    "stage_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+    "status": "pending",
+    "binding_status": "Main is reviewing changed product tooling at the immutable candidate. Bind its actual close artifacts separately; local tests, native closure and carried RTX 5090 approval do not approve this subject.",
     "required_scope": [
       "Native component cut, binding, staging and verifier changes",
       "Dependency SBOM generation including runtime redistributable provenance",

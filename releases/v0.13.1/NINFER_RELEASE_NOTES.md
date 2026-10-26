@@ -1,12 +1,13 @@
 # OMP NInfer v0.13.1 — rebased native Windows lanes
 
-**Draft only: council, lead lane pin and candidate-bound public acceptance remain pending.**
+**Prepared composition: fresh candidate acceptance passed; product publication is separate.**
 The published product remains [v0.13.0](../v0.13.0/NINFER_RELEASE_NOTES.md). Native beta.1 cuts
 at `eecb437f` were published but are superseded after a fork CI test-fixture failure; they are not
 the accepted v0.13.1 subject. The successor `7a25cd72` has exact-head fork CI, actual beta.2
 packages and both fresh full native hardware chains. Both native beta.2 component prereleases,
 exact 11-file sets and byte-mirrored qualification/profile bindings are recorded.
-Runtime eligibility grants no council, candidate-route or product publication approval;
+The native council closed without remediation, and fresh public-route/client acceptance passed
+on candidate `92dfb132`. Product-tooling council binding and final evidence pins remain separate;
 no earlier native measurement or product acceptance is relabelled.
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
@@ -16,10 +17,10 @@ to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
 | Lane / client | Component | Qualification boundary |
 | --- | --- | --- |
-| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.2` | Published, fresh source/package/profile qualification; new public-install acceptance pending |
+| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.2` | Published, fresh source/package/profile qualification and candidate-bound public-install acceptance |
 | RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.2` | Same source; separate package, profile, dependency inventory and qualification |
 | RTX 5090 container | Unchanged `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05` | Carry exact v0.13.0 runtime/model/profile; no new container performance measurement claimed |
-| Oh My Pi | Unmodified upstream `18.12.6`, source `45c35e40` | Same three upstream client binaries; new composition/route acceptance remains separate |
+| Oh My Pi | Unmodified upstream `18.12.6`, source `45c35e40` | Same three upstream client binaries; fresh three-platform/live/route acceptance passed |
 
 The new native line uses upstream master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`.
 The frozen native source is `7a25cd72f490183e4113f1e84e68e36d653ddd28`; a moving branch or
@@ -132,8 +133,9 @@ lifecycle, at full and reduced shared Host budgets. `shared_stable_prefix` on an
 is permitted public-prefix reuse, not private-state leakage. The rebased natives support
 JSON-schema output, 128-character tool names, status schema 2 and request-log schema 30.
 Published v0.13.0 natives retain HTTP 400 schema refusal and 64-character names until upgraded.
-Actual OMP 18.12.6 typed-tool/result/final-answer oracles and state-security/restoration passed;
-new public-route/client acceptance remains separate.
+Actual OMP 18.12.6 typed-tool/result/final-answer oracles and state-security/restoration passed.
+Separate fresh candidate-bound public-route/client acceptance also passed; it is not inferred
+from these runtime qualification fixtures.
 
 ## Unchanged RTX 5090 and client
 
@@ -146,14 +148,16 @@ Stock OMP 18.12.6 source/tree/assets and per-model `compat.statefulResponses` re
 
 ## Remaining release gates and support boundaries
 
-1. Bind actual native/product-tooling council dispositions. The pending ledger grants no approval;
-   the unchanged RTX 5090 council is not native execution or new product-tooling review.
-2. Lead lane-pin the exact stage commit; root authority/live profiles remain published v0.13.0 until then.
-3. Fresh client/platform, all five documented routes, both native public installs, rollback/upgrade
-   lineage where actually supported, and independent host restoration. Changed native model-download
-   blocks require an explicit `documented_routes.document_change`, not a claim of byte-identical prose-only editing.
-4. Compose and pin platform, acceptance and manifest evidence; require-ready/check-pins, tests and
-   CI before founder-only product publication. No product release date is assigned here.
+The native council dispositions are bound; product-tooling council closure remains to be bound
+before the final manifest pin. The stage and lane pin are complete. Fresh acceptance on candidate
+`92dfb13285994f1527711cf464847f07e44613dd` passed all five documented routes (31 exact blocks),
+three stock OMP 18.12.6 clients and both native public installs, with independent restoration.
+Both canonical native roots were freshly installed from the documented beta.2 blocks after
+preserving their old lineages; both rebased lineages have no predecessor and zero rollback
+directions. The later public-URL checks returned `already_installed`, not another promotion.
+Changed native package/model-download blocks have an explicit `documented_routes.document_change`;
+the current guide's later edits are prose only. Final evidence pins, tests and CI precede product
+publication by the lead. No product release date is assigned here.
 
 macOS remains preview; Linux client evidence remains WSL2-scoped. No new native vision, DFlash2,
 smaller-host support, universal warm reuse, loss-free shutdown, cross-owner recovery, SLA, signing,
@@ -165,3 +169,11 @@ retry is still required. MACs authenticate content/origin, not monotonic freshne
 filesystem writer can replay an older authentic generation.
 The unchanged RTX 5090 retains its deferred owner/session-gate metadata churn, stale-publication
 orphan work and workflow base-receipt cross-checking gaps; this native port does not claim to fix them.
+The carried RTX 5090 runtime also predates the native export-lease admission fix
+(`5ecb96fb5`): an isolated request arriving while a durable checkpoint export writes off the
+execution lock can fail that engine until restart. Reachability on the RTX 5090 lane has not been
+reproduced ([#88](https://github.com/alphastorm/omp-ninfer/issues/88)).
+Native installer rollback after a failed candidate stop still removes candidate targets and the
+candidate GPU-owner lease before repair, unchanged from v0.12.2. Recovery is process exit or
+reboot plus `-RepairInterruptedInstall`
+([#89](https://github.com/alphastorm/omp-ninfer/issues/89)).
