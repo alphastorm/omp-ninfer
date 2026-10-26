@@ -6,14 +6,14 @@ at `eecb437f` were published but are superseded after a fork CI test-fixture fai
 the accepted v0.13.1 subject. The successor `7a25cd72` has exact-head fork CI, actual beta.2
 packages and both fresh full native hardware chains. Both native beta.2 component prereleases,
 exact 11-file sets and byte-mirrored qualification/profile bindings are recorded.
-The native council closed without remediation, and fresh public-route/client acceptance passed
-on candidate `92dfb132`. Product-tooling council binding and final evidence pins remain separate;
-no earlier native measurement or product acceptance is relabelled.
+Both native-runtime and product-tooling councils closed without remediation, and fresh
+public-route/client acceptance passed on candidate `92dfb132`. Their dispositions and evidence
+are bound separately; no earlier native measurement or product acceptance is relabelled.
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
 to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
-## Draft composition
+## Composition
 
 | Lane / client | Component | Qualification boundary |
 | --- | --- | --- |
@@ -148,16 +148,23 @@ Stock OMP 18.12.6 source/tree/assets and per-model `compat.statefulResponses` re
 
 ## Remaining release gates and support boundaries
 
-The native council dispositions are bound; product-tooling council closure remains to be bound
-before the final manifest pin. The stage and lane pin are complete. Fresh acceptance on candidate
+Both native-runtime and product-tooling councils closed without remediation, with no confirmed
+or unresolved in-scope P0/P1; their dispositions and artifact digests are bound in the
+[review ledger](review/runtime-ledger.json). Deferred native/carried-runtime items are tracked in
+[#88](https://github.com/alphastorm/omp-ninfer/issues/88) and
+[#89](https://github.com/alphastorm/omp-ninfer/issues/89); product-tooling P2/P3 items are tracked
+in [#90](https://github.com/alphastorm/omp-ninfer/issues/90).
+The stage and lane pin are complete. Fresh acceptance on candidate
 `92dfb13285994f1527711cf464847f07e44613dd` passed all five documented routes (31 exact blocks),
 three stock OMP 18.12.6 clients and both native public installs, with independent restoration.
 Both canonical native roots were freshly installed from the documented beta.2 blocks after
 preserving their old lineages; both rebased lineages have no predecessor and zero rollback
 directions. The later public-URL checks returned `already_installed`, not another promotion.
 Changed native package/model-download blocks have an explicit `documented_routes.document_change`;
-the current guide's later edits are prose only. Final evidence pins, tests and CI precede product
-publication by the lead. No product release date is assigned here.
+the current guide's later edits are prose only. Platform, composed-acceptance and manifest pins
+bind this evidence without changing the accepted candidate. Only product publication by the lead
+remains, gated by the strict ready/pin verification, full suite and head CI. No product release
+date is assigned here.
 
 macOS remains preview; Linux client evidence remains WSL2-scoped. No new native vision, DFlash2,
 smaller-host support, universal warm reuse, loss-free shutdown, cross-owner recovery, SLA, signing,

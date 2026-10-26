@@ -58,10 +58,10 @@ extra slots 2/4, prefill 2,048/1,024, strict origin authentication and admission
 fixture; its published cuts remain unused. Fresh successor `7a25cd72` now passes both complete
 native chains, with 150.94/84.06 tok/s C1 decode and 85.71/208.78 s exact 130,048-token retrieval.
 Both beta.2 prereleases, inventories and fresh qualification/profile bindings are recorded.
-The native council closed without remediation, and the stage/lane pin is complete. Fresh
-candidate `92dfb132` passed all five routes/31 blocks, three stock clients and both native public
-installs with independent restoration. Product-tooling council binding and final evidence pins
-remain separate gates.
+Both native-runtime and product-tooling councils closed without remediation, and the stage/lane
+pin is complete. Fresh candidate `92dfb132` passed all five routes/31 blocks, three stock clients
+and both native public installs with independent restoration. Council dispositions and immutable
+acceptance evidence are bound separately; only product publication remains.
 
 The native route moves to the published version 3 artifact `81f924d4` and fresh per-release
 checkpoint roots; old native generations are not migrated. JSON-schema output remains an exact-source
@@ -123,8 +123,8 @@ unmet:
    staged rebased native profiles on `64d10fbf` add `--admission-headroom-mib` 640 MiB on RTX
    4090 and 768 MiB on RTX 3090 plus strict origin authentication. Actual published beta.2
    packages, dependency SBOMs and fresh source `7a25cd72` host/hardware/protocol qualification
-   are bound. The native council and fresh candidate-bound public-route/client acceptance are
-   complete; product-tooling council binding and final evidence pins precede product publication.
+   are bound. Both council dispositions and fresh candidate-bound public-route/client acceptance
+   are complete and separately bound; only product publication remains.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.13.0/qualification/rtx4090.json`](releases/v0.13.0/qualification/rtx4090.json),

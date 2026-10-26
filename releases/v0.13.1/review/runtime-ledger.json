@@ -2,9 +2,9 @@
   "artifact_type": "omp_ninfer_review_ledger",
   "schema_version": 1,
   "release": "v0.13.1",
-  "status": "native-closed-product-tooling-pending",
-  "approval_granted": false,
-  "scope": "The frozen native-runtime full council is closed without remediation, with no confirmed or unresolved in-scope P0/P1. Changed product-tooling council binding remains pending; native runtime evidence and carried RTX 5090 review do not approve that separate subject.",
+  "status": "closed-without-remediation",
+  "approval_granted": true,
+  "scope": "Both frozen full councils closed without remediation, with no confirmed or unresolved in-scope P0/P1. Approval is limited to these G4 dispositions, not product publication or inferred public-route acceptance. Native-runtime and product-tooling findings, residuals and artifact digests are bound separately; carried RTX 5090 review retains its historical scope.",
   "native_runtime": {
     "repository": "https://github.com/alphastorm/ninfer",
     "branch": "rebase/upstream-64d10fbf",
@@ -18,8 +18,8 @@
     "subject_digest": "acf8cd783976b34afd7c69f17a702cd0832f59f17a686b0d2e2fc5f8cec84048",
     "binding_status": "Main closed the actual N11 native-runtime/packaging/workflow-binding council without remediation. All ten returned evidence/unresolved items have final dispositions; no confirmed or unresolved in-scope P0/P1 remains. Published native beta.2 components at this source stand.",
     "receipt_digests": {
-      "close-report.md": "58dae42d06dfe4b3a9caf9fecb68f7304bac9a361587ebdbef940199f57eb2d5",
-      "ledger.md": "ccd32f601bfcff765cc30c83a27a0b86a5f3ac407deb71cbe40c8dbe38272ac4",
+      "close-report.md": "bfed3ecbe26fc7f62622e385695e7b8db924fd093920a668a2f533b7008fd1d1",
+      "ledger.md": "de8450166c8fc5122e4d57e633c118c23a68cdbaec8c896e5451af2c58addb50",
       "review-record.json": "bf4b132d3c6f8bdb56e30c859310e93b0ce29b88d165585a6d1a41b2aebfd959",
       "packet.md": "2dd802db92c8c69198ca08d1ff5a380a41e5597c2d9783995553e4097e4c3171",
       "panel-selection.json": "45b2fce652509bb0eab3ff9cff17474e46223df6f36beb33b8cae3539506711a",
@@ -45,7 +45,7 @@
       "L7": "defer P3: unregistered same-instance cleanup ownership; issue #89",
       "L8": "defer P3: conservative stale-generation retention; issue #89",
       "L9": "reject: published runtime-base targetCommitish matches source; falsified",
-      "L10": "defer P3: full sm_120a runtime compile concerns the next RTX 5090 cut only; issue #88"
+      "L10": "reject: full sm_120a runtime compile at N11 passed, workflow run 40288937184; falsified; result recorded in issue #88"
     },
     "deferred_issues": [
       "https://github.com/alphastorm/omp-ninfer/issues/88",
@@ -62,8 +62,51 @@
     "repository": "https://github.com/alphastorm/omp-ninfer",
     "branch": "v0131/release-stage",
     "stage_commit": "92dfb13285994f1527711cf464847f07e44613dd",
-    "status": "pending",
-    "binding_status": "Main is reviewing changed product tooling at the immutable candidate. Bind its actual close artifacts separately; local tests, native closure and carried RTX 5090 approval do not approve this subject.",
+    "status": "closed-without-remediation",
+    "review_sequence_id": "omp-ninfer-v0.13.1-product-tooling",
+    "review_id": "CR-20261026T082448Z-92dfb132",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "base_commit": "48487e2cf54e3a3dd55bdf2110a588db2a9c7aba",
+    "subject_digest": "2cb5d945ff335636182d51ac518927afab064c56cf8d284a6c733f915f4feccc",
+    "binding_status": "Main closed the actual product-tooling council without remediation. Fourteen ledger rows cover all nineteen returned items; no confirmed or unresolved in-scope P0/P1 remains. Candidate 92dfb132 stands; no product-tooling change or re-cut is required for v0.13.1.",
+    "receipt_digests": {
+      "close-report.md": "26a1fdf63aacabc6d4c2f80a120b74a6b0a3a274bff784c1fbaf92fb0200608b",
+      "ledger.md": "9f9ee9a0e8becd418f2d86d244bca362af654948578281e084335e602de1c334",
+      "review-record.json": "24ab7eb95e5fcbad312be16c3f2b9b2cdd5400bcdd07b5e48bb188b050882773",
+      "packet.md": "c24ceaec960ead0fb672f8592a71043a6a7bb78312ade042b8f4dca5265fcbe8",
+      "panel-selection.json": "e31e0dbd9fc843b23be161d3854769e7633df848f61188029b65e950d3b027e3",
+      "resolver-receipt.json": "f1e4df55f923de174a62523155ebd6612e4f24f31510bc8f4c888a3d52698170",
+      "review-dispatch-envelope.json": "6f7fc70f9af1fd107cb1275e991fc266dbac1ec30c98dc5c41fc289208c79a53",
+      "close-recheck.json": "a9e13fbf34899426b305c6b12b8040b07cb6be0c361e38353c1acab619ca1a7f"
+    },
+    "reviewer_results": {
+      "daybreak-blue": "completed; openai-codex/gpt-6-sol:max",
+      "gemini-argon": "completed; google-antigravity/gemini-4-argon:high",
+      "gpt-astra": "completed; openai-codex/gpt-6-astra:max",
+      "claude-mythos": "missing/transport_failure; HTTP 429; the one permitted retry failed identically",
+      "claude": "completed; anthropic/claude-fable-5-1:max",
+      "oracle_shadow": "failed outside the council; unauthenticated web session; nonblocking"
+    },
+    "dispositions": {
+      "PT1": "defer P3: acceptance-driver restore-lock race bounded by begin timeouts; issue #90",
+      "PT2": "defer P2: composer/verifier dependency-SBOM completeness; shipped orchestrator receipt hashes match actual published inventories; issue #90",
+      "PT3": "defer P2: composer configuration provenance on a path not used for shipped receipts; issue #90",
+      "PT4": "reject: production checkpoint mount differs from the acceptance window directory; falsified",
+      "PT5": "defer P2: cutter accepts identity-only CycloneDX; shipped inventories populated; issue #90",
+      "PT6": "defer P2: verifier source-archive checksum closure; shipped sets complete; issue #90",
+      "PT7": "defer P2: contradictory rollback/gate-input hardening; current first-lineage shape enforced; issue #90",
+      "PT8": "defer P3: historical native documented-route test fixture; current blocks executed end to end; issue #90",
+      "PT9": "defer P3: binder write ordering and existing-lane validation; issue #90",
+      "PT10": "defer P2: combined --dry-run --publish operator footgun, fix before next component cut; no misuse occurred; issue #90",
+      "PT11": "defer P2: composer phase byte bindings; shipped receipts use the orchestrator; issue #90",
+      "PT12": "defer P3: tag/package-stem consistency hardening; published identities agree; issue #90",
+      "PT13": "reject: dependency inventory covers packaged DLLs at package level and SPDX file inventory is complete; falsified; mapping residual in issue #90",
+      "PT14": "reject: native acceptance and restoration passed at candidate 92dfb132; falsified"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/omp-ninfer/issues/90"
+    ],
     "required_scope": [
       "Native component cut, binding, staging and verifier changes",
       "Dependency SBOM generation including runtime redistributable provenance",

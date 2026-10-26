@@ -40,12 +40,13 @@ The first native beta.1 cuts at `eecb437f` are published but unused after a fork
 Frozen beta.2 source `7a25cd72` has exact-head CI, Windows 90/90 per architecture, 75 package units,
 both Linux builds and both fresh full hardware chains (150.94/84.06 tok/s C1 decode;
 85.71/208.78 s exact 130,048-token retrieval; 1,647/1,650-token restart reuse). Both actual beta.2
-prereleases, inventories and byte-mirrored qualification/profile receipts are bound. The native
-council closed without remediation. Fresh candidate `92dfb132` acceptance passed all five routes,
-three client platforms and both first-of-lineage native public installs with independent
-restoration. Neither old native proof nor the carried RTX 5090 ledger transfers. Product-tooling
-council binding and final evidence pins remain separate gates. The lane pin has promoted working
-authorities; published v0.13.0 positions above remain the public product until publication.
+prereleases, inventories and byte-mirrored qualification/profile receipts are bound. Both
+native-runtime and product-tooling councils closed without remediation. Fresh candidate
+`92dfb132` acceptance passed all five routes, three client platforms and both first-of-lineage
+native public installs with independent restoration. Neither old native proof nor the carried
+RTX 5090 ledger transfers. Council dispositions and immutable acceptance evidence are bound
+separately; only product publication remains. The lane pin has promoted working authorities;
+published v0.13.0 positions above remain the public product until publication.
 
 ## v0.13.0 sync program
 

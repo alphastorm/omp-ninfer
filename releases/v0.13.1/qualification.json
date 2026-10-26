@@ -38,7 +38,7 @@
     },
     "composition_run": true
   },
-  "scope": "Published native beta.2 source 7a25cd72, byte-mirrored lane/package/profile/dependency proof, exact unchanged RTX 5090 beta.2 and stock OMP 18.12.6. Fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate 92dfb13285994f1527711cf464847f07e44613dd, with independent incumbent/native restoration including directory presence and documented staging. Darwin remains preview; Windows and WSL2 client profiles are qualified, not a separate native Linux OS. Both native canonical beta.2 roots were freshly installed after preserving old lineages; each rebased lineage has no predecessor, rollback not_applicable and zero directions. Native council is closed; product-tooling council binding, immutable evidence pins and publication remain separate.",
+  "scope": "Published native beta.2 source 7a25cd72, byte-mirrored lane/package/profile/dependency proof, exact unchanged RTX 5090 beta.2 and stock OMP 18.12.6. Fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate 92dfb13285994f1527711cf464847f07e44613dd, with independent incumbent/native restoration including directory presence and documented staging. Darwin remains preview; Windows and WSL2 client profiles are qualified, not a separate native Linux OS. Both native canonical beta.2 roots were freshly installed after preserving old lineages; each rebased lineage has no predecessor, rollback not_applicable and zero directions. Both full councils are closed without remediation; their dispositions and immutable acceptance evidence are bound separately. Product publication is not granted by this receipt.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -376,12 +376,15 @@
       "scope": "Actual published beta.2 closed sets include separate package SPDX file inventories (not renamed/replaced) and canonical package-stem.cdx.json dependency inventories. Ten CRT and two DirectStorage DLL components have actual byte/version/license provenance. Immutable build receipts retain pre-hardware status; separate final lane qualification passes."
     },
     "g4_review": {
-      "status": "native-closed-product-tooling-pending",
+      "status": "passed",
       "repository_path": "releases/v0.13.1/review/runtime-ledger.json",
-      "sha256": "b2a623b5f979c880a6d12e541521cb55bfec47fa22b7ef1f308db6a562ca676a",
+      "sha256": "4552cb3bfb2dd8bfebbc4e01604ccda879c4c7d5ead4cdd6c653d6b0d6651ea6",
       "native_council": "CR-20261026T071003Z-7a25cd72",
       "native_source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
-      "criterion": "Native full council closed without remediation, no confirmed or unresolved in-scope P0/P1; deferred issues #88/#89 are disclosed. Changed product-tooling council binding remains pending on candidate 92dfb132. The carried RTX 5090 ledger and runtime tests do not approve that separate subject."
+      "product_tooling_council": "CR-20261026T082448Z-92dfb132",
+      "product_tooling_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+      "product_tooling_base_commit": "48487e2cf54e3a3dd55bdf2110a588db2a9c7aba",
+      "criterion": "Both actual full councils closed without remediation, with no confirmed or unresolved in-scope P0/P1. Native/carried-runtime residuals are tracked in #88/#89, product-tooling P2/P3 in #90. Both strong critics completed in each council; Mythos supplemental transport failures and failed nonblocking Oracle shadows are recorded, not approvals. Closure is bound to separate frozen subjects, never inferred from runtime tests or carried RTX 5090 review."
     },
     "changed_client_acceptance": {
       "status": "passed",
@@ -478,12 +481,9 @@
       "scope": "Fresh actual N11 lane proof with honest scratch equivalence, canonical normal/pressure payloads, strict-origin restart, OMP and restoration. Not candidate-bound public URL installation or native council."
     }
   },
-  "interpretation": "Both native variants bind exact-source fresh N11 qualification and actual published beta.2 assets. Their original scratch qualification retains public_package_executed=false and distinct config/package hashes; the separate new candidate-bound routes/public URL acceptance executed the real public packages and exact public configurations. Carried RTX 5090/client runtime/source-review receipts keep their original v0.13.0 subjects, dates and performance limits, while all five routes and three live clients were accepted fresh on 92dfb132. Image input covers macOS/Windows against RTX 5090 only. Native canonical promotions used fresh first-of-lineage roots after preserving old lineages; subsequent public URL checks verified idempotence, not another upgrade or rollback. Evidence-only commits do not advance the accepted candidate. Native council closed without remediation; product-tooling council closure must be bound separately. Product publication is not granted by this receipt.",
-  "eligibility_scope": "Runtime/installability and fresh candidate-bound public-route/client acceptance are complete. Root authority/live profiles name v0.13.1. Immutable platform/composed/manifest pins bind evidence without changing the accepted candidate. Native council closure is bound, not inferred from tests; product-tooling council binding and final verification remain separate. publication_authorized stays false.",
-  "remaining_release_gates": [
-    "Bind Main's actual closed product-tooling council artifacts on immutable candidate 92dfb132; native/runtime evidence grants no approval of that subject.",
-    "Complete platform, composed acceptance and manifest evidence pins, full suite, require-ready/check-pins and head CI before lead-owned product publication."
-  ],
+  "interpretation": "Both native variants bind exact-source fresh N11 qualification and actual published beta.2 assets. Their original scratch qualification retains public_package_executed=false and distinct config/package hashes; the separate new candidate-bound routes/public URL acceptance executed the real public packages and exact public configurations. Carried RTX 5090/client runtime/source-review receipts keep their original v0.13.0 subjects, dates and performance limits, while all five routes and three live clients were accepted fresh on 92dfb132. Image input covers macOS/Windows against RTX 5090 only. Native canonical promotions used fresh first-of-lineage roots after preserving old lineages; subsequent public URL checks verified idempotence, not another upgrade or rollback. Evidence-only commits do not advance the accepted candidate. Both native-runtime and product-tooling full councils closed without remediation, with deferred residuals tracked in #88/#89/#90. Product publication is not granted by this receipt.",
+  "eligibility_scope": "Runtime/installability, fresh candidate-bound public-route/client acceptance and both actual G4 council dispositions are complete. Root authority/live profiles name v0.13.1. Immutable platform/composed/manifest pins bind evidence without changing the accepted candidate. G4 is closed by the bound ledgers, not inferred from runtime tests. Only lead-owned product publication remains; publication_authorized stays false.",
+  "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.13.1/qualification/receipt-audit.json",
     "sha256": "2331557ebae7d7ebfc93a3692e5aebd8b998dced120d634ead85007d2fb90574"

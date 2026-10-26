@@ -113,11 +113,13 @@ master `64d10fbf`, carrying the exact v0.13.0 RTX 5090 beta.2 runtime/profile an
 OMP 18.12.6 assets. Native beta.1 cuts at `eecb437f` are published but unused after a fork CI
 fixture failure. Native beta.2 source `7a25cd72` has exact-head CI, actual packages and both fresh
 full hardware chains. Both beta.2 prereleases and their exact inventories are published and bound.
-The native council closed without remediation. Fresh candidate `92dfb132` acceptance passed all
-five routes/31 blocks, three stock clients and both native public installs with independent
-restoration. Both canonical roots were freshly promoted with no rebased-lineage predecessor;
-the subsequent public-URL checks were idempotent `already_installed` operations. Product-tooling
-council binding and final evidence pins remain separate gates; v0.13.0 is still the public product.
+Both native-runtime and product-tooling councils closed without remediation. Fresh candidate
+`92dfb132` acceptance passed all five routes/31 blocks, three stock clients and both native public
+installs with independent restoration. Both canonical roots were freshly promoted with no
+rebased-lineage predecessor; subsequent public-URL checks were idempotent `already_installed`
+operations. Council dispositions and immutable acceptance evidence are bound separately;
+only product publication remains.
+v0.13.0 is still the public product.
 
 Both natives move to published model version 3 `81f924d4`, revision
 `1cbd84e7221e51186bd7f093a149912d2489625b`, 20,437,521,664 bytes. Native downloads use a new
