@@ -742,6 +742,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"variant_campaign: {error}", file=sys.stderr)
         return 2
     print(json.dumps({key: result[key] for key in ("status", "summary", "byte_comparison") if key in result}, indent=2))
+    if args.mode == "quality" and "quality" in result:
+        print(json.dumps({"quality_verdict": result["quality"]["verdict"]}))
+        return {"pass": 0, "fail": 1, "invalid": 2}[result["quality"]["verdict"]]
     return 0
 
 

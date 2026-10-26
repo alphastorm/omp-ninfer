@@ -6,6 +6,7 @@ import io
 import json
 import sys
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -202,6 +203,13 @@ class VariantsTest(unittest.TestCase):
 
 
 class EndpointTest(unittest.TestCase):
+    def test_managed_pair_propagates_powered_fail_and_invalid_verdicts(self) -> None:
+        for verdict, expected in (("pass", 0), ("fail", 1), ("invalid", 2)):
+            runner = types.SimpleNamespace(run_campaign=lambda *a, **kw: {"quality": {"verdict": verdict}})
+            with patch.dict(sys.modules, {"variant_campaign": runner}), patch("sys.stdout", new=io.StringIO()):
+                self.assertEqual(SCREEN.main(["pair", "--lane", "rtx4090", "--plan", "plan.json",
+                                              "--out", "out"]), expected)
+
     def test_native_and_container_urls_do_not_encode_a_lane(self) -> None:
         for port in (18082, 18089):
             root = f"http://127.0.0.1:{port}"

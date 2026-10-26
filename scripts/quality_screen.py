@@ -631,6 +631,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     summary = {key: result[key] for key in ("verdict", "validity", "pairs", "primary") if key in result}
     print(json.dumps(summary if args.command == "verdict" else result, indent=1))
+    if args.command == "pair":
+        return {"pass": 0, "fail": 1, "invalid": 2}[result["quality"]["verdict"]]
     return 0
 
 

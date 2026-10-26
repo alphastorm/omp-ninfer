@@ -124,6 +124,9 @@ one capture, not freshness. The caller owns restart and isolation.
 fresh-server sequence above. Existing `variants` and `verdict` commands and EXP-085's
 statistical rule are unchanged. A self-pair passes only if the real outputs/validity
 checks pass; binary identity alone is not evidence of output identity.
+The managed `pair` and runner `--mode quality` return 0 for pass, 1 for a failed
+primary gate and 2 for invalid evidence; a partial `--arm-index` capture is not a verdict.
+The historical report-only `verdict` command retains its existing exit behavior.
 
 ## Nsight Systems
 

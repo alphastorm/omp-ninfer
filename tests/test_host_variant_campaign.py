@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from contextlib import closing
 import importlib.util
+import io
 import json
 from pathlib import Path
 import sqlite3
@@ -179,6 +180,13 @@ class CampaignTests(unittest.TestCase):
         text = (hosts / "run_variant_campaign.ps1").read_text()
         self.assertIn("[string]$Lane", text)
         self.assertNotIn("wsl.exe", text)
+
+    def test_powered_failure_or_invalidity_is_not_a_successful_cli_exit(self):
+        for verdict, expected in (("pass", 0), ("fail", 1), ("invalid", 2)):
+            with patch.object(HOST, "run_campaign", return_value={"quality": {"verdict": verdict}}), \
+                 patch("sys.stdout", new=io.StringIO()):
+                self.assertEqual(HOST.main(["--lane", "rtx4090", "--plan", "plan.json",
+                                            "--out", "out", "--mode", "quality"]), expected)
 
 
 class TraceTests(unittest.TestCase):
