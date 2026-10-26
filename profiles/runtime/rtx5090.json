@@ -1,0 +1,35 @@
+{
+  "artifact_type": "omp_ninfer_runtime_profile",
+  "schema_version": 1,
+  "kind": "container",
+  "lane": "rtx5090",
+  "settings": {
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "listen": {"host": "0.0.0.0", "port": 8080},
+    "authentication": {"mode": "required-api-key-file"},
+    "model_id": "q38-ninfer",
+    "engine": {
+      "max_context": 131072,
+      "kv_capacity": "auto",
+      "prefill_chunk": 1024,
+      "kv_dtype": "bf16",
+      "max_concurrency": 2,
+      "pending_timeout_ms": 180000,
+      "vision": true,
+      "gpu_keep_warm_ms": 60000
+    },
+    "context_cache": {"device_state_slots": 2, "host_context_mib": "20867.734375"},
+    "speculative": {"backend": "dflash2", "draft_tokens": 7, "lm_head_draft": true},
+    "reasoning": {"preserve_thinking": true},
+    "session_checkpoint": {"enabled": true, "quota_mib": 24576, "staging_mib": 256, "require_origin_auth": true}
+  },
+  "container": {
+    "binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "published_bind_host": "127.0.0.1",
+    "published_port": 18089,
+    "checkpoint_mount_target": "/checkpoints-v013",
+    "checkpoint_seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+    "restart_policy": "no"
+  }
+}

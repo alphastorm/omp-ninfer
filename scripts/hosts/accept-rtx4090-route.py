@@ -10,9 +10,7 @@ collect preserved secrets, runtime caches, or credential files from the host.
 from __future__ import annotations
 
 import argparse
-import base64
 import datetime
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -23,15 +21,9 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from compose_native_qualification import first_release_rollback
-
-
-def quote(value: object) -> str:
-    return "'" + str(value).replace("'", "''") + "'"
-
-
-def sha(path: Path) -> str:
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import powershell_encoded_command, powershell_quote, sha256_file
+from restore import restore_and_audit
 
 
 def run(argv: list[str], *, cwd: Path | None = None, timeout: int = 120,
@@ -51,7 +43,7 @@ def run(argv: list[str], *, cwd: Path | None = None, timeout: int = 120,
 
 
 def ssh(host: str, code: str, **kwargs: object) -> subprocess.CompletedProcess[str]:
-    encoded = base64.b64encode(code.encode("utf-16le")).decode("ascii")
+    encoded = powershell_encoded_command(code)
     return run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", host,
                 "powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded], **kwargs)
 
@@ -246,11 +238,11 @@ def main() -> int:
               "Attempt": a.attempt, "WindowMinutes": a.window_minutes}
 
     def invoke(mode: str, name: str, timeout: int, check: bool = True) -> subprocess.CompletedProcess[str]:
-        arguments = " ".join("-" + key + " " + quote(value) for key, value in {**params, "Mode": mode}.items())
-        arguments += " -RequiredHoldPaths @(" + ",".join(quote(path) for path in a.require_hold) + ")"
+        arguments = " ".join("-" + key + " " + powershell_quote(value) for key, value in {**params, "Mode": mode}.items())
+        arguments += " -RequiredHoldPaths @(" + ",".join(powershell_quote(path) for path in a.require_hold) + ")"
         if a.first_release:
             arguments += " -FirstRelease"
-        code = "$ProgressPreference='SilentlyContinue'; & ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(remote + "\\accept-rtx4090-route.ps1") + "))) " + arguments
+        code = "$ProgressPreference='SilentlyContinue'; & ([scriptblock]::Create([IO.File]::ReadAllText(" + powershell_quote(remote + "\\accept-rtx4090-route.ps1") + "))) " + arguments
         return ssh(a.host, code, log=w / name, timeout=timeout, check=check)
 
     def collect() -> None:
@@ -263,7 +255,7 @@ foreach($name in @('structured','client-logs')) {if(Test-Path (Join-Path $w $nam
 if(Test-Path (Join-Path $w 'route-home\.omp\logs')) {Copy-Item (Join-Path $w 'route-home\.omp\logs') (Join-Path $out 'route-client-logs') -Recurse -Force};
 foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w ($name+'\snapshot.json'))){Copy-Item (Join-Path $w ($name+'\snapshot.json')) (Join-Path $out ($name+'-snapshot.json')) -Force}};
 & tar.exe -czf (Join-Path $w 'evidence.tar.gz') -C $out .;if($LASTEXITCODE -ne 0){throw 'evidence archive failed'}
-""".replace("WORKSPACE", quote(remote))
+""".replace("WORKSPACE", powershell_quote(remote))
         ssh(a.host, code, log=w / "collection.log", timeout=120)
         run(["scp", "-q", a.host + ":" + remote.replace("\\", "/") + "/evidence.tar.gz", str(w / "evidence.tar.gz")], timeout=120)
         destination = w / "evidence"
@@ -283,22 +275,22 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         manifest = json.loads((bundle / "manifest.json").read_text())
         if manifest["lane"] != route_lane:
             raise RuntimeError("bundle lane differs from selected native lane")
-        if manifest["document_sha256"] != sha(clone / manifest["document"]):
+        if manifest["document_sha256"] != sha256_file(clone / manifest["document"]):
             raise RuntimeError("bundle document differs from clean clone")
-        if len(manifest["steps"]) != 7 or any(sha(bundle / step["file"]) != step["sha256"] for step in manifest["steps"]):
+        if len(manifest["steps"]) != 7 or any(sha256_file(bundle / step["file"]) != step["sha256"] for step in manifest["steps"]):
             raise RuntimeError("documented block bytes differ")
-        ssh(a.host, "$ErrorActionPreference='Stop';New-Item -ItemType Directory -Force " + quote(remote) + "|Out-Null", timeout=30)
+        ssh(a.host, "$ErrorActionPreference='Stop';New-Item -ItemType Directory -Force " + powershell_quote(remote) + "|Out-Null", timeout=30)
         run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper), str(clone / "scripts/hosts/run-documented-route.ps1"),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         run(["scp", "-qr", str(bundle), a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
-        parse = "$t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile(" + quote(remote + "\\accept-rtx4090-route.ps1") + ",[ref]$t,[ref]$e)|Out-Null;if($e.Count){$e|ConvertTo-Json;exit 1};'PARSE_OK'"
+        parse = "$t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile(" + powershell_quote(remote + "\\accept-rtx4090-route.ps1") + ",[ref]$t,[ref]$e)|Out-Null;if($e.Count){$e|ConvertTo-Json;exit 1};'PARSE_OK'"
         ssh(a.host, parse, log=w / "powershell-parse.log", timeout=30)
         invoke("Preflight", "preflight-driver.log", 1200)
         invoke("DryRun", "restoration-dry-run.json", 120)
         collect()
         (w / "driver-preflight.json").write_text(json.dumps({"status": "passed", "plan": plan,
-            "orchestrator_sha256": sha(orchestrator), "probe_sha256": sha(probe),
-            "gpu_helper_sha256": sha(gpu_helper),
+            "orchestrator_sha256": sha256_file(orchestrator), "probe_sha256": sha256_file(probe),
+            "gpu_helper_sha256": sha256_file(gpu_helper),
             "document_sha256": manifest["document_sha256"], "steps": manifest["steps"]}, indent=2) + "\n")
     elif a.mode == "validate":
         # Revalidate changed orchestration without repeating a successful installation/download.
@@ -312,17 +304,17 @@ $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path 
 $h=Join-Path $w 'preflight-home';Set-Variable HOME $h -Scope Global -Force;$env:HOME=$h;$env:USERPROFILE=$h;$env:LOCALAPPDATA=Join-Path $h 'AppData\Local';$env:APPDATA=Join-Path $h 'AppData\Roaming';
 $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated binary missing'};
 & py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider PROVIDER --model MODEL --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
-""".replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate)).replace("PROVIDER", quote(provider)).replace("MODEL", quote(f"{provider}/{model}"))
+""".replace("WORKSPACE", powershell_quote(remote)).replace("RELEASE", powershell_quote(a.release)).replace("CANDIDATE", powershell_quote(a.candidate)).replace("PROVIDER", powershell_quote(provider)).replace("MODEL", powershell_quote(f"{provider}/{model}"))
         ssh(a.host, code, log=w / "preflight-revalidation.log", timeout=120)
         invoke("DryRun", "restoration-dry-run.json", 120)
-        preflight["orchestrator_sha256"] = sha(orchestrator)
-        preflight["probe_sha256"] = sha(probe)
-        preflight["gpu_helper_sha256"] = sha(gpu_helper)
+        preflight["orchestrator_sha256"] = sha256_file(orchestrator)
+        preflight["probe_sha256"] = sha256_file(probe)
+        preflight["gpu_helper_sha256"] = sha256_file(gpu_helper)
         (w / "driver-preflight.json").write_text(json.dumps(preflight, indent=2) + "\n")
         collect()
     elif a.mode == "accept":
         preflight = json.loads((w / "driver-preflight.json").read_text())
-        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe) or preflight["gpu_helper_sha256"] != sha(gpu_helper):
+        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha256_file(orchestrator) or preflight["probe_sha256"] != sha256_file(probe) or preflight["gpu_helper_sha256"] != sha256_file(gpu_helper):
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():
             raise RuntimeError("acceptance attempt already spent; use a new workspace for one authorized correction")
@@ -336,9 +328,10 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
             result["transport_error"] = str(exc)
         finally:
             try:
-                restored = invoke("Restore", "independent-restoration.log", 600, check=False)
+                restored, audited = restore_and_audit(
+                    lambda: invoke("Restore", "independent-restoration.log", 600, check=False),
+                    lambda: invoke("Audit", "final-audit-driver.log", 120, check=False))
                 result["restoration_exit"] = restored.returncode
-                audited = invoke("Audit", "final-audit-driver.log", 120, check=False)
                 result["audit_exit"] = audited.returncode
             finally:
                 collect()
@@ -355,7 +348,8 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
             print(json.dumps({"status": result["status"], "evidence": str(w / "evidence"), "detail": str(w / "driver-window.json")}))
             return 1
     elif a.mode == "restore":
-        result = invoke("Restore", "independent-restoration.log", 600, check=False)
+        result, _ = restore_and_audit(
+            lambda: invoke("Restore", "independent-restoration.log", 600, check=False))
         collect()
         return result.returncode
     else:

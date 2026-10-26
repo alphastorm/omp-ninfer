@@ -340,7 +340,7 @@ class LinuxClientInstallationTests(unittest.TestCase):
         self.launcher = self.home / ".local/bin/omp"
         self.distribution = {
             "distribution_kind": "upstream-release", "asset_url": "https://example.invalid/omp-linux-x64",
-            "asset_sha256": self.host.digest(self.asset), "binary_sha256": self.host.digest(self.asset),
+            "asset_sha256": self.host.sha256_file(self.asset), "binary_sha256": self.host.sha256_file(self.asset),
         }
 
     def test_verified_raw_binary_is_executable_at_the_documented_path(self) -> None:
@@ -351,7 +351,7 @@ class LinuxClientInstallationTests(unittest.TestCase):
         self.assertEqual(self.launcher.stat().st_mode & 0o777, 0o755)
         self.assertEqual(receipt["method"], "documented-url-and-sha256")
         self.assertFalse(receipt["fenced_block"])
-        self.assertEqual(receipt["asset_sha256"], self.host.digest(self.launcher))
+        self.assertEqual(receipt["asset_sha256"], self.host.sha256_file(self.launcher))
         self.assertFalse((self.home / ".local/share/omp/releases").exists())
 
     def test_bad_download_or_binary_identity_cannot_replace_an_installed_client(self) -> None:

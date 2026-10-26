@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,28 @@ def watch(files: list[str], commit_count: int, ahead_by: int) -> dict[str, Any]:
 
 
 class UpstreamWatchTest(unittest.TestCase):
+    def test_product_watch_tracks_named_sources_and_same_base_adoption(self) -> None:
+        entries = json.loads((ROOT / "upstream-watch.json").read_text())["upstreams"]
+        self.assertEqual(len({entry["id"] for entry in entries}), len(entries))
+        sources = {entry["upstream"]: entry for entry in entries}
+        for repository, ref, base in (
+            ("Wallawalla47/ninfer-custom", "master", "81c8ce09"),
+            ("gzenz/ninfer", "master", "d44ab584"),
+            ("hyz615/RUR1NINFER", "codex/xgrammar-structured-output", "79d2296"),
+            ("ashalliants/ninfer-3090", "master", "64d10fbf"),
+        ):
+            with self.subTest(repository=repository):
+                entry = sources[repository]
+                self.assertEqual(entry["upstream_ref"], ref)
+                self.assertRegex(entry["fork_point"], r"^[0-9a-f]{40}$")
+                self.assertTrue(entry["fork_point"].startswith(base))
+                self.assertIn("src/", entry["overlap_paths"])
+                # Each real entry drives the existing planner's exact compare baseline.
+                with mock.patch.object(WATCH, "gh_api", return_value={
+                    "sha": entry["fork_point"], "commit": {"committer": {"date": "2026-10-26T00:00:00Z"}}}):
+                    self.assertEqual(WATCH.watch_one(entry, False)["verdict"], "up-to-date")
+        self.assertEqual(sources["ashalliants/ninfer-3090"]["adoption_role"], "same-base-source")
+
     def test_cut_file_list_is_unknown_overlap_not_a_pull_candidate(self) -> None:
         # The API lists the first 300 paths alphabetically; the overlapping src/ paths come later.
         files = [f"bench/ops/case_{i:03d}.cu" for i in range(WATCH.API_FILE_LIMIT)]
