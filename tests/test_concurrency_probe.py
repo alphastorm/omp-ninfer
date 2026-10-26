@@ -16,6 +16,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("concurrency_probe", ROOT / "scripts" / "concurrency_probe.py")
@@ -437,13 +438,15 @@ class ConcurrencyProbeTests(unittest.TestCase):
         server = self.server()
         baseline, _ = self.baseline(server)
         server.plan = lambda _, index: {"reset": True} if index == 2 else {}
-        code, receipt = self.run_probe(server, "--scenario", "solo")
+        with mock.patch.object(PROBE.time, "sleep", wraps=time.sleep) as sleep:
+            code, receipt = self.run_probe(server, "--scenario", "solo")
         self.assertEqual(code, 0)
+        self.assertEqual(sleep.call_args_list.count(mock.call(2)), 1)
         request = receipt["scenarios"][0]["requests"][0]
         self.assertEqual(len(request["attempts"]), 2)
         first, retried = request["attempts"]
         backoff = retried["submitted_monotonic_s"] - first["completed_monotonic_s"]
-        self.assertLessEqual(abs(backoff - 2), 4 * baseline["ttft_s"])  # Documented retry backoff.
+        self.assertGreaterEqual(backoff, 2)  # Scheduler oversleep is not a probe contract.
         self.assertGreaterEqual(request["ttft_s"], backoff)
         self.assertLessEqual(request["ttft_s"] - backoff, 4 * baseline["ttft_s"])
         self.assertLessEqual(request["total_s"] - backoff, 4 * baseline["total_s"])
