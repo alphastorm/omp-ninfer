@@ -3,16 +3,18 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import tarfile
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-CUTTER = ROOT / "scripts/hosts/cut-ninfer-4090-component.sh"
+CUTTER = ROOT / "scripts/hosts/cut-ninfer-component.sh"
 
 
 def digest(data: bytes) -> str:
@@ -31,6 +33,9 @@ class NativeCutterTests(unittest.TestCase):
         self.git_run("config", "user.name", "Native cutter fixture")
         self.git_run("config", "user.email", "fixture@example.invalid")
         self.specs = {}
+        workflow = self.runtime / ".github/workflows/publish-runtime-image.yml"
+        workflow.parent.mkdir(parents=True)
+        workflow.write_text("name: fixture\n")
         for lane, version in (("rtx3090", "0.6.2"), ("rtx4090", "0.6.2")):
             spec = {"lane": lane, "release_version": version + "-beta.1",
                     "release_id": f"qwen38-{lane[3:]}-native-v{version}-beta.1",
@@ -62,6 +67,7 @@ class NativeCutterTests(unittest.TestCase):
         (tools / "gh").write_text(
             '#!/bin/sh\ncase "$1 $2" in\n'
             ' "auth status") exit 0;;\n "api repos/alphastorm/ninfer") echo true;;\n'
+            ' "api repos/alphastorm/ninfer/git/ref/tags/"*) [ "${EXISTING_TAG:-}" = "${2##*/}" ]; exit $?;;\n'
             ' "release view") exit 1;;\n *) echo "unexpected GitHub operation" >&2; exit 99;;\nesac\n')
         for path in tools.iterdir():
             path.chmod(0o755)
@@ -123,12 +129,114 @@ class NativeCutterTests(unittest.TestCase):
             f"{digest(p.read_bytes())}  {p.name}\n" for p in sorted(root.iterdir()) if p.name != "SHA256SUMS"))
 
     def command(self, lane: str, assets: Path) -> list[str]:
-        return ["bash", str(CUTTER), "--version", "v" + self.specs[lane]["release_version"].split("-")[0],
+        return ["bash", str(CUTTER), "--kind", "native", "--version", "v" + self.specs[lane]["release_version"].split("-")[0],
                 "--commit", self.commit, "--assets", str(assets), "--checksums-sha",
                 digest((assets / "SHA256SUMS").read_bytes()), "--notes-file", str(self.notes)]
 
     def run_cut(self, command: list[str]) -> subprocess.CompletedProcess:
         return subprocess.run(command, env=self.env, cwd=self.root, capture_output=True, text=True)
+
+    def container_assets(self, **identity_changes) -> tuple[Path, list[str]]:
+        root = self.root / "container-assets"
+        root.mkdir()
+        archive = "ninfer-qwen38-rtx5090-v0.6.2-linux-x86_64-cuda13.1.tar.gz"
+        sbom = archive.removesuffix(".tar.gz") + ".spdx.json"
+        sums = archive.removesuffix(".tar.gz") + ".SHA256SUMS"
+        source = f"runtime-source-{self.commit[:8]}.tar.gz"
+        identity = {"patch_stack_sha": self.commit, "release_version": "v0.6.2",
+                    "source_dirty": False, **identity_changes}
+        content = json.dumps(identity).encode()
+        with tarfile.open(root / archive, "w:gz") as package:
+            member = tarfile.TarInfo(archive.removesuffix(".tar.gz") + "/build-identity.json")
+            member.size = len(content)
+            package.addfile(member, io.BytesIO(content))
+        (root / sbom).write_text("{}\n")
+        (root / source).write_bytes(subprocess.run(
+            [self.git, "-C", str(self.runtime), "archive", "--format=tar.gz", self.commit],
+            capture_output=True, check=True).stdout)
+        (root / sums).write_text("".join(
+            f"{digest((root / name).read_bytes())}  {name}\n" for name in (archive, sbom)))
+        command = ["bash", str(CUTTER), "--kind", "container", "--version", "v0.6.2",
+                   "--commit", self.commit, "--assets", str(root), "--archive-sha",
+                   digest((root / archive).read_bytes()), "--sbom-sha", digest((root / sbom).read_bytes()),
+                   "--source-archive-sha", digest((root / source).read_bytes()),
+                   "--base-image", "ghcr.io/alphastorm/ninfer@sha256:" + "a" * 64,
+                   "--runtime-base-receipt-release", "runtime-base-12345678-20261026"]
+        return root, command
+
+    def test_container_preflight_preserves_output_assets_and_no_effect_default(self) -> None:
+        assets, command = self.container_assets()
+        result = self.run_cut(command + ["--lane", "rtx5090", "--dry-run"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout,
+            f"preflight ok: v0.6.2-qwen38-5090-beta.1 and v0.6.2-qwen38-5090-source.1 at {self.commit}; "
+            f"archive {command[command.index('--archive-sha') + 1]}; "
+            f"base ghcr.io/alphastorm/ninfer@sha256:{'a' * 64}; "
+            "base receipt runtime-base-12345678-20261026\n"
+            "dry run: no tag, release, or workflow run was created\n")
+        self.assertEqual(self.run_cut(command).stdout, result.stdout)
+        self.assertEqual(len(list(assets.iterdir())), 4)
+        self.assertEqual(self.git_run("tag"), "")
+
+    def test_container_rejects_each_declared_hash_and_invalid_base_receipt(self) -> None:
+        _, command = self.container_assets()
+        for flag, message in (("--archive-sha", "archive sha256"), ("--sbom-sha", "sbom sha256"),
+                              ("--source-archive-sha", "source archive sha256"),
+                              ("--base-image", "--base-image"),
+                              ("--runtime-base-receipt-release", "--runtime-base-receipt-release")):
+            with self.subTest(flag=flag):
+                result = self.run_cut(command + [flag, "0" * 64])
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(message, result.stderr)
+        result = self.run_cut(command + ["--dry-run", "--publish"])
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("choose --dry-run or --publish", result.stderr)
+
+    def test_container_build_identity_source_tree_and_origin_are_bound(self) -> None:
+        for change in ({"source_dirty": True}, {"patch_stack_sha": "0" * 40},
+                       {"release_version": "v0.0.1"}):
+            with self.subTest(identity=change):
+                assets, command = self.container_assets(**change)
+                result = self.run_cut(command)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("build-identity.json disagrees", result.stderr)
+                shutil.rmtree(assets)
+        assets, command = self.container_assets()
+        source = assets / f"runtime-source-{self.commit[:8]}.tar.gz"
+        original = source.read_bytes()
+        source.write_bytes(b"not the commit tree")
+        result = self.run_cut(command + ["--source-archive-sha", digest(source.read_bytes())])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("source archive is not git archive", result.stderr)
+        source.write_bytes(original)
+        self.git_run("update-ref", "-d", "refs/remotes/origin/main")
+        result = self.run_cut(command)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("commit is not on any origin branch", result.stderr)
+
+    def test_container_refuses_an_existing_binary_or_source_tag(self) -> None:
+        _, command = self.container_assets()
+        for tag in ("v0.6.2-qwen38-5090-beta.1", "v0.6.2-qwen38-5090-source.1"):
+            with self.subTest(tag=tag):
+                self.env["EXISTING_TAG"] = tag
+                result = self.run_cut(command)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("tag already exists: " + tag, result.stderr)
+
+    def test_kind_lane_and_foreign_kind_options_fail_without_external_operations(self) -> None:
+        _, command = self.container_assets()
+        for extra, message in ((["--kind", "other"], "--kind must be"),
+                               (["--lane", "rtx4090"], "--lane must be rtx5090"),
+                               (["--checksums-sha", "0" * 64], "native-only"),
+                               (["--kind", "native"], "container-only")):
+            with self.subTest(arguments=extra):
+                result = self.run_cut(command + extra)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn(message, result.stderr)
+        for flag in ("--kind", "--runtime-base-receipt-release", "--archive-sha"):
+            result = self.run_cut(["bash", str(CUTTER), flag])
+            self.assertEqual(result.returncode, 2)
+            self.assertIn(flag + " requires a value", result.stderr)
 
     def test_both_lanes_close_the_eleven_file_set_without_creating_a_tag(self) -> None:
         for lane in self.specs:

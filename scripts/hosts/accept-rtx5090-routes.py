@@ -8,7 +8,6 @@ No automatic acceptance retries. --dry-run is entirely read-only/no-effect.
 Only JSON receipts and named private logs are collected, never credential files.
 """
 import argparse
-import base64
 import datetime
 import hashlib
 import json
@@ -25,18 +24,12 @@ import urllib.request
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import documented_route  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import powershell_encoded_command, powershell_quote, sha256_file
 
 
 def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-
-def sha(path):
-    h = hashlib.sha256()
-    with Path(path).open('rb') as f:
-        for data in iter(lambda: f.read(8 * 1024 * 1024), b''):
-            h.update(data)
-    return h.hexdigest()
 
 
 MARKER = 'OMP_NINFER_TOOL_OK'
@@ -132,15 +125,14 @@ def main():
             args.append('--dry-run')
         return remote(args, 'host-' + action + ('-dry-run' if dry else ''), timeout)
     def win(action, timeout=120, dry=False):
-        quote = lambda s: "'" + str(s).replace("'", "''") + "'"
-        ps = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(windows + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + quote(windows) + " -Release " + quote(a.release) + " -Candidate " + quote(a.candidate)
+        ps = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + powershell_quote(windows + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + powershell_quote(windows) + " -Release " + powershell_quote(a.release) + " -Candidate " + powershell_quote(a.candidate)
         if dry:
             ps += ' -DryRun'
         # Only owner-hold operations use bypass. The documented runner is launched as text.
         args = ['powershell', '-NoProfile']
         if action in ('Hold', 'Release'):
             args += ['-ExecutionPolicy', 'Bypass']
-        args += ['-EncodedCommand', base64.b64encode(ps.encode('utf-16le')).decode()]
+        args += ['-EncodedCommand', powershell_encoded_command(ps)]
         return run(['ssh', '-o', 'BatchMode=yes', a.windows_host, ' '.join(args)], 'windows-' + action.lower() + ('-dry-run' if dry else ''), timeout)
     def isolated(home):
         (home / 'tmp').mkdir(parents=True, exist_ok=True)
@@ -179,10 +171,10 @@ def main():
         save('collection.json', {'completed_utc': now(), 'missing': missing})
     def summarize():
         result = {'release': a.release, 'candidate': a.candidate, 'status': 'passed', 'completed_utc': now(), 'routes': {}, 'clients': {}, 'timings': timings, 'corrections': [],
-                  'new_scripts': [str(source / f) for f in ('accept-rtx5090-routes.py', 'accept-rtx5090-host.py', 'accept-windows-client.ps1', 'omp-client-probe.py')]}
+                  'new_scripts': [str(source / f) for f in ('accept-rtx5090-routes.py', 'accept-rtx5090-host.py', 'common.py', 'restore.py', 'accept-windows-client.ps1', 'omp-client-probe.py')]}
         if a.prior_workspace:
             result['corrections'] = json.loads((Path(a.prior_workspace) / 'corrections.json').read_text())
-        result['script_sha256'] = {path: sha(path) for path in result['new_scripts']}
+        result['script_sha256'] = {path: sha256_file(path) for path in result['new_scripts']}
         for label, count in (('host', 2), ('mac', 10), ('windows', 5)):
             receipt = json.loads((root / (label + '-route.json')).read_text())
             manifest = json.loads((root / (label + '-bundle/manifest.json')).read_text())
@@ -274,7 +266,7 @@ def main():
             route = result['routes']['mac']['receipt']
             start = datetime.datetime.fromisoformat(route['started_utc'].replace('Z', '+00:00')).timestamp()
             end = datetime.datetime.fromisoformat(route['completed_utc'].replace('Z', '+00:00')).timestamp() + 2
-            matches = [path for path in temp_root.glob('tmp.*/durable.txt') if start <= path.stat().st_mtime <= end and (path.parent / 'context.md').is_file() and sha(path.parent / 'context.md') == context_hash.hexdigest()]
+            matches = [path for path in temp_root.glob('tmp.*/durable.txt') if start <= path.stat().st_mtime <= end and (path.parent / 'context.md').is_file() and sha256_file(path.parent / 'context.md') == context_hash.hexdigest()]
             assert len(matches) == 1, 'cannot uniquely bind Mac smoke directory to this route'
             shutil.move(str(matches[0].parent), str(collected_smoke))
             smoke = [collected_smoke / 'durable.txt']
@@ -311,21 +303,21 @@ def main():
         assert dist['distribution_kind'] == 'upstream-release', 'stock upstream client required'
         bundle = root / 'mac-bundle'
         install = next(step for step in json.loads((bundle / 'manifest.json').read_text())['steps'] if step['slug'] == 'client-install')
-        assert sha(bundle / install['file']) == install['sha256'], 'client-install block differs from bundle'
+        assert sha256_file(bundle / install['file']) == install['sha256'], 'client-install block differs from bundle'
         prehome = root / 'mac-preflight-home'
         prehome.mkdir(exist_ok=True)
         run(['bash', bundle / install['file']], 'mac-install-preflight', 300, env=isolated(prehome), cwd=prehome)
         asset = prehome / dist['asset_name']
         binary = prehome / '.local/bin/omp'
-        assert sha(asset) == dist['asset_sha256'], 'published client asset checksum mismatch'
-        assert sha(binary) == dist['binary_sha256'], 'installed client binary checksum mismatch'
+        assert sha256_file(asset) == dist['asset_sha256'], 'published client asset checksum mismatch'
+        assert sha256_file(binary) == dist['binary_sha256'], 'installed client binary checksum mismatch'
         assert shutil.which('sha256sum') and shutil.which('ssh')
         freeport()
         macprobe('preflight', prehome)
         remote(['mkdir', '-p', wsl], 'wsl-private-root')
-        create = '$null=New-Item -ItemType Directory -Force -Path ' + "'" + windows.replace("'", "''") + "'"
-        run(['ssh', a.windows_host, 'powershell -NoProfile -EncodedCommand ' + base64.b64encode(create.encode('utf-16le')).decode()], 'windows-private-root')
-        for name in ('accept-rtx5090-host.py', 'omp-client-probe.py'):
+        create = '$null=New-Item -ItemType Directory -Force -Path ' + powershell_quote(windows)
+        run(['ssh', a.windows_host, 'powershell -NoProfile -EncodedCommand ' + powershell_encoded_command(create)], 'windows-private-root')
+        for name in ('accept-rtx5090-host.py', 'common.py', 'restore.py', 'omp-client-probe.py'):
             run(['scp', '-q', source / name, a.wsl_host + ':' + wsl + '/' + name], 'stage-wsl-' + name)
         for name in ('accept-windows-client.ps1', 'omp-client-probe.py'):
             run(['scp', '-q', source / name, a.windows_host + ':' + windows.replace('\\', '/') + '/' + name], 'stage-windows-' + name)
@@ -334,7 +326,7 @@ def main():
         host('restore', dry=True)
         win('Release', dry=True)
         save('preflight.json', {'status': 'passed', 'release': a.release, 'candidate': a.candidate, 'completed_utc': now(),
-             'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha(asset), 'mac_binary_sha256': sha(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
+             'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha256_file(asset), 'mac_binary_sha256': sha256_file(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
     elif a.action == 'windows-live-only':
         assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed'
         assert a.prior_workspace, 'completion requires the restored route evidence root'

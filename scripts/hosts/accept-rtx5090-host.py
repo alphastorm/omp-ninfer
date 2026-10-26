@@ -5,10 +5,7 @@ All durable state is private to --workspace. Restoration is lock-protected and
 safe to invoke independently of route success. --dry-run has no effects.
 """
 import argparse
-import base64
 import datetime
-import fcntl
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -18,17 +15,14 @@ import sys
 import time
 import urllib.request
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import powershell_encoded_command, powershell_quote, sha256_file
+from restore import (completed_restoration, directory_snapshot, restoration_lock,
+                     restore_and_audit, restore_directory_metadata)
+
 
 def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-
-def digest(path):
-    h = hashlib.sha256()
-    with Path(path).open('rb') as f:
-        for chunk in iter(lambda: f.read(8 * 1024 * 1024), b''):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def documented_host_names(release):
@@ -44,7 +38,7 @@ def documented_host_names(release):
 
 def install_linux_client(distribution, asset, home):
     assert distribution['distribution_kind'] == 'upstream-release', 'stock upstream client required'
-    asset_sha256 = digest(asset)
+    asset_sha256 = sha256_file(asset)
     assert asset_sha256 == distribution['asset_sha256'], 'published client asset checksum mismatch'
     # Linux has no fenced install block: use the guide's pinned raw binary URL and hash.
     assert asset_sha256 == distribution['binary_sha256'], 'upstream client asset is not the expected binary'
@@ -52,10 +46,10 @@ def install_linux_client(distribution, asset, home):
     launcher.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(asset, launcher)
     launcher.chmod(0o755)
-    assert digest(launcher) == distribution['binary_sha256'], 'installed client binary checksum mismatch'
+    assert sha256_file(launcher) == distribution['binary_sha256'], 'installed client binary checksum mismatch'
     return {'method': 'documented-url-and-sha256', 'fenced_block': False,
             'asset_url': distribution['asset_url'], 'asset_sha256': asset_sha256,
-            'binary_sha256': digest(launcher), 'mode': '0755'}
+            'binary_sha256': sha256_file(launcher), 'mode': '0755'}
 
 
 def windows_environment(probe, runtime=Path('/run/WSL')):
@@ -127,35 +121,24 @@ def main():
             assert r.status == 200
             return json.load(r)
     def ps(action):
-        quote = lambda s: "'" + str(s).replace("'", "''") + "'"
-        text = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(a.windows_workspace + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + quote(a.windows_workspace) + " -Release " + quote(a.release) + " -Candidate " + quote(a.candidate)
+        text = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + powershell_quote(a.windows_workspace + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + powershell_quote(a.windows_workspace) + " -Release " + powershell_quote(a.release) + " -Candidate " + powershell_quote(a.candidate)
         environment = windows_environment('/mnt/c/Windows/System32/cmd.exe')
-        return run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', base64.b64encode(text.encode('utf-16le')).decode()], 90, environment)
+        return run(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', powershell_encoded_command(text)], 90, environment)
     def baseline():
         d = inspect(a.production)
         assert d['Config']['Image'] == a.production_image and d['State']['Running'] and d['HostConfig']['RestartPolicy']['Name'] == 'unless-stopped', 'production baseline changed'
         assert health(18088)['status'] == 'ok'
         assert run(['git', '-C', checkout, 'status', '--porcelain']) == '', 'original checkout dirty'
         assert not subprocess.run(['docker', 'inspect', 'omp-ninfer-beta'], capture_output=True).returncode == 0, 'beta container already exists'
-        directories = {}
-        for path in (key.parent, home / '.local/share/omp-ninfer', logs.parent.parent, logs.parent, logs, checkpoints):
-            try:
-                metadata = path.stat()
-            except FileNotFoundError:
-                directories[str(path)] = {'exists': False}
-            else:
-                directories[str(path)] = {'exists': True, 'mode': metadata.st_mode & 0o777,
-                                          'atime_ns': metadata.st_atime_ns, 'mtime_ns': metadata.st_mtime_ns}
+        directories = directory_snapshot((key.parent, home / '.local/share/omp-ninfer',
+                                          logs.parent.parent, logs.parent, logs, checkpoints))
         return {'started_utc': now(), 'checkout': run(['git', '-C', checkout, 'rev-parse', 'HEAD']), 'branch': run(['git', '-C', checkout, 'rev-parse', '--abbrev-ref', 'HEAD']),
                 'production_image': d['Config']['Image'], 'production_image_id': d['Image'], 'restart': d['HostConfig']['RestartPolicy']['Name'],
-                'mounts': d['Mounts'], 'health': health(18088), 'key_sha256': digest(key),
+                'mounts': d['Mounts'], 'health': health(18088), 'key_sha256': sha256_file(key),
                 'directories': directories}
     def restore():
-        with (root / 'restore.lock').open('a') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            if (root / 'restoration.json').exists():
-                previous = json.loads((root / 'restoration.json').read_text())
-                assert not previous.get('retained_window_created_parents'), 'window-created parents retained; restoration proof failed'
+        with restoration_lock(root):
+            if completed_restoration(root):
                 return
             if not (root / 'baseline.json').exists():
                 baseline()
@@ -198,24 +181,13 @@ def main():
                 if key.exists():
                     key.unlink()
                 (root / 'original-api-key').rename(key)
-            result['documented_key_restored'] = digest(key) == b['key_sha256']
+            result['documented_key_restored'] = sha256_file(key) == b['key_sha256']
             target = b['checkout'] if b['branch'] == 'HEAD' else b['branch']
             run(['git', '-C', checkout, 'checkout', '-q', target])
             result['checkout'] = run(['git', '-C', checkout, 'rev-parse', 'HEAD'])
             result['branch'] = run(['git', '-C', checkout, 'rev-parse', '--abbrev-ref', 'HEAD'])
             result['checkout_restored'] = result['checkout'] == b['checkout'] and result['branch'] == b['branch'] and run(['git', '-C', checkout, 'status', '--porcelain']) == ''
-            retained_parents = []
-            for path, metadata in sorted(b['directories'].items(), key=lambda v: len(Path(v[0]).parts), reverse=True):
-                if metadata['exists']:
-                    os.chmod(path, metadata['mode'])
-                    os.utime(path, ns=(metadata['atime_ns'], metadata['mtime_ns']))
-                elif Path(path).exists():
-                    # Only an empty window-created parent may be removed; never recurse
-                    # into state another owner added during the window.
-                    try:
-                        Path(path).rmdir()
-                    except OSError:
-                        retained_parents.append(path)
+            retained_parents = restore_directory_metadata(b['directories'])
             result['retained_window_created_parents'] = retained_parents
             result['documented_directories_restored'] = not retained_parents
             assert result['documented_key_restored'] and result['checkout_restored']
@@ -246,7 +218,7 @@ def main():
         assert not list(dockerconfig.iterdir()), 'anonymous Docker configuration is not empty'
         logged('anonymous-runtime-pull.log', ['docker', 'pull', runtime['image_reference']], 600, env)
         image = inspect(runtime['image_reference'])
-        assert model.stat().st_size == runtime['model_bytes'] and digest(model) == runtime['model_sha256']
+        assert model.stat().st_size == runtime['model_bytes'] and sha256_file(model) == runtime['model_sha256']
         asset = root / dist['asset_url'].rsplit('/', 1)[-1]
         if not asset.exists():
             run(['curl', '--fail', '--location', '--silent', '--show-error', '--output', asset, dist['asset_url']], 300)
@@ -256,7 +228,7 @@ def main():
         launcher = linuxhome / '.local/bin/omp'
         installation = install_linux_client(dist, asset, linuxhome)
         logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local'], 90, clientenv)
-        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
+        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': sha256_file(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
     elif a.action == 'begin':
         assert not (root / 'baseline.json').exists(), 'window already attempted; no implicit retry'
         assert 0 < a.restore_after_seconds <= 3000
@@ -277,7 +249,7 @@ def main():
             run(['git', '-C', checkout, 'checkout', '-q', '--detach', a.candidate])
             logged('stop-production.log', ['bash', Path(a.window_dir) / 'window.sh', 'stop-production'], 180)
         except BaseException:
-            restore()
+            restore_and_audit(restore)
             raise
     elif a.action == 'watchdog':
         b = json.loads((root / 'baseline.json').read_text())
@@ -285,9 +257,9 @@ def main():
             if (root / 'restoration.json').exists():
                 return
             time.sleep(5)
-        restore()
+        restore_and_audit(restore)
     elif a.action == 'restore':
-        restore()
+        restore_and_audit(restore)
     elif a.action == 'host-route':
         logged('host-route.log', ['bash', clone / 'scripts/hosts/run-documented-route.sh', root / 'host-bundle', clone, root / 'host-route.json'], 1200, env)
     elif a.action == 'setup':

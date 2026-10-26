@@ -136,3 +136,16 @@ jobs:
               --temporary-previous ci-predecessor --mode dry-run
             test ! -e "$workspace"
           done
+      - name: Plan the RTX 5090 routes without contacting hosts
+        env:
+          CANDIDATE: ${{ github.sha }}
+        run: |
+          release=$(python3 -c 'import json; print(json.load(open("compatibility.json"))["product_release"])')
+          workspace="$RUNNER_TEMP/acceptance-dry-run-rtx5090"
+          python3 scripts/hosts/accept-rtx5090-routes.py \
+            --action window --release "$release" --candidate "$CANDIDATE" \
+            --workspace "$workspace" --wsl-workspace /tmp/ci/acceptance \
+            --windows-workspace C:/ci/acceptance --production-image no-image.invalid \
+            --wsl-host no-host.invalid --windows-host no-host.invalid \
+            --route-ssh-destination no-user@no-host.invalid --dry-run
+          test ! -e "$workspace"

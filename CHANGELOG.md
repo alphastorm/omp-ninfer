@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Unify runtime component cutting under `scripts/hosts/cut-ninfer-component.sh --kind
+  container|native` with explicit lane selection, preserved kind-specific preflights/assets,
+  and no-effect defaults; publication requires `--publish`, never together with `--dry-run`.
+  Share acceptance SHA/PowerShell and restoration primitives, stage their WSL dependencies,
+  and add the RTX 5090 route planner beside both native dry-runs in CI.
+- Render container CLI arguments and native schema 4 server configs from the shared
+  `omp_ninfer_runtime_profile` schema in `profiles/runtime/`, preserving the qualified
+  v0.13.1 bytes and identities. Track `Wallawalla47`, `gzenz` and `hyz615` source references and
+  classify `ashalliants` as a same-`64d10fbf` adoption source, not an adopted community binary.
 - Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
@@ -1102,7 +1111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--resume-from` continues each of them once after a restart of the same arm, recording whether
   the server restored it from its checkpoint. A desk-code answer cut off by the output limit now
   scores inconclusive instead of wrong.
-- `scripts/hosts/cut-ninfer-4090-component.sh` publishes an RTX 4090 native runtime component
+- `scripts/hosts/cut-ninfer-component.sh --kind native` publishes an RTX 4090 native runtime component
   after its canonical qualification. It defaults to a no-effect preflight that closes and verifies
   the asset set against its outer `SHA256SUMS`, matches the package build receipt and the lane
   specification at the commit, compares the source archive's tar stream byte for byte with

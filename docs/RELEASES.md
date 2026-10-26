@@ -2281,7 +2281,22 @@ upstream provenance and the darwin-arm64, windows-x64 and linux-x64 binaries, wh
 equal their asset hashes, and `scripts/verify_release.py` checks every binding. Client acceptance
 is never inherited from a predecessor release.
 
-Both native runtime lanes use `scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090|rtx4090` after the
+All runtime components use `scripts/hosts/cut-ninfer-component.sh --kind container|native`.
+The lane is `--lane rtx5090` for containers and `--lane rtx3090|rtx4090` for native
+packages; omitted lanes default to RTX 5090 and RTX 4090 respectively. Both kinds default
+to no-effect preflight. Publication requires explicit founder-only `--publish`; the former
+container cutter's implicit publication mode is retired. Combining `--dry-run` and `--publish`
+is refused before any external operation.
+
+The container path retains its four local inputs (binary archive, SPDX, binary `SHA256SUMS`,
+exact `git archive` source), declared SHA-256 checks, clean binary/source identity, origin-branch
+and workflow checks, GitHub authentication and absence checks for both tags/releases.
+Supply `--archive-sha`, `--sbom-sha`, `--source-archive-sha`, `--base-image` and
+`--runtime-base-receipt-release runtime-base-<sha8>-<yyyymmdd>`. Publication creates the
+binary and source prereleases, then dispatches `publish-runtime-image.yml` with the same
+base-image receipt binding; its digest receipt is still the input to `stage_release.py`.
+
+Both native runtime lanes use `scripts/hosts/cut-ninfer-component.sh --kind native --lane rtx3090|rtx4090` after the
 lane's canonical native qualification (`tools/qualification/qualify_native.py` in the runtime
 fork). The default mode checks that the outer `SHA256SUMS` closes and verifies the asset
 directory, that the package build receipt and the lane specification at the commit name the same
@@ -2290,8 +2305,8 @@ the commit, and that neither the tag nor the release exists. `--publish` is foun
 pushes the component tag and creates one prerelease with the closed set; binding it into a
 product release stays `scripts/bind_native_variant.py`.
 
-The historical cutter and `accept-rtx4090-route.{py,ps1}` filenames each remain the single
-implementation for both native lanes. Omit `--lane` / `-Lane` to select RTX 4090;
+`accept-rtx4090-route.{py,ps1}` remains the single acceptance implementation for both
+native lanes. Omit `--lane` / `-Lane` to select RTX 4090;
 RTX 3090 requires an explicit lane. Both lanes require the Python driver's explicit `--host`;
 lane identity never selects a physical SSH destination or a host-appliance hold.
 It uses state root `C:/ProgramData/NInfer/qwen38-3090-native`, task
@@ -2324,6 +2339,53 @@ The absent-directory correction was a successor to the frozen v0.12.0 acceptance
 not part of that candidate. PR #82's ordering rule required publication first: merging it
 earlier would have changed the exact commit that the completed release acceptance names.
 
+Acceptance Python drivers share SHA-256, PowerShell quoting and UTF-16LE encoded-command
+helpers in `scripts/hosts/common.py`, and ordered restoration/audit primitives in
+`scripts/hosts/restore.py`. The WSL backend retains lock-protected idempotence and
+presence/metadata restoration; native restoration remains the independent SSH call to the
+PowerShell backend, followed by its audit. The 5090 route driver stages both Python modules
+with the WSL helper and records their hashes. CI plans all three lanes without contacting
+hosts or creating workspaces; it does not claim live host acceptance.
+
+### One authored runtime profile
+
+Edit serving settings only in `profiles/runtime/rtx{5090,4090,3090}.json`, artifact type
+`omp_ninfer_runtime_profile`, schema 1. `kind` and `lane` select the runtime wire format.
+All lanes share `settings.listen`, `authentication`, `model_id`, `engine`, `context_cache`,
+`speculative`, `reasoning` and `session_checkpoint`. Native-only release, response-store,
+telemetry and host-memory settings remain explicit; container-only image/binary/model,
+publication and checkpoint-mount identities are in `container`. Unknown or unrepresentable
+settings fail instead of being silently dropped. Decimal Host budgets stay strings to
+preserve their exact representation.
+
+`scripts/render_runtime_profile.py` emits a container CLI argument array or a native
+`ninfer_windows_server_config` schema 4 object from this one source schema. For a container,
+`--template` retains the existing client/transport envelope while rendering its runtime
+arguments and identity. The renderer reuses `verify_release.configuration_identity`,
+including argument ordering; native output keeps schema 4's field order and LF-terminated
+two-space JSON bytes. For example, on a future release branch:
+
+```sh
+python3 scripts/render_runtime_profile.py --profile profiles/runtime/rtx4090.json \
+  --output profiles/v0.13.1/rtx4090/server-config.json --check
+python3 scripts/render_runtime_profile.py --profile profiles/runtime/rtx5090.json \
+  --template profiles/qwen38-rtx5090-manual-tunnel.json \
+  --output profiles/qwen38-rtx5090-manual-tunnel.json --check
+```
+
+`--check` compares exact bytes without writes. For a new release, update the source settings
+and component identities, replace the example's output release, and omit `--check` to render;
+render both container envelopes before staging. Native packaging must consume the rendered
+schema 4 file before qualification and component cutting. Do not hand-edit the generated
+runtime fields or overwrite a published release's profile or evidence.
+
+The v0.13.1 native configs and both root container profiles are exact byte-regeneration
+fixtures: no qualified config, manifest, receipt or identity is rewritten by this
+consolidation. Historical release receipts retain the commands and script hashes actually
+exercised at their recorded commits; they are immutable evidence, not current invocation
+examples. Runtime wire formats remain different because the published native schema 4
+and container lifecycle identity algorithms are different; only the authored schema is unified.
+
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
 
 The RTX 3090 addition is complete: v0.9.1 accepted all five documented routes on candidate
@@ -2348,7 +2410,7 @@ controller fix that lets a rollback launch a predecessor whose config predates
 export NINFER_RUNTIME_DIR=/path/to/ninfer-checkout
 export ASSETS=/path/to/verified-package-a NOTES=/path/to/component-notes.txt
 SUMS_SHA=$(shasum -a 256 "$ASSETS/SHA256SUMS" | cut -d' ' -f1)
-bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 \
+bash scripts/hosts/cut-ninfer-component.sh --kind native --lane rtx3090 --version v0.6.2 \
   --commit f08309da3cc1d4226d127b7c9ce22267d12070cc --assets "$ASSETS" \
   --checksums-sha "$SUMS_SHA" --notes-file "$NOTES" --dry-run
 # FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.

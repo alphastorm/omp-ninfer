@@ -24,7 +24,7 @@ class NativeGpuTests(unittest.TestCase):
             self.assertIn("'-StateRoot', $stateRoot", text)
         driver = (HOSTS / "accept-rtx4090-route.py").read_text()
         self.assertIn('gpu_helper = scripts / "native-gpu.ps1"', driver)
-        self.assertIn('preflight["gpu_helper_sha256"] != sha(gpu_helper)', driver)
+        self.assertIn('preflight["gpu_helper_sha256"] != sha256_file(gpu_helper)', driver)
         public = (HOSTS / "accept-native-public-install.ps1").read_text()
         self.assertIn("$installArgs.GpuUuid = $gpuUuid", public)
 

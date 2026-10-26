@@ -57,12 +57,40 @@
       "upstream": "ashalliants/ninfer-3090",
       "upstream_ref": "master",
       "fork_repo": "alphastorm/ninfer",
-      "fork_point": "81c8ce093b2c1646a87566a8e59d807fcf0ec95c",
-      "fork_point_meaning": "research baseline of the community line adopted by Don-Chad; not an adopted product source",
+      "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "fork_point_meaning": "same-base adoption source: shares upstream master 64d10fbf with every shipped v0.13.1 lane; candidate source changes still require downstream matched performance and quality qualification, not community binaries",
+      "adoption_role": "same-base-source",
       "overlap_paths": [
         "src/",
         "packaging/windows/"
       ]
+    },
+    {
+      "id": "ninfer-wallawalla",
+      "upstream": "Wallawalla47/ninfer-custom",
+      "upstream_ref": "master",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "81c8ce093b2c1646a87566a8e59d807fcf0ec95c",
+      "fork_point_meaning": "research comparison baseline; tracked source reference, not an adopted runtime",
+      "overlap_paths": ["src/", "packaging/windows/", "tests/"]
+    },
+    {
+      "id": "ninfer-gzenz",
+      "upstream": "gzenz/ninfer",
+      "upstream_ref": "master",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "d44ab58408aa389728cd8b1ee50179527e1f3e0d",
+      "fork_point_meaning": "research comparison baseline; tracked source reference, not an adopted runtime",
+      "overlap_paths": ["src/", "packaging/windows/", "tests/"]
+    },
+    {
+      "id": "ninfer-rur1",
+      "upstream": "hyz615/RUR1NINFER",
+      "upstream_ref": "codex/xgrammar-structured-output",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "79d229656b297ff9932a58c3664dd56d87a73522",
+      "fork_point_meaning": "research comparison baseline of the grammar/structured-output source; not an adopted runtime",
+      "overlap_paths": ["src/", "tests/"]
     },
     {
       "id": "oh-my-pi-client",
