@@ -31,6 +31,17 @@ def digest(path):
     return h.hexdigest()
 
 
+def documented_host_names(release):
+    """Checkpoint directory and model file that docs/QUICKSTART.md section 3 creates for a release.
+
+    The v0.13 line uses a fresh store and a separate v3 model path; earlier releases keep the
+    original names. tests/test_stock_client_harness.py binds this to the current guide."""
+    major, minor = (int(part) for part in release.removeprefix('v').split('.')[:2])
+    if (major, minor) >= (0, 13):
+        return 'checkpoints-v013', 'qwen3_8_27b-v3.ninfer'
+    return 'checkpoints', 'qwen3_8_27b.ninfer'
+
+
 def install_linux_client(distribution, asset, home):
     assert distribution['distribution_kind'] == 'upstream-release', 'stock upstream client required'
     asset_sha256 = digest(asset)
@@ -92,9 +103,8 @@ def main():
     checkout = home / 'omp-ninfer'
     key = home / '.config/omp-ninfer/api-key'
     logs = home / '.local/state/omp-ninfer'
-    checkpoint_directory = 'checkpoints-v013' if a.release == 'v0.13.0' else 'checkpoints'
+    checkpoint_directory, model_name = documented_host_names(a.release)
     checkpoints = home / '.local/share/omp-ninfer' / checkpoint_directory
-    model_name = 'qwen3_8_27b-v3.ninfer' if a.release == 'v0.13.0' else 'qwen3_8_27b.ninfer'
     model = home / '.local/share/omp-ninfer' / model_name
     os.environ['PATH'] = '/usr/bin:/bin:/usr/local/bin:/usr/lib/wsl/lib:' + os.environ.get('PATH', '')
     def save(name, value):

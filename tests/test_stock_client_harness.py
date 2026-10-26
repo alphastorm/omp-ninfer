@@ -8,6 +8,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -749,6 +750,26 @@ class WindowsHostRestorationTests(unittest.TestCase):
                                ({"markers": [], "tasks": self.baseline["tasks"]}, "markers")):
             with self.subTest(after=after), self.assertRaisesRegex(AssertionError, message):
                 self.routes.assert_windows_host_unchanged(self.baseline, after)
+
+
+class DocumentedHostNamesTests(unittest.TestCase):
+    """The 5090 host driver checks and preserves exactly what the current guide's host route creates."""
+
+    def test_driver_store_and_model_match_the_current_guide(self) -> None:
+        def load(name, path):
+            spec = importlib.util.spec_from_file_location(name, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+        host = load("names_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")
+        route = load("names_route", ROOT / "scripts/documented_route.py")
+        text = "\n".join(block.text for _, block in route.lane_blocks(
+            ROOT / "docs/QUICKSTART.md", "rtx5090-container-host"))
+        assignment = lambda name: re.search(rf'^{name}="\$(?:HOME|ROOT)/([^"]+)"$', text, re.M).group(1)
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        self.assertEqual(assignment("ROOT"), ".local/share/omp-ninfer")
+        self.assertEqual(host.documented_host_names(release),
+                         (assignment("CHECKPOINTS"), assignment("MODEL")))
 
 
 

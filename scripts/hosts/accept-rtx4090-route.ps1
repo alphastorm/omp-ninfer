@@ -23,7 +23,7 @@ param(
     [string]$StateRoot='',
     [string]$TaskName='',
     [string]$Stage='',
-    [string]$Model='C:\ProgramData\omp-ninfer-model\qwen3_8_27b.ninfer',
+    [string]$Model='C:\ProgramData\omp-ninfer-model\qwen3_8_27b-v3.ninfer',
     [string]$KeyFile='C:\ProgramData\omp-ninfer-keys\api-key.txt',
     [string]$HostState='C:\ProgramData\OMP\windows-hosts\state',
     [string[]]$RequiredHoldPaths=@(),

@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import shutil
+import re
 import subprocess
 import sys
 import tempfile
@@ -327,6 +328,18 @@ $results|ConvertTo-Json -Compress
         public = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text()
         self.assertIn('$base = "http://$($rel.host):$($rel.port)"', public)
         self.assertNotIn("container-host-paused", public)
+
+    def test_driver_model_default_is_the_file_the_documented_route_creates(self) -> None:
+        source = (ROOT / "scripts/hosts/accept-rtx4090-route.ps1").read_text()
+        default = re.search(r"\[string\]\$Model='([^']+)'", source).group(1)
+        spec = importlib.util.spec_from_file_location("model_route", ROOT / "scripts/documented_route.py")
+        route = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(route)
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            text = "\n".join(block.text for _, block in route.lane_blocks(ROOT / "docs/QUICKSTART.md", lane))
+            directory = re.search(r"^\$ModelDir = Join-Path \$env:ProgramData '([^']+)'$", text, re.M).group(1)
+            name = re.search(r"^\$Model = Join-Path \$ModelDir '([^']+)'$", text, re.M).group(1)
+            self.assertEqual(default, "C:\\ProgramData\\" + directory + "\\" + name, lane)
 
     def test_assessor_binds_3090_model_route_and_package(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
