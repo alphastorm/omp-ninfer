@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   profiling with per-op round/prefill attribution and graph-launch CPU time.
 - Extend the EXP-085 powered quality screen with endpoint-generic capture and fresh-server
   same-host baseline/candidate pairing, retaining the registered statistical margins and
-  validity rules and reporting actual model-output byte comparisons.
+  validity rules and reporting actual model-output byte comparisons. Add deterministic,
+  bounded fresh-server shards with identity-verified resume, retained capture seals and
+  complete-set-only reduction, plus per-100-prompt wall timing and sampled GPU clocks.
 - Unify runtime component cutting under `scripts/hosts/cut-ninfer-component.sh --kind
   container|native` with explicit lane selection, preserved kind-specific preflights/assets,
   and no-effect defaults; publication requires `--publish`, never together with `--dry-run`.

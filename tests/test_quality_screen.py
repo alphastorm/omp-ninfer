@@ -275,5 +275,218 @@ class EndpointTest(unittest.TestCase):
             self.assertEqual(SCREEN.compare_responses(baseline, candidate)["different_or_missing"], 1)
 
 
+class ShardsTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.cases = self.root / "cases"
+        self.cases.mkdir()
+        rows = [{"case_id": case, "class": "test",
+                 "input": {"context": "evidence", "task": "Answer."},
+                 "safety": {"contains_synthetic_secret": case in CONTROLS}}
+                for case in (*CASES, *CONTROLS)]
+        (self.cases / "set.jsonl").write_text("".join(json.dumps(row) + "\n" for row in rows))
+        self.plan = self.root / "plan.json"
+        self.plan.write_text(json.dumps({"cases": str(self.cases)}))
+        sys.path.insert(0, str(ROOT / "scripts/hosts"))
+        import variant_campaign
+        self.runner = variant_campaign
+        self.identity = {"binary_sha256": "binary", "binary_version": "source",
+                         "model_sha256": "model", "config_sha256": "config", "image": None,
+                         "seccomp_profile_sha256": None,
+                         "gpu": {"uuid": "GPU-selected", "driver": "driver", "power_limit_w": 450}}
+        self.fingerprint = {"arms": {"A": self.identity, "B": self.identity}, "inputs": "frozen"}
+        self.patches = [
+            patch.object(self.runner, "validate_plan"),
+            patch.object(SCREEN, "pair_fingerprint", return_value=self.fingerprint),
+            patch.object(self.runner, "capture_arm", side_effect=self.capture),
+        ]
+        self.mocks = [item.start() for item in self.patches]
+        for item in self.patches:
+            self.addCleanup(item.stop)
+        self.out = self.root / "out"
+
+    def capture(self, lane, plan, model_sha, key, index, directory, mode, **kwargs):
+        directory.mkdir()
+        run = directory / "quality"
+        run.mkdir()
+        ids = [json.loads(line)["case_id"] for line in kwargs["quality_cases"].read_text().splitlines()]
+        self.runner.save(run / "manifest.json", {"label": "test"})
+        scores, responses = [], []
+        for sample_id in ids:
+            case, variant = sample_id.rsplit(".v", 1)
+            sample = production_sample(case, int(variant))
+            responses.append({"case_id": sample_id, "content": sample["output"], "reasoning": "", "error": None})
+            scores.append({"case_id": sample_id, "class": "test", "is_redaction_control": sample["control"],
+                           "required_facts_found": sample["facts_found"], "required_facts_total": sample["facts_total"],
+                           "schema_valid": True, "tool_evaluable": True, "tool_selection_ok": True,
+                           "tool_argument_ok": True, "output_tokens": 100, "secret_leaks": sample["leaks"]})
+        (run / "responses.jsonl").write_text("".join(json.dumps(row) + "\n" for row in responses))
+        self.runner.save(run / "scores.json", {"per_case": scores})
+        receipt = {"status": "passed", "identity": self.identity, "wall_seconds": len(ids) * 2}
+        self.runner.save(directory / "receipt.json", receipt)
+        return receipt
+
+    def pair(self, **kwargs):
+        return SCREEN.sharded_pair("rtx4090", self.plan, self.out, shard_size=50, **kwargs)
+
+    def test_plan_is_deterministic_complete_and_preserves_prompt_and_subset_order(self):
+        layout, files = SCREEN.shard_plan(self.cases, 50)
+        again = SCREEN.shard_plan(self.cases, 50)
+        self.assertEqual((layout, files), again)
+        expected = SCREEN.screen_order(CASES + CONTROLS, set(CONTROLS))
+        for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
+            jobs = [job for job in layout["jobs"] if job["role"] == role]
+            ids = [sample for job in jobs for sample in job["prompt_ids"]]
+            self.assertEqual(ids, expected[:80] if "determinism" in role else expected)
+            self.assertTrue(all(len(job["prompt_ids"]) <= 50 for job in jobs))
+        for invalid in (0, -1):
+            with self.assertRaises(SCREEN.ScreenError):
+                SCREEN.shard_plan(self.cases, invalid)
+
+    def test_resume_skips_verified_shards_and_never_decides_a_partial_set(self):
+        first = self.pair(max_shards=1)
+        self.assertNotIn("quality", first)
+        self.assertFalse((self.out / "result.json").exists())
+        self.assertEqual(first["completed_shards"], 1)
+        with self.assertRaisesRegex(SCREEN.ScreenError, "requires --resume"):
+            self.pair(max_shards=1)
+        self.mocks[-1].reset_mock()
+        second = self.pair(max_shards=1, resume=True)
+        self.assertEqual(second["completed_shards"], 2)
+        self.mocks[-1].assert_called_once()
+        self.assertNotIn("quality", second)
+
+    def test_complete_self_pair_scores_all_shards_and_compares_retained_bytes(self):
+        original = SCREEN.decide
+        with patch.object(SCREEN, "decide", side_effect=lambda *args: original(*args, resamples=100)):
+            result = self.pair()
+        self.assertEqual(result["completed_shards"], result["total_shards"])
+        self.assertEqual(result["quality"]["verdict"], "pass")
+        self.assertEqual(result["quality"]["counted_prompts"], 240)
+        self.assertEqual(result["byte_comparison"]["identical"], 240)
+        self.assertTrue(all(row["all_identical"] for row in result["determinism_byte_comparison"].values()))
+        self.assertTrue(all(row["wall_seconds_per_100_prompts"] == 200 for row in result["timing"]))
+
+    def test_changed_inputs_runtime_prompt_and_sealed_capture_are_refused_before_launch(self):
+        self.pair(max_shards=1)
+        self.mocks[-1].reset_mock()
+        with patch.object(SCREEN, "pair_fingerprint", return_value={**self.fingerprint, "inputs": "changed"}):
+            with self.assertRaisesRegex(SCREEN.ScreenError, "identity changed"):
+                self.pair(max_shards=1, resume=True)
+        prompt = self.out / "prompts/screen-0000.jsonl"
+        original = prompt.read_bytes()
+        prompt.write_bytes(original + b"\n")
+        with self.assertRaisesRegex(SCREEN.ScreenError, "prompt file changed"):
+            self.pair(max_shards=1, resume=True)
+        prompt.write_bytes(original)
+        run = next(self.out.glob("0-production-*/attempt-*/quality"))
+        (run / "manifest.json").write_text('{"label":"changed"}')
+        with self.assertRaisesRegex(SCREEN.ScreenError, "hash changed"):
+            self.pair(max_shards=1, resume=True)
+        self.mocks[-1].assert_not_called()
+
+    def test_changed_measured_runtime_and_response_bytes_cannot_be_skipped(self):
+        self.pair(max_shards=1)
+        self.mocks[-1].reset_mock()
+        capture = next(self.out.glob("0-production-*/attempt-*"))
+        path = capture / "receipt.json"
+        receipt = self.runner.load(path)
+        for field in ("binary_sha256", "config_sha256", "model_sha256"):
+            changed = json.loads(json.dumps(receipt))
+            changed["identity"][field] = "different"
+            self.runner.save(path, changed)
+            with self.assertRaisesRegex(SCREEN.ScreenError, "runtime identity"):
+                self.pair(max_shards=1, resume=True)
+        self.runner.save(path, receipt)
+        responses = capture / "quality/responses.jsonl"
+        responses.write_text(responses.read_text().replace("log-001:0", "changed:0"))
+        with self.assertRaisesRegex(SCREEN.ScreenError, "hash changed"):
+            self.pair(max_shards=1, resume=True)
+        self.mocks[-1].assert_not_called()
+
+    def test_actual_tool_output_difference_invalidates_fresh_determinism(self):
+        original_capture = self.capture
+        def changed(*args, **kwargs):
+            receipt = original_capture(*args, **kwargs)
+            if args[4] == 2:
+                path = args[5] / "quality/responses.jsonl"
+                rows = [json.loads(line) for line in path.read_text().splitlines()]
+                rows[0]["tool_calls"] = [{"function": {"name": "changed", "arguments": "{}"}}]
+                path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            return receipt
+        self.mocks[-1].side_effect = changed
+        original = SCREEN.decide
+        with patch.object(SCREEN, "decide", side_effect=lambda *args: original(*args, resamples=100)):
+            result = self.pair()
+        self.assertEqual(result["quality"]["verdict"], "invalid")
+        self.assertFalse(result["quality"]["validity"]["checks"]["deterministic_bytes"])
+        self.assertNotIn("primary", result["quality"])
+
+    def test_fingerprint_binds_source_config_corpus_fixture_and_qualification_bytes(self):
+        model = self.root / "model"
+        binary = self.root / "binary"
+        fixtures = self.root / "fixtures"
+        qualification = self.root / "qualification"
+        config = self.root / "config.json"
+        model.write_bytes(b"model")
+        binary.write_bytes(b"binary")
+        fixtures.mkdir()
+        qualification.mkdir()
+        (fixtures / "source.txt").write_text("evidence")
+        (qualification / "executor.py").write_text("executor")
+        self.runner.save(config, {"engine": {"kv_dtype": "int8"}})
+        plan = {"cases": str(self.cases), "fixtures": str(fixtures), "qualification": str(qualification),
+                "model_path": str(model), "gpu_uuid": "GPU-selected", "config_path": str(config),
+                "arms": {label: {"binary": str(binary)} for label in ("A", "B")}}
+        self.runner.save(self.plan, plan)
+        fingerprint = self.patches[1]
+        fingerprint.stop()
+        # Use the real native hash/version path while keeping this test host-free.
+        with patch.object(self.runner, "gpu", return_value=self.identity["gpu"]), \
+             patch.object(self.runner, "command", return_value=types.SimpleNamespace(stdout="source")):
+            baseline = SCREEN.pair_fingerprint(self.runner, "rtx4090", self.plan, plan)
+            for path in (model, binary, config, self.cases / "set.jsonl",
+                         fixtures / "source.txt", qualification / "executor.py", self.plan):
+                before = path.read_bytes()
+                if path == config:
+                    self.runner.save(path, {"engine": {"kv_dtype": "bf16"}})
+                else:
+                    path.write_bytes(before + b"\n")
+                self.assertNotEqual(SCREEN.pair_fingerprint(self.runner, "rtx4090", self.plan, plan), baseline)
+                path.write_bytes(before)
+        fingerprint.start()
+
+    def test_duplicate_missing_or_reordered_capture_ids_cannot_be_sealed(self):
+        layout, _ = SCREEN.shard_plan(self.cases, 50)
+        job = layout["jobs"][0]
+        self.pair(max_shards=1)
+        capture = next(self.out.glob("0-production-*/attempt-*"))
+        path = capture / "quality/responses.jsonl"
+        rows = path.read_text().splitlines()
+        for bad in (rows[:-1], [rows[1], rows[0], *rows[2:]], [rows[0], *rows[:-1]]):
+            path.write_text("\n".join(bad) + "\n")
+            with self.assertRaisesRegex(SCREEN.ScreenError, "order/completeness"):
+                SCREEN.verified_capture(self.runner, capture, job, self.identity)
+
+    def test_interrupted_attempt_is_retained_but_failed_finished_capture_is_not_retried(self):
+        self.pair(max_shards=1)
+        directory = self.out / "0-production-0001"
+        partial = directory / "attempt-0000"
+        partial.mkdir(parents=True)
+        (partial / "stderr.log").write_text("interrupted")
+        self.pair(max_shards=1, resume=True)
+        self.assertTrue((directory / "attempt-0001/receipt.json").exists())
+        self.assertEqual((partial / "stderr.log").read_text(), "interrupted")
+        failed = self.out / "0-production-0002/attempt-0000"
+        failed.mkdir(parents=True)
+        self.runner.save(failed / "receipt.json", {"status": "failed"})
+        self.mocks[-1].reset_mock()
+        with self.assertRaisesRegex(SCREEN.ScreenError, "unsealed finished/failed"):
+            self.pair(max_shards=1, resume=True)
+        self.mocks[-1].assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -103,6 +103,26 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(result["engine"], {"max_context": 131072, "prefill_chunk": 1024})
             self.assertEqual(plan["config"]["engine"]["prefill_chunk"], 2048)
 
+    def test_sampler_records_selected_gpu_clocks(self):
+        row = "GPU-selected, RTX 3090, 581.80, 350, 22000, 345, 70, 99, 1815, 9751\n"
+        with patch.object(HOST, "command", return_value=MagicMock(stdout=row)) as command:
+            sample = HOST.gpu("GPU-selected")
+        self.assertEqual(sample["sm_clock_mhz"], 1815)
+        self.assertEqual(sample["memory_clock_mhz"], 9751)
+        self.assertIn("clocks.sm,clocks.mem", command.call_args.args[0][3])
+
+    def test_quality_shard_controls_route_to_shared_pair_and_refuse_other_modes(self):
+        with patch.object(HOST.quality, "sharded_pair", return_value={"status": "shard-complete"}) as pair:
+            result = HOST.run_campaign("rtx4090", Path("plan"), Path("out"), mode="quality",
+                                       shard_size=100, max_shards=1, resume=True)
+            self.assertEqual(result["status"], "shard-complete")
+            pair.assert_called_once_with("rtx4090", Path("plan"), Path("out"),
+                                         shard_size=100, max_shards=1, resume=True)
+        for mode, index, profile in (("c1", None, False), ("quality", 0, False), ("quality", None, True)):
+            with self.assertRaises(HOST.CampaignError):
+                HOST.run_campaign("rtx4090", Path("plan"), Path("out"), mode=mode,
+                                  arm_index=index, profile=profile, shard_size=100)
+
     def test_generated_argv_preserves_checkpoint_and_backend_profile(self):
         paths = {key: key for key in ("model", "port", "key_file", "model_id", "binary_sha256",
                                       "model_sha256", "log", "checkpoints")}

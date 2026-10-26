@@ -6,6 +6,9 @@ param(
     [ValidateSet('c1', 'role', 'quality', 'retrieval', 'requests', 'command')][string]$Mode = 'c1',
     [string]$Python = 'python',
     [ValidateRange(-1, 3)][int]$ArmIndex = -1,
+    [ValidateRange(1, 2147483647)][int]$ShardSize,
+    [ValidateRange(1, 2147483647)][int]$MaxShards,
+    [switch]$Resume,
     [switch]$Nsys
 )
 # Run on the GPU host under the fleet's hostlock/gpu-lease. On WSL use the Python
@@ -16,6 +19,9 @@ $ProgressPreference = 'SilentlyContinue'
 $runner = Join-Path $PSScriptRoot 'variant_campaign.py'
 $arguments = @($runner, '--lane', $Lane, '--plan', $Plan, '--out', $Output, '--mode', $Mode)
 if ($ArmIndex -ge 0) { $arguments += @('--arm-index', [string]$ArmIndex) }
+if ($PSBoundParameters.ContainsKey('ShardSize')) { $arguments += @('--shard-size', [string]$ShardSize) }
+if ($PSBoundParameters.ContainsKey('MaxShards')) { $arguments += @('--max-shards', [string]$MaxShards) }
+if ($Resume) { $arguments += '--resume' }
 if ($Nsys) { $arguments += '--nsys' }
 $pythonCommand = Get-Command -Name $Python -CommandType Application -ErrorAction Stop
 $global:LASTEXITCODE = 2

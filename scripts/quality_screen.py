@@ -32,6 +32,7 @@ import json
 import math
 import os
 import random
+import secrets
 import subprocess
 import sys
 import urllib.parse
@@ -188,8 +189,10 @@ def load_cases(cases_dir: Path) -> list[tuple[str, str, bool]]:
     return sorted(cases)
 
 
-def write_variants(cases_dir: Path, out: Path, determinism_out: Path) -> dict[str, Any]:
+def variant_rows(cases_dir: Path) -> tuple[list[tuple[str, str, bool]], list[str]]:
     cases = load_cases(cases_dir)
+    if len({case_id for case_id, _, _ in cases}) != len(cases):
+        raise ScreenError("duplicate counted case IDs")
     prefixes = variant_prefixes(int(PREREGISTRATION["redaction_variants_per_control"]))
     rows = []
     for case_id, line, control in cases:
@@ -198,6 +201,11 @@ def write_variants(cases_dir: Path, out: Path, determinism_out: Path) -> dict[st
             variant["case_id"] = variant_id(case_id, index)
             variant["input"]["task"] = prefixes[index] + variant["input"]["task"]
             rows.append(json.dumps(variant, ensure_ascii=False) + "\n")
+    return cases, rows
+
+
+def write_variants(cases_dir: Path, out: Path, determinism_out: Path) -> dict[str, Any]:
+    cases, rows = variant_rows(cases_dir)
     subset = rows[: int(PREREGISTRATION["determinism_prompts"])]
     out.write_text("".join(rows), encoding="utf-8")
     determinism_out.write_text("".join(subset), encoding="utf-8")
@@ -561,7 +569,8 @@ def capture_endpoint(*, qualification: Path, cases: Path, fixtures: Path, base_u
     return run_identity(out)
 
 
-def compare_responses(baseline: Path, candidate: Path) -> dict[str, Any]:
+def compare_responses(baseline: Path, candidate: Path,
+                      sample_ids: Sequence[str] | None = None) -> dict[str, Any]:
     """Compare actual model-output bytes, not token counts or timing-bearing response envelopes."""
     def outputs(run: Path) -> dict[str, bytes]:
         rows = {}
@@ -577,11 +586,208 @@ def compare_responses(baseline: Path, candidate: Path) -> dict[str, Any]:
                                    ensure_ascii=False, separators=(",", ":")).encode()
         return rows
     a, b = outputs(baseline), outputs(candidate)
-    ids = sorted(set(a) | set(b))
+    ids = sorted(set(a) | set(b)) if sample_ids is None else list(sample_ids)
     equal = sum(case in a and case in b and a[case] == b[case] for case in ids)
     return {"compared": len(ids), "identical": equal, "different_or_missing": len(ids) - equal,
             "all_identical": bool(ids) and equal == len(ids),
             "projection": "UTF-8 JSON [content, reasoning, tool_calls], excluding transport/tool-call IDs and timings"}
+
+
+def shard_plan(cases_dir: Path, shard_size: int) -> tuple[dict[str, Any], dict[str, bytes]]:
+    """Contiguous fixed boundaries, identical in both arms and their fresh first-80 reruns."""
+    if shard_size < 1:
+        raise ScreenError("shard size must be positive")
+    cases, rows = variant_rows(cases_dir)
+    files: dict[str, bytes] = {}
+    jobs = []
+    for index, role in enumerate(("production", "candidate", "candidate_determinism", "production_determinism")):
+        selected = rows if index < 2 else rows[:int(PREREGISTRATION["determinism_prompts"])]
+        kind = "screen" if index < 2 else "determinism"
+        for number, start in enumerate(range(0, len(selected), shard_size)):
+            group = selected[start:start + shard_size]
+            name = f"prompts/{kind}-{number:04d}.jsonl"
+            data = "".join(group).encode("utf-8")
+            files[name] = data
+            jobs.append({"id": f"{index}-{role}-{number:04d}", "arm_index": index, "role": role,
+                         "cases": name, "cases_sha256": hashlib.sha256(data).hexdigest(),
+                         "prompt_ids": [json.loads(line)["case_id"] for line in group]})
+    return {"schema_version": 1, "shard_size": shard_size, "counted_cases": len(cases),
+            "counted_prompts": len(rows), "jobs": jobs}, files
+
+
+def runtime_identity(identity: dict[str, Any]) -> dict[str, Any]:
+    """Stable measured fields only; changing telemetry and per-start paths are not identities."""
+    return {**{name: identity[name] for name in
+               ("binary_sha256", "binary_version", "model_sha256", "config_sha256", "image",
+                "seccomp_profile_sha256")},
+            "gpu": {name: identity["gpu"][name] for name in ("uuid", "driver", "power_limit_w")}}
+
+
+def pair_fingerprint(runner: Any, lane: str, plan_path: Path, plan: dict[str, Any]) -> dict[str, Any]:
+    model_sha = runner.sha256_file(Path(plan["model_path"]))
+    if plan.get("model_sha256") and plan["model_sha256"] != model_sha:
+        raise ScreenError("model SHA-256 differs from frozen plan")
+    selected = runner.gpu(plan["gpu_uuid"])
+    arms = {}
+    for label, arm in plan["arms"].items():
+        probe = object.__new__(runner.Server)
+        probe.plan, probe.arm = plan, arm
+        probe.container = "ov-" + plan.get("holder", "harness") + f"-identity-{os.getpid()}-{label.lower()}"
+        policy = arm.get("seccomp_profile", plan.get("seccomp_profile")) if arm.get("image") else None
+        probe.docker_security_args = ["--security-opt", "seccomp=" + str(policy)] if policy else []
+        sha, version = probe.binary_identity()
+        arms[label] = {"binary_sha256": sha, "binary_version": version, "model_sha256": model_sha,
+                       "config_sha256": runner.digest(runner.effective_config(plan, arm)), "image": arm.get("image"),
+                       "seccomp_profile_sha256": runner.sha256_file(Path(policy)) if policy else None,
+                       "gpu": {**{key: selected[key] for key in ("uuid", "driver")},
+                               "power_limit_w": float(arm.get("power_limit_w", selected["power_limit_w"]))}}
+    inputs = {}
+    for name, directory in (("cases", Path(plan["cases"])), ("fixtures", Path(plan["fixtures"])),
+                            ("qualification", Path(plan["qualification"]))):
+        entries = {path.relative_to(directory).as_posix(): runner.sha256_file(path)
+                   for path in sorted(directory.rglob("*"))
+                   if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"}
+        if not entries:
+            raise ScreenError(f"no {name} input files")
+        inputs[name] = entries
+    scripts = Path(__file__).resolve().parent
+    return {"lane": lane, "plan_sha256": runner.sha256_file(plan_path), "arms": arms, "inputs": inputs,
+            "preregistration_sha256": runner.digest(PREREGISTRATION),
+            "tools": {name: runner.sha256_file(scripts / name) for name in
+                      ("quality_screen.py", "redaction_screen.py", "hosts/variant_campaign.py", "hosts/common.py")}}
+
+
+def verified_capture(runner: Any, directory: Path, job: dict[str, Any], expected: dict[str, Any]) -> dict[str, Any]:
+    receipt = runner.load(directory / "receipt.json")
+    if receipt["status"] != "passed" or runtime_identity(receipt["identity"]) != expected:
+        raise ScreenError(f"{job['id']}: failed or changed runtime identity")
+    run = directory / "quality"
+    rows = [json.loads(line) for line in (run / "responses.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()]
+    scored = runner.load(run / "scores.json")["per_case"]
+    expected_ids = job["prompt_ids"]
+    if [row["case_id"] for row in rows] != expected_ids:
+        raise ScreenError(f"{job['id']}: capture order/completeness differs from shard plan")
+    if len(scored) != len(expected_ids) or {row["case_id"] for row in scored} != set(expected_ids):
+        raise ScreenError(f"{job['id']}: scored IDs differ from shard plan")
+    load_run(run)  # Check score/response binding before this capture becomes skippable.
+    return {"receipt_sha256": runner.sha256_file(directory / "receipt.json"),
+            "files": {name: runner.sha256_file(run / name) for name in
+                      ("manifest.json", "responses.jsonl", "scores.json")}}
+
+
+def sharded_pair(lane: str, plan_path: Path, out: Path, *, shard_size: int = 100,
+                 max_shards: int | None = None, resume: bool = False) -> dict[str, Any]:
+    """Run at most max_shards fresh captures; no verdict exists until all sealed shards verify."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
+    import variant_campaign as runner
+    if max_shards is not None and max_shards < 1:
+        raise ScreenError("max shards must be positive")
+    plan = runner.load(plan_path)
+    runner.validate_plan(plan, lane)
+    layout, files = shard_plan(Path(plan["cases"]), shard_size)
+    fingerprint = pair_fingerprint(runner, lane, plan_path, plan)
+    manifest = {"artifact_type": "omp-ninfer.quality-shard-plan", "layout": layout, "identity": fingerprint}
+    out = out.resolve()
+    out.mkdir(parents=True, exist_ok=True)
+    manifest_path = out / "shards.json"
+    if manifest_path.exists():
+        if not resume:
+            raise ScreenError("existing shard campaign requires --resume")
+        if runner.load(manifest_path) != manifest:
+            raise ScreenError("shard plan or frozen input/runtime/tool identity changed")
+        for name, data in files.items():
+            if (out / name).read_bytes() != data:
+                raise ScreenError("frozen shard prompt file changed")
+    else:
+        if any(out.iterdir()):
+            raise ScreenError("new shard campaign requires an empty output root")
+        (out / "prompts").mkdir()
+        for name, data in files.items():
+            (out / name).write_bytes(data)
+        runner.save(manifest_path, manifest)
+    key_file = out / "api-key"
+    if not key_file.exists():
+        key_file.write_text(secrets.token_hex(32) + "\n", encoding="utf-8")
+        key_file.chmod(0o600)
+    manifest_sha = runner.digest(manifest)
+    completed = []
+    pending = []
+    # Verify EVERY existing completion before starting any new GPU work, including later shards.
+    for job in layout["jobs"]:
+        directory = out / job["id"]
+        seal_path = directory / "complete.json"
+        if not seal_path.exists():
+            pending.append(job)
+            continue
+        seal = runner.load(seal_path)
+        capture = directory / seal["capture"]
+        expected = fingerprint["arms"]["A" if job["arm_index"] in (0, 3) else "B"]
+        actual = {"manifest_sha256": manifest_sha, "job": job, "capture": seal["capture"],
+                  "evidence": verified_capture(runner, capture, job, expected)}
+        if seal != actual:
+            raise ScreenError(f"{job['id']}: sealed capture identity/hash changed")
+        completed.append((job, capture))
+    for job in pending[:max_shards]:
+        directory = out / job["id"]
+        directory.mkdir(exist_ok=True)
+        attempts = sorted(directory.glob("attempt-*"))
+        if any((attempt / "receipt.json").exists() for attempt in attempts):
+            raise ScreenError(f"{job['id']}: unsealed finished/failed capture; preserve evidence and use a new root")
+        # An interrupted attempt without a receipt is retained, never overwritten.
+        capture = directory / f"attempt-{len(attempts):04d}"
+        runner.capture_arm(lane, plan, fingerprint["arms"]["A"]["model_sha256"], key_file,
+                           job["arm_index"], capture, "quality", quality_cases=out / job["cases"])
+        expected = fingerprint["arms"]["A" if job["arm_index"] in (0, 3) else "B"]
+        seal = {"manifest_sha256": manifest_sha, "job": job, "capture": capture.name,
+                "evidence": verified_capture(runner, capture, job, expected)}
+        temporary = directory / "complete.tmp"
+        runner.save(temporary, seal)
+        temporary.replace(directory / "complete.json")
+        completed.append((job, capture))
+    result: dict[str, Any] = {"artifact_type": "omp-ninfer.sharded-quality-campaign", "schema_version": 1,
+                              "lane": lane, "mode": "quality", "manifest_sha256": manifest_sha,
+                              "completed_shards": len(completed), "total_shards": len(layout["jobs"])}
+    if len(completed) != len(layout["jobs"]):
+        return dict(result, status="shard-complete")
+    merged = out / "merged"
+    merged.mkdir(exist_ok=True)
+    runs = {}
+    timing = []
+    by_id = {job["id"]: capture for job, capture in completed}
+    for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
+        directory = merged / role
+        directory.mkdir(exist_ok=True)
+        per_case, responses = [], []
+        for job in layout["jobs"]:
+            if job["role"] != role:
+                continue
+            capture = by_id[job["id"]]
+            per_case.extend(runner.load(capture / "quality/scores.json")["per_case"])
+            responses.append((capture / "quality/responses.jsonl").read_text(encoding="utf-8").rstrip() + "\n")
+            seconds = runner.load(capture / "receipt.json")["wall_seconds"]
+            timing.append({"shard": job["id"], "prompts": len(job["prompt_ids"]), "wall_seconds": seconds,
+                           "wall_seconds_per_100_prompts": seconds * 100 / len(job["prompt_ids"])})
+        runner.save(directory / "scores.json", {"per_case": per_case, "corpus_sha256": manifest_sha})
+        (directory / "responses.jsonl").write_text("".join(responses), encoding="utf-8")
+        runner.save(directory / "manifest.json", {"label": role, "shards_manifest_sha256": manifest_sha})
+        runs[role] = directory
+    result["quality"] = verdict(argparse.Namespace(**runs))
+    result["byte_comparison"] = compare_responses(runs["production"], runs["candidate"])
+    subset = [sample for job in layout["jobs"] if job["role"] == "production_determinism"
+              for sample in job["prompt_ids"]]
+    result["determinism_byte_comparison"] = {
+        role: compare_responses(runs[role], runs[role + "_determinism"], subset)
+        for role in ("production", "candidate")}
+    direct = all(row["all_identical"] for row in result["determinism_byte_comparison"].values())
+    result["quality"]["validity"]["checks"]["deterministic_bytes"] = direct
+    if not direct:
+        result["quality"]["validity"]["valid"] = False
+        result["quality"]["verdict"] = "invalid"
+        result["quality"].pop("primary", None)
+    result["timing"] = timing
+    runner.save(out / "result.json", result)
+    return result
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -609,6 +815,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     pair.add_argument("--lane", choices=("rtx3090", "rtx4090", "rtx5090"), required=True)
     pair.add_argument("--plan", type=Path, required=True)
     pair.add_argument("--out", type=Path, required=True)
+    pair.add_argument("--shard-size", type=int, help="prompts per fresh-server shard; identical boundaries in both arms")
+    pair.add_argument("--max-shards", type=int, help="capture at most this many shards in this lock hold")
+    pair.add_argument("--resume", action="store_true", help="verify identities and skip sealed completed shards")
     args = parser.parse_args(argv)
     try:
         if args.command == "variants":
@@ -625,13 +834,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             sys.path.insert(0, str(Path(__file__).resolve().parent / "hosts"))
             from variant_campaign import run_campaign
-            result = run_campaign(args.lane, args.plan, args.out, mode="quality")
-    except (ScreenError, OSError, KeyError, ValueError, subprocess.SubprocessError) as error:
+            result = run_campaign(args.lane, args.plan, args.out, mode="quality", shard_size=args.shard_size,
+                                  max_shards=args.max_shards, resume=args.resume)
+    except (ScreenError, OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         print(f"quality_screen: {error}", file=sys.stderr)
         return 2
     summary = {key: result[key] for key in ("verdict", "validity", "pairs", "primary") if key in result}
     print(json.dumps(summary if args.command == "verdict" else result, indent=1))
-    if args.command == "pair":
+    if args.command == "pair" and "quality" in result:
         return {"pass": 0, "fail": 1, "invalid": 2}[result["quality"]["verdict"]]
     return 0
 

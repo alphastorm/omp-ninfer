@@ -71,7 +71,7 @@ def command(argv: Sequence[str], timeout: float = 120, **kwargs: Any) -> subproc
 
 def gpu(uuid_: str) -> dict[str, Any]:
     fields = ("uuid", "name", "driver_version", "power.limit", "memory.used", "power.draw",
-              "temperature.gpu", "utilization.gpu")
+              "temperature.gpu", "utilization.gpu", "clocks.sm", "clocks.mem")
     text = command(["nvidia-smi", "-i", uuid_, "--query-gpu=" + ",".join(fields),
                     "--format=csv,noheader,nounits"]).stdout
     rows = list(csv.reader(io.StringIO(text)))
@@ -81,7 +81,7 @@ def gpu(uuid_: str) -> dict[str, Any]:
     if values[0] != uuid_:
         raise CampaignError("GPU UUID changed")
     return dict(zip(("uuid", "name", "driver", "power_limit_w", "memory_used_mib", "power_w",
-                     "temperature_c", "utilization_percent"),
+                     "temperature_c", "utilization_percent", "sm_clock_mhz", "memory_clock_mhz"),
                     values[:3] + [float(value) for value in values[3:]]))
 
 
@@ -129,7 +129,8 @@ class Sampler:
     def summary(self) -> dict[str, Any]:
         return {"samples": len(self.rows), **{
             "max_" + field: max(row[field] for row in self.rows)
-            for field in ("memory_used_mib", "power_w", "temperature_c", "utilization_percent")}}
+            for field in ("memory_used_mib", "power_w", "temperature_c", "utilization_percent",
+                          "sm_clock_mhz", "memory_clock_mhz")}}
 
 
 def http(root: str, key: str, path: str, body: Any = None, timeout: float = 900) -> dict[str, Any]:
@@ -625,8 +626,107 @@ def summarize_arms(arms: list[dict[str, Any]], output_root: Path | None = None) 
             if per_case and output_root is not None else None}
 
 
+def capture_arm(lane: str, plan: dict[str, Any], model_sha: str, key_file: Path,
+                index: int, directory: Path, mode: str, profile: bool = False,
+                quality_cases: Path | None = None) -> dict[str, Any]:
+    """One owned fresh server, with the same cleanup contract for full arms and shards."""
+    label = ORDER[index]
+    directory.mkdir(exist_ok=False)
+    arm = plan["arms"][label]
+    config = effective_config(plan, arm)
+    before = gpu(plan["gpu_uuid"])
+    sampler = Sampler(plan["gpu_uuid"], directory / "vram.jsonl",
+                      float(plan.get("sample_interval_seconds", 0.2)))
+    server: Server | None = None
+    receipt: dict[str, Any] = {"arm": label, "index": index, "status": "failed", "requests": []}
+    started = time.monotonic()
+    try:
+        if "power_limit_w" in arm:
+            set_power(plan["gpu_uuid"], float(arm["power_limit_w"]))
+        server = Server(plan, arm, config, directory, model_sha, key_file, profile)
+        receipt["identity"] = {"binary_sha256": server.binary_sha, "binary_version": server.version,
+                               "model_sha256": model_sha, "config": config, "config_sha256": digest(config),
+                               "gpu": gpu(plan["gpu_uuid"]), "image": arm.get("image"),
+                               "seccomp_profile_sha256": sha256_file(Path(server.seccomp_profile))
+                               if server.seccomp_profile else None,
+                               "checkpoint_filesystem": server.checkpoint_filesystem,
+                               "server_arguments": server.argv,
+                               "server_arguments_sha256": digest(server.argv)}
+        with sampler:
+            server.start()
+            receipt["ready_memory_mib"] = gpu(plan["gpu_uuid"])["memory_used_mib"]
+            if mode == "quality":
+                assert quality_cases is not None
+                receipt["quality_run"] = quality.capture_endpoint(
+                    qualification=Path(plan["qualification"]), cases=quality_cases, fixtures=Path(plan["fixtures"]),
+                    base_url=server.root, model=server.paths["model_id"], api_key_file=key_file,
+                    out=directory / "quality", label=f"{lane}/{directory.name}")
+            else:
+                http(server.root, server.key, "/v1/chat/completions",
+                     {"model": server.paths["model_id"], "messages": [{"role": "user", "content": "Warm the managed path."}],
+                      "max_tokens": 32, "temperature": 0})
+                if mode == "c1":
+                    receipt["requests"] = c1(server)
+                elif mode == "role":
+                    receipt["requests"] = role_requests(server, plan)
+                elif mode == "requests":
+                    receipt["requests"] = [
+                        request_metrics(server, dict(entry["body"], model=server.paths["model_id"]), entry["id"])
+                        for entry in plan["requests"]]
+                elif mode == "retrieval":
+                    body = {"model": server.paths["model_id"], "messages": load(Path(plan["retrieval_fixture"])),
+                            "max_completion_tokens": 128, "temperature": 0, "reasoning_effort": "none"}
+                    row = request_metrics(server, body, "retrieval_130048")
+                    expected = digest(["ORCHID=493817; COLOR=COBALT", "", []])
+                    row["exact"] = row["output_sha256"] == expected
+                    if row["prompt_tokens"] != 130048 or not row["exact"]:
+                        raise CampaignError("130048-token retrieval was not exact")
+                    receipt["requests"] = [row]
+                else:
+                    replacements = dict(server.paths, arm_dir=str(directory), log=str(directory / "requests.jsonl"),
+                                        key_file=str(key_file))
+                    argv = [str(value).format_map(replacements) for value in plan["workload_command"]]
+                    with (directory / "workload.log").open("wb") as log:
+                        subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+                                       check=True, timeout=float(plan.get("workload_timeout_seconds", 3000)))
+            receipt["status"] = "passed"
+    except BaseException as error:
+        receipt.update(status="failed", error_type=type(error).__name__)
+        raise
+    finally:
+        try:
+            try:
+                if server:
+                    server.stop()
+                    if profile:
+                        receipt["nsys"] = server.profile_summary()
+            except BaseException as error:
+                receipt.update(status="failed", cleanup_error_type=type(error).__name__)
+                raise
+            if sampler.rows:
+                receipt["vram"] = sampler.summary()
+        finally:
+            try:
+                if abs(gpu(plan["gpu_uuid"])["power_limit_w"] - before["power_limit_w"]) > 0.5:
+                    set_power(plan["gpu_uuid"], before["power_limit_w"])
+                receipt["restored_power_limit_w"] = gpu(plan["gpu_uuid"])["power_limit_w"]
+            except BaseException as error:
+                receipt.update(status="failed", restore_error_type=type(error).__name__)
+                raise
+            finally:
+                receipt["wall_seconds"] = time.monotonic() - started
+                save(directory / "receipt.json", receipt)
+    return receipt
+
+
 def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profile: bool = False,
-                 arm_index: int | None = None) -> dict[str, Any]:
+                 arm_index: int | None = None, shard_size: int | None = None,
+                 max_shards: int | None = None, resume: bool = False) -> dict[str, Any]:
+    if shard_size is not None or max_shards is not None or resume:
+        if mode != "quality" or arm_index is not None or profile:
+            raise CampaignError("sharding/resume requires quality mode without arm-index or profiling")
+        return quality.sharded_pair(lane, plan_path, out, shard_size=100 if shard_size is None else shard_size,
+                                    max_shards=max_shards, resume=resume)
     plan = load(plan_path)
     validate_plan(plan, lane)
     out = out.resolve()
@@ -659,90 +759,8 @@ def run_campaign(lane: str, plan_path: Path, out: Path, mode: str = "c1", profil
             raise CampaignError("run the preceding ABBA arm first")
         if index and load(out / f"{index - 1}-{ORDER[index - 1]}" / "receipt.json")["status"] != "passed":
             raise CampaignError("a failed preceding arm invalidates this campaign")
-        directory = out / f"{index}-{label}"
-        directory.mkdir(exist_ok=False)
-        arm = plan["arms"][label]
-        config = effective_config(plan, arm)
-        before = gpu(plan["gpu_uuid"])
-        sampler = Sampler(plan["gpu_uuid"], directory / "vram.jsonl",
-                          float(plan.get("sample_interval_seconds", 0.2)))
-        server: Server | None = None
-        receipt: dict[str, Any] = {"arm": label, "index": index, "status": "failed", "requests": []}
-        try:
-            if "power_limit_w" in arm:
-                set_power(plan["gpu_uuid"], float(arm["power_limit_w"]))
-            server = Server(plan, arm, config, directory, model_sha, key_file, profile)
-            receipt["identity"] = {"binary_sha256": server.binary_sha, "binary_version": server.version,
-                                   "model_sha256": model_sha, "config": config, "config_sha256": digest(config),
-                                   "gpu": gpu(plan["gpu_uuid"]), "image": arm.get("image"),
-                                   "seccomp_profile_sha256": sha256_file(Path(server.seccomp_profile))
-                                   if server.seccomp_profile else None,
-                                   "checkpoint_filesystem": server.checkpoint_filesystem,
-                                   "server_arguments": server.argv,
-                                   "server_arguments_sha256": digest(server.argv)}
-            with sampler:
-                server.start()
-                receipt["ready_memory_mib"] = gpu(plan["gpu_uuid"])["memory_used_mib"]
-                if mode == "quality":
-                    cases = out / ("screen.jsonl" if index < 2 else "determinism.jsonl")
-                    receipt["quality_run"] = quality.capture_endpoint(
-                        qualification=Path(plan["qualification"]), cases=cases, fixtures=Path(plan["fixtures"]),
-                        base_url=server.root, model=server.paths["model_id"], api_key_file=key_file,
-                        out=directory / "quality", label=f"{lane}/{index}-{label}")
-                else:
-                    http(server.root, server.key, "/v1/chat/completions",
-                         {"model": server.paths["model_id"], "messages": [{"role": "user", "content": "Warm the managed path."}],
-                          "max_tokens": 32, "temperature": 0})
-                    if mode == "c1":
-                        receipt["requests"] = c1(server)
-                    elif mode == "role":
-                        receipt["requests"] = role_requests(server, plan)
-                    elif mode == "requests":
-                        receipt["requests"] = [
-                            request_metrics(server, dict(entry["body"], model=server.paths["model_id"]), entry["id"])
-                            for entry in plan["requests"]]
-                    elif mode == "retrieval":
-                        body = {"model": server.paths["model_id"], "messages": load(Path(plan["retrieval_fixture"])),
-                                "max_completion_tokens": 128, "temperature": 0, "reasoning_effort": "none"}
-                        row = request_metrics(server, body, "retrieval_130048")
-                        expected = digest(["ORCHID=493817; COLOR=COBALT", "", []])
-                        row["exact"] = row["output_sha256"] == expected
-                        if row["prompt_tokens"] != 130048 or not row["exact"]:
-                            raise CampaignError("130048-token retrieval was not exact")
-                        receipt["requests"] = [row]
-                    else:
-                        replacements = dict(server.paths, arm_dir=str(directory), log=str(directory / "requests.jsonl"),
-                                            key_file=str(key_file))
-                        argv = [str(value).format_map(replacements) for value in plan["workload_command"]]
-                        with (directory / "workload.log").open("wb") as log:
-                            subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
-                                           check=True, timeout=float(plan.get("workload_timeout_seconds", 3000)))
-                receipt["status"] = "passed"
-        except BaseException as error:
-            receipt.update(status="failed", error_type=type(error).__name__)
-            raise
-        finally:
-            try:
-                try:
-                    if server:
-                        server.stop()
-                        if profile:
-                            receipt["nsys"] = server.profile_summary()
-                except BaseException as error:
-                    receipt.update(status="failed", cleanup_error_type=type(error).__name__)
-                    raise
-                if sampler.rows:
-                    receipt["vram"] = sampler.summary()
-            finally:
-                try:
-                    if abs(gpu(plan["gpu_uuid"])["power_limit_w"] - before["power_limit_w"]) > 0.5:
-                        set_power(plan["gpu_uuid"], before["power_limit_w"])
-                    receipt["restored_power_limit_w"] = gpu(plan["gpu_uuid"])["power_limit_w"]
-                except BaseException as error:
-                    receipt.update(status="failed", restore_error_type=type(error).__name__)
-                    raise
-                finally:
-                    save(directory / "receipt.json", receipt)
+        capture_arm(lane, plan, model_sha, key_file, index, out / f"{index}-{label}", mode, profile,
+                    out / ("screen.jsonl" if index < 2 else "determinism.jsonl") if mode == "quality" else None)
     arm_paths = [out / f"{index}-{label}" / "receipt.json" for index, label in enumerate(ORDER)]
     if not all(path.exists() for path in arm_paths):
         return {"status": "arm-complete", "completed_index": arm_index}
@@ -771,9 +789,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--mode", choices=("c1", "role", "quality", "retrieval", "requests", "command"), default="c1")
     parser.add_argument("--nsys", action="store_true")
     parser.add_argument("--arm-index", type=int, choices=range(4), help="one bounded arm; same out root, indices 0..3")
+    parser.add_argument("--shard-size", type=int, help="quality only: prompts per fresh-server shard")
+    parser.add_argument("--max-shards", type=int, help="quality only: bounded captures in this hold")
+    parser.add_argument("--resume", action="store_true", help="quality only: verify and skip completed shards")
     args = parser.parse_args(argv)
     try:
-        result = run_campaign(args.lane, args.plan, args.out, args.mode, args.nsys, args.arm_index)
+        result = run_campaign(args.lane, args.plan, args.out, args.mode, args.nsys, args.arm_index,
+                              args.shard_size, args.max_shards, args.resume)
     except (CampaignError, quality.ScreenError, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
         print(f"variant_campaign: {error}", file=sys.stderr)
         return 2

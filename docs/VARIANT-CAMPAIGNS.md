@@ -7,6 +7,9 @@ both standalone VRAM samplers. The older `scripts/run_variant_campaign.py` remai
 separate frozen variant-matrix reducer, not a host lifecycle driver.
 When staging a subset, retain `scripts/hosts/{variant_campaign,common}.py` and
 `scripts/{quality_screen,redaction_screen}.py` with their directory hierarchy.
+Quality mode also needs the private qualification root's `manifest.schema.json`,
+`scripts/{run_qualification,score_qualification,_qual}.py`, cases and fixtures.
+Keep that whole input set frozen, not just the public runner.
 
 ## Ownership and measurement
 
@@ -119,6 +122,7 @@ Checkpoint-disabled smoke evidence can stay on a Windows-drive mount.
   headroom. Requires `qualification`, `cases`, `fixtures`. `result.json` contains the
   original powered verdict plus an actual model-output byte comparison. It never
   relaxes completeness, perturbation, determinism or primary metric margins.
+  The sampler also records SM and memory clocks in MHz.
 
 For lock fairness, run `--arm-index 0`, `1`, `2`, `3` (`-ArmIndex`) separately against
 the same output root, releasing the external lock between arms. Arm N requires the
@@ -143,6 +147,49 @@ checks pass; binary identity alone is not evidence of output identity.
 The managed `pair` and runner `--mode quality` return 0 for pass, 1 for a failed
 primary gate and 2 for invalid evidence; a partial `--arm-index` capture is not a verdict.
 The historical report-only `verdict` command retains its existing exit behavior.
+
+### Bounded, resumable powered captures
+
+Use a fixed shard size and limit each external lock hold explicitly:
+
+```sh
+python3 scripts/quality_screen.py pair --lane rtx4090 --plan PLAN.json \
+  --out PRIVATE_RUN --shard-size 100 --max-shards 1
+# Release/reacquire the external GPU lock, then repeat until result.json exists:
+python3 scripts/quality_screen.py pair --lane rtx4090 --plan PLAN.json \
+  --out PRIVATE_RUN --shard-size 100 --max-shards 1 --resume
+```
+
+The host runner accepts the same `--shard-size`, `--max-shards` and `--resume`
+arguments with `--mode quality`. Its PowerShell wrapper exposes `-ShardSize`,
+`-MaxShards` and `-Resume`. Do not combine sharding with `--arm-index` or profiling.
+Without shard controls, the original whole-arm sequence remains available.
+
+`shards.json` freezes a deterministic contiguous plan over the original prompt order:
+A's full screen, B's full screen, B's fresh first-80 subset, A's fresh first-80 subset.
+Both arms use identical boundaries; subset boundaries match the screen boundaries.
+Every shard starts and stops its own server. A 1,120-prompt screen at size 100 needs
+12 A captures, 12 B captures and two 80-prompt fresh captures: **26 captures, 2,400
+requests**, with no reduction of EXP-085's statistical sample.
+
+Resume first verifies every sealed capture and its identities, not just the next one.
+It rejects changed plan, runner/helpers, qualification files, cases/fixtures, model,
+binary/version, configuration, GPU/driver/power limit, prompt files, or retained
+response/score/manifest bytes. Each shard retains a lifecycle receipt and an atomic
+`complete.json` seal. An interrupted attempt without a receipt is preserved in its
+own `attempt-*` directory; resume starts that shard again on a fresh owned server.
+A finished/failed but unsealed capture is not silently retried: preserve it and use
+a new campaign root. Never modify a frozen deployment while its campaign is active.
+
+A bounded invocation returns `status: shard-complete` and no verdict while any
+capture is missing. Only the complete verified set is merged and passed to the
+unchanged EXP-085 reducer. `result.json` includes direct retained-byte comparison
+of A versus B and both fresh determinism subsets, plus each shard's wall seconds
+and wall seconds per 100 prompts (server startup/capture/cleanup included; manifest
+and runtime identity preflight are additional hold overhead).
+Choose a smaller fixed size before starting when a shard would exceed the host's
+hold limit; a per-request timeout is not a whole-hold watchdog. The external worker
+must enforce its own hold deadline and owned-process/power cleanup.
 
 ## Nsight Systems
 
