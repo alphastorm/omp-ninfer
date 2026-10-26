@@ -212,6 +212,8 @@ def server_arguments(config: dict[str, Any], paths: dict[str, str], arm: dict[st
         args += ["--session-checkpoint-dir", paths["checkpoints"]]
         for field in ("quota_mib", "staging_mib"):
             args += ["--session-checkpoint-" + field.replace("_", "-"), str(checkpoint[field])]
+        if checkpoint.get("require_origin_auth"):
+            args.append("--session-checkpoint-require-origin-auth")
     args += [str(value).format_map(paths) for value in arm.get("server_args", [])]
     return args
 

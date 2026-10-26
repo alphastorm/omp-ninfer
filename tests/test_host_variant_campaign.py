@@ -87,12 +87,14 @@ class CampaignTests(unittest.TestCase):
         config = {"engine": {"prefill_chunk": 1024, "prefix_reuse": False},
                   "speculative": {"backend": "dflash2", "draft_tokens": 7},
                   "context_cache": {"host_context_mib": "14787.734375", "device_state_slots": 2},
-                  "session_checkpoint": {"enabled": True, "quota_mib": 24576, "staging_mib": 256}}
+                  "session_checkpoint": {"enabled": True, "quota_mib": 24576, "staging_mib": 256,
+                                         "require_origin_auth": True}}
         args = HOST.server_arguments(config, paths, {})
         self.assertIn("--no-prefix-reuse", args)
         self.assertEqual(args[args.index("--spec") + 1], "dflash2")
         self.assertEqual(args[args.index("--draft-tokens") + 1], "7")
         self.assertEqual(args[args.index("--session-checkpoint-dir") + 1], "checkpoints")
+        self.assertIn("--session-checkpoint-require-origin-auth", args)
         self.assertEqual(args.count("--request-log-jsonl"), 1)
 
     def test_c1_is_the_qualification_prompt_and_exact_usage_is_required(self):
