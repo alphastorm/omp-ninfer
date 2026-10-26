@@ -759,6 +759,7 @@ class DocumentedHostNamesTests(unittest.TestCase):
         def load(name, path):
             spec = importlib.util.spec_from_file_location(name, path)
             module = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = module
             spec.loader.exec_module(module)
             return module
         host = load("names_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")

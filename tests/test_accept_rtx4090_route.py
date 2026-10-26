@@ -334,6 +334,7 @@ $results|ConvertTo-Json -Compress
         default = re.search(r"\[string\]\$Model='([^']+)'", source).group(1)
         spec = importlib.util.spec_from_file_location("model_route", ROOT / "scripts/documented_route.py")
         route = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = route
         spec.loader.exec_module(route)
         for lane in ("rtx4090-native", "rtx3090-native"):
             text = "\n".join(block.text for _, block in route.lane_blocks(ROOT / "docs/QUICKSTART.md", lane))

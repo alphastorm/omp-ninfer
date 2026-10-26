@@ -486,7 +486,7 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.13.1/qualification/receipt-audit.json",
-    "sha256": "2331557ebae7d7ebfc93a3692e5aebd8b998dced120d634ead85007d2fb90574"
+    "sha256": "b70e49ddb0ac27fda5a702a650663caa74f209e35187dd45bebffdb93288ec27"
   },
   "not_remeasured_gates": [
     {

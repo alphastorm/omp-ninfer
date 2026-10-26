@@ -46,7 +46,7 @@
       "predecessor_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "staged_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "disposition": "kept-unchanged-subject",
-      "reason": "Keep unchanged stock OMP 18.12.6 host-free review at its real historical release/source; current client/platform acceptance is pending."
+      "reason": "Keep unchanged stock OMP 18.12.6 host-free review at its real historical release/source; fresh current client/platform acceptance is bound separately."
     },
     {
       "file": "staging.json",
@@ -155,9 +155,9 @@
     {
       "file": "client-components.json",
       "predecessor_sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42",
-      "staged_sha256": "748f16322301863187ce866d73df21b5fe59a0674e544ba4b5fb999cc5f22d42",
-      "disposition": "kept-unchanged-subject",
-      "reason": "Keep the exact three unchanged upstream OMP 18.12.6 asset descriptors; no client rebuild or new acceptance is inferred."
+      "staged_sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4",
+      "disposition": "replaced",
+      "reason": "The composer regenerates release-local v0.13.1 metadata. Upstream OMP 18.12.6 tag/source/tree and all three asset names, sizes and SHA-256 identities remain unchanged; fresh client acceptance is separate, not inferred from this descriptor."
     },
     {
       "file": "build.json",
@@ -194,15 +194,18 @@
   "dropped_files": [],
   "review_ledger": {
     "file": "review/runtime-ledger.json",
-    "disposition": "replaced-with-pending-native-product-binding",
+    "disposition": "replaced-with-closed-native-product-binding",
     "repository_path": "releases/v0.13.1/review/runtime-ledger.json",
-    "sha256": "29719961801bdc507559b972517fa34c44c5f0b229870dc33fc191abfe8fc817",
+    "sha256": "4552cb3bfb2dd8bfebbc4e01604ccda879c4c7d5ead4cdd6c653d6b0d6651ea6",
     "predecessor_repository_path": "releases/v0.13.0/review/runtime-ledger.json",
     "predecessor_sha256": "cf9151a24beb3cf69f809f89f9e92908b4ab995bc8e0c7226bacfe0d47db7c34",
-    "reason": "The original 5090 ledger remains immutable and valid only for the unchanged 5090 subject. No native or new product-tooling approval is fabricated."
+    "reason": "Both actual frozen native-runtime and product-tooling councils closed without remediation; final dispositions and digests are bound separately. The original 5090 ledger remains immutable and valid only for its unchanged subject."
   },
   "public_acceptance": {
-    "disposition": "not-carried",
-    "reason": "No acceptance directory is copied or represented as fresh v0.13.1 proof. Candidate/public URL installation and restoration remain separate gates."
+    "disposition": "freshly-composed-not-carried",
+    "candidate_commit": "92dfb13285994f1527711cf464847f07e44613dd",
+    "repository_path": "releases/v0.13.1/acceptance/composed-external-installation.json",
+    "sha256": "cba907a219357efaf099cd8faaf963a8622f9366ff32fe72df67b27ab5385eb5",
+    "reason": "All five current routes, three stock clients and both first-of-lineage native public installs passed fresh on the accepted candidate with independent restoration. Canonical promotions were fresh; later public URL installs were already_installed. No predecessor acceptance directory or rollback direction is relabelled."
   }
 }

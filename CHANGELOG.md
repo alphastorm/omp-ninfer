@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Disclose the carried RTX 5090 export-lease admission risk (reachability not reproduced,
   [#88](https://github.com/alphastorm/omp-ninfer/issues/88)) and unchanged native installer
   failed-stop rollback/repair residual ([#89](https://github.com/alphastorm/omp-ninfer/issues/89)).
+- Register dynamically imported route-test modules before execution for Python 3.13 dataclass
+  resolution. Audit regenerated release-local client metadata separately from unchanged upstream
+  tag/source/tree and asset identities; preserve the current-guide assertions.
 - Move native model-download blocks to the shared published version 3 artifact `81f924d4` and a
   separate `qwen3_8_27b-v3.ninfer` file, retaining old native models/checkpoints for rollback.
   Native K5 profiles use strict origin authentication, shared Host budgets, extra device-state
