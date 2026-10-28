@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
   `summarize()` reads the same records, so a window can no longer be spent on corrections that
   are only written after it fails.
+- Refuse release readiness while the release's manifest, compatibility authority or qualification,
+  a line naming the release, or the quickstart's prose still calls release work pending (the
+  server's pending-request timeout is not release state); while the qualification's G4 review
+  summary disagrees with the closed, approved council ledger it pins; or while its documented-route
+  acceptance summary does not restate the routes evidence it binds.
 
 ### Changed
 

@@ -753,6 +753,44 @@ class ReleaseContractTest(unittest.TestCase):
         VERIFY_RELEASE.validate_release_documentation(root, PUBLIC_RELEASE, errors)
         self.assertEqual(errors, [])
 
+    def test_ready_rejects_pending_work_anywhere_in_the_versioned_guide(self) -> None:
+        """v0.14.0's composed guide before its finalization sweep: the stale sentences wrap and
+        never name the version. The engine's pending-request queue and fenced code are not
+        release state."""
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "docs/QUICKSTART.md").write_text(
+            f"# Quickstart\n\n> **{PUBLIC_RELEASE}: RTX 5090 · RTX 4090 · RTX 3090**\n\n"
+            "- **Native rollback:** Both beta.3 runtime qualifications record no predecessor. Fresh\n"
+            "  public-install and restoration acceptance remains\n"
+            "  pending. Preserve prior native release roots separately for historical recovery.\n\n"
+            "The beta.3 runtime qualification records no predecessor; fresh public-install and\n"
+            "product-route acceptance is pending. Keep prior native release roots untouched.\n\n"
+            "RTX 5090 admits two requests at once and holds a pending\n"
+            "request for up to 180 s; native lanes serve one at a time with a 30 s pending timeout.\n\n"
+            "```powershell\n$pending = Get-Job -State Running\n```\n",
+            encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [
+            "docs/QUICKSTART.md:7: contains stale release-state phrase 'pending' in ready mode",
+            "docs/QUICKSTART.md:10: contains stale release-state phrase 'pending' in ready mode",
+        ])
+
+    def test_ready_rejects_pending_work_on_lines_naming_the_release(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        (root / "README.md").write_text(
+            f"# Test fixture\n\nFresh {PUBLIC_RELEASE} public-route acceptance is pending.\n"
+            f"The {PUBLIC_RELEASE} RTX 5090 lane holds a pending\nrequest for up to 180 s.\n"
+            "Fresh changed-client acceptance is pending for the next release.\n",
+            encoding="utf-8",
+        )
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [
+            "README.md:3: contains stale release-state phrase 'pending' in ready mode",
+        ])
+
     def test_release_tree_text_rejects_private_markers(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
@@ -765,20 +803,34 @@ class ReleaseContractTest(unittest.TestCase):
             errors,
         )
 
-    def test_ready_rejects_stale_phrase_inside_limitation_lists(self) -> None:
+    def test_ready_rejects_pending_work_in_any_phrasing(self) -> None:
+        """How staged releases state unfinished work; v0.12.0 and v0.11.0 shipped the first two
+        ready. The engine's queue terms and a receipt's recorded state are not release work."""
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
         manifest_path = root / "releases" / PUBLIC_RELEASE / "manifest.json"
-        manifest = self.load(manifest_path)
-        manifest["limitations"] = list(manifest.get("limitations", [])) + [
-            "The RTX 5090 identities remain pending."
-        ]
-        self.save(manifest_path, manifest)
-        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
-        self.assertTrue(
-            any("stale release-state phrase" in error for error in errors),
-            errors,
-        )
+        original = self.load(manifest_path)
+        path = f"manifest.limitations[{len(original['limitations'])}]"
+        for sentence, phrase in (
+            ("Fresh product acceptance is pending; predecessor acceptance is not carried forward.",
+             "pending"),
+            ("Local C qualification is distinct from the still-pending documented-route/composed "
+             "acceptance.", "pending"),
+            ("The RTX 5090 identities remain pending.", "pending"),
+            ("Upstream OMP client external-install acceptance pending", "pending"),
+            ("Pending candidate-bound public-install acceptance.", "Pending"),
+            ("G4 is explicitly pending in its ledger.", "pending"),
+            ("Two active lanes plus two extra device-state slots and 180-second pending timeout.", None),
+            ("Both sets bind their build receipts; build hardware-pending capture is not altered.", None),
+            ("Keep-warm stops whenever a request is pending.", None),
+        ):
+            with self.subTest(sentence=sentence):
+                manifest = deepcopy(original)
+                manifest["limitations"].append(sentence)
+                self.save(manifest_path, manifest)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                self.assertEqual(errors, [] if phrase is None else [
+                    f"{path} contains stale release-state phrase {phrase!r} in ready mode"])
 
     def test_public_release_passes_ready_validation(self) -> None:
         temporary, root = self.public_draft_copy()
@@ -1228,6 +1280,105 @@ class ReleaseContractTest(unittest.TestCase):
 
                     _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
                     self.assertIn(expected_error, errors)
+                finally:
+                    temporary.cleanup()
+
+    def bind_g4_review(self, root: Path, change_ledger=None, change_gate=None) -> None:
+        """Bind v0.14.0's closed council ledger and the G4 summary restating it into the fixture,
+        after an optional change to either; the summary pins the ledger bytes it is given."""
+        release_root = root / "releases" / PUBLIC_RELEASE
+        ledger = self.load(ROOT / "releases/v0.14.0/review/runtime-ledger.json")
+        ledger["release"] = PUBLIC_RELEASE
+        if change_ledger is not None:
+            change_ledger(ledger)
+        ledger_path = release_root / "review" / "runtime-ledger.json"
+        self.save(ledger_path, ledger)
+        gate = self.load(ROOT / "releases/v0.14.0/qualification.json")["observed_gates"]["g4_review"]
+        gate.update(repository_path=ledger_path.relative_to(root).as_posix(),
+                    sha256=hashlib.sha256(ledger_path.read_bytes()).hexdigest())
+        if change_gate is not None:
+            change_gate(gate)
+        self.rebind_qualification(
+            release_root, lambda qualification: qualification["observed_gates"].update(g4_review=gate))
+
+    def test_ready_g4_summary_must_restate_a_closed_approved_ledger(self) -> None:
+        ledger = f"releases/{PUBLIC_RELEASE}/review/runtime-ledger.json"
+        gate = "qualification.observed_gates.g4_review"
+        mismatched = [f"{gate}.ledger_status must equal the review ledger's status",
+                      f"{gate}.approval_granted must equal the review ledger's approval_granted"]
+        cases = (
+            ("closed and approved", None, None, []),
+            # v0.14.0's binding as staging wrote it, under the summary finalization writes.
+            ("staged binding", lambda record: record.update(
+                artifact_type="omp_ninfer_runtime_review_binding", status="pending",
+                approval_granted=False), None, [
+                f"{ledger} must be this release's review ledger",
+                f"{ledger} status 'pending' is not closed",
+                f"{ledger} must grant G4 approval", *mismatched]),
+            # v0.13.1's ledger between its two councils.
+            ("one council closed", lambda record: record.update(
+                status="native-closed-product-tooling-pending", approval_granted=False), None, [
+                f"{ledger} status 'native-closed-product-tooling-pending' is not closed",
+                f"{ledger} must grant G4 approval", *mismatched]),
+            ("council left open", lambda record: record["product_tooling"].update(status="pending"),
+             None, [f"{ledger} product_tooling.status 'pending' is not closed"]),
+            ("other bytes", None, lambda summary: summary.update(sha256="0" * 64),
+             [f"{gate}.sha256 must match the review ledger bytes"]),
+            ("failed summary", None, lambda summary: summary.update(status="failed"),
+             [f"{gate}.status must be passed in ready mode"]),
+        )
+        for case, change_ledger, change_gate, expected in cases:
+            with self.subTest(case=case):
+                temporary, root = self.public_draft_copy()
+                try:
+                    self.bind_g4_review(root, change_ledger, change_gate)
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertEqual(errors, expected)
+                finally:
+                    temporary.cleanup()
+
+    def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
+        """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,
+        restated for that evidence, then drift it the ways a hand edit did."""
+        summary_field = "qualification.documented_route_acceptance"
+        bound = "qualification.composition.documented_route_acceptance"
+        cases = (
+            ("restated", lambda root, summary: None, []),
+            # v0.14.0 reconciled its routes evidence and rewrote this hash by hand (1a6a224).
+            ("hash before the reconcile", lambda root, summary: summary.update(
+                evidence_sha256="95a64662e83c8a636e2fe399e8aa6f4169e7dc9147dd61635155b71ab93b5fa1"),
+             [f"{summary_field}.evidence_sha256 must be {bound}.sha256"]),
+            ("other candidate", lambda root, summary: summary.update(
+                candidate_commit="c81a8e7efb37b8d5c36b16a10a18945cb5aa313d"),
+             [f"{summary_field}.candidate_commit must be the routes evidence's candidate_commit"]),
+            ("staged", lambda root, summary: summary.update(status="pending"), [
+                f"{summary_field}.status must not contain draft or pending in ready mode",
+                f"{summary_field}.status contains stale release-state phrase 'pending' in ready mode",
+                f"{summary_field}.status must be passed"]),
+            ("evidence edited after binding", lambda root, summary: (
+                root / "releases" / PUBLIC_RELEASE / "acceptance" / "documented-routes.json").write_text(
+                    "{}\n", encoding="utf-8"),
+             [f"{bound} must bind the checked-in passed routes evidence",
+              f"{summary_field}.candidate_commit must be the routes evidence's candidate_commit"]),
+        )
+        for case, change, expected in cases:
+            with self.subTest(case=case):
+                temporary, root = self.public_draft_copy()
+                try:
+                    release_root = root / "releases" / PUBLIC_RELEASE
+                    qualification = self.load(release_root / "qualification.json")
+                    reference = qualification["composition"]["documented_route_acceptance"]
+                    routes = self.load(root / reference["repository_path"])
+                    summary = self.load(ROOT / "releases/v0.14.0/qualification.json")[
+                        "documented_route_acceptance"]
+                    summary.update(candidate_commit=routes["candidate_commit"],
+                                   evidence_path=reference["repository_path"],
+                                   evidence_sha256=reference["sha256"])
+                    change(root, summary)
+                    self.rebind_qualification(release_root, lambda record: record.update(
+                        documented_route_acceptance=summary))
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertEqual(errors, expected)
                 finally:
                     temporary.cleanup()
 

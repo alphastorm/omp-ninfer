@@ -2288,10 +2288,17 @@ Each `releases/<version>/manifest.json` has three valid states:
 `--require-ready` rejects case-insensitive `unreleased`, `publication pending`,
 `publication remains` or `ready candidate` on a line naming the selected product version
 in every tracked Markdown file outside `releases/`, or in the quickstart's first blockquote
-banner even without a version.
-Each error names `file:line` and asks for release-neutral wording before publishing.
+banner even without a version. It also rejects release work described as `pending`, in any
+position, on such a line, anywhere in the quickstart's prose outside fenced code, and in any string
+of the release's manifest, compatibility authority or qualification. The server's pending-request
+timeout and the native build receipt's recorded `hardware-pending` state are product terms, not
+release state.
+Markdown errors name `file:line`; JSON errors name the field.
 A version-and-scope banner such as v0.10.0's stays true before and after publication;
 published evidence under `releases/` is not subject to this living-docs check.
+The qualification's G4 review summary must pin its ledger's bytes and restate the ledger's closed
+status and approval, and its documented-route acceptance summary must restate the routes evidence
+the composition binds.
 
 `ready` means the package is technically cuttable. It does not grant authority to create repositories,
 push commits/tags, upload images/assets, publish a GitHub release, or modify the Homebrew tap.

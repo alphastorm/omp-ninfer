@@ -67,6 +67,22 @@ PLACEHOLDER_RE = re.compile(r"(?:<[^>]+>|\bTODO\b|\bTBD\b)", re.IGNORECASE)
 PENDING_RELEASE_PROSE_RE = re.compile(
     r"\b(?:unreleased|publication (?:pending|remains)|ready candidate)\b", re.IGNORECASE
 )
+# How releases describe unfinished release work: every staged manifest, compatibility authority
+# and qualification since v0.6.9 says "pending", in any grammatical position ("acceptance is
+# pending", "pins remain pending", "G4 is explicitly pending", "client acceptance pending",
+# "Pending v0.13.1 candidate-bound acceptance"). A guard that listed phrasings let ready v0.11.0
+# and v0.12.0 ship "the still-pending documented-route/composed acceptance" and "Fresh product
+# acceptance is pending", so the state word itself is the marker.
+PENDING_STATE_RE = re.compile(r"\bpending\b", re.IGNORECASE)
+# Product vocabulary that reuses the word for engine or receipt state rather than release work:
+# the server's pending-request queue and its timeout, and the hardware-pending qualification
+# state the native package-build receipt records.
+PENDING_PRODUCT_TERM_RE = re.compile(
+    r"\bpending[\s-]+(?:timeouts?|requests?)\b|\brequests?\s+(?:is|are)\s+pending\b"
+    r"|\bhardware-pending\b",
+    re.IGNORECASE,
+)
+CLOSED_REVIEW_STATUS_RE = re.compile(r"^closed(?:-[a-z]+)*$")
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
 MARKDOWN_REFERENCE_RE = re.compile(r'^\[[^]]+\]:\s+(\S+)', re.MULTILINE)
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -605,14 +621,26 @@ def validate_ga_evidence_bindings(
                                 f"releases/{release}/qualification/rtx5090.json", errors)
 
 
-def walk_strings(value: Any) -> list[str]:
+def walk_string_fields(value: Any, path: str) -> Iterator[tuple[str, str]]:
+    """Every string in a JSON document, with its path."""
     if isinstance(value, str):
-        return [value]
-    if isinstance(value, dict):
-        return [item for child in value.values() for item in walk_strings(child)]
-    if isinstance(value, list):
-        return [item for child in value for item in walk_strings(child)]
-    return []
+        yield path, value
+    elif isinstance(value, dict):
+        for field, child in value.items():
+            yield from walk_string_fields(child, f"{path}.{field}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            yield from walk_string_fields(child, f"{path}[{index}]")
+
+
+def walk_strings(value: Any) -> list[str]:
+    return [text for _, text in walk_string_fields(value, "")]
+
+
+def pending_release_state(text: str) -> list[re.Match[str]]:
+    """Where prose still describes release work as unfinished, outside the product terms."""
+    masked = PENDING_PRODUCT_TERM_RE.sub(lambda term: " " * len(term.group(0)), text)
+    return list(PENDING_STATE_RE.finditer(masked))
 
 
 def walk_object_fields(
@@ -637,11 +665,8 @@ def validate_ready_state_consistency(
     forbidden_markers = ("draft", "pending")
     stale_phrases = (
         "release draft",
-        "remains pending",
-        "remain pending",
         "remains blocked",
         "remain blocked",
-        "publication remains blocked",
         "in qualification",
     )
     for label, document in (
@@ -679,14 +704,107 @@ def validate_ready_state_consistency(
                     f"{path} must be an empty array in ready mode",
                     errors,
                 )
-        for text in walk_strings(document):
+        for path, text in walk_string_fields(document, label):
             normalized = text.casefold()
-            for phrase in stale_phrases:
-                require(
-                    phrase not in normalized,
-                    f"{label} contains stale release-state phrase {phrase!r} in ready mode",
-                    errors,
-                )
+            stale = [phrase for phrase in stale_phrases if phrase in normalized]
+            stale += [match.group(0) for match in pending_release_state(text)]
+            errors.extend(f"{path} contains stale release-state phrase {phrase!r} in ready mode"
+                          for phrase in stale)
+
+
+def bound_file(root: Path, reference: Any) -> Path | None:
+    """The checked-in file a repository-relative evidence reference names, if it exists."""
+    if not isinstance(reference, str):
+        return None
+    path = (root / reference).resolve()
+    return path if path.is_relative_to(root.resolve()) and path.is_file() else None
+
+
+def validate_review_ledger(
+    root: Path,
+    release: Any,
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """A ready G4 summary must restate the closed, approved council ledger it pins.
+
+    The qualification's G4 entry is a copy and the ledger is the record. Nothing read the ledger,
+    so a G4 summary marked passed over a pending ledger verified ready (#100).
+    """
+    gates = qualification.get("observed_gates")
+    gate = gates.get("g4_review") if isinstance(gates, dict) else None
+    if gate is None:
+        return
+    label = "qualification.observed_gates.g4_review"
+    if not isinstance(gate, dict):
+        errors.append(f"{label} must be an object")
+        return
+    require(gate.get("status") == "passed", f"{label}.status must be passed in ready mode", errors)
+    reference = gate.get("repository_path")
+    path = bound_file(root, reference)
+    if path is None:
+        errors.append(f"{label}.repository_path must name the checked-in review ledger")
+        return
+    require(sha256_file(path) == gate.get("sha256"),
+            f"{label}.sha256 must match the review ledger bytes", errors)
+    ledger = load_json(path)
+    require(ledger.get("artifact_type") == "omp_ninfer_review_ledger"
+            and ledger.get("release") == release,
+            f"{reference} must be this release's review ledger", errors)
+    # Closed means the ledger and every council it binds; a carried review has no council run.
+    statuses = {"status": ledger.get("status")}
+    statuses.update({f"{key}.status": value.get("status") for key, value in ledger.items()
+                     if isinstance(value, dict) and "review_id" in value})
+    for field, status in statuses.items():
+        require(isinstance(status, str) and CLOSED_REVIEW_STATUS_RE.fullmatch(status) is not None,
+                f"{reference} {field} {status!r} is not closed", errors)
+    require(ledger.get("approval_granted") is True, f"{reference} must grant G4 approval", errors)
+    restated = {"ledger_status": "status", "approval_granted": "approval_granted"}
+    restated.update({field: field for field in ("publication_authorized",
+                                                "public_route_acceptance_granted")
+                     if field in gate})
+    for field, source in restated.items():
+        require(gate.get(field) == ledger.get(source),
+                f"{label}.{field} must equal the review ledger's {source}", errors)
+
+
+def validate_documented_route_acceptance(
+    root: Path,
+    qualification: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """A ready route-acceptance summary must restate the passed routes evidence it binds.
+
+    Composition writes the summary beside its binding; one left from staging or edited afterwards
+    names evidence the release no longer binds (#100).
+    """
+    composition = qualification.get("composition")
+    bound = composition.get("documented_route_acceptance") if isinstance(composition, dict) else None
+    summary = qualification.get("documented_route_acceptance")
+    if bound is None and summary is None:
+        return
+    label = "qualification.composition.documented_route_acceptance"
+    if not isinstance(bound, dict):
+        errors.append(f"{label} must bind the routes evidence the summary restates")
+        return
+    path = bound_file(root, bound.get("repository_path"))
+    require(bound.get("status") == "passed" and path is not None
+            and sha256_file(path) == bound.get("sha256"),
+            f"{label} must bind the checked-in passed routes evidence", errors)
+    if summary is None:
+        return
+    if not isinstance(summary, dict):
+        errors.append("qualification.documented_route_acceptance must be an object")
+        return
+    routes = load_json(path) if path is not None else {}
+    for field, expected, meaning in (
+        ("status", "passed", "passed"),
+        ("evidence_path", bound.get("repository_path"), f"{label}.repository_path"),
+        ("evidence_sha256", bound.get("sha256"), f"{label}.sha256"),
+        ("candidate_commit", routes.get("candidate_commit"), "the routes evidence's candidate_commit"),
+    ):
+        require(summary.get(field) == expected,
+                f"qualification.documented_route_acceptance.{field} must be {meaning}", errors)
 
 
 def validate_exact_lane_set(
@@ -1501,6 +1619,22 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
                         f"{document.relative_to(root).as_posix()} has missing local link: {target}", errors)
 
 
+def prose_paragraphs(lines: list[str]) -> Iterator[tuple[int, str]]:
+    """Each Markdown paragraph outside fenced code, with the number of its first line."""
+    fenced = False
+    first, paragraph = 0, []
+    for number, line in enumerate([*lines, ""], 1):
+        if line.lstrip().startswith("```"):
+            fenced = not fenced
+        elif not fenced and line.strip():
+            first = first if paragraph else number
+            paragraph.append(line)
+            continue
+        if paragraph:
+            yield first, "\n".join(paragraph)
+            paragraph = []
+
+
 def validate_release_documentation(root: Path, release: str, errors: list[str]) -> None:
     release_re = re.compile(r"(?<![\w.-])" + re.escape(release) + r"(?![\w.-])", re.IGNORECASE)
     for document in repository_files(root, (".md",), tracked_only=True):
@@ -1508,14 +1642,26 @@ def validate_release_documentation(root: Path, release: str, errors: list[str]) 
         if relative.startswith("releases/"):
             continue
         lines = document.read_text(encoding="utf-8").splitlines()
+        guide = relative == "docs/QUICKSTART.md"
         banner_line = next((number for number, line in enumerate(lines, 1)
-                            if line.lstrip().startswith(">")), None) if relative == "docs/QUICKSTART.md" else None
+                            if line.lstrip().startswith(">")), None) if guide else None
+        stale: dict[int, str] = {}
         for number, line in enumerate(lines, 1):
             if PENDING_RELEASE_PROSE_RE.search(line) and (release_re.search(line) or number == banner_line):
-                errors.append(
+                stale[number] = (
                     f"{relative}:{number}: describes {release} as unreleased or pending publication; "
                     "use release-neutral wording before publishing"
                 )
+        # Sentences wrap, so pending work is read per paragraph. The versioned guide describes
+        # only the release it prepares and rarely repeats the version: all of its prose is in
+        # scope. Elsewhere a line must name the release.
+        for first, paragraph in prose_paragraphs(lines):
+            for match in pending_release_state(paragraph):
+                number = first + paragraph.count("\n", 0, match.start())
+                if number not in stale and (guide or release_re.search(lines[number - 1])):
+                    stale[number] = (f"{relative}:{number}: contains stale release-state phrase "
+                                     f"{match.group(0)!r} in ready mode")
+        errors.extend(stale[number] for number in sorted(stale))
 
 
 def validate_public_text(root: Path, errors: list[str]) -> None:
@@ -2200,6 +2346,8 @@ def validate(
             validate_ready_state_consistency(
                 manifest, compatibility, qualification, errors
             )
+            validate_review_ledger(root, release, qualification, errors)
+            validate_documented_route_acceptance(root, qualification, errors)
             validate_ga_evidence_bindings(
                 release, manifest, compatibility, qualification, errors
             )
