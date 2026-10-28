@@ -2359,18 +2359,21 @@ evidence are already frozen.
 
 ### Canonical native protocol evidence
 
-`scripts/compose_native_qualification.py` consumes the runtime's actual
-`tools/smoke/agent_protocol.py` schema 2 product result, not an authored per-check map.
-The raw `ninfer_agent_protocol_smoke` payload has `contract: product`,
+A native lane's `releases/<version>/qualification/<lane>.json` is the
+`ninfer_windows_release_qualification` receipt that the runtime fork's canonical orchestrator
+(`tools/qualification/qualify_native.py`) stages from its own phase receipts. The release tree
+copies it unchanged; nothing in this repository composes one. The orchestrator consumes the
+runtime's actual `tools/smoke/agent_protocol.py` schema 2 product result, not an authored
+per-check map. The raw `ninfer_agent_protocol_smoke` payload has `contract: product`,
 `status_identity_verified: true`, `authenticated_session_identity: true`, reuse paths,
 Responses lifecycle results and Chat/Responses structured-output results. It has no legacy
 `identity`, `status` or `checks` fields.
 
 Both normal and reduced-budget runs retain their actual phase receipts in `protocol` and
-`protocol_under_pool_pressure`. Each wrapper keeps its real phase status, recorded file hash and
-nested raw `.protocol`; the normal wrapper also retains observed HTTP identity/runtime and GPU
-attestation. Composition checks the raw evidence file's decoded payload and exact byte hash
-against that phase record. It never manufactures a status/check count inside the canonical payload.
+`protocol_under_pool_pressure`. Each wrapper keeps its real phase status, the evidence file hash
+recorded when the phase ran and nested raw `.protocol`; the normal wrapper also retains observed
+HTTP identity/runtime and GPU attestation. Nothing manufactures a status/check count inside the
+canonical payload.
 
 Same-session reuse must select `private_endpoint`, `private_input_replay` or `private_long_anchor`.
 An isolated session must select `root` or `shared_stable_prefix`: that is a private-session
