@@ -139,7 +139,7 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
-    def test_v0131_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
+    def test_v0140_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
         routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
                   for lane in documented_route.LANES}
         self.assertEqual(sum(len(steps) for steps in routes.values()), 31)
@@ -150,16 +150,26 @@ class ExtractionTests(unittest.TestCase):
                 if step.slug == "client-install":
                     self.assertIn("v18.12.6", block.text)
                 if step.slug == "clone-and-verify":
-                    self.assertIn("v0.13.1", block.text)
+                    self.assertIn("git clone --branch v0.14.0 --depth 1", block.text)
+                    self.assertIn("--require-ready", block.text)
+        executable = "\n".join(
+            block.text for block in documented_route.parse_blocks(
+                documented_route.DEFAULT_DOC.read_text(encoding="utf-8"))
+            if block.language in ("sh", "powershell"))
+        self.assertNotIn("v0.13.1", executable)
+        self.assertEqual(re.findall(r"git clone --branch (v[0-9.]+)", executable),
+                         ["v0.14.0"] * 4)
+        self.assertEqual(re.findall(r"releases[/\\](v[0-9.]+)[/\\]manifest\.json", executable),
+                         ["v0.14.0"] * 5)
         preparation = documented_route.extract(
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
         self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v013"', preparation)
-        self.assertIn("releases/v0.13.1/manifest.json", preparation)
+        self.assertIn("releases/v0.14.0/manifest.json", preparation)
         self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
         for lane in ("rtx4090-native", "rtx3090-native"):
             steps = {step.slug: block for step, block in routes[lane]}
             native = steps["stage-and-install"].text
-            self.assertIn(r"releases\v0.13.1\manifest.json", native)
+            self.assertIn(r"releases\v0.14.0\manifest.json", native)
             self.assertIn("'qwen3_8_27b-v3.ninfer'", native)
             self.assertIn("$NativeModel = $Manifest.components.model", native)
             self.assertNotIn("components.native_model", native)
@@ -175,30 +185,38 @@ class ExtractionTests(unittest.TestCase):
                     self.assertTrue(block.text.strip(), f"{lane}/{step.slug} is empty")
 
     def test_bundle_files_are_the_documented_bytes(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            output = Path(temporary)
-            manifest = documented_route.bundle(NATIVE_DOC, "rtx4090-native", output)
-            for step in manifest["steps"]:
-                data = (output / step["file"]).read_bytes()
-                self.assertEqual(hashlib.sha256(data).hexdigest(), step["sha256"])
-                block = documented_route.extract(NATIVE_DOC, step["heading"], step["index"])
-                self.assertEqual(data.decode("utf-8"), block.text)
-            self.assertEqual(
-                manifest["document_sha256"],
-                hashlib.sha256(NATIVE_DOC.read_bytes()).hexdigest(),
-            )
+        cases = [(documented_route.DEFAULT_DOC, lane) for lane in documented_route.LANES]
+        cases.append((NATIVE_DOC, "rtx4090-native"))
+        for doc, lane in cases:
+            with self.subTest(document=doc.name, lane=lane), tempfile.TemporaryDirectory() as temporary:
+                output = Path(temporary)
+                manifest = documented_route.bundle(doc, lane, output)
+                self.assertEqual(len(manifest["steps"]), len(documented_route.LANES[lane]))
+                for step in manifest["steps"]:
+                    data = (output / step["file"]).read_bytes()
+                    self.assertEqual(hashlib.sha256(data).hexdigest(), step["sha256"])
+                    block = documented_route.extract(doc, step["heading"], step["index"])
+                    self.assertEqual(data.decode("utf-8"), block.text)
+                self.assertEqual(
+                    manifest["document_sha256"],
+                    hashlib.sha256(doc.read_bytes()).hexdigest(),
+                )
 
     def test_native_route_steps_carry_the_variables_they_use(self) -> None:
         """A reader pastes the blocks into one window; a later block may only use names an
         earlier one defined. Catches a doc edit that moves a definition below its first use."""
-        defined: set[str] = set()
-        import re
-        for step, block in documented_route.lane_blocks(NATIVE_DOC, "rtx4090-native"):
-            used = set(re.findall(r"\$([A-Z][A-Za-z]+)\b", block.text))
-            assigned = set(re.findall(r"^\s*\$([A-Z][A-Za-z]+)\s*=", block.text, re.M))
-            missing = {name for name in used - assigned - defined if name not in {"Sid", "Rule", "Asset", "Name", "Path", "Applied", "Acl", "Admins", "Secret", "LASTEXITCODE", "HOME"}}
-            self.assertFalse(missing, f"{step.slug} uses {sorted(missing)} before any block defines them")
-            defined |= assigned
+        cases = [(NATIVE_DOC, "rtx4090-native"),
+                 (documented_route.DEFAULT_DOC, "rtx4090-native"),
+                 (documented_route.DEFAULT_DOC, "rtx3090-native")]
+        for doc, lane in cases:
+            with self.subTest(document=doc.name, lane=lane):
+                defined: set[str] = set()
+                for step, block in documented_route.lane_blocks(doc, lane):
+                    used = set(re.findall(r"\$([A-Z][A-Za-z]+)\b", block.text))
+                    assigned = set(re.findall(r"^\s*\$([A-Z][A-Za-z]+)\s*=", block.text, re.M))
+                    missing = {name for name in used - assigned - defined if name not in {"Sid", "Rule", "Asset", "Name", "Path", "Applied", "Acl", "Admins", "Secret", "LASTEXITCODE", "HOME"}}
+                    self.assertFalse(missing, f"{step.slug} uses {sorted(missing)} before any block defines them")
+                    defined |= assigned
 
     def test_windows_blocks_stay_within_windows_powershell(self) -> None:
         """The Windows routes run in Windows PowerShell 5.1 on .NET Framework. These calls exist

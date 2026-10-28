@@ -55,6 +55,31 @@ Full release authority: [`releases/v0.13.1/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.13.1/qualification.json`](releases/v0.13.1/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
+## Next release — v0.14.0 guide preparation
+
+The [candidate manifest](releases/v0.14.0/manifest.json),
+[release notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
+[qualification](releases/v0.14.0/qualification.json) bind engine source
+`2c6f423bd817b6534158553e1b34ab4959c43165` across all three published beta.3 components.
+The [prepared guide](docs/QUICKSTART.md) targets v0.14.0 for fresh acceptance, not public execution:
+v0.13.1 remains the published product until the ready gate and founder-owned publication.
+
+RTX 5090 changes to image `760fb6be` / server `55f0b95a`, keeping profile
+`qwen38-5090-v0.13.0` / config `751d22dc`, DFlash2 K7 and BF16 C2. The native RTX 4090/RTX 3090
+beta.3 packages keep INT8 MTP3 C1 with `Group64` A8 off, strict origin auth, 640/768 MiB admission
+headroom and release-isolated schema 3 stores. RTX 3090 now serves at 350 W (owner baseline
+restored to 370 W in qualification); a running v0.13.1 lane must be stopped before upgrade
+because its 300 W lease fails the new installer check
+([#94](https://github.com/alphastorm/omp-ninfer/issues/94)).
+
+Model v3 `81f924d4` (20,437,521,664 bytes), native `qwen3_8_27b-v3.ninfer`, container
+`checkpoints-v013` and stock OMP 18.12.6 remain unchanged. No cross-binary checkpoint migration
+or prior product acceptance is inferred. Fresh acceptance of all five routes/31 exact blocks,
+three clients and both native public installs with independent restoration is pending.
+Changed product references require `documented_routes.document_change`; current review binding,
+composed evidence pins and publication are distinct gates. The 5090-only second-build
+reproducibility exception remains explicit; no global quality or universal speedup claim is added.
+
 ## Remaining work
 
 Items below remain open after `v0.13.1`; each names the current evidence showing the gap is still
@@ -258,7 +283,7 @@ per-version history lives in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASES.
   [performance backlog](docs/PERFORMANCE.md#ideas-backlog) and see
   [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - **RTX 3090, RTX 4090, or RTX 5090 owner?**
-  [Get started](docs/QUICKSTART.md) with the matching published lane, then file a content-safe
+  [Get started](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md) with the matching published lane, then file a content-safe
   [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
   or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
   Pass and fail reports both improve the observed matrix; one lane never authorizes package

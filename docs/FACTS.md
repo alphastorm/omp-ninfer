@@ -1,13 +1,13 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-26 · Published release: v0.13.1 (2026-10-26) · stock Oh My Pi 18.12.6
+Updated: 2026-10-27 · Published release: v0.13.1 (2026-10-26) · stock Oh My Pi 18.12.6
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.13.1/manifest.json`](../releases/v0.13.1/manifest.json).
-[Get started](QUICKSTART.md) ·
+[Get started](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md) ·
 [Download v0.13.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.1)
 
 ## What it is
@@ -62,7 +62,7 @@ the qualified v0.13.0 RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.2`, s
 client binaries unchanged. Release authority:
 [`releases/v0.13.1/manifest.json`](../releases/v0.13.1/manifest.json) ·
 [`releases/v0.13.1/NINFER_RELEASE_NOTES.md`](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) ·
-[`COMPATIBILITY.md`](COMPATIBILITY.md). The
+[`v0.13.1 compatibility matrix`](../releases/v0.13.1/COMPATIBILITY.md). The
 [client upgrade review](measurements/2026-10-25-omp-18126-client-upgrade-review.json) records the
 host-free checks across the Responses wire contract, image-aware snapcompact gate, and print-mode
 slash dispatch.
@@ -124,6 +124,39 @@ slash dispatch.
   [#89](https://github.com/alphastorm/omp-ninfer/issues/89), and
   [#90](https://github.com/alphastorm/omp-ninfer/issues/90)); RTX 5090 runtime qualification carries
   unchanged from v0.13.0 (`6d4d0a05`).
+
+## Next release — v0.14.0 guide preparation
+
+The [candidate manifest](../releases/v0.14.0/manifest.json),
+[release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
+[release-local compatibility matrix](../releases/v0.14.0/COMPATIBILITY.md) bind one engine source,
+`2c6f423bd817b6534158553e1b34ab4959c43165`, across all three published beta.3 components.
+The [prepared guide](QUICKSTART.md) now targets v0.14.0 in every executable product reference.
+Do not execute its install blocks before product publication and the ready gate.
+Published v0.13.1 remains authoritative; its acceptance does not transfer.
+
+| Prepared lane | Component | Package / image | Server | Public configuration |
+| --- | --- | --- | --- | --- |
+| RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` | Image `760fb6be` | `55f0b95a` | Kept `qwen38-5090-v0.13.0`, `751d22dc` |
+| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3` | Package `87038cfb` | `5caa7780` | `qwen38-4090-native-v0.7.0-beta.3`, `b5cfbf50` |
+| RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3` | Package `a7637f66` | `fedce425` | `qwen38-3090-native-v0.7.0-beta.3`, `d08d262b` |
+
+Both native profiles retain INT8 MTP3 C1, 131,072 context/KV, strict origin authentication,
+640/768 MiB admission headroom, 2/4 extra device-state slots and shared Host budgets of
+15,506,063,360/12,284,837,888 bytes; `Group64` A8 is compiled off. RTX 3090's serving cap is
+350 W; managed qualification restored the owner's 370 W baseline. Stop the running v0.13.1
+RTX 3090 lane before installing v0.14.0: its 300 W GPU-owner lease fails the new 350 W check
+before replacement ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)).
+
+The shared v3 model (`81f924d4`, 20,437,521,664 bytes) and stock OMP 18.12.6 binaries are unchanged.
+Native routes retain `C:\ProgramData\omp-ninfer-model\qwen3_8_27b-v3.ninfer` and per-instance
+`session-checkpoints-v3`; the container retains `checkpoints-v013`. Kept names do not prove
+cross-binary checkpoint compatibility; preserve older roots and replay OMP transcripts.
+RTX 5090 ships checked first-build bytes under an explicit reproducibility exception, not a
+bit-identical-second-build claim. Fresh runtime qualification is not product acceptance:
+all five routes/31 blocks, three stock clients, both native public installs and independent
+restoration remain pending, with explicit `documented_routes.document_change`, review/evidence
+pins and founder-owned publication still separate.
 
 ## Models
 

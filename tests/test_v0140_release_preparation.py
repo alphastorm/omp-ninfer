@@ -10,6 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+import documented_route
 import render_compatibility
 import verify_release
 
@@ -41,6 +42,62 @@ def sha(path: Path) -> str:
 
 
 class V0140PreparationTests(unittest.TestCase):
+    def test_prepared_guide_keeps_publication_and_acceptance_gated(self) -> None:
+        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        self.assertIn(
+            "> **Prepared guide: v0.14.0 · stock Oh My Pi 18.12.6 · product-route qualification pending**",
+            text)
+        self.assertIn("Do not execute these install blocks before the product is published",
+                      " ".join(text.split()))
+        self.assertIn("The published release remains v0.13.1:", text)
+        published = "https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md"
+        self.assertIn(f"[use its immutable guide]({published})", text)
+        self.assertIn("documented_routes.document_change", text)
+        self.assertIn("## Previous release acceptance — v0.13.1", text)
+        self.assertIn("predecessor acceptance does not transfer", text)
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"[published-guide]: {published}", readme)
+        self.assertIn("### [Get started →][published-guide]", readme)
+
+    def test_prepared_guide_lane_identities_match_the_candidate_manifest(self) -> None:
+        manifest = load(RELEASE / "manifest.json")
+        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        self.assertIn(SOURCE, text)
+        glance = text.split("## Prepared composition at a glance\n", 1)[1].split(
+            "\n- **Serving limits", 1)[0]
+        primary = manifest["components"]["ninfer"]
+        self.assertIn(primary["release_tag"], glance)
+        self.assertIn(primary["oci_reference"], glance)
+        self.assertIn(primary["server_binary_sha256"][:8], glance)
+        self.assertIn(manifest["runtime_identity"]["deployment_profile"], glance)
+        self.assertIn(CONFIG[:8], glance)
+        self.assertIn("20,437,521,664 bytes", glance)
+        for variant in manifest["components"]["ninfer_variants"]:
+            number = variant["id"].split("-", 1)[0][3:]
+            row = next(line for line in glance.splitlines()
+                       if line.startswith(f"| RTX {number} native Windows"))
+            with self.subTest(lane=number):
+                for value in (variant["release_tag"], variant["source_commit"][:8],
+                              variant["package_sha256"][:8], variant["server_binary_sha256"][:8],
+                              variant["configuration_sha256"][:8], MODEL[:8],
+                              f"qwen38-{number}-native-v0.7.0-beta.3",
+                              "MTP3/INT8", "`Group64` A8 off"):
+                    self.assertIn(value, row)
+                if number == "3090":
+                    self.assertIn("350 W serving cap", row)
+        self.assertNotIn("beta.2", glance)
+        self.assertIn("founder-approved 5090-only reproducibility exception", glance)
+
+    def test_native_3090_upgrade_requires_stop_before_the_first_install_block(self) -> None:
+        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        section = text.split("## Native Windows RTX 3090 release lane\n", 1)[1].split(
+            "```powershell", 1)[0]
+        for claim in ("stop the running RTX 3090 lane before installing v0.14.0",
+                      "installed controller's `Stop` action", "300 W GPU-owner lease",
+                      "350 W serving cap", "A stopped lane upgrades normally",
+                      "https://github.com/alphastorm/omp-ninfer/issues/94"):
+            self.assertIn(claim, section)
+
     def test_three_lanes_bind_one_exact_engine_source(self) -> None:
         manifest = load(RELEASE / "manifest.json")
         self.assertNotIn("native_model", manifest["components"])

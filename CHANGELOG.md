@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare the v0.14.0 QUICKSTART for route acceptance: retarget every executable product tag and
+  manifest path, bind the beta.3 lane identities and 350 W RTX 3090 stop-before-upgrade policy,
+  and retain the unchanged v3 model/store blocks. Fresh candidate-bound acceptance is pending;
+  published front-door install links stay on the immutable v0.13.1 guide.
 - Stage v0.14.0 with one engine source `2c6f423b` across the RTX 5090 container and both
   native Windows lanes (`v0.7.0-qwen38-{5090,4090,3090}-beta.3`), retaining published model
   version 3 `81f924d4` and unmodified stock OMP 18.12.6. All three component cuts are published

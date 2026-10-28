@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.13.1.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.13.1.](assets/banner.png)][published-guide]
 
 <div align="center">
 
@@ -6,16 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.13.1** with unmodified
+Every install route in the [published guide][published-guide] was run end to end on **v0.13.1** with unmodified
 [Oh My Pi 18.12.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6) — 31 steps,
 three client platforms, both native lanes
 ([receipt](releases/v0.13.1/acceptance/composed-external-installation.json)).
 
-### [Get started →](docs/QUICKSTART.md)
+### [Get started →][published-guide]
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.13.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.1) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.13.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.1) · [Lanes][published-lanes] ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -33,6 +33,9 @@ three client platforms, both native lanes
 [context-badge]: https://img.shields.io/badge/context-130%2C048%20tokens%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
+[published-guide]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md
+[published-lanes]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md#choose-your-lane
+[published-client]: https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md#omp-18126-client
 
 ## What it does
 
@@ -89,9 +92,9 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 
 ## Get started
 
-1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+1. **[Choose your lane][published-lanes]** and check its prerequisites.
 2. **Clone tag `v0.13.1`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.12.6 client](docs/QUICKSTART.md#omp-18126-client)** with the
+3. **[Install the stock Oh My Pi 18.12.6 client][published-client]** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
@@ -105,6 +108,16 @@ model and state roots untouched for historical recovery; prior sessions replay f
 transcripts); the RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.2`) and stock Oh My Pi
 18.12.6 client carry unchanged from v0.13.0. Native owners staying on v0.10.0 keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+
+### Next release: v0.14.0 route preparation
+
+The [candidate notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) bind all three beta.3 runtime
+components to engine source `2c6f423b`, keeping the v3 model and stock OMP 18.12.6 unchanged.
+Native MTP3 keeps `Group64` A8 off; RTX 3090 moves to a 350 W cap and must be stopped before
+upgrading from v0.13.1 ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)).
+The [working-tree guide](docs/QUICKSTART.md) prepares fresh route acceptance, not public execution.
+Fresh product acceptance, review/evidence pins and founder-owned publication remain separate;
+the front-door install links stay on the published v0.13.1 guide.
 
 ## How it works
 
@@ -148,7 +161,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
 
 | Document | What it answers |
 | --- | --- |
-| [Quickstart](docs/QUICKSTART.md) | Which lane, prerequisites, exact install, acceptance checks |
+| [Published quickstart][published-guide] | Which lane, prerequisites, exact install, acceptance checks |
 | [Facts](docs/FACTS.md) | Current identities, limits, and non-claims in one place |
 | [Decision guide](docs/DECISION_GUIDE.md) | This versus Ollama, LM Studio, llama.cpp, vLLM |
 | [Compatibility](docs/COMPATIBILITY.md) | Qualified client and runtime combinations (generated) |
