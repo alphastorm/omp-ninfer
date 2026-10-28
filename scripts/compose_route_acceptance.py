@@ -108,7 +108,7 @@ def save(path: Path, document: Any) -> None:
 
 
 def relative(path: Path) -> str:
-    return str(path.relative_to(ROOT))
+    return path.relative_to(ROOT).as_posix()
 
 
 def require(condition: bool, message: str) -> None:
