@@ -2419,15 +2419,20 @@ The default manifest is the source tree's `vcpkg.json` and the default runtime e
 
 The resolved vcpkg lock input is a build-owner snapshot, not vcpkg's filesystem mutex file:
 it records the manifest's `builtin-baseline` and a `packages` array containing each resolved
-package's `name`, exact `version`, SPDX `license` expression and `dependencies` name array,
-including transitive and build dependencies. Collect versions from the installed vcpkg tree and
-licenses from the corresponding pinned port metadata, rather than treating version constraints
-in the manifest as installed versions. The CUDA input's `dlls` array records each package-relative
+package's `name`, exact `version`, SPDX `license` expression, `dependencies` name array
+(including transitive and build dependencies) and `dlls` array of the package-relative paths of
+the DLLs the native package ships from that port (`[]` for a port that ships none). Collect
+versions from the installed vcpkg tree, each port's DLLs from its installed file list
+(`vcpkg_installed/vcpkg/info/<port>_<version>_<triplet>.list`) and licenses from the
+corresponding pinned port metadata, rather than treating version constraints in the manifest as
+installed versions. The CUDA input's `dlls` array records each package-relative
 DLL `path`, exact `version` from its version metadata, and HTTPS `eula` URL. The vendored input's
 `sources` array records every top-level `third_party/` directory's relative `path`, component
 `name`, exact `version`, SPDX `license` expression and relative `license_file`. The generator's
 help includes the input schemas; missing versions, licenses, files or dependency edges fail
-instead of producing a partial inventory.
+instead of producing a partial inventory. Every DLL in the package must belong to exactly one
+CUDA, runtime or vcpkg entry, and each vcpkg component lists its DLLs as nested `file`
+components with their package path and SHA-256.
 
 The runtime inventory records `dlls` entries with package `bin/` basenames, `component`
 (`msvc-crt` or `directstorage`), actual file `version`, `bytes` and `sha256`. Its `licenses`
@@ -2444,8 +2449,10 @@ Its canonical filename is `<native-package-stem>.cdx.json`; the original file in
 including `SHA256SUMS`: package, inner checksums, SPDX, CycloneDX, source archive, build receipt,
 installer, controller, GPU-owner controller and state-protection helper. The build receipt binds
 `dependency_sbom.name`, `sha256`, `format: CycloneDX-1.5` and generator/input digests.
-Cut preflight checks the actual CycloneDX header, source commit and server hash; renaming SPDX
-does not satisfy it. `bind_native_variant.py` derives dependency pins from the same checksum set.
+Cut preflight checks the actual CycloneDX header, source commit and server hash, a dependency
+graph that reaches every component from the server, and one SHA-256-bound component for every
+DLL in the package archive; renaming SPDX or cutting an identity-only document does not satisfy
+it. `bind_native_variant.py` derives dependency pins from the same checksum set.
 When staging a product release that carries that native component,
 `scripts/stage_release.py` accepts paired, repeatable
 `--sbom-dependency-url VARIANT=URL` and `--sbom-dependency-sha256 VARIANT=SHA256` arguments.
@@ -2521,7 +2528,8 @@ lane's canonical native qualification (`tools/qualification/qualify_native.py` i
 fork). The default mode checks that the outer `SHA256SUMS` closes and verifies the asset
 directory, that the package build receipt and the lane specification at the commit name the same
 release and source, that the source archive's tar stream is byte-identical to `git archive` of
-the commit, and that neither the tag nor the release exists. `--publish` is founder-only: it
+the commit, that the dependency CycloneDX maps every packaged DLL in a component graph rooted at
+the server, and that neither the tag nor the release exists. `--publish` is founder-only: it
 pushes the component tag and creates one prerelease with the closed set; binding it into a
 product release stays `scripts/bind_native_variant.py`. The component tag must name the package
 filename's version and beta: `v0.7.0-qwen38-4090-beta.3` for

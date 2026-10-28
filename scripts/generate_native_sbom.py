@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Build a deterministic CycloneDX 1.5 dependency SBOM from native build inputs.
 
-No downloads, dependency resolution, or guessed versions/licenses. --vcpkg-lock is
+No downloads, dependency resolution, or guessed versions/licenses/DLL ownership. --vcpkg-lock is
 an explicit resolved snapshot: {"builtin-baseline": SHA40, "packages": [{"name":
-NAME, "version": VERSION, "license": SPDX_EXPRESSION, "dependencies": [NAME]}]}.
-The build owner collects it from the installed vcpkg versions and port licenses;
-it is not vcpkg's filesystem mutex file, nor the manifest's version constraints.
+NAME, "version": VERSION, "license": SPDX_EXPRESSION, "dependencies": [NAME],
+"dlls": [PACKAGE_PATH]}]}. The build owner collects versions and port licenses from the
+installed vcpkg tree, and "dlls" (package paths of the DLLs the package ships from that port,
+[] if none) from the port's vcpkg_installed/vcpkg/info/<port>_<version>_<triplet>.list.
+It is not vcpkg's filesystem mutex file, nor the manifest's version constraints.
 CUDA inventory is {"dlls": [{"path": "bin/cudart64_13.dll", "version": VERSION,
 "eula": HTTPS_URL}]}; obtain versions from the packaged DLLs' VersionInfo.
 Optional --runtime-inventory is {"dlls": [{"name": DLL_NAME, "component": "msvc-crt"
@@ -15,7 +17,9 @@ or "directstorage", "version": VERSION, "bytes": BYTES, "sha256": SHA256}],
 License files are relative to that inventory's directory; package pins are an optional pair.
 Vendored inventory is {"sources": [{"path": "nlohmann", "name": NAME,
 "version": VERSION, "license": SPDX_EXPRESSION, "license_file": "LICENSE.MIT"}]}.
-Paths are relative to the package or source tree's third_party directory.
+Paths are relative to the package or source tree's third_party directory. Every DLL in the
+package must be named by exactly one CUDA, runtime or vcpkg entry; each vcpkg component lists
+its DLLs as nested file components with their package path and SHA-256.
 
 Example (all inventories describe the exact build being packaged):
   python3 scripts/generate_native_sbom.py --package-dir package --source-dir source \\
@@ -114,6 +118,9 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
         dependencies = row.get("dependencies")
         require(isinstance(dependencies, list) and all(isinstance(item, str) for item in dependencies),
                 f"{name} dependencies must be a name array (including transitive dependencies)")
+        dlls = row.get("dlls")
+        require(isinstance(dlls, list) and all(isinstance(item, str) for item in dlls),
+                f"{name} dlls must be an array of package DLL paths ([] if it ships none)")
         by_name[name] = row
     for name in direct_names + [item for row in packages for item in row["dependencies"]]:
         require(name in by_name, f"vcpkg lock is missing dependency: {name}")
@@ -134,18 +141,35 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
     components: list[dict] = []
     edges: dict[str, list[str]] = {}
     root_dependencies = {"vcpkg:" + name for name in direct_names}
+    claimed: set[str] = set()  # Each packaged DLL belongs to exactly one inventory entry.
+
+    def claim(path: str, inventory_name: str) -> None:
+        require(path.casefold() not in claimed, f"duplicate {inventory_name} DLL: {path} is already inventoried")
+        claimed.add(path.casefold())
+
     for name, row in sorted(by_name.items()):
         ref = "vcpkg:" + name
-        components.append({"type": "library", "bom-ref": ref, "name": name, "version": row["version"],
-                           "purl": f"pkg:vcpkg/{quote(name)}@{quote(row['version'], safe='')}",
-                           "licenses": [{"expression": row["license"]}]})
+        component = {"type": "library", "bom-ref": ref, "name": name, "version": row["version"],
+                     "purl": f"pkg:vcpkg/{quote(name)}@{quote(row['version'], safe='')}",
+                     "licenses": [{"expression": row["license"]}]}
+        files = []
+        for value in sorted(row["dlls"]):
+            dll, path = relative_file(package_dir, value, f"{name} DLL path")
+            require(dll.suffix.lower() == ".dll", f"{name} DLL path must name a .dll file: {path}")
+            claim(path, "vcpkg")
+            files.append({"type": "file", "bom-ref": f"{ref}:{path}", "name": PurePosixPath(path).name,
+                          "hashes": [{"alg": "SHA-256", "content": digest(dll)}],
+                          "properties": [property_("package_path", path)]})
+        if files:
+            component["components"] = files
+        components.append(component)
         edges[ref] = sorted({"vcpkg:" + item for item in row["dependencies"]})
 
     dll_paths: set[str] = set()
     for row in rows(load(cuda_inventory), "dlls"):
         dll, path = relative_file(package_dir, row.get("path"), "CUDA DLL path")
         require(dll.suffix.lower() == ".dll", "CUDA inventory entries must be DLLs")
-        require(path.casefold() not in dll_paths, f"duplicate CUDA DLL: {path}")
+        claim(path, "CUDA")
         dll_paths.add(path.casefold())
         version = text(row.get("version"), f"{dll.name} version")
         eula = text(row.get("eula"), f"{dll.name} EULA")
@@ -174,8 +198,7 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
             require(PurePosixPath(name).name == name and name.lower().endswith(".dll"),
                     "runtime DLL name must be a filename")
             dll, path = relative_file(package_dir, "bin/" + name, "runtime DLL path")
-            require(path.casefold() not in redist_paths and path.casefold() not in dll_paths,
-                    f"duplicate runtime DLL: {path}")
+            claim(path, "runtime")
             redist_paths.add(path.casefold())
             component = row.get("component")
             require(component in ("msvc-crt", "directstorage"), "unknown runtime redistributable component")
@@ -218,6 +241,11 @@ def build_sbom(*, package_dir: Path, source_dir: Path, source_commit: str,
             if dll.is_file() and REDIST_DLL_RE.fullmatch(dll.name):
                 require(dll.relative_to(package_dir).as_posix().casefold() in redist_paths,
                         f"runtime inventory is missing packaged DLL: {dll.name}")
+
+    for dll in sorted(package_dir.rglob("*")):
+        if dll.is_file() and dll.suffix.lower() == ".dll":
+            path = dll.relative_to(package_dir).as_posix()
+            require(path.casefold() in claimed, f"no inventory maps packaged DLL: {path}")
 
     third_party = source_dir / "third_party"
     require(third_party.is_dir(), "source tree must contain third_party")

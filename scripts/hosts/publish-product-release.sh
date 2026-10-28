@@ -19,6 +19,9 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 release=""; commit=""; pr=""; publish=0; dry_run=0
 while (($#)); do
   case "$1" in
+    --release|--commit|--pr) (($# >= 2)) || { echo "$1 requires a value" >&2; exit 2; } ;;
+  esac
+  case "$1" in
     --release) release="$2"; shift 2 ;;
     --commit) commit="$2"; shift 2 ;;
     --pr) pr="$2"; shift 2 ;;
