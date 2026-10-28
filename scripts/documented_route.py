@@ -192,7 +192,7 @@ def bundle(doc: Path, lane: str, output: Path) -> dict:
         })
     manifest = {
         "artifact_type": "omp_ninfer_documented_route_bundle", "schema_version": 1,
-        "lane": lane, "document": str(doc.relative_to(ROOT)) if doc.is_relative_to(ROOT) else str(doc),
+        "lane": lane, "document": doc.relative_to(ROOT).as_posix() if doc.is_relative_to(ROOT) else str(doc),
         "document_sha256": hashlib.sha256(doc.read_bytes()).hexdigest(), "steps": steps,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")

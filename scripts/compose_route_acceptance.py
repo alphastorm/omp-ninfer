@@ -12,9 +12,10 @@ evidence record per client profile. This turns them into the release's acceptanc
   releases/<release>/acceptance/documented-routes.json
   releases/<release>/acceptance/composed-external-installation.json
 
-and moves the manifest, qualification and compatibility authority to the ready posture. Stock
-client identity comes from this release's upstream manifest and compatibility profiles, never
-from a previous fork's receipts. Installed binaries must match the published upstream assets.
+and moves the manifest, qualification (with the documented-route acceptance summary the ready gate
+reads) and compatibility authority to the ready posture. Stock client identity comes from this
+release's upstream manifest and compatibility profiles, never from a previous fork's receipts.
+Installed binaries must match the published upstream assets.
 
     python3 scripts/compose_route_acceptance.py --release v0.8.0 \\
         --candidate <40-hex> --as-of 2026-09-25 --measurement-prefix 2026-09-25-v080 \\
@@ -24,7 +25,10 @@ from a previous fork's receipts. Installed binaries must match the published ups
 The evidence file is private (it names no secrets, but it is the operator's working record);
 its schema is the EVIDENCE_KEYS below, and each platforms entry names the status (qualified or
 preview) its profile takes: upstream staging leaves every profile pending, so this is where the
-accepted posture is decided. The immutable URL pins that follow are scripts/rebind_release.py's:
+accepted posture is decided. documented_routes.scope states what the accepted routes cover.
+restoration is the restoration receipt's body in v0.14.0's shape (candidate_commit, rtx5090 and
+one section per accepted native lane); every displaced incumbent must be observed back in place,
+or nothing is written. The immutable URL pins that follow are scripts/rebind_release.py's:
 commit these files, then --stage platform, acceptance, manifest.
 """
 from __future__ import annotations
@@ -59,6 +63,29 @@ LIVE_TRUE = ("typed_read_tool_calls", "linked_tool_results", "tool_result_marker
              "exact_visible_final_answer", "agent_end", "continuation_exact_nonce",
              "runtime_identity_bound")
 ACCEPTED_STATUSES = ("qualified", "preview")
+# The restoration receipt's own fields: evidence cannot set them, so it cannot relabel itself.
+RESTORATION_RECEIPT_FIELDS = ("artifact_type", "schema_version", "release", "as_of", "status",
+                              "production_upgrade_activated",
+                              "raw_private_paths_credentials_or_outputs_included")
+# What the displaced RTX 5090 incumbent's restoration must have observed: the same immutable image
+# healthy from Windows and WSL2 with its checkpoint mount, and the route's key, checkout,
+# container, hold and directories undone. Its digest and unless-stopped policy are checked apart.
+INCUMBENT_RESTORED = ("original_runtime_healthy", "original_image_retained",
+                      "checkpoint_mount_retained", "windows_health_ok", "wsl_health_ok",
+                      "documented_route_key_restored", "original_checkout_restored",
+                      "route_container_absent", "window_hold_removed",
+                      "documented_directories_restored")
+# What each accepted native lane's restoration must have observed, beside its two audits.
+NATIVE_RESTORED = ("public_install_restored", "canonical_cross_lane_census_identical",
+                   "holds_and_client_files_unchanged", "documented_directory_presence_restored",
+                   "documented_stage_restored")
+NATIVE_AUDITS = ("restoration_checks", "final_audit_checks")
+# What a native lane's own live run must have observed before its public-install receipt can
+# back the composed tool, continuation and fail-closed claims.
+NATIVE_OBSERVED = ("exact_tool_marker", "linked_tool_history", "exact_continuation_nonce",
+                   "offline_request_failed_without_model_response",
+                   "recovery_health_and_bound_runtime_identity_passed")
+OCI_IMAGE_RE = re.compile(r"^[^@\s]+@sha256:[0-9a-f]{64}$")
 
 _spec = importlib.util.spec_from_file_location("documented_route", ROOT / "scripts" / "documented_route.py")
 assert _spec and _spec.loader
@@ -81,7 +108,7 @@ def save(path: Path, document: Any) -> None:
 
 
 def relative(path: Path) -> str:
-    return str(path.relative_to(ROOT))
+    return path.relative_to(ROOT).as_posix()
 
 
 def require(condition: bool, message: str) -> None:
@@ -152,6 +179,86 @@ def check_live(profile: str, live: dict, manifest: dict) -> None:
             f"{profile}: fail-closed request did not fail")
     require(closed.get("no_model_response") is True and closed.get("only_selected_local_provider_observed") is True,
             f"{profile}: fail-closed request reached a model or another provider")
+
+
+def check_native_observations(lane: str, observations: Any) -> None:
+    """A native lane's own live run, never its exit status, decides its public-install receipt."""
+    require(isinstance(observations, dict), f"{lane}: native acceptance observations are missing")
+    for key in NATIVE_OBSERVED:
+        require(observations.get(key) is True, f"{lane}: native acceptance did not observe {key}")
+    calls = observations.get("server_tool_calls")
+    require(isinstance(calls, int) and not isinstance(calls, bool) and calls >= 1,
+            f"{lane}: native acceptance observed no server tool call")
+    require(observations.get("cloud_fallback_observed") is False,
+            f"{lane}: native acceptance did not rule out cloud fallback")
+    install = observations.get("public_install")
+    require(isinstance(install, dict) and install.get("status") == "passed",
+            f"{lane}: the native public install did not pass")
+
+
+def positive_seconds(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+
+
+def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str) -> None:
+    """Restoration counts only when it observed every incumbent the windows displaced back in place."""
+    require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
+    overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
+    require(not overridden, f"restoration evidence cannot set the receipt's own fields {overridden}")
+    require(restoration.get("candidate_commit") == candidate,
+            f"restoration ran for {restoration.get('candidate_commit')!r}, not candidate {candidate}")
+    incumbent = restoration.get("rtx5090")
+    require(isinstance(incumbent, dict), "restoration evidence needs the rtx5090 incumbent")
+    for key in INCUMBENT_RESTORED:
+        require(incumbent.get(key) is True, f"rtx5090 restoration did not observe {key}")
+    image = incumbent.get("original_image")
+    require(isinstance(image, str) and OCI_IMAGE_RE.fullmatch(image) is not None,
+            "rtx5090 restoration must name the incumbent's digest-pinned image")
+    require(incumbent.get("restart_policy") == "unless-stopped",
+            f"rtx5090 restoration left restart policy {incumbent.get('restart_policy')!r}, "
+            "not unless-stopped")
+    holds = incumbent.get("window_hold_seconds")
+    require(isinstance(holds, list) and bool(holds) and all(positive_seconds(hold) for hold in holds),
+            "rtx5090 restoration must record every production window's hold seconds")
+    for lane in NATIVE_LANES:
+        gpu = lane.removesuffix("-native")
+        native = restoration.get(gpu)
+        if lane not in lanes:
+            require(native is None, f"restoration names undeclared native lane {gpu}")
+            continue
+        require(isinstance(native, dict) and native.get("status") == "passed",
+                f"{gpu} restoration did not pass")
+        for key in NATIVE_RESTORED:
+            require(native.get(key) is True, f"{gpu} restoration did not observe {key}")
+        for key in NATIVE_AUDITS:
+            checks = native.get(key)
+            require(isinstance(checks, dict) and bool(checks)
+                    and all(value is True for value in checks.values()),
+                    f"{gpu} restoration {key} did not all pass")
+        require(positive_seconds(native.get("window_hold_seconds")),
+                f"{gpu} restoration must record its window hold seconds")
+
+
+def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str) -> dict:
+    """The qualification's restoration line, read from the evidence check_restoration accepted."""
+    natives = {lane.removesuffix("-native"): restoration[lane.removesuffix("-native")]
+               for lane in lanes if lane in NATIVE_LANES}
+    incumbent = restoration["rtx5090"]
+    summary: dict[str, Any] = {
+        "path": path,
+        "status": "passed",
+        # The accepted window is the last: a corrected attempt follows the restored failure.
+        "driver_hold_s": incumbent["window_hold_seconds"][-1],
+        "production_upgrade_activated": False,
+        "documented_directory_presence_restored": incumbent["documented_directories_restored"]
+        and all(native["documented_directory_presence_restored"] for native in natives.values()),
+    }
+    if natives:
+        summary["native_documented_stage_restored"] = all(
+            native["documented_stage_restored"] for native in natives.values())
+        summary["native_driver_window_s"] = {gpu: native["window_hold_seconds"]
+                                             for gpu, native in natives.items()}
+    return summary
 
 
 def platform_receipt(release: str, as_of: str, profile: dict, evidence: dict,
@@ -261,10 +368,16 @@ def main() -> int:
     for variant in manifest["components"].get("ninfer_variants", []):
         require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
                 f"{variant['id']}: runtime model must match the effective native model")
+        native = evidence[variant["id"].split("-")[0]]
+        check_native_observations(variant["id"], native.get("observations"))
         lane_receipt = variant.get("qualification", {}).get("summary")
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
-        check_native_first_release(evidence[variant["id"].split("-")[0]],
-                                   load(receipt_path) if lane_receipt else {})
+        check_native_first_release(native, load(receipt_path) if lane_receipt else {})
+    # The restoration receipt and every incumbent-restored claim below rest on this evidence.
+    check_restoration(evidence["restoration"], lanes, args.candidate)
+    scope = evidence["documented_routes"].get("scope")
+    require(isinstance(scope, str) and bool(scope.strip()),
+            "evidence documented_routes needs the scope the accepted routes cover")
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
@@ -310,7 +423,7 @@ def main() -> int:
                        "sha256": sha256(restoration_path.read_bytes())}
 
     # 3. One platform receipt per client profile, named for its platform and the client version.
-    platform_rows = []
+    platform_rows, platform_paths = [], []
     for profile in authority["profiles"]:
         platform_evidence = evidence["platforms"][profile["id"]]
         filename = f"{OMP_PROFILE_PLATFORMS[profile['id']]}-{omp['distribution_version']}.json"
@@ -326,6 +439,7 @@ def main() -> int:
             "sha256": digest,
         }
         platform_rows.append({"profile": profile["id"], "sha256": digest})
+        platform_paths.append(relative(acceptance_root / filename))
 
     # 4. The native lane's public-install receipt.
     windows = next(p for p in authority["profiles"]
@@ -496,11 +610,33 @@ def main() -> int:
         "platform_receipts": platform_rows,
         "note": composed["qualification_note"],
     }
-    composition["documented_route_acceptance"] = {
+    routes_ref = {"repository_path": relative(routes_path), "sha256": sha256(routes_path.read_bytes())}
+    composition["documented_route_acceptance"] = {"status": "passed", **routes_ref}
+    # The summary the ready gate reads replaces the pending one staging wrote, restating this
+    # composition instead of waiting for a hand edit.
+    summary: dict[str, Any] = {
         "status": "passed",
-        "repository_path": relative(routes_path),
-        "sha256": sha256(routes_path.read_bytes()),
+        "scope": scope,
+        "candidate_commit": args.candidate,
+        # Every executed block still matches the guide (refused above otherwise), so committing
+        # this evidence leaves the candidate's routes unchanged.
+        "evidence_commit_changes_candidate": False,
+        "evidence_path": routes_ref["repository_path"],
+        "evidence_sha256": routes_ref["sha256"],
     }
+    if "document_change" in routes_doc:
+        summary["document_change"] = routes_doc["document_change"]
+    summary.update({
+        # check_route required every documented step to run and pass.
+        "documented_route_steps": {lane: "{0}/{0}".format(len(route_rows[lane]["steps"]))
+                                   for lane in lanes},
+        "platform_receipts": platform_paths,
+        "fresh_product_acceptance": True,
+        "restoration": restoration_summary(evidence["restoration"], lanes,
+                                           restoration_ref["repository_path"]),
+        "composition_run": True,
+    })
+    qualification["documented_route_acceptance"] = summary
     qualification["as_of"] = max(qualification["as_of"], args.as_of)
     qualification["external_installation_qualified"] = True
     qualification["remaining_release_gates"] = []

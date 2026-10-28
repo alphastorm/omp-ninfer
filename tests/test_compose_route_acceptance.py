@@ -25,7 +25,9 @@ assert STAGE_SPEC and STAGE_SPEC.loader
 STAGE = importlib.util.module_from_spec(STAGE_SPEC)
 sys.modules[STAGE_SPEC.name] = STAGE
 STAGE_SPEC.loader.exec_module(STAGE)
-from verify_release import validate_client_profile_predicates  # noqa: E402  # pyright: ignore[reportMissingImports]
+from verify_release import (  # noqa: E402  # pyright: ignore[reportMissingImports]
+    validate_client_profile_predicates, validate_ready_state_consistency,
+)
 
 # v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
 ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
@@ -82,6 +84,32 @@ LIVE = {
     "fail_closed": {"exit_code": 1, "no_model_response": True,
                     "only_selected_local_provider_observed": True},
 }
+# v0.14.0's restoration evidence: its receipt without the fields the composer writes itself.
+RESTORATION = {key: value for key, value in json.loads(
+    (ROOT / "docs/measurements/2026-10-28-v0140-acceptance-restoration.json").read_text(encoding="utf-8")
+).items() if key not in ("artifact_type", "schema_version", "release", "as_of", "status",
+                         "production_upgrade_activated",
+                         "raw_private_paths_credentials_or_outputs_included")}
+RESTORATION["candidate_commit"] = CANDIDATE
+FIRST_RELEASE = {"rollback": {"status": "not_applicable", "directions": 0,
+                              "reason": "first release of the lineage"}}
+# The route-acceptance summary v0.14.0's staging left for composition to replace.
+STAGED_ROUTE_ACCEPTANCE = {
+    "status": "pending",
+    "fresh_product_acceptance": False,
+    "scope": "Fresh candidate-bound external-install acceptance of all five routes, three unchanged "
+             "stock OMP 18.12.6 clients and both beta.3 native public installs is required. No "
+             "predecessor product acceptance is carried.",
+    "document_change": "Published QUICKSTART blocks remain on v0.13.1 at this stage.",
+}
+
+
+def native_evidence(gpu: str) -> dict:
+    """v0.14.0's first-of-lineage public-install evidence for one native lane."""
+    receipt = json.loads((ROOT / f"releases/v0.14.0/acceptance/{gpu}-public-install.json")
+                         .read_text(encoding="utf-8"))
+    return {key: receipt[key] for key in ("preparation", "observations", "limitations")}
+
 
 
 def route_receipt(lane: str) -> dict:
@@ -230,11 +258,14 @@ class UpstreamCompositionTests(unittest.TestCase):
             "id": "rtx4090-windows-native", "release_tag": "native-runtime",
             "source_commit": "9" * 40, "package_bytes": 100, "package_sha256": "9" * 64,
             "server_binary_sha256": "a" * 64, "configuration_sha256": "b" * 64,
-            "model_artifact_sha256": "c" * 64}]
+            "model_artifact_sha256": "c" * 64,
+            "qualification": {"summary": "qualification/rtx4090.json"}}]
+        MODULE.save(self.release_root / "qualification" / "rtx4090.json", FIRST_RELEASE)
         manifest.update(status="candidate", publication={"blockers": ["acceptance"]}, qualification={})
         MODULE.save(self.release_root / "manifest.json", manifest)
         MODULE.save(self.release_root / "qualification.json", {
-            "as_of": "2026-01-01", "composition": {"external_installation_acceptance": {
+            "as_of": "2026-01-01", "documented_route_acceptance": deepcopy(STAGED_ROUTE_ACCEPTANCE),
+            "composition": {"external_installation_acceptance": {
                 "public_url": "https://example.invalid/acceptance.json"}}})
         # The authority exactly as upstream staging leaves it: the predecessor's accepted profiles
         # reset to pending, without receipts or installability.
@@ -256,9 +287,13 @@ class UpstreamCompositionTests(unittest.TestCase):
                 "status": ACCEPTED[profile["id"]],
                 "binary_sha256": profile["client_distribution"]["binary_sha256"],
                 "live_acceptance": deepcopy(LIVE), "limitations": []} for profile in self.profiles},
-            "rtx4090": {"preparation": {}, "observations": {}, "limitations": []},
-            "restoration": {},
-            "documented_routes": {"mode": "offline-fixture", "qualification_environment": {}},
+            "rtx4090": native_evidence("rtx4090"),
+            "restoration": {key: deepcopy(RESTORATION[key])
+                            for key in ("candidate_commit", "rtx5090", "rtx4090")},
+            "documented_routes": {"mode": "offline-fixture", "qualification_environment": {},
+                                  "scope": "Fresh candidate-bound routes, stock clients and the "
+                                           "native public install passed; no predecessor product "
+                                           "acceptance is carried."},
             "composed": {"mode": "offline-fixture", "authority_status": "qualified",
                 "public_client_downloads": {"status": "passed", "anonymous": True},
                 "linux_live_client": {"status": "passed"}, "client_note": "Stock binary",
@@ -287,7 +322,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         manifest["components"]["ninfer_variants"] = []
         MODULE.save(self.release_root / "manifest.json", manifest)
         evidence = MODULE.load(self.root / "evidence.json")
-        del evidence["rtx4090"]
+        del evidence["rtx4090"], evidence["restoration"]["rtx4090"]
         MODULE.save(self.root / "evidence.json", evidence)
         del self.argv[-2:]
 
@@ -322,7 +357,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         for gpu in ("rtx3090", "rtx4090"):
             with self.subTest(gpu=gpu):
                 evidence = MODULE.load(self.root / "evidence.json")
-                evidence[gpu] = {"preparation": {}, "observations": {}, "limitations": []}
+                evidence[gpu] = native_evidence(gpu)
                 MODULE.save(self.root / "evidence.json", evidence)
                 with self.assertRaisesRegex(SystemExit, "undeclared native evidence"):
                     self.compose()
@@ -409,16 +444,122 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertFalse((self.release_root / "acceptance").exists())
         self.assertEqual(list((self.root / "docs" / "measurements").iterdir()), [])
 
+    def refused_before_writing(self, select, cases) -> None:
+        """Each change to the evidence section select picks is refused, and nothing is written."""
+        original = (self.root / "evidence.json").read_text(encoding="utf-8")
+        for case, change, message in cases:
+            with self.subTest(case=case):
+                evidence = json.loads(original)
+                change(select(evidence))
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, message):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+                self.assertEqual(list((self.root / "docs" / "measurements").iterdir()), [])
+
+    def test_restoration_must_observe_every_displaced_incumbent_before_writing(self) -> None:
+        """Empty restoration evidence once composed a passed receipt and incumbent-restored claims."""
+        self.refused_before_writing(lambda evidence: evidence["restoration"], (
+            ("empty", lambda restoration: restoration.clear(), "restoration evidence is empty"),
+            ("no incumbent", lambda restoration: restoration.pop("rtx5090"),
+             "needs the rtx5090 incumbent"),
+            ("other image", lambda restoration: restoration["rtx5090"].update(original_image_retained=False),
+             "did not observe original_image_retained"),
+            ("unpinned image", lambda restoration: restoration["rtx5090"].update(
+                original_image="ghcr.io/alphastorm/ninfer-runtime:latest"), "digest-pinned image"),
+            ("restart policy", lambda restoration: restoration["rtx5090"].update(restart_policy="no"),
+             "not unless-stopped"),
+            ("unhealthy", lambda restoration: restoration["rtx5090"].update(wsl_health_ok=False),
+             "did not observe wsl_health_ok"),
+            ("no window", lambda restoration: restoration["rtx5090"].update(window_hold_seconds=[]),
+             "hold seconds"),
+            ("native lane", lambda restoration: restoration.pop("rtx4090"), "rtx4090 restoration did not pass"),
+            ("native audit", lambda restoration: restoration["rtx4090"]["final_audit_checks"].update(
+                task_ready=False), "rtx4090 restoration final_audit_checks did not all pass"),
+            ("native stage", lambda restoration: restoration["rtx4090"].update(documented_stage_restored=False),
+             "did not observe documented_stage_restored"),
+            ("undeclared lane", lambda restoration: restoration.update(rtx3090=deepcopy(RESTORATION["rtx3090"])),
+             "undeclared native lane rtx3090"),
+            ("other candidate", lambda restoration: restoration.update(candidate_commit="2" * 40),
+             "not candidate"),
+            ("relabelled upgrade", lambda restoration: restoration.update(production_upgrade_activated=True),
+             "cannot set the receipt's own fields"),
+        ))
+
+    def test_native_receipt_needs_its_own_live_observations_before_writing(self) -> None:
+        """Empty native observations once composed a passed public-install receipt."""
+        self.refused_before_writing(lambda evidence: evidence["rtx4090"]["observations"], (
+            ("empty", lambda observations: observations.clear(), "did not observe exact_tool_marker"),
+            ("no tool call", lambda observations: observations.update(server_tool_calls=0),
+             "no server tool call"),
+            ("no continuation", lambda observations: observations.update(exact_continuation_nonce=False),
+             "did not observe exact_continuation_nonce"),
+            ("not fail-closed", lambda observations: observations.update(
+                offline_request_failed_without_model_response=False),
+             "did not observe offline_request_failed_without_model_response"),
+            ("cloud fallback", lambda observations: observations.update(cloud_fallback_observed=True),
+             "rule out cloud fallback"),
+            ("install failed", lambda observations: observations["public_install"].update(status="failed"),
+             "public install did not pass"),
+        ))
+
+    def test_composition_replaces_the_staged_route_acceptance_summary(self) -> None:
+        """Staging leaves the summary the ready gate reads pending; composition, not a hand edit,
+        replaces it with what this composition bound."""
+        self.add_3090()
+        self.assertEqual(self.compose(), 0)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        routes = self.release_root / "acceptance" / "documented-routes.json"
+        version = DESCRIPTOR["omp"]["distribution_version"]
+        self.assertEqual(qualification["documented_route_acceptance"], {
+            "status": "passed",
+            "scope": MODULE.load(self.root / "evidence.json")["documented_routes"]["scope"],
+            "candidate_commit": CANDIDATE,
+            "evidence_commit_changes_candidate": False,
+            "evidence_path": f"releases/{self.release}/acceptance/documented-routes.json",
+            "evidence_sha256": MODULE.sha256(routes.read_bytes()),
+            "documented_route_steps": {
+                lane: "{0}/{0}".format(len(MODULE.documented_route.LANES[lane]))
+                for lane in (*MODULE.LANES, *MODULE.NATIVE_LANES)},
+            "platform_receipts": [f"releases/{self.release}/acceptance/{platform}-{version}.json"
+                                  for platform in MODULE.OMP_PROFILE_PLATFORMS.values()],
+            "fresh_product_acceptance": True,
+            "restoration": {
+                "path": "docs/measurements/fixture-acceptance-restoration.json",
+                "status": "passed",
+                "driver_hold_s": RESTORATION["rtx5090"]["window_hold_seconds"][-1],
+                "production_upgrade_activated": False,
+                "documented_directory_presence_restored": True,
+                "native_documented_stage_restored": True,
+                "native_driver_window_s": {gpu: RESTORATION[gpu]["window_hold_seconds"]
+                                           for gpu in ("rtx4090", "rtx3090")},
+            },
+            "composition_run": True,
+        })
+        self.assertEqual(qualification["composition"]["documented_route_acceptance"]["sha256"],
+                         MODULE.sha256(routes.read_bytes()))
+        errors: list[str] = []
+        validate_ready_state_consistency({}, {}, qualification, errors)
+        self.assertEqual(errors, [])
+
+    def test_route_acceptance_summary_needs_the_accepted_scope_before_writing(self) -> None:
+        self.refused_before_writing(lambda evidence: evidence["documented_routes"], (
+            ("absent", lambda routes: routes.pop("scope"), "needs the scope"),
+            ("blank", lambda routes: routes.update(scope=" "), "needs the scope"),
+        ))
+
     def add_3090(self, *, route: bool = True, evidence: bool = True) -> None:
         manifest = MODULE.load(self.release_root / "manifest.json")
         variant = deepcopy(manifest["components"]["ninfer_variants"][0])
         variant.update(id="rtx3090-windows-native", release_tag="v0.6.2-qwen38-3090-beta.1",
-                       package_sha256="3" * 64)
+                       package_sha256="3" * 64, qualification={"summary": "qualification/rtx3090.json"})
         manifest["components"]["ninfer_variants"].insert(0, variant)
         MODULE.save(self.release_root / "manifest.json", manifest)
+        MODULE.save(self.release_root / "qualification" / "rtx3090.json", FIRST_RELEASE)
         if evidence:
             source = MODULE.load(self.root / "evidence.json")
-            source["rtx3090"] = {"preparation": {}, "observations": {"lane": "rtx3090"}, "limitations": []}
+            source["rtx3090"] = native_evidence("rtx3090")
+            source["restoration"]["rtx3090"] = deepcopy(RESTORATION["rtx3090"])
             MODULE.save(self.root / "evidence.json", source)
         if route:
             receipt = route_receipt("rtx3090-native")
