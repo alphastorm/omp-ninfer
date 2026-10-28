@@ -27,7 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   missing, leave an identical file in place, and refuse by name to overwrite one that differs: a
   macOS/Linux rerun used to replace the reader's own settings, and a native Windows rerun stopped
   at the files its own earlier run had installed
-  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
+  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)). The WSL2 Linux client row of
+  "Choose your lane" now includes section 6, which creates `~/.omp/agent` and installs the key the
+  provider fragment reads.
 - Stop the Windows guide at a failed native command: each tag clone and
   `py -3 scripts\verify_release.py --require-ready` ready gate throws on a nonzero exit, and the
   RTX 5090 fail-closed check throws when its WSL2 `stop-ninfer.sh` fails instead of sending the

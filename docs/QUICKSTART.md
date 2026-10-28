@@ -14,7 +14,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
 | RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
 | RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
-| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
+| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [client key](#6-install-the-same-key-on-the-mac), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
@@ -812,8 +812,9 @@ Windows forwarding or release acceptance.
 
 ## 6. Install the same key on the Mac
 
-In another Mac terminal, stream the key over SSH from the login shell or the `Ubuntu-24.04` WSL2
-distro (on Windows, the first branch prints one harmless `cannot find the path` line):
+In another Mac terminal, or the WSL2 Linux client's shell, stream the key over SSH from the login
+shell or the `Ubuntu-24.04` WSL2 distro (on Windows, the first branch prints one harmless
+`cannot find the path` line):
 
 ```sh
 install -d -m 700 "$HOME/.omp/agent"
