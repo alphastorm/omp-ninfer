@@ -216,9 +216,11 @@ the current window only):
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ### Install the exact native Windows client
@@ -254,9 +256,11 @@ acceptance passed. Keep prior native release roots untouched for historical reco
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ```powershell
@@ -444,9 +448,11 @@ this prerequisite is not a claim of qualified upgrade/rollback directions.
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ```powershell
@@ -897,6 +903,7 @@ native Windows request:
 
 ```powershell
 wsl.exe -d Ubuntu-24.04 -- bash -lc 'cd ~/omp-ninfer && ./examples/manual-tunnel/stop-ninfer.sh'
+if ($LASTEXITCODE -ne 0) { throw 'NInfer stop failed' }
 & $Launcher -p --no-session --auto-approve --max-time 20s `
   --model ninfer-beta/q38-ninfer 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }

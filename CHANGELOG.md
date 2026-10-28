@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   saved checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid.
   The guide now describes deliberate rotation
   ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
+- Stop the Windows guide at a failed native command: each tag clone and
+  `py -3 scripts\verify_release.py --require-ready` ready gate throws on a nonzero exit, and the
+  RTX 5090 fail-closed check throws when its WSL2 `stop-ninfer.sh` fails instead of sending the
+  outage request to a runtime that may still be serving
+  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
 - Keep the unit suite off the documented tunnel port: `scripts/hosts/run-documented-route.sh`
   takes its tunnel port from `ROUTE_TUNNEL_PORT` (default `18089`; another port is recorded on the
   tunnel step) and its tests use an ephemeral port, so running the suite can no longer take

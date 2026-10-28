@@ -626,5 +626,58 @@ class HostPreparationTests(unittest.TestCase):
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
 
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
+class WindowsNativeCommandTests(unittest.TestCase):
+    """A pasted PowerShell block does not stop at a failed native command; without a $LASTEXITCODE
+    check its next line runs (omp-ninfer#100 item 7). Each block runs with its native commands
+    stubbed: every stub records its call, and the named ones fail."""
+
+    @staticmethod
+    def steps(lane: str) -> dict[str, str]:
+        return {step.slug: block.text
+                for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)}
+
+    def run_block(self, block: str, failing: set[str], prelude: str = "",
+                  stale_clone: bool = False) -> tuple[list[str], bool]:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            stubs = root / "bin"
+            stubs.mkdir()
+            calls = root / "calls.txt"
+            for name, effect in (("git", "mkdir -p omp-ninfer"), ("py", ""), ("wsl.exe", ""), ("omp", "")):
+                result = "exit 1" if name in failing else f"{effect}\nexit 0"
+                (stubs / name).write_text(f"#!/bin/sh\necho {name} >> '{calls}'\n{result}\n")
+                (stubs / name).chmod(0o755)
+            if stale_clone:
+                (root / "omp-ninfer").mkdir()
+            script = root / "block.ps1"
+            script.write_text("function Set-ExecutionPolicy {}\n"  # Windows-only policy; not under test.
+                              + prelude + block + "'NEXT_BLOCK_REACHED'\n")
+            completed = subprocess.run(
+                [shutil.which("pwsh"), "-NoProfile", "-File", str(script)], cwd=root, capture_output=True,
+                text=True, timeout=60, env=dict(os.environ, PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+            ran = calls.read_text().split() if calls.exists() else []
+            return ran, "NEXT_BLOCK_REACHED" in completed.stdout
+
+    def test_a_failed_clone_or_ready_gate_stops_the_route(self) -> None:
+        for lane in ("rtx5090-windows-client", "rtx4090-native", "rtx3090-native"):
+            block = self.steps(lane)["clone-and-verify"]
+            with self.subTest(lane=lane, failing="nothing"):
+                self.assertEqual(self.run_block(block, set()), (["git", "py"], True))
+            with self.subTest(lane=lane, failing="ready gate"):
+                self.assertEqual(self.run_block(block, {"py"}), (["git", "py"], False))
+            with self.subTest(lane=lane, failing="clone"):
+                # The likeliest failed clone: an earlier release's clone already holds the name.
+                self.assertEqual(self.run_block(block, {"git"}, stale_clone=True), (["git"], False))
+
+    def test_a_failed_runtime_stop_ends_the_outage_check_before_its_request(self) -> None:
+        block = self.steps("rtx5090-windows-client")["fail-closed"]
+        prelude = "$Launcher = Join-Path $PSScriptRoot 'bin/omp'\n"
+        # The stop works and the request fails, as an outage requires.
+        self.assertEqual(self.run_block(block, {"omp"}, prelude), (["wsl.exe", "omp"], True))
+        # The runtime may still be serving: no request may stand in for the outage.
+        self.assertEqual(self.run_block(block, {"wsl.exe", "omp"}, prelude), (["wsl.exe"], False))
+
+
 if __name__ == "__main__":
     unittest.main()
