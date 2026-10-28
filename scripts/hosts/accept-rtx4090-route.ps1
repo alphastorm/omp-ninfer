@@ -198,7 +198,12 @@ function Child($childMode,$seconds) {
     $name=$childMode.ToLowerInvariant()
     $p=Start-Process -FilePath "$PSHOME\powershell.exe" -ArgumentList @('-NoProfile','-NonInteractive','-EncodedCommand',$encoded) -PassThru -RedirectStandardOutput "$Workspace\$name.stdout.log" -RedirectStandardError "$Workspace\$name.stderr.log"
     $handle=$p.Handle # Required: WaitForExit(timeout) otherwise loses the exit code on Windows PowerShell.
-    if(-not $p.WaitForExit($seconds*1000)){& taskkill.exe /PID $p.Id /T /F|Out-Null;throw "$childMode child timeout; restore now"}
+    if(-not $p.WaitForExit($seconds*1000)) {
+        & taskkill.exe /PID $p.Id /T /F|Out-Null
+        # taskkill also fails when the child exited meanwhile; only a child still running is reported.
+        if($LASTEXITCODE -ne 0 -and -not $p.WaitForExit(30000)){throw "$childMode child timeout; taskkill failed (exit $LASTEXITCODE) and the child still runs; restore now"}
+        throw "$childMode child timeout; restore now"
+    }
     $p.WaitForExit();$p.Refresh();$code=$p.ExitCode
     if($null -eq $code){throw "$childMode child exit code unavailable"}
     return [int]$code
@@ -329,7 +334,9 @@ if($Mode -eq 'Preflight') {
         & git -C $Clone checkout -q $Candidate
         if($LASTEXITCODE -ne 0){throw 'preflight checkout failed'}
     }
-    if((& git -C $Clone rev-parse HEAD|Out-String).Trim() -cne $Candidate -or (& git -C $Clone status --porcelain|Out-String).Trim()){throw 'candidate clone is not clean and exact'}
+    $head=(& git -C $Clone rev-parse HEAD|Out-String).Trim();if($LASTEXITCODE -ne 0){throw 'candidate clone HEAD unreadable'}
+    $changes=(& git -C $Clone status --porcelain|Out-String).Trim();if($LASTEXITCODE -ne 0){throw 'candidate clone status unreadable'}
+    if($head -cne $Candidate -or $changes){throw 'candidate clone is not clean and exact'}
     $manifest=ReadJson "$Clone\releases\$Release\manifest.json"
     $nativeModel=if($manifest.components.PSObject.Properties.Name -contains 'native_model'){$manifest.components.native_model}else{$manifest.components.model}
     if($manifest.components.omp.distribution_kind -cne 'upstream-release'){throw 'stock upstream client required'}
@@ -359,8 +366,8 @@ if($Mode -eq 'Preflight') {
     if((Hash $clientAsset) -cne $manifest.components.omp.artifact_sha256){throw 'client asset mismatch'}
     & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $documented.selector --endpoint http://127.0.0.1:18082/v1
     if($LASTEXITCODE -ne 0){throw 'structured probe preflight failed'}
-    $version=(& $binary --version|Out-String).Trim()
-    & $binary --help > "$Workspace\client-help.txt"
+    $version=(& $binary --version|Out-String).Trim();if($LASTEXITCODE -ne 0){throw 'isolated client --version failed'}
+    & $binary --help > "$Workspace\client-help.txt";if($LASTEXITCODE -ne 0){throw 'isolated client --help failed'}
     $agent=Join-Path $HOME '.omp\agent';New-Item -ItemType Directory -Force $agent|Out-Null
     Copy-Item $documented.fragment "$agent\models.yml"
     Copy-Item "$Clone\examples\manual-tunnel\fail-closed.yml" "$agent\config.yml"

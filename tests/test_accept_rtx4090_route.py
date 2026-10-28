@@ -555,5 +555,78 @@ New-Item -ItemType File -Force (Join-Path $Workspace 'route-home\AppData\Local\O
             self.assertFalse(assess()["checks"]["only_expected_server_model"])
 
 
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to run the orchestrator's statements")
+class NativeCommandStatusTests(unittest.TestCase):
+    """The orchestrator checks each native command's exit status (the omp-ninfer#100 item 7 class).
+    Production statements run against PowerShell function fakes of git, the client and taskkill."""
+
+    def run_proof(self, proof: str) -> object:
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "proof.ps1"
+            script.write_text(proof)
+            shutil.copy(ROOT / "scripts/hosts/native-gpu.ps1", directory)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory],
+                                    capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return json.loads(result.stdout)
+
+    def test_preflight_refuses_an_unreadable_clone_or_a_failing_client(self) -> None:
+        """A failed `git status --porcelain` printed nothing, which read as a clean candidate, and the
+        client's --version and --help exit statuses were never read."""
+        rows = self.run_proof(r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+function Statements($from,$to) {$start=$text.IndexOf($from);$text.Substring($start,$text.IndexOf($to,$start)-$start)}
+$cloneCheck=Statements '    if(-not (Test-Path "$Clone\.git"))' '    $manifest=ReadJson'
+$clientCheck=Statements '    $version=' '    $agent=Join-Path'
+$Candidate='1'*40;$Clone=Join-Path $Scratch 'clone';$Workspace=$Scratch;$binary='omp-fixture'
+New-Item -ItemType Directory -Force (Join-Path $Clone '.git')|Out-Null
+function git {$global:LASTEXITCODE=0;if($args[2] -ceq $failing){$global:LASTEXITCODE=128}elseif($args[2] -ceq 'rev-parse'){$Candidate}}
+function omp-fixture {$global:LASTEXITCODE=0;if($args[0] -ceq $failing){$global:LASTEXITCODE=1}else{'omp/0.0.0'}}
+$rows=[ordered]@{}
+foreach($failing in @('nothing','rev-parse','status','--version','--help')) {
+  $rows[$failing]=@(foreach($check in @($cloneCheck,$clientCheck)) {
+    try{Invoke-Expression $check;'accepted'}catch{'refused'}
+  })
+}
+$rows|ConvertTo-Json -Compress
+''')
+        self.assertEqual(rows, {"nothing": ["accepted", "accepted"], "rev-parse": ["refused", "accepted"],
+                                "status": ["refused", "accepted"], "--version": ["accepted", "refused"],
+                                "--help": ["accepted", "refused"]})
+
+    def test_a_timed_out_child_that_survives_taskkill_is_reported_running(self) -> None:
+        """taskkill's exit status was ignored: a timed-out child it failed to stop was reported only as
+        a timeout while the window went on to restore the host under it."""
+        messages = self.run_proof(r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+$definitions=$text.Substring(0,$text.IndexOf('# Child isolation happens'))
+$assertions=@'
+function Start-Process {
+  param($FilePath,$ArgumentList,[switch]$PassThru,$RedirectStandardOutput,$RedirectStandardError)
+  # The child outlives its window; after taskkill it has exited only when $exits.
+  $process=[pscustomobject]@{Handle=1;Id=4242;ExitCode=$null;Waits=0}
+  $process|Add-Member ScriptMethod WaitForExit {param($milliseconds) $this.Waits++;$this.Waits -gt 1 -and $exits}
+  $process|Add-Member ScriptMethod Refresh {}
+  return $process
+}
+function taskkill.exe {$global:LASTEXITCODE=$killExit}
+foreach($case in @(@(0,$true),@(128,$true),@(1,$false))) {
+  $killExit,$exits=$case
+  try{Child Route 1|Out-Null;'returned'}catch{$_.Exception.Message}
+}
+'@
+$messages=@(& ([scriptblock]::Create($definitions+$assertions)) -Lane rtx3090 -Release v0.12.0 -Candidate ('1'*40) -Workspace $Scratch -Bundle $Scratch -Clone $Scratch -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot (Join-Path $Scratch 'state') -RealHome (Join-Path $Scratch 'home'))
+ConvertTo-Json -Compress $messages
+''')
+        # Stopped by taskkill, or already gone when it ran (taskkill exit 128): a plain timeout.
+        self.assertEqual(messages[:2], ["Route child timeout; restore now"] * 2)
+        self.assertIn("still runs", messages[2])
+
+
 if __name__ == "__main__":
     unittest.main()
