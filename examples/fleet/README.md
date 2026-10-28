@@ -13,18 +13,20 @@ The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standa
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The current fragments target **v0.13.1 / OMP 18.12.6**.
-The RTX 5090 profile uses `qwen38-5090-v0.13.0` (`751d22dc`), model container version 3 `81f924d4`,
-and host directory `checkpoints-v013` mounted at `/checkpoints-v013` with mandatory
-`--session-checkpoint-require-origin-auth` (carried unchanged from v0.13.0); prior server sessions
-replay from OMP transcripts, never from the old checkpoint root. Native RTX 4090 uses
-`v0.7.0-qwen38-4090-beta.2` (source `7a25cd72` on `64d10fbf`, profile
-`qwen38-4090-native-v0.7.0-beta.2`, public config `b21cdaf8`), the same published model container
-version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`), and release-isolated schema 3 checkpoint directory
-`cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the installed release ID such as `qwen38-4090-native-v0.7.0-beta.2-7a25cd72f490`) with mandatory
+The current fragments target **v0.14.0 / OMP 18.12.6**.
+The RTX 5090 profile uses `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b` on `64d10fbf`, image
+`760fb6be`, server `55f0b95a`), profile `qwen38-5090-v0.13.0` (`751d22dc`), model container version
+3 `81f924d4`, and host directory `checkpoints-v013` mounted at `/checkpoints-v013` with mandatory
+`--session-checkpoint-require-origin-auth`; prior server sessions replay from OMP transcripts, never
+from an older checkpoint root. Native RTX 4090 uses `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b` on
+`64d10fbf`, profile `qwen38-4090-native-v0.7.0-beta.3`, public config `b5cfbf50`, package `87038cfb`,
+server `5caa7780`), the same published model container version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`),
+and release-isolated schema 3 checkpoint directory
+`cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the installed
+release ID such as `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`) with mandatory
 `--session-checkpoint-require-origin-auth`. Enforced JSON-schema output and 128-character
-Chat/Responses tool names are qualified on both the RTX 5090 container and rebased native lanes. No
-multi-machine fleet completed-work qualification is claimed for v0.13.1; per-lane installation
+Chat/Responses tool names are qualified on both the RTX 5090 container and native lanes. No
+multi-machine fleet completed-work qualification is claimed for v0.14.0; per-lane installation
 eligibility follows the exact manifest ready gate. The release uses the
 checksummed binary from the [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.

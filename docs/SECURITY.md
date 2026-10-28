@@ -52,7 +52,7 @@ OMP remains responsible for tool approval and workspace boundaries.
 6. The upstream OMP 18.12.6 binaries, shared Qwen3.8 27B model container version 3 artifact
    (`81f924d4`), NInfer container image and native packages, server binaries, SPDX and CycloneDX
    dependency SBOMs, seccomp profile, runtime configurations, and qualification summaries are pinned
-   by immutable SHA-256 digests and commits in `releases/v0.13.1/manifest.json` before release
+   by immutable SHA-256 digests and commits in `releases/v0.14.0/manifest.json` before release
    status becomes `ready`.
 7. The NInfer container image is pulled by OCI manifest digest (`@sha256:`), never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
@@ -80,7 +80,7 @@ checkpoints across all three qualified lanes:
   256 MiB staging, schema 3, mandatory `--session-checkpoint-require-origin-auth`) and `/logs`, written as the invoking user via `io_uring` and `O_DIRECT`.
 - **Native Windows RTX 4090 and RTX 3090 lanes:** Checkpoints (`cache/<release-instance-id>/session-checkpoints-v3`,
   where `<release-instance-id>` is the installed release ID such as
-  `qwen38-4090-native-v0.7.0-beta.2-7a25cd72f490`; 24,576 MiB quota, 256 MiB staging, schema 3,
+  `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`; 24,576 MiB quota, 256 MiB staging, schema 3,
   mandatory `--session-checkpoint-require-origin-auth`), release metadata, `last-stop.json`, and
   request JSONL logs live under protected state roots
   (`%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`), while
@@ -95,7 +95,7 @@ key and stored outside the checkpoint root. `scripts/checkpoint_sync.py` verifie
 byte count and SHA-256 before atomic rename publication, and the runtime refuses or quarantines
 modified or unauthenticated generations at load (`--session-checkpoint-require-origin-auth`, which is
 mandatory in the `qwen38-5090-v0.13.0` container profile and both
-`qwen38-4090-native-v0.7.0-beta.2` / `qwen38-3090-native-v0.7.0-beta.2` native profiles,
+`qwen38-4090-native-v0.7.0-beta.3` / `qwen38-3090-native-v0.7.0-beta.3` native profiles,
 requires a valid MAC on at least a 32-byte bearer key; within one API-key principal, `prompt_cache_key` names a session capability, so use
 unique high-entropy keys and never share that principal among mutually untrusted clients). Because checkpoint payloads and request logs
 contain unencrypted session state on disk, treat checkpoint directories, replica storage, and log
@@ -106,7 +106,7 @@ Stopping or removing the container (`examples/manual-tunnel/stop-ninfer.sh`) or 
 lane (`Control-Release.ps1 -Action Stop`) retains the model artifact, bearer key, checkpoint store,
 request logs, and OMP transcripts. On native lanes, a managed stop flushes live sessions to
 checkpoints within a 900-second graceful wait and, on the RTX 3090 lane, restores the 370 W default
-power limit from its 300 W serving cap. Delete the model, key, checkpoint root, logs, and
+power limit from its 350 W serving cap. Delete the model, key, checkpoint root, logs, and
 transcripts explicitly when decommissioning a machine. Removing NInfer checkpoint state does not
 remove the OMP transcript.
 
@@ -127,7 +127,7 @@ defect.
 
 ## Artifact verification
 
-Run from the exact release tag (`v0.13.1`):
+Run from the exact release tag (`v0.14.0`):
 
 ```sh
 python3 scripts/verify_release.py --require-ready

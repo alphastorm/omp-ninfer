@@ -1,17 +1,6 @@
 # Quickstart
 
-> **Prepared guide: v0.14.0 · stock Oh My Pi 18.12.6 · candidate route acceptance passed; not published**
-
-All three beta.3 components are published and runtime-qualified at engine source
-`2c6f423bd817b6534158553e1b34ab4959c43165`; fresh v0.14.0 product-route, client, native
-public-install and independent restoration acceptance passed on frozen candidate `c81a8e7e`.
-Current council binding, final evidence pins and founder-owned publication are separate.
-Do not execute these install
-blocks before the product is published and the ready gate passes.
-The published release remains v0.13.1:
-[use its immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md).
-Fresh exact-byte acceptance covers this preparation's changed executable product references,
-with `documented_routes.document_change`; predecessor acceptance does not transfer.
+> **Versioned guide: v0.14.0 · stock Oh My Pi 18.12.6 · Qualified on RTX 5090 · 4090 · 3090**
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -19,18 +8,18 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Prepared client route in v0.14.0 | Start here |
+| GPU and host | Client route in v0.14.0 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 candidate public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 candidate public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
 
-- **Clone the tag and run the ready gate:** after publication, start from a clean clone of `v0.14.0` and verify
+- **Clone the tag and run the ready gate:** start from a clean clone of `v0.14.0` and verify
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
   on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
@@ -88,7 +77,7 @@ changing a running host.
 
 ## OMP 18.12.6 client
 
-Prepared release `v0.14.0` pins unmodified upstream
+Release `v0.14.0` pins unmodified upstream
 [Oh My Pi v18.12.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6) (source
 `45c35e40c46166dc726ccc52f5d27f40f2449f99`, tree `8a90a1b48b370649bd3f026d5f609e500626785c`),
 carried unchanged from `v0.13.1`.
@@ -114,12 +103,11 @@ When migrating from an earlier client:
   `ninfer-beta` / `ninfer-main` at `2` and `ninfer-native-4090` / `ninfer-heavy` /
   `ninfer-native-3090` at `1`, and compaction stays at OMP's default.
 
-## Fresh candidate acceptance — v0.14.0
+## Acceptance evidence
 
-Fresh v0.14.0 client, route, native public-install and independent restoration acceptance passed
+Fresh v0.14.0 client, route, native public-install, and independent restoration acceptance passed
 on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d`. Client acceptance is never
-inherited; no predecessor product receipt is relabeled. The guide remains prepared until
-product publication and the ready gate.
+inherited; no predecessor product receipt is relabeled.
 
 | Documented route | Fresh acceptance |
 | --- | --- |
@@ -141,7 +129,7 @@ predecessor and zero rollback directions.
 
 The RTX 5090 initial attempt failed closed when a same-Mac unit-suite run bound the actual
 `127.0.0.1:18089` tunnel port after preflight. The incumbent was restored; one corrected attempt
-on unchanged C passed with test/route runners excluded from that Mac during the window
+on unchanged candidate `c81a8e7e` passed with test/route runners excluded from that Mac during the window
 ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)). The driver's corrected-window
 summary first refused a missing `corrections.json` after route/client/restoration success;
 recording that disclosure and rerunning summarize alone changed no execution evidence
@@ -159,10 +147,10 @@ RTX 5090 production was not upgraded during acceptance.
 tester-equivalent observations, not independent external-user outcomes. Deferrals
 [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
 and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#99](https://github.com/alphastorm/omp-ninfer/issues/99)
-remain disclosed in the [candidate notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md), including
+remain disclosed in the [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md), including
 the contributor harness's native default-model issue (#98). See [Releases](RELEASES.md).
 
-## Prepared composition at a glance
+## Current release at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
@@ -171,11 +159,12 @@ the contributor harness's native default-model issue (#98). See [Releases](RELEA
 | RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.7.0-qwen38-3090-beta.3`, source `2c6f423b` on upstream `64d10fbf`, package `a7637f66`, server `fedce425` | `81f924d4` (20,437,521,664 bytes) | `qwen38-3090-native-v0.7.0-beta.3` (public config `d08d262b`): mandatory strict origin auth, MTP3/INT8, `Group64` A8 off, 131,072 context, C1, 30 s pending timeout, four extra slots, 1,024-token prefill, shared Host budget, 768 MiB admission headroom, 350 W serving cap; JSON-schema output, 128-character tool names, text/tools (no vision or DFlash2) |
 
 The exact RTX 5090 image is
-`ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a`.
+`ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a`,
+and all three lanes bind engine source `2c6f423bd817b6534158553e1b34ab4959c43165`.
 It ships checked first-build bytes under a founder-approved 5090-only reproducibility exception;
 same-source second builds are not bit-identical. See the
 [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
-[candidate manifest](../releases/v0.14.0/manifest.json) for exact identities and scope.
+[manifest](../releases/v0.14.0/manifest.json) for exact identities and scope.
 
 - **Serving limits and compaction:** RTX 5090 admits two requests at once and holds a pending
   request for up to 180 s (`--pending-timeout-ms 180000`) when both prompts plus output reservations

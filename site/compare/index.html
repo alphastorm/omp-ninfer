@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison</title>
-<meta name="description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.13.1 (2026-10-26): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
+<meta name="description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/compare/">
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison">
-<meta property="og:description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.13.1 (2026-10-26): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
+<meta property="og:description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/compare/">
 <meta name="twitter:card" content="summary">
@@ -18,9 +18,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.13.1 (published 2026-10-26) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.13.1",
- "datePublished": "2026-10-26",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (published 2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.14.0",
+ "datePublished": "2026-10-28",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -46,13 +46,13 @@
 <a href="https://github.com/Neroued/ninfer">NInfer</a> serving Qwen3.8&nbsp;27B. Every project below
 is excellent at a different job; most operators should use one of them, and this page exists to make
 that call fast and candid, without self-assigned scores or rankings.</p>
-<p class="verified">OMP NInfer column: v0.13.1, stock Oh My Pi 18.12.6 (2026-10-26). Other columns:
+<p class="verified">OMP NInfer column: v0.14.0, stock Oh My Pi 18.12.6 (2026-10-28). Other columns:
 public documentation as of 2026-08-31; reverify before deciding.</p>
 
 <h2>The map</h2>
 <table>
 <tr><th>Dimension</th><th>OMP NInfer</th><th>Ollama</th><th>LM Studio</th><th>llama.cpp</th><th>vLLM</th></tr>
-<tr><td>Primary job</td><td>Durable OMP appliance (<code>v0.13.1</code>, stock OMP <code>18.12.6</code>; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090)</td><td>Easy model runner</td><td>GUI model runner</td><td>Portable inference engine</td><td>General serving engine</td></tr>
+<tr><td>Primary job</td><td>Durable OMP appliance (<code>v0.14.0</code>, stock OMP <code>18.12.6</code>; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090)</td><td>Easy model runner</td><td>GUI model runner</td><td>Portable inference engine</td><td>General serving engine</td></tr>
 <tr><td>Model breadth</td><td>One model (Qwen3.8 27B), hash-pinned across all lanes (20.4&nbsp;GB <code>81f924d4</code>)</td><td>Broad</td><td>Broad</td><td>Broad</td><td>Broad</td></tr>
 <tr><td>Qualified OMP workflow</td><td>Core product (vision + tools + JSON-schema output on RTX 5090; text + tools + JSON-schema output on native RTX 4090 and RTX 3090)</td><td>Generic endpoint</td><td>Generic endpoint</td><td>Generic endpoint</td><td>Generic endpoint</td></tr>
 <tr><td>Explicit Responses continuation</td><td>Core product</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td></tr>
@@ -63,7 +63,7 @@ public documentation as of 2026-08-31; reverify before deciding.</p>
 <tr><td>Best fit</td><td>One private, long-lived OMP session</td><td>Easy breadth</td><td>Desktop convenience</td><td>Portability</td><td>Serving scale</td></tr>
 </table>
 <p class="verified">Last verified 2026-08-31 against each project’s public documentation; the OMP
-NInfer column was updated 2026-10-26 for published v0.13.1 (2026-10-26) without re-verifying the
+NInfer column was updated 2026-10-28 for published v0.14.0 (2026-10-28) without re-verifying the
 other projects. Capabilities change quickly — reverify before deciding.</p>
 <p>Qwen3.8 27B is the served model. <a href="https://github.com/Neroued/ninfer">Neroued’s NInfer</a>
 and its GPU ports supply the specialized single-GPU engine; this project’s runtime adds explicit
@@ -85,7 +85,7 @@ LM&nbsp;Studio for model breadth and convenience, llama.cpp for portability, or 
 serving and concurrency.</p>
 <p>Full criteria: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md">decision guide</a> ·
 prior art: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELATED_WORK.md">related work</a> ·
-<a href="../status/">v0.13.1 release status</a></p>
+<a href="../status/">v0.14.0 release status</a></p>
 </main>
 <footer>
   Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
