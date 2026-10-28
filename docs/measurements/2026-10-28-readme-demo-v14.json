@@ -1,0 +1,290 @@
+{
+  "artifact_type": "omp_ninfer_readme_demo_recording",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "lane": "rtx5090",
+  "recorded_utc": "2026-10-28T07:24:02Z",
+  "purpose": "README hero recording: one real Oh My Pi session against the released v0.14.0 RTX 5090 runtime, including a server restart mid-session. Product claims are bound by the release receipts, not by this clip.",
+  "client": {
+    "distribution": "unmodified upstream Oh My Pi release binary",
+    "asset": "omp-darwin-arm64",
+    "version": "18.12.6",
+    "upstream_tag": "v18.12.6",
+    "sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58",
+    "verified_against": "releases/v0.14.0/qualification/client-components.json",
+    "configuration": {
+      "models_yml": "examples/manual-tunnel/models.fragment.yml installed verbatim (provider ninfer-beta, model q38-ninfer, compat.statefulResponses true)",
+      "config_yml": "examples/manual-tunnel/fail-closed.yml installed verbatim (retries and model fallback off, update check off, maxInFlightRequests)",
+      "key": "the appliance bearer key installed as ninfer-beta.key (mode 600) and read through the fragment's !cat value",
+      "launch": "omp --model ninfer-beta/q38-ninfer --hide-thinking --thinking low",
+      "environment": "isolated neutral HOME outside any user account; PATH limited to the demo bin directory and the system directories; OMP_SKIP_SETUP=1 (skips the first-run wizard); TERM=xterm-256color COLORTERM=truecolor",
+      "display_only_adaptations": [
+        "--hide-thinking hides reasoning blocks in the TUI; the model's reasoning ran unchanged",
+        "--thinking low selects the fragment's lowest effort level"
+      ]
+    }
+  },
+  "runtime": {
+    "component": "v0.7.0-qwen38-5090-beta.3",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+    "identity_over_authenticated_status": {
+      "binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+      "config_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+      "deployment_profile": "qwen38-5090-v0.13.0",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "model_id": "q38-ninfer",
+      "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "build_profile": "rtx5090",
+      "cuda_architecture": "120a",
+      "source_dirty": false
+    },
+    "runtime_over_authenticated_status": {
+      "kv_cache": "bf16",
+      "kv_capacity_tokens": 146368,
+      "max_context": 131072,
+      "speculative_backend": "dflash2",
+      "speculative_draft_window": 7,
+      "public_model_id": "q38-ninfer"
+    },
+    "max_concurrency": 2,
+    "host": "the maintainer's RTX 5090 appliance (Windows 11, Docker Desktop/WSL2), promoted to omp-ninfer v0.14.0 earlier the same day"
+  },
+  "route": {
+    "shape": "Mac loopback 127.0.0.1:18089 -> OpenSSH local forward -> appliance host loopback -> Docker published port -> bearer-authenticated ninfer-serve",
+    "capture_adaptation": "The maintainer's production container keeps the released profile, configuration, image, server binary and model identity but publishes its port on the Windows host instead of the product profile's loopback-only :18089 and runs with restart=unless-stopped; the Mac side used the product's documented loopback port through the tunnel. Engine bytes, configuration, model and authentication were the released identity throughout.",
+    "restart_helper": "ninfer-restart: a demo shell helper outside the project directory that runs `docker restart --timeout 60` on the inference host over SSH, polls /health through the tunnel, then prints one line from the authenticated /v1/ninfer/status response (max_context and the engine source prefix). Its two output lines are the helper's own text; the SSH destination comes from an environment variable and never appears on screen."
+  },
+  "session": {
+    "terminal": {
+      "cols": 100,
+      "rows": 30,
+      "type": "xterm-kitty"
+    },
+    "project": "scratch git repository with lru.py (an OrderedDict LRU cache whose get() does not refresh recency) and test_lru.py (three unittest cases, one failing); synthetic, content-safe",
+    "turns": [
+      {
+        "input": "One test in test_lru.py fails: the cache evicts the wrong entry. Find the bug in lru.py, fix it, and run the tests.",
+        "observed": "read both files, explained the bug, one-line edit at lru.py:16 (self._items.move_to_end(key)), ran python3 -m unittest -v: 3/3 ok, summarized Bug and Fix",
+        "wall_seconds_from_enter_to_idle": 8.2
+      },
+      {
+        "input": "!ninfer-restart",
+        "observed": "ninfer-serve container restarted on the appliance; helper reported serving again after 36 s",
+        "wall_seconds_from_enter_to_idle": 36.3
+      },
+      {
+        "input": "In one sentence: why did only the third test catch it?",
+        "observed": "answered in context after the restart (first two tests never rely on a get refreshing recency before eviction)",
+        "wall_seconds_from_enter_to_idle": 4.7
+      }
+    ],
+    "idle_threshold_seconds_for_wall_times": 3.0,
+    "context_usage_at_end": "8% of 131,072 tokens in the OMP status line",
+    "driver": "keystrokes were sent by a pty driver at roughly 36 characters per second with jitter; no text was pasted"
+  },
+  "restart": {
+    "command": "docker restart --timeout 60 <container> over SSH; graceful stop (SIGTERM with a 60 s grace) then start of the same container id",
+    "container_started_utc_after_restart": "2026-10-28T07:24:32.911Z",
+    "helper_reported_seconds_until_serving": 36,
+    "fleet_custody": "owner fleet admission was paused before the take, the same container id was reconciled and admission resumed after it (phase Fleet, no blockers)",
+    "continuation_after_restart": {
+      "source": "GET /v1/ninfer/status over the tunnel after the recording; counters are since the restarted process started",
+      "cache_last_selection": {
+        "frontier_tokens": 10375,
+        "path": "private_endpoint"
+      },
+      "reused_prompt_tokens": 10375,
+      "computed_prefill_tokens_since_restart": 155,
+      "committed_decode_tokens_since_restart": 314,
+      "decode_rounds_since_restart": 84,
+      "reading": "The follow-up after the restart reused 10,375 retained prompt tokens over the session's own continuation endpoint and computed 155 new prefill tokens: the session state flushed by the graceful stop was restored from the release-isolated checkpoint store. The session was below the 32,768-token automatic checkpoint gate, so without a graceful stop the same turn would have been replayed from OMP's transcript."
+    },
+    "status_snapshot": {
+      "artifact_type": "ninfer_server_status",
+      "cache": {
+        "device_state": {
+          "capacity": 4,
+          "occupied": 4
+        },
+        "host_kv": {
+          "capacity_bytes": null,
+          "occupied_bytes": 683671552
+        },
+        "host_state": {
+          "capacity": null,
+          "occupied": 5
+        },
+        "last_materialization_predicted_nanoseconds": null,
+        "last_selection": {
+          "frontier_tokens": 10375,
+          "path": "private_endpoint"
+        },
+        "private_catalog": {
+          "capacity": null,
+          "occupied": 2
+        },
+        "private_evictions": null,
+        "reused_prompt_tokens": 10375,
+        "shared_catalog": {
+          "active_references": null,
+          "capacity": null,
+          "occupied": 1
+        },
+        "shared_evictions": null
+      },
+      "identity": {
+        "binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+        "build_profile": "rtx5090",
+        "build_type": "Release",
+        "config_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+        "cuda_architecture": "120a",
+        "cuda_compiler": "NVIDIA-13.1.115",
+        "cuda_toolkit": "13.1.115",
+        "cxx_compiler": "GNU-13.3.0",
+        "deployment_profile": "qwen38-5090-v0.13.0",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "model_id": "q38-ninfer",
+        "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "source_dirty": false,
+        "target": "Qwen3_5ForCausalLM",
+        "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+        "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+      },
+      "mtp": {
+        "acceptance_ratio": 0.39622641509433965,
+        "accepted_tokens": 231,
+        "drafted_tokens": 583,
+        "fallback_steps": 0,
+        "rounds": 84,
+        "tokens_per_round": 3.75
+      },
+      "runtime": {
+        "kv_cache": "bf16",
+        "kv_capacity_mode": "auto",
+        "kv_capacity_tokens": 146368,
+        "max_context": 131072,
+        "proposal_head": "optimized",
+        "public_model_id": "q38-ninfer",
+        "speculative_backend": "dflash2",
+        "speculative_draft_window": 7
+      },
+      "scheduler": {
+        "capture_pending": 0,
+        "committed_decode_tokens": 314,
+        "computed_prefill_tokens": 155,
+        "decode_device_wait_nanoseconds": 1268375891,
+        "decode_host_nanoseconds": 19301913,
+        "decode_ready": 0,
+        "decode_rounds": 84,
+        "decode_row_rounds": 84,
+        "materializing": 0,
+        "max_concurrency": 2,
+        "max_pending_requests": 16,
+        "paused": 0,
+        "prefill_device_wait_nanoseconds": 264355203,
+        "prefill_host_nanoseconds": 41422783,
+        "prefilling": 0,
+        "replaying": 0,
+        "running": 0,
+        "terminal_pending": 0,
+        "waiting": 0
+      },
+      "schema_version": 2,
+      "status": "ok",
+      "unavailable_fields": {
+        "cache.host_kv.capacity_bytes": "unified Host pool has no independently reserved KV capacity",
+        "cache.host_state.capacity": "unified Host pool has no independently reserved State capacity",
+        "cache.last_materialization_predicted_nanoseconds": "fork whole-materialization planner has no master equivalent",
+        "cache.private_catalog.capacity": "master catalog is resource-budgeted, not a fixed private-slot count",
+        "cache.private_evictions": "fork pressure-policy counters have no equivalent master counter",
+        "cache.shared_catalog.active_references": "master has no native shared-reader-count ledger",
+        "cache.shared_catalog.capacity": "master catalog is resource-budgeted, not a fixed shared-slot count",
+        "cache.shared_evictions": "fork pressure-policy counters have no equivalent master counter"
+      }
+    }
+  },
+  "redaction": {
+    "verified_over": "the complete raw cast byte stream",
+    "zero_occurrences_of": [
+      "maintainer username",
+      "host names and tailnet suffixes",
+      "tunnel and appliance port numbers",
+      "bearer key material",
+      "pyenv/homebrew interpreter paths",
+      "user home directories"
+    ],
+    "truecolor_sequences": 5522,
+    "note": "the scratch project lives under a shared neutral home directory outside any user account; that path is visible in one tool panel"
+  },
+  "files": {
+    "omp-ninfer-demo-v14.cast": {
+      "sha256": "40d38c380ec13053b7542e5a86213f747329baa1bbc46c0c4b453ef561295ff1",
+      "bytes": 653823
+    },
+    "omp-ninfer-demo-v14-render.cast": {
+      "sha256": "5474eeb485453f92c127157b1aa3a5acb9799ec4a224c8ea19ca3f53c09c465e",
+      "bytes": 625022
+    },
+    "omp-ninfer-demo-v14.gif": {
+      "sha256": "c1fb503ae66feeec80f55a2c3af84386357f412b3c8a56aa4831d86bd9d9f694",
+      "bytes": 2232959
+    },
+    "omp-ninfer-demo-v14.mp4": {
+      "sha256": "e571f21ceb8558b4db1bf541716a110a59949e55b4dddc64034dedd2cac3823c",
+      "bytes": 1837044
+    },
+    "omp-ninfer-demo-v14-poster.png": {
+      "sha256": "35dce796a491338bd3ee42ec3295559b3cabe69b9779abd38cde49923f6ed88e",
+      "bytes": 196316
+    }
+  },
+  "render": {
+    "render_cast_derivation": {
+      "from": "omp-ninfer-demo-v14.cast",
+      "to": "omp-ninfer-demo-v14-render.cast",
+      "event_payloads": "byte-identical and in the same order; only two timing changes",
+      "restart_wait_compression": {
+        "events": [
+          632,
+          1084
+        ],
+        "raw_seconds": 36.158,
+        "rendered_seconds": 2.4,
+        "scale": 0.066375,
+        "note": "the interval from the helper's first output line to its 'serving again' line, during which the TUI showed only a running indicator"
+      },
+      "tail_trim": {
+        "kept_events": 1315,
+        "raw_events": 1345,
+        "note": "the /exit keystrokes and shutdown after the final answer are dropped; the last kept event is the final answer render"
+      },
+      "raw_duration_seconds": 76.639,
+      "render_duration_seconds": 35.159
+    },
+    "agg": "agg --font-family \"JetBrains Mono\" --font-size 28 --fps-cap 20 --idle-time-limit 1.75 --last-frame-duration 3 --theme 060809,E8ECEF,0B0E11,C85045,85C29A,D8B575,87A5C4,8E7BE8,8FB8B2,B6BEC7,3A434D,E0685C,9FD3AE,E7C98A,9FBBD8,AB9DF0,A8CFC9,E8ECEF omp-ninfer-demo-v14-render.cast omp-ninfer-demo-v14.gif",
+    "gifsicle": "gifsicle -O3 (lossless)",
+    "gif": {
+      "width": 1714,
+      "height": 1215,
+      "frames": 285,
+      "seconds": 31.83
+    },
+    "ffmpeg_mp4": "ffmpeg -i omp-ninfer-demo-v14.gif -an -vf 'fps=30,pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0:color=#060809,format=yuv420p' -c:v libx264 -preset slow -crf 18 -movflags +faststart omp-ninfer-demo-v14.mp4",
+    "mp4": {
+      "width": 1714,
+      "height": 1216,
+      "fps": 30,
+      "frames": 955,
+      "seconds": 31.83,
+      "note": "one row of ground color padded for an even height"
+    },
+    "poster": "GIF frame 285 of 285 (the final answer), 1714x1215",
+    "tools": {
+      "asciinema": "3.2.1",
+      "agg": "agg 1.9.0",
+      "gifsicle": "LCDF Gifsicle 1.98",
+      "ffmpeg": "ffmpeg version 9.0.2"
+    }
+  }
+}

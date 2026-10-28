@@ -144,17 +144,26 @@ imply official partnership.
 | `assets/icon.svg` | icon source (512, rx116 tile) |
 | `assets/icon-512.png` | rendered icon — repo/org avatar |
 | `assets/favicon-32.png` / `favicon-16.png` | PNG favicon fallbacks |
-| `docs/media/omp-ninfer-demo.gif` | canonical full-session GIF render; retained for provenance |
-| `docs/media/omp-ninfer-demo.mp4` | real-session demo master (MP4) |
-| `docs/media/omp-ninfer-demo-poster.png` | demo poster frame for posts and video embeds |
-| `docs/media/omp-ninfer-demo.cast` | raw asciinema capture behind the demo (provenance: `docs/media/README.md`) |
-| `docs/media/omp-ninfer-demo-social.mp4` | updater-free social derivative of the canonical demo |
-| `docs/media/omp-ninfer-demo-social-discord.gif` | update-banner-free README/Discord fallback |
-| `docs/media/omp-ninfer-demo-social-poster.png` | poster from the clean social interval |
+| `docs/media/omp-ninfer-demo-v14.gif` | canonical v0.14.0 README embed (1714×1215, 20 fps cap, 31.83 s); provenance in `docs/media/README.md` |
+| `docs/media/omp-ninfer-demo-v14.mp4` | canonical v0.14.0 real-session demo master (1714×1216, 30 fps H.264 `yuv420p` faststart, silent) |
+| `docs/media/omp-ninfer-demo-v14-poster.png` | canonical v0.14.0 demo poster frame (1714×1215, final frame) |
+| `docs/media/omp-ninfer-demo-v14.cast` | canonical v0.14.0 raw asciinema capture, unedited (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-v14-render.cast` | canonical v0.14.0 render cast (restart wait compressed, `/exit` tail dropped; byte-identical event payloads; provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-v3.gif` | historical v0.3.0 README embed (1224×868, 20 fps); retained for provenance |
+| `docs/media/omp-ninfer-demo-v3.mp4` | historical v0.3.0 real-session demo master (MP4); retained for provenance |
+| `docs/media/omp-ninfer-demo-v3-poster.png` | historical v0.3.0 demo poster frame (1224×868); retained for provenance |
+| `docs/media/omp-ninfer-demo-v3.cast` | historical v0.3.0 raw asciinema capture (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo.gif` | historical v0.2-era full-session GIF render; retained for provenance |
+| `docs/media/omp-ninfer-demo.mp4` | historical v0.2-era real-session demo master (MP4); retained for provenance |
+| `docs/media/omp-ninfer-demo-poster.png` | historical v0.2-era demo poster frame for posts and video embeds |
+| `docs/media/omp-ninfer-demo.cast` | historical v0.2-era raw asciinema capture (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-social.mp4` | historical v0.2-era updater-free social derivative |
+| `docs/media/omp-ninfer-demo-social-discord.gif` | historical v0.2-era update-banner-free README/Discord fallback |
+| `docs/media/omp-ninfer-demo-social-poster.png` | historical v0.2-era poster from the clean social interval |
 | `docs/media/omp-ninfer-launch-card.png` | scoped launch evidence card; provenance in `docs/media/README.md` |
-| `docs/media/omp-ninfer-demo-2x.gif` | crisp 1224×868 20 fps README embed rendered straight from the cast |
-| `docs/media/omp-ninfer-demo-2x.mp4` | H.264 transcode of the 2x render; preferred social attachment |
-| `docs/media/omp-ninfer-demo-2x-poster.png` | poster frame from the 2x render |
+| `docs/media/omp-ninfer-demo-2x.gif` | historical v0.3.0-launch 1224×868 20 fps README embed rendered straight from the v0.2-era cast |
+| `docs/media/omp-ninfer-demo-2x.mp4` | historical H.264 transcode of the 2x render |
+| `docs/media/omp-ninfer-demo-2x-poster.png` | historical poster frame from the 2x render |
 
 Regeneration: run `python3 scripts/render_assets.py`. It renders the banner, architecture,
 benchmark, and social-preview HTML sources with headless Chrome and verifies every PNG dimension;

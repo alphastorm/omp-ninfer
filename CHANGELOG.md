@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Record the v0.14.0 README hero session on the released RTX 5090 lane in `docs/media/`
+  (`omp-ninfer-demo-v14.gif`, `omp-ninfer-demo-v14.mp4`, `omp-ninfer-demo-v14-poster.png`,
+  `omp-ninfer-demo-v14.cast`, `omp-ninfer-demo-v14-render.cast`) with receipt
+  `docs/measurements/2026-10-28-readme-demo-v14.json`: unmodified upstream Oh My Pi (OMP) 18.12.6
+  finds and fixes a failing `lru.py` test, restarts the `ninfer-serve` container mid-session, and
+  answers a follow-up reusing 10,375 retained prompt tokens from the session checkpoint flushed on
+  graceful stop (155 new prefill tokens).
+
 ### Fixed
 
 - Require a corrected 5090 acceptance attempt to carry a non-empty `corrections.json` record
@@ -19,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark v0.14.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
+- Show each lane's full runtime component tag (`v0.7.0-qwen38-5090-beta.3`,
+  `v0.7.0-qwen38-4090-beta.3`, `v0.7.0-qwen38-3090-beta.3`) in the qualification-receipt strip
+  (`assets/benchmarks.html` and `assets/benchmarks.png`) instead of a bare `v0.7.0`.
 
 ## [0.14.0] - 2026-10-28
 
