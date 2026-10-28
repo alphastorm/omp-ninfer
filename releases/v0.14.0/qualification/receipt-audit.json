@@ -1,0 +1,216 @@
+{
+  "artifact_type": "omp_ninfer_release_receipt_audit",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "source_release": "v0.13.1",
+  "status": "composed-three-lane",
+  "policy": "All changed-runtime/native subjects are replaced with fresh exact-source N receipts. The historical stock-client review retains its original subject and bytes; acceptance composes the current release descriptor while preserving every v0.13.1 client binary/asset identity. Unrepeated predecessor restore/remediation/tooling/prose proof is dropped rather than relabelled. No predecessor product acceptance or council approval transfers.",
+  "files": [
+    {
+      "file": "build.json",
+      "predecessor_sha256": "abf1fc95af2901dea1b195b96f39e93f09ed83a8dabc9735b1f284597af9aafa",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "61937724af4bd921c71d09231fc5e2bb0c7f2ce8f431e65fea421b0a8d5af413"
+    },
+    {
+      "file": "client-components.json",
+      "predecessor_sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4",
+      "disposition": "composed-by-acceptance",
+      "reason": "Acceptance regenerated the v0.14.0 descriptor metadata by design; all three stock OMP 18.12.6 client binary/asset identities are unchanged from v0.13.1. This is not a client rebuild or inherited live acceptance.",
+      "staged_sha256": "e6cc2d7525f3b6cc8f7bb8b605a2bda0b2cdaa558cfac00c2d07fb111e4baa49"
+    },
+    {
+      "file": "component-cut-dry-run.json",
+      "predecessor_sha256": "8532627a2f123754fa3005136cfa7b51b39bbd089edb97eefa508c9a3d6971de",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "434bcb5e7c6c4c4e04a28bb9245bb20f24a62900bac21c2e97643c84935c18db"
+    },
+    {
+      "file": "concurrency.json",
+      "predecessor_sha256": "2d1ac4d6574f98bd247eb87cdfe00b5ebea4100fb3abb48823cfdc7b5bc394f4",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "110201935b3752905fdff6e98af7504d5a9825ccacd36cb5b112139c75eefabb"
+    },
+    {
+      "file": "decode-parity.json",
+      "predecessor_sha256": "4eca1adf4ed6d63094d593180c2376162a02a7cc8efcde17a09c75bcdf480af9",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "73dd8c31d3fc2854775357bf10ebdf6240421c1fe20f49d08fe3d7dd6a1c09e4"
+    },
+    {
+      "file": "durability.json",
+      "predecessor_sha256": "5ccab53fddc781f3ed702fcb89e2a7a63884dbd2a0cc71cb429a5e3e9cee83c4",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "97bf32ee292b49aa613f3b7b8e7ec3ca90dd06e855d0254bcf917e16d9ce3348"
+    },
+    {
+      "file": "integrated-cli.json",
+      "predecessor_sha256": "ba62dcc8e71384d627c2a896f7b0fedfe9222c9037cf35da6464c448ee1993d8",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "f1ff7c4a0968b652e2756c7628216b99f44e2ecb69b7896aeabc56f1d225b418"
+    },
+    {
+      "file": "native-ci.json",
+      "predecessor_sha256": "a103a498b23adf364bf821222bdff0c9973890b83b56ba9f3d63d10453f6cb18",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "19a8152058122ea304d789b440f9c7229a3903ce75950238a832a03d29f30eed"
+    },
+    {
+      "file": "native-integration.json",
+      "predecessor_sha256": "43762c11764279ef28d53686e16344129c4be41f80b545ac858cc79468741e8b",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4"
+    },
+    {
+      "file": "native-publication.json",
+      "predecessor_sha256": "eff33c1a177d31ff817dd573479dda23d915534ef7623a29a52c679b8f77d348",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+    },
+    {
+      "file": "native-remediation.json",
+      "predecessor_sha256": "412a9ee57816b750e0c1b600a523e662818530e0aa97733e1187c3458eacf3b9",
+      "disposition": "dropped",
+      "reason": "Historical native K6/capacity/export remediation is not a fresh N receipt; actual current installed chain must be bound separately."
+    },
+    {
+      "file": "packaging.json",
+      "predecessor_sha256": "610e566a40b0e38abf1c279f5d79099a394273df73efd636e7f72f1b7d703d6a",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1"
+    },
+    {
+      "file": "protocol.json",
+      "predecessor_sha256": "10b8165c350028a27d044d30380a7ee508ce17a9aa3bf60788f28840f7ef2c72",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "48d9aecab25c707a742fb967c7491a2710bfc55e8eec5fbbc4514fd74f94dea3"
+    },
+    {
+      "file": "receipt-audit.json",
+      "predecessor_sha256": "b70e49ddb0ac27fda5a702a650663caa74f209e35187dd45bebffdb93288ec27",
+      "disposition": "replaced",
+      "reason": "Replace the predecessor audit with the complete current kept/replaced/dropped census; omit recursive self-hash."
+    },
+    {
+      "file": "release-prose.json",
+      "predecessor_sha256": "d851138ee86c763efadb79caa0a91c0867258891f7d2694e572b16dab685d483",
+      "disposition": "dropped",
+      "reason": "Predecessor prose results do not cover new notes; new preparation tests exercise the current prose when the completed tree is tested."
+    },
+    {
+      "file": "release-tooling-tests.json",
+      "predecessor_sha256": "1e019b0877a4e10fc4f0982e87cccd3bf5de4dcbd3606313881059913285bdaf",
+      "disposition": "dropped",
+      "reason": "Predecessor suite results cannot qualify the changed tree. Both full current interpreter suites must run before each eventual commit; results belong in the current report/receipt after execution."
+    },
+    {
+      "file": "remediation.json",
+      "predecessor_sha256": "155e26ac16fe45138fa24fdd5cf5d90868323a5366fdd68438567d5fe21f3d5c",
+      "disposition": "dropped",
+      "reason": "Historical F/F2 remediation and review are not fresh N regressions or approval."
+    },
+    {
+      "file": "restore-matrix.json",
+      "predecessor_sha256": "37f069b3cd664eb560213370ec8bfe38eb8aa2c705b27a8cf1b608268ec46c36",
+      "disposition": "dropped",
+      "reason": "Historical F2 fault-injection matrix is not rerun on N; drop rather than relabel."
+    },
+    {
+      "file": "rtx3090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "55bb8f69079879bb6e572fbe96ce5077ff74f4c3e1f1b6e8902b7f1f462e99d5",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d"
+    },
+    {
+      "file": "rtx3090.json",
+      "predecessor_sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d"
+    },
+    {
+      "file": "rtx4090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "c514dd96b0b8422c8769cc64df16f208e8d42eb6a2613fbd35eb1436e5a4f71f",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379"
+    },
+    {
+      "file": "rtx4090.json",
+      "predecessor_sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330",
+      "disposition": "replaced",
+      "reason": "Fresh exact-source N beta.3 full native qualification, actual published 11-file set or integrated publication/build evidence; source/config/server/package/dependency bindings and public/scratch distinctions are explicit. No predecessor acceptance or council transfer.",
+      "staged_sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0"
+    },
+    {
+      "file": "rtx5090.json",
+      "predecessor_sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4"
+    },
+    {
+      "file": "runtime-base.json",
+      "predecessor_sha256": "90b1e1f728ca4ce7039378239a242087659e9f2ec93b9c25c93ff45415f8e30b",
+      "disposition": "replaced",
+      "reason": "Fresh N runtime-base reuse binding preserving the true original base publication.",
+      "staged_sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
+    },
+    {
+      "file": "runtime-publication.json",
+      "predecessor_sha256": "0ee25885304f96ec344e0c468f802c8ae17872634d201110c4a1aa0905be869f",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "204d28a40ff07beaa8d8303dab306331ab2198fa5c8bb105f8fce3d8b63de6ef"
+    },
+    {
+      "file": "staging.json",
+      "predecessor_sha256": "16a30edac9cbecbcddd48db3b1fe5245ca52d86312df31c3ad0fc5be33ba55ca",
+      "disposition": "replaced",
+      "reason": "Fresh N shipping-byte/runtime-publication/staging evidence with actual source and scope; not inherited product acceptance or review.",
+      "staged_sha256": "a1ffdd29b6d6bf359b3a3751c71ea90dd71662e1ac3579d2bbdb0b971cd3576a"
+    },
+    {
+      "file": "stock-omp.json",
+      "predecessor_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Keep byte-identical host-free review of unchanged stock OMP 18.12.6 at its original subject/date; no current live acceptance.",
+      "staged_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f"
+    }
+  ],
+  "dropped_files": [
+    "native-remediation.json",
+    "release-prose.json",
+    "release-tooling-tests.json",
+    "remediation.json",
+    "restore-matrix.json"
+  ],
+  "review_ledger": {
+    "file": "review/runtime-ledger.json",
+    "disposition": "replaced-closed-current-reviews",
+    "repository_path": "releases/v0.14.0/review/runtime-ledger.json",
+    "sha256": "82d46a808b8774951d0ad21ecdf76b010645025192b49d0466a8ffa58bd0e423",
+    "predecessor_repository_path": "releases/v0.13.1/review/runtime-ledger.json",
+    "predecessor_sha256": "4552cb3bfb2dd8bfebbc4e01604ccda879c4c7d5ead4cdd6c653d6b0d6651ea6",
+    "reason": "Bind both actual closed common-engine and product-tooling councils, each frozen subject, all dispositions and receipt digests. Approval is G4-only; no carried approval, product publication or inferred route acceptance."
+  },
+  "public_acceptance": {
+    "disposition": "replaced-fresh-candidate-acceptance",
+    "status": "passed",
+    "candidate_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",
+    "reason": "The predecessor acceptance was dropped, not relabelled. All five routes/31 exact executable blocks, three unchanged stock-client binaries and both beta.3 native public installs passed fresh on C with independent restoration. The initial 5090 refusal, single corrected pass and summarize-only correction-record step remain disclosed."
+  }
+}

@@ -39,7 +39,7 @@ stay retired. Do not reuse them.
   the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
   is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
-  When install authority matters, bind it to the current ready release (`v0.13.1`) instead of
+  When install authority matters, bind it to the current ready release (`v0.14.0`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
 - Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
   documentation links whenever the surface has room for only one action. The GitHub `Latest`
@@ -180,7 +180,7 @@ the primary action, badges, and the documentation row. No `# OMP NInfer` heading
 the banner), no restated headline, no caveat lines above the fold.
 
 ```md
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.13.1.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.14.0.](assets/banner.png)](docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -188,12 +188,12 @@ the banner), no restated headline, no caveat lines above the fold.
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.13.1** with unmodified
+Every install route in the guide was run end to end on **v0.14.0** with unmodified
 [Oh My Pi 18.12.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.13.1/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.14.0/acceptance/composed-external-installation.json)).
 
-**[Get started →](docs/QUICKSTART.md)** &nbsp;·&nbsp; [Download v0.13.1](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.13.1)
+**[Get started →](docs/QUICKSTART.md)** &nbsp;·&nbsp; [Download v0.14.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.14.0)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 

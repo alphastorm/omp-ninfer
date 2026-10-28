@@ -16,6 +16,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Mark v0.14.0 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
+
+## [0.14.0] - 2026-10-28
+
+### Changed
+
+- Finalize v0.14.0's ready qualification posture: preserve the historical draft-stage receipt,
+  bind fresh acceptance and closed councils separately, and keep publication founder-owned.
+- Bind v0.14.0's two closed G4 councils to their frozen fork and product-tooling subjects,
+  all dispositions and artifact digests; retain deferred issues and missing Mythos transport
+  results explicitly. G4 approval grants neither publication nor public-route acceptance.
+- Reconcile v0.14.0's composed descriptor audit and acceptance wording: acceptance regenerates
+  release metadata while preserving every v0.13.1 client binary/asset identity. Preparation tests
+  retain publication gating and real identity contracts, not stage-time prose or a notes line cap.
+- Prepare the v0.14.0 QUICKSTART for route acceptance: retarget every executable product tag and
+  manifest path, bind the beta.3 lane identities and 350 W RTX 3090 stop-before-upgrade policy,
+  and retain the unchanged v3 model/store blocks. Fresh candidate-bound acceptance passed.
+- Compose fresh acceptance on frozen candidate `c81a8e7e`: all five routes/31 exact executable
+  blocks, three stock OMP 18.12.6 clients and both first-lineage beta.3 native public installs
+  passed. Independent restoration passed with a 421.229 s RTX 5090 hold and 392.504/393.945 s
+  RTX 4090/3090 driver windows. Canonical native promotions were fresh; later public-URL
+  checks returned `already_installed`, not upgrade/rollback proof. Product publication is separate.
+- Disclose the RTX 5090 initial fail-closed attempt: a same-Mac unit-suite run took the real
+  tunnel port `127.0.0.1:18089` mid-window; the incumbent was restored. One corrected attempt
+  on unchanged candidate `c81a8e7e` passed with exclusive test/route sequencing
+  ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)). The driver checked `corrections.json`
+  only at summarize; after recording it, summarize alone was rerun on unchanged evidence
+  ([#99](https://github.com/alphastorm/omp-ninfer/issues/99)). Native client-acceptance default-model
+  handling remains deferred ([#98](https://github.com/alphastorm/omp-ninfer/issues/98)).
+- Stage v0.14.0 with one engine source `2c6f423b` across the RTX 5090 container and both
+  native Windows lanes (`v0.7.0-qwen38-{5090,4090,3090}-beta.3`), retaining published model
+  version 3 `81f924d4` and unmodified stock OMP 18.12.6. All three component cuts are published
+  with fresh runtime/package and managed native qualification evidence;
+  candidate-bound external installation, G4 review and founder-owned product publication
+  remain distinct.
+- Bind RTX 5090 round-tail retirement/consumer-capture scheduling, the materialized-BF16
+  gated-attention seam, TMA descriptor ABI and upstream JPEG/grammar/schema/vision-identity
+  fixes without changing the DFlash2 K7 `qwen38-5090-v0.13.0` profile or configuration `751d22dc`.
+  Exact first-build server `55f0b95a` passed the RC union and 84/84 T1 request/output hashes;
+  serial role median decode measured 342.04 → 347.57 tok/s (×1.0162), not an end-to-end OMP claim.
+- Record the founder-approved RTX 5090-only reproducibility exception: nvcc 13.1.115 linked
+  executables are not bit-identical on second builds. Corrected temporary names leave 177/574
+  ELF differences; all 397 compared object/other files match. Random cudafe++ module-ID suffixes
+  are reproduced on individual files, but no all-file normalization proof is claimed. Ship the
+  already checked first-build bytes; deterministic module IDs remain a follow-up.
+- Keep `Group64` A8 off on both native lanes: RTX 4090 failed the preregistered symmetric
+  new-leak screen; RTX 3090 passed but the founder selected off conservatively. Both shipping
+  closures passed 34/34 second-build EXE/DLL byte comparisons and 84/84 retained-output T1 parity.
+  Matched strict C1 decode is flat (151.215 → 151.573 / 90.855 → 90.879 tok/s); exact 130,048-token
+  retrieval passed all four arms on each lane with roughly 5% better candidate prefill.
+- Bind both fresh 15-phase native managed chains and exact 11-file beta.3 outer sets:
+  standalone C1 decode 151.54/90.64 tok/s, exact retrieval 81.78/187.88 s, short-session
+  explicit/graceful restart reuse 1,647/1,650 tokens and owner restoration 450/370 W. Scratch
+  installs differ only in listen port; public-package execution and candidate-bound external
+  acceptance are not inferred. Both lineages have rollback `not_applicable`, zero directions.
+  Reuse eleven scan-clean v0.13.1 dependency DLL builds at the same versions, preserving every
+  checked engine EXE; neutral closures pass 34/34 raw-byte double builds and fresh full chains.
+- Raise the RTX 3090 qualified serving cap to 350 W; matched pre-cut measurement arms restored the
+  prior 370 W limit. Keep native MTP3 C1, INT8 KV, strict origin authentication and isolated schema 3
+  stores. Disclose still-open [#88](https://github.com/alphastorm/omp-ninfer/issues/88) and
+  [#89](https://github.com/alphastorm/omp-ninfer/issues/89), plus release-tooling hardening
+  [#90](https://github.com/alphastorm/omp-ninfer/issues/90), without claiming their dedicated
+  reproduction/fault-injection items are closed by aggregate qualification or fresh acceptance.
+- Require stopping the running RTX 3090 lane before upgrading from v0.13.1 to v0.14.0:
+  the old 300 W GPU-owner lease fails the new installer's 350 W cap check before replacement,
+  leaving the old lane running unchanged; a stopped lane upgrades normally
+  ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Record deferred engine retirement
+  before error/cancel delivery ([#95](https://github.com/alphastorm/omp-ninfer/issues/95)) and
+  media decode range checks ([#96](https://github.com/alphastorm/omp-ninfer/issues/96)).
 - Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
@@ -2479,7 +2550,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.2...v0.13.0
 [0.12.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.12.1...v0.12.2

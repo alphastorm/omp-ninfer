@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.13.1`
+Product release: `v0.14.0`
 Composition: **qualified**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.12.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64) (sha256 `cfbb5e38cd8f`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/darwin-arm64-18.12.6.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.12.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe) (sha256 `73d73c11dc88`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/windows-x64-18.12.6.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.12.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64) (sha256 `85d9daf3a05f`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/linux-x64-18.12.6.json) |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.12.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64) (sha256 `cfbb5e38cd8f`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6ca10235b875b81e618ab78e164c0b20bb414d58/releases/v0.14.0/acceptance/darwin-arm64-18.12.6.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.12.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-windows-x64.exe) (sha256 `73d73c11dc88`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6ca10235b875b81e618ab78e164c0b20bb414d58/releases/v0.14.0/acceptance/windows-x64-18.12.6.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.12.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-linux-x64) (sha256 `85d9daf3a05f`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6ca10235b875b81e618ab78e164c0b20bb414d58/releases/v0.14.0/acceptance/linux-x64-18.12.6.json) |
 
 ## Native runtime variants
 
@@ -19,13 +19,13 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx4090.json) |
 
 Package bindings:
 
-- `rtx3090-windows-native`: component `v0.7.0-qwen38-3090-beta.2`; package [`ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d`; 967,836,157 bytes.
-- `rtx4090-windows-native`: component `v0.7.0-qwen38-4090-beta.2`; package [`ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68`; 950,981,452 bytes.
+- `rtx3090-windows-native`: component `v0.7.0-qwen38-3090-beta.3`; package [`ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.3/ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3`; 971,496,678 bytes.
+- `rtx4090-windows-native`: component `v0.7.0-qwen38-4090-beta.3`; package [`ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.3/ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437`; 954,798,284 bytes.
 - `rtx3090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 - `rtx4090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 
@@ -35,9 +35,9 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 
 | Lane | JSON-schema structured output | Tool-name limit | Status schema | Request-log schema |
 | --- | --- | ---: | ---: | ---: |
-| RTX 5090 unchanged beta.2 container | Supported on the unchanged v0.13.0 runtime; v0.13.1 composition/route acceptance remains separate. | 128 | 2 | 30 |
-| RTX 4090 rebased native Windows | Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate. | 128 | 2 | 30 |
-| RTX 3090 rebased native Windows | Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate. | 128 | 2 | 30 |
+| RTX 5090 beta.3 container | Supported on source 2c6f423b by fresh runtime product smokes; candidate-bound external-install acceptance remains separate. | 128 | 2 | 30 |
+| RTX 4090 native Windows beta.3 | Supported on source 2c6f423b by fresh installed normal/pressure Chat and Responses product smokes; candidate-bound external-install acceptance remains separate. | 128 | 2 | 30 |
+| RTX 3090 native Windows beta.3 | Supported on source 2c6f423b by fresh installed normal/pressure Chat and Responses product smokes; candidate-bound external-install acceptance remains separate. | 128 | 2 | 30 |
 
 ## Profile boundaries
 
@@ -47,13 +47,12 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.
-- No secret, raw log, prompt, or model output crosses the receipt boundary.
-- Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
-- JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
-- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
-- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
-- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
+- Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
+- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
+- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
+- The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.
 
 Blockers:
 
@@ -63,13 +62,12 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.
-- Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.
-- Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
-- JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
-- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
-- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
-- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
+- Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
+- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
+- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
+- The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.
 
 Blockers:
 
@@ -79,14 +77,12 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.
-- Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.
-- Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.
-- Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.
-- JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
-- Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.
-- Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.
-- Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
+- Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
+- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
+- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
+- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
+- The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.
 
 Blockers:
 

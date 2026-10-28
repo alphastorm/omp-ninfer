@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_g2_decode_parity",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-performance-comparison",
+  "measured_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+  "measured_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+  "measured": {
+    "role_cases": 84,
+    "role_requests": 336,
+    "output_hash_matches_all_arms": 84,
+    "request_hash_matches_all_arms": 84,
+    "candidate_median_decode_tokens_per_second": 347.568073642978,
+    "shipped_median_decode_tokens_per_second": 342.04165140565766,
+    "candidate_over_shipped": 1.0161571616047604,
+    "percent_of_shipped": 101.61571616047604
+  },
+  "t1": {
+    "passed": true,
+    "evidence_kind": "output SHA256 equality; not retained-byte comparison",
+    "order": [
+      "A1",
+      "B1",
+      "B2",
+      "A2"
+    ],
+    "scope": "84 frozen role cases per arm; EXP-097 fixed-KV benchmark shape, contexts excluded",
+    "case_ids_file_sha256": "ba26dc6dee3985a1ca9261e14dc2ac20495a9ebdbc09a5aef66906abbd372a04",
+    "case_ids_sha256": "62a35145affbfce4b86aed94f7c3f3b8ad7ad6c372bba71af67c379ad34024b9",
+    "arms": [
+      {
+        "arm": "A1",
+        "runtime": "control",
+        "exit": 0,
+        "seconds": 300.095
+      },
+      {
+        "arm": "B1",
+        "runtime": "candidate",
+        "exit": 0,
+        "seconds": 307.393
+      },
+      {
+        "arm": "B2",
+        "runtime": "candidate",
+        "exit": 0,
+        "seconds": 307.167
+      },
+      {
+        "arm": "A2",
+        "runtime": "control",
+        "exit": 0,
+        "seconds": 311.302
+      }
+    ]
+  },
+  "provenance": {
+    "evidence_name": "t1-result.json",
+    "evidence_sha256": "97000c445ddb64f15d9c6f386a10064a86aea5a3e21b0c487e152e4d2c39ebdd",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "evidence_post_freeze_uncommitted": true
+  },
+  "scope": "Fresh 84-role ABBA fixed-KV EXP-097 benchmark shape on the exact shipping first build. Equality is request/output SHA256, not retained-byte comparison. Not automatic-KV production throughput, powered global quality/leak, depth/frontier or historical parallel-agent acceptance."
+}

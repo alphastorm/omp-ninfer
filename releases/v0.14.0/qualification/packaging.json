@@ -1,0 +1,99 @@
+{
+  "artifact_type": "omp_ninfer_runtime_package_inventory",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed",
+  "package": {
+    "artifact_type": "ninfer_local_release_receipt",
+    "asset": {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa"
+    },
+    "build_profile": "rtx5090",
+    "checksums": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+    "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "sbom": {
+      "format": "SPDX-2.3",
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sha256": "17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869"
+    },
+    "schema_version": 1,
+    "source_date_epoch": 1793113953,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "build_identity": {
+    "artifact_type": "ninfer_release_build_identity",
+    "binaries": {
+      "ninfer": "09b0fb429d13f98fa98024222b2526a770009fbd55fc96eef22cc61a45629b2b",
+      "ninfer-serve": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467"
+    },
+    "build_profile": "rtx5090",
+    "build_type": "Release",
+    "cuda_architecture": "120a",
+    "cuda_compiler": "NVIDIA-13.1.115",
+    "cuda_toolkit": "13.1.115",
+    "cxx_compiler": "GNU-13.3.0",
+    "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "platform": "linux-x86_64-cuda13.1",
+    "release_version": "v0.7.0",
+    "schema_version": 1,
+    "source_dirty": false,
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+  },
+  "assets": [
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "bytes": 547378794,
+      "sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "bytes": 3596,
+      "sha256": "17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869"
+    },
+    {
+      "name": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+      "bytes": 348,
+      "sha256": "9f5ed2e607345c23e97f7616ebba8f59ed18293a614e1fd337ffe4084c4366cc"
+    },
+    {
+      "name": "runtime-source-2c6f423b.tar.gz",
+      "bytes": 12538488,
+      "sha256": "1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff"
+    }
+  ],
+  "component_tags": [
+    "v0.7.0-qwen38-5090-beta.3",
+    "v0.7.0-qwen38-5090-source.3",
+    "v0.7.0-qwen38-5090-runtime-beta.3"
+  ],
+  "closure": {
+    "launcher": "deterministic-nvcc v1",
+    "round": 1,
+    "round2_byte_identity": "FAILED (nvcc module ids); founder exception 2026-10-27",
+    "round_files": 574,
+    "serve_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467"
+  },
+  "provenance": {
+    "evidence_name": "integration-rc-package.json",
+    "evidence_sha256": "0c6c0184a99ea7914fb7d257d8afabb67f526e86d5fa8f33ba13aba1288898b8",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "evidence_post_freeze_uncommitted": true
+  },
+  "scope": "Exact first-build beta.3 archive/source/SPDX/checksum inventory. Local package receipt remains unpublished at capture; actual component/image publication is bound separately. No anonymous binary-archive download or product acceptance is inferred."
+}

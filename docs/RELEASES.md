@@ -5,19 +5,86 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.13.1)](#v0131--rebased-native-windows-lanes-carried-rtx-5090-runtime-and-stock-omp-18126) ·
-[Previous v0.13.0](#v0130--rebased-rtx-5090-runtime-stock-omp-18126-carried-native-lanes) ·
+**Navigation:** [Current release (v0.14.0)](#v0140--one-engine-source-across-all-three-lanes-and-stock-omp-18126) ·
+[Previous v0.13.1](#v0131--rebased-native-windows-lanes-carried-rtx-5090-runtime-and-stock-omp-18126) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
+## v0.14.0 — one engine source across all three lanes and stock OMP 18.12.6
+
+Published **2026-10-28** (`2026-10-28T05:57:29Z`, GitHub release ID `426309668`, annotated tag
+`v0.14.0` → `7c4c832a24479996d8ae84b65ccb7237a21749da`) as GitHub `Latest`, succeeding `v0.13.1`
+(published 2026-10-26). All three qualified GPU lanes bind one frozen engine source
+`2c6f423bd817b6534158553e1b34ab4959c43165` (`2c6f423b`) on upstream `Neroued/ninfer` master
+`64d10fbf9f8e6bfc79ab0570b94674c5b9997929` as `v0.7.0-qwen38-5090-beta.3` (release ID `426156233`),
+`v0.7.0-qwen38-4090-beta.3` (release ID `426225131`), and `v0.7.0-qwen38-3090-beta.3` (release ID
+`426226384`), replacing the `v0.13.1` split between container `6d4d0a05` and native `7a25cd72`. The
+shared published model container version 3 `81f924d4` (20,437,521,664 bytes, revision `1cbd84e7`,
+`qwen3_8_27b-v3.ninfer`) and unmodified upstream OMP **18.12.6** (`45c35e40`, tree `8a90a1b4`) carry
+unchanged across all lanes.
+
+RTX 5090 binds OCI image `760fb6be` on runtime base `d4377ed0` (`runtime-base-04b603aa-20261025`,
+original source `04b603aa`) and checked first-build server `55f0b95a`, retaining deployment profile
+`qwen38-5090-v0.13.0` / configuration `751d22dc`, BF16 KV (146,368 automatic tokens), DFlash2 K=7,
+two requests in flight, and `/checkpoints-v013`. The shipping binary records **182.49 tok/s** server
+decode (**178.78 tok/s** wall, 0.244 DFlash2 acceptance, 2.71 tokens/round), **57.00 s** cold exact
+130,048-token retrieval (56.416 s server prefill, 2,281.5 tok/s wall), **20,926 cached tokens / 27
+byte-identical continuation bytes** across four-boot schema 3 restart, **35.5524 s** 32 GB C2
+durable pressure overlap with **1,074,790,400 bytes** headroom, 66/66 host and 11/11 dense real-model
+tests, and **342.04 → 347.57 tok/s** (**×1.0162**) serial 84-role median decode parity with 84/84
+request/output SHA-256 hash matches. The checked first build ships under an explicit founder-approved
+5090-only reproducibility exception: same-source second builds under `nvcc` 13.1.115 are not
+bit-identical (249/574 ELF files differed in the first pair; correcting PID-dependent temporary names
+reduced the differences to 177/574 linked executables while all 397 compared object/other files matched;
+deterministic module IDs remain a follow-up).
+
+Native packages `87038cfb` (RTX 4090) and `a7637f66` (RTX 3090) bind public configurations
+`b5cfbf50` and `d08d262b` (`qwen38-4090-native-v0.7.0-beta.3` and `qwen38-3090-native-v0.7.0-beta.3`),
+retain INT8 KV, MTP3, C1, 640 / 768 MiB admission headroom, shared Host budgets
+(15,506,063,360 / 12,284,837,888 bytes), strict origin authentication, and release-isolated
+`session-checkpoints-v3` stores, and compile `Group64` A8 off (RTX 4090 failed the 200-pair
+symmetric Application B new-leak gate at p=1/32; RTX 3090 passed at p=1/16, and the founder selected
+off conservatively). Eleven dependency DLLs reuse scan-clean published v0.13.1 builds at the same
+versions while `libjpeg-turbo` 3.2.0 is new; both neutral closures pass 34/34 second-build EXE/DLL
+raw-byte comparisons and fresh 15-phase installed hardware chains (**151.54 / 90.64 tok/s** C1 decode,
+**2,195.36 / 976.98 tok/s** prefill, **81.78 / 187.88 s** exact 130,048-token retrieval, and
+**1,647 / 1,650**-token restart reuse across **34.062 / 35.016 s** restarts). RTX 3090's serving cap
+is **350 W**, with the owner's 370 W baseline restored on stop. **Stop a running v0.13.1 RTX 3090
+lane before upgrading to v0.14.0:** its old 300 W GPU-owner lease fails the new 350 W cap check
+before replacement, leaving the old lane running unchanged; a stopped lane upgrades normally
+([#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Both lineages have no supported
+predecessor (`not_applicable`, zero rollback directions).
+
+Both the common-engine fork (`CR-20261028T031911Z-2c6f423b`) and product-tooling
+(`CR-20261028T043650Z-c81a8e7e`) full councils closed without remediation in the
+[review ledger](../releases/v0.14.0/review/runtime-ledger.json), with deferred P2/P3 residuals
+tracked in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#100](https://github.com/alphastorm/omp-ninfer/issues/100).
+Fresh acceptance on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d` passed all five
+documented routes (31 blocks), three stock OMP 18.12.6 clients, and both first-of-lineage beta.3
+native public installs (19/19 route-behavior checks on both RTX 4090 and RTX 3090), with independent
+host restoration (421.229 s corrected RTX 5090 hold after an initial same-Mac unit-suite port
+collision on `127.0.0.1:18089` failed closed and restored the incumbent,
+[#97](https://github.com/alphastorm/omp-ninfer/issues/97) /
+[#99](https://github.com/alphastorm/omp-ninfer/issues/99); 392.504 s RTX 4090 window; 393.945 s RTX
+3090 window;
+[documented routes](../releases/v0.14.0/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json),
+[restoration](measurements/2026-10-28-v0140-acceptance-restoration.json)). Canonical beta.3 native
+roots were promoted fresh from the documented blocks after preserving beta.2 roots; subsequent
+public-URL checks returned `already_installed`. See the
+[release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md),
+[manifest](../releases/v0.14.0/manifest.json), and
+[qualification](../releases/v0.14.0/qualification.json).
+
 ## v0.13.1 — rebased native Windows lanes, carried RTX 5090 runtime, and stock OMP 18.12.6
 
 Published **2026-10-26** (`2026-10-26T10:10:04Z`, GitHub release ID `424093029`, annotated tag
 `v0.13.1` → `c739c6ed60e8a4a1005cf4931e85112f71ca2e51`) as GitHub `Latest`, succeeding `v0.13.0`
-(published 2026-10-25). Both native Windows lanes rebase onto upstream `Neroued/ninfer` master
+(published 2026-10-25); superseded by `v0.14.0` on 2026-10-28. Both native Windows lanes rebase onto upstream `Neroued/ninfer` master
 `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` at frozen source
 `7a25cd72f490183e4113f1e84e68e36d653ddd28` as `v0.7.0-qwen38-4090-beta.2` (release ID `423932557`)
 and `v0.7.0-qwen38-3090-beta.2` (release ID `423934131`). Earlier native beta.1 component
@@ -160,16 +227,16 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.13.1`, published 2026-10-26 (`Latest`); predecessor `v0.13.0` (2026-10-25) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.14.0`, published 2026-10-28 (`Latest`); predecessor `v0.13.1` (2026-10-26) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
-pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` and current
-`v0.13.1` pin stock OMP 18.12.6. All five documented routes and fresh platform-client acceptance
-passed on the published components; see
-[documented-route acceptance](../releases/v0.13.1/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.13.1/acceptance/composed-external-installation.json).
+pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0`, `v0.13.1`,
+and current `v0.14.0` pin stock OMP 18.12.6. All five documented routes and fresh platform-client
+acceptance passed on the published components; see
+[documented-route acceptance](../releases/v0.14.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -185,11 +252,160 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.14.0 public release — one engine source across all three lanes and stock OMP 18.12.6
+
+Published 2026-10-28 (`2026-10-28T05:57:29Z`, GitHub release ID `426309668`, annotated tag
+`v0.14.0` → `7c4c832a24479996d8ae84b65ccb7237a21749da`); the current GitHub `Latest` release
+(predecessor `v0.13.1`, published 2026-10-26).
+
+The [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
+[manifest](../releases/v0.14.0/manifest.json) bind all three GPU lanes to one frozen engine source
+`2c6f423bd817b6534158553e1b34ab4959c43165` on upstream `Neroued/ninfer` master
+`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`, retaining the shared published model container version 3
+`81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da` (20,437,521,664 bytes, revision
+`1cbd84e7221e51186bd7f093a149912d2489625b`, downloaded to `qwen3_8_27b-v3.ninfer`) and unmodified
+upstream OMP **18.12.6** client unchanged
+([runtime publication](../releases/v0.14.0/qualification/runtime-publication.json),
+[packaging inventory](../releases/v0.14.0/qualification/packaging.json),
+[native publication](../releases/v0.14.0/qualification/native-publication.json)):
+
+- **RTX 5090 container (`rtx5090`):** component prerelease
+  [`v0.7.0-qwen38-5090-beta.3`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.3)
+  (release ID `426156233`, published `2026-10-28T01:08:55Z`; source archive release
+  [`v0.7.0-qwen38-5090-source.3`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-source.3),
+  release ID `426157044`, published `2026-10-28T01:08:59Z`; runtime image receipt release
+  [`v0.7.0-qwen38-5090-runtime-beta.3`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-runtime-beta.3),
+  release ID `426158097`, published `2026-10-28T01:11:06Z`), CUDA 13.1.115 (`sm_120a`), build
+  profile `rtx5090`, deployment profile `qwen38-5090-v0.13.0`, configuration
+  `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`, `ninfer-serve`
+  `55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467`, `ninfer`
+  `09b0fb429d13f98fa98024222b2526a770009fbd55fc96eef22cc61a45629b2b`, OCI image
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a`
+  on runtime base
+  `ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e`
+  (`runtime-base-04b603aa-20261025`, original source `04b603aae4e9ce3c26f4175cf808180c0f05b5fe`),
+  checked first build under the founder-approved 5090-only reproducibility exception
+  ([lane receipt](../releases/v0.14.0/qualification/rtx5090.json): 182.49 tok/s server / 178.78
+  tok/s wall decode over 2,048 tokens at 0.244 DFlash2 K=7 acceptance and 2.71 tokens/round,
+  57.00 s cold exact 130,048-token retrieval / 56.416 s server prefill, 30,848 MiB idle VRAM;
+  [durability](../releases/v0.14.0/qualification/durability.json): 20,926 cached tokens / 27
+  byte-identical continuation bytes across four-boot restart;
+  [concurrency](../releases/v0.14.0/qualification/concurrency.json): 35.5524 s 32 GB C2 durable
+  pressure overlap, 1,074,790,400 bytes headroom, +2 MiB graph growth;
+  [decode parity](../releases/v0.14.0/qualification/decode-parity.json): 84/84 request/output
+  SHA-256 hash matches, 342.04 → 347.57 tok/s median decode, ×1.0162):
+
+| RTX 5090 asset (`v0.7.0-qwen38-5090-beta.3` / `source.3` / `runtime-beta.3`) | Asset ID | SHA-256 | Bytes |
+| --- | ---: | --- | ---: |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz` | `683396640` | `b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa` | 547,378,794 |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json` | `683396641` | `17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869` | 3,596 |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS` | `683396642` | `9f5ed2e607345c23e97f7616ebba8f59ed18293a614e1fd337ffe4084c4366cc` | 348 |
+| `runtime-source-2c6f423b.tar.gz` (`v0.7.0-qwen38-5090-source.3`) | `683399375` | `1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff` | 12,538,488 |
+| `ninfer-runtime-image-v0.7.0-qwen38-5090-beta.3.json` (`v0.7.0-qwen38-5090-runtime-beta.3`) | `683403283` | `204d28a40ff07beaa8d8303dab306331ab2198fa5c8bb105f8fce3d8b63de6ef` | 1,215 |
+
+- **RTX 4090 native Windows (`rtx4090-windows-native`):** component prerelease
+  [`v0.7.0-qwen38-4090-beta.3`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-4090-beta.3)
+  (release ID `426225131`, published `2026-10-28T03:19:27Z`), CUDA 13.3.73 (`sm_89`), build profile
+  `native-v0.7.0-beta.3-rtx4090`, deployment profile `qwen38-4090-native-v0.7.0-beta.3`, public
+  configuration `b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38` (scratch
+  port-only qualified configuration
+  `08f9a23f614b23a612c48f5c249e1def43bad370a0bd8a2ab66d20f6fcd2fb22`, scratch package
+  `b3db62e5ff365042bfc51912e003e2db8c7e8e6ee700667ce176cb380a8c5821`), `ninfer-serve.exe`
+  `5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9`, `ninfer.exe`
+  `7c1ef118556bf37a833b3c29dc4a5f1f69bd3f1d2191c114de85b0dabbbdb4f2`, `ninfer_bench.exe`
+  `a73fafb3d288ed19dcf7ec1e441a66a40e409340151607508becff32ad82a9d4`, installed release ID
+  `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`
+  ([lane receipt](../releases/v0.14.0/qualification/rtx4090.json): 151.54 tok/s C1 decode at
+  87.59% MTP3 acceptance, 2,195.36 tok/s prefill, 81.78 s exact 130,048-token retrieval,
+  1,647/1,650-token restart reuse across 34.062 s restart, canonical schema 2 protocol at full
+  14,787.734375 MiB and reduced 12,438.578125 MiB shared Host budgets, `Group64` A8 off,
+  first-of-lineage rollback `not_applicable`, 450 W restored on stop):
+
+| RTX 4090 asset (`v0.7.0-qwen38-4090-beta.3`) | Asset ID | SHA-256 | Bytes |
+| --- | ---: | --- | ---: |
+| `ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz` | `683668562` | `87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437` | 954,798,284 |
+| `ninfer-rtx4090-native-v0.7.0-beta.3-source.tar.gz` | `683668540` | `61ffe2be11ad27055fe1a1c361414988638b37578415ebe34cdf4e42642a0f1a` | 12,238,132 |
+| `ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.spdx.json` | `683668563` | `e37f562032deb824459a978e64399138aed6b4afa74e559423d7025321473976` | 34,269 |
+| `ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.cdx.json` | `683668546` | `02eb41f3569e68f5d95095467f9fc69a30715a23e124fa8245510f344210db04` | 24,578 |
+| `ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.SHA256SUMS` | `683668561` | `6a3e43b5869f7ae61b7ea911e02182d3798728094134785bfeb040776989259e` | 404 |
+| `package-build-receipt.json` | `683668567` | `b9e287bfa0c8c703be4f17baf604748fe1c89e6a89c4fda31ca005f3a6382036` | 4,504 |
+| `Install-Release.ps1` | `683668543` | `f9ced520968196afc07b76b5a3264e9ec61d5f2b0d122242f096ee676861cbd9` | 75,317 |
+| `Control-Release.ps1` | `683668542` | `bb69183f6d2876b867134f82874a1370125d1d10f64703f662fdf43f7f1d4b04` | 71,509 |
+| `Control-GpuOwner.ps1` | `683668545` | `432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334` | 17,391 |
+| `Protect-StateRoot.ps1` | `683668578` | `d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36` | 15,203 |
+| `SHA256SUMS` | `683668580` | `c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379` | 1,129 |
+
+- **RTX 3090 native Windows (`rtx3090-windows-native`):** component prerelease
+  [`v0.7.0-qwen38-3090-beta.3`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-3090-beta.3)
+  (release ID `426226384`, published `2026-10-28T03:21:37Z`), CUDA 13.3.73 (`sm_86`), build profile
+  `native-v0.7.0-beta.3-rtx3090`, deployment profile `qwen38-3090-native-v0.7.0-beta.3`, public
+  configuration `d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15` (scratch
+  port-only qualified configuration
+  `f70269173c3f907e5f0c2a5aabff66de5270d9087a821413971964477e043bfd`, scratch package
+  `1e0708a1bf6dfd0a839673dd664aa32bf24d1d834be8c64b4cbb14dbf58738a7`), `ninfer-serve.exe`
+  `fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3`, `ninfer.exe`
+  `119591957930a34814b27d49cc65f8f5a4922dbc566df977be8b8f27b718a982`, `ninfer_bench.exe`
+  `d0ce4034c58f5b8452cfc7e59f2b5b9566b4bb8e8b8cd89b88b0876f924e9882`, installed release ID
+  `qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817`
+  ([lane receipt](../releases/v0.14.0/qualification/rtx3090.json): 90.64 tok/s C1 decode at 92.96%
+  MTP3 acceptance under the 350 W serving cap, 976.98 tok/s prefill, 187.88 s exact 130,048-token
+  retrieval, 1,647/1,650-token restart reuse across 35.016 s restart, canonical schema 2 protocol
+  at full 11,715.734375 MiB and reduced 9,366.578125 MiB shared Host budgets, `Group64` A8 off,
+  first-of-lineage rollback `not_applicable`, 370 W restored on stop; stop a running v0.13.1 lane
+  before upgrading because its 300 W lease refuses against the new 350 W cap,
+  [#94](https://github.com/alphastorm/omp-ninfer/issues/94)):
+
+| RTX 3090 asset (`v0.7.0-qwen38-3090-beta.3`) | Asset ID | SHA-256 | Bytes |
+| --- | ---: | --- | ---: |
+| `ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz` | `683673067` | `a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3` | 971,496,678 |
+| `ninfer-rtx3090-native-v0.7.0-beta.3-source.tar.gz` | `683673048` | `e667eb1fa6c04e8018e6737bfa7c5943b5212c3d26a90f84f2d7ea61a1013c53` | 12,238,089 |
+| `ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.spdx.json` | `683673063` | `d335174050cdbb3d45c3a887bbc8105aa52b1295eeea8f87ecf40586ca0ac3d7` | 34,269 |
+| `ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.cdx.json` | `683673042` | `ebbe9e1dc96309ff67af8f409bb3324431923c53ccc5a100fadd29b414754d5a` | 24,578 |
+| `ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS` | `683673062` | `9dd159a0571bd8ddab0e9a27f37de1101362121abb7ddfa963b9ba0a0ae6496d` | 404 |
+| `package-build-receipt.json` | `683673065` | `b6950f5b10768a96740b32fd7dedc643e5959f32324ca9d2ebd7ac19d3c239e8` | 4,504 |
+| `Install-Release.ps1` | `683673046` | `f9ced520968196afc07b76b5a3264e9ec61d5f2b0d122242f096ee676861cbd9` | 75,317 |
+| `Control-Release.ps1` | `683673045` | `bb69183f6d2876b867134f82874a1370125d1d10f64703f662fdf43f7f1d4b04` | 71,509 |
+| `Control-GpuOwner.ps1` | `683673044` | `432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334` | 17,391 |
+| `Protect-StateRoot.ps1` | `683673094` | `d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36` | 15,203 |
+| `SHA256SUMS` | `683673106` | `9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d` | 1,129 |
+
+- **Oh My Pi client (carried unchanged from v0.13.0 and v0.13.1):** unmodified upstream `can1357/oh-my-pi` `v18.12.6`,
+  release ID `420053191`, source `45c35e40c46166dc726ccc52f5d27f40f2449f99`, tree
+  `8a90a1b48b370649bd3f026d5f609e500626785c` (`omp-darwin-arm64` `cfbb5e38`, 197,245,984 bytes;
+  `omp-windows-x64.exe` `73d73c11`, 224,254,976 bytes; `omp-linux-x64` `85d9daf3`, 256,702,432
+  bytes in [`client-components.json`](../releases/v0.14.0/qualification/client-components.json)).
+
+Both full councils (`CR-20261028T031911Z-2c6f423b` on the common-engine fork and
+`CR-20261028T043650Z-c81a8e7e` on product tooling) closed without remediation in
+[`review/runtime-ledger.json`](../releases/v0.14.0/review/runtime-ledger.json) (deferred items in
+[#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
+Fresh authorized-window acceptance passed on frozen candidate
+`c81a8e7efb37b8d5c36b16a10a18945cb5aa313d`: all five documented routes / 31 blocks (RTX 5090 host
+2/2, macOS 10/10 preview, Windows 5/5 with one explicit pre-publication clone substitution, native
+RTX 4090 7/7 blocks and 19/19 route-behavior checks with first-of-lineage rollback
+`not_applicable`, native RTX 3090 7/7 blocks and 19/19 route-behavior checks with first-of-lineage
+rollback `not_applicable`), three newly downloaded stock 18.12.6 clients (typed tool turn, exact
+continuation, fail-closed request, plus macOS/Windows image input against RTX 5090), and both
+native public installs (fresh canonical promotion followed by idempotent `already_installed`
+public-URL verification for `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817` and
+`qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817`). After the initial RTX 5090 attempt failed closed
+when a same-Mac unit-suite run bound `127.0.0.1:18089` and restored the incumbent
+([#97](https://github.com/alphastorm/omp-ninfer/issues/97),
+[#99](https://github.com/alphastorm/omp-ninfer/issues/99)), the corrected RTX 5090 acceptance-window
+production hold completed in 421.229 s within the `2026-10-28T04:56:16Z`–`05:04:01Z` window and the native windows completed in
+392.504 s (RTX 4090) and 393.945 s (RTX 3090), with independent restoration of the RTX 5090
+incumbent and both promoted canonical native baselines at 450 W / 370 W (preserving beta.2 roots
+separately without reactivating them).
+[Documented routes](../releases/v0.14.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json) ·
+[Restoration](measurements/2026-10-28-v0140-acceptance-restoration.json) ·
+[Qualification](../releases/v0.14.0/qualification.json).
+
 ### v0.13.1 public release — rebased native Windows lanes with carried RTX 5090 runtime and stock OMP 18.12.6
 
 Published 2026-10-26 (`2026-10-26T10:10:04Z`, GitHub release ID `424093029`, annotated tag
-`v0.13.1` → `c739c6ed60e8a4a1005cf4931e85112f71ca2e51`); the current GitHub `Latest` release
-(predecessor `v0.13.0`, published 2026-10-25).
+`v0.13.1` → `c739c6ed60e8a4a1005cf4931e85112f71ca2e51`); superseded as GitHub `Latest` by `v0.14.0`.
 
 The [release notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.13.1/manifest.json) rebase both native Windows lanes onto upstream
