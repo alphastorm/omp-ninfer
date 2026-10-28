@@ -4,7 +4,7 @@
   "release": "v0.14.0",
   "as_of": "2026-10-28",
   "source_release": "v0.13.1",
-  "status": "staged-three-lane-draft",
+  "status": "composed-three-lane",
   "policy": "All changed-runtime/native subjects are replaced with fresh exact-source N receipts. The historical stock-client review retains its original subject and bytes; acceptance composes the current release descriptor while preserving every v0.13.1 client binary/asset identity. Unrepeated predecessor restore/remediation/tooling/prose proof is dropped rather than relabelled. No predecessor product acceptance or council approval transfers.",
   "files": [
     {
@@ -208,8 +208,9 @@
     "reason": "Bind both actual closed common-engine and product-tooling councils, each frozen subject, all dispositions and receipt digests. Approval is G4-only; no carried approval, product publication or inferred route acceptance."
   },
   "public_acceptance": {
-    "disposition": "dropped-not-carried",
-    "status": "pending",
-    "reason": "The predecessor acceptance directory was removed by stage_release; fresh all-route/client/public-native acceptance is required after lane pin."
+    "disposition": "replaced-fresh-candidate-acceptance",
+    "status": "passed",
+    "candidate_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",
+    "reason": "The predecessor acceptance was dropped, not relabelled. All five routes/31 exact executable blocks, three unchanged stock-client binaries and both beta.3 native public installs passed fresh on C with independent restoration. The initial 5090 refusal, single corrected pass and summarize-only correction-record step remain disclosed."
   }
 }

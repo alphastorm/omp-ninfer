@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Finalize v0.14.0's ready qualification posture: preserve the historical draft-stage receipt,
+  bind fresh acceptance and closed councils separately, and keep publication founder-owned.
 - Bind v0.14.0's two closed G4 councils to their frozen fork and product-tooling subjects,
   all dispositions and artifact digests; retain deferred issues and missing Mythos transport
   results explicitly. G4 approval grants neither publication nor public-route acceptance.

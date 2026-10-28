@@ -42,7 +42,7 @@
     },
     "composition_run": true
   },
-  "scope": "All three published v0.7.0 beta.3 lanes bind exact engine source N with fresh lane/package evidence. RTX 5090 ships checked first-build server 55f0b95a under an explicit founder-approved reproducibility exception; natives ship unchanged checked EXEs with scan-clean same-version dependency DLLs, MTP3/A8 off and RTX 3090 at 350 W. Both fresh native 15-phase installed qualification chains passed. Separate fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate c81a8e7efb37b8d5c36b16a10a18945cb5aa313d with independent incumbent/native restoration. Darwin remains preview; Windows and WSL2 client profiles are qualified, not a separate native Linux OS. Both native canonical beta.3 roots were freshly installed after preserving beta.2 roots and staging; each first-release lineage has no predecessor, rollback not_applicable and zero directions. Current G4 binding, final evidence pins and founder-owned product publication remain separate.",
+  "scope": "All three published v0.7.0 beta.3 lanes bind exact engine source N with fresh lane/package evidence. RTX 5090 ships checked first-build server 55f0b95a under an explicit founder-approved reproducibility exception; natives ship unchanged checked EXEs with scan-clean same-version dependency DLLs, MTP3/A8 off and RTX 3090 at 350 W. Both fresh native 15-phase installed qualification chains passed. Separate fresh platform/live/outage acceptance, all five documented routes/31 exact current blocks and both native public installs passed on frozen candidate c81a8e7efb37b8d5c36b16a10a18945cb5aa313d with independent incumbent/native restoration. Darwin remains preview; Windows and WSL2 client profiles are qualified, not a separate native Linux OS. Both native canonical beta.3 roots were freshly installed after preserving beta.2 roots and staging; each first-release lineage has no predecessor, rollback not_applicable and zero directions. Both actual full councils are closed and bound with no confirmed or unresolved in-scope P0/P1 after declared controls. G4 approval does not authorize founder-owned product publication.",
   "runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -64,12 +64,9 @@
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
   },
-  "interpretation": "Fresh shipping-byte RC union and T1 hash parity qualify the changed 5090 binary; corrected-build op oracles and failed byte comparisons retain distinct identities. Native matched pre-cut T1/retrieval/strict C1 and A8 screens do not substitute for managed package qualification. Original scratch qualification retains public_package_executed=false and distinct config/package hashes; separate candidate-bound routes/public URL acceptance executed the actual beta.3 public packages and configurations. The original base publication and unchanged stock-client host-free review keep their historical subjects, while all five routes and three live clients were accepted fresh on c81a8e7e. Image input covers macOS/Windows against RTX 5090 only. Initial 5090 execution failed closed on a same-Mac unit-suite port collision and restored production; one corrected attempt passed without changing C (#97). Late correction-record validation required recording the disclosure and rerunning summarize alone on unchanged execution evidence (#99). Native canonical promotions were fresh first-of-lineage installs after preserving beta.2 roots/staging; later public URL checks verified idempotence, not another upgrade or rollback. Evidence-only commits do not advance C. Deferrals remain #88/#89/#90 and #94/#95/#96/#97/#98/#99, including native client_acceptance default-model handling (#98). Current council binding, final evidence pins and product publication remain separate.",
-  "eligibility_scope": "Runtime/installability and fresh candidate-bound public-route/client acceptance are complete. Root authority/live profiles name v0.14.0; the guide stays prepared and public front-door links remain on v0.13.1. Immutable platform/composed/manifest pins bind evidence without changing C. Current common-engine and product-tooling council dispositions/binding and final ready verification remain separate. publication_authorized stays false.",
-  "remaining_release_gates": [
-    "Bind the actual current common-engine and product-tooling G4 dispositions on immutable subjects; runtime and fresh acceptance evidence grant no review approval.",
-    "Complete final manifest evidence pin, full suites, require-ready/check-pins and head CI before founder-owned product publication."
-  ],
+  "interpretation": "Fresh shipping-byte RC union and T1 hash parity qualify the changed 5090 binary; corrected-build op oracles and failed byte comparisons retain distinct identities. Native matched pre-cut T1/retrieval/strict C1 and A8 screens do not substitute for managed package qualification. Original scratch qualification retains public_package_executed=false and distinct config/package hashes; separate candidate-bound routes/public URL acceptance executed the actual beta.3 public packages and configurations. The original base publication and unchanged stock-client host-free review keep their historical subjects, while all five routes and three live clients were accepted fresh on c81a8e7e. Image input covers macOS/Windows against RTX 5090 only. Initial 5090 execution failed closed on a same-Mac unit-suite port collision and restored production; one corrected attempt passed without changing C (#97). Late correction-record validation required recording the disclosure and rerunning summarize alone on unchanged execution evidence (#99). Native canonical promotions were fresh first-of-lineage installs after preserving beta.2 roots/staging; later public URL checks verified idempotence, not another upgrade or rollback. Evidence-only commits do not advance C. Deferrals remain #88/#89/#90 and #94/#95/#96/#97/#98/#99/#100, including native client_acceptance default-model handling (#98). Both actual council dispositions are bound separately from runtime/route evidence. G4 approval is limited to those dispositions; product publication remains founder-owned.",
+  "eligibility_scope": "Runtime/installability, fresh candidate-bound public-route/client acceptance and both actual G4 council dispositions are complete. Root authority/live profiles name v0.14.0; the guide stays prepared and public front-door links remain on v0.13.1 until publication. Immutable platform/composed/manifest pins bind evidence without changing C. G4 closure comes from the bound ledgers, not runtime tests. Final current-head suites, ready/check-pins verification, remote hashes and CI precede founder-owned publication; publication_authorized stays false.",
+  "remaining_release_gates": [],
   "not_remeasured_gates": [
     {
       "id": "powered_quality_and_leak_shipping_profile",
@@ -163,7 +160,7 @@
       "status": "passed",
       "repository_path": "releases/v0.14.0/acceptance/composed-external-installation.json",
       "sha256": "f42046d04815efb368e4bc385372417f60edfd9fb08cad7b64a62293d05352c4",
-      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/36b93ba87c237d86918e9b9008d4242cfeb35def/releases/v0.14.0/acceptance/composed-external-installation.json",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/88c8a43bfd1c5b13041ac059ee880d4e4286ab3b/releases/v0.14.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-28",
       "release": "v0.14.0",
       "component_release_tag": "v18.12.6",
@@ -372,7 +369,7 @@
       "repository_path": "releases/v0.14.0/qualification/staging.json",
       "sha256": "a1ffdd29b6d6bf359b3a3751c71ea90dd71662e1ac3579d2bbdb0b971cd3576a",
       "stage": "draft",
-      "scope": "Actual complete source-N runtime and both native bind/copy/rebind preparation; root promotion and acceptance are separate."
+      "scope": "The bound historical draft-stage receipt records actual complete source-N runtime and both native bind/copy/rebind preparation without premature promotion. Subsequent lane pin/root promotion, fresh candidate-bound acceptance and both actual closed councils are bound separately. No product publication is granted."
     },
     "rtx3090": {
       "status": "passed",
@@ -450,6 +447,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.14.0/qualification/receipt-audit.json",
-    "sha256": "2d5924e7499609dcbf71ea0a2034a1dab6bd833bf465c22bf49f65c2f51eb944"
+    "sha256": "c4fa032cbe73e56d5fdaf63a57fefb0d37429b8756529072c39018b6ae888c9f"
   }
 }
