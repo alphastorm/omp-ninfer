@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DOC = ROOT / "docs" / "QUICKSTART.md"
 _HEADING_RE = re.compile(r"^(#{2,3}) (.+?)\s*$")
 _FENCE_RE = re.compile(r"^```([A-Za-z0-9_-]*)\s*$")
+_MODELS_FRAGMENT_RE = re.compile(r"examples[\\/]([\w-]+)[\\/](models[\w-]*\.fragment\.yml)")
+_FRAGMENT_MODEL_RE = re.compile(r"^      - id: (\S+)$", re.M)
 
 
 @dataclass(frozen=True)
@@ -172,6 +174,21 @@ def lane_blocks(doc: Path, lane: str) -> list[tuple[Step, Block]]:
             )
         resolved.append((step, block))
     return resolved
+
+
+def provider_model_id(provider_block: str, checkout: Path) -> str:
+    """The model a documented provider block configures: the only model of the one shipped models
+    fragment it installs from ``checkout``. Client acceptance and the native route acceptance take
+    a lane's model from here (the PowerShell orchestrator reads the same two files), so none keeps
+    a lane-to-model table that can drift from the release it runs against (omp-ninfer#98)."""
+    fragments = set(_MODELS_FRAGMENT_RE.findall(provider_block))
+    if len(fragments) != 1:
+        raise ValueError("a documented provider step must install exactly one models fragment")
+    ((directory, name),) = fragments
+    ids = _FRAGMENT_MODEL_RE.findall((checkout / "examples" / directory / name).read_text(encoding="utf-8"))
+    if len(ids) != 1:
+        raise ValueError(f"examples/{directory}/{name} must declare exactly one model")
+    return ids[0]
 
 
 def bundle(doc: Path, lane: str, output: Path) -> dict:

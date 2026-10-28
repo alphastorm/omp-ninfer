@@ -44,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
   `summarize()` reads the same records, so a window can no longer be spent on corrections that
   are only written after it fails.
+- Default a live `scripts/client_acceptance.py --lane rtx3090-native` run to the served
+  `q38-ninfer` model instead of `qwen3.8-27b`: without `--model-id`, every lane now requests the
+  model in the provider fragment its quickstart step installs
+  ([#98](https://github.com/alphastorm/omp-ninfer/issues/98)).
 
 ### Changed
 

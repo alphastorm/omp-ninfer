@@ -23,6 +23,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from compose_native_qualification import first_release_rollback
+from documented_route import provider_model_id
 
 
 def quote(value: object) -> str:
@@ -71,7 +72,6 @@ def private_text(path: Path) -> str:
 # The documented acceptance's turns: the tool turn, the nonce plant and the nonce recall.
 DOCUMENTED_TURNS = 3
 NONCE = "493817-205361"
-NATIVE_MODELS = {"rtx4090": "qwen3.8-27b", "rtx3090": "q38-ninfer"}
 
 
 def request_shape(completed: list[dict]) -> dict[str, bool]:
@@ -83,9 +83,19 @@ def request_shape(completed: list[dict]) -> dict[str, bool]:
             "requests_match_turns_and_tool_calls": len(completed) == DOCUMENTED_TURNS + tool_calls}
 
 
+def documented_model(bundle: Path, clone: Path) -> str:
+    """The model the bundle's documented provider step configures from the candidate clone, which
+    every documented request names. The candidate documents it; no lane table here can drift."""
+    steps = json.loads((bundle / "manifest.json").read_text())["steps"]
+    provider = [step for step in steps if step["slug"] == "provider"]
+    if len(provider) != 1:
+        raise ValueError("bundle must hold exactly one documented provider step")
+    return provider_model_id((bundle / provider[0]["file"]).read_text(encoding="utf-8"), clone)
+
+
 def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, candidate: str,
                     lane: str = "rtx4090") -> dict[str, object]:
-    model = NATIVE_MODELS[lane]
+    model = documented_model(bundle, clone)
     provider = f"ninfer-native-{lane.removeprefix('rtx')}"
     def load(name: str) -> dict:
         return json.loads(private_text(evidence / name))
@@ -182,7 +192,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--lane", choices=sorted(NATIVE_MODELS), default="rtx4090")
+    p.add_argument("--lane", choices=("rtx3090", "rtx4090"), default="rtx4090")
     p.add_argument("--release", required=True)
     p.add_argument("--candidate", required=True)
     p.add_argument("--workspace", type=Path, required=True)
@@ -203,7 +213,6 @@ def main() -> int:
     a = p.parse_args()
     route_lane = f"{a.lane}-native"
     provider = f"ninfer-native-{a.lane.removeprefix('rtx')}"
-    model = NATIVE_MODELS[a.lane]
     if not re.fullmatch(r"[0-9a-f]{40}", a.candidate):
         p.error("candidate must be an exact commit")
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", a.release):
@@ -305,6 +314,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         preflight = json.loads((w / "driver-preflight.json").read_text())
         if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane:
             raise RuntimeError("candidate changed since preflight")
+        selector = f"{provider}/{documented_model(bundle, clone)}"
         run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         code = r"""$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$w=WORKSPACE;
@@ -312,7 +322,7 @@ $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path 
 $h=Join-Path $w 'preflight-home';Set-Variable HOME $h -Scope Global -Force;$env:HOME=$h;$env:USERPROFILE=$h;$env:LOCALAPPDATA=Join-Path $h 'AppData\Local';$env:APPDATA=Join-Path $h 'AppData\Roaming';
 $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated binary missing'};
 & py -3 (Join-Path $w 'omp-client-probe.py') --release RELEASE --candidate CANDIDATE --phase preflight --output (Join-Path $w 'structured') --binary $binary --clone (Join-Path $w 'candidate') --platform windows-x64 --profile windows-docker-local --provider PROVIDER --model MODEL --endpoint http://127.0.0.1:18082/v1;exit $LASTEXITCODE
-""".replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate)).replace("PROVIDER", quote(provider)).replace("MODEL", quote(f"{provider}/{model}"))
+""".replace("WORKSPACE", quote(remote)).replace("RELEASE", quote(a.release)).replace("CANDIDATE", quote(a.candidate)).replace("PROVIDER", quote(provider)).replace("MODEL", quote(selector))
         ssh(a.host, code, log=w / "preflight-revalidation.log", timeout=120)
         invoke("DryRun", "restoration-dry-run.json", 120)
         preflight["orchestrator_sha256"] = sha(orchestrator)

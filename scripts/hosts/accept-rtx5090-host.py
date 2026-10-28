@@ -2,10 +2,13 @@
 """WSL-side bounded acceptance window with an independent restoration watchdog.
 
 All durable state is private to --workspace. Restoration is lock-protected and
-safe to invoke independently of route success. --dry-run has no effects.
+safe to invoke independently of route success: begin makes every change under the
+same lock, and no action changes the host before begin or after a recorded
+restoration. --dry-run has no effects.
 """
 import argparse
 import base64
+import contextlib
 import datetime
 import fcntl
 import hashlib
@@ -81,6 +84,13 @@ def windows_environment(probe, runtime=Path('/run/WSL')):
     raise RuntimeError('no WSL interop relay starts a Windows process; tried: ' + (', '.join(candidates) or 'none'))
 
 
+def probe_selector(model_id):
+    """The Linux structured client's selector for the probe: the provider its fragment declares (its key
+    file is ninfer-beta.key) and the model the driver takes from the candidate's documented provider
+    step. The probe assumes no lane, so neither may come from a default (omp-ninfer#98)."""
+    return ['--provider', 'ninfer-beta', '--model', 'ninfer-beta/' + model_id]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', required=True, choices=('preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
@@ -89,8 +99,11 @@ def main():
     p.add_argument('--production', default='ninfer-5090-v070p')
     p.add_argument('--window-dir', default='/home/sunil/services/engine-window')
     p.add_argument('--restore-after-seconds', type=int, default=3000, help='Independent watchdog delay; reserve restoration time inside the total envelope')
+    p.add_argument('--model-id', help="Model the Linux structured client requests, from the candidate's documented provider step; required by the actions that start the client probe")
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
+    if a.action in ('preflight', 'linux-live', 'linux-outage') and not a.model_id:
+        p.error('--action ' + a.action + ' starts the client probe and requires --model-id')
     if a.dry_run:
         print(json.dumps({'status': 'dry-run', 'action': a.action, 'effects': 'none',
                           'client_install': {'profile': 'linux-docker-local', 'method': 'documented-url-and-sha256',
@@ -150,9 +163,34 @@ def main():
                 'production_image': d['Config']['Image'], 'production_image_id': d['Image'], 'restart': d['HostConfig']['RestartPolicy']['Name'],
                 'mounts': d['Mounts'], 'health': health(18088), 'key_sha256': digest(key),
                 'directories': directories}
-    def restore():
+    locked = False
+    @contextlib.contextmanager
+    def restore_lock():
+        # Restoration and every window change take this lock, so neither runs inside the other:
+        # a restoration that starts during begin (the watchdog at its deadline, or the driver's
+        # restore after its begin call timed out) waits, then undoes all of begin. Reentrant in
+        # this process: begin's failure path restores under the lock begin already holds, where
+        # a second flock on a new descriptor would deadlock.
+        nonlocal locked
+        if locked:
+            yield
+            return
         with (root / 'restore.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
+            locked = True
+            try:
+                yield
+            finally:
+                locked = False
+    def require_open_window():
+        # Only a later restoration undoes a change: none follows a change made before begin, and
+        # every restoration after the recorded one is a no-op. Checked under the lock, so it never
+        # passes while a restoration runs; an action already running when one starts is not stopped.
+        with restore_lock():
+            assert (root / 'baseline.json').exists(), 'window not begun; host unchanged'
+            assert not (root / 'restoration.json').exists(), 'window already restored; host unchanged'
+    def restore():
+        with restore_lock():
             if (root / 'restoration.json').exists():
                 previous = json.loads((root / 'restoration.json').read_text())
                 assert not previous.get('retained_window_created_parents'), 'window-created parents retained; restoration proof failed'
@@ -255,30 +293,33 @@ def main():
         clientenv = dict(os.environ, HOME=str(linuxhome), XDG_DATA_HOME=str(linuxhome / '.local/share'), XDG_CONFIG_HOME=str(linuxhome / '.config'), XDG_BIN_HOME=str(linuxhome / '.local/bin'))
         launcher = linuxhome / '.local/bin/omp'
         installation = install_linux_client(dist, asset, linuxhome)
-        logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local'], 90, clientenv)
+        logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', *probe_selector(a.model_id)], 90, clientenv)
         save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
     elif a.action == 'begin':
-        assert not (root / 'baseline.json').exists(), 'window already attempted; no implicit retry'
-        assert 0 < a.restore_after_seconds <= 3000
-        b = baseline(); b['start_epoch'] = time.time(); b['restore_deadline_epoch'] = time.time() + a.restore_after_seconds
-        save('baseline.json', b)
-        with (root / 'watchdog.log').open('w') as log:
-            command = [sys.executable, __file__, *sys.argv[1:]]
-            command[command.index('begin')] = 'watchdog'
-            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
-        save('watchdog.json', {'pid': process.pid, 'restore_deadline_epoch': b['restore_deadline_epoch']})
-        try:
-            key.rename(root / 'original-api-key')
-            for label, path in (('logs', logs), ('checkpoints', checkpoints)):
-                if b['directories'][str(path)]['exists']:
-                    path.rename(root / ('original-' + label))
-                path.mkdir(mode=0o700, parents=True)
-            run(['git', '-C', checkout, 'fetch', '-q', str(clone), a.candidate], 90)
-            run(['git', '-C', checkout, 'checkout', '-q', '--detach', a.candidate])
-            logged('stop-production.log', ['bash', Path(a.window_dir) / 'window.sh', 'stop-production'], 180)
-        except BaseException:
-            restore()
-            raise
+        # Baseline, watchdog and every host change, through stopped production, under the lock.
+        with restore_lock():
+            assert not (root / 'baseline.json').exists(), 'window already attempted; no implicit retry'
+            assert not (root / 'restoration.json').exists(), 'window already restored; host unchanged'
+            assert 0 < a.restore_after_seconds <= 3000
+            b = baseline(); b['start_epoch'] = time.time(); b['restore_deadline_epoch'] = time.time() + a.restore_after_seconds
+            save('baseline.json', b)
+            with (root / 'watchdog.log').open('w') as log:
+                command = [sys.executable, __file__, *sys.argv[1:]]
+                command[command.index('begin')] = 'watchdog'
+                process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+            save('watchdog.json', {'pid': process.pid, 'restore_deadline_epoch': b['restore_deadline_epoch']})
+            try:
+                key.rename(root / 'original-api-key')
+                for label, path in (('logs', logs), ('checkpoints', checkpoints)):
+                    if b['directories'][str(path)]['exists']:
+                        path.rename(root / ('original-' + label))
+                    path.mkdir(mode=0o700, parents=True)
+                run(['git', '-C', checkout, 'fetch', '-q', str(clone), a.candidate], 90)
+                run(['git', '-C', checkout, 'checkout', '-q', '--detach', a.candidate])
+                logged('stop-production.log', ['bash', Path(a.window_dir) / 'window.sh', 'stop-production'], 180)
+            except BaseException:
+                restore()
+                raise
     elif a.action == 'watchdog':
         b = json.loads((root / 'baseline.json').read_text())
         while time.time() < b['restore_deadline_epoch']:
@@ -289,10 +330,12 @@ def main():
     elif a.action == 'restore':
         restore()
     elif a.action == 'host-route':
+        require_open_window()
         logged('host-route.log', ['bash', clone / 'scripts/hosts/run-documented-route.sh', root / 'host-bundle', clone, root / 'host-route.json'], 1200, env)
     elif a.action == 'setup':
         # Explicit completion-window setup, not another documented-route acceptance.
         # Reuse the original documented key only inside this same trusted host boundary.
+        require_open_window()
         shutil.copy2(root / 'original-api-key', key)
         logged('beta-setup.log', [clone / 'examples/manual-tunnel/start-ninfer.sh',
                '--model', model,
@@ -307,6 +350,7 @@ def main():
             status = json.load(r)
         save('runtime-observed.json', {'timestamp': now(), 'configured_image': d['Config']['Image'], 'repo_digests': image['RepoDigests'], 'image_id': d['Image'], 'binary_sha256': binary, 'served': status})
     elif a.action in ('beta-start', 'beta-stop'):
+        require_open_window()
         run(['docker', 'start' if a.action == 'beta-start' else 'stop', 'omp-ninfer-beta'], 150)
         if a.action == 'beta-start':
             for _ in range(150):
@@ -328,7 +372,7 @@ def main():
             os.chmod(agent / 'ninfer-beta.key', 0o600)
         clientenv = dict(os.environ, HOME=str(linuxhome), XDG_DATA_HOME=str(linuxhome / '.local/share'), XDG_CONFIG_HOME=str(linuxhome / '.config'), XDG_BIN_HOME=str(linuxhome / '.local/bin'))
         phase = 'live' if a.action == 'linux-live' else 'outage'
-        logged('linux-' + phase + '.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', phase, '--output', root / 'linux-structured', '--binary', linuxhome / '.local/bin/omp', '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', '--key-file', agent / 'ninfer-beta.key'], 850, clientenv)
+        logged('linux-' + phase + '.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', phase, '--output', root / 'linux-structured', '--binary', linuxhome / '.local/bin/omp', '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', '--key-file', agent / 'ninfer-beta.key', *probe_selector(a.model_id)], 850, clientenv)
     print(json.dumps({'action': a.action, 'status': 'passed', 'workspace': str(root)}))
 
 

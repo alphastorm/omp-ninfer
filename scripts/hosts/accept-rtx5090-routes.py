@@ -6,6 +6,8 @@ Window always invokes independent restoration in finally; a detached WSL
 watchdog begins restoration at 50 minutes, reserving ten minutes of the cap.
 No automatic acceptance retries. --dry-run is entirely read-only/no-effect.
 Only JSON receipts and named private logs are collected, never credential files.
+Each structured client is asked for the model its documented provider step
+configures from the candidate, and the summary expects that model.
 """
 import argparse
 import base64
@@ -42,6 +44,19 @@ def sha(path):
 MARKER = 'OMP_NINFER_TOOL_OK'
 NONCE = '493817-205361'
 MARKER_TOKEN = re.compile(r'(?<![A-Z0-9_])' + MARKER + r'(?![A-Z0-9_])')
+
+# The provider every RTX 5090 client lane's documented fragment declares; its key file is named for it.
+PROVIDER = 'ninfer-beta'
+
+
+def documented_model(bundle, clone):
+    """The model a bundle's documented provider step configures from the candidate clone: the one model
+    of the shipped fragment that step installs. The window asks each structured client for it and the
+    summary expects it, so no model kept here can drift from the candidate (omp-ninfer#98)."""
+    bundle = Path(bundle)
+    steps = [step for step in json.loads((bundle / 'manifest.json').read_text())['steps'] if step['slug'] == 'provider']
+    assert len(steps) == 1, 'bundle must hold exactly one documented provider step'
+    return documented_route.provider_model_id((bundle / steps[0]['file']).read_text(encoding='utf-8'), Path(clone))
 
 
 def windows_route_answers(lines):
@@ -142,15 +157,19 @@ def main():
         return r.stdout.strip() if capture else None
     def remote(argv, label, timeout=120):
         return run(['ssh', '-o', 'BatchMode=yes', a.wsl_host, shlex.join([str(x) for x in argv])], label, timeout)
-    def host(action, timeout=120, dry=False):
+    def host(action, timeout=120, dry=False, model_id=None):
         args = ['python3', wsl + '/accept-rtx5090-host.py', '--action', action, '--release', a.release, '--candidate', a.candidate,
                 '--workspace', wsl, '--windows-workspace', windows, '--production-image', a.production_image, '--restore-after-seconds', str(watchdog_seconds)]
+        if model_id:
+            args += ['--model-id', model_id]
         if dry:
             args.append('--dry-run')
         return remote(args, 'host-' + action + ('-dry-run' if dry else ''), timeout)
-    def win(action, timeout=120, dry=False):
+    def win(action, timeout=120, dry=False, model_id=None):
         quote = lambda s: "'" + str(s).replace("'", "''") + "'"
         ps = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(windows + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + quote(windows) + " -Release " + quote(a.release) + " -Candidate " + quote(a.candidate)
+        if model_id:
+            ps += ' -ModelId ' + quote(model_id)
         if dry:
             ps += ' -DryRun'
         # Only owner-hold operations use bypass. The documented runner is launched as text.
@@ -165,10 +184,17 @@ def main():
                     XDG_BIN_HOME=str(home / '.local/bin'), XDG_CACHE_HOME=str(home / '.cache'),
                     TMPDIR=str(home / 'tmp') + '/',
                     PATH=str(home / '.local/bin') + ':' + os.environ['PATH'])
-    def macprobe(phase, home=routehome):
+    def documented_models():
+        # Each structured client's model, from its documented provider step in this window's bundles and
+        # the candidate clone that step installs from. The Linux client installs the macOS/Linux shell
+        # route's fragment, as the Mac does; the Windows client installs its own.
+        return {'linux': documented_model(root / 'mac-bundle', clone), 'mac': documented_model(root / 'mac-bundle', macclone),
+                'windows': documented_model(root / 'windows-bundle', clone)}
+    def macprobe(phase, model_id, home=routehome):
         args = [sys.executable, source / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', phase,
                 '--output', root / 'mac-structured', '--binary', home / '.local/bin/omp', '--clone', macclone,
-                '--platform', 'macos-arm64', '--profile', 'darwin-remote-ssh', '--key-file', home / '.omp/agent/ninfer-beta.key', '--vision-image', macclone / 'assets/icon-512.png']
+                '--platform', 'macos-arm64', '--profile', 'darwin-remote-ssh', '--key-file', home / '.omp/agent/ninfer-beta.key',
+                '--provider', PROVIDER, '--model', PROVIDER + '/' + model_id, '--vision-image', macclone / 'assets/icon-512.png']
         run(args, 'mac-' + phase, 850, isolated(home))
     def freeport():
         with socket.socket() as s:
@@ -207,6 +233,7 @@ def main():
             assert receipt['document_sha256'] == manifest['document_sha256']
             assert all(step['block_sha256'] == step['executed_sha256'] == expected['sha256'] and step['status'] in ('passed', 'substituted') for step, expected in zip(receipt['steps'], manifest['steps']))
             result['routes'][label] = {'path': str(root / (label + '-route.json')), 'receipt': receipt}
+        documented = documented_models()
         for label, folder in (('linux', 'remote-linux-structured'), ('mac', 'mac-structured'), ('windows', 'windows-structured')):
             evidence_root = Path(a.windows_evidence) if label == 'windows' and a.windows_evidence else root
             receipt = json.loads((evidence_root / folder / 'receipt.json').read_text())
@@ -244,7 +271,7 @@ def main():
                             if isinstance(node.get('model'), str):
                                 models.add(node['model'])
                             stack.extend(node.values())
-                assert providers == {'ninfer-beta'} and models and models <= {'q38-ninfer'}, label + '/' + phase + ': unexpected provider/model record'
+                assert providers == {PROVIDER} and models and models <= {documented[label]}, label + '/' + phase + ': unexpected provider/model record'
                 stream_audit[phase] = {'providers': sorted(providers), 'models': sorted(models), 'input_image_records': images, 'only_selected_provider_and_model': True, 'decode_encoding': encoding, 'transcript_sha256': hashlib.sha256(raw).hexdigest()}
             receipt['full_stream_audit'] = stream_audit
             result['clients'][label] = receipt
@@ -323,6 +350,7 @@ def main():
         if not macclone.exists():
             run(['git', 'clone', '-q', '--no-hardlinks', clone, macclone], 'mac-clone')
             run(['git', '-C', macclone, 'checkout', '-q', a.candidate], 'mac-checkout')
+        documented = documented_models()
         comp = json.loads((clone / 'compatibility.json').read_text())
         dist = next(v['client_distribution'] for v in comp['profiles'] if v['id'] == 'darwin-remote-ssh')
         assert dist['distribution_kind'] == 'upstream-release', 'stock upstream client required'
@@ -338,7 +366,7 @@ def main():
         assert sha(binary) == dist['binary_sha256'], 'installed client binary checksum mismatch'
         assert shutil.which('sha256sum') and shutil.which('ssh')
         freeport()
-        macprobe('preflight', prehome)
+        macprobe('preflight', documented['mac'], prehome)
         remote(['mkdir', '-p', wsl], 'wsl-private-root')
         create = '$null=New-Item -ItemType Directory -Force -Path ' + "'" + windows.replace("'", "''") + "'"
         run(['ssh', a.windows_host, 'powershell -NoProfile -EncodedCommand ' + base64.b64encode(create.encode('utf-16le')).decode()], 'windows-private-root')
@@ -346,14 +374,15 @@ def main():
             run(['scp', '-q', source / name, a.wsl_host + ':' + wsl + '/' + name], 'stage-wsl-' + name)
         for name in ('accept-windows-client.ps1', 'omp-client-probe.py'):
             run(['scp', '-q', source / name, a.windows_host + ':' + windows.replace('\\', '/') + '/' + name], 'stage-windows-' + name)
-        win('Preflight', 600)
-        host('preflight', 900)
+        win('Preflight', 600, model_id=documented['windows'])
+        host('preflight', 900, model_id=documented['linux'])
         host('restore', dry=True)
         win('Release', dry=True)
         save('preflight.json', {'status': 'passed', 'release': a.release, 'candidate': a.candidate, 'completed_utc': now(),
              'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha(asset), 'mac_binary_sha256': sha(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
     elif a.action == 'windows-live-only':
         assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed'
+        documented = documented_models()
         assert a.prior_workspace, 'completion requires the restored route evidence root'
         prior = Path(a.prior_workspace)
         assert all(json.loads((prior / (label + '-route.json')).read_text())['status'] == 'passed' for label in ('host', 'mac', 'windows'))
@@ -374,9 +403,9 @@ def main():
             host('begin', 300)
             host('setup', 1250)
             host('identity')
-            win('Live', 850)
+            win('Live', 850, model_id=documented['windows'])
             host('beta-stop', 180)
-            win('Outage', 150)
+            win('Outage', 150, model_id=documented['windows'])
         except BaseException as exc:
             error = str(exc)
             save('first-failure.json', {'boundary': error, 'timestamp': now()})
@@ -407,6 +436,8 @@ def main():
     else:
         assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed', 'preflight required'
         assert not (root / 'window-attempt.json').exists(), 'window already attempted; no implicit retry'
+        # Derived before any attempt is recorded or a host changes.
+        documented = documented_models()
         freeport()
         if a.attempt == 'corrected':
             assert a.prior_workspace, 'corrected attempt requires its restored initial evidence'
@@ -431,15 +462,15 @@ def main():
             host('begin', 300); started = True
             host('host-route', 1250)
             host('identity')
-            host('linux-live', 850)
+            host('linux-live', 850, model_id=documented['linux'])
             host('beta-stop', 180)
-            host('linux-outage', 120)
+            host('linux-outage', 120, model_id=documented['linux'])
             host('beta-start', 360)
             env = isolated(routehome)
             env['ROUTE_SSH_DESTINATION'] = a.route_ssh_destination
             run(['bash', macclone / 'scripts/hosts/run-documented-route.sh', root / 'mac-bundle', macclone, root / 'mac-route.json'], 'mac-route', 1000, env)
             # The runner closed its documented forward. Prove the structured client fail-closed there.
-            macprobe('outage')
+            macprobe('outage', documented['mac'])
             tunnel_log = (root / 'structured-tunnel.log').open('w')
             tunnel = subprocess.Popen(['ssh', '-N', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes', '-o', 'ServerAliveInterval=10', '-L', '127.0.0.1:18089:127.0.0.1:18089', a.route_ssh_destination], stdin=subprocess.DEVNULL, stdout=tunnel_log, stderr=tunnel_log)
             for _ in range(30):
@@ -451,18 +482,18 @@ def main():
                             break
                 except Exception:
                     time.sleep(1)
-            macprobe('live')
+            macprobe('live', documented['mac'])
             # A prior passed outage plus live evidence completes this client's result without a second probe.
             path = root / 'mac-structured/receipt.json'
             receipt = json.loads(path.read_text())
             assert receipt['live_acceptance']['fail_closed']['no_model_response']
             receipt['status'] = 'passed'; path.write_text(json.dumps(receipt, indent=2) + '\n')
             tunnel.terminate(); tunnel.wait(timeout=15); tunnel = None; tunnel_log.close()
-            win('Live', 850)
+            win('Live', 850, model_id=documented['windows'])
             # The documented fail-closed block removes beta, not merely stops it.
             # Capture structured live events first, then let the unchanged route own removal.
             win('Route', 850)
-            win('Outage', 150)
+            win('Outage', 150, model_id=documented['windows'])
         except BaseException as exc:
             error = str(exc)
             save('first-failure.json', {'boundary': error, 'timestamp': now()})

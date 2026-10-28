@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import importlib.util
+import io
 import json
 import shutil
 import re
@@ -14,6 +17,8 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+import documented_route
 SPEC = importlib.util.spec_from_file_location("accept_rtx4090_route",
                                               ROOT / "scripts" / "hosts" / "accept-rtx4090-route.py")
 assert SPEC is not None and SPEC.loader is not None
@@ -23,6 +28,98 @@ SPEC.loader.exec_module(DRIVER)
 
 def completed(*tool_calls: int) -> list[dict]:
     return [{"result": {"tool_call_count": count}} for count in tool_calls]
+
+
+def write_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value))
+
+
+def served_model_ids(checkout: Path) -> dict[str, str]:
+    """Each native lane's served model ID: the model_id of the server config its release variant
+    binds. Server-side identities only, never a client provider fragment."""
+    release = json.loads((checkout / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+    tree = checkout / "releases" / release
+    configurations = {hashlib.sha256(path.read_bytes()).hexdigest(): json.loads(path.read_bytes())["model_id"]
+                      for path in (tree / "profiles").glob("*/server-config.json")}
+    variants = json.loads((tree / "manifest.json").read_text(encoding="utf-8"))["components"]["ninfer_variants"]
+    return {variant["id"].removesuffix("-windows-native"): configurations[variant["configuration_sha256"]]
+            for variant in variants}
+
+
+def renamed_candidate(root: Path) -> Path:
+    """A successor candidate that renamed each native model: its native server configs serve, and its
+    guide's provider fragments configure, the current ID plus "-next"."""
+    clone = root / "candidate"
+    tree = Path("releases") / json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+    for relative in (Path("compatibility.json"), Path("docs/QUICKSTART.md"), tree / "manifest.json"):
+        (clone / relative).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(ROOT / relative, clone / relative)
+    shutil.copytree(ROOT / "examples/windows-native", clone / "examples/windows-native")
+    for fragment in (clone / "examples/windows-native").glob("*.fragment.yml"):
+        fragment.write_text(re.sub(r"(?m)^(      - id: \S+)$", r"\1-next", fragment.read_text(encoding="utf-8")),
+                            encoding="utf-8")
+    renamed = {}
+    for source in (ROOT / tree / "profiles").glob("*/server-config.json"):
+        config = json.loads(source.read_bytes())
+        config["model_id"] += "-next"
+        target = clone / source.relative_to(ROOT)
+        write_json(target, config)
+        renamed[hashlib.sha256(source.read_bytes()).hexdigest()] = hashlib.sha256(target.read_bytes()).hexdigest()
+    manifest = json.loads((clone / tree / "manifest.json").read_text(encoding="utf-8"))
+    for variant in manifest["components"]["ninfer_variants"]:
+        variant["configuration_sha256"] = renamed[variant["configuration_sha256"]]
+    write_json(clone / tree / "manifest.json", manifest)
+    return clone
+
+
+def rtx3090_window(root: Path, model: str) -> dict:
+    """The collected evidence of a passing RTX 3090 window, its candidate clone and the documented
+    bundle it ran. The bundle's provider step installs the clone's RTX 3090 fragment, whose one model
+    is ``model``; every documented request and local client response names it."""
+    evidence, clone, bundle = root / "evidence", root / "clone", root / "bundle"
+    candidate = "1" * 40
+    identity = {"binary_sha256": "a" * 64, "config_sha256": "b" * 64,
+                "model_artifact_sha256": "c" * 64, "patch_stack_sha": "d" * 40,
+                "source_dirty": False}
+    variant = {"id": "rtx3090-windows-native", "server_binary_sha256": "a" * 64,
+               "configuration_sha256": "b" * 64, "model_artifact_sha256": "c" * 64,
+               "source_commit": "d" * 40, "package_sha256": "e" * 64}
+    write_json(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
+    fragment = Path("examples/windows-native/models-rtx3090.fragment.yml")
+    (clone / fragment).parent.mkdir(parents=True)
+    (clone / fragment).write_text(re.sub(r"(?m)^      - id: \S+$", "      - id: " + model,
+                                         (ROOT / fragment).read_text(encoding="utf-8")), encoding="utf-8")
+    blocks = documented_route.bundle(ROOT / "docs/QUICKSTART.md", "rtx3090-native", bundle)
+    steps = [{"slug": step["slug"], "status": "passed", "block_sha256": step["sha256"],
+              "executed_sha256": step["sha256"],
+              "substitution": candidate if step["slug"] == "clone-and-verify" else None} for step in blocks["steps"]]
+    route = {"lane": "rtx3090-native", "status": "passed", "clone_commit": candidate,
+             "document_sha256": blocks["document_sha256"], "steps": steps, "completed_utc": "2026-01-01T01:00:00Z"}
+    write_json(evidence / "route.json", route)
+    write_json(evidence / "recovery-health.json", {"status_code": 200})
+    write_json(evidence / "recovery-status.json", {"process_state": "running", "endpoint_state": "ready",
+                                                   "server": {"status": "ok", "identity": identity}})
+    write_json(evidence / "installed-identity.json", {"package_sha256": "e" * 64})
+    for name in ("restoration", "final-audit"):
+        write_json(evidence / f"{name}.json", {"status": "passed"})
+    live = {"typed_read_tool_calls": 1, "linked_tool_results": 1,
+            **{key: True for key in ("tool_result_marker", "exact_visible_final_answer", "agent_end",
+                                     "continuation_exact_nonce", "runtime_identity_bound")},
+            "fail_closed": {"exit_code": 1, "no_model_response": True, "only_selected_local_provider_observed": True}}
+    write_json(evidence / "structured/receipt.json", {"status": "passed", "live_acceptance": live})
+    (evidence / "route.stdout.log").write_text("OMP_NINFER_TOOL_OK\n493817-205361\n")
+    requests = [{"event": "request_done", "request": {"request_id": str(i), "model": model,
+                 "has_tool_history": i == 1}, "result": {"tool_call_count": int(i == 0)}} for i in range(4)]
+    (evidence / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))
+    logs = [{"timestamp": "2026-01-01T00:00:00Z", "provider": "ninfer-native-3090", "model": model,
+             "message": "agent_end maintenance routing", "stopReason": "error", "contentBlocks": 0,
+             "hasText": False, "hasToolCalls": False},
+            {"timestamp": "2026-01-01T00:00:00Z", "message": "agent turn ended with provider error"}]
+    (evidence / "route-client-logs").mkdir()
+    (evidence / "route-client-logs/client.log").write_text("\n".join(map(json.dumps, logs)))
+    return {"evidence": evidence, "clone": clone, "bundle": bundle, "variant": variant, "route": route,
+            "requests": requests}
 
 
 class RequestShapeTests(unittest.TestCase):
@@ -108,7 +205,7 @@ $FirstRelease=$false;$TemporaryPrevious='older'
 $p.power_limit_w=if($Lane -eq 'rtx3090'){450}else{370}
 $rejected=$false;try{AssertBaseline $p}catch{$rejected=$true}
 if(-not $rejected){throw 'other lane power limit was accepted'}
-@{lane=$Lane;root=$StateRoot;task=$TaskName;power=$ownerPowerLimit;selector=$selector}
+@{lane=$Lane;root=$StateRoot;task=$TaskName;power=$ownerPowerLimit}
 '@
 $results=@(foreach($lane in @('rtx3090','rtx4090')) {
   & ([scriptblock]::Create($definitions+$assertions)) -Lane $lane -Release v0.9.1 -Candidate ('1'*40) -Workspace C:/window -Bundle C:/bundle -Clone C:/clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -RealHome C:/home
@@ -128,9 +225,7 @@ $results|ConvertTo-Json -Compress
             self.assertEqual(rows["rtx3090"]["power"], 370)
             self.assertEqual(rows["rtx3090"]["task"], "NInfer-Qwen38-3090-Native")
             self.assertTrue(rows["rtx3090"]["root"].endswith("qwen38-3090-native"))
-            self.assertEqual(rows["rtx3090"]["selector"], "ninfer-native-3090/q38-ninfer")
             self.assertEqual(rows["rtx4090"]["power"], 450)
-            self.assertEqual(rows["rtx4090"]["selector"], "ninfer-native-4090/qwen3.8-27b")
 
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for directory preservation")
     def test_optional_native_directories_preserve_presence_in_both_lineage_modes(self) -> None:
@@ -344,76 +439,193 @@ $results|ConvertTo-Json -Compress
 
     def test_assessor_binds_3090_model_route_and_package(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            evidence, clone, bundle = root / "evidence", root / "clone", root / "bundle"
-            def save(path, value):
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(json.dumps(value))
+            window = rtx3090_window(Path(directory), "q38-ninfer")
+            evidence, clone, bundle, variant = (window[key] for key in ("evidence", "clone", "bundle", "variant"))
             candidate = "1" * 40
-            identity = {"binary_sha256": "a" * 64, "config_sha256": "b" * 64,
-                        "model_artifact_sha256": "c" * 64, "patch_stack_sha": "d" * 40,
-                        "source_dirty": False}
-            variant = {"id": "rtx3090-windows-native", "server_binary_sha256": "a" * 64,
-                       "configuration_sha256": "b" * 64, "model_artifact_sha256": "c" * 64,
-                       "source_commit": "d" * 40, "package_sha256": "e" * 64}
-            save(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
-            slugs = ["client-install", "clone-and-verify", "variant", "stage-and-install", "operate", "provider", "acceptance"]
-            steps = [{"slug": slug, "status": "passed", "sha256": "f" * 64,
-                      "block_sha256": "f" * 64, "executed_sha256": "f" * 64,
-                      "substitution": candidate if slug == "clone-and-verify" else None} for slug in slugs]
-            route = {"lane": "rtx3090-native", "status": "passed", "clone_commit": candidate,
-                     "document_sha256": "0" * 64, "steps": steps, "completed_utc": "2026-01-01T01:00:00Z"}
-            save(bundle / "manifest.json", {"lane": "rtx3090-native", "document_sha256": "0" * 64, "steps": steps})
-            save(evidence / "route.json", route)
-            save(evidence / "recovery-health.json", {"status_code": 200})
-            save(evidence / "recovery-status.json", {"process_state": "running", "endpoint_state": "ready",
-                                                       "server": {"status": "ok", "identity": identity}})
-            save(evidence / "installed-identity.json", {"package_sha256": "e" * 64})
-            for name in ("restoration", "final-audit"):
-                save(evidence / f"{name}.json", {"status": "passed"})
-            live = {"typed_read_tool_calls": 1, "linked_tool_results": 1,
-                    **{key: True for key in ("tool_result_marker", "exact_visible_final_answer", "agent_end",
-                                             "continuation_exact_nonce", "runtime_identity_bound")},
-                    "fail_closed": {"exit_code": 1, "no_model_response": True, "only_selected_local_provider_observed": True}}
-            save(evidence / "structured/receipt.json", {"status": "passed", "live_acceptance": live})
-            (evidence / "route.stdout.log").write_text("OMP_NINFER_TOOL_OK\n493817-205361\n")
-            requests = [{"event": "request_done", "request": {"request_id": str(i), "model": "q38-ninfer",
-                         "has_tool_history": i == 1}, "result": {"tool_call_count": int(i == 0)}} for i in range(4)]
-            (evidence / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))
-            logs = [{"timestamp": "2026-01-01T00:00:00Z", "provider": "ninfer-native-3090", "model": "q38-ninfer",
-                     "message": "agent_end maintenance routing", "stopReason": "error", "contentBlocks": 0,
-                     "hasText": False, "hasToolCalls": False},
-                    {"timestamp": "2026-01-01T00:00:00Z", "message": "agent turn ended with provider error"}]
-            log_dir = evidence / "route-client-logs"
-            log_dir.mkdir()
-            (log_dir / "client.log").write_text("\n".join(map(json.dumps, logs)))
             result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
             self.assertEqual(result["status"], "passed", result["checks"])
             variant["qualification"] = {"summary": "qualification/first.json"}
-            save(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
-            save(clone / "releases/v0.9.1/qualification/first.json", {"rollback": {"status": "not_applicable",
+            write_json(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
+            write_json(clone / "releases/v0.9.1/qualification/first.json", {"rollback": {"status": "not_applicable",
                 "directions": 0, "reason": "first release of the lineage"}})
             preparation = {"lineage_mode": "first_release", "previous_release_present": False,
                            "temporary_active": None, "temporary_previous": ""}
-            save(evidence / "preparation.json", preparation)
+            write_json(evidence / "preparation.json", preparation)
             result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
             self.assertEqual(result["status"], "passed", result["checks"])
             preparation["temporary_previous"] = "unsupported"
-            save(evidence / "preparation.json", preparation)
+            write_json(evidence / "preparation.json", preparation)
             result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
             self.assertFalse(result["checks"]["first_release_preparation_has_no_predecessor"])
             del variant["qualification"]
-            save(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
+            write_json(clone / "releases/v0.9.1/manifest.json", {"components": {"ninfer_variants": [variant]}})
+            route, requests = window["route"], window["requests"]
             route["lane"] = "rtx4090-native"
-            save(evidence / "route.json", route)
+            write_json(evidence / "route.json", route)
             requests[0]["request"]["model"] = "qwen3.8-27b"
             (evidence / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))
-            save(evidence / "installed-identity.json", {"package_sha256": "9" * 64})
+            write_json(evidence / "installed-identity.json", {"package_sha256": "9" * 64})
             result = DRIVER.assess_evidence(evidence, clone, bundle, "v0.9.1", candidate, "rtx3090")
             self.assertEqual(result["status"], "failed")
             self.assertFalse(result["checks"]["runner_passed"])
             self.assertFalse(result["checks"]["only_expected_server_model"])
             self.assertFalse(result["checks"]["installed_package_bound"])
+
+
+class DocumentedModelTests(unittest.TestCase):
+    """The route asks for the model its candidate's documented provider step configures, which is the
+    model that candidate's native server serves. It keeps no lane table of its own (omp-ninfer#98):
+    the scripts run from the operator's checkout against a frozen candidate."""
+
+    LIVE = r'''
+param($Source,$Workspace,$Bundle,$Clone,$Lane)
+$ErrorActionPreference='Stop'
+# py records the structured probe's arguments instead of running it; the Live phase exits with it.
+function py {[Console]::Out.WriteLine((ConvertTo-Json -Compress @($args)));$global:LASTEXITCODE=0}
+New-Item -ItemType File -Force (Join-Path $Workspace 'route-home\AppData\Local\OMP\omp.exe')|Out-Null
+& ([scriptblock]::Create([IO.File]::ReadAllText($Source))) -Mode Live -Lane $Lane -Release v0.14.0 -Candidate ('1'*40) -Workspace $Workspace -Bundle $Bundle -Clone $Clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot (Join-Path $Workspace 'state') -KeyFile (Join-Path $Workspace 'key.txt') -RealHome (Join-Path $Workspace 'home')
+'''
+
+    def live_model(self, lane: str, clone: Path) -> str:
+        """The --model of the Live phase's structured probe against ``clone`` and the bundle of its
+        documented route: the model the window asks the candidate's server for."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace, bundle = root / "window", root / "bundle"
+            workspace.mkdir()
+            shutil.copy(ROOT / "scripts/hosts/native-gpu.ps1", workspace)
+            (workspace / "key.txt").write_text("synthetic-test-key\n")
+            documented_route.bundle(clone / "docs/QUICKSTART.md", f"{lane}-native", bundle)
+            (root / "live.ps1").write_text(self.LIVE)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(root / "live.ps1"),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), str(workspace),
+                                     str(bundle), str(clone), lane], capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        probe = json.loads(result.stdout)
+        return probe[probe.index("--model") + 1]
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to run the route's live phase")
+    def test_each_lane_asks_for_the_model_its_server_serves(self) -> None:
+        served = served_model_ids(ROOT)
+        self.assertEqual(sorted(served), ["rtx3090", "rtx4090"])
+        for lane, model in served.items():
+            with self.subTest(lane=lane):
+                self.assertEqual(self.live_model(lane, ROOT), f"ninfer-native-{lane[3:]}/{model}")
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to run the route's live phase")
+    def test_a_candidate_that_renames_its_models_is_asked_for_the_new_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            clone = renamed_candidate(Path(directory))
+            for lane, model in served_model_ids(clone).items():
+                with self.subTest(lane=lane):
+                    self.assertTrue(model.endswith("-next"))
+                    self.assertEqual(self.live_model(lane, clone), f"ninfer-native-{lane[3:]}/{model}")
+
+    def test_revalidation_probes_the_model_the_candidate_serves(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            clone, bundle, workspace = renamed_candidate(root), root / "bundle", root / "workspace"
+            documented_route.bundle(clone / "docs/QUICKSTART.md", "rtx3090-native", bundle)
+            write_json(workspace / "driver-preflight.json",
+                       {"plan": {"candidate": "1" * 40, "client_install": {"lane": "rtx3090-native"}}})
+            command = ["accept-rtx4090-route.py", "--lane", "rtx3090", "--release", "v0.14.0",
+                       "--candidate", "1" * 40, "--host", "fixture-host", "--workspace", str(workspace),
+                       "--remote-workspace", "C:/acceptance", "--clone", str(clone), "--bundle", str(bundle),
+                       "--expected-state-sha256", "2" * 64, "--temporary-previous", "older", "--mode", "validate"]
+            completed_process = subprocess.CompletedProcess([], 0, "", "")
+            with mock.patch.object(sys, "argv", command), \
+                    mock.patch.object(DRIVER, "ssh", return_value=completed_process) as ssh, \
+                    mock.patch.object(DRIVER, "run", return_value=completed_process), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(DRIVER.main(), 0)
+            model = served_model_ids(clone)["rtx3090"]
+        self.assertIn("--model " + DRIVER.quote(f"ninfer-native-3090/{model}"), ssh.call_args_list[0].args[1])
+
+    def test_assessor_expects_the_model_the_candidate_documents(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            window = rtx3090_window(Path(directory), "q38-ninfer-next")
+            def assess() -> dict:
+                return DRIVER.assess_evidence(window["evidence"], window["clone"], window["bundle"], "v0.9.1",
+                                              "1" * 40, "rtx3090")
+            result = assess()
+            self.assertEqual(result["status"], "passed", result["checks"])
+            for row in window["requests"]:
+                row["request"]["model"] = "q38-ninfer"
+            (window["evidence"] / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, window["requests"])))
+            self.assertFalse(assess()["checks"]["only_expected_server_model"])
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to run the orchestrator's statements")
+class NativeCommandStatusTests(unittest.TestCase):
+    """The orchestrator checks each native command's exit status (the omp-ninfer#100 item 7 class).
+    Production statements run against PowerShell function fakes of git, the client and taskkill."""
+
+    def run_proof(self, proof: str) -> object:
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "proof.ps1"
+            script.write_text(proof)
+            shutil.copy(ROOT / "scripts/hosts/native-gpu.ps1", directory)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory],
+                                    capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return json.loads(result.stdout)
+
+    def test_preflight_refuses_an_unreadable_clone_or_a_failing_client(self) -> None:
+        """A failed `git status --porcelain` printed nothing, which read as a clean candidate, and the
+        client's --version and --help exit statuses were never read."""
+        rows = self.run_proof(r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+function Statements($from,$to) {$start=$text.IndexOf($from);$text.Substring($start,$text.IndexOf($to,$start)-$start)}
+$cloneCheck=Statements '    if(-not (Test-Path "$Clone\.git"))' '    $manifest=ReadJson'
+$clientCheck=Statements '    $version=' '    $agent=Join-Path'
+$Candidate='1'*40;$Clone=Join-Path $Scratch 'clone';$Workspace=$Scratch;$binary='omp-fixture'
+New-Item -ItemType Directory -Force (Join-Path $Clone '.git')|Out-Null
+function git {$global:LASTEXITCODE=0;if($args[2] -ceq $failing){$global:LASTEXITCODE=128}elseif($args[2] -ceq 'rev-parse'){$Candidate}}
+function omp-fixture {$global:LASTEXITCODE=0;if($args[0] -ceq $failing){$global:LASTEXITCODE=1}else{'omp/0.0.0'}}
+$rows=[ordered]@{}
+foreach($failing in @('nothing','rev-parse','status','--version','--help')) {
+  $rows[$failing]=@(foreach($check in @($cloneCheck,$clientCheck)) {
+    try{Invoke-Expression $check;'accepted'}catch{'refused'}
+  })
+}
+$rows|ConvertTo-Json -Compress
+''')
+        self.assertEqual(rows, {"nothing": ["accepted", "accepted"], "rev-parse": ["refused", "accepted"],
+                                "status": ["refused", "accepted"], "--version": ["accepted", "refused"],
+                                "--help": ["accepted", "refused"]})
+
+    def test_a_timed_out_child_that_survives_taskkill_is_reported_running(self) -> None:
+        """taskkill's exit status was ignored: a timed-out child it failed to stop was reported only as
+        a timeout while the window went on to restore the host under it."""
+        messages = self.run_proof(r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+$definitions=$text.Substring(0,$text.IndexOf('# Child isolation happens'))
+$assertions=@'
+function Start-Process {
+  param($FilePath,$ArgumentList,[switch]$PassThru,$RedirectStandardOutput,$RedirectStandardError)
+  # The child outlives its window; after taskkill it has exited only when $exits.
+  $process=[pscustomobject]@{Handle=1;Id=4242;ExitCode=$null;Waits=0}
+  $process|Add-Member ScriptMethod WaitForExit {param($milliseconds) $this.Waits++;$this.Waits -gt 1 -and $exits}
+  $process|Add-Member ScriptMethod Refresh {}
+  return $process
+}
+function taskkill.exe {$global:LASTEXITCODE=$killExit}
+foreach($case in @(@(0,$true),@(128,$true),@(1,$false))) {
+  $killExit,$exits=$case
+  try{Child Route 1|Out-Null;'returned'}catch{$_.Exception.Message}
+}
+'@
+$messages=@(& ([scriptblock]::Create($definitions+$assertions)) -Lane rtx3090 -Release v0.12.0 -Candidate ('1'*40) -Workspace $Scratch -Bundle $Scratch -Clone $Scratch -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot (Join-Path $Scratch 'state') -RealHome (Join-Path $Scratch 'home'))
+ConvertTo-Json -Compress $messages
+''')
+        # Stopped by taskkill, or already gone when it ran (taskkill exit 128): a plain timeout.
+        self.assertEqual(messages[:2], ["Route child timeout; restore now"] * 2)
+        self.assertIn("still runs", messages[2])
 
 
 if __name__ == "__main__":

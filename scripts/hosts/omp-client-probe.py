@@ -8,6 +8,8 @@ Preflight binds --version to the tested release manifest or --client-component.
 Clients with per-model stateful compat (18.8.x and later) never receive PI_OPENAI_STATEFUL;
 the historical 18.4.10 baseline still receives its required environment override.
 --local-rehearsal labels candidate probes and never supplies qualification evidence.
+The probe assumes no lane: every run names the provider and model selector that its
+lane's documented provider step configures.
 """
 import argparse
 import base64
@@ -118,8 +120,8 @@ def main():
     for name in ("release", "candidate", "output", "binary", "clone", "platform", "profile"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--phase", choices=("preflight", "live", "outage"), required=True)
-    parser.add_argument("--provider", default="ninfer-beta")
-    parser.add_argument("--model", default="ninfer-beta/q38-ninfer")
+    parser.add_argument("--provider", required=True)
+    parser.add_argument("--model", required=True, help="provider/model selector the lane's documented provider step configures")
     parser.add_argument("--endpoint", default="http://127.0.0.1:18089/v1")
     parser.add_argument("--key-file")
     parser.add_argument("--expected-runtime")
