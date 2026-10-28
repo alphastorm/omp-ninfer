@@ -455,9 +455,15 @@ class HostDirectoryRestorationTests(unittest.TestCase):
         self.branch = "main"
         self.fail_fetch = False
         self.windows_commands = []
+        self.commands = []
+        # A callable per command step, run once when that host command starts.
+        self.interleave = {}
 
     def command(self, argv, **kwargs):
         argv = [str(v) for v in argv]
+        self.commands.append(argv)
+        for step in [step for step in self.interleave if step in argv]:
+            self.interleave.pop(step)()
         code, output = 0, ""
         if argv[:2] == ["docker", "inspect"]:
             if "--format" in argv:
@@ -504,6 +510,21 @@ class HostDirectoryRestorationTests(unittest.TestCase):
                 return command(argv, **kwargs)
             with unittest.mock.patch.object(self.host.subprocess, "run", side_effect=with_windows):
                 self.host.main()
+
+    def restore_now(self) -> None:
+        """An independent restoration starting at this instant: the detached watchdog at its
+        deadline, or the driver's restore after its begin call timed out. Its flock blocks while
+        another holder has the lock; made non-blocking here, a held lock refuses it at once, and
+        the caller resumes it after begin returns, where the blocked restoration would continue."""
+        fcntl = self.host.fcntl
+        flock = fcntl.flock
+        def attempt(descriptor, operation):
+            return flock(descriptor, operation | fcntl.LOCK_NB)
+        with unittest.mock.patch.object(fcntl, "flock", side_effect=attempt):
+            try:
+                self.action("restore")
+            except BlockingIOError:
+                pass
 
     def test_absent_logs_and_checkpoints_are_recorded_created_and_restored_absent(self) -> None:
         parent = self.logs.parent.parent
@@ -579,6 +600,58 @@ class HostDirectoryRestorationTests(unittest.TestCase):
         self.assertFalse(self.checkpoints.exists())
         self.assertEqual(self.key.read_text(), "original private fixture key\n")
         self.assertTrue((self.workspace / "restoration.json").exists())
+
+    def assert_restoration_during_begin_undoes_all_of_it(self, step: str) -> None:
+        self.interleave[step] = self.restore_now
+        self.action("begin")
+        self.assertEqual(self.interleave, {}, "the restoration never started inside begin")
+        self.action("restore")
+        proof = json.loads((self.workspace / "restoration.json").read_text())
+        self.assertTrue(self.image["State"]["Running"], "production left stopped behind a restoration proof")
+        self.assertTrue(proof["running"] and proof["same_image"] and proof["documented_key_restored"]
+                        and proof["checkout_restored"] and proof["documented_directories_restored"])
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertEqual((self.sha, self.branch), ("1" * 40, "main"))
+        for path in (self.logs.parent, self.logs, self.checkpoints):
+            self.assertFalse(path.exists(), path)
+
+    def test_restoration_starting_before_the_candidate_checkout_undoes_all_of_begin(self) -> None:
+        self.assert_restoration_during_begin_undoes_all_of_it("fetch")
+
+    def test_restoration_starting_while_production_stops_undoes_all_of_begin(self) -> None:
+        self.assert_restoration_during_begin_undoes_all_of_it("stop-production")
+
+    def test_begin_refuses_a_workspace_whose_restoration_is_recorded(self) -> None:
+        # The driver restores in its finally even when its begin call never reached the host;
+        # every restoration after a recorded one is a no-op, so nothing may change the host now.
+        self.action("restore")
+        commands = len(self.commands)
+        with self.assertRaisesRegex(AssertionError, "already restored"):
+            self.action("begin")
+        self.assertEqual(self.commands[commands:], [])
+        self.assertFalse((self.workspace / "baseline.json").exists())
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertTrue(self.image["State"]["Running"])
+        self.assertEqual((self.sha, self.branch), ("1" * 40, "main"))
+
+    def assert_window_actions_refused(self, message: str) -> None:
+        for action in ("host-route", "setup", "beta-start", "beta-stop"):
+            with self.subTest(action=action):
+                issued = (len(self.commands), len(self.windows_commands))
+                with self.assertRaisesRegex(AssertionError, message):
+                    self.action(action)
+                self.assertEqual((len(self.commands), len(self.windows_commands)), issued)
+
+    def test_window_actions_never_change_the_host_before_begin(self) -> None:
+        self.assert_window_actions_refused("not begun")
+
+    def test_window_actions_never_change_a_restored_host(self) -> None:
+        # Restoration is recorded once; nothing would undo a beta container, key or route state
+        # created after it.
+        self.action("begin")
+        self.action("restore")
+        self.assert_window_actions_refused("already restored")
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
 
 
 class WindowsHoldDirectoryTests(unittest.TestCase):
