@@ -634,6 +634,7 @@ class NativeInstallGateTests(unittest.TestCase):
                     self.assertEqual(result.stdout.strip(), "REFUSED_BEFORE_DOWNLOAD")
 
 
+@unittest.skipIf(os.name == "nt", "executes a POSIX shell block and checks POSIX file modes")
 class HostPreparationTests(unittest.TestCase):
     """A reader reruns the inference host's preparation block after any later failure. The rerun
     must keep the bearer key: checkpoint MACs and every client's copy are bound to it
@@ -705,6 +706,7 @@ class ClientConfigurationTests(unittest.TestCase):
 
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
 class WindowsNativeCommandTests(unittest.TestCase):
     """A pasted PowerShell block does not stop at a failed native command; without a $LASTEXITCODE
     check its next line runs (omp-ninfer#100 item 7). Each block runs with its native commands
