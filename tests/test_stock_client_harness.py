@@ -138,6 +138,9 @@ class ParallelIdentityTests(unittest.TestCase):
 
 @unittest.skipIf(os.name == "nt", "local executable fixtures use POSIX launchers")
 class ClientPreflightTests(unittest.TestCase):
+    # The probe assumes no lane, so every run names its provider and model selector.
+    SELECTOR = ("--provider", "ninfer-beta", "--model", "ninfer-beta/q38-ninfer")
+
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -166,12 +169,23 @@ class ClientPreflightTests(unittest.TestCase):
         self.binary.chmod(0o755)
         self.output = self.root / "receipt"
 
-    def run_probe(self, *extra: str, stdin: int | None = None) -> subprocess.CompletedProcess[str]:
+    def run_probe(self, *extra: str, stdin: int | None = None,
+                  selector: tuple[str, ...] = SELECTOR) -> subprocess.CompletedProcess[str]:
         return subprocess.run([
             sys.executable, str(PROBE), "--release", "v9.9.9", "--candidate", "1" * 40,
             "--output", str(self.output), "--binary", str(self.binary), "--clone", str(self.root),
-            "--platform", "local-fixture", "--profile", "darwin-remote-ssh", "--phase", "preflight", *extra,
+            "--platform", "local-fixture", "--profile", "darwin-remote-ssh", "--phase", "preflight", *selector, *extra,
         ], stdin=stdin, capture_output=True, text=True, timeout=30, env=dict(os.environ, PI_OPENAI_STATEFUL="0"))
+
+    def test_a_probe_without_a_provider_or_model_refuses_before_any_client_runs(self) -> None:
+        """The probe assumes no lane. The RTX 5090 window's callers named none and were asked for
+        ninfer-beta/q38-ninfer whatever their candidate served (omp-ninfer#98)."""
+        for missing, selector in (("--provider", self.SELECTOR[2:]), ("--model", self.SELECTOR[:2])):
+            with self.subTest(missing=missing):
+                result = self.run_probe(selector=selector)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn(missing, result.stderr)
+                self.assertFalse(self.output.exists())
 
     def test_preflight_accepts_manifest_version_and_enables_stateful_environment(self) -> None:
         result = self.run_probe()
