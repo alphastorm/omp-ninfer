@@ -591,6 +591,40 @@ class NativeInstallGateTests(unittest.TestCase):
                     self.assertEqual(result.stdout.strip(), "REFUSED_BEFORE_DOWNLOAD")
 
 
+class HostPreparationTests(unittest.TestCase):
+    """A reader reruns the inference host's preparation block after any later failure. The rerun
+    must keep the bearer key: checkpoint MACs and every client's copy are bound to it
+    (omp-ninfer#100 item 6)."""
+
+    def prepare(self, home: Path) -> bytes:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
+        release = re.search(r"releases/(v[0-9.]+)/manifest\.json", block).group(1)
+        model = json.loads((ROOT / "releases" / release / "manifest.json").read_text(
+            encoding="utf-8"))["components"]["model"]
+        # The transfer and the 20 GB checks are not under test: curl fetches nothing, and the
+        # size and checksum probes report the pinned artifact.
+        stubs = home / "stubs"
+        stubs.mkdir(exist_ok=True)
+        for name, body in (("curl", "exit 0"), ("stat", f"echo {model['artifact_bytes']}"),
+                           ("sha256sum", "cat >/dev/null")):
+            (stubs / name).write_text(f"#!/bin/sh\n{body}\n")
+            (stubs / name).chmod(0o755)
+        subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, check=True, timeout=60,
+                       env={"HOME": str(home), "PATH": f"{stubs}{os.pathsep}{os.environ['PATH']}"})
+        return (home / ".config" / "omp-ninfer" / "api-key").read_bytes()
+
+    def test_a_rerun_keeps_the_existing_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            key = home / ".config" / "omp-ninfer" / "api-key"
+            first = self.prepare(home)
+            self.assertRegex(first.decode(), r"\A[0-9a-f]{64}\n\Z")
+            self.assertEqual(key.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(self.prepare(home), first)
+            key.write_bytes(b"")  # what an interrupted first run leaves behind
+            self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
+
 
 if __name__ == "__main__":
     unittest.main()

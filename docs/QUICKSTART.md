@@ -692,13 +692,18 @@ test "$(stat -c %s "$MODEL")" = "$MODEL_BYTES"
 printf '%s  %s\n' "$MODEL_SHA256" "$MODEL" | sha256sum --check --strict
 
 umask 077
-openssl rand -hex 32 > "$STATE/api-key"
+# a rerun keeps the existing key: checkpoint MACs and every client's copy are bound to it
+test -s "$STATE/api-key" || openssl rand -hex 32 > "$STATE/api-key"
 chmod 600 "$STATE/api-key"
 ```
 
 The artifact is pinned to one Hugging Face revision, byte count, and SHA-256. A checksum mismatch is
 a hard stop; do not rename or reuse the partial file as a successful download. The separate
 `qwen3_8_27b-v3.ninfer` path avoids appending a resumed download onto an older model container.
+
+A rerun keeps an existing nonempty key, because checkpoint MACs and the copy each client holds are
+bound to it. To rotate the key, stop NInfer, move the old key aside, rerun this block, and install
+the new key on every client; checkpoints saved under the old key no longer load.
 
 Keep the host directory `checkpoints-v013`, mounted at `/checkpoints-v013`; keep the v0.12.x
 `checkpoints` store untouched for historical recovery. The retained profile/store names do not

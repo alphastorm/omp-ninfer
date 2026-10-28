@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
   `summarize()` reads the same records, so a window can no longer be spent on corrections that
   are only written after it fails.
+- Keep the inference host's existing key when the RTX 5090 container guide's preparation block is
+  rerun: it generates `~/.config/omp-ninfer/api-key` only when the file is missing or empty, so
+  saved checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid.
+  The guide now describes deliberate rotation
+  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
 - Keep the unit suite off the documented tunnel port: `scripts/hosts/run-documented-route.sh`
   takes its tunnel port from `ROUTE_TUNNEL_PORT` (default `18089`; another port is recorded on the
   tunnel step) and its tests use an ephemeral port, so running the suite can no longer take
