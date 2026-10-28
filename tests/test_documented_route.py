@@ -679,5 +679,92 @@ class WindowsNativeCommandTests(unittest.TestCase):
         self.assertEqual(self.run_block(block, {"wsl.exe", "omp"}, prelude), (["wsl.exe"], False))
 
 
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
+class WindowsHostScriptNativeCommandTests(unittest.TestCase):
+    """The Windows acceptance scripts check each native command's exit status (omp-ninfer#100
+    item 7). git and py are stubs that record their calls; the named git subcommands fail."""
+
+    CANDIDATE = "1" * 40
+    # The receipt's host facts exist only on Windows and are not under test.
+    RUNNER_HOST = r"""param($Runner, $Bundle, $WorkDir, $Receipt, $Candidate)
+function Get-CimInstance { [pscustomobject]@{ Caption = 'fixture' } }
+function Set-ExecutionPolicy {}
+class FixtureIdentity { static [object] GetCurrent() { return [FixtureIdentity]::new() } }
+class FixturePrincipal { FixturePrincipal([object]$Identity) {} [bool] IsInRole([object]$Role) { return $false } }
+$accelerators = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
+$accelerators::Add('Security.Principal.WindowsIdentity', [FixtureIdentity])
+$accelerators::Add('Security.Principal.WindowsPrincipal', [FixturePrincipal])
+& ([scriptblock]::Create([IO.File]::ReadAllText($Runner))) -Bundle $Bundle -WorkDir $WorkDir -Receipt $Receipt -CloneOverride $Candidate
+"""
+
+    def run_pwsh(self, root: Path, failing: set[str], arguments: list) -> tuple[list[str], str]:
+        stubs = root / "bin"
+        stubs.mkdir()
+        calls = root / "calls.txt"
+        effects = {"clone": "mkdir -p omp-ninfer", "rev-parse": f"echo {self.CANDIDATE}"}
+        cases = "".join(f"  {name}) {'exit 128' if name in failing else effects.get(name, ':')} ;;\n"
+                        for name in ("clone", "checkout", "rev-parse", "status"))
+        (stubs / "git").write_text(f"#!/bin/sh\n[ \"$1\" = -C ] && shift 2\n"
+                                   f"echo \"git $1\" >> '{calls}'\ncase \"$1\" in\n{cases}esac\n")
+        (stubs / "py").write_text(f"#!/bin/sh\necho py >> '{calls}'\n")
+        for stub in stubs.iterdir():
+            stub.chmod(0o755)
+        completed = subprocess.run(
+            [shutil.which("pwsh"), "-NoProfile", "-File", *map(str, arguments)], cwd=root, capture_output=True,
+            text=True, timeout=60, env=dict(os.environ, PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+        return (calls.read_text().splitlines() if calls.exists() else []), completed.stdout + completed.stderr
+
+    def substitute_clone(self, failing: set[str], stale_clone: bool = False) -> tuple[list[str], list[str]]:
+        clone = {step.slug: block.text for step, block in documented_route.lane_blocks(
+            documented_route.DEFAULT_DOC, "rtx5090-windows-client")}["clone-and-verify"]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / "bundle"
+            bundle.mkdir()
+            steps = []
+            for position, (slug, text) in enumerate((("clone-and-verify", clone), ("after", "$null = 1\n")), 1):
+                name = f"{position:02d}-{slug}.ps1"
+                (bundle / name).write_text(text, encoding="utf-8")
+                steps.append({"position": position, "slug": slug, "file": name, "heading": "H", "index": 0,
+                              "sha256": hashlib.sha256(text.encode()).hexdigest()})
+            (bundle / "manifest.json").write_text(json.dumps({
+                "lane": "rtx5090-windows-client", "document": "doc", "document_sha256": "0" * 64,
+                "steps": steps}))
+            work = root / "work"
+            (work / "omp-ninfer" if stale_clone else work).mkdir(parents=True)
+            host = root / "host.ps1"
+            host.write_text(self.RUNNER_HOST)
+            receipt = root / "receipt.json"
+            ran, output = self.run_pwsh(root, failing, [
+                host, ROOT / "scripts" / "hosts" / "run-documented-route.ps1", bundle, work, receipt, self.CANDIDATE])
+            self.assertTrue(receipt.exists(), output)
+            return [step["status"] for step in json.loads(receipt.read_text())["steps"]], ran
+
+    def test_a_failed_candidate_clone_or_checkout_fails_the_substituted_step(self) -> None:
+        """A failed clone or checkout left the runner in whatever directory existed: it verified
+        that commit as the candidate and recorded the step as substituted."""
+        self.assertEqual(self.substitute_clone(set()),
+                         (["substituted", "passed"], ["git clone", "git checkout", "py"]))
+        self.assertEqual(self.substitute_clone({"checkout"}),
+                         (["failed", "skipped"], ["git clone", "git checkout"]))
+        # An earlier attempt's clone already holds the name.
+        self.assertEqual(self.substitute_clone({"clone"}, stale_clone=True), (["failed", "skipped"], ["git clone"]))
+
+    def test_an_unreadable_candidate_clone_is_not_read_as_clean(self) -> None:
+        """A failed `git status --porcelain` prints nothing, which read as a clean candidate clone."""
+        for failing, expected in ((set(), ["git rev-parse", "git status", "py"]),
+                                  ({"status"}, ["git rev-parse", "git status"])):
+            with self.subTest(failing=sorted(failing)), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                workspace = root / "workspace"
+                (workspace / "candidate").mkdir(parents=True)
+                ran, output = self.run_pwsh(root, failing, [
+                    ROOT / "scripts" / "hosts" / "accept-windows-client.ps1", "-Action", "Preflight",
+                    "-Workspace", workspace, "-Release", "v0.14.0", "-Candidate", self.CANDIDATE,
+                    "-ControlRoot", root / "control"])
+                self.assertEqual(ran, expected, output)
+
+
 if __name__ == "__main__":
     unittest.main()

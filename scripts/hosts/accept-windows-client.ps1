@@ -103,7 +103,10 @@ if($Action -eq 'Preflight') {
     New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
     if(!(Test-Path $Clone)) { & git clone -q https://github.com/alphastorm/omp-ninfer.git $Clone; if($LASTEXITCODE -ne 0){throw 'candidate clone failed'}; & git -C $Clone checkout -q $Candidate; if($LASTEXITCODE -ne 0){throw 'candidate checkout failed'} }
     if((& git -C $Clone rev-parse HEAD).Trim() -cne $Candidate){throw 'wrong candidate checkout'}
-    if((& git -C $Clone status --porcelain | Out-String).Trim()){throw 'candidate clone is dirty'}
+    # A failed status prints nothing, which would read as a clean clone.
+    $porcelain=(& git -C $Clone status --porcelain | Out-String).Trim()
+    if($LASTEXITCODE -ne 0){throw 'candidate clone status failed'}
+    if($porcelain){throw 'candidate clone is dirty'}
     if(!(Test-Path (Join-Path $Bundle 'manifest.json'))) { & py -3 (Join-Path $Clone 'scripts\documented_route.py') bundle --lane rtx5090-windows-client --output $Bundle; if($LASTEXITCODE -ne 0){throw 'bundle failed'} }
     $Tokens=$null;$ParseErrors=$null
     Get-ChildItem $Bundle -Filter '*.ps1' | ForEach-Object { [Management.Automation.Language.Parser]::ParseFile($_.FullName,[ref]$Tokens,[ref]$ParseErrors)|Out-Null; if($ParseErrors.Count){throw $ParseErrors} }

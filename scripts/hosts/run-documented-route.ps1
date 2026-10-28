@@ -89,8 +89,12 @@ foreach ($step in $manifest.steps) {
         Write-Host ("== step {0}: {1} ({2} [{3}])" -f $step.position, $step.slug, $step.heading, $step.index)
         if ($CloneOverride -and [string]$step.slug -eq 'clone-and-verify') {
             $record.substitution = "cloned commit $CloneOverride in place of the tag this run's acceptance creates; verified as installable, not ready"
+            # A failed clone or checkout would leave this step verifying whatever commit the
+            # directory holds (an earlier attempt's clone, or the default branch) as the candidate.
             & git clone -q https://github.com/alphastorm/omp-ninfer.git omp-ninfer 2>$null
+            if ($LASTEXITCODE -ne 0) { throw "candidate clone failed (exit $LASTEXITCODE)" }
             & git -C omp-ninfer checkout -q $CloneOverride 2>$null
+            if ($LASTEXITCODE -ne 0) { throw "candidate checkout of $CloneOverride failed (exit $LASTEXITCODE)" }
             Set-Location -LiteralPath omp-ninfer
             Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
             $named = [regex]::Match([IO.File]::ReadAllText($path), '--branch (v[0-9][0-9.]*)').Groups[1].Value
