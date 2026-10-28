@@ -9,9 +9,11 @@
   "lock": {
     "builtin-baseline": "abcdef1234567890abcdef1234567890abcdef12",
     "packages": [
-      {"name": "curl", "version": "8.14.1#2", "license": "curl", "dependencies": ["zlib"]},
-      {"name": "ffmpeg", "version": "7.1.1", "license": "LGPL-2.1-or-later", "dependencies": ["zlib"]},
-      {"name": "zlib", "version": "1.3.1", "license": "Zlib", "dependencies": []}
+      {"name": "curl", "version": "8.14.1#2", "license": "curl", "dependencies": ["zlib"],
+       "dlls": ["bin/libcurl.dll"]},
+      {"name": "ffmpeg", "version": "7.1.1", "license": "LGPL-2.1-or-later", "dependencies": ["zlib"],
+       "dlls": ["bin/avcodec-61.dll", "bin/avutil-59.dll"]},
+      {"name": "zlib", "version": "1.3.1", "license": "Zlib", "dependencies": [], "dlls": ["bin/zlib1.dll"]}
     ]
   },
   "cuda": {
@@ -29,7 +31,11 @@
   "package_files": {
     "bin/ninfer-serve.exe": "synthetic runtime bytes for host-free SBOM tests\n",
     "bin/cudart64_13.dll": "synthetic cudart bytes\n",
-    "bin/cublas64_13.dll": "synthetic cublas bytes\n"
+    "bin/cublas64_13.dll": "synthetic cublas bytes\n",
+    "bin/libcurl.dll": "synthetic libcurl bytes\n",
+    "bin/avcodec-61.dll": "synthetic avcodec bytes\n",
+    "bin/avutil-59.dll": "synthetic avutil bytes\n",
+    "bin/zlib1.dll": "synthetic zlib bytes\n"
   },
   "source_files": {
     "third_party/nlohmann/LICENSE.MIT": "synthetic MIT license fixture\n",

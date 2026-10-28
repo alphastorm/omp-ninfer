@@ -1,18 +1,27 @@
 """Native component preflight validates real local archives without publishing or networking."""
 from __future__ import annotations
 
+from copy import deepcopy
 import gzip
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import tarfile
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CUTTER = ROOT / "scripts/hosts/cut-ninfer-4090-component.sh"
+SBOM_FIXTURE = json.loads((ROOT / "tests/fixtures/native-sbom.json").read_text(encoding="utf-8"))
+GENERATOR_SPEC = importlib.util.spec_from_file_location(
+    "generate_native_sbom", ROOT / "scripts/generate_native_sbom.py")
+assert GENERATOR_SPEC and GENERATOR_SPEC.loader
+GENERATOR = importlib.util.module_from_spec(GENERATOR_SPEC)
+GENERATOR_SPEC.loader.exec_module(GENERATOR)
 
 
 def digest(data: bytes) -> str:
@@ -73,7 +82,7 @@ class NativeCutterTests(unittest.TestCase):
         return subprocess.run([self.git, "-C", str(self.runtime), *args], check=True,
                               capture_output=True, text=True).stdout
 
-    def assets(self, lane: str) -> Path:
+    def assets(self, lane: str, unlisted_package_files: dict[str, str] | None = None) -> Path:
         spec = self.specs[lane]
         root = self.root / f"{lane}-assets"
         root.mkdir()
@@ -83,14 +92,29 @@ class NativeCutterTests(unittest.TestCase):
         sbom = f"{stem}-{spec['platform']}.spdx.json"
         dependency = f"{stem}-{spec['platform']}.cdx.json"
         inner = f"{stem}-{spec['platform']}.SHA256SUMS"
-        (root / package).write_bytes(b"native package fixture\n")
+        # A real payload archive whose dependency inventory is the generator's actual output for
+        # that payload: the cut must accept exactly what generate_native_sbom.py emits.
+        work = Path(tempfile.mkdtemp(dir=self.root))
+        payload, tree = work / "payload", work / "source"
+        for directory, key in ((payload, "package_files"), (tree, "source_files")):
+            for path, content in SBOM_FIXTURE[key].items():
+                (directory / path).parent.mkdir(parents=True, exist_ok=True)
+                (directory / path).write_bytes(content.encode())
+        inputs = {key: work / f"{key}.json" for key in ("manifest", "lock", "cuda", "third_party")}
+        for key, path in inputs.items():
+            path.write_text(json.dumps(SBOM_FIXTURE[key]))
+        inventory = GENERATOR.build_sbom(
+            package_dir=payload, source_dir=tree, source_commit=self.commit,
+            vcpkg_manifest=inputs["manifest"], vcpkg_lock=inputs["lock"],
+            cuda_inventory=inputs["cuda"], third_party_inventory=inputs["third_party"])
+        (root / dependency).write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n")
+        # Files added after generation model a package that drifted from its inventory.
+        for path, content in (unlisted_package_files or {}).items():
+            (payload / path).write_bytes(content.encode())
+        with tarfile.open(root / package, "w:gz") as bundle:
+            bundle.add(payload, arcname=package.removesuffix(".tar.gz"))
         (root / sbom).write_text('{}\n')
-        server_sha = digest(b"server fixture")
-        (root / dependency).write_text(json.dumps({
-            "bomFormat": "CycloneDX", "specVersion": "1.5",
-            "metadata": {"component": {"version": self.commit,
-                                     "hashes": [{"alg": "SHA-256", "content": server_sha}]}}
-        }) + "\n")
+        server_sha = digest((payload / "bin/ninfer-serve.exe").read_bytes())
         archive = subprocess.run([self.git, "-C", str(self.runtime), "-c", "core.autocrlf=false",
                                   "-c", "core.eol=lf", "archive", "--format=tar",
                                   "--prefix=runtime-source/", self.commit],
@@ -180,6 +204,58 @@ class NativeCutterTests(unittest.TestCase):
                               else "SBOM", result.stderr)
                 shutil.rmtree(assets)
 
+    def test_identity_only_or_open_dependency_inventory_is_refused(self) -> None:
+        refusals = {"identity-only": "dependency SBOM lists no components",
+                    "no-graph": "dependency SBOM dependency graph",
+                    "dangling-edge": "dependency SBOM dependency graph",
+                    "unreachable": "unreachable from the server",
+                    "duplicate-ref": "unique bom-refs",
+                    "unmapped-dll": "does not map packaged DLL bin/libcurl.dll",
+                    "rehashed-dll": "does not hash packaged DLL bin/zlib1.dll",
+                    "phantom-dll": "maps bin/zlib-ng.dll, which the package does not ship",
+                    "unlisted-dll": "does not map packaged DLL bin/brotlicommon.dll"}
+        for mutation, message in refusals.items():
+            with self.subTest(mutation=mutation):
+                assets = self.assets("rtx4090", {"bin/brotlicommon.dll": "unlisted transitive DLL\n"}
+                                     if mutation == "unlisted-dll" else None)
+                receipt_path = assets / "package-build-receipt.json"
+                receipt = json.loads(receipt_path.read_text())
+                dependency_path = assets / receipt["dependency_sbom"]["name"]
+                inventory = json.loads(dependency_path.read_text())
+                server = inventory["metadata"]["component"]["bom-ref"]
+                edges = {row["ref"]: row["dependsOn"] for row in inventory["dependencies"]}
+                files = {row["name"]: row.get("components", []) for row in inventory["components"]
+                         if row["bom-ref"].startswith("vcpkg:")}
+                if mutation == "identity-only":
+                    inventory = {key: inventory[key] for key in
+                                 ("$schema", "bomFormat", "specVersion", "version", "metadata")}
+                elif mutation == "no-graph":
+                    del inventory["dependencies"]
+                elif mutation == "dangling-edge":
+                    edges[server].append("vcpkg:absent")
+                elif mutation == "unreachable":
+                    edges[server].remove("third_party:nlohmann")
+                elif mutation == "duplicate-ref":
+                    inventory["components"].append(deepcopy(inventory["components"][0]))
+                elif mutation == "unmapped-dll":
+                    files["curl"].clear()
+                elif mutation == "rehashed-dll":
+                    files["zlib"][0]["hashes"][0]["content"] = "0" * 64
+                elif mutation == "phantom-dll":
+                    phantom = deepcopy(files["zlib"][0])
+                    phantom.update({"bom-ref": "vcpkg:zlib:bin/zlib-ng.dll", "name": "zlib-ng.dll",
+                                    "properties": [{"name": "ninfer:package_path", "value": "bin/zlib-ng.dll"}]})
+                    files["zlib"].append(phantom)
+                dependency_path.write_text(json.dumps(inventory))
+                receipt["dependency_sbom"]["sha256"] = digest(dependency_path.read_bytes())
+                receipt_path.write_text(json.dumps(receipt))
+                self.sums(assets)
+                result = self.run_cut(self.command("rtx4090", assets))
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertNotIn("preflight ok", result.stdout)
+                shutil.rmtree(assets)
+
     def test_forgotten_lane_extra_asset_and_receipt_drift_are_refused(self) -> None:
         assets = self.assets("rtx3090")
         result = self.run_cut(self.command("rtx3090", assets))
@@ -232,7 +308,6 @@ class NativeCutterTests(unittest.TestCase):
         implicit = self.run_cut(command + ["--lane", "rtx3090"])
         self.assertEqual(implicit.returncode, 0, implicit.stderr)
         self.assertEqual(implicit.stdout, explicit.stdout)
-
 
 
 if __name__ == "__main__":

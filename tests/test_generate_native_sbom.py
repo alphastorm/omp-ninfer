@@ -197,10 +197,50 @@ class NativeSbomTests(unittest.TestCase):
             self.assertIn(hashlib.sha256(path.read_bytes()).hexdigest(), json.dumps(document["metadata"]["properties"]))
         self.assertNotIn(str(self.root), json.dumps(document))
 
+    def test_vcpkg_packages_map_their_dlls_to_package_paths_and_bytes(self) -> None:
+        components = {row["bom-ref"]: row for row in self.build()["components"]}
+        for row in self.fixture["lock"]["packages"]:
+            with self.subTest(package=row["name"]):
+                ref = "vcpkg:" + row["name"]
+                self.assertEqual(components[ref]["components"], [
+                    {"type": "file", "bom-ref": f"{ref}:{path}", "name": path.rsplit("/", 1)[1],
+                     "hashes": [{"alg": "SHA-256", "content": hashlib.sha256(
+                         self.fixture["package_files"][path].encode()).hexdigest()}],
+                     "properties": [{"name": "ninfer:package_path", "value": path}]}
+                    for path in sorted(row["dlls"])])
+        # A port that ships no DLL (here a build helper) says so and carries no file components.
+        self.fixture["lock"]["packages"].append({"name": "vcpkg-cmake", "version": "2024-04-23",
+                                                 "license": "MIT", "dependencies": [], "dlls": []})
+        self.fixture["lock"]["packages"][2]["dependencies"].append("vcpkg-cmake")
+        components = {row["bom-ref"]: row for row in self.build()["components"]}
+        self.assertNotIn("components", components["vcpkg:vcpkg-cmake"])
+
+    def test_every_packaged_dll_maps_to_exactly_one_inventory_entry(self) -> None:
+        original = deepcopy(self.fixture["lock"])
+        for dlls, message in (("bin/libcurl.dll", "dlls must be"), ([1], "dlls must be"),
+                              (["bin/absent.dll"], "does not exist"),
+                              (["bin/ninfer-serve.exe"], "must name a .dll"),
+                              (["../outside.dll"], "normalized relative"),
+                              (["bin/libcurl.dll", "bin/zlib1.dll"], "duplicate vcpkg DLL: bin/zlib1.dll"),
+                              (["bin/libcurl.dll", "bin/cudart64_13.dll"],
+                               "duplicate CUDA DLL: bin/cudart64_13.dll"),
+                              ([], "no inventory maps packaged DLL: bin/libcurl.dll")):
+            with self.subTest(dlls=dlls):
+                self.fixture["lock"] = deepcopy(original)
+                self.fixture["lock"]["packages"][0]["dlls"] = dlls
+                with self.assertRaisesRegex(ValueError, message):
+                    self.build()
+        self.fixture["lock"] = original
+        (self.package / "bin/brotlicommon.dll").write_bytes(b"unlisted transitive DLL")
+        with self.assertRaisesRegex(ValueError, "no inventory maps packaged DLL: bin/brotlicommon.dll"):
+            self.build()
+
     def test_input_order_does_not_change_component_or_graph_order(self) -> None:
         before = self.build()
         for key, field in (("lock", "packages"), ("cuda", "dlls"), ("third_party", "sources")):
             self.fixture[key][field].reverse()
+        for row in self.fixture["lock"]["packages"]:
+            row["dlls"].reverse()
         self.fixture["manifest"]["dependencies"].reverse()
         after = self.build()
         # Input-byte hashes deliberately change; the bill of materials and graph do not.
@@ -219,12 +259,13 @@ class NativeSbomTests(unittest.TestCase):
         lock = deepcopy(original)
         lock["packages"].append(deepcopy(lock["packages"][0]))
         cases.append((lock, "duplicate vcpkg"))
-        for field in ("version", "license", "dependencies"):
+        for field in ("version", "license", "dependencies", "dlls"):
             lock = deepcopy(original)
             lock["packages"][0].pop(field)
             cases.append((lock, field))
         lock = deepcopy(original)
-        lock["packages"].append({"name": "unused", "version": "1", "license": "MIT", "dependencies": []})
+        lock["packages"].append({"name": "unused", "version": "1", "license": "MIT", "dependencies": [],
+                                 "dlls": []})
         cases.append((lock, "outside the manifest"))
         for lock, message in cases:
             with self.subTest(message=message):

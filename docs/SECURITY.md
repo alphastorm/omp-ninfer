@@ -144,9 +144,10 @@ executable, model, or profile requires a new release qualification binding.
 
 The native package's existing SPDX file inventory remains authoritative for packaged bytes.
 An additional CycloneDX 1.5 dependency inventory can be generated with
-`scripts/generate_native_sbom.py`. It records resolved vcpkg packages and their dependency graph,
-CUDA runtime DLL names, versions, hashes and EULA URLs, vendored `third_party/` source names,
-versions and license expressions, and the runtime executable's SHA-256 and build source commit.
+`scripts/generate_native_sbom.py`. It records resolved vcpkg packages, the package path and
+SHA-256 of every DLL each one ships, and their dependency graph, CUDA runtime DLL names,
+versions, hashes and EULA URLs, vendored `third_party/` source names, versions and license
+expressions, and the runtime executable's SHA-256 and build source commit.
 The inventories and vcpkg manifest are themselves hash-bound in the output. Absolute build paths
 and operator identities are not recorded.
 

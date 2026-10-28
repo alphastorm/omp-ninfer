@@ -5,6 +5,8 @@
 # asset directory, the package build receipt and lane specification name the commit and release,
 # the source archive holds exactly that commit's tree, and neither tag nor release exists yet.
 # The outer set includes a distinct dependency CycloneDX SBOM; the inner SPDX remains unchanged.
+# That inventory must be a component graph rooted at the server that maps every DLL the package
+# archive ships to one SHA-256-bound component; an identity-only document is refused.
 # Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
 #
 # Usage:
@@ -113,6 +115,65 @@ if (component.get("version") != commit
         or {"alg": "SHA-256", "content": receipt["binaries"]["server_sha256"]}
         not in component.get("hashes", [])):
     raise SystemExit("dependency SBOM does not bind this source and server binary")
+# An identity header is not an inventory: require the generator's component graph, rooted at the
+# server and reaching every component, and exactly one SHA-256-bound component (a CUDA or runtime
+# DLL, or a vcpkg package's nested file) for each DLL in the package archive.
+server = component.get("bom-ref")
+if not isinstance(server, str) or not server:
+    raise SystemExit("dependency SBOM server component has no bom-ref")
+components = inventory.get("components")
+if not isinstance(components, list) or not components:
+    raise SystemExit("dependency SBOM lists no components")
+refs, nodes, mapped = {server}, set(), {}
+pending = [(item, True) for item in components]
+while pending:
+    item, top = pending.pop()
+    ref = item.get("bom-ref") if isinstance(item, dict) else None
+    if (not isinstance(ref, str) or ref in refs or not item.get("name")
+            or (top and not (item.get("version") and item.get("licenses")))):
+        raise SystemExit("dependency SBOM components need unique bom-refs, names, versions and licenses")
+    refs.add(ref)
+    if top:
+        nodes.add(ref)
+    for prop in item.get("properties") or []:
+        path = prop.get("value") if isinstance(prop, dict) and prop.get("name") == "ninfer:package_path" else None
+        if isinstance(path, str) and path.lower().endswith(".dll"):
+            if path.casefold() in mapped:
+                raise SystemExit(f"dependency SBOM maps {path} twice")
+            mapped[path.casefold()] = [entry.get("content") for entry in item.get("hashes") or []
+                                       if isinstance(entry, dict) and entry.get("alg") == "SHA-256"]
+    pending.extend((child, False) for child in item.get("components") or [])
+edges = {}
+for edge in inventory.get("dependencies") or []:
+    ref = edge.get("ref") if isinstance(edge, dict) else None
+    if not isinstance(ref, str) or ref in edges or not isinstance(edge.get("dependsOn"), list):
+        raise SystemExit("dependency SBOM dependency graph is malformed")
+    edges[ref] = edge["dependsOn"]
+if (set(edges) != nodes | {server}
+        or not all(isinstance(target, str) and target in nodes for targets in edges.values() for target in targets)):
+    raise SystemExit("dependency SBOM dependency graph does not cover exactly its components")
+reached, frontier = set(), [server]
+while frontier:
+    ref = frontier.pop()
+    if ref not in reached:
+        reached.add(ref)
+        frontier.extend(edges[ref])
+if reached != set(edges):
+    raise SystemExit("dependency SBOM leaves components unreachable from the server")
+packaged = {}
+with tarfile.open(root / package, "r|gz") as bundle:
+    for member in bundle:
+        parts = pathlib.PurePosixPath(member.name).parts[1:]
+        if member.isfile() and parts and parts[-1].lower().endswith(".dll"):
+            packaged["/".join(parts).casefold()] = hashlib.file_digest(
+                bundle.extractfile(member), "sha256").hexdigest()
+for path in sorted(packaged.keys() | mapped.keys()):
+    if path not in mapped:
+        raise SystemExit(f"dependency SBOM does not map packaged DLL {path}")
+    if path not in packaged:
+        raise SystemExit(f"dependency SBOM maps {path}, which the package does not ship")
+    if mapped[path] != [packaged[path]]:
+        raise SystemExit(f"dependency SBOM does not hash packaged DLL {path}")
 support_keys = {"Install-Release.ps1": "installer_sha256", "Control-Release.ps1": "controller_sha256",
                 "Control-GpuOwner.ps1": "gpu_owner_controller_sha256",
                 "Protect-StateRoot.ps1": "state_protection_sha256"}
