@@ -1,15 +1,17 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
-  "product_release": "v0.13.1",
+  "product_release": "v0.14.0",
   "composition": {
-    "status": "qualified",
+    "status": "v0.14.0 upstream OMP v18.12.6 client external-install acceptance pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
     "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "ninfer_lifecycle_source_commit": "6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff",
+    "ninfer_lifecycle_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
     "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "blockers": [],
+    "blockers": [
+      "Fresh candidate-bound external-install platform and documented-route acceptance is required"
+    ],
     "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
   },
   "profiles": [
@@ -31,7 +33,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.13.1",
+      "product_release": "v0.14.0",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -39,19 +41,17 @@
       "container_port": 8080,
       "limitations": [
         "The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.",
-        "No secret, raw log, prompt, or model output crosses the receipt boundary.",
-        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
-        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
-        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
-        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+        "Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.",
+        "Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.",
+        "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
+        "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/darwin-arm64-18.12.6.json",
-        "sha256": "93799ae9f0a73c33ab0d8907e9c6b216ed6c8fc409b91958a6a1911b95621385"
-      },
+      "blockers": [
+        "Fresh v0.14.0 external-install acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -72,18 +72,18 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx5090.json",
-          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx5090.json",
+          "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
-        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+        "image_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
         "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
-        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -114,7 +114,7 @@
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/2c6f423bd817b6534158553e1b34ab4959c43165/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -122,7 +122,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -135,9 +135,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.13.1",
+      "product_release": "v0.14.0",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -145,19 +145,17 @@
       "container_port": 8080,
       "limitations": [
         "The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.",
-        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
-        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
-        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
-        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
-        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+        "Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.",
+        "Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.",
+        "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
+        "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/windows-x64-18.12.6.json",
-        "sha256": "c4f779177e81d3debc09c851b54d6b89a118d5af55cae4c8c2ec0b106dc1505f"
-      },
+      "blockers": [
+        "Fresh v0.14.0 external-install acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -178,18 +176,18 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx5090.json",
-          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx5090.json",
+          "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
-        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+        "image_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
         "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
-        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -220,7 +218,7 @@
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/2c6f423bd817b6534158553e1b34ab4959c43165/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -228,7 +226,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -241,9 +239,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.13.1",
+      "product_release": "v0.14.0",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -251,20 +249,17 @@
       "container_port": 8080,
       "limitations": [
         "The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
-        "Two requests at a time on the RTX 5090 (a third waits in OMP), one trusted owner, and no silent cloud fallback are qualified.",
-        "Schema 3 uses isolated /checkpoints-v013; v0.12.x checkpoints are not imported or migrated. Saved OMP transcripts replay for a fresh prefill.",
-        "Linux x64 client acceptance runs under Ubuntu in WSL2; it does not establish a non-WSL Linux OS qualification.",
-        "JSON-schema structured output is runtime-supported by grammar/product smoke; fresh stock OMP 18.12.6 platform and public-route acceptance passed on candidate b1a54dc9 on 2026-10-25. Rebased native packages need admission-headroom changes and independent packaging/qualification for v0.13.1.",
-        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.",
-        "Fixed in beta.2: restore/pressure lock order, progress-sensitive automatic-save retries, gate-tag/native-owner timing, post-delete survivor publication, restore freshness, quota-current preservation and full victim payload validation. Thirteen named regressions pass within the 66-test F2 host gate; exact strict-profile startup and lane gates pass.",
-        "Strict checkpoint origin authentication is mandatory (--session-checkpoint-require-origin-auth, config 751d22dc); root plus API key at least 32 bytes, documented generated key 64 characters. Authenticated origin/content is not rollback-resistant freshness; filesystem writers can replay authentic old generations.",
-        "Finite native import/victim-validation I/O may delay decode; superseded owner/gate metadata and stale-generation work retain explicit deferred capacity/latency risks. Runtime-base receipt selection and rebased Windows K6 qualification remain v0.13.1 work, not claimed fixed here."
+        "Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.",
+        "Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.",
+        "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
+        "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
+        "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c27e3fca8bf4840bab491f11cd80375bed0698ae/releases/v0.13.1/acceptance/linux-x64-18.12.6.json",
-        "sha256": "5877a4c96a0a9ac69ec02e931963bef00587c879032b2c1bbae3e913a0338369"
-      },
+      "blockers": [
+        "Fresh v0.14.0 external-install acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -285,18 +280,18 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx5090.json",
-          "sha256": "92541474f5269e1837b104a1eef3a4c5307f4a4e3a403985e8159a80089adfd0"
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx5090.json",
+          "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4"
         }
       },
       "runtime": {
-        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
-        "image_digest": "sha256:5d10a998a42ba927dd8bbe54d928128e0d97ec7bd55d8dec2846d8681f79a4cd",
+        "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+        "image_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
         "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
         "model_bytes": 20437521664,
         "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
         "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
-        "server_binary_sha256": "9790a00467c4351929ab9a3e68347ab0436357a956f845efc5b4475f75718c55",
+        "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
         "minimum_vram_gib": 31,
         "minimum_disk_gib": 64,
         "cuda_architecture": "sm_120a",
@@ -327,7 +322,7 @@
         "request_log_schema_version": 30
       },
       "lifecycle": {
-        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/6d4d0a05aded2a1b353b8998e7b08b0f2fb34bff/tools/lifecycle/ninfer_container.py",
+        "script_url": "https://raw.githubusercontent.com/alphastorm/ninfer/2c6f423bd817b6534158553e1b34ab4959c43165/tools/lifecycle/ninfer_container.py",
         "script_sha256": "46f340d1202dfda377898dab0a7e2b19a728b5c96f8274f28d772943346c011c",
         "arguments": []
       }
@@ -343,17 +338,17 @@
       "installation_mode": "native-windows-package",
       "installable": true,
       "silent_cloud_fallback": false,
-      "release_tag": "v0.7.0-qwen38-3090-beta.2",
-      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
-      "package_name": "ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_sha256": "626ba6ff5c871744211aeeb4bb18f16b307402c6426e6e2643227516fd0eeb7d",
-      "package_bytes": 967836157,
+      "release_tag": "v0.7.0-qwen38-3090-beta.3",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "package_name": "ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-3090-beta.3/ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+      "package_bytes": 971496678,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
-        "path": "releases/v0.13.1/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx3090.json",
-        "sha256": "c662e821e1248f5c5667920c1270eebc6c6efd583e4c291f826fe5cb70598baf"
+        "path": "releases/v0.14.0/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx3090.json",
+        "sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
       "model_bytes": 20437521664,
@@ -368,17 +363,17 @@
       "installation_mode": "native-windows-package",
       "installable": true,
       "silent_cloud_fallback": false,
-      "release_tag": "v0.7.0-qwen38-4090-beta.2",
-      "source_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
-      "package_name": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
-      "package_bytes": 950981452,
+      "release_tag": "v0.7.0-qwen38-4090-beta.3",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "package_name": "ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-4090-beta.3/ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+      "package_bytes": 954798284,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
-        "path": "releases/v0.13.1/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6e5934be579f05cdf2d3618b2c7b0f87ed16177/releases/v0.13.1/qualification/rtx4090.json",
-        "sha256": "46c424fdc88793c24e090066c94d4adbb31fd9c1e3f7bafa274032e6bbee8330"
+        "path": "releases/v0.14.0/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/828aa00add5daec88b7f57b0511ac0a5bbf913f8/releases/v0.14.0/qualification/rtx4090.json",
+        "sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
       "model_bytes": 20437521664,
@@ -387,22 +382,22 @@
   ],
   "runtime_contracts": [
     {
-      "lane": "RTX 5090 unchanged beta.2 container",
-      "json_schema": "Supported on the unchanged v0.13.0 runtime; v0.13.1 composition/route acceptance remains separate.",
+      "lane": "RTX 5090 beta.3 container",
+      "json_schema": "Supported on source 2c6f423b by fresh runtime product smokes; candidate-bound external-install acceptance remains separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 4090 rebased native Windows",
-      "json_schema": "Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate.",
+      "lane": "RTX 4090 native Windows beta.3",
+      "json_schema": "Supported on source 2c6f423b by fresh installed normal/pressure Chat and Responses product smokes; candidate-bound external-install acceptance remains separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 3090 rebased native Windows",
-      "json_schema": "Supported on source 7a25cd72 by fresh normal/pressure Chat and Responses product smokes; candidate/public-route acceptance remains separate.",
+      "lane": "RTX 3090 native Windows beta.3",
+      "json_schema": "Supported on source 2c6f423b by fresh installed normal/pressure Chat and Responses product smokes; candidate-bound external-install acceptance remains separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
