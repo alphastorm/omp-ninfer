@@ -74,6 +74,23 @@ def assert_windows_host_unchanged(before, after):
     assert before['directories'] == after['directories'], 'Windows directories changed'
 
 
+def correction_records(prior):
+    """The operator's corrections for a corrected attempt, written before that attempt spends a
+    window and carried unchanged into the summary. Schema: a non-empty JSON array of objects, each
+    naming the route it corrects and the correction, both non-empty strings:
+    [{"route": "host", "change": "what the published route did instead"}, ...].
+    A corrected attempt must not start — or later summarize — without them."""
+    path = Path(prior) / 'corrections.json'
+    assert path.exists(), 'corrected attempt requires ' + str(path) + ' before the window opens'
+    records = json.loads(path.read_text())
+    assert isinstance(records, list) and records, 'corrections.json must be a non-empty JSON array'
+    for index, record in enumerate(records):
+        assert isinstance(record, dict), 'corrections.json record %d must be an object' % index
+        for field in ('route', 'change'):
+            value = record.get(field)
+            assert isinstance(value, str) and value.strip(), 'corrections.json record %d needs a non-empty %s' % (index, field)
+    return records
+
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -181,7 +198,7 @@ def main():
         result = {'release': a.release, 'candidate': a.candidate, 'status': 'passed', 'completed_utc': now(), 'routes': {}, 'clients': {}, 'timings': timings, 'corrections': [],
                   'new_scripts': [str(source / f) for f in ('accept-rtx5090-routes.py', 'accept-rtx5090-host.py', 'accept-windows-client.ps1', 'omp-client-probe.py')]}
         if a.prior_workspace:
-            result['corrections'] = json.loads((Path(a.prior_workspace) / 'corrections.json').read_text())
+            result['corrections'] = correction_records(a.prior_workspace)
         result['script_sha256'] = {path: sha(path) for path in result['new_scripts']}
         for label, count in (('host', 2), ('mac', 10), ('windows', 5)):
             receipt = json.loads((root / (label + '-route.json')).read_text())
@@ -397,6 +414,9 @@ def main():
             assert json.loads((prior / 'window-attempt.json').read_text())['attempt'] == 'initial'
             restoration = json.loads((prior / 'restoration.json').read_text())
             assert_host_restored(restoration)
+            # The corrected attempt is authorized by records written beforehand; summarize() reads
+            # the same file, so a window can never be spent on corrections that are added later.
+            correction_records(prior)
             watchdog_seconds = int(3600 - restoration['window_seconds'] - 600)
             assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
             assert not (prior / 'corrected-attempt.json').exists(), 'the corrected attempt was already spent'

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Require a corrected 5090 acceptance attempt to carry a non-empty `corrections.json` record
+  (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
+  `summarize()` reads the same records, so a window can no longer be spent on corrections that
+  are only written after it fails.
+
 ### Changed
 
 - Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
