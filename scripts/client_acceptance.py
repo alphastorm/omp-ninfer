@@ -18,6 +18,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import socketserver
 import subprocess
@@ -57,6 +58,20 @@ def block_addresses(lane, doc=DEFAULT_DOC):
         blocks.append({"slug": "survives-restart", "heading": block.heading, "index": block.index,
                        "sha256": block.sha256, "language": block.language})
     return blocks
+
+
+def documented_model_id(lane):
+    """The model ID the lane's documented provider step configures. That quickstart block installs
+    one shipped models fragment, whose only model is the ID the lane's OMP turns request."""
+    fragments = {fragment for step, block in lane_blocks(DEFAULT_DOC, lane) if step.slug == "provider"
+                 for fragment in re.findall(r"examples[\\/]([\w-]+)[\\/](models[\w-]*\.fragment\.yml)", block.text)}
+    if len(fragments) != 1:
+        raise ValueError(f"{lane}: the documented provider step must install exactly one models fragment")
+    ((directory, name),) = fragments
+    ids = re.findall(r"^      - id: (\S+)$", (ROOT / "examples" / directory / name).read_text(encoding="utf-8"), re.M)
+    if len(ids) != 1:
+        raise ValueError(f"{lane}: examples/{directory}/{name} must declare exactly one model")
+    return ids[0]
 
 
 def command_json(value):
@@ -285,7 +300,7 @@ def main(argv=None):
     parser.add_argument("--lane", choices=[v for v in LANES if v != "rtx5090-container-host"], default="rtx5090-macos-client")
     parser.add_argument("--local-rehearsal", action="store_true")
     parser.add_argument("--endpoint")
-    parser.add_argument("--model-id", help="served model ID; defaults to the selected lane's documented ID")
+    parser.add_argument("--model-id", help="served model ID; defaults to the model the selected lane's documented provider step configures")
     parser.add_argument("--key-file", type=Path)
     for action in ("restart", "stop", "start"):
         parser.add_argument("--" + action + "-cmd", type=command_json)
@@ -304,7 +319,7 @@ def main(argv=None):
                 or endpoint.path.rstrip("/") != "/v1"):
             parser.error("use the documented http://loopback:port/v1 route, not a remote or credential-bearing URL")
     args.omp = args.omp.resolve()
-    model_id = args.model_id or ("qwen3.8-27b" if args.lane.endswith("-native") else "q38-ninfer")
+    model_id = args.model_id or documented_model_id(args.lane)
     args.model = "ninfer-acceptance/" + model_id
     receipt = {"artifact_type": "omp_ninfer_client_acceptance", "schema_version": 1,
                "receipt_class": receipt_class(args.local_rehearsal), "qualification_claimed": False,

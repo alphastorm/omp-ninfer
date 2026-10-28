@@ -1,6 +1,7 @@
 """Hardware-independent receipt, live lifecycle and real Responses stub contracts."""
 import argparse
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -115,6 +116,63 @@ class ReceiptClassTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "partial hook"):
                     runner.run_checks(args, Path(directory), lifecycle, {"checks": {}})
             self.assertEqual(calls, expected)
+
+
+class DocumentedModelTests(unittest.TestCase):
+    """A live lane selected without --model-id requests the model its own server serves."""
+
+    @staticmethod
+    def served_model_ids():
+        # Server-side identities of the current release, never the client's own provider fragments:
+        # the container runtime's public model ID and each native variant's bound server config.
+        release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+        tree = ROOT / "releases" / release
+        manifest = json.loads((tree / "manifest.json").read_text(encoding="utf-8"))
+        configurations = {hashlib.sha256(path.read_bytes()).hexdigest(): json.loads(path.read_bytes())["model_id"]
+                          for path in (tree / "profiles").glob("*/server-config.json")}
+        native = {variant["id"]: configurations[variant["configuration_sha256"]]
+                  for variant in manifest["components"]["ninfer_variants"]}
+        container = manifest["runtime_identity"]["public_model_id"]
+        return {"rtx4090-native": native["rtx4090-windows-native"],
+                "rtx3090-native": native["rtx3090-windows-native"],
+                "rtx5090-macos-client": container, "rtx5090-windows-client": container}
+
+    def configured(self, *selection):
+        """Run a live acceptance up to its first client turn; return the provider models it wrote
+        into the disposable OMP home and the selector its turns use. No hook or client runs."""
+        seen = {}
+        def first_turn(args, home, lifecycle, receipt):
+            models = json.loads((home / ".omp/agent/models.yml").read_text(encoding="utf-8"))
+            seen["models"] = [model["id"] for model in models["providers"]["ninfer-acceptance"]["models"]]
+            seen["selector"] = args.model
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binary, key = root / "omp", root / "key"
+            binary.write_bytes(b"fixture client")
+            key.write_text("synthetic-test-key\n")
+            version = argparse.Namespace(returncode=0, stdout="omp/18.12.6\n")
+            with patch.object(runner.probe, "launch", return_value=version), \
+                 patch.object(runner, "run_checks", side_effect=first_turn), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                runner.main(["--omp", str(binary), "--omp-sha256", runner.sha256(binary),
+                             "--omp-version", "omp/18.12.6", "--endpoint", "http://127.0.0.1:9/v1",
+                             "--key-file", str(key), "--restart-cmd", '["true"]', "--stop-cmd", '["true"]',
+                             "--start-cmd", '["true"]', "--receipt", str(root / "receipt.json"), *selection])
+        return seen
+
+    def test_each_lane_defaults_to_the_model_its_server_serves(self):
+        served = self.served_model_ids()
+        lanes = [lane for lane in runner.LANES if lane != "rtx5090-container-host"]
+        self.assertEqual(sorted(served), sorted(lanes))
+        for lane in lanes:
+            with self.subTest(lane=lane):
+                seen = self.configured("--lane", lane)
+                self.assertEqual(seen["models"], [served[lane]])
+                self.assertEqual(seen["selector"], "ninfer-acceptance/" + served[lane])
+
+    def test_an_explicit_model_id_replaces_the_lane_default(self):
+        seen = self.configured("--lane", "rtx3090-native", "--model-id", "owner-model")
+        self.assertEqual(seen, {"models": ["owner-model"], "selector": "ninfer-acceptance/owner-model"})
 
 
 class StubTests(unittest.TestCase):
