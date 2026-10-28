@@ -44,9 +44,6 @@ if(-not $TaskName){$TaskName="NInfer-Qwen38-$gpu-Native"}
 if(-not $Stage){$Stage="C:\ProgramData\omp-ninfer-stage-$Lane-windows-native"}
 $ownerPowerLimit=if($Lane -eq 'rtx3090'){370}else{450}
 $provider="ninfer-native-$gpu"
-$modelId=if($Lane -eq 'rtx3090'){'q38-ninfer'}else{'qwen3.8-27b'}
-$selector="$provider/$modelId"
-$fragment=if($Lane -eq 'rtx3090'){'models-rtx3090.fragment.yml'}else{'models.fragment.yml'}
 $controller=Join-Path $StateRoot 'Control-Release.ps1'
 $self=Join-Path $Workspace 'accept-rtx4090-route.ps1'
 $runner=Join-Path $Workspace 'run-documented-route.ps1'
@@ -60,6 +57,20 @@ function Quote($value) { "'"+([string]$value).Replace("'","''")+"'" }
 function Describe($path) {
     $exists=Test-Path -LiteralPath $path
     [ordered]@{path=$path;exists=$exists;sha256=(Hash $path);sddl=$(if($exists){(Get-Acl -LiteralPath $path).Sddl}else{$null})}
+}
+function DocumentedProvider {
+    # The candidate's documented provider step installs one shipped models fragment, whose only model
+    # is the one the lane serves. The rule of documented_route.py provider_model_id, read from this
+    # window's bundle and candidate clone, so no lane table here can drift from the release accepted.
+    $steps=@((ReadJson (Join-Path $Bundle 'manifest.json')).steps|Where-Object slug -CEQ 'provider')
+    if($steps.Count -ne 1){throw 'bundle must hold exactly one documented provider step'}
+    $block=Get-Content -LiteralPath (Join-Path $Bundle $steps[0].file) -Raw -Encoding UTF8
+    $installed=@([regex]::Matches($block,'examples[\\/]([\w-]+)[\\/](models[\w-]*\.fragment\.yml)')|ForEach-Object {"examples\$($_.Groups[1].Value)\$($_.Groups[2].Value)"}|Select-Object -Unique)
+    if($installed.Count -ne 1){throw 'the documented provider step must install exactly one models fragment'}
+    $fragment=Join-Path $Clone $installed[0]
+    $ids=@([regex]::Matches((Get-Content -LiteralPath $fragment -Raw -Encoding UTF8),'(?m)^      - id: (\S+)\r?$')|ForEach-Object {$_.Groups[1].Value})
+    if($ids.Count -ne 1){throw "$($installed[0]) must declare exactly one model"}
+    [pscustomobject]@{fragment=$fragment;selector="$provider/$($ids[0])"}
 }
 function Probe {
     $state=ReadJson "$StateRoot\state.json"
@@ -291,8 +302,8 @@ if($Mode -in @('Live','Offline')) {
     SetIsolation 'route';$env:NINFER_NATIVE_API_KEY=[IO.File]::ReadAllText($KeyFile).Trim()
     $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
     if(-not (Test-Path $binary -PathType Leaf)){throw 'isolated installed client binary missing'}
-    $phase=if($Mode -eq 'Live'){'live'}else{'outage'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $selector --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
+    $phase=if($Mode -eq 'Live'){'live'}else{'outage'};$documented=DocumentedProvider
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $documented.selector --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
     exit $LASTEXITCODE
 }
 if($Mode -eq 'DryRun') {
@@ -327,6 +338,7 @@ if($Mode -eq 'Preflight') {
     if($bundleManifest.lane -cne "$Lane-native"){throw 'bundle lane differs from selected native lane'}
     if((Hash "$Clone\docs\QUICKSTART.md") -cne $bundleManifest.document_sha256){throw 'bundle document mismatch'}
     foreach($step in $bundleManifest.steps){if((Hash (Join-Path $Bundle $step.file)) -cne $step.sha256){throw 'bundle block mismatch'};$tokens=$null;$errors=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $Bundle $step.file),[ref]$tokens,[ref]$errors)|Out-Null;if($errors.Count){throw "bundle parse failed: $($step.slug)"}}
+    $documented=DocumentedProvider
     if((Hash $runner) -cne (Hash "$Clone\scripts\hosts\run-documented-route.ps1")){throw 'runner not from candidate'}
     Push-Location $Clone
     try{& py -3 scripts\verify_release.py --release $Release --require-installable;if($LASTEXITCODE -ne 0){throw 'candidate not installable'}}finally{Pop-Location}
@@ -345,18 +357,18 @@ if($Mode -eq 'Preflight') {
     if((Hash $binary) -cne $manifest.components.omp.binary_sha256){throw 'client binary mismatch'}
     $clientAsset=Join-Path "$Workspace\preflight-work" $manifest.components.omp.artifact_name
     if((Hash $clientAsset) -cne $manifest.components.omp.artifact_sha256){throw 'client asset mismatch'}
-    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $selector --endpoint http://127.0.0.1:18082/v1
+    & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase preflight --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $documented.selector --endpoint http://127.0.0.1:18082/v1
     if($LASTEXITCODE -ne 0){throw 'structured probe preflight failed'}
     $version=(& $binary --version|Out-String).Trim()
     & $binary --help > "$Workspace\client-help.txt"
     $agent=Join-Path $HOME '.omp\agent';New-Item -ItemType Directory -Force $agent|Out-Null
-    Copy-Item (Join-Path "$Clone\examples\windows-native" $fragment) "$agent\models.yml"
+    Copy-Item $documented.fragment "$agent\models.yml"
     Copy-Item "$Clone\examples\manual-tunnel\fail-closed.yml" "$agent\config.yml"
     # The parse passes only on exit 0 with exactly the documented selector listed; stderr is kept
     # as evidence.
     $parser=Start-Process -FilePath $binary -ArgumentList 'models',$provider,'--json' -WorkingDirectory (Get-Location).ProviderPath -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Workspace\parser-models.json" -RedirectStandardError "$Workspace\parser-models.stderr"
     $parserListed=@((ReadJson "$Workspace\parser-models.json").models|ForEach-Object {$_.selector})
-    if(($parserListed -join ',') -cne $selector -or $parser.ExitCode -ne 0){throw 'provider parser failed'}
+    if(($parserListed -join ',') -cne $documented.selector -or $parser.ExitCode -ne 0){throw 'provider parser failed'}
     $modelSha=Hash $Model;if($modelSha -cne $nativeModel.artifact_sha256 -or (Get-Item $Model).Length -ne $nativeModel.artifact_bytes -or $variant.model_artifact_sha256 -cne $nativeModel.artifact_sha256){throw 'documented native model identity mismatch'}
     if(-not (Test-Path $KeyFile)){throw 'documented key missing'}
     $b=Snapshot "$Workspace\preflight-snapshot";EnableExactAcl

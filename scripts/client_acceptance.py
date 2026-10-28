@@ -18,7 +18,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import re
 import secrets
 import socketserver
 import subprocess
@@ -28,7 +27,7 @@ import threading
 import time
 import urllib.parse
 
-from documented_route import DEFAULT_DOC, LANES, extract, lane_blocks
+from documented_route import DEFAULT_DOC, LANES, extract, lane_blocks, provider_model_id
 from omp_client_environment import client_environment
 from stock_omp_session_proof import Omp, SEED, RECALL_BUILD, RECALL_BOTH, BUILD, NAME, recalls
 
@@ -61,17 +60,10 @@ def block_addresses(lane, doc=DEFAULT_DOC):
 
 
 def documented_model_id(lane):
-    """The model ID the lane's documented provider step configures. That quickstart block installs
-    one shipped models fragment, whose only model is the ID the lane's OMP turns request."""
-    fragments = {fragment for step, block in lane_blocks(DEFAULT_DOC, lane) if step.slug == "provider"
-                 for fragment in re.findall(r"examples[\\/]([\w-]+)[\\/](models[\w-]*\.fragment\.yml)", block.text)}
-    if len(fragments) != 1:
-        raise ValueError(f"{lane}: the documented provider step must install exactly one models fragment")
-    ((directory, name),) = fragments
-    ids = re.findall(r"^      - id: (\S+)$", (ROOT / "examples" / directory / name).read_text(encoding="utf-8"), re.M)
-    if len(ids) != 1:
-        raise ValueError(f"{lane}: examples/{directory}/{name} must declare exactly one model")
-    return ids[0]
+    """The model ID the lane's documented provider step configures: the ID the lane's OMP turns
+    request."""
+    (block,) = [block for step, block in lane_blocks(DEFAULT_DOC, lane) if step.slug == "provider"]
+    return provider_model_id(block.text, ROOT)
 
 
 def command_json(value):
