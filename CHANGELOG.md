@@ -19,10 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Require a corrected 5090 acceptance attempt to carry a non-empty `corrections.json` record
-  (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
-  `summarize()` reads the same records, so a window can no longer be spent on corrections that
-  are only written after it fails.
 - Keep the inference host's existing key when the RTX 5090 container guide's preparation block is
   rerun: it generates `~/.config/omp-ninfer/api-key` only when the file is missing or empty, so
   saved checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid.
@@ -38,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tunnel step) and its tests use an ephemeral port, so running the suite can no longer take
   `127.0.0.1:18089` from a live macOS route on the same machine
   ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)).
+- Require a corrected 5090 acceptance attempt to carry a non-empty `corrections.json` record
+  (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
+  `summarize()` reads the same records, so a window can no longer be spent on corrections that
+  are only written after it fails.
 
 ### Changed
 
