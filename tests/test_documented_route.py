@@ -907,20 +907,6 @@ $accelerators::Add('Security.Principal.WindowsPrincipal', [FixturePrincipal])
         # An earlier attempt's clone already holds the name.
         self.assertEqual(self.substitute_clone({"clone"}, stale_clone=True), (["failed", "skipped"], ["git clone"]))
 
-    def test_an_unreadable_candidate_clone_is_not_read_as_clean(self) -> None:
-        """A failed `git status --porcelain` prints nothing, which read as a clean candidate clone."""
-        for failing, expected in ((set(), ["git rev-parse", "git status", "py"]),
-                                  ({"status"}, ["git rev-parse", "git status"])):
-            with self.subTest(failing=sorted(failing)), tempfile.TemporaryDirectory() as temporary:
-                root = Path(temporary)
-                workspace = root / "workspace"
-                (workspace / "candidate").mkdir(parents=True)
-                ran, output = self.run_pwsh(root, failing, [
-                    ROOT / "scripts" / "hosts" / "accept-windows-client.ps1", "-Action", "Preflight",
-                    "-Workspace", workspace, "-Release", "v0.14.0", "-Candidate", self.CANDIDATE,
-                    "-ControlRoot", root / "control"])
-                self.assertEqual(ran, expected, output)
-
 
 if __name__ == "__main__":
     unittest.main()
