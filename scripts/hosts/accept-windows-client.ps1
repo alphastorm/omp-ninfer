@@ -7,9 +7,13 @@ param(
     [Parameter(Mandatory=$true)][string]$Release,
     [Parameter(Mandatory=$true)][string]$Candidate,
     [string]$ControlRoot='C:\ProgramData\OMP\windows-hosts',
+    # Model the structured probe requests, from the candidate's documented provider step; only the
+    # actions that start the probe take it, so a hold release never depends on it.
+    [string]$ModelId,
     [switch]$DryRun
 )
 $ErrorActionPreference='Stop'
+if(@('Preflight','Live','Outage') -contains $Action -and [string]::IsNullOrWhiteSpace($ModelId)){throw "$Action starts the structured probe and requires -ModelId"}
 if ($DryRun) { @{status='dry-run';action=$Action;workspace=$Workspace;effects='none';client_install=@{lane='rtx5090-windows-client';step='client-install';launcher='$env:LOCALAPPDATA\OMP\omp.exe';distribution_kind='upstream-release'}} | ConvertTo-Json -Depth 3 -Compress; return }
 $RealLocal=$env:LOCALAPPDATA
 $Clone=Join-Path $Workspace 'candidate'
@@ -55,7 +59,7 @@ function Probe($Phase) {
     $args2=@('-3',(Join-Path $Workspace 'omp-client-probe.py'),'--release',$Release,'--candidate',$Candidate,'--phase',$Phase,
         '--output',(Join-Path $Workspace 'windows-structured'),'--binary',(Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'),
         '--clone',$Clone,'--platform','windows-x64','--profile','windows-docker-local','--key-file',(Join-Path $HOME '.omp\agent\ninfer-beta.key'),
-        '--vision-image',(Join-Path $Clone 'assets\icon-512.png'))
+        '--provider','ninfer-beta','--model',"ninfer-beta/$ModelId",'--vision-image',(Join-Path $Clone 'assets\icon-512.png'))
     & py @args2
     if($LASTEXITCODE -ne 0){throw "structured probe $Phase failed (exit $LASTEXITCODE)"}
 }

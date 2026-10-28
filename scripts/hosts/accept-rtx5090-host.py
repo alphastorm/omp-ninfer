@@ -84,6 +84,13 @@ def windows_environment(probe, runtime=Path('/run/WSL')):
     raise RuntimeError('no WSL interop relay starts a Windows process; tried: ' + (', '.join(candidates) or 'none'))
 
 
+def probe_selector(model_id):
+    """The Linux structured client's selector for the probe: the provider its fragment declares (its key
+    file is ninfer-beta.key) and the model the driver takes from the candidate's documented provider
+    step. The probe assumes no lane, so neither may come from a default (omp-ninfer#98)."""
+    return ['--provider', 'ninfer-beta', '--model', 'ninfer-beta/' + model_id]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', required=True, choices=('preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
@@ -92,8 +99,11 @@ def main():
     p.add_argument('--production', default='ninfer-5090-v070p')
     p.add_argument('--window-dir', default='/home/sunil/services/engine-window')
     p.add_argument('--restore-after-seconds', type=int, default=3000, help='Independent watchdog delay; reserve restoration time inside the total envelope')
+    p.add_argument('--model-id', help="Model the Linux structured client requests, from the candidate's documented provider step; required by the actions that start the client probe")
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
+    if a.action in ('preflight', 'linux-live', 'linux-outage') and not a.model_id:
+        p.error('--action ' + a.action + ' starts the client probe and requires --model-id')
     if a.dry_run:
         print(json.dumps({'status': 'dry-run', 'action': a.action, 'effects': 'none',
                           'client_install': {'profile': 'linux-docker-local', 'method': 'documented-url-and-sha256',
@@ -283,7 +293,7 @@ def main():
         clientenv = dict(os.environ, HOME=str(linuxhome), XDG_DATA_HOME=str(linuxhome / '.local/share'), XDG_CONFIG_HOME=str(linuxhome / '.config'), XDG_BIN_HOME=str(linuxhome / '.local/bin'))
         launcher = linuxhome / '.local/bin/omp'
         installation = install_linux_client(dist, asset, linuxhome)
-        logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local'], 90, clientenv)
+        logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', *probe_selector(a.model_id)], 90, clientenv)
         save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
     elif a.action == 'begin':
         # Baseline, watchdog and every host change, through stopped production, under the lock.
@@ -362,7 +372,7 @@ def main():
             os.chmod(agent / 'ninfer-beta.key', 0o600)
         clientenv = dict(os.environ, HOME=str(linuxhome), XDG_DATA_HOME=str(linuxhome / '.local/share'), XDG_CONFIG_HOME=str(linuxhome / '.config'), XDG_BIN_HOME=str(linuxhome / '.local/bin'))
         phase = 'live' if a.action == 'linux-live' else 'outage'
-        logged('linux-' + phase + '.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', phase, '--output', root / 'linux-structured', '--binary', linuxhome / '.local/bin/omp', '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', '--key-file', agent / 'ninfer-beta.key'], 850, clientenv)
+        logged('linux-' + phase + '.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', phase, '--output', root / 'linux-structured', '--binary', linuxhome / '.local/bin/omp', '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', '--key-file', agent / 'ninfer-beta.key', *probe_selector(a.model_id)], 850, clientenv)
     print(json.dumps({'action': a.action, 'status': 'passed', 'workspace': str(root)}))
 
 
