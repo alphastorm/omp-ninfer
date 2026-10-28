@@ -5,9 +5,9 @@ Every published native lane carries a ``ninfer_windows_release_qualification`` r
 (``tools/qualification/qualify_native.py``) stages it from its own phase receipts; the release
 tree copies it unchanged and nothing in this repository composes one. ``verify_release.py``,
 ``compose_route_acceptance.py`` and the native route-acceptance driver judge it with these
-predicates: the zero-direction first-lineage rollback, and the canonical schema-2 product
-protocol evidence and shared Host profile that native components from v0.7.0 must carry.
-Published historical receipts remain immutable; no legacy checks map is synthesized.
+predicates: the two honest rollback outcomes, and the canonical schema-2 product protocol
+evidence and shared Host profile that native components from v0.7.0 must carry. Published
+historical receipts remain immutable; no legacy checks map is synthesized.
 """
 
 from __future__ import annotations
@@ -23,6 +23,17 @@ def first_release_rollback(value: Any) -> bool:
             and type(value.get("directions")) is int and value["directions"] == 0
             and value.get("reason") == "first release of the lineage"
             and value.get("intermediate_release") is None and value.get("stops", []) == [])
+
+
+def bidirectional_rollback(value: Any) -> bool:
+    """A passed rollback: both directions through a named predecessor, back to the candidate."""
+    if not isinstance(value, dict) or value.get("status") != "passed":
+        return False
+    predecessor = value.get("intermediate_release")
+    candidate = value.get("active_release_after", value.get("active_release"))
+    return (type(value.get("directions")) is int and value["directions"] == 2
+            and isinstance(predecessor, str) and predecessor != ""
+            and isinstance(candidate, str) and candidate != "" and predecessor != candidate)
 
 
 def product_protocol_errors(value: Any) -> list[str]:

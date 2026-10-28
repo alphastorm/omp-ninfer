@@ -24,6 +24,7 @@ from urllib.parse import unquote, urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from omp_client_environment import uses_per_model_stateful
 from compose_native_qualification import (
+    bidirectional_rollback,
     first_release_rollback,
     native_protocol_qualification_errors,
 )
@@ -854,11 +855,59 @@ def validate_aggregate_as_of(
 
 
 def validate_native_rollback(receipt: dict[str, Any], label: str, errors: list[str]) -> None:
+    """A rollback claim is the zero-direction first lineage or both directions through a named
+    predecessor, and the rollback gate and the section's own status make the same claim."""
     rollback = receipt.get("rollback", {})
-    gate = receipt.get("deterministic_gates", {}).get("rollback")
-    if gate == "not_applicable" or (isinstance(rollback, dict) and rollback.get("status") == "not_applicable"):
+    gates = receipt.get("deterministic_gates", {})
+    gate = gates.get("rollback") if isinstance(gates, dict) else None
+    status = rollback.get("status") if isinstance(rollback, dict) else None
+    if "not_applicable" in (gate, status):
         require(first_release_rollback(rollback) and gate == "not_applicable",
                 f"{label}: rollback not_applicable requires a zero-direction first lineage", errors)
+    elif "passed" in (gate, status):
+        require(bidirectional_rollback(rollback) and gate == "passed",
+                f"{label}: a passed rollback requires both directions through a named predecessor",
+                errors)
+
+
+NATIVE_DETERMINISTIC_GATES = (
+    "protocol",
+    "protocol_under_pool_pressure",
+    "long_session",
+    "persistence",
+    "rollback",
+    "state_security",
+    "golden_equivalent",
+    "benchmark_c1",
+)
+
+
+def validate_native_gates(
+    receipt: dict[str, Any], label: str, errors: list[str], *, complete: bool
+) -> None:
+    """A qualified lane passed every deterministic gate it records, and each gate's evidence
+    section agrees wherever it records its own status. Rollback alone may be the first-lineage
+    not_applicable that validate_native_rollback admits. A complete receipt (every native
+    component from v0.7.0) records each gate of the orchestrator's set with its section.
+    """
+    gates = receipt.get("deterministic_gates")
+    if gates is None and not complete:
+        return
+    if not isinstance(gates, dict):
+        errors.append(f"{label}: deterministic gates must be an object")
+        return
+    if complete:
+        for gate in NATIVE_DETERMINISTIC_GATES:
+            require(gate in gates and isinstance(receipt.get(gate), dict),
+                    f"{label}: deterministic gate {gate} and its evidence section must be "
+                    "recorded", errors)
+    for gate, value in gates.items():
+        if gate == "rollback" and value == "not_applicable":
+            continue
+        section = receipt.get(gate)
+        recorded = section.get("status", "passed") if isinstance(section, dict) else "passed"
+        require(value == "passed" and recorded == "passed",
+                f"{label}: deterministic gate {gate} and its evidence section must pass", errors)
 
 
 def validate_manifest_tag_prose(
@@ -930,10 +979,26 @@ CHECKSUM_TRIGGER_ASSET_FIELDS = CHECKSUM_REQUIRED_ASSET_FIELDS[1:] + (
     "source_archive",
 )
 SHA256SUMS_ENTRY_RE = re.compile(r"^([0-9a-f]{64}) [ *](.+)$")
+NATIVE_PACKAGE_STEM_RE = re.compile(
+    r"^ninfer-rtx(3090|4090)-native-v([0-9]+\.[0-9]+\.[0-9]+)-beta\.([1-9][0-9]*)-"
+)
 
 
 def native_dependency_sbom_filename(package_name: str) -> str:
     return package_name.removesuffix(".tar.gz").removesuffix(".zip") + ".cdx.json"
+
+
+def native_package_component_tag(package_name: Any) -> str | None:
+    """The component tag a native-packager filename names, or None for an older scheme.
+
+    Package stem `ninfer-rtx<lane>-native-v<version>-beta.<n>` publishes under component tag
+    `v<version>-qwen38-<lane>-beta.<n>`; the earlier omp and zip schemes have no such pairing.
+    """
+    match = NATIVE_PACKAGE_STEM_RE.match(package_name) if isinstance(package_name, str) else None
+    if match is None:
+        return None
+    lane, version, beta = match.groups()
+    return f"v{version}-qwen38-{lane}-beta.{beta}"
 
 
 def rebased_native_component(item: dict[str, Any]) -> bool:
@@ -1047,10 +1112,17 @@ def validate_variant_checksums(
             f"{prefix} checksums entry {filename} must match {field}_sha256",
             errors,
         )
-    if source_asset is not None and source_asset[1] in entries:
+    # A native-packager set always lists the bound source archive. Earlier-scheme sets are
+    # checked when they list it: the first RTX 4090 component published its source beside its set.
+    package_url = item.get("package_url")
+    package_name = (Path(unquote(urlparse(package_url).path)).name
+                    if isinstance(package_url, str) else None)
+    if source_asset is not None and (
+        source_asset[1] in entries or native_package_component_tag(package_name) is not None
+    ):
         field, filename, expected_digest = source_asset
         require(
-            entries[filename] == [expected_digest],
+            entries.get(filename) == [expected_digest],
             f"{prefix} checksums entry {filename} must match {field}_sha256",
             errors,
         )
@@ -1170,6 +1242,10 @@ def validate_ninfer_variants(
         if isinstance(package_url, str) and isinstance(package_name, str):
             require(package_url == asset_prefix + package_name,
                     f"{prefix}.package_url must bind the exact package name", errors)
+        named_tag = native_package_component_tag(package_name)
+        require(named_tag is None or release_tag == named_tag,
+                f"{prefix}.release_tag must name the package version and beta ({named_tag})",
+                errors)
 
         if ga_release(release):
             validate_variant_checksums(root, release, item, prefix, errors)
@@ -1232,21 +1308,24 @@ def validate_ninfer_variants(
             require(isinstance(receipt.get("deferred_gates"), list)
                     and len(receipt["deferred_gates"]) > 0,
                     f"{prefix} preview qualification must enumerate deferred gates", errors)
+        rebased = rebased_native_component(item)
         validate_native_rollback(receipt, prefix, errors)
-        if status == "qualified" and rebased_native_component(item):
-            errors.extend(f"{prefix}: {error}"
-                          for error in native_protocol_qualification_errors(receipt))
+        if status == "qualified":
+            validate_native_gates(receipt, prefix, errors, complete=rebased)
+            if rebased:
+                errors.extend(f"{prefix}: {error}"
+                              for error in native_protocol_qualification_errors(receipt))
         identity = receipt.get("identity", {})
         package = receipt.get("package", {})
+        require(package.get("filename") == package_name,
+                f"{prefix} qualification package name must match", errors)
+        require(package.get("sha256") == item.get("package_sha256"),
+                f"{prefix} qualification package must match", errors)
+        require(package.get("bytes") == item.get("package_bytes"),
+                f"{prefix} qualification package size must match", errors)
         if parity_receipt:
             require(receipt.get("source_commit") == item.get("source_commit"),
                     f"{prefix} qualification source must match", errors)
-            require(package.get("filename") == package_name,
-                    f"{prefix} qualification package name must match", errors)
-            require(package.get("sha256") == item.get("package_sha256"),
-                    f"{prefix} qualification package must match", errors)
-            require(package.get("bytes") == item.get("package_bytes"),
-                    f"{prefix} qualification package size must match", errors)
             if native_receipt:
                 require(receipt.get("server_binary_sha256") == item.get("server_binary_sha256"),
                         f"{prefix} qualification server must match", errors)
@@ -1266,8 +1345,8 @@ def validate_ninfer_variants(
                     f"{prefix} qualification server must match", errors)
             require(identity.get("configuration_sha256") == item.get("configuration_sha256"),
                     f"{prefix} qualification configuration must match", errors)
-            require(package.get("sha256") == item.get("package_sha256"),
-                    f"{prefix} qualification package must match", errors)
+            require(identity.get("model_artifact_sha256") == item.get("model_artifact_sha256"),
+                    f"{prefix} qualification model must match the variant", errors)
             for field in (
                 "sbom_sha256",
                 "installer_sha256",
@@ -1277,6 +1356,12 @@ def validate_ninfer_variants(
             ):
                 require(package.get(field) == item.get(field),
                         f"{prefix} qualification {field} must match", errors)
+            # Receipts staged before the v0.7.0 orchestrator do not record these two pins.
+            for field, pin in (("dependency_sbom_sha256", "sbom_dependency_sha256"),
+                               ("outer_checksums_sha256", "checksums_sha256")):
+                if field in package or rebased:
+                    require(package.get(field) == item.get(pin),
+                            f"{prefix} qualification {field} must match", errors)
 
 
 def validate_server_arguments(

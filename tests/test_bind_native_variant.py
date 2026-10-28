@@ -238,8 +238,10 @@ class BindNativeVariantTest(unittest.TestCase):
             "beta_qualified": True,
             "identity": {"source_commit": self.receipt["patch_stack_sha"],
                          "server_binary_sha256": self.receipt["binaries"]["server_sha256"],
-                         "configuration_sha256": self.receipt["config_sha256"]},
-            "package": {"sha256": self.receipt["package"]["sha256"],
+                         "configuration_sha256": self.receipt["config_sha256"],
+                         "model_artifact_sha256": self.receipt["model_sha256"]},
+            "package": {"filename": self.package_3090, "sha256": self.receipt["package"]["sha256"],
+                        "bytes": self.receipt["package"]["bytes"],
                         "sbom_sha256": self.entries[self.package_3090.removesuffix(".tar.gz") + ".spdx.json"],
                         **{field + "_sha256": self.entries[name] for field, name in BINDER.SUPPORT_ASSETS.items()}},
         }

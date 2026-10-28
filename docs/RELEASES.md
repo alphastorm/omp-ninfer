@@ -2390,6 +2390,15 @@ Immutable older native receipts stay valid under their real older component tags
 relabeling their legacy fields as new-runtime evidence. In `v0.13.1`, both rebased native lanes
 supply passed canonical schema 2 product payloads at full and reduced shared Host budgets.
 
+`verify_release.py` binds each lane receipt to its manifest row: source, server, configuration and
+model identities; package filename, SHA-256 and size; SPDX and support-asset hashes; and the
+dependency inventory and outer `SHA256SUMS` hashes, which receipts of v0.7.0 components always
+record. A qualified receipt must pass every deterministic gate it records, and an evidence section
+that records its own status must agree with its gate. v0.7.0 components record all eight gates:
+protocol, pressure protocol, long session, persistence, rollback, state security, golden
+equivalent and C1. Rollback is either `not_applicable` with zero directions for the first release
+of a lineage, or passed in both directions through a named predecessor.
+
 ### Native dependency SBOM
 
 For a new native package, generate the additional CycloneDX 1.5 JSON inventory with
@@ -2507,7 +2516,10 @@ directory, that the package build receipt and the lane specification at the comm
 release and source, that the source archive's tar stream is byte-identical to `git archive` of
 the commit, and that neither the tag nor the release exists. `--publish` is founder-only: it
 pushes the component tag and creates one prerelease with the closed set; binding it into a
-product release stays `scripts/bind_native_variant.py`.
+product release stays `scripts/bind_native_variant.py`. The component tag must name the package
+filename's version and beta: `v0.7.0-qwen38-4090-beta.3` for
+`ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz`. The verifier also
+requires a native package's outer set to list the bound source archive.
 
 The historical cutter and `accept-rtx4090-route.{py,ps1}` filenames each remain the single
 implementation for both native lanes. Omit `--lane` / `-Lane` to select RTX 4090;

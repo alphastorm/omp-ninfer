@@ -127,7 +127,7 @@ class DependencySbomContractTests(unittest.TestCase):
                         errors)
 
 
-class FirstReleaseRollbackContractTest(unittest.TestCase):
+class NativeRollbackContractTest(unittest.TestCase):
     def test_native_binding_and_verifier_keep_the_first_lineage_exception_honest(self) -> None:
         rollback = {"status": "not_applicable", "directions": 0, "reason": "first release of the lineage"}
         receipt = {"rollback": rollback, "deterministic_gates": {"rollback": "not_applicable"}}
@@ -143,10 +143,122 @@ class FirstReleaseRollbackContractTest(unittest.TestCase):
                 VERIFY_RELEASE.validate_native_rollback({"rollback": {**rollback, **fields},
                     "deterministic_gates": {"rollback": gate}}, "native", errors)
                 self.assertEqual(len(errors), 1)
-        errors = []
-        VERIFY_RELEASE.validate_native_rollback({"rollback": {"status": "passed", "directions": 2},
-            "deterministic_gates": {"rollback": "passed"}}, "native", errors)
-        self.assertEqual(errors, [])
+
+    def test_passed_rollback_requires_both_directions_through_a_named_predecessor(self) -> None:
+        # The shipped composer-form upgrade rollback, and the orchestrator's passed form of it.
+        shipped = json.loads((ROOT / "releases/v0.13.0/qualification/rtx3090.json").read_text(
+            encoding="utf-8"))["rollback"]
+        orchestrated = {"status": "passed", "directions": 2,
+                        "intermediate_release": shipped["intermediate_release"],
+                        "active_release": shipped["active_release_after"], "stops": shipped["stops"]}
+        for rollback in (shipped, orchestrated):
+            errors = []
+            VERIFY_RELEASE.validate_native_rollback(
+                {"rollback": rollback, "deterministic_gates": {"rollback": "passed"}}, "native", errors)
+            self.assertEqual(errors, [])
+        candidate = shipped["active_release_after"]
+        for fields, gate in (
+            ({"directions": None}, "passed"), ({"directions": 1}, "passed"),
+            ({"directions": True}, "passed"), ({"intermediate_release": None}, "passed"),
+            ({"intermediate_release": ""}, "passed"), ({"intermediate_release": candidate}, "passed"),
+            ({"status": None}, "passed"), ({}, None),
+        ):
+            with self.subTest(fields=fields, gate=gate):
+                rollback = {key: value for key, value in {**shipped, **fields}.items()
+                            if value is not None}
+                errors = []
+                VERIFY_RELEASE.validate_native_rollback(
+                    {"rollback": rollback, "deterministic_gates": {"rollback": gate} if gate else {}},
+                    "native", errors)
+                self.assertEqual(len(errors), 1, errors)
+
+
+class ShippedNativeReceiptBindingTest(unittest.TestCase):
+    """Mutations of a shipped v0.14.0 orchestrator receipt, rehashed into its manifest row."""
+
+    RELEASE = "v0.14.0"
+
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        release = ROOT / "releases" / self.RELEASE
+        shutil.copytree(release / "qualification",
+                        self.root / "releases" / self.RELEASE / "qualification")
+        self.manifest = json.loads((release / "manifest.json").read_text(encoding="utf-8"))
+        self.authority = json.loads((release / "compatibility.json").read_text(encoding="utf-8"))
+        self.variant = self.manifest["components"]["ninfer_variants"][-1]
+        self.prefix = f"components.ninfer_variants.{self.variant['id']}"
+        self.receipt_path = self.root / self.variant["qualification"]["summary"]
+        self.original = self.receipt_path.read_bytes()
+
+    def validate(self, mutate=None) -> list[str]:
+        receipt = json.loads(self.original)
+        if mutate is not None:
+            mutate(receipt)
+        self.receipt_path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
+        self.variant["qualification"]["sha256"] = VERIFY_RELEASE.sha256_file(self.receipt_path)
+        errors: list[str] = []
+        VERIFY_RELEASE.validate_ninfer_variants(
+            self.root, self.RELEASE, self.manifest["components"]["ninfer_variants"], self.authority,
+            VERIFY_RELEASE.effective_native_model(self.manifest)["artifact_sha256"], errors)
+        return errors
+
+    def test_receipt_package_and_model_identities_must_match_the_variant(self) -> None:
+        self.assertEqual(self.validate(), [])
+        other = "0" * 64
+        for label, mutate, expected in (
+            ("dependency inventory", lambda receipt: receipt["package"].update(
+                dependency_sbom_sha256=other), "dependency_sbom_sha256 must match"),
+            ("no dependency inventory", lambda receipt: receipt["package"].pop(
+                "dependency_sbom_sha256"), "dependency_sbom_sha256 must match"),
+            ("package filename", lambda receipt: receipt["package"].update(
+                filename=receipt["package"]["filename"].replace("beta.3", "beta.2")),
+             "package name must match"),
+            ("package bytes", lambda receipt: receipt["package"].update(
+                bytes=receipt["package"]["bytes"] + 1), "package size must match"),
+            ("model", lambda receipt: receipt["identity"].update(model_artifact_sha256=other),
+             "model must match the variant"),
+            ("outer checksum set", lambda receipt: receipt["package"].update(
+                outer_checksums_sha256=other), "outer_checksums_sha256 must match"),
+            ("no outer checksum set", lambda receipt: receipt["package"].pop(
+                "outer_checksums_sha256"), "outer_checksums_sha256 must match"),
+        ):
+            with self.subTest(label=label):
+                self.assertEqual(self.validate(mutate), [f"{self.prefix} qualification {expected}"])
+
+    def test_every_deterministic_gate_and_its_evidence_section_must_pass(self) -> None:
+        for label, mutate in (
+            ("failed security gate", lambda receipt: receipt["deterministic_gates"].update(
+                state_security="failed")),
+            ("skipped benchmark gate", lambda receipt: receipt["deterministic_gates"].update(
+                benchmark_c1="skipped")),
+            ("missing long-session gate", lambda receipt: receipt["deterministic_gates"].pop(
+                "long_session")),
+            ("failed section behind a passed gate", lambda receipt: receipt["persistence"].update(
+                status="failed")),
+            ("missing golden-equivalent section", lambda receipt: receipt.pop("golden_equivalent")),
+        ):
+            with self.subTest(label=label):
+                errors = self.validate(mutate)
+                self.assertEqual(len(errors), 1, errors)
+                self.assertTrue(errors[0].startswith(f"{self.prefix}: deterministic gate"), errors)
+
+    def test_component_tag_must_name_the_package_version_and_beta(self) -> None:
+        shipped = self.variant["release_tag"]
+        for tag in ("v0.7.0-qwen38-4090-beta.2", "v0.6.11-qwen38-4090-beta.3"):
+            with self.subTest(tag=tag):
+                variant = deepcopy(self.variant)
+                for field, value in variant.items():
+                    if field.endswith("_url"):
+                        variant[field] = value.replace(f"/{shipped}/", f"/{tag}/")
+                variant["release_tag"] = tag
+                errors: list[str] = []
+                VERIFY_RELEASE.validate_ninfer_variants(
+                    self.root, self.RELEASE, [variant], {"runtime_variants": [variant]},
+                    variant["model_artifact_sha256"], errors)
+                self.assertEqual(errors, [
+                    f"{self.prefix}.release_tag must name the package version and beta ({shipped})"])
 
 
 class ReleaseContractTest(unittest.TestCase):
@@ -1787,9 +1899,12 @@ class ReleaseContractTest(unittest.TestCase):
                     "source_commit": "a" * 40,
                     "server_binary_sha256": "b" * 64,
                     "configuration_sha256": "c" * 64,
+                    "model_artifact_sha256": "1" * 64,
                 },
                 "package": {
+                    "filename": "ninfer-rtx3090-omp-v0.2.0-windows-x86_64-cuda12.8-rtx3090.tar.gz",
                     "sha256": "d" * 64,
+                    "bytes": 1,
                     "sbom_sha256": "f" * 64,
                     "installer_sha256": "4" * 64,
                     "controller_sha256": "5" * 64,
@@ -1881,6 +1996,9 @@ class ReleaseContractTest(unittest.TestCase):
                     variant[field] = value.replace(old_tag, variant["release_tag"])
             variant["package_url"] = (
                 f"https://github.com/alphastorm/ninfer/releases/download/{variant['release_tag']}/{variant['package_name']}")
+            receipt["package"]["filename"] = variant["package_name"]
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            variant["qualification"]["sha256"] = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
             errors = []
             VERIFY_RELEASE.validate_ninfer_variants(root, release, [variant], compatibility, "1" * 64, errors)
             self.assertEqual(errors, [])
@@ -1932,6 +2050,7 @@ class ReleaseContractTest(unittest.TestCase):
             "outer_digest_drift",
             "installer_entry_drift",
             "package_entry_drift",
+            "source_entry_missing",
         )
         for case in cases:
             with self.subTest(case=case):
@@ -1964,6 +2083,22 @@ class ReleaseContractTest(unittest.TestCase):
                         variant["checksums_sha256"] = "0" * 64
                         expected_error = (
                             f"{prefix}.checksums_sha256 must match the checksums file"
+                        )
+                    elif case == "source_entry_missing":
+                        # Native-packager sets always list their source archive.
+                        filename = variant["source_archive_url"].rsplit("/", 1)[-1]
+                        mutated_text = "\n".join(
+                            line for line in checksums_text.split("\n")
+                            if not line.endswith(f"  {filename}")
+                        )
+                        self.assertNotEqual(mutated_text, checksums_text)
+                        checksums_path.write_text(mutated_text, encoding="utf-8")
+                        variant["checksums_sha256"] = hashlib.sha256(
+                            checksums_path.read_bytes()
+                        ).hexdigest()
+                        expected_error = (
+                            f"{prefix} checksums entry {filename} must match "
+                            "source_archive_sha256"
                         )
                     else:
                         if case == "installer_entry_drift":
