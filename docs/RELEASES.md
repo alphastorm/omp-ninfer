@@ -2619,9 +2619,12 @@ python3 scripts/bind_native_variant.py --release v0.9.1 --lane rtx3090 --add \
 python3 scripts/rebind_release.py --release v0.9.1 --draft
 ```
 
-`--add` creates the manifest, release compatibility and qualification-composition rows in
-canonical order only after the existing verifier accepts the real qualification receipt.
-Without it a missing row remains an error. The root authority and existing lanes are untouched.
+Every bind, a rebind of an existing lane as well as `--add`, runs the verifier's native-row checks
+against the lane receipt already in the release tree and the supplied `SHA256SUMS` before it
+writes anything; only then does it check that set into the release tree and write the manifest.
+`--add` also creates the release compatibility and qualification-composition rows in canonical
+order. Without it a missing row remains an error. The root authority and existing lanes are
+untouched.
 Commit the bindings, then run `rebind_release.py --release v0.9.1 --pin <receipt-commit> --stage lane`.
 At that cut update the existing routes' product pins to v0.9.1 and the current-release prose;
 do not change their component pins. Freeze the candidate only after those edits are committed.

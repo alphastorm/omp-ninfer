@@ -1035,7 +1035,13 @@ def validate_variant_checksums(
     item: dict[str, Any],
     prefix: str,
     errors: list[str],
+    *,
+    checksums_path: Path | None = None,
 ) -> None:
+    """The release's checked-in outer SHA256SUMS closes over every asset the row binds.
+
+    `checksums_path` verifies a set that is not checked in yet (the binder's input) instead.
+    """
     has_component_assets = any(
         item.get(f"{field}_url") is not None
         or item.get(f"{field}_sha256") is not None
@@ -1071,13 +1077,14 @@ def validate_variant_checksums(
 
     checksums_digest = item.get("checksums_sha256")
     require_sha(checksums_digest, f"{prefix}.checksums_sha256", errors)
-    checksums_path = (
-        root
-        / "releases"
-        / release
-        / "qualification"
-        / f"{item.get('id')}.SHA256SUMS"
-    )
+    if checksums_path is None:
+        checksums_path = (
+            root
+            / "releases"
+            / release
+            / "qualification"
+            / f"{item.get('id')}.SHA256SUMS"
+        )
     require(checksums_path.is_file(), f"{prefix} checksums file must exist", errors)
     if not checksums_path.is_file():
         return
@@ -1146,7 +1153,13 @@ def validate_ninfer_variants(
     errors: list[str],
     *,
     allow_pending: bool = False,
+    incoming_checksums: dict[str, Path] | None = None,
 ) -> None:
+    """Native runtime rows, their checksum closure, and the lane receipts they bind.
+
+    `incoming_checksums` maps a variant id to an outer SHA256SUMS that is not checked in yet:
+    the binder verifies its input before it writes the release tree.
+    """
     require(isinstance(variants, list), "components.ninfer_variants must be an array", errors)
     if not isinstance(variants, list):
         return
@@ -1248,7 +1261,8 @@ def validate_ninfer_variants(
                 errors)
 
         if ga_release(release):
-            validate_variant_checksums(root, release, item, prefix, errors)
+            validate_variant_checksums(root, release, item, prefix, errors,
+                                       checksums_path=(incoming_checksums or {}).get(variant_id))
 
         qualification = item.get("qualification", {})
         require(isinstance(qualification, dict), f"{prefix}.qualification must be an object", errors)
