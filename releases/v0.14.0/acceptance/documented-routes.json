@@ -7,7 +7,7 @@
   "operator_class": "owner-operated tester-equivalent",
   "mode": "Fresh candidate-bound execution of all five v0.14.0 documented routes; the passed RTX 5090 corrected attempt is used, and pre-publication clone substitutions remain explicit in unchanged runner receipts.",
   "document_sha256": "7d23c75b31095cbdd70adf9fabea62ee2e07921db636d0cc336b117f94e7cae3",
-  "current_document_sha256": "0b94eb791cfb032334cec08daab1e292fe62f0c02ca30f04863320449654ae6d",
+  "current_document_sha256": "dd3fe56a8625003d226942f71a32ae5e37f4643330f184e8ba8547e9bc610621",
   "executed_blocks_match_current": true,
   "document_change": "Compared with v0.13.1, frozen candidate c81a8e7e changes every executable product tag/manifest reference to v0.14.0 and binds the actual beta.3 components while retaining the shared v3 model/store blocks. All five routes executed those candidate blocks fresh; no predecessor route acceptance is relabelled. Subsequent guide banner, route-acceptance summary and disclosures are prose-only edits; every current executable route block remains byte-identical to its candidate receipt.",
   "candidate_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",

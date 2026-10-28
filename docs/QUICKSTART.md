@@ -187,8 +187,8 @@ same-source second builds are not bit-identical. See the
 - **Native two-GPU UUID topology and rollback:** Both native packages bind their GPU UUID and PCI
   address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Both beta.3 runtime
   qualifications record no predecessor (`not_applicable`, zero rollback directions), not an
-  inherited beta.2 upgrade/rollback result. Fresh public-install and restoration acceptance remains
-  pending. Preserve prior native release roots separately for historical recovery.
+  inherited beta.2 upgrade/rollback result. Fresh candidate-bound public-install and restoration
+  acceptance passed. Preserve prior native release roots separately for historical recovery.
 - **RTX 3090 power and upgrade:** the serving cap is now 350 W. Qualification restored the owner's
   370 W baseline on stop; this is not a promise about another operator's hardware. Stop a running
   v0.13.1 RTX 3090 lane before installing v0.14.0; its old 300 W lease otherwise fails the new
@@ -260,8 +260,8 @@ Requires Windows 11 x64, one RTX 4090 (sm_89), a supported NVIDIA driver, Git, P
 (`py` launcher), and 40 GiB free disk. The installer binds the unique RTX 4090 UUID and PCI address
 even beside an RTX 3090 (use `-GpuUuid` if multiple RTX 4090 cards exist; never hide a card). Stop
 the other native lane on port `18082` first. The beta.3 runtime qualification records no predecessor
-(`not_applicable`, zero rollback directions); fresh public-install and product-route acceptance is
-pending. Keep prior native release roots untouched for historical recovery.
+(`not_applicable`, zero rollback directions); fresh candidate-bound public-install and product-route
+acceptance passed. Keep prior native release roots untouched for historical recovery.
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
@@ -627,7 +627,7 @@ if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 
 The macOS arm64 client is a preview platform (stock upstream binary over a manual OpenSSH loopback
 tunnel, without a managed macOS installer or appliance service); fresh acceptance of all 10
-executable blocks against the beta.3 RTX 5090 container lane is pending. Sections 3 and 4 also serve as
+executable blocks against the beta.3 RTX 5090 container lane passed. Sections 3 and 4 also serve as
 the inference-host setup for the Windows and WSL2 Linux client routes.
 
 ### Prerequisites

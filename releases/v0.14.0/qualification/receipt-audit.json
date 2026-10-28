@@ -5,7 +5,7 @@
   "as_of": "2026-10-28",
   "source_release": "v0.13.1",
   "status": "staged-three-lane-draft",
-  "policy": "All changed-runtime/native subjects are replaced with fresh exact-source N receipts; historical unchanged stock-client review/descriptor bytes retain their actual subjects. Unrepeated predecessor restore/remediation/tooling/prose proof is dropped rather than relabelled. No predecessor product acceptance or council approval transfers.",
+  "policy": "All changed-runtime/native subjects are replaced with fresh exact-source N receipts. The historical stock-client review retains its original subject and bytes; acceptance composes the current release descriptor while preserving every v0.13.1 client binary/asset identity. Unrepeated predecessor restore/remediation/tooling/prose proof is dropped rather than relabelled. No predecessor product acceptance or council approval transfers.",
   "files": [
     {
       "file": "build.json",
@@ -17,9 +17,9 @@
     {
       "file": "client-components.json",
       "predecessor_sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4",
-      "disposition": "kept-unchanged-subject",
-      "reason": "Keep the unchanged stock OMP three-platform identity descriptor at its original v0.13.1 metadata; not regenerated/current acceptance or a new client cut.",
-      "staged_sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4"
+      "disposition": "composed-by-acceptance",
+      "reason": "Acceptance regenerated the v0.14.0 descriptor metadata by design; all three stock OMP 18.12.6 client binary/asset identities are unchanged from v0.13.1. This is not a client rebuild or inherited live acceptance.",
+      "staged_sha256": "e6cc2d7525f3b6cc8f7bb8b605a2bda0b2cdaa558cfac00c2d07fb111e4baa49"
     },
     {
       "file": "component-cut-dry-run.json",

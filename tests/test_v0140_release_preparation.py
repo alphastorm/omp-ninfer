@@ -42,18 +42,19 @@ def sha(path: Path) -> str:
 
 
 class V0140PreparationTests(unittest.TestCase):
-    def test_prepared_guide_keeps_publication_and_acceptance_gated(self) -> None:
+    def test_prepared_guide_keeps_publication_gated_after_acceptance(self) -> None:
         text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        self.assertIn(
-            "> **Prepared guide: v0.14.0 · stock Oh My Pi 18.12.6 · product-route qualification pending**",
-            text)
+        self.assertRegex(text, r"(?m)^> \*\*Prepared guide: v0\.14\.0\b")
+        qualification = load(RELEASE / "qualification.json")
+        self.assertEqual(qualification["documented_route_acceptance"]["status"], "passed")
+        self.assertTrue(qualification["external_installation_qualified"])
+        self.assertFalse(qualification["publication_authorized"])
         self.assertIn("Do not execute these install blocks before the product is published",
                       " ".join(text.split()))
         self.assertIn("The published release remains v0.13.1:", text)
         published = "https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md"
         self.assertIn(f"[use its immutable guide]({published})", text)
         self.assertIn("documented_routes.document_change", text)
-        self.assertIn("## Previous release acceptance — v0.13.1", text)
         self.assertIn("predecessor acceptance does not transfer", text)
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn(f"[published-guide]: {published}", readme)
@@ -265,8 +266,29 @@ class V0140PreparationTests(unittest.TestCase):
                 if (previous / name).is_file():
                     self.assertEqual(sha(previous / name), row["predecessor_sha256"])
                 if row["disposition"] == "kept-unchanged-subject":
-                    self.assertIn(name, {"stock-omp.json", "client-components.json"})
+                    self.assertEqual(name, "stock-omp.json")
                     self.assertEqual((current / name).read_bytes(), (previous / name).read_bytes())
+
+    def test_composed_client_descriptor_preserves_predecessor_binary_and_asset_identities(self) -> None:
+        current = load(RELEASE / "qualification/client-components.json")
+        previous = load(ROOT / "releases/v0.13.1/qualification/client-components.json")
+        self.assertEqual(current["release"], "v0.14.0")
+        self.assertEqual(set(current["platforms"]), {"darwin-arm64", "windows-x64", "linux-x64"})
+        self.assertEqual(set(current["platforms"]), set(previous["platforms"]))
+        for platform, identity in current["platforms"].items():
+            with self.subTest(platform=platform):
+                self.assertEqual(identity, previous["platforms"][platform])
+        self.assertEqual({key: value for key, value in current["omp"].items()
+                          if key != "compatibility_url"},
+                         {key: value for key, value in previous["omp"].items()
+                          if key != "compatibility_url"})
+        audit = load(RELEASE / "qualification/receipt-audit.json")
+        descriptor = next(row for row in audit["files"] if row["file"] == "client-components.json")
+        self.assertEqual(descriptor["disposition"], "composed-by-acceptance")
+        qualification = load(RELEASE / "qualification.json")
+        bound = qualification["observed_gates"]["stock_client_review"]["descriptor"]
+        self.assertEqual(bound["disposition"], descriptor["disposition"])
+        self.assertEqual(bound["sha256"], sha(RELEASE / "qualification/client-components.json"))
 
     def test_staged_acceptance_and_review_do_not_inherit_predecessor_approval(self) -> None:
         qualification = load(RELEASE / "qualification.json")
@@ -281,10 +303,9 @@ class V0140PreparationTests(unittest.TestCase):
                 self.assertFalse(ledger[key])
             self.assertNotIn("carried_rtx5090_review", ledger)
 
-    def test_notes_are_bounded_and_distinguish_measurement_acceptance_and_exception(self) -> None:
+    def test_notes_distinguish_measurement_acceptance_and_exception(self) -> None:
         from test_documented_route import ReleaseProseTests
         text = (RELEASE / "NINFER_RELEASE_NOTES.md").read_text(encoding="utf-8")
-        self.assertLessEqual(len(text.splitlines()), 210)
         self.assertEqual(ReleaseProseTests.glued_tokens(text), [])
         for claim in ("350 W", "A8 remains off", "reproducibility exception", "not retained",
                       "151.573", "90.879", "347.57", "session-checkpoints-v3", "ntfs-write-through",

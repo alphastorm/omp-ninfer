@@ -15,7 +15,7 @@
     "note": "All three freshly downloaded unchanged stock OMP 18.12.6 asset/binary identities, typed tool/result, exact continuation and unavailable-route fail-closed checks passed; both native routes used the same stock Windows client."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "12cc5c5dfe2b59e2c91c44def5a44a04bbe9dd582e07ca347186cb02405a59b7",
+  "compatibility_sha256": "e1fa1593a9aebe2a93ddd7e57a19f8cf8638d9d94089a128525c39329dd2f02d",
   "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
   "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
   "platform_receipts": [
@@ -189,7 +189,7 @@
   "evidence": {
     "documented_routes": {
       "repository_path": "releases/v0.14.0/acceptance/documented-routes.json",
-      "sha256": "95a64662e83c8a636e2fe399e8aa6f4169e7dc9147dd61635155b71ab93b5fa1"
+      "sha256": "a3d80e3e5092a7eae6e9c5a06a83499663bf2312dd4b32cf38d236a82ad91fe5"
     },
     "rtx4090_public_install": {
       "repository_path": "releases/v0.14.0/acceptance/rtx4090-public-install.json",

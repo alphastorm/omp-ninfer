@@ -47,7 +47,7 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.
-- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
 - Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
@@ -62,7 +62,7 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.
-- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
 - Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
@@ -77,7 +77,7 @@ Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rol
 
 Limitations:
 - The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.
-- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance is pending; predecessor acceptance does not transfer.
+- Fresh v0.14.0 stock OMP 18.12.6 platform/public-route acceptance passed on candidate c81a8e7e; predecessor acceptance does not transfer.
 - Fresh source N runtime protocol and JSON-schema gates are separate from product-route acceptance.
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.

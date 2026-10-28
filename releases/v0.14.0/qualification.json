@@ -12,7 +12,7 @@
     "candidate_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",
     "evidence_commit_changes_candidate": false,
     "evidence_path": "releases/v0.14.0/acceptance/documented-routes.json",
-    "evidence_sha256": "95a64662e83c8a636e2fe399e8aa6f4169e7dc9147dd61635155b71ab93b5fa1",
+    "evidence_sha256": "a3d80e3e5092a7eae6e9c5a06a83499663bf2312dd4b32cf38d236a82ad91fe5",
     "document_change": "Fresh candidate execution covers every changed v0.14.0 executable product reference and the actual beta.3 components, retaining shared v3 model/store blocks. Subsequent guide edits change prose only; all current executable route blocks match their candidate receipts. The initial 5090 host-local tunnel-port collision failed closed and restored production; the driver's one corrected attempt passed on unchanged C. The late-required correction disclosure was followed only by summarize on unchanged execution evidence.",
     "documented_route_steps": {
       "rtx5090-container-host": "2/2",
@@ -162,7 +162,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.14.0/acceptance/composed-external-installation.json",
-      "sha256": "a4581eedd56fa7d814b3c876304fd6b3e660c1c928e1978a63f7dffc3899f3fd",
+      "sha256": "f42046d04815efb368e4bc385372417f60edfd9fb08cad7b64a62293d05352c4",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/36b93ba87c237d86918e9b9008d4242cfeb35def/releases/v0.14.0/acceptance/composed-external-installation.json",
       "as_of": "2026-10-28",
       "release": "v0.14.0",
@@ -175,7 +175,7 @@
       "windows_asset_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
       "windows_binary_sha256": "73d73c11dc8821cf939441a964992aefc9c5b0d5a4418e9e8985a46439b60eef",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "12cc5c5dfe2b59e2c91c44def5a44a04bbe9dd582e07ca347186cb02405a59b7",
+      "compatibility_sha256": "e1fa1593a9aebe2a93ddd7e57a19f8cf8638d9d94089a128525c39329dd2f02d",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -203,7 +203,7 @@
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.14.0/acceptance/documented-routes.json",
-      "sha256": "95a64662e83c8a636e2fe399e8aa6f4169e7dc9147dd61635155b71ab93b5fa1"
+      "sha256": "a3d80e3e5092a7eae6e9c5a06a83499663bf2312dd4b32cf38d236a82ad91fe5"
     }
   },
   "observed_gates": {
@@ -312,7 +312,9 @@
       "sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "descriptor": {
         "repository_path": "releases/v0.14.0/qualification/client-components.json",
-        "sha256": "e6cc2d7525f3b6cc8f7bb8b605a2bda0b2cdaa558cfac00c2d07fb111e4baa49"
+        "sha256": "e6cc2d7525f3b6cc8f7bb8b605a2bda0b2cdaa558cfac00c2d07fb111e4baa49",
+        "disposition": "composed-by-acceptance",
+        "scope": "Acceptance regenerated release/compatibility metadata; every client platform's binary/asset identity is unchanged from v0.13.1."
       },
       "live_beta3_acceptance": "Passed separately on candidate c81a8e7e in changed_client_acceptance and its three fresh platform receipts; the carried source-review receipt remains host-free.",
       "scope": "Historical host-free review of unchanged stock OMP 18.12.6. The current release descriptor and fresh platform/public-route acceptance are separately bound, not inferred from the historical review."
@@ -352,7 +354,7 @@
       "status": "passed",
       "candidate_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",
       "repository_path": "releases/v0.14.0/acceptance/documented-routes.json",
-      "sha256": "95a64662e83c8a636e2fe399e8aa6f4169e7dc9147dd61635155b71ab93b5fa1",
+      "sha256": "a3d80e3e5092a7eae6e9c5a06a83499663bf2312dd4b32cf38d236a82ad91fe5",
       "criterion": "Fresh beta.3 RTX 5090 public-image/client routes, three exact stock OMP 18.12.6 clients, all five current routes/31 executable blocks and both native beta.3 public packages passed. Typed tool/result, exact continuation, fail-closed and scoped macOS/Windows image-input observations bind actual image/binary/configuration/model identities. Independent same-image incumbent restoration and both native state/ACL/support/task/hold/client/power/directory/staging audits passed. Both canonical native roots were fresh first-of-lineage installs, with zero rollback directions; later public URL checks were already_installed. The initial 5090 port-collision refusal and restoration, one corrected attempt and late correction-record summarize-only rerun are disclosed (#97/#99). Changed product references have explicit document_change; no rehearsal or predecessor acceptance is substituted."
     },
     "staging": {
@@ -438,6 +440,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.14.0/qualification/receipt-audit.json",
-    "sha256": "97afc04cb43b1f8011ae62afc6bc2b7383989a84553b5b8499aa216bc6047cd6"
+    "sha256": "156fefdff20150c6b424357a046093668789b7079c8b4b8434aafd4a09985255"
   }
 }

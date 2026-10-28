@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Reconcile v0.14.0's composed descriptor audit and acceptance wording: acceptance regenerates
+  release metadata while preserving every v0.13.1 client binary/asset identity. Preparation tests
+  retain publication gating and real identity contracts, not stage-time prose or a notes line cap.
 - Prepare the v0.14.0 QUICKSTART for route acceptance: retarget every executable product tag and
   manifest path, bind the beta.3 lane identities and 350 W RTX 3090 stop-before-upgrade policy,
   and retain the unchanged v3 model/store blocks. Fresh candidate-bound acceptance passed;
