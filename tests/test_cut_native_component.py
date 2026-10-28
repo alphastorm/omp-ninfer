@@ -1,10 +1,12 @@
-"""Native component preflight validates real local archives without publishing or networking."""
+"""Component cut preflights validate real local archives and release bindings without publishing
+or networking."""
 from __future__ import annotations
 
 from copy import deepcopy
 import gzip
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -16,12 +18,47 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CUTTER = ROOT / "scripts/hosts/cut-ninfer-4090-component.sh"
+RUNTIME_CUTTER = ROOT / "scripts/hosts/cut-ninfer-5090-component.sh"
 SBOM_FIXTURE = json.loads((ROOT / "tests/fixtures/native-sbom.json").read_text(encoding="utf-8"))
 GENERATOR_SPEC = importlib.util.spec_from_file_location(
     "generate_native_sbom", ROOT / "scripts/generate_native_sbom.py")
 assert GENERATOR_SPEC and GENERATOR_SPEC.loader
 GENERATOR = importlib.util.module_from_spec(GENERATOR_SPEC)
 GENERATOR_SPEC.loader.exec_module(GENERATOR)
+# Read-only GitHub stand-in for the RTX 5090 cut: it serves fixture releases of alphastorm/ninfer
+# as gh would and refuses every other operation, so no test can create a tag, release or run.
+FAKE_GH = '''#!/usr/bin/env python3
+import json, os, pathlib, sys
+args = sys.argv[1:]
+with open(os.environ["GH_LOG"], "a", encoding="utf-8") as log:
+    log.write(" ".join(args) + "\\n")
+releases = pathlib.Path(os.environ["GH_RELEASES"])
+def option(name):
+    return args[args.index(name) + 1] if name in args else None
+if args[:2] == ["auth", "status"]:
+    sys.exit(0)
+if args[:1] == ["api"] and args[1].startswith("repos/alphastorm/ninfer/git/ref/tags/"):
+    sys.exit(0 if (releases / args[1].rsplit("/", 1)[1]).is_dir() else 1)
+if args[:1] == ["release"] and args[1] in ("view", "download"):
+    release = releases / args[2]
+    if option("--repo") != "alphastorm/ninfer" or not release.is_dir():
+        sys.exit("release not found")
+    if args[1] == "view":
+        view = json.loads((release / "view.json").read_text())
+        fields = option("--json")
+        print(json.dumps({key: view[key] for key in fields.split(",")} if fields else view))
+        sys.exit(0)
+    asset = release / option("--pattern")
+    if not asset.is_file():
+        sys.exit("no assets match the file pattern")
+    if option("--output") == "-":
+        sys.stdout.buffer.write(asset.read_bytes())
+    else:
+        (pathlib.Path(option("--dir") or ".") / asset.name).write_bytes(asset.read_bytes())
+    sys.exit(0)
+print("unexpected GitHub operation: " + " ".join(args), file=sys.stderr)
+sys.exit(99)
+'''
 
 
 def digest(data: bytes) -> str:
@@ -308,6 +345,173 @@ class NativeCutterTests(unittest.TestCase):
         implicit = self.run_cut(command + ["--lane", "rtx3090"])
         self.assertEqual(implicit.returncode, 0, implicit.stderr)
         self.assertEqual(implicit.stdout, explicit.stdout)
+
+
+@unittest.skipIf(os.name == "nt", "POSIX shell and fake-executable fixture")
+class RuntimeCutterTests(unittest.TestCase):
+    VERSION = "v0.7.0"
+    NAME = f"ninfer-qwen38-rtx5090-{VERSION}-linux-x86_64-cuda13.1"
+    BASE_IMAGE = "ghcr.io/alphastorm/ninfer@sha256:" + "d" * 64
+
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.git = shutil.which("git")
+        self.runtime = self.root / "runtime"
+        self.runtime.mkdir()
+        self.git_run("init", "-q")
+        self.git_run("config", "user.name", "Runtime cutter fixture")
+        self.git_run("config", "user.email", "fixture@example.invalid")
+        (self.runtime / "Dockerfile").write_text("FROM scratch AS runtime-base\n")
+        self.git_run("add", ".")
+        self.git_run("commit", "-qm", "runtime base")
+        self.base = self.git_run("rev-parse", "HEAD").strip()
+        workflow = self.runtime / ".github/workflows/publish-runtime-image.yml"
+        workflow.parent.mkdir(parents=True)
+        workflow.write_text("name: Publish NInfer runtime image\n")
+        self.git_run("add", ".")
+        self.git_run("commit", "-qm", "release")
+        self.commit = self.git_run("rev-parse", "HEAD").strip()
+        self.git_run("update-ref", "refs/remotes/origin/main", self.commit)
+        # A sibling of the release commit: present locally but never its ancestor.
+        self.diverged = self.git_run("commit-tree", f"{self.base}^{{tree}}", "-p", self.base,
+                                     "-m", "diverged base").strip()
+        self.remote = self.root / "remote.git"
+        subprocess.run([self.git, "init", "--bare", "-q", str(self.remote)], check=True)
+        self.git_run("remote", "add", "origin", str(self.remote))
+        self.releases = self.root / "releases"
+        self.release = self.publish_base(self.base)
+        tools = self.root / "bin"
+        tools.mkdir()
+        (tools / "gh").write_text(FAKE_GH)
+        (tools / "gh").chmod(0o755)
+        self.log = self.root / "gh.log"
+        self.env = {**os.environ, "PATH": f"{tools}:{os.environ['PATH']}", "GH_LOG": str(self.log),
+                    "GH_RELEASES": str(self.releases), "NINFER_RUNTIME_DIR": str(self.runtime)}
+        self.assets = self.root / "assets"
+        self.assets.mkdir()
+        identity = json.dumps({"artifact_type": "ninfer_release_build_identity", "schema_version": 1,
+                               "patch_stack_sha": self.commit, "release_version": self.VERSION,
+                               "source_dirty": False}).encode()
+        member = tarfile.TarInfo(f"{self.NAME}/build-identity.json")
+        member.size = len(identity)
+        with tarfile.open(self.assets / f"{self.NAME}.tar.gz", "w:gz") as archive:
+            archive.addfile(member, io.BytesIO(identity))
+        (self.assets / f"{self.NAME}.spdx.json").write_text("{}\n")
+        (self.assets / f"{self.NAME}.SHA256SUMS").write_text("".join(
+            f"{digest((self.assets / name).read_bytes())}  {name}\n"
+            for name in (f"{self.NAME}.tar.gz", f"{self.NAME}.spdx.json")))
+        (self.assets / f"runtime-source-{self.commit[:8]}.tar.gz").write_bytes(subprocess.run(
+            [self.git, "-C", str(self.runtime), "archive", "--format=tar.gz", self.commit],
+            check=True, capture_output=True).stdout)
+
+    def git_run(self, *args: str) -> str:
+        return subprocess.run([self.git, "-C", str(self.runtime), *args], check=True,
+                              capture_output=True, text=True).stdout
+
+    def publish_base(self, source: str, *, name: str | None = None, view: dict | None = None,
+                     receipt: dict | None = None, asset: bool = True) -> str:
+        """Write one runtime-base prerelease in the shape publish-runtime-base.yml publishes."""
+        name = name or f"runtime-base-{source[:8]}-20261025"
+        release = self.releases / name
+        release.mkdir(parents=True)
+        (release / "view.json").write_text(json.dumps({
+            "tagName": name, "isPrerelease": True, "isDraft": False, "targetCommitish": source, **(view or {})}))
+        if asset:
+            (release / "ninfer-runtime-base.json").write_text(json.dumps({
+                "artifact_type": "ninfer_runtime_base_publication_receipt", "schema_version": 1,
+                "source_commit": source, "runtime_base_release_tag": name, "base_tag_note": "fixture base",
+                "platform": "linux/amd64", "build_target": "runtime-base",
+                "cuda_image": "nvidia/cuda:13.1.2-runtime-ubuntu24.04", "cuda_image_digest": "sha256:" + "c" * 64,
+                "cuda_image_reference": "nvidia/cuda:13.1.2-runtime-ubuntu24.04@sha256:" + "c" * 64,
+                "image_reference": self.BASE_IMAGE, "image_digest": self.BASE_IMAGE.split("@")[1],
+                "installed_packages": [{"name": "adduser", "version": "3.137ubuntu1", "architecture": "all"}],
+                "provenance": "mode=max", "sbom": True,
+                "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/1",
+                "created_at": "2026-10-25T08:56:43Z", "secret_free": True, **(receipt or {})}, indent=2) + "\n")
+        return name
+
+    def command(self, release: str, *extra: str) -> list[str]:
+        return ["bash", str(RUNTIME_CUTTER), "--version", self.VERSION, "--commit", self.commit,
+                "--assets", str(self.assets),
+                "--archive-sha", digest((self.assets / f"{self.NAME}.tar.gz").read_bytes()),
+                "--sbom-sha", digest((self.assets / f"{self.NAME}.spdx.json").read_bytes()),
+                "--source-archive-sha",
+                digest((self.assets / f"runtime-source-{self.commit[:8]}.tar.gz").read_bytes()),
+                "--base-image", self.BASE_IMAGE, "--runtime-base-receipt-release", release,
+                "--beta", "4", *extra]
+
+    def run_cut(self, command: list[str]) -> subprocess.CompletedProcess:
+        return subprocess.run(command, env=self.env, cwd=self.root, capture_output=True, text=True)
+
+    def assert_no_public_effect(self) -> None:
+        operations = self.log.read_text().splitlines() if self.log.exists() else []
+        for operation in operations:
+            self.assertTrue(operation.split()[:2] in (["auth", "status"], ["release", "view"],
+                                                      ["release", "download"])
+                            or operation.startswith("api repos/alphastorm/ninfer/git/ref/tags/"), operation)
+        tags = subprocess.run([self.git, "--git-dir", str(self.remote), "show-ref", "--tags"],
+                              capture_output=True, text=True)
+        self.assertEqual(tags.stdout, "")
+
+    def test_dry_run_binds_the_published_base_receipt_and_its_ancestor_source(self) -> None:
+        command = self.command(self.release, "--dry-run")
+        result = self.run_cut(command)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        archive_sha = command[command.index("--archive-sha") + 1]
+        self.assertEqual(result.stdout,
+            f"runtime base verified: {self.release} binds {self.BASE_IMAGE}; "
+            f"source {self.base} is an ancestor of {self.commit}\n"
+            f"preflight ok: v0.7.0-qwen38-5090-beta.4 and v0.7.0-qwen38-5090-source.4 at {self.commit}; "
+            f"archive {archive_sha}; base {self.BASE_IMAGE}; base receipt {self.release}\n"
+            "dry run: no tag, release, or workflow run was created\n")
+        self.assert_no_public_effect()
+
+    def test_unbound_runtime_base_is_refused_before_any_effect(self) -> None:
+        other_image = "ghcr.io/alphastorm/ninfer@sha256:" + "e" * 64
+        cases = (
+            ("absent", lambda: "runtime-base-00000000-20261025", "release is unavailable"),
+            ("draft", lambda: self.publish_base(self.base, view={"isDraft": True}),
+             "is not a published runtime base prerelease"),
+            ("full release", lambda: self.publish_base(self.base, view={"isPrerelease": False}),
+             "is not a published runtime base prerelease"),
+            ("no receipt", lambda: self.publish_base(self.base, asset=False),
+             "carries no ninfer-runtime-base.json"),
+            ("other image", lambda: self.publish_base(self.base, receipt={"image_reference": other_image}),
+             f"binds {other_image}, not --base-image {self.BASE_IMAGE}"),
+            ("other receipt", lambda: self.publish_base(
+                self.base, receipt={"runtime_base_release_tag": f"runtime-base-{self.base[:8]}-20261024"}),
+             "receipt runtime_base_release_tag is not"),
+            ("image receipt", lambda: self.publish_base(
+                self.base, receipt={"artifact_type": "ninfer_runtime_image_publication_receipt"}),
+             "receipt artifact_type is not"),
+            ("retargeted", lambda: self.publish_base(self.base, view={"targetCommitish": self.commit}),
+             "does not match receipt source"),
+            ("misnamed", lambda: self.publish_base(self.base, name=f"runtime-base-{self.diverged[:8]}-20261025"),
+             "does not match receipt source"),
+            ("diverged", lambda: self.publish_base(self.diverged), f"is not an ancestor of {self.commit}"),
+            ("unfetched", lambda: self.publish_base("f" * 40), f"runtime base source {'f' * 40} is not in"),
+        )
+        for label, publish, message in cases:
+            with self.subTest(case=label):
+                shutil.rmtree(self.releases)
+                self.releases.mkdir()
+                self.log.unlink(missing_ok=True)
+                result = self.run_cut(self.command(publish(), "--dry-run"))
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertNotIn("preflight ok", result.stdout)
+                self.assert_no_public_effect()
+
+    def test_value_flags_without_a_value_are_usage_errors_before_any_operation(self) -> None:
+        for flag in ("--version", "--commit", "--assets", "--archive-sha", "--sbom-sha", "--source-archive-sha",
+                     "--base-image", "--runtime-base-receipt-release", "--beta", "--notes-file"):
+            with self.subTest(flag=flag):
+                result = self.run_cut(self.command(self.release, "--dry-run", flag))
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn(f"{flag} requires a value", result.stderr)
+                self.assertFalse(self.log.exists())
 
 
 if __name__ == "__main__":

@@ -17,14 +17,21 @@
 #
 # --base-image is the image_reference from a publish-runtime-base.yml prerelease receipt
 # named by --runtime-base-receipt-release: the digest-pinned master-compatible runtime dependency
-# layer the runtime-image workflow wraps the published binaries onto. The workflow verifies
-# the receipt's image reference and ancestor source commit before publishing an image.
+# layer the runtime-image workflow wraps the published binaries onto. That workflow checks the
+# receipt binding only after both prereleases exist, so the preflight (and --dry-run) proves the
+# same binding before any public effect: the receipt release is a published prerelease at its
+# receipt's source, the receipt names that release and --base-image, and that source commit is
+# an ancestor of --commit in $NINFER_RUNTIME_DIR.
 set -euo pipefail
 
 REPO=alphastorm/ninfer
 RUNTIME_REPO_DIR="${NINFER_RUNTIME_DIR:-$HOME/Development/ninfer-lane-5090}"
 version=""; commit=""; assets=""; archive_sha=""; sbom_sha=""; source_sha=""; base_image=""; runtime_base_receipt_release=""; beta=1; notes_file=""; dry_run=0
 while [ $# -gt 0 ]; do
+  case "$1" in
+    --version|--commit|--assets|--archive-sha|--sbom-sha|--source-archive-sha|--base-image|--runtime-base-receipt-release|--beta|--notes-file)
+      (($# >= 2)) || { echo "$1 requires a value" >&2; exit 2; } ;;
+  esac
   case "$1" in
     --version) version="$2"; shift 2 ;;
     --commit) commit="$2"; shift 2 ;;
@@ -79,6 +86,44 @@ for tag in "$binary_tag" "$source_tag"; do
   if gh api "repos/$REPO/git/ref/tags/$tag" >/dev/null 2>&1; then echo "tag already exists: $tag" >&2; exit 1; fi
   if gh release view "$tag" --repo "$REPO" >/dev/null 2>&1; then echo "release already exists: $tag" >&2; exit 1; fi
 done
+base_release_json=$(gh release view "$runtime_base_receipt_release" --repo "$REPO" \
+  --json tagName,isPrerelease,isDraft,targetCommitish) \
+  || { echo "runtime base receipt release is unavailable: $runtime_base_receipt_release" >&2; exit 1; }
+base_receipt_json=$(gh release download "$runtime_base_receipt_release" --repo "$REPO" \
+  --pattern ninfer-runtime-base.json --output -) \
+  || { echo "$runtime_base_receipt_release carries no ninfer-runtime-base.json" >&2; exit 1; }
+python3 - "$base_release_json" "$base_receipt_json" "$runtime_base_receipt_release" "$base_image" \
+  "$commit" "$RUNTIME_REPO_DIR" <<'PY'
+import json, re, subprocess, sys
+view, receipt, release, base_image, commit, runtime = sys.argv[1:]
+try:
+    view, receipt = json.loads(view), json.loads(receipt)
+except ValueError:
+    raise SystemExit(f"{release} release metadata or receipt is not JSON")
+if not isinstance(view, dict) or not isinstance(receipt, dict):
+    raise SystemExit(f"{release} release metadata or receipt is not a JSON object")
+if view.get("tagName") != release or view.get("isPrerelease") is not True or view.get("isDraft") is not False:
+    raise SystemExit(f"{release} is not a published runtime base prerelease")
+for key, value in (("artifact_type", "ninfer_runtime_base_publication_receipt"), ("schema_version", 1),
+                   ("runtime_base_release_tag", release), ("platform", "linux/amd64"),
+                   ("build_target", "runtime-base")):
+    if type(receipt.get(key)) is not type(value) or receipt.get(key) != value:
+        raise SystemExit(f"{release} receipt {key} is not {value}")
+if receipt.get("image_reference") != base_image:
+    raise SystemExit(f"{release} receipt binds {receipt.get('image_reference')}, not --base-image {base_image}")
+source = receipt.get("source_commit")
+if not isinstance(source, str) or re.fullmatch(r"[0-9a-f]{40}", source) is None:
+    raise SystemExit(f"{release} receipt source_commit is not a full commit")
+if not release.startswith(f"runtime-base-{source[:8]}-") or view.get("targetCommitish") != source:
+    raise SystemExit(f"{release} release name or target does not match receipt source {source}")
+def git(*args):
+    return subprocess.run(["git", "-C", runtime, *args], capture_output=True).returncode
+if git("cat-file", "-e", f"{source}^{{commit}}"):
+    raise SystemExit(f"runtime base source {source} is not in {runtime}")
+if git("merge-base", "--is-ancestor", source, commit):
+    raise SystemExit(f"runtime base source {source} is not an ancestor of {commit}")
+print(f"runtime base verified: {release} binds {base_image}; source {source} is an ancestor of {commit}")
+PY
 echo "preflight ok: $binary_tag and $source_tag at $commit; archive $archive_sha; base $base_image; base receipt $runtime_base_receipt_release"
 if [ "$dry_run" = 1 ]; then
   echo "dry run: no tag, release, or workflow run was created"
