@@ -10,6 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(ROOT / "tests"))  # test_documented_route, also when this module runs alone
 import documented_route
 import render_compatibility
 import verify_release

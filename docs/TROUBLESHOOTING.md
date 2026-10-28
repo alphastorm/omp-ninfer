@@ -317,14 +317,21 @@ entry (ignoring the retired fork-only `ninferStatefulResponses` key) and require
 `Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue` in PowerShell) so an inherited
 `0` cannot disable Responses chaining.
 
-Install or merge the fail-closed configuration into `~/.omp/agent/config.yml`, then run the
-explicit provider/model route:
+Install the fail-closed configuration as `~/.omp/agent/config.yml`. As in quickstart section 7, the
+block leaves an identical file in place and refuses to replace a `config.yml` that differs; if it
+refuses, merge `examples/manual-tunnel/fail-closed.yml` into your file:
 
 ```sh
 unset PI_OPENAI_STATEFUL
-install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
-omp --model ninfer-beta/q38-ninfer
+if [ ! -e "$HOME/.omp/agent/config.yml" ]; then
+  install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
+elif ! cmp -s examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"; then
+  echo 'existing ~/.omp/agent/config.yml differs; merge fail-closed.yml instead of overwriting it' >&2; false
+fi
 ```
+
+Then run the explicit provider/model route from the same shell:
+`omp --model ninfer-beta/q38-ninfer`.
 
 ### Text works but image input fails
 

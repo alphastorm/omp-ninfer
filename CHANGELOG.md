@@ -19,6 +19,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Keep existing reader state when guide blocks are rerun. The RTX 5090 inference host's preparation
+  block generates `~/.config/omp-ninfer/api-key` only when the file is missing or empty, so saved
+  checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid; the guide
+  now describes deliberate rotation. Every client route's provider and config blocks, and the
+  troubleshooting fail-closed recipe, install `~/.omp/agent/models.yml` and `config.yml` when
+  missing, leave an identical file in place, and refuse by name to overwrite one that differs: a
+  macOS/Linux rerun used to replace the reader's own settings, and a native Windows rerun stopped
+  at the files its own earlier run had installed
+  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)). The WSL2 Linux client row of
+  "Choose your lane" now includes section 6, which creates `~/.omp/agent` and installs the key the
+  provider fragment reads.
+- Stop the Windows guide at a failed native command: each tag clone and
+  `py -3 scripts\verify_release.py --require-ready` ready gate throws on a nonzero exit, and the
+  RTX 5090 fail-closed check throws when its WSL2 `stop-ninfer.sh` fails instead of sending the
+  outage request to a runtime that may still be serving
+  ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
+- Keep the unit suite off the documented tunnel port: `scripts/hosts/run-documented-route.sh`
+  takes its tunnel port from `ROUTE_TUNNEL_PORT` (default `18089`; another port is recorded on the
+  tunnel step) and its tests use an ephemeral port, so running the suite can no longer take
+  `127.0.0.1:18089` from a live macOS route on the same machine
+  ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)).
 - Require a corrected 5090 acceptance attempt to carry a non-empty `corrections.json` record
   (`[{"route": ..., "change": ...}]`) in its restored prior workspace before the window opens.
   `summarize()` reads the same records, so a window can no longer be spent on corrections that

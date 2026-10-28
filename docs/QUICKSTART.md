@@ -14,7 +14,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
 | RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
 | RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
-| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
+| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [client key](#6-install-the-same-key-on-the-mac), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
@@ -216,9 +216,11 @@ the current window only):
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ### Install the exact native Windows client
@@ -254,9 +256,11 @@ acceptance passed. Keep prior native release roots untouched for historical reco
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ```powershell
@@ -380,17 +384,26 @@ $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 
 ## Point OMP at the native lane
 
+Install the lane's fragment and the fail-closed config into `~/.omp/agent`, then load the key. A
+rerun leaves identical files in place, and the block refuses to replace a `models.yml` or
+`config.yml` that differs:
+
 ```powershell
 $Provider = if ($VariantId -ceq 'rtx4090-windows-native') { 'ninfer-native-4090' } else { 'ninfer-native-3090' }
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+$ModelsSource = '.\examples\windows-native\models.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.$Provider instead of overwriting it."
 }
-Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
@@ -444,9 +457,11 @@ this prerequisite is not a claim of qualified upgrade/rollback directions.
 
 ```powershell
 git clone --branch v0.14.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 py -3 scripts\verify_release.py --require-ready
+if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 ```
 
 ```powershell
@@ -567,17 +582,26 @@ $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 
 ## Point OMP at the RTX 3090 native lane
 
+Install the lane's fragment and the fail-closed config into `~/.omp/agent`, then load the key. A
+rerun leaves identical files in place, and the block refuses to replace a `models.yml` or
+`config.yml` that differs:
+
 ```powershell
 $Provider = 'ninfer-native-3090'
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+$ModelsSource = '.\examples\windows-native\models-rtx3090.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.$Provider instead of overwriting it."
 }
-Copy-Item .\examples\windows-native\models-rtx3090.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
@@ -692,13 +716,18 @@ test "$(stat -c %s "$MODEL")" = "$MODEL_BYTES"
 printf '%s  %s\n' "$MODEL_SHA256" "$MODEL" | sha256sum --check --strict
 
 umask 077
-openssl rand -hex 32 > "$STATE/api-key"
+# a rerun keeps the existing key: checkpoint MACs and every client's copy are bound to it
+test -s "$STATE/api-key" || openssl rand -hex 32 > "$STATE/api-key"
 chmod 600 "$STATE/api-key"
 ```
 
 The artifact is pinned to one Hugging Face revision, byte count, and SHA-256. A checksum mismatch is
 a hard stop; do not rename or reuse the partial file as a successful download. The separate
 `qwen3_8_27b-v3.ninfer` path avoids appending a resumed download onto an older model container.
+
+A rerun keeps an existing nonempty key, because checkpoint MACs and the copy each client holds are
+bound to it. To rotate the key, stop NInfer, move the old key aside, rerun this block, and install
+the new key on every client; checkpoints saved under the old key no longer load.
 
 Keep the host directory `checkpoints-v013`, mounted at `/checkpoints-v013`; keep the v0.12.x
 `checkpoints` store untouched for historical recovery. The retained profile/store names do not
@@ -783,8 +812,9 @@ Windows forwarding or release acceptance.
 
 ## 6. Install the same key on the Mac
 
-In another Mac terminal, stream the key over SSH from the login shell or the `Ubuntu-24.04` WSL2
-distro (on Windows, the first branch prints one harmless `cannot find the path` line):
+In another Mac terminal, or the WSL2 Linux client's shell, stream the key over SSH from the login
+shell or the `Ubuntu-24.04` WSL2 distro (on Windows, the first branch prints one harmless
+`cannot find the path` line):
 
 ```sh
 install -d -m 700 "$HOME/.omp/agent"
@@ -799,36 +829,47 @@ Do not paste the key into YAML, shell history, issues, or support bundles.
 
 ## 7. Add the OMP provider
 
-If `~/.omp/agent/models.yml` does not exist, install the per-model fragment:
+Install the per-model fragment as `~/.omp/agent/models.yml`. A rerun leaves an identical file in
+place, and the block refuses to replace a `models.yml` that differs:
 
 ```sh
 unset PI_OPENAI_STATEFUL
-install -m 600 examples/manual-tunnel/models.fragment.yml \
-  "$HOME/.omp/agent/models.yml"
+if [ ! -e "$HOME/.omp/agent/models.yml" ]; then
+  install -m 600 examples/manual-tunnel/models.fragment.yml "$HOME/.omp/agent/models.yml"
+elif ! cmp -s examples/manual-tunnel/models.fragment.yml "$HOME/.omp/agent/models.yml"; then
+  echo 'existing ~/.omp/agent/models.yml differs; merge providers.ninfer-beta instead of overwriting it' >&2; false
+fi
 ```
 
 The server hashes OMP's `prompt_cache_key` into the session identity, `compat.statefulResponses: true`
 chains turns with `previous_response_id`, encrypted reasoning and summaries stay off, and effort
-clamps within `low`, `medium`, and `xhigh`. If `models.yml` already exists, unset `PI_OPENAI_STATEFUL`
-and merge only `providers.ninfer-beta` from
+clamps within `low`, `medium`, and `xhigh`. If the block refused an existing `models.yml`, merge
+only `providers.ninfer-beta` from
 [`models.fragment.yml`](../examples/manual-tunnel/models.fragment.yml):
 
 ```yaml
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
-For the macOS/Linux shell route, install the fail-closed default config:
+For the macOS/Linux shell route, install the fail-closed default config the same way. If the block
+refuses an existing `config.yml`, merge
+[`fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml) into it:
 
 ```sh
-install -m 600 examples/manual-tunnel/fail-closed.yml \
-  "$HOME/.omp/agent/config.yml"
+if [ ! -e "$HOME/.omp/agent/config.yml" ]; then
+  install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
+elif ! cmp -s examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"; then
+  echo 'existing ~/.omp/agent/config.yml differs; merge fail-closed.yml instead of overwriting it' >&2; false
+fi
 ```
 
 ### Native Windows OMP
 
 Native Windows OMP does not support `!cat`; copy or merge `providers.ninfer-beta` from
 [`examples/windows-docker-local/models.fragment.yml`](../examples/windows-docker-local/models.fragment.yml),
-install the fail-closed config, and load the key in the current PowerShell process:
+install the fail-closed config, and load the key in the current PowerShell process. A rerun leaves
+identical files in place, and the block refuses to replace a `models.yml` or `config.yml` that
+differs:
 
 ```powershell
 $Agent = Join-Path $HOME '.omp\agent'
@@ -843,11 +884,16 @@ if ($LASTEXITCODE -ne 0) { throw 'NInfer key ACL restriction failed' }
 
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw 'Existing OMP models/config found; merge providers.ninfer-beta and retry mappings instead of overwriting them.'
+$ModelsSource = '.\examples\windows-docker-local\models.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.ninfer-beta instead of overwriting it."
 }
-Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
@@ -892,6 +938,7 @@ native Windows request:
 
 ```powershell
 wsl.exe -d Ubuntu-24.04 -- bash -lc 'cd ~/omp-ninfer && ./examples/manual-tunnel/stop-ninfer.sh'
+if ($LASTEXITCODE -ne 0) { throw 'NInfer stop failed' }
 & $Launcher -p --no-session --auto-approve --max-time 20s `
   --model ninfer-beta/q38-ninfer 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }

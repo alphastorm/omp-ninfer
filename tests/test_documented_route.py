@@ -21,16 +21,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import documented_route  # noqa: E402
 
 RUNNER = ROOT / "scripts" / "hosts" / "run-documented-route.sh"
-NATIVE_DOC = ROOT / "tests" / "fixtures" / "native-quickstart-5861712f.md"
-
-
-def document_for(lane: str) -> Path:
-    return NATIVE_DOC if lane.endswith("-native") else documented_route.DEFAULT_DOC
 
 
 def control_blocks() -> list[documented_route.Block]:
-    return [block for doc in (documented_route.DEFAULT_DOC, NATIVE_DOC)
-            for block in documented_route.parse_blocks(doc.read_text(encoding="utf-8"))]
+    return documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8"))
 
 
 class ReleaseProseTests(unittest.TestCase):
@@ -178,17 +172,16 @@ class ExtractionTests(unittest.TestCase):
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
             with self.subTest(lane=lane):
-                resolved = documented_route.lane_blocks(document_for(lane), lane)
+                resolved = documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
                 self.assertEqual(len(resolved), len(documented_route.LANES[lane]))
                 for step, block in resolved:
                     self.assertEqual(block.language, step.language)
                     self.assertTrue(block.text.strip(), f"{lane}/{step.slug} is empty")
 
     def test_bundle_files_are_the_documented_bytes(self) -> None:
-        cases = [(documented_route.DEFAULT_DOC, lane) for lane in documented_route.LANES]
-        cases.append((NATIVE_DOC, "rtx4090-native"))
-        for doc, lane in cases:
-            with self.subTest(document=doc.name, lane=lane), tempfile.TemporaryDirectory() as temporary:
+        doc = documented_route.DEFAULT_DOC
+        for lane in documented_route.LANES:
+            with self.subTest(lane=lane), tempfile.TemporaryDirectory() as temporary:
                 output = Path(temporary)
                 manifest = documented_route.bundle(doc, lane, output)
                 self.assertEqual(len(manifest["steps"]), len(documented_route.LANES[lane]))
@@ -205,13 +198,10 @@ class ExtractionTests(unittest.TestCase):
     def test_native_route_steps_carry_the_variables_they_use(self) -> None:
         """A reader pastes the blocks into one window; a later block may only use names an
         earlier one defined. Catches a doc edit that moves a definition below its first use."""
-        cases = [(NATIVE_DOC, "rtx4090-native"),
-                 (documented_route.DEFAULT_DOC, "rtx4090-native"),
-                 (documented_route.DEFAULT_DOC, "rtx3090-native")]
-        for doc, lane in cases:
-            with self.subTest(document=doc.name, lane=lane):
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            with self.subTest(lane=lane):
                 defined: set[str] = set()
-                for step, block in documented_route.lane_blocks(doc, lane):
+                for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                     used = set(re.findall(r"\$([A-Z][A-Za-z]+)\b", block.text))
                     assigned = set(re.findall(r"^\s*\$([A-Z][A-Za-z]+)\s*=", block.text, re.M))
                     missing = {name for name in used - assigned - defined if name not in {"Sid", "Rule", "Asset", "Name", "Path", "Applied", "Acl", "Admins", "Secret", "LASTEXITCODE", "HOME"}}
@@ -294,7 +284,7 @@ class ExtractionTests(unittest.TestCase):
         structured probe must plant the nonce with an OK-only reply and ask for a verbatim recall."""
         prompts = []
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(document_for(lane), lane):
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                 quoted = r'"([^"\n]*)"' if block.language == "sh" else r"'([^'\n]*)'"
                 prompts += [(f"{lane}/{step.slug}", text) for text in re.findall(quoted, block.text)]
         probe = ast.parse((ROOT / "scripts" / "hosts" / "omp-client-probe.py").read_text(encoding="utf-8"))
@@ -351,7 +341,7 @@ class ExtractionTests(unittest.TestCase):
 
         plants = greps = 0
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(document_for(lane), lane):
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                 for planted in re.findall(r"Remember the nonce ([A-Z0-9-]+)(?: for my next turn)?\.", block.text):
                     plants += 1
                     with self.subTest(lane=lane, step=step.slug, plant=planted):
@@ -366,6 +356,13 @@ class ExtractionTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # The runner checks its tunnel on a free ephemeral port, never on the documented 18089: a
+        # live macOS route on this machine binds that port between its steps (omp-ninfer#97).
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            self.port = probe.getsockname()[1]
+
     def write_bundle(self, root: Path, steps: list[tuple[str, ...]]) -> Path:
         bundle = root / "bundle"
         bundle.mkdir()
@@ -391,11 +388,11 @@ class RunnerTests(unittest.TestCase):
                        "    def do_GET(self):\n"
                        "        self.send_response(200); self.send_header(\"Content-Length\", \"2\"); self.end_headers(); self.wfile.write(b\"ok\")\n"
                        "    def log_message(self, *a): pass\n"
-                       "HTTPServer((\"127.0.0.1\", 18089), H).serve_forever()'\n")
+                       "HTTPServer((\"127.0.0.1\", {port}), H).serve_forever()'\n")
 
     def write_tunnel_listener(self, root: Path, body: str | None = None) -> None:
         listener = root / "clone" / "open-tunnel.sh"
-        listener.write_text(body if body is not None else self.HEALTH_LISTENER)
+        listener.write_text((body if body is not None else self.HEALTH_LISTENER).format(port=self.port))
         listener.chmod(0o755)
 
     def run_bundle(self, root: Path, bundle: Path, stdin: int | None = None,
@@ -403,7 +400,7 @@ class RunnerTests(unittest.TestCase):
         receipt = root / "receipt.json"
         completed = subprocess.run(["bash", str(RUNNER), str(bundle), str(root / "clone"), str(receipt)],
                                    stdin=stdin, capture_output=True, text=True, check=False,
-                                   timeout=timeout)
+                                   timeout=timeout, env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
         return completed.returncode, json.loads(receipt.read_text())
 
     def test_blocks_share_one_shell_and_the_first_failure_ends_the_run(self) -> None:
@@ -455,22 +452,12 @@ class RunnerTests(unittest.TestCase):
     def test_the_tunnel_block_is_stopped_for_real_before_fail_closed(self) -> None:
         """The tunnel block execs ssh inside the runner's wrapper; stopping only the wrapper
         leaves the listener up and the fail-closed check sees a live route (macOS run 8)."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [
                 ("tunnel", "./open-tunnel.sh\n"),
                 ("fail-closed", "python3 - <<'PY'\nimport socket, sys\ns = socket.socket(); s.settimeout(1)\n"
-                                "try: s.connect(('127.0.0.1', 18089))\nexcept OSError: sys.exit(0)\n"
+                                f"try: s.connect(('127.0.0.1', {self.port}))\nexcept OSError: sys.exit(0)\n"
                                 "print('outage request unexpectedly succeeded'); sys.exit(1)\nPY\n", "Fail closed"),
             ])
             self.write_tunnel_listener(root)
@@ -485,34 +472,22 @@ class RunnerTests(unittest.TestCase):
         block sees a live route. The run must refuse instead (measured 2026-09-12)."""
         import contextlib
         squatter = socket.socket()
-        squatter.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            squatter.bind(("127.0.0.1", 18089))
-        except OSError:
-            self.skipTest("local port 18089 is in use")
+        squatter.bind(("127.0.0.1", 0))
         squatter.listen(1)
+        self.port = squatter.getsockname()[1]
         with contextlib.closing(squatter), tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
             listener = root / "clone" / "open-tunnel.sh"
-            listener.write_text("#!/bin/sh\nexec sleep 600\n")
+            listener.write_text("#!/bin/sh\ntouch started\nexec sleep 600\n")
             listener.chmod(0o755)
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1, receipt)
             self.assertEqual(receipt["steps"][0]["status"], "failed")
+            self.assertFalse((root / "clone" / "started").exists(), "the tunnel started on a taken port")
 
     def test_a_failed_run_stops_the_tunnel_it_started(self) -> None:
         """The error path must release the forward, or the next run inherits it."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("break", "false\n")])
@@ -523,23 +498,13 @@ class RunnerTests(unittest.TestCase):
             after = socket.socket()
             after.settimeout(1)
             with self.assertRaises(OSError):
-                after.connect(("127.0.0.1", 18089))
+                after.connect(("127.0.0.1", self.port))
             after.close()
 
     def test_a_tunnel_that_reaches_nothing_fails_its_own_step(self) -> None:
         """A bound forward only proves ssh exists. When the far end serves nothing the tunnel
         step used to pass and the failure surfaced two blocks later as a tool-turn error
         (measured 2026-09-12, post-cut). The step owns that diagnosis."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("after", "echo never\n")])
@@ -547,10 +512,78 @@ class RunnerTests(unittest.TestCase):
             self.write_tunnel_listener(root, "#!/bin/sh\nexec python3 -c 'import socket, time\n"
                                              "s = socket.socket()\n"
                                              "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
-                                             "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
+                                             "s.bind((\"127.0.0.1\", {port})); s.listen(64); time.sleep(600)'\n")
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["failed", "skipped"])
+
+    def test_a_tunnel_checked_off_the_documented_port_says_so_in_its_receipt(self) -> None:
+        """Only tests move the runner's tunnel checks off 18089, the port the documented forward
+        binds; a receipt from such a run must not read as the documented route (omp-ninfer#97)."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
+            self.write_tunnel_listener(root)
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 0, receipt)
+            self.assertIn(str(self.port), receipt["steps"][0]["substitution"])
+
+    def test_a_malformed_tunnel_port_is_refused_before_any_step_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("mark", 'touch "$PWD/../ran"\n')])
+            for port in ("0", "65536", "080", "port"):
+                with self.subTest(port=port):
+                    completed = subprocess.run(
+                        ["bash", str(RUNNER), str(bundle), str(root / "clone"), str(root / "receipt.json")],
+                        capture_output=True, text=True, check=False, timeout=30,
+                        env=dict(os.environ, ROUTE_TUNNEL_PORT=port))
+                    self.assertEqual(completed.returncode, 2, completed.stderr)
+                    self.assertFalse((root / "ran").exists())
+                    self.assertFalse((root / "receipt.json").exists())
+
+    def test_missing_empty_or_nonexistent_arguments_are_refused_before_any_step_runs(self) -> None:
+        """`cd -- ""` succeeds, so an empty CLONE ran the route in the caller's directory, and a
+        missing or unwritable RECEIPT failed only after every step had run. The runner checks its
+        arguments first and exits 2 with nothing run or written."""
+        cases = {
+            "no arguments": (),
+            "no receipt": ("{bundle}", "{clone}"),
+            "an extra argument": ("{bundle}", "{clone}", "{receipt}", "{receipt}"),
+            "empty bundle": ("", "{clone}", "{receipt}"),
+            "bundle without a manifest": ("{clone}", "{clone}", "{receipt}"),
+            "empty clone": ("{bundle}", "", "{receipt}"),
+            "missing clone": ("{bundle}", "{root}/missing", "{receipt}"),
+            "empty receipt": ("{bundle}", "{clone}", ""),
+            "receipt in a missing directory": ("{bundle}", "{clone}", "{root}/missing/receipt.json"),
+            "receipt names a directory": ("{bundle}", "{clone}", "{clone}"),
+        }
+        for case, arguments in cases.items():
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                bundle = self.write_bundle(root, [("mark", 'touch "$PWD/ran"\n')])
+                paths = {"root": root, "bundle": bundle, "clone": root / "clone", "receipt": root / "receipt.json"}
+                completed = subprocess.run(
+                    ["bash", str(RUNNER), *(argument.format(**paths) for argument in arguments)],
+                    cwd=root, capture_output=True, text=True, check=False, timeout=30,
+                    env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
+                self.assertEqual(completed.returncode, 2, completed.stderr)
+                self.assertEqual(sorted(path.name for path in root.iterdir()), ["bundle", "clone"])
+                self.assertFalse((root / "clone" / "ran").exists())
+
+    def test_relative_arguments_name_paths_in_the_callers_directory(self) -> None:
+        """The runner changes into CLONE before it reads BUNDLE and writes RECEIPT; a relative
+        path still names what it named where the operator typed it."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.write_bundle(root, [("mark", 'touch "$PWD/ran"\n')])
+            completed = subprocess.run(
+                ["bash", str(RUNNER), "bundle", "clone", "receipt.json"],
+                cwd=root, capture_output=True, text=True, check=False, timeout=30,
+                env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual(json.loads((root / "receipt.json").read_text())["status"], "passed")
+            self.assertTrue((root / "clone" / "ran").exists())
 
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -573,7 +606,7 @@ class NativeInstallGateTests(unittest.TestCase):
         for lane in ("rtx3090", "rtx4090"):
             variant_id = f"{lane}-windows-native"
             blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
-                NATIVE_DOC, f"{lane}-native")}
+                documented_route.DEFAULT_DOC, f"{lane}-native")}
             releases = set(re.findall(r"releases[/\\](v[^/\\\s]+)[/\\]manifest\.json",
                                       "\n".join(blocks.values())))
             self.assertTrue(releases, "native route must read a release manifest")
@@ -600,6 +633,279 @@ class NativeInstallGateTests(unittest.TestCase):
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                     self.assertEqual(result.stdout.strip(), "REFUSED_BEFORE_DOWNLOAD")
 
+
+@unittest.skipIf(os.name == "nt", "executes a POSIX shell block and checks POSIX file modes")
+class HostPreparationTests(unittest.TestCase):
+    """A reader reruns the inference host's preparation block after any later failure. The rerun
+    must keep the bearer key: checkpoint MACs and every client's copy are bound to it
+    (omp-ninfer#100 item 6)."""
+
+    def prepare(self, home: Path) -> bytes:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
+        release = re.search(r"releases/(v[0-9.]+)/manifest\.json", block).group(1)
+        model = json.loads((ROOT / "releases" / release / "manifest.json").read_text(
+            encoding="utf-8"))["components"]["model"]
+        # The transfer and the 20 GB checks are not under test: curl fetches nothing, and the
+        # size and checksum probes report the pinned artifact.
+        stubs = home / "stubs"
+        stubs.mkdir(exist_ok=True)
+        for name, body in (("curl", "exit 0"), ("stat", f"echo {model['artifact_bytes']}"),
+                           ("sha256sum", "cat >/dev/null")):
+            (stubs / name).write_text(f"#!/bin/sh\n{body}\n")
+            (stubs / name).chmod(0o755)
+        subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, check=True, timeout=60,
+                       env={"HOME": str(home), "PATH": f"{stubs}{os.pathsep}{os.environ['PATH']}"})
+        return (home / ".config" / "omp-ninfer" / "api-key").read_bytes()
+
+    def test_a_rerun_keeps_the_existing_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            key = home / ".config" / "omp-ninfer" / "api-key"
+            first = self.prepare(home)
+            self.assertRegex(first.decode(), r"\A[0-9a-f]{64}\n\Z")
+            self.assertEqual(key.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(self.prepare(home), first)
+            key.write_bytes(b"")  # what an interrupted first run leaves behind
+            self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
+
+
+@unittest.skipIf(os.name == "nt", "executes POSIX shell blocks and checks POSIX file modes")
+class ClientConfigurationTests(unittest.TestCase):
+    """Section 7's macOS/Linux blocks and the troubleshooting guide's fail-closed recipe install OMP's
+    models.yml and config.yml. A reader reruns blocks after a later failure and may already run OMP
+    with their own providers and settings: a block leaves an identical file alone and refuses to
+    replace a different one (omp-ninfer#100 item 6)."""
+
+    @staticmethod
+    def blocks() -> dict[str, str]:
+        blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
+            documented_route.DEFAULT_DOC, "rtx5090-macos-client")}
+        blocks["troubleshooting"] = documented_route.extract(
+            ROOT / "docs" / "TROUBLESHOOTING.md", "OMP cannot resolve `ninfer-beta/q38-ninfer`").text
+        return blocks
+
+    @staticmethod
+    def install(home: Path, block: str) -> subprocess.CompletedProcess:
+        return subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, capture_output=True,
+                              text=True, timeout=30, env={"HOME": str(home), "PATH": os.environ["PATH"]})
+
+    def test_a_rerun_keeps_an_identical_file_and_a_different_one_is_refused(self) -> None:
+        blocks = self.blocks()
+        for slug, name, source in (("provider", "models.yml", "models.fragment.yml"),
+                                   ("fail-closed-config", "config.yml", "fail-closed.yml"),
+                                   ("troubleshooting", "config.yml", "fail-closed.yml")):
+            with self.subTest(slug=slug), tempfile.TemporaryDirectory() as temporary:
+                home = Path(temporary)
+                target = home / ".omp" / "agent" / name
+                target.parent.mkdir(parents=True)  # section 6 creates it
+                shipped = (ROOT / "examples" / "manual-tunnel" / source).read_bytes()
+                for attempt in ("fresh", "rerun"):
+                    completed = self.install(home, blocks[slug])
+                    self.assertEqual(completed.returncode, 0, f"{attempt}: {completed.stderr}")
+                    self.assertEqual(target.read_bytes(), shipped)
+                    self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+                own = b"# the reader's own OMP settings\n"
+                target.write_bytes(own)
+                refused = self.install(home, blocks[slug])
+                self.assertNotEqual(refused.returncode, 0)
+                self.assertIn(name, refused.stderr)
+                self.assertEqual(target.read_bytes(), own)
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
+class WindowsClientConfigurationTests(unittest.TestCase):
+    """The Windows provider blocks follow section 7's rule for OMP's models.yml and config.yml: a rerun
+    after a later failure passes a block that already installed them, and a file that differs is the
+    reader's own, refused by name before either file is written (omp-ninfer#100 item 6)."""
+
+    # The earlier block each provider block reads, and the models fragment it installs.
+    LANES = {"rtx5090-windows-client": ("", "windows-docker-local/models.fragment.yml"),
+             "rtx4090-native": ("variant", "windows-native/models.fragment.yml"),
+             "rtx3090-native": ("variant", "windows-native/models-rtx3090.fragment.yml")}
+    # One strict session, as the route runner keeps. The RTX 5090 block copies the key out of WSL2
+    # and restricts it with icacls (stubs here); WindowsIdentity exists only on Windows.
+    SESSION = r"""param($Block, $ApiKeyFile)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+class FixtureIdentity { [string]$Name = 'fixture'; static [object] GetCurrent() { return [FixtureIdentity]::new() } }
+$accelerators = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
+$accelerators::Add('Security.Principal.WindowsIdentity', [FixtureIdentity])
+try { Invoke-Expression ([IO.File]::ReadAllText($Block)) } catch { 'STOPPED ' + $_.Exception.Message; exit 1 }
+'NEXT_BLOCK_REACHED'
+"""
+
+    def configure(self, root: Path, lane: str) -> tuple[bool, str]:
+        steps = {step.slug: block.text
+                 for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)}
+        stubs = root / "bin"
+        stubs.mkdir(exist_ok=True)
+        for name, body in (("wsl.exe", "echo " + "0" * 64), ("icacls.exe", "exit 0")):
+            (stubs / name).write_text(f"#!/bin/sh\n{body}\n")
+            (stubs / name).chmod(0o755)
+        (root / "home").mkdir(exist_ok=True)
+        key = root / "api-key.txt"
+        key.write_text("1" * 64 + "\n")
+        block = root / "block.ps1"
+        block.write_text(steps.get(self.LANES[lane][0], "") + steps["provider"])
+        session = root / "session.ps1"
+        session.write_text(self.SESSION)
+        completed = subprocess.run(
+            [shutil.which("pwsh"), "-NoProfile", "-File", str(session), str(block), str(key)], cwd=ROOT,
+            capture_output=True, text=True, timeout=60,
+            env=dict(os.environ, HOME=str(root / "home"), PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+        return "NEXT_BLOCK_REACHED" in completed.stdout, completed.stdout + completed.stderr
+
+    def test_a_rerun_keeps_identical_files_and_a_different_one_is_refused(self) -> None:
+        own = b"# the reader's own OMP settings\n"
+        for lane, (_, fragment) in self.LANES.items():
+            with self.subTest(lane=lane), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                agent = root / "home" / ".omp" / "agent"
+                shipped = {agent / "models.yml": (ROOT / "examples" / fragment).read_bytes(),
+                           agent / "config.yml": (ROOT / "examples" / "manual-tunnel" / "fail-closed.yml").read_bytes()}
+                for attempt in ("fresh", "rerun"):
+                    reached, output = self.configure(root, lane)
+                    self.assertTrue(reached, f"{attempt}: {output}")
+                    self.assertEqual({path: path.read_bytes() for path in shipped}, shipped)
+                # The reader's own file, with the other one not yet installed.
+                for mine, other in ((agent / "models.yml", agent / "config.yml"),
+                                    (agent / "config.yml", agent / "models.yml")):
+                    mine.write_bytes(own)
+                    other.unlink()
+                    reached, output = self.configure(root, lane)
+                    self.assertFalse(reached, output)
+                    self.assertIn(mine.name, output)
+                    self.assertEqual(mine.read_bytes(), own)
+                    self.assertFalse(other.exists(), f"a refused block wrote {other.name}")
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
+class WindowsNativeCommandTests(unittest.TestCase):
+    """A pasted PowerShell block does not stop at a failed native command; without a $LASTEXITCODE
+    check its next line runs (omp-ninfer#100 item 7). Each block runs with its native commands
+    stubbed: every stub records its call, and the named ones fail."""
+
+    @staticmethod
+    def steps(lane: str) -> dict[str, str]:
+        return {step.slug: block.text
+                for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)}
+
+    def run_block(self, block: str, failing: set[str], prelude: str = "",
+                  stale_clone: bool = False) -> tuple[list[str], bool]:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            stubs = root / "bin"
+            stubs.mkdir()
+            calls = root / "calls.txt"
+            for name, effect in (("git", "mkdir -p omp-ninfer"), ("py", ""), ("wsl.exe", ""), ("omp", "")):
+                result = "exit 1" if name in failing else f"{effect}\nexit 0"
+                (stubs / name).write_text(f"#!/bin/sh\necho {name} >> '{calls}'\n{result}\n")
+                (stubs / name).chmod(0o755)
+            if stale_clone:
+                (root / "omp-ninfer").mkdir()
+            script = root / "block.ps1"
+            script.write_text("function Set-ExecutionPolicy {}\n"  # Windows-only policy; not under test.
+                              + prelude + block + "'NEXT_BLOCK_REACHED'\n")
+            completed = subprocess.run(
+                [shutil.which("pwsh"), "-NoProfile", "-File", str(script)], cwd=root, capture_output=True,
+                text=True, timeout=60, env=dict(os.environ, PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+            ran = calls.read_text().split() if calls.exists() else []
+            return ran, "NEXT_BLOCK_REACHED" in completed.stdout
+
+    def test_a_failed_clone_or_ready_gate_stops_the_route(self) -> None:
+        for lane in ("rtx5090-windows-client", "rtx4090-native", "rtx3090-native"):
+            block = self.steps(lane)["clone-and-verify"]
+            with self.subTest(lane=lane, failing="nothing"):
+                self.assertEqual(self.run_block(block, set()), (["git", "py"], True))
+            with self.subTest(lane=lane, failing="ready gate"):
+                self.assertEqual(self.run_block(block, {"py"}), (["git", "py"], False))
+            with self.subTest(lane=lane, failing="clone"):
+                # The likeliest failed clone: an earlier release's clone already holds the name.
+                self.assertEqual(self.run_block(block, {"git"}, stale_clone=True), (["git"], False))
+
+    def test_a_failed_runtime_stop_ends_the_outage_check_before_its_request(self) -> None:
+        block = self.steps("rtx5090-windows-client")["fail-closed"]
+        prelude = "$Launcher = Join-Path $PSScriptRoot 'bin/omp'\n"
+        # The stop works and the request fails, as an outage requires.
+        self.assertEqual(self.run_block(block, {"omp"}, prelude), (["wsl.exe", "omp"], True))
+        # The runtime may still be serving: no request may stand in for the outage.
+        self.assertEqual(self.run_block(block, {"wsl.exe", "omp"}, prelude), (["wsl.exe"], False))
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
+class WindowsHostScriptNativeCommandTests(unittest.TestCase):
+    """The Windows acceptance scripts check each native command's exit status (omp-ninfer#100
+    item 7). git and py are stubs that record their calls; the named git subcommands fail."""
+
+    CANDIDATE = "1" * 40
+    # The receipt's host facts exist only on Windows and are not under test.
+    RUNNER_HOST = r"""param($Runner, $Bundle, $WorkDir, $Receipt, $Candidate)
+function Get-CimInstance { [pscustomobject]@{ Caption = 'fixture' } }
+function Set-ExecutionPolicy {}
+class FixtureIdentity { static [object] GetCurrent() { return [FixtureIdentity]::new() } }
+class FixturePrincipal { FixturePrincipal([object]$Identity) {} [bool] IsInRole([object]$Role) { return $false } }
+$accelerators = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
+$accelerators::Add('Security.Principal.WindowsIdentity', [FixtureIdentity])
+$accelerators::Add('Security.Principal.WindowsPrincipal', [FixturePrincipal])
+& ([scriptblock]::Create([IO.File]::ReadAllText($Runner))) -Bundle $Bundle -WorkDir $WorkDir -Receipt $Receipt -CloneOverride $Candidate
+"""
+
+    def run_pwsh(self, root: Path, failing: set[str], arguments: list) -> tuple[list[str], str]:
+        stubs = root / "bin"
+        stubs.mkdir()
+        calls = root / "calls.txt"
+        effects = {"clone": "mkdir -p omp-ninfer", "rev-parse": f"echo {self.CANDIDATE}"}
+        cases = "".join(f"  {name}) {'exit 128' if name in failing else effects.get(name, ':')} ;;\n"
+                        for name in ("clone", "checkout", "rev-parse", "status"))
+        (stubs / "git").write_text(f"#!/bin/sh\n[ \"$1\" = -C ] && shift 2\n"
+                                   f"echo \"git $1\" >> '{calls}'\ncase \"$1\" in\n{cases}esac\n")
+        (stubs / "py").write_text(f"#!/bin/sh\necho py >> '{calls}'\n")
+        for stub in stubs.iterdir():
+            stub.chmod(0o755)
+        completed = subprocess.run(
+            [shutil.which("pwsh"), "-NoProfile", "-File", *map(str, arguments)], cwd=root, capture_output=True,
+            text=True, timeout=60, env=dict(os.environ, PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+        return (calls.read_text().splitlines() if calls.exists() else []), completed.stdout + completed.stderr
+
+    def substitute_clone(self, failing: set[str], stale_clone: bool = False) -> tuple[list[str], list[str]]:
+        clone = {step.slug: block.text for step, block in documented_route.lane_blocks(
+            documented_route.DEFAULT_DOC, "rtx5090-windows-client")}["clone-and-verify"]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / "bundle"
+            bundle.mkdir()
+            steps = []
+            for position, (slug, text) in enumerate((("clone-and-verify", clone), ("after", "$null = 1\n")), 1):
+                name = f"{position:02d}-{slug}.ps1"
+                (bundle / name).write_text(text, encoding="utf-8")
+                steps.append({"position": position, "slug": slug, "file": name, "heading": "H", "index": 0,
+                              "sha256": hashlib.sha256(text.encode()).hexdigest()})
+            (bundle / "manifest.json").write_text(json.dumps({
+                "lane": "rtx5090-windows-client", "document": "doc", "document_sha256": "0" * 64,
+                "steps": steps}))
+            work = root / "work"
+            (work / "omp-ninfer" if stale_clone else work).mkdir(parents=True)
+            host = root / "host.ps1"
+            host.write_text(self.RUNNER_HOST)
+            receipt = root / "receipt.json"
+            ran, output = self.run_pwsh(root, failing, [
+                host, ROOT / "scripts" / "hosts" / "run-documented-route.ps1", bundle, work, receipt, self.CANDIDATE])
+            self.assertTrue(receipt.exists(), output)
+            return [step["status"] for step in json.loads(receipt.read_text())["steps"]], ran
+
+    def test_a_failed_candidate_clone_or_checkout_fails_the_substituted_step(self) -> None:
+        """A failed clone or checkout left the runner in whatever directory existed: it verified
+        that commit as the candidate and recorded the step as substituted."""
+        self.assertEqual(self.substitute_clone(set()),
+                         (["substituted", "passed"], ["git clone", "git checkout", "py"]))
+        self.assertEqual(self.substitute_clone({"checkout"}),
+                         (["failed", "skipped"], ["git clone", "git checkout"]))
+        # An earlier attempt's clone already holds the name.
+        self.assertEqual(self.substitute_clone({"clone"}, stale_clone=True), (["failed", "skipped"], ["git clone"]))
 
 
 if __name__ == "__main__":

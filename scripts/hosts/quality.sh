@@ -5,9 +5,16 @@
 #
 # Usage: quality.sh <lane> <arm-label> <campaign-id> [base-url] [api-key-file] [model-id]
 set -euo pipefail
+usage="usage: quality.sh <lane> <arm-label> <campaign-id> [base-url] [api-key-file] [model-id]"
+(( $# >= 3 && $# <= 6 )) || { echo "$usage" >&2; exit 2; }
 lane="$1"
 label="$2"
 campaign_id="$3"
+[[ -n $lane && -n $campaign_id ]] || { echo "$usage" >&2; exit 2; }
+# The label names the run directory deleted and rewritten below, so it must be an arm label as the
+# arms manifest defines one: an empty label names the whole quality directory, and a label holding
+# a path can name any directory.
+[[ $label =~ ^[a-z0-9-]+$ ]] || { echo "arm label must use lowercase letters, digits, and hyphens" >&2; exit 2; }
 base_url="${4:-http://127.0.0.1:8080/v1}"
 api_key_file="${5:-/run/secrets/ninfer_api_key}"
 model_id="${6:-q38-ninfer}"
