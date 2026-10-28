@@ -12,9 +12,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "hosts" / "accept-windows-client.ps1"
+PWSH = shutil.which("pwsh")
 
 
-@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows client script")
+@unittest.skipUnless(PWSH, "PowerShell is needed to execute the Windows client script")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
 class WindowsClientNativeCommandTests(unittest.TestCase):
     CANDIDATE = "1" * 40
@@ -34,7 +35,7 @@ class WindowsClientNativeCommandTests(unittest.TestCase):
         workspace = root / "workspace"
         (workspace / "candidate").mkdir(parents=True)
         completed = subprocess.run(
-            [shutil.which("pwsh"), "-NoProfile", "-File", str(SCRIPT), "-Action", "Preflight",
+            [PWSH or "pwsh", "-NoProfile", "-File", str(SCRIPT), "-Action", "Preflight",
              "-Workspace", str(workspace), "-Release", "v0.14.0", "-Candidate", self.CANDIDATE,
              "-ControlRoot", str(root / "control"), "-ModelId", "q38-ninfer"],
             cwd=root, capture_output=True, text=True, timeout=60,
