@@ -2366,18 +2366,21 @@ evidence are already frozen.
 
 ### Canonical native protocol evidence
 
-`scripts/compose_native_qualification.py` consumes the runtime's actual
-`tools/smoke/agent_protocol.py` schema 2 product result, not an authored per-check map.
-The raw `ninfer_agent_protocol_smoke` payload has `contract: product`,
+A native lane's `releases/<version>/qualification/<lane>.json` is the
+`ninfer_windows_release_qualification` receipt that the runtime fork's canonical orchestrator
+(`tools/qualification/qualify_native.py`) stages from its own phase receipts. The release tree
+copies it unchanged; nothing in this repository composes one. The orchestrator consumes the
+runtime's actual `tools/smoke/agent_protocol.py` schema 2 product result, not an authored
+per-check map. The raw `ninfer_agent_protocol_smoke` payload has `contract: product`,
 `status_identity_verified: true`, `authenticated_session_identity: true`, reuse paths,
 Responses lifecycle results and Chat/Responses structured-output results. It has no legacy
 `identity`, `status` or `checks` fields.
 
 Both normal and reduced-budget runs retain their actual phase receipts in `protocol` and
-`protocol_under_pool_pressure`. Each wrapper keeps its real phase status, recorded file hash and
-nested raw `.protocol`; the normal wrapper also retains observed HTTP identity/runtime and GPU
-attestation. Composition checks the raw evidence file's decoded payload and exact byte hash
-against that phase record. It never manufactures a status/check count inside the canonical payload.
+`protocol_under_pool_pressure`. Each wrapper keeps its real phase status, the evidence file hash
+recorded when the phase ran and nested raw `.protocol`; the normal wrapper also retains observed
+HTTP identity/runtime and GPU attestation. Nothing manufactures a status/check count inside the
+canonical payload.
 
 Same-session reuse must select `private_endpoint`, `private_input_replay` or `private_long_anchor`.
 An isolated session must select `root` or `shared_stable_prefix`: that is a private-session
@@ -2393,6 +2396,15 @@ Native components from v0.7.0 must satisfy these protocol gates in `verify_relea
 Immutable older native receipts stay valid under their real older component tags, not by
 relabeling their legacy fields as new-runtime evidence. In `v0.13.1`, both rebased native lanes
 supply passed canonical schema 2 product payloads at full and reduced shared Host budgets.
+
+`verify_release.py` binds each lane receipt to its manifest row: source, server, configuration and
+model identities; package filename, SHA-256 and size; SPDX and support-asset hashes; and the
+dependency inventory and outer `SHA256SUMS` hashes, which receipts of v0.7.0 components always
+record. A qualified receipt must pass every deterministic gate it records, and an evidence section
+that records its own status must agree with its gate. v0.7.0 components record all eight gates:
+protocol, pressure protocol, long session, persistence, rollback, state security, golden
+equivalent and C1. Rollback is either `not_applicable` with zero directions for the first release
+of a lineage, or passed in both directions through a named predecessor.
 
 ### Native dependency SBOM
 
@@ -2511,7 +2523,10 @@ directory, that the package build receipt and the lane specification at the comm
 release and source, that the source archive's tar stream is byte-identical to `git archive` of
 the commit, and that neither the tag nor the release exists. `--publish` is founder-only: it
 pushes the component tag and creates one prerelease with the closed set; binding it into a
-product release stays `scripts/bind_native_variant.py`.
+product release stays `scripts/bind_native_variant.py`. The component tag must name the package
+filename's version and beta: `v0.7.0-qwen38-4090-beta.3` for
+`ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz`. The verifier also
+requires a native package's outer set to list the bound source archive.
 
 The historical cutter and `accept-rtx4090-route.{py,ps1}` filenames each remain the single
 implementation for both native lanes. Omit `--lane` / `-Lane` to select RTX 4090;
@@ -2611,9 +2626,12 @@ python3 scripts/bind_native_variant.py --release v0.9.1 --lane rtx3090 --add \
 python3 scripts/rebind_release.py --release v0.9.1 --draft
 ```
 
-`--add` creates the manifest, release compatibility and qualification-composition rows in
-canonical order only after the existing verifier accepts the real qualification receipt.
-Without it a missing row remains an error. The root authority and existing lanes are untouched.
+Every bind, a rebind of an existing lane as well as `--add`, runs the verifier's native-row checks
+against the lane receipt already in the release tree and the supplied `SHA256SUMS` before it
+writes anything; only then does it check that set into the release tree and write the manifest.
+`--add` also creates the release compatibility and qualification-composition rows in canonical
+order. Without it a missing row remains an error. The root authority and existing lanes are
+untouched.
 Commit the bindings, then run `rebind_release.py --release v0.9.1 --pin <receipt-commit> --stage lane`.
 At that cut update the existing routes' product pins to v0.9.1 and the current-release prose;
 do not change their component pins. Freeze the candidate only after those edits are committed.

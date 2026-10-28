@@ -3,23 +3,27 @@
 
 A native lane's release identity is entirely determined by two files the packager already
 produces - `SHA256SUMS` (the closed outer distribution set) and `package-build-receipt.json` -
-plus the component tag the assets are published under. Transcribing those into
-`releases/<version>/manifest.json` by hand is how a derived record drifts from the bytes it
-claims to describe, which is exactly the failure v0.5.1 had to correct.
+plus the component tag the assets are published under, which must name the native package
+filename's version and beta. Transcribing those into `releases/<version>/manifest.json` by hand
+is how a derived record drifts from the bytes it claims to describe, which is exactly the failure
+v0.5.1 had to correct.
 
-    python3 scripts/bind_native_variant.py --release v0.6.0 --lane rtx4090 \
-        --tag v0.6.0-qwen38-4090-native.1 \
+    python3 scripts/bind_native_variant.py --release v0.14.0 --lane rtx4090 \
+        --tag v0.7.0-qwen38-4090-beta.3 \
         --checksums /path/to/SHA256SUMS \
         --receipt /path/to/package-build-receipt.json
 
 The script never invents a value: every hash comes from the checksum set, every size and identity
-from the build receipt, and every URL from the tag plus the asset's own filename. It refuses a
-distribution set that does not carry each asset the manifest binds, and it leaves the release's
-hash chain to `rebind_release.py`, which must run afterwards.
+from the build receipt, and every URL from the tag plus the asset's own filename. Copy the lane's
+qualification receipt to `releases/<version>/qualification/<lane>.json` first: for a rebind as for
+a new lane, the verifier must accept the derived row, that receipt and the supplied checksum set
+before anything is written. Only then does the script check the set into the release tree and
+write the manifest. It leaves the release's hash chain to `rebind_release.py`, which must run
+afterwards.
 For a new lane, pass --add, --maximum-context-tokens and --qualification-commit after
-committing its real qualification receipt. The verifier must accept that receipt before
-the manifest row and its release-local compatibility/qualification mirrors are added.
-Without --add, a missing row remains an error. Root compatibility is never promoted here.
+committing its real qualification receipt; the row's release-local compatibility/qualification
+mirrors are added with it. Without --add, a missing row remains an error. Root compatibility is
+never promoted here.
 """
 
 from __future__ import annotations
@@ -29,6 +33,7 @@ import hashlib
 import json
 import re
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +43,7 @@ from render_compatibility import RUNTIME_VARIANT_IDS
 from verify_release import (
     effective_native_model,
     native_dependency_sbom_filename,
+    native_package_component_tag,
     validate_dependency_sbom,
     validate_ninfer_variants,
 )
@@ -83,13 +89,17 @@ def require(entries: dict[str, str], name: str) -> str:
 def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
          receipt_path: Path, release: str, *, maximum_context_tokens: int | None = None,
          qualification_commit: str | None = None, add: bool = False) -> dict[str, Any]:
+    """Derive the lane's row, have the verifier accept it, and only then put it in `manifest`.
+
+    Nothing is written: the caller checks the set into the release tree after this returns.
+    """
     variant_id = LANE_VARIANTS.get(lane)
     if variant_id is None:
         raise BindError(f"unknown native lane: {lane}")
     variants = manifest["components"].get("ninfer_variants", [])
-    variant = next((item for item in variants if item.get("id") == variant_id), None)
-    new_variant = variant is None
-    if variant is None:
+    index = next((position for position, item in enumerate(variants)
+                  if item.get("id") == variant_id), None)
+    if index is None:
         if not add:
             raise BindError(f"manifest has no {variant_id} variant; use --add to admit a new lane")
         if maximum_context_tokens is None or maximum_context_tokens <= 0:
@@ -101,6 +111,8 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
             "repository": "https://github.com/alphastorm/ninfer",
             "maximum_context_tokens": maximum_context_tokens,
         }
+    else:
+        variant = deepcopy(variants[index])
 
     entries = parse_checksums(checksums)
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -113,6 +125,11 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         raise BindError("build receipt model must match the effective native model")
     package = receipt["package"]
     package_name = package["filename"]
+    named_tag = native_package_component_tag(package_name)
+    if named_tag is None:
+        raise BindError(f"{package_name} is not a native package filename")
+    if tag != named_tag:
+        raise BindError(f"component tag {tag} must name the package version and beta ({named_tag})")
     if require(entries, package_name) != package["sha256"]:
         raise BindError("package hash disagrees between the build receipt and the checksum set")
     if require(entries, receipt_path.name) != hashlib.sha256(
@@ -140,11 +157,6 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         variant_id, dependency_errors)
     if dependency_errors:
         raise BindError("; ".join(dependency_errors))
-    # The manifest binds the closed outer set - the SHA256SUMS that lists every published asset,
-    # not the per-package inner listing - and the verifier requires a byte-identical copy of it
-    # in the release tree.
-    checked_in = ROOT / "releases" / release / "qualification" / f"{variant_id}.SHA256SUMS"
-    checked_in.write_bytes(checksums.read_bytes())
 
     variant.update({
         "release_tag": tag,
@@ -175,21 +187,26 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     if not summary_path.is_file():
         raise BindError(f"missing lane qualification receipt: {qualification['summary']}")
     qualification["sha256"] = hashlib.sha256(summary_path.read_bytes()).hexdigest()
-    if new_variant:
+    if index is None:
         qualification["public_url"] = (
             f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
             f"{qualification_commit}/{qualification['summary']}"
         )
-        errors: list[str] = []
-        validate_ninfer_variants(
-            ROOT, release, [variant], {"runtime_variants": [variant]},
-            native_model.get("artifact_sha256"), errors,
-        )
-        if errors:
-            raise BindError("; ".join(errors))
+    errors: list[str] = []
+    validate_ninfer_variants(
+        ROOT, release, [variant], {"runtime_variants": [variant]},
+        native_model.get("artifact_sha256"), errors,
+        allow_pending=manifest.get("status") == "draft",
+        incoming_checksums={variant_id: checksums},
+    )
+    if errors:
+        raise BindError("; ".join(errors))
+    if index is None:
         variants.append(variant)
         variants.sort(key=lambda item: RUNTIME_VARIANT_IDS.index(item["id"]))
         manifest["components"]["ninfer_variants"] = variants
+    else:
+        variants[index] = variant
     return variant
 
 
@@ -266,6 +283,11 @@ def main() -> int:
                    qualification_commit=args.qualification_commit, add=args.add)
     if is_new:
         add_lane_rows(args.release, variant)
+    # Every check has passed. The manifest binds the closed outer set - the SHA256SUMS that lists
+    # every published asset, not the per-package inner listing - and the verifier requires a
+    # byte-identical copy of it in the release tree.
+    checked_in = ROOT / "releases" / args.release / "qualification" / f"{variant['id']}.SHA256SUMS"
+    checked_in.write_bytes(args.checksums.read_bytes())
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"bound {variant['id']} in releases/{args.release}/manifest.json")
     print(f"  package {variant['package_name']} {variant['package_bytes']} bytes")
