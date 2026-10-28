@@ -154,6 +154,8 @@ class MockHandler(http.server.BaseHTTPRequestHandler):
         sleeps = plan.get("sleeps", [.012, .008, .008, .008])
         reasoning, text = "", ""
         for delta_index, delay in enumerate(sleeps):
+            if before_delta := plan.get("before_delta"):
+                before_delta(delta_index)
             time.sleep(delay)
             if call["epoch"] != self.server.epoch:
                 self.connection.shutdown(socket.SHUT_RDWR)
@@ -243,37 +245,45 @@ class ConcurrencyProbeTests(unittest.TestCase):
         argv = [sys.executable, "-c", source]
         return subprocess.list2cmdline(argv) if sys.platform == "win32" else shlex.join(argv)
 
-    def baseline(self, server, command=None):
-        # Calibrate with a real no-retry request in this process and, when used,
-        # the same shell/subprocess as the sampler. TCP buffering and process
-        # startup costs belong to the host, not to the probe's metric contract.
-        code, receipt = self.run_probe(server, "--scenario", "solo")
-        self.assertEqual(code, 0)
-        request = receipt["scenarios"][0]["requests"][0]
-        cost = request["total_s"]
-        if command:
-            started = time.monotonic()
-            subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
-            cost = max(cost, time.monotonic() - started)
-        return request, cost
+    @contextlib.contextmanager
+    def observe_progress(self, callback):
+        stream_request = PROBE.stream_request
 
-    def assert_stream_timing(self, request, call, baseline):
+        def observed_request(args, key, spec, progress, barrier):
+            update = progress.update
+
+            def observed_update(**changes):
+                update(**changes)
+                callback(spec["label"], progress)
+
+            with mock.patch.object(progress, "update", side_effect=observed_update):
+                return stream_request(args, key, spec, progress, barrier)
+
+        with mock.patch.object(PROBE, "stream_request", side_effect=observed_request):
+            yield
+
+    def assert_stream_timing(self, request, call):
         sent, received = call["deltas"], [d["monotonic_s"] for d in request["output_deltas"]]
         self.assertEqual(len(received), len(sent))
         # A response.created timestamp cannot pass the lower bound: the server
         # records each real delta immediately before writing it to the socket.
         for before_write, after_read in zip(sent, received):
             self.assertGreaterEqual(after_read, before_write)
-            self.assertLessEqual(after_read - before_write, 4 * baseline["ttft_s"])
+        self.assertEqual(received, sorted(received))
+        self.assertEqual(request["first_output_monotonic_s"], received[0])
+        self.assertEqual(request["last_output_monotonic_s"], received[-1])
         self.assertAlmostEqual(request["ttft_s"], received[0] - request["submitted_monotonic_s"])
+        self.assertAlmostEqual(request["total_s"], request["completed_monotonic_s"] - request["submitted_monotonic_s"])
         self.assertAlmostEqual(request["decode_tok_s"], request["output_tokens"] / (received[-1] - received[0]))
 
     def test_metrics_count_reasoning_and_measure_concurrent_makespan(self):
+        both_received = threading.Barrier(2)
+
         def plan(payload, _):
-            return {"sleeps": [.06, .02, .09, .03] if payload["input"] == PROBE.DECODE_PROMPT else [.10, .10, .12, .08]}
-        server = self.server()
-        baseline, _ = self.baseline(server)
-        server.plan = plan
+            return {"sleeps": [.06, .02, .09, .03] if payload["input"] == PROBE.DECODE_PROMPT else [.10, .10, .12, .08],
+                    "before_delta": lambda index: both_received.wait(5) if index == 0 else None}
+
+        server = self.server(plan)
         code, receipt = self.run_probe(server, "--scenario", "decode_pair")
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
@@ -282,8 +292,8 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertLess(max(r["submitted_monotonic_s"] for r in (a, b)),
                         min(r["first_output_monotonic_s"] for r in (a, b)))
         calls = {call["payload"]["input"]: call for call in server.calls[-2:]}
-        self.assert_stream_timing(a, calls[PROBE.DECODE_PROMPT], baseline)
-        self.assert_stream_timing(b, calls[PROBE.SECOND_DECODE_PROMPT], baseline)
+        self.assert_stream_timing(a, calls[PROBE.DECODE_PROMPT])
+        self.assert_stream_timing(b, calls[PROBE.SECOND_DECODE_PROMPT])
         stamps = [d["monotonic_s"] for d in a["output_deltas"]]
         gaps = [(end - start) * 1000 for start, end in zip(stamps, stamps[1:])]
         low, middle, high = sorted(gaps)
@@ -308,12 +318,20 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertEqual(receipt["identity"]["server_before"]["body"]["identity"]["runtime_git_commit"], "mock-runtime")
 
     def test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft(self):
-        server = self.server()
-        baseline, cost = self.baseline(server)
-        server.plan = lambda payload, _: {
-            "sleeps": [cost, cost, 6 * cost, cost]
-            if payload["input"] == PROBE.DECODE_PROMPT else [2 * cost, cost / 4, cost / 4]}
-        code, receipt = self.run_probe(server, "--scenario", "prefill_during_decode", "--stall-after", "2")
+        prefill_output_read = threading.Event()
+
+        def plan(payload, _):
+            return {"sleeps": [.01] * 4,
+                    "before_delta": lambda index: prefill_output_read.wait(5) if index == 2 else None
+                    } if payload["input"] == PROBE.DECODE_PROMPT else {"sleeps": [.02, .01, .01]}
+
+        def progress(label, state):
+            if label == "prefill-B" and state.deltas:
+                prefill_output_read.set()
+
+        server = self.server(plan)
+        with self.observe_progress(progress):
+            code, receipt = self.run_probe(server, "--scenario", "prefill_during_decode", "--stall-after", "2")
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         a, b = result["requests"]
@@ -324,35 +342,88 @@ class ConcurrencyProbeTests(unittest.TestCase):
         gap = (a["output_deltas"][2]["monotonic_s"] - a["output_deltas"][1]["monotonic_s"]) * 1000
         self.assertAlmostEqual(gaps[0]["gap_ms"], gap)
         self.assertAlmostEqual(gaps[0]["overlap_ms"], b["ttft_s"] * 1000)
-        self.assertAlmostEqual(result["interference"]["a_itl_max_ms"], gap)
+        self.assertAlmostEqual(result["interference"]["a_itl_max_ms"], max(a["itl_gaps_ms"]))
         self.assertEqual(result["interference"]["b_ttft_s"], b["ttft_s"])
-        self.assert_stream_timing(b, server.calls[-1], baseline)
+        self.assert_stream_timing(b, server.calls[-1])
 
     def test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples(self):
-        server = self.server(lambda *_: {"sleeps": [.03, .01, .01]})
+        decode_finished, sampled_twice = threading.Event(), threading.Event()
         vram = self.python_command("print(1234)")
-        baseline, cost = self.baseline(server, vram)
-        server.plan = lambda payload, _: {
-            "sleeps": [.03, .01, .01] if isinstance(payload["input"], str) else [1 + 4 * cost, .01, .01]}
-        code, receipt = self.run_probe(server, "--scenario", "decode_during_prefill", "--vram-cmd", vram)
+        run_command = PROBE.run_command
+        sample_count = 0
+
+        def before_prefill_delta(index):
+            if index == 0:
+                decode_finished.wait(5)
+                sampled_twice.wait(5)
+
+        def sample(command, timeout):
+            nonlocal sample_count
+            result = run_command(command, timeout)
+            sample_count += 1
+            if sample_count == 2:
+                sampled_twice.set()
+            return result
+
+        def progress(label, state):
+            if label == "decode-A" and state.finished:
+                decode_finished.set()
+
+        server = self.server(lambda payload, _: {
+            "sleeps": [.03, .01, .01],
+            "before_delta": None if isinstance(payload["input"], str) else before_prefill_delta})
+        with self.observe_progress(progress), mock.patch.object(PROBE, "run_command", side_effect=sample):
+            code, receipt = self.run_probe(server, "--scenario", "decode_during_prefill", "--vram-cmd", vram)
         self.assertEqual(code, 0)
         result = receipt["scenarios"][0]
         b, a = result["requests"]
         offset = a["submitted_monotonic_s"] - b["submitted_monotonic_s"]
-        self.assertLessEqual(abs(offset - 1), 4 * cost)  # Intentional one-second delay.
+        self.assertGreaterEqual(offset, 1)  # Intentional delay, with no bound on scheduler oversleep.
         self.assertLess(a["completed_monotonic_s"], b["first_output_monotonic_s"])
         self.assertEqual(result["interference"]["a_ttft_s"], a["ttft_s"])
-        self.assertLessEqual(a["ttft_s"], 4 * max(baseline["ttft_s"], cost))
         self.assertEqual(result["interference"]["a_total_s"], a["total_s"])
-        self.assertLessEqual(a["total_s"], 4 * cost)
-        self.assert_stream_timing(a, server.calls[-1], baseline)
+        self.assert_stream_timing(a, server.calls[-1])
         self.assertEqual(result["vram"]["peak_mib"], 1234)
         samples = result["vram"]["samples"]
         self.assertGreaterEqual(len(samples), 2)
-        interval = samples[1]["monotonic_s"] - samples[0]["monotonic_s"]
-        # Windows waits can wake just before their requested deadline. Bound
-        # both directions by the measured host cost, not an exact clock floor.
-        self.assertLessEqual(abs(interval - 1), cost)
+        self.assertTrue(all(s["used_mib"] == 1234 for s in samples))
+        stamps = [s["monotonic_s"] for s in samples]
+        self.assertEqual(stamps, sorted(stamps))
+
+    def test_prefill_decode_gate_sleeps_only_until_the_submit_offset(self):
+        args = PROBE.parse_args(["--api-key-file", str(self.key), "--receipt", str(self.receipt)])
+        probe = PROBE.Probe(args, KEY, {"scenarios": []})
+        b = {"first_output_monotonic_s": 12}
+        a = {"ttft_s": .1, "total_s": .2}
+        with mock.patch.object(probe, "batch", return_value=[b, a]) as batch:
+            probe.scenario("decode_during_prefill", 0)
+        gate_factory = batch.call_args.args[0][1]["gate_factory"]
+        for submitted, current, expected in ((10, 10.25, .75), (10, 11.25, 0), (None, 12, None)):
+            with self.subTest(submitted=submitted, current=current):
+                state = mock.Mock()
+                state.wait_submitted.return_value = submitted
+                with (mock.patch.object(PROBE, "now", return_value=current),
+                      mock.patch.object(PROBE.time, "sleep") as sleep):
+                    self.assertEqual(gate_factory([state])(), submitted is not None)
+                if expected is None:
+                    sleep.assert_not_called()
+                else:
+                    sleep.assert_called_once_with(expected)
+
+    def test_vram_sampler_waits_only_the_remainder_of_each_second(self):
+        for command_time, expected_wait in ((.25, .75), (1.5, 0)):
+            with self.subTest(command_time=command_time):
+                sampler = PROBE.VramSampler("mock-vram")
+                sampler.stop = mock.Mock()
+                sampler.stop.is_set.side_effect = [False, True]
+                result = subprocess.CompletedProcess("mock-vram", 0, "1234\n", "")
+                with (mock.patch.object(PROBE, "now", side_effect=[10, 10 + command_time]),
+                      mock.patch.object(PROBE, "run_command", return_value=result) as command):
+                    sampler.sample()
+                command.assert_called_once_with("mock-vram", 10)
+                sampler.stop.wait.assert_called_once_with(expected_wait)
+                self.assertEqual(sampler.samples[0]["monotonic_s"], 10)
+                self.assertEqual(sampler.samples[0]["used_mib"], 1234)
 
     def test_session_turns_preserve_both_lineages_and_join_only_run_window_logs(self):
         server = self.server(lambda payload, _: {"status": "incomplete" if not payload.get("previous_response_id") else "completed"})
@@ -435,9 +506,7 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertTrue(receipt["scenarios"][0]["requests"][1]["ok"])
 
     def test_one_pre_stream_reset_retry_keeps_submit_latency(self):
-        server = self.server()
-        baseline, _ = self.baseline(server)
-        server.plan = lambda _, index: {"reset": True} if index == 2 else {}
+        server = self.server(lambda _, index: {"reset": True} if index == 1 else {})
         with mock.patch.object(PROBE.time, "sleep", wraps=time.sleep) as sleep:
             code, receipt = self.run_probe(server, "--scenario", "solo")
         self.assertEqual(code, 0)
@@ -448,11 +517,11 @@ class ConcurrencyProbeTests(unittest.TestCase):
         backoff = retried["submitted_monotonic_s"] - first["completed_monotonic_s"]
         self.assertGreaterEqual(backoff, 2)  # Scheduler oversleep is not a probe contract.
         self.assertGreaterEqual(request["ttft_s"], backoff)
-        self.assertLessEqual(request["ttft_s"] - backoff, 4 * baseline["ttft_s"])
-        self.assertLessEqual(request["total_s"] - backoff, 4 * baseline["total_s"])
-        self.assert_stream_timing(request, server.calls[-1], baseline)
-        self.assertGreaterEqual(request["decode_tok_s"], baseline["decode_tok_s"] / 4)
-        self.assertLessEqual(request["decode_tok_s"], 4 * baseline["decode_tok_s"])
+        self.assertLessEqual(request["submitted_monotonic_s"], first["submitted_monotonic_s"])
+        self.assertIn("error", first)
+        self.assertEqual(retried["http_status"], 200)
+        self.assertGreaterEqual(request["total_s"], request["ttft_s"])
+        self.assert_stream_timing(request, server.calls[-1])
 
     def test_total_timeout_bounds_a_continuously_streaming_request(self):
         server = self.server(lambda *_: {"sleeps": [.02] * 100})
@@ -461,7 +530,43 @@ class ConcurrencyProbeTests(unittest.TestCase):
         request = receipt["scenarios"][0]["requests"][0]
         self.assertEqual(request["finish_status"], "timeout")
         self.assertGreaterEqual(request["total_s"], .10)
-        self.assertLess(request["total_s"], .30)
+        self.assertIsNone(request["output_tokens"])
+        self.assertIsNone(request["decode_tok_s"])
+
+    def test_total_deadline_timer_closes_a_continuously_streaming_socket(self):
+        args = PROBE.parse_args(["--api-key-file", str(self.key), "--receipt", str(self.receipt),
+                                 "--timeout", ".12"])
+        probe = PROBE.Probe(args, KEY, {"scenarios": []})
+        spec = probe.spec("deadline", PROBE.DECODE_PROMPT, 256, store=False)
+        clock = 10
+        response = mock.Mock(status=200)
+        response.getheader.return_value = "text/event-stream"
+        connection = mock.Mock()
+        connection.getresponse.return_value = response
+
+        def continuous_events(_):
+            nonlocal clock
+            for step in range(1, 7):
+                clock = 10 + step * .02
+                if step == 6:
+                    timer.call_args.args[1]()
+                    return
+                yield "response.output_text.delta", {"delta": TEXT}, clock
+
+        with (mock.patch.object(PROBE, "now", side_effect=lambda: clock),
+              mock.patch.object(PROBE.http.client, "HTTPConnection", return_value=connection),
+              mock.patch.object(PROBE.threading, "Timer") as timer,
+              mock.patch.object(PROBE, "sse_events", continuous_events)):
+            request = PROBE.stream_request(args, KEY, spec, PROBE.Progress(), threading.Barrier(1))
+        self.assertAlmostEqual(timer.call_args.args[0], .12)
+        timer.return_value.start.assert_called_once_with()
+        timer.return_value.cancel.assert_called_once_with()
+        connection.sock.shutdown.assert_called_once_with(socket.SHUT_RDWR)
+        connection.close.assert_called_once_with()
+        self.assertFalse(request["ok"])
+        self.assertEqual(request["finish_status"], "timeout")
+        self.assertEqual(len(request["output_deltas"]), 5)
+        self.assertAlmostEqual(request["total_s"], .12)
         self.assertIsNone(request["output_tokens"])
         self.assertIsNone(request["decode_tok_s"])
 
@@ -473,6 +578,71 @@ class ConcurrencyProbeTests(unittest.TestCase):
         self.assertEqual(record["http_status"], 200)
         self.assertEqual(record["finish_status"], "failed")
         self.assertEqual(record["error"]["code"], "server_error")
+
+
+class SchedulerContentionTests(unittest.TestCase):
+    def run_with_scheduler_delays(self, method, *, stall_reads=False):
+        # Inject a known schedule instead of hoping a busy host hits the race:
+        # waits oversleep, the sampler wakes late, and a retried reader is stalled.
+        real_sleep = time.sleep
+        sampler_init = PROBE.VramSampler.__init__
+        sse_events = PROBE.sse_events
+        retried = threading.Event()
+        injected = set()
+
+        def oversleep(delay):
+            real_sleep(delay)
+            if delay >= .5:
+                real_sleep(.5)
+                injected.add("sleep")
+            if delay == 2:
+                retried.set()
+
+        def delayed_sampler_init(sampler, command):
+            sampler_init(sampler, command)
+            wait = sampler.stop.wait
+
+            def delayed_wait(timeout):
+                injected.add("sampler")
+                return wait(timeout + .5)
+
+            sampler.stop.wait = delayed_wait
+
+        def delayed_events(response):
+            if stall_reads or retried.is_set():
+                real_sleep(.5)
+                injected.add("reader")
+            yield from sse_events(response)
+
+        result = unittest.TestResult()
+        with (mock.patch.object(PROBE.time, "sleep", side_effect=oversleep),
+              mock.patch.object(PROBE.VramSampler, "__init__", delayed_sampler_init),
+              mock.patch.object(PROBE, "sse_events", delayed_events)):
+            ConcurrencyProbeTests(method).run(result)
+        self.assertEqual(result.testsRun, 1)
+        self.assertTrue(result.wasSuccessful(), "\n".join(
+            detail for _, detail in result.failures + result.errors))
+        return injected
+
+    def test_prefill_timing_contracts_survive_scheduler_oversleep(self):
+        injected = self.run_with_scheduler_delays(
+            "test_short_decode_is_submitted_one_second_into_prefill_with_vram_samples")
+        self.assertEqual(injected, {"sleep", "sampler"})
+
+    def test_retry_timing_contracts_survive_scheduler_oversleep(self):
+        injected = self.run_with_scheduler_delays(
+            "test_one_pre_stream_reset_retry_keeps_submit_latency")
+        self.assertEqual(injected, {"sleep", "reader"})
+
+    def test_pair_metrics_survive_a_stalled_stream_reader(self):
+        injected = self.run_with_scheduler_delays(
+            "test_metrics_count_reasoning_and_measure_concurrent_makespan", stall_reads=True)
+        self.assertEqual(injected, {"reader"})
+
+    def test_prefill_overlap_survives_a_stalled_stream_reader(self):
+        injected = self.run_with_scheduler_delays(
+            "test_prefill_overlap_reports_the_decode_gap_not_created_event_ttft", stall_reads=True)
+        self.assertEqual(injected, {"reader"})
 
 
 if __name__ == "__main__":
