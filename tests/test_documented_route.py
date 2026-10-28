@@ -21,16 +21,10 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import documented_route  # noqa: E402
 
 RUNNER = ROOT / "scripts" / "hosts" / "run-documented-route.sh"
-NATIVE_DOC = ROOT / "tests" / "fixtures" / "native-quickstart-5861712f.md"
-
-
-def document_for(lane: str) -> Path:
-    return NATIVE_DOC if lane.endswith("-native") else documented_route.DEFAULT_DOC
 
 
 def control_blocks() -> list[documented_route.Block]:
-    return [block for doc in (documented_route.DEFAULT_DOC, NATIVE_DOC)
-            for block in documented_route.parse_blocks(doc.read_text(encoding="utf-8"))]
+    return documented_route.parse_blocks(documented_route.DEFAULT_DOC.read_text(encoding="utf-8"))
 
 
 class ReleaseProseTests(unittest.TestCase):
@@ -178,17 +172,16 @@ class ExtractionTests(unittest.TestCase):
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
             with self.subTest(lane=lane):
-                resolved = documented_route.lane_blocks(document_for(lane), lane)
+                resolved = documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
                 self.assertEqual(len(resolved), len(documented_route.LANES[lane]))
                 for step, block in resolved:
                     self.assertEqual(block.language, step.language)
                     self.assertTrue(block.text.strip(), f"{lane}/{step.slug} is empty")
 
     def test_bundle_files_are_the_documented_bytes(self) -> None:
-        cases = [(documented_route.DEFAULT_DOC, lane) for lane in documented_route.LANES]
-        cases.append((NATIVE_DOC, "rtx4090-native"))
-        for doc, lane in cases:
-            with self.subTest(document=doc.name, lane=lane), tempfile.TemporaryDirectory() as temporary:
+        doc = documented_route.DEFAULT_DOC
+        for lane in documented_route.LANES:
+            with self.subTest(lane=lane), tempfile.TemporaryDirectory() as temporary:
                 output = Path(temporary)
                 manifest = documented_route.bundle(doc, lane, output)
                 self.assertEqual(len(manifest["steps"]), len(documented_route.LANES[lane]))
@@ -205,13 +198,10 @@ class ExtractionTests(unittest.TestCase):
     def test_native_route_steps_carry_the_variables_they_use(self) -> None:
         """A reader pastes the blocks into one window; a later block may only use names an
         earlier one defined. Catches a doc edit that moves a definition below its first use."""
-        cases = [(NATIVE_DOC, "rtx4090-native"),
-                 (documented_route.DEFAULT_DOC, "rtx4090-native"),
-                 (documented_route.DEFAULT_DOC, "rtx3090-native")]
-        for doc, lane in cases:
-            with self.subTest(document=doc.name, lane=lane):
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            with self.subTest(lane=lane):
                 defined: set[str] = set()
-                for step, block in documented_route.lane_blocks(doc, lane):
+                for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                     used = set(re.findall(r"\$([A-Z][A-Za-z]+)\b", block.text))
                     assigned = set(re.findall(r"^\s*\$([A-Z][A-Za-z]+)\s*=", block.text, re.M))
                     missing = {name for name in used - assigned - defined if name not in {"Sid", "Rule", "Asset", "Name", "Path", "Applied", "Acl", "Admins", "Secret", "LASTEXITCODE", "HOME"}}
@@ -294,7 +284,7 @@ class ExtractionTests(unittest.TestCase):
         structured probe must plant the nonce with an OK-only reply and ask for a verbatim recall."""
         prompts = []
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(document_for(lane), lane):
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                 quoted = r'"([^"\n]*)"' if block.language == "sh" else r"'([^'\n]*)'"
                 prompts += [(f"{lane}/{step.slug}", text) for text in re.findall(quoted, block.text)]
         probe = ast.parse((ROOT / "scripts" / "hosts" / "omp-client-probe.py").read_text(encoding="utf-8"))
@@ -351,7 +341,7 @@ class ExtractionTests(unittest.TestCase):
 
         plants = greps = 0
         for lane in documented_route.LANES:
-            for step, block in documented_route.lane_blocks(document_for(lane), lane):
+            for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane):
                 for planted in re.findall(r"Remember the nonce ([A-Z0-9-]+)(?: for my next turn)?\.", block.text):
                     plants += 1
                     with self.subTest(lane=lane, step=step.slug, plant=planted):
@@ -573,7 +563,7 @@ class NativeInstallGateTests(unittest.TestCase):
         for lane in ("rtx3090", "rtx4090"):
             variant_id = f"{lane}-windows-native"
             blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
-                NATIVE_DOC, f"{lane}-native")}
+                documented_route.DEFAULT_DOC, f"{lane}-native")}
             releases = set(re.findall(r"releases[/\\](v[^/\\\s]+)[/\\]manifest\.json",
                                       "\n".join(blocks.values())))
             self.assertTrue(releases, "native route must read a release manifest")
