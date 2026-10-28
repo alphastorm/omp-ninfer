@@ -11,8 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Prepare the v0.14.0 QUICKSTART for route acceptance: retarget every executable product tag and
   manifest path, bind the beta.3 lane identities and 350 W RTX 3090 stop-before-upgrade policy,
-  and retain the unchanged v3 model/store blocks. Fresh candidate-bound acceptance is pending;
-  published front-door install links stay on the immutable v0.13.1 guide.
+  and retain the unchanged v3 model/store blocks. Fresh candidate-bound acceptance passed;
+  the guide stays prepared and published front-door links stay on the immutable v0.13.1 guide.
+- Compose fresh acceptance on frozen candidate `c81a8e7e`: all five routes/31 exact executable
+  blocks, three stock OMP 18.12.6 clients and both first-lineage beta.3 native public installs
+  passed. Independent restoration passed with a 421.229 s RTX 5090 hold and 392.504/393.945 s
+  RTX 4090/3090 driver windows. Canonical native promotions were fresh; later public-URL
+  checks returned `already_installed`, not upgrade/rollback proof. Product publication is separate.
+- Disclose the RTX 5090 initial fail-closed attempt: a same-Mac unit-suite run took the real
+  tunnel port `127.0.0.1:18089` mid-window; the incumbent was restored. One corrected attempt
+  on unchanged C passed with exclusive test/route sequencing
+  ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)). The driver checked `corrections.json`
+  only at summarize; after recording it, summarize alone was rerun on unchanged evidence
+  ([#99](https://github.com/alphastorm/omp-ninfer/issues/99)). Native client-acceptance default-model
+  handling remains deferred ([#98](https://github.com/alphastorm/omp-ninfer/issues/98)).
 - Stage v0.14.0 with one engine source `2c6f423b` across the RTX 5090 container and both
   native Windows lanes (`v0.7.0-qwen38-{5090,4090,3090}-beta.3`), retaining published model
   version 3 `81f924d4` and unmodified stock OMP 18.12.6. All three component cuts are published
@@ -44,8 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Raise the RTX 3090 qualified serving cap to 350 W; matched P14 arms restored the prior
   370 W limit. Keep native MTP3 C1, INT8 KV, strict origin authentication and isolated schema 3
   stores. Disclose still-open [#88](https://github.com/alphastorm/omp-ninfer/issues/88) and
-  [#89](https://github.com/alphastorm/omp-ninfer/issues/89) without claiming their dedicated
-  reproduction/fault-injection items are closed by aggregate qualification.
+  [#89](https://github.com/alphastorm/omp-ninfer/issues/89), plus release-tooling hardening
+  [#90](https://github.com/alphastorm/omp-ninfer/issues/90), without claiming their dedicated
+  reproduction/fault-injection items are closed by aggregate qualification or fresh acceptance.
 - Require stopping the running RTX 3090 lane before upgrading from v0.13.1 to v0.14.0:
   the old 300 W GPU-owner lease fails the new installer's 350 W cap check before replacement,
   leaving the old lane running unchanged; a stopped lane upgrades normally

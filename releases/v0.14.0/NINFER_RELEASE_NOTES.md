@@ -1,6 +1,6 @@
 # OMP NInfer v0.14.0 — one engine source across three lanes
 
-**All three components staged; fresh product acceptance and review remain separate.**
+**Prepared composition: fresh candidate acceptance passed; review binding and publication are separate.**
 This is not a published product release. The published product remains
 [v0.13.1](../v0.13.1/NINFER_RELEASE_NOTES.md). All three beta.3 components bind engine source
 `2c6f423bd817b6534158553e1b34ab4959c43165` (N). Component publication, runtime qualification,
@@ -17,7 +17,7 @@ to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 | RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` | BF16 KV, DFlash2 K7, C2, vision; kept `qwen38-5090-v0.13.0` profile |
 | RTX 4090 native Windows | Published `v0.7.0-qwen38-4090-beta.3` | INT8 KV, MTP3, C1, `Group64` A8 off |
 | RTX 3090 native Windows | Published `v0.7.0-qwen38-3090-beta.3` | INT8 KV, MTP3, C1, `Group64` A8 off, 350 W cap |
-| Oh My Pi | Unmodified upstream `18.12.6`, source `45c35e40` | Same three client binaries; fresh product acceptance still required |
+| Oh My Pi | Unmodified upstream `18.12.6`, source `45c35e40` | Same three client binaries; fresh three-platform/live/route acceptance passed |
 
 The upstream base remains `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. The model remains the
 published version 3 artifact `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`
@@ -163,21 +163,66 @@ the new 350 W cap and refuses before replacing it; the old lane keeps running un
 A stopped lane upgrades normally. Tracked in
 [#94](https://github.com/alphastorm/omp-ninfer/issues/94).
 
+## Fresh candidate acceptance
+
+Fresh acceptance on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d` passed all
+five documented routes/31 exact executable blocks: RTX 5090 host 2/2, macOS 10/10, Windows 5/5
+(four passed plus one explicit pre-publication clone/require-installable substitution), and
+native RTX 4090/3090 7/7 each with 19/19 route-behavior checks. Three freshly downloaded stock
+OMP 18.12.6 clients passed runtime-bound typed tool/result, exact continuation and unavailable-route
+fail-closed checks. Image input passed on macOS/Windows against RTX 5090 only; Darwin stays
+preview, Windows and Linux client profiles are qualified, and Linux evidence is WSL2-scoped.
+
+Both canonical native roots were freshly promoted through documented beta.3 install blocks after
+same-volume preservation of beta.2 roots and staging. Both first-release lineages have no
+predecessor (`not_applicable`, zero rollback directions). Subsequent public-URL checks verified
+the seven manifest assets against each 10-entry checksum set and returned `already_installed`
+for `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817` and
+`qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817`. Authenticated status/completion returned 200,
+anonymous status 401; package/binary/configuration/model identities and MTP smoke passed.
+
+The initial RTX 5090 attempt failed closed at the macOS tunnel step: a same-Mac omp-ninfer
+unit-suite run took the real `127.0.0.1:18089` port mid-window after a free-port preflight.
+In-window and independent restoration returned the incumbent to its same image, healthy and
+`unless-stopped`. One corrected attempt on unchanged C passed with test/route runners excluded
+from that Mac during the window ([#97](https://github.com/alphastorm/omp-ninfer/issues/97)).
+The corrected window ran `2026-10-28T04:56:16Z`–`05:04:01Z`, with a 421.229 s production hold.
+Its first summary refused a missing `corrections.json` only after routes, clients and restoration
+had passed; the operator then recorded the disclosure and reran `--action summarize` alone on
+unchanged execution evidence ([#99](https://github.com/alphastorm/omp-ninfer/issues/99)).
+This is one corrected acceptance attempt, not an undisclosed fresh route run.
+
+Both native attempt-1 driver windows passed and restored independently: 392.504 s RTX 4090,
+393.945 s RTX 3090. All 18 restoration/final-audit checks passed, including state/ACLs, task XML,
+support inventory, holds/client files, pointers, power, directory presence and documented staging.
+The promoted beta.3 stopped baselines remain canonical (450/370 W); preserved beta.2 roots
+were not reactivated. RTX 5090 production was restored, not upgraded. These are owner-operated
+tester-equivalent observations, not independent external-user outcomes.
+[Documented routes](acceptance/documented-routes.json) and
+[composed acceptance](acceptance/composed-external-installation.json) bind the evidence;
+only guide prose changed after execution.
+
 ## Remaining gates and follow-ups
 
-Fresh candidate-bound external-install acceptance (all five routes, three stock clients and both
-native public installs), the product-tooling council, composed review/evidence pins and
-founder-owned product publication remain separate. The current fork council closed with no
-P0/P1; its binding waits for composition with the product-tooling council. Changed guide blocks require
-`documented_routes.document_change`; the published QUICKSTART is not advanced by this stage.
+The product-tooling council, current council binding, final evidence pins and founder-owned
+product publication remain separate. The current fork council closed with no P0/P1; its binding
+waits for composition with the product-tooling council. Changed executable product references
+have explicit `documented_routes.document_change` and fresh exact-byte acceptance. The guide
+stays prepared, and front-door links remain on published v0.13.1 until publication.
 
-Carried deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88) and
-[#89](https://github.com/alphastorm/omp-ninfer/issues/89) are still open when this stage is written.
+Carried deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88),
+[#89](https://github.com/alphastorm/omp-ninfer/issues/89) and
+[#90](https://github.com/alphastorm/omp-ninfer/issues/90) remain open.
 The #88 tracked 5090-specific off-lock export/admission reproduction is not established by this
 release's aggregate gates. #89 tracks installer failed-stop rollback/cleanup and checkpoint I/O
-classification/stale-generation issues; the native qualification chain is not closure of every
-fault-injection item. New deferred follow-ups are
+classification/stale-generation issues; #90 tracks composer/verifier/binder/cutter hardening.
+The native qualification chain and fresh acceptance do not close every fault-injection item.
+Together with the stop-before-upgrade prerequisite in #94, new deferred follow-ups are
 [#95](https://github.com/alphastorm/omp-ninfer/issues/95) (retire engine state before delivering
-error/cancel responses) and [#96](https://github.com/alphastorm/omp-ninfer/issues/96) (media decode
-range checks). No issue closure or inherited council approval is claimed. Deterministic 5090
-module IDs and a corrected, repeated native A8 screen are explicit follow-ups.
+error/cancel responses), [#96](https://github.com/alphastorm/omp-ninfer/issues/96) (media decode
+range checks), [#97](https://github.com/alphastorm/omp-ninfer/issues/97) (unit tests bind the real
+tunnel port), [#98](https://github.com/alphastorm/omp-ninfer/issues/98) (`client_acceptance.py`
+native default-model handling) and [#99](https://github.com/alphastorm/omp-ninfer/issues/99)
+(correction-record validation only at summarize). No issue closure or inherited council approval
+is claimed. Deterministic 5090 module IDs and a corrected, repeated native A8 screen are explicit
+follow-ups.

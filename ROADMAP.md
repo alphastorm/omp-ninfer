@@ -55,13 +55,13 @@ Full release authority: [`releases/v0.13.1/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.13.1/qualification.json`](releases/v0.13.1/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
-## Next release — v0.14.0 guide preparation
+## Next release — v0.14.0 accepted candidate
 
 The [candidate manifest](releases/v0.14.0/manifest.json),
 [release notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
 [qualification](releases/v0.14.0/qualification.json) bind engine source
 `2c6f423bd817b6534158553e1b34ab4959c43165` across all three published beta.3 components.
-The [prepared guide](docs/QUICKSTART.md) targets v0.14.0 for fresh acceptance, not public execution:
+The [prepared guide](docs/QUICKSTART.md) has fresh v0.14.0 acceptance, not publication authority:
 v0.13.1 remains the published product until the ready gate and founder-owned publication.
 
 RTX 5090 changes to image `760fb6be` / server `55f0b95a`, keeping profile
@@ -74,10 +74,16 @@ because its 300 W lease fails the new installer check
 
 Model v3 `81f924d4` (20,437,521,664 bytes), native `qwen3_8_27b-v3.ninfer`, container
 `checkpoints-v013` and stock OMP 18.12.6 remain unchanged. No cross-binary checkpoint migration
-or prior product acceptance is inferred. Fresh acceptance of all five routes/31 exact blocks,
-three clients and both native public installs with independent restoration is pending.
-Changed product references require `documented_routes.document_change`; current review binding,
-composed evidence pins and publication are distinct gates. The 5090-only second-build
+or prior product acceptance is inferred. Fresh acceptance on frozen candidate `c81a8e7e` passed
+all five routes/31 exact blocks, three stock OMP 18.12.6 clients and both first-lineage native
+public installs with independent restoration (421.229 s corrected RTX 5090 hold;
+392.504/393.945 s RTX 4090/3090 driver windows). Native canonical promotions were fresh;
+later public-URL checks were `already_installed`, with no predecessor/rollback direction.
+The initial 5090 attempt failed closed on a same-Mac test's real tunnel-port collision and
+restored the incumbent; one corrected attempt passed on unchanged C (#97). The late
+`corrections.json` check needed summarize alone to be rerun, not another window (#99).
+Changed product references are bound by `documented_routes.document_change`; current council
+binding, final evidence pins and publication remain distinct gates. The 5090-only second-build
 reproducibility exception remains explicit; no global quality or universal speedup claim is added.
 
 ## Remaining work
@@ -138,6 +144,13 @@ unmet:
    rollback cleanup, isolated capacity miss, checkpoint open/close error classification, and
    stale-generation retention), and [#90](https://github.com/alphastorm/omp-ninfer/issues/90)
    (release-tooling composer, verifier, binder, and cutter hardening).
+   The accepted v0.14.0 candidate also discloses
+   [#94](https://github.com/alphastorm/omp-ninfer/issues/94) (3090 stop-before-upgrade),
+   [#95](https://github.com/alphastorm/omp-ninfer/issues/95) (retirement before error/cancel delivery),
+   [#96](https://github.com/alphastorm/omp-ninfer/issues/96) (media decode range checks),
+   [#97](https://github.com/alphastorm/omp-ninfer/issues/97) (tests binding the real tunnel port),
+   [#98](https://github.com/alphastorm/omp-ninfer/issues/98) (native client-acceptance default model),
+   and [#99](https://github.com/alphastorm/omp-ninfer/issues/99) (late correction-record validation).
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
    ([`releases/v0.13.1/qualification/rtx4090.json`](releases/v0.13.1/qualification/rtx4090.json),

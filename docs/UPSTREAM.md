@@ -20,6 +20,28 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 | `Don-Chad/ninfer-3090` (engine watch) | `upgrade-available`; community adoption recorded | Master `d8c29253` (2026-10-16), 1,907 commits after historical fork point `ef6ecc3c` | [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) adopted the ashalliants-derived line. Commit/file lists are cut; overlap is `unknown-truncated`. Shipped v0.13.1 native source is `7a25cd72` on upstream master `64d10fbf`; it adopts no community binary. |
 | `ashalliants/ninfer-3090` (community source watch) | `upgrade-available`; tracked separately | Master `0312a1d7` (2026-10-24), 1,890 commits after research baseline `81c8ce09` | Active source of the adopted community line; commit/file lists are cut (`unknown-truncated`). Performance and persistence claims require independent qualification. |
 
+## Prepared v0.14.0 common-engine composition
+
+The [prepared v0.14.0 notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) bind all three
+published beta.3 components to source `2c6f423bd817b6534158553e1b34ab4959c43165`, still on
+upstream `64d10fbf`, with the shared v3 model and stock OMP 18.12.6 unchanged. Fresh acceptance
+on frozen candidate `c81a8e7e` passed all five routes/31 exact blocks, three stock clients and
+both first-lineage native public installs with independent restoration
+([composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json)).
+The corrected RTX 5090 hold was 421.229 s; native driver windows were 392.504/393.945 s.
+Canonical beta.3 promotions preserved beta.2 roots; subsequent public checks were
+`already_installed`, not upgrade/rollback proof. Native MTP3 keeps `Group64` A8 off, and
+RTX 3090 serves at 350 W with the 370 W owner baseline restored.
+
+The initial 5090 attempt failed closed on a same-Mac test's real tunnel-port collision and
+restored the incumbent; one corrected attempt on unchanged C passed (#97). Recording the
+late-required `corrections.json` and rerunning summarize alone changed no execution evidence
+(#99). Deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#99](https://github.com/alphastorm/omp-ninfer/issues/99),
+including native client-acceptance default-model handling (#98), remain disclosed in the notes.
+Current council binding, final evidence pins and founder-owned publication are separate.
+The guide stays prepared; published v0.13.1 remains the front-door authority.
+
 ## v0.13.1 native runtime composition
 
 Published release **v0.13.1** (2026-10-26, [release notes](../releases/v0.13.1/NINFER_RELEASE_NOTES.md))

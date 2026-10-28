@@ -125,7 +125,7 @@ slash dispatch.
   [#90](https://github.com/alphastorm/omp-ninfer/issues/90)); RTX 5090 runtime qualification carries
   unchanged from v0.13.0 (`6d4d0a05`).
 
-## Next release — v0.14.0 guide preparation
+## Next release — v0.14.0 accepted candidate
 
 The [candidate manifest](../releases/v0.14.0/manifest.json),
 [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
@@ -153,10 +153,22 @@ Native routes retain `C:\ProgramData\omp-ninfer-model\qwen3_8_27b-v3.ninfer` and
 `session-checkpoints-v3`; the container retains `checkpoints-v013`. Kept names do not prove
 cross-binary checkpoint compatibility; preserve older roots and replay OMP transcripts.
 RTX 5090 ships checked first-build bytes under an explicit reproducibility exception, not a
-bit-identical-second-build claim. Fresh runtime qualification is not product acceptance:
-all five routes/31 blocks, three stock clients, both native public installs and independent
-restoration remain pending, with explicit `documented_routes.document_change`, review/evidence
-pins and founder-owned publication still separate.
+bit-identical-second-build claim. Separate fresh product acceptance passed on frozen candidate
+`c81a8e7efb37b8d5c36b16a10a18945cb5aa313d`: all five routes/31 exact blocks, three stock
+OMP 18.12.6 clients, both first-lineage beta.3 native public installs and independent restoration
+([composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json)).
+The corrected RTX 5090 hold was 421.229 s; native driver windows were 392.504/393.945 s.
+Canonical native promotions were fresh, later public-URL checks `already_installed`; rollback
+remains `not_applicable`, zero directions, and the promoted stopped baseline restored at 450/370 W.
+The initial 5090 attempt failed closed on a same-Mac unit-suite port collision and restored
+the incumbent; one corrected attempt on unchanged C passed (#97). Its late correction-record
+check was resolved by recording the disclosure and rerunning summarize alone, not execution (#99).
+Deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#99](https://github.com/alphastorm/omp-ninfer/issues/99),
+including the native client-acceptance default-model issue (#98), remain in the
+[candidate notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md).
+Explicit `documented_routes.document_change` binds the changed product references; current
+council binding, final evidence pins and founder-owned publication are still separate.
 
 ## Models
 

@@ -3,15 +3,13 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.14.0",
   "composition": {
-    "status": "v0.14.0 upstream OMP v18.12.6 client external-install acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6",
     "lifecycle_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
     "ninfer_lifecycle_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
     "request_compatibility_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-    "blockers": [
-      "Fresh candidate-bound external-install platform and documented-route acceptance is required"
-    ],
+    "blockers": [],
     "composed_source_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99"
   },
   "profiles": [
@@ -48,10 +46,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "Fresh v0.14.0 external-install acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c81a8e7efb37b8d5c36b16a10a18945cb5aa313d/releases/v0.14.0/acceptance/darwin-arm64-18.12.6.json",
+        "sha256": "047b2b7f72de3d2ad343f1c16bfefeade70581924976e075f12ec5f992d486f7"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -122,7 +121,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -135,7 +134,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.14.0",
       "aliases": [
@@ -152,10 +151,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "Fresh v0.14.0 external-install acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c81a8e7efb37b8d5c36b16a10a18945cb5aa313d/releases/v0.14.0/acceptance/windows-x64-18.12.6.json",
+        "sha256": "34ec11f1f4a088c7a8b74129f6d4a7ad64066c00316ca2256e454c43c3f0011c"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -226,7 +226,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -239,7 +239,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.14.0",
       "aliases": [
@@ -256,10 +256,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "Fresh v0.14.0 external-install acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c81a8e7efb37b8d5c36b16a10a18945cb5aa313d/releases/v0.14.0/acceptance/linux-x64-18.12.6.json",
+        "sha256": "6d41661ff9c8776e59d4cfe9edb175fba20a09d8672d7ec29c141f2991a7f505"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

@@ -6,7 +6,7 @@ product; component repositories keep their own versions and tags, and the produc
 the exact combination.
 
 **Navigation:** [Current release (v0.13.1)](#v0131--rebased-native-windows-lanes-carried-rtx-5090-runtime-and-stock-omp-18126) ·
-[Prepared v0.14.0](#v0140--prepared-guide-for-route-acceptance-not-a-published-release) ·
+[Prepared v0.14.0](#v0140--accepted-candidate-not-a-published-release) ·
 [Previous v0.13.0](#v0130--rebased-rtx-5090-runtime-stock-omp-18126-carried-native-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
@@ -14,7 +14,7 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.14.0 — prepared guide for route acceptance, not a published release
+## v0.14.0 — accepted candidate, not a published release
 
 The [candidate manifest](../releases/v0.14.0/manifest.json),
 [notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md),
@@ -22,14 +22,15 @@ The [candidate manifest](../releases/v0.14.0/manifest.json),
 [release-local compatibility](../releases/v0.14.0/COMPATIBILITY.md) bind engine source
 `2c6f423bd817b6534158553e1b34ab4959c43165` across RTX 5090
 `v0.7.0-qwen38-5090-beta.3` and native `v0.7.0-qwen38-4090-beta.3` /
-`v0.7.0-qwen38-3090-beta.3`. The components are published and runtime-qualified; the product is
-not published or externally accepted. Published v0.13.1 remains authoritative:
+`v0.7.0-qwen38-3090-beta.3`. The components are published and runtime-qualified; fresh
+candidate-bound external acceptance passed, but the product is not published.
+Published v0.13.1 remains authoritative:
 [use its immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md).
 
 The [prepared QUICKSTART](QUICKSTART.md) now clones `v0.14.0` and reads its manifest in every
 install/model block. All five routes retain their 31 executable block addresses. Product-reference
-changes require explicit `documented_routes.document_change` and fresh candidate-bound execution,
-not a relabeling of v0.13.1 receipts. Do not execute before product publication and the ready gate.
+changes have explicit `documented_routes.document_change` and fresh candidate-bound execution,
+not relabeled v0.13.1 receipts. Do not execute before product publication and the ready gate.
 
 RTX 5090 binds image `760fb6be` and server `55f0b95a`, retaining `qwen38-5090-v0.13.0` /
 config `751d22dc`, BF16 KV and DFlash2 K7 C2. The checked first build ships under the explicit
@@ -46,10 +47,23 @@ The shared published v3 model `81f924d4` (20,437,521,664 bytes) and stock OMP 18
 are unchanged. Native model path `C:\ProgramData\omp-ninfer-model\qwen3_8_27b-v3.ninfer`,
 per-instance `session-checkpoints-v3` and container `checkpoints-v013` remain; none establishes
 cross-binary generation compatibility. Keep prior roots untouched and replay OMP transcripts.
-Fresh all-five-route, three-client, native public-install and independent restoration acceptance,
-current review binding, composed evidence pins and founder-owned product publication remain
-separate gates. The stage's qualification/notes describe its earlier guide state; this guide-only
-preparation does not rewrite pinned runtime receipts or grant acceptance.
+Fresh acceptance on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d` passed all
+five routes/31 exact blocks, three stock OMP 18.12.6 clients and both native public installs
+([composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json)).
+Both native canonical beta.3 promotions were first of lineage after preserving beta.2 roots;
+later public-URL checks were `already_installed`, not upgrade or rollback evidence.
+Independent restoration passed (421.229 s corrected RTX 5090 hold; 392.504/393.945 s native
+driver windows), retaining the 5090 incumbent and the promoted stopped native baselines.
+The initial 5090 attempt failed closed when a same-Mac test run took `127.0.0.1:18089` and
+restored production; one corrected attempt on unchanged C passed
+([#97](https://github.com/alphastorm/omp-ninfer/issues/97)). The driver's late `corrections.json`
+check was satisfied by a disclosure followed by summarize alone on unchanged execution evidence
+([#99](https://github.com/alphastorm/omp-ninfer/issues/99)).
+Deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#99](https://github.com/alphastorm/omp-ninfer/issues/99)
+remain disclosed, including the native contributor-harness default-model issue (#98).
+Current council binding, final evidence pins and founder-owned publication remain separate gates;
+the working-tree guide stays prepared, and runtime receipts keep their original subjects.
 
 ## v0.13.1 — rebased native Windows lanes, carried RTX 5090 runtime, and stock OMP 18.12.6
 

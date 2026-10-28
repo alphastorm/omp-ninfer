@@ -109,15 +109,21 @@ transcripts); the RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.2`) and s
 18.12.6 client carry unchanged from v0.13.0. Native owners staying on v0.10.0 keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
-### Next release: v0.14.0 route preparation
+### Next release: v0.14.0 accepted candidate
 
 The [candidate notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) bind all three beta.3 runtime
 components to engine source `2c6f423b`, keeping the v3 model and stock OMP 18.12.6 unchanged.
 Native MTP3 keeps `Group64` A8 off; RTX 3090 moves to a 350 W cap and must be stopped before
 upgrading from v0.13.1 ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)).
-The [working-tree guide](docs/QUICKSTART.md) prepares fresh route acceptance, not public execution.
-Fresh product acceptance, review/evidence pins and founder-owned publication remain separate;
-the front-door install links stay on the published v0.13.1 guide.
+Fresh acceptance on candidate `c81a8e7e` passed all five routes/31 exact blocks, three stock
+OMP 18.12.6 clients and both first-lineage native public installs with independent restoration.
+The RTX 5090 initial attempt failed closed on a host-local port collision; its one corrected
+attempt passed, with cause/restoration and driver bookkeeping disclosed in the candidate notes
+([#97](https://github.com/alphastorm/omp-ninfer/issues/97),
+[#99](https://github.com/alphastorm/omp-ninfer/issues/99)).
+The [working-tree guide](docs/QUICKSTART.md) stays prepared, not public execution.
+Current council binding, final evidence pins and founder-owned publication remain separate;
+front-door install links stay on the published v0.13.1 guide.
 
 ## How it works
 

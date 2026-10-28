@@ -1,14 +1,16 @@
 # Quickstart
 
-> **Prepared guide: v0.14.0 · stock Oh My Pi 18.12.6 · product-route qualification pending**
+> **Prepared guide: v0.14.0 · stock Oh My Pi 18.12.6 · candidate route acceptance passed; not published**
 
 All three beta.3 components are published and runtime-qualified at engine source
 `2c6f423bd817b6534158553e1b34ab4959c43165`; fresh v0.14.0 product-route, client, native
-public-install and independent restoration acceptance is pending. Do not execute these install
+public-install and independent restoration acceptance passed on frozen candidate `c81a8e7e`.
+Current council binding, final evidence pins and founder-owned publication are separate.
+Do not execute these install
 blocks before the product is published and the ready gate passes.
 The published release remains v0.13.1:
 [use its immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md).
-This preparation changes executable product references and requires fresh exact-byte acceptance
+Fresh exact-byte acceptance covers this preparation's changed executable product references,
 with `documented_routes.document_change`; predecessor acceptance does not transfer.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
@@ -21,8 +23,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance pending; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 candidate public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 candidate public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -112,41 +114,53 @@ When migrating from an earlier client:
   `ninfer-beta` / `ninfer-main` at `2` and `ninfer-native-4090` / `ninfer-heavy` /
   `ninfer-native-3090` at `1`, and compaction stays at OMP's default.
 
-## Previous release acceptance — v0.13.1
+## Fresh candidate acceptance — v0.14.0
 
-The observations below belong to the immutable v0.13.1 guide, not this prepared v0.14.0 route.
-Fresh v0.14.0 client, route, native public-install and independent restoration acceptance is
-pending. Client acceptance is never inherited. The previous release passed on frozen candidate
-`92dfb13285994f1527711cf464847f07e44613dd`; no predecessor product receipt is relabeled.
+Fresh v0.14.0 client, route, native public-install and independent restoration acceptance passed
+on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d`. Client acceptance is never
+inherited; no predecessor product receipt is relabeled. The guide remains prepared until
+product publication and the ready gate.
 
 | Documented route | Fresh acceptance |
 | --- | --- |
 | RTX 5090 Windows 11 + Docker Desktop/WSL2 host | 2/2 blocks passed |
 | macOS arm64 client over manual SSH tunnel | 10/10 passed; platform remains preview |
-| Windows x64 client over RTX 5090 loopback | 5/5 passed |
+| Windows x64 client over RTX 5090 loopback | 5/5 accepted: 4 passed, 1 explicit pre-publication clone substitution |
 | Native RTX 4090 on the two-GPU host | 7/7 blocks passed (19/19 route-behavior checks); first-release rollback `not_applicable` |
 | Native RTX 3090 on the two-GPU host | 7/7 blocks passed (19/19 route-behavior checks); first-release rollback `not_applicable` |
 
 All three newly downloaded stock clients passed runtime-bound typed tool/result, exact
 continuation, and unavailable-route fail-closed checks. Linux ran under WSL2, not a separately
 qualified native Linux OS. Image input passed on macOS and Windows against RTX 5090 only; there is
-no native-lane or Linux vision claim. Both canonical beta.2 native roots were freshly installed
+no native-lane or Linux vision claim. Both canonical beta.3 native roots were freshly installed
 from the documented blocks after preserving their old lineages. The later public-URL checks
-verified the exact assets and returned `already_installed`; both rebased lineages have no
+verified the exact assets and returned `already_installed` for
+`qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817` and
+`qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817`; both first-release lineages have no
 predecessor and zero rollback directions.
 
+The RTX 5090 initial attempt failed closed when a same-Mac unit-suite run bound the actual
+`127.0.0.1:18089` tunnel port after preflight. The incumbent was restored; one corrected attempt
+on unchanged C passed with test/route runners excluded from that Mac during the window
+([#97](https://github.com/alphastorm/omp-ninfer/issues/97)). The driver's corrected-window
+summary first refused a missing `corrections.json` after route/client/restoration success;
+recording that disclosure and rerunning summarize alone changed no execution evidence
+([#99](https://github.com/alphastorm/omp-ninfer/issues/99)).
+
 Independent restoration passed for the RTX 5090 incumbent (image, mounts, health, restart policy,
-checkout, key, and directory presence; 429.388 s window) and for both sequential native baselines
+checkout, key, and directory presence; 421.229 s corrected hold) and for both sequential native baselines
 (state, ACLs, tasks, holds, client files, power, directory presence, and documented staging).
-Production was not upgraded during the acceptance window.
-[Documented routes](../releases/v0.13.1/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.13.1/acceptance/composed-external-installation.json) bind all
-31 executable route blocks in the
-[immutable v0.13.1 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.1/docs/QUICKSTART.md);
-only that guide's prose changed after execution. This prepared guide changes product references
-and requires an explicit document-change binding and fresh acceptance. These are
-owner-operated tester-equivalent observations, not independent external-user outcomes. See
-[Releases](RELEASES.md).
+The native driver windows were 392.504 s (RTX 4090) and 393.945 s (RTX 3090), restoring their
+promoted beta.3 stopped baselines at 450/370 W; preserved beta.2 roots were not reactivated.
+RTX 5090 production was not upgraded during acceptance.
+[Documented routes](../releases/v0.14.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json) bind all
+31 executable route blocks; only guide prose changed after execution. These are owner-operated
+tester-equivalent observations, not independent external-user outcomes. Deferrals
+[#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#99](https://github.com/alphastorm/omp-ninfer/issues/99)
+remain disclosed in the [candidate notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md), including
+the contributor harness's native default-model issue (#98). See [Releases](RELEASES.md).
 
 ## Prepared composition at a glance
 

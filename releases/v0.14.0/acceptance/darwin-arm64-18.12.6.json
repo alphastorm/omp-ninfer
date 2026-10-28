@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "darwin-remote-ssh-45c35e40-cfbb5e38cd-v0.14.0",
+  "product_release": "v0.14.0",
+  "profile": "darwin-remote-ssh",
+  "status": "passed",
+  "as_of": "2026-10-28",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.12.6",
+    "commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "tree": "8a90a1b48b370649bd3f026d5f609e500626785c"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.12.6",
+    "upstream_commit": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+    "os": "macOS 27",
+    "architecture": "arm64",
+    "published": true,
+    "asset_name": "omp-darwin-arm64",
+    "asset_bytes": 197245984,
+    "asset_sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58",
+    "binary_sha256": "cfbb5e38cd8f8a3be55e710700be587d287deaacdc58c9b0a661c5086bccfe58",
+    "release_id": 420053191,
+    "asset_id": 663781499,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.12.6/omp-darwin-arm64"
+  },
+  "live_acceptance": {
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "providers": [
+        "ninfer-beta"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "errors": [
+        "Couldn't connect to 127.0.0.1:18089 (connection refused). Check that the server is running and reachable."
+      ],
+      "endpoint": "http://127.0.0.1:18089/v1",
+      "method": "configured route unavailable; no provider configuration changes"
+    },
+    "omp_version": "omp/18.12.6",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 25,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "runtime_server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "runtime_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "providers": [
+      "ninfer-beta"
+    ],
+    "models": [
+      "q38-ninfer"
+    ],
+    "raw_transcript_included": false,
+    "vision_observed": true,
+    "vision_input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592",
+    "runtime_image_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+    "runtime_variant": "rtx5090-container",
+    "profile_runtime_qualified_by_this_receipt": false,
+    "documented_server_restart_nonce_returned": true
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "macOS arm64 remains preview.",
+    "Fresh candidate-bound live/tool/continuation/outage acceptance of unchanged stock OMP 18.12.6; runtime performance and native vision are not inferred."
+  ]
+}
