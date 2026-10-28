@@ -366,6 +366,13 @@ class ExtractionTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # The runner checks its tunnel on a free ephemeral port, never on the documented 18089: a
+        # live macOS route on this machine binds that port between its steps (omp-ninfer#97).
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            self.port = probe.getsockname()[1]
+
     def write_bundle(self, root: Path, steps: list[tuple[str, ...]]) -> Path:
         bundle = root / "bundle"
         bundle.mkdir()
@@ -391,11 +398,11 @@ class RunnerTests(unittest.TestCase):
                        "    def do_GET(self):\n"
                        "        self.send_response(200); self.send_header(\"Content-Length\", \"2\"); self.end_headers(); self.wfile.write(b\"ok\")\n"
                        "    def log_message(self, *a): pass\n"
-                       "HTTPServer((\"127.0.0.1\", 18089), H).serve_forever()'\n")
+                       "HTTPServer((\"127.0.0.1\", {port}), H).serve_forever()'\n")
 
     def write_tunnel_listener(self, root: Path, body: str | None = None) -> None:
         listener = root / "clone" / "open-tunnel.sh"
-        listener.write_text(body if body is not None else self.HEALTH_LISTENER)
+        listener.write_text((body if body is not None else self.HEALTH_LISTENER).format(port=self.port))
         listener.chmod(0o755)
 
     def run_bundle(self, root: Path, bundle: Path, stdin: int | None = None,
@@ -403,7 +410,7 @@ class RunnerTests(unittest.TestCase):
         receipt = root / "receipt.json"
         completed = subprocess.run(["bash", str(RUNNER), str(bundle), str(root / "clone"), str(receipt)],
                                    stdin=stdin, capture_output=True, text=True, check=False,
-                                   timeout=timeout)
+                                   timeout=timeout, env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
         return completed.returncode, json.loads(receipt.read_text())
 
     def test_blocks_share_one_shell_and_the_first_failure_ends_the_run(self) -> None:
@@ -455,22 +462,12 @@ class RunnerTests(unittest.TestCase):
     def test_the_tunnel_block_is_stopped_for_real_before_fail_closed(self) -> None:
         """The tunnel block execs ssh inside the runner's wrapper; stopping only the wrapper
         leaves the listener up and the fail-closed check sees a live route (macOS run 8)."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [
                 ("tunnel", "./open-tunnel.sh\n"),
                 ("fail-closed", "python3 - <<'PY'\nimport socket, sys\ns = socket.socket(); s.settimeout(1)\n"
-                                "try: s.connect(('127.0.0.1', 18089))\nexcept OSError: sys.exit(0)\n"
+                                f"try: s.connect(('127.0.0.1', {self.port}))\nexcept OSError: sys.exit(0)\n"
                                 "print('outage request unexpectedly succeeded'); sys.exit(1)\nPY\n", "Fail closed"),
             ])
             self.write_tunnel_listener(root)
@@ -485,34 +482,22 @@ class RunnerTests(unittest.TestCase):
         block sees a live route. The run must refuse instead (measured 2026-09-12)."""
         import contextlib
         squatter = socket.socket()
-        squatter.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            squatter.bind(("127.0.0.1", 18089))
-        except OSError:
-            self.skipTest("local port 18089 is in use")
+        squatter.bind(("127.0.0.1", 0))
         squatter.listen(1)
+        self.port = squatter.getsockname()[1]
         with contextlib.closing(squatter), tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
             listener = root / "clone" / "open-tunnel.sh"
-            listener.write_text("#!/bin/sh\nexec sleep 600\n")
+            listener.write_text("#!/bin/sh\ntouch started\nexec sleep 600\n")
             listener.chmod(0o755)
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1, receipt)
             self.assertEqual(receipt["steps"][0]["status"], "failed")
+            self.assertFalse((root / "clone" / "started").exists(), "the tunnel started on a taken port")
 
     def test_a_failed_run_stops_the_tunnel_it_started(self) -> None:
         """The error path must release the forward, or the next run inherits it."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("break", "false\n")])
@@ -523,23 +508,13 @@ class RunnerTests(unittest.TestCase):
             after = socket.socket()
             after.settimeout(1)
             with self.assertRaises(OSError):
-                after.connect(("127.0.0.1", 18089))
+                after.connect(("127.0.0.1", self.port))
             after.close()
 
     def test_a_tunnel_that_reaches_nothing_fails_its_own_step(self) -> None:
         """A bound forward only proves ssh exists. When the far end serves nothing the tunnel
         step used to pass and the failure surfaced two blocks later as a tool-turn error
         (measured 2026-09-12, post-cut). The step owns that diagnosis."""
-        probe = socket.socket()
-        probe.settimeout(0.5)
-        try:
-            probe.connect(("127.0.0.1", 18089))
-        except OSError:
-            pass
-        else:
-            self.skipTest("local port 18089 is in use")
-        finally:
-            probe.close()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n"), ("after", "echo never\n")])
@@ -547,10 +522,35 @@ class RunnerTests(unittest.TestCase):
             self.write_tunnel_listener(root, "#!/bin/sh\nexec python3 -c 'import socket, time\n"
                                              "s = socket.socket()\n"
                                              "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
-                                             "s.bind((\"127.0.0.1\", 18089)); s.listen(64); time.sleep(600)'\n")
+                                             "s.bind((\"127.0.0.1\", {port})); s.listen(64); time.sleep(600)'\n")
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 1, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["failed", "skipped"])
+
+    def test_a_tunnel_checked_off_the_documented_port_says_so_in_its_receipt(self) -> None:
+        """Only tests move the runner's tunnel checks off 18089, the port the documented forward
+        binds; a receipt from such a run must not read as the documented route (omp-ninfer#97)."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
+            self.write_tunnel_listener(root)
+            code, receipt = self.run_bundle(root, bundle)
+            self.assertEqual(code, 0, receipt)
+            self.assertIn(str(self.port), receipt["steps"][0]["substitution"])
+
+    def test_a_malformed_tunnel_port_is_refused_before_any_step_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("mark", 'touch "$PWD/../ran"\n')])
+            for port in ("0", "65536", "080", "port"):
+                with self.subTest(port=port):
+                    completed = subprocess.run(
+                        ["bash", str(RUNNER), str(bundle), str(root / "clone"), str(root / "receipt.json")],
+                        capture_output=True, text=True, check=False, timeout=30,
+                        env=dict(os.environ, ROUTE_TUNNEL_PORT=port))
+                    self.assertEqual(completed.returncode, 2, completed.stderr)
+                    self.assertFalse((root / "ran").exists())
+                    self.assertFalse((root / "receipt.json").exists())
 
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
