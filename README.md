@@ -55,11 +55,11 @@ project does not claim it. What OMP NInfer adds is continuation you can rely on:
 
 <div align="center">
 
-<img src="docs/media/omp-ninfer-demo-v3.gif" alt="Oh My Pi on OMP NInfer (v0.3.0 recording, RTX 5090): fixes a ring-buffer bug, reruns the tests to green, then answers a stateful follow-up. Idle gaps compressed." width="900">
+<img src="docs/media/omp-ninfer-demo-v14.gif" alt="Oh My Pi on OMP NInfer (v0.14.0 recording, RTX 5090): finds one failing LRU-cache test and fixes the bug in lru.py, reruns the tests to green, restarts the ninfer-serve container mid-session, and answers a follow-up from the restored session, with idle gaps and the reload compressed." width="900">
 
-<sub>Recorded on v0.3.0 (RTX 5090): bug fixed, tests green, stateful follow-up. 15 s, idle gaps
-compressed, no restart shown · <a href="docs/media/omp-ninfer-demo-v3.mp4">MP4</a> ·
-<a href="docs/media/README.md#canonical-files">provenance</a></sub>
+<sub>Recorded on v0.14.0 (RTX 5090): LRU bug fixed, tests green, ninfer-serve restarted
+mid-session, follow-up answered reusing 10,375 retained prompt tokens. 32 s, idle gaps and the
+36 s reload compressed · <a href="docs/media/omp-ninfer-demo-v14.mp4">MP4</a> · <a href="docs/media/README.md#canonical-files">provenance</a></sub>
 
 </div>
 
