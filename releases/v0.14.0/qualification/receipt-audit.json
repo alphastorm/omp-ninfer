@@ -200,12 +200,12 @@
   ],
   "review_ledger": {
     "file": "review/runtime-ledger.json",
-    "disposition": "replaced-pending-current-review",
+    "disposition": "replaced-closed-current-reviews",
     "repository_path": "releases/v0.14.0/review/runtime-ledger.json",
-    "sha256": "2d4d41e6a587df3b99e5227b04569ef9c0b37425df4643ecae7578df43ffa577",
+    "sha256": "82d46a808b8774951d0ad21ecdf76b010645025192b49d0466a8ffa58bd0e423",
     "predecessor_repository_path": "releases/v0.13.1/review/runtime-ledger.json",
     "predecessor_sha256": "4552cb3bfb2dd8bfebbc4e01604ccda879c4c7d5ead4cdd6c653d6b0d6651ea6",
-    "reason": "New common-engine and product-tooling subject needs current dispositions; no carried approval."
+    "reason": "Bind both actual closed common-engine and product-tooling councils, each frozen subject, all dispositions and receipt digests. Approval is G4-only; no carried approval, product publication or inferred route acceptance."
   },
   "public_acceptance": {
     "disposition": "dropped-not-carried",

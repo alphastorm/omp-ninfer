@@ -345,10 +345,20 @@
       "scope": "Both fresh installed normal/pressure canonical wrappers and payloads pass, retaining scratch identities and public listen-port-only equivalence."
     },
     "g4_review": {
-      "status": "pending",
+      "status": "passed",
       "repository_path": "releases/v0.14.0/review/runtime-ledger.json",
-      "sha256": "2d4d41e6a587df3b99e5227b04569ef9c0b37425df4643ecae7578df43ffa577",
-      "scope": "Current common-engine and product-tooling councils are separate; no prior review approval transfers."
+      "sha256": "82d46a808b8774951d0ad21ecdf76b010645025192b49d0466a8ffa58bd0e423",
+      "ledger_status": "closed-without-remediation",
+      "approval_granted": true,
+      "native_council": "CR-20261028T031911Z-2c6f423b",
+      "native_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "native_base_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "product_tooling_council": "CR-20261028T043650Z-c81a8e7e",
+      "product_tooling_commit": "c81a8e7efb37b8d5c36b16a10a18945cb5aa313d",
+      "product_tooling_base_commit": "c739c6ed60e8a4a1005cf4931e85112f71ca2e51",
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false,
+      "scope": "Both actual full councils closed without source/tooling remediation and no confirmed or unresolved in-scope P0/P1 remains after declared controls. Approval covers only these G4 dispositions. All five fork and ten tooling rows are bound; fork residuals are tracked in #89/#94/#95/#96 and tooling residuals in #100. Both independent-evidence seats completed in each council; Mythos missing/transport_failure after two HTTP 429 responses is not approval. Release-data/test mitigations and explicit ledger/G4 and restoration pre-pin controls are separate from the frozen subjects; no predecessor council approval transfers."
     },
     "changed_client_acceptance": {
       "status": "passed",
@@ -440,6 +450,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.14.0/qualification/receipt-audit.json",
-    "sha256": "156fefdff20150c6b424357a046093668789b7079c8b4b8434aafd4a09985255"
+    "sha256": "2d5924e7499609dcbf71ea0a2034a1dab6bd833bf465c22bf49f65c2f51eb944"
   }
 }

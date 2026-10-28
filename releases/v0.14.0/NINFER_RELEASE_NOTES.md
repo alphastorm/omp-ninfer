@@ -1,6 +1,6 @@
 # OMP NInfer v0.14.0 — one engine source across three lanes
 
-**Prepared composition: fresh candidate acceptance passed; review binding and publication are separate.**
+**Prepared composition: fresh candidate acceptance passed; both G4 councils closed; not published.**
 This is not a published product release. The published product remains
 [v0.13.1](../v0.13.1/NINFER_RELEASE_NOTES.md). All three beta.3 components bind engine source
 `2c6f423bd817b6534158553e1b34ab4959c43165` (N). Component publication, runtime qualification,
@@ -204,11 +204,18 @@ only guide prose changed after execution.
 
 ## Remaining gates and follow-ups
 
-The product-tooling council, current council binding, final evidence pins and founder-owned
-product publication remain separate. The current fork council closed with no P0/P1; its binding
-waits for composition with the product-tooling council. Changed executable product references
-have explicit `documented_routes.document_change` and fresh exact-byte acceptance. The guide
-stays prepared, and front-door links remain on published v0.13.1 until publication.
+Both actual full councils closed without source/tooling remediation, with no confirmed or
+unresolved in-scope P0/P1 after the declared controls. Their separate frozen subjects,
+dispositions and receipt digests are bound in [the G4 ledger](review/runtime-ledger.json).
+Both independent-evidence seats completed in each council; the Mythos supplemental seat is
+missing/transport_failure after HTTP 429 on its initial call and single retry, not approved.
+G4 approval is limited to these dispositions, never product publication or inferred route
+acceptance. Release-data/test mitigations reconcile the composed descriptor and stale acceptance
+wording; explicit ledger/G4 agreement and independent restoration checks precede the manifest pin.
+Final evidence pins, current-head verification/CI and founder-owned product publication remain
+separate. Changed executable product references have explicit `documented_routes.document_change`
+and fresh exact-byte acceptance. The guide stays prepared, and front-door links remain on
+published v0.13.1 until publication.
 
 Carried deferrals [#88](https://github.com/alphastorm/omp-ninfer/issues/88),
 [#89](https://github.com/alphastorm/omp-ninfer/issues/89) and
@@ -223,6 +230,10 @@ error/cancel responses), [#96](https://github.com/alphastorm/omp-ninfer/issues/9
 range checks), [#97](https://github.com/alphastorm/omp-ninfer/issues/97) (unit tests bind the real
 tunnel port), [#98](https://github.com/alphastorm/omp-ninfer/issues/98) (`client_acceptance.py`
 native default-model handling) and [#99](https://github.com/alphastorm/omp-ninfer/issues/99)
-(correction-record validation only at summarize). No issue closure or inherited council approval
-is claimed. Deterministic 5090 module IDs and a corrected, repeated native A8 screen are explicit
-follow-ups.
+(correction-record validation only at summarize). Product-tooling residuals are tracked in
+[#100](https://github.com/alphastorm/omp-ninfer/issues/100): ledger-summary consistency,
+restoration-input validation, pre-effect runtime-base receipt binding, top-level route status,
+stale-phrase matching, and the existing key-preservation/Windows exit-status guide gaps.
+The release's explicit pre-pin controls cover the first two gaps, not a tooling fix.
+No issue closure or inherited council approval is claimed. Deterministic 5090 module IDs and a
+corrected, repeated native A8 screen are explicit follow-ups.

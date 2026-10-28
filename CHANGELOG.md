@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bind v0.14.0's two closed G4 councils to their frozen fork and product-tooling subjects,
+  all dispositions and artifact digests; retain deferred issues and missing Mythos transport
+  results explicitly. G4 approval grants neither publication nor public-route acceptance.
 - Reconcile v0.14.0's composed descriptor audit and acceptance wording: acceptance regenerates
   release metadata while preserving every v0.13.1 client binary/asset identity. Preparation tests
   retain publication gating and real identity contracts, not stage-time prose or a notes line cap.
