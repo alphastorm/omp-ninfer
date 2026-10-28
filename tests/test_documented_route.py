@@ -542,6 +542,49 @@ class RunnerTests(unittest.TestCase):
                     self.assertFalse((root / "ran").exists())
                     self.assertFalse((root / "receipt.json").exists())
 
+    def test_missing_empty_or_nonexistent_arguments_are_refused_before_any_step_runs(self) -> None:
+        """`cd -- ""` succeeds, so an empty CLONE ran the route in the caller's directory, and a
+        missing or unwritable RECEIPT failed only after every step had run. The runner checks its
+        arguments first and exits 2 with nothing run or written."""
+        cases = {
+            "no arguments": (),
+            "no receipt": ("{bundle}", "{clone}"),
+            "an extra argument": ("{bundle}", "{clone}", "{receipt}", "{receipt}"),
+            "empty bundle": ("", "{clone}", "{receipt}"),
+            "bundle without a manifest": ("{clone}", "{clone}", "{receipt}"),
+            "empty clone": ("{bundle}", "", "{receipt}"),
+            "missing clone": ("{bundle}", "{root}/missing", "{receipt}"),
+            "empty receipt": ("{bundle}", "{clone}", ""),
+            "receipt in a missing directory": ("{bundle}", "{clone}", "{root}/missing/receipt.json"),
+            "receipt names a directory": ("{bundle}", "{clone}", "{clone}"),
+        }
+        for case, arguments in cases.items():
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                bundle = self.write_bundle(root, [("mark", 'touch "$PWD/ran"\n')])
+                paths = {"root": root, "bundle": bundle, "clone": root / "clone", "receipt": root / "receipt.json"}
+                completed = subprocess.run(
+                    ["bash", str(RUNNER), *(argument.format(**paths) for argument in arguments)],
+                    cwd=root, capture_output=True, text=True, check=False, timeout=30,
+                    env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
+                self.assertEqual(completed.returncode, 2, completed.stderr)
+                self.assertEqual(sorted(path.name for path in root.iterdir()), ["bundle", "clone"])
+                self.assertFalse((root / "clone" / "ran").exists())
+
+    def test_relative_arguments_name_paths_in_the_callers_directory(self) -> None:
+        """The runner changes into CLONE before it reads BUNDLE and writes RECEIPT; a relative
+        path still names what it named where the operator typed it."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.write_bundle(root, [("mark", 'touch "$PWD/ran"\n')])
+            completed = subprocess.run(
+                ["bash", str(RUNNER), "bundle", "clone", "receipt.json"],
+                cwd=root, capture_output=True, text=True, check=False, timeout=30,
+                env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual(json.loads((root / "receipt.json").read_text())["status"], "passed")
+            self.assertTrue((root / "clone" / "ran").exists())
+
     def test_a_step_whose_bytes_drifted_from_the_document_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

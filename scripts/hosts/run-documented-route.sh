@@ -20,7 +20,19 @@
 # ROUTE_TUNNEL_PORT to an ephemeral port so they never take the port a live route on the same
 # Mac binds between steps (omp-ninfer#97); a tunnel step checked on another port records it.
 set -eE -o pipefail
+(( $# == 3 )) || { echo "usage: run-documented-route.sh BUNDLE CLONE RECEIPT" >&2; exit 2; }
 BUNDLE=$1; CLONE=$2; RECEIPT=$3
+# Arguments are checked before anything runs: `cd -- ""` succeeds, so an empty CLONE would run the
+# route in the caller's directory, and a RECEIPT with no directory to land in would fail only
+# after every step had run.
+[[ -n $BUNDLE && -f $BUNDLE/manifest.json ]] || { echo "BUNDLE must be a directory holding manifest.json" >&2; exit 2; }
+[[ -n $CLONE && -d $CLONE ]] || { echo "CLONE must be an existing directory" >&2; exit 2; }
+[[ -n $RECEIPT && ! -d $RECEIPT && -d $(dirname -- "$RECEIPT") ]] || { echo "RECEIPT must name a file in an existing directory" >&2; exit 2; }
+# The runner changes into CLONE before it reads BUNDLE and writes RECEIPT; a relative path keeps
+# naming what it named in the caller's directory.
+[[ $BUNDLE == /* ]] || BUNDLE=$PWD/$BUNDLE
+[[ $CLONE == /* ]] || CLONE=$PWD/$CLONE
+[[ $RECEIPT == /* ]] || RECEIPT=$PWD/$RECEIPT
 TUNNEL_PORT=${ROUTE_TUNNEL_PORT:-18089}
 if [[ ! $TUNNEL_PORT =~ ^[1-9][0-9]{0,4}$ ]] || (( TUNNEL_PORT > 65535 )); then
   echo "ROUTE_TUNNEL_PORT must be a TCP port from 1 through 65535" >&2
