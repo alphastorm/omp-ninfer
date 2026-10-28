@@ -810,29 +810,38 @@ Do not paste the key into YAML, shell history, issues, or support bundles.
 
 ## 7. Add the OMP provider
 
-If `~/.omp/agent/models.yml` does not exist, install the per-model fragment:
+Install the per-model fragment as `~/.omp/agent/models.yml`. A rerun leaves an identical file in
+place, and the block refuses to replace a `models.yml` that differs:
 
 ```sh
 unset PI_OPENAI_STATEFUL
-install -m 600 examples/manual-tunnel/models.fragment.yml \
-  "$HOME/.omp/agent/models.yml"
+if [ ! -e "$HOME/.omp/agent/models.yml" ]; then
+  install -m 600 examples/manual-tunnel/models.fragment.yml "$HOME/.omp/agent/models.yml"
+elif ! cmp -s examples/manual-tunnel/models.fragment.yml "$HOME/.omp/agent/models.yml"; then
+  echo 'existing ~/.omp/agent/models.yml differs; merge providers.ninfer-beta instead of overwriting it' >&2; false
+fi
 ```
 
 The server hashes OMP's `prompt_cache_key` into the session identity, `compat.statefulResponses: true`
 chains turns with `previous_response_id`, encrypted reasoning and summaries stay off, and effort
-clamps within `low`, `medium`, and `xhigh`. If `models.yml` already exists, unset `PI_OPENAI_STATEFUL`
-and merge only `providers.ninfer-beta` from
+clamps within `low`, `medium`, and `xhigh`. If the block refused an existing `models.yml`, merge
+only `providers.ninfer-beta` from
 [`models.fragment.yml`](../examples/manual-tunnel/models.fragment.yml):
 
 ```yaml
 apiKey: '!cat "$HOME/.omp/agent/ninfer-beta.key"'
 ```
 
-For the macOS/Linux shell route, install the fail-closed default config:
+For the macOS/Linux shell route, install the fail-closed default config the same way. If the block
+refuses an existing `config.yml`, merge
+[`fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml) into it:
 
 ```sh
-install -m 600 examples/manual-tunnel/fail-closed.yml \
-  "$HOME/.omp/agent/config.yml"
+if [ ! -e "$HOME/.omp/agent/config.yml" ]; then
+  install -m 600 examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"
+elif ! cmp -s examples/manual-tunnel/fail-closed.yml "$HOME/.omp/agent/config.yml"; then
+  echo 'existing ~/.omp/agent/config.yml differs; merge fail-closed.yml instead of overwriting it' >&2; false
+fi
 ```
 
 ### Native Windows OMP

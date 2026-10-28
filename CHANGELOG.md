@@ -19,10 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Keep the inference host's existing key when the RTX 5090 container guide's preparation block is
-  rerun: it generates `~/.config/omp-ninfer/api-key` only when the file is missing or empty, so
-  saved checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid.
-  The guide now describes deliberate rotation
+- Keep existing reader state when the RTX 5090 container guide's blocks are rerun. The inference
+  host's preparation block generates `~/.config/omp-ninfer/api-key` only when the file is missing
+  or empty, so saved checkpoints (whose MACs are keyed by it) and the copies installed on clients
+  stay valid; the guide now describes deliberate rotation. The macOS/Linux provider and config
+  blocks leave an identical `~/.omp/agent/models.yml` or `config.yml` in place and refuse to
+  overwrite one that differs, as the Windows blocks already refuse
   ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
 - Stop the Windows guide at a failed native command: each tag clone and
   `py -3 scripts\verify_release.py --require-ready` ready gate throws on a nonzero exit, and the

@@ -669,6 +669,41 @@ class HostPreparationTests(unittest.TestCase):
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
 
+@unittest.skipIf(os.name == "nt", "executes POSIX shell blocks and checks POSIX file modes")
+class ClientConfigurationTests(unittest.TestCase):
+    """Section 7's macOS/Linux blocks install OMP's models.yml and config.yml. A reader reruns blocks
+    after a later failure and may already run OMP with their own providers and settings: a block
+    leaves an identical file alone and refuses to replace a different one, as the Windows blocks
+    refuse (omp-ninfer#100 item 6)."""
+
+    @staticmethod
+    def install(home: Path, slug: str) -> subprocess.CompletedProcess:
+        block = {step.slug: block.text for step, block in documented_route.lane_blocks(
+            documented_route.DEFAULT_DOC, "rtx5090-macos-client")}[slug]
+        return subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, capture_output=True,
+                              text=True, timeout=30, env={"HOME": str(home), "PATH": os.environ["PATH"]})
+
+    def test_a_rerun_keeps_an_identical_file_and_a_different_one_is_refused(self) -> None:
+        for slug, name, source in (("provider", "models.yml", "models.fragment.yml"),
+                                   ("fail-closed-config", "config.yml", "fail-closed.yml")):
+            with self.subTest(slug=slug), tempfile.TemporaryDirectory() as temporary:
+                home = Path(temporary)
+                target = home / ".omp" / "agent" / name
+                target.parent.mkdir(parents=True)  # section 6 creates it
+                shipped = (ROOT / "examples" / "manual-tunnel" / source).read_bytes()
+                for attempt in ("fresh", "rerun"):
+                    completed = self.install(home, slug)
+                    self.assertEqual(completed.returncode, 0, f"{attempt}: {completed.stderr}")
+                    self.assertEqual(target.read_bytes(), shipped)
+                    self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+                own = b"# the reader's own OMP settings\n"
+                target.write_bytes(own)
+                refused = self.install(home, slug)
+                self.assertNotEqual(refused.returncode, 0)
+                self.assertIn(name, refused.stderr)
+                self.assertEqual(target.read_bytes(), own)
+
+
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
 class WindowsNativeCommandTests(unittest.TestCase):
     """A pasted PowerShell block does not stop at a failed native command; without a $LASTEXITCODE
