@@ -19,12 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Keep existing reader state when the RTX 5090 container guide's blocks are rerun. The inference
-  host's preparation block generates `~/.config/omp-ninfer/api-key` only when the file is missing
-  or empty, so saved checkpoints (whose MACs are keyed by it) and the copies installed on clients
-  stay valid; the guide now describes deliberate rotation. The macOS/Linux provider and config
-  blocks leave an identical `~/.omp/agent/models.yml` or `config.yml` in place and refuse to
-  overwrite one that differs, as the Windows blocks already refuse
+- Keep existing reader state when guide blocks are rerun. The RTX 5090 inference host's preparation
+  block generates `~/.config/omp-ninfer/api-key` only when the file is missing or empty, so saved
+  checkpoints (whose MACs are keyed by it) and the copies installed on clients stay valid; the guide
+  now describes deliberate rotation. Every client route's provider and config blocks, and the
+  troubleshooting fail-closed recipe, install `~/.omp/agent/models.yml` and `config.yml` when
+  missing, leave an identical file in place, and refuse by name to overwrite one that differs: a
+  macOS/Linux rerun used to replace the reader's own settings, and a native Windows rerun stopped
+  at the files its own earlier run had installed
   ([#100](https://github.com/alphastorm/omp-ninfer/issues/100)).
 - Stop the Windows guide at a failed native command: each tag clone and
   `py -3 scripts\verify_release.py --require-ready` ready gate throws on a nonzero exit, and the

@@ -672,37 +672,113 @@ class HostPreparationTests(unittest.TestCase):
 
 @unittest.skipIf(os.name == "nt", "executes POSIX shell blocks and checks POSIX file modes")
 class ClientConfigurationTests(unittest.TestCase):
-    """Section 7's macOS/Linux blocks install OMP's models.yml and config.yml. A reader reruns blocks
-    after a later failure and may already run OMP with their own providers and settings: a block
-    leaves an identical file alone and refuses to replace a different one, as the Windows blocks
-    refuse (omp-ninfer#100 item 6)."""
+    """Section 7's macOS/Linux blocks and the troubleshooting guide's fail-closed recipe install OMP's
+    models.yml and config.yml. A reader reruns blocks after a later failure and may already run OMP
+    with their own providers and settings: a block leaves an identical file alone and refuses to
+    replace a different one (omp-ninfer#100 item 6)."""
 
     @staticmethod
-    def install(home: Path, slug: str) -> subprocess.CompletedProcess:
-        block = {step.slug: block.text for step, block in documented_route.lane_blocks(
-            documented_route.DEFAULT_DOC, "rtx5090-macos-client")}[slug]
+    def blocks() -> dict[str, str]:
+        blocks = {step.slug: block.text for step, block in documented_route.lane_blocks(
+            documented_route.DEFAULT_DOC, "rtx5090-macos-client")}
+        blocks["troubleshooting"] = documented_route.extract(
+            ROOT / "docs" / "TROUBLESHOOTING.md", "OMP cannot resolve `ninfer-beta/q38-ninfer`").text
+        return blocks
+
+    @staticmethod
+    def install(home: Path, block: str) -> subprocess.CompletedProcess:
         return subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, capture_output=True,
                               text=True, timeout=30, env={"HOME": str(home), "PATH": os.environ["PATH"]})
 
     def test_a_rerun_keeps_an_identical_file_and_a_different_one_is_refused(self) -> None:
+        blocks = self.blocks()
         for slug, name, source in (("provider", "models.yml", "models.fragment.yml"),
-                                   ("fail-closed-config", "config.yml", "fail-closed.yml")):
+                                   ("fail-closed-config", "config.yml", "fail-closed.yml"),
+                                   ("troubleshooting", "config.yml", "fail-closed.yml")):
             with self.subTest(slug=slug), tempfile.TemporaryDirectory() as temporary:
                 home = Path(temporary)
                 target = home / ".omp" / "agent" / name
                 target.parent.mkdir(parents=True)  # section 6 creates it
                 shipped = (ROOT / "examples" / "manual-tunnel" / source).read_bytes()
                 for attempt in ("fresh", "rerun"):
-                    completed = self.install(home, slug)
+                    completed = self.install(home, blocks[slug])
                     self.assertEqual(completed.returncode, 0, f"{attempt}: {completed.stderr}")
                     self.assertEqual(target.read_bytes(), shipped)
                     self.assertEqual(target.stat().st_mode & 0o777, 0o600)
                 own = b"# the reader's own OMP settings\n"
                 target.write_bytes(own)
-                refused = self.install(home, slug)
+                refused = self.install(home, blocks[slug])
                 self.assertNotEqual(refused.returncode, 0)
                 self.assertIn(name, refused.stderr)
                 self.assertEqual(target.read_bytes(), own)
+
+
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
+@unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
+class WindowsClientConfigurationTests(unittest.TestCase):
+    """The Windows provider blocks follow section 7's rule for OMP's models.yml and config.yml: a rerun
+    after a later failure passes a block that already installed them, and a file that differs is the
+    reader's own, refused by name before either file is written (omp-ninfer#100 item 6)."""
+
+    # The earlier block each provider block reads, and the models fragment it installs.
+    LANES = {"rtx5090-windows-client": ("", "windows-docker-local/models.fragment.yml"),
+             "rtx4090-native": ("variant", "windows-native/models.fragment.yml"),
+             "rtx3090-native": ("variant", "windows-native/models-rtx3090.fragment.yml")}
+    # One strict session, as the route runner keeps. The RTX 5090 block copies the key out of WSL2
+    # and restricts it with icacls (stubs here); WindowsIdentity exists only on Windows.
+    SESSION = r"""param($Block, $ApiKeyFile)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+class FixtureIdentity { [string]$Name = 'fixture'; static [object] GetCurrent() { return [FixtureIdentity]::new() } }
+$accelerators = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
+$accelerators::Add('Security.Principal.WindowsIdentity', [FixtureIdentity])
+try { Invoke-Expression ([IO.File]::ReadAllText($Block)) } catch { 'STOPPED ' + $_.Exception.Message; exit 1 }
+'NEXT_BLOCK_REACHED'
+"""
+
+    def configure(self, root: Path, lane: str) -> tuple[bool, str]:
+        steps = {step.slug: block.text
+                 for step, block in documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)}
+        stubs = root / "bin"
+        stubs.mkdir(exist_ok=True)
+        for name, body in (("wsl.exe", "echo " + "0" * 64), ("icacls.exe", "exit 0")):
+            (stubs / name).write_text(f"#!/bin/sh\n{body}\n")
+            (stubs / name).chmod(0o755)
+        (root / "home").mkdir(exist_ok=True)
+        key = root / "api-key.txt"
+        key.write_text("1" * 64 + "\n")
+        block = root / "block.ps1"
+        block.write_text(steps.get(self.LANES[lane][0], "") + steps["provider"])
+        session = root / "session.ps1"
+        session.write_text(self.SESSION)
+        completed = subprocess.run(
+            [shutil.which("pwsh"), "-NoProfile", "-File", str(session), str(block), str(key)], cwd=ROOT,
+            capture_output=True, text=True, timeout=60,
+            env=dict(os.environ, HOME=str(root / "home"), PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+        return "NEXT_BLOCK_REACHED" in completed.stdout, completed.stdout + completed.stderr
+
+    def test_a_rerun_keeps_identical_files_and_a_different_one_is_refused(self) -> None:
+        own = b"# the reader's own OMP settings\n"
+        for lane, (_, fragment) in self.LANES.items():
+            with self.subTest(lane=lane), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                agent = root / "home" / ".omp" / "agent"
+                shipped = {agent / "models.yml": (ROOT / "examples" / fragment).read_bytes(),
+                           agent / "config.yml": (ROOT / "examples" / "manual-tunnel" / "fail-closed.yml").read_bytes()}
+                for attempt in ("fresh", "rerun"):
+                    reached, output = self.configure(root, lane)
+                    self.assertTrue(reached, f"{attempt}: {output}")
+                    self.assertEqual({path: path.read_bytes() for path in shipped}, shipped)
+                # The reader's own file, with the other one not yet installed.
+                for mine, other in ((agent / "models.yml", agent / "config.yml"),
+                                    (agent / "config.yml", agent / "models.yml")):
+                    mine.write_bytes(own)
+                    other.unlink()
+                    reached, output = self.configure(root, lane)
+                    self.assertFalse(reached, output)
+                    self.assertIn(mine.name, output)
+                    self.assertEqual(mine.read_bytes(), own)
+                    self.assertFalse(other.exists(), f"a refused block wrote {other.name}")
 
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")

@@ -384,17 +384,26 @@ $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 
 ## Point OMP at the native lane
 
+Install the lane's fragment and the fail-closed config into `~/.omp/agent`, then load the key. A
+rerun leaves identical files in place, and the block refuses to replace a `models.yml` or
+`config.yml` that differs:
+
 ```powershell
 $Provider = if ($VariantId -ceq 'rtx4090-windows-native') { 'ninfer-native-4090' } else { 'ninfer-native-3090' }
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+$ModelsSource = '.\examples\windows-native\models.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.$Provider instead of overwriting it."
 }
-Copy-Item .\examples\windows-native\models.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
@@ -573,17 +582,26 @@ $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 
 ## Point OMP at the RTX 3090 native lane
 
+Install the lane's fragment and the fail-closed config into `~/.omp/agent`, then load the key. A
+rerun leaves identical files in place, and the block refuses to replace a `models.yml` or
+`config.yml` that differs:
+
 ```powershell
 $Provider = 'ninfer-native-3090'
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw "Existing OMP models/config found; merge providers.$Provider and the retry mapping instead of overwriting them."
+$ModelsSource = '.\examples\windows-native\models-rtx3090.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.$Provider instead of overwriting it."
 }
-Copy-Item .\examples\windows-native\models-rtx3090.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
@@ -848,7 +866,9 @@ fi
 
 Native Windows OMP does not support `!cat`; copy or merge `providers.ninfer-beta` from
 [`examples/windows-docker-local/models.fragment.yml`](../examples/windows-docker-local/models.fragment.yml),
-install the fail-closed config, and load the key in the current PowerShell process:
+install the fail-closed config, and load the key in the current PowerShell process. A rerun leaves
+identical files in place, and the block refuses to replace a `models.yml` or `config.yml` that
+differs:
 
 ```powershell
 $Agent = Join-Path $HOME '.omp\agent'
@@ -863,11 +883,16 @@ if ($LASTEXITCODE -ne 0) { throw 'NInfer key ACL restriction failed' }
 
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
-if ((Test-Path $ModelsPath) -or (Test-Path $ConfigPath)) {
-  throw 'Existing OMP models/config found; merge providers.ninfer-beta and retry mappings instead of overwriting them.'
+$ModelsSource = '.\examples\windows-docker-local\models.fragment.yml'
+$ConfigSource = '.\examples\manual-tunnel\fail-closed.yml'
+if ((Test-Path $ModelsPath) -and (Get-FileHash $ModelsPath).Hash -cne (Get-FileHash $ModelsSource).Hash) {
+  throw "Existing $ModelsPath differs; merge providers.ninfer-beta instead of overwriting it."
 }
-Copy-Item .\examples\windows-docker-local\models.fragment.yml $ModelsPath
-Copy-Item .\examples\manual-tunnel\fail-closed.yml $ConfigPath
+if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileHash $ConfigSource).Hash) {
+  throw "Existing $ConfigPath differs; merge fail-closed.yml instead of overwriting it."
+}
+if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
+if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
 $env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
 Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
