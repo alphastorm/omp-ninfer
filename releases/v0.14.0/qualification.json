@@ -1,0 +1,376 @@
+{
+  "artifact_type": "omp_ninfer_release_qualification",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "documented_route_acceptance": {
+    "status": "pending",
+    "fresh_product_acceptance": false,
+    "scope": "Fresh candidate-bound external-install acceptance of all five routes, three unchanged stock OMP 18.12.6 clients and both beta.3 native public installs is required. No predecessor product acceptance is carried.",
+    "document_change": "Published QUICKSTART blocks remain on v0.13.1 at this stage. Any later candidate-guide block changes require documented_routes.document_change and fresh exact-byte route execution."
+  },
+  "scope": "All three published v0.7.0 beta.3 lanes bind exact engine source N with fresh lane/package evidence. RTX 5090 ships checked first-build server 55f0b95a under an explicit founder-approved reproducibility exception; natives ship unchanged checked EXEs with scan-clean same-version dependency DLLs, MTP3/A8 off and RTX 3090 at 350 W. Both fresh native 15-phase installed qualification chains passed. Runtime/installability eligibility is not candidate-bound external installation, current G4 approval or product publication.",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "behavioral_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "release_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "release_source_archive_sha256": "1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff",
+    "release_server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_artifact_bytes": 20437521664,
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "require_origin_auth": true
+  },
+  "native_runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/p14-integration",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "interpretation": "Fresh shipping-byte RC union and T1 hash parity qualify the changed 5090 binary; corrected-build op oracles and failed byte comparisons retain distinct identities. Native matched pre-cut T1/retrieval/strict C1 and A8 screens do not substitute for managed package qualification or candidate-bound public installs. The original base publication and unchanged stock-client host-free evidence keep their actual historical subjects. Both G4 councils and fresh route/platform acceptance remain separate.",
+  "eligibility_scope": "Runtime and lane-candidate installability only; no inherited external acceptance, review approval, publication date or publication authority.",
+  "remaining_release_gates": [
+    "external-install acceptance against the beta.3 image and both native public packages, including three stock clients and all five exact candidate routes",
+    "Current common-engine and product-tooling G4 dispositions",
+    "Composed external-install evidence and immutable platform/acceptance/manifest pins",
+    "Founder-owned product publication"
+  ],
+  "not_remeasured_gates": [
+    {
+      "id": "powered_quality_and_leak_shipping_profile",
+      "status": "not re-measured globally",
+      "reason": "Native A8 ON/OFF symmetric screens and measured PPL are bounded experimental comparisons; shipping A8 is off. T1 equality and numerical/grammar/ops checks are not a powered global output/quality/leak guarantee."
+    },
+    {
+      "id": "historical_agent_mix_parallel_and_long_sessions",
+      "status": "not re-measured",
+      "reason": "The fresh 84-role comparison is serial fixed-KV; C2 sibling/overlap gates and exact retrieval do not rerun historical OMP parallel/fanout/warm-arrival or long compaction campaigns."
+    },
+    {
+      "id": "full_depth_g2",
+      "status": "not re-measured",
+      "reason": "Fresh N T1 covers 84 frozen role cases and request/output hashes, not the historical depth corpus or automatic-KV production profile."
+    },
+    {
+      "id": "rtx5090_reproducibility",
+      "status": "founder-approved-exception",
+      "reason": "First and corrected pairs fail linked-ELF byte identity. Only the checked first-build 55f0b95a binary is shipped; no reproducible-5090 claim."
+    }
+  ],
+  "composition": {
+    "behavioral_qualification": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/rtx5090.json",
+      "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+      "provenance": {
+        "evidence_name": "rtx5090-v0140-profile-gates.json",
+        "evidence_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "evidence_post_freeze_uncommitted": true
+      },
+      "evidence_scope": "Fresh lane gates on the published beta.3 image and kept configuration; not product-route acceptance."
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "release_server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+      "oci_manifest_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+      "binary_package_sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa",
+      "binary_package_bytes": 547378794,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.3/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.3",
+      "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+      "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
+      "package_inventory": {
+        "repository_path": "releases/v0.14.0/qualification/packaging.json",
+        "sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1"
+      },
+      "runtime_base_receipt": {
+        "repository_path": "releases/v0.14.0/qualification/runtime-base.json",
+        "sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
+      },
+      "scope": "Fresh beta.3 archive/source/SPDX/image and ancestor-base reuse. Anonymous image pull is recorded separately by the lane operator; no independent anonymous archive/SPDX download or external-install claim."
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.14.0/qualification/rtx3090.json",
+        "sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "release_tag": "v0.7.0-qwen38-3090-beta.3",
+        "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+        "configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.14.0/qualification/rtx4090.json",
+        "sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "release_tag": "v0.7.0-qwen38-4090-beta.3",
+        "package_sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+        "configuration_sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "Fresh candidate-bound external-install composition is required after native beta.3 cuts and the lane pin."
+    },
+    "native_integration": {
+      "repository_path": "releases/v0.14.0/qualification/native-integration.json",
+      "sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4"
+    },
+    "native_publication": {
+      "repository_path": "releases/v0.14.0/qualification/native-publication.json",
+      "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+    }
+  },
+  "observed_gates": {
+    "integrated_cli": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/integrated-cli.json",
+      "sha256": "f1ff7c4a0968b652e2756c7628216b99f44e2ecb69b7896aeabc56f1d225b418",
+      "accepted_flags": 25,
+      "all_help_flags": 59,
+      "host_context_bytes": 21881405440,
+      "require_origin_auth": true
+    },
+    "g1_restart": {
+      "status": "passed-production-path",
+      "repository_path": "releases/v0.14.0/qualification/durability.json",
+      "sha256": "97bf32ee292b49aa613f3b7b8e7ec3ca90dd06e855d0254bcf917e16d9ce3348",
+      "minimum_checkpoint_hit_tokens": 16384,
+      "checkpoint_hit_tokens": 20926,
+      "continuation_bytes": 27,
+      "byte_identical": true,
+      "four_boots": true
+    },
+    "g2_decode": {
+      "status": "passed-performance-comparison",
+      "repository_path": "releases/v0.14.0/qualification/decode-parity.json",
+      "sha256": "73dd8c31d3fc2854775357bf10ebdf6240421c1fe20f49d08fe3d7dd6a1c09e4",
+      "observed_ratio": 1.0161571616047604,
+      "scope": "84-role serial fixed-KV benchmark, request/output hash parity; not automatic-KV production or a historical depth campaign."
+    },
+    "g3_integrated_qualification": {
+      "status": "passed-scoped",
+      "ctest": {
+        "repository_path": "releases/v0.14.0/qualification/build.json",
+        "sha256": "61937724af4bd921c71d09231fc5e2bb0c7f2ce8f431e65fea421b0a8d5af413"
+      },
+      "c2_and_32gb": {
+        "repository_path": "releases/v0.14.0/qualification/concurrency.json",
+        "sha256": "110201935b3752905fdff6e98af7504d5a9825ccacd36cb5b112139c75eefabb"
+      },
+      "schema_and_product_protocol": {
+        "repository_path": "releases/v0.14.0/qualification/protocol.json",
+        "sha256": "48d9aecab25c707a742fb967c7491a2710bfc55e8eec5fbbc4514fd74f94dea3"
+      },
+      "host_tests": {
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "dense_tests": {
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pressure_overlap_seconds": 35.5524,
+      "scope": "Exact first-build N RC union. No inherited fault-injection matrix or prior remediation proof.",
+      "native_windows": {
+        "repository_path": "releases/v0.14.0/qualification/native-integration.json",
+        "sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4"
+      }
+    },
+    "rtx5090": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/rtx5090.json",
+      "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+      "prefill_prompt_tokens": 130048,
+      "exact_retrieval": true,
+      "wall_seconds": 57.0,
+      "server_prefill_seconds": 56.41564541099997,
+      "decode_completion_tokens": 2048,
+      "decode_tokens_per_second_server": 182.49,
+      "decode_tokens_per_second_wall": 178.78,
+      "kv_capacity_tokens": 146368,
+      "vram_used_mib_idle": 30848,
+      "agent_protocol_across_docker_restart": "passed"
+    },
+    "runtime_publication": {
+      "status": "passed",
+      "runtime_image": {
+        "repository_path": "releases/v0.14.0/qualification/runtime-publication.json",
+        "sha256": "204d28a40ff07beaa8d8303dab306331ab2198fa5c8bb105f8fce3d8b63de6ef"
+      },
+      "runtime_base_reuse": {
+        "repository_path": "releases/v0.14.0/qualification/runtime-base.json",
+        "sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
+      },
+      "product_publication_authorized": false,
+      "native_components": {
+        "repository_path": "releases/v0.14.0/qualification/native-publication.json",
+        "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+      }
+    },
+    "packaging": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/packaging.json",
+      "sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1",
+      "scope": "Fresh 5090 local package inventory; publication and external-install acceptance are distinct.",
+      "native_components": {
+        "repository_path": "releases/v0.14.0/qualification/native-publication.json",
+        "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+      }
+    },
+    "stock_client_review": {
+      "status": "passed-host-free-only",
+      "repository_path": "releases/v0.14.0/qualification/stock-omp.json",
+      "sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
+      "descriptor": {
+        "repository_path": "releases/v0.14.0/qualification/client-components.json",
+        "sha256": "29ba7a4b9be33328fc40a5cbb9931bb306535024189c7f4c28ea28710cf023e4"
+      },
+      "scope": "Byte-identical historical review/descriptor of unchanged stock OMP 18.12.6; no current platform or public-route acceptance."
+    },
+    "native_ci": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/native-ci.json",
+      "sha256": "19a8152058122ea304d789b440f9c7229a3903ce75950238a832a03d29f30eed",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "run_id": 40528693778
+    },
+    "native_packaging": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/native-publication.json",
+      "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7",
+      "outer_hashed_entries_per_lane": 10,
+      "total_files_per_lane": 11,
+      "scope": "Both actual published beta.3 sets bind package, source, SPDX file inventory, distinct canonical dependency CycloneDX, immutable build receipt and four support scripts; build hardware-pending capture is not altered."
+    },
+    "native_protocol": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/native-integration.json",
+      "sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4",
+      "schema_version": 2,
+      "contract": "product",
+      "chat_json_schema": true,
+      "responses_json_schema": true,
+      "scope": "Both fresh installed normal/pressure canonical wrappers and payloads pass, retaining scratch identities and public listen-port-only equivalence."
+    },
+    "g4_review": {
+      "status": "pending",
+      "repository_path": "releases/v0.14.0/review/runtime-ledger.json",
+      "sha256": "2d4d41e6a587df3b99e5227b04569ef9c0b37425df4643ecae7578df43ffa577",
+      "scope": "Current common-engine and product-tooling councils are separate; no prior review approval transfers."
+    },
+    "changed_client_acceptance": {
+      "status": "pending",
+      "scope": "All five candidate-bound routes, three current clients and both native public installs remain external-install gates."
+    },
+    "staging": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/staging.json",
+      "sha256": "a1ffdd29b6d6bf359b3a3751c71ea90dd71662e1ac3579d2bbdb0b971cd3576a",
+      "stage": "draft",
+      "scope": "Actual complete source-N runtime and both native bind/copy/rebind preparation; root promotion and acceptance are separate."
+    },
+    "rtx3090": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/rtx3090.json",
+      "sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "public_configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+      "qualified_scratch_configuration_sha256": "f70269173c3f907e5f0c2a5aabff66de5270d9087a821413971964477e043bfd",
+      "public_package_executed": false,
+      "decode_tokens_per_second": 90.64278748524055,
+      "long_session_prompt_tokens": 130048,
+      "long_session_seconds": 187.87808290000248,
+      "explicit_restart_cached_tokens": 1647,
+      "graceful_restart_cached_tokens": 1650,
+      "rollback_status": "not_applicable",
+      "rollback_directions": 0,
+      "qualified_power_limit_w": 350,
+      "restored_power_limit_w": 370,
+      "scope": "Fresh full exact-source native installed qualification, actual public config/package with distinct scratch port/config/package identities. Not candidate-bound external-install acceptance or council approval."
+    },
+    "rtx4090": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/rtx4090.json",
+      "sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "public_configuration_sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+      "qualified_scratch_configuration_sha256": "08f9a23f614b23a612c48f5c249e1def43bad370a0bd8a2ab66d20f6fcd2fb22",
+      "public_package_executed": false,
+      "decode_tokens_per_second": 151.54126942332869,
+      "long_session_prompt_tokens": 130048,
+      "long_session_seconds": 81.78437300000223,
+      "explicit_restart_cached_tokens": 1647,
+      "graceful_restart_cached_tokens": 1650,
+      "rollback_status": "not_applicable",
+      "rollback_directions": 0,
+      "qualified_power_limit_w": 0,
+      "restored_power_limit_w": 450,
+      "scope": "Fresh full exact-source native installed qualification, actual public config/package with distinct scratch port/config/package identities. Not candidate-bound external-install acceptance or council approval."
+    },
+    "native_source_and_profiles": {
+      "status": "passed",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "release_version": "0.7.0-beta.3",
+      "configuration_hash_algorithm": "SHA256 of the exact UTF-8/LF packaged server-config.json bytes",
+      "public_port": 18082,
+      "public_profiles": {
+        "rtx4090": {
+          "repository_path": "releases/v0.14.0/profiles/rtx4090/server-config.json",
+          "sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+          "release_id": "qwen38-4090-native-v0.7.0-beta.3",
+          "package_build_receipt_sha256": "b9e287bfa0c8c703be4f17baf604748fe1c89e6a89c4fda31ca005f3a6382036"
+        },
+        "rtx3090": {
+          "repository_path": "releases/v0.14.0/profiles/rtx3090/server-config.json",
+          "sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+          "release_id": "qwen38-3090-native-v0.7.0-beta.3",
+          "package_build_receipt_sha256": "b6950f5b10768a96740b32fd7dedc643e5959f32324ca9d2ebd7ac19d3c239e8"
+        }
+      },
+      "scope": "Actual public beta.3 package bytes; distinct listen-port-only installed scratch configs keep their own hashes."
+    },
+    "native_build_and_package": {
+      "status": "passed",
+      "repository_path": "releases/v0.14.0/qualification/native-integration.json",
+      "sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4",
+      "windows_host_tests_per_architecture": 90,
+      "package_host_units": 78,
+      "linux_build_architectures": [
+        "86",
+        "89"
+      ],
+      "shipping_exes_unchanged_after_privacy_remediation": true,
+      "scope": "Exact-source host/package/Linux build checks reused honestly after byte-identical EXE proof; fresh neutral 34-file raw-byte double builds and both full installed chains completed."
+    }
+  },
+  "receipt_audit": {
+    "repository_path": "releases/v0.14.0/qualification/receipt-audit.json",
+    "sha256": "97afc04cb43b1f8011ae62afc6bc2b7383989a84553b5b8499aa216bc6047cd6"
+  }
+}

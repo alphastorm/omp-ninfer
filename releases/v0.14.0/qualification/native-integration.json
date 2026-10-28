@@ -1,0 +1,962 @@
+{
+  "artifact_type": "omp_ninfer_native_integrated_qualification",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "status": "passed",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/p14-integration",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
+    "model_artifact_bytes": 20437521664
+  },
+  "scope": "Fresh exact-source N fork CI, Windows/Linux host/package checks, remediated deterministic neutral closures, both full 15-phase installed native chains, normal/pressure canonical product protocol, long context, authenticated restart, OMP, security and restoration. Actual public profiles/packages and scratch listen-port-only equivalents retain separate identities. Public-package execution, current G4 and candidate-bound external installation are not inferred.",
+  "source_ci": {
+    "repository_path": "releases/v0.14.0/qualification/native-ci.json",
+    "sha256": "19a8152058122ea304d789b440f9c7229a3903ce75950238a832a03d29f30eed",
+    "run_id": 40528693778
+  },
+  "build": {
+    "targets": [
+      "ninfer",
+      "ninfer-serve",
+      "ninfer_bench"
+    ],
+    "host_checks": {
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "windows_ctest": {
+        "89": {
+          "passed": true,
+          "cases": 90,
+          "passed_cases": 90,
+          "receipt": "windows-host-sm89.json",
+          "attempts": [
+            {
+              "passed": 89,
+              "reason": "WMI console stdin remained open; stdin arithmetic oracle waited for EOF",
+              "failed": 1,
+              "receipt": "windows-host-sm89.json.attempt1"
+            },
+            {
+              "passed": 1,
+              "change": "private runner redirects CTest stdin from NUL; only failed case rerun",
+              "failed": 0,
+              "receipt": "windows-host-sm89-stdin-retry.xml"
+            }
+          ]
+        },
+        "86": {
+          "passed": true,
+          "cases": 90,
+          "passed_cases": 90,
+          "receipt": "windows-host-sm86.json",
+          "attempts": []
+        }
+      },
+      "windows_package_units": {
+        "passed": true,
+        "recovery": {
+          "source_changes": 0,
+          "historical_fixtures": [
+            "f08309da",
+            "075d442e",
+            "03f56e58"
+          ],
+          "transport": "cmd redirects stderr as bytes and closes stdin, bypassing PowerShell native stderr ErrorAction Stop"
+        },
+        "exit": 0,
+        "raw_log": "windows-package-host-retry.log",
+        "schema": "ninfer-integrated-windows-package-host/1",
+        "source": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "tests": 78,
+        "gpu_compute": false
+      },
+      "linux_compiles": {
+        "89": {
+          "exit": 0,
+          "targets": [
+            "ninfer",
+            "ninfer-serve",
+            "ninfer_bench"
+          ],
+          "binary_count": 3,
+          "seconds": 820,
+          "receipt": "linux-sm89.json"
+        },
+        "86": {
+          "exit": 0,
+          "targets": [
+            "ninfer",
+            "ninfer-serve",
+            "ninfer_bench"
+          ],
+          "binary_count": 3,
+          "seconds": 834,
+          "receipt": "linux-sm86.json"
+        }
+      },
+      "shipping_input_verification": "shipping-input-verification.json",
+      "dependency_closure_sbom": "dependency-closure.cdx.json"
+    },
+    "host_checks_provenance": {
+      "evidence_name": "host-checks.json",
+      "sha256": "9ddcc5af52c6df8952fe8992d55911d99a037af7c7284284535d6aac08d0d1d5",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    },
+    "neutral_dependencies": {
+      "substituted_dlls": 11,
+      "resolved_installed_ports": 12,
+      "group64_a8": "OFF",
+      "scope": "Same-version published v0.13.1 scan-clean DLL builds replace private-path-bearing dependency builds; libjpeg-turbo 3.2.0 remains new. Exact source and every engine EXE are unchanged. Host matrices were not rerun after the privacy substitution; direct EXE identity and fresh full installed chains bind the reuse.",
+      "provenance": {
+        "evidence_name": "REPORT.md",
+        "sha256": "5803ea8a73b7200ba58f375975023238e24dea33501c3712699428011b3bc3dd",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "evidence_post_freeze_uncommitted": true
+      }
+    },
+    "windows": {
+      "sm89": {
+        "host_passed": 90,
+        "host_total": 90,
+        "host_matrix_reused_after_private_dependency_substitution": true,
+        "closure_files": 34,
+        "round1_round2_raw_bytes_identical": true,
+        "checked_exes_raw_bytes_identical": [
+          {
+            "name": "ninfer-perplexity.exe",
+            "old_sha256": "3923f46fb2bc8f8bce3ab3b7c0669fe3d8dd8191cd5f5f89d26a97167e325398",
+            "new_sha256": "3923f46fb2bc8f8bce3ab3b7c0669fe3d8dd8191cd5f5f89d26a97167e325398",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer-serve.exe",
+            "old_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9",
+            "new_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer.exe",
+            "old_sha256": "7c1ef118556bf37a833b3c29dc4a5f1f69bd3f1d2191c114de85b0dabbbdb4f2",
+            "new_sha256": "7c1ef118556bf37a833b3c29dc4a5f1f69bd3f1d2191c114de85b0dabbbdb4f2",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_bench.exe",
+            "old_sha256": "a73fafb3d288ed19dcf7ec1e441a66a40e409340151607508becff32ad82a9d4",
+            "new_sha256": "a73fafb3d288ed19dcf7ec1e441a66a40e409340151607508becff32ad82a9d4",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_add_q5_a16_test.exe",
+            "old_sha256": "449d45a80d7bc696055ef9240b28bf64a709a667a0aacdf802b007414e0c6bb7",
+            "new_sha256": "449d45a80d7bc696055ef9240b28bf64a709a667a0aacdf802b007414e0c6bb7",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_split_multi_output_test.exe",
+            "old_sha256": "973f83cecb038423766f279a924f5dbfb81ecc7477b06fa7b1ecb6c39f9b926a",
+            "new_sha256": "973f83cecb038423766f279a924f5dbfb81ecc7477b06fa7b1ecb6c39f9b926a",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_split_two_output_test.exe",
+            "old_sha256": "7edfdc40f70ab80385883ccea5f06ab19c2e39f034be497f112b69db7a4d54f3",
+            "new_sha256": "7edfdc40f70ab80385883ccea5f06ab19c2e39f034be497f112b69db7a4d54f3",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_swiglu_q4_a16_test.exe",
+            "old_sha256": "4ec2a680831378c38f8996ed2fcb2cfe9e325200c9999f9a95828b88647c4db7",
+            "new_sha256": "4ec2a680831378c38f8996ed2fcb2cfe9e325200c9999f9a95828b88647c4db7",
+            "raw_bytes_equal": true
+          }
+        ],
+        "substituted_dlls": [
+          {
+            "name": "avcodec-62.dll",
+            "relative_path": "x64-windows/bin/avcodec-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "80e67b5721703244d6753227fa10b2dd1d4dabe75b15f7c07fb08c2e4e60a610",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avcodec-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avdevice-62.dll",
+            "relative_path": "x64-windows/bin/avdevice-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "751f00d0bc33f997a38353b1fac43b8b06312d4137d330586e0e18803a0d4dca",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avdevice-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avfilter-11.dll",
+            "relative_path": "x64-windows/bin/avfilter-11.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "47b55ef784b7ccc6acd8412affd4a1ecba26619c1e85b3919e94e40e9425daa7",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avfilter-11.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avformat-62.dll",
+            "relative_path": "x64-windows/bin/avformat-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "10d91b88c5dc80870076940c3db52d5fab32a4e813a5e813665d3620ff89f467",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avformat-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avutil-60.dll",
+            "relative_path": "x64-windows/bin/avutil-60.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "b5478ffd7099bcdf82cbd843ef15a472ad2438942b7d0c19d772ab58e582373b",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avutil-60.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "hwloc-15.dll",
+            "relative_path": "x64-windows/bin/hwloc-15.dll",
+            "package": "hwloc",
+            "version": "2.11.2",
+            "sha256": "0d75f683730e2e3c14df16612ea6b44346524dc467abad53fa68d5839c58aab7",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/hwloc-15.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "libcurl.dll",
+            "relative_path": "x64-windows/bin/libcurl.dll",
+            "package": "curl",
+            "version": "8.21.0#1",
+            "sha256": "cd566c60f47dd047d205373504507a7fb92855cdff193255dfb41312fc5d0988",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/libcurl.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "pkgconf-8.dll",
+            "relative_path": "x64-windows/bin/pkgconf-8.dll",
+            "package": "pkgconf",
+            "version": "3.0.3",
+            "sha256": "838d19b7baa4055377fc8a09b7206b8e107168560a06edaae4fc8eb48c18837c",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/pkgconf-8.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "swresample-6.dll",
+            "relative_path": "x64-windows/bin/swresample-6.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "24db69bdca1e9c49b7715021ddce9eeaaf4ab3bddadd0b11132309d2e54c1894",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/swresample-6.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "swscale-9.dll",
+            "relative_path": "x64-windows/bin/swscale-9.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "eaf93292cd9a9e235c4760807abc0b5abffccc169c3e6c120d58f8cde31a3458",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/swscale-9.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "z.dll",
+            "relative_path": "x64-windows/bin/z.dll",
+            "package": "zlib",
+            "version": "1.3.2#1",
+            "sha256": "3a87f7f57e9ce0abac602db28406904b3ffc9bc33636e6967a1444d3952f73cf",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/z.dll",
+            "rtx3090_identical": true
+          }
+        ],
+        "final_receipt_sha256": "c746edc4e8febe469157c407643b8b0a92c511cb8bde44914de45456463179ff",
+        "server_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9"
+      },
+      "sm86": {
+        "host_passed": 90,
+        "host_total": 90,
+        "host_matrix_reused_after_private_dependency_substitution": true,
+        "closure_files": 34,
+        "round1_round2_raw_bytes_identical": true,
+        "checked_exes_raw_bytes_identical": [
+          {
+            "name": "ninfer-perplexity.exe",
+            "old_sha256": "e43de105323d2538733d222714dc7ee5d35e24c7f5d35bec5da14ff6824168d1",
+            "new_sha256": "e43de105323d2538733d222714dc7ee5d35e24c7f5d35bec5da14ff6824168d1",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer-serve.exe",
+            "old_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+            "new_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer.exe",
+            "old_sha256": "119591957930a34814b27d49cc65f8f5a4922dbc566df977be8b8f27b718a982",
+            "new_sha256": "119591957930a34814b27d49cc65f8f5a4922dbc566df977be8b8f27b718a982",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_bench.exe",
+            "old_sha256": "d0ce4034c58f5b8452cfc7e59f2b5b9566b4bb8e8b8cd89b88b0876f924e9882",
+            "new_sha256": "d0ce4034c58f5b8452cfc7e59f2b5b9566b4bb8e8b8cd89b88b0876f924e9882",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_add_q5_a16_test.exe",
+            "old_sha256": "b4e0087d945b13931e7b1ad4e6fd0cdd7468f4690edd63e5b472d203aa6a3356",
+            "new_sha256": "b4e0087d945b13931e7b1ad4e6fd0cdd7468f4690edd63e5b472d203aa6a3356",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_split_multi_output_test.exe",
+            "old_sha256": "81e1f0e6952921001171310acd7c67929f170e6d9c26ca2f338c3faaab45c401",
+            "new_sha256": "81e1f0e6952921001171310acd7c67929f170e6d9c26ca2f338c3faaab45c401",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_split_two_output_test.exe",
+            "old_sha256": "09becf74ba332a957e797bcd8d5c1ce591a8a9625fb03cb81764be37c095ed33",
+            "new_sha256": "09becf74ba332a957e797bcd8d5c1ce591a8a9625fb03cb81764be37c095ed33",
+            "raw_bytes_equal": true
+          },
+          {
+            "name": "ninfer_linear_swiglu_q4_a16_test.exe",
+            "old_sha256": "cbb9c61f12c1f8a9d52712ae1a5b71677b8a0805722a6a053c77cb5f1b1ad1af",
+            "new_sha256": "cbb9c61f12c1f8a9d52712ae1a5b71677b8a0805722a6a053c77cb5f1b1ad1af",
+            "raw_bytes_equal": true
+          }
+        ],
+        "substituted_dlls": [
+          {
+            "name": "avcodec-62.dll",
+            "relative_path": "x64-windows/bin/avcodec-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "80e67b5721703244d6753227fa10b2dd1d4dabe75b15f7c07fb08c2e4e60a610",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avcodec-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avdevice-62.dll",
+            "relative_path": "x64-windows/bin/avdevice-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "751f00d0bc33f997a38353b1fac43b8b06312d4137d330586e0e18803a0d4dca",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avdevice-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avfilter-11.dll",
+            "relative_path": "x64-windows/bin/avfilter-11.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "47b55ef784b7ccc6acd8412affd4a1ecba26619c1e85b3919e94e40e9425daa7",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avfilter-11.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avformat-62.dll",
+            "relative_path": "x64-windows/bin/avformat-62.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "10d91b88c5dc80870076940c3db52d5fab32a4e813a5e813665d3620ff89f467",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avformat-62.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "avutil-60.dll",
+            "relative_path": "x64-windows/bin/avutil-60.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "b5478ffd7099bcdf82cbd843ef15a472ad2438942b7d0c19d772ab58e582373b",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/avutil-60.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "hwloc-15.dll",
+            "relative_path": "x64-windows/bin/hwloc-15.dll",
+            "package": "hwloc",
+            "version": "2.11.2",
+            "sha256": "0d75f683730e2e3c14df16612ea6b44346524dc467abad53fa68d5839c58aab7",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/hwloc-15.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "libcurl.dll",
+            "relative_path": "x64-windows/bin/libcurl.dll",
+            "package": "curl",
+            "version": "8.21.0#1",
+            "sha256": "cd566c60f47dd047d205373504507a7fb92855cdff193255dfb41312fc5d0988",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/libcurl.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "pkgconf-8.dll",
+            "relative_path": "x64-windows/bin/pkgconf-8.dll",
+            "package": "pkgconf",
+            "version": "3.0.3",
+            "sha256": "838d19b7baa4055377fc8a09b7206b8e107168560a06edaae4fc8eb48c18837c",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/pkgconf-8.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "swresample-6.dll",
+            "relative_path": "x64-windows/bin/swresample-6.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "24db69bdca1e9c49b7715021ddce9eeaaf4ab3bddadd0b11132309d2e54c1894",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/swresample-6.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "swscale-9.dll",
+            "relative_path": "x64-windows/bin/swscale-9.dll",
+            "package": "ffmpeg",
+            "version": "8.1.2#3",
+            "sha256": "eaf93292cd9a9e235c4760807abc0b5abffccc169c3e6c120d58f8cde31a3458",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/swscale-9.dll",
+            "rtx3090_identical": true
+          },
+          {
+            "name": "z.dll",
+            "relative_path": "x64-windows/bin/z.dll",
+            "package": "zlib",
+            "version": "1.3.2#1",
+            "sha256": "3a87f7f57e9ce0abac602db28406904b3ffc9bc33636e6967a1444d3952f73cf",
+            "source_package_sha256": "ffaa410aa1cad9055509ea1c5d1fcc0c097b94170e41a28bab40585e83666b68",
+            "source_member": "ninfer-rtx4090-native-v0.7.0-beta.2-windows-x86_64-cuda13.3-rtx4090/bin/z.dll",
+            "rtx3090_identical": true
+          }
+        ],
+        "final_receipt_sha256": "7e11649ae4e04a7222df676bc77af4cd608fe54b2f5d9c9efa5a772826b3e49c",
+        "server_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3"
+      }
+    }
+  },
+  "lanes": {
+    "rtx4090": {
+      "component_tag": "v0.7.0-qwen38-4090-beta.3",
+      "release_id": "qwen38-4090-native-v0.7.0-beta.3",
+      "build_profile": "native-v0.7.0-beta.3-rtx4090",
+      "package": {
+        "filename": "ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+        "sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+        "bytes": 954798284
+      },
+      "server_binary_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9",
+      "public_profile": {
+        "repository_path": "profiles/v0.14.0/rtx4090/server-config.json",
+        "sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+        "admission_headroom_mib": 640,
+        "checkpoint_require_origin_auth": true,
+        "concurrency": 1,
+        "device_state_slots": 2,
+        "gpu_keep_warm_ms": 60000,
+        "graceful_stop_timeout_seconds": 900,
+        "host_context_bytes": 15506063360,
+        "host_context_mib": "14787.734375",
+        "kv_capacity": 131072,
+        "kv_dtype": "int8",
+        "managed_stop": "stop-event",
+        "max_context": 131072,
+        "prefill_chunk": 2048,
+        "public_model_id": "qwen3.8-27b",
+        "speculative_backend": "mtp",
+        "speculative_draft_tokens": 3
+      },
+      "source_archive": {
+        "name": "ninfer-rtx4090-native-v0.7.0-beta.3-source.tar.gz",
+        "sha256": "61ffe2be11ad27055fe1a1c361414988638b37578415ebe34cdf4e42642a0f1a",
+        "bytes": 12238132
+      },
+      "package_spdx": {
+        "name": "ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.spdx.json",
+        "sha256": "e37f562032deb824459a978e64399138aed6b4afa74e559423d7025321473976",
+        "format": "SPDX-2.3"
+      },
+      "dependency_cyclonedx": {
+        "name": "ninfer-rtx4090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx4090.cdx.json",
+        "sha256": "02eb41f3569e68f5d95095467f9fc69a30715a23e124fa8245510f344210db04",
+        "format": "CycloneDX-1.5",
+        "runtime_source_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "generator_sha256": "c7960aea433d28d2ab37d678bb1f347cee6e7d7853b97c3472633d6bc9e75610",
+        "inputs": {
+          "vcpkg_manifest_sha256": "b6e9528c9bb0f30870199193330f633411774ff5fac9946fc95d13678c215b44",
+          "vcpkg_resolved_sha256": "2b6b74771f377b8196cd5fb466467a3379fbd137c22798f22759d1d4cef0232f",
+          "cuda_inventory_sha256": "e52c39f7a326a396c3ab1e71a93f172396a9eb4a599d51704e477125c061553e",
+          "third_party_inventory_sha256": "0a771dc2b1703003eef362baa7392ba7a43865af04a37fc1acd2d138ef6963d5",
+          "runtime_inventory_sha256": "48b08bbe24d154c1eba4abd8bf432165889b50b60c253fe7c0baca882e74d538"
+        }
+      },
+      "package_build_receipt": {
+        "artifact_type": "ninfer_windows_package_build_receipt",
+        "schema_version": 2,
+        "sha256": "b9e287bfa0c8c703be4f17baf604748fe1c89e6a89c4fda31ca005f3a6382036",
+        "qualification_status": "hardware-pending",
+        "qualification_status_authority": "immutable-pre-hardware-package-build"
+      },
+      "hardware_qualification": {
+        "status": "passed",
+        "qualified_utc": "2026-10-28T02:41:25Z",
+        "beta_qualified": true,
+        "recorded_phase_count": 15,
+        "repository_path": "releases/v0.14.0/qualification/rtx4090.json",
+        "sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0",
+        "phase_receipts": {
+          "benchmark_c1": {
+            "receipt_sha256": "6036e8e49645dd304d6e3dff5b7bfd002ae89ea7918b17b5e00db7491a4b6aca",
+            "status": "passed"
+          },
+          "context_128k": {
+            "receipt_sha256": "0e68b4eb38b50bd7e215df9a461a661090e56c971b82fc6365fa67ab50de913c",
+            "status": "passed"
+          },
+          "neutral_build": {
+            "receipt_sha256": "c2f05759a099b845f46fa7e140766062e4b59d030c600e8142b2acd50b62f29b",
+            "status": "passed"
+          },
+          "omp": {
+            "receipt_sha256": "06d423c6fe0d25d847c6a3fec267366982a1ae0907f35ac8a3fbb37c7c1db6e2",
+            "status": "passed"
+          },
+          "package": {
+            "receipt_sha256": "899e457129cbf1cc507c3b837a71ef2bfe9d253695908a6020f0c12a65487c33",
+            "status": "passed"
+          },
+          "preflight": {
+            "receipt_sha256": "14d96128f4a50b504fcdbcd6ca0d3cb1bb20993ce2099d8480e07a76976e6387",
+            "status": "passed"
+          },
+          "pressure_protocol": {
+            "receipt_sha256": "cfc9a9b73b5d51af1c298203b4d105a72c65afcd502515c8b6ab7e03709db4b1",
+            "status": "passed"
+          },
+          "private_path_scan": {
+            "receipt_sha256": "b74ad8195471feeaf06e69d9bb785a42d9a71608c99155f59f1987ab343b1bd3",
+            "status": "passed"
+          },
+          "protocol": {
+            "receipt_sha256": "b0a73879e3be006cc8c769baa8ccabd679229ce7c896181f6c22bfa8fb45ef10",
+            "status": "passed"
+          },
+          "receipt": {
+            "receipt_sha256": "4a238e3aa55944bbe351b8c5e2e730d474a9a9ea1782c96513bc26a403df166b",
+            "status": "passed"
+          },
+          "restart": {
+            "receipt_sha256": "23e1300f9f5a4513d50357ed0c3bc8b06f6d5a3c50a6c3cf1d4c5437fb23ed82",
+            "status": "passed"
+          },
+          "restore": {
+            "receipt_sha256": "14f786408ccf62fdfefa10039fe0349de5ae20e0ef9e367df3eea0572fd4b0c8",
+            "status": "passed"
+          },
+          "rollback": {
+            "receipt_sha256": "7092455d89872f7465252032fc392f4c63cebf53d39cb8c58b646d761c066904",
+            "status": "passed"
+          },
+          "security": {
+            "receipt_sha256": "a84188f6f076fc9b2b22842856cd4b957a53d6fd432a5453437b2739f3444107",
+            "status": "passed"
+          },
+          "transfer_install": {
+            "receipt_sha256": "67bca2bb469c52bda59cdf16fc2711f1062b9813e5a996f64810d54ed33347bb",
+            "status": "passed"
+          }
+        }
+      },
+      "benchmark_c1": {
+        "completion_tokens": 1024,
+        "computed_prefill_tokens": 4541,
+        "decode_tokens_per_second": 151.54126942332869,
+        "max_gpu_utilization_percent": 100,
+        "max_memory_used_mib": 22847,
+        "max_power_w": 467.27,
+        "max_temperature_c": 65.84,
+        "mtp_acceptance_percent": 87.58865248226951,
+        "prefill_tokens_per_second": 2195.362616760078,
+        "prompt_tokens": 4541,
+        "status": "passed",
+        "wall_seconds": 8.879761899996083
+      },
+      "long_session": {
+        "completion_tokens": 17,
+        "elapsed_seconds": 81.78437300000223,
+        "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+        "prompt_tokens": 130048,
+        "status": "passed"
+      },
+      "persistence": {
+        "cached_input_tokens": 1647,
+        "restart_seconds": 34.06216190000123,
+        "process_replaced": true,
+        "restart_counters_reset": true,
+        "status": "passed"
+      },
+      "managed_stop_flush_cached_tokens": 1650,
+      "canonical_protocol": {
+        "normal_status": "passed",
+        "pressure_status": "passed",
+        "structured_output": {
+          "chat_json_schema": true,
+          "responses_json_schema": true
+        }
+      },
+      "scratch_equivalence": {
+        "configuration_delta": {
+          "path": "/listen/port",
+          "public": 18082,
+          "scratch": 18210
+        },
+        "identical_binaries": {
+          "benchmark_sha256": "a73fafb3d288ed19dcf7ec1e441a66a40e409340151607508becff32ad82a9d4",
+          "ninfer_sha256": "7c1ef118556bf37a833b3c29dc4a5f1f69bd3f1d2191c114de85b0dabbbdb4f2",
+          "server_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9"
+        },
+        "identical_support_assets": {
+          "controller_sha256": "bb69183f6d2876b867134f82874a1370125d1d10f64703f662fdf43f7f1d4b04",
+          "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "installer_sha256": "f9ced520968196afc07b76b5a3264e9ec61d5f2b0d122242f096ee676861cbd9",
+          "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+        },
+        "observed_identity": {
+          "binary_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9",
+          "build_profile": "native-v0.7.0-beta.3-rtx4090",
+          "build_type": "Release",
+          "config_sha256": "08f9a23f614b23a612c48f5c249e1def43bad370a0bd8a2ab66d20f6fcd2fb22",
+          "cuda_architecture": "89",
+          "cuda_compiler": "NVIDIA-13.3.73",
+          "cuda_toolkit": "13.3.73",
+          "cxx_compiler": "MSVC-19.44.35228.0",
+          "deployment_profile": "qwen38-4090-native-v0.7.0-beta.3",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+          "model_id": "qwen3.8-27b",
+          "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+          "source_dirty": false,
+          "target": "Qwen3_5ForCausalLM",
+          "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+          "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        },
+        "production_route_activation_performed": false,
+        "public_configuration_sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+        "public_package_executed": false,
+        "public_package_sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+        "scratch_configuration_sha256": "08f9a23f614b23a612c48f5c249e1def43bad370a0bd8a2ab66d20f6fcd2fb22",
+        "scratch_package_sha256": "b3db62e5ff365042bfc51912e003e2db8c7e8e6ee700667ce176cb380a8c5821",
+        "startup_attestation": {
+          "gpu_index": 0,
+          "gpu_name": "NVIDIA GeForce RTX 4090",
+          "gpu_uuid_verified": true,
+          "request_log_schema": 30
+        },
+        "status": "passed"
+      },
+      "restoration": {
+        "gpu_lease_active": false,
+        "incumbent_state": "untouched",
+        "power_limit_w": 450,
+        "process_count": 0,
+        "status": "passed",
+        "task_state": "Ready"
+      },
+      "rollback": {
+        "active_release": "qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817",
+        "directions": 0,
+        "reason": "first release of the lineage",
+        "status": "not_applicable"
+      },
+      "selection": {
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "group64_a8": "OFF",
+        "qualified_power_limit_w": 0,
+        "restored_power_limit_w": 450
+      }
+    },
+    "rtx3090": {
+      "component_tag": "v0.7.0-qwen38-3090-beta.3",
+      "release_id": "qwen38-3090-native-v0.7.0-beta.3",
+      "build_profile": "native-v0.7.0-beta.3-rtx3090",
+      "package": {
+        "filename": "ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+        "sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+        "bytes": 971496678
+      },
+      "server_binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+      "public_profile": {
+        "repository_path": "profiles/v0.14.0/rtx3090/server-config.json",
+        "sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+        "admission_headroom_mib": 768,
+        "checkpoint_require_origin_auth": true,
+        "concurrency": 1,
+        "device_state_slots": 4,
+        "gpu_keep_warm_ms": 0,
+        "graceful_stop_timeout_seconds": 900,
+        "host_context_bytes": 12284837888,
+        "host_context_mib": "11715.734375",
+        "kv_capacity": 131072,
+        "kv_dtype": "int8",
+        "managed_stop": "stop-event",
+        "max_context": 131072,
+        "prefill_chunk": 1024,
+        "public_model_id": "q38-ninfer",
+        "speculative_backend": "mtp",
+        "speculative_draft_tokens": 3
+      },
+      "source_archive": {
+        "name": "ninfer-rtx3090-native-v0.7.0-beta.3-source.tar.gz",
+        "sha256": "e667eb1fa6c04e8018e6737bfa7c5943b5212c3d26a90f84f2d7ea61a1013c53",
+        "bytes": 12238089
+      },
+      "package_spdx": {
+        "name": "ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.spdx.json",
+        "sha256": "d335174050cdbb3d45c3a887bbc8105aa52b1295eeea8f87ecf40586ca0ac3d7",
+        "format": "SPDX-2.3"
+      },
+      "dependency_cyclonedx": {
+        "name": "ninfer-rtx3090-native-v0.7.0-beta.3-windows-x86_64-cuda13.3-rtx3090.cdx.json",
+        "sha256": "ebbe9e1dc96309ff67af8f409bb3324431923c53ccc5a100fadd29b414754d5a",
+        "format": "CycloneDX-1.5",
+        "runtime_source_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "generator_sha256": "c7960aea433d28d2ab37d678bb1f347cee6e7d7853b97c3472633d6bc9e75610",
+        "inputs": {
+          "vcpkg_manifest_sha256": "b6e9528c9bb0f30870199193330f633411774ff5fac9946fc95d13678c215b44",
+          "vcpkg_resolved_sha256": "2b6b74771f377b8196cd5fb466467a3379fbd137c22798f22759d1d4cef0232f",
+          "cuda_inventory_sha256": "e52c39f7a326a396c3ab1e71a93f172396a9eb4a599d51704e477125c061553e",
+          "third_party_inventory_sha256": "0a771dc2b1703003eef362baa7392ba7a43865af04a37fc1acd2d138ef6963d5",
+          "runtime_inventory_sha256": "48b08bbe24d154c1eba4abd8bf432165889b50b60c253fe7c0baca882e74d538"
+        }
+      },
+      "package_build_receipt": {
+        "artifact_type": "ninfer_windows_package_build_receipt",
+        "schema_version": 2,
+        "sha256": "b6950f5b10768a96740b32fd7dedc643e5959f32324ca9d2ebd7ac19d3c239e8",
+        "qualification_status": "hardware-pending",
+        "qualification_status_authority": "immutable-pre-hardware-package-build"
+      },
+      "hardware_qualification": {
+        "status": "passed",
+        "qualified_utc": "2026-10-28T03:15:05Z",
+        "beta_qualified": true,
+        "recorded_phase_count": 15,
+        "repository_path": "releases/v0.14.0/qualification/rtx3090.json",
+        "sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d",
+        "phase_receipts": {
+          "benchmark_c1": {
+            "receipt_sha256": "0d4326794dd2baed3dfa7cab4f0f069232fb9086fece48695bfe5e1da26ebbc7",
+            "status": "passed"
+          },
+          "context_128k": {
+            "receipt_sha256": "d220e0ecd430f4352d845f28be8b3d108c2085989baf21751f1f4ed65207ef0d",
+            "status": "passed"
+          },
+          "neutral_build": {
+            "receipt_sha256": "f61811c11daada20abf3455b320730bcce1839b46eda0a05555cb8e32fdb8176",
+            "status": "passed"
+          },
+          "omp": {
+            "receipt_sha256": "afa9d787e30b781b7b4be7b58d47020767728179a03dc2fc1f789cb7dee046c0",
+            "status": "passed"
+          },
+          "package": {
+            "receipt_sha256": "88e20b3bd76c7da8aa7a85f82b59e2d75e95f9f7952aed8df4a7ad8d3e60f128",
+            "status": "passed"
+          },
+          "preflight": {
+            "receipt_sha256": "425593cc98509e4e290ad92ae3d2014081d640821cc9b349326706731401f990",
+            "status": "passed"
+          },
+          "pressure_protocol": {
+            "receipt_sha256": "86f420822020963f8c179f0f387bd728aeb725302cd1856fa8fbe75c88ea745f",
+            "status": "passed"
+          },
+          "private_path_scan": {
+            "receipt_sha256": "e5357366e7f3c967ac1a07f58043728cd945420d4bcd240997d88dd3ae77c1f0",
+            "status": "passed"
+          },
+          "protocol": {
+            "receipt_sha256": "a5848e62d11cbc57de5870543e7fe9c2f090d89a47382401abc89145c4d88fc3",
+            "status": "passed"
+          },
+          "receipt": {
+            "receipt_sha256": "cb3aa35d6471bf3fafa3b545bbcbfbee7c1c446c9ad4ee6e0e063cc7ada3c815",
+            "status": "passed"
+          },
+          "restart": {
+            "receipt_sha256": "6599c5099f31484ac89dde55464ea5b1f856ae524918f2c0aa78050281895bb0",
+            "status": "passed"
+          },
+          "restore": {
+            "receipt_sha256": "10e1179524e75980f3491e4e2f6604e0376697231f2e698cd854fa78f516f830",
+            "status": "passed"
+          },
+          "rollback": {
+            "receipt_sha256": "c86ac85890a62bb4f5842690215263f7497cd22363395e364efd39a8881e4bcf",
+            "status": "passed"
+          },
+          "security": {
+            "receipt_sha256": "2a11723452c0a8e39b1f7840f640e5259323b66b9326e4c3551734c828d468fd",
+            "status": "passed"
+          },
+          "transfer_install": {
+            "receipt_sha256": "a7be18c90ab48c63201681fdf683f401f66d05e150094a1ceb2ed21615148764",
+            "status": "passed"
+          }
+        }
+      },
+      "benchmark_c1": {
+        "completion_tokens": 1024,
+        "computed_prefill_tokens": 4541,
+        "decode_tokens_per_second": 90.64278748524055,
+        "max_gpu_utilization_percent": 100,
+        "max_memory_used_mib": 22734,
+        "max_power_w": 350.19,
+        "max_temperature_c": 58.19,
+        "mtp_acceptance_percent": 92.96296296296296,
+        "power_envelope_w": 351.0,
+        "prefill_tokens_per_second": 976.9817421669236,
+        "prompt_tokens": 4541,
+        "status": "passed",
+        "wall_seconds": 16.026617099996656
+      },
+      "long_session": {
+        "completion_tokens": 17,
+        "elapsed_seconds": 187.87808290000248,
+        "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+        "prompt_tokens": 130048,
+        "status": "passed"
+      },
+      "persistence": {
+        "cached_input_tokens": 1647,
+        "restart_seconds": 35.015784699993674,
+        "process_replaced": true,
+        "restart_counters_reset": true,
+        "status": "passed"
+      },
+      "managed_stop_flush_cached_tokens": 1650,
+      "canonical_protocol": {
+        "normal_status": "passed",
+        "pressure_status": "passed",
+        "structured_output": {
+          "chat_json_schema": true,
+          "responses_json_schema": true
+        }
+      },
+      "scratch_equivalence": {
+        "configuration_delta": {
+          "path": "/listen/port",
+          "public": 18082,
+          "scratch": 18211
+        },
+        "identical_binaries": {
+          "benchmark_sha256": "d0ce4034c58f5b8452cfc7e59f2b5b9566b4bb8e8b8cd89b88b0876f924e9882",
+          "ninfer_sha256": "119591957930a34814b27d49cc65f8f5a4922dbc566df977be8b8f27b718a982",
+          "server_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3"
+        },
+        "identical_support_assets": {
+          "controller_sha256": "bb69183f6d2876b867134f82874a1370125d1d10f64703f662fdf43f7f1d4b04",
+          "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "installer_sha256": "f9ced520968196afc07b76b5a3264e9ec61d5f2b0d122242f096ee676861cbd9",
+          "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+        },
+        "observed_identity": {
+          "binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+          "build_profile": "native-v0.7.0-beta.3-rtx3090",
+          "build_type": "Release",
+          "config_sha256": "f70269173c3f907e5f0c2a5aabff66de5270d9087a821413971964477e043bfd",
+          "cuda_architecture": "86",
+          "cuda_compiler": "NVIDIA-13.3.73",
+          "cuda_toolkit": "13.3.73",
+          "cxx_compiler": "MSVC-19.44.35228.0",
+          "deployment_profile": "qwen38-3090-native-v0.7.0-beta.3",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+          "model_id": "q38-ninfer",
+          "patch_stack_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+          "source_dirty": false,
+          "target": "Qwen3_5ForCausalLM",
+          "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+          "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        },
+        "production_route_activation_performed": false,
+        "public_configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+        "public_package_executed": false,
+        "public_package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+        "scratch_configuration_sha256": "f70269173c3f907e5f0c2a5aabff66de5270d9087a821413971964477e043bfd",
+        "scratch_package_sha256": "1e0708a1bf6dfd0a839673dd664aa32bf24d1d834be8c64b4cbb14dbf58738a7",
+        "startup_attestation": {
+          "gpu_index": 1,
+          "gpu_name": "NVIDIA GeForce RTX 3090",
+          "gpu_uuid_verified": true,
+          "request_log_schema": 30
+        },
+        "status": "passed"
+      },
+      "restoration": {
+        "gpu_lease_active": false,
+        "incumbent_state": "untouched",
+        "power_limit_w": 370,
+        "process_count": 0,
+        "status": "passed",
+        "task_state": "Ready"
+      },
+      "rollback": {
+        "active_release": "qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817",
+        "directions": 0,
+        "reason": "first release of the lineage",
+        "status": "not_applicable"
+      },
+      "selection": {
+        "speculative_backend": "mtp",
+        "draft_tokens": 3,
+        "group64_a8": "OFF",
+        "qualified_power_limit_w": 350,
+        "restored_power_limit_w": 370
+      }
+    }
+  },
+  "provenance": [
+    {
+      "evidence_name": "REPORT.md",
+      "sha256": "5803ea8a73b7200ba58f375975023238e24dea33501c3712699428011b3bc3dd",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    },
+    {
+      "evidence_name": "exe-identity.json",
+      "sha256": "e90bb47f02e496d7dbd0ba1a678d13f9613d8c4f5c51e50eca6700ed704159b9",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    }
+  ]
+}

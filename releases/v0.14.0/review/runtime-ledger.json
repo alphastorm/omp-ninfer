@@ -1,0 +1,16 @@
+{
+  "artifact_type": "omp_ninfer_runtime_review_binding",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "status": "pending",
+  "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+  "approval_granted": false,
+  "publication_authorized": false,
+  "public_route_acceptance_granted": false,
+  "required_reviews": [
+    "Common-engine runtime changes from shipped native 7a25cd72 and container 6d4d0a05 to N",
+    "Current product release tooling and composition"
+  ],
+  "scope": "No v0.13.x council approval transfers to the changed source or product composition. Actual current council dispositions must be bound separately by the lead."
+}

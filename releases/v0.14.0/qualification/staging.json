@@ -1,0 +1,90 @@
+{
+  "artifact_type": "omp_ninfer_native_component_staging",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-draft",
+  "native_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+  "native_component_tags": [
+    "v0.7.0-qwen38-4090-beta.3",
+    "v0.7.0-qwen38-3090-beta.3"
+  ],
+  "rtx5090_binding": {
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "archive_sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa",
+    "archive_bytes": 547378794,
+    "source_archive_sha256": "1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff",
+    "source_archive_bytes": 12538488,
+    "checksums_sha256": "9f5ed2e607345c23e97f7616ebba8f59ed18293a614e1fd337ffe4084c4366cc",
+    "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+    "qualification_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47"
+  },
+  "method": "Executed stage_release.py with exact published beta.3 RTX 5090 pins, kept deployment profile and actual lane receipt; corrected archive/source sizes/checksum digest and replaced changed-source evidence. Copied both exact fresh native lane receipts, ran bind_native_variant.py for both published beta.3 tags using real closed-set/build receipts, copied exact packaged profiles to root versioned and release-local paths, restored current native authority mirrors and rebound the draft.",
+  "stage_helper_exit_code": 0,
+  "stage_helper_verifier_errors": [
+    "profile: release must match the manifest",
+    "profiles/qwen38-rtx5090-manual-tunnel.json: release must match the manifest",
+    "root and release compatibility authorities must be byte-identical",
+    "root and release compatibility matrices must be byte-identical"
+  ],
+  "root_authority": "Unchanged published v0.13.1 until the lead lane pin.",
+  "g4": "pending-current-engine-and-product-tooling-ledgers",
+  "external_installation_acceptance": "pending",
+  "product_publication_authorized": false,
+  "scope": "All three source-N published components and fresh current lane receipts staged. Root authority remains v0.13.1 until lane pin; no predecessor acceptance, current G4 approval or product publication is granted.",
+  "native_bindings": [
+    {
+      "id": "rtx3090-windows-native",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+      "server_binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+      "configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+      "checksums_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d",
+      "dependency_sbom_sha256": "ebbe9e1dc96309ff67af8f409bb3324431923c53ccc5a100fadd29b414754d5a",
+      "qualification_sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d"
+    },
+    {
+      "id": "rtx4090-windows-native",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "package_sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+      "server_binary_sha256": "5caa778029ba973ed06446f002d9da95faba0d70d66cb033abee7c4b88ad46e9",
+      "configuration_sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+      "checksums_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379",
+      "dependency_sbom_sha256": "02eb41f3569e68f5d95095467f9fc69a30715a23e124fa8245510f344210db04",
+      "qualification_sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0"
+    }
+  ],
+  "binder_input_bindings": [
+    {
+      "lane": "rtx4090",
+      "tag": "v0.7.0-qwen38-4090-beta.3",
+      "checksums_artifact": "SHA256SUMS",
+      "checksums_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379",
+      "build_receipt_artifact": "package-build-receipt.json",
+      "build_receipt_sha256": "b9e287bfa0c8c703be4f17baf604748fe1c89e6a89c4fda31ca005f3a6382036"
+    },
+    {
+      "lane": "rtx3090",
+      "tag": "v0.7.0-qwen38-3090-beta.3",
+      "checksums_artifact": "SHA256SUMS",
+      "checksums_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d",
+      "build_receipt_artifact": "package-build-receipt.json",
+      "build_receipt_sha256": "b6950f5b10768a96740b32fd7dedc643e5959f32324ca9d2ebd7ac19d3c239e8"
+    }
+  ],
+  "draft_rebind_command": "python3 scripts/rebind_release.py --release v0.14.0 --draft"
+}

@@ -9,6 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Stage v0.14.0 with one engine source `2c6f423b` across the RTX 5090 container and both
+  native Windows lanes (`v0.7.0-qwen38-{5090,4090,3090}-beta.3`), retaining published model
+  version 3 `81f924d4` and unmodified stock OMP 18.12.6. All three component cuts are published
+  with fresh runtime/package and managed native qualification evidence;
+  candidate-bound external installation, G4 review and founder-owned product publication
+  remain distinct; v0.13.1 remains the published product.
+- Bind RTX 5090 round-tail retirement/consumer-capture scheduling, the materialized-BF16
+  gated-attention seam, TMA descriptor ABI and upstream JPEG/grammar/schema/vision-identity
+  fixes without changing the DFlash2 K7 `qwen38-5090-v0.13.0` profile or configuration `751d22dc`.
+  Exact first-build server `55f0b95a` passed the RC union and 84/84 T1 request/output hashes;
+  serial role median decode measured 342.04 → 347.57 tok/s (×1.0162), not an end-to-end OMP claim.
+- Record the founder-approved RTX 5090-only reproducibility exception: nvcc 13.1.115 linked
+  executables are not bit-identical on second builds. Corrected temporary names leave 177/574
+  ELF differences; all 397 compared object/other files match. Random cudafe++ module-ID suffixes
+  are reproduced on individual files, but no all-file normalization proof is claimed. Ship the
+  already checked first-build bytes; deterministic module IDs remain a follow-up.
+- Keep `Group64` A8 off on both native lanes: RTX 4090 failed the preregistered symmetric
+  new-leak screen; RTX 3090 passed but the founder selected off conservatively. Both shipping
+  closures passed 34/34 second-build EXE/DLL byte comparisons and 84/84 retained-output T1 parity.
+  Matched strict C1 decode is flat (151.215 → 151.573 / 90.855 → 90.879 tok/s); exact 130,048-token
+  retrieval passed all four arms on each lane with roughly 5% better candidate prefill.
+- Bind both fresh 15-phase native managed chains and exact 11-file beta.3 outer sets:
+  standalone C1 decode 151.54/90.64 tok/s, exact retrieval 81.78/187.88 s, short-session
+  explicit/graceful restart reuse 1,647/1,650 tokens and owner restoration 450/370 W. Scratch
+  installs differ only in listen port; public-package execution and candidate-bound external
+  acceptance are not inferred. Both lineages have rollback `not_applicable`, zero directions.
+  Reuse eleven scan-clean v0.13.1 dependency DLL builds at the same versions, preserving every
+  checked engine EXE; neutral closures pass 34/34 raw-byte double builds and fresh full chains.
+- Raise the RTX 3090 qualified serving cap to 350 W; matched P14 arms restored the prior
+  370 W limit. Keep native MTP3 C1, INT8 KV, strict origin authentication and isolated schema 3
+  stores. Disclose still-open [#88](https://github.com/alphastorm/omp-ninfer/issues/88) and
+  [#89](https://github.com/alphastorm/omp-ninfer/issues/89) without claiming their dedicated
+  reproduction/fault-injection items are closed by aggregate qualification.
+- Require stopping the running RTX 3090 lane before upgrading from v0.13.1 to v0.14.0:
+  the old 300 W GPU-owner lease fails the new installer's 350 W cap check before replacement,
+  leaving the old lane running unchanged; a stopped lane upgrades normally
+  ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Record deferred engine retirement
+  before error/cancel delivery ([#95](https://github.com/alphastorm/omp-ninfer/issues/95)) and
+  media decode range checks ([#96](https://github.com/alphastorm/omp-ninfer/issues/96)).
 - Mark v0.13.1 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
