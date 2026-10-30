@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   location even when its summary is absent (P15-R09).
 - Enforce every nested qualification `repository_path`/`sha256` binding against the
   repository's actual file bytes in draft, installable and ready verification (P15-R11).
+  From v0.15.1 every repository reference requires its hash; published path-only annotations
+  remain historical metadata rather than being rewritten as new evidence.
 - Refuse route composition unless the restored RTX 5090 image's digest equals the latest
   ready GA predecessor's published manifest digest; restoration flags alone do not suffice
   (P15-R02).

@@ -1686,7 +1686,6 @@ class ReleaseContractTest(unittest.TestCase):
         for reference, sha, expected in (
             ("binding-fixture.txt", digest, None),
             ("binding-fixture.txt", "0" * 64, "sha256 must match repository file bytes"),
-            ("binding-fixture.txt", None, "sha256 must be a lower-case SHA-256"),
             ("missing.txt", digest, "repository_path must name a file inside the repository"),
             ("../outside.txt", digest, "repository_path must name a file inside the repository"),
             (str(target), digest, "repository_path must name a file inside the repository"),
@@ -1703,6 +1702,18 @@ class ReleaseContractTest(unittest.TestCase):
                                         in error for error in errors), errors)
                 else:
                     self.assertEqual(errors, [])
+
+    def test_new_qualification_bindings_require_hashes_without_rewriting_published_annotations(self):
+        historical = self.load(ROOT / "releases/v0.15.0/qualification.json")
+        annotation = historical["observed_gates"]["changed_client_acceptance"]
+        self.assertIn("repository_path", annotation)
+        self.assertNotIn("sha256", annotation)
+        errors = []
+        VERIFY_RELEASE.validate_repository_bindings(ROOT, historical, errors, require_hashes=False)
+        self.assertEqual(errors, [], "published path-only annotations are not rewritten")
+        errors = []
+        VERIFY_RELEASE.validate_repository_bindings(ROOT, annotation, errors)
+        self.assertTrue(any("sha256 must be a lower-case SHA-256" in error for error in errors), errors)
 
     def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
         """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,

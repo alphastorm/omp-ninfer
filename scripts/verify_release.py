@@ -722,13 +722,14 @@ def bound_file(root: Path, reference: Any) -> Path | None:
 
 
 def validate_repository_bindings(root: Path, value: Any, errors: list[str],
-                                 label: str = "qualification") -> None:
+                                 label: str = "qualification", *, require_hashes: bool = True) -> None:
     """Enforce every repository file/hash binding, including nested qualification entries."""
     if isinstance(value, list):
         for index, child in enumerate(value):
-            validate_repository_bindings(root, child, errors, f"{label}[{index}]")
+            validate_repository_bindings(root, child, errors, f"{label}[{index}]",
+                                         require_hashes=require_hashes)
     elif isinstance(value, dict):
-        if "repository_path" in value:
+        if "repository_path" in value and (require_hashes or "sha256" in value):
             reference = value["repository_path"]
             path = bound_file(root, reference)
             valid_path = (isinstance(reference, str) and not Path(reference).is_absolute()
@@ -739,7 +740,8 @@ def validate_repository_bindings(root: Path, value: Any, errors: list[str],
                 require(sha256_file(path) == value.get("sha256"),
                         f"{label}.sha256 must match repository file bytes", errors)
         for key, child in value.items():
-            validate_repository_bindings(root, child, errors, f"{label}.{key}")
+            validate_repository_bindings(root, child, errors, f"{label}.{key}",
+                                         require_hashes=require_hashes)
 
 
 def validate_review_ledger(
@@ -2107,7 +2109,9 @@ def validate(
 
     profile = load_json(profile_path) if profile_path.is_file() else {}
     qualification = load_json(qualification_path) if qualification_path.is_file() else {}
-    validate_repository_bindings(root, qualification, errors)
+    # Published path-only gate annotations predate mandatory paired bindings.
+    validate_repository_bindings(root, qualification, errors,
+                                 require_hashes=(product_version(release) or (0, 0, 0)) >= (0, 15, 1))
     qualification_pending = pending_allowed and not qualification
     components = manifest.get("components", {})
     omp = components.get("omp", {})
