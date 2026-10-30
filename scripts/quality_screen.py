@@ -102,7 +102,10 @@ PREREGISTRATION: dict[str, Any] = {
                     "the frozen N15 source (component v0.8.0-beta.1), whose server prefix is appended here "
                     "before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen "
                     "prompts and the first 80 determinism prompts in fixed matched contiguous <=100-prompt "
-                    "shards with resumed identity and seal verification; under this rule unchanged"),
+                    "shards with resumed identity and seal verification; under this rule unchanged. Appended "
+                    "2026-10-30 before any candidate data: the candidate is the frozen source 2af6b3de RTX "
+                    "3090 package (server 05cb97e4, configuration 55788a64, model 81f924d4); every role, "
+                    "production included, uses 50-prompt shards"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
