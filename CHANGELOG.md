@@ -41,7 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cannot validate an existing older checkout (P15-R05).
 - Remove capture-only command/environment metadata from all four public demo casts, normalize the
   synthetic scratch-home text, refresh the recording receipt, and include complete decoded
-  cast text in the public marker scan (P15-R12).
+  cast text in the public marker scan (P15-R12). Regenerate all ten demo GIF/MP4 variants and
+  four changed posters from those normalized casts, preserving dimensions, frame counts and
+  durations; retain the unchanged v3 poster and all referenced historical media. Refresh hashes
+  and render provenance without rewriting published release records.
 - Align the installed fail-closed fragment's client-version comments with the stock OMP
   18.14.0 manifest pin (P15-R13).
 

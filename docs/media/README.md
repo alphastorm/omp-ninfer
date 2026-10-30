@@ -9,6 +9,10 @@ demonstrates the end-to-end interactive flow on one machine; **qualified product
 claims are bound by the release receipts under `releases/v0.14.0/` and `docs/BENCHMARKS.md`, not
 timed from this clip.**
 
+The current GIF/MP4 files and changed poster frames were regenerated on **2026-10-30** from
+the path-normalized public casts (P15-R12). This is a presentation-only correction, not a new
+recording or runtime qualification. Published `releases/` records are unchanged.
+
 ## Canonical recording (v0.14)
 
 - **Client:** unmodified upstream Oh My Pi `18.12.6` (`v18.12.6`) release binary `omp-darwin-arm64`
@@ -91,9 +95,9 @@ claims stay bound by `releases/v0.14.0/`.
 | --- | --- | --- |
 | `omp-ninfer-demo-v14.cast` | `e01935efe16ec1cd7a48948991eb39fbb4fc42a4e972aced7b508944e83e00d8` | Path-normalized asciinema capture (`653,405` bytes, `100×30`, `1,345` events, `76.64 s`); capture-only command/environment headers removed. |
 | `omp-ninfer-demo-v14-render.cast` | `3bdf99428470638ac96cee12186f2ddaf9fe7530e1e9990e1d7f6ce7c8574b5d` | Path-normalized render cast (`624,604` bytes, `1,315` kept events, `35.159 s`): payloads match the normalized capture; the `36.158 s` restart wait (`632..1084`) is scaled by `0.066375` to `2.4 s` and the `/exit` tail after event `1315` is dropped. |
-| `omp-ninfer-demo-v14.gif` | `c1fb503ae66feeec80f55a2c3af84386357f412b3c8a56aa4831d86bd9d9f694` | `1714×1215`, `285` frames, `31.83 s` (including a `3 s` final hold), `2,232,959` bytes; rendered from `omp-ninfer-demo-v14-render.cast` with `agg` (JetBrains Mono `28 px`, `--fps-cap 20`, `--idle-time-limit 1.75`, `--last-frame-duration 3`) and lossless `gifsicle -O3`. The README embed. |
-| `omp-ninfer-demo-v14.mp4` | `e571f21ceb8558b4db1bf541716a110a59949e55b4dddc64034dedd2cac3823c` | `1714×1216` (one row of `#060809` ground color padded for an even height), `30 fps` CFR (`955` frames), `31.83 s`, `1,837,044` bytes; H.264 `yuv420p` faststart, silent. |
-| `omp-ninfer-demo-v14-poster.png` | `35dce796a491338bd3ee42ec3295559b3cabe69b9779abd38cde49923f6ed88e` | Final frame (GIF frame `285` of `285`), `1714×1215`, `196,316` bytes: the passing test run, the `!ninfer-restart` recovery line, and the post-restart follow-up answer. |
+| `omp-ninfer-demo-v14.gif` | `e2e6e2864102741ce137f558d02077fd76d05e9ace9ef53ba80e123d9dcc96e8` | `1714×1215`, `285` frames, `31.83 s` (including a `3 s` final hold), `2,215,462` bytes; re-rendered from `omp-ninfer-demo-v14-render.cast` with `agg` (JetBrains Mono `28 px`, `--fps-cap 20`, `--idle-time-limit 1.75`, `--last-frame-duration 3`) and lossless `gifsicle -O3`. The README embed. |
+| `omp-ninfer-demo-v14.mp4` | `65fcb60362ce6cf9063c15608eb9a574936cad5dcf00d580e32c8a88ec85e673` | `1714×1216` (one row of `#060809` ground color padded for an even height), `30 fps` CFR (`955` frames), `31.83 s`, `1,822,674` bytes; re-encoded H.264 `yuv420p` faststart, silent. |
+| `omp-ninfer-demo-v14-poster.png` | `f6c6389648f4c0e16c4a21d580b59efd6f04ffb839efd0a5300239a232ef6bdd` | Regenerated final frame (GIF frame `285` of `285`, zero-based `284`), `1714×1215`, `196,303` bytes: the passing test run, the `!ninfer-restart` recovery line, and the post-restart follow-up answer. |
 
 ## Render cast and render
 
@@ -110,8 +114,7 @@ Together, these two timing changes reduce the cast duration from `76.639 s` (`76
 events) to `35.159 s` (`1,315` kept events) before `agg` idle compression.
 
 Rendered with `asciinema` 3.2.1, `agg` 1.9.0, LCDF `Gifsicle` 1.98 (lossless `-O3`), and `ffmpeg`
-9.0.2. These commands document the original render. The GIF, MP4 and poster remain those original
-rendered binaries; the public casts were subsequently path-normalized, not re-recorded.
+9.0.2. The same versions and parameters were used for the path-normalized re-render.
 
 ```sh
 agg --font-family "JetBrains Mono" --font-size 28 --fps-cap 20 --idle-time-limit 1.75 --last-frame-duration 3 \
@@ -119,6 +122,8 @@ agg --font-family "JetBrains Mono" --font-size 28 --fps-cap 20 --idle-time-limit
   omp-ninfer-demo-v14-render.cast omp-ninfer-demo-v14.gif   # then gifsicle -O3 (lossless)
 ffmpeg -i omp-ninfer-demo-v14.gif -an -vf 'fps=30,pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0:color=#060809,format=yuv420p' \
   -c:v libx264 -preset slow -crf 18 -movflags +faststart omp-ninfer-demo-v14.mp4
+ffmpeg -i omp-ninfer-demo-v14.gif -vf 'select=eq(n\,284)' \
+  -fps_mode passthrough -frames:v 1 omp-ninfer-demo-v14-poster.png
 ```
 
 The theme keeps the brand ground/ink and Local violet slots exactly and re-tunes the green,
@@ -131,14 +136,14 @@ The recorded environment used a neutral shared home directory outside any user a
 scrub removes command/environment metadata from every public cast header and normalizes displayed
 home-path prefixes to `/demo-home`. Event order, timing, and all other event bytes are retained.
 The release verifier scans both raw and decoded `.cast` text, including headers, for private
-markers. The v14 streams retain their `5,522` truecolor sequences. These sanitized cast
-representations do not claim that the original rendered binaries were regenerated or that a
-new recording or runtime qualification occurred.
+markers. The v14 streams retain their `5,522` truecolor sequences. The current rendered
+representations now use those normalized casts too; neither the scrub nor the re-render is
+a new recording or runtime qualification.
 
 ## Historical media (v0.3-era recording)
 
-The v0.3.0 rendered recording remains unchanged (`15.303371 s`, `1224×868`, `2,829,121` bytes
-MP4; `5,425` truecolor sequences); its current public cast is path-normalized as described above.
+The v0.3.0 recording was re-rendered from its normalized cast (`15.303371 s`, `1224×868`,
+`2,823,113` bytes MP4; the cast retains `5,425` truecolor sequences).
 It was recorded with `omp-18.0.9-macos-arm64` (SHA-256
 `ba85e7ab…c00c7`) against the v0.3.0 RTX 5090 runtime (image
 `ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2…f08d`, server binary `d11dbba7…efdfa`, model
@@ -148,44 +153,125 @@ in `ringbuf.py` and answering one stateful follow-up, with no server restart sho
 | File | SHA-256 | Provenance |
 | --- | --- | --- |
 | `omp-ninfer-demo-v3.cast` | `77bdd1d8695729b98bca986e06a18d48df3c27734f577c6955efc9576d87b5d8` | Path-normalized asciinema v3 capture; capture-only headers removed. 100×30, `xterm-256color`, 1,283 events. |
-| `omp-ninfer-demo-v3.gif` | `481dc84654bef6c087985670a990bcdcfda75634e40be43b7f5d41bf2cee6717` | 1224×868, 20 fps GIF89a rendered from the banner-trimmed cast (below) with `agg` (JetBrains Mono 20 px, brand theme, `--idle-time-limit 1.75`), optimized with `gifsicle -O3`. |
-| `omp-ninfer-demo-v3.mp4` | `e7f8be69b4040edc8209e8ee75bcf04cffe8155d82b0758894491b4380266ae3` | H.264 `yuv420p` faststart transcode of the same render, even dimensions, silent. |
-| `omp-ninfer-demo-v3-poster.png` | `722b8bf81e031510690b31cc770c92a982c2a39c82dc1cfcd6d975c216d3698d` | Single 1224×868 frame: the passing test run, the one-line fix summary, and the stateful follow-up question. |
+| `omp-ninfer-demo-v3.gif` | `26ba0feed9f28a8d84a4e17e3d2a6bf527ada18bb192c477968e02f7051554ad` | Re-rendered 1224×868, 142-frame, 17.02 s GIF89a from the banner-trimmed cast (below) with `agg` (JetBrains Mono 20 px, 20 fps cap, brand theme, `--idle-time-limit 1.75`), optimized with `gifsicle -O3`. |
+| `omp-ninfer-demo-v3.mp4` | `ae2e6858a64a72cad453907d0a152b3eda493e97467fabda2fc2335419dfe4de` | Re-encoded H.264 `yuv420p` faststart transcode of the same render, 142 VFR frames, even dimensions, silent. |
+| `omp-ninfer-demo-v3-poster.png` | `722b8bf81e031510690b31cc770c92a982c2a39c82dc1cfcd6d975c216d3698d` | Unchanged 1224×868 poster: its source GIF frame 100 (zero-based) is pixel-identical after normalization. The passing test run, the one-line fix summary, and the stateful follow-up question. |
 
 The rendered v0.3 files begin after the pinned client's generic update banner
 ([#18](https://github.com/alphastorm/omp-ninfer/issues/18)) left the frame: the cast's leading 633
 events were re-timed to zero across the first 14.93 s of idle-compressed playback, keeping event
-payloads and order byte-identical to the raw cast (trimmed intermediate SHA-256
-`778d9f0ed1bececa7074f5c1b488e6378e4f8ab924075d753df5b75a8317a8ca`). At recording time the
+payloads and order byte-identical to the normalized cast. At recording time the
 appliance's incumbent container was a post-release development build, so the owner's
 stop/record/restore flow served the pinned v0.3.0 image temporarily on a separate loopback port
 with a fresh temporary key and restored the incumbent container afterward.
 
 ## Historical media (v0.2-era recording)
 
-The previous rendered recording and its launch derivatives remain unchanged; only the current
-public cast representation is path-normalized. They were recorded against the identical runtime image during the
+The previous recording and its launch derivatives were also re-rendered from the normalized
+public cast. They were recorded against the identical runtime image during the
 `v0.2.0-beta.1` window, when the client displayed a beta-suffixed provider name and the RTX 3090
 lane was still preview-only.
 
 | File | SHA-256 | Provenance |
 | --- | --- | --- |
 | `omp-ninfer-demo.cast` | `64be5fe325a6298ceea1a55adf05e864d7afc7d5e12da091375b16308c1447f9` | Path-normalized asciinema v3 capture; capture-only headers removed. 100×30. |
-| `omp-ninfer-demo.gif` | `d30836afe7abb07cdf137d06971d7be41d3a83846451e746254535d47bdc2ff7` | `agg` render (16 px), `gifsicle -O3 --lossy=70`. |
-| `omp-ninfer-demo.mp4` | `a8d1b3bbe4f2dbd44a121a43a5c3d59beb6ade19c5e667b99fbfdae3ee932509` | H.264 `yuv420p` faststart master. Silent. |
-| `omp-ninfer-demo-poster.png` | `321cca847cdbe500502057887e46a9613cdea34dc8198ec4de15c3667713b920` | Single frame: passing tests, fix summary, follow-up prompt. |
-| `omp-ninfer-demo-social.mp4` | `e2e8fbc4cb42c5c30a12ac0299c081728d6f4f6627ae74c260a2abc97fa0bd81` | 978×694, 30 fps, begins 8.5 s in, after the update banner left the frame. |
-| `omp-ninfer-demo-social-discord.gif` | `c5423f9e9289cecb68c42edb9631da0833c05b3ab0e61981465fa61f87ac7763` | 720×511, 10 fps GIF89a fallback. |
-| `omp-ninfer-demo-social-poster.png` | `80b8ce9069b201802dcaecd9a7b5da080ea4aca0a1e7a4eeadaeef7538788373` | 978×694 frame from the clean social interval. |
+| `omp-ninfer-demo.gif` | `8a94dd01f1285b1dd6d6f35d5d6be559994f527f9ccd38d09bb82dd324f2904d` | Re-rendered 979×694, 456 frames, 31.09 s; `agg` (16 px, 30 fps cap), `gifsicle -O3 --lossy=70`. |
+| `omp-ninfer-demo.mp4` | `deae37e4cd401b48f8a11adb9aa812f4db65a1a8b923e51394b40798a0b81524` | Re-encoded 978×694 H.264 `yuv420p` faststart master from the full-quality render, 456 VFR frames, 26.88 s declared duration. Silent. |
+| `omp-ninfer-demo-poster.png` | `baf7fd262fdc607bfd25b922a2a1ef4025d93e31d92ea866a4e92c16d74783d9` | Regenerated full-quality GIF frame 262 (zero-based), 979×694: passing tests, fix summary, follow-up prompt. |
+| `omp-ninfer-demo-social.mp4` | `96256e86734261c71c2b338f3764b68799b64698fdfb8ff7cc4a4f9844ff9bb5` | Re-encoded 978×694, 30 fps, 587 frames, 19.566667 s; begins 8.5 s in, after the update banner left the frame. |
+| `omp-ninfer-demo-social-discord.gif` | `524148d704539022adf09390d056b6562d4d3a75bb77c769bea66425792f51fe` | Regenerated 720×511, 10 fps, 196-frame, 19.6 s GIF89a fallback, 64-color palette. |
+| `omp-ninfer-demo-social-poster.png` | `6da345eaafc87cd3b676f338110bf7ad4d667de642267e27d4cc60ba7acf2e13` | Regenerated 978×694 frame from the clean social interval (social MP4 frame 100, zero-based). |
 | `omp-ninfer-launch-card.png` | `91c7b8be815e0a21ca6bfc753b21e3036f4c8a71ab8390b54bc1e3ea40e0b093` | 1600×900 evidence card; its warm/cold figure is one measured 89,216-token follow-up — retained state versus fresh-process cold start. |
-| `omp-ninfer-demo-2x.gif` | `c806e5d585ca9ff4042951be0d1e80efb08667a00742d49197fb8bef8f1d45a5` | 1224×868, 20 fps; the v0.3.0-launch README embed, superseded by `-v3`. |
-| `omp-ninfer-demo-2x.mp4` | `99cb0dbfff8ae01a979ff8f89bf46916c55a84503b5a2e38febdac2d59c3109e` | H.264 transcode of the 2x render. |
-| `omp-ninfer-demo-2x-poster.png` | `a30db22bcdbb4455f80d042af6091438f41ae9508166150dafcc9b8e84b5213c` | Single 1224×868 frame. |
+| `omp-ninfer-demo-2x.gif` | `54e17ed3b0ca709b6efec5e9cedf966d848c2700d93e7840f1514782f4e07b38` | Re-rendered 1224×868, 20 fps cap, 226 frames, 22.59 s; the v0.3.0-launch README embed, superseded by `-v3`. Font size 20, not double-speed playback. |
+| `omp-ninfer-demo-2x.mp4` | `89625a2a96c46e134ee1f2dcabdbe88808f48236ec173ee4e0ac1227486d465b` | Re-encoded H.264 transcode of the 2x render, 226 VFR frames, 17.94 s declared duration. |
+| `omp-ninfer-demo-2x-poster.png` | `970cc0b8aa581463b13559024b372616624062f696a13a86471fabc0b1ab42c6` | Regenerated GIF frame 120 (zero-based), 1224×868. |
 
 The historical capture carries its own disclosed adaptation: the capture host's WSL
 mirrored-loopback path was unavailable during that session, so the runtime container was
 relaunched from the identical image with bridge networking and a published host-loopback port.
 Engine bytes, configuration, model, and authentication were unchanged.
+
+## Reproducing the historical re-renders
+
+Run in `docs/media/` with the tool versions listed above. The historical command lineage is
+preserved in commits `6a78aab` (16 px render), `865cc45` (social and 20 px derivatives), and
+`50c6af8` (v3 trim). All casts here are the normalized representations, not the old capture
+bytes. The `-2x` trim removes exactly `8.5 s` of idle-compressed playback: zero the first `371`
+event intervals and shorten the next interval to `0.026 s`. The v3 trim zeroes the first `633`
+intervals (`14.931 s` idle-compressed). Payloads and order stay unchanged.
+
+```sh
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+for source, target, count in [
+    ("omp-ninfer-demo.cast", "demo-trim.cast", 371),
+    ("omp-ninfer-demo-v3.cast", "demo-v3-trim.cast", 633),
+]:
+    records = [json.loads(line) for line in Path(source).read_text().splitlines()]
+    for event in records[1:count + 1]:
+        event[0] = 0.0
+    if count == 371:
+        records[count + 1][0] = 0.026
+    Path(target).write_text("\n".join(
+        json.dumps(record, ensure_ascii=False, separators=(",", ":")) for record in records
+    ) + "\n")
+PY
+
+legacy_theme='060809,E8ECEF,0B0E11,C85045,8FBF7F,D8A657,7DAEA3,8E7BE8,86B3A8,B6BEC7,3A434D,EA6962,A9B665,E7B84C,89AEB8,AB9DF0,95D1C9,E8ECEF'
+brand_theme='060809,E8ECEF,0B0E11,C85045,85C29A,D8B575,87A5C4,8E7BE8,8FB8B2,B6BEC7,3A434D,E0685C,9FD3AE,E7C98A,9FBBD8,AB9DF0,A8CFC9,E8ECEF'
+
+agg --font-family "JetBrains Mono" --font-size 16 --fps-cap 30 \
+  --idle-time-limit 1.75 --last-frame-duration 3 --theme "$legacy_theme" \
+  omp-ninfer-demo.cast demo-full.gif
+gifsicle -O3 --lossy=70 -o omp-ninfer-demo.gif demo-full.gif
+ffmpeg -i demo-full.gif -an -vf 'scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p' \
+  -c:v libx264 -preset medium -crf 23 -movflags +faststart omp-ninfer-demo.mp4
+
+agg --font-family "JetBrains Mono" --font-size 20 --fps-cap 20 \
+  --idle-time-limit 1.75 --last-frame-duration 3 --theme "$brand_theme" \
+  demo-trim.cast demo-2x-full.gif
+gifsicle -O3 -o omp-ninfer-demo-2x.gif demo-2x-full.gif
+ffmpeg -i omp-ninfer-demo-2x.gif -an -vf format=yuv420p \
+  -c:v libx264 -preset medium -crf 23 -movflags +faststart omp-ninfer-demo-2x.mp4
+
+agg --font-family "JetBrains Mono" --font-size 20 --fps-cap 20 \
+  --idle-time-limit 1.75 --last-frame-duration 3 --theme "$brand_theme" \
+  demo-v3-trim.cast demo-v3-full.gif
+gifsicle -O3 -o omp-ninfer-demo-v3.gif demo-v3-full.gif
+ffmpeg -i omp-ninfer-demo-v3.gif -an -vf format=yuv420p \
+  -c:v libx264 -preset medium -crf 18 -movflags +faststart omp-ninfer-demo-v3.mp4
+
+ffmpeg -ss 8.5 -i omp-ninfer-demo.mp4 -an -vf 'fps=30,format=yuv420p' \
+  -c:v libx264 -preset medium -crf 18 -movflags +faststart \
+  -frames:v 587 omp-ninfer-demo-social.mp4
+ffmpeg -i omp-ninfer-demo-social.mp4 \
+  -filter_complex 'fps=10,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64[p];[b][p]paletteuse' \
+  omp-ninfer-demo-social-discord.gif
+
+ffmpeg -i demo-full.gif -vf 'select=eq(n\,262)' \
+  -fps_mode passthrough -frames:v 1 omp-ninfer-demo-poster.png
+ffmpeg -i omp-ninfer-demo-2x.gif -vf 'select=eq(n\,120)' \
+  -fps_mode passthrough -frames:v 1 omp-ninfer-demo-2x-poster.png
+ffmpeg -i omp-ninfer-demo-social.mp4 -vf 'select=eq(n\,100)' \
+  -fps_mode passthrough -frames:v 1 omp-ninfer-demo-social-poster.png
+```
+
+The legacy MP4s intentionally retain their original VFR encoding and declared durations; unlike
+the v14 transcode, they do not add a CFR final hold. Their last decoded presentation timestamps
+can exceed the container's declared duration. The social transcode explicitly retains the
+original `587` CFR frames: re-encoding the normalized master changes B-frame packet-tail timing,
+so an uncapped trim can otherwise add two frames. All five GIFs retain the original dimensions,
+frame counts and durations; the four cast-derived GIFs also retain every original frame delay.
+
+The original social provenance specifies the trim, scale and frame rate, but not its complete
+palette/dither expression or exact poster timestamp. The reconstruction uses the original GIF's
+measured `64` colors with FFmpeg's default palette dithering and selects social frame `100`,
+matching the original poster's depicted interval. These are disclosed reconstruction choices,
+not recovered historical commands. The base, 2x and v14 poster source frames changed and were
+regenerated; the v3 poster's source frame was pixel-identical and its existing PNG was retained.
+No media was removed: every retained demo file still has a media or brand inventory reference.
 
 ## Receipts
 

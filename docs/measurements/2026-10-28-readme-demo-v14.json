@@ -215,7 +215,7 @@
       "user home directories"
     ],
     "truecolor_sequences": 5522,
-    "note": "Capture-only command and environment header fields were removed in the v0.15.1 documentation scrub. The synthetic scratch-home prefix in both public cast streams is normalized to /demo-home; event order and timing are unchanged. GIF, MP4 and poster remain the original renders of the synthetic project, not a new capture.",
+    "note": "Capture-only command and environment header fields were removed in the v0.15.1 documentation scrub. The synthetic scratch-home prefix in both public cast streams is normalized to /demo-home; event order and timing are unchanged. On 2026-10-30 the GIF, MP4 and poster were regenerated from the normalized render cast with the same render parameters. This is not a new capture or runtime qualification.",
     "public_header_fields": ["version", "term", "timestamp"]
   },
   "files": {
@@ -228,16 +228,16 @@
       "bytes": 624604
     },
     "omp-ninfer-demo-v14.gif": {
-      "sha256": "c1fb503ae66feeec80f55a2c3af84386357f412b3c8a56aa4831d86bd9d9f694",
-      "bytes": 2232959
+      "sha256": "e2e6e2864102741ce137f558d02077fd76d05e9ace9ef53ba80e123d9dcc96e8",
+      "bytes": 2215462
     },
     "omp-ninfer-demo-v14.mp4": {
-      "sha256": "e571f21ceb8558b4db1bf541716a110a59949e55b4dddc64034dedd2cac3823c",
-      "bytes": 1837044
+      "sha256": "65fcb60362ce6cf9063c15608eb9a574936cad5dcf00d580e32c8a88ec85e673",
+      "bytes": 1822674
     },
     "omp-ninfer-demo-v14-poster.png": {
-      "sha256": "35dce796a491338bd3ee42ec3295559b3cabe69b9779abd38cde49923f6ed88e",
-      "bytes": 196316
+      "sha256": "f6c6389648f4c0e16c4a21d580b59efd6f04ffb839efd0a5300239a232ef6bdd",
+      "bytes": 196303
     }
   },
   "render": {
@@ -280,7 +280,18 @@
       "seconds": 31.83,
       "note": "one row of ground color padded for an even height"
     },
-    "poster": "GIF frame 285 of 285 (the final answer), 1714x1215",
+    "poster": "GIF frame 285 of 285 (zero-based 284, the final answer), 1714x1215",
+    "ffmpeg_poster": "ffmpeg -i omp-ninfer-demo-v14.gif -vf 'select=eq(n\\,284)' -fps_mode passthrough -frames:v 1 omp-ninfer-demo-v14-poster.png",
+    "regeneration": {
+      "date": "2026-10-30",
+      "reason": "P15-R12: render the public path-normalized cast instead of retaining the pre-normalization binaries",
+      "source_cast_normalization_commit": "eb76eec",
+      "same_dimensions_frame_counts_durations": true,
+      "gif_frame_delays_identical": true,
+      "new_recording": false,
+      "new_runtime_qualification": false,
+      "published_release_records_changed": false
+    },
     "tools": {
       "asciinema": "3.2.1",
       "agg": "agg 1.9.0",
