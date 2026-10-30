@@ -3,16 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#060809">
 <title>OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison</title>
 <meta name="description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/compare/">
+<link rel="preload" href="../fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison">
 <meta property="og:description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/compare/">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
@@ -28,17 +35,22 @@
 </head>
 <body>
 <header class="site">
-  <img src="../logo.svg" alt="" aria-hidden="true">
-  <a class="brand" href="../">OMP NInfer</a>
-  <nav>
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../logo.svg" alt="" width="24" height="24">OMP NInfer</a>
+    <nav aria-label="Site">
       <a href="../">Overview</a>
-      <a href="../compare/" aria-current="page">Compare</a>
-      <a href="../status/">Status</a>
       <a href="../benchmarks/">Benchmarks</a>
+      <a href="../compare/" aria-current="page">Compare</a>
       <a href="../security/">Security</a>
-  </nav>
+      <a href="../status/">Status</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
+    </nav>
+  </div>
 </header>
 <main>
+<section class="page">
+<div class="wrap">
 <p class="eyebrow">Decision guide</p>
 <h1>Choosing a local backend for coding sessions</h1>
 <p class="lede">OMP NInfer is the qualified appliance and release layer between
@@ -50,23 +62,25 @@ that call fast and candid, without self-assigned scores or rankings.</p>
 public documentation as of 2026-08-31; reverify before deciding.</p>
 
 <h2>The map</h2>
+<div class="table-scroll">
 <table>
 <tr><th>Dimension</th><th>OMP NInfer</th><th>Ollama</th><th>LM Studio</th><th>llama.cpp</th><th>vLLM</th></tr>
-<tr><td>Primary job</td><td>Durable OMP appliance (<code>v0.14.0</code>, stock OMP <code>18.12.6</code>; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090)</td><td>Easy model runner</td><td>GUI model runner</td><td>Portable inference engine</td><td>General serving engine</td></tr>
-<tr><td>Model breadth</td><td>One model (Qwen3.8 27B), hash-pinned across all lanes (20.4&nbsp;GB <code>81f924d4</code>)</td><td>Broad</td><td>Broad</td><td>Broad</td><td>Broad</td></tr>
-<tr><td>Qualified OMP workflow</td><td>Core product (vision + tools + JSON-schema output on RTX 5090; text + tools + JSON-schema output on native RTX 4090 and RTX 3090)</td><td>Generic endpoint</td><td>Generic endpoint</td><td>Generic endpoint</td><td>Generic endpoint</td></tr>
-<tr><td>Explicit Responses continuation</td><td>Core product</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td></tr>
-<tr><td>Process-restart recovery</td><td>Core differentiator: transactional checkpoints, verified restore</td><td>Different mechanism/contract</td><td>Different mechanism/contract</td><td>Different mechanism/contract</td><td>Different architecture</td></tr>
-<tr><td>Off-machine checkpoints</td><td>Verified host/NAS replicas; matching runtime/profile/credentials required for restore</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td><td>Verify current support</td></tr>
-<tr><td>GUI</td><td>No</td><td>Limited</td><td>Strong</td><td>No</td><td>No</td></tr>
-<tr><td>Multi-user throughput</td><td>Not the target (two requests in flight on RTX 5090; one per native lane)</td><td>Limited</td><td>Not the target</td><td>Limited</td><td>Strong</td></tr>
-<tr><td>Best fit</td><td>One private, long-lived OMP session</td><td>Easy breadth</td><td>Desktop convenience</td><td>Portability</td><td>Serving scale</td></tr>
+<tr><td>Primary job</td><td data-label="OMP NInfer">Durable OMP appliance (<code>v0.14.0</code>, stock OMP <code>18.12.6</code>; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090)</td><td data-label="Ollama">Easy model runner</td><td data-label="LM Studio">GUI model runner</td><td data-label="llama.cpp">Portable inference engine</td><td data-label="vLLM">General serving engine</td></tr>
+<tr><td>Model breadth</td><td data-label="OMP NInfer">One model (Qwen3.8 27B), hash-pinned across all lanes (20.4&nbsp;GB <code>81f924d4</code>)</td><td data-label="Ollama">Broad</td><td data-label="LM Studio">Broad</td><td data-label="llama.cpp">Broad</td><td data-label="vLLM">Broad</td></tr>
+<tr><td>Qualified OMP workflow</td><td data-label="OMP NInfer">Core product (vision + tools + JSON-schema output on RTX 5090; text + tools + JSON-schema output on native RTX 4090 and RTX 3090)</td><td data-label="Ollama">Generic endpoint</td><td data-label="LM Studio">Generic endpoint</td><td data-label="llama.cpp">Generic endpoint</td><td data-label="vLLM">Generic endpoint</td></tr>
+<tr><td>Explicit Responses continuation</td><td data-label="OMP NInfer">Core product</td><td data-label="Ollama">Verify current support</td><td data-label="LM Studio">Verify current support</td><td data-label="llama.cpp">Verify current support</td><td data-label="vLLM">Verify current support</td></tr>
+<tr><td>Process-restart recovery</td><td data-label="OMP NInfer">Core differentiator: transactional checkpoints, verified restore</td><td data-label="Ollama">Different mechanism/contract</td><td data-label="LM Studio">Different mechanism/contract</td><td data-label="llama.cpp">Different mechanism/contract</td><td data-label="vLLM">Different architecture</td></tr>
+<tr><td>Off-machine checkpoints</td><td data-label="OMP NInfer">Verified host/NAS replicas; matching runtime/profile/credentials required for restore</td><td data-label="Ollama">Verify current support</td><td data-label="LM Studio">Verify current support</td><td data-label="llama.cpp">Verify current support</td><td data-label="vLLM">Verify current support</td></tr>
+<tr><td>GUI</td><td data-label="OMP NInfer">No</td><td data-label="Ollama">Limited</td><td data-label="LM Studio">Strong</td><td data-label="llama.cpp">No</td><td data-label="vLLM">No</td></tr>
+<tr><td>Multi-user throughput</td><td data-label="OMP NInfer">Not the target (two requests in flight on RTX 5090; one per native lane)</td><td data-label="Ollama">Limited</td><td data-label="LM Studio">Not the target</td><td data-label="llama.cpp">Limited</td><td data-label="vLLM">Strong</td></tr>
+<tr><td>Best fit</td><td data-label="OMP NInfer">One private, long-lived OMP session</td><td data-label="Ollama">Easy breadth</td><td data-label="LM Studio">Desktop convenience</td><td data-label="llama.cpp">Portability</td><td data-label="vLLM">Serving scale</td></tr>
 </table>
-<p class="verified">Last verified 2026-08-31 against each project’s public documentation; the OMP
+</div>
+<p class="verified">Last verified 2026-08-31 against each project's public documentation; the OMP
 NInfer column was updated 2026-10-28 for published v0.14.0 (2026-10-28) without re-verifying the
 other projects. Capabilities change quickly — reverify before deciding.</p>
-<p>Qwen3.8 27B is the served model. <a href="https://github.com/Neroued/ninfer">Neroued’s NInfer</a>
-and its GPU ports supply the specialized single-GPU engine; this project’s runtime adds explicit
+<p>Qwen3.8 27B is the served model. <a href="https://github.com/Neroued/ninfer">Neroued's NInfer</a>
+and its GPU ports supply the specialized single-GPU engine; this project's runtime adds explicit
 OpenAI Responses continuation state and durable local NVMe checkpoints. Oh My Pi owns tools,
 transcript state, and agent orchestration. Ordinary in-process prefix caching already avoids
 repeated prefill of matching input while a server stays up and is conceded as prior art; the
@@ -86,11 +100,24 @@ serving and concurrency.</p>
 <p>Full criteria: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md">decision guide</a> ·
 prior art: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELATED_WORK.md">related work</a> ·
 <a href="../status/">v0.14.0 release status</a></p>
+</div>
+</section>
 </main>
 <footer>
-  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
-  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
-  every number on this site is bound to a versioned release receipt.
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../logo.svg" alt="" width="20" height="20">OMP NInfer</a>
+    <ul class="links">
+      <li><a href="../">Overview</a></li>
+      <li><a href="../benchmarks/">Benchmarks</a></li>
+      <li><a href="../security/">Security</a></li>
+      <li><a href="../status/">Status</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer">GitHub</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">Facts</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/CHANGELOG.md">Changelog</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE">MIT license</a></li>
+    </ul>
+    <p>Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA. Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>: every number on this site is bound to a versioned release receipt.</p>
+  </div>
 </footer>
 </body>
 </html>

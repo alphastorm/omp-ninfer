@@ -3,7 +3,15 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ['site/**', '.github/workflows/pages.yml']
+    paths:
+      - site/**
+      - assets/logo.svg
+      - assets/favicon.svg
+      - assets/og.png
+      - assets/architecture.png
+      - docs/media/omp-ninfer-demo-v14.mp4
+      - docs/media/omp-ninfer-demo-v14-poster.png
+      - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
@@ -23,6 +31,18 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The site carries no copies of brand or media assets; stage each from its canonical source
+      # so a re-render or a new recording cannot leave the site stale. One `cp <source> site/<name>`
+      # per line: tests/test_site.py parses these lines and checks every page reference against
+      # them, and the site/ block in .gitignore lists the same names.
+      - name: Stage canonical brand and media assets
+        run: |
+          cp assets/logo.svg site/logo.svg
+          cp assets/favicon.svg site/favicon.svg
+          cp assets/og.png site/og.png
+          cp assets/architecture.png site/architecture.png
+          cp docs/media/omp-ninfer-demo-v14.mp4 site/demo-v14.mp4
+          cp docs/media/omp-ninfer-demo-v14-poster.png site/demo-v14-poster.png
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
