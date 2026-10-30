@@ -1,6 +1,7 @@
 """The variant campaign's quality.sh deletes and rewrites only its own arm's run directory."""
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -24,10 +25,10 @@ class QualityArgumentTests(unittest.TestCase):
         scripts = root / "qualification" / "scripts"
         scripts.mkdir(parents=True)
         (scripts / "run_qualification.py").write_text(
-            "import pathlib, sys\n"
+            "import json, pathlib, sys\n"
             "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\n"
             "out.mkdir(parents=True, exist_ok=True)\n"
-            "(out / 'run.json').write_text('{}')\n")
+            "(out / 'run.json').write_text(json.dumps({'model': sys.argv[sys.argv.index('--model') + 1]}))\n")
         (scripts / "score_qualification.py").write_text(
             "import pathlib, sys\n"
             "(pathlib.Path(sys.argv[sys.argv.index('--run') + 1]) / 'scores.json').write_text('{}')\n")
@@ -48,21 +49,24 @@ class QualityArgumentTests(unittest.TestCase):
 
     def test_an_arm_is_scored_in_its_own_run_directory(self) -> None:
         root = self.campaign()
-        completed = self.quality(root, "rtx5090", "candidate-a", "campaign-1", URL, str(root / "api-key"))
+        model = "candidate-wire-model"
+        completed = self.quality(root, "rtx5090", "candidate-a", "campaign-1", URL, str(root / "api-key"), model)
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertTrue((root / "quality" / "candidate-a" / "scores.json").is_file())
+        self.assertEqual(json.loads((root / "quality" / "candidate-a" / "run.json").read_text())["model"], model)
         self.assertEqual((root / "quality" / "incumbent" / "scores.json").read_text(), '{"scored": true}\n')
 
     def test_missing_empty_or_escaping_arguments_are_refused_before_any_effect(self) -> None:
         """An empty label made the arm's run directory the quality directory itself, so the script
         deleted every scored run before it ran; a label holding a path could name any directory."""
         for arguments in ((), ("rtx5090", "candidate-a"),
-                          ("rtx5090", "candidate-a", "campaign-1", URL, KEY, "q38-ninfer", "extra"),
-                          ("", "candidate-a", "campaign-1", URL, KEY),
-                          ("rtx5090", "candidate-a", "", URL, KEY),
-                          ("rtx5090", "", "campaign-1", URL, KEY),
-                          ("rtx5090", "..", "campaign-1", URL, KEY),
-                          ("rtx5090", "../qualification", "campaign-1", URL, KEY)):
+                          ("rtx5090", "candidate-a", "campaign-1", URL, KEY),
+                          ("rtx5090", "candidate-a", "campaign-1", URL, KEY, "candidate-wire-model", "extra"),
+                          ("", "candidate-a", "campaign-1", URL, KEY, "candidate-wire-model"),
+                          ("rtx5090", "candidate-a", "", URL, KEY, "candidate-wire-model"),
+                          ("rtx5090", "", "campaign-1", URL, KEY, "candidate-wire-model"),
+                          ("rtx5090", "..", "campaign-1", URL, KEY, "candidate-wire-model"),
+                          ("rtx5090", "../qualification", "campaign-1", URL, KEY, "candidate-wire-model")):
             with self.subTest(arguments=arguments):
                 root = self.campaign()
                 before = self.tree(root)
