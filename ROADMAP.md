@@ -61,23 +61,24 @@ Full release authority: [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0
 
 ## Remaining work
 
-### Staged v0.15.0 fast-track
+### Staged v0.15.0 client-only release
 
-**Staged, not published:** stock OMP 18.14.0 (`31147f9d`) plus a gated native RTX 3090
-DFlash2 K7 upgrade; RTX 4090 and RTX 5090 carry their exact v0.14.0 beta.3 runtimes unchanged.
-This host-free stage still binds the old RTX 3090 MTP3 package. Its planned
-`v0.8.0-qwen38-3090-beta.1` rebind follows the shipping-package 15-phase chain, powered EXP-101
-screen, 84-role depth-0 ABBA speed gate (weighted at least 1.08, every case at least 0.95),
-131K fit/true-cold durability and agent probes. Fresh client/route/public-install acceptance,
+**Staged, not published:** stock OMP 18.14.0 (`31147f9d`), with the exact RTX 5090, RTX 4090
+and RTX 3090 v0.14.0 beta.3 runtime components, model bytes and serving profiles carried unchanged.
+Both native lanes remain MTP3; no runtime rebuild or native DFlash2 switch is in this release.
+The P15 native evidence-binding tools, guide-derived client probe defaults, WSL2 guide,
+read-only upstream watch and CI coverage ship as product changes. Fresh client/route/public-install acceptance,
 restoration, one council over changed scope, composition and pins precede publication.
 The staged [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
-[manifest](releases/v0.15.0/manifest.json) distinguish current bindings from planned components.
+[manifest](releases/v0.15.0/manifest.json) bind the client-only scope.
 Use the [immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
 for installation until publication.
 
-**Deferred to v0.15.1:** RTX 4090 DFlash2 K6/K5; the `alphastorm/ninfer#48/#49` fix train on
-carried RTX 4090/RTX 5090 components; council P2 deferrals. No runtime rebuild or EXP-102
-qualification of those carried lanes is part of the fast-track.
+**Deferred to v0.15.1:** native RTX 3090 DFlash2 after fork-after-resume failed with
+`Native could not release an unreferenced checkpoint owner`; RTX 4090 DFlash2 K6/K5; the
+`alphastorm/ninfer#48/#49` fix train on all three carried runtime components; council P2 deferrals.
+The runtime defect must be fixed and the shipping-package gates must pass before any native
+DFlash2 lane switch. No date or unmeasured outcome is promised.
 
 ### Published-release gaps
 
@@ -160,8 +161,8 @@ unmet:
    [`releases/v0.14.0/qualification/rtx3090.json`](releases/v0.14.0/qualification/rtx3090.json),
    [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml)); concurrent
    native requests require memory and latency qualification on those exact packages.
-8. **Open kernel and schedule backlog (including native DFlash2 for the next release).** Native
-   DFlash2 K=7 lane-profile qualification is in progress for the next release without a date
+8. **Open kernel and schedule backlog (including native DFlash2 deferred to v0.15.1).** Native
+   DFlash2 K=7 lane-profile qualification is deferred beyond the client-only v0.15.0 without a date
    commitment (EXP-098,
    [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json):
    the `sm_86`/`sm_89` load-time fit seam in `2c6f423b` requantizes the 5-layer draft MLP `gate`/`up`
@@ -287,7 +288,7 @@ so future work does not repeat closed experiments:
   3090 at 300 W at 130,048 tokens) shipped
   ([`docs/measurements/2026-10-27-native-group64-a8-prefill.json`](docs/measurements/2026-10-27-native-group64-a8-prefill.json)).
 - **DFlash2 on the native RTX 4090 and RTX 3090 lanes — initial unquantized port rejected
-  (EXP-089); load-seam fit and RTX 3090 gates passed, in progress for the next release (EXP-098).**
+  (EXP-089); historical load-seam fit and RTX 3090 gates passed, lane switch deferred to v0.15.1 (EXP-098).**
   The initial `alphastorm/ninfer` `c11b02f4` port failed `sm_89`/`sm_86` device link on three `W8`
   static shared-memory kernels (`49,664–50,176` B vs `49,152` B) and its unquantized `1.65 GiB`
   drafter did not fit the 131,072-token 24 GB budget
@@ -302,8 +303,9 @@ so future work does not repeat closed experiments:
   missed the `0.95` per-case floor on depth-0 case `log-024@0` (`0.945889`, reproduced at `0.9451`
   in isolated ABBA,
   [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json)).
-  Published `v0.14.0` native profiles retain MTP3; native DFlash2 K=7 is in progress for the next
-  release without a date commitment (with RTX 4090 gated on resolving `log-024@0`).
+  Both published `v0.14.0` and client-only `v0.15.0` native profiles retain MTP3. Native RTX 3090
+  DFlash2 is deferred to v0.15.1 after the fork-after-resume runtime defect; RTX 4090 remains
+  gated on resolving `log-024@0`. The historical gates do not qualify a new shipping package.
 - **NVFP4 and FP8 KV caches with DFlash2 on the RTX 5090 — rejected by quality screen (EXP-084,
   EXP-085, EXP-087, EXP-088).** Raised KV capacity to four device state slots, but failed the
   1,120-prompt paired quality screen on unsupported claims or secret leaks; BF16 KV remains shipped

@@ -94,7 +94,7 @@
     },
     "external_installation_acceptance": {
       "status": "pending",
-      "note": "rerun against the published v0.7.0-qwen38-5090-beta.3 component (image 760fb6be) before the cut; the receipt lands at releases/v0.15.0/acceptance/composed-external-installation.json"
+      "note": "Fresh stock OMP 18.14.0 and final-guide acceptance must run against all three unchanged v0.14.0 runtime components; the receipt lands at releases/v0.15.0/acceptance/composed-external-installation.json."
     },
     "native_integration": {
       "repository_path": "releases/v0.14.0/qualification/native-integration.json",
@@ -109,18 +109,17 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "Host-free v0.15.0 draft: stock OMP 18.14.0 is new; all three v0.14.0 runtime identities and original qualification subjects are carried unchanged. RTX 3090 remains MTP3 here until the lead binds the gated DFlash2 component. No new platform, route, public-install, restoration or council approval is claimed.",
-  "interpretation": "Runtime-release eligibility applies only to the carried published components. The two macOS stub rehearsals are client-semantic evidence, not GPU inference or real NInfer checkpoint survival. New-client acceptance and the eventual RTX 3090 replacement require fresh final-candidate evidence.",
+  "scope": "Client-only v0.15.0 draft: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects are carried unchanged. Both native lanes remain MTP3. No new platform, route, public-install, restoration or council approval is claimed.",
+  "interpretation": "Runtime-release eligibility applies only to the carried published components. The two macOS stub rehearsals are client-semantic evidence, not GPU inference or real NInfer checkpoint survival. The new client and prepared guide require fresh final-candidate acceptance on all three unchanged runtime lanes.",
   "eligibility_scope": "Staged draft only. Root authority, profiles and launchers remain v0.14.0; no lane pin, release tag, component publication or product publication occurs in this stage.",
   "documented_route_acceptance": {
     "status": "pending",
-    "scope": "Fresh stock OMP 18.14.0 and final RTX 3090-bound guide execution required; predecessor route and restoration observations do not transfer.",
+    "scope": "Fresh stock OMP 18.14.0 and final client-only guide execution required on all three carried runtime lanes; predecessor route and restoration observations do not transfer.",
     "fresh_product_acceptance": false,
     "composition_run": false
   },
   "remaining_release_gates": [
-    "RTX 3090 shipping-package qualification, powered screen, depth-0 84-role ABBA speed, 131K fit/true-cold durability and agent probes before DFlash2 rebind",
-    "lane pin after native variant rebind and draft hash-chain reconciliation",
+    "lane pin after client-only draft hash-chain reconciliation",
     "fresh stock OMP 18.14.0 platform, documented-route, native public-install and independent restoration acceptance on the final candidate",
     "one council over changed scope since v0.14.0",
     "composition, immutable evidence pins and founder-owned publication"
@@ -134,7 +133,7 @@
     "stock_client_review": {
       "status": "passed-host-free-only",
       "repository_path": "docs/measurements/2026-10-30-omp-18140-client-upgrade-review.json",
-      "sha256": "1d53d7be2b346326dcbca2cfab4deb71de4c17fe55724942ac955843d1be5671",
+      "sha256": "e1108dcf05802e9dad4613bcbd4ba072b76df729632a79f8e77b4daa33e9ab87",
       "descriptor": {
         "repository_path": "releases/v0.15.0/qualification/client-components.json",
         "disposition": "new-client-identity",
@@ -145,10 +144,6 @@
     "changed_client_acceptance": {
       "status": "pending",
       "scope": "Fresh three-platform and final-candidate documented-route/public-install evidence required."
-    },
-    "rtx3090_dflash2": {
-      "status": "pending",
-      "scope": "DFlash2 K7 component is not yet bound; current RTX 3090 runtime is the carried v0.14.0 MTP3 package."
     },
     "g4_review": {
       "status": "pending",

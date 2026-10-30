@@ -13,7 +13,7 @@
   "client_upgrade": {
     "from": "18.12.6",
     "to": "18.14.0",
-    "reason": "Consume the rebuilt upstream binaries and preserve the exact custom Responses selectors and compatibility settings. Runtime bytes remain unchanged in this host-free stage; the planned RTX 3090 component is rebound separately after its gates.",
+    "reason": "Consume the rebuilt upstream binaries and preserve the exact custom Responses selectors and compatibility settings. All three v0.14.0 runtime components, model bytes and serving profiles remain unchanged in the client-only v0.15.0 release.",
     "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
     "upstream_tree": "9a63b5bfbb5971962c44fca660744b0d75dcd2c2",
     "release_id": 428242783,
@@ -104,7 +104,7 @@
     "qualification_claimed": false,
     "new_client_inference_qualification_claimed": false,
     "predecessor_acceptance_transferred": false,
-    "scope_limit": "Source review and two imported macOS stub rehearsals only. Windows/Linux execution, real GPU behavior, native package upgrade/rollback, all fresh documented routes, restoration, council and publication remain separate gates."
+    "scope_limit": "Source review and two imported macOS stub rehearsals only. Windows/Linux execution, real GPU behavior, all fresh documented routes, native public installs, restoration, council and publication remain separate gates. No new runtime upgrade/rollback is qualified."
   },
   "sources": [
     "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0",

@@ -155,7 +155,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "106f32ed22441a6244f898bd89ac1bd4b5ad86599b858f37defe38efa315ebcf",
+    "summary_sha256": "34b517f6b64180192b141d299af9879ac348f20c4816ac5419f4d811c26cb596",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cfc88a58f2a28b190957c9c5bfe03eea2d9b79c4/releases/v0.15.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": false
@@ -188,7 +188,7 @@
     ],
     "blockers": [
       "external-installation and fresh stock OMP 18.14.0 platform/documented-route acceptance have not run on the final v0.15.0 candidate",
-      "RTX 3090 still carries v0.14.0 MTP3 until the gated DFlash2 K7 component rebind; changed-scope council, composition and immutable pins remain required"
+      "client-only candidate lane pin, changed-scope council, composition and immutable evidence pins remain required; all three v0.14.0 runtime components stay unchanged"
     ],
     "external_installation_qualified": false
   }

@@ -5,13 +5,13 @@
   "as_of": "2026-10-30",
   "source_release": "v0.14.0",
   "status": "host-free-staged",
-  "policy": "Carry every unchanged runtime evidence file with its original subject/date. Replace client descriptor, host-free client review and staging metadata. No predecessor product acceptance or council approval transfers. RTX 3090 remains the carried MTP3 subject until a separate gated rebind.",
+  "policy": "Carry every unchanged runtime evidence file with its original subject/date. Replace client descriptor, host-free client review and staging metadata. No predecessor product acceptance or council approval transfers. All three v0.14.0 runtime/model/profile subjects remain unchanged throughout the client-only v0.15.0 release.",
   "files": [
     {
       "file": "build.json",
       "predecessor_sha256": "61937724af4bd921c71d09231fc5e2bb0c7f2ce8f431e65fea421b0a8d5af413",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "61937724af4bd921c71d09231fc5e2bb0c7f2ce8f431e65fea421b0a8d5af413"
     },
     {
@@ -25,70 +25,70 @@
       "file": "component-cut-dry-run.json",
       "predecessor_sha256": "434bcb5e7c6c4c4e04a28bb9245bb20f24a62900bac21c2e97643c84935c18db",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "434bcb5e7c6c4c4e04a28bb9245bb20f24a62900bac21c2e97643c84935c18db"
     },
     {
       "file": "concurrency.json",
       "predecessor_sha256": "110201935b3752905fdff6e98af7504d5a9825ccacd36cb5b112139c75eefabb",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "110201935b3752905fdff6e98af7504d5a9825ccacd36cb5b112139c75eefabb"
     },
     {
       "file": "decode-parity.json",
       "predecessor_sha256": "73dd8c31d3fc2854775357bf10ebdf6240421c1fe20f49d08fe3d7dd6a1c09e4",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "73dd8c31d3fc2854775357bf10ebdf6240421c1fe20f49d08fe3d7dd6a1c09e4"
     },
     {
       "file": "durability.json",
       "predecessor_sha256": "97bf32ee292b49aa613f3b7b8e7ec3ca90dd06e855d0254bcf917e16d9ce3348",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "97bf32ee292b49aa613f3b7b8e7ec3ca90dd06e855d0254bcf917e16d9ce3348"
     },
     {
       "file": "integrated-cli.json",
       "predecessor_sha256": "f1ff7c4a0968b652e2756c7628216b99f44e2ecb69b7896aeabc56f1d225b418",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "f1ff7c4a0968b652e2756c7628216b99f44e2ecb69b7896aeabc56f1d225b418"
     },
     {
       "file": "native-ci.json",
       "predecessor_sha256": "19a8152058122ea304d789b440f9c7229a3903ce75950238a832a03d29f30eed",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "19a8152058122ea304d789b440f9c7229a3903ce75950238a832a03d29f30eed"
     },
     {
       "file": "native-integration.json",
       "predecessor_sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4"
     },
     {
       "file": "native-publication.json",
       "predecessor_sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
     },
     {
       "file": "packaging.json",
       "predecessor_sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1"
     },
     {
       "file": "protocol.json",
       "predecessor_sha256": "48d9aecab25c707a742fb967c7491a2710bfc55e8eec5fbbc4514fd74f94dea3",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "48d9aecab25c707a742fb967c7491a2710bfc55e8eec5fbbc4514fd74f94dea3"
     },
     {
@@ -101,49 +101,49 @@
       "file": "rtx3090-windows-native.SHA256SUMS",
       "predecessor_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d"
     },
     {
       "file": "rtx3090.json",
       "predecessor_sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d"
     },
     {
       "file": "rtx4090-windows-native.SHA256SUMS",
       "predecessor_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379"
     },
     {
       "file": "rtx4090.json",
       "predecessor_sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0"
     },
     {
       "file": "rtx5090.json",
       "predecessor_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4"
     },
     {
       "file": "runtime-base.json",
       "predecessor_sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
     },
     {
       "file": "runtime-publication.json",
       "predecessor_sha256": "204d28a40ff07beaa8d8303dab306331ab2198fa5c8bb105f8fce3d8b63de6ef",
       "disposition": "kept-unchanged-subject",
-      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the planned RTX 3090 DFlash2 component.",
+      "reason": "Exact v0.14.0 runtime/package subject and measurement date carried unchanged. Any embedded old-client observation remains historical; it does not qualify OMP 18.14.0 or the prepared v0.15.0 guide.",
       "staged_sha256": "204d28a40ff07beaa8d8303dab306331ab2198fa5c8bb105f8fce3d8b63de6ef"
     },
     {
@@ -151,14 +151,14 @@
       "predecessor_sha256": "a1ffdd29b6d6bf359b3a3751c71ea90dd71662e1ac3579d2bbdb0b971cd3576a",
       "disposition": "replaced",
       "reason": "Current host-free draft operation and remaining gates; no lane pin or current hardware qualification.",
-      "staged_sha256": "f2848db7c76735a7e35956470da9f4baae361b9ca43640766fb67d1f48141fa8"
+      "staged_sha256": "317dfcfbc25055450e89145c69aae45eb5afb6956a1a28308851f10f072d34fc"
     },
     {
       "file": "stock-omp.json",
       "predecessor_sha256": "707fe48642bc17ded6ac4e7e26c047f9480f89089078885f031a58c1565bd12f",
       "disposition": "replaced",
       "reason": "Content-safe L9 source/asset/macOS-stub review of the new client, not inference or current guide acceptance.",
-      "staged_sha256": "1d53d7be2b346326dcbca2cfab4deb71de4c17fe55724942ac955843d1be5671"
+      "staged_sha256": "e1108dcf05802e9dad4613bcbd4ba072b76df729632a79f8e77b4daa33e9ab87"
     }
   ],
   "dropped_files": [],

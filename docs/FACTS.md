@@ -50,13 +50,13 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
 
-**Staged next: v0.15.0, not published.** The host-free draft pins stock Oh My Pi **18.14.0**
-(`31147f9d`, tree `9a63b5bf`; Darwin `60884395`, Windows `620a5935`, Linux `e7dd2b60`) and
-currently carries all three v0.14.0 runtime packages unchanged. RTX 4090 `v0.7.0-qwen38-4090-beta.3`
-and RTX 5090 `v0.7.0-qwen38-5090-beta.3` remain carried in the final fast-track scope. RTX 3090
-still binds MTP3 `v0.7.0-qwen38-3090-beta.3` here; its planned DFlash2 K7
-`v0.8.0-qwen38-3090-beta.1` rebind awaits shipping-package gates. Fresh client/route acceptance,
-changed-scope council, composition and immutable pins are separate. The root compatibility
+**Staged next: v0.15.0, not published.** The client-only draft pins stock Oh My Pi **18.14.0**
+(`31147f9d`, tree `9a63b5bf`; Darwin `60884395`, Windows `620a5935`, Linux `e7dd2b60`) and carries
+all three v0.14.0 runtime packages, model bytes and serving profiles unchanged: RTX 5090
+`v0.7.0-qwen38-5090-beta.3`, RTX 4090 `v0.7.0-qwen38-4090-beta.3` / MTP3, and RTX 3090
+`v0.7.0-qwen38-3090-beta.3` / MTP3. Product tooling and guide changes ship without a runtime
+rebuild. Native RTX 3090 DFlash2 moves to v0.15.1 after a runtime defect was found. Fresh
+client/route acceptance, changed-scope council, composition and immutable pins are separate. The root compatibility
 authority stays v0.14.0 until the lead's lane pin. See the
 [staged notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md),
 [staged manifest](../releases/v0.15.0/manifest.json), and

@@ -1,13 +1,13 @@
 # Quickstart
 
-> **Prepared guide: v0.15.0 · stock Oh My Pi 18.14.0 · fresh runtime and route acceptance required**
+> **Prepared guide: v0.15.0 · stock Oh My Pi 18.14.0 · fresh client and route acceptance required**
 
 This guide prepares an unpublished candidate. The published release remains **v0.14.0**; use
 its [immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
 until v0.15.0 is published. The executable blocks below target v0.15.0 for fresh acceptance;
 they do not authorize installation from a draft or replace the ready gate.
-This host-free stage still carries the v0.14.0 RTX 3090 MTP3 package. Its planned DFlash2 K7
-replacement must pass its gates and be rebound before the candidate's route window.
+This client-only release carries all three v0.14.0 runtime components, models and serving
+profiles unchanged. Native RTX 3090 DFlash2 is deferred to v0.15.1 after a runtime defect was found.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -20,7 +20,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
 | RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; unchanged beta.3 runtime, fresh client/route acceptance required | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; carried beta.3 MTP3 until the gated DFlash2 rebind | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; unchanged beta.3 MTP3 runtime, fresh client/route acceptance required | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -138,9 +138,9 @@ predicates and two macOS semantic stub rehearsals, not fresh live route acceptan
 
 ## Acceptance evidence
 
-**v0.15.0 acceptance has not run.** The stock client, retargeted guide, and eventual RTX 3090
-replacement require fresh candidate-bound platform, documented-route/public-install, and
-restoration receipts. None of the historical observations below accept these changed blocks.
+**v0.15.0 acceptance has not run.** The stock client and retargeted guide require fresh
+candidate-bound platform, documented-route/public-install, and restoration receipts on all three
+unchanged runtime lanes. None of the historical observations below accept these changed blocks.
 
 Historical v0.14.0 client, route, native public-install, and independent restoration acceptance passed
 on frozen candidate `c81a8e7efb37b8d5c36b16a10a18945cb5aa313d`. Client acceptance is never
@@ -490,9 +490,9 @@ beside an RTX 4090 (use `-GpuUuid` if multiple RTX 3090 cards exist). Stop the o
 port `18082` first. The beta.3 runtime qualification records no predecessor (`not_applicable`,
 zero rollback directions); prior beta.2 acceptance does not transfer.
 
-This section still installs the carried MTP3 package; it is not yet the planned DFlash2 K7
-route. The following older upgrade warning applies only to that carried installer's historical
-v0.13.1-to-v0.14.0 transition, not the planned equal-cap 350 W upgrade from v0.14.0.
+This client-only release installs the same MTP3 runtime package as v0.14.0; it changes neither
+the runtime profile nor the 350 W serving cap. The following upgrade warning applies only to the
+historical v0.13.1-to-v0.14.0 transition.
 
 **Upgrade from v0.13.1: stop the running RTX 3090 lane before installing v0.14.0.** Use the
 installed controller's `Stop` action from [Operate the RTX 3090 native lane](#operate-the-rtx-3090-native-lane)
