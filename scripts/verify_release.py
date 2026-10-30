@@ -1272,6 +1272,9 @@ def validate_ninfer_variants(
     *,
     allow_pending: bool = False,
     incoming_checksums: dict[str, Path] | None = None,
+    incoming_quality_screens: dict[str, Path] | None = None,
+    incoming_t1_parities: dict[str, Path] | None = None,
+    incoming_fits: dict[str, Path] | None = None,
 ) -> None:
     """Native runtime rows, their checksum closure, and the lane receipts they bind.
 
@@ -1339,6 +1342,9 @@ def validate_ninfer_variants(
         require(isinstance(item.get("maximum_context_tokens"), int)
                 and item["maximum_context_tokens"] > 0,
                 f"{prefix}.maximum_context_tokens must be positive", errors)
+        if (product_version(release) or (0, 0, 0)) >= QUALITY_SCREEN_FROM:
+            require(compatibility_item.get("maximum_context_tokens") == item.get("maximum_context_tokens"),
+                    f"{prefix}.maximum_context_tokens must match compatibility", errors)
         release_tag = item.get("release_tag")
         require(isinstance(release_tag, str)
                 and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
@@ -1413,6 +1419,15 @@ def validate_ninfer_variants(
                 errors,
             )
         receipt = load_json(summary_path) if summary_path.is_file() else {}
+        if "runtime_shape" in item:
+            require(receipt.get("runtime_shape") == item["runtime_shape"],
+                    f"{prefix} qualification runtime_shape must match the variant", errors)
+        validate_native_quality(
+            root, release, item, errors,
+            incoming_screen=(incoming_quality_screens or {}).get(variant_id),
+            incoming_parity=(incoming_t1_parities or {}).get(variant_id),
+            incoming_fit=(incoming_fits or {}).get(variant_id),
+        )
         # The RTX 3090 parity lineage and every mainline native lane qualify through an
         # orchestrator summary; the RTX 4090 durable lineage through its beta receipt.
         native_receipt = (
@@ -1494,6 +1509,208 @@ def validate_ninfer_variants(
                 if field in package or rebased:
                     require(package.get(field) == item.get(pin),
                             f"{prefix} qualification {field} must match", errors)
+
+
+QUALITY_SCREEN_FROM = (0, 15, 0)
+T1_CASE_IDS_SHA256 = "62a35145affbfce4b86aed94f7c3f3b8ad7ad6c372bba71af67c379ad34024b9"
+T1_COMPARISON_METHOD = "retained-output-bytes"
+NATIVE_IDENTITY_FIELDS = ("server_binary_sha256", "configuration_sha256", "model_artifact_sha256")
+FIT_FIELDS = ("device_state_slots", "admission_headroom_mib", "draft_mlp_device_format",
+              "token_embedding_residency")
+
+
+def product_version(release: str) -> tuple[int, int, int] | None:
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?", release)
+    return tuple(map(int, match.groups())) if match else None
+
+
+def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dict[str, Any] | None:
+    """The immediately preceding GA directory owns the predecessor, not a CLI-supplied row."""
+    current = product_version(release)
+    candidates = [(product_version(path.name), path) for path in (root / "releases").iterdir()
+                  if path.is_dir() and ga_release(path.name) and product_version(path.name) is not None]
+    older = [(version, path) for version, path in candidates if current and version < current]
+    if not older:
+        return None
+    path = max(older, key=lambda value: value[0])[1] / "manifest.json"
+    if not path.is_file():
+        return None
+    return next((row for row in load_json(path).get("components", {}).get("ninfer_variants", [])
+                 if isinstance(row, dict) and row.get("id") == variant_id), None)
+
+
+def native_shape(root: Path, variant: dict[str, Any]) -> dict[str, Any] | None:
+    shape = variant.get("runtime_shape")
+    if isinstance(shape, dict):
+        return {"speculative_backend": shape.get("speculative_backend"), "fit": shape.get("fit")}
+    # Historical MTP rows predate runtime_shape. Read their hash-bound qualification,
+    # whose config records the actual slots/headroom; MTP never uses the DFlash2 load seam.
+    qualification = variant.get("qualification", {})
+    summary = qualification.get("summary")
+    if not isinstance(summary, str):
+        return None
+    path = (root / summary).resolve()
+    if not path.is_relative_to(root.resolve()) or not path.is_file() or (
+            sha256_file(path) != qualification.get("sha256")):
+        return None
+    config = load_json(path).get("configuration", {})
+    if config.get("speculative_backend") != "mtp":
+        return None
+    return {"speculative_backend": "mtp", "fit": {
+        "device_state_slots": config.get("device_state_slots"),
+        "admission_headroom_mib": config.get("admission_headroom_mib"),
+        "draft_mlp_device_format": "artifact", "token_embedding_residency": "device",
+    }}
+
+
+def native_evidence(root: Path, release: str, variant: dict[str, Any], field: str,
+                    errors: list[str], incoming: Path | None = None) -> dict[str, Any] | None:
+    label = f"{variant.get('id')}.qualification.{field}"
+    reference = variant.get("qualification", {}).get(field)
+    if not isinstance(reference, dict) or set(reference) != {"path", "sha256"}:
+        errors.append(f"{label} must bind path and sha256")
+        return None
+    relative = reference.get("path")
+    destination = (root / relative).resolve() if isinstance(relative, str) else root.resolve()
+    require(isinstance(relative, str) and destination.is_relative_to(
+        (root / "releases" / release / "qualification").resolve()),
+        f"{label}.path must stay inside release qualification", errors)
+    require_sha(reference.get("sha256"), f"{label}.sha256", errors)
+    path = incoming if incoming is not None else destination
+    if not path.is_file():
+        errors.append(f"{label} file must exist")
+        return None
+    require(sha256_file(path) == reference.get("sha256"), f"{label} SHA-256 must match bytes", errors)
+    value = load_json(path)
+    for text in walk_strings(value):
+        for marker in PRIVATE_MARKERS:
+            require(marker not in text, f"{label} contains private marker {marker!r}", errors)
+    require(value.get("raw_prompts_outputs_or_secrets_included") is False,
+            f"{label} must exclude raw prompts, outputs and secrets", errors)
+    return value
+
+
+def validate_quality_screen(root: Path, release: str, variant: dict[str, Any],
+                            errors: list[str], incoming: Path | None = None) -> None:
+    value = native_evidence(root, release, variant, "quality_screen", errors, incoming)
+    if value is None:
+        return
+    label = f"{variant.get('id')}.qualification.quality_screen"
+    require(value.get("artifact_type") == "omp-ninfer.quality-screen-verdict"
+            and value.get("schema_version") == 1, f"{label} must be a schema-1 quality verdict", errors)
+    require(value.get("verdict") == "pass" and value.get("validity", {}).get("valid") is True,
+            f"{label} must pass and be valid", errors)
+    from quality_screen import validate_native_arms
+    from redaction_screen import ScreenError, native_arm
+    runs = value.get("runs", {})
+    try:
+        selected = {role: {"arm": native_arm(runs[role]["arm"])} for role in (
+            "production", "candidate", "production_determinism", "candidate_determinism")}
+        validate_native_arms(selected)
+    except (ScreenError, KeyError, TypeError, ValueError):
+        errors.append(f"{label} must bind four valid native arms with fresh determinism identity")
+        return
+    candidate, production = selected["candidate"]["arm"], selected["production"]["arm"]
+    for key in ("package_sha256", *NATIVE_IDENTITY_FIELDS):
+        require(candidate.get(key) == variant.get(key),
+                f"{label} candidate {key} must match the variant", errors)
+    require(production["lane"] == variant["id"].split("-")[0],
+            f"{label} production lane must match the variant", errors)
+
+
+def validate_t1_parity(root: Path, release: str, variant: dict[str, Any],
+                       predecessor: dict[str, Any] | None, errors: list[str],
+                       incoming: Path | None = None) -> None:
+    value = native_evidence(root, release, variant, "t1_parity", errors, incoming)
+    if value is None:
+        return
+    label = f"{variant['id']}.qualification.t1_parity"
+    allowed = {"artifact_type", "schema_version", "status", "lane", "predecessor", "candidate",
+               "case_ids_sha256", "compared", "identical", "comparison_method",
+               "raw_prompts_outputs_or_secrets_included"}
+    require(set(value) == allowed and value.get("artifact_type") == "omp-ninfer.native-t1-parity"
+            and value.get("schema_version") == 1 and value.get("status") == "passed",
+            f"{label} must be a content-safe schema-1 native T1 receipt", errors)
+    require(value.get("lane") == variant["id"].split("-")[0], f"{label} lane must match", errors)
+    require(value.get("case_ids_sha256") == T1_CASE_IDS_SHA256
+            and value.get("compared") == 84 and value.get("identical") == 84
+            and value.get("comparison_method") == T1_COMPARISON_METHOD,
+            f"{label} requires 84/84 actual retained output-byte comparisons on the frozen corpus", errors)
+    for role, row in (("candidate", variant), ("predecessor", predecessor or {})):
+        identity = value.get(role, {})
+        require(isinstance(identity, dict) and set(identity) == set(NATIVE_IDENTITY_FIELDS),
+                f"{label}.{role} must carry only server/config/model hashes", errors)
+        for key in NATIVE_IDENTITY_FIELDS:
+            require(isinstance(identity, dict) and identity.get(key) == row.get(key)
+                    and isinstance(row.get(key), str) and SHA256_RE.fullmatch(row[key]) is not None,
+                    f"{label}.{role}.{key} must match the bound {role}", errors)
+    shape = native_shape(root, variant)
+    require(predecessor is not None and shape is not None and shape["speculative_backend"] == "mtp"
+            and shape == native_shape(root, predecessor),
+            f"{label} exemption requires unchanged predecessor MTP backend and fit", errors)
+
+
+def validate_native_fit(root: Path, release: str, variant: dict[str, Any],
+                        errors: list[str], incoming: Path | None = None) -> None:
+    value = native_evidence(root, release, variant, "fit", errors, incoming)
+    if value is None:
+        return
+    label = f"{variant['id']}.qualification.fit"
+    require(value.get("artifact_type") == "omp-ninfer.native-fit" and value.get("schema_version") == 1
+            and value.get("status") == "passed", f"{label} must be a passed schema-1 fit receipt", errors)
+    identity = value.get("identity", {})
+    for key in ("package_sha256", *NATIVE_IDENTITY_FIELDS):
+        require(identity.get(key) == variant.get(key), f"{label} {key} must match the variant", errors)
+    shape = native_shape(root, variant)
+    require(value.get("runtime_shape") == variant.get("runtime_shape"),
+            f"{label} runtime_shape must match the variant", errors)
+    require(value.get("maximum_context_tokens") == variant.get("maximum_context_tokens")
+            and variant.get("maximum_context_tokens") == 131072,
+            f"{label} must qualify the advertised 131072-token ceiling", errors)
+    required = {"rtx3090-windows-native": 768, "rtx4090-windows-native": 640}[variant["id"]]
+    fit = shape.get("fit", {}) if shape else {}
+    require(fit == {"device_state_slots": 0, "admission_headroom_mib": required,
+                    "draft_mlp_device_format": "Q4_G64_FP16", "token_embedding_residency": "host-mapped"},
+            f"{label} DFlash2 fit must bind zero slots, lane headroom and the native load seam", errors)
+    observed = value.get("measured_admission_headroom_mib")
+    require(type(observed) in (int, float) and observed >= required,
+            f"{label} measured headroom must meet the lane requirement", errors)
+    weights = value.get("effective_weights", {})
+    for key in ("converted_device_bytes", "host_mapped_bytes"):
+        require(type(weights.get(key)) is int and weights[key] > 0,
+                f"{label} effective_weights.{key} must be positive", errors)
+
+
+def validate_native_quality(root: Path, release: str, variant: dict[str, Any], errors: list[str],
+                            *, incoming_screen: Path | None = None, incoming_parity: Path | None = None,
+                            incoming_fit: Path | None = None) -> None:
+    qualification = variant.get("qualification", {})
+    if not isinstance(qualification, dict):
+        return
+    version = product_version(release)
+    if "quality_screen" in qualification:
+        validate_quality_screen(root, release, variant, errors, incoming_screen)
+    if version is None or version < QUALITY_SCREEN_FROM:
+        return
+    predecessor = predecessor_native_variant(root, release, variant["id"])
+    shape = native_shape(root, variant)
+    previous_shape = native_shape(root, predecessor) if predecessor is not None else None
+    carried = predecessor is not None and all(variant.get(key) == predecessor.get(key) for key in (
+        "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens")) and shape == previous_shape
+    if carried:
+        return
+    require(isinstance(shape, dict) and shape.get("speculative_backend") in ("mtp", "dflash2")
+            and isinstance(shape.get("fit"), dict) and set(shape["fit"]) == set(FIT_FIELDS),
+            f"{variant['id']}.runtime_shape must bind backend and fit", errors)
+    if "t1_parity" in qualification:
+        validate_t1_parity(root, release, variant, predecessor, errors, incoming_parity)
+    elif "quality_screen" not in qualification:
+        errors.append(f"{variant['id']}.qualification.quality_screen is required for a new native runtime; "
+                      "unchanged MTP rebuilds may bind 84/84 t1_parity instead")
+    if shape and shape.get("speculative_backend") == "dflash2":
+        require("quality_screen" in qualification,
+                f"{variant['id']} DFlash2 requires qualification.quality_screen", errors)
+        validate_native_fit(root, release, variant, errors, incoming_fit)
 
 
 def validate_server_arguments(

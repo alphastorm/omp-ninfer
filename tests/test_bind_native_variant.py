@@ -11,6 +11,7 @@ import importlib.util
 import io
 import json
 import sys
+import tarfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -404,6 +405,140 @@ class BindNativeVariantTest(unittest.TestCase):
         self.assertEqual(native["rtx4090-windows-native"], {"untouched": True})
         self.assertEqual(native["rtx3090-windows-native"]["package_sha256"], variant["package_sha256"])
         self.assertEqual(root_authority.read_text(), "unchanged root authority")
+
+    def test_rebind_ceiling_updates_release_mirror_only_after_all_checks(self) -> None:
+        self.manifest_path.write_text(json.dumps(self.manifest))
+        compatibility = self.release_root.parent / "compatibility.json"
+        compatibility.write_text(json.dumps({"runtime_variants": [
+            {"id": "rtx4090-windows-native", "maximum_context_tokens": 131072, "untouched": True}]}))
+        root_authority = self.workspace / "compatibility.json"
+        root_authority.write_text("unchanged")
+        argv = ["bind_native_variant.py", "--release", RELEASE, "--lane", "rtx4090", "--tag", TAG,
+                "--checksums", str(self.checksums_path), "--receipt", str(self.receipt_path),
+                "--maximum-context-tokens", "65536"]
+        with mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()):
+            BINDER.main()
+        self.assertEqual(json.loads(self.manifest_path.read_text())["components"]["ninfer_variants"][-1][
+            "maximum_context_tokens"], 65536)
+        self.assertEqual(json.loads(compatibility.read_text())["runtime_variants"][0],
+                         {"id": "rtx4090-windows-native", "maximum_context_tokens": 65536, "untouched": True})
+        self.assertEqual(root_authority.read_text(), "unchanged")
+        for invalid in (0, -1):
+            with self.assertRaises(BINDER.BindError):
+                BINDER.bind(self.manifest, "rtx4090", TAG, self.checksums_path, self.receipt_path,
+                            RELEASE, maximum_context_tokens=invalid)
+
+    def prepare_p15(self):
+        self.rebased_assets()
+        self.release_root = self.workspace / "releases/v0.15.0/qualification"
+        self.release_root.mkdir(parents=True)
+        self.manifest_path = self.release_root.parent / "manifest.json"
+        self.manifest["status"] = "draft"
+        variant = self.manifest["components"]["ninfer_variants"][-1]
+        self.manifest["components"]["ninfer_variants"] = [variant]
+        variant["qualification"].pop("public_url", None)
+        shape = {"max_concurrency": 1, "speculative_backend": "mtp",
+                 "draft_tokens": {"min": 1, "max": None}, "proposal": "artifact-default",
+                 "fit": {"device_state_slots": 2, "admission_headroom_mib": 640,
+                         "draft_mlp_device_format": "artifact", "token_embedding_residency": "device"}}
+        previous = {**deepcopy(variant), "runtime_shape": shape, "server_binary_sha256": "a" * 64,
+                    "configuration_sha256": "b" * 64, "model_artifact_sha256": self.receipt["model_sha256"]}
+        predecessor = self.workspace / "releases/v0.14.0/manifest.json"
+        predecessor.parent.mkdir()
+        predecessor.write_text(json.dumps({"components": {"ninfer_variants": [previous]}}))
+        package = self.workspace / PACKAGE.replace("v0.6.1", "v0.8.0")
+        config = json.dumps({"speculative": {"backend": "mtp"}}).encode()
+        spec = json.dumps({"schema_version": 5, "lane": "rtx4090", "runtime_shape": shape}).encode()
+        with tarfile.open(package, "w:gz") as archive:
+            for name, data in (("server-config.json", config), ("release-spec.json", spec)):
+                member = tarfile.TarInfo("payload/" + name)
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+        self.receipt.update(config_sha256=hashlib.sha256(config).hexdigest())
+        self.receipt["package"] = {"filename": package.name, "bytes": package.stat().st_size,
+                                   "sha256": hashlib.sha256(package.read_bytes()).hexdigest()}
+        self.write_receipt()
+        self.entries = {name.replace("v0.7.0", "v0.8.0"): value for name, value in self.entries.items()}
+        self.entries[package.name] = self.receipt["package"]["sha256"]
+        self.entries["package-build-receipt.json"] = self.receipt_digest
+        self.write_checksums()
+        qualified = json.loads(REBASED_LANE_RECEIPT.read_text())
+        qualified["runtime_shape"] = shape
+        self.write_lane_receipt(qualified)
+        from test_native_screen_arm import arm_identity
+        screen = {"artifact_type": "omp-ninfer.quality-screen-verdict", "schema_version": 1,
+                  "verdict": "pass", "validity": {"valid": True},
+                  "raw_prompts_outputs_or_secrets_included": False, "runs": {}}
+        for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
+            arm = arm_identity("candidate" in role, "determinism" in role)
+            arm.update(lane="rtx4090", gpu_name="NVIDIA GeForce RTX 4090",
+                       release_id="qwen38-4090-native-v0.8.0-beta.1", power_limit_w=450,
+                       model_artifact_sha256=self.receipt["model_sha256"])
+            if "candidate" in role:
+                arm.update(package_sha256=self.receipt["package"]["sha256"],
+                           server_binary_sha256=self.receipt["binaries"]["server_sha256"],
+                           configuration_sha256=self.receipt["config_sha256"])
+            screen["runs"][role] = {"arm": arm}
+        self.screen_path = self.workspace / "verdict.json"
+        self.screen_path.write_text(json.dumps(screen))
+        return package
+
+    def test_p15_binds_screen_and_derived_shape_before_copying_any_evidence(self):
+        self.prepare_p15()
+        before = deepcopy(self.manifest)
+        with self.assertRaisesRegex(BINDER.BindError, "quality_screen"):
+            BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                        self.receipt_path, "v0.15.0")
+        self.assertEqual(self.manifest, before)
+        self.manifest_path.write_text(json.dumps(self.manifest))
+        argv = ["bind_native_variant.py", "--release", "v0.15.0", "--lane", "rtx4090",
+                "--tag", "v0.8.0-qwen38-4090-beta.1", "--checksums", str(self.checksums_path),
+                "--receipt", str(self.receipt_path), "--quality-screen", str(self.screen_path)]
+        with mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()):
+            BINDER.main()
+        variant = json.loads(self.manifest_path.read_text())["components"]["ninfer_variants"][0]
+        reference = variant["qualification"]["quality_screen"]
+        self.assertEqual((self.workspace / reference["path"]).read_bytes(), self.screen_path.read_bytes())
+        self.assertEqual(reference["sha256"], hashlib.sha256(self.screen_path.read_bytes()).hexdigest())
+        self.assertEqual(variant["runtime_shape"]["speculative_backend"], "mtp")
+        self.assertEqual(variant["runtime_shape"]["fit"]["device_state_slots"], 2)
+
+    def test_p15_refuses_unauthenticated_tar_or_screen_before_writing(self):
+        package = self.prepare_p15()
+        before = deepcopy(self.manifest)
+        screen = json.loads(self.screen_path.read_text())
+        screen["verdict"] = "invalid"
+        self.screen_path.write_text(json.dumps(screen))
+        with self.assertRaisesRegex(BINDER.BindError, "must pass"):
+            BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                        self.receipt_path, "v0.15.0", quality_screen=self.screen_path)
+        self.assertEqual(self.manifest, before)
+        self.assertFalse((self.release_root / "rtx4090-windows-native.quality-screen.json").exists())
+        package.write_bytes(b"tampered")
+        with self.assertRaisesRegex(BINDER.BindError, "hash-matching"):
+            BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                        self.receipt_path, "v0.15.0", quality_screen=self.screen_path)
+
+    def test_p15_mtp_rebuild_binds_direct_t1_parity_instead_of_screen(self):
+        self.prepare_p15()
+        predecessor = json.loads((self.workspace / "releases/v0.14.0/manifest.json").read_text())[
+            "components"]["ninfer_variants"][0]
+        candidate = {"server_binary_sha256": self.receipt["binaries"]["server_sha256"],
+                     "configuration_sha256": self.receipt["config_sha256"],
+                     "model_artifact_sha256": self.receipt["model_sha256"]}
+        parity = {"artifact_type": "omp-ninfer.native-t1-parity", "schema_version": 1, "status": "passed",
+                  "lane": "rtx4090", "candidate": candidate,
+                  "predecessor": {key: predecessor[key] for key in candidate},
+                  "case_ids_sha256": "62a35145affbfce4b86aed94f7c3f3b8ad7ad6c372bba71af67c379ad34024b9",
+                  "compared": 84, "identical": 84, "comparison_method": "retained-output-bytes",
+                  "raw_prompts_outputs_or_secrets_included": False}
+        path = self.workspace / "t1.json"
+        path.write_text(json.dumps(parity))
+        variant = BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                              self.receipt_path, "v0.15.0", t1_parity=path)
+        self.assertNotIn("quality_screen", variant["qualification"])
+        self.assertEqual(variant["qualification"]["t1_parity"]["sha256"],
+                         hashlib.sha256(path.read_bytes()).hexdigest())
 
 
 if __name__ == "__main__":

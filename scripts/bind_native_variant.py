@@ -24,6 +24,12 @@ For a new lane, pass --add, --maximum-context-tokens and --qualification-commit 
 committing its real qualification receipt; the row's release-local compatibility/qualification
 mirrors are added with it. Without --add, a missing row remains an error. Root compatibility is
 never promoted here.
+
+From v0.15.0 supply the authenticated tar beside SHA256SUMS (or --package). Its
+schema-5 runtime_shape is derived from bytes. New/changed native runtimes bind
+--quality-screen; unchanged MTP rebuilds may instead bind --t1-parity with 84/84
+actual retained-output-byte comparisons. DFlash2 also requires --fit-proof.
+--maximum-context-tokens replaces both an existing row and its release-local mirror.
 """
 
 from __future__ import annotations
@@ -33,6 +39,7 @@ import hashlib
 import json
 import re
 import sys
+import tarfile
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -44,6 +51,8 @@ from verify_release import (
     effective_native_model,
     native_dependency_sbom_filename,
     native_package_component_tag,
+    product_version,
+    sha256_file,
     validate_dependency_sbom,
     validate_ninfer_variants,
 )
@@ -88,7 +97,9 @@ def require(entries: dict[str, str], name: str) -> str:
 
 def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
          receipt_path: Path, release: str, *, maximum_context_tokens: int | None = None,
-         qualification_commit: str | None = None, add: bool = False) -> dict[str, Any]:
+         qualification_commit: str | None = None, add: bool = False,
+         quality_screen: Path | None = None, t1_parity: Path | None = None,
+         fit_proof: Path | None = None, package_path: Path | None = None) -> dict[str, Any]:
     """Derive the lane's row, have the verifier accept it, and only then put it in `manifest`.
 
     Nothing is written: the caller checks the set into the release tree after this returns.
@@ -113,6 +124,10 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         }
     else:
         variant = deepcopy(variants[index])
+    if maximum_context_tokens is not None:
+        if maximum_context_tokens <= 0:
+            raise BindError("--maximum-context-tokens must be positive")
+        variant["maximum_context_tokens"] = maximum_context_tokens
 
     entries = parse_checksums(checksums)
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -178,6 +193,9 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
         variant.pop(field, None)
     variant.update(dependency_pins)
+    if (product_version(release) or (0, 0, 0)) >= (0, 15, 0):
+        variant["runtime_shape"] = package_runtime_shape(
+            package_path or checksums.parent / package_name, receipt)
     for field, asset in SUPPORT_ASSETS.items():
         variant[f"{field}_url"] = f"{DOWNLOAD}/{tag}/{asset}"
         variant[f"{field}_sha256"] = require(entries, asset)
@@ -187,6 +205,14 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     if not summary_path.is_file():
         raise BindError(f"missing lane qualification receipt: {qualification['summary']}")
     qualification["sha256"] = hashlib.sha256(summary_path.read_bytes()).hexdigest()
+    for field, path, suffix in (("quality_screen", quality_screen, "quality-screen"),
+                                ("t1_parity", t1_parity, "t1-parity"),
+                                ("fit", fit_proof, "fit")):
+        if path is not None:
+            qualification[field] = {
+                "path": f"releases/{release}/qualification/{variant_id}.{suffix}.json",
+                "sha256": sha256_file(path),
+            }
     if index is None:
         qualification["public_url"] = (
             f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/"
@@ -198,6 +224,9 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         native_model.get("artifact_sha256"), errors,
         allow_pending=manifest.get("status") == "draft",
         incoming_checksums={variant_id: checksums},
+        incoming_quality_screens={variant_id: quality_screen} if quality_screen else None,
+        incoming_t1_parities={variant_id: t1_parity} if t1_parity else None,
+        incoming_fits={variant_id: fit_proof} if fit_proof else None,
     )
     if errors:
         raise BindError("; ".join(errors))
@@ -208,6 +237,35 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     else:
         variants[index] = variant
     return variant
+
+
+def package_runtime_shape(path: Path, receipt: dict[str, Any]) -> dict[str, Any]:
+    """Derive policy from the authenticated tar, not an unbound transcription of its spec."""
+    if not path.is_file() or sha256_file(path) != receipt["package"]["sha256"]:
+        raise BindError("v0.15.0 native binding requires the hash-matching package tar (--package)")
+    metadata: dict[str, tuple[dict[str, Any], str]] = {}
+    with tarfile.open(path, mode="r|gz") as archive:
+        for member in archive:
+            name = Path(member.name).name
+            if name not in ("release-spec.json", "server-config.json"):
+                continue
+            if name in metadata or not member.isfile() or member.size > 1024 * 1024:
+                raise BindError("native tar must carry unique regular spec/config metadata")
+            stream = archive.extractfile(member)
+            if stream is None:
+                raise BindError("native tar metadata is unreadable")
+            data = stream.read()
+            metadata[name] = (json.loads(data), hashlib.sha256(data).hexdigest())
+    if set(metadata) != {"release-spec.json", "server-config.json"}:
+        raise BindError("native tar is missing release-spec.json or server-config.json")
+    spec = metadata["release-spec.json"][0]
+    config, config_sha = metadata["server-config.json"]
+    shape = spec.get("runtime_shape")
+    if (spec.get("schema_version") != 5 or spec.get("lane") != receipt.get("lane")
+            or config_sha != receipt.get("config_sha256") or not isinstance(shape, dict)
+            or shape.get("speculative_backend") != config.get("speculative", {}).get("backend")):
+        raise BindError("schema-5 package policy/config identity must match the build receipt")
+    return shape
 
 
 def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
@@ -263,7 +321,11 @@ def main() -> int:
                         help="the lane's package-build-receipt.json")
     parser.add_argument("--add", action="store_true", help="explicitly admit a missing native lane")
     parser.add_argument("--maximum-context-tokens", type=int,
-                        help="qualified context ceiling; required when adding a lane")
+                        help="qualified context ceiling; may replace an existing lane's ceiling")
+    parser.add_argument("--quality-screen", type=Path, help="passing powered native screen verdict")
+    parser.add_argument("--t1-parity", type=Path, help="84/84 retained-byte parity for an unchanged MTP rebuild")
+    parser.add_argument("--fit-proof", type=Path, help="shipping-config native DFlash2 fit receipt")
+    parser.add_argument("--package", type=Path, help="native tar; defaults to beside SHA256SUMS (v0.15.0+)")
     parser.add_argument("--qualification-commit",
                         help="40-hex product commit containing the lane receipt; required for a new lane")
     args = parser.parse_args()
@@ -280,7 +342,17 @@ def main() -> int:
                      for row in manifest["components"].get("ninfer_variants", []))
     variant = bind(manifest, args.lane, args.tag, args.checksums, args.receipt, args.release,
                    maximum_context_tokens=args.maximum_context_tokens,
-                   qualification_commit=args.qualification_commit, add=args.add)
+                   qualification_commit=args.qualification_commit, add=args.add,
+                   quality_screen=args.quality_screen, t1_parity=args.t1_parity,
+                   fit_proof=args.fit_proof, package_path=args.package)
+    compatibility_path = ROOT / "releases" / args.release / "compatibility.json"
+    compatibility = None
+    if not is_new and args.maximum_context_tokens is not None:
+        compatibility = json.loads(compatibility_path.read_text(encoding="utf-8"))
+        mirror = next((row for row in compatibility["runtime_variants"] if row.get("id") == variant["id"]), None)
+        if mirror is None:
+            raise BindError("existing lane must have a release-local compatibility mirror")
+        mirror["maximum_context_tokens"] = variant["maximum_context_tokens"]
     if is_new:
         add_lane_rows(args.release, variant)
     # Every check has passed. The manifest binds the closed outer set - the SHA256SUMS that lists
@@ -288,6 +360,12 @@ def main() -> int:
     # byte-identical copy of it in the release tree.
     checked_in = ROOT / "releases" / args.release / "qualification" / f"{variant['id']}.SHA256SUMS"
     checked_in.write_bytes(args.checksums.read_bytes())
+    for field, path in (("quality_screen", args.quality_screen), ("t1_parity", args.t1_parity),
+                        ("fit", args.fit_proof)):
+        if path is not None:
+            (ROOT / variant["qualification"][field]["path"]).write_bytes(path.read_bytes())
+    if compatibility is not None:
+        compatibility_path.write_text(json.dumps(compatibility, indent=2) + "\n", encoding="utf-8")
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"bound {variant['id']} in releases/{args.release}/manifest.json")
     print(f"  package {variant['package_name']} {variant['package_bytes']} bytes")
@@ -300,6 +378,6 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except BindError as error:
+    except (BindError, OSError, ValueError, tarfile.TarError) as error:
         print(f"bind failed: {error}")
         raise SystemExit(1)
