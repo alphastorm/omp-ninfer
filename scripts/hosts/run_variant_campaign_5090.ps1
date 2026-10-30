@@ -26,7 +26,9 @@ $models = @{
     'nvfp4' = '/home/sunil/builds/models/qwen3_8_27b_nvfp4.ninfer'
 }
 $apiKeyFile = '/home/sunil/services/ninfer-5090/secrets/api_key'
-$modelId = 'q38-ninfer'
+# Run this launcher from the product checkout; staged child tools receive its exact selector.
+$modelId = (& python -c 'import sys; sys.path.insert(0, sys.argv[1]); from client_acceptance import documented_model_id; print(documented_model_id(sys.argv[2]))' (Join-Path $PSScriptRoot '..') 'rtx5090-macos-client' | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($modelId)) { throw 'documented RTX 5090 model lookup failed' }
 $sourceCommit = 'ce51ccb689521cadcff541f4bd4cdea9998b7cd5'
 $binarySha256 = '989e2b7155bb6b49a0e012a6f0daee5c7eb82320e167ab2de0700bacdcc24fea'
 $corpusSha256 = '9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623'
@@ -300,7 +302,8 @@ try {
                 }
             }
             if ($null -eq $failureCode -and $needsQuality -and -not (Test-WslFile "$campaignRoot/quality/$label/scores.json")) {
-                Invoke-InContainer $experimentName @('bash', '/campaign/quality.sh', $lane, $label, $campaignId) $label 'quality'
+                Invoke-InContainer $experimentName @('bash', '/campaign/quality.sh', $lane, $label, $campaignId,
+                    'http://127.0.0.1:8080/v1', '/run/secrets/ninfer_api_key', $modelId) $label 'quality'
             }
         }
         finally {

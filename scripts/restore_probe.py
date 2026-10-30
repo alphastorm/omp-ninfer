@@ -106,7 +106,7 @@ def main() -> int:
     parser.add_argument("--lane", required=True)
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True, type=Path)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--base-tokens", type=int, default=48000)
     parser.add_argument("--restart-cmd", required=True)
     parser.add_argument("--tamper-cmd",
@@ -118,6 +118,9 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
 
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     api_key = args.api_key_file.read_text().strip()
     session = hashlib.sha256(
         f"restore-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()

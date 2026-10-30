@@ -48,7 +48,7 @@ def main() -> int:
     parser.add_argument("--lane", required=True)
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--sessions", type=int, default=3)
     parser.add_argument("--base-tokens", type=int, default=100000)
     parser.add_argument("--rounds", type=int, default=2)
@@ -57,6 +57,9 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args()
 
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     api_key = Path(args.api_key_file).read_text(encoding="utf-8").strip()
     started_ms = int(time.time() * 1000)
     stamp = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")

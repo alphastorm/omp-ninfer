@@ -288,7 +288,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--omp", required=True, type=Path)
     parser.add_argument("--omp-sha256", required=True)
-    parser.add_argument("--omp-version", required=True, help="exact stock version, e.g. omp/18.12.1")
+    parser.add_argument("--omp-version", required=True, help="exact stock version, e.g. omp/18.14.0")
     parser.add_argument("--lane", choices=[v for v in LANES if v != "rtx5090-container-host"], default="rtx5090-macos-client")
     parser.add_argument("--local-rehearsal", action="store_true")
     parser.add_argument("--endpoint")

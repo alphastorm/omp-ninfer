@@ -635,7 +635,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--arm", default="unlabelled", help="receipt label, e.g. C1 or C2")
     parser.add_argument("--base-url", default="http://127.0.0.1:18099")
     parser.add_argument("--api-key-file", required=True, type=Path)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--identity-json", type=Path)
     parser.add_argument("--receipt", required=True, type=Path)
     parser.add_argument("--scenario", choices=SCENARIOS, action="append", help="repeatable; default: all; with --resume-from: restart")
@@ -659,6 +659,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--log-cmd", metavar="CMD", help="shell command printing request JSONL after the run")
     parser.add_argument("--fail-fast", action="store_true")
     args = parser.parse_args(argv)
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     args.scenario = args.scenario or (["restart"] if args.resume_from else list(SCENARIOS))
     args.phase = args.phase or ("resume" if args.resume_from else "seed")
     endpoint = urllib.parse.urlsplit(args.base_url)

@@ -3,10 +3,11 @@
 # Executed inside the arm's container (5090) or on the native host (4090) with the
 # campaign root mounted/staged at $CAMPAIGN_ROOT (default /campaign).
 #
-# Usage: quality.sh <lane> <arm-label> <campaign-id> [base-url] [api-key-file] [model-id]
+# Usage: quality.sh <lane> <arm-label> <campaign-id> <base-url> <api-key-file> <model-id>
+# The checkout launcher derives model-id from the guide; this staged child assumes no lane.
 set -euo pipefail
-usage="usage: quality.sh <lane> <arm-label> <campaign-id> [base-url] [api-key-file] [model-id]"
-(( $# >= 3 && $# <= 6 )) || { echo "$usage" >&2; exit 2; }
+usage="usage: quality.sh <lane> <arm-label> <campaign-id> <base-url> <api-key-file> <model-id>"
+(( $# == 6 )) || { echo "$usage" >&2; exit 2; }
 lane="$1"
 label="$2"
 campaign_id="$3"
@@ -15,9 +16,10 @@ campaign_id="$3"
 # arms manifest defines one: an empty label names the whole quality directory, and a label holding
 # a path can name any directory.
 [[ $label =~ ^[a-z0-9-]+$ ]] || { echo "arm label must use lowercase letters, digits, and hyphens" >&2; exit 2; }
-base_url="${4:-http://127.0.0.1:8080/v1}"
-api_key_file="${5:-/run/secrets/ninfer_api_key}"
-model_id="${6:-q38-ninfer}"
+base_url="$4"
+api_key_file="$5"
+model_id="$6"
+[[ -n $base_url && -n $api_key_file && -n $model_id ]] || { echo "$usage" >&2; exit 2; }
 root="${CAMPAIGN_ROOT:-/campaign}"
 qual="$root/qualification"
 out="$root/quality/$label"

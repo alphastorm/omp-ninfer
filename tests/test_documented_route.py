@@ -134,6 +134,9 @@ class ReleaseProseTests(unittest.TestCase):
 
 class ExtractionTests(unittest.TestCase):
     def test_v0140_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        clients = json.loads((ROOT / "releases" / release / "qualification" /
+                              "client-components.json").read_text())["platforms"]
         routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
                   for lane in documented_route.LANES}
         self.assertEqual(sum(len(steps) for steps in routes.values()), 31)
@@ -142,7 +145,9 @@ class ExtractionTests(unittest.TestCase):
                 self.assertEqual(documented_route.extract(
                     documented_route.DEFAULT_DOC, step.heading, step.index).text, block.text)
                 if step.slug == "client-install":
-                    self.assertIn("v18.12.6", block.text)
+                    client = clients["darwin-arm64" if block.language == "sh" else "windows-x64"]
+                    self.assertIn(client["asset_url"], block.text)
+                    self.assertIn(client["asset_sha256"], block.text)
                 if step.slug == "clone-and-verify":
                     self.assertIn("git clone --branch v0.14.0 --depth 1", block.text)
                     self.assertIn("--require-ready", block.text)
@@ -712,6 +717,64 @@ class ClientConfigurationTests(unittest.TestCase):
                 self.assertIn(name, refused.stderr)
                 self.assertEqual(target.read_bytes(), own)
 
+    def test_wsl2_installs_the_pinned_linux_client_and_local_key_without_ssh(self) -> None:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "WSL2 Linux client over local loopback").text
+        descriptor = re.search(r"^CLIENT='([^']+)'$", block, re.M).group(1)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            home, stubs = root / "home", root / "bin"
+            stubs.mkdir()
+            key = home / ".config/omp-ninfer/api-key"
+            key.parent.mkdir(parents=True)
+            key.write_text("synthetic-wsl-key\n")
+            binary = root / "client"
+            binary.write_text("#!/bin/sh\nprintf 'omp/fixture\\n'\n")
+            pin = root / descriptor
+            pin.parent.mkdir(parents=True)
+            pin.write_text(json.dumps({"omp": {"distribution_version": "fixture"}, "platforms": {
+                "linux-x64": {"asset_url": "https://example.invalid/omp-linux-x64",
+                              "asset_sha256": hashlib.sha256(binary.read_bytes()).hexdigest()}}}))
+            for name, content in (
+                ("curl", '#!/bin/sh\ncp "$CLIENT_FIXTURE" omp-linux-x64\n'),
+                ("sha256sum", f'#!{sys.executable}\nimport hashlib,sys\n'
+                              'print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest(), sys.argv[1])\n'),
+                ("ssh", "#!/bin/sh\nexit 99\n"),
+            ):
+                path = stubs / name
+                path.write_text(content)
+                path.chmod(0o755)
+            environment = dict(os.environ, HOME=str(home), CLIENT_FIXTURE=str(binary),
+                               PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}")
+            result = subprocess.run(["bash", "-c", block], cwd=root, env=environment,
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((home / ".local/bin/omp").read_bytes(), binary.read_bytes())
+            self.assertEqual((home / ".omp/agent/ninfer-beta.key").read_bytes(), key.read_bytes())
+            self.assertEqual((home / ".omp/agent/ninfer-beta.key").stat().st_mode & 0o777, 0o600)
+
+    def test_wsl2_outage_stops_the_runtime_before_requesting_the_loopback_route(self) -> None:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "WSL2 Linux client over local loopback", 1).text
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            stop = home / "omp-ninfer/examples/manual-tunnel/stop-ninfer.sh"
+            stop.parent.mkdir(parents=True)
+            stubs = home / "bin"
+            stubs.mkdir()
+            calls = home / "calls"
+            omp = stubs / "omp"
+            omp.write_text('#!/bin/sh\nprintf request >> "$HOME/calls"\nexit 1\n')
+            omp.chmod(0o755)
+            for stop_code, expected_code, expected_calls in ((1, 1, ""), (0, 0, "request")):
+                stop.write_text(f"#!/bin/sh\nexit {stop_code}\n")
+                stop.chmod(0o755)
+                result = subprocess.run(["bash", "-c", block], capture_output=True, text=True, timeout=10,
+                                        env=dict(os.environ, HOME=str(home),
+                                                 PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+                self.assertEqual(result.returncode, expected_code, result.stderr)
+                self.assertEqual(calls.read_text() if calls.exists() else "", expected_calls)
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows blocks")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
@@ -729,10 +792,17 @@ class WindowsClientConfigurationTests(unittest.TestCase):
     SESSION = r"""param($Block, $ApiKeyFile)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$env:PI_OPENAI_STATEFUL = '0'
+Remove-Item Env:NINFER_NATIVE_API_KEY, Env:NINFER_BETA_API_KEY -ErrorAction SilentlyContinue
 class FixtureIdentity { [string]$Name = 'fixture'; static [object] GetCurrent() { return [FixtureIdentity]::new() } }
 $accelerators = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
 $accelerators::Add('Security.Principal.WindowsIdentity', [FixtureIdentity])
-try { Invoke-Expression ([IO.File]::ReadAllText($Block)) } catch { 'STOPPED ' + $_.Exception.Message; exit 1 }
+try { Invoke-Expression ([IO.File]::ReadAllText($Block)) } catch {
+  'KEY_LOADED=' + (($env:NINFER_NATIVE_API_KEY -ceq ('1' * 64)) -or ($env:NINFER_BETA_API_KEY -ceq ('0' * 64)))
+  'STATEFUL_CLEARED=' + (-not (Test-Path Env:PI_OPENAI_STATEFUL))
+  'STOPPED ' + $_.Exception.Message
+  exit 1
+}
 'NEXT_BLOCK_REACHED'
 """
 
@@ -777,6 +847,8 @@ try { Invoke-Expression ([IO.File]::ReadAllText($Block)) } catch { 'STOPPED ' + 
                     reached, output = self.configure(root, lane)
                     self.assertFalse(reached, output)
                     self.assertIn(mine.name, output)
+                    self.assertIn("KEY_LOADED=True", output)
+                    self.assertIn("STATEFUL_CLEARED=True", output)
                     self.assertEqual(mine.read_bytes(), own)
                     self.assertFalse(other.exists(), f"a refused block wrote {other.name}")
 
