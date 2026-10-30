@@ -8,9 +8,10 @@ native lane to DFlash2.
 
 The published product remains [v0.14.0](../v0.14.0/NINFER_RELEASE_NOTES.md); use its
 [immutable installation guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
-until publication. The [prepared guide](../../docs/QUICKSTART.md) targets this candidate for
-fresh acceptance, not installation from a draft. Predecessor client/platform, documented-route,
-public-install, restoration and council approval do not transfer to the new composition.
+until publication. The [prepared guide](../../docs/QUICKSTART.md) passed fresh acceptance on
+candidate `af62e7662fdc7195f7c1c88f2278b15f63130eba`; it is not an installation recommendation
+before publication. Client/platform, documented-route, public-install and restoration evidence
+was re-executed, not inherited. Council approval remains a separate changed-scope gate.
 Product publication remains founder-owned. Owner-operated, exact-profile 0.x release; no SLA.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
@@ -23,7 +24,7 @@ to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
 | Component | Exact identity | Serving boundary |
 | --- | --- | --- |
-| Oh My Pi | Unmodified upstream `v18.14.0`, source `31147f9d1a76608549821c3759f8487b4d66c72d`, tree `9a63b5bfbb5971962c44fca660744b0d75dcd2c2` | New stock client; fresh platform and live route acceptance required |
+| Oh My Pi | Unmodified upstream `v18.14.0`, source `31147f9d1a76608549821c3759f8487b4d66c72d`, tree `9a63b5bfbb5971962c44fca660744b0d75dcd2c2` | New stock client; fresh three-platform and five-route acceptance passed; macOS remains preview |
 | RTX 5090 container | `v0.7.0-qwen38-5090-beta.3`; server `55f0b95a`, archive `b8f315bc`, image `760fb6be` on base `d4377ed0` | Unchanged BF16 KV, DFlash2 K7, two active requests, vision; kept `qwen38-5090-v0.13.0` profile |
 | RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3`; package `87038cfb`, server `5caa7780`, public config `b5cfbf50` | Unchanged INT8 KV, MTP3, one active request, `Group64` A8 off |
 | RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3`; package `a7637f66`, server `fedce425`, public config `d08d262b` | Unchanged INT8 KV, MTP3, one active request, `Group64` A8 off, 350 W serving cap |
@@ -157,24 +158,26 @@ Strict checkpoint origin authentication remains mandatory. Within one API-key pr
 principal among mutually untrusted clients. Saves remain best effort. Windows NTFS
 `ntfs-write-through` is not POSIX `fsync` or a power-loss guarantee.
 
-## Fresh client and route acceptance to record
+## Fresh client and route acceptance
 
-The final frozen candidate needs fresh platform and live client checks, all five documented routes
-and their exact block hashes (including the added WSL2 steps), both native public installs and
-independent restoration. Runtime carry-forward does not satisfy any of these changed-client gates.
-Only the following fields await values produced by the authorized acceptance windows:
+Fresh acceptance passed on frozen candidate `af62e7662fdc7195f7c1c88f2278b15f63130eba` on
+2026-10-30. Both initial windows passed and restored; no corrected attempt, canonical promotion
+or production upgrade was performed. Runtime qualification carries unchanged, but these changed-client
+observations were executed fresh. The receipts are owner-operated tester-equivalent evidence,
+not independent external-user outcomes.
 
-| Acceptance evidence | Result awaiting receipt |
+| Acceptance evidence | Observed result |
 | --- | --- |
-| Exact stock OMP 18.14.0 platform and live tool/continuation/restart/resume/fail-closed checks | `<STOCK_CLIENT_PLATFORM_ACCEPTANCE>` |
-| Final-candidate guide execution: five routes/31 composer-addressed blocks plus WSL2 checks | `<DOCUMENTED_ROUTE_ACCEPTANCE>` |
-| RTX 4090 and RTX 3090 public-install identities and observed install outcomes | `<NATIVE_PUBLIC_INSTALL_ACCEPTANCE>` |
-| Independent container/native restoration audits and observed hold durations | `<INDEPENDENT_RESTORATION_AND_HOLD_SECONDS>` |
+| Exact stock OMP 18.14.0 platform and live tool/continuation/restart/resume/fail-closed checks | All three freshly downloaded stock binaries matched their published asset hashes and `omp/18.14.0`. Typed read-tool/result, exact continuation and unavailable-route fail-closed checks passed on [macOS arm64](acceptance/darwin-arm64-18.14.0.json) (preview), [Windows x64](acceptance/windows-x64-18.14.0.json) and [Linux x64 under WSL2](acceptance/linux-x64-18.14.0.json). The macOS documented route also returned the exact nonce after server restart and client resume. Image input passed on macOS/Windows against RTX 5090 only. |
+| Final-candidate guide execution: five routes/31 composer-addressed blocks plus WSL2 checks | [All five routes passed](acceptance/documented-routes.json): RTX 5090 host 2/2, macOS 10/10, Windows 5/5, native RTX 4090 7/7 and RTX 3090 7/7. Pre-publication candidate-clone substitutions are explicit. The WSL2 Linux client additionally passed documented URL/hash installation, typed tools, continuation and runtime-outage checks; this is not native Linux OS or Linux vision qualification. Subsequent guide edits are prose-only; executable blocks are unchanged. |
+| RTX 4090 and RTX 3090 public-install identities and observed install outcomes | Both fresh first-lineage documented installs passed with the new stock Windows client after preserving the canonical roots and staging. Separate [RTX 4090](acceptance/rtx4090-public-install.json) and [RTX 3090](acceptance/rtx3090-public-install.json) public-URL checks verified all manifest asset hashes and served identities; both installers returned `already_installed` for the unchanged beta.3 packages (`87038cfb` / `a7637f66`), changed no lifecycle pointers and requested no runtime start. Both lineages have no predecessor: rollback `not_applicable`, zero directions. |
+| Independent container/native restoration audits and observed hold durations | [Independent restoration passed](../../docs/measurements/2026-10-30-v0150-acceptance-restoration.json). RTX 5090 restored the same digest-pinned `760fb6be` image, healthy and `unless-stopped`, checkpoint mount, checkout, key, directories and Windows markers/tasks; the route container and hold were removed after **403.884 s**. Both native restoration/final audits passed, including state/ACL/task/power/holds/client files/directories/staging, with cross-lane census unchanged; driver windows were **371.326 s** (RTX 4090) and **394.389 s** (RTX 3090). Canonical beta.3 tasks returned Ready/stopped at owner baselines 450/370 W, without a process, listener or lease. |
 
-The changed-scope council, composition, lane/platform/acceptance/manifest pins, ready verification
-and founder-owned publication remain separate gates, not passed claims or acceptance-result
-placeholders. Root compatibility authority, profiles and launchers remain on v0.14.0 until the
-lane pin. This draft is neither installable nor ready.
+The [composed acceptance](acceptance/composed-external-installation.json) binds these fresh
+observations separately from carried runtime qualification. Root compatibility authority, profiles
+and launchers were lane-pinned to this candidate. The changed-scope product council and carried
+fork-council binding, final manifest evidence pin, strict ready verification and founder-owned
+publication remain separate gates; acceptance grants no publication authority.
 
 ## Support boundaries and next work
 

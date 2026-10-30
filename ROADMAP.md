@@ -67,8 +67,13 @@ Full release authority: [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0
 and RTX 3090 v0.14.0 beta.3 runtime components, model bytes and serving profiles carried unchanged.
 Both native lanes remain MTP3; no runtime rebuild or native DFlash2 switch is in this release.
 The P15 native evidence-binding tools, guide-derived client probe defaults, WSL2 guide,
-read-only upstream watch and CI coverage ship as product changes. Fresh client/route/public-install acceptance,
-restoration, one council over changed scope, composition and pins precede publication.
+read-only upstream watch and CI coverage ship as product changes. Fresh stock-client acceptance
+on all three platforms, all five routes/31 exact blocks, both native public installs and independent
+restoration passed on candidate `af62e766` on 2026-10-30
+([composed receipt](releases/v0.15.0/acceptance/composed-external-installation.json)).
+Both initial windows restored their baselines; no promotion or production upgrade occurred.
+Changed-scope product council and carried fork-council binding, final manifest pin, strict ready
+verification and founder-owned publication remain separate gates.
 The staged [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
 [manifest](releases/v0.15.0/manifest.json) bind the client-only scope.
 Use the [immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)

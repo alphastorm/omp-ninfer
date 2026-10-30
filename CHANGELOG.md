@@ -56,9 +56,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   v0.15.0 guide before route acceptance. Exact selectors and Responses compatibility keys stay;
   `qwen3.8-27b` gets stock replace-edit while opaque `q38-ninfer` stays hashline.
 - Rescope v0.15.0 to a client-only release carrying the exact v0.14.0 RTX 5090, RTX 4090 and
-  RTX 3090 beta.3 runtime/model/profile bytes unchanged; both native lanes remain MTP3. No new
-  platform/public-route acceptance, council approval, lane pin, tag or publication is claimed.
-  The published product and root authority remain v0.14.0. Native RTX 3090 DFlash2 is deferred
+  RTX 3090 beta.3 runtime/model/profile bytes unchanged; both native lanes remain MTP3.
+  Fresh stock OMP 18.14.0 three-platform acceptance, five routes/31 exact blocks, both native
+  public installs and independent restoration passed on frozen candidate `af62e766` on 2026-10-30.
+  Both initial windows passed and restored (403.884 s RTX 5090 hold; 371.326/394.389 s native
+  driver windows); public native checks were `already_installed`, not upgrade/rollback proof.
+  Root authority/profiles/launchers are lane-pinned to v0.15.0. No council approval, final manifest
+  pin, tag or publication is claimed; the published product remains v0.14.0. Native RTX 3090 DFlash2 is deferred
   to v0.15.1 after fork-after-resume failed with
   `Native could not release an unreferenced checkpoint owner`. RTX 4090 DFlash2 K6/K5,
   `alphastorm/ninfer#48/#49` for all three carried components, and council P2 deferrals remain deferred.

@@ -1,0 +1,210 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.15.0",
+  "lane": "rtx3090-windows-native",
+  "as_of": "2026-10-30",
+  "status": "passed",
+  "candidate_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.14.0",
+    "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 242797056,
+    "asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+    "binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+    "release_id": 428242783,
+    "asset_id": 689493879,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-windows-x64.exe",
+    "version": "omp/18.14.0"
+  },
+  "runtime": {
+    "tag": "v0.7.0-qwen38-3090-beta.3",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "package_bytes": 971496678,
+    "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+    "binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+    "configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "preparation": {
+    "lineage_mode": "first_release",
+    "previous_release_present": false,
+    "qualification_installed_instance_preserved": true,
+    "documented_stage_preserved": true,
+    "documented_install": "Fresh temporary first-lineage documented install after preserving the canonical beta.3 root and documented staging. Both were restored; the later public-URL check returned already_installed for the same canonical package, not an upgrade or promotion.",
+    "two_gpu_host": true,
+    "one_native_lane_at_a_time": true,
+    "shared_port": 18082,
+    "public_install_model_reference": "Published v3 model verified by the public-install assets and served identity, with the unchanged canonical model retained; no predecessor checkpoint generations imported."
+  },
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_endpoint",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 0,
+    "cloud_fallback_observed": false,
+    "structured_client": {
+      "omp_version": "omp/18.14.0",
+      "event_counts": {
+        "session": 1,
+        "agent_start": 1,
+        "turn_start": 2,
+        "message_start": 4,
+        "message_end": 4,
+        "message_update": 28,
+        "tool_execution_start": 1,
+        "tool_execution_end": 1,
+        "turn_end": 2,
+        "agent_end": 1
+      },
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "tool_result_marker": true,
+      "exact_visible_final_answer": true,
+      "agent_end": true,
+      "continuation_exact_nonce": true,
+      "runtime_identity_bound": true,
+      "runtime_server_binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+      "runtime_configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "providers": [
+        "ninfer-native-3090"
+      ],
+      "models": [
+        "q38-ninfer"
+      ],
+      "raw_transcript_included": false,
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-native-3090"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "errors": [
+          "Couldn't connect to 127.0.0.1:18082 (connection refused). Check that the server is running and reachable."
+        ],
+        "endpoint": "http://127.0.0.1:18082/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    },
+    "documented_marker_bare_line": true,
+    "rollback": {
+      "status": "not_applicable",
+      "directions": 0,
+      "reason": "first release of the lineage"
+    },
+    "retained_previous_release": "",
+    "public_install": {
+      "status": "passed",
+      "integrity": {
+        "checksum_set_sha256": "9a79841b7c242346030ebe8e588080c536c9ae8d9a083a6a4ce96e0b06679e8d",
+        "checksum_entries": 10,
+        "assets": {
+          "package": {
+            "sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+            "bytes": 971496678,
+            "in_checksum_set": true
+          },
+          "sbom": {
+            "sha256": "d335174050cdbb3d45c3a887bbc8105aa52b1295eeea8f87ecf40586ca0ac3d7",
+            "bytes": 34269,
+            "in_checksum_set": true
+          },
+          "source_archive": {
+            "sha256": "e667eb1fa6c04e8018e6737bfa7c5943b5212c3d26a90f84f2d7ea61a1013c53",
+            "bytes": 12238089,
+            "in_checksum_set": true
+          },
+          "installer": {
+            "sha256": "f9ced520968196afc07b76b5a3264e9ec61d5f2b0d122242f096ee676861cbd9",
+            "bytes": 75317,
+            "in_checksum_set": true
+          },
+          "controller": {
+            "sha256": "bb69183f6d2876b867134f82874a1370125d1d10f64703f662fdf43f7f1d4b04",
+            "bytes": 71509,
+            "in_checksum_set": true
+          },
+          "gpu_owner_controller": {
+            "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+            "bytes": 17391,
+            "in_checksum_set": true
+          },
+          "state_protection": {
+            "sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36",
+            "bytes": 15203,
+            "in_checksum_set": true
+          }
+        },
+        "all_manifest_assets_downloaded_from_public_urls": true,
+        "all_manifest_asset_hashes_verified": true
+      },
+      "installed": {
+        "release_id": "qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817",
+        "server_binary_sha256": "fedce425c09b3eca249d7ae3b4f8dcfe4a6839a82befa6168f77625ef6ec04c3",
+        "configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+        "matches_manifest": true
+      },
+      "install": {
+        "execution_source": "downloaded-public-url",
+        "outcome": "already_installed",
+        "release_id": "qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817",
+        "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+        "exact_qualified_bytes_accepted": true,
+        "lifecycle_pointers_changed": false,
+        "runtime_start_requested": false
+      },
+      "smoke": {
+        "authenticated_status_http": 200,
+        "status_ms": 1.8,
+        "served_identity_matches_installed": true,
+        "anonymous_status_http": 401,
+        "completion_http": 200,
+        "completion_ms": 469.1,
+        "completion_tokens": 3,
+        "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+        "output_contains_marker": true,
+        "speculative_backend": "mtp",
+        "public_model_id": "q38-ninfer"
+      },
+      "restoration": {
+        "process_state": "stopped",
+        "endpoint_state": "unavailable",
+        "prior_state_restored": true,
+        "power_limit_w": 370,
+        "active_release": "qwen38-3090-native-v0.7.0-beta.3-2c6f423bd817"
+      }
+    }
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-10-30-v0150-rtx3090-native-run.json",
+    "sha256": "ba3eb2d6bfecc83f243369d4d2c5084e3963a1405fe37ac43d8e24aebb9195f6"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-10-30-v0150-acceptance-restoration.json",
+    "sha256": "edc43405ba9507a63786e0323f15aebaa31b586c82fc442c10999e4441e44da8"
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent acceptance, not independent external-user outcomes.",
+    "Fresh stock OMP 18.14.0 acceptance on the unchanged v0.14.0 beta.3 MTP3 runtime/model/profile bytes; no new runtime performance or powered quality campaign.",
+    "One Windows host with two native GPU lanes; serving is sequential on shared port 18082.",
+    "The documented install was fresh in a temporary first-lineage root. The separate downloaded-public-URL installer returned already_installed for the restored canonical beta.3 package; lifecycle pointers were unchanged.",
+    "First-release lineage: no predecessor, rollback not_applicable and zero directions. This does not establish an upgrade/rollback target.",
+    "Independent restoration and final audit cover state, ACLs, tasks, power, holds, client files, directory presence and documented staging; canonical census is unchanged.",
+    "No native vision or DFlash2 claim; current council binding, final immutable evidence pin and product publication are separate gates."
+  ]
+}

@@ -15,8 +15,8 @@ the exact combination.
 
 ## Staged v0.15.0 — stock OMP 18.14.0 with unchanged GPU lanes
 
-**Staged client-only draft, not published.** Stock OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`)
-replaces 18.12.6 in the release-local descriptor. RTX 5090 `v0.7.0-qwen38-5090-beta.3`
+**Staged client-only release, not published.** Stock OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`)
+replaces 18.12.6 in the candidate descriptor. RTX 5090 `v0.7.0-qwen38-5090-beta.3`
 (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, kept profile/config
 `qwen38-5090-v0.13.0` / `751d22dc`) and RTX 4090 `v0.7.0-qwen38-4090-beta.3`
 (package `87038cfb`, server `5caa7780`, config `b5cfbf50`, MTP3) carry unchanged from v0.14.0.
@@ -25,12 +25,19 @@ config `d08d262b`, MTP3, 350 W) unchanged too. All three lanes retain source `2c
 the shared version 3 model and their exact serving profiles. The P15 product tooling and docs
 ship, but no engine rebuild or native DFlash2 serving change is part of v0.15.0.
 
-The [prepared guide](QUICKSTART.md) targets v0.15.0 before any route window; use the
+The [prepared guide](QUICKSTART.md) passed fresh v0.15.0 acceptance on frozen candidate
+`af62e7662fdc7195f7c1c88f2278b15f63130eba` on 2026-10-30; use the
 [immutable v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
-for the published release. Runtime carry-forward does not transfer client/public-route acceptance
-or council approval. Root authority/profiles stay v0.14.0 until the later lane pin. Fresh platform,
-live/documented-route and public-install acceptance, restoration, one changed-scope council,
-composition and immutable pins remain gates. Native RTX 3090 DFlash2 is deferred to v0.15.1
+for the published release. Freshly downloaded stock clients passed on macOS (preview), Windows
+and Linux under WSL2; all five routes/31 exact blocks and both native public installs passed.
+Both initial windows restored the same baselines: 403.884 s RTX 5090 hold and 371.326/394.389 s
+native driver windows. Public-URL native installers returned `already_installed`, not an
+upgrade/rollback result; no canonical promotion or production upgrade occurred.
+The [composed receipt](../releases/v0.15.0/acceptance/composed-external-installation.json)
+is fresh changed-client evidence, not relabeled predecessor acceptance. Root authority/profiles
+were lane-pinned to v0.15.0; changed-scope product council and carried fork-council binding,
+final manifest evidence pin, strict ready verification and founder-owned publication remain
+separate gates. Native RTX 3090 DFlash2 is deferred to v0.15.1
 after fork-after-resume failed with `Native could not release an unreferenced checkpoint owner`.
 RTX 4090 DFlash2 K6/K5, the `alphastorm/ninfer#48/#49` fixes for all three carried runtime
 components, and council P2 deferrals remain deferred.

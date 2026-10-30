@@ -109,6 +109,15 @@ serving cap, leaving the old lane running unchanged; a stopped lane upgrades nor
 ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Native owners staying on v0.10.0 keep
 the [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
+**Next on main — v0.15.0, not published:** stock OMP 18.14.0 with all three v0.14.0 runtime,
+model and profile identities unchanged. Fresh three-platform acceptance, five routes/31 exact
+blocks, both native public installs and independent restoration passed on candidate `af62e766`;
+macOS stays preview and Linux evidence stays WSL2-scoped
+([composed receipt](releases/v0.15.0/acceptance/composed-external-installation.json)).
+Changed-scope council binding, the final manifest pin, strict ready verification and founder-owned
+publication remain separate gates. Until publication, install from the
+[immutable v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md).
+
 ## How it works
 
 ![OMP NInfer architecture: Oh My Pi keeps the truth, an authenticated loopback route, NInfer keeps the continuation](assets/architecture.png)

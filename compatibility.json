@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.15.0",
   "composition": {
-    "status": "v0.15.0 upstream OMP v18.14.0 client acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0",
     "lifecycle_source_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
@@ -46,10 +46,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/af62e7662fdc7195f7c1c88f2278b15f63130eba/releases/v0.15.0/acceptance/darwin-arm64-18.14.0.json",
+        "sha256": "c83b233ae7c2ff2c0706cd95b5f7ea15ccd1ea084427abae0ae0b372de7a921c"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -120,7 +121,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -133,7 +134,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.15.0",
       "aliases": [
@@ -150,10 +151,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/af62e7662fdc7195f7c1c88f2278b15f63130eba/releases/v0.15.0/acceptance/windows-x64-18.14.0.json",
+        "sha256": "48d64147ae8772a70b9fce3267c6a37cbff820a2cd5b401b3800b52d474d0830"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -224,7 +226,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -237,7 +239,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.15.0",
       "aliases": [
@@ -254,10 +256,11 @@
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/af62e7662fdc7195f7c1c88f2278b15f63130eba/releases/v0.15.0/acceptance/linux-x64-18.14.0.json",
+        "sha256": "e8830f42137bf0966b78e8798015ecca01e1188b49b2e0ea89951644149080cd"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

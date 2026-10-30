@@ -27,6 +27,22 @@ commits after the shipped stock OMP 18.12.6 source `45c35e40`. Client commit/fil
 cut (250/300); no watched client or engine head is an adopted release pin. Recommendations
 are subject-text/path heuristics, not a security assessment or a qualification result.
 
+## Staged v0.15.0 client-only composition
+
+Stock OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`) replaces the published 18.12.6 client;
+all three beta.3 runtime components, models and serving profiles remain byte-identical to
+v0.14.0. Fresh acceptance on candidate `af62e766` passed all three client platforms, all five
+routes/31 exact blocks, both native public installs and independent restoration on 2026-10-30
+([receipt](../releases/v0.15.0/acceptance/composed-external-installation.json);
+[client source review](measurements/2026-10-30-omp-18140-client-upgrade-review.json)).
+macOS remains preview, Linux evidence is WSL2-only, and both native lanes stay MTP3.
+No engine rebuild, native DFlash2 switch, canonical promotion or production upgrade is claimed.
+Root authority and live profiles are lane-pinned to v0.15.0; council binding, final manifest pin,
+strict ready verification and founder-owned publication are separate gates. The published release
+remains v0.14.0; use its
+[immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
+until publication.
+
 ## v0.14.0 common-engine composition
 
 Published release **v0.14.0** (2026-10-28, [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md))

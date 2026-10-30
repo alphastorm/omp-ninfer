@@ -93,8 +93,37 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Fresh stock OMP 18.14.0 and final-guide acceptance must run against all three unchanged v0.14.0 runtime components; the receipt lands at releases/v0.15.0/acceptance/composed-external-installation.json."
+      "status": "passed",
+      "repository_path": "releases/v0.15.0/acceptance/composed-external-installation.json",
+      "sha256": "d2dcdccd4485ca50f16e491e1d2cd27a67111a458b416ce7c360760aa42ab06c",
+      "public_url": null,
+      "as_of": "2026-10-30",
+      "release": "v0.15.0",
+      "component_release_tag": "v18.14.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+      "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "e8160ccd8ebd53ef9189b0171d968e8450caa055c973bcd53a8196fd5c0a5832",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "c83b233ae7c2ff2c0706cd95b5f7ea15ccd1ea084427abae0ae0b372de7a921c"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "48d64147ae8772a70b9fce3267c6a37cbff820a2cd5b401b3800b52d474d0830"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "e8830f42137bf0966b78e8798015ecca01e1188b49b2e0ea89951644149080cd"
+        }
+      ],
+      "note": "Fresh candidate af62e766 passed all five routes/31 exact blocks, three stock OMP 18.14.0 clients, both first-lineage beta.3 native documented installs and independent restoration. Both initial windows passed and restored. Separate public-URL native checks returned already_installed with lifecycle pointers unchanged. Runtime/model/profile identities and their original qualifications carry unchanged from v0.14.0; council binding, final manifest pin, strict ready verification and founder-owned publication are separate."
     },
     "native_integration": {
       "repository_path": "releases/v0.14.0/qualification/native-integration.json",
@@ -103,27 +132,56 @@
     "native_publication": {
       "repository_path": "releases/v0.14.0/qualification/native-publication.json",
       "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.15.0/acceptance/documented-routes.json",
+      "sha256": "6293528e648622d509bdc632fa178cf71614413c4e5aca7c893fd2037027a6da"
     }
   },
   "as_of": "2026-10-30",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "Client-only v0.15.0 draft: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects are carried unchanged. Both native lanes remain MTP3. No new platform, route, public-install, restoration or council approval is claimed.",
-  "interpretation": "Runtime-release eligibility applies only to the carried published components. The two macOS stub rehearsals are client-semantic evidence, not GPU inference or real NInfer checkpoint survival. The new client and prepared guide require fresh final-candidate acceptance on all three unchanged runtime lanes.",
+  "external_installation_qualified": true,
+  "scope": "Client-only v0.15.0: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects carry unchanged. Both native lanes remain MTP3. Fresh three-platform live-client acceptance, all five documented routes/31 exact blocks, both first-lineage native public installs and independent restoration passed on candidate af62e7662fdc7195f7c1c88f2278b15f63130eba on 2026-10-30. macOS remains preview; Windows and WSL2 Linux clients are qualified, not a separate native Linux OS. Changed-scope council binding, final manifest evidence pin, strict ready verification and founder-owned publication remain separate gates.",
+  "interpretation": "Carried runtime qualifications retain their original subjects and are not new runtime performance, quality or durability measurements. The host-free source review and macOS stub rehearsals are separately scoped; fresh exact-candidate platform/live and documented-route acceptance used the new published stock OMP 18.14.0 binaries on the unchanged beta.3 components. Image input covers macOS and Windows against RTX 5090 only. Both initial windows passed and restored without correction, canonical promotion or production upgrade: RTX 5090 retained its digest-pinned image, mount and unless-stopped policy after a 403.884 s hold; native drivers ran 371.3255772590637/394.3888010978699 s and restored the same canonical beta.3 stopped state hashes at 450/370 W. Native documented installs were fresh temporary first-lineage installs; later downloaded-public-URL checks returned already_installed with lifecycle pointers unchanged. Neither native lane has a predecessor or supported rollback direction. Acceptance is owner-operated tester-equivalent, not independent external-user outcomes or council approval.",
   "eligibility_scope": "Staged draft only. Root authority, profiles and launchers remain v0.14.0; no lane pin, release tag, component publication or product publication occurs in this stage.",
   "documented_route_acceptance": {
-    "status": "pending",
-    "scope": "Fresh stock OMP 18.14.0 and final client-only guide execution required on all three carried runtime lanes; predecessor route and restoration observations do not transfer.",
-    "fresh_product_acceptance": false,
-    "composition_run": false
+    "status": "passed",
+    "scope": "All five fresh documented routes/31 exact candidate blocks, three newly downloaded stock OMP 18.14.0 clients and both first-lineage native beta.3 public installs passed on unchanged v0.14.0 runtime/model/profile bytes. No predecessor client or product-route acceptance is carried; Linux evidence is WSL2-scoped and macOS remains preview.",
+    "candidate_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.15.0/acceptance/documented-routes.json",
+    "evidence_sha256": "6293528e648622d509bdc632fa178cf71614413c4e5aca7c893fd2037027a6da",
+    "document_change": "The frozen candidate retargeted executable product/client references to v0.15.0 and stock OMP 18.14.0, including the WSL2 client instructions, while keeping every v0.14.0 runtime/model/profile identity. All five routes executed these candidate blocks fresh. Subsequent guide banner, acceptance summary and scope disclosures are prose-only changes; every current executable route block remains byte-identical to its candidate receipt. WSL2 URL/hash installation and live/outage checks are additionally evidenced, not a sixth composer route.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.15.0/acceptance/darwin-arm64-18.14.0.json",
+      "releases/v0.15.0/acceptance/windows-x64-18.14.0.json",
+      "releases/v0.15.0/acceptance/linux-x64-18.14.0.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-10-30-v0150-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 403.884,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 371.3255772590637,
+        "rtx3090": 394.3888010978699
+      }
+    },
+    "composition_run": true
   },
-  "remaining_release_gates": [
-    "lane pin after client-only draft hash-chain reconciliation",
-    "fresh stock OMP 18.14.0 platform, documented-route, native public-install and independent restoration acceptance on the final candidate",
-    "one council over changed scope since v0.14.0",
-    "composition, immutable evidence pins and founder-owned publication"
-  ],
+  "remaining_release_gates": [],
   "observed_gates": {
     "carried_runtime_qualification": {
       "status": "carried-unchanged-subjects",
@@ -142,8 +200,10 @@
       "scope": "L9 source review, three asset downloads and two macOS stub rehearsals; no live client or final-guide acceptance."
     },
     "changed_client_acceptance": {
-      "status": "pending",
-      "scope": "Fresh three-platform and final-candidate documented-route/public-install evidence required."
+      "status": "passed",
+      "candidate_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+      "repository_path": "releases/v0.15.0/acceptance/composed-external-installation.json",
+      "scope": "Fresh stock OMP 18.14.0 acceptance on macOS arm64 preview, Windows x64 and Linux x64 under WSL2; all five documented routes/31 exact candidate blocks, both native first-lineage public installs and independent restoration passed. Both initial windows passed and restored without correction or promotion; separate public-URL native checks were already_installed. No predecessor client/route acceptance is carried, no new runtime measurement is inferred, and council approval/publication are separate."
     },
     "g4_review": {
       "status": "pending",

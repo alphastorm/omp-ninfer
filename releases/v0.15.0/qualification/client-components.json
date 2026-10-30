@@ -3,6 +3,7 @@
   "schema_version": 1,
   "release": "v0.15.0",
   "omp": {
+    "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/cfc88a58f2a28b190957c9c5bfe03eea2d9b79c4/compatibility.json",
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
     "upstream_tag": "v18.14.0",
