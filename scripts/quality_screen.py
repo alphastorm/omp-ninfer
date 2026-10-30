@@ -114,7 +114,10 @@ PREREGISTRATION: dict[str, Any] = {
                     "4090 package of the frozen P16 source, whose server prefix and profile are appended here "
                     "before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen "
                     "prompts and the first 80 determinism prompts in fixed matched contiguous 50-prompt shards "
-                    "with resumed identity and seal verification; under this rule unchanged"),
+                    "with resumed identity and seal verification; under this rule unchanged. Amended 2026-10-30 "
+                    "before any data: the scratch install listens on the release-spec port 18082, as EXP-101's "
+                    "does, because the incumbent's installer has no port override and any other port would change "
+                    "configuration b5cfbf50"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
