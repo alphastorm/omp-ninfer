@@ -36,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Check native acceptance's stop and final restart, and always check the Windows runner's
   trailing native exit code. Expected outage failures and hash-verified resumed downloads
   explicitly consume their status instead of exempting an entire block (P15-R01).
+- Chain the macOS/Linux clone, directory change and release-scoped ready gate so clone failure
+  cannot validate an existing older checkout (P15-R05).
 
 ### Changed
 

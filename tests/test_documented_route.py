@@ -676,6 +676,40 @@ class HostPreparationTests(unittest.TestCase):
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
 
+@unittest.skipIf(os.name == "nt", "executes the documented POSIX clone block")
+class ShellCloneTests(unittest.TestCase):
+    def test_clone_failure_never_verifies_a_stale_checkout_and_ready_is_release_scoped(self):
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "1. Clone the exact release on both machines").text
+        release = re.search(r"--branch (v[0-9.]+)", block).group(1)
+        for clone_exit, verify_exit, stale in ((1, 0, True), (0, 1, False), (0, 0, False)):
+            with self.subTest(clone_exit=clone_exit, verify_exit=verify_exit), \
+                    tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                stubs = root / "bin"
+                stubs.mkdir()
+                if stale:
+                    (root / "omp-ninfer").mkdir()
+                for name, body in (
+                    ("git", 'echo git >> "$CALLS"\n[ "$CLONE_EXIT" -eq 0 ] || exit "$CLONE_EXIT"\n'
+                            'mkdir -p omp-ninfer\n'),
+                    ("python3", 'echo "python3 $*" >> "$CALLS"\nexit "$VERIFY_EXIT"\n'),
+                ):
+                    path = stubs / name
+                    path.write_text("#!/bin/sh\n" + body)
+                    path.chmod(0o755)
+                calls = root / "calls"
+                result = subprocess.run(["bash", "-c", block], cwd=root, capture_output=True, text=True,
+                                        timeout=20, env=dict(os.environ, CALLS=str(calls),
+                                            CLONE_EXIT=str(clone_exit), VERIFY_EXIT=str(verify_exit),
+                                            PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+                self.assertEqual(result.returncode, clone_exit or verify_exit, result.stderr)
+                ran = calls.read_text().splitlines()
+                self.assertEqual(len(ran), 1 if clone_exit else 2, ran)
+                if not clone_exit:
+                    self.assertIn(f"--release {release} --require-ready", ran[-1])
+
+
 @unittest.skipIf(os.name == "nt", "executes POSIX shell blocks and checks POSIX file modes")
 class ClientConfigurationTests(unittest.TestCase):
     """Section 7's macOS/Linux blocks and the troubleshooting guide's fail-closed recipe install OMP's

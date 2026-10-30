@@ -759,11 +759,14 @@ interface. Both machines and local accounts must be controlled by one trusted ow
 
 ## 1. Clone the exact release on both machines
 
+Run the chain as one block. A failed clone stops before entering any existing `omp-ninfer`
+directory; the ready gate explicitly names the release being installed.
+
 ```sh
 git clone --branch v0.15.0 --depth 1 \
-  https://github.com/alphastorm/omp-ninfer.git
-cd omp-ninfer
-python3 scripts/verify_release.py --require-ready
+  https://github.com/alphastorm/omp-ninfer.git &&
+cd omp-ninfer &&
+python3 scripts/verify_release.py --release v0.15.0 --require-ready
 ```
 
 ## 2. Install the OMP beta on the Mac
