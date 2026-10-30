@@ -88,6 +88,14 @@ unchanged from v0.13.0 and v0.13.1. Release authority:
 host-free checks across the Responses wire contract, image-aware snapcompact gate, and print-mode
 slash dispatch.
 
+The tagged [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](../releases/v0.14.0/NINFER_RELEASE_NOTES.md)
+header and the `publication` block of
+[`releases/v0.14.0/manifest.json`](../releases/v0.14.0/manifest.json) record the composition's
+freeze-time state (prepared, fresh acceptance passed, product publication a separate gate) and are
+immutable after the freeze, and the publication record is this section,
+[`docs/RELEASES.md`](RELEASES.md), and the
+[GitHub release](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.14.0).
+
 | Component or lane | Form and transport | Release tag and source | Image or package | Serving profile | Context | Requests in flight | Speculative backend | Modalities |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
 | Oh My Pi client | Unmodified upstream release binaries: macOS arm64 (preview), Windows x64, Linux x64 (WSL2 live evidence) | `v18.12.6`, source `45c35e40`, tree `8a90a1b4` | `omp-darwin-arm64` (`cfbb5e38`), `omp-windows-x64.exe` (`73d73c11`), `omp-linux-x64` (`85d9daf3`) in [`client-components.json`](../releases/v0.14.0/qualification/client-components.json) | Per-model `compat.statefulResponses: true`, fail-closed config | 131,072 | `2` on RTX 5090; `1` per native lane | Target lane | Coding agent, typed tools, branches, compaction |
@@ -340,6 +348,70 @@ capabilities to another):
   provide preemption or guaranteed faster single-session wall time.
 - **Not independent external-user outcomes:** All qualification and acceptance receipts are
   owner-operated measurements on retained hardware.
+
+## Glossary
+
+- **`DFlash2`:** Speculative decoding backend (`--spec dflash2`) that uses the five-layer block
+  drafter bundled in the version 3 model artifact to propose seven candidate tokens (`K=7`) in one
+  masked-block pass for target verification. It is the qualified speculative backend on the RTX 5090
+  container lane (`qwen38-5090-v0.13.0`) and is not qualified on the native Windows RTX 4090 and
+  RTX 3090 lanes.
+- **`MTP3`:** MTP speculative decoding backend (`--spec mtp --draft-tokens 3` with
+  `--lm-head-draft`, or `backend: "mtp"`, `draft_tokens: 3` in native server configs) that drafts
+  three candidate tokens per round so the target model verifies four tokens (the active token plus
+  three drafts) in a single pass. It is the qualified speculative backend on the native Windows RTX
+  4090 and RTX 3090 lanes and served the RTX 5090 lane prior to `v0.10.0`.
+- **`Group64 A8` (`A8 off`):** Native prefill 8-bit group-64 integer-activation route
+  (`-DNINFER_NATIVE_PREFILL_GROUP64_A8`, `group64_a8`) for the quantized model body on the native
+  Windows lanes. Both `v0.14.0` native Windows packages compile it off (`A8 off`) after the RTX
+  4090 failed its preregistered 200-pair new-leak behavioral screen (five one-way changes) and the
+  founder selected off conservatively across both cards.
+- **`C1`:** Single-request (`concurrency: 1`) serving and benchmark posture on the native Windows
+  RTX 4090 and RTX 3090 lanes, in contrast to two-request (`C2`) serving on the RTX 5090 container
+  lane. As the `benchmark_c1` qualification gate (and matched strict `C1` pre-cut comparison), it
+  generates 1,024 completion tokens after 4,541 computed prompt tokens with no prefix-cache hit
+  (`seed 57004`, temperature `0` in strict ABBA comparisons), recording prefill throughput, decode
+  throughput, MTP3 acceptance, peak VRAM, and peak board power.
+- **`T1`:** Pre-cut output-parity and serial decode gate over 84 frozen role-corpus cases (`336`
+  role requests across four `ABBA` arms with a fixed 131,072-token KV pool and persistence
+  disabled), comparing a candidate build against the shipped control. Native Windows `T1` checks
+  retained output bytes across all 84 cases, while RTX 5090 `T1` checks request and output SHA-256
+  hashes (`84/84`) rather than retained byte streams; neither substitutes for managed package
+  qualification or a global quality and leak screen.
+- **`INT8 KV` / `BF16 KV`:** Key-value (`KV`) attention cache storage formats (`--kv-dtype` /
+  `kv_dtype`) bound by each lane's profile. The 32 GB RTX 5090 container profile uses 16-bit
+  `BF16 KV` (`--kv-dtype bf16`, 146,368 automatic KV tokens across up to two requests in flight),
+  while the 24 GB native Windows RTX 4090 and RTX 3090 profiles use 8-bit `INT8 KV`
+  (`kv_dtype: "int8"`, halving the KV footprint relative to BF16) to hold the full 131,072-token
+  context ceiling on 24 GB cards.
+- **`strict-origin profile`:** A deployment profile and runtime configuration (`qwen38-5090-v0.13.0`
+  config `751d22dc`, `qwen38-4090-native-v0.7.0-beta.3` config `b5cfbf50`, and
+  `qwen38-3090-native-v0.7.0-beta.3` config `d08d262b`) that enforces mandatory checkpoint origin
+  authentication (`--session-checkpoint-require-origin-auth` / `require_origin_auth: true`). It
+  requires a configured checkpoint root and a bearer API key of at least 32 bytes (64 characters as
+  documented), keys each published checkpoint generation's `manifest.mac` HMAC from material
+  derived from that bearer key, and refuses or quarantines unauthenticated or modified checkpoints
+  at load.
+- **`draft window`:** The number of candidate tokens (`K`, configured via `--draft-tokens` /
+  `draft_tokens` and recorded in receipts as `speculative_draft_window` or `draft_window`) that the
+  speculative drafter proposes in each decode round for the target model to verify in a single pass.
+  In `v0.14.0`, the RTX 5090 container profile uses a draft window of `7` under DFlash2 (`K=7`), and
+  the native Windows RTX 4090 and RTX 3090 profiles use `3` under MTP3 (`K=3`).
+- **`schema 3 checkpoints`:** The current on-disk session-checkpoint format
+  (`checkpoint_schema_version: 3`, paired with fingerprint schema 2, status schema 2, and
+  request-log schema 30) stored under `/checkpoints-v013` on the RTX 5090 container lane and
+  `cache/<release-instance-id>/session-checkpoints-v3` on the native Windows lanes. Each generation
+  is atomically published to local NVMe with SHA-256 file digests and a bearer-key-derived
+  `manifest.mac` HMAC (`--session-checkpoint-require-origin-auth`), and restores only when the
+  runtime binary hash, patch-stack SHA, model artifact, deployment profile, and session credentials
+  match.
+- **`retained state`:** Server-side OpenAI Responses continuation state (KV cache, device and host
+  state images, and draft context) held in GPU/host memory or restored from a local NVMe checkpoint
+  and addressed through `previous_response_id` with session identity derived from `prompt_cache_key`
+  (attested on reuse by `usage.input_tokens_details.cached_tokens`). It serves as an acceleration
+  layer rather than the sole copy of the conversation: when retained state is absent, evicted, or
+  incompatible, the server returns `previous_response_not_found` and Oh My Pi replays its
+  authoritative local transcript for a cold root prefill.
 
 ## Where the history lives
 

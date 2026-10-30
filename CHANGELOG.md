@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   finds and fixes a failing `lru.py` test, restarts the `ninfer-serve` container mid-session, and
   answers a follow-up reusing 10,375 retained prompt tokens from the session checkpoint flushed on
   graceful stop (155 new prefill tokens).
+- Redesign the public site as an editorial product page: the two-line headline, the entity
+  chain, one receipt line and one primary action above the real v0.14.0 recording (poster frame
+  with in-place playback), the README's "what it does" statement, the three lanes as a
+  typographic receipt table, the entity chain with the architecture illustration and release
+  invariants, and the candid fit columns. Compare, benchmarks, status, and security share the
+  shell; their reference tables render as labelled cards on phones. The site self-hosts Space
+  Grotesk and JetBrains Mono latin subsets, stages brand and demo assets from their canonical
+  sources at deploy time instead of committing copies (the committed social preview was a stale
+  render), declares `og:image` on every page, and gains `tests/test_site.py` to keep page
+  references, staging, ignores, and metadata coherent.
 
 ### Fixed
 

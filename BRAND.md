@@ -74,8 +74,9 @@ Same blue-black ground and neutral ramp as the gateway (`ground #060809`,
 
 | Token | Hex | oklch | Use |
 |---|---|---|---|
-| local | `#8E7BE8` | oklch(0.65 0.15 290) | the dot, the ×, links, focus, boundary lines |
-| local-hover | `#AB9DF0` | — | link hover lighten |
+| local | `#8E7BE8` | oklch(0.65 0.15 290) | the dot, the ×, boundary lines; artwork links and focus |
+| local-text | `#AB9DF0` | oklch(0.73 0.12 290) | site text, links, eyebrows, actions, focus rings on ground — 8.4:1 on ground, ink-dark on it 8.1:1 (`#8E7BE8` measures 5.9:1, below the 7:1 bar for body-size text) |
+| local-hover | `#C3BBF4` | — | site link and action hover; artwork hover stays `#AB9DF0` |
 | fail | `#C85045` | oklch(0.58 0.14 27) | failed qualification/fail-closed states (shared) |
 | kinship | `#F97316` | — (upstream orange) | citation micro-dot only; see gateway kinship rule |
 
@@ -86,7 +87,10 @@ no implied partnership. Restrained, no gamer RGB.
 
 Space Grotesk 500/600 (headings, wordmark, −0.015em) + JetBrains Mono 400/500
 (eyebrows, stats, paths; labels 10–12px uppercase, letter-spacing 0.1–0.2em).
-Webfonts on marketing surfaces only.
+Webfonts on marketing surfaces only. The public site self-hosts latin subsets of both faces as
+first-party assets (`site/fonts/`, variable weight, OFL-1.1 license texts beside the files) and
+loads nothing remote; artwork sources still import them from Google Fonts at render time only.
+Body text on the site stays on the system sans stack.
 
 Composition is editorial, not dashboard-like: one message wins the first read, one proof wins the
 second, and metadata recedes. Use open ground, large type, thin rules, and asymmetry before adding
@@ -156,6 +160,7 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo.gif` | historical v0.2-era full-session GIF render; retained for provenance |
 | `docs/media/omp-ninfer-demo.mp4` | historical v0.2-era real-session demo master (MP4); retained for provenance |
 | `docs/media/omp-ninfer-demo-poster.png` | historical v0.2-era demo poster frame for posts and video embeds |
+| `site/` | canonical public site (`alphastorm.github.io/omp-ninfer`): five hand-maintained pages, `site.css`, and `site/fonts/`. `.github/workflows/pages.yml` stages `logo.svg`, `favicon.svg`, `og.png`, `architecture.png`, and the v14 demo MP4 and poster from their canonical sources at deploy time (`tests/test_site.py` keeps that list, `.gitignore`, and every page reference in step), so `site/` never carries copies. The home page's recording is the v14 demo; its qualified numbers come from the receipts, never the clip. |
 | `docs/media/omp-ninfer-demo.cast` | historical v0.2-era raw asciinema capture (provenance: `docs/media/README.md`) |
 | `docs/media/omp-ninfer-demo-social.mp4` | historical v0.2-era updater-free social derivative |
 | `docs/media/omp-ninfer-demo-social-discord.gif` | historical v0.2-era update-banner-free README/Discord fallback |

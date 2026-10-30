@@ -3,16 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#060809">
 <title>OMP NInfer security — loopback-only, fail-closed, hash-pinned</title>
-<meta name="description" content="OMP NInfer v0.14.0 (2026-10-28) security boundary: loopback-only listeners on 127.0.0.1:18089 and 127.0.0.1:18082, bearer auth, fail-closed routing, single trusted owner, and hash-pinned bytes.">
+<meta name="description" content="OMP NInfer security boundary: loopback-only listeners on 127.0.0.1:18089 and 127.0.0.1:18082, bearer authentication, fail-closed routing, single trusted owner, and hash-pinned release bytes.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/security/">
+<link rel="preload" href="../fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer security — loopback-only, fail-closed, hash-pinned">
-<meta property="og:description" content="OMP NInfer v0.14.0 (2026-10-28) security boundary: loopback-only listeners on 127.0.0.1:18089 and 127.0.0.1:18082, bearer auth, fail-closed routing, single trusted owner, and hash-pinned bytes.">
+<meta property="og:description" content="OMP NInfer security boundary: loopback-only listeners on 127.0.0.1:18089 and 127.0.0.1:18082, bearer authentication, fail-closed routing, single trusted owner, and hash-pinned release bytes.">
+<meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://alphastorm.github.io/omp-ninfer/security/">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {"@context": "https://schema.org", "@type": "SoftwareApplication",
  "name": "OMP NInfer",
@@ -28,75 +35,95 @@
 </head>
 <body>
 <header class="site">
-  <img src="../logo.svg" alt="" aria-hidden="true">
-  <a class="brand" href="../">OMP NInfer</a>
-  <nav>
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../logo.svg" alt="" width="24" height="24">OMP NInfer</a>
+    <nav aria-label="Site">
       <a href="../">Overview</a>
-      <a href="../compare/">Compare</a>
-      <a href="../status/">Status</a>
       <a href="../benchmarks/">Benchmarks</a>
+      <a href="../compare/">Compare</a>
       <a href="../security/" aria-current="page">Security</a>
-  </nav>
+      <a href="../status/">Status</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
+    </nav>
+  </div>
 </header>
 <main>
+<section class="page">
+<div class="wrap">
 <p class="eyebrow">Security</p>
 <h1>Private by design, fail-closed by default</h1>
-<p class="lede">Your prompt, transcript, and checkpointed continuation state stay on hardware you
-own. Both endpoints bind loopback only, every request carries a bearer token, and an unreachable GPU
-fails the turn instead of answering from a cloud model.</p>
-<p class="verified">Fail-closed behavior is part of v0.14.0 acceptance (three stock Oh My Pi 18.12.6
-clients, live outage check), not a configuration hope. Full model:
+<p class="lede">Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and
+release layer) to NInfer (inference engine) serving Qwen3.8&nbsp;27B (served model) on hardware you
+own. Your prompt, transcript, and checkpointed continuation state stay local: runtime listeners bind
+loopback only, every request carries a bearer key, and an unreachable GPU fails the turn instead of
+answering from a cloud model.</p>
+<p class="verified">Verified on published v0.14.0 (2026-10-28, stock Oh My Pi 18.12.6): fail-closed
+behavior is proved in release acceptance across all three client platforms, not assumed from
+configuration. Full model:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md">docs/SECURITY.md</a>.</p>
 
 <h2>Security boundary and release invariants</h2>
-<ul>
-<li><strong>Single trusted owner:</strong> Every published release supports one trusted owner
+<ul class="invariants">
+<li><b>Single trusted owner</b><span>Every published release supports one trusted owner
 controlling both the Oh My Pi client and the qualified RTX runtime host. Local administrators and
 root are inside the trust boundary; shared shell hosts, hostile local users, public HTTP exposure,
-and multi-tenant isolation are outside the release claim.</li>
-<li><strong>Loopback-only listeners (<code>127.0.0.1:18089</code> and
-<code>127.0.0.1:18082</code>):</strong> On the RTX 5090 container lane, Docker runs with
+and multi-tenant isolation are outside the release claim.</span></li>
+<li><b>Loopback-only listeners</b><span>On the RTX 5090 container lane, Docker runs with
 <code>--cap-drop ALL</code>, <code>no-new-privileges</code>, and the hash-pinned
-<code>io_uring</code> seccomp profile, publishing the server port only on host loopback
+<code>io_uring</code> seccomp profile (examples/manual-tunnel/ninfer_io_uring_seccomp.json), publishing the server port only on host loopback
 (<code>127.0.0.1:18089</code>). On the native Windows RTX 4090 and RTX 3090 lanes, the server binds
 <code>127.0.0.1:18082</code> directly on the host (one native lane runs at a time). The macOS
 preview client reaches the RTX 5090 host only through an authenticated manual SSH local forward
-(<code>-L 127.0.0.1:18089:127.0.0.1:18089</code>).</li>
-<li><strong>Bearer authentication:</strong> Every status, Responses, checkpoint, and stored-response
+(<code>-L 127.0.0.1:18089:127.0.0.1:18089</code>).</span></li>
+<li><b>Bearer authentication</b><span>Every status, Responses, checkpoint, and stored-response
 route requires a random bearer key stored in access-restricted key files (mode <code>0600</code> on
 POSIX and WSL2; Administrators and SYSTEM ACLs under
 <code>%ProgramData%\omp-ninfer-keys\api-key.txt</code> and user-only <code>icacls.exe</code> ACLs
-on native Windows), never committed or embedded in YAML.</li>
-<li><strong>Fail closed, never cloud fallback:</strong> Explicit local provider routes disable
+on native Windows), never committed or embedded in YAML.</span></li>
+<li><b>Fail closed, never cloud fallback</b><span>Explicit local provider routes disable
 retries, model fallback, and automatic client self-updates
 (<a href="https://github.com/alphastorm/omp-ninfer/blob/main/examples/manual-tunnel/fail-closed.yml"><code>examples/manual-tunnel/fail-closed.yml</code></a>).
 If the local lane or SSH tunnel is unavailable, the request stops rather than silently escaping to a
-hosted model.</li>
-<li><strong>Everything hash-pinned and origin-authenticated:</strong> Stock Oh My Pi 18.12.6
+hosted model.</span></li>
+<li><b>Everything hash-pinned and origin-authenticated</b><span>Stock Oh My Pi client
 binaries, the shared Qwen3.8 27B model container version 3 artifact (<code>81f924d4</code> across all
 three lanes), container image (<code>@sha256:</code>), native packages, SPDX and CycloneDX dependency
 SBOMs, server binaries, and configurations are bound in
 <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json"><code>releases/v0.14.0/manifest.json</code></a>.
 Checkpoints live in owner-restricted local NVMe directories with HMAC origin authentication
-(<code>manifest.mac</code>; mandatory <code>--session-checkpoint-require-origin-auth</code> on RTX 5090 schema 3 <code>/checkpoints-v013</code> and native <code>session-checkpoints-v3</code>), not encryption.</li>
+(<code>manifest.mac</code>; mandatory <code>--session-checkpoint-require-origin-auth</code> on RTX 5090 schema 3 <code>/checkpoints-v013</code> and native <code>session-checkpoints-v3</code>), not encryption.</span></li>
 </ul>
 
 <h2>Artifact verification and vulnerability reporting</h2>
-<p>From a clean clone of the exact release tag (<code>v0.14.0</code>), verify the manifest, compatibility output, and
-release invariants before starting a lane:</p>
-<p><code>python3 scripts/verify_release.py --require-ready</code></p>
+<p>From a clean clone of the current release tag, verify <code>compatibility.json</code>, the
+release manifest, and release invariants before starting a lane (exits 0 on a valid ready manifest):</p>
+<pre><code>python3 scripts/verify_release.py --require-ready</code></pre>
 <p>Report suspected vulnerabilities privately through
 <a href="https://github.com/alphastorm/omp-ninfer/security/advisories/new">GitHub private vulnerability reporting</a>
 (never a public issue). Full threat model and support policy:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md">docs/SECURITY.md</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/SECURITY.md">SECURITY.md</a> ·
-<a href="../status/">v0.14.0 release status</a>.</p>
-<p class="verified">Last verified 2026-10-28 for published v0.14.0 (2026-10-28).</p>
+<a href="../status/">release status</a>.</p>
+<p class="verified">Stopping a container or native lane retains the model artifact, bearer key, checkpoint store, request logs, and Oh My Pi transcripts on disk; delete them explicitly when decommissioning a host.</p>
+</div>
+</section>
 </main>
 <footer>
-  Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.
-  Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>:
-  every number on this site is bound to a versioned release receipt.
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../logo.svg" alt="" width="20" height="20">OMP NInfer</a>
+    <ul class="links">
+      <li><a href="../">Overview</a></li>
+      <li><a href="../benchmarks/">Benchmarks</a></li>
+      <li><a href="../compare/">Compare</a></li>
+      <li><a href="../status/">Status</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer">GitHub</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">Facts</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/CHANGELOG.md">Changelog</a></li>
+      <li><a href="https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE">MIT license</a></li>
+    </ul>
+    <p>Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA. Evidence lives in the <a href="https://github.com/alphastorm/omp-ninfer">repository</a>: every number on this site is bound to a versioned release receipt.</p>
+  </div>
 </footer>
 </body>
 </html>

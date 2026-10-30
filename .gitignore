@@ -19,3 +19,11 @@ acceptance-output/
 prompt-exports/
 .ruby-lsp/
 /REPORT.md
+
+# Staged into site/ from their canonical sources by .github/workflows/pages.yml; never commit copies.
+site/logo.svg
+site/favicon.svg
+site/og.png
+site/architecture.png
+site/demo-v14.mp4
+site/demo-v14-poster.png
