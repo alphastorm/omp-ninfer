@@ -200,6 +200,16 @@ class NativeCaptureTests(unittest.TestCase):
         with self.assertRaisesRegex(ScreenError, "18082"):
             NATIVE.active_release(self.args.state_root, "screen-prod")
 
+    def test_uncapped_lane_screens_at_owner_power_only(self):
+        spec = {"lifecycle": {"gpu_owner_controller_protocol": {"qualified_power_limit_w": None,
+                                                                "owner_power_limit_w": 450}}}
+        release = {**self.release, "gpu_name": "NVIDIA GeForce RTX 4090"}
+        reply = type("Reply", (), {"stdout": "NVIDIA GeForce RTX 4090, 450.00\n"})()
+        with patch.object(NATIVE.subprocess, "run", return_value=reply):
+            self.assertEqual(NATIVE.measured_power(release, spec, 450), 450.0)
+            with self.assertRaisesRegex(ScreenError, "qualification"):
+                NATIVE.measured_power(release, spec, 350)
+
     def test_cache_cleanup_never_targets_product_or_symlink(self):
         release = {**self.release, "cache_root": str(self.root / "product")}
         with self.assertRaises(ScreenError):

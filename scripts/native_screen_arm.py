@@ -120,7 +120,12 @@ def active_release(state_root: Path, suffix: str) -> tuple[dict[str, Any], dict[
 
 def measured_power(release: dict[str, Any], spec: dict[str, Any], expected: float) -> float:
     policy = spec["lifecycle"].get("gpu_owner_controller_protocol", {})
-    if policy.get("qualified_power_limit_w", expected) != expected:
+    # A lane without a serving cap (qualified_power_limit_w null, e.g. RTX 4090 beta.3) runs at the
+    # owner's documented setting, so the arm must match owner_power_limit_w instead.
+    qualified = policy.get("qualified_power_limit_w")
+    if qualified is None:
+        qualified = policy.get("owner_power_limit_w")
+    if qualified is not None and qualified != expected:
         raise ScreenError("requested power cap differs from release-spec qualification")
     result = subprocess.run(["nvidia-smi", "--id=" + release["gpu_uuid"],
                              "--query-gpu=name,power.limit", "--format=csv,noheader,nounits"],
