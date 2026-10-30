@@ -30,8 +30,14 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import random
+import subprocess
 import sys
+import time
+import urllib.parse
+import urllib.request
+from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from typing import Any, Sequence
@@ -496,6 +502,8 @@ def verdict(args: argparse.Namespace) -> dict[str, Any]:
     runs = {"production": args.production, "candidate": args.candidate,
             "production_determinism": args.production_determinism,
             "candidate_determinism": args.candidate_determinism}
+    identities = {name: run_identity(path) for name, path in runs.items()}
+    validate_native_arms(identities)
     loaded = {name: load_run(path) for name, path in runs.items()}
     decision = decide(loaded["production"], loaded["candidate"],
                       loaded["production_determinism"], loaded["candidate_determinism"])
@@ -504,10 +512,89 @@ def verdict(args: argparse.Namespace) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "tool_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "preregistration": PREREGISTRATION,
-        "runs": {name: run_identity(path) for name, path in runs.items()},
+        "runs": identities,
         **decision,
         "raw_prompts_outputs_or_secrets_included": False,
     }
+
+
+def validate_native_arms(runs: dict[str, Any]) -> None:
+    """Native identity is an admission precondition, not a change to EXP-085's decision rule."""
+    if not any("arm" in identity for identity in runs.values()):
+        return
+    if not all("arm" in identity for identity in runs.values()):
+        raise ScreenError("all four native runs require arm.json")
+    stable = ("lane", "gpu_name", "power_limit_w", "package_sha256", "server_binary_sha256",
+              "configuration_sha256", "model_artifact_sha256", "release_id")
+    for role in ("production", "candidate"):
+        screen, rerun = runs[role]["arm"], runs[role + "_determinism"]["arm"]
+        if any(screen[field] != rerun[field] for field in stable):
+            raise ScreenError(f"{role}: determinism runtime identity differs from screen")
+        start = lambda arm: datetime.fromisoformat(
+            arm["fresh_start"]["process_started_utc"].replace("Z", "+00:00"))
+        if start(rerun) <= start(screen):
+            raise ScreenError(f"{role}: determinism requires a later fresh start")
+    production, candidate = runs["production"]["arm"], runs["candidate"]["arm"]
+    for field in ("lane", "gpu_name", "model_artifact_sha256", "power_limit_w", "prompts_sha256"):
+        if production[field] != candidate[field]:
+            raise ScreenError(f"native production and candidate must share {field}")
+    if runs["production_determinism"]["arm"]["prompts_sha256"] != (
+            runs["candidate_determinism"]["arm"]["prompts_sha256"]):
+        raise ScreenError("native determinism arms must share prompts_sha256")
+    if candidate["server_binary_sha256"] == production["server_binary_sha256"]:
+        raise ScreenError("native candidate server must differ from production")
+
+
+def endpoint_root(base_url: str) -> str:
+    """P14 capture adapter: accept a server root or its /v1 base without lane assumptions."""
+    parsed = urllib.parse.urlsplit(base_url)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password:
+        raise ScreenError("base URL must be an HTTP(S) endpoint without embedded credentials")
+    if parsed.query or parsed.fragment or parsed.path.rstrip("/") not in ("", "/v1"):
+        raise ScreenError("base URL must name the server root or /v1")
+    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, "", "", ""))
+
+
+def capture_endpoint(*, qualification: Path, cases: Path, fixtures: Path, base_url: str,
+                     model: str, api_key_file: Path, out: Path, label: str,
+                     timeout: float = 900, deadline: float | None = None) -> dict[str, Any]:
+    """Reuse P14's private executor/scorer and unchanged EXP-085 request settings."""
+    root = endpoint_root(base_url)
+    key = api_key_file.read_text(encoding="utf-8-sig").strip()
+    if not key:
+        raise ScreenError("API key file is empty")
+    request = urllib.request.Request(root + "/v1/models", headers={"Authorization": "Bearer " + key})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        models = json.load(response)
+    if model not in {entry.get("id") for entry in models.get("data", [])}:
+        raise ScreenError("endpoint does not serve the requested model")
+    scripts = qualification / "scripts"
+    for name in ("run_qualification.py", "score_qualification.py"):
+        if not (scripts / name).is_file():
+            raise ScreenError(f"missing private qualification script: {name}")
+    if out.exists():
+        raise ScreenError("refusing to mix a new capture with an existing run")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    commands = [
+        [sys.executable, str(scripts / "run_qualification.py"), "--model", model,
+         "--base-url", root + "/v1", "--cases", str(cases), "--fixtures", str(fixtures),
+         "--out", str(out), "--concurrency", "1", "--reasoning-mode", "low",
+         "--reasoning-wire", "top-level", "--reasoning-token-headroom", "8192",
+         "--temperature", "0", "--timeout", str(timeout), "--no-ssh", "--label", label],
+        [sys.executable, str(scripts / "score_qualification.py"), "--run", str(out),
+         "--cases", str(cases)],
+    ]
+    # The private executor's legacy environment key is transport-only, not a 5090 assumption.
+    environment = dict(os.environ, LOCAL_5090_API_KEY=key)
+    deadline = deadline if deadline is not None else time.monotonic() + 3000
+    for index, command in enumerate(commands):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise ScreenError("capture hold exhausted before scoring completed")
+        with (out.parent / f"{out.name}-{index}.log").open("wb") as log:
+            subprocess.run(command, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+                           env=environment, check=True, timeout=remaining)
+    return run_identity(out)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

@@ -31,7 +31,9 @@ import itertools
 import json
 import math
 import random
+import re
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable, Sequence
 
@@ -352,12 +354,57 @@ def decide(production: dict[str, dict[str, Any]], candidate: dict[str, dict[str,
     return result
 
 
+NATIVE_ARM_FIELDS = {
+    "artifact_type", "schema_version", "kind", "lane", "release_id", "package_sha256",
+    "server_binary_sha256", "configuration_sha256", "model_artifact_sha256", "gpu_name",
+    "power_limit_w", "endpoint_port", "concurrency", "reasoning", "fresh_start", "prompts_sha256",
+}
+
+
+def native_arm(value: Any) -> dict[str, Any]:
+    """Accept only the public-safe arm contract, never an arbitrary lifecycle record."""
+    if not isinstance(value, dict) or set(value) != NATIVE_ARM_FIELDS:
+        raise ScreenError("native arm has missing or unexpected fields")
+    if (value["artifact_type"] != "omp_ninfer_screen_arm" or value["schema_version"] != 1
+            or value["kind"] != "native-windows"):
+        raise ScreenError("invalid native arm artifact")
+    lane = value["lane"]
+    if lane not in ("rtx3090", "rtx4090") or value["gpu_name"] != (
+            "NVIDIA GeForce RTX " + lane.removeprefix("rtx")):
+        raise ScreenError("native arm lane/GPU mismatch")
+    if not isinstance(value["release_id"], str) or not re.fullmatch(
+            r"qwen38-" + lane.removeprefix("rtx") + r"-native-v[0-9A-Za-z.-]+", value["release_id"]):
+        raise ScreenError("invalid native arm release ID")
+    for field in ("package_sha256", "server_binary_sha256", "configuration_sha256",
+                  "model_artifact_sha256", "prompts_sha256"):
+        if not isinstance(value[field], str) or not re.fullmatch(r"[0-9a-f]{64}", value[field]):
+            raise ScreenError(f"invalid native arm {field}")
+    if (value["endpoint_port"] != 18082 or value["concurrency"] != 1
+            or value["reasoning"] != "low" or isinstance(value["power_limit_w"], bool)
+            or not isinstance(value["power_limit_w"], (int, float)) or value["power_limit_w"] <= 0):
+        raise ScreenError("native arm must use port 18082, concurrency 1, low reasoning and a power cap")
+    fresh = value["fresh_start"]
+    if (not isinstance(fresh, dict) or set(fresh) != {"cache_root_empty", "process_started_utc"}
+            or fresh["cache_root_empty"] is not True):
+        raise ScreenError("native arm must attest an empty cache before starting")
+    try:
+        timestamp = datetime.fromisoformat(fresh["process_started_utc"].replace("Z", "+00:00"))
+    except (TypeError, ValueError, AttributeError) as error:
+        raise ScreenError("invalid native arm start timestamp") from error
+    if timestamp.utcoffset() is None or timestamp.utcoffset().total_seconds() != 0:
+        raise ScreenError("native arm start timestamp must be UTC")
+    return value
+
+
 def run_identity(run: Path) -> dict[str, Any]:
     manifest = json.loads((run / "manifest.json").read_text(encoding="utf-8"))
     scores = json.loads((run / "scores.json").read_text(encoding="utf-8"))
-    return {"label": manifest.get("label"), "corpus_sha256": scores.get("corpus_sha256"),
+    identity = {"label": manifest.get("label"), "corpus_sha256": scores.get("corpus_sha256"),
             "scores_sha256": hashlib.sha256((run / "scores.json").read_bytes()).hexdigest(),
             "responses_sha256": hashlib.sha256((run / "responses.jsonl").read_bytes()).hexdigest()}
+    if (run / "arm.json").is_file():
+        identity["arm"] = native_arm(json.loads((run / "arm.json").read_text(encoding="utf-8")))
+    return identity
 
 
 def verdict(args: argparse.Namespace) -> dict[str, Any]:
