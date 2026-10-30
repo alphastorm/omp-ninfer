@@ -98,6 +98,22 @@ class CompatibilityAuthorityTests(unittest.TestCase):
             profile["client_distribution"] = descriptor["platforms"][platform]
         return authority
 
+    def test_p15_native_versions_do_not_open_other_lineages(self) -> None:
+        for lane in ("rtx3090", "rtx4090"):
+            tag = f"v0.8.0-qwen38-{lane[3:]}-beta.1"
+            package = f"ninfer-{lane}-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-{lane}.tar.gz"
+            tag_re = MODULE.RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
+            package_re = MODULE.RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
+            self.assertIsNotNone(tag_re.fullmatch(tag))
+            self.assertIsNotNone(package_re.fullmatch(package))
+            for invalid in ("v0.8.1", "v0.9.0", "v0.7.1", "v0.6.12"):
+                self.assertIsNone(tag_re.fullmatch(tag.replace("v0.8.0", invalid)))
+                self.assertIsNone(package_re.fullmatch(package.replace("v0.8.0", invalid)))
+            for invalid in ("beta.0", "beta.01", "beta.1-extra", "mtp3.1"):
+                self.assertIsNone(tag_re.fullmatch(tag.replace("beta.1", invalid)))
+                self.assertIsNone(package_re.fullmatch(package.replace("beta.1", invalid)))
+            self.assertIsNone(package_re.fullmatch(package.replace("cuda13.3", "cuda12.8")))
+
     def test_upstream_raw_binaries_render_download_and_digest(self) -> None:
         authority = MODULE.load_authority(self._write(self.upstream_authority()))
         rendered = MODULE.render(authority)
