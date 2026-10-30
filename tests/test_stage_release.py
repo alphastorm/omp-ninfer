@@ -19,7 +19,7 @@ TARGET = "v0.99.0"
 CURRENT = "v0.12.2"
 ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
 sys.path.insert(0, str(ROOT / "scripts"))
-from verify_release import configuration_identity
+from verify_release import configuration_identity, product_version
 
 
 class StageReleaseTests(unittest.TestCase):
@@ -37,6 +37,14 @@ class StageReleaseTests(unittest.TestCase):
         root = Path(temporary.name)
         for name in ("scripts", "profiles", "releases"):
             shutil.copytree(ROOT / name, root / name)
+        # This fixture stages its chosen source as the immediate predecessor.
+        # Later checked-in releases are not part of that historical starting state.
+        source_version = product_version(source_release)
+        assert source_version is not None
+        for path in (root / "releases").iterdir():
+            version = product_version(path.name)
+            if version is not None and version > source_version:
+                shutil.rmtree(path)
         for profile in ACCEPTED_PROFILES.glob("*.json"):
             shutil.copy2(profile, root / "profiles" / profile.name)
         if source_release in (SOURCE, "v0.10.0"):
@@ -87,6 +95,13 @@ class StageReleaseTests(unittest.TestCase):
         for path in source.rglob("*.json"):
             if path.name not in {"manifest.json", "compatibility.json"}:
                 self.save(path, omit_client_evidence(self.load(path)))
+        # Redacting client-only evidence changes native summary bytes too. Keep
+        # the predecessor's configuration proof hash-bound to those fixture bytes.
+        for variant in manifest["components"].get("ninfer_variants", []):
+            qualification = variant["qualification"]
+            summary = root / qualification["summary"]
+            qualification["sha256"] = hashlib.sha256(summary.read_bytes()).hexdigest()
+        self.save(source / "manifest.json", manifest)
         for path in source.glob("*.md"):
             path.write_text("# Staging fixture\n", encoding="utf-8")
         compatibility = self.load(source / "compatibility.json")
@@ -409,6 +424,26 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertRegex(result.stderr, r"NINFER_RELEASE_NOTES\.md:\d+: retains predecessor OMP identity")
         self.assertFalse((root / "releases" / TARGET / "acceptance").exists())
+
+    def test_older_source_with_newer_native_shape_still_requires_a_screen(self) -> None:
+        root = self.staging_copy()
+        later = root / "releases" / CURRENT
+        shutil.copytree(ROOT / "releases" / CURRENT, later)
+        manifest = self.load(later / "manifest.json")
+        variant = next(row for row in manifest["components"]["ninfer_variants"]
+                       if row["id"] == "rtx4090-windows-native")
+        variant["runtime_shape"] = {
+            "speculative_backend": "dflash2",
+            "fit": {"device_state_slots": 0, "admission_headroom_mib": 640,
+                    "draft_mlp_device_format": "Q4_G64_FP16", "token_embedding_residency": "host-mapped"}}
+        self.save(later / "manifest.json", manifest)
+        result = self.stage(root)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("rtx4090-windows-native.qualification.quality_screen is required", result.stdout)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")
+        source = self.load(root / "releases" / SOURCE / "manifest.json")
+        self.assertEqual(staged["components"]["ninfer_variants"][0]["package_sha256"],
+                         source["components"]["ninfer_variants"][0]["package_sha256"])
 
     def test_staging_reports_leftover_predecessor_pins_without_failing(self) -> None:
         root = self.staging_copy()
