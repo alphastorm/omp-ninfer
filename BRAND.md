@@ -74,8 +74,9 @@ Same blue-black ground and neutral ramp as the gateway (`ground #060809`,
 
 | Token | Hex | oklch | Use |
 |---|---|---|---|
-| local | `#8E7BE8` | oklch(0.65 0.15 290) | the dot, the ×, links, focus, boundary lines |
-| local-hover | `#AB9DF0` | — | link hover lighten |
+| local | `#8E7BE8` | oklch(0.65 0.15 290) | the dot, the ×, boundary lines; artwork links and focus |
+| local-text | `#AB9DF0` | oklch(0.73 0.12 290) | site text, links, eyebrows, actions, focus rings on ground — 8.4:1 on ground, ink-dark on it 8.1:1 (`#8E7BE8` measures 5.9:1, below the 7:1 bar for body-size text) |
+| local-hover | `#C3BBF4` | — | site link and action hover; artwork hover stays `#AB9DF0` |
 | fail | `#C85045` | oklch(0.58 0.14 27) | failed qualification/fail-closed states (shared) |
 | kinship | `#F97316` | — (upstream orange) | citation micro-dot only; see gateway kinship rule |
 

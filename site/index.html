@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,6 +8,8 @@
 <title>OMP NInfer — durable local inference for coding agents</title>
 <meta name="description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/">
+<script>document.documentElement.className = "js";</script>
+<link rel="preload" href="demo-v14-poster.png" as="image" fetchpriority="high">
 <link rel="preload" href="fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site.css">
@@ -162,7 +164,7 @@
       <li><span class="role">Inference engine</span><span class="who"><a href="https://github.com/Neroued/ninfer">NInfer</a></span><p>Neroued's single-GPU engine and its GPU ports. This project's runtime adds explicit OpenAI Responses continuation state (<code>previous_response_id</code>) and durable local NVMe checkpoints.</p></li>
       <li><span class="role">Served model</span><span class="who">Qwen3.8 27B</span><p>One hash-pinned artifact, 20.4 GB <code>81f924d4</code>, identical across all three qualified lanes.</p></li>
     </ol>
-    <figure class="illustration"><img src="architecture.png" width="2480" height="840" loading="lazy" alt="System boundary illustration: Oh My Pi, the authoritative client, keeps the truth — transcript, tools, branches, and replay commit locally before provider state advances. An authenticated loopback link leads to the qualified NInfer runtime, which keeps Qwen3.8 and scoped Responses state on the selected GPU; invalid state falls back to transcript replay. Commit boundary: complete stream, then durable transcript, then provider state. Lanes: 5090 WSL2, 4090 native, 3090 native."></figure>
+    <figure class="illustration"><img src="architecture.png" width="2480" height="840" loading="lazy" fetchpriority="low" alt="System boundary illustration: Oh My Pi, the authoritative client, keeps the truth — transcript, tools, branches, and replay commit locally before provider state advances. An authenticated loopback link leads to the qualified NInfer runtime, which keeps Qwen3.8 and scoped Responses state on the selected GPU; invalid state falls back to transcript replay. Commit boundary: complete stream, then durable transcript, then provider state. Lanes: 5090 WSL2, 4090 native, 3090 native."></figure>
     <p class="illustration-cap">Commit boundary: complete stream → durable transcript → provider state. One truth, one accelerator, no hidden gateway.</p>
     <ul class="invariants">
       <li><b>Loopback only</b><span>The runtime binds <code>127.0.0.1:18089</code> (RTX 5090 container) or <code>127.0.0.1:18082</code> (native Windows lanes); remote macOS clients reach the host through an authenticated SSH local port forward.</span></li>
@@ -271,6 +273,11 @@
   button.addEventListener("click", function () {
     frame.classList.add("playing");
     video.play().catch(function () { video.setAttribute("controls", ""); });
+  });
+  video.addEventListener("ended", function () {
+    frame.classList.remove("playing");
+    video.currentTime = 0;
+    button.textContent = "Play again · 32 s";
   });
 })();
 </script>
