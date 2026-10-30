@@ -149,6 +149,10 @@ section { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid var(--border
 .hero .wrap > * { min-width: 0; }
 .hero h1 { max-width: 20ch; }
 .hero h1 .line { display: block; }
+@media (max-width: 420px) {
+  .hero h1 { font-size: 2.25rem; text-wrap: balance; }
+  .hero h1 .line { display: inline; }
+}
 .hero-body { display: grid; gap: 28px; align-items: start; }
 .hero-body .actions { margin-top: 0; }
 .hero .chain { font-size: 15px; color: var(--muted); margin-top: 18px; max-width: var(--measure); line-height: 1.6; }
@@ -278,6 +282,7 @@ table { border-collapse: collapse; width: 100%; margin: 24px 0; font-size: 14px;
 th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; overflow-wrap: anywhere; }
 th { color: var(--muted); font: 600 11.5px/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 td:first-child { color: var(--ink); font-weight: 600; }
+td:first-child code { white-space: nowrap; }
 tr:hover td { background: var(--raised); }
 .table-scroll { overflow-x: auto; margin: 24px 0; }
 .table-scroll table { margin: 0; min-width: 760px; }
