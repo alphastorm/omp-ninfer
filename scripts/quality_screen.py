@@ -94,6 +94,15 @@ PREREGISTRATION: dict[str, Any] = {
                     "884e5a43), against EXP-085's production screen and determinism runs, under this rule "
                     "unchanged; its verdict against EXP-085's BF16 DFlash2 runs (spk5-df2k7-c2ds2) is reported, "
                     "not a gate"),
+        "EXP-101": ("registered 2026-10-30 before any data: native Windows RTX 3090 powered screen for DFlash2 "
+                    "K=7 (one request, low reasoning, 350 W, INT8 KV, 131,072 tokens). Production arm: the "
+                    "published v0.14.0 incumbent v0.7.0-beta.3 (server fedce425, configuration d08d262b, model "
+                    "81f924d4) as a packaged scratch install on the same card at release-spec port 18082; "
+                    "production screen, then fresh-cache determinism. Candidate arm: the RTX 3090 package of "
+                    "the frozen N15 source (component v0.8.0-beta.1), whose server prefix is appended here "
+                    "before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen "
+                    "prompts and the first 80 determinism prompts in fixed matched contiguous <=100-prompt "
+                    "shards with resumed identity and seal verification; under this rule unchanged"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
